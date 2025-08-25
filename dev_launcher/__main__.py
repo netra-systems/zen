@@ -251,23 +251,23 @@ QUICK SHORTCUTS:
     )
     service_group.add_argument(
         "--set-redis",
-        choices=["local", "shared", "docker", "mock"],
-        help="Set Redis mode (local/shared/docker/mock)"
+        choices=["local", "shared", "docker", "disabled"],
+        help="Set Redis mode (local/shared/docker/disabled)"
     )
     service_group.add_argument(
         "--set-clickhouse",
-        choices=["local", "shared", "docker", "mock"],
-        help="Set ClickHouse mode (local/shared/docker/mock)"
+        choices=["local", "shared", "docker", "disabled"],
+        help="Set ClickHouse mode (local/shared/docker/disabled)"
     )
     service_group.add_argument(
         "--set-postgres",
-        choices=["local", "shared", "docker", "mock"],
-        help="Set PostgreSQL mode (local/shared/docker/mock)"
+        choices=["local", "shared", "docker", "disabled"],
+        help="Set PostgreSQL mode (local/shared/docker/disabled)"
     )
     service_group.add_argument(
         "--set-llm",
-        choices=["local", "shared", "mock"],
-        help="Set LLM mode (local/shared/mock)"
+        choices=["local", "shared", "disabled"],
+        help="Set LLM mode (local/shared/disabled)"
     )
     service_group.add_argument(
         "--reset-services",

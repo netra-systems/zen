@@ -78,11 +78,9 @@ describe('Thread Navigation Integration Tests', () => {
         threads: sampleThreads
       });
       
-      // The default activeThreadId from mockChatStore is 'thread-1', 
-      // but the TestChatSidebar seems to be using a different initial value
-      // Let's work with the actual behavior we observe
+      // Set initial activeThreadId to thread-1 (from mockChatStore default)
       testSetup.configureStore({
-        activeThreadId: 'thread-2'  // Start with thread-2 as observed in debug
+        activeThreadId: 'thread-1'
       });
 
       renderWithProvider(<TestChatSidebar />);
@@ -91,18 +89,18 @@ describe('Thread Navigation Integration Tests', () => {
       const thread2 = screen.getByTestId('thread-item-thread-2');
       const thread3 = screen.getByTestId('thread-item-thread-3');
       
-      // Initial state: thread-2 should be active (as observed in debug output)
-      await waitFor(() => {
-        expect(thread2).toHaveClass('bg-emerald-50');
-        expect(thread1).not.toHaveClass('bg-emerald-50');
-        expect(thread3).not.toHaveClass('bg-emerald-50');
-      }, { timeout: 500 });
-      
-      // Click thread-1 to switch from thread-2 to thread-1
-      await user.click(thread1);
+      // Initial state: thread-1 should be active (from store configuration)
       await waitFor(() => {
         expect(thread1).toHaveClass('bg-emerald-50');
         expect(thread2).not.toHaveClass('bg-emerald-50');
+        expect(thread3).not.toHaveClass('bg-emerald-50');
+      }, { timeout: 500 });
+      
+      // Click thread-2 to switch from thread-1 to thread-2  
+      await user.click(thread2);
+      await waitFor(() => {
+        expect(thread2).toHaveClass('bg-emerald-50');
+        expect(thread1).not.toHaveClass('bg-emerald-50');
         expect(thread3).not.toHaveClass('bg-emerald-50');
       }, { timeout: 1000 });
       
@@ -114,11 +112,11 @@ describe('Thread Navigation Integration Tests', () => {
         expect(thread2).not.toHaveClass('bg-emerald-50');
       }, { timeout: 1000 });
       
-      // Quick switch back to thread-2 to ensure no corruption
-      await user.click(thread2);
+      // Quick switch back to thread-1 to ensure no corruption
+      await user.click(thread1);
       await waitFor(() => {
-        expect(thread2).toHaveClass('bg-emerald-50');
-        expect(thread1).not.toHaveClass('bg-emerald-50');
+        expect(thread1).toHaveClass('bg-emerald-50');
+        expect(thread2).not.toHaveClass('bg-emerald-50');
         expect(thread3).not.toHaveClass('bg-emerald-50');
       }, { timeout: 1000 });
     });
@@ -159,12 +157,21 @@ describe('Thread Navigation Integration Tests', () => {
 
       renderWithProvider(<TestChatSidebar />);
       
+      // Wait for component to fully render
+      await waitFor(() => {
+        expect(screen.getByTestId('thread-item-thread-2')).toBeInTheDocument();
+      });
+      
       const targetThread = screen.getByTestId('thread-item-thread-2');
+      
+      // Clear any previous router calls from component initialization
+      mockRouter.push.mockClear();
+      
       await user.click(targetThread);
       
       await waitFor(() => {
         expect(mockRouter.push).toHaveBeenCalledWith('/chat/thread-2');
-      });
+      }, { timeout: 2000 });
     });
 
     it('should handle deep linking to specific threads', async () => {

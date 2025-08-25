@@ -6,7 +6,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.database_initializer import DatabaseInitializer
-from test_framework.fixtures import isolated_environment
+# Removed isolated_environment import - not needed for these tests
 
 pytestmark = [
     pytest.mark.database,
@@ -18,7 +18,7 @@ class TestMigrationSystem:
     """Test database migration system functionality."""
     
     @pytest.mark.asyncio
-    async def test_migration_rollback_fails_without_backup(self, isolated_environment):
+    async def test_migration_rollback_fails_without_backup(self):
         """Test that migration rollback fails without proper backup."""
         # This test should fail initially - expecting rollback mechanism
         manager = DatabaseManager()
@@ -29,7 +29,7 @@ class TestMigrationSystem:
             await initializer.rollback_migration("invalid_backup_id")
             
     @pytest.mark.asyncio 
-    async def test_schema_version_mismatch_detection(self, isolated_environment):
+    async def test_schema_version_mismatch_detection(self):
         """Test detection of schema version mismatches."""
         # This should fail initially - no version mismatch detection
         manager = DatabaseManager()
@@ -44,7 +44,7 @@ class TestMigrationSystem:
                     await manager.validate_schema_compatibility()
                     
     @pytest.mark.asyncio
-    async def test_concurrent_migration_prevention(self, isolated_environment):
+    async def test_concurrent_migration_prevention(self):
         """Test prevention of concurrent migrations.""" 
         # This should fail initially - no concurrent migration lock
         manager = DatabaseManager()

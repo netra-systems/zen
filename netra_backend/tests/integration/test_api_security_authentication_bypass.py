@@ -28,7 +28,7 @@ from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 from netra_backend.app.main import app
 from netra_backend.app.core.security import SecurityContext, UserInfo
-from netra_backend.app.dependencies import get_current_user
+from netra_backend.app.auth_integration.auth import get_current_user
 
 
 class TestAPISecurityAuthenticationBypass:
@@ -37,7 +37,6 @@ class TestAPISecurityAuthenticationBypass:
     def setup_method(self):
         """Set up test fixtures"""
         self.test_client = TestClient(app)
-        self.security_manager = SecurityManager()
         
     def test_invalid_jwt_token_rejection(self):
         """Test rejection of invalid JWT tokens - EXPECTED TO FAIL if validation is weak"""

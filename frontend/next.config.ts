@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     const isDevelopment = process.env.NODE_ENV === 'development';
+    const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
     
     if (isDevelopment) {
       // In development, use a more permissive CSP without nonces
@@ -38,6 +39,42 @@ const nextConfig: NextConfig = {
                 "media-src 'self' http://localhost:* http://127.0.0.1:*",
                 "frame-src 'self' http://localhost:* http://127.0.0.1:*"
               ].join('; ')
+            }
+          ]
+        }
+      ];
+    }
+    
+    if (isStaging) {
+      // Staging-specific security headers
+      return [
+        {
+          source: '/:path*',
+          headers: [
+            {
+              key: 'Content-Security-Policy',
+              value: [
+                "default-src 'self' https://*.staging.netrasystems.ai",
+                "script-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai",
+                "style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai",
+                "img-src 'self' data: blob: https://*.staging.netrasystems.ai",
+                "connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai",
+                "font-src 'self' data: https://*.staging.netrasystems.ai",
+                "media-src 'self' https://*.staging.netrasystems.ai",
+                "frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com"
+              ].join('; ')
+            },
+            {
+              key: 'X-Frame-Options',
+              value: 'SAMEORIGIN'
+            },
+            {
+              key: 'X-Content-Type-Options', 
+              value: 'nosniff'
+            },
+            {
+              key: 'Referrer-Policy',
+              value: 'strict-origin-when-cross-origin'
             }
           ]
         }

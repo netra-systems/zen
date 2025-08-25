@@ -25,9 +25,11 @@ class UnifiedPostgresDB:
     def __init__(self):
         # Detect environment from unified config
         config = get_unified_config()
-        self.is_cloud_run = config.deployment.is_cloud_run
+        # Use environment constants for cloud run detection
+        from netra_backend.app.core.environment_constants import EnvironmentDetector
+        self.is_cloud_run = EnvironmentDetector.is_cloud_run()
         self.is_staging = config.environment == "staging"
-        self.is_production = config.environment == "production"
+        self.is_production = config.environment == "production" 
         self.is_test = config.environment == "test"
         
         # Manager will be initialized on first use

@@ -134,11 +134,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(storedToken);
         try {
           const decodedUser = jwtDecode(storedToken) as User;
-          setUser(decodedUser);
-          // Sync with Zustand store
-          syncAuthStore(decodedUser, storedToken);
-          // Start automatic token refresh cycle
-          scheduleTokenRefreshCheck(storedToken);
+          
+          // Check if token is expired
+          const now = Date.now() / 1000;
+          if (decodedUser.exp && decodedUser.exp < now) {
+            logger.warn('Stored token is expired', {
+              component: 'AuthContext',
+              action: 'expired_token_detected',
+              expiry: decodedUser.exp,
+              now
+            });
+            
+            // Try to refresh token if possible
+            try {
+              await handleTokenRefresh(storedToken);
+            } catch (refreshError) {
+              logger.warn('Could not refresh expired token', refreshError as Error);
+              unifiedAuthService.removeToken();
+              syncAuthStore(null, null);
+            }
+          } else {
+            setUser(decodedUser);
+            // Sync with Zustand store
+            syncAuthStore(decodedUser, storedToken);
+            // Start automatic token refresh cycle
+            scheduleTokenRefreshCheck(storedToken);
+          }
         } catch (e) {
           logger.error('Invalid token detected', e as Error, {
             component: 'AuthContext',

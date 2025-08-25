@@ -46,7 +46,8 @@ interface UnifiedApiConfig {
  * Detect current environment with clear precedence
  * 1. NEXT_PUBLIC_ENVIRONMENT (explicit)
  * 2. NODE_ENV mapping
- * 3. Default to development
+ * 3. Domain-based detection for staging
+ * 4. Default to development
  */
 function detectEnvironment(): Environment {
   // Explicit environment variable takes precedence
@@ -54,6 +55,19 @@ function detectEnvironment(): Environment {
   if (explicitEnv === 'production' || explicitEnv === 'staging' || explicitEnv === 'test' || explicitEnv === 'development') {
     logger.info(`Environment detected from NEXT_PUBLIC_ENVIRONMENT: ${explicitEnv}`);
     return explicitEnv as Environment;
+  }
+  
+  // Check if running in browser and detect by domain
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.includes('staging.netrasystems.ai')) {
+      logger.info('Environment detected from hostname as staging');
+      return 'staging';
+    }
+    if (hostname.includes('netrasystems.ai') && !hostname.includes('staging')) {
+      logger.info('Environment detected from hostname as production');
+      return 'production';
+    }
   }
   
   // Fallback to NODE_ENV

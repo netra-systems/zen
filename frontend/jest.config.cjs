@@ -74,6 +74,7 @@ const config = {
     createProject('visual', ['<rootDir>/__tests__/visual/**/*.test.[jt]s?(x)']),
     createProject('cross-browser', ['<rootDir>/__tests__/cross-browser/**/*.test.[jt]s?(x)']),
     createProject('performance', ['<rootDir>/__tests__/performance/**/*.test.[jt]s?(x)']),
+    createProject('staging', ['<rootDir>/__tests__/staging/**/*.test.[jt]s?(x)']),
     
     // System and infrastructure tests
     createProject('system', ['<rootDir>/__tests__/system/**/*.test.[jt]s?(x)']),

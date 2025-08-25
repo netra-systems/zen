@@ -27,6 +27,7 @@ from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
 from urllib.parse import urlparse
+import urllib.parse
 
 
 class DatabaseManager:
@@ -685,6 +686,211 @@ class DatabaseManager:
                 raise ValueError("Database password cannot be empty string for non-Cloud SQL PostgreSQL")
         
         return True
+    
+    @staticmethod
+    def _validate_password_integrity(original_url: str, sanitized_url: str) -> None:
+        """Validate that password wasn't corrupted during sanitization.
+        
+        Args:
+            original_url: Original database URL
+            sanitized_url: URL after sanitization
+            
+        Raises:
+            ValueError: If password corruption is detected
+        """
+        try:
+            original_parsed = urlparse(original_url)
+            sanitized_parsed = urlparse(sanitized_url)
+            
+            # Check if password was corrupted
+            if original_parsed.password and sanitized_parsed.password:
+                if original_parsed.password != sanitized_parsed.password:
+                    raise ValueError(
+                        f"Password corrupted during sanitization - authentication will fail. "
+                        f"Original length: {len(original_parsed.password)}, "
+                        f"sanitized length: {len(sanitized_parsed.password)}"
+                    )
+            elif original_parsed.password and not sanitized_parsed.password:
+                raise ValueError("Password integrity compromised - password was completely removed during sanitization")
+        
+        except Exception as e:
+            if "Password corrupted" in str(e) or "integrity compromised" in str(e):
+                raise  # Re-raise our validation errors
+            raise ValueError(f"Password integrity validation failed: {e}")
+    
+    @staticmethod
+    def _validate_url_encoding_integrity(url: str) -> None:
+        """Validate URL encoding doesn't corrupt passwords.
+        
+        Args:
+            url: Database URL to validate
+            
+        Raises:
+            ValueError: If URL encoding issues are detected
+        """
+        import urllib.parse
+        
+        try:
+            # Check for double encoding issues
+            decoded_once = urllib.parse.unquote(url)
+            decoded_twice = urllib.parse.unquote(decoded_once)
+            
+            if decoded_once != decoded_twice:
+                raise ValueError("URL encoding corruption detected - double encoding may corrupt passwords")
+            
+            # Check for problematic URL encoding patterns
+            parsed = urlparse(url)
+            if parsed.password:
+                password = parsed.password
+                
+                # Check for encoded characters that might indicate corruption
+                if '%' in password:
+                    try:
+                        decoded_password = urllib.parse.unquote(password)
+                        if decoded_password != password:
+                            logger.warning(f"Password contains URL encoding - ensure this is intentional")
+                    except Exception:
+                        raise ValueError("Password contains invalid URL encoding")
+        
+        except Exception as e:
+            if "URL encoding" in str(e):
+                raise  # Re-raise our validation errors
+            raise ValueError(f"URL encoding validation failed: {e}")
+    
+    @staticmethod
+    def _validate_credentials_before_connection(url: str) -> None:
+        """Validate credentials before attempting database connection.
+        
+        Args:
+            url: Database URL to validate
+            
+        Raises:
+            ValueError: If credentials are invalid or missing
+        """
+        parsed = urlparse(url)
+        
+        # Check for empty password after sanitization
+        if parsed.password == "":
+            raise ValueError("Empty password detected - database connection will fail")
+        
+        # Check for missing password
+        if not parsed.password and "postgresql" in url and "/cloudsql/" not in url:
+            raise ValueError("Missing password - database connection requires authentication")
+        
+        # Check for placeholder passwords
+        placeholder_patterns = [
+            "password", "secret", "redacted", "filtered", "hidden", "*"
+        ]
+        
+        if parsed.password:
+            password_lower = parsed.password.lower()
+            for pattern in placeholder_patterns:
+                if pattern in password_lower and len(parsed.password) < 20:
+                    # Short passwords containing placeholder words are suspicious
+                    if parsed.password in ["password", "PASSWORD", "secret", "SECRET", "REDACTED", "***HIDDEN***"]:
+                        raise ValueError(f"Invalid password - placeholder detected: {pattern}")
+    
+    @staticmethod
+    def _validate_password_length(url: str, min_length: int = 6) -> None:
+        """Validate password length after sanitization.
+        
+        Args:
+            url: Database URL to validate
+            min_length: Minimum password length required
+            
+        Raises:
+            ValueError: If password is too short
+        """
+        parsed = urlparse(url)
+        
+        if parsed.password and len(parsed.password) < min_length:
+            raise ValueError(
+                f"Password length validation failed - password too short after sanitization: "
+                f"{len(parsed.password)} characters (minimum: {min_length})"
+            )
+    
+    @staticmethod
+    def _validate_staging_password_integrity(original_url: str, processed_url: str) -> None:
+        """Validate password integrity specifically for staging environment.
+        
+        Args:
+            original_url: Original database URL
+            processed_url: Processed/sanitized database URL
+            
+        Raises:
+            ValueError: If staging validation fails
+        """
+        try:
+            original_parsed = urlparse(original_url)
+            processed_parsed = urlparse(processed_url)
+            
+            if not original_parsed.password or not processed_parsed.password:
+                raise ValueError("Staging validation failed - password missing in URL")
+            
+            if original_parsed.password != processed_parsed.password:
+                raise ValueError(
+                    f"Staging password integrity check failed - password corrupted during processing. "
+                    f"This indicates a sanitization error that must be fixed."
+                )
+            
+        except Exception as e:
+            if "Staging" in str(e):
+                raise  # Re-raise our validation errors
+            raise ValueError(f"Staging validation error: {e}")
+    
+    @staticmethod
+    def _validate_password_entropy(password: str, min_entropy_score: float = 2.5) -> None:
+        """Validate password entropy for staging environment.
+        
+        Args:
+            password: Password to validate
+            min_entropy_score: Minimum entropy score required
+            
+        Raises:
+            ValueError: If password entropy is too low
+        """
+        if not password:
+            raise ValueError("Password entropy validation failed - empty password")
+        
+        # Simple entropy calculation
+        import math
+        from collections import Counter
+        
+        char_counts = Counter(password)
+        entropy = 0.0
+        password_length = len(password)
+        
+        for count in char_counts.values():
+            probability = count / password_length
+            if probability > 0:
+                entropy -= probability * math.log2(probability)
+        
+        if entropy < min_entropy_score:
+            raise ValueError(
+                f"Password entropy too low for staging environment: {entropy:.2f} "
+                f"(minimum: {min_entropy_score}). Password lacks sufficient randomness."
+            )
+    
+    @staticmethod
+    def _extract_password_from_url(url: str) -> str:
+        """Extract password from database URL safely.
+        
+        Args:
+            url: Database URL
+            
+        Returns:
+            Extracted password
+            
+        Raises:
+            ValueError: If password extraction fails
+        """
+        try:
+            parsed = urlparse(url)
+            if not parsed.password:
+                raise ValueError("No password found in URL")
+            return parsed.password
+        except Exception as e:
+            raise ValueError(f"Password extraction failed: {e}")
 
     @staticmethod
     def _get_default_auth_url() -> str:

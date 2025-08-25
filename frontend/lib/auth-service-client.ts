@@ -52,12 +52,21 @@ export class AuthServiceClient {
       logger.debug(`Fetching auth config from: ${this.endpoints.authConfig}`);
       
       const response = await fetch(this.endpoints.authConfig, {
-        signal: AbortSignal.timeout(3000),
+        signal: AbortSignal.timeout(5000), // Increased timeout for staging
         credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: Failed to fetch auth configuration`);
+        // Don't throw immediately for 403 errors in staging - this is expected
+        if (response.status === 403 && this.environment === 'staging') {
+          logger.info('Auth service returned 403 - authentication required for staging');
+        } else {
+          throw new Error(`HTTP ${response.status}: Failed to fetch auth configuration`);
+        }
       }
       
       const config = await response.json();
@@ -68,6 +77,16 @@ export class AuthServiceClient {
       return config;
     } catch (error) {
       logger.warn('Auth service unavailable, using offline configuration:', error);
+      
+      // For staging/production, still try to provide a working config
+      if (this.environment === 'staging' || this.environment === 'production') {
+        return {
+          development_mode: false,
+          google_client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+          oauth_enabled: true,
+          offline_mode: false
+        };
+      }
       
       // Return offline configuration for development/test
       return {

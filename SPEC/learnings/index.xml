@@ -572,6 +572,17 @@
             <critical-takeaway>Test coverage: 47 failing test methods across 5 categories provide comprehensive deployment validation.</critical-takeaway>
             <critical-takeaway>Pre-deployment validation prevents 80% of staging deployment failures through early issue detection.</critical-takeaway>
         </category>
+        
+        <category name="Iteration 3 Persistent Issues" path="SPEC/learnings/iteration3_persistent_issues.xml" keywords="Persistent Issues, Password Sanitization, ClickHouse Control Characters, Health Endpoint Methods, Compound Failures">
+            <critical-takeaway>CRITICAL: Three persistent issues compound to create 100% deployment failure: password corruption, URL control characters, missing methods.</critical-takeaway>
+            <critical-takeaway>Password sanitization corrupts special characters (@, !, #, $) causing authentication failures - need password-aware sanitization.</critical-takeaway>
+            <critical-takeaway>ClickHouse URLs retain control characters (newline at position 34) after sanitization - comprehensive character removal required.</critical-takeaway>
+            <critical-takeaway>DatabaseEnvironmentValidator missing get_environment_info(), validate_database_url(), get_safe_database_name() methods.</critical-takeaway>
+            <critical-takeaway>Issues cascade through layers: environment -> services -> health endpoints, blocking recovery and diagnostics.</critical-takeaway>
+            <critical-takeaway>47 failing tests created across 4 test files demonstrate root causes and prevent regressions after fixes.</critical-takeaway>
+            <critical-takeaway>Staging environment requires strict validation for passwords, URLs, and method availability - zero tolerance for corruption.</critical-takeaway>
+            <critical-takeaway>Recovery mechanisms fail due to compound issues - need failsafe systems that bypass all three problem areas.</critical-takeaway>
+        </category>
     </categories>
     
     <recent_major_fixes>
