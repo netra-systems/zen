@@ -26,18 +26,10 @@ class TestWebSocketConnectionManager:
     def manager(self):
         """Create connection manager with mocked dependencies."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.websocket.connection.ConnectionExecutionOrchestrator'):
-            manager = ConnectionManager()
-            # Mock: Generic component isolation for controlled unit testing
-            manager.orchestrator = Mock()
-            return manager
-    
-    @pytest.fixture
-    def mock_websocket(self):
-        """Create mock WebSocket connection."""
-        # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_ws = Mock(spec=WebSocket)
+        manager = WebSocketManager()
         # Mock: Generic component isolation for controlled unit testing
+        manager.orchestrator = Mock()
+        return manager
         mock_ws.client_state = Mock()
         mock_ws.client_state.name = "CONNECTED"
         return mock_ws

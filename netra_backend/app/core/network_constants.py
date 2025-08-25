@@ -375,7 +375,7 @@ class NetworkEnvironmentHelper:
         from shared.database_url_builder import DatabaseURLBuilder
         
         env = get_env()
-        builder = DatabaseURLBuilder(env.get_all_variables())
+        builder = DatabaseURLBuilder(env.get_all())
         
         # Validate configuration
         is_valid, error_msg = builder.validate()

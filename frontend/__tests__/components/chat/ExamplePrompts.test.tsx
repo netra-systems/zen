@@ -3,6 +3,62 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { jest } from '@jest/globals';
 
+// Mock framer-motion
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }) => React.createElement('div', props, children)
+  },
+  AnimatePresence: ({ children }) => children
+}));
+
+// Mock lucide-react icons
+jest.mock('lucide-react', () => ({
+  ChevronDown: () => React.createElement('div', { 'data-testid': 'chevron-down' }),
+  Send: () => React.createElement('div', { 'data-testid': 'send-icon' }),
+  Sparkles: () => React.createElement('div', { 'data-testid': 'sparkles-icon' }),
+  Zap: () => React.createElement('div', { 'data-testid': 'zap-icon' }),
+  TrendingUp: () => React.createElement('div', { 'data-testid': 'trending-up-icon' }),
+  Shield: () => React.createElement('div', { 'data-testid': 'shield-icon' }),
+  Database: () => React.createElement('div', { 'data-testid': 'database-icon' }),
+  Brain: () => React.createElement('div', { 'data-testid': 'brain-icon' })
+}));
+
+// Mock UI components
+jest.mock('@/components/ui/card', () => ({
+  Card: ({ children, ...props }) => React.createElement('div', { ...props, className: 'card' }, children),
+  CardContent: ({ children, ...props }) => React.createElement('div', { ...props, className: 'card-content' }, children)
+}));
+
+jest.mock('@/components/ui/collapsible', () => ({
+  Collapsible: ({ children, ...props }) => React.createElement('div', props, children),
+  CollapsibleContent: ({ children, ...props }) => React.createElement('div', props, children),
+  CollapsibleTrigger: ({ children, ...props }) => React.createElement('button', props, children)
+}));
+
+jest.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }) => React.createElement('button', props, children)
+}));
+
+// Mock external dependencies
+jest.mock('@/lib/examplePrompts', () => ({
+  examplePrompts: [
+    "Help me reduce my AI costs by 30% while maintaining quality. I'm spending $5000/month on GPT-4 calls.",
+    "My chatbot response time is too slow at 3 seconds. Can you optimize it to under 1 second without increasing costs?",
+    "I'm launching a new feature next month that will 3x my API usage. How should I prepare my infrastructure?"
+  ]
+}));
+
+jest.mock('@/lib/utils', () => ({
+  generateUniqueId: jest.fn(() => 'test-id-123')
+}));
+
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn()
+  }
+}));
+
 // Mock dependencies at the top level
 const mockSendMessage = jest.fn();
 const mockWebSocket = {
@@ -63,7 +119,7 @@ describe('ExamplePrompts', () => {
 
     render(<ExamplePrompts />);
 
-    const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
+    const firstPrompt = screen.getByText(/Help me reduce my AI costs by 30% while maintaining quality/i);
     fireEvent.click(firstPrompt);
 
     expect(mockUnifiedChatStore.addMessage).toHaveBeenCalledWith(expect.objectContaining({
@@ -87,7 +143,7 @@ describe('ExamplePrompts', () => {
     
     render(<ExamplePrompts />);
     
-    const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
+    const firstPrompt = screen.getByText(/Help me reduce my AI costs by 30% while maintaining quality/i);
     fireEvent.click(firstPrompt);
     
     expect(consoleErrorSpy).toHaveBeenCalledWith('[ERROR]', 'User must be authenticated to send messages');

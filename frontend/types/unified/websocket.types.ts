@@ -64,4 +64,4 @@ export {
 } from '../domains/websocket';
 
 // Re-export enums
-export { WebSocketMessageType, AgentStatus } from '../shared/enums';
+export { MessageType, WebSocketMessageType, AgentStatus } from '../shared/enums';

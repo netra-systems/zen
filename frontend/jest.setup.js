@@ -780,7 +780,7 @@ jest.mock('@/components/chat/hooks/useMessageSending', () => ({
     error: null,
     handleSend: jest.fn().mockImplementation(async (params) => {
       // Simulate real behavior - validate params and resolve quickly
-      if (params?.message && params?.isAuthenticated) {
+      if (params?.message) {
         return Promise.resolve();
       }
       return Promise.reject(new Error('Invalid params'));

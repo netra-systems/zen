@@ -320,13 +320,15 @@ async def process_agent_message(user_id_str: str, data: str, agent_service):
     # Create dedicated session for each message processing to avoid long-running sessions
     max_retries = 2
     for attempt in range(max_retries + 1):
+        db_session = None
         try:
+            # Try to get database session - this is what we retry on failure
             async with get_async_db() as db_session:
                 # Ensure session is properly initialized
                 if not db_session:
                     raise ValueError("Failed to create database session")
                 
-                # Process message with the session
+                # Process message with the session - agent errors propagate immediately
                 await agent_service.handle_websocket_message(user_id_str, data, db_session)
                 
                 # Explicit commit to ensure transactional integrity
@@ -334,15 +336,33 @@ async def process_agent_message(user_id_str: str, data: str, agent_service):
                 return
                 
         except Exception as e:
-            logger.error(f"Database session error for user {user_id_str} (attempt {attempt + 1}): {e}")
+            # Classify the error type
+            is_db_error = (_is_database_retryable_error(e) or 
+                          "Database not configured" in str(e) or 
+                          "Failed to create database session" in str(e))
             
-            # Retry on transient database errors
-            if attempt < max_retries and _is_database_retryable_error(e):
-                await asyncio.sleep(0.1 * (attempt + 1))  # Brief backoff
-                continue
+            # Debug logging for troubleshooting
+            logger.debug(f"Exception in process_agent_message: {e}, is_db_error: {is_db_error}, attempt: {attempt}")
+            
+            if is_db_error:
+                logger.error(f"Database session error for user {user_id_str} (attempt {attempt + 1}): {e}")
+                
+                # Retry on transient database errors
+                if attempt < max_retries:
+                    await asyncio.sleep(0.1 * (attempt + 1))  # Brief backoff
+                    continue
+                else:
+                    # Re-raise after max retries
+                    raise
             else:
-                # Re-raise after max retries or non-retryable error
-                raise
+                # Agent processing errors - rollback transaction if we have a session, then re-raise immediately
+                logger.debug(f"Agent error detected, not retrying: {e}")
+                if db_session:
+                    try:
+                        await db_session.rollback()
+                    except:
+                        pass  # Ignore rollback errors, focus on the original error
+                raise  # Re-raise agent error immediately without retry
 
 
 def check_connection_alive(conn_info, user_id_str: str, manager) -> bool:
@@ -508,7 +528,7 @@ def _is_database_retryable_error(error: Exception) -> bool:
     """Check if a database error is retryable."""
     error_str = str(error).lower()
     db_retryable_indicators = [
-        'connection lost', 'connection timed out', 'connection reset',
+        'connection lost', 'connection timed out', 'connection timeout', 'connection reset',
         'database is locked', 'deadlock detected', 'connection broken',
         'server closed the connection', 'timeout expired', 'connection pool',
         'no connection available', 'connection invalid'

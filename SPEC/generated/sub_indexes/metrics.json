@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-24T17:28:32.116347",
+    "generated_at": "2025-08-24T21:09:43.300787",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 163
+    "total_literals": 162
   },
   "literals": {
     "(timestamp) as time_bucket, count() as event_count": {
@@ -12,13 +12,6 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/agents/data_sub_agent/query_operations.py:45"
-      ]
-    },
-    "/metricDescriptors/run.googleapis.com/request_count": {
-      "value": "/metricDescriptors/run.googleapis.com/request_count",
-      "category": "metrics",
-      "locations": [
-        "scripts/cleanup_staging_environments.py:143"
       ]
     },
     "_bucket": {
@@ -916,7 +909,7 @@
       "value": "recent_operations_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/health.py:428"
+        "netra_backend/app/routes/health.py:442"
       ]
     },
     "recent_requests_count": {
@@ -1180,14 +1173,14 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/db/connection_pool_manager.py:273",
-        "netra_backend/app/db/database_manager.py:318",
+        "netra_backend/app/db/database_manager.py:291",
         "netra_backend/app/db/postgres_async.py:74",
         "netra_backend/app/db/postgres_cloud.py:102",
         "netra_backend/app/db/postgres_core.py:239",
         "netra_backend/app/db/postgres_core.py:468",
         "netra_backend/app/services/database/connection_manager.py:127",
-        "auth_service/auth_core/database/connection.py:165",
-        "auth_service/auth_core/database/connection.py:177"
+        "auth_service/auth_core/database/connection.py:218",
+        "auth_service/auth_core/database/connection.py:230"
       ]
     },
     "test_count": {
@@ -1256,8 +1249,8 @@
       "value": "timeout_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/health.py:390",
-        "netra_backend/app/routes/health.py:427"
+        "netra_backend/app/routes/health.py:404",
+        "netra_backend/app/routes/health.py:441"
       ]
     },
     "todo_count": {
@@ -1336,8 +1329,8 @@
       "value": "validation_error_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/health.py:391",
-        "netra_backend/app/routes/health.py:427"
+        "netra_backend/app/routes/health.py:405",
+        "netra_backend/app/routes/health.py:441"
       ]
     },
     "variables_count": {

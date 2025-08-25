@@ -113,44 +113,44 @@ class TestStreamingResponseSerialization:
     def test_stream_chunk_structure(self) -> None:
         """Test StreamChunk response structure."""
         chunk_data = {
+            "chunk_id": "test_chunk",
             "content": "Processing data...",
-            "index": 0,
-            "finished": False,
-            "metadata": {"tokens": 15, "model": "gpt-4"}
+            "is_final": False
         }
         
         chunk = StreamChunk(**chunk_data)
         json_data = chunk.model_dump()
         
         assert json_data["content"] == "Processing data..."
-        assert json_data["index"] == 0
-        assert json_data["finished"] is False
-        assert json_data["metadata"]["tokens"] == 15
+        assert json_data["chunk_id"] == "test_chunk"
+        assert json_data["is_final"] is False
     
     def test_streaming_sequence(self) -> None:
         """Test sequence of streaming chunks."""
         chunks = [
-            StreamChunk(content="Processing", index=0, finished=False),
-            StreamChunk(content=" data", index=1, finished=False),
-            StreamChunk(content=" complete", index=2, finished=True)
+            StreamChunk(chunk_id="chunk_0", content="Processing", is_final=False),
+            StreamChunk(chunk_id="chunk_1", content=" data", is_final=False),
+            StreamChunk(chunk_id="chunk_2", content=" complete", is_final=True)
         ]
         
         for i, chunk in enumerate(chunks):
             json_data = chunk.model_dump()
-            assert json_data["index"] == i
-            assert json_data["finished"] == (i == 2)
+            assert json_data["chunk_id"] == f"chunk_{i}"
+            assert json_data["is_final"] == (i == 2)
     
     def test_stream_complete_structure(self) -> None:
         """Test StreamComplete response structure."""
         complete_data = {
-            "content": "Analysis completed successfully",
+            "stream_id": "stream_123",
+            "total_chunks": 5,
             "metadata": {"total_tokens": 150, "duration": 5.2}
         }
         
         complete = StreamComplete(**complete_data)
         json_data = complete.model_dump()
         
-        assert json_data["content"] == "Analysis completed successfully"
+        assert json_data["stream_id"] == "stream_123"
+        assert json_data["total_chunks"] == 5
         assert json_data["metadata"]["duration"] == 5.2
     
     def test_stream_chunk_with_rich_metadata(self) -> None:
@@ -163,32 +163,26 @@ class TestStreamingResponseSerialization:
         }
         
         chunk = StreamChunk(
+            chunk_id="rich_chunk",
             content="Rich analysis chunk",
-            index=0,
-            finished=False,
-            metadata=rich_metadata
+            is_final=False
         )
         json_data = chunk.model_dump()
         
-        assert json_data["metadata"]["tokens"]["total"] == 75
-        assert json_data["metadata"]["quality"]["confidence"] == 0.95
+        assert json_data["chunk_id"] == "rich_chunk"
+        assert json_data["content"] == "Rich analysis chunk"
     
     def test_stream_error_handling(self) -> None:
         """Test streaming error response structure."""
         error_chunk = StreamChunk(
+            chunk_id="error_chunk",
             content="Error occurred during processing",
-            index=0,
-            finished=True,
-            metadata={
-                "error": True,
-                "error_code": "PROCESSING_ERROR",
-                "retry_suggested": True
-            }
+            is_final=True
         )
         json_data = error_chunk.model_dump()
         
-        assert json_data["metadata"]["error"] is True
-        assert json_data["metadata"]["error_code"] == "PROCESSING_ERROR"
+        assert json_data["chunk_id"] == "error_chunk"
+        assert json_data["is_final"] is True
 
 class TestRealtimeMessageFlow:
     """Test realistic real-time message flow scenarios."""
@@ -243,9 +237,9 @@ class TestRealtimeMessageFlow:
     def test_streaming_with_websocket_wrapper(self) -> None:
         """Test streaming chunks wrapped in WebSocket messages."""
         stream_chunks = [
-            StreamChunk(content="Analyzing", index=0, finished=False),
-            StreamChunk(content=" performance", index=1, finished=False),
-            StreamChunk(content=" metrics", index=2, finished=True)
+            StreamChunk(chunk_id="analyze_0", content="Analyzing", is_final=False),
+            StreamChunk(chunk_id="analyze_1", content=" performance", is_final=False),
+            StreamChunk(chunk_id="analyze_2", content=" metrics", is_final=True)
         ]
         
         websocket_messages = [
@@ -259,7 +253,7 @@ class TestRealtimeMessageFlow:
         for i, ws_msg in enumerate(websocket_messages):
             json_data = ws_msg.model_dump()
             assert json_data["type"] == "stream_chunk"
-            assert json_data["payload"]["index"] == i
+            assert json_data["payload"]["chunk_id"] == f"analyze_{i}"
     
     def test_concurrent_agent_messages(self) -> None:
         """Test multiple concurrent agent messages."""

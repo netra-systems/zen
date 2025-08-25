@@ -10,9 +10,9 @@ import sys
 from pathlib import Path
 
 from netra_backend.tests.test_config_core import (
-    TestConfigStatus,
-    TestConfigValidationResult,
-    TestValidationContext,
+    ConfigStatusHelper as TestConfigStatus,
+    ConfigValidationResultHelper as TestConfigValidationResult,
+    ValidationContextHelper as TestValidationContext,
 )
 # TODO: Import from actual test files once they exist
 # from netra_backend.tests.test_config_engine import (

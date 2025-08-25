@@ -523,6 +523,66 @@ class BatchingTestHelper:
         }
 
 
+class PerformanceTestCase:
+    """Base class for performance test cases."""
+    
+    def __init__(self, name: str = "Performance Test"):
+        self.name = name
+        self.benchmark = PerformanceBenchmark(name)
+        self.metrics: Optional[PerformanceMetrics] = None
+    
+    async def run_load_test(self, operation: Callable, 
+                          concurrent_users: int = 10,
+                          operations_per_user: int = 10,
+                          ramp_up_time: float = 0.0) -> PerformanceMetrics:
+        """Run a load test."""
+        self.metrics = await self.benchmark.run_load_test(
+            operation, concurrent_users, operations_per_user, ramp_up_time
+        )
+        return self.metrics
+    
+    async def run_stress_test(self, operation: Callable,
+                            duration_seconds: float = 60.0,
+                            concurrent_users: int = 50) -> PerformanceMetrics:
+        """Run a stress test."""
+        self.metrics = await self.benchmark.run_stress_test(
+            operation, duration_seconds, concurrent_users
+        )
+        return self.metrics
+    
+    def create_report(self) -> str:
+        """Create a performance report from the last test run."""
+        if not self.metrics:
+            return "No performance metrics available. Run a test first."
+        return self.benchmark.create_report(self.metrics)
+    
+    def assert_performance_requirements(self, 
+                                      max_response_time_ms: Optional[float] = None,
+                                      min_throughput_ops_per_sec: Optional[float] = None,
+                                      max_error_rate_percent: Optional[float] = None,
+                                      max_memory_usage_mb: Optional[float] = None):
+        """Assert performance requirements."""
+        if not self.metrics:
+            raise AssertionError("No performance metrics available. Run a test first.")
+        
+        if max_response_time_ms is not None:
+            actual_ms = self.metrics.avg_response_time * 1000
+            assert actual_ms <= max_response_time_ms, \
+                f"Average response time {actual_ms:.2f}ms exceeds limit {max_response_time_ms}ms"
+        
+        if min_throughput_ops_per_sec is not None:
+            assert self.metrics.throughput_ops_per_second >= min_throughput_ops_per_sec, \
+                f"Throughput {self.metrics.throughput_ops_per_second:.2f} ops/sec below minimum {min_throughput_ops_per_sec}"
+        
+        if max_error_rate_percent is not None:
+            assert self.metrics.error_rate_percent <= max_error_rate_percent, \
+                f"Error rate {self.metrics.error_rate_percent:.2f}% exceeds limit {max_error_rate_percent}%"
+        
+        if max_memory_usage_mb is not None:
+            assert self.metrics.peak_memory_mb <= max_memory_usage_mb, \
+                f"Peak memory usage {self.metrics.peak_memory_mb:.1f}MB exceeds limit {max_memory_usage_mb}MB"
+
+
 def create_test_operations() -> Dict[str, Callable]:
     """Create test operations for benchmarking."""
     return {

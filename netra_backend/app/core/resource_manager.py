@@ -30,7 +30,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Callable, Union
@@ -83,7 +83,7 @@ class ResourceLimits:
 @dataclass
 class ResourceUsage:
     """Current resource usage snapshot."""
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     memory_mb: float = 0.0
     memory_percent: float = 0.0
     file_descriptors: int = 0
@@ -109,7 +109,7 @@ class ResourceAlert:
     limit_value: Union[int, float]
     percentage: float
     message: str
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     actions_taken: List[str] = field(default_factory=list)
 
 
@@ -143,7 +143,7 @@ class ResourceManager:
         
         # Current process info
         self.process = psutil.Process()
-        self.process_start_time = datetime.utcnow()
+        self.process_start_time = datetime.now(UTC)
         
         # Resource tracking
         self.usage_history: List[ResourceUsage] = []
@@ -307,7 +307,7 @@ class ResourceManager:
             
             if self.usage_history:
                 # Find usage from 1 minute ago
-                cutoff_time = datetime.utcnow() - timedelta(minutes=1)
+                cutoff_time = datetime.now(UTC) - timedelta(minutes=1)
                 for usage in reversed(self.usage_history):
                     if usage.timestamp <= cutoff_time:
                         memory_growth_1m = memory_mb - usage.memory_mb

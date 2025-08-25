@@ -42,13 +42,22 @@ class TestGlobalErrorHandler:
     
     def test_global_error_handler_shared_state(self):
         """Test global error handler maintains shared state."""
-        initial_count = global_error_handler.total_errors
+        initial_count = global_error_handler._error_metrics['total_errors']
         
         # Add error through global handler
         test_error = ValidationError("Global test error")
-        global_error_handler._store_error(test_error)
+        # Convert to proper AgentError first
+        from netra_backend.app.schemas.shared_types import ErrorContext
+        context = ErrorContext(
+            trace_id="test_trace_global",
+            operation="test_operation",
+            agent_name="TestAgent",
+            operation_name="test_operation"
+        )
+        agent_error = global_error_handler._convert_to_agent_error(test_error, context)
+        global_error_handler._store_error(agent_error)
         
-        assert global_error_handler.total_errors == initial_count + 1
+        assert global_error_handler._error_metrics['total_errors'] == initial_count + 1
     
     def test_global_error_handler_thread_safety(self):
         """Test global error handler thread safety."""
@@ -56,10 +65,23 @@ class TestGlobalErrorHandler:
         error1 = ValidationError("Thread test 1")
         error2 = NetworkError("Thread test 2")
         
-        global_error_handler._store_error(error1)
-        global_error_handler._store_error(error2)
+        # Convert errors to proper AgentErrors first
+        from netra_backend.app.schemas.shared_types import ErrorContext
+        context = ErrorContext(
+            trace_id="test_trace_thread",
+            operation="test_operation", 
+            agent_name="TestAgent",
+            operation_name="test_operation"
+        )
         
-        assert global_error_handler.total_errors >= 2
+        agent_error1 = global_error_handler._convert_to_agent_error(error1, context)
+        agent_error2 = global_error_handler._convert_to_agent_error(error2, context)
+        
+        initial_count = global_error_handler._error_metrics['total_errors']
+        global_error_handler._store_error(agent_error1)
+        global_error_handler._store_error(agent_error2)
+        
+        assert global_error_handler._error_metrics['total_errors'] >= initial_count + 2
 
 class TestErrorHandlerDecorator:
     """Test handle_agent_error decorator functionality."""

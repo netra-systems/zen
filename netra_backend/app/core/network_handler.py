@@ -29,11 +29,16 @@ from urllib.parse import urlparse
 import dns.resolver
 import aiohttp
 from aiohttp import web
-from aiohttp.web_middlewares import cors_handler
-from aiohttp_cors import CorsConfig, setup as cors_setup
 
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.error_types import NetworkError
+try:
+    from aiohttp_cors import setup as cors_setup
+    import aiohttp_cors
+    AIOHTTP_CORS_AVAILABLE = True
+except ImportError:
+    AIOHTTP_CORS_AVAILABLE = False
+
+from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
+from netra_backend.app.agents.agent_error_types import NetworkError
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.unified_logging import get_logger
 
@@ -175,17 +180,19 @@ class NetworkHandler:
         self.websocket_pools: Dict[str, List[Any]] = {}
         
         # Circuit breakers
-        self.dns_breaker = CircuitBreaker(
+        dns_config = CircuitConfig(
+            name="dns_resolver",
             failure_threshold=5,
-            recovery_timeout=60.0,
-            expected_exception=(dns.resolver.NXDOMAIN, dns.resolver.Timeout)
+            recovery_timeout=60.0
         )
+        self.dns_breaker = CircuitBreaker(dns_config)
         
-        self.ssl_breaker = CircuitBreaker(
+        ssl_config = CircuitConfig(
+            name="ssl_handler",  
             failure_threshold=3,
-            recovery_timeout=120.0,
-            expected_exception=(ssl.SSLError, ssl.CertificateError)
+            recovery_timeout=120.0
         )
+        self.ssl_breaker = CircuitBreaker(ssl_config)
         
         # Monitoring
         self.monitor_task: Optional[asyncio.Task] = None
@@ -296,6 +303,12 @@ class NetworkHandler:
     def setup_cors(self, app: web.Application) -> None:
         """Setup CORS middleware for web application."""
         effective_origins = self._get_effective_cors_origins()
+        
+        if not AIOHTTP_CORS_AVAILABLE:
+            self.logger.warning("aiohttp-cors not available, CORS setup skipped", extra={
+                "origins": effective_origins
+            })
+            return
         
         cors = cors_setup(app, defaults={
             "*": aiohttp_cors.ResourceOptions(

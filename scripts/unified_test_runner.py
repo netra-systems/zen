@@ -442,8 +442,13 @@ class UnifiedTestRunner:
         if args.verbose:
             print(f"[DEBUG] Running command for {service}: {cmd}")
         
-        # Execute tests
+        # Execute tests with timeout
         start_time = time.time()
+        # Set timeout based on service type
+        if service == "frontend":
+            timeout_seconds = 120  # 2 minutes for frontend tests (mostly unit tests)
+        else:
+            timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
             result = subprocess.run(
                 cmd,
@@ -452,9 +457,25 @@ class UnifiedTestRunner:
                 text=True,
                 shell=True,
                 encoding='utf-8',
-                errors='replace'
+                errors='replace',
+                timeout=timeout_seconds
             )
+            # Handle unicode encoding issues by cleaning the output
+            if result.stdout:
+                result.stdout = result.stdout.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
+            if result.stderr:
+                result.stderr = result.stderr.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
             success = result.returncode == 0
+        except subprocess.TimeoutExpired:
+            print(f"[ERROR] {service} tests timed out after {timeout_seconds} seconds")
+            print(f"[ERROR] Command: {cmd}")
+            success = False
+            result = subprocess.CompletedProcess(
+                args=cmd, 
+                returncode=1, 
+                stdout="", 
+                stderr=f"Tests timed out after {timeout_seconds} seconds"
+            )
         except Exception as e:
             print(f"[ERROR] Failed to run {service} tests: {e}")
             success = False
@@ -483,7 +504,7 @@ class UnifiedTestRunner:
             "smoke": ["-m", '"smoke"'],
             "unit": ["-m", '"not integration and not e2e"'],
             "integration": ["-m", '"integration"'],
-            "api": ["-k", '"api"'],
+            "api": ["tests/test_api_core_critical.py", "tests/test_api_error_handling_critical.py", "tests/test_api_threads_messages_critical.py", "tests/test_api_agent_generation_critical.py", "tests/test_api_endpoints_critical.py"],
             "database": ["-k", '"database or db"'],
             "websocket": ["-k", '"websocket or ws"'],
             "agent": ["-k", '"agent"'],
@@ -495,8 +516,8 @@ class UnifiedTestRunner:
         if category_name in category_markers:
             cmd_parts.extend(category_markers[category_name])
         
-        # Add environment-specific filtering
-        if hasattr(args, 'env') and args.env:
+        # Add environment-specific filtering (skip for API category which doesn't use env markers)
+        if hasattr(args, 'env') and args.env and category_name != "api":
             # Add environment marker to filter tests - use pytest markers, not -k expressions
             env_marker = f'env_{args.env}'
             cmd_parts.extend(["-m", env_marker])
@@ -548,7 +569,7 @@ class UnifiedTestRunner:
             "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
             "integration": f"npm run test:integration -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
             "e2e": f"npm run test:critical -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
-            "frontend": f"npm run test:fast -- --setupFilesAfterEnv='<rootDir>/{setup_file}'"
+            "frontend": f"npm run test:fast"
         }
         
         base_command = category_commands.get(category_name, f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}'")

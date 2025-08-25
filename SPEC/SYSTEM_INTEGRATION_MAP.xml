@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system_integration_map>
+    <metadata>
+        <version>1.0.0</version>
+        <last_updated>2025-08-25</last_updated>
+        <purpose>Comprehensive map of all system integration points, data flows, and cross-service dependencies</purpose>
+        <status>Active</status>
+    </metadata>
+
+    <integration_points>
+        <authentication>
+            <description>Token-based authentication flow between services</description>
+            <flow>
+                <step number="1">Frontend initiates OAuth via Auth Service</step>
+                <step number="2">Auth Service handles OAuth provider interaction</step>
+                <step number="3">Auth Service generates JWT and returns to Frontend</step>
+                <step number="4">Frontend includes JWT in all Backend API calls</step>
+                <step number="5">Backend validates tokens with Auth Service</step>
+            </flow>
+            <endpoints>
+                <endpoint service="auth" path="/auth/oauth" method="GET" purpose="Initiate OAuth flow"/>
+                <endpoint service="auth" path="/auth/callback" method="GET" purpose="OAuth callback handler"/>
+                <endpoint service="auth" path="/auth/validate" method="POST" purpose="Token validation"/>
+                <endpoint service="auth" path="/auth/logout" method="POST" purpose="User logout"/>
+            </endpoints>
+            <dependencies>
+                <dependency from="frontend" to="auth_service" type="oauth_flow"/>
+                <dependency from="backend" to="auth_service" type="token_validation"/>
+            </dependencies>
+            <caching>
+                <cache type="redis" ttl="300" key_pattern="auth:token:{token_hash}"/>
+            </caching>
+        </authentication>
+
+        <websocket_communication>
+            <description>Real-time bidirectional communication</description>
+            <protocol>
+                <format>JSON</format>
+                <authentication>Bearer token in connection params</authentication>
+                <reconnection>Automatic with exponential backoff</reconnection>
+            </protocol>
+            <message_types>
+                <type name="chat" description="User chat messages"/>
+                <type name="status" description="System status updates"/>
+                <type name="agent_update" description="AI agent progress"/>
+                <type name="error" description="Error notifications"/>
+            </message_types>
+            <flow>
+                <step number="1">Frontend establishes WebSocket connection with token</step>
+                <step number="2">Backend validates token and accepts connection</step>
+                <step number="3">Frontend sends JSON messages</step>
+                <step number="4">Backend processes through agent system</step>
+                <step number="5">Backend streams responses back to Frontend</step>
+            </flow>
+        </websocket_communication>
+
+        <database_connectivity>
+            <description>Shared database infrastructure with service isolation</description>
+            <databases>
+                <database name="postgresql" shared="true">
+                    <services>backend, auth_service</services>
+                    <isolation>Table/schema level separation</isolation>
+                    <connection_types>
+                        <type env="development">TCP without SSL</type>
+                        <type env="staging">Unix socket without SSL params</type>
+                        <type env="production">Unix socket preferred, TCP+SSL fallback</type>
+                    </connection_types>
+                </database>
+                <database name="redis" shared="true">
+                    <services>backend, auth_service</services>
+                    <isolation>Key namespace prefixes</isolation>
+                    <namespaces>
+                        <namespace service="backend" prefix="backend:"/>
+                        <namespace service="auth" prefix="auth:"/>
+                    </namespaces>
+                </database>
+                <database name="clickhouse" shared="false">
+                    <services>backend</services>
+                    <purpose>Analytics and metrics</purpose>
+                </database>
+            </databases>
+        </database_connectivity>
+
+        <configuration_management>
+            <description>Unified configuration system with service independence</description>
+            <architecture>
+                <component name="IsolatedEnvironment" location="/dev_launcher/isolated_environment.py">
+                    <purpose>Central environment variable management</purpose>
+                    <features>
+                        <feature>Complete isolation in dev/test</feature>
+                        <feature>Source tracking for debugging</feature>
+                        <feature>Thread-safe with RLock</feature>
+                        <feature>Subprocess environment management</feature>
+                    </features>
+                </component>
+                <component name="UnifiedConfig" location="/netra_backend/app/config.py">
+                    <purpose>Main configuration interface</purpose>
+                    <pattern>get_config() for all access</pattern>
+                </component>
+                <component name="DatabaseURLBuilder" location="/shared/database_url_builder.py">
+                    <purpose>Environment-aware database URL construction</purpose>
+                    <shared>true</shared>
+                </component>
+            </architecture>
+            <environment_detection>
+                <environment name="development" indicators="local database, no SSL"/>
+                <environment name="test" indicators="memory database option"/>
+                <environment name="staging" indicators="Cloud SQL, staging domains"/>
+                <environment name="production" indicators="Cloud SQL HA, production domains"/>
+            </environment_detection>
+        </configuration_management>
+
+        <service_discovery>
+            <description>Dynamic port allocation in development, fixed domains in deployment</description>
+            <development>
+                <mechanism>JSON files in .service_discovery/</mechanism>
+                <files>
+                    <file service="frontend" path=".service_discovery/frontend_config.json"/>
+                    <file service="backend" path=".service_discovery/backend_config.json"/>
+                    <file service="auth" path=".service_discovery/auth_service_config.json"/>
+                </files>
+                <port_allocation>Dynamic search from configurable start points</port_allocation>
+            </development>
+            <staging>
+                <frontend>https://staging.netrasystems.ai</frontend>
+                <backend>https://api.staging.netrasystems.ai</backend>
+                <auth>https://auth.staging.netrasystems.ai</auth>
+            </staging>
+            <production>
+                <frontend>https://app.netrasystems.ai</frontend>
+                <backend>https://api.netrasystems.ai</backend>
+                <auth>https://auth.netrasystems.ai</auth>
+            </production>
+        </service_discovery>
+
+        <agent_orchestration>
+            <description>Multi-agent AI system orchestration</description>
+            <architecture>
+                <supervisor location="/netra_backend/app/agents/supervisor_agent/">
+                    <purpose>Main orchestration and routing</purpose>
+                    <responsibilities>
+                        <responsibility>Message classification</responsibility>
+                        <responsibility>Agent selection</responsibility>
+                        <responsibility>Response aggregation</responsibility>
+                    </responsibilities>
+                </supervisor>
+                <agents>
+                    <agent name="data_sub_agent" purpose="Data processing and analysis"/>
+                    <agent name="apex_optimizer" purpose="AI optimization strategies"/>
+                    <agent name="cost_analyzer" purpose="Cost analysis and reduction"/>
+                    <agent name="performance_optimizer" purpose="Performance improvements"/>
+                </agents>
+            </architecture>
+            <communication>
+                <pattern>Message passing through supervisor</pattern>
+                <format>Structured JSON with agent context</format>
+                <llm_integration>OpenAI, Anthropic, local models</llm_integration>
+            </communication>
+        </agent_orchestration>
+
+        <deployment_pipeline>
+            <description>GCP-based deployment with multi-environment support</description>
+            <environments>
+                <environment name="staging">
+                    <project>netra-staging</project>
+                    <region>us-central1</region>
+                    <services>Cloud Run auto-scaling</services>
+                    <database>Cloud SQL PostgreSQL</database>
+                </environment>
+                <environment name="production">
+                    <project>netra-production</project>
+                    <regions>Multi-region</regions>
+                    <services>Cloud Run with traffic management</services>
+                    <database>Cloud SQL HA configuration</database>
+                </environment>
+            </environments>
+            <deployment_script>/scripts/deploy_to_gcp.py</deployment_script>
+            <build_options>
+                <option name="local" flag="--build-local" description="5-10x faster"/>
+                <option name="cloud" flag="default" description="Cloud Build"/>
+            </build_options>
+        </deployment_pipeline>
+
+        <monitoring_observability>
+            <description>System health and performance monitoring</description>
+            <health_checks>
+                <endpoint service="all" path="/health" method="GET"/>
+            </health_checks>
+            <logging>
+                <structured>true</structured>
+                <levels>DEBUG, INFO, WARNING, ERROR, CRITICAL</levels>
+                <destinations>Console, Cloud Logging</destinations>
+            </logging>
+            <metrics>
+                <framework>Prometheus/Grafana</framework>
+                <tracing>OpenTelemetry</tracing>
+                <slis>
+                    <sli name="latency" target="p99 &lt; 200ms"/>
+                    <sli name="availability" target="99.9%"/>
+                    <sli name="error_rate" target="&lt; 1%"/>
+                </slis>
+            </metrics>
+        </monitoring_observability>
+    </integration_points>
+
+    <data_flows>
+        <flow name="user_authentication">
+            <description>Complete user authentication lifecycle</description>
+            <steps>
+                <step>User clicks login in Frontend</step>
+                <step>Frontend redirects to Auth Service OAuth endpoint</step>
+                <step>Auth Service initiates OAuth with provider</step>
+                <step>Provider authenticates and returns to Auth Service</step>
+                <step>Auth Service creates/updates user record</step>
+                <step>Auth Service generates JWT token</step>
+                <step>Auth Service redirects to Frontend with token</step>
+                <step>Frontend stores token in localStorage</step>
+                <step>Frontend includes token in API requests</step>
+                <step>Backend validates token with Auth Service</step>
+            </steps>
+        </flow>
+
+        <flow name="chat_message_processing">
+            <description>Real-time chat message processing</description>
+            <steps>
+                <step>User types message in Frontend</step>
+                <step>Frontend sends via WebSocket</step>
+                <step>Backend receives and validates</step>
+                <step>Backend routes to Supervisor Agent</step>
+                <step>Supervisor classifies and delegates</step>
+                <step>Sub-agents process in parallel</step>
+                <step>Results aggregated by Supervisor</step>
+                <step>Response streamed via WebSocket</step>
+                <step>Frontend displays real-time updates</step>
+            </steps>
+        </flow>
+
+        <flow name="deployment_process">
+            <description>Code deployment to production</description>
+            <steps>
+                <step>Developer runs deployment script</step>
+                <step>Script builds Docker images locally</step>
+                <step>Images pushed to Artifact Registry</step>
+                <step>Cloud Run services updated</step>
+                <step>Health checks validate deployment</step>
+                <step>Traffic gradually shifted to new revision</step>
+                <step>Monitoring confirms stability</step>
+                <step>Old revisions retained for rollback</step>
+            </steps>
+        </flow>
+    </data_flows>
+
+    <shared_resources>
+        <resource name="PostgreSQL Database" type="infrastructure">
+            <shared_by>backend, auth_service</shared_by>
+            <isolation>Table/schema level</isolation>
+            <risk>High coupling through shared data</risk>
+            <mitigation>Service-specific schemas</mitigation>
+        </resource>
+
+        <resource name="Redis Cache" type="infrastructure">
+            <shared_by>backend, auth_service</shared_by>
+            <isolation>Key namespace prefixes</isolation>
+            <risk>Medium - namespace conflicts</risk>
+            <mitigation>Strict prefix enforcement</mitigation>
+        </resource>
+
+        <resource name="DatabaseURLBuilder" type="code">
+            <location>/shared/database_url_builder.py</location>
+            <shared_by>all services</shared_by>
+            <justification>Acceptable per SPEC/acceptable_duplicates.xml</justification>
+        </resource>
+
+        <resource name="Schema Definitions" type="code">
+            <location>/shared/schemas/</location>
+            <shared_by>backend, frontend</shared_by>
+            <purpose>Type consistency across services</purpose>
+        </resource>
+
+        <resource name="GCP Secret Manager" type="infrastructure">
+            <shared_by>all services</shared_by>
+            <isolation>Service-specific secret paths</isolation>
+            <secrets>
+                <secret name="JWT_SECRET_KEY" synchronized="true"/>
+                <secret name="DATABASE_URL" service_specific="false"/>
+                <secret name="OAUTH_CLIENT_ID" shared="true"/>
+                <secret name="OAUTH_CLIENT_SECRET" shared="true"/>
+            </secrets>
+        </resource>
+    </shared_resources>
+
+    <critical_dependencies>
+        <dependency>
+            <from>Frontend</from>
+            <to>Backend</to>
+            <type>REST API</type>
+            <criticality>High</criticality>
+            <fallback>Offline mode with queued requests</fallback>
+        </dependency>
+
+        <dependency>
+            <from>Backend</from>
+            <to>Auth Service</to>
+            <type>Token Validation</type>
+            <criticality>High</criticality>
+            <fallback>5-minute cache in Redis</fallback>
+        </dependency>
+
+        <dependency>
+            <from>All Services</from>
+            <to>PostgreSQL</to>
+            <type>Database</type>
+            <criticality>Critical</criticality>
+            <fallback>Read replicas for queries</fallback>
+        </dependency>
+
+        <dependency>
+            <from>Backend</from>
+            <to>LLM Providers</to>
+            <type>AI Processing</type>
+            <criticality>High</criticality>
+            <fallback>Local model or graceful degradation</fallback>
+        </dependency>
+    </critical_dependencies>
+
+    <compliance_status>
+        <requirement name="Service Independence" status="85%" target="100%">
+            <violations>
+                <violation>Shared PostgreSQL database</violation>
+                <violation>193 cross-service imports</violation>
+            </violations>
+        </requirement>
+
+        <requirement name="Import Management" status="48.21%" target="100%">
+            <violations>
+                <violation>Extensive relative imports in tests</violation>
+                <violation>Cross-service import dependencies</violation>
+            </violations>
+        </requirement>
+
+        <requirement name="Configuration Unity" status="89%" target="100%">
+            <violations>
+                <violation>20+ direct os.environ access</violation>
+                <violation>Legacy config patterns in tests</violation>
+            </violations>
+        </requirement>
+
+        <requirement name="Test Coverage" status="51.4%" target="97%">
+            <gaps>
+                <gap>Security validators: 0% coverage</gap>
+                <gap>Agent systems: 0% coverage</gap>
+                <gap>WebSocket: 12.8% coverage</gap>
+            </gaps>
+        </requirement>
+    </compliance_status>
+
+    <risk_assessment>
+        <risk level="critical" area="security">
+            <description>Zero test coverage for security validators</description>
+            <impact>Potential security vulnerabilities undetected</impact>
+            <mitigation>Immediate test implementation required</mitigation>
+        </risk>
+
+        <risk level="high" area="reliability">
+            <description>Low test coverage (51.4%) overall</description>
+            <impact>Production bugs and regressions likely</impact>
+            <mitigation>Systematic coverage improvement campaign</mitigation>
+        </risk>
+
+        <risk level="medium" area="maintainability">
+            <description>Import violations and cross-service dependencies</description>
+            <impact>Difficult refactoring and service evolution</impact>
+            <mitigation>Import cleanup and service boundary enforcement</mitigation>
+        </risk>
+
+        <risk level="low" area="performance">
+            <description>Shared database without connection pooling optimization</description>
+            <impact>Potential bottlenecks under load</impact>
+            <mitigation>Connection pool tuning and monitoring</mitigation>
+        </risk>
+    </risk_assessment>
+</system_integration_map>

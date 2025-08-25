@@ -25,8 +25,13 @@ def get_global_error_handler():
     return global_agent_error_handler
 
 # For backward compatibility, create instances when accessed
-AgentErrorHandler = None
-global_error_handler = None
+from netra_backend.app.core.error_handlers.agents.agent_error_handler import (
+    AgentErrorHandler,
+    global_agent_error_handler
+)
+
+# Maintain backward compatibility aliases
+global_error_handler = global_agent_error_handler
 from netra_backend.app.core.exceptions_agent import AgentError
 
 # Import external dependencies that were referenced

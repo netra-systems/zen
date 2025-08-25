@@ -75,8 +75,12 @@ class TestBasicHealthEndpoint:
                 }
             })
             
+            # Create mock Response object
+            mock_response = MagicMock()
+            mock_response.headers = {}
+            
             # Call the health endpoint
-            result = await health(mock_request)
+            result = await health(mock_request, mock_response)
             
             # Verify the result
             assert isinstance(result, dict)
@@ -107,8 +111,12 @@ class TestBasicHealthEndpoint:
         mock_request.app.state.startup_phase = "initializing_database"
         mock_request.app.state.startup_progress = 75
         
+        # Create mock Response object
+        mock_response = MagicMock()
+        mock_response.headers = {}
+        
         # Call the health endpoint
-        result = await health(mock_request)
+        result = await health(mock_request, mock_response)
         
         # Should return Response object for error cases
         assert isinstance(result, Response)
@@ -140,8 +148,12 @@ class TestBasicHealthEndpoint:
         )
         mock_request.app.state.startup_error = "Database connection failed"
         
+        # Create mock Response object
+        mock_response = MagicMock()
+        mock_response.headers = {}
+        
         # Call the health endpoint
-        result = await health(mock_request)
+        result = await health(mock_request, mock_response)
         
         # Should return Response object for error cases
         assert isinstance(result, Response)
@@ -165,8 +177,12 @@ class TestBasicHealthEndpoint:
         mock_request = MagicMock()
         mock_request.app.state = MockAppState(startup_complete=None)
         
+        # Create mock Response object
+        mock_response = MagicMock()
+        mock_response.headers = {}
+        
         # Call the health endpoint
-        result = await health(mock_request)
+        result = await health(mock_request, mock_response)
         
         # Should return Response object for error cases
         assert isinstance(result, Response)
@@ -196,8 +212,12 @@ class TestBasicHealthEndpoint:
         # Set startup time to 6 minutes ago (exceeds 5 minute timeout)
         mock_request.app.state.startup_start_time = time.time() - 360
         
+        # Create mock Response object
+        mock_response = MagicMock()
+        mock_response.headers = {}
+        
         # Call the health endpoint
-        result = await health(mock_request)
+        result = await health(mock_request, mock_response)
         
         # Should return Response object for error cases
         assert isinstance(result, Response)
@@ -228,8 +248,12 @@ class TestBasicHealthEndpoint:
         mock_startup_complete._mock_name = "startup_complete"
         mock_request.app.state.startup_complete = mock_startup_complete
         
+        # Create mock Response object
+        mock_response = MagicMock()
+        mock_response.headers = {}
+        
         # Call the health endpoint
-        result = await health(mock_request)
+        result = await health(mock_request, mock_response)
         
         # Should return Response object for error cases
         assert isinstance(result, Response)
@@ -300,8 +324,12 @@ class TestBasicHealthEndpoint:
         )
         mock_request.app.state.startup_error = "Test error"
         
+        # Create mock Response object
+        mock_response = MagicMock()
+        mock_response.headers = {}
+        
         # Call the health endpoint
-        result = await health(mock_request)
+        result = await health(mock_request, mock_response)
         
         # Should return Response object for error cases
         assert isinstance(result, Response)

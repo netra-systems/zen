@@ -139,10 +139,25 @@ async def _execute_session_transaction(session: AsyncSession):
 @asynccontextmanager
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get async database session with resilient transaction handling."""
-    from netra_backend.app.db.postgres_core import async_session_factory
+    from netra_backend.app.db.postgres_core import async_session_factory, initialize_postgres
     
     if async_session_factory is None:
-        logger.error("async_session_factory is not initialized.")
+        logger.debug("async_session_factory is not initialized, attempting to initialize database...")
+        try:
+            # Attempt to initialize the database
+            initialized_factory = initialize_postgres()
+            if initialized_factory is None:
+                logger.error("Failed to initialize database: initialize_postgres() returned None")
+                raise RuntimeError("Database not configured")
+            # Re-import the initialized factory
+            from netra_backend.app.db.postgres_core import async_session_factory
+        except Exception as e:
+            logger.error(f"Failed to initialize database during session creation: {e}")
+            raise RuntimeError("Database not configured") from e
+    
+    # Check again after potential initialization    
+    if async_session_factory is None:
+        logger.error("async_session_factory is still None after initialization attempt")
         raise RuntimeError("Database not configured")
         
     async with async_session_factory() as session:

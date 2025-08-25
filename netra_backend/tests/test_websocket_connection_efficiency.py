@@ -50,8 +50,8 @@ class TestWebSocketConnectionEfficiency:
         
         manager = WebSocketManager()
         assert manager is not None
-        assert hasattr(manager, 'active_connections')
-        assert isinstance(manager.active_connections, dict)
+        assert hasattr(manager, 'connection_stats')
+        assert manager.connection_stats["active_connections"] == 0
 
     @pytest.mark.asyncio
     async def test_safe_websocket_functions(self):
@@ -61,15 +61,16 @@ class TestWebSocketConnectionEfficiency:
             safe_websocket_close,
             is_websocket_connected
         )
+        from starlette.websockets import WebSocketState
         
         # Mock WebSocket
         mock_websocket = Mock()
-        mock_websocket.client_state = 1  # Connected state
+        mock_websocket.application_state = WebSocketState.CONNECTED
         
         # Test connection check
         assert is_websocket_connected(mock_websocket) is True
         
-        mock_websocket.client_state = 3  # Disconnected state
+        mock_websocket.application_state = WebSocketState.DISCONNECTED
         assert is_websocket_connected(mock_websocket) is False
 
     def test_websocket_message_types(self):

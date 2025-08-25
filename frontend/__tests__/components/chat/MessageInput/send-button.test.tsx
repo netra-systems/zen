@@ -6,25 +6,22 @@
 // Mock dependencies BEFORE imports
 const mockSendMessage = jest.fn();
 const mockUseWebSocket = jest.fn();
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseThreadStore = jest.fn();
-const mockUseAuthStore = jest.fn();
 const mockGenerateUniqueId = jest.fn();
 
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: mockUseWebSocket
 }));
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: jest.fn()
 }));
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: mockUseThreadStore
+  useThreadStore: jest.fn()
 }));
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: jest.fn()
 }));
 jest.mock('@/lib/utils', () => ({
-  generateUniqueId: mockGenerateUniqueId,
+  generateUniqueId: jest.fn(),
   cn: jest.fn((...classes) => classes.filter(Boolean).join(' '))
 }));
 jest.mock('@/components/chat/utils/messageInputUtils', () => ({

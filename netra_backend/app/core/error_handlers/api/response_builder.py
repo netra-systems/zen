@@ -165,7 +165,8 @@ class ErrorResponseBuilder:
         """Log error based on severity level."""
         severity_value = self._normalize_severity(severity)
         log_method = self._get_log_method(severity_value)
-        log_method("{} severity error: {}", severity_value.title(), exc)
+        message = f"{severity_value.title()} severity error: {exc}"
+        log_method(message)
     
     def _normalize_severity(self, severity: Union[ErrorSeverity, str]) -> str:
         """Normalize severity to string value."""

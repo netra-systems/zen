@@ -22,8 +22,7 @@ class TestMonitoringCoverage:
     @pytest.fixture
     def monitor(self):
         """Create performance monitor for testing."""
-        thresholds = PerformanceThresholds()
-        return PerformanceMonitor(thresholds)
+        return PerformanceMonitor()
     
     @pytest.mark.asyncio
     async def test_all_checks_run_despite_individual_failures(self, monitor):
@@ -299,17 +298,33 @@ class TestMonitoringReliabilityPatterns:
             await asyncio.sleep(0.1)  # Simulate slow check
             call_order.append(f"{name}_end")
         
+        # Create properly awaitable async mock functions
+        async def response_check():
+            return await slow_check("response")
+        
+        async def memory_check():
+            return await slow_check("memory")
+            
+        async def error_check():
+            return await slow_check("error")
+            
+        async def throughput_check():
+            return await slow_check("throughput")
+            
+        async def cpu_check():
+            return await slow_check("cpu")
+        
         # Mock checks with different execution times
         with patch.object(monitor, '_check_response_time_threshold', 
-                         side_effect=lambda: slow_check("response")):
+                         side_effect=response_check):
             with patch.object(monitor, '_check_memory_threshold', 
-                             side_effect=lambda: slow_check("memory")):
+                             side_effect=memory_check):
                 with patch.object(monitor, '_check_error_rate_threshold',
-                                 side_effect=lambda: slow_check("error")):
+                                 side_effect=error_check):
                     with patch.object(monitor, '_check_throughput_threshold',
-                                     side_effect=lambda: slow_check("throughput")):
+                                     side_effect=throughput_check):
                         with patch.object(monitor, '_check_cpu_threshold',
-                                         side_effect=lambda: slow_check("cpu")):
+                                         side_effect=cpu_check):
                             
                             start_time = asyncio.get_event_loop().time()
                             await monitor._check_performance_thresholds()

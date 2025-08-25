@@ -231,18 +231,16 @@ class DatabaseConnector:
     def _normalize_postgres_url(self, url: str) -> str:
         """Normalize PostgreSQL URL format for asyncpg compatibility.
         
-        DatabaseURLBuilder already provides properly formatted URLs,
-        but we keep this for backward compatibility and edge cases.
+        Uses DatabaseURLBuilder for consistent URL normalization.
         """
         if not url:
             return url
-        # Convert postgres:// to postgresql://
-        if url.startswith("postgres://"):
-            url = url.replace("postgres://", "postgresql://")
+        # Use DatabaseURLBuilder for consistent normalization
+        from shared.database_url_builder import DatabaseURLBuilder
+        normalized = DatabaseURLBuilder.normalize_postgres_url(url)
         # Strip async driver prefixes for asyncpg (asyncpg expects plain postgresql://)
-        url = url.replace("postgresql+asyncpg://", "postgresql://")
-        url = url.replace("postgres+asyncpg://", "postgresql://")
-        return url
+        normalized = normalized.replace("postgresql+asyncpg://", "postgresql://")
+        return normalized
     
     async def validate_all_connections(self) -> bool:
         """

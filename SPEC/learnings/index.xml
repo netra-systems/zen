@@ -47,6 +47,16 @@
             <critical-takeaway>URLs are now clean and semantic: auth.domain/auth/*, api.domain/api/*.</critical-takeaway>
         </category>
         
+        <category name="Deployment Performance Testing" path="SPEC/learnings/iteration3_deployment_performance_testing.xml" keywords="Deployment, Performance, Startup, Memory, CPU, Health, Timeout, Resource Optimization">
+            <critical-takeaway>CRITICAL: Deployment performance tests prevent timeout failures and validate resource optimization compliance.</critical-takeaway>
+            <critical-takeaway>Startup timeout prevention requires comprehensive testing with 60-second Cloud Run limits.</critical-takeaway>
+            <critical-takeaway>Memory optimization from 2Gi to 1Gi requires extensive validation with leak detection.</critical-takeaway>
+            <critical-takeaway>Health endpoints must respond within 100ms for deployment readiness validation.</critical-takeaway>
+            <critical-takeaway>Edge case testing covers memory pressure, CPU throttling, and cascading timeout scenarios.</critical-takeaway>
+            <critical-takeaway>Performance monitoring must be integrated into deployment pipelines for regression detection.</critical-takeaway>
+            <critical-takeaway>Container startup probes require comprehensive success/failure/recovery testing.</critical-takeaway>
+        </category>
+        
         <category name="Project Structure" path="SPEC/learnings/project_structure_enforcement.xml" keywords="Structure, Imports, netra_backend, Canonical">
             <critical-takeaway>THE canonical structure: netra_backend/app/ for production, netra_backend/tests/ for tests. This is PERMANENT.</critical-takeaway>
             <critical-takeaway>All imports MUST use netra_backend.app.* prefix. Fix imports, NOT the structure.</critical-takeaway>

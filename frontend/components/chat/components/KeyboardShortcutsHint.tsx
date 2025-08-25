@@ -7,24 +7,28 @@ interface KeyboardShortcutsHintProps {
   hasMessage: boolean;
 }
 
-const ShortcutItem: React.FC<{
+function ShortcutItem({ icon, text }: {
   icon: React.ReactNode;
   text: string;
-}> = ({ icon, text }) => (
-  <span className="flex items-center gap-1">
-    {icon}
-    <span>{text}</span>
-  </span>
-);
+}) {
+  return (
+    <span className="flex items-center gap-1">
+      {icon}
+      <span>{text}</span>
+    </span>
+  );
+}
 
-const SearchShortcut: React.FC = () => (
+const SearchShortcut = React.memo(() => (
   <ShortcutItem 
     icon={<Command className="w-3 h-3" />}
     text="+ K for search"
   />
-);
+));
 
-const HistoryShortcut: React.FC = () => (
+SearchShortcut.displayName = 'SearchShortcut';
+
+const HistoryShortcut = React.memo(() => (
   <ShortcutItem 
     icon={
       <>
@@ -34,7 +38,9 @@ const HistoryShortcut: React.FC = () => (
     }
     text="for history"
   />
-);
+));
+
+HistoryShortcut.displayName = 'HistoryShortcut';
 
 const shouldShowHint = (isAuthenticated: boolean, hasMessage: boolean): boolean => {
   return isAuthenticated && !hasMessage;
@@ -59,3 +65,6 @@ export const KeyboardShortcutsHint: React.FC<KeyboardShortcutsHintProps> = ({
     )}
   </AnimatePresence>
 );
+
+// Export internal components for testing
+export { SearchShortcut, HistoryShortcut };

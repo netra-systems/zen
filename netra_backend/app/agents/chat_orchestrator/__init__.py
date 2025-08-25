@@ -6,8 +6,8 @@ Last Updated: 2025-01-22
 Business Value: Modular components for AI optimization consultation orchestration.
 """
 
-# Import the main orchestrator from parent directory
-from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
+# Note: ChatOrchestrator is available in chat_orchestrator_main.py
+# Avoid importing it here to prevent circular imports
 
 # Import helper modules
 from netra_backend.app.agents.chat_orchestrator.confidence_manager import (
@@ -31,7 +31,7 @@ from netra_backend.app.agents.chat_orchestrator.pipeline_executor import (
 from netra_backend.app.agents.chat_orchestrator.trace_logger import TraceLogger
 
 __all__ = [
-    "ChatOrchestrator",
+    # "ChatOrchestrator",  # Available in chat_orchestrator_main.py
     "ConfidenceLevel",
     "ConfidenceManager",
     "ExecutionPlanner",

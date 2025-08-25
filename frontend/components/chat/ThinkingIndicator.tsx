@@ -60,7 +60,7 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
       className="flex justify-start mt-4 mb-4"
     >
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r opacity-20 blur-xl rounded-2xl ${getColorScheme()}" />
+        <div className={`absolute inset-0 bg-gradient-to-r opacity-20 blur-xl rounded-2xl ${getColorScheme()}`} />
         
         <div className="relative bg-white border border-gray-200 rounded-2xl shadow-lg p-4 max-w-sm">
           <div className="flex items-center space-x-3">

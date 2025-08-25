@@ -59,7 +59,57 @@ class DatabaseURLBuilder:
         @property
         def is_cloud_sql(self) -> bool:
             """Check if this is a Cloud SQL configuration."""
-            return self.parent.postgres_host is not None and "/cloudsql/" in self.parent.postgres_host
+            # Check POSTGRES_HOST environment variable first
+            if self.parent.postgres_host is not None and "/cloudsql/" in self.parent.postgres_host:
+                return True
+            
+            # Also check DATABASE_URL for Cloud SQL pattern
+            if self.parent.database_url and "/cloudsql/" in self.parent.database_url:
+                return True
+            
+            return False
+        
+        def _parse_database_url_components(self):
+            """Parse user, password, host, and database from DATABASE_URL for Cloud SQL."""
+            if not self.parent.database_url or "/cloudsql/" not in self.parent.database_url:
+                return None, None, None, None
+            
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(self.parent.database_url)
+                
+                # Extract user and password
+                user = parsed.username or ""
+                password = parsed.password or ""
+                
+                # Extract database name from path
+                database = parsed.path.lstrip('/') if parsed.path else ""
+                
+                # Extract Cloud SQL socket path from host or query params
+                if "/cloudsql/" in parsed.path:
+                    # Format: postgresql://user:pass@host/cloudsql/project:region:instance/db
+                    # Extract the cloudsql path from the path
+                    import re
+                    path_match = re.search(r'/cloudsql/[^/]+', parsed.path)
+                    if path_match:
+                        cloudsql_host = path_match.group(0)
+                        # Extract database name after cloudsql path
+                        db_match = re.search(r'/cloudsql/[^/]+/(.+)', parsed.path)
+                        if db_match:
+                            database = db_match.group(1)
+                        return user, password, cloudsql_host, database
+                elif "host=" in (parsed.query or ""):
+                    # Format: postgresql://user:pass@/db?host=/cloudsql/project:region:instance
+                    import re
+                    query_match = re.search(r'host=([^&]+)', parsed.query)
+                    if query_match:
+                        cloudsql_host = query_match.group(1)
+                        return user, password, cloudsql_host, database
+                
+            except Exception:
+                pass
+            
+            return None, None, None, None
         
         @property
         def async_url(self) -> Optional[str]:
@@ -67,14 +117,29 @@ class DatabaseURLBuilder:
             if not self.is_cloud_sql:
                 return None
             
+            # Try to get components from individual env vars first
+            user = self.parent.postgres_user
+            password = self.parent.postgres_password
+            database = self.parent.postgres_db
+            host = self.parent.postgres_host
+            
+            # If individual components aren't available, parse from DATABASE_URL
+            if not user or not host or not database:
+                parsed_user, parsed_password, parsed_host, parsed_database = self._parse_database_url_components()
+                if parsed_user is not None:
+                    user = user or parsed_user
+                    password = password or parsed_password
+                    host = host or parsed_host
+                    database = database or parsed_database
+            
             # URL encode user and password for safety
-            user = quote(self.parent.postgres_user, safe='') if self.parent.postgres_user else ""
-            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
+            user = quote(user, safe='') if user else ""
+            password_part = f":{quote(password, safe='')}" if password else ""
             return (
                 f"postgresql+asyncpg://"
                 f"{user}{password_part}"
-                f"@/{self.parent.postgres_db}"
-                f"?host={self.parent.postgres_host}"
+                f"@/{database}"
+                f"?host={host}"
             )
         
         @property
@@ -83,14 +148,29 @@ class DatabaseURLBuilder:
             if not self.is_cloud_sql:
                 return None
             
+            # Try to get components from individual env vars first
+            user = self.parent.postgres_user
+            password = self.parent.postgres_password
+            database = self.parent.postgres_db
+            host = self.parent.postgres_host
+            
+            # If individual components aren't available, parse from DATABASE_URL
+            if not user or not host or not database:
+                parsed_user, parsed_password, parsed_host, parsed_database = self._parse_database_url_components()
+                if parsed_user is not None:
+                    user = user or parsed_user
+                    password = password or parsed_password
+                    host = host or parsed_host
+                    database = database or parsed_database
+            
             # URL encode user and password for safety
-            user = quote(self.parent.postgres_user, safe='') if self.parent.postgres_user else ""
-            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
+            user = quote(user, safe='') if user else ""
+            password_part = f":{quote(password, safe='')}" if password else ""
             return (
                 f"postgresql://"
                 f"{user}{password_part}"
-                f"@/{self.parent.postgres_db}"
-                f"?host={self.parent.postgres_host}"
+                f"@/{database}"
+                f"?host={host}"
             )
         
         @property
@@ -528,6 +608,20 @@ class DatabaseURLBuilder:
             config_type = "Custom"
         
         return f"Database URL ({self.environment}/{config_type}): {masked_url}"
+    
+    def normalize_url(self, url: str) -> str:
+        """
+        Normalize database URL using instance configuration.
+        
+        This is the instance method that uses configuration context.
+        
+        Args:
+            url: Database URL to normalize
+            
+        Returns:
+            Normalized PostgreSQL URL
+        """
+        return self.normalize_postgres_url(url)
     
     @staticmethod
     def normalize_postgres_url(url: str) -> str:

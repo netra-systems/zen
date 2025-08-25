@@ -68,7 +68,7 @@ class TestConfigEnvironmentDetection:
         os.environ['TESTING'] = 'true'
         
         # Act
-        result = config_env.get_environment()
+        result = config_env.detect()
         
         # Assert
         assert result == "testing"
@@ -81,7 +81,7 @@ class TestConfigEnvironmentDetection:
             mock_detect.return_value = "production"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "production"
@@ -95,7 +95,7 @@ class TestConfigEnvironmentDetection:
             mock_detect.return_value = None
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "development"
@@ -119,7 +119,7 @@ class TestConfigEnvironmentDetection:
                 os.environ['ENVIRONMENT'] = env_value
                 
                 # Act
-                result = config_env.get_environment()
+                result = config_env.detect()
                 
                 # Assert
                 assert result == expected
@@ -135,7 +135,7 @@ class TestConfigEnvironmentDetection:
             mock_detect.return_value = "staging"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "testing"
@@ -153,7 +153,7 @@ class TestConfigObjectCreation:
     def test_create_config_development(self, config_env):
         """Test creation of development configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='development'):
+        with patch.object(config_env, 'detect', return_value='development'):
             
             # Act
             config = config_env.create_config()
@@ -165,7 +165,7 @@ class TestConfigObjectCreation:
     def test_create_config_production(self, config_env):
         """Test creation of production configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='production'):
+        with patch.object(config_env, 'detect', return_value='production'):
             
             # Act
             config = config_env.create_config()
@@ -178,7 +178,7 @@ class TestConfigObjectCreation:
     def test_create_config_staging(self, config_env):
         """Test creation of staging configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='staging'):
+        with patch.object(config_env, 'detect', return_value='staging'):
             
             # Act
             config = config_env.create_config()
@@ -190,7 +190,7 @@ class TestConfigObjectCreation:
     def test_create_config_testing(self, config_env):
         """Test creation of testing configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='testing'):
+        with patch.object(config_env, 'detect', return_value='testing'):
             
             # Act
             config = config_env.create_config()
@@ -202,7 +202,7 @@ class TestConfigObjectCreation:
     def test_create_config_unknown_environment_defaults(self, config_env):
         """Test creation with unknown environment defaults to development"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='unknown'):
+        with patch.object(config_env, 'detect', return_value='unknown'):
             
             # Act
             config = config_env.create_config()
@@ -246,7 +246,7 @@ class TestEnvironmentValidation:
         }
         
         for env_name, config_class in environment_mappings.items():
-            with patch.object(config_env, 'get_environment', return_value=env_name):
+            with patch.object(config_env, 'detect', return_value=env_name):
                 config = config_env.create_config()
                 assert isinstance(config, config_class)
 
@@ -267,7 +267,7 @@ class TestCloudEnvironmentDetection:
             mock_detect.return_value = "production"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "production"
@@ -282,7 +282,7 @@ class TestCloudEnvironmentDetection:
             mock_detect.return_value = "staging"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "staging"
@@ -297,7 +297,7 @@ class TestCloudEnvironmentDetection:
             mock_detect.return_value = "production"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "production"
@@ -322,7 +322,7 @@ class TestConfigurationLogging:
             with patch('app.config_environment.detect_cloud_run_environment', return_value=None):
                 
                 # Act
-                config_env.get_environment()
+                config_env.detect()
                 
                 # Assert - Logger should be called for environment detection
                 assert mock_logger.debug.called or mock_logger.info.called
@@ -330,7 +330,7 @@ class TestConfigurationLogging:
     def test_config_creation_logging(self, config_env):
         """Test logging during config object creation"""
         with patch.object(config_env, '_logger') as mock_logger:
-            with patch.object(config_env, 'get_environment', return_value='development'):
+            with patch.object(config_env, 'detect', return_value='development'):
                 
                 # Act
                 config_env.create_config()
@@ -351,7 +351,7 @@ class TestPerformanceAndEdgeCases:
         with patch('app.config_environment.detect_cloud_run_environment', return_value='production'):
             
             # Act - Multiple calls
-            results = [config_env.get_environment() for _ in range(10)]
+            results = [config_env.detect() for _ in range(10)]
             
             # Assert - All results should be identical
             assert len(set(results)) == 1
@@ -361,7 +361,7 @@ class TestPerformanceAndEdgeCases:
         """Test config creation performance with multiple calls"""
         import time
         
-        with patch.object(config_env, 'get_environment', return_value='development'):
+        with patch.object(config_env, 'detect', return_value='development'):
             
             # Act - Time multiple config creations
             start_time = time.time()
@@ -387,7 +387,7 @@ class TestPerformanceAndEdgeCases:
                 os.environ['ENVIRONMENT'] = test_env
                 
                 # Should not raise exception
-                result = config_env.get_environment()
+                result = config_env.detect()
                 
                 # Should default to development for invalid environments
                 if test_env == "production":

@@ -18,7 +18,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from typing import Dict, Any, List, Optional
 
 from netra_backend.app.core.unified_logging import get_logger
-from netra_backend.app.guardrails.input_filters import InputFilter
+from netra_backend.app.guardrails.input_filters import InputFilters
 
 pytestmark = [
     pytest.mark.e2e,
@@ -40,7 +40,7 @@ class TestComplianceSecurityValidation:
         This test should initially fail - expecting comprehensive PII detection
         and sanitization mechanisms across all data flows.
         """
-        input_filter = InputFilter()
+        input_filter = InputFilters()
         
         # Test cases with various PII patterns
         pii_test_cases = [
@@ -317,7 +317,7 @@ class TestComplianceSecurityValidation:
         This test should initially fail - expecting robust input validation
         against SQL injection, XSS, and other injection attack vectors.
         """
-        input_filter = InputFilter()
+        input_filter = InputFilters()
         
         # Test various injection attack patterns
         injection_test_cases = [

@@ -841,13 +841,14 @@ CMD ["npm", "start"]
         return all_healthy
     
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
-                   run_checks: bool = False) -> bool:
+                   run_checks: bool = False, service_filter: Optional[str] = None) -> bool:
         """Deploy all services to GCP.
         
         Args:
             skip_build: Skip building images (use existing)
             use_local_build: Build images locally (faster) instead of Cloud Build
             run_checks: Run pre-deployment checks
+            service_filter: Deploy only specific service (e.g., 'frontend', 'backend', 'auth')
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
@@ -872,10 +873,19 @@ CMD ["npm", "start"]
         if not self.setup_secrets():
             print("⚠️ Failed to setup secrets, continuing anyway...")
             
+        # Filter services if specified
+        services_to_deploy = self.services
+        if service_filter:
+            services_to_deploy = [s for s in self.services if s.name == service_filter]
+            if not services_to_deploy:
+                print(f"❌ Service '{service_filter}' not found. Available: {[s.name for s in self.services]}")
+                return False
+            print(f"   Service Filter: {service_filter}")
+        
         # Deploy services in order: backend, auth, frontend
         service_urls = {}
         
-        for service in self.services:
+        for service in services_to_deploy:
             # Build image
             if not skip_build:
                 if not self.build_image(service, use_local=use_local_build):
@@ -998,6 +1008,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Clean up deployments")
     parser.add_argument("--service-account", 
                        help="Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)")
+    parser.add_argument("--service", 
+                       help="Deploy only specific service (frontend, backend, auth)")
     
     args = parser.parse_args()
     
@@ -1016,7 +1028,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
             success = deployer.deploy_all(
                 skip_build=args.skip_build,
                 use_local_build=args.build_local,
-                run_checks=args.run_checks
+                run_checks=args.run_checks,
+                service_filter=args.service
             )
             
         sys.exit(0 if success else 1)

@@ -34,9 +34,9 @@ class TestSupplyResearcherCore:
     async def test_llm_prompt_template_usage(self, agent, mock_llm_manager):
         """Test that agent uses LLM prompt templates correctly"""
         request = "What are the latest prices for Claude-3 Opus?"
-        _setup_llm_claude_response(mock_llm_manager)
+        self._setup_llm_claude_response(mock_llm_manager)
         parsed = agent.parser.parse_natural_language_request(request)
-        _verify_claude_parsing(parsed)
+        self._verify_claude_parsing(parsed)
 
     def _setup_llm_claude_response(self, mock_llm_manager):
         """Setup LLM mock for Claude response (≤8 lines)"""
@@ -57,10 +57,10 @@ class TestSupplyResearcherCore:
     @pytest.mark.asyncio
     async def test_websocket_event_streaming(self, agent):
         """Test WebSocket event streaming during research"""
-        state = _create_websocket_test_state()
-        _setup_research_api_mock(agent)
+        state = self._create_websocket_test_state()
+        self._setup_research_api_mock(agent)
         await agent.execute(state, "ws_test_run", stream_updates=True)
-        _verify_websocket_streaming(agent)
+        self._verify_websocket_streaming(agent)
 
     def _create_websocket_test_state(self):
         """Create state for WebSocket testing (≤8 lines)"""
@@ -85,7 +85,7 @@ class TestSupplyResearcherCore:
         """Verify WebSocket streaming occurred (≤8 lines)"""
         assert_websocket_updates_sent(agent)
         call_args = agent.websocket_manager.send_agent_update.call_args_list
-        statuses = _extract_websocket_statuses(call_args)
+        statuses = self._extract_websocket_statuses(call_args)
         assert agent.websocket_manager.send_agent_update.called
 
     def _extract_websocket_statuses(self, call_args):
@@ -102,10 +102,10 @@ class TestSupplyResearcherCore:
     @pytest.mark.asyncio
     async def test_state_persistence_redis(self, agent):
         """Test agent state persistence in Redis"""
-        _setup_redis_mock()
-        state = _create_redis_test_state()
-        _test_redis_capability(agent, state)
-        _verify_redis_integration(agent)
+        self._setup_redis_mock()
+        state = self._create_redis_test_state()
+        self._test_redis_capability(agent, state)
+        self._verify_redis_integration(agent)
 
     def _setup_redis_mock(self):
         """Setup Redis mock for testing (≤8 lines)"""
@@ -149,9 +149,9 @@ class TestSupplyResearcherCore:
     async def test_multi_provider_parallel_research(self, agent):
         """Test parallel research execution for multiple providers"""
         providers = ["openai", "anthropic", "google"]
-        _setup_parallel_research_mock(agent)
-        result = await _execute_parallel_research(agent, providers)
-        _verify_parallel_execution(result, providers)
+        self._setup_parallel_research_mock(agent)
+        result = await self._execute_parallel_research(agent, providers)
+        self._verify_parallel_execution(result, providers)
 
     def _setup_parallel_research_mock(self, agent):
         """Setup mock for parallel research (≤8 lines)"""
@@ -185,11 +185,11 @@ class TestSupplyResearcherCore:
 
     def test_confidence_score_calculation(self, agent):
         """Test confidence score calculation with various factors"""
-        high_data = _create_high_confidence_data()
-        extracted_high = _create_high_confidence_extracted()
+        high_data = self._create_high_confidence_data()
+        extracted_high = self._create_high_confidence_extracted()
         score_high = agent.data_extractor.calculate_confidence_score(
             high_data, extracted_high)
-        _verify_high_confidence_score(score_high)
+        self._verify_high_confidence_score(score_high)
 
     def _create_high_confidence_data(self):
         """Create high confidence research data (≤8 lines)"""
@@ -221,11 +221,11 @@ class TestSupplyResearcherCore:
 
     def test_low_confidence_score_calculation(self, agent):
         """Test low confidence score calculation"""
-        low_data = _create_low_confidence_data()
-        extracted_low = _create_low_confidence_extracted()
+        low_data = self._create_low_confidence_data()
+        extracted_low = self._create_low_confidence_extracted()
         score_low = agent.data_extractor.calculate_confidence_score(
             low_data, extracted_low)
-        _verify_low_confidence_score(score_low)
+        self._verify_low_confidence_score(score_low)
 
     def _create_low_confidence_data(self):
         """Create low confidence research data (≤8 lines)"""

@@ -75,8 +75,9 @@ class PostgreSQLContainer:
 
 class MockPool:
     """Mock database pool for testing"""
+    @asynccontextmanager
     async def acquire(self):
-        return MockConnection()
+        yield MockConnection()
     
     async def close(self):
         pass

@@ -66,6 +66,11 @@ jest.mock('@/lib/auth-service-config', () => ({
   getAuthServiceConfig: mockGetAuthServiceConfig
 }));
 
+// Also mock the auth-service-client which is actually used by unified-auth-service
+jest.mock('@/lib/auth-service-client', () => ({
+  authServiceClient: mockAuthServiceClient
+}));
+
 // Mock logger
 const mockLogger = {
   info: jest.fn(),

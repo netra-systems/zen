@@ -87,14 +87,21 @@ class TestDatabaseManagerIntegration:
         """Test mode detection uses unified config environment."""
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
-            # Mock: Component isolation for controlled unit testing
-            mock_config.return_value = Mock(
-                environment='testing',
-                database_url='sqlite:///:memory:'
-            )
-            
-            url = DatabaseManager.get_base_database_url()
-            assert 'sqlite' in url
+            with patch('netra_backend.app.db.database_manager.get_env') as mock_get_env:
+                # Mock: Component isolation for controlled unit testing - test fallback scenario
+                mock_config.return_value = Mock(
+                    environment='testing',
+                    database_url=None  # No database URL configured, should trigger sqlite fallback
+                )
+                
+                # Mock get_env to return empty DATABASE_URL so no URL is found
+                mock_env = Mock()
+                mock_env.get.side_effect = lambda key, default='': '' if key == 'DATABASE_URL' else default
+                mock_env.get_all.return_value = {}
+                mock_get_env.return_value = mock_env
+                
+                url = DatabaseManager.get_base_database_url()
+                assert 'sqlite' in url
 
 
 class TestRedisManagerIntegration:

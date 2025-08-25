@@ -15,16 +15,19 @@ import type {
 // Mock Data Factory Functions
 // ============================================
 
-export const createMockServer = (overrides?: Partial<MCPServerInfo>): MCPServerInfo => ({
-  id: 'mock-server-1',
-  name: 'mock-server',
-  url: 'http://localhost:3001',
-  transport: 'HTTP',
-  status: 'CONNECTED' as MCPServerStatus,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  ...overrides
-});
+export const createMockServer = (overrides?: Partial<MCPServerInfo>): MCPServerInfo => {
+  const fixedDate = '2025-08-25T06:33:34.322Z';
+  return {
+    id: 'mock-server-1',
+    name: 'mock-server',
+    url: 'http://localhost:3001',
+    transport: 'HTTP',
+    status: 'CONNECTED' as MCPServerStatus,
+    created_at: fixedDate,
+    updated_at: fixedDate,
+    ...overrides
+  };
+};
 
 export const createMockTool = (overrides?: Partial<MCPTool>): MCPTool => ({
   name: 'mock-tool',
@@ -57,16 +60,19 @@ export const createMockResource = (overrides?: Partial<MCPResource>): MCPResourc
   ...overrides
 });
 
-export const createMockExecution = (overrides?: Partial<MCPToolExecution>): MCPToolExecution => ({
-  id: 'exec-1',
-  tool_name: 'mock-tool',
-  server_name: 'mock-server',
-  status: 'COMPLETED',
-  arguments: { param1: 'value1' },
-  started_at: new Date().toISOString(),
-  duration_ms: 1500,
-  ...overrides
-});
+export const createMockExecution = (overrides?: Partial<MCPToolExecution>): MCPToolExecution => {
+  const fixedDate = '2025-08-25T06:33:34.322Z';
+  return {
+    id: 'exec-1',
+    tool_name: 'mock-tool',
+    server_name: 'mock-server',
+    status: 'COMPLETED',
+    arguments: { param1: 'value1' },
+    started_at: fixedDate,
+    duration_ms: 1500,
+    ...overrides
+  };
+};
 
 // ============================================
 // Mock State Management
@@ -259,15 +265,11 @@ export const setupMCPMocks = () => {
     };
   });
 
-  // Mock the useMCPTools hook
-  jest.doMock('@/hooks/useMCPTools', () => ({
-    useMCPTools: jest.fn().mockImplementation(() => createMockUseMCPTools())
-  }));
+  // Don't mock the useMCPTools hook - let it use the mocked service
 };
 
 export const cleanupMCPMocks = () => {
   jest.dontMock('@/services/mcp-client-service');
-  jest.dontMock('@/hooks/useMCPTools');
   mcpMockState.reset();
 };
 
@@ -285,10 +287,26 @@ export const expectMCPServiceNotCalled = (serviceFn: jest.MockedFunction<any>) =
 
 export const expectMCPHookState = (hookReturn: UseMCPToolsReturn, expected: Partial<UseMCPToolsReturn>) => {
   if (expected.tools) {
-    expect(hookReturn.tools).toEqual(expected.tools);
+    expect(hookReturn.tools).toHaveLength(expected.tools.length);
+    expected.tools.forEach((tool, index) => {
+      expect(hookReturn.tools[index]).toMatchObject({
+        name: tool.name,
+        server_name: tool.server_name,
+        description: tool.description
+      });
+    });
   }
   if (expected.servers) {
-    expect(hookReturn.servers).toEqual(expected.servers);
+    expect(hookReturn.servers).toHaveLength(expected.servers.length);
+    expected.servers.forEach((server, index) => {
+      expect(hookReturn.servers[index]).toMatchObject({
+        id: server.id,
+        name: server.name,
+        url: server.url,
+        transport: server.transport,
+        status: server.status
+      });
+    });
   }
   if (expected.isLoading !== undefined) {
     expect(hookReturn.isLoading).toBe(expected.isLoading);

@@ -292,8 +292,18 @@ class AgentPipelineInfrastructure:
     
     async def create_supervisor_agent(self) -> SupervisorAgent:
         """Create supervisor agent with real dependencies."""
-        # Simplified supervisor creation for testing
-        return SupervisorAgent()
+        from unittest.mock import MagicMock, AsyncMock
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.config import get_config
+        
+        # Create required dependencies
+        db_session = AsyncMock()
+        config = get_config()
+        llm_manager = LLMManager(config)
+        websocket_manager = AsyncMock()
+        tool_dispatcher = MagicMock()
+        
+        return SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
     
     def _get_user_for_tier(self, tier: PlanTier):
         """Get test user for plan tier."""

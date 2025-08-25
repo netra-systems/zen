@@ -49,7 +49,7 @@ class EnvironmentDetector:
         if self._cached_environment:
             return self._cached_environment
             
-        environment = EnvironmentDetector.get_environment()
+        environment = get_environment()
         self._cached_environment = environment
         self._logger.info(f"Detected environment: {environment}")
         return environment

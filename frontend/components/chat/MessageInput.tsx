@@ -116,7 +116,7 @@ export const MessageInput: React.FC = () => {
             rows={rows}
             disabled={isDisabled}
             className={textareaClassName}
-            style={textareaStyle}
+            style={{...textareaStyle, height: `${rows * LINE_HEIGHT}px`}}
             aria-label="Message input"
             aria-describedby="char-count"
           />

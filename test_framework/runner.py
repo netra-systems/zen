@@ -90,9 +90,18 @@ class UnifiedTestRunner:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=str(cwd))
             exit_code = result.returncode
             output = result.stdout + result.stderr
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
             exit_code = 1
-            output = f"Tests timed out after {timeout} seconds"
+            # Get partial output if available
+            output = ""
+            if e.stdout:
+                output += e.stdout.decode() if isinstance(e.stdout, bytes) else str(e.stdout)
+            if e.stderr:
+                output += e.stderr.decode() if isinstance(e.stderr, bytes) else str(e.stderr)
+            output += f"\n\nTests timed out after {timeout} seconds"
+        except Exception as e:
+            exit_code = 1
+            output = f"Error running frontend tests: {str(e)}"
         
         # Update results
         self.results["frontend"]["exit_code"] = exit_code

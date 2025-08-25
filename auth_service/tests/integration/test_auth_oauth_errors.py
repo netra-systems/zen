@@ -143,8 +143,9 @@ class TestOAuthErrorHandling:
                 assert any(page in location for page in ["error", "login", "denied"])
     
     # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
     @patch('httpx.AsyncClient')
-    def test_oauth_token_exchange_failure(self, mock_client, oauth_state, oauth_code):
+    def test_oauth_token_exchange_failure(self, mock_client, mock_validate_state, oauth_state, oauth_code):
         """
         Test OAuth token exchange failure
         
@@ -157,7 +158,11 @@ class TestOAuthErrorHandling:
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
+        # Mock session validation to pass CSRF checks (we're testing token exchange, not CSRF)
+        mock_validate_state.return_value = True
+        
         # Test various token exchange failure scenarios
+        # NOTE: All token exchange failures are normalized to 401 for security (prevent information leakage)
         failure_scenarios = [
             {
                 "status_code": 400,
@@ -165,7 +170,7 @@ class TestOAuthErrorHandling:
                     "error": "invalid_grant",
                     "error_description": "Invalid authorization code"
                 },
-                "expected_status": [401, 400, 500]
+                "expected_status": [401]  # Security: normalized to 401
             },
             {
                 "status_code": 401,
@@ -173,7 +178,7 @@ class TestOAuthErrorHandling:
                     "error": "unauthorized_client",
                     "error_description": "Unauthorized client"
                 },
-                "expected_status": [401, 500]
+                "expected_status": [401]  # Security: normalized to 401
             },
             {
                 "status_code": 500,
@@ -181,7 +186,7 @@ class TestOAuthErrorHandling:
                     "error": "server_error",
                     "error_description": "Internal server error"
                 },
-                "expected_status": [500, 502]
+                "expected_status": [401]  # Security: normalized to 401
             },
             {
                 "status_code": 429,
@@ -189,9 +194,12 @@ class TestOAuthErrorHandling:
                     "error": "rate_limit_exceeded",
                     "error_description": "Too many requests"
                 },
-                "expected_status": [429, 500]
+                "expected_status": [401]  # Security: normalized to 401
             }
         ]
+        
+        # Set session cookie on client to avoid deprecation warning
+        client.cookies.set("session_id", "test_session_123")
         
         for scenario in failure_scenarios:
             # Mock failed token exchange
@@ -208,8 +216,9 @@ class TestOAuthErrorHandling:
             assert response.status_code in scenario["expected_status"]
     
     # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
     @patch('httpx.AsyncClient')
-    def test_oauth_user_info_failure(self, mock_client, oauth_state, oauth_code):
+    def test_oauth_user_info_failure(self, mock_client, mock_validate_state, oauth_state, oauth_code):
         """
         Test OAuth user info fetch failure
         
@@ -221,6 +230,9 @@ class TestOAuthErrorHandling:
         # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
+        
+        # Mock session validation to pass CSRF checks
+        mock_validate_state.return_value = True
         
         # Mock successful token exchange
         # Mock: Generic component isolation for controlled unit testing
@@ -263,6 +275,9 @@ class TestOAuthErrorHandling:
             }
         ]
         
+        # Set session cookie for this test 
+        client.cookies.set("session_id", "test_session_123")
+        
         for failure in user_info_failures:
             # Mock failed user info fetch
             # Mock: Generic component isolation for controlled unit testing
@@ -279,8 +294,9 @@ class TestOAuthErrorHandling:
             assert response.status_code in [401, 400, 422, 500, 502]
     
     # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
     @patch('httpx.AsyncClient')
-    def test_oauth_network_timeout_handling(self, mock_client, oauth_state, oauth_code):
+    def test_oauth_network_timeout_handling(self, mock_client, mock_validate_state, oauth_state, oauth_code):
         """
         Test OAuth network timeout handling
         
@@ -292,6 +308,9 @@ class TestOAuthErrorHandling:
         # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
+        
+        # Mock session validation to pass CSRF checks
+        mock_validate_state.return_value = True
         
         # Test various network failure scenarios
         network_failures = [
@@ -335,6 +354,9 @@ class TestOAuthErrorHandling:
                 mock_async_client.post.return_value = token_response
                 mock_async_client.post.side_effect = None
                 mock_async_client.get.side_effect = failure["exception"]
+            
+            # Set session cookie for this test iteration 
+            client.cookies.set("session_id", "test_session_123")
             
             response = client.get(
                 f"/auth/callback?code={oauth_code}&state={oauth_state}"

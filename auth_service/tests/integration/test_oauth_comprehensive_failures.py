@@ -135,15 +135,23 @@ class TestOAuthComprehensiveFailures:
             with patch("httpx.AsyncClient.get") as mock_get:
                 mock_get.return_value.json.return_value = mock_google_user
                 
-                # Use unique code to avoid reuse detection across test runs
-                unique_code = f"test_auth_code_{secrets.token_urlsafe(8)}"
-                response = client.post(
-                    "/auth/callback/google",
-                    json={
-                        "code": unique_code,
-                        "state": state,
-                    }
-                )
+                # Mock state parameter validation to pass CSRF checks
+                with patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter') as mock_validate_state:
+                    mock_validate_state.return_value = True
+                    
+                    # Generate session ID for testing
+                    session_id = f"test_session_{secrets.token_urlsafe(8)}"
+                    
+                    # Use unique code to avoid reuse detection across test runs
+                    unique_code = f"test_auth_code_{secrets.token_urlsafe(8)}"
+                    response = client.post(
+                        "/auth/callback/google",
+                        json={
+                            "code": unique_code,
+                            "state": state,
+                        },
+                        cookies={"session_id": session_id}
+                    )
         
         # This SHOULD succeed but will initially fail with 404 (endpoint not implemented)
         if response.status_code == 404:

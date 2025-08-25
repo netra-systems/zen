@@ -9,7 +9,7 @@ Business Value: Validates end-to-end agent interactions.
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.agents.chat_orchestrator import ChatOrchestrator
+from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
 from netra_backend.app.agents.researcher import ResearcherAgent
 from netra_backend.app.agents.analyst import AnalystAgent

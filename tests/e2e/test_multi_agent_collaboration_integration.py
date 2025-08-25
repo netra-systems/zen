@@ -39,7 +39,13 @@ class TestMultiAgentCollaboration:
         # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = AsyncMock()
         
-        supervisor = SupervisorAgent(llm_manager=llm_manager)
+        from unittest.mock import MagicMock
+        
+        # Create required dependencies
+        db_session = AsyncMock()
+        tool_dispatcher = MagicMock()
+        
+        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
         supervisor.user_id = "test_collaboration_user"
         
@@ -251,7 +257,14 @@ async def test_supervisor_delegation_performance():
     config = get_config()
     llm_manager = LLMManager(config)
     
-    supervisor = SupervisorAgent(llm_manager=llm_manager)
+    from unittest.mock import MagicMock, AsyncMock
+    
+    # Create required dependencies
+    db_session = AsyncMock()
+    websocket_manager = AsyncMock()
+    tool_dispatcher = MagicMock()
+    
+    supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
     sub_agent = BaseSubAgent(llm_manager=llm_manager, name="PerfTestAgent")
     
     # Test delegation speed

@@ -40,17 +40,14 @@ class AuthDatabase:
             return
         
         # Determine database URL and configuration based on environment
-        # Check if we're in a pytest environment
-        import sys
-        is_pytest = 'pytest' in sys.modules or 'pytest' in ' '.join(sys.argv)
+        # NO pytest bypass - tests and production use identical code paths
         
-        # Check if DATABASE_URL is explicitly set - if so, use it even in tests
-        # This allows tests to override the default SQLite behavior
+        # Check if DATABASE_URL is explicitly set
         database_url_env = os.getenv("DATABASE_URL", "")
-        force_postgres_in_test = (is_pytest and database_url_env and 
+        force_postgres_in_test = (self.environment == "testing" and database_url_env and 
                                  ("postgresql://" in database_url_env or "postgres://" in database_url_env))
         
-        if (self.is_test_mode or self.environment == "test" or is_pytest) and not force_postgres_in_test:
+        if (self.is_test_mode or self.environment == "test") and not force_postgres_in_test:
             # Check if we should use file-based DB for tests (needed for proper table persistence)
             use_file_db = os.getenv("AUTH_USE_FILE_DB", "false").lower() == "true"
             if use_file_db:

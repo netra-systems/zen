@@ -1,7 +1,6 @@
 {
   "values": [
     "(timestamp) as time_bucket, count() as event_count",
-    "/metricDescriptors/run.googleapis.com/request_count",
     "_bucket",
     "_count",
     "_sum",

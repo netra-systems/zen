@@ -38,14 +38,18 @@ const MockMessageInput: React.FC<{
     setMessage('');
   };
 
-  // Show error when message exceeds limit
+  // Show error when message exceeds limit and clear appropriate errors
   React.useEffect(() => {
     if (message.length > maxLength) {
       setError(`Message too long. Maximum ${maxLength} characters allowed.`);
-    } else if (error && message.length <= maxLength) {
+    } else if (error && error.includes('Maximum') && message.length <= maxLength) {
+      // Clear the length error when back within limits
+      setError('');
+    } else if (error === 'Message cannot be empty' && message.trim().length > 0) {
+      // Clear empty message error when user starts typing
       setError('');
     }
-  }, [message.length, maxLength, error]);
+  }, [message, maxLength, error]);
 
   return (
     <form onSubmit={handleSubmit} data-testid="message-form">

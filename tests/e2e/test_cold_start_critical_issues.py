@@ -483,14 +483,30 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             del os.environ["GEMINI_API_KEY"]
             
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        agent = SupervisorAgent()
+        from unittest.mock import AsyncMock, MagicMock
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.config import get_config
+        
+        # Create required dependencies
+        db_session = AsyncMock()
+        config = get_config()
+        llm_manager = LLMManager(config)
+        websocket_manager = AsyncMock()
+        tool_dispatcher = MagicMock()
+        
+        agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        
+        from netra_backend.app.agents.state import DeepAgentState
+        
+        # Create proper state object
+        state = DeepAgentState(
+            thread_id="test",
+            user_id="user123",
+            message="Hello"
+        )
         
         with pytest.raises(Exception) as exc_info:
-            await agent.execute({
-                "message": "Hello",
-                "thread_id": "test",
-                "user_id": "user123"
-            })
+            await agent.execute(state, run_id="test_run", stream_updates=False)
             
         assert "api" in str(exc_info.value).lower() and \
                "key" in str(exc_info.value).lower()
@@ -510,14 +526,31 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             
         Database.execute = failing_execute
         
-        agent = SupervisorAgent()
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from unittest.mock import AsyncMock, MagicMock
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.config import get_config
+        
+        # Create required dependencies
+        db_session = AsyncMock()
+        config = get_config()
+        llm_manager = LLMManager(config)
+        websocket_manager = AsyncMock()
+        tool_dispatcher = MagicMock()
+        
+        agent = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        
+        from netra_backend.app.agents.state import DeepAgentState
+        
+        # Create proper state object
+        state = DeepAgentState(
+            thread_id="test",
+            user_id="user123",
+            message="Test message"
+        )
         
         with pytest.raises(Exception) as exc_info:
-            await agent.execute({
-                "message": "Test message",
-                "thread_id": "test",
-                "user_id": "user123"
-            })
+            await agent.execute(state, run_id="test_run", stream_updates=False)
             
         assert "database" in str(exc_info.value).lower()
 

@@ -9,7 +9,7 @@ Business Value: Ensures orchestration logic correctness.
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.agents.chat_orchestrator import ChatOrchestrator
+from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
 from netra_backend.app.agents.base.interface import ExecutionContext
 

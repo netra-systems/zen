@@ -39,7 +39,13 @@ class TestAgentContextIsolation:
         # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = AsyncMock()
         
-        supervisor = SupervisorAgent(llm_manager=llm_manager)
+        from unittest.mock import MagicMock, AsyncMock
+        
+        # Create required dependencies
+        db_session = AsyncMock()
+        tool_dispatcher = MagicMock()
+        
+        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
         supervisor.user_id = f"test_context_user_{uuid.uuid4()}"
         

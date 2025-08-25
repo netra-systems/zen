@@ -252,7 +252,7 @@ class TestConcurrencyEdgeCases:
         # Submit tasks rapidly
         tasks = []
         for i in range(submission_count):
-            task = pool.submit(rapid_task(i))
+            task = pool.submit_background_task(rapid_task(i))
             tasks.append(task)
         
         # Wait for all completions

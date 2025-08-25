@@ -23,7 +23,6 @@ import redis.asyncio as redis
 
 from auth_service.auth_core.redis_manager import auth_redis_manager, AuthRedisManager
 from auth_service.auth_core.security.oauth_security import OAuthSecurityManager
-from test_framework.fixtures import temporary_redis_config
 
 
 class TestRedisConnectionFailover:

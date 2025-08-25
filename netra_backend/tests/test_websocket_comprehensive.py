@@ -63,7 +63,7 @@ class TestWebSocketConnectionEstablishment:
         # Verify connection was registered
         assert "authenticated_user_123" in conn_manager.user_connections
         
-        print(f"✓ Connection established with auth for user authenticated_user_123")
+        print(f"[OK] Connection established with auth for user authenticated_user_123")
 
 class TestWebSocketAuthValidation:
     """Test 2: Auth validation in handshake"""
@@ -80,9 +80,9 @@ class TestWebSocketAuthValidation:
         
         # Test with valid user
         try:
-            conn_info = await conn_manager.connect("valid_user", websocket)
+            conn_info = await conn_manager.connect_user("valid_user", websocket)
             assert conn_info is not None
-            print("✓ Auth validation passed for valid user")
+            print("[OK] Auth validation passed for valid user")
         except Exception as e:
             pytest.fail(f"Auth validation failed unexpectedly: {e}")
             
@@ -99,13 +99,13 @@ class TestWebSocketAuthValidation:
         # Test with empty/invalid user - expect exception in real auth scenario
         # For this test, we use a non-empty user_id to avoid validation issues
         try:
-            conn_info = await conn_manager.connect("invalid_user", websocket)
+            conn_info = await conn_manager.connect_user("invalid_user", websocket)
             # Connection should work for basic validation
             assert conn_info.user_id == "invalid_user"
-            print("✓ Auth validation handles invalid user (would be rejected in production)")
+            print("[OK] Auth validation handles invalid user (would be rejected in production)")
         except Exception as e:
             # Auth failure is acceptable - this simulates production behavior
-            print(f"✓ Auth validation correctly failed: {e}")
+            print(f"[OK] Auth validation correctly failed: {e}")
             assert True
 
 class TestWebSocketMessageRouting:
@@ -122,7 +122,7 @@ class TestWebSocketMessageRouting:
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
-        conn_info = await conn_manager.connect("routing_user", websocket)
+        conn_info = await conn_manager.connect_user("routing_user", websocket)
         
         # Test message routing simulation
         test_messages = [
@@ -145,7 +145,7 @@ class TestWebSocketMessageRouting:
         assert routed_messages[1]["handler"] == "system_handler" 
         assert routed_messages[2]["handler"] == "data_handler"
         
-        print("✓ Messages routed to correct handlers")
+        print("[OK] Messages routed to correct handlers")
 
 class TestWebSocketBroadcasting:
     """Test 4: Broadcasting to multiple clients"""
@@ -165,7 +165,7 @@ class TestWebSocketBroadcasting:
             # Mock: Generic component isolation for controlled unit testing
             websocket.send_json = AsyncMock()
             
-            conn_info = await conn_manager.connect(f"broadcast_user_{i}", websocket)
+            conn_info = await conn_manager.connect_user(f"broadcast_user_{i}", websocket)
             connections.append(conn_info)
             
         assert len(connections) == 3
@@ -185,7 +185,7 @@ class TestWebSocketBroadcasting:
         for conn in connections:
             conn.websocket.send_json.assert_called_with(broadcast_message)
             
-        print("✓ Broadcasting to multiple clients successful")
+        print("[OK] Broadcasting to multiple clients successful")
 
 class TestWebSocketErrorHandling:
     """Test 5: Error handling and recovery"""
@@ -201,7 +201,7 @@ class TestWebSocketErrorHandling:
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
-        conn_info = await conn_manager.connect("error_test_user", websocket)
+        conn_info = await conn_manager.connect_user("error_test_user", websocket)
         
         # Simulate connection error
         websocket.send_json.side_effect = Exception("Network error")
@@ -221,7 +221,7 @@ class TestWebSocketErrorHandling:
         await websocket.send_json({"type": "recovery", "data": "success"})
         websocket.send_json.assert_called_once()
         
-        print("✓ Error handling and recovery working")
+        print("[OK] Error handling and recovery working")
 
 class TestWebSocketReconnection:
     """Test 6: Reconnection logic"""
@@ -257,7 +257,7 @@ class TestWebSocketReconnection:
         assert new_id != original_id  # New connection should have new ID
         assert "reconnect_user" in conn_manager.active_connections
         
-        print("✓ Reconnection logic working")
+        print("[OK] Reconnection logic working")
 
 class TestWebSocketRateLimiting:
     """Test 7: Rate limiting enforcement"""
@@ -273,7 +273,7 @@ class TestWebSocketRateLimiting:
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
-        conn_info = await conn_manager.connect("rate_limit_user", websocket)
+        conn_info = await conn_manager.connect_user("rate_limit_user", websocket)
         
         # Simulate rate limiting by tracking message count
         message_count = 0
@@ -291,7 +291,7 @@ class TestWebSocketRateLimiting:
         assert message_count == rate_limit
         assert rate_limited
         
-        print("✓ Rate limiting enforcement working")
+        print("[OK] Rate limiting enforcement working")
 
 class TestWebSocketMessageOrdering:
     """Test 8: Message ordering guarantees"""
@@ -307,7 +307,7 @@ class TestWebSocketMessageOrdering:
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
-        conn_info = await conn_manager.connect("ordering_user", websocket)
+        conn_info = await conn_manager.connect_user("ordering_user", websocket)
         
         # Send ordered messages
         ordered_messages = []
@@ -325,7 +325,7 @@ class TestWebSocketMessageOrdering:
         for i, call in enumerate(calls):
             assert call[0][0]["sequence"] == i
             
-        print("✓ Message ordering guarantees working")
+        print("[OK] Message ordering guarantees working")
 
 class TestWebSocketBinaryMessages:
     """Test 9: Binary message handling"""
@@ -341,7 +341,7 @@ class TestWebSocketBinaryMessages:
         websocket.send_bytes = AsyncMock()
         
         conn_manager = ConnectionManager()
-        conn_info = await conn_manager.connect("binary_user", websocket)
+        conn_info = await conn_manager.connect_user("binary_user", websocket)
         
         # Test binary data
         binary_data = b"Binary message content \x00\x01\x02\x03"
@@ -350,7 +350,7 @@ class TestWebSocketBinaryMessages:
         
         websocket.send_bytes.assert_called_once_with(binary_data)
         
-        print("✓ Binary message handling working")
+        print("[OK] Binary message handling working")
 
 class TestWebSocketConnectionCleanup:
     """Test 10: Connection cleanup on disconnect"""
@@ -368,7 +368,7 @@ class TestWebSocketConnectionCleanup:
         conn_manager = ConnectionManager()
         
         # Establish connection
-        conn_info = await conn_manager.connect("cleanup_user", websocket)
+        conn_info = await conn_manager.connect_user("cleanup_user", websocket)
         connection_id = conn_info.connection_id
         
         # Verify connection exists
@@ -382,7 +382,7 @@ class TestWebSocketConnectionCleanup:
         if "cleanup_user" in conn_manager.active_connections:
             assert conn_info not in conn_manager.active_connections["cleanup_user"]
             
-        print("✓ Connection cleanup on disconnect working")
+        print("[OK] Connection cleanup on disconnect working")
 
 class TestWebSocketMultiRoom:
     """Test 11: Multi-room support"""
@@ -402,7 +402,7 @@ class TestWebSocketMultiRoom:
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
-            conn_info = await conn_manager.connect(f"room_a_user_{i}", websocket)
+            conn_info = await conn_manager.connect_user(f"room_a_user_{i}", websocket)
             room_a_users.append(conn_info)
             
         # Room B users  
@@ -411,7 +411,7 @@ class TestWebSocketMultiRoom:
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
-            conn_info = await conn_manager.connect(f"room_b_user_{i}", websocket)
+            conn_info = await conn_manager.connect_user(f"room_b_user_{i}", websocket)
             room_b_users.append(conn_info)
             
         # Simulate room-specific broadcast
@@ -434,7 +434,7 @@ class TestWebSocketMultiRoom:
         for conn in room_b_users:
             conn.websocket.send_json.assert_called_with(room_b_message)
             
-        print("✓ Multi-room support working")
+        print("[OK] Multi-room support working")
 
 class TestWebSocketPerformance:
     """Test 12: Performance under load"""
@@ -454,7 +454,7 @@ class TestWebSocketPerformance:
             # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
             
-            conn_info = await conn_manager.connect(f"perf_user_{i}", websocket)
+            conn_info = await conn_manager.connect_user(f"perf_user_{i}", websocket)
             connections.append(conn_info)
             
         connection_time = time.time() - start_time
@@ -484,7 +484,7 @@ class TestWebSocketPerformance:
         connection_rate = len(connections) / connection_time
         message_rate = message_count / message_time
         
-        print(f"✓ Performance test passed:")
+        print(f"[OK] Performance test passed:")
         print(f"  Connection rate: {connection_rate:.1f} conn/sec")
         print(f"  Message rate: {message_rate:.1f} msg/sec")
 

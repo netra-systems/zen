@@ -42,7 +42,13 @@ class TestLLMQualityGateIntegration:
         # Create quality validator
         quality_validator = QualityMetricValidator()
         
-        supervisor = SupervisorAgent(llm_manager=llm_manager)
+        from unittest.mock import MagicMock
+        
+        # Create required dependencies
+        db_session = AsyncMock()
+        tool_dispatcher = MagicMock()
+        
+        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
         supervisor.user_id = "test_quality_user"
         

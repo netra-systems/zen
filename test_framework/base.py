@@ -15,11 +15,47 @@ class BaseTestCase:
     
     def setup_method(self):
         """Setup method run before each test."""
-        pass
+        # Initialize metrics for each test method
+        self._metrics: Dict[str, Any] = {}
     
     def teardown_method(self):
         """Teardown method run after each test."""
         pass
+    
+    def record_metric(self, name: str, value: Any) -> None:
+        """Record a performance metric.
+        
+        Args:
+            name: The name of the metric
+            value: The value to record
+        """
+        # Initialize metrics if not already done (defensive programming)
+        if not hasattr(self, '_metrics'):
+            self._metrics = {}
+        self._metrics[name] = value
+    
+    def get_metric(self, name: str) -> Any:
+        """Get a recorded metric.
+        
+        Args:
+            name: The name of the metric
+            
+        Returns:
+            The metric value or None if not found
+        """
+        if not hasattr(self, '_metrics'):
+            return None
+        return self._metrics.get(name)
+    
+    def get_all_metrics(self) -> Dict[str, Any]:
+        """Get all recorded metrics.
+        
+        Returns:
+            Dictionary of all metrics
+        """
+        if not hasattr(self, '_metrics'):
+            return {}
+        return self._metrics.copy()
 
 
 class AsyncTestCase(BaseTestCase):

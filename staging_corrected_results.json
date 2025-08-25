@@ -1,0 +1,238 @@
+{
+  "timestamp": "2025-08-24T23:00:20.210012",
+  "test_type": "user_flows_and_advanced_features_corrected",
+  "summary": {
+    "total_tests": 12,
+    "passed": 8,
+    "failed": 4,
+    "errors": 0,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "test_name": "WebSocket Health Endpoint",
+      "service": "websocket",
+      "status": "PASS",
+      "duration_ms": 160,
+      "error_message": null,
+      "details": {
+        "endpoint": "/ws/health",
+        "response_received": true,
+        "response_data": {
+          "status": "healthy",
+          "service": "websocket",
+          "version": "1.0.0",
+          "timestamp": "2025-08-25T06:00:20.008717+00:00",
+          "metrics": {
+            "websocket": {
+              "active_connections": 0,
+              "total_connections": 0,
+              "messages_processed": 0,
+              "error_rate": 0.0
+            },
+            "authentication": {
+              "success_rate": 0.0,
+              "rate_limited_requests": 0
+            },
+            "monitoring": {
+              "monitored_connections": 0,
+              "healthy_connections": 0
+            }
+          },
+          "config": {
+            "max_connections_per_user": 3,
+            "heartbeat_interval": 45
+          }
+        }
+      },
+      "response_time_ms": 160,
+      "status_code": 200
+    },
+    {
+      "test_name": "WebSocket Config Endpoint",
+      "service": "websocket",
+      "status": "PASS",
+      "duration_ms": 80,
+      "error_message": null,
+      "details": {
+        "endpoint": "/ws/config",
+        "response_received": true,
+        "has_config_data": true
+      },
+      "response_time_ms": 80,
+      "status_code": 200
+    },
+    {
+      "test_name": "Thread Creation",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 80,
+      "error_message": "Unexpected status code: 403",
+      "details": {
+        "response": {
+          "error": true,
+          "error_code": "AUTH_UNAUTHORIZED",
+          "message": "Not authenticated",
+          "user_message": "An HTTP error occurred",
+          "details": {
+            "error_id": "80a6f282-aee5-4eb9-b5a0-b1b3c19e5051"
+          },
+          "trace_id": "80a6f282-aee5-4eb9-b5a0-b1b3c19e5051",
+          "timestamp": "2025-08-25T06:00:20.172885+00:00",
+          "request_id": null
+        }
+      },
+      "response_time_ms": 80,
+      "status_code": 403
+    },
+    {
+      "test_name": "Thread Listing",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 79,
+      "error_message": "Unexpected status code: 403",
+      "details": {
+        "response": {
+          "error": true,
+          "error_code": "AUTH_UNAUTHORIZED",
+          "message": "Not authenticated",
+          "user_message": "An HTTP error occurred",
+          "details": {
+            "error_id": "69542ac2-d235-4288-bc7d-aa97f2faefc1"
+          },
+          "trace_id": "69542ac2-d235-4288-bc7d-aa97f2faefc1",
+          "timestamp": "2025-08-25T06:00:20.249693+00:00",
+          "request_id": null
+        }
+      },
+      "response_time_ms": 79,
+      "status_code": 403
+    },
+    {
+      "test_name": "Agent Run",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 78,
+      "error_message": null,
+      "details": {
+        "endpoint_available": true,
+        "validates_input": true,
+        "method": "POST"
+      },
+      "response_time_ms": 78,
+      "status_code": 422
+    },
+    {
+      "test_name": "Agent Message",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 96,
+      "error_message": null,
+      "details": {
+        "endpoint_available": true,
+        "validates_input": true,
+        "method": "POST"
+      },
+      "response_time_ms": 96,
+      "status_code": 422
+    },
+    {
+      "test_name": "Agent Stream",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 79,
+      "error_message": null,
+      "details": {
+        "endpoint_available": true,
+        "validates_input": true,
+        "method": "POST"
+      },
+      "response_time_ms": 79,
+      "status_code": 422
+    },
+    {
+      "test_name": "System Config",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 101,
+      "error_message": "Unexpected status code: 403",
+      "details": {
+        "response": {
+          "error": true,
+          "error_code": "AUTH_UNAUTHORIZED",
+          "message": "Not authenticated",
+          "user_message": "An HTTP error occurred",
+          "details": {
+            "error_id": "e835d77e-512d-4699-8932-320dea44921c"
+          },
+          "trace_id": "e835d77e-512d-4699-8932-320dea44921c",
+          "timestamp": "2025-08-25T06:00:20.606190+00:00",
+          "request_id": null
+        }
+      },
+      "response_time_ms": 101,
+      "status_code": 403
+    },
+    {
+      "test_name": "WebSocket Config",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 72,
+      "error_message": "Unexpected status code: 403",
+      "details": {
+        "response": {
+          "error": true,
+          "error_code": "AUTH_UNAUTHORIZED",
+          "message": "Not authenticated",
+          "user_message": "An HTTP error occurred",
+          "details": {
+            "error_id": "c5b96147-6210-46a0-a0c2-5b5745e7ac63"
+          },
+          "trace_id": "c5b96147-6210-46a0-a0c2-5b5745e7ac63",
+          "timestamp": "2025-08-25T06:00:20.684120+00:00",
+          "request_id": null
+        }
+      },
+      "response_time_ms": 72,
+      "status_code": 403
+    },
+    {
+      "test_name": "Public Config",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 78,
+      "error_message": null,
+      "details": {
+        "config_available": true,
+        "response_size": 121,
+        "has_config_data": true
+      },
+      "response_time_ms": 78,
+      "status_code": 200
+    },
+    {
+      "test_name": "404 Error Handling",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 99,
+      "error_message": null,
+      "details": {
+        "proper_404_response": true
+      },
+      "response_time_ms": 99,
+      "status_code": 404
+    },
+    {
+      "test_name": "Malformed JSON Handling",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 73,
+      "error_message": null,
+      "details": {
+        "handles_malformed_json": true
+      },
+      "response_time_ms": 73,
+      "status_code": 422
+    }
+  ]
+}

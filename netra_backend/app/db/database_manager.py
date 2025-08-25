@@ -26,6 +26,7 @@ from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
+from shared.database_url_builder import DatabaseURLBuilder
 from urllib.parse import urlparse
 import urllib.parse
 
@@ -42,53 +43,54 @@ class DatabaseManager:
         Returns:
             Clean database URL with driver prefixes stripped but SSL params preserved for non-Cloud SQL
         """
-        # Check if we're in a test environment and should bypass config caching
-        import sys
-        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
-        
+        # ALWAYS use unified configuration - single source of truth
+        # BUT prioritize environment variable for test isolation
         raw_url = ""
         
-        if is_pytest:
-            # In pytest mode, directly check environment to handle dynamic test env changes
-            raw_url = get_env().get("DATABASE_URL", "")
-            # Skip TEST_COLLECTION_MODE check since tests need to process URLs normally during execution
-        else:
-            # Get from unified configuration - single source of truth for non-test environments
-            try:
-                config = get_unified_config()
-                raw_url = config.database_url or ""
-                
-                # Check test collection mode from config
-                if config.environment == "testing" and not raw_url:
-                    return "sqlite:///:memory:"
-            except Exception:
-                # Fallback for bootstrap or when config not available
-                raw_url = get_env().get("DATABASE_URL", "")
-                test_collection_mode = get_env().get('TEST_COLLECTION_MODE')
-                if test_collection_mode == '1' and not raw_url:
-                    return "sqlite:///:memory:"
+        # First check if DATABASE_URL is explicitly set in environment (for test isolation)
+        env_url = get_env().get("DATABASE_URL", "")
+        
+        try:
+            config = get_unified_config()
+            # Use env URL if set, otherwise use config URL
+            raw_url = env_url or config.database_url or ""
+            
+            # Check test collection mode from config
+            if config.environment == "testing" and not raw_url:
+                return "sqlite:///:memory:"
+        except Exception:
+            # Fallback for bootstrap or when config not available
+            raw_url = env_url
+            test_collection_mode = get_env().get('TEST_COLLECTION_MODE')
+            if test_collection_mode == '1' and not raw_url:
+                return "sqlite:///:memory:"
         
         if not raw_url:
             return DatabaseManager._get_default_database_url()
         
-        # Normalize URL by removing driver-specific prefixes
-        normalized = DatabaseManager._normalize_postgres_url(raw_url)
+        # Use DatabaseURLBuilder for consistent URL handling - single source of truth
+        env_vars = get_env().get_all()
+        env_vars['DATABASE_URL'] = raw_url
+        builder = DatabaseURLBuilder(env_vars)
         
-        # Handle SSL parameters and add schema search_path
+        # Get normalized URL from builder and remove driver-specific elements
+        normalized = builder.normalize_url(raw_url)
+        
+        # Remove driver suffixes to get clean base URL (postgresql+asyncpg -> postgresql, postgres+asyncpg -> postgresql)
+        import re
+        if "postgresql+" in normalized:
+            normalized = re.sub(r'postgresql\+[^:]+://', 'postgresql://', normalized)
+        elif "postgres+" in normalized:
+            normalized = re.sub(r'postgres\+[^:]+://', 'postgresql://', normalized)
+        
+        # Handle schema search_path based on environment
         from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
         parsed = urlparse(normalized)
         query_params = parse_qs(parsed.query)
         
-        # Handle Cloud SQL connections
-        if "/cloudsql/" in normalized or "@/cloudsql/" in normalized:
-            # Remove SSL-related parameters for Cloud SQL
-            ssl_params = ['sslmode', 'sslcert', 'sslkey', 'sslrootcert', 'ssl']
-            for param in ssl_params:
-                query_params.pop(param, None)
-        
-        # Add search_path option if not already present (but not for Cloud SQL)
-        is_cloud_sql = "/cloudsql/" in normalized or "@/cloudsql/" in normalized
-        if 'options' not in query_params and normalized.startswith("postgresql://") and not is_cloud_sql:
+        # Only add search_path for non-Cloud SQL connections (check directly for Cloud SQL pattern)
+        is_cloud_sql = "/cloudsql/" in normalized
+        if not is_cloud_sql and 'options' not in query_params and normalized.startswith("postgresql://"):
             current_env = get_current_environment()
             if current_env == "development":
                 # Use netra_dev schema for development
@@ -112,25 +114,16 @@ class DatabaseManager:
         Returns:
             Database URL compatible with synchronous drivers
         """
-        # Get raw URL without search_path additions that get_base_database_url() adds
-        import sys
-        from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
-        
-        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
-        
+        # ALWAYS use unified configuration - no pytest bypass
         raw_url = ""
         
-        if is_pytest:
-            # In pytest mode, directly check environment to handle dynamic test env changes
+        # Get from unified configuration - single source of truth
+        try:
+            config = get_unified_config()
+            raw_url = config.database_url or ""
+        except Exception:
+            # Fallback for bootstrap or when config not available
             raw_url = get_env().get("DATABASE_URL", "")
-        else:
-            # Get from unified configuration - single source of truth for non-test environments
-            try:
-                config = get_unified_config()
-                raw_url = config.database_url or ""
-            except Exception:
-                # Fallback for bootstrap or when config not available
-                raw_url = get_env().get("DATABASE_URL", "")
         
         if not raw_url:
             return "sqlite:///:memory:"
@@ -139,36 +132,32 @@ class DatabaseManager:
         if raw_url.startswith("sqlite"):
             return raw_url
         
-        # Parse the URL for conversion
-        parsed = urlparse(raw_url)
+        # Use DatabaseURLBuilder for consistent URL handling
+        env_vars = get_env().get_all()
+        env_vars['DATABASE_URL'] = raw_url
+        builder = DatabaseURLBuilder(env_vars)
         
-        # Convert async driver to sync and handle SSL conversion
-        scheme = parsed.scheme
-        if scheme in ["postgresql+asyncpg", "postgres+asyncpg"]:
-            scheme = "postgresql"
-        elif scheme == "postgres":
-            scheme = "postgresql"
+        # If URL contains /cloudsql/ pattern, handle as Cloud SQL
+        if "/cloudsql/" in raw_url:
+            # Check if builder can provide a valid sync URL
+            if builder.cloud_sql.is_cloud_sql:
+                sync_url = builder.cloud_sql.sync_url
+                # Only use builder result if it's not malformed
+                if sync_url and sync_url != "postgresql://@/?host=":
+                    return sync_url
+            
+            # Fallback: treat as pre-formatted Cloud SQL URL and return normalized as-is
+            normalized = DatabaseURLBuilder.normalize_postgres_url(raw_url)
+            return normalized
         
-        # Handle SSL parameter conversion for sync drivers
-        query_params = parse_qs(parsed.query)
+        # For non-Cloud SQL, format for sync driver with SSL parameter conversion
+        sync_url = builder.format_url_for_driver(raw_url, 'base')
         
-        # Check if this is a Cloud SQL connection
-        is_cloud_sql = "/cloudsql/" in raw_url or "@/cloudsql/" in raw_url
+        # Convert ssl= to sslmode= for sync drivers
+        if "ssl=" in sync_url and "sslmode=" not in sync_url:
+            sync_url = sync_url.replace("ssl=", "sslmode=")
         
-        if is_cloud_sql:
-            # Remove SSL-related parameters for Cloud SQL
-            ssl_params = ['sslmode', 'sslcert', 'sslkey', 'sslrootcert', 'ssl']
-            for param in ssl_params:
-                query_params.pop(param, None)
-        else:
-            # Convert ssl=require to sslmode=require for sync drivers (non-Cloud SQL)
-            if 'ssl' in query_params and 'sslmode' not in query_params:
-                query_params['sslmode'] = query_params.pop('ssl')
-        
-        new_query = urlencode(query_params, doseq=True)
-        normalized = urlunparse(parsed._replace(scheme=scheme, query=new_query))
-        
-        return normalized
+        return sync_url
     
     @staticmethod
     def get_application_url_async() -> str:
@@ -181,10 +170,20 @@ class DatabaseManager:
         # For async driver, ensure postgresql+asyncpg:// prefix
         if base_url.startswith("sqlite"):
             return base_url.replace("sqlite://", "sqlite+aiosqlite://")
-        if not base_url.startswith("postgresql+asyncpg://"):
-            base_url = "postgresql+asyncpg://" + base_url.split("://", 1)[-1]
-        # Convert SSL parameters for asyncpg compatibility
-        base_url = DatabaseManager._convert_sslmode_to_ssl(base_url)
+        
+        # Use DatabaseURLBuilder for driver-specific formatting
+        env_vars = get_env().get_all()
+        env_vars['DATABASE_URL'] = base_url
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # For Cloud SQL, use the properly parsed async URL from builder
+        if builder.cloud_sql.is_cloud_sql:
+            async_url = builder.cloud_sql.async_url
+            if async_url and async_url != "postgresql+asyncpg://@/?host=":
+                return async_url
+        
+        # For non-Cloud SQL, format for async driver
+        base_url = builder.format_url_for_driver(base_url, 'asyncpg')
         
         # Remove search_path options from URL - handled via server_settings in connect_args
         from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
@@ -210,7 +209,8 @@ class DatabaseManager:
         
         # Check for driver-specific elements
         has_async_driver = "asyncpg" in base_url
-        has_mixed_ssl = DatabaseManager._has_mixed_ssl_params(base_url)
+        # Check for mixed SSL params using simple string check
+        has_mixed_ssl = "ssl=" in base_url and "sslmode=" in base_url
         
         return not (has_async_driver or has_mixed_ssl)
     
@@ -231,7 +231,10 @@ class DatabaseManager:
             return False
         
         # Should use sslmode (not ssl) unless Cloud SQL
-        if not DatabaseManager._is_cloud_sql_connection(target_url) and "ssl=" in target_url:
+        env_vars = get_env().get_all()
+        env_vars['DATABASE_URL'] = target_url
+        builder = DatabaseURLBuilder(env_vars)
+        if not builder.cloud_sql.is_cloud_sql and "ssl=" in target_url:
             return False
         
         return target_url.startswith("postgresql://")
@@ -253,7 +256,10 @@ class DatabaseManager:
             return False
         
         # Should use ssl (not sslmode) unless Cloud SQL
-        if not DatabaseManager._is_cloud_sql_connection(target_url) and "sslmode=" in target_url:
+        env_vars = get_env().get_all()
+        env_vars['DATABASE_URL'] = target_url
+        builder = DatabaseURLBuilder(env_vars)
+        if not builder.cloud_sql.is_cloud_sql and "sslmode=" in target_url:
             return False
         
         return True
@@ -384,23 +390,26 @@ class DatabaseManager:
         Returns:
             True if using Cloud SQL Unix socket connections
         """
-        # Check if we're in pytest mode and should directly read environment
-        import sys
-        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
+        # Get DATABASE_URL - prioritize environment for test isolation
+        env_database_url = get_env().get("DATABASE_URL", "")
         
-        if is_pytest:
-            # In pytest mode, directly check environment to handle dynamic test env changes
-            database_url = get_env().get("DATABASE_URL", "")
+        # If DATABASE_URL is set in environment, use it directly (important for tests)
+        if env_database_url:
+            database_url = env_database_url
         else:
-            # Get from unified configuration - single source of truth for non-test environments
+            # Otherwise use unified configuration
             try:
                 config = get_unified_config()
                 database_url = config.database_url or ""
             except Exception:
                 # Fallback for bootstrap
-                database_url = get_env().get("DATABASE_URL", "")
+                database_url = ""
         
-        return DatabaseManager._is_cloud_sql_connection(database_url)
+        # Use DatabaseURLBuilder for Cloud SQL detection
+        env_vars = get_env().get_all()
+        env_vars['DATABASE_URL'] = database_url
+        builder = DatabaseURLBuilder(env_vars)
+        return builder.cloud_sql.is_cloud_sql
     
     @staticmethod
     def is_local_development() -> bool:
@@ -409,17 +418,9 @@ class DatabaseManager:
         Returns:
             True if running in local development environment
         """
-        # Check if we're in pytest mode and should use direct environment detection
-        import sys
-        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
-        
-        if is_pytest:
-            # In pytest mode, use direct environment detection
-            return get_current_environment() == "development"
-        else:
-            # Get from unified configuration for non-test environments
-            config = get_unified_config()
-            return config.environment == "development"
+        # ALWAYS use unified configuration - no pytest bypass
+        config = get_unified_config()
+        return config.environment == "development"
     
     @staticmethod
     def is_remote_environment() -> bool:
@@ -535,14 +536,9 @@ class DatabaseManager:
         """
         current_env = get_current_environment()
         
-        # Check if we're running in pytest environment (the tests expect specific URLs)
-        import sys
-        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
+        # NO pytest bypass - tests and production use identical code paths
         
-        if is_pytest:
-            # When running in pytest, tests expect this specific URL format regardless of current_env
-            return "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
-        elif current_env in ["testing", "test"]:
+        if current_env in ["testing", "test"]:
             return "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
         elif current_env == "development":
             return "postgresql://postgres:password@localhost:5432/netra?options=-c%20search_path%3Dnetra_dev,public"
@@ -587,11 +583,9 @@ class DatabaseManager:
         config = get_unified_config()
         current_env = config.environment
         is_test_mode = config.environment == "testing"
+        # NO pytest bypass - use environment configuration only
         
-        import sys
-        is_pytest = 'pytest' in sys.modules or 'pytest' in ' '.join(sys.argv)
-        
-        return current_env in ["testing", "test"] or is_test_mode or is_pytest
+        return current_env in ["testing", "test"] or is_test_mode
     
     @staticmethod
     def create_auth_application_engine():
@@ -603,48 +597,9 @@ class DatabaseManager:
         """Get auth session - delegates to application session."""
         return DatabaseManager.get_application_session()
     
-    @staticmethod
-    def _normalize_postgres_url(url: str) -> str:
-        """Normalize PostgreSQL URL format."""
-        if not url:
-            return url
-        # Convert postgres:// to postgresql://
-        if url.startswith("postgres://"):
-            url = url.replace("postgres://", "postgresql://")
-        # Strip async driver prefixes
-        url = url.replace("postgresql+asyncpg://", "postgresql://")
-        url = url.replace("postgres+asyncpg://", "postgresql://")
-        return url
     
-    @staticmethod
-    def _is_cloud_sql_connection(url: str) -> bool:
-        """Check if URL is a Cloud SQL Unix socket connection."""
-        return "/cloudsql/" in url if url else False
     
-    @staticmethod
-    def _has_mixed_ssl_params(url: str) -> bool:
-        """Check if URL has both ssl= and sslmode= parameters."""
-        if not url:
-            return False
-        return "ssl=" in url and "sslmode=" in url
     
-    @staticmethod
-    def _convert_sslmode_to_ssl(url: str) -> str:
-        """Convert SSL parameters for asyncpg compatibility."""
-        if not url:
-            return url
-        # For Cloud SQL, remove all SSL parameters
-        if DatabaseManager._is_cloud_sql_connection(url):
-            import re
-            url = re.sub(r'[&?]sslmode=[^&]*', '', url)
-            url = re.sub(r'[&?]ssl=[^&]*', '', url)
-            url = re.sub(r'&&+', '&', url)
-            url = re.sub(r'[&?]$', '', url)
-        else:
-            # Convert sslmode to ssl for asyncpg
-            if "sslmode=require" in url:
-                url = url.replace("sslmode=require", "ssl=require")
-        return url
     
     @staticmethod
     def validate_database_credentials(url: str) -> bool:

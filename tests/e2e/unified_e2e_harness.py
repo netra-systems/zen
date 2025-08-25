@@ -118,8 +118,15 @@ class UnifiedE2ETestHarness:
     
     def get_websocket_url(self) -> str:
         """Get WebSocket URL for backend service."""
-        # Use environment-specific WebSocket URL
-        return self.env_config.services.websocket
+        # Derive WebSocket URL from backend URL
+        backend_url = self.env_config.services.backend
+        if backend_url.startswith("https://"):
+            return backend_url.replace("https://", "wss://") + "/ws"
+        elif backend_url.startswith("http://"):
+            return backend_url.replace("http://", "ws://") + "/ws"
+        else:
+            # Default to localhost WebSocket URL
+            return "ws://localhost:8000/ws"
     
     def is_environment_ready(self) -> bool:
         """Check if test environment is ready."""
