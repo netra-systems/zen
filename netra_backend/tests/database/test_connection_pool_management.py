@@ -4,7 +4,7 @@ import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock
 
-from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
+from netra_backend.app.services.database.connection_manager import ConnectionManager as ConnManager
 from netra_backend.app.core.database_url_builder import DatabaseURLBuilder
 from test_framework.fixtures import isolated_environment
 
@@ -25,7 +25,7 @@ class TestConnectionPoolManagement:
         connection_url = url_builder.build_url(require_ssl=True)
         
         # Should fail if SSL is not properly configured
-        manager = DatabaseConnectionManager(connection_url)
+        manager = ConnectionManager(connection_url)
         
         with pytest.raises(Exception, match="SSL"):
             await manager.get_connection()
@@ -34,7 +34,7 @@ class TestConnectionPoolManagement:
     async def test_connection_pool_exhaustion_recovery(self, isolated_environment):
         """Test connection pool recovery from exhaustion."""
         # This should fail initially - no recovery mechanism implemented
-        manager = DatabaseConnectionManager(max_connections=2)
+        manager = ConnectionManager(max_connections=2)
         
         connections = []
         try:

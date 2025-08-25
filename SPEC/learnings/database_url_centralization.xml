@@ -269,4 +269,62 @@
     
     <tags>database, no-fallbacks, centralization, critical, fail-fast</tags>
   </learning>
+  
+  <learning id="cloud-sql-none-check" date="2025-08-25">
+    <title>Always Check for None Before String Operations</title>
+    <category>Database,Configuration,BugFix</category>
+    <insight>
+      When checking if a configuration value contains a substring, ALWAYS check
+      for None first to avoid AttributeError. This is especially critical for
+      optional configuration values like postgres_host.
+    </insight>
+    
+    <problem>
+      DatabaseURLBuilder had a bug in Cloud SQL detection:
+      ```python
+      # WRONG - Causes AttributeError if postgres_host is None
+      return "/cloudsql/" in self.parent.postgres_host
+      ```
+      
+      This caused failures when postgres_host was None, which is common
+      in test environments or when using DATABASE_URL directly.
+    </problem>
+    
+    <solution>
+      Always check for None before string operations:
+      ```python
+      # CORRECT - Safe check for None first
+      return self.parent.postgres_host is not None and "/cloudsql/" in self.parent.postgres_host
+      
+      # Also correct for negation
+      return bool(self.parent.postgres_host and not ("/cloudsql/" in self.parent.postgres_host))
+      ```
+    </solution>
+    
+    <best_practices>
+      <practice>
+        <rule>Check for None before string operations</rule>
+        <rationale>
+          Optional configuration values may be None. String operations on None
+          cause AttributeError crashes.
+        </rationale>
+      </practice>
+      <practice>
+        <rule>Use explicit None checks for clarity</rule>
+        <rationale>
+          "is not None and" is clearer than relying on truthiness when
+          the intent is to check for None specifically.
+        </rationale>
+      </practice>
+      <practice>
+        <rule>Test with missing configuration values</rule>
+        <rationale>
+          Tests should include cases where optional configuration values
+          are not set to catch these bugs early.
+        </rationale>
+      </practice>
+    </best_practices>
+    
+    <tags>database, none-check, bug-fix, cloud-sql</tags>
+  </learning>
 </learnings>
