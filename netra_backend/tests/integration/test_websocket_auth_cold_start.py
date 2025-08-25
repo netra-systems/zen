@@ -575,7 +575,7 @@ class TestWebSocketAuthColdStartL3:
         
         # Mock auth service degradation
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             # Simulate slow response from auth service
             async def slow_validation(*args, **kwargs):
                 await asyncio.sleep(5)

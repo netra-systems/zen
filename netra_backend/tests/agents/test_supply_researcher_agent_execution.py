@@ -142,7 +142,7 @@ class TestSupplyResearcherAgentExecution:
     async def test_redis_cache_integration(self, agent):
         """Test Redis caching for research results"""
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        with patch('app.redis_manager.RedisManager') as mock_redis:
+        with patch('netra_backend.app.redis_manager.RedisManager') as mock_redis:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_instance = Mock()
             # Mock: Redis external service isolation for fast, reliable tests without network dependency

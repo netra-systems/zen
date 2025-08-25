@@ -128,7 +128,7 @@ class TestDataEnrichment:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
-        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+        with patch('netra_backend.app.redis_manager.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # The enrich_data method handles external enrichment internally

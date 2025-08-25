@@ -110,7 +110,7 @@ class TestSupplyResearcherCore:
     def _setup_redis_mock(self):
         """Setup Redis mock for testing (≤8 lines)"""
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        with patch('app.redis_manager.RedisManager') as mock_redis_class:
+        with patch('netra_backend.app.redis_manager.RedisManager') as mock_redis_class:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
             # Mock: Redis external service isolation for fast, reliable tests without network dependency

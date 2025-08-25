@@ -43,7 +43,7 @@ class TestSupplyResearcherInfrastructure:
     def _setup_redis_cache(self, agent):
         """Setup Redis cache with fallback data (≤8 lines)"""
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        with patch('app.redis_manager.RedisManager') as mock_redis_class:
+        with patch('netra_backend.app.redis_manager.RedisManager') as mock_redis_class:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
@@ -89,7 +89,7 @@ class TestSupplyResearcherInfrastructure:
     def _setup_metrics_collection(self):
         """Setup metrics collection mocks (≤8 lines)"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.agents.supply_researcher_sub_agent.metrics') as mock_metrics:
+        with patch('netra_backend.app.agents.supply_researcher_sub_agent.metrics') as mock_metrics:
             # Mock: Generic component isolation for controlled unit testing
             mock_metrics.counter = Mock()
             # Mock: Generic component isolation for controlled unit testing

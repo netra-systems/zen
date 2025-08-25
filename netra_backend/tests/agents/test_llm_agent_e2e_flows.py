@@ -46,7 +46,7 @@ async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
     mock_persistence = _create_concurrent_persistence_mock()
     
     # Mock: Agent supervisor isolation for testing without spawning real agents
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisors = _create_concurrent_supervisors(
             mock_db_session, mock_llm_manager, mock_websocket_manager, 
             mock_tool_dispatcher, mock_persistence
@@ -272,7 +272,7 @@ def _create_e2e_supervisor(infrastructure):
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     
     # Mock: Agent supervisor isolation for testing without spawning real agents
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher = Mock(spec=ToolDispatcher)

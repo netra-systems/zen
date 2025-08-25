@@ -99,7 +99,7 @@ def mock_auth_client():
     """Mock auth client for OAuth testing"""
 
     # Mock: Component isolation for testing without external dependencies
-    with patch('app.clients.auth_client.auth_client') as mock:
+    with patch('app.clients.auth_client_core.auth_client') as mock:
 
         mock.get_oauth_config.return_value = {
 
@@ -488,7 +488,7 @@ class TestCrossServiceTokenValidation:
         # Mock auth service token validation
 
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
             mock_validate.return_value = {
 

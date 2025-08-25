@@ -37,7 +37,7 @@ class TestSupplyResearch:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.supply.research_suppliers') as mock_research:
+        with patch('netra_backend.app.routes.supply.research_suppliers') as mock_research:
             mock_research.return_value = {
                 "suppliers": [
                     {
@@ -88,7 +88,7 @@ class TestSupplyResearch:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.supply.enrich_supplier') as mock_enrich:
+        with patch('netra_backend.app.routes.supply.enrich_supplier') as mock_enrich:
             mock_enrich.return_value = {
                 "supplier_id": "sup123",
                 "enriched_data": {
@@ -150,7 +150,7 @@ class TestSupplyResearch:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.supply_chain_service.validate_chain') as mock_validate:
+        with patch('netra_backend.app.services.supply_chain_service.validate_chain') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
                 "issues": [],
@@ -180,7 +180,7 @@ class TestSupplyResearch:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.supply_market_service.analyze_market') as mock_analyze:
+        with patch('netra_backend.app.services.supply_market_service.analyze_market') as mock_analyze:
             mock_analyze.return_value = {
                 "market_overview": {
                     "total_suppliers": 1250,
@@ -243,7 +243,7 @@ class TestSupplyResearch:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.supplier_comparison.compare_suppliers') as mock_compare:
+        with patch('netra_backend.app.services.supplier_comparison.compare_suppliers') as mock_compare:
             mock_compare.return_value = {
                 "comparison_matrix": {
                     "sup1": {

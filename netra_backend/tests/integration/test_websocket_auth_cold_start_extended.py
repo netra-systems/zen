@@ -686,7 +686,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         async with websockets.connect(ws_url, extra_headers=headers) as websocket:
             # Simulate tier upgrade in backend
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.get_user_tier') as mock_tier:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.get_user_tier') as mock_tier:
                 mock_tier.return_value = "enterprise"
                 
                 await websocket.send(json.dumps({
@@ -1093,7 +1093,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         # Simulate auth service failures
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             failure_count = 0
             
             async def failing_validation(*args, **kwargs):
@@ -1598,7 +1598,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             
             # Simulate role upgrade in backend
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.get_user_roles') as mock_roles:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.get_user_roles') as mock_roles:
                 mock_roles.return_value = ["user", "admin"]
                 
                 # Notify session of role change
