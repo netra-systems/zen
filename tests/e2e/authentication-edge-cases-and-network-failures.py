@@ -73,6 +73,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         ]
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_token_expiration_handling_completely_broken(self):
         """
         EXPECTED TO FAIL - CRITICAL TOKEN EXPIRATION ISSUE
@@ -121,6 +122,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
                 pytest.fail(f"Token expiration handling failed: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_invalid_credential_scenarios_causing_system_crashes(self):
         """
         EXPECTED TO FAIL - CRITICAL INVALID CREDENTIALS ISSUE
@@ -173,6 +175,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
                     pytest.fail(f"Invalid credential scenario '{scenario_name}' caused unexpected error: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_network_connectivity_failures_between_services(self):
         """
         EXPECTED TO FAIL - CRITICAL NETWORK CONNECTIVITY ISSUE
@@ -224,6 +227,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         assert len(connectivity_issues) == 0, f"Network connectivity failures: {connectivity_issues}"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_completely_unreachable_or_down(self):
         """
         EXPECTED TO FAIL - CRITICAL AUTH SERVICE AVAILABILITY ISSUE
@@ -267,6 +271,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
                         pytest.fail(f"Auth service down scenario '{scenario_name}' not handled gracefully: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_service_account_permissions_missing_or_insufficient(self):
         """
         EXPECTED TO FAIL - CRITICAL SERVICE ACCOUNT PERMISSIONS ISSUE
@@ -310,6 +315,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
                     pytest.fail(f"Service account permission scenario '{scenario_name}' failed: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_jwt_signing_key_mismatches_across_services(self):
         """
         EXPECTED TO FAIL - CRITICAL JWT KEY SYNC ISSUE
@@ -398,6 +404,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         assert len(network_policy_issues) == 0, f"Network policy blocking authentication traffic: {network_policy_issues}"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_ssl_tls_handshake_failures_in_staging_production(self):
         """
         EXPECTED TO FAIL - CRITICAL SSL/TLS ISSUE
@@ -440,7 +447,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         # Should NOT have SSL/TLS handshake issues
         assert len(ssl_handshake_issues) == 0, f"SSL/TLS handshake failures: {ssl_handshake_issues}"
 
-    @pytest.mark.medium
+    @pytest.mark.critical
     def test_dns_resolution_failures_for_authentication_services(self):
         """
         EXPECTED TO FAIL - MEDIUM DNS RESOLUTION ISSUE
@@ -478,6 +485,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         assert len(dns_resolution_issues) == 0, f"DNS resolution failures: {dns_resolution_issues}"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_load_balancer_proxy_authentication_configuration_errors(self):
         """
         EXPECTED TO FAIL - CRITICAL LOAD BALANCER CONFIG ISSUE
@@ -515,7 +523,8 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
             except Exception as e:
                 pytest.fail(f"Load balancer authentication configuration error: {str(e)}")
 
-    @pytest.mark.medium
+    @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_authentication_circuit_breaker_not_implemented(self):
         """
         EXPECTED TO FAIL - MEDIUM CIRCUIT BREAKER ISSUE

@@ -83,6 +83,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
         self.start_time = time.time()
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_complete_service_account_permissions_breakdown(self):
         """
         EXPECTED TO FAIL - CRITICAL SERVICE ACCOUNT PERMISSIONS ISSUE
@@ -154,6 +155,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
         assert len(permission_failures) == 0, f"Service account permission failures: {permission_failures}"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_complete_jwt_signing_key_mismatch_across_all_services(self):
         """
         EXPECTED TO FAIL - CRITICAL JWT KEY SYNCHRONIZATION ISSUE
@@ -274,6 +276,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
         assert len(network_blocking_issues) == 0, f"Network policies blocking authentication traffic: {network_blocking_issues}"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_complete_end_to_end_authentication_system_breakdown(self):
         """
         EXPECTED TO FAIL - CRITICAL END-TO-END SYSTEM BREAKDOWN
@@ -390,6 +393,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
         assert len(flow_failures) == 0, f"Complete end-to-end authentication system breakdown: {flow_failures}"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_authentication_performance_completely_unacceptable(self):
         """
         EXPECTED TO FAIL - CRITICAL AUTHENTICATION PERFORMANCE ISSUE  
@@ -494,6 +498,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
         assert len(performance_issues) == 0, f"Authentication performance completely unacceptable: {performance_issues}"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_zero_authentication_recovery_mechanisms(self):
         """
         EXPECTED TO FAIL - CRITICAL RECOVERY MECHANISM ISSUE

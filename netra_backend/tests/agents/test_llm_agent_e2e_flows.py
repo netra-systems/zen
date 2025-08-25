@@ -290,14 +290,14 @@ def _create_e2e_supervisor(infrastructure):
 
 def _configure_e2e_pipeline(supervisor):
     """Configure supervisor pipeline for E2E testing"""
-    from netra_backend.app.agents.base.execution_context import (
+    from netra_backend.app.agents.supervisor.execution_context import (
         AgentExecutionResult,
     )
     # Mock: Async component isolation for testing without real async operations
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
-        AgentExecutionResult(success=True, result=None),
-        AgentExecutionResult(success=True, result=None),
-        AgentExecutionResult(success=True, result=None)
+        AgentExecutionResult(success=True, state=None),
+        AgentExecutionResult(success=True, state=None),
+        AgentExecutionResult(success=True, state=None)
     ])
 
 async def _execute_e2e_flow(supervisor):

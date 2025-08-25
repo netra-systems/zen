@@ -63,6 +63,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
         self.start_time = time.time()
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_frontend_to_backend_authentication_complete_failure(self):
         """
         EXPECTED TO FAIL - CRITICAL CROSS-SERVICE ISSUE
@@ -102,7 +103,8 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
             except Exception as e:
                 pytest.fail(f"Frontend → Backend authentication failed: {str(e)}")
 
-    @pytest.mark.critical 
+    @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_backend_to_auth_service_communication_failure(self):
         """
         EXPECTED TO FAIL - CRITICAL AUTH SERVICE ISSUE
@@ -145,6 +147,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                 pytest.fail(f"Backend → Auth Service communication failed: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_to_database_authentication_state_corruption(self):
         """
         EXPECTED TO FAIL - CRITICAL DATABASE AUTH ISSUE  
@@ -193,6 +196,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                 pytest.fail(f"Auth Service → Database state corruption: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_all_service_authentication_latency_exceeds_6_seconds(self):
         """
         EXPECTED TO FAIL - CRITICAL LATENCY ISSUE
@@ -247,7 +251,8 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
         if slow_services:
             pytest.fail(f"Slow service authentications: {slow_services}")
 
-    @pytest.mark.medium
+    @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_service_discovery_authentication_failures(self):
         """
         EXPECTED TO FAIL - MEDIUM SERVICE DISCOVERY ISSUE
@@ -284,6 +289,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                 pytest.fail(f"Service discovery authentication failed: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_mutual_tls_configuration_missing_or_broken(self):
         """
         EXPECTED TO FAIL - CRITICAL MTLS ISSUE
@@ -318,6 +324,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                 pytest.fail(f"mTLS configuration failure: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_service_account_credentials_not_shared_between_services(self):
         """
         EXPECTED TO FAIL - CRITICAL CREDENTIAL SHARING ISSUE
@@ -352,6 +359,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                     pytest.fail(f"Service account credentials not accessible for {service_name}: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_jwt_signing_key_synchronization_failures_across_services(self):
         """
         EXPECTED TO FAIL - CRITICAL JWT KEY SYNC ISSUE
@@ -395,7 +403,8 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                 except Exception as e:
                     pytest.fail(f"JWT key synchronization failure for {service}: {str(e)}")
 
-    @pytest.mark.medium
+    @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_authentication_recovery_between_services_non_existent(self):
         """
         EXPECTED TO FAIL - MEDIUM RECOVERY ISSUE
@@ -444,6 +453,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
             assert recovery_attempt_count <= 3, "Should recover within 3 attempts"
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_network_policies_blocking_inter_service_communication(self):
         """
         EXPECTED TO FAIL - CRITICAL NETWORK POLICY ISSUE
@@ -490,6 +500,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                     pytest.fail(f"Service communication failure {source} → {target}: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_service_mesh_authentication_configuration_errors(self):
         """
         EXPECTED TO FAIL - CRITICAL SERVICE MESH ISSUE

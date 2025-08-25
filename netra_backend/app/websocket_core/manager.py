@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 from contextlib import asynccontextmanager
 
 from fastapi import WebSocket, WebSocketDisconnect
-from starlette.websockets import WebSocketState
+from fastapi.websockets import WebSocketState
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage

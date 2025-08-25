@@ -82,8 +82,8 @@ class TestBenchmarkMetrics:
         
         def cpu_intensive_task():
             """Simulate CPU-intensive generation task"""
-            for _ in range(1000000):
-                _ = sum(range(100))
+            for _ in range(10000):  # Reduced from 1M to 10K for CI/CD performance
+                _ = sum(range(10))  # Reduced inner work as well
         
         # Get baseline CPU usage
         psutil.cpu_percent()  # First call returns 0

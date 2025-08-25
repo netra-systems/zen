@@ -130,12 +130,26 @@ class RedisManager:
                 self._handle_connection_error(e)  # Disable manager before re-raising
                 raise
             
-            # FIX: Try local fallback if remote Redis fails
+            # FIX: Try local fallback if remote Redis fails - but not in staging/production
             config = get_unified_config()
             redis_mode = config.redis_mode.lower()
+            environment = getattr(config, 'environment', 'development').lower()
+            
+            # Check environment variables for fallback control
+            from netra_backend.app.core.isolated_environment import get_env
+            env = get_env()
+            redis_fallback_enabled = env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
+            redis_required = env.get("REDIS_REQUIRED", "false").lower() == "true"
+            
+            # Disable fallback in staging/production environments or if explicitly disabled
+            if environment in ['staging', 'production'] or not redis_fallback_enabled or redis_required:
+                logger.error(f"Redis connection failed in {environment} environment: {e}. Localhost fallback disabled (fallback_enabled={redis_fallback_enabled}, required={redis_required}).")
+                self._handle_connection_error(e)
+                return
+            
             if redis_mode != "local":
                 logger.warning(f"Remote Redis failed: {e}. Attempting local fallback...")
-                # Temporarily modify config for local fallback
+                # Temporarily modify config for local fallback (development only)
                 config.redis_mode = "local"
                 try:
                     self.redis_client = self._create_redis_client()

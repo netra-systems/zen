@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
-from starlette.websockets import WebSocketState
+from fastapi.websockets import WebSocketState
 
 from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.logging_config import central_logger

@@ -38,6 +38,7 @@ Root Causes (Auth Service Failures):
 
 import asyncio
 import pytest
+import ssl
 import time
 import psutil
 import subprocess
@@ -78,6 +79,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
         super().teardown_method()
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_completely_unresponsive_no_fallback(self):
         """
         EXPECTED TO FAIL - CRITICAL SERVICE DOWN ISSUE
@@ -119,6 +121,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                 pytest.fail(f"Auth service request timeout after {duration:.2f}s - no fallback mechanism implemented")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_returning_500_internal_server_error(self):
         """
         EXPECTED TO FAIL - CRITICAL SERVER ERROR ISSUE
@@ -159,6 +162,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                     pytest.fail("Auth Service 500 error handling timeout - no resilience mechanism")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_database_connectivity_lost(self):
         """
         EXPECTED TO FAIL - CRITICAL DATABASE CONNECTIVITY ISSUE
@@ -248,6 +252,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
             pytest.fail(f"Auth Service crash recovery mechanism not implemented: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_overwhelmed_with_requests_503_no_circuit_breaker(self):
         """
         EXPECTED TO FAIL - CRITICAL OVERLOAD ISSUE
@@ -303,6 +308,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                 pytest.fail("No circuit breaker or rate limiting - requests timeout instead of proper 503 responses")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_network_partitioned_from_other_services(self):
         """
         EXPECTED TO FAIL - CRITICAL NETWORK PARTITION ISSUE
@@ -347,6 +353,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                     pytest.fail(f"No network partition handling - connection failed after {partition_duration:.2f}s")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_ssl_certificate_expired(self):
         """
         EXPECTED TO FAIL - CRITICAL SSL CERT EXPIRY ISSUE
@@ -378,6 +385,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                     pytest.fail(f"SSL certificate expiry not handled gracefully: {str(e)}")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_oauth_provider_connectivity_lost(self):
         """
         EXPECTED TO FAIL - CRITICAL OAUTH PROVIDER ISSUE
@@ -412,6 +420,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                     pytest.fail("OAuth provider connectivity loss causing Auth Service to hang")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_redis_cache_layer_down(self):
         """
         EXPECTED TO FAIL - CRITICAL CACHE LAYER ISSUE
@@ -449,6 +458,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                         pytest.fail("Auth Service crashes when Redis cache layer is down")
 
     @pytest.mark.critical
+    @pytest.mark.asyncio
     async def test_auth_service_graceful_shutdown_not_working(self):
         """
         EXPECTED TO FAIL - CRITICAL GRACEFUL SHUTDOWN ISSUE

@@ -21,16 +21,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
-# Load environment variables from .env file
-# Try parent directory first (where main .env is located)
-env_path = Path(__file__).parent.parent / ".env"
-if env_path.exists():
-    load_dotenv(env_path)
-    print(f"Loaded environment from: {env_path}")
+# Load environment variables from .env file ONLY in development
+# In staging/production, all config comes from Cloud Run env vars and Google Secret Manager
+environment = os.getenv('ENVIRONMENT', '').lower()
+if environment in ['staging', 'production', 'prod']:
+    print(f"Running in {environment} - skipping .env file loading (using GSM)")
 else:
-    # Fallback to current directory
-    load_dotenv()
-    print("Loaded environment from current directory or system")
+    # Try parent directory first (where main .env is located)
+    env_path = Path(__file__).parent.parent / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"Loaded environment from: {env_path}")
+    else:
+        # Fallback to current directory
+        load_dotenv()
+        print("Loaded environment from current directory or system")
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router

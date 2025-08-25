@@ -38,6 +38,17 @@
             <critical-takeaway>Auth service MUST use unified configuration via lazy loading pattern while maintaining service independence (unified_config_auth_service.xml).</critical-takeaway>
         </category>
 
+        <category name="Staging Authentication Failures [CRITICAL]" path="SPEC/learnings/staging_authentication_failures_2025.xml" keywords="Staging, Authentication, 403 Forbidden, Service-to-Service, Token Refresh, JWT Secret, OAuth">
+            <critical-takeaway>CRITICAL: Authentication failures in staging indicate imminent production failures that will cause complete platform unavailability and 100% revenue loss.</critical-takeaway>
+            <critical-takeaway>MANDATORY: All authentication tests must run in staging environment (@pytest.mark.env("staging")) to catch environment-specific configuration issues.</critical-takeaway>
+            <critical-takeaway>Frontend gets 403 Forbidden when calling backend threads endpoint due to service account authentication failure and JWT secret mismatch.</critical-takeaway>
+            <critical-takeaway>Service-to-service authentication completely broken between frontend-backend and backend-auth services - microservice architecture non-functional.</critical-takeaway>
+            <critical-takeaway>Token refresh mechanism completely non-functional - users cannot maintain sessions and are forced to re-authenticate repeatedly.</critical-takeaway>
+            <critical-takeaway>JWT secret synchronization failure between services causes valid tokens to be rejected across service boundaries.</critical-takeaway>
+            <critical-takeaway>OAuth configuration misconfigured in staging preventing new user registration and social login - no user acquisition possible.</critical-takeaway>
+            <critical-takeaway>CORS configuration blocks legitimate cross-service authentication requests causing service communication failures.</critical-takeaway>
+        </category>
+
         <category name="Database Connectivity Critical Fix [RESOLVED]" path="SPEC/learnings/database_postgres_connectivity_fix_2025.xml" keywords="Database, Postgres, Connection, POSTGRES_DB, netra_dev, staging">
             <critical-takeaway>RESOLVED 2025-08-25: Fixed critical 'database postgres does not exist' error by updating POSTGRES_DB configuration.</critical-takeaway>
             <critical-takeaway>NEVER use 'postgres' system database name for application data - use 'netra_dev' for staging and development.</critical-takeaway>
@@ -121,6 +132,14 @@
         
         <category name="Secret Manager Interface" path="SPEC/learnings/secret_manager_interface.xml" keywords="SecretManager, load_all_secrets, Interface Contract, UnifiedSecretManager">
             <critical-takeaway>SecretManager MUST provide public load_all_secrets() method for UnifiedSecretManager compatibility.</critical-takeaway>
+        </category>
+        
+        <category name="Configuration Issues 2025" path="SPEC/learnings/configuration_issues_2025.xml" keywords="DATABASE_URL, ClickHouse, Redis, Environment Detection, Import Paths, WebSocket">
+            <critical-takeaway>DATABASE_URL must use Cloud SQL format in staging, never localhost fallback - staging configuration failures indicate production readiness issues.</critical-takeaway>
+            <critical-takeaway>Redis fallback to localhost must be disabled in staging/production via REDIS_FALLBACK_ENABLED=false environment variable.</critical-takeaway>
+            <critical-takeaway>Import paths: ClickHouseClient moved to data_sub_agent module, RedisClient is RedisManager, WebSocket imports use fastapi not starlette.</critical-takeaway>
+            <critical-takeaway>IsolatedEnvironment singleton requires instance reset when testing different environment configurations.</critical-takeaway>
+            <critical-takeaway>Service client connection tests must use async patterns: asyncio.run(client.connect()) for ClickHouse, asyncio.run(client.ping()) for Redis.</critical-takeaway>
             <critical-takeaway>Never access private methods (_method) from external components - use public interfaces.</critical-takeaway>
             <critical-takeaway>Secret loading failures should log warnings but NOT crash the application.</critical-takeaway>
             <critical-takeaway>Always write interface contract tests when creating component dependencies.</critical-takeaway>

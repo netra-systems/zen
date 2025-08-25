@@ -30,6 +30,11 @@ class TestMemoryCache:
         """Create cache instance for testing."""
         return MemoryCache(max_size=100, default_ttl=60)
         
+    @pytest.fixture
+    def perf_cache(self):
+        """Create cache instance for performance testing."""
+        return MemoryCache(max_size=2000, default_ttl=60)  # Larger cache for performance tests
+        
     @pytest.mark.asyncio
     async def test_cache_basic_operations(self, cache):
         """Test basic cache operations."""
@@ -78,10 +83,11 @@ class TestMemoryCache:
         assert result == "overflow_value"
         
     @pytest.mark.asyncio
-    async def test_cache_performance(self, cache):
+    async def test_cache_performance(self, perf_cache):
         """Test cache performance under load."""
         # Populate cache
         items = 1000
+        cache = perf_cache  # Use the larger performance cache
         start_time = time.time()
         
         for i in range(items):

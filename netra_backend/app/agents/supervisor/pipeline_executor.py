@@ -124,8 +124,8 @@ class PipelineExecutor:
                         state: DeepAgentState) -> None:
         """Process execution results."""
         for result in results:
-            if result.success and result.result:
-                state.merge_from(result.result)
+            if result.success and result.state:
+                state.merge_from(result.state)
 
     def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStep]) -> None:
         """Log pipeline execution type (parallel vs sequential)."""
