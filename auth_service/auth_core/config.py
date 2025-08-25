@@ -11,6 +11,7 @@ import logging
 # Use auth_service's own isolated environment management - NEVER import from dev_launcher or netra_backend
 from auth_service.auth_core.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
+from shared.database_url_builder import DatabaseURLBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -163,100 +164,65 @@ class AuthConfig:
     
     @staticmethod
     def get_database_url() -> str:
-        """Get database URL for auth service.
-        
-        Constructs URL from individual POSTGRES_* environment variables.
-        Falls back to DATABASE_URL if individual variables not set.
-        """
+        """Get database URL for auth service using comprehensive URL builder."""
         env_manager = get_env()
         
-        # Try to construct URL from individual PostgreSQL variables
-        postgres_host = env_manager.get("POSTGRES_HOST")
-        postgres_port = env_manager.get("POSTGRES_PORT")
-        postgres_db = env_manager.get("POSTGRES_DB")
-        postgres_user = env_manager.get("POSTGRES_USER")
-        postgres_password = env_manager.get("POSTGRES_PASSWORD")
+        # Build all environment variables dict
+        env_vars = {
+            "ENVIRONMENT": AuthConfig.get_environment(),
+            "POSTGRES_HOST": env_manager.get("POSTGRES_HOST"),
+            "POSTGRES_PORT": env_manager.get("POSTGRES_PORT"),
+            "POSTGRES_DB": env_manager.get("POSTGRES_DB"),
+            "POSTGRES_USER": env_manager.get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD")
+        }
         
-        if postgres_host and postgres_user and postgres_db:
-            # Construct URL from individual variables
-            port_part = f":{postgres_port}" if postgres_port else ":5432"
-            pass_part = f":{postgres_password}" if postgres_password else ""
-            
-            # Check for Cloud SQL Unix socket (staging/production)
-            if "/cloudsql/" in postgres_host:
-                # Unix socket format for Cloud SQL
-                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@/{postgres_db}?host={postgres_host}"
-            else:
-                # Standard TCP connection
-                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@{postgres_host}{port_part}/{postgres_db}"
-                
-                # Add SSL mode for staging/production
-                env = AuthConfig.get_environment()
-                if env in ["staging", "production"]:
-                    database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
-            
-            logger.info(f"Constructed database URL from individual PostgreSQL variables")
-            return database_url
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
         
-        # Fall back to DATABASE_URL if individual variables not set
-        database_url = env_manager.get("DATABASE_URL", "")
+        # Validate configuration
+        is_valid, error_msg = builder.validate()
+        if not is_valid:
+            raise ValueError(f"Database configuration error: {error_msg}")
+        
+        # Get URL for current environment
+        database_url = builder.get_url_for_environment(sync=False)
         
         if not database_url:
             env = AuthConfig.get_environment()
-            # Fail loudly in staging/production if no database config
-            if env in ["staging", "production"]:
+            if env in ["development", "staging", "production"]:
                 raise ValueError(
                     f"No PostgreSQL configuration found for {env} environment. "
-                    "Set either POSTGRES_HOST/USER/DB or DATABASE_URL environment variables."
+                    "Set POSTGRES_HOST/USER/DB environment variables."
                 )
-            # Only warn in development/test
-            logger.warning("No database configuration found for development/test environment")
-            return database_url
+            logger.warning("No database configuration found for test environment")
+            return ""
         
-        # Import here to avoid circular imports
-        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-        
-        # Return normalized URL for auth service compatibility
-        return AuthDatabaseManager._normalize_database_url(database_url)
+        logger.info(f"Using database URL from {builder.debug_info()['environment']} configuration")
+        return database_url
     
     @staticmethod
     def get_raw_database_url() -> str:
-        """Get raw database URL from environment without normalization.
-        
-        Constructs URL from individual POSTGRES_* environment variables.
-        Falls back to DATABASE_URL if individual variables not set.
-        """
+        """Get raw database URL for synchronous operations (like alembic)."""
         env_manager = get_env()
         
-        # Try to construct URL from individual PostgreSQL variables
-        postgres_host = env_manager.get("POSTGRES_HOST")
-        postgres_port = env_manager.get("POSTGRES_PORT")
-        postgres_db = env_manager.get("POSTGRES_DB")
-        postgres_user = env_manager.get("POSTGRES_USER")
-        postgres_password = env_manager.get("POSTGRES_PASSWORD")
+        # Build all environment variables dict
+        env_vars = {
+            "ENVIRONMENT": AuthConfig.get_environment(),
+            "POSTGRES_HOST": env_manager.get("POSTGRES_HOST"),
+            "POSTGRES_PORT": env_manager.get("POSTGRES_PORT"),
+            "POSTGRES_DB": env_manager.get("POSTGRES_DB"),
+            "POSTGRES_USER": env_manager.get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD")
+        }
         
-        if postgres_host and postgres_user and postgres_db:
-            # Construct URL from individual variables
-            port_part = f":{postgres_port}" if postgres_port else ":5432"
-            pass_part = f":{postgres_password}" if postgres_password else ""
-            
-            # Check for Cloud SQL Unix socket (staging/production)
-            if "/cloudsql/" in postgres_host:
-                # Unix socket format for Cloud SQL (raw format without driver)
-                return f"postgresql://{postgres_user}{pass_part}@/{postgres_db}?host={postgres_host}"
-            else:
-                # Standard TCP connection (raw format without driver)
-                database_url = f"postgresql://{postgres_user}{pass_part}@{postgres_host}{port_part}/{postgres_db}"
-                
-                # Add SSL mode for staging/production
-                env = AuthConfig.get_environment()
-                if env in ["staging", "production"]:
-                    database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
-                
-                return database_url
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
         
-        # Fall back to DATABASE_URL if individual variables not set
-        return env_manager.get("DATABASE_URL", "")
+        # Get synchronous URL for current environment
+        database_url = builder.get_url_for_environment(sync=True)
+        
+        return database_url or ""
     
     @staticmethod
     def get_redis_url() -> str:
@@ -310,19 +276,8 @@ class AuthConfig:
         
         # Log database URL (masked)
         db_url = AuthConfig.get_database_url()
-        if db_url:
-            # Mask credentials in database URL for logging
-            if "://" in db_url:
-                protocol, rest = db_url.split("://", 1)
-                if "@" in rest:
-                    _, host_part = rest.split("@", 1)
-                    logger.info(f"  Database URL: {protocol}://***@{host_part}")
-                else:
-                    logger.info(f"  Database URL: {db_url}")
-            else:
-                logger.info(f"  Database URL: {'*' * 10 if db_url else 'NOT SET'}")
-        else:
-            logger.info(f"  Database URL: NOT SET (will use in-memory SQLite)")
+        masked_url = DatabaseURLBuilder.mask_url_for_logging(db_url)
+        logger.info(f"  Database URL: {masked_url}")
 
 
 def get_config() -> AuthConfig:

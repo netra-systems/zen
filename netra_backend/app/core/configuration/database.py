@@ -107,155 +107,56 @@ class DatabaseConfigManager:
             self._update_redis_config_object(config, redis_url)
     
     def _get_postgres_url(self) -> Optional[str]:
-        """Get PostgreSQL URL from environment or defaults.
-        
-        Constructs URL from individual POSTGRES_* environment variables.
-        Falls back to DATABASE_URL if individual variables not set.
-        """
+        """Get PostgreSQL URL using comprehensive URL builder."""
         # Return cached URL if available
         if self._postgres_url_cache is not None:
             return self._postgres_url_cache
-            
-        # Try to construct URL from individual PostgreSQL variables
-        postgres_host = self._env.get("POSTGRES_HOST")
-        postgres_port = self._env.get("POSTGRES_PORT")
-        postgres_db = self._env.get("POSTGRES_DB")
-        postgres_user = self._env.get("POSTGRES_USER")
-        postgres_password = self._env.get("POSTGRES_PASSWORD")
         
-        # Validate individual PostgreSQL variables if any are set
-        if any([postgres_host, postgres_user, postgres_db]):
-            validation_errors = []
-            
-            # Check for empty string values (common configuration mistake)
-            if postgres_host == "":
-                validation_errors.append("POSTGRES_HOST is empty string")
-            if postgres_user == "":
-                validation_errors.append("POSTGRES_USER is empty string")
-            if postgres_db == "":
-                validation_errors.append("POSTGRES_DB is empty string")
-            if postgres_password == "":
-                validation_errors.append("POSTGRES_PASSWORD is empty string")
-            if postgres_port == "":
-                validation_errors.append("POSTGRES_PORT is empty string")
-                
-            # Check for placeholder values
-            if postgres_password and postgres_password.lower() in ["placeholder", "todo", "changeme"]:
-                validation_errors.append(f"POSTGRES_PASSWORD contains placeholder value: {postgres_password}")
-                
-            # Check for required fields
-            if not postgres_host:
-                validation_errors.append("POSTGRES_HOST not set when using individual PostgreSQL variables")
-            if not postgres_user:
-                validation_errors.append("POSTGRES_USER not set when using individual PostgreSQL variables")
-            if not postgres_db:
-                validation_errors.append("POSTGRES_DB not set when using individual PostgreSQL variables")
-                
-            # In staging/production, password is required
-            if self._environment in ["staging", "production"] and not postgres_password:
-                validation_errors.append(f"POSTGRES_PASSWORD required in {self._environment} environment")
-                
-            # Validate port if provided
-            if postgres_port and not postgres_port.isdigit():
-                validation_errors.append(f"POSTGRES_PORT must be numeric: {postgres_port}")
-                
-            # Fail fast if validation errors found
-            if validation_errors:
-                error_msg = f"PostgreSQL configuration validation failed: {'; '.join(validation_errors)}"
-                self._logger.error(error_msg)
-                raise ConfigurationError(error_msg)
+        from shared.database_url_builder import DatabaseURLBuilder
         
-        if postgres_host and postgres_user and postgres_db:
-            # Construct URL from individual variables
-            port_part = f":{postgres_port}" if postgres_port else ":5432"
-            pass_part = f":{postgres_password}" if postgres_password else ""
-            
-            # Check for Cloud SQL Unix socket (staging/production)
-            if "/cloudsql/" in postgres_host:
-                # Unix socket format for Cloud SQL
-                url = f"postgresql+asyncpg://{postgres_user}{pass_part}@/{postgres_db}?host={postgres_host}"
-            else:
-                # Standard TCP connection
-                url = f"postgresql+asyncpg://{postgres_user}{pass_part}@{postgres_host}{port_part}/{postgres_db}"
-                
-                # Add SSL mode for staging/production
-                if self._environment in ["staging", "production"]:
-                    url += "?sslmode=require" if "?" not in url else "&sslmode=require"
-            
-            # Log constructed URL
-            if url not in self._logged_urls:
-                masked_url = f"postgresql+asyncpg://***@{postgres_host}:{postgres_port or '5432'}/{postgres_db}"
-                self._logger.info(f"Constructed PostgreSQL URL from individual variables: {masked_url}")
-                self._logged_urls.add(url)
+        # Build environment variables dict
+        env_vars = {
+            "ENVIRONMENT": self._environment,
+            "POSTGRES_HOST": self._env.get("POSTGRES_HOST"),
+            "POSTGRES_PORT": self._env.get("POSTGRES_PORT"),
+            "POSTGRES_DB": self._env.get("POSTGRES_DB"),
+            "POSTGRES_USER": self._env.get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": self._env.get("POSTGRES_PASSWORD"),
+            "DATABASE_URL": self._env.get("DATABASE_URL"),
+        }
+        
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Validate configuration
+        is_valid, error_msg = builder.validate()
+        if not is_valid:
+            self._logger.error(f"Database configuration error: {error_msg}")
+            raise ConfigurationError(error_msg)
+        
+        # Get URL for current environment
+        url = builder.get_url_for_environment(sync=False)
+        
+        if not url:
+            if self._environment in ["staging", "production"]:
+                raise ConfigurationError(
+                    f"No PostgreSQL configuration found for {self._environment} environment. "
+                    "Set POSTGRES_HOST/USER/DB environment variables."
+                )
+            self._logger.warning(f"PostgreSQL configuration missing for {self._environment} environment")
+            url = None
         else:
-            # Fall back to DATABASE_URL if individual variables not set
-            url = self._env.get("DATABASE_URL")
-            if url:
-                # Normalize the URL to add driver if missing
-                url = self._normalize_postgres_url(url)
-                
-                # Only log once per URL to prevent spam
-                if url not in self._logged_urls:
-                    # Mask password but show full URL structure for debugging
-                    parsed = urlparse(url)
-                    # Handle Unix socket URLs (Cloud SQL proxy)
-                    if "/cloudsql/" in url or not parsed.hostname:
-                        masked_url = f"{parsed.scheme}://***@{parsed.path}?{parsed.query}"
-                    else:
-                        masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
-                    self._logger.info(f"Loading DATABASE_URL: {masked_url}")
-                    self._logged_urls.add(url)
-            else:
-                # No fallback to default values
-                # In staging/production, fail loudly
-                if self._environment in ["staging", "production"]:
-                    self._logger.error(f"PostgreSQL configuration missing for {self._environment} environment")
-                    self._logger.error("Required: Either POSTGRES_HOST/USER/DB or DATABASE_URL must be set")
-                    raise ConfigurationError(
-                        f"No PostgreSQL configuration found for {self._environment} environment. "
-                        "Set either POSTGRES_HOST/USER/DB or DATABASE_URL environment variables."
-                    )
-                # In test/development, warn but allow empty
-                self._logger.warning(f"PostgreSQL configuration missing for {self._environment} environment")
-                url = None  # Return None for test/dev environments
-                
+            # Log URL (masked) if not already logged
+            if url not in self._logged_urls:
+                debug_info = builder.debug_info()
+                self._logger.info(f"Using PostgreSQL URL from {self._environment} configuration")
+                self._logger.debug(f"Database config: Cloud SQL={debug_info['has_cloud_sql']}, TCP={debug_info['has_tcp_config']}")
+                self._logged_urls.add(url)
+        
         # Cache the URL
         self._postgres_url_cache = url
         return url
     
-    def _normalize_postgres_url(self, url: str) -> str:
-        """Normalize PostgreSQL URL format.
-        
-        Converts postgres:// to postgresql:// and adds async driver.
-        """
-        if not url:
-            return url
-            
-        # Convert postgres:// to postgresql://
-        if url.startswith("postgres://"):
-            url = url.replace("postgres://", "postgresql://")
-        
-        # Strip any existing async driver prefixes first
-        url = url.replace("postgresql+asyncpg://", "postgresql://")
-        url = url.replace("postgres+asyncpg://", "postgresql://")
-        
-        # Add async driver for application use
-        if url.startswith("postgresql://"):
-            url = url.replace("postgresql://", "postgresql+asyncpg://")
-            self._logger.debug(f"Added asyncpg driver for application use")
-        
-        return url
-    
-    def _get_default_postgres_url(self) -> str:
-        """DEPRECATED: No longer provide default PostgreSQL URLs.
-        
-        This method is kept for backward compatibility but should not be used.
-        Database URLs must be explicitly configured via environment variables.
-        """
-        raise ConfigurationError(
-            "Default database URLs are no longer supported. "
-            "Database configuration must be explicitly provided via environment variables."
-        )
     
     def _validate_postgres_url(self, url: str) -> None:
         """Validate database URL against environment rules."""
