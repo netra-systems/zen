@@ -97,10 +97,8 @@ class EnvironmentVariables:
     REDIS_PORT = "REDIS_PORT"
     REDIS_PASSWORD = "REDIS_PASSWORD"
     
-    # Environment-specific password variables (from string literals analysis)
-    CLICKHOUSE_DEVELOPMENT_PASSWORD = "CLICKHOUSE_DEVELOPMENT_PASSWORD"
-    CLICKHOUSE_STAGING_PASSWORD = "CLICKHOUSE_STAGING_PASSWORD"
-    CLICKHOUSE_PRODUCTION_PASSWORD = "CLICKHOUSE_PRODUCTION_PASSWORD"
+    # ClickHouse password variable
+    CLICKHOUSE_PASSWORD = "CLICKHOUSE_PASSWORD"
     
     # Project configuration
     GCP_PROJECT_ID_NUMERICAL_STAGING = "GCP_PROJECT_ID_NUMERICAL_STAGING"
@@ -440,14 +438,8 @@ class EnvironmentConfig:
         Returns:
             str: The environment variable name for ClickHouse password
         """
-        password_vars = {
-            Environment.DEVELOPMENT.value: EnvironmentVariables.CLICKHOUSE_DEVELOPMENT_PASSWORD,
-            Environment.STAGING.value: EnvironmentVariables.CLICKHOUSE_STAGING_PASSWORD,
-            Environment.PRODUCTION.value: EnvironmentVariables.CLICKHOUSE_PRODUCTION_PASSWORD,
-            Environment.TESTING.value: EnvironmentVariables.CLICKHOUSE_DEVELOPMENT_PASSWORD
-        }
-        
-        return password_vars.get(environment, EnvironmentVariables.CLICKHOUSE_DEVELOPMENT_PASSWORD)
+        # Use unified CLICKHOUSE_PASSWORD for all environments
+        return EnvironmentVariables.CLICKHOUSE_PASSWORD
 
 
 # Convenience functions for common environment checks

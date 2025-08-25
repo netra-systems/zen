@@ -281,13 +281,16 @@ async def ready(request: Request) -> Dict[str, Any]:
         
         # Only try to get database dependency after startup state check passes
         try:
-            db = await get_db_dependency().__anext__()
-            try:
-                result = await _check_readiness_status(db)
-                return result
-            finally:
-                # Close the database session
-                await db.aclose()
+            # Use async for to properly handle session lifecycle
+            async for db in get_db_dependency():
+                try:
+                    result = await _check_readiness_status(db)
+                    return result
+                except Exception as check_error:
+                    logger.error(f"Readiness check failed: {check_error}")
+                    raise check_error
+        except HTTPException:
+            raise
         except Exception as db_error:
             logger.error(f"Database dependency failed during readiness: {db_error}")
             return _create_error_response(503, {

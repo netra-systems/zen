@@ -261,8 +261,7 @@ class SecretManager:
     def _get_database_mapping(self) -> Dict[str, str]:
         """Get database service environment mappings."""
         return {
-            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "clickhouse-password": "CLICKHOUSE_PASSWORD",
             "redis-default": "REDIS_PASSWORD"
         }
     

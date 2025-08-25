@@ -143,7 +143,7 @@ GOOGLE_CLIENT_ID → google-client-id
 GOOGLE_CLIENT_SECRET → google-client-secret
 JWT_SECRET_KEY → jwt-secret-key
 FERNET_KEY → fernet-key
-CLICKHOUSE_DEFAULT_PASSWORD → clickhouse-default-password
+CLICKHOUSE_PASSWORD → clickhouse-password
 ```
 
 ### GCP Secret Manager

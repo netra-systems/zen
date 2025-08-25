@@ -100,13 +100,17 @@ class GoogleSecretManager:
         """
         return {
             # Google Secret Manager name -> Local environment variable name
+            "postgres-host-staging": "POSTGRES_HOST",
+            "postgres-port-staging": "POSTGRES_PORT",
+            "postgres-db-staging": "POSTGRES_DB",
+            "postgres-user-staging": "POSTGRES_USER",
+            "postgres-password-staging": "POSTGRES_PASSWORD",
             "gemini-api-key": "GEMINI_API_KEY",
             "google-client-id": "GOOGLE_CLIENT_ID",
             "google-client-secret": "GOOGLE_CLIENT_SECRET",
             "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
             "langfuse-public-key": "LANGFUSE_PUBLIC_KEY",
-            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "clickhouse-password": "CLICKHOUSE_PASSWORD",  # Single unified password for ClickHouse
             "jwt-secret-key": "JWT_SECRET_KEY",
             "fernet-key": "FERNET_KEY",
             "redis-default": "REDIS_PASSWORD",

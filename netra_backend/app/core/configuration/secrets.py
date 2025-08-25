@@ -154,7 +154,7 @@ class SecretManager:
         """Get database-related secret mappings."""
         clickhouse_mapping = self._get_clickhouse_password_mapping()
         redis_mapping = self._get_redis_password_mapping()
-        return {"CLICKHOUSE_DEFAULT_PASSWORD": clickhouse_mapping, "REDIS_PASSWORD": redis_mapping}
+        return {"CLICKHOUSE_PASSWORD": clickhouse_mapping, "REDIS_PASSWORD": redis_mapping}
     
     def _get_clickhouse_password_mapping(self) -> Dict[str, Any]:
         """Get ClickHouse password mapping."""
@@ -359,7 +359,7 @@ class SecretManager:
             "JWT_SECRET_KEY": "JWT_SECRET_KEY",
             "FERNET_KEY": "FERNET_KEY",
             "SERVICE_SECRET": "SERVICE_SECRET",
-            "CLICKHOUSE_DEFAULT_PASSWORD": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "CLICKHOUSE_PASSWORD": "CLICKHOUSE_PASSWORD",
             "REDIS_PASSWORD": "REDIS_PASSWORD",
             "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
             "OPENAI_API_KEY": "OPENAI_API_KEY"
