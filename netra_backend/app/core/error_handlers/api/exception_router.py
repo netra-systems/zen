@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from netra_backend.app.core.error_handlers.api.response_builder import (
     ErrorResponseBuilder,
 )
-from netra_backend.app.core.error_handlers_status_mapping import StatusCodeMapper
+from netra_backend.app.core.error_handlers.status_mapping import status_mapper
 from netra_backend.app.core.error_response import ErrorResponse
 from netra_backend.app.core.exceptions import ErrorCode, NetraException
 
@@ -24,7 +24,7 @@ class ExceptionRouter:
         """Initialize exception router."""
         self._logger = logger
         self._response_builder = response_builder
-        self._status_mapper = StatusCodeMapper()
+        self._status_mapper = status_mapper
         self._handler_map = self._build_handler_map()
     
     def _build_handler_map(self) -> Dict[type, Callable]:
@@ -100,4 +100,4 @@ class ExceptionRouter:
     
     def get_http_status_code(self, error_code: ErrorCode) -> int:
         """Map error codes to HTTP status codes."""
-        return self._status_mapper.get_http_status_code(error_code)
+        return self._status_mapper.get_status_code(error_code)

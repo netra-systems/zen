@@ -14,8 +14,8 @@ from netra_backend.app.core.agent_recovery_strategies_main import (
     AgentType,
     agent_recovery_registry,
 )
-from netra_backend.app.core.circuit_breaker_registry_adaptive import (
-    circuit_breaker_registry,
+from netra_backend.app.core.resilience.registry import (
+    resilience_registry,
 )
 from netra_backend.app.core.database_recovery_strategies import (
     database_recovery_registry,
@@ -28,7 +28,7 @@ from netra_backend.app.core.error_logging import error_logger
 from netra_backend.app.core.error_recovery import OperationType, RecoveryContext
 from netra_backend.app.core.graceful_degradation import degradation_manager
 from netra_backend.app.core.memory_recovery_strategies import memory_monitor
-from netra_backend.app.core.websocket_recovery_strategies import (
+from netra_backend.app.websocket_core.manager import (
     websocket_recovery_manager,
 )
 from netra_backend.app.logging_config import central_logger
@@ -55,7 +55,7 @@ class EnhancedErrorRecoverySystem:
     def _setup_retry_and_circuit_breaker_managers(self) -> None:
         """Setup retry and circuit breaker managers."""
         self.retry_manager = retry_manager
-        self.circuit_breaker_registry = circuit_breaker_registry
+        self.circuit_breaker_registry = resilience_registry
     
     def _setup_degradation_and_memory_managers(self) -> None:
         """Setup degradation and memory managers."""

@@ -6,7 +6,7 @@ document upload failures, validation errors, and indexing issues.
 
 from typing import Dict, List, Optional
 
-from netra_backend.app.agents.error_handler import AgentError, ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.error_codes import ErrorSeverity
 
 

@@ -1,125 +1,67 @@
-"""Error types, enums, and data classes for error logging.
+"""Core error types module.
 
-Provides core data structures for error classification and context management.
+Defines resource-related exception classes following SSOT principles.
 """
 
-import uuid
-from collections import deque
-from dataclasses import asdict, dataclass, field
-from datetime import datetime
-from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, Optional
 
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
-from netra_backend.app.core.error_recovery import OperationType
+from netra_backend.app.core.exceptions_base import NetraException
 
 
-class LogLevel(Enum):
-    """Enhanced log levels for error logging."""
-    DEBUG = "debug"
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-    CRITICAL = "critical"
-    SECURITY = "security"
-    BUSINESS = "business"
-
-
-class ErrorCategory(Enum):
-    """Categories for error classification."""
-    SYSTEM = "system"
-    APPLICATION = "application"
-    SECURITY = "security"
-    BUSINESS = "business"
-    INFRASTRUCTURE = "infrastructure"
-    INTEGRATION = "integration"
-    USER = "user"
-
-
-@dataclass
-class DetailedErrorContext:
-    """Rich context information for error logging with extensive metadata."""
-    # Core identifiers
-    error_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    correlation_id: Optional[str] = None
-    trace_id: Optional[str] = None
-    session_id: Optional[str] = None
+class ResourceError(NetraException):
+    """Exception raised when resource-related operations fail."""
     
-    # Temporal information
-    timestamp: datetime = field(default_factory=datetime.now)
-    
-    # Error classification
-    severity: ErrorSeverity = ErrorSeverity.MEDIUM
-    category: ErrorCategory = ErrorCategory.APPLICATION
-    error_code: Optional[ErrorCode] = None
-    
-    # Operational context
-    operation_type: Optional[OperationType] = None
-    operation_id: Optional[str] = None
-    agent_type: Optional[str] = None
-    component: Optional[str] = None
-    
-    # User and request context
-    user_id: Optional[str] = None
-    request_id: Optional[str] = None
-    client_ip: Optional[str] = None
-    user_agent: Optional[str] = None
-    
-    # Technical context
-    stack_trace: Optional[str] = None
-    environment: str = "development"
-    version: Optional[str] = None
-    
-    # Business context
-    business_impact: Optional[str] = None
-    affected_users: int = 0
-    financial_impact: float = 0.0
-    
-    # Additional metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for logging."""
-        data = asdict(self)
-        data = self._convert_enums(data)
-        data = self._convert_datetime(data)
-        return data
-    
-    def _convert_enums(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Convert enum fields to values."""
-        enum_fields = ['severity', 'category', 'error_code', 'operation_type']
-        for field_name in enum_fields:
-            value = data.get(field_name)
-            if hasattr(value, 'value'):
-                data[field_name] = value.value
-        return data
-    
-    def _convert_datetime(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Convert datetime to ISO string."""
-        if isinstance(data.get('timestamp'), datetime):
-            data['timestamp'] = data['timestamp'].isoformat()
-        return data
-
-
-@dataclass
-class ErrorAggregation:
-    """Aggregated error information for pattern analysis."""
-    error_signature: str
-    count: int = 0
-    first_seen: datetime = field(default_factory=datetime.now)
-    last_seen: datetime = field(default_factory=datetime.now)
-    affected_components: Set[str] = field(default_factory=set)
-    affected_users: Set[str] = field(default_factory=set)
-    severity_distribution: Dict[str, int] = field(default_factory=dict)
-    recent_occurrences: deque = field(default_factory=lambda: deque(maxlen=100))
-
-
-class ResourceError(Exception):
-    """Exception raised for resource-related errors."""
-    
-    def __init__(self, message: str, resource_type: str = None, details: Dict[str, Any] = None):
-        self.message = message
+    def __init__(self, message: str = None, resource_type: str = None, 
+                 details: Optional[Dict[str, Any]] = None, **kwargs):
+        """Initialize ResourceError with resource-specific context."""
         self.resource_type = resource_type
-        self.details = details or {}
-        super().__init__(message)
+        
+        # Build details dictionary with resource context
+        if details is None:
+            details = {}
+        if resource_type:
+            details["resource_type"] = resource_type
+            
+        super().__init__(
+            message=message or "Resource operation failed",
+            code=ErrorCode.INTERNAL_ERROR,
+            severity=ErrorSeverity.HIGH,
+            details=details,
+            user_message="A system resource error occurred. Please try again later.",
+            **kwargs
+        )
+
+
+class MemoryError(ResourceError):
+    """Exception raised when memory-related operations fail."""
+    
+    def __init__(self, message: str = None, memory_usage: int = None, **kwargs):
+        """Initialize MemoryError with memory-specific context."""
+        details = kwargs.get('details', {})
+        if memory_usage is not None:
+            details["memory_usage_mb"] = memory_usage
+            
+        super().__init__(
+            message=message or "Memory resource error",
+            resource_type="memory",
+            details=details,
+            **kwargs
+        )
+
+
+class CPUError(ResourceError):
+    """Exception raised when CPU-related operations fail."""
+    
+    def __init__(self, message: str = None, cpu_usage: float = None, **kwargs):
+        """Initialize CPUError with CPU-specific context."""
+        details = kwargs.get('details', {})
+        if cpu_usage is not None:
+            details["cpu_usage_percent"] = cpu_usage
+            
+        super().__init__(
+            message=message or "CPU resource error",
+            resource_type="cpu",
+            details=details,
+            **kwargs
+        )

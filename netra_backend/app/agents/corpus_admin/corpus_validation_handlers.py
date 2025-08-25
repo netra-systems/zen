@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from netra_backend.app.agents.corpus_admin.corpus_error_types import (
     DocumentValidationError,
 )
-from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
