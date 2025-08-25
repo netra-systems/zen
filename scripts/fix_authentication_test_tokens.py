@@ -32,10 +32,13 @@ def fix_authentication_test_file():
         print(f"Test file not found: {test_file_path}")
         return
     
-    # Create JWT helper
-    jwt_helper = JWTTestHelper()
+    # Use a consistent test secret that matches the middleware initialization
+    test_secret = "test-secret"
     
-    # Generate proper JWT tokens
+    # Create JWT helper with the test secret
+    jwt_helper = JWTTestHelper(secret=test_secret)
+    
+    # Generate proper JWT tokens using the same secret as the middleware
     frontend_token = jwt_helper.create_user_token(
         user_id="frontend-user",
         email="frontend@netra.com",
