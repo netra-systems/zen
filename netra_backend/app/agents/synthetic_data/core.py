@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,

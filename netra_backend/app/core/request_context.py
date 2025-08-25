@@ -8,7 +8,7 @@ from typing import Any, Callable, Optional, Tuple
 
 from fastapi import Request
 
-from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
 
 

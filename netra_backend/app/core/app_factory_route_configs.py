@@ -13,8 +13,8 @@ def _get_auth_route_configs(modules: dict) -> dict:
     """Get authentication route configurations."""
     # Auth router not needed - auth is handled by separate auth service
     return {
-        "agent": (modules["agent_router"], "/api/agent", ["agent"]),
-        "auth_resilience": (modules["auth_resilience_router"], "/api", ["auth-resilience"])
+        "agent": (modules["agent_router"], "/api/agent", ["agent"])
+        # auth_resilience router removed - functionality consolidated into auth_client_core
     }
 
 

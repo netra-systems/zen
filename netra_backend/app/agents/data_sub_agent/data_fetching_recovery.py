@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.data_sub_agent.error_types import DataFetchingError
-from netra_backend.app.agents.error_handler import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

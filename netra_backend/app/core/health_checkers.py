@@ -27,12 +27,42 @@ class ServicePriority(Enum):
     OPTIONAL = "optional"      # System continues normally when unavailable
 
 
-# Service priority mapping - critical services cause system failure,
-# important services cause degraded status, optional services are ignored
+def _get_service_priority_for_environment(service: str) -> ServicePriority:
+    """Get service priority based on environment."""
+    config = unified_config_manager.get_config()
+    env = config.environment.lower()
+    
+    # Base priorities
+    base_priorities = {
+        "postgres": ServicePriority.CRITICAL,
+        "system_resources": ServicePriority.IMPORTANT,
+        "websocket": ServicePriority.IMPORTANT,
+    }
+    
+    if service in base_priorities:
+        return base_priorities[service]
+    
+    # Environment-specific priorities
+    if env in ['staging', 'production']:
+        # In staging/production, external services are critical
+        staging_priorities = {
+            "redis": ServicePriority.CRITICAL,
+            "clickhouse": ServicePriority.CRITICAL,
+        }
+        return staging_priorities.get(service, ServicePriority.IMPORTANT)
+    else:
+        # In development, external services are optional
+        dev_priorities = {
+            "redis": ServicePriority.IMPORTANT,
+            "clickhouse": ServicePriority.OPTIONAL,  # Often disabled in dev
+        }
+        return dev_priorities.get(service, ServicePriority.IMPORTANT)
+
+# Legacy mapping for backward compatibility
 SERVICE_PRIORITIES = {
     "postgres": ServicePriority.CRITICAL,
     "redis": ServicePriority.IMPORTANT,
-    "clickhouse": ServicePriority.OPTIONAL,  # Often disabled in dev
+    "clickhouse": ServicePriority.OPTIONAL,
     "websocket": ServicePriority.IMPORTANT,
     "system_resources": ServicePriority.IMPORTANT,
 }

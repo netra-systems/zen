@@ -5,7 +5,7 @@ from typing import Any, Dict
 from netra_backend.app.agents.actions_goals_plan_builder import ActionPlanBuilder
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import ValidationError
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor

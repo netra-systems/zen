@@ -3,7 +3,7 @@
 import re
 from typing import Any, Dict
 
-from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.exceptions_config import (
     ValidationError as NetraValidationError,
 )

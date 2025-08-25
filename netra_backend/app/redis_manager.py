@@ -5,6 +5,7 @@ import redis.asyncio as redis
 from typing import Dict, Optional
 
 from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger as logger
 
 
@@ -124,8 +125,8 @@ class RedisManager:
                 return
             
             # In pytest environment (but not test_mode fallback), re-raise exceptions for test validation
-            import os
-            if os.getenv("PYTEST_CURRENT_TEST"):
+            env = get_env()
+            if env.get("PYTEST_CURRENT_TEST"):
                 logger.debug(f"Pytest detected - disabling Redis manager and re-raising connection exception: {e}")
                 self._handle_connection_error(e)  # Disable manager before re-raising
                 raise
@@ -145,6 +146,9 @@ class RedisManager:
             if environment in ['staging', 'production'] or not redis_fallback_enabled or redis_required:
                 logger.error(f"Redis connection failed in {environment} environment: {e}. Localhost fallback disabled (fallback_enabled={redis_fallback_enabled}, required={redis_required}).")
                 self._handle_connection_error(e)
+                # In staging/production, raise the error instead of graceful fallback
+                if environment in ['staging', 'production'] or redis_required:
+                    raise
                 return
             
             if redis_mode != "local":
@@ -186,8 +190,8 @@ class RedisManager:
                     return None
                 
                 # In pytest environment (but not test_mode fallback), re-raise exceptions for test validation
-                import os
-                if os.getenv("PYTEST_CURRENT_TEST"):
+                env = get_env()
+                if env.get("PYTEST_CURRENT_TEST"):
                     logger.debug(f"Pytest detected - re-raising Redis operation exception: {e}")
                     raise
                     

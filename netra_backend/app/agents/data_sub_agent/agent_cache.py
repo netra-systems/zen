@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,
@@ -115,7 +115,7 @@ class DataSubAgentCacheManager(BaseExecutionInterface):
         
     def _init_error_handler(self) -> None:
         """Initialize error handling."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         
     def _ensure_cache_initialized(self) -> None:
         """Initialize cache dictionaries if they don't exist."""

@@ -155,8 +155,8 @@ class PerformanceUtils:
         return batch_size / (execution_time_ms / 1000)
 
 
-class ErrorHandler:
-    """Functions for error handling and logging."""
+class MetricsErrorUtilities:
+    """Utility functions for error handling and logging in metrics operations."""
     
     @staticmethod
     def extract_error_info(error: Exception) -> tuple[str, str]:
@@ -188,6 +188,9 @@ class ErrorHandler:
     def log_timeout_error(operation_id: str, timeout_seconds: float) -> None:
         """Log timeout error."""
         logger.warning(f"Operation {operation_id} timed out after {timeout_seconds}s")
+
+# Backward compatibility alias
+ErrorHandler = MetricsErrorUtilities
 
 
 class BatchResultProcessor:

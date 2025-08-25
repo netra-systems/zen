@@ -525,8 +525,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    from netra_backend.app.websocket_core import get_unified_manager
-    websocket_manager = get_unified_manager()
+    from netra_backend.app.websocket_core import get_websocket_manager
+    websocket_manager = get_websocket_manager()
     return SupervisorAgent(
         app.state.db_session_factory, 
         app.state.llm_manager, 

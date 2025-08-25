@@ -9,9 +9,8 @@ from netra_backend.app.agents.supply_researcher.agent import SupplyResearcherAge
 from netra_backend.app.agents.supply_researcher.data_extractor import (
     SupplyDataExtractor,
 )
-from netra_backend.app.agents.supply_researcher.database_manager import (
-    SupplyDatabaseManager,
-)
+# SINGLE SOURCE OF TRUTH: Use consolidated DatabaseManager
+from netra_backend.app.db.database_manager import SupplyDatabaseManager
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 from netra_backend.app.agents.supply_researcher.parsers import SupplyRequestParser
 from netra_backend.app.agents.supply_researcher.research_engine import (

@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     AgentExecutionMixin,
     BaseExecutionInterface,

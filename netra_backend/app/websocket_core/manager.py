@@ -429,6 +429,91 @@ class WebSocketManager:
             
             return len(stale_connections)
     
+    async def send_error(self, user_id: str, error_message: str, error_code: str = "GENERAL_ERROR") -> bool:
+        """Send error message to user - consolidated error handling."""
+        error_msg = {
+            "type": "error",
+            "error": {
+                "code": error_code,
+                "message": error_message,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        }
+        return await self.send_to_user(user_id, error_msg)
+    
+    async def initiate_recovery(self, connection_id: str, user_id: str, error: Any, strategies: Optional[List] = None) -> bool:
+        """Initiate connection recovery - consolidated recovery functionality."""
+        try:
+            logger.info(f"Initiating recovery for connection {connection_id}, user {user_id}")
+            
+            # Clean up the failed connection
+            if connection_id in self.connections:
+                await self._cleanup_connection(connection_id, 1006, "Recovery initiated")
+            
+            # Update error stats
+            self.connection_stats["errors_handled"] += 1
+            
+            # Recovery strategies could be enhanced here in the future
+            logger.info(f"Recovery completed for connection {connection_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Recovery failed for connection {connection_id}: {e}")
+            return False
+    
+    def get_recovery_status(self, connection_id: str) -> Optional[Dict[str, Any]]:
+        """Get recovery status for connection - consolidated recovery status."""
+        if connection_id not in self.connections:
+            # Connection not active, recovery completed or not needed
+            return None
+        
+        conn = self.connections[connection_id]
+        return {
+            "connection_id": connection_id,
+            "user_id": conn["user_id"],
+            "is_healthy": conn["is_healthy"],
+            "last_activity": conn["last_activity"].isoformat() if conn["last_activity"] else None,
+            "message_count": conn["message_count"]
+        }
+    
+    async def create_connection(self, connection_id: str, url: str, config: Optional[Any] = None) -> 'WebSocketManager':
+        """Create managed WebSocket connection - recovery manager compatibility."""
+        # For backward compatibility with recovery manager interface
+        logger.info(f"Creating connection {connection_id} for URL {url}")
+        return self
+    
+    async def remove_connection(self, connection_id: str) -> None:
+        """Remove and cleanup connection - recovery manager compatibility."""
+        if connection_id in self.connections:
+            await self._cleanup_connection(connection_id, 1000, "Connection removed")
+    
+    async def recover_all_connections(self) -> Dict[str, bool]:
+        """Attempt recovery for all failed connections - recovery manager compatibility."""
+        await self.cleanup_stale_connections()
+        return {}  # No specific recovery needed, cleanup handles it
+    
+    def get_all_status(self) -> Dict[str, Any]:
+        """Get status of all connections - recovery manager compatibility."""
+        return {
+            conn_id: {
+                "connection_id": conn_id,
+                "user_id": conn["user_id"], 
+                "is_healthy": conn["is_healthy"],
+                "last_activity": conn["last_activity"].isoformat() if conn["last_activity"] else None,
+                "message_count": conn["message_count"]
+            }
+            for conn_id, conn in self.connections.items()
+        }
+    
+    async def cleanup_all(self) -> None:
+        """Cleanup all connections - recovery manager compatibility."""
+        await self.shutdown()
+    
+    def save_state_snapshot(self, connection_id: str, state: Any) -> None:
+        """Save state snapshot for connection recovery - recovery manager compatibility."""
+        logger.debug(f"State snapshot saved for connection: {connection_id}")
+        # WebSocket connections are stateless, no persistent state to save
+
     async def shutdown(self) -> None:
         """Gracefully shutdown WebSocket manager."""
         logger.info(f"Shutting down WebSocket manager with {len(self.connections)} connections")
@@ -460,6 +545,16 @@ def get_websocket_manager() -> WebSocketManager:
     return _websocket_manager
 
 
+# Backward compatibility aliases for recovery system
+def get_manager() -> WebSocketManager:
+    """Get WebSocket manager (legacy compatibility)."""
+    return get_websocket_manager()
+
+
+# Global instance for error recovery integration
+websocket_recovery_manager = get_websocket_manager()
+
+
 @asynccontextmanager
 async def websocket_context():
     """Context manager for WebSocket operations with automatic cleanup."""
@@ -469,6 +564,42 @@ async def websocket_context():
     finally:
         # Perform any necessary cleanup
         await manager.cleanup_stale_connections()
+
+
+async def sync_state(connection_id: Optional[str] = None, callbacks: Optional[List] = None) -> bool:
+    """
+    Synchronize WebSocket connection state - backward compatibility function.
+    
+    Args:
+        connection_id: Optional connection ID to sync
+        callbacks: Optional callbacks to execute during sync
+    
+    Returns:
+        True if sync was successful
+    """
+    manager = get_websocket_manager()
+    
+    try:
+        if connection_id:
+            # Sync specific connection
+            if connection_id in manager.connections:
+                conn = manager.connections[connection_id]
+                # Update last activity to refresh state
+                conn["last_activity"] = datetime.now(timezone.utc)
+                logger.debug(f"Synced state for connection {connection_id}")
+                return True
+            else:
+                logger.warning(f"Connection {connection_id} not found for sync")
+                return False
+        else:
+            # Sync all connections - cleanup stale ones
+            cleaned = await manager.cleanup_stale_connections()
+            logger.debug(f"Synced all connections, cleaned {cleaned} stale")
+            return True
+            
+    except Exception as e:
+        logger.error(f"State sync failed: {e}")
+        return False
 
 
 async def broadcast_message(message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 

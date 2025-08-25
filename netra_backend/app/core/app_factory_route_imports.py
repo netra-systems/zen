@@ -78,9 +78,9 @@ def import_named_routers() -> dict:
 def _import_auth_routers() -> dict:
     """Import authentication-related routers"""
     from netra_backend.app.routes.agent_route import router as agent_router
-    from netra_backend.app.routes.auth_resilience import router as auth_resilience_router
+    # Auth resilience router removed - functionality consolidated into auth_client_core
     # Auth router not needed - auth is handled by separate auth service
-    return {"agent_router": agent_router, "auth_resilience_router": auth_resilience_router}
+    return {"agent_router": agent_router}
 
 
 def _import_core_routers() -> dict:

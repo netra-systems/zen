@@ -197,37 +197,72 @@ async def _check_clickhouse_connection() -> None:
         logger.debug("ClickHouse check skipped - skip_clickhouse_init=True")
         return
     
-    # In development, make ClickHouse optional for readiness
-    if config.environment in ["development", "staging"]:
+    # Environment-specific ClickHouse requirements
+    if config.environment == "development":
         try:
             await asyncio.wait_for(_perform_clickhouse_check(), timeout=2.0)
         except (asyncio.TimeoutError, Exception) as e:
-            logger.warning(f"ClickHouse check failed (non-critical in {config.environment}): {e}")
+            logger.warning(f"ClickHouse check failed (non-critical in development): {e}")
             return  # Don't fail readiness for ClickHouse in development
+    elif config.environment == "staging":
+        # In staging, ClickHouse is required but with longer timeout
+        try:
+            await asyncio.wait_for(_perform_clickhouse_check(), timeout=10.0)
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.error(f"ClickHouse check failed in staging (critical): {e}")
+            raise  # Fail readiness for ClickHouse in staging
     else:
         await _perform_clickhouse_check()
 
 async def _perform_clickhouse_check() -> None:
     """Perform the actual ClickHouse connection check."""
     try:
-        from netra_backend.app.services.clickhouse_service import clickhouse_service
-        await clickhouse_service.execute_health_check()
+        from netra_backend.app.services.clickhouse_service import ClickHouseService
+        service = ClickHouseService()
+        result = await service.execute_health_check()
+        if not result:
+            raise Exception("ClickHouse health check returned False")
     except Exception as e:
         await _handle_clickhouse_error(e)
 
 async def _handle_clickhouse_error(error: Exception) -> None:
     """Handle ClickHouse connection errors."""
-    logger.warning(f"ClickHouse check failed (non-critical): {error}")
     config = unified_config_manager.get_config()
-    if config.environment in ["staging", "development"]:
-        logger.info(f"Ignoring ClickHouse failure in {config.environment} environment")
+    if config.environment == "development":
+        logger.warning(f"ClickHouse check failed (non-critical in development): {error}")
+    elif config.environment == "staging":
+        logger.error(f"ClickHouse check failed (critical in staging): {error}")
+        raise  # Fail in staging environment
     else:
+        logger.error(f"ClickHouse check failed: {error}")
         raise
+
+async def _check_redis_connection() -> None:
+    """Check Redis connection for staging environment."""
+    config = unified_config_manager.get_config()
+    
+    # Environment-specific Redis requirements
+    if config.environment == "staging":
+        # In staging, Redis is required
+        from netra_backend.app.redis_manager import redis_manager
+        if not redis_manager.enabled:
+            raise Exception("Redis is disabled but required in staging")
+        if not await redis_manager.ping():
+            raise Exception("Redis ping failed in staging")
+    elif config.environment == "development":
+        # In development, Redis is optional
+        try:
+            from netra_backend.app.redis_manager import redis_manager
+            if redis_manager.enabled:
+                await asyncio.wait_for(redis_manager.ping(), timeout=2.0)
+        except Exception as e:
+            logger.warning(f"Redis check failed (non-critical in development): {e}")
 
 async def _check_database_connection(db: AsyncSession) -> None:
     """Check database connection using dependency injection."""
     await _check_postgres_connection(db)
     await _check_clickhouse_connection()
+    await _check_redis_connection()
 
 async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
     """Check application readiness including core database connectivity."""
@@ -235,6 +270,7 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         # Run all checks concurrently with shorter timeouts for faster response
         postgres_task = asyncio.create_task(_check_postgres_connection(db))
         clickhouse_task = asyncio.create_task(_check_clickhouse_connection())
+        redis_task = asyncio.create_task(_check_redis_connection())
         health_task = asyncio.create_task(health_interface.get_health_status(HealthLevel.BASIC))
         
         # Wait for core PostgreSQL check (required)
@@ -245,17 +281,34 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
             logger.error(f"PostgreSQL readiness check failed: {e}")
             raise HTTPException(status_code=503, detail="Core database unavailable")
         
-        # Wait for other checks with shorter timeouts (optional)
+        # Wait for external service checks based on environment
+        config = unified_config_manager.get_config()
         clickhouse_status = "unavailable"
+        redis_status = "unavailable"
+        
         try:
-            await asyncio.wait_for(clickhouse_task, timeout=2.0)  # Reduced from 3.0s
+            await asyncio.wait_for(clickhouse_task, timeout=5.0)
             clickhouse_status = "connected"
         except (asyncio.TimeoutError, Exception) as e:
-            logger.debug(f"ClickHouse not available during readiness (non-critical): {e}")
+            if config.environment == "staging":
+                logger.error(f"ClickHouse required but unavailable in staging: {e}")
+                raise Exception(f"ClickHouse unavailable in staging: {e}")
+            else:
+                logger.debug(f"ClickHouse not available during readiness (non-critical): {e}")
+        
+        try:
+            await asyncio.wait_for(redis_task, timeout=3.0)
+            redis_status = "connected"
+        except (asyncio.TimeoutError, Exception) as e:
+            if config.environment == "staging":
+                logger.error(f"Redis required but unavailable in staging: {e}")
+                raise Exception(f"Redis unavailable in staging: {e}")
+            else:
+                logger.debug(f"Redis not available during readiness (non-critical): {e}")
         
         health_status = {}
         try:
-            health_status = await asyncio.wait_for(health_task, timeout=1.5)  # Reduced from 2.0s
+            health_status = await asyncio.wait_for(health_task, timeout=1.5)
         except (asyncio.TimeoutError, Exception) as e:
             logger.debug(f"Health interface check failed (non-critical): {e}")
             health_status = {"status": "healthy", "message": "Basic health check bypassed"}
@@ -267,6 +320,7 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
             "timestamp": time.time(),
             "core_db": postgres_status,
             "clickhouse_db": clickhouse_status,
+            "redis_db": redis_status,
             "details": health_status
         }
         

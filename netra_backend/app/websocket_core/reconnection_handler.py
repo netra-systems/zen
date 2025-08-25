@@ -1,5 +1,5 @@
 # Shim module for backward compatibility
-from netra_backend.app.core.websocket_recovery_manager import WebSocketRecoveryManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketRecoveryManager
 from netra_backend.app.core.websocket_recovery_types import ConnectionState, ReconnectionReason
 
 # Alias for backward compatibility
@@ -20,10 +20,8 @@ _reconnection_handler = None
 
 def get_reconnection_handler() -> WebSocketRecoveryManager:
     """Get the global reconnection handler."""
-    global _reconnection_handler
-    if _reconnection_handler is None:
-        _reconnection_handler = WebSocketRecoveryManager()
-    return _reconnection_handler
+    from netra_backend.app.websocket_core.manager import get_websocket_manager
+    return get_websocket_manager()
 
 # Export for backward compatibility
 __all__ = [
