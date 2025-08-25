@@ -184,7 +184,7 @@ The **String Literals Index** is a critical system for maintaining consistency a
 
 **Categories Tracked:**
 *   `configuration`: Config keys, settings, parameters (e.g., "redis_url", "max_retries")
-*   `paths`: API endpoints, file paths, directories (e.g., "/api/v1/threads", "/websocket")
+*   `paths`: API endpoints, file paths, directories (e.g., "/api/threads", "/websocket")
 *   `identifiers`: Service names, agent types (e.g., "supervisor_agent", "auth_service")
 *   `database`: Table/column names (e.g., "threads", "created_at")
 *   `events`: Event names, message types (e.g., "thread_created", "websocket_connect")

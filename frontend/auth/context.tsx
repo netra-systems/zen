@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useEffect, ReactNode, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, ReactNode, useState, useCallback, useRef } from 'react';
 import { User } from '@/types';
 import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,18 @@ export interface AuthContextType {
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Hook to access auth context
+ * This is the primary way components should access authentication state
+ */
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

@@ -367,7 +367,7 @@ class AuthenticationFlowTester:
         # Test backend authentication
         try:
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/user/profile",
+                f"{BACKEND_URL}/api/user/profile",
                 headers=headers
             ) as response:
                 if response.status == 200:

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>KnowledgeBase.EventLoopManagement</name>
+        <type>AsyncioPatterns</type>
+        <version>1.0</version>
+        <description>Critical learnings about event loop management, async execution patterns, and thread-safe asyncio operations in the Netra development environment.</description>
+        <created_date>2025-08-25</created_date>
+        <related_files>
+            <file>dev_launcher/launcher.py</file>
+            <file>dev_launcher/isolated_environment.py</file>
+            <file>auth_service/auth_core/database/database_manager.py</file>
+            <file>shared/database_url_builder.py</file>
+        </related_files>
+    </metadata>
+    
+    <critical-patterns>
+        <pattern id="event-loop-conflict-detection">
+            <title>Event Loop Conflict Pattern Recognition</title>
+            <description>Proper detection and handling of existing event loops to prevent conflicts</description>
+            
+            <problem>
+                <symptom>RuntimeError: "cannot be called from a running event loop"</symptom>
+                <symptom>asyncio.run() fails when called from within existing event loop</symptom>
+                <symptom>Thread-based async execution hangs or fails unexpectedly</symptom>
+                <root_cause>Creating new event loops without checking for existing ones</root_cause>
+            </problem>
+            
+            <solution>
+                <title>Always Check for Running Event Loop</title>
+                <code>
+try:
+    # Check if we're already in an event loop
+    loop = asyncio.get_running_loop()
+    # Use asyncio.run_coroutine_threadsafe for thread-safe execution
+    future = asyncio.run_coroutine_threadsafe(async_function(), loop)
+    result = future.result(timeout=30)  # Add timeout for safety
+except RuntimeError:
+    # No running loop, safe to use asyncio.run()
+    result = asyncio.run(async_function())
+                </code>
+            </solution>
+            
+            <benefits>
+                - Prevents "cannot be called from a running event loop" errors
+                - Enables safe async execution in both sync and async contexts
+                - Maintains thread safety in complex applications
+            </benefits>
+        </pattern>
+        
+        <pattern id="thread-safe-async-execution">
+            <title>Thread-Safe Async Execution Pattern</title>
+            <description>Proper handling of async operations across thread boundaries</description>
+            
+            <implementation>
+                <technique>Use asyncio.run_coroutine_threadsafe()</technique>
+                <technique>Add appropriate timeouts to future.result()</technique>
+                <technique>Handle both sync and async contexts gracefully</technique>
+            </implementation>
+            
+            <example>
+                <file>dev_launcher/launcher.py</file>
+                <context>Database initialization in sync context with potential existing event loop</context>
+                <pattern>
+def initialize_database_sync():
+    """Initialize database from sync context, handling existing event loops."""
+    try:
+        loop = asyncio.get_running_loop()
+        # We're in an async context, use thread-safe execution
+        future = asyncio.run_coroutine_threadsafe(
+            initialize_database_async(), 
+            loop
+        )
+        return future.result(timeout=30)
+    except RuntimeError:
+        # No running loop, safe to use asyncio.run()
+        return asyncio.run(initialize_database_async())
+                </pattern>
+            </example>
+            
+            <guidance>
+                <rule>ALWAYS check for running event loop before using asyncio.run()</rule>
+                <rule>Use run_coroutine_threadsafe() when loop exists</rule>
+                <rule>Include reasonable timeouts on future.result()</rule>
+                <rule>Handle both execution paths (with/without existing loop)</rule>
+            </guidance>
+        </pattern>
+        
+        <pattern id="database-ssl-parameter-normalization">
+            <title>Database URL SSL Parameter Conflicts Resolution</title>
+            <description>Handling incompatible SSL parameter formats between PostgreSQL drivers</description>
+            
+            <problem>
+                <symptom>Database connection failures with SSL parameter errors</symptom>
+                <symptom>Different behavior between psycopg2 (sync) and asyncpg (async) drivers</symptom>
+                <root_cause>Drivers use incompatible SSL parameter formats (sslmode= vs ssl=)</root_cause>
+            </problem>
+            
+            <solution>
+                <title>SSL Parameter Normalization During URL Building</title>
+                <description>Transform SSL parameters based on target driver during URL construction</description>
+                <code>
+def normalize_ssl_parameters(url: str, target_driver: str) -> str:
+    """Normalize SSL parameters for target database driver."""
+    if target_driver == "asyncpg":
+        # Convert sslmode=require to ssl=require for asyncpg
+        url = url.replace("sslmode=require", "ssl=require")
+        url = url.replace("sslmode=prefer", "ssl=prefer")
+    elif target_driver == "psycopg2":
+        # Convert ssl=require to sslmode=require for psycopg2
+        url = url.replace("ssl=require", "sslmode=require")
+        url = url.replace("ssl=prefer", "sslmode=prefer")
+    return url
+                </code>
+            </solution>
+            
+            <critical_insight>
+                <point>Cloud SQL Unix socket connections must have NO SSL parameters</point>
+                <point>SSL is handled at the socket level for /cloudsql/ connections</point>
+                <point>Always normalize SSL parameters during URL building, not at connection time</point>
+            </critical_insight>
+        </pattern>
+        
+        <pattern id="event-loop-resource-cleanup">
+            <title>Event Loop Resource Cleanup Pattern</title>
+            <description>Proper cleanup of event loops and async resources on exceptions</description>
+            
+            <problem>
+                <symptom>Event loops not properly closed on exceptions</symptom>
+                <symptom>Resource leaks in async operations</symptom>
+                <symptom>Hanging threads or processes on failure</symptom>
+            </problem>
+            
+            <solution>
+                <title>Try-Finally Pattern for Event Loop Cleanup</title>
+                <code>
+def run_async_with_cleanup(async_func):
+    """Run async function with proper cleanup on exceptions."""
+    loop = None
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop.run_until_complete(async_func())
+    except Exception as e:
+        logger.error(f"Async operation failed: {e}")
+        raise
+    finally:
+        if loop and not loop.is_closed():
+            try:
+                # Clean up any remaining tasks
+                pending_tasks = asyncio.all_tasks(loop)
+                for task in pending_tasks:
+                    task.cancel()
+                
+                # Close the loop
+                loop.close()
+            except Exception as cleanup_error:
+                logger.warning(f"Error during loop cleanup: {cleanup_error}")
+                </code>
+            </solution>
+            
+            <guidance>
+                <rule>ALWAYS use try-finally blocks for event loop operations</rule>
+                <rule>Cancel pending tasks before closing loops</rule>
+                <rule>Handle cleanup errors gracefully with warnings, not failures</rule>
+                <rule>Set event loop to None after closing to prevent reuse</rule>
+            </guidance>
+        </pattern>
+        
+        <pattern id="async-testing-event-loops">
+            <title>Testing Event Loop Issues Pattern</title>
+            <description>Proper testing strategies for event loop handling</description>
+            
+            <testing_approach>
+                <principle>Mock network operations but test actual event loop handling</principle>
+                <principle>Test in different contexts: sync, async, threaded</principle>
+                <principle>Validate cleanup behavior on both success and failure paths</principle>
+            </testing_approach>
+            
+            <example>
+                <test_case>Sync context calling async function</test_case>
+                <test_case>Async context with existing event loop</test_case>
+                <test_case>Threaded execution with event loop conflicts</test_case>
+                <test_case>Exception handling with proper cleanup</test_case>
+                <test_case>Timeout scenarios with hanging operations</test_case>
+            </example>
+            
+            <key_insight>
+                <point>Test the event loop management logic, not just the business logic</point>
+                <point>Verify both success and failure cleanup paths</point>
+                <point>Include timeout testing to prevent hanging tests</point>
+            </key_insight>
+        </pattern>
+    </critical-patterns>
+    
+    <common_antipatterns>
+        <antipattern id="nested-asyncio-run">
+            <title>Nested asyncio.run() Calls</title>
+            <description>Calling asyncio.run() from within an existing event loop</description>
+            <symptom>RuntimeError: "cannot be called from a running event loop"</symptom>
+            <fix>Use asyncio.run_coroutine_threadsafe() instead</fix>
+        </antipattern>
+        
+        <antipattern id="unchecked-event-loop-creation">
+            <title>Creating Event Loops Without Checking</title>
+            <description>Creating new event loops without checking for existing ones</description>
+            <symptom>Multiple event loops leading to conflicts and hangs</symptom>
+            <fix>Always check asyncio.get_running_loop() first</fix>
+        </antipattern>
+        
+        <antipattern id="missing-ssl-parameter-normalization">
+            <title>Driver-Agnostic SSL Parameters</title>
+            <description>Using same SSL parameters for different database drivers</description>
+            <symptom>Connection failures with SSL configuration errors</symptom>
+            <fix>Normalize SSL parameters based on target driver</fix>
+        </antipattern>
+        
+        <antipattern id="missing-event-loop-cleanup">
+            <title>Missing Event Loop Cleanup</title>
+            <description>Not properly cleaning up event loops on exceptions</description>
+            <symptom>Resource leaks and hanging processes</symptym>
+            <fix>Use try-finally blocks for proper cleanup</fix>
+        </antipattern>
+    </common_antipatterns>
+    
+    <implementation_guidance>
+        <development_practices>
+            <practice>Always include event loop detection in async initialization code</practice>
+            <practice>Normalize database SSL parameters during URL building phase</practice>
+            <practice>Include timeout parameters in thread-safe async operations</practice>
+            <practice>Test event loop handling in multiple execution contexts</practice>
+        </development_practices>
+        
+        <code_review_checklist>
+            <item>Does async code check for existing event loops?</item>
+            <item>Are SSL parameters normalized for target database driver?</item>
+            <item>Is proper cleanup implemented for event loops?</item>
+            <item>Are timeouts included for async operations?</item>
+            <item>Are both success and failure paths tested?</item>
+        </code_review_checklist>
+        
+        <monitoring_points>
+            <metric>Event loop creation failures</metric>
+            <metric>Database connection SSL parameter errors</metric>
+            <metric>Hanging async operations (timeout monitoring)</metric>
+            <metric>Resource cleanup success rates</metric>
+        </monitoring_points>
+    </implementation_guidance>
+    
+    <related_learnings>
+        <learning>Database Architecture (SPEC/learnings/database.xml)</learning>
+        <learning>Pragmatic Rigor (SPEC/learnings/pragmatic_rigor.xml)</learning>
+        <learning>No Silent Fallbacks (SPEC/learnings/no_silent_fallbacks.xml)</learning>
+        <learning>Environment Management (SPEC/learnings/environment_management.xml)</learning>
+    </related_learnings>
+</specification>

@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 import { TestProviders, AuthTestProvider, mockAuthContextValue } from '../setup/test-providers';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth/unified-auth-service';
 import { useAuthStore } from '@/store/authStore';
 
 // Mock dependencies

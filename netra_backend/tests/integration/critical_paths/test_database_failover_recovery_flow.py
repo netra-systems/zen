@@ -106,7 +106,7 @@ class DatabaseFailoverTester:
         try:
             # Check via backend API
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/database/health"
+                f"{BACKEND_URL}/api/database/health"
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -224,7 +224,7 @@ class DatabaseFailoverTester:
             for scenario in scenarios:
                 # Check failover conditions
                 async with self.session.get(
-                    f"{BACKEND_URL}/api/v1/database/failover-status"
+                    f"{BACKEND_URL}/api/database/failover-status"
                 ) as response:
                     if response.status == 200:
                         data = await response.json()
@@ -248,7 +248,7 @@ class DatabaseFailoverTester:
             }
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/database/trigger-failover",
+                f"{BACKEND_URL}/api/database/trigger-failover",
                 json=trigger_request
             ) as response:
                 if response.status == 200:
@@ -279,7 +279,7 @@ class DatabaseFailoverTester:
                 print("[INFO] Simulating primary database failure...")
                 
                 async with self.session.post(
-                    f"{BACKEND_URL}/api/v1/database/simulate-failure",
+                    f"{BACKEND_URL}/api/database/simulate-failure",
                     json={"type": "primary_down", "duration_seconds": 10}
                 ) as response:
                     if response.status == 200:
@@ -291,7 +291,7 @@ class DatabaseFailoverTester:
             
             while time.time() - start_time < FAILOVER_TIMEOUT:
                 async with self.session.get(
-                    f"{BACKEND_URL}/api/v1/database/failover-status"
+                    f"{BACKEND_URL}/api/database/failover-status"
                 ) as response:
                     if response.status == 200:
                         data = await response.json()
@@ -314,7 +314,7 @@ class DatabaseFailoverTester:
             if failover_completed:
                 # Verify new primary is responding
                 async with self.session.get(
-                    f"{BACKEND_URL}/api/v1/database/health"
+                    f"{BACKEND_URL}/api/database/health"
                 ) as response:
                     if response.status == 200:
                         data = await response.json()
@@ -385,7 +385,7 @@ class DatabaseFailoverTester:
             
             # Check via API
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/database/consistency-check"
+                f"{BACKEND_URL}/api/database/consistency-check"
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -446,7 +446,7 @@ class DatabaseFailoverTester:
         try:
             # Get initial pool stats
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/database/pool-stats"
+                f"{BACKEND_URL}/api/database/pool-stats"
             ) as response:
                 if response.status == 200:
                     initial_stats = await response.json()
@@ -460,7 +460,7 @@ class DatabaseFailoverTester:
             async def make_request(i):
                 try:
                     async with self.session.get(
-                        f"{BACKEND_URL}/api/v1/health"
+                        f"{BACKEND_URL}/api/health"
                     ) as resp:
                         return resp.status == 200
                 except:
@@ -479,7 +479,7 @@ class DatabaseFailoverTester:
             await asyncio.sleep(2)
             
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/database/pool-stats"
+                f"{BACKEND_URL}/api/database/pool-stats"
             ) as response:
                 if response.status == 200:
                     recovery_stats = await response.json()
@@ -531,7 +531,7 @@ class DatabaseFailoverTester:
             
             for tx in test_transactions:
                 async with self.session.post(
-                    f"{BACKEND_URL}/api/v1/database/transaction",
+                    f"{BACKEND_URL}/api/database/transaction",
                     json=tx
                 ) as response:
                     if response.status in [200, 201]:
@@ -543,7 +543,7 @@ class DatabaseFailoverTester:
                         
             # Check transaction log
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/database/transaction-log"
+                f"{BACKEND_URL}/api/database/transaction-log"
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -568,7 +568,7 @@ class DatabaseFailoverTester:
         try:
             # Check if primary is available for recovery
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/database/recovery-status"
+                f"{BACKEND_URL}/api/database/recovery-status"
             ) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -586,7 +586,7 @@ class DatabaseFailoverTester:
             }
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/database/recover",
+                f"{BACKEND_URL}/api/database/recover",
                 json=recovery_request
             ) as response:
                 if response.status in [200, 202]:
@@ -602,7 +602,7 @@ class DatabaseFailoverTester:
                         await asyncio.sleep(5)
                         
                         async with self.session.get(
-                            f"{BACKEND_URL}/api/v1/database/recovery/{recovery_id}"
+                            f"{BACKEND_URL}/api/database/recovery/{recovery_id}"
                         ) as status_response:
                             if status_response.status == 200:
                                 status_data = await status_response.json()
@@ -651,7 +651,7 @@ class DatabaseFailoverTester:
             test_query = "SELECT count() FROM events"
             
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/analytics/query",
+                f"{BACKEND_URL}/api/analytics/query",
                 params={"query": test_query}
             ) as response:
                 if response.status == 200:

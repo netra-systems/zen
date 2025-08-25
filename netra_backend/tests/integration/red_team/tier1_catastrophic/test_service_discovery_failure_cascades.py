@@ -143,9 +143,9 @@ class TestServiceDiscoveryFailureCascades:
                 async with httpx.AsyncClient(timeout=5.0) as client:
                     # Test backend API endpoints that require auth
                     auth_required_endpoints = [
-                        "http://localhost:8000/api/v1/threads",
-                        "http://localhost:8000/api/v1/messages", 
-                        "http://localhost:8000/api/v1/user/profile"
+                        "http://localhost:8000/api/threads",
+                        "http://localhost:8000/api/messages", 
+                        "http://localhost:8000/api/user/profile"
                     ]
                     
                     failures = []

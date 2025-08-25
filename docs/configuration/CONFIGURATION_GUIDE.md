@@ -914,11 +914,11 @@ gcloud secrets access latest --secret="jwt-secret-key"
 ```bash
 # Test Gemini API key
 curl -H "x-goog-api-key: YOUR_API_KEY" \
-  "https://generativelanguage.googleapis.com/v1/models"
+  "https://generativelanguage.googleapis.com/models"
 
 # Test OpenAI API key
 curl -H "Authorization: Bearer YOUR_API_KEY" \
-  "https://api.openai.com/v1/models"
+  "https://api.openai.com/models"
 ```
 
 **Issue: CORS Errors in Browser**
@@ -1026,7 +1026,7 @@ python -c "from netra_backend.app.core.configuration.base import get_unified_con
 
 # Test Gemini API key manually
 curl -H "x-goog-api-key: YOUR_API_KEY" \
-  "https://generativelanguage.googleapis.com/v1/models"
+  "https://generativelanguage.googleapis.com/models"
 ```
 
 #### Issue: CORS Errors in Browser

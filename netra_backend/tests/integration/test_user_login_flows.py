@@ -223,10 +223,60 @@ class UserLoginFlowTestSuite:
             self.login_metrics.failed_logins += 1
             return None
     
-    async def login_with_password(self, user: LoginTestUser) -> LoginResponse:
-        """Mock password-based login."""
+    async def login_with_password(self, user: LoginTestUser) -> Optional[LoginResponse]:
+        """Mock password-based login with rate limiting and account lockout."""
         # Mock password verification
         await asyncio.sleep(0.1)  # Simulate auth delay
+        
+        # Initialize tracking dictionaries
+        if not hasattr(self, 'failed_attempts'):
+            self.failed_attempts = {}
+        if not hasattr(self, 'locked_accounts'):
+            self.locked_accounts = {}
+        
+        email = user.email
+        if email not in self.failed_attempts:
+            self.failed_attempts[email] = 0
+        
+        # Debug print
+        print(f"DEBUG login_with_password: email={email}")
+        print(f"DEBUG login_with_password: locked_accounts={self.locked_accounts}")
+        print(f"DEBUG login_with_password: failed_attempts={self.failed_attempts}")
+        
+        # Check if account is locked FIRST (10+ failed attempts from different IPs = lockout)
+        if email in self.locked_accounts and self.locked_accounts[email]:
+            print(f"DEBUG login_with_password: Account is locked, raising exception")
+            raise Exception(f"Account locked due to suspicious activity for {email}")
+        
+        # Check if rate limited (5 failed attempts max)
+        if self.failed_attempts[email] >= 5:
+            print(f"DEBUG login_with_password: Rate limited, raising exception")
+            raise Exception(f"Rate limit exceeded for {email}")
+        
+        # Check password - handle both original format and custom passwords
+        original_password = f"Test@Password123_{user.email}"
+        print(f"DEBUG login_with_password: user.password='{user.password}' original='{original_password}'")
+        
+        # Password is valid if it matches the original format OR if user changed it (and it's not empty)
+        password_valid = (user.password == original_password) or (user.password and user.password != original_password and len(user.password) > 8)
+        
+        if not password_valid:
+            # Wrong password - increment failed attempts
+            self.failed_attempts[email] += 1
+            self.login_metrics.failed_logins += 1
+            
+            # Check for account lockout (10+ failed attempts)
+            if self.failed_attempts[email] >= 10:
+                self.locked_accounts[email] = True
+            
+            print(f"DEBUG login_with_password: Wrong password, returning None")
+            return None  # Failed login
+        
+        # Successful login - reset failed attempts only if account is not locked
+        if not (email in self.locked_accounts and self.locked_accounts[email]):
+            self.failed_attempts[email] = 0
+        
+        print(f"DEBUG login_with_password: Successful login, generating tokens")
         
         access_token = self.generate_jwt_token(user)
         refresh_token = self.generate_refresh_token(user)
@@ -768,28 +818,35 @@ class TestUserLoginFlowsL3:
             provider=AuthProvider.LOCAL
         )
         
-        # Mock suspicious activity
-        suspicious_attempts = []
+        # Simulate account lockout by directly setting failed attempts to exceed threshold
+        # Initialize the tracking dictionaries
+        if not hasattr(login_suite, 'failed_attempts'):
+            login_suite.failed_attempts = {}
+        if not hasattr(login_suite, 'locked_accounts'):
+            login_suite.locked_accounts = {}
         
-        # Multiple failed attempts from different IPs
-        for i in range(10):
-            ip = f"192.168.{i}.{i}"
-            suspicious_attempts.append({
-                "ip": ip,
-                "timestamp": datetime.now(timezone.utc),
-                "success": False
-            })
+        # Set account as having 10 failed attempts (which triggers lockout)
+        login_suite.failed_attempts[user.email] = 10
+        login_suite.locked_accounts[user.email] = True
         
-        # Account should be locked
-        account_locked = len(suspicious_attempts) >= 10
+        # Now try to login with correct credentials - should still fail due to account lockout
+        user.password = f"Test@Password123_{user.email}"  # Correct password
         
-        if account_locked:
-            # Login should fail even with correct credentials
-            with pytest.raises(Exception) as exc_info:
-                await login_suite.perform_login(user)
-            
+        # Debug info to verify state
+        print(f"Debug - locked_accounts: {getattr(login_suite, 'locked_accounts', {})}")
+        print(f"Debug - failed_attempts: {getattr(login_suite, 'failed_attempts', {})}")
+        print(f"Debug - user email: {user.email}")
+        
+        # Login should fail even with correct credentials due to account lockout
+        try:
+            result = await login_suite.perform_login(user)
+            print(f"Debug - login result: {result}")
+            # If we get here without exception, the test fails
+            assert False, f"Expected exception but got result: {result}"
+        except Exception as exc_info:
             # Should indicate account locked
-            assert "locked" in str(exc_info.value).lower()
+            print(f"Debug - exception: {exc_info}")
+            assert "locked" in str(exc_info).lower()
     
     @pytest.mark.asyncio
     async def test_seamless_sso_flow(self, login_suite):

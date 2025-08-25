@@ -64,23 +64,37 @@ class IsolatedEnvironment:
             logger.debug("IsolatedEnvironment (auth_service) initialized")
     
     def _auto_load_env_file(self) -> None:
-        """Automatically load .env file if it exists."""
+        """Automatically load .env or .secrets file if it exists."""
         import sys
         
-        # Skip auto-loading .env during pytest to allow test configuration to take precedence
+        # Skip auto-loading during pytest to allow test configuration to take precedence
         if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-            logger.debug("Skipping .env auto-load during pytest execution")
+            logger.debug("Skipping env file auto-load during pytest execution")
+            return
+            
+        # Skip auto-loading if explicitly disabled
+        if os.environ.get("DISABLE_SECRETS_LOADING", "").lower() == "true":
+            logger.debug("Skipping env file auto-load due to DISABLE_SECRETS_LOADING")
             return
             
         try:
-            # Look for .env file in project root
+            # Look for .env file first
             env_file = Path.cwd() / ".env"
             if env_file.exists():
                 loaded_count = self.load_from_file(env_file)
                 if loaded_count > 0:
                     logger.debug(f"Auto-loaded {loaded_count} variables from .env")
+                return
+            
+            # If no .env file, look for .secrets file
+            secrets_file = Path.cwd() / ".secrets"
+            if secrets_file.exists():
+                loaded_count = self.load_from_file(secrets_file)
+                if loaded_count > 0:
+                    logger.debug(f"Auto-loaded {loaded_count} variables from .secrets")
+                    
         except Exception as e:
-            logger.warning(f"Failed to auto-load .env file: {e}")
+            logger.warning(f"Failed to auto-load env file: {e}")
     
     @classmethod
     def get_instance(cls) -> 'IsolatedEnvironment':
@@ -168,6 +182,80 @@ class IsolatedEnvironment:
             logger.error(f"Failed to load environment from {filepath}: {e}")
         
         return loaded
+
+    def validate_staging_database_credentials(self) -> dict:
+        """Validate database credentials specifically for staging environment.
+        
+        Returns:
+            Dictionary with validation status and issues
+        """
+        validation_result = {
+            "valid": True,
+            "issues": [],
+            "warnings": []
+        }
+        
+        # Check environment is staging
+        environment = self.get("ENVIRONMENT", "").lower()
+        if environment != "staging":
+            validation_result["warnings"].append(f"Not in staging environment (current: {environment})")
+            return validation_result
+        
+        # Check required database variables
+        required_vars = ["POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]
+        missing_vars = []
+        
+        for var in required_vars:
+            value = self.get(var)
+            if not value:
+                missing_vars.append(var)
+        
+        if missing_vars:
+            validation_result["valid"] = False
+            validation_result["issues"].append(f"Missing required staging database variables: {missing_vars}")
+        
+        # Validate specific credential values for staging
+        postgres_host = self.get("POSTGRES_HOST", "")
+        postgres_user = self.get("POSTGRES_USER", "")
+        postgres_password = self.get("POSTGRES_PASSWORD", "")
+        
+        # Host validation for staging
+        if postgres_host == "localhost":
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_HOST cannot be 'localhost' in staging - should be Cloud SQL connection")
+        
+        # User validation for staging - check for problematic patterns
+        if postgres_user == "user_pr-4":
+            validation_result["valid"] = False
+            validation_result["issues"].append("Invalid POSTGRES_USER 'user_pr-4' - this will cause authentication failures")
+        elif postgres_user.startswith("user_pr-"):
+            validation_result["valid"] = False
+            validation_result["issues"].append(f"Invalid POSTGRES_USER pattern '{postgres_user}' - appears to be misconfigured")
+        elif not postgres_user:
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_USER is not set")
+        elif postgres_user != "postgres":
+            validation_result["warnings"].append(f"POSTGRES_USER is '{postgres_user}' - verify this is correct for staging")
+        
+        # Password validation for staging
+        if not postgres_password:
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_PASSWORD is not set")
+        elif len(postgres_password) < 8:
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_PASSWORD is too short (< 8 characters) for staging")
+        elif postgres_password in ["password", "123456", "admin", "test", "wrong_password"]:
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_PASSWORD is using insecure default - must be secure for staging")
+        elif postgres_password.isdigit() and len(postgres_password) < 12:
+            validation_result["valid"] = False
+            validation_result["issues"].append("POSTGRES_PASSWORD is only numbers and too short - needs complexity")
+        
+        # Check for development credentials in staging
+        if "dev" in postgres_password.lower():
+            validation_result["warnings"].append("POSTGRES_PASSWORD contains 'dev' - verify this is not development password")
+        
+        return validation_result
     
     def get_all(self) -> Dict[str, str]:
         """Get all environment variables."""

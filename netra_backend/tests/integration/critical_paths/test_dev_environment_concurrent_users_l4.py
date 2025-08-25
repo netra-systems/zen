@@ -445,7 +445,7 @@ class ConcurrentUserTester:
             headers = {"Authorization": f"Bearer {token}"}
             
             async with session.get(
-                f"{BACKEND_URL}/api/v1/user/profile",
+                f"{BACKEND_URL}/api/user/profile",
                 headers=headers
             ) as response:
                 if response.status == 200:
@@ -499,7 +499,7 @@ class ConcurrentUserTester:
                         try:
                             headers = {"Authorization": f"Bearer {token1}"}
                             async with session1.get(
-                                f"{BACKEND_URL}/api/v1/threads/{thread_id}",
+                                f"{BACKEND_URL}/api/threads/{thread_id}",
                                 headers=headers
                             ) as response:
                                 if response.status == 200:

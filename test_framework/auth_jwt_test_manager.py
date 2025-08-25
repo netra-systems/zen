@@ -96,7 +96,7 @@ class JWTGenerationTestManager:
             async with httpx.AsyncClient() as client:
                 headers = {"Authorization": f"Bearer {token}"}
                 response = await client.get(
-                    f"{self.backend_service_url}/api/v1/validate_token",
+                    f"{self.backend_service_url}/api/validate_token",
                     headers=headers,
                     timeout=5.0
                 )

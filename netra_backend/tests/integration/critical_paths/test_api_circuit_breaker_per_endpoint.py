@@ -98,8 +98,8 @@ class ApiCircuitBreakerManager:
     async def setup_circuit_breaker_configs(self):
         """Configure circuit breakers for different endpoints."""
         self.circuit_configs = {
-            "/api/v1/users": CircuitBreakerConfig(
-                endpoint_pattern="/api/v1/users",
+            "/api/users": CircuitBreakerConfig(
+                endpoint_pattern="/api/users",
                 failure_threshold=5,
                 success_threshold=3,
                 timeout_seconds=30,
@@ -107,8 +107,8 @@ class ApiCircuitBreakerManager:
                 error_percentage=50.0,
                 minimum_requests=10
             ),
-            "/api/v1/agents": CircuitBreakerConfig(
-                endpoint_pattern="/api/v1/agents",
+            "/api/agents": CircuitBreakerConfig(
+                endpoint_pattern="/api/agents",
                 failure_threshold=3,
                 success_threshold=2,
                 timeout_seconds=20,
@@ -116,8 +116,8 @@ class ApiCircuitBreakerManager:
                 error_percentage=60.0,
                 minimum_requests=5
             ),
-            "/api/v1/threads": CircuitBreakerConfig(
-                endpoint_pattern="/api/v1/threads",
+            "/api/threads": CircuitBreakerConfig(
+                endpoint_pattern="/api/threads",
                 failure_threshold=7,
                 success_threshold=4,
                 timeout_seconds=45,
@@ -125,8 +125,8 @@ class ApiCircuitBreakerManager:
                 error_percentage=40.0,
                 minimum_requests=15
             ),
-            "/api/v1/metrics": CircuitBreakerConfig(
-                endpoint_pattern="/api/v1/metrics",
+            "/api/metrics": CircuitBreakerConfig(
+                endpoint_pattern="/api/metrics",
                 failure_threshold=2,
                 success_threshold=1,
                 timeout_seconds=15,
@@ -134,8 +134,8 @@ class ApiCircuitBreakerManager:
                 error_percentage=70.0,
                 minimum_requests=3
             ),
-            "/api/v1/health": CircuitBreakerConfig(
-                endpoint_pattern="/api/v1/health",
+            "/api/health": CircuitBreakerConfig(
+                endpoint_pattern="/api/health",
                 failure_threshold=10,
                 success_threshold=5,
                 timeout_seconds=60,
@@ -303,11 +303,11 @@ class ApiCircuitBreakerManager:
         app = web.Application(middlewares=[circuit_breaker_middleware])
         
         # Register routes
-        app.router.add_route('*', '/api/v1/users{path:.*}', handle_gateway_request)
-        app.router.add_route('*', '/api/v1/agents{path:.*}', handle_gateway_request)
-        app.router.add_route('*', '/api/v1/threads{path:.*}', handle_gateway_request)
-        app.router.add_route('*', '/api/v1/metrics{path:.*}', handle_gateway_request)
-        app.router.add_route('*', '/api/v1/health{path:.*}', handle_gateway_request)
+        app.router.add_route('*', '/api/users{path:.*}', handle_gateway_request)
+        app.router.add_route('*', '/api/agents{path:.*}', handle_gateway_request)
+        app.router.add_route('*', '/api/threads{path:.*}', handle_gateway_request)
+        app.router.add_route('*', '/api/metrics{path:.*}', handle_gateway_request)
+        app.router.add_route('*', '/api/health{path:.*}', handle_gateway_request)
         
         self.test_server = await asyncio.create_task(
             aiohttp.web.create_server(app, "localhost", 0)
@@ -341,11 +341,11 @@ class ApiCircuitBreakerManager:
         """Forward request to backend service."""
         # Determine backend service based on path
         service_mapping = {
-            "/api/v1/users": ("user_service", 8001),
-            "/api/v1/agents": ("agent_service", 8002),
-            "/api/v1/threads": ("thread_service", 8003),
-            "/api/v1/metrics": ("metrics_service", 8004),
-            "/api/v1/health": ("health_service", 8005)
+            "/api/users": ("user_service", 8001),
+            "/api/agents": ("agent_service", 8002),
+            "/api/threads": ("thread_service", 8003),
+            "/api/metrics": ("metrics_service", 8004),
+            "/api/health": ("health_service", 8005)
         }
         
         endpoint = self.normalize_endpoint_path(request.path)
@@ -462,27 +462,27 @@ class ApiCircuitBreakerManager:
     async def get_fallback_response(self, endpoint: str) -> Dict[str, Any]:
         """Get fallback response for endpoint."""
         fallback_templates = {
-            "/api/v1/users": {
+            "/api/users": {
                 "error": "User service temporarily unavailable",
                 "fallback": True,
                 "retry_after": 30
             },
-            "/api/v1/agents": {
+            "/api/agents": {
                 "error": "Agent service temporarily unavailable",
                 "fallback": True,
                 "agents": []
             },
-            "/api/v1/threads": {
+            "/api/threads": {
                 "error": "Thread service temporarily unavailable",
                 "fallback": True,
                 "threads": []
             },
-            "/api/v1/metrics": {
+            "/api/metrics": {
                 "error": "Metrics service temporarily unavailable",
                 "fallback": True,
                 "metrics": {}
             },
-            "/api/v1/health": {
+            "/api/health": {
                 "status": "degraded",
                 "fallback": True,
                 "services": []
@@ -678,10 +678,10 @@ async def circuit_breaker_manager():
 @pytest.mark.asyncio
 async def test_circuit_breaker_opens_on_failures(circuit_breaker_manager):
     """Test circuit breaker opens after failure threshold."""
-    endpoint = "/api/v1/agents"
+    endpoint = "/api/agents"
     
     # Inject failures into agent service
-    await circuit_breaker_manager.inject_failure("agent_service", "error", "/api/v1/agents", 30)
+    await circuit_breaker_manager.inject_failure("agent_service", "error", "/api/agents", 30)
     
     # Test circuit breaker behavior
     test_result = await circuit_breaker_manager.test_circuit_breaker_behavior(endpoint, 10)
@@ -699,10 +699,10 @@ async def test_circuit_breaker_opens_on_failures(circuit_breaker_manager):
 @pytest.mark.asyncio
 async def test_circuit_breaker_fallback_responses(circuit_breaker_manager):
     """Test fallback responses when circuit is open."""
-    endpoint = "/api/v1/users"
+    endpoint = "/api/users"
     
     # Inject failures
-    await circuit_breaker_manager.inject_failure("user_service", "error", "/api/v1/users", 20)
+    await circuit_breaker_manager.inject_failure("user_service", "error", "/api/users", 20)
     
     # Force circuit to open by making failing requests
     for i in range(10):
@@ -723,7 +723,7 @@ async def test_circuit_breaker_fallback_responses(circuit_breaker_manager):
 @pytest.mark.asyncio
 async def test_circuit_breaker_recovery_half_open(circuit_breaker_manager):
     """Test circuit breaker recovery through half-open state."""
-    endpoint = "/api/v1/metrics"
+    endpoint = "/api/metrics"
     
     # Configure short timeout for faster testing
     config = circuit_breaker_manager.circuit_configs[endpoint]
@@ -732,7 +732,7 @@ async def test_circuit_breaker_recovery_half_open(circuit_breaker_manager):
     
     try:
         # Inject failures to open circuit
-        await circuit_breaker_manager.inject_failure("metrics_service", "error", "/api/v1/metrics", 5)
+        await circuit_breaker_manager.inject_failure("metrics_service", "error", "/api/metrics", 5)
         
         # Force circuit open
         for i in range(5):
@@ -768,10 +768,10 @@ async def test_circuit_breaker_recovery_half_open(circuit_breaker_manager):
 @pytest.mark.asyncio
 async def test_per_endpoint_circuit_isolation(circuit_breaker_manager):
     """Test that circuit breakers are isolated per endpoint."""
-    endpoints = ["/api/v1/users", "/api/v1/agents", "/api/v1/threads"]
+    endpoints = ["/api/users", "/api/agents", "/api/threads"]
     
     # Inject failure only in user service
-    await circuit_breaker_manager.inject_failure("user_service", "error", "/api/v1/users", 20)
+    await circuit_breaker_manager.inject_failure("user_service", "error", "/api/users", 20)
     
     # Make requests to all endpoints
     results = {}
@@ -784,9 +784,9 @@ async def test_per_endpoint_circuit_isolation(circuit_breaker_manager):
         results[endpoint] = endpoint_results
     
     # Only user endpoint should have circuit issues
-    user_fallbacks = [r for r in results["/api/v1/users"] if r["is_fallback"]]
-    agent_fallbacks = [r for r in results["/api/v1/agents"] if r["is_fallback"]]
-    thread_fallbacks = [r for r in results["/api/v1/threads"] if r["is_fallback"]]
+    user_fallbacks = [r for r in results["/api/users"] if r["is_fallback"]]
+    agent_fallbacks = [r for r in results["/api/agents"] if r["is_fallback"]]
+    thread_fallbacks = [r for r in results["/api/threads"] if r["is_fallback"]]
     
     assert len(user_fallbacks) > 0  # User service should fail
     assert len(agent_fallbacks) == 0  # Agent service should work
@@ -798,7 +798,7 @@ async def test_per_endpoint_circuit_isolation(circuit_breaker_manager):
 @pytest.mark.asyncio
 async def test_circuit_breaker_different_failure_types(circuit_breaker_manager):
     """Test circuit breaker with different types of failures."""
-    endpoint = "/api/v1/health"
+    endpoint = "/api/health"
     
     failure_types = ["error", "timeout", "slow"]
     
@@ -807,7 +807,7 @@ async def test_circuit_breaker_different_failure_types(circuit_breaker_manager):
         circuit_breaker_manager.circuit_states[endpoint] = CircuitState.CLOSED
         
         # Inject specific failure type
-        await circuit_breaker_manager.inject_failure("health_service", failure_type, "/api/v1/health", 10)
+        await circuit_breaker_manager.inject_failure("health_service", failure_type, "/api/health", 10)
         
         # Make requests to trigger circuit breaker
         failure_results = []
@@ -834,10 +834,10 @@ async def test_circuit_breaker_different_failure_types(circuit_breaker_manager):
 @pytest.mark.asyncio
 async def test_circuit_breaker_concurrent_requests(circuit_breaker_manager):
     """Test circuit breaker with concurrent requests."""
-    endpoint = "/api/v1/threads"
+    endpoint = "/api/threads"
     
     # Inject failures
-    await circuit_breaker_manager.inject_failure("thread_service", "error", "/api/v1/threads", 15)
+    await circuit_breaker_manager.inject_failure("thread_service", "error", "/api/threads", 15)
     
     # Make concurrent requests
     concurrent_tasks = []
@@ -867,9 +867,9 @@ async def test_circuit_breaker_metrics_accuracy(circuit_breaker_manager):
     """Test accuracy of circuit breaker metrics."""
     # Generate test traffic across endpoints
     test_scenarios = [
-        ("/api/v1/users", "user_service", 5),
-        ("/api/v1/agents", "agent_service", 3),
-        ("/api/v1/metrics", "metrics_service", 4)
+        ("/api/users", "user_service", 5),
+        ("/api/agents", "agent_service", 3),
+        ("/api/metrics", "metrics_service", 4)
     ]
     
     for endpoint, service, failure_count in test_scenarios:
@@ -903,7 +903,7 @@ async def test_circuit_breaker_metrics_accuracy(circuit_breaker_manager):
 @pytest.mark.asyncio
 async def test_circuit_breaker_performance_requirements(circuit_breaker_manager):
     """Test circuit breaker performance overhead."""
-    endpoint = "/api/v1/health"
+    endpoint = "/api/health"
     
     # Test response times with circuit breaker
     response_times = []

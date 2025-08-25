@@ -23,7 +23,7 @@
 **Status:** Fixed
 - Updated import to include `ASGITransport`
 - Fixed AsyncClient initialization to use `transport` parameter correctly
-- **Remaining Issue:** `/api/v1/resources` endpoint doesn't exist (404 error)
+- **Remaining Issue:** `/api/resources` endpoint doesn't exist (404 error)
   - Test is trying to access non-existent endpoint
   - Test needs to be updated to use actual endpoints
 

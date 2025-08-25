@@ -67,7 +67,7 @@ async def test_early_to_mid_tier_upgrade_with_team_setup(
     
     # Set up team workspace
     response = await async_client.post(
-        "/api/v1/teams/create",
+        "/api/teams/create",
         json={
             "name": "AI Engineering Team",
             "description": "Team workspace for AI optimization",
@@ -106,7 +106,7 @@ async def test_mid_tier_team_member_management(
     
     # Create team
     response = await async_client.post(
-        "/api/v1/teams/create",
+        "/api/teams/create",
         json={"name": "Test Team", "description": "Team for testing"},
         headers=headers
     )
@@ -114,7 +114,7 @@ async def test_mid_tier_team_member_management(
     
     # Invite team member
     response = await async_client.post(
-        f"/api/v1/teams/{team_id}/invite",
+        f"/api/teams/{team_id}/invite",
         json={
             "email": "teammate@example.com",
             "role": "member",
@@ -127,7 +127,7 @@ async def test_mid_tier_team_member_management(
     assert "invitation_token" in invitation
     
     # List team members
-    response = await async_client.get(f"/api/v1/teams/{team_id}/members", headers=headers)
+    response = await async_client.get(f"/api/teams/{team_id}/members", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     members = response.json()
     assert len(members) >= 1  # Owner
@@ -153,7 +153,7 @@ async def test_mid_tier_shared_analytics_workspace(
     
     # Create team
     response = await async_client.post(
-        "/api/v1/teams/create",
+        "/api/teams/create",
         json={"name": "Analytics Team", "description": "Shared analytics"},
         headers=headers
     )
@@ -161,7 +161,7 @@ async def test_mid_tier_shared_analytics_workspace(
     
     # Access team analytics
     response = await async_client.get(
-        f"/api/v1/teams/{team_id}/analytics/dashboard",
+        f"/api/teams/{team_id}/analytics/dashboard",
         headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
@@ -172,7 +172,7 @@ async def test_mid_tier_shared_analytics_workspace(
     
     # Test shared cost center reporting
     response = await async_client.get(
-        f"/api/v1/teams/{team_id}/analytics/cost-center",
+        f"/api/teams/{team_id}/analytics/cost-center",
         params={"period": "current_month"},
         headers=headers
     )
@@ -221,7 +221,7 @@ async def test_mid_tier_bulk_optimization_operations(
     }
     
     response = await async_client.post(
-        "/api/v1/optimizations/bulk",
+        "/api/optimizations/bulk",
         json=bulk_request,
         headers=headers
     )
@@ -233,7 +233,7 @@ async def test_mid_tier_bulk_optimization_operations(
     # Monitor bulk job progress
     batch_id = bulk_job["batch_id"]
     response = await async_client.get(
-        f"/api/v1/optimizations/bulk/{batch_id}/status",
+        f"/api/optimizations/bulk/{batch_id}/status",
         headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
@@ -258,12 +258,12 @@ async def test_mid_tier_integrations_and_dashboards(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Test integrations marketplace
-    response = await async_client.get("/api/v1/integrations/marketplace", headers=headers)
+    response = await async_client.get("/api/integrations/marketplace", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     
     # Install integration
     response = await async_client.post(
-        "/api/v1/integrations/install",
+        "/api/integrations/install",
         json={"integration_id": "slack", "configuration": {"channel": "#ai"}},
         headers=headers
     )
@@ -271,7 +271,7 @@ async def test_mid_tier_integrations_and_dashboards(
     
     # Create custom dashboard
     response = await async_client.post(
-        "/api/v1/dashboards/create",
+        "/api/dashboards/create",
         json={"name": "Cost Dashboard", "widgets": [{"type": "cost_trend"}]},
         headers=headers
     )
@@ -295,7 +295,7 @@ async def test_mid_tier_cost_allocation_and_api_limits(
     
     # Set up cost centers
     response = await async_client.post(
-        "/api/v1/billing/cost-centers",
+        "/api/billing/cost-centers",
         json={"cost_centers": [{"name": "Development", "code": "DEV"}]},
         headers=headers
     )
@@ -303,7 +303,7 @@ async def test_mid_tier_cost_allocation_and_api_limits(
     
     # Generate API key and test higher limits
     response = await async_client.post(
-        "/api/v1/api-keys/generate",
+        "/api/api-keys/generate",
         json={"name": "Pro API Key", "type": "production"},
         headers=headers
     )
@@ -313,7 +313,7 @@ async def test_mid_tier_cost_allocation_and_api_limits(
     successful_requests = 0
     for i in range(150):
         response = await async_client.get(
-            "/api/v1/usage/current",
+            "/api/usage/current",
             headers={"X-API-Key": api_key}
         )
         if response.status_code == status.HTTP_200_OK:

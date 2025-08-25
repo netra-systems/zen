@@ -99,8 +99,8 @@ class ApiTransformationManager:
         """Configure transformation rules for different endpoints."""
         self.transformation_rules = {
             # User data transformation (v1 to v2)
-            "/api/v1/users": TransformationRule(
-                endpoint_pattern="/api/v1/users",
+            "/api/users": TransformationRule(
+                endpoint_pattern="/api/users",
                 direction="both",
                 source_schema="user_v1",
                 target_schema="user_v2", 
@@ -154,8 +154,8 @@ class ApiTransformationManager:
                 }
             ),
             # Agent configuration format conversion
-            "/api/v1/agents/config": TransformationRule(
-                endpoint_pattern="/api/v1/agents/config",
+            "/api/agents/config": TransformationRule(
+                endpoint_pattern="/api/agents/config",
                 direction="response",
                 source_schema="agent_config_internal",
                 target_schema="agent_config_public",
@@ -174,8 +174,8 @@ class ApiTransformationManager:
                 }
             ),
             # Metrics aggregation transformation
-            "/api/v1/metrics/aggregate": TransformationRule(
-                endpoint_pattern="/api/v1/metrics/aggregate",
+            "/api/metrics/aggregate": TransformationRule(
+                endpoint_pattern="/api/metrics/aggregate",
                 direction="both",
                 source_schema="metrics_request_v1",
                 target_schema="metrics_request_v2",
@@ -483,10 +483,10 @@ class ApiTransformationManager:
         app = web.Application(middlewares=[transformation_middleware])
         
         # Register gateway routes
-        app.router.add_route('*', '/api/v1/users{path:.*}', handle_default)
+        app.router.add_route('*', '/api/users{path:.*}', handle_default)
         app.router.add_route('*', '/api/legacy/threads{path:.*}', handle_default)
-        app.router.add_get('/api/v1/agents/config', handle_default)
-        app.router.add_post('/api/v1/metrics/aggregate', handle_default)
+        app.router.add_get('/api/agents/config', handle_default)
+        app.router.add_post('/api/metrics/aggregate', handle_default)
         app.router.add_post('/api/webhooks/inbound', handle_default)
         
         self.test_server = await asyncio.create_task(
@@ -741,10 +741,10 @@ class ApiTransformationManager:
         """Forward transformed request to backend."""
         # Map external endpoints to internal endpoints
         endpoint_mapping = {
-            "/api/v1/users": "/internal/v2/users",
+            "/api/users": "/internal/v2/users",
             "/api/legacy/threads": "/internal/v2/threads",
-            "/api/v1/agents/config": "/internal/agent/config",
-            "/api/v1/metrics/aggregate": "/internal/metrics/query",
+            "/api/agents/config": "/internal/agent/config",
+            "/api/metrics/aggregate": "/internal/metrics/query",
             "/api/webhooks/inbound": "/internal/webhooks/process"
         }
         
@@ -980,7 +980,7 @@ async def test_field_mapping_transformation(transformation_manager):
     
     # Test transformation accuracy
     result = await transformation_manager.test_transformation_accuracy(
-        "/api/v1/users", test_data, expected_transformations
+        "/api/users", test_data, expected_transformations
     )
     
     assert result["success"] is True
@@ -1025,7 +1025,7 @@ async def test_legacy_thread_transformation(transformation_manager):
 async def test_agent_config_data_conversion(transformation_manager):
     """Test agent configuration data conversion and filtering."""
     result = await transformation_manager.make_transformed_request(
-        "/api/v1/agents/config", "GET"
+        "/api/agents/config", "GET"
     )
     
     assert result["status_code"] == 200
@@ -1067,7 +1067,7 @@ async def test_metrics_schema_evolution(transformation_manager):
     }
     
     result = await transformation_manager.make_transformed_request(
-        "/api/v1/metrics/aggregate", "POST", test_data
+        "/api/metrics/aggregate", "POST", test_data
     )
     
     assert result["status_code"] == 200
@@ -1128,7 +1128,7 @@ async def test_transformation_error_handling(transformation_manager):
     }
     
     result = await transformation_manager.make_transformed_request(
-        "/api/v1/users", "POST", invalid_data
+        "/api/users", "POST", invalid_data
     )
     
     # Should handle transformation gracefully
@@ -1147,9 +1147,9 @@ async def test_concurrent_transformations(transformation_manager):
     """Test concurrent transformation requests."""
     # Test data for different endpoints
     test_scenarios = [
-        ("/api/v1/users", "POST", {"name": "User1", "email": "user1@example.com"}),
+        ("/api/users", "POST", {"name": "User1", "email": "user1@example.com"}),
         ("/api/legacy/threads", "POST", {"thread_title": "Thread1", "user_uuid": "user1"}),
-        ("/api/v1/agents/config", "GET", None),
+        ("/api/agents/config", "GET", None),
         ("/api/webhooks/inbound", "POST", {"event_type": "test", "timestamp": "2024-01-01T00:00:00Z"})
     ]
     
@@ -1187,7 +1187,7 @@ async def test_transformation_performance(transformation_manager):
     
     for i in range(20):
         result = await transformation_manager.make_transformed_request(
-            "/api/v1/users", "POST", test_data
+            "/api/users", "POST", test_data
         )
         if result["status_code"] == 200:
             response_times.append(result["response_time"])
@@ -1203,7 +1203,7 @@ async def test_transformation_performance(transformation_manager):
     concurrent_tasks = []
     for i in range(10):
         task = transformation_manager.make_transformed_request(
-            "/api/v1/users", "POST", test_data
+            "/api/users", "POST", test_data
         )
         concurrent_tasks.append(task)
     
@@ -1225,9 +1225,9 @@ async def test_transformation_metrics_accuracy(transformation_manager):
     """Test accuracy of transformation metrics collection."""
     # Generate test traffic across endpoints
     test_requests = [
-        ("/api/v1/users", "POST", {"name": "Test1", "email": "test1@example.com"}),
+        ("/api/users", "POST", {"name": "Test1", "email": "test1@example.com"}),
         ("/api/legacy/threads", "POST", {"thread_title": "Test Thread"}),
-        ("/api/v1/agents/config", "GET", None),
+        ("/api/agents/config", "GET", None),
     ]
     
     for path, method, data in test_requests * 2:  # 6 total requests

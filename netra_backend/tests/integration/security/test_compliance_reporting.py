@@ -75,9 +75,9 @@ class TestComplianceReporting:
             "unauthenticated_calls": 50,
             "rate_limit_violations": 3,
             "api_endpoints_accessed": [
-                {"endpoint": "/api/v1/search", "calls": 45000, "compliance_flags": ["gdpr_logged"]},
-                {"endpoint": "/api/v1/upload", "calls": 12000, "compliance_flags": ["soc2_tracked"]},
-                {"endpoint": "/api/v1/admin", "calls": 890, "compliance_flags": ["hipaa_logged", "admin_only"]}
+                {"endpoint": "/api/search", "calls": 45000, "compliance_flags": ["gdpr_logged"]},
+                {"endpoint": "/api/upload", "calls": 12000, "compliance_flags": ["soc2_tracked"]},
+                {"endpoint": "/api/admin", "calls": 890, "compliance_flags": ["hipaa_logged", "admin_only"]}
             ],
             "data_transfer_volume": "2.5TB",
             "compliance_score": 99.8

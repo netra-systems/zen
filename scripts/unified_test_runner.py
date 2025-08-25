@@ -545,10 +545,10 @@ class UnifiedTestRunner:
             os.environ.pop('USE_REAL_LLM', None)
         
         category_commands = {
-            "unit": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=unit",
-            "integration": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=integration",
-            "e2e": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=e2e",
-            "frontend": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}'"
+            "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
+            "integration": f"npm run test:integration -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
+            "e2e": f"npm run test:critical -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
+            "frontend": f"npm run test:fast -- --setupFilesAfterEnv='<rootDir>/{setup_file}'"
         }
         
         base_command = category_commands.get(category_name, f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}'")

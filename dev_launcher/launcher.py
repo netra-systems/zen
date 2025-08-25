@@ -743,9 +743,9 @@ class DevLauncher:
             self._print("✅", "CACHE", "Environment unchanged, skipping checks")
             return True
         
-        # Run comprehensive environment validation
+        # Run comprehensive environment validation with fallbacks
         self._print("🔍", "ENV", "Checking environment...")
-        validation_result = self.environment_validator.validate_all()
+        validation_result = self.environment_validator.validate_with_fallbacks()
         
         if not validation_result.is_valid:
             self._print("❌", "ENV", "Environment validation failed")
@@ -1552,11 +1552,31 @@ class DevLauncher:
             return success
         
         try:
-            # Run async check
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            ready = loop.run_until_complete(check_readiness())
-            loop.close()
+            # Run async check with proper event loop handling
+            try:
+                # Check if we're already in an async context
+                current_loop = asyncio.get_running_loop()
+                # Use run_coroutine_threadsafe for thread-safe execution
+                future = asyncio.run_coroutine_threadsafe(check_readiness(), current_loop)
+                ready = future.result(timeout=timeout)
+            except RuntimeError:
+                # No running loop, create a new one safely
+                try:
+                    ready = asyncio.run(check_readiness())
+                except RuntimeError as e:
+                    # Fallback: use new event loop in isolated context
+                    loop = None
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        ready = loop.run_until_complete(check_readiness())
+                    finally:
+                        if loop is not None:
+                            try:
+                                loop.close()
+                            except Exception as cleanup_e:
+                                logger.warning(f"Failed to close event loop: {cleanup_e}")
+                        asyncio.set_event_loop(None)
             
             if ready:
                 self._print("✅", "READY", "Backend is ready")
@@ -1597,23 +1617,29 @@ class DevLauncher:
         try:
             # Run async check with proper event loop handling
             try:
-                # Try to get the running loop first
-                loop = asyncio.get_running_loop()
-                # If we're in an async context, create a task
-                task = asyncio.create_task(verify_auth())
-                verified = asyncio.run_coroutine_threadsafe(verify_auth(), loop).result(timeout=timeout)
+                # Check if we're already in an async context
+                current_loop = asyncio.get_running_loop()
+                # Use run_coroutine_threadsafe for thread-safe execution
+                future = asyncio.run_coroutine_threadsafe(verify_auth(), current_loop)
+                verified = future.result(timeout=timeout)
             except RuntimeError:
                 # No running loop, create a new one safely
                 try:
                     verified = asyncio.run(verify_auth())
-                except RuntimeError:
-                    # Fallback: use new event loop in thread
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
+                except RuntimeError as e:
+                    # Fallback: use new event loop in isolated context
+                    loop = None
                     try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
                         verified = loop.run_until_complete(verify_auth())
                     finally:
-                        loop.close()
+                        if loop is not None:
+                            try:
+                                loop.close()
+                            except Exception as cleanup_e:
+                                logger.warning(f"Failed to close event loop: {cleanup_e}")
+                        asyncio.set_event_loop(None)
             
             if verified:
                 self._print("✅", "READY", "Auth system verified")
@@ -1651,11 +1677,31 @@ class DevLauncher:
             return success
         
         try:
-            # Run async check
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            ready = loop.run_until_complete(check_frontend())
-            loop.close()
+            # Run async check with proper event loop handling
+            try:
+                # Check if we're already in an async context
+                current_loop = asyncio.get_running_loop()
+                # Use run_coroutine_threadsafe for thread-safe execution
+                future = asyncio.run_coroutine_threadsafe(check_frontend(), current_loop)
+                ready = future.result(timeout=timeout)
+            except RuntimeError:
+                # No running loop, create a new one safely
+                try:
+                    ready = asyncio.run(check_frontend())
+                except RuntimeError as e:
+                    # Fallback: use new event loop in isolated context
+                    loop = None
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        ready = loop.run_until_complete(check_frontend())
+                    finally:
+                        if loop is not None:
+                            try:
+                                loop.close()
+                            except Exception as cleanup_e:
+                                logger.warning(f"Failed to close event loop: {cleanup_e}")
+                        asyncio.set_event_loop(None)
             
             if ready:
                 self._print("✅", "READY", "Frontend is ready")

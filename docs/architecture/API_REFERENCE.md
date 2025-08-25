@@ -1807,7 +1807,7 @@ Paginated responses include metadata:
 The API uses URL versioning. The current version is apex-v1:
 
 ```
-https://api.netrasystems.ai/apex-v1/...
+https://api.netrasystems.ai/apex-...
 ```
 
 Version information is also available in response headers:

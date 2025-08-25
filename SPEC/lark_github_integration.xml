@@ -140,7 +140,7 @@ async function sendToLark(channelId, card) {
   const token = await getLarkToken();
   
   await axios.post(
-    'https://open.larksuite.com/open-apis/im/v1/messages',
+    'https://open.larksuite.com/open-apis/im/messages',
     {
       receive_id: channelId,
       msg_type: 'interactive',
@@ -497,7 +497,7 @@ async function sendUserNotification(userId, message) {
   const token = await getLarkToken();
   
   await axios.post(
-    'https://open.larksuite.com/open-apis/im/v1/messages',
+    'https://open.larksuite.com/open-apis/im/messages',
     {
       receive_id: userId,
       msg_type: 'text',
@@ -787,7 +787,7 @@ async function sendUserNotification(userId, message, config) {
   const token = await getLarkToken(config);
   
   await axios.post(
-    'https://open.larksuite.com/open-apis/im/v1/messages',
+    'https://open.larksuite.com/open-apis/im/messages',
     {
       receive_id: userId,
       msg_type: 'text',
@@ -968,7 +968,7 @@ async function sendToLark(channelId, card, config) {
   
   // Send message
   await axios.post(
-    'https://open.larksuite.com/open-apis/im/v1/messages',
+    'https://open.larksuite.com/open-apis/im/messages',
     {
       receive_id: channelId,
       msg_type: 'interactive',
@@ -1046,7 +1046,7 @@ exports.handler = async (event) => {
     
     // Send to alerts channel
     await axios.post(
-      'https://open.larksuite.com/open-apis/im/v1/messages',
+      'https://open.larksuite.com/open-apis/im/messages',
       {
         receive_id: config.channels.alerts,
         msg_type: 'interactive',

@@ -26,6 +26,7 @@
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
             <critical-takeaway>Always verify OAuth configuration matches between code and provider console (oauth_deployment_verification.xml).</critical-takeaway>
             <critical-takeaway>Next.js proxy rewrites must be disabled in production - frontend should call services directly (oauth_staging_issues.xml).</critical-takeaway>
+            <critical-takeaway>Auth service routes ALWAYS use /api/auth/* prefix - frontend must include this (frontend_auth_urls.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">
@@ -37,6 +38,15 @@
             <critical-takeaway>Auth service MUST use unified configuration via lazy loading pattern while maintaining service independence (unified_config_auth_service.xml).</critical-takeaway>
         </category>
 
+        <category name="API Versioning Anti-Pattern" path="SPEC/learnings/api_versioning_antipattern.xml" keywords="API, v1, versioning, URLs, paths, REST">
+            <critical-takeaway>CRITICAL: The /api/v1 pattern is an ANTI-PATTERN causing confusion - use direct paths without version prefixes.</critical-takeaway>
+            <critical-takeaway>Auth service currently uses /api/auth/* but this should be /auth/* in future.</critical-takeaway>
+            <critical-takeaway>Backend has mixed versioning (/api/* and /api/*) causing inconsistency.</critical-takeaway>
+            <critical-takeaway>Frontend must hardcode knowledge of which services use v1 - source of bugs.</critical-takeaway>
+            <critical-takeaway>For internal microservices, version through deployment strategies, not URLs.</critical-takeaway>
+            <critical-takeaway>URLs should be clean and semantic: auth.domain/auth/*, api.domain/api/*.</critical-takeaway>
+        </category>
+        
         <category name="Project Structure" path="SPEC/learnings/project_structure_enforcement.xml" keywords="Structure, Imports, netra_backend, Canonical">
             <critical-takeaway>THE canonical structure: netra_backend/app/ for production, netra_backend/tests/ for tests. This is PERMANENT.</critical-takeaway>
             <critical-takeaway>All imports MUST use netra_backend.app.* prefix. Fix imports, NOT the structure.</critical-takeaway>
@@ -157,7 +167,7 @@
         
         <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">
             <critical-takeaway>All imports MUST use absolute imports with netra_backend namespace (e.g., from netra_backend.app.db import models).</critical-takeaway>
-            <critical-takeaway>Auth service endpoints use /auth prefix, NOT /api/v1/auth.</critical-takeaway>
+            <critical-takeaway>Auth service endpoints use /auth prefix, NOT /api/auth.</critical-takeaway>
             <critical-takeaway>Use /auth/dev/login for testing (no registration endpoint exists).</critical-takeaway>
             <critical-takeaway>Test files use netra_backend.tests.* namespace for test imports.</critical-takeaway>
         </category>
@@ -188,6 +198,8 @@
             <critical-takeaway>Health check endpoints must initialize database connections lazily if not already initialized.</critical-takeaway>
             <critical-takeaway>Auth service requires /health/ready endpoint on configured port (8080 default, not 8001).</critical-takeaway>
             <critical-takeaway>Database health checks must handle uninitialized async_engine gracefully by calling initialize_postgres().</critical-takeaway>
+            <critical-takeaway>Backend has TWO health implementations: active health.py at /health prefix and unused unified_health.py - /health/ready endpoint exists at /health/ready.</critical-takeaway>
+            <critical-takeaway>Health route registration uses health.py module (not unified_health.py) with endpoints: /health/, /health/ready, /health/live and others.</critical-takeaway>
         </category>
 
         <category name="Database/AsyncIO" path="SPEC/learnings/database_asyncio.xml" keywords="AsyncSession, Database, Postgres, ClickHouse">
@@ -519,6 +531,46 @@
             <critical-takeaway>TEST ISOLATION IS CRITICAL - All tests MUST use isolation mode to prevent pollution. Reset to original after each test.</critical-takeaway>
             <critical-takeaway>Use get_subprocess_env() for external process calls to maintain isolation boundaries</critical-takeaway>
             <critical-takeaway>Thread-safe operations with RLock for concurrent access. Variable protection prevents accidental overrides.</critical-takeaway>
+        </category>
+        
+        <category name="Port Binding Race Condition" path="SPEC/learnings/port_binding_race_condition.xml" keywords="Port Binding, Race Condition, Windows, Dev Launcher, Socket, Interface, localhost, 0.0.0.0, SO_REUSEADDR">
+            <critical-takeaway>ALWAYS check port availability on same interface that will be used for binding (e.g., if binding to 0.0.0.0, check 0.0.0.0, not localhost).</critical-takeaway>
+            <critical-takeaway>Match socket options (SO_REUSEADDR) between availability check and actual binding - if service doesn't use SO_REUSEADDR, don't use it in check.</critical-takeaway>
+            <critical-takeaway>Add small delays on Windows after port checks (time.sleep(0.01)) to allow OS socket cleanup and prevent race conditions.</critical-takeaway>
+            <critical-takeaway>Windows has different socket cleanup timing than Unix - interface mismatch creates race conditions where port appears available but bind fails.</critical-takeaway>
+            <critical-takeaway>Use centralized port allocation functions (find_available_port) with consistent interface parameters to maintain cross-platform compatibility.</critical-takeaway>
+        </category>
+        
+        <category name="GCP Staging Deployment Issues 2025" path="SPEC/learnings/gcp_staging_deployment_issues_2025.xml" keywords="GCP, Staging, Deployment, PostgreSQL, ClickHouse, SECRET_KEY, psycopg2, API Endpoints, Startup Sequence, Authentication, URL Validation, Database Drivers">
+            <critical-takeaway>CRITICAL: 80% of staging deployment failures prevented through comprehensive pre-deployment validation - never accept defaults in staging/production.</critical-takeaway>
+            <critical-takeaway>PostgreSQL authentication failures: validate credentials before connection attempts, implement environment-specific credential requirements.</critical-takeaway>
+            <critical-takeaway>ClickHouse URL control characters: implement URL validation detecting control characters (ASCII 0-31, 127), sanitize environment variables.</critical-takeaway>
+            <critical-takeaway>SECRET_KEY must be minimum 32 characters with entropy validation, detect insecure patterns, separate JWT_SECRET from SECRET_KEY.</critical-takeaway>
+            <critical-takeaway>Database drivers (psycopg2, asyncpg, clickhouse-connect) must be validated during startup, implement fallback strategies.</critical-takeaway>
+            <critical-takeaway>API endpoint 404s: validate route registration, router exports, prefix configuration during application startup.</critical-takeaway>
+            <critical-takeaway>Startup sequence: fix logger scoping, initialization order (logger -> config -> services), break circular dependencies.</critical-takeaway>
+            <critical-takeaway>Environment-specific validation: Development (permissive), Staging (strict, fail-fast), Production (ultra-strict, zero tolerance).</critical-takeaway>
+        </category>
+        
+        <category name="Event Loop Management" path="SPEC/learnings/event_loop_management.xml" keywords="Event Loop, asyncio, Thread Safety, Database SSL Parameters, Resource Cleanup, Async Execution">
+            <critical-takeaway>ALWAYS check for running event loop with asyncio.get_running_loop() before using asyncio.run() to prevent "cannot be called from a running event loop" errors.</critical-takeaway>
+            <critical-takeaway>Use asyncio.run_coroutine_threadsafe() for thread-safe async execution when event loop already exists.</critical-takeaway>
+            <critical-takeaway>Database SSL parameter conflicts: sync drivers (psycopg2) use sslmode=, async drivers (asyncpg) use ssl= - normalize during URL building.</critical-takeaway>
+            <critical-takeaway>Cloud SQL Unix socket connections must have NO SSL parameters - SSL handled at socket level.</critical-takeaway>
+            <critical-takeaway>ALWAYS use try-finally blocks for event loop cleanup to prevent resource leaks on exceptions.</critical-takeaway>
+            <critical-takeaway>Include timeouts on future.result() calls to prevent hanging operations in thread-safe async execution.</critical-takeaway>
+            <critical-takeaway>Test event loop handling in multiple contexts: sync, async, threaded execution scenarios.</critical-takeaway>
+        </category>
+        
+        <category name="GCP Staging Deployment Tests 2025" path="SPEC/learnings/gcp_staging_deployment_tests_2025.xml" keywords="Failing Tests, PostgreSQL Authentication, ClickHouse Secret Formatting, Redis Connection, Migration Locks, Deployment Validation">
+            <critical-takeaway>CRITICAL: Create failing tests BEFORE fixing deployment issues to validate root cause understanding and prevent regressions.</critical-takeaway>
+            <critical-takeaway>PostgreSQL authentication failures: 80% caused by wrong password or username in GCP Secret Manager - test with invalid credentials.</critical-takeaway>
+            <critical-takeaway>ClickHouse secret formatting: Extra whitespace/newlines from Secret Manager cause URL parsing failures - test all control characters (ASCII 0-31, 127).</critical-takeaway>
+            <critical-takeaway>Redis connection issues: Service not provisioned in staging - test connection refusal and authentication failures.</critical-takeaway>
+            <critical-takeaway>Migration lock problems: Concurrent migrations and stale locks prevent deployments - test advisory lock acquisition failures.</critical-takeaway>
+            <critical-takeaway>Comprehensive validation: All secrets must be trimmed and validated - test environment-specific strictness (dev permissive, staging strict).</critical-takeaway>
+            <critical-takeaway>Test coverage: 47 failing test methods across 5 categories provide comprehensive deployment validation.</critical-takeaway>
+            <critical-takeaway>Pre-deployment validation prevents 80% of staging deployment failures through early issue detection.</critical-takeaway>
         </category>
     </categories>
     

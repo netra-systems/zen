@@ -142,7 +142,7 @@ class QuotaManager:
         """Get current quota status from API."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {self.tester.current_token}"}
-            response = await client.get(f"{self.tester.backend_base_url}/api/v1/user/quota", headers=headers)
+            response = await client.get(f"{self.tester.backend_base_url}/api/user/quota", headers=headers)
             assert response.status_code == 200, f"Quota status failed: {response.status_code}"
             return response.json()
     
@@ -191,7 +191,7 @@ class UpgradeFlowManager:
         async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {self.tester.current_token}"}
             response = await client.post(
-                f"{self.tester.backend_base_url}/api/v1/user/upgrade",
+                f"{self.tester.backend_base_url}/api/user/upgrade",
                 headers=headers,
                 json=upgrade_request
             )

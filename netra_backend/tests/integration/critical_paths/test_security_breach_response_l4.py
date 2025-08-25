@@ -1019,7 +1019,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
             "/.env",
             "/admin",
             "/dashboard",
-            "/api/v1/health",
+            "/api/health",
             "/api/debug"
         ]
         

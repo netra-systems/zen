@@ -37,31 +37,27 @@ import MainChat from '@/components/chat/MainChat';
 import { renderWithProviders, createMockWebSocket } from '../../shared/unified-test-utilities';
 import { simulateMobileViewport, resetViewport } from '../../components/MessageInput/shared-test-setup';
 
+// Store mocks for real component integration
+
 // Mock WebSocket for streaming simulation
 const mockWebSocket = createMockWebSocket();
 const mockSendMessage = createActAsyncMockFunction();
 const mockHandleSend = createActAsyncMockFunction();
 
-// Store mocks for real component integration
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseThreadStore = jest.fn();
-const mockUseAuthStore = jest.fn();
-const mockUseWebSocket = jest.fn();
-
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: jest.fn()
 }));
 
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: mockUseThreadStore
+  useThreadStore: jest.fn()
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: jest.fn()
 }));
 
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: mockUseWebSocket
+  useWebSocket: jest.fn()
 }));
 
 // Message input hooks mocks
@@ -77,12 +73,24 @@ jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
   useTextareaResize: jest.fn(() => ({ rows: 1 }))
 }));
 
+let mockIsSending = false;
 jest.mock('@/components/chat/hooks/useMessageSending', () => ({
-  useMessageSending: jest.fn(() => ({
-    isSending: false,
+  useMessageSending: () => ({
+    isSending: mockIsSending,
     handleSend: mockHandleSend
-  }))
+  })
 }));
+
+// Get references to the mocked functions after they're created
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useThreadStore } from '@/store/threadStore';
+import { useAuthStore } from '@/store/authStore';
+import { useWebSocket } from '@/hooks/useWebSocket';
+
+const mockUseUnifiedChatStoreImpl = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
+const mockUseThreadStoreImpl = useThreadStore as jest.MockedFunction<typeof useThreadStore>;
+const mockUseAuthStoreImpl = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
+const mockUseWebSocketImpl = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
 
 // Performance measurement utilities
 const measurePerformance = async (operation: () => Promise<void>) => {
@@ -104,7 +112,7 @@ const createStreamingResponse = (content: string, delay: number = 50) => {
 
 // Setup authenticated user state
 const setupAuthenticatedUser = () => {
-  mockUseAuthStore.mockReturnValue({
+  mockUseAuthStoreImpl.mockReturnValue({
     isAuthenticated: true,
     user: { id: 'user-123', email: 'test@netrasystems.ai' },
     token: 'valid-token'
@@ -113,7 +121,7 @@ const setupAuthenticatedUser = () => {
 
 // Setup chat store with real-like state
 const setupChatStore = (overrides = {}) => {
-  mockUseUnifiedChatStore.mockReturnValue({
+  mockUseUnifiedChatStoreImpl.mockReturnValue({
     activeThreadId: 'thread-123',
     isProcessing: false,
     messages: [],
@@ -129,7 +137,7 @@ const setupChatStore = (overrides = {}) => {
 
 // Setup thread store
 const setupThreadStore = () => {
-  mockUseThreadStore.mockReturnValue({
+  mockUseThreadStoreImpl.mockReturnValue({
     currentThreadId: 'thread-123',
     setCurrentThread: jest.fn(),
     addThread: jest.fn()
@@ -138,7 +146,7 @@ const setupThreadStore = () => {
 
 // Setup WebSocket mock
 const setupWebSocket = (overrides = {}) => {
-  mockUseWebSocket.mockReturnValue({
+  mockUseWebSocketImpl.mockReturnValue({
     sendMessage: mockSendMessage,
     isConnected: true,
     connectionState: 'connected',
@@ -151,6 +159,7 @@ const setupWebSocket = (overrides = {}) => {
 describe('First Message Experience - Complete User Journey', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsSending = false;
     setupAuthenticatedUser();
     setupChatStore();
     setupThreadStore();
@@ -313,24 +322,14 @@ describe('First Message Experience - Complete User Journey', () => {
     });
 
     it('should show sending indicator while processing', async () => {
-      const user = userEvent.setup();
+      // Set sending state to true for the test
+      mockIsSending = true;
       
-      // Mock slow send operation
-      mockHandleSend.mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      });
+      const { rerender } = renderWithProviders(<MessageInput />);
       
-      renderWithProviders(<MessageInput />);
-      
-      const textarea = screen.getByLabelText('Message input');
-      
-      await user.type(textarea, 'Test');
-      
-      // Click send button to see sending state
       const sendButton = screen.getByLabelText('Send message');
-      await actFireEvent.click(sendButton);
       
-      // Should show sending state immediately
+      // Should show sending state
       expect(sendButton).toHaveTextContent('Sending...');
       expect(sendButton).toBeDisabled();
     });

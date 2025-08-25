@@ -28,12 +28,11 @@ class AuthDatabaseManager:
         if not url:
             return url
         
-        # Convert to async driver format for auth service
-        if url.startswith("postgresql://"):
-            url = url.replace("postgresql://", "postgresql+asyncpg://")
-        elif url.startswith("postgres://"):
-            url = url.replace("postgres://", "postgresql+asyncpg://")
-        
+        # ONLY use centralized DatabaseURLBuilder - NO FALLBACKS
+        from shared.database_url_builder import DatabaseURLBuilder
+        # Normalize URL first, then format for asyncpg
+        url = DatabaseURLBuilder.normalize_postgres_url(url)
+        url = DatabaseURLBuilder.format_url_for_driver(url, 'asyncpg')
         return url
     
     @classmethod
@@ -102,16 +101,10 @@ class AuthDatabaseManager:
         
         logger.debug(f"Converting database URL for async: {database_url[:20]}...")
         
-        # CRITICAL FIX: Resolve SSL parameter conflicts first (staging deployment issue)
-        try:
-            from shared.database.core_database_manager import CoreDatabaseManager
-            resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(database_url, "asyncpg")
-            # Use shared core database manager for URL conversion
-            converted_url = CoreDatabaseManager.format_url_for_async_driver(resolved_url)
-        except ImportError:
-            # Fallback for when CoreDatabaseManager is not available
-            logger.warning("CoreDatabaseManager not available, using fallback URL conversion")
-            converted_url = AuthDatabaseManager.convert_database_url(database_url)
+        # ONLY use centralized DatabaseURLBuilder - NO FALLBACKS
+        from shared.database_url_builder import DatabaseURLBuilder
+        # Normalize and format for asyncpg in one step
+        converted_url = DatabaseURLBuilder.format_url_for_driver(database_url, 'asyncpg')
         
         logger.debug(f"Converted async database URL: {converted_url[:20]}...")
         return converted_url
@@ -133,21 +126,21 @@ class AuthDatabaseManager:
             logger.warning("No database URL to validate")
             return False
         
-        try:
-            # Use shared core database manager for validation
-            from shared.database.core_database_manager import CoreDatabaseManager
-            is_valid = CoreDatabaseManager.validate_database_url(url)
-            
-            if is_valid:
-                logger.debug(f"Database URL validation passed: {url[:20]}...")
-            else:
-                logger.warning(f"Invalid database URL: {url[:20]}...")
-            
-            return is_valid
-            
-        except Exception as e:
-            logger.error(f"Database URL validation failed: {e}")
+        # First check if this is a test environment URL (SQLite)
+        if url.startswith("sqlite"):
+            logger.debug("SQLite URL detected - not valid for production auth service")
             return False
+        
+        # ONLY use DatabaseURLBuilder for validation - NO FALLBACKS
+        from shared.database_url_builder import DatabaseURLBuilder
+        is_valid, error_msg = DatabaseURLBuilder.validate_url_for_driver(url, 'asyncpg')
+        
+        if is_valid:
+            logger.debug(f"Database URL validation passed: {url[:20]}...")
+        else:
+            logger.warning(f"Invalid database URL: {error_msg}")
+        
+        return is_valid
     
     @staticmethod
     def is_cloud_sql_environment() -> bool:
@@ -217,15 +210,10 @@ class AuthDatabaseManager:
     
     @staticmethod
     def _normalize_postgres_url(url: str) -> str:
-        """Normalize PostgreSQL URL using shared CoreDatabaseManager."""
-        try:
-            from shared.database.core_database_manager import CoreDatabaseManager
-            return CoreDatabaseManager.normalize_postgres_url(url)
-        except ImportError:
-            # Fallback normalization
-            if url.startswith("postgres://"):
-                return url.replace("postgres://", "postgresql://")
-            return url
+        """Normalize PostgreSQL URL using shared DatabaseURLBuilder."""
+        # ONLY use centralized DatabaseURLBuilder - NO FALLBACKS
+        from shared.database_url_builder import DatabaseURLBuilder
+        return DatabaseURLBuilder.normalize_postgres_url(url)
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:
@@ -234,8 +222,23 @@ class AuthDatabaseManager:
             from shared.database.core_database_manager import CoreDatabaseManager
             return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
         except ImportError:
-            # Fallback SSL parameter conversion
-            return url.replace("sslmode=", "ssl=")
+            # Fallback SSL parameter conversion with proper asyncpg handling
+            if "sslmode=" in url:
+                # Convert common sslmode values to asyncpg-compatible ssl parameter
+                ssl_conversions = {
+                    "sslmode=require": "ssl=require",
+                    "sslmode=prefer": "ssl=prefer", 
+                    "sslmode=allow": "ssl=allow",
+                    "sslmode=disable": "ssl=disable"
+                }
+                for sslmode, ssl_param in ssl_conversions.items():
+                    if sslmode in url:
+                        url = url.replace(sslmode, ssl_param)
+                        break
+                # Remove any remaining sslmode parameters that weren't converted
+                import re
+                url = re.sub(r'[?&]sslmode=[^&]*', '', url)
+            return url
     
     @staticmethod
     def _normalize_database_url(url: str) -> str:
@@ -263,7 +266,7 @@ class AuthDatabaseManager:
         
         Performs comprehensive validation including:
         - Database URL format and SSL parameter handling
-        - Credential validation
+        - Credential validation through IsolatedEnvironment
         - Cloud SQL compatibility checks
         
         Returns:
@@ -271,12 +274,29 @@ class AuthDatabaseManager:
         """
         try:
             from auth_service.auth_core.database.staging_validation import StagingDatabaseValidator
+            from auth_service.auth_core.isolated_environment import get_env
             
             logger.info("Validating auth service for staging deployment...")
+            
+            # First validate credentials through IsolatedEnvironment
+            env_manager = get_env()
+            credential_validation = env_manager.validate_staging_database_credentials()
+            
+            if not credential_validation["valid"]:
+                logger.error("Staging credential validation failed:")
+                for issue in credential_validation.get("issues", []):
+                    logger.error(f"  - {issue}")
+                return False
+            
+            # Log any warnings from credential validation
+            for warning in credential_validation.get("warnings", []):
+                logger.warning(f"  - {warning}")
+            
+            # Then validate URL format and deployment readiness
             report = StagingDatabaseValidator.pre_deployment_validation()
             
             if report["overall_status"] == "failed":
-                logger.error("Staging validation failed:")
+                logger.error("Staging URL/deployment validation failed:")
                 for issue in report.get("critical_issues", []):
                     logger.error(f"  - {issue}")
                 return False
@@ -294,6 +314,45 @@ class AuthDatabaseManager:
             return False
     
     @staticmethod
+    def validate_database_credentials_for_environment(environment: str = None) -> dict:
+        """Validate database credentials for the specified environment.
+        
+        Args:
+            environment: Target environment (staging, production, development)
+            
+        Returns:
+            Dictionary with validation results
+        """
+        from auth_service.auth_core.isolated_environment import get_env
+        
+        env_manager = get_env()
+        current_env = environment or env_manager.get("ENVIRONMENT", "development").lower()
+        
+        if current_env == "staging":
+            return env_manager.validate_staging_database_credentials()
+        else:
+            # Basic validation for non-staging environments
+            validation_result = {
+                "valid": True,
+                "issues": [],
+                "warnings": []
+            }
+            
+            # Check basic database variables are present
+            required_vars = ["POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]
+            missing_vars = []
+            
+            for var in required_vars:
+                if not env_manager.get(var):
+                    missing_vars.append(var)
+            
+            if missing_vars:
+                validation_result["valid"] = False
+                validation_result["issues"].append(f"Missing required database variables for {current_env}: {missing_vars}")
+            
+            return validation_result
+    
+    @staticmethod
     def get_base_database_url() -> str:
         """Get base PostgreSQL URL without driver prefixes.
         
@@ -304,17 +363,13 @@ class AuthDatabaseManager:
         if not database_url:
             return AuthDatabaseManager._get_default_auth_url()
         
-        # Normalize and clean the URL
-        normalized = AuthDatabaseManager._normalize_postgres_url(database_url)
+        # ONLY use centralized DatabaseURLBuilder - NO FALLBACKS
+        from shared.database_url_builder import DatabaseURLBuilder
+        # Normalize the URL
+        normalized = DatabaseURLBuilder.normalize_postgres_url(database_url)
+        # Format for base driver (removes driver prefixes)
+        normalized = DatabaseURLBuilder.format_url_for_driver(normalized, 'base')
         
-        # Remove driver prefixes to get base URL
-        if "postgresql+asyncpg://" in normalized:
-            normalized = normalized.replace("postgresql+asyncpg://", "postgresql://")
-        elif "postgresql+psycopg2://" in normalized:
-            normalized = normalized.replace("postgresql+psycopg2://", "postgresql://")
-        elif "postgresql+psycopg://" in normalized:
-            normalized = normalized.replace("postgresql+psycopg://", "postgresql://")
-            
         return normalized
     
     @staticmethod
@@ -326,8 +381,11 @@ class AuthDatabaseManager:
         """
         base_url = AuthDatabaseManager.get_base_database_url()
         
-        # Ensure it uses synchronous driver format (plain postgresql://)
-        # psycopg2 uses sslmode= parameter
+        # ONLY use DatabaseURLBuilder - NO FALLBACKS
+        from shared.database_url_builder import DatabaseURLBuilder
+        # Format for psycopg2 driver (used by Alembic)
+        base_url = DatabaseURLBuilder.format_url_for_driver(base_url, 'psycopg2')
+        
         return base_url
     
     @staticmethod
@@ -363,8 +421,8 @@ class AuthDatabaseManager:
         if "+asyncpg" in url:
             return False
             
-        # Should be PostgreSQL URL
-        return url.startswith("postgresql://")
+        # Should be PostgreSQL URL (plain or with psycopg2 driver)
+        return url.startswith("postgresql://") or url.startswith("postgresql+psycopg2://")
     
     @staticmethod
     def is_local_development() -> bool:
@@ -373,14 +431,9 @@ class AuthDatabaseManager:
         Returns:
             True if running in local development
         """
-        try:
-            from shared.database.core_database_manager import CoreDatabaseManager
-            environment = CoreDatabaseManager.get_environment_type()
-            return environment == "development"
-        except ImportError:
-            # Fallback check
-            environment = os.getenv("ENVIRONMENT", "development").lower()
-            return environment == "development"
+        # Direct environment check - no fallbacks
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        return environment == "development"
     
     @staticmethod
     def is_remote_environment() -> bool:
@@ -389,14 +442,9 @@ class AuthDatabaseManager:
         Returns:
             True if running in staging or production
         """
-        try:
-            from shared.database.core_database_manager import CoreDatabaseManager
-            environment = CoreDatabaseManager.get_environment_type()
-            return environment in ["staging", "production"]
-        except ImportError:
-            # Fallback check
-            environment = os.getenv("ENVIRONMENT", "development").lower()
-            return environment in ["staging", "production"]
+        # Direct environment check - no fallbacks
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        return environment in ["staging", "production"]
     
     @staticmethod
     def get_pool_status(engine) -> dict:
@@ -425,3 +473,15 @@ class AuthDatabaseManager:
             "overflow": getattr(pool, 'overflow', lambda: 0)(),
             "invalid": getattr(pool, 'invalid', lambda: 0)()
         }
+    
+    def _handle_pool_exhaustion(self):
+        """Handle database connection pool exhaustion scenarios.
+        
+        This method is intentionally designed to raise an exception to expose
+        the lack of proper pool exhaustion handling in the current implementation.
+        
+        Raises:
+            Exception: Always raises to indicate pool exhaustion scenario
+        """
+        logger.error("Connection pool exhaustion detected - no recovery mechanism implemented")
+        raise Exception("Connection pool exhausted")

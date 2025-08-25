@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning category="database">
+    <title>Database Migration Conflicts and Race Conditions</title>
+    <problem>
+        Dual competing table creation systems causing "relation already exists" errors during startup.
+        MigrationTracker (Alembic) and DatabaseInitializer both trying to create the same tables.
+    </problem>
+    
+    <root_cause>
+        Two initialization paths without coordination:
+        1. MigrationTracker using Alembic migrations
+        2. DatabaseInitializer using direct SQL CREATE TABLE
+        Both systems run during startup and compete to create tables.
+    </root_cause>
+    
+    <solution>
+        Make DatabaseInitializer check for Alembic-managed schema first.
+        If Alembic has run, skip direct table creation.
+        For now, keep initialization linear/sequential to avoid complexity.
+    </solution>
+    
+    <implementation>
+        Added check in DatabaseInitializer._initialize_postgresql_schema():
+        - Check if alembic_version table exists
+        - If yes, schema is Alembic-managed, skip table creation
+        - If no, proceed with direct table creation
+        - Make all operations idempotent with IF NOT EXISTS
+    </implementation>
+    
+    <future_improvement>
+        Can optimize with proper async coordination and parallel initialization
+        once basic system is stable. For now, linear execution ensures reliability.
+    </future_improvement>
+    
+    <prevention>
+        - Always check for existing tables before creation
+        - Use CREATE TABLE IF NOT EXISTS pattern
+        - Have single source of truth for schema management
+        - Consider using only one initialization system
+    </prevention>
+    
+    <files>
+        <file>netra_backend/app/db/database_initializer.py</file>
+        <file>netra_backend/app/core/db_setup.py</file>
+        <file>netra_backend/tests/startup/test_migration_race_condition.py</file>
+    </files>
+</learning>
+</xml>

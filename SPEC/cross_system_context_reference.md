@@ -245,7 +245,7 @@ def get_backend_url():
 - **Caching**: 5-minute TTL in Redis
 
 **Frontend → Backend**:
-- **REST API**: /api/v1/* endpoints
+- **REST API**: /api/* endpoints
 - **WebSocket**: /ws for real-time
 - **Authentication**: Bearer token in headers
 - **Error Handling**: Circuit breaker pattern

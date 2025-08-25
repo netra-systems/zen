@@ -93,6 +93,8 @@ async def test_connection():
             await conn.close()
         except Exception as e:
             print(f"   FAILED: {e}")
+            import traceback
+            print(f"   TRACEBACK: {traceback.format_exc()}")
             return False
         
         print(f"\n4. Testing sync connection with psycopg2...")
@@ -108,6 +110,8 @@ async def test_connection():
                     print(f"   SUCCESS! PostgreSQL version: {result[:50]}...")
         except Exception as e:
             print(f"   FAILED: {e}")
+            import traceback
+            print(f"   TRACEBACK: {traceback.format_exc()}")
             return False
         
         print("\n" + "=" * 60)

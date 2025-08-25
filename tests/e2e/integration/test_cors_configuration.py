@@ -131,9 +131,9 @@ class TestCORSConfiguration:
         backend_endpoints = [
             "/health",
             "/health/ready", 
-            "/api/v1/threads",
-            "/api/v1/auth/status",
-            "/api/v1/config"
+            "/api/threads",
+            "/api/auth/status",
+            "/api/config"
         ]
         
         results = {}
@@ -233,7 +233,7 @@ class TestCORSConfiguration:
     async def test_preflight_options_requests(self, cors_validator):
         """Test OPTIONS preflight requests across services."""
         test_urls = [
-            f"{cors_validator.config.backend_url}/api/v1/threads",
+            f"{cors_validator.config.backend_url}/api/threads",
             f"{cors_validator.config.auth_url}/auth/config",
             f"{cors_validator.config.backend_url}/health"
         ]

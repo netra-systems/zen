@@ -27,11 +27,11 @@ import pytest
 DEV_BACKEND_URL = "http://localhost:8000"
 AUTH_SERVICE_URL = "http://localhost:8081"
 SERVICES = {
-    "backend": f"{DEV_BACKEND_URL}/api/v1/health",
+    "backend": f"{DEV_BACKEND_URL}/api/health",
     "auth": f"{AUTH_SERVICE_URL}/health",
-    "database": f"{DEV_BACKEND_URL}/api/v1/health/db",
-    "cache": f"{DEV_BACKEND_URL}/api/v1/health/cache",
-    "websocket": f"{DEV_BACKEND_URL}/api/v1/health/ws"
+    "database": f"{DEV_BACKEND_URL}/api/health/db",
+    "cache": f"{DEV_BACKEND_URL}/api/health/cache",
+    "websocket": f"{DEV_BACKEND_URL}/api/health/ws"
 }
 
 class HealthCheckCascadeTester:
@@ -110,7 +110,7 @@ class HealthCheckCascadeTester:
         """Test circuit breaker activation on repeated failures."""
         print("\n[BREAKER] Testing circuit breaker activation...")
         
-        endpoint = f"{DEV_BACKEND_URL}/api/v1/test/failure"
+        endpoint = f"{DEV_BACKEND_URL}/api/test/failure"
         failures = 0
         circuit_opened = False
         
@@ -140,7 +140,7 @@ class HealthCheckCascadeTester:
         headers = {"X-Test-Mode": "degrade-cache"}
         
         async with self.session.get(
-            f"{DEV_BACKEND_URL}/api/v1/data",
+            f"{DEV_BACKEND_URL}/api/data",
             headers=headers
         ) as response:
             if response.status == 200:

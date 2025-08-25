@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider } from '@/auth/context';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';

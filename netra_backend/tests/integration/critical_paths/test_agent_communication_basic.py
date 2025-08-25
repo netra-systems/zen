@@ -38,7 +38,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Agent Test Thread"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -53,7 +53,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -75,7 +75,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Response Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -90,7 +90,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -102,7 +102,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             max_attempts = 10
             for _ in range(max_attempts):
                 async with session.get(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     assert resp.status == 200
@@ -128,7 +128,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Chain Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -143,7 +143,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -155,7 +155,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             max_attempts = 20
             for _ in range(max_attempts):
                 async with session.get(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     assert resp.status == 200
@@ -185,7 +185,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Error Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -202,7 +202,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -214,7 +214,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             await asyncio.sleep(2)
             
             async with session.get(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -235,7 +235,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Timeout Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -251,7 +251,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -263,7 +263,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             await asyncio.sleep(7)
             
             async with session.get(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -283,7 +283,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Concurrent Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -300,7 +300,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 }
                 
                 tasks.append(session.post(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages",
                     json=message_data,
                     headers={"Authorization": f"Bearer {token}"}
                 ))
@@ -319,7 +319,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             
             for message_id in message_ids:
                 async with session.get(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     assert resp.status == 200
@@ -337,7 +337,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Priority Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -361,7 +361,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 }
                 
                 async with session.post(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages",
                     json=message_data,
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
@@ -375,7 +375,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             completion_times = []
             for message_id, priority in message_ids:
                 async with session.get(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     assert resp.status == 200
@@ -401,7 +401,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Context Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -416,7 +416,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message1_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -431,7 +431,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message2_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -443,7 +443,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             await asyncio.sleep(3)
             
             async with session.get(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -465,7 +465,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 thread_data = {"title": f"Load Test {i}"}
                 
                 async with session.post(
-                    f"{self.backend_url}/api/v1/threads",
+                    f"{self.backend_url}/api/threads",
                     json=thread_data,
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
@@ -483,7 +483,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                     }
                     
                     tasks.append(session.post(
-                        f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                        f"{self.backend_url}/api/threads/{thread_id}/messages",
                         json=message_data,
                         headers={"Authorization": f"Bearer {token}"}
                     ))
@@ -520,7 +520,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             thread_data = {"title": "Retry Test"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -536,7 +536,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -548,7 +548,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             max_attempts = 15
             for _ in range(max_attempts):
                 async with session.get(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     assert resp.status == 200

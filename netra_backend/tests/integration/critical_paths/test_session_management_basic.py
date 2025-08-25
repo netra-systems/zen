@@ -70,7 +70,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
         async with aiohttp.ClientSession() as session:
             # Valid session
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -79,7 +79,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             
             # Invalid session
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": "Bearer invalid_token"}
             ) as resp:
                 assert resp.status == 401
@@ -112,7 +112,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
         # Try to use expired session
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 401
@@ -145,7 +145,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             
             # Verify token no longer works
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 401
@@ -175,7 +175,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             # Verify all sessions work
             for token in tokens:
                 async with session.get(
-                    f"{self.backend_url}/api/v1/users/me",
+                    f"{self.backend_url}/api/users/me",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     assert resp.status == 200
@@ -210,7 +210,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
         
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -250,7 +250,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             
             # Get session info
             async with session.get(
-                f"{self.backend_url}/api/v1/users/sessions",
+                f"{self.backend_url}/api/users/sessions",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -316,7 +316,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
         
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -338,7 +338,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             tasks = []
             for i in range(10):
                 tasks.append(session.get(
-                    f"{self.backend_url}/api/v1/threads",
+                    f"{self.backend_url}/api/threads",
                     headers={"Authorization": f"Bearer {token}"}
                 ))
             
@@ -350,7 +350,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             
             # Session should still be valid
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200

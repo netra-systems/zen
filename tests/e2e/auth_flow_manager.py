@@ -34,8 +34,9 @@ class AuthCompleteFlowManager:
     async def setup_complete_test_environment(self):
         """Setup complete test environment with controlled services."""
         try:
+            await self.harness.test_start_test_environment()
             await self.auth_tester.setup_controlled_services()
             yield self.auth_tester
         finally:
             await self.auth_tester.cleanup_services()
-            await self.harness.cleanup()
+            await self.harness.test_cleanup_test_environment()

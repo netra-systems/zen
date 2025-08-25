@@ -169,9 +169,9 @@ class TestAuthenticationE2E(DevEnvironmentE2ETests):
         """Test authorization for different user tiers."""
         tiers = [PlanTier.FREE, PlanTier.PRO, PlanTier.ENTERPRISE]
         tier_endpoints = {
-            PlanTier.FREE: ["/api/v1/basic"],
-            PlanTier.PRO: ["/api/v1/basic", "/api/v1/advanced"],
-            PlanTier.ENTERPRISE: ["/api/v1/basic", "/api/v1/advanced", "/api/v1/enterprise"]
+            PlanTier.FREE: ["/api/basic"],
+            PlanTier.PRO: ["/api/basic", "/api/advanced"],
+            PlanTier.ENTERPRISE: ["/api/basic", "/api/advanced", "/api/enterprise"]
         }
         
         for tier in tiers:
@@ -469,7 +469,7 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         
         # 1. Create entity
         create_response = await async_client.post(
-            "/api/v1/entities",
+            "/api/entities",
             json=entity_data,
             headers=headers
         )
@@ -486,7 +486,7 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         }
         
         update_response = await async_client.put(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             json=update_data,
             headers=headers
         )
@@ -494,7 +494,7 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         
         # 3. Read entity to verify consistency
         read_response = await async_client.get(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             headers=headers
         )
         assert read_response.status_code == 200
@@ -503,14 +503,14 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         
         # 4. Delete entity
         delete_response = await async_client.delete(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             headers=headers
         )
         assert delete_response.status_code in [200, 204]
         
         # 5. Verify deletion
         verify_response = await async_client.get(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             headers=headers
         )
         assert verify_response.status_code == 404
@@ -639,7 +639,7 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
         
         try:
             profile_response = await async_client.post(
-                "/api/v1/profiles",
+                "/api/profiles",
                 json=profile,
                 headers=headers
             )
@@ -653,7 +653,7 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
         # 4. Try to retrieve detailed results (endpoint may not exist)
         try:
             results_response = await async_client.get(
-                "/api/v1/optimizations/latest",
+                "/api/optimizations/latest",
                 headers=headers
             )
             # Accept success, not found, or unauthorized for dev environment

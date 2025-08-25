@@ -87,18 +87,30 @@ class OAuthSecurityManager:
         Returns:
             True if nonce is valid (not replayed), False if already used
         """
-        # Ensure Redis connection via unified manager
-        if not self.redis_manager.is_available():
-            self.redis_manager.connect()
+        nonce_key = f"oauth_nonce:{nonce}"
+        
+        # Use memory store if Redis not available (for testing)
+        if self._use_memory_store():
+            # Check if already used
+            if nonce_key in self._memory_store:
+                logger.warning(f"Nonce replay attack detected: {nonce}")
+                return False
             
-        redis_client = self.redis_client
-        if not redis_client:
-            logger.warning("Redis not available for nonce tracking")
-            return True  # Allow if Redis not available
-            
+            # Mark as used
+            self._memory_store[nonce_key] = "used"
+            return True
+        
+        # Use Redis for production
         try:
-            nonce_key = f"oauth_nonce:{nonce}"
-            
+            # Ensure Redis connection via unified manager
+            if not self.redis_manager.is_available():
+                self.redis_manager.connect()
+                
+            redis_client = self.redis_client
+            if not redis_client:
+                logger.warning("Redis not available for nonce tracking")
+                return True  # Allow if Redis not available
+                
             # Use atomic SET with NX to prevent race conditions
             result = redis_client.set(nonce_key, "used", ex=600, nx=True)
             
@@ -122,18 +134,30 @@ class OAuthSecurityManager:
         Returns:
             True if code is valid (first use), False if already used
         """
-        # Ensure Redis connection via unified manager
-        if not self.redis_manager.is_available():
-            self.redis_manager.connect()
+        code_key = f"oauth_code:{code}"
+        
+        # Use memory store if Redis not available (for testing)
+        if self._use_memory_store():
+            # Check if already used
+            if code_key in self._memory_store:
+                logger.warning(f"Authorization code reuse attack detected: {code}")
+                return False
             
-        redis_client = self.redis_client
-        if not redis_client:
-            logger.warning("Redis not available for code tracking")
-            return True  # Allow if Redis not available
-            
+            # Mark as used
+            self._memory_store[code_key] = "used"
+            return True
+        
+        # Use Redis for production
         try:
-            code_key = f"oauth_code:{code}"
-            
+            # Ensure Redis connection via unified manager
+            if not self.redis_manager.is_available():
+                self.redis_manager.connect()
+                
+            redis_client = self.redis_client
+            if not redis_client:
+                logger.warning("Redis not available for code tracking")
+                return True  # Allow if Redis not available
+                
             # Use atomic SET with NX to prevent race conditions
             result = redis_client.set(code_key, "used", ex=600, nx=True)
             
@@ -350,12 +374,13 @@ class OAuthSecurityManager:
             stored_session_id = state_data.get("session_id", "")
             stored_timestamp = state_data.get("timestamp", 0)
             
-            # Check expiration (10 minutes)
-            if time.time() - stored_timestamp > 600:
+            # Check expiration (10 minutes) - import time here for testability
+            import time as time_module
+            if time_module.time() - stored_timestamp > 600:
                 del self._memory_store[state_key]
                 return False
             
-            # Delete state on validation attempt (single use)
+            # Delete state on any validation attempt (single use, prevents timing attacks)
             del self._memory_store[state_key]
             
             # Timing-safe session comparison
@@ -381,18 +406,17 @@ class OAuthSecurityManager:
             stored_session_id = state_data.get("session_id", "")
             stored_timestamp = state_data.get("timestamp", 0)
             
-            # Check expiration (10 minutes)
-            if time.time() - stored_timestamp > 600:
+            # Check expiration (10 minutes) - import time here for testability
+            import time as time_module
+            if time_module.time() - stored_timestamp > 600:
                 redis_client.delete(state_key)
                 return False
             
-            # Timing-safe session comparison
-            session_match = hmac.compare_digest(stored_session_id, session_id)
-            
-            # Delete state on any validation attempt (single use)
+            # Delete state on any validation attempt (single use, prevents timing attacks)
             redis_client.delete(state_key)
             
-            return session_match
+            # Timing-safe session comparison
+            return hmac.compare_digest(stored_session_id, session_id)
             
         except Exception as e:
             logger.error(f"State parameter validation error: {e}")
@@ -517,7 +541,8 @@ class OAuthSecurityManager:
             stored_timestamp = state_data.get("timestamp", 0)
             
             # Check expiration
-            if time.time() - stored_timestamp > 600:
+            import time as time_module
+            if time_module.time() - stored_timestamp > 600:
                 del self._memory_store[provider_state_key]
                 return False
             
@@ -549,7 +574,8 @@ class OAuthSecurityManager:
             stored_timestamp = state_data.get("timestamp", 0)
             
             # Check expiration
-            if time.time() - stored_timestamp > 600:
+            import time as time_module
+            if time_module.time() - stored_timestamp > 600:
                 redis_client.delete(provider_state_key)
                 return False
             

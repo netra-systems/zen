@@ -174,7 +174,7 @@ class CardinalityProtectionValidator:
             labels={
                 "request_id": str(uuid.uuid4()),  # Very high cardinality
                 "method": random.choice(["GET", "POST", "PUT", "DELETE"]),
-                "endpoint": random.choice(["/api/v1/users", "/api/v1/agents", "/api/v1/threads"]),
+                "endpoint": random.choice(["/api/users", "/api/agents", "/api/threads"]),
                 "status_code": str(random.choice([200, 201, 400, 401, 500])),
                 "node": f"node-{random.randint(1, 10)}"
             },

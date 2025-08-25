@@ -27,9 +27,9 @@ def test_agent_supervisor_via_introspection():
         
         # Check if we can access any agent-related routes
         test_routes = [
-            "/api/v1/agents",
-            "/api/v1/threads", 
-            "/api/v1/messages"
+            "/api/agents",
+            "/api/threads", 
+            "/api/messages"
         ]
         
         accessible_routes = []

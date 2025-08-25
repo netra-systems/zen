@@ -27,7 +27,7 @@ class TestServiceCommunicationFailure:
         Tests that the backend handles the auth service being down gracefully.
         """
         headers = {"Authorization": f"Bearer {auth_token}"}
-        protected_endpoint = f"{BACKEND_URL}/api/v1/user/profile"
+        protected_endpoint = f"{BACKEND_URL}/api/user/profile"
 
         # Patch httpx.post to simulate the auth service being down
         # NOTE: This assumes the backend uses httpx.post to validate the token.

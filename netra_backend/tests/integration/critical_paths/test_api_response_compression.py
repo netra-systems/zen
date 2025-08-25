@@ -60,40 +60,40 @@ class ApiCompressionManager:
     async def setup_compression_configs(self):
         """Configure compression settings for different endpoints."""
         self.compression_configs = {
-            "/api/v1/large-data": CompressionConfig(
-                endpoint_pattern="/api/v1/large-data",
+            "/api/large-data": CompressionConfig(
+                endpoint_pattern="/api/large-data",
                 compression_enabled=True,
                 compression_types=["gzip", "deflate"],
                 min_size_bytes=1024,  # 1KB minimum
                 compression_level=6,
                 content_types=["application/json", "text/plain"]
             ),
-            "/api/v1/users": CompressionConfig(
-                endpoint_pattern="/api/v1/users",
+            "/api/users": CompressionConfig(
+                endpoint_pattern="/api/users",
                 compression_enabled=True,
                 compression_types=["gzip"],
                 min_size_bytes=500,  # 500 bytes minimum
                 compression_level=9,  # Maximum compression
                 content_types=["application/json"]
             ),
-            "/api/v1/metrics": CompressionConfig(
-                endpoint_pattern="/api/v1/metrics",
+            "/api/metrics": CompressionConfig(
+                endpoint_pattern="/api/metrics",
                 compression_enabled=True,
                 compression_types=["gzip", "deflate"],
                 min_size_bytes=100,
                 compression_level=3,  # Fast compression
                 content_types=["application/json"]
             ),
-            "/api/v1/static": CompressionConfig(
-                endpoint_pattern="/api/v1/static",
+            "/api/static": CompressionConfig(
+                endpoint_pattern="/api/static",
                 compression_enabled=True,
                 compression_types=["gzip", "deflate", "br"],
                 min_size_bytes=0,  # Compress everything
                 compression_level=9,
                 content_types=["application/json", "text/css", "text/javascript", "text/html"]
             ),
-            "/api/v1/images": CompressionConfig(
-                endpoint_pattern="/api/v1/images",
+            "/api/images": CompressionConfig(
+                endpoint_pattern="/api/images",
                 compression_enabled=False,  # Don't compress images
                 compression_types=[],
                 min_size_bytes=0,
@@ -268,11 +268,11 @@ class ApiCompressionManager:
         app = web.Application(middlewares=[compression_middleware])
         
         # Register routes
-        app.router.add_get('/api/v1/large-data', handle_large_data)
-        app.router.add_get('/api/v1/users', handle_users)
-        app.router.add_get('/api/v1/metrics', handle_metrics)
-        app.router.add_get('/api/v1/static/style.css', handle_static_content)
-        app.router.add_get('/api/v1/images/logo.png', handle_images)
+        app.router.add_get('/api/large-data', handle_large_data)
+        app.router.add_get('/api/users', handle_users)
+        app.router.add_get('/api/metrics', handle_metrics)
+        app.router.add_get('/api/static/style.css', handle_static_content)
+        app.router.add_get('/api/images/logo.png', handle_images)
         
         self.test_server = await asyncio.create_task(
             aiohttp.web.create_server(app, "localhost", 0)
@@ -573,7 +573,7 @@ async def compression_manager():
 async def test_gzip_compression_enabled(compression_manager):
     """Test gzip compression for large responses."""
     result = await compression_manager.make_compressed_request(
-        "/api/v1/large-data", "gzip"
+        "/api/large-data", "gzip"
     )
     
     assert result["status_code"] == 200
@@ -604,7 +604,7 @@ async def test_compression_content_negotiation(compression_manager):
     
     for accept_encoding, expected_encoding in encoding_tests:
         result = await compression_manager.make_compressed_request(
-            "/api/v1/users", accept_encoding
+            "/api/users", accept_encoding
         )
         
         assert result["status_code"] == 200
@@ -623,7 +623,7 @@ async def test_compression_size_threshold(compression_manager):
     """Test compression size thresholds."""
     # Large data should be compressed
     large_result = await compression_manager.make_compressed_request(
-        "/api/v1/large-data", "gzip"
+        "/api/large-data", "gzip"
     )
     
     assert large_result["status_code"] == 200
@@ -640,7 +640,7 @@ async def test_compression_size_threshold(compression_manager):
 async def test_compression_disabled_for_images(compression_manager):
     """Test that compression is disabled for image content."""
     result = await compression_manager.make_compressed_request(
-        "/api/v1/images/logo.png", "gzip, deflate"
+        "/api/images/logo.png", "gzip, deflate"
     )
     
     assert result["status_code"] == 200
@@ -657,10 +657,10 @@ async def test_compression_disabled_for_images(compression_manager):
 async def test_compression_effectiveness(compression_manager):
     """Test compression effectiveness across different endpoints."""
     test_endpoints = [
-        "/api/v1/large-data",
-        "/api/v1/users",
-        "/api/v1/metrics",
-        "/api/v1/static/style.css"
+        "/api/large-data",
+        "/api/users",
+        "/api/metrics",
+        "/api/static/style.css"
     ]
     
     effectiveness_result = await compression_manager.test_compression_effectiveness(
@@ -689,7 +689,7 @@ async def test_compression_effectiveness(compression_manager):
 async def test_compression_performance_impact(compression_manager):
     """Test compression performance impact."""
     # Test response times with and without compression
-    endpoint = "/api/v1/users"
+    endpoint = "/api/users"
     
     # Measure with compression
     compressed_times = []
@@ -729,7 +729,7 @@ async def test_concurrent_compression_requests(compression_manager):
     """Test concurrent compression handling."""
     # Make concurrent requests with compression
     concurrent_tasks = []
-    endpoints = ["/api/v1/users", "/api/v1/metrics", "/api/v1/large-data"]
+    endpoints = ["/api/users", "/api/metrics", "/api/large-data"]
     
     for i in range(15):
         endpoint = endpoints[i % len(endpoints)]
@@ -758,7 +758,7 @@ async def test_concurrent_compression_requests(compression_manager):
 async def test_compression_headers_correctness(compression_manager):
     """Test correctness of compression-related headers."""
     result = await compression_manager.make_compressed_request(
-        "/api/v1/metrics", "gzip, deflate"
+        "/api/metrics", "gzip, deflate"
     )
     
     assert result["status_code"] == 200
@@ -790,10 +790,10 @@ async def test_compression_metrics_accuracy(compression_manager):
     """Test accuracy of compression metrics collection."""
     # Generate test requests
     test_requests = [
-        "/api/v1/users",
-        "/api/v1/metrics", 
-        "/api/v1/large-data",
-        "/api/v1/images/logo.png"  # Should not be compressed
+        "/api/users",
+        "/api/metrics", 
+        "/api/large-data",
+        "/api/images/logo.png"  # Should not be compressed
     ]
     
     for endpoint in test_requests * 2:  # 8 total requests

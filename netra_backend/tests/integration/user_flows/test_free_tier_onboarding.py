@@ -205,7 +205,7 @@ async def test_free_tier_usage_limits_enforcement(
 
     response = await async_client.post(
 
-        "/api/v1/chat/message",
+        "/api/chat/message",
 
         json={"content": "Test near limit", "thread_id": str(uuid.uuid4())},
 
@@ -252,7 +252,7 @@ async def test_free_tier_daily_limit_blocking(
 
     response = await async_client.post(
 
-        "/api/v1/chat/message",
+        "/api/chat/message",
 
         json={"content": "Beyond limit", "thread_id": str(uuid.uuid4())},
 
@@ -293,7 +293,7 @@ async def test_free_tier_feature_restrictions(
     
     for feature in blocked_features:
 
-        endpoint = f"/api/v1/tools/{feature.replace('_', '-')}"
+        endpoint = f"/api/tools/{feature.replace('_', '-')}"
 
         access_granted = await UserFlowTestBase.verify_feature_access(
 
@@ -369,7 +369,7 @@ async def test_free_tier_basic_analytics_access(
 
     response = await async_client.get(
 
-        "/api/v1/analytics/summary",
+        "/api/analytics/summary",
 
         params={"period": "last_7_days"},
 
@@ -420,7 +420,7 @@ async def test_free_tier_limited_export_capability(
 
     response = await async_client.post(
 
-        "/api/v1/export/advanced-analytics",
+        "/api/export/advanced-analytics",
 
         json={"format": "excel"},
 
@@ -455,7 +455,7 @@ async def test_free_tier_upgrade_prompts(
 
     response = await async_client.post(
 
-        "/api/v1/tools/advanced-analytics/execute",
+        "/api/tools/advanced-analytics/execute",
 
         json={"query": "test"},
 
@@ -504,7 +504,7 @@ async def test_free_tier_error_handling(
 
     headers = {"Authorization": f"Bearer {access_token}"}
 
-    response = await async_client.get("/api/v1/support/options", headers=headers)
+    response = await async_client.get("/api/support/options", headers=headers)
 
     assert response.status_code == status.HTTP_200_OK
 

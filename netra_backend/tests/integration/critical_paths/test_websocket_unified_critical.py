@@ -7,7 +7,7 @@ The startup's survival depends on these tests catching all issues before deploym
 TESTED ENDPOINTS:
 - /ws - Basic WebSocket with regular JSON
 - /ws/{user_id} - User-specific endpoint forwarding to secure
-- /ws/v1/{user_id} - Versioned endpoint forwarding to secure  
+- /ws/{user_id} - Versioned endpoint forwarding to secure  
 - /ws - Comprehensive secure endpoint
 - /ws/mcp - MCP JSON-RPC protocol endpoint
 
@@ -799,7 +799,7 @@ class TestWebSocketEndpointRouting:
     
     @pytest.mark.asyncio
     async def test_versioned_endpoint_forwarding(self, auth_token):
-        """Test /ws/v1/{user_id} forwards to secure endpoint."""
+        """Test /ws/{user_id} forwards to secure endpoint."""
         headers = {"Authorization": f"Bearer {auth_token}"}
         
         with patch.object(auth_client, 'validate_token_jwt') as mock_validate:
@@ -811,7 +811,7 @@ class TestWebSocketEndpointRouting:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient(f"/ws/v1/{TEST_USER_ID}", headers=headers)
+            client = WebSocketTestClient(f"/ws/{TEST_USER_ID}", headers=headers)
             
             try:
                 connected = await client.connect()
@@ -1110,7 +1110,7 @@ class TestWebSocketServiceDiscovery:
         ws_config = config["websocket_config"]
         
         # Verify expected endpoints are listed
-        expected_endpoints = ["/ws", "/ws/{user_id}", "/ws/v1/{user_id}", "/ws"]
+        expected_endpoints = ["/ws", "/ws/{user_id}", "/ws/{user_id}", "/ws"]
         assert ws_config["available_endpoints"] == expected_endpoints
         
         # Verify security configuration

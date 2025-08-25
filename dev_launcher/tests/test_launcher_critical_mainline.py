@@ -26,7 +26,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, call, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, Mock, call, patch, PropertyMock
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
@@ -1133,12 +1133,17 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         
         # Mock database connector
         # Mock: Generic component isolation for controlled unit testing
-        mock_stop_monitoring = Mock()
+        mock_stop_monitoring = AsyncMock()
         launcher.database_connector.stop_health_monitoring = mock_stop_monitoring
         launcher.database_connector._shutdown_requested = False
         
-        # Mock other components
-        launcher.process_manager.processes = {}
+        # Mock other components - add a dummy process to ensure shutdown logic runs
+        launcher.process_manager.processes = {"dummy": MagicMock()}
+        
+        # Mock shutdown methods to prevent actual service termination
+        launcher._terminate_all_services_ordered = MagicMock()
+        launcher._stop_supporting_services = MagicMock()
+        launcher._verify_port_cleanup = MagicMock()
         
         # Simulate no running event loop (normal shutdown scenario)
         # Mock: Component isolation for testing without external dependencies

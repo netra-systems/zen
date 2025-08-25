@@ -163,7 +163,7 @@ with socketserver.TCPServer(('0.0.0.0', 8080), PaymentHandler) as httpd:
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(
-                        f"http://localhost:{port}/v1/charges",
+                        f"http://localhost:{port}/charges",
                         headers={'Authorization': 'Bearer sk_test_mock_key'},
                         timeout=aiohttp.ClientTimeout(total=2)
                     ) as response:

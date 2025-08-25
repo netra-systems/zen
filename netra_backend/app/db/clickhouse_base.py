@@ -11,6 +11,33 @@ class ClickHouseDatabase:
     A client for interacting with a ClickHouse database.
     It handles connection, disconnection, and data operations.
     """
+    def _validate_connection_parameters(self, host: str, port: int, database: str, user: str, password: str):
+        """Validate ClickHouse connection parameters for control characters and format."""
+        # Check for control characters in string parameters
+        string_params = {"host": host, "database": database, "user": user, "password": password}
+        
+        for param_name, param_value in string_params.items():
+            if not isinstance(param_value, str):
+                continue
+                
+            # Check for control characters (ASCII 0-31 and 127)
+            for i, char in enumerate(param_value):
+                if ord(char) < 32 or ord(char) == 127:
+                    char_name = {
+                        '\n': 'newline',
+                        '\r': 'carriage return', 
+                        '\t': 'tab'
+                    }.get(char, f'control character (ASCII {ord(char)})')
+                    raise ValueError(f"ClickHouse {param_name} contains {char_name} at position {i}: {repr(param_value)}")
+        
+        # Validate port range
+        if not isinstance(port, int) or port < 1 or port > 65535:
+            raise ValueError(f"ClickHouse port must be integer between 1-65535, got: {port}")
+        
+        # Validate host format
+        if not host or not host.strip():
+            raise ValueError("ClickHouse host cannot be empty")
+    
     def _set_connection_details(self, host: str, port: int, database: str, user: str, password: str, secure: bool):
         """Set basic connection details."""
         self.host = host
@@ -26,6 +53,8 @@ class ClickHouseDatabase:
     
     def _initialize_connection_params(self, host: str, port: int, database: str, user: str, password: str, secure: bool):
         """Initialize ClickHouse connection parameters."""
+        # Validate parameters first
+        self._validate_connection_parameters(host, port, database, user, password)
         self._set_connection_details(host, port, database, user, password, secure)
         self._initialize_client_state()
     

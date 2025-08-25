@@ -90,7 +90,7 @@ class UnifiedE2ETestHarness:
         async with aiohttp.ClientSession() as session:
             payload = {"message": message}
             async with session.post(
-                f"{self.backend_url}/api/v1/chat/message",
+                f"{self.backend_url}/api/chat/message",
                 json=payload,
                 headers=headers
             ) as resp:
@@ -101,7 +101,7 @@ class UnifiedE2ETestHarness:
         headers = {"Authorization": f"Bearer {token}"}
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{self.backend_url}/api/v1/users/profile",
+                f"{self.backend_url}/api/users/profile",
                 headers=headers
             ) as resp:
                 if resp.status == 200:
@@ -177,7 +177,7 @@ class TestCriticalUnifiedFlows:
         async with aiohttp.ClientSession() as session:
             # Test protected endpoint
             async with session.get(
-                f"{self.harness.backend_url}/api/v1/users/profile",
+                f"{self.harness.backend_url}/api/users/profile",
                 headers=headers
             ) as resp:
                 assert resp.status == 200, "Token validation failed"
@@ -185,7 +185,7 @@ class TestCriticalUnifiedFlows:
             # Test invalid token rejection
             bad_headers = {"Authorization": "Bearer invalid_token"}
             async with session.get(
-                f"{self.harness.backend_url}/api/v1/users/profile",
+                f"{self.harness.backend_url}/api/users/profile",
                 headers=bad_headers
             ) as resp:
                 assert resp.status == 401, "Invalid token not rejected"
@@ -264,7 +264,7 @@ class TestCriticalUnifiedFlows:
         async with aiohttp.ClientSession() as session:
             for i in range(50):  # Try to trigger rate limit
                 async with session.get(
-                    f"{self.harness.backend_url}/api/v1/users/profile",
+                    f"{self.harness.backend_url}/api/users/profile",
                     headers=headers
                 ) as resp:
                     if resp.status == 429:
@@ -318,7 +318,7 @@ class TestDataConsistency:
                     
             # Get user from Backend
             async with session.get(
-                f"{self.harness.backend_url}/api/v1/users/profile",
+                f"{self.harness.backend_url}/api/users/profile",
                 headers=headers
             ) as resp:
                 if resp.status == 200:

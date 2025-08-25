@@ -202,7 +202,7 @@ class TestUserSessionPersistenceRestart:
             headers = {"Session-ID": session_id}
             
             # FAILURE EXPECTED HERE - session activity tracking may not exist
-            response = test_client.get("/api/v1/threads", headers=headers)
+            response = test_client.get("/api/threads", headers=headers)
             
             # Wait between activities
             await asyncio.sleep(0.1)
@@ -275,7 +275,7 @@ class TestUserSessionPersistenceRestart:
         test_client = TestClient(app)
         headers = {"Session-ID": session_id}
         
-        response = test_client.get("/api/v1/threads", headers=headers)
+        response = test_client.get("/api/threads", headers=headers)
         # Should not require re-authentication
         assert response.status_code != 401, "Session not recognized after restart"
 

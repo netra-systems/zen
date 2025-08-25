@@ -141,7 +141,7 @@ class RateLimitTester:
             headers = {"Authorization": f"Bearer {token}"}
             
             # Make requests up to the limit
-            endpoint = f"{DEV_BACKEND_URL}/api/v1/health"
+            endpoint = f"{DEV_BACKEND_URL}/api/health"
             success_count = 0
             rate_limited_count = 0
             
@@ -195,7 +195,7 @@ class RateLimitTester:
             headers = {"Authorization": f"Bearer {token}"}
             
             # Send burst of requests
-            endpoint = f"{DEV_BACKEND_URL}/api/v1/threads"
+            endpoint = f"{DEV_BACKEND_URL}/api/threads"
             burst_size = 30
             
             async def make_request(i: int) -> Tuple[int, int]:
@@ -244,9 +244,9 @@ class RateLimitTester:
             
             # Test different endpoints
             endpoints = {
-                f"{DEV_BACKEND_URL}/api/v1/health": 1000,  # High limit
+                f"{DEV_BACKEND_URL}/api/health": 1000,  # High limit
                 f"{AUTH_SERVICE_URL}/auth/refresh": 10,     # Low limit
-                f"{DEV_BACKEND_URL}/api/v1/agents": 50      # Medium limit
+                f"{DEV_BACKEND_URL}/api/agents": 50      # Medium limit
             }
             
             results = {}
@@ -299,7 +299,7 @@ class RateLimitTester:
         print("\n[TIERS] STEP 5: Testing tier-based rate limits...")
         
         try:
-            endpoint = f"{DEV_BACKEND_URL}/api/v1/health"
+            endpoint = f"{DEV_BACKEND_URL}/api/health"
             tier_results = {}
             
             for user in TEST_USERS:
@@ -359,7 +359,7 @@ class RateLimitTester:
             headers = {"Authorization": f"Bearer {token}"}
             
             # Trigger rate limit
-            endpoint = f"{DEV_BACKEND_URL}/api/v1/health"
+            endpoint = f"{DEV_BACKEND_URL}/api/health"
             
             # Make many requests quickly
             for _ in range(150):
@@ -400,7 +400,7 @@ class RateLimitTester:
             user = TEST_USERS[0]
             token = self.user_tokens[user["email"]]
             headers = {"Authorization": f"Bearer {token}"}
-            endpoint = f"{DEV_BACKEND_URL}/api/v1/health"
+            endpoint = f"{DEV_BACKEND_URL}/api/health"
             
             # Create multiple sessions (simulating distributed clients)
             sessions = []
@@ -459,7 +459,7 @@ class RateLimitTester:
             session = self.sessions[user["email"]]
             token = self.user_tokens[user["email"]]
             headers = {"Authorization": f"Bearer {token}"}
-            endpoint = f"{DEV_BACKEND_URL}/api/v1/health"
+            endpoint = f"{DEV_BACKEND_URL}/api/health"
             
             # Phase 1: Hit rate limit
             phase1_success = 0
@@ -516,7 +516,7 @@ class RateLimitTester:
             session = aiohttp.ClientSession()
             
             try:
-                endpoint = f"{DEV_BACKEND_URL}/api/v1/health"
+                endpoint = f"{DEV_BACKEND_URL}/api/health"
                 success_count = 0
                 rate_limited = False
                 
@@ -561,7 +561,7 @@ class RateLimitTester:
                 
                 # Get metrics endpoint
                 async with session.get(
-                    f"{DEV_BACKEND_URL}/api/v1/metrics/rate_limits",
+                    f"{DEV_BACKEND_URL}/api/metrics/rate_limits",
                     headers=headers
                 ) as response:
                     if response.status == 200:

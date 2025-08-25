@@ -22,7 +22,7 @@ from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from netra_backend.app.websocket_core import get_unified_manager as get_manager
 
 logger = central_logger.get_logger(__name__)
-router = APIRouter(prefix="/api/v1/example-messages", tags=["example-messages"])
+router = APIRouter(prefix="/api/example-messages", tags=["example-messages"])
 
 
 @router.websocket("/ws/{user_id}")

@@ -29,7 +29,7 @@ app = FastAPI()
 def health():
     return {"status": "healthy", "timestamp": "2024-01-01T00:00:00Z"}
 
-@app.get("/api/v1/users")
+@app.get("/api/users")
 def get_users_v1():
     return {"users": []}
 
@@ -146,7 +146,7 @@ class TestCoreAPIL3Integration:
     def test_api_versioning(self, client):
         """Test API versioning support."""
         # V1 endpoint
-        response_v1 = client.get("/api/v1/users")
+        response_v1 = client.get("/api/users")
         assert response_v1.status_code in [200, 404]
         
         # V2 endpoint (if exists)

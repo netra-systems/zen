@@ -123,9 +123,10 @@ async def get_auth_config(request: Request):
 @router.get("/login")
 async def initiate_oauth_login(
     provider: str = "google",
-    return_url: Optional[str] = None
+    return_url: Optional[str] = None,
+    request: Request = None
 ):
-    """Initiate OAuth login flow"""
+    """Initiate OAuth login flow with proper CSRF protection"""
     from fastapi.responses import RedirectResponse
     try:
         # Get OAuth configuration
@@ -134,9 +135,22 @@ async def initiate_oauth_login(
             logger.error("OAuth not configured - GOOGLE_CLIENT_ID is not set")
             raise HTTPException(status_code=500, detail="OAuth not configured")
         
+        # Generate secure state parameter
+        state = oauth_security.generate_state_parameter()
+        
+        # Generate or get session ID for CSRF protection
+        session_id = request.cookies.get("session_id") if request else None
+        if not session_id:
+            session_id = oauth_security.generate_secure_session_id()
+        
+        # Store state parameter with session binding for CSRF protection
+        state_stored = oauth_security.store_state_parameter(state, session_id)
+        if not state_stored:
+            logger.error("Failed to store OAuth state parameter")
+            raise HTTPException(status_code=500, detail="Authentication state storage failed")
+        
         # Build OAuth URL
         redirect_uri = _determine_urls()[1] + "/auth/callback"
-        state = secrets.token_urlsafe(32)  # Generate random state
         
         oauth_url = (
             "https://accounts.google.com/o/oauth2/v2/auth?"
@@ -150,7 +164,21 @@ async def initiate_oauth_login(
         if return_url:
             oauth_url += f"&return_url={return_url}"
         
-        return RedirectResponse(url=oauth_url, status_code=302)
+        logger.info(f"OAuth login initiated with state stored: {state[:10]}... for session: {session_id[:10]}...")
+        
+        # Create response with session cookie if needed
+        response = RedirectResponse(url=oauth_url, status_code=302)
+        if not request.cookies.get("session_id"):
+            response.set_cookie(
+                key="session_id", 
+                value=session_id,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                max_age=600  # 10 minutes - same as state expiration
+            )
+        
+        return response
     except Exception as e:
         logger.error(f"OAuth initiation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -527,9 +555,10 @@ async def dev_login(
 async def oauth_callback(
     code: str,
     state: str,
-    return_url: Optional[str] = None
+    return_url: Optional[str] = None,
+    request: Request = None
 ):
-    """Handle OAuth callback from Google"""
+    """Handle OAuth callback from Google with CSRF protection"""
     import uuid
 
     from fastapi.responses import RedirectResponse
@@ -540,6 +569,18 @@ async def oauth_callback(
     logger.info(f"OAuth callback received - code: {code[:10]}..., state: {state[:10]}...")
     
     try:
+        # SECURITY CHECK: Validate OAuth state parameter to prevent CSRF attacks
+        session_id = request.cookies.get("session_id") if request else None
+        if not session_id:
+            logger.error("OAuth callback missing session cookie - potential CSRF attack")
+            raise HTTPException(status_code=400, detail="Invalid session state - authentication failed")
+        
+        # Validate state parameter against stored value
+        if not oauth_security.validate_state_parameter(state, session_id):
+            logger.error(f"OAuth state validation failed - potential CSRF attack from session: {session_id[:10]}...")
+            raise HTTPException(status_code=400, detail="Invalid state parameter - authentication failed")
+        
+        logger.info(f"OAuth state validation successful for session: {session_id[:10]}...")
         # Exchange code for tokens
         google_client_id = AuthConfig.get_google_client_id()
         google_client_secret = AuthConfig.get_google_client_secret()
@@ -646,6 +687,9 @@ async def oauth_callback(
         logger.info(f"Redirecting to: {redirect_url[:50]}...")
         return RedirectResponse(url=redirect_url, status_code=302)
         
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is (don't convert to 500)
+        raise
     except Exception as e:
         logger.error(f"OAuth callback error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -676,7 +720,20 @@ async def oauth_callback_post(
         if origin and not validate_cors_origin(origin):
             raise HTTPException(status_code=403, detail="Origin not allowed")
         
-        # SECURITY CHECK 2: PKCE validation if provided
+        # SECURITY CHECK 2: OAuth state validation to prevent CSRF attacks
+        session_id = client_info.get("session_id")
+        if not session_id:
+            logger.error("OAuth POST callback missing session ID - potential CSRF attack")
+            raise HTTPException(status_code=400, detail="Invalid session state - authentication failed")
+        
+        # Validate state parameter against stored value
+        if not oauth_security.validate_state_parameter(request.state, session_id):
+            logger.error(f"OAuth POST state validation failed - potential CSRF attack from session: {session_id[:10]}...")
+            raise HTTPException(status_code=400, detail="Invalid state parameter - authentication failed")
+        
+        logger.info(f"OAuth POST state validation successful for session: {session_id[:10]}...")
+        
+        # SECURITY CHECK 3: PKCE validation if provided
         if (hasattr(request, 'code_verifier') and hasattr(request, 'code_challenge') and 
             request.code_verifier and request.code_challenge):
             if not oauth_security.validate_pkce_challenge(request.code_verifier, request.code_challenge):

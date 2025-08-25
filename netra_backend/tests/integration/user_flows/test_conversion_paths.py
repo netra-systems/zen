@@ -73,7 +73,7 @@ async def test_complete_free_to_enterprise_conversion_journey(
     # Attempt message that triggers upgrade prompt
     headers = {"Authorization": f"Bearer {access_token}"}
     response = await async_client.post(
-        "/api/v1/chat/message",
+        "/api/chat/message",
         json={"content": "Need advanced analysis", "thread_id": str(uuid.uuid4())},
         headers=headers
     )
@@ -88,7 +88,7 @@ async def test_complete_free_to_enterprise_conversion_journey(
     
     # Verify early tier features work
     response = await async_client.post(
-        "/api/v1/tools/advanced-cost-analyzer/execute",
+        "/api/tools/advanced-cost-analyzer/execute",
         json={"analysis_type": "basic"},
         headers=headers
     )
@@ -97,7 +97,7 @@ async def test_complete_free_to_enterprise_conversion_journey(
     # Phase 3: Team growth triggers Mid tier
     # Simulate team collaboration needs
     response = await async_client.post(
-        "/api/v1/teams/create",
+        "/api/teams/create",
         json={"name": "Test Team", "description": "Growing team"},
         headers=headers
     )
@@ -114,7 +114,7 @@ async def test_complete_free_to_enterprise_conversion_journey(
     # Phase 4: Enterprise needs trigger final upgrade
     # Simulate enterprise requirements
     response = await async_client.post(
-        "/api/v1/organizations/create",
+        "/api/organizations/create",
         json={"name": "Enterprise Corp", "compliance_requirements": ["SOC2"]},
         headers=headers
     )
@@ -130,7 +130,7 @@ async def test_complete_free_to_enterprise_conversion_journey(
     
     # Verify full enterprise feature access
     response = await async_client.post(
-        "/api/v1/audit/logs",
+        "/api/audit/logs",
         headers=headers
     )
     assert response.status_code != status.HTTP_403_FORBIDDEN
@@ -154,7 +154,7 @@ async def test_usage_based_conversion_triggers(
         await usage_service.track_message(user_id)
     
     response = await async_client.post(
-        "/api/v1/chat/message",
+        "/api/chat/message",
         json={"content": "Test message", "thread_id": str(uuid.uuid4())},
         headers=headers
     )
@@ -164,7 +164,7 @@ async def test_usage_based_conversion_triggers(
     
     # Test feature-based conversion trigger
     response = await async_client.post(
-        "/api/v1/tools/enterprise-analytics",
+        "/api/tools/enterprise-analytics",
         json={"query": "advanced analysis"},
         headers=headers
     )
@@ -200,20 +200,20 @@ async def test_conversion_analytics_tracking(
         # Simulate the trigger event
         if event == "daily_limit_reached":
             response = await async_client.post(
-                "/api/v1/usage/track-limit-event",
+                "/api/usage/track-limit-event",
                 json={"event_type": "limit_reached", "limit_type": "daily_messages"},
                 headers=headers
             )
         elif event == "advanced_feature_attempted":
             await async_client.post(
-                "/api/v1/tools/advanced-analytics",
+                "/api/tools/advanced-analytics",
                 headers=headers
             )
         # Events should be automatically tracked
     
     # Check conversion analytics
     response = await async_client.get(
-        "/api/v1/analytics/conversion-funnel",
+        "/api/analytics/conversion-funnel",
         headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
@@ -241,7 +241,7 @@ async def test_trial_and_retention_mechanisms(
     
     # Test trial extension
     response = await async_client.post(
-        "/api/v1/billing/trial-extension",
+        "/api/billing/trial-extension",
         json={"reason": "evaluating_features", "team_size": 5},
         headers=headers
     )
@@ -252,7 +252,7 @@ async def test_trial_and_retention_mechanisms(
     
     # Test downgrade intent and retention
     response = await async_client.post(
-        "/api/v1/billing/downgrade-intent",
+        "/api/billing/downgrade-intent",
         json={"reason": "cost_concerns", "feedback": "Too expensive"},
         headers=headers
     )
@@ -274,7 +274,7 @@ async def test_referral_and_campaign_conversion(
     
     # Generate referral code
     response = await async_client.post(
-        "/api/v1/referrals/generate",
+        "/api/referrals/generate",
         json={"campaign": "free_to_early_conversion"},
         headers=headers
     )
@@ -283,13 +283,13 @@ async def test_referral_and_campaign_conversion(
     assert "referral_code" in referral_data
     
     # Check for active campaigns
-    response = await async_client.get("/api/v1/campaigns/active", headers=headers)
+    response = await async_client.get("/api/campaigns/active", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     campaigns = response.json()
     
     # Track conversion funnel metrics
     response = await async_client.post(
-        "/api/v1/analytics/conversion-event",
+        "/api/analytics/conversion-event",
         json={"event": "upgrade_flow_started", "step": "pricing_viewed"},
         headers=headers
     )

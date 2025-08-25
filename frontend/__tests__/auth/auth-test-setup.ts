@@ -17,12 +17,12 @@ const defaultMockAuthConfig = {
   development_mode: process.env.NODE_ENV === 'development',
   google_client_id: 'mock-google-client-id',
   endpoints: {
-    login: 'http://localhost:8081/api/v1/auth/login',
-    logout: 'http://localhost:8081/api/v1/auth/logout',
-    callback: 'http://localhost:8081/api/v1/auth/callback',
-    token: 'http://localhost:8081/api/v1/auth/token',
-    user: 'http://localhost:8081/api/v1/auth/me',
-    dev_login: 'http://localhost:8081/api/v1/auth/dev/login'
+    login: 'http://localhost:8081/api/auth/login',
+    logout: 'http://localhost:8081/api/auth/logout',
+    callback: 'http://localhost:8081/api/auth/callback',
+    token: 'http://localhost:8081/api/auth/token',
+    user: 'http://localhost:8081/api/auth/me',
+    dev_login: 'http://localhost:8081/api/auth/dev/login'
   },
   authorized_javascript_origins: ['http://localhost:3000'],
   authorized_redirect_uris: ['http://localhost:3000/auth/callback']
@@ -43,15 +43,15 @@ const mockAuthServiceClient = {
 const mockGetAuthServiceConfig = jest.fn(() => ({
   baseUrl: 'http://localhost:8081',
   endpoints: {
-    login: 'http://localhost:8081/api/v1/auth/login',
-    logout: 'http://localhost:8081/api/v1/auth/logout',
-    callback: 'http://localhost:8081/api/v1/auth/callback',
-    token: 'http://localhost:8081/api/v1/auth/token',
-    refresh: 'http://localhost:8081/api/v1/auth/refresh',
-    validate_token: 'http://localhost:8081/api/v1/auth/validate',
-    config: 'http://localhost:8081/api/v1/auth/config',
-    session: 'http://localhost:8081/api/v1/auth/session',
-    me: 'http://localhost:8081/api/v1/auth/me'
+    login: 'http://localhost:8081/api/auth/login',
+    logout: 'http://localhost:8081/api/auth/logout',
+    callback: 'http://localhost:8081/api/auth/callback',
+    token: 'http://localhost:8081/api/auth/token',
+    refresh: 'http://localhost:8081/api/auth/refresh',
+    validate_token: 'http://localhost:8081/api/auth/validate',
+    config: 'http://localhost:8081/api/auth/config',
+    session: 'http://localhost:8081/api/auth/session',
+    me: 'http://localhost:8081/api/auth/me'
   },
   oauth: {
     googleClientId: 'mock-google-client-id',
@@ -98,12 +98,12 @@ const offlineFallbackConfig = {
   development_mode: false,
   google_client_id: 'mock-google-client-id',
   endpoints: {
-    login: 'http://localhost:8081/api/v1/auth/login',
-    logout: 'http://localhost:8081/api/v1/auth/logout',
-    callback: 'http://localhost:8081/api/v1/auth/callback',
-    token: 'http://localhost:8081/api/v1/auth/token',
-    user: 'http://localhost:8081/api/v1/auth/me',
-    dev_login: 'http://localhost:8081/api/v1/auth/dev/login'
+    login: 'http://localhost:8081/api/auth/login',
+    logout: 'http://localhost:8081/api/auth/logout',
+    callback: 'http://localhost:8081/api/auth/callback',
+    token: 'http://localhost:8081/api/auth/token',
+    user: 'http://localhost:8081/api/auth/me',
+    dev_login: 'http://localhost:8081/api/auth/dev/login'
   },
   authorized_javascript_origins: ['http://localhost:3000'],
   authorized_redirect_uris: ['http://localhost:3000/auth/callback']

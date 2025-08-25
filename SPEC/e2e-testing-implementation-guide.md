@@ -183,7 +183,7 @@ export default function() {
   let data = generateSyntheticPayload();
   
   // Submit for processing
-  let response = http.post('https://api.netrasystems.ai/v1/process', data);
+  let response = http.post('https://api.netrasystems.ai/process', data);
   
   check(response, {
     'status is 200': (r) => r.status === 200,

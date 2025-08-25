@@ -40,7 +40,7 @@
 ### Configuration Verification
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_WEBSOCKET_URL=ws://localhost:8000/ws/v1/{user_id}
+NEXT_PUBLIC_WEBSOCKET_URL=ws://localhost:8000/ws/{user_id}
 ```
 
 ---
@@ -140,7 +140,7 @@ async getConfig() {
 ## 🌐 WebSocket Configuration
 
 ### WebSocket Settings Verified
-- **URL Pattern:** `ws://localhost:8000/ws/v1/{user_id}`
+- **URL Pattern:** `ws://localhost:8000/ws/{user_id}`
 - **Fallback Handling:** ✅ Implemented
 - **Connection Timeout:** ✅ 3 seconds
 - **Error Recovery:** ✅ Graceful degradation

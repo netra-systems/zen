@@ -14,7 +14,7 @@ from netra_backend.app.routes.utils.error_handlers import handle_service_error
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/discovery", tags=["discovery"])
+router = APIRouter(prefix="/api/discovery", tags=["discovery"])
 
 
 class ServiceInfo(BaseModel):

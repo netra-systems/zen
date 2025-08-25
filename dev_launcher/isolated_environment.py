@@ -21,6 +21,37 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def _mask_sensitive_value(key: str, value: str) -> str:
+    """
+    Mask sensitive environment variable values for logging.
+    
+    Args:
+        key: Environment variable name
+        value: Environment variable value
+        
+    Returns:
+        Masked value safe for logging
+    """
+    # Sensitive patterns - variables that should never be logged in full
+    sensitive_patterns = [
+        'password', 'secret', 'key', 'token', 'auth', 'credential',
+        'private', 'cert', 'api_key', 'jwt', 'oauth', 'fernet'
+    ]
+    
+    key_lower = key.lower()
+    
+    # Check if this is a sensitive variable
+    if any(pattern in key_lower for pattern in sensitive_patterns):
+        if len(value) <= 3:
+            return "***"
+        else:
+            # Show first 3 chars and mask the rest
+            return f"{value[:3]}***"
+    
+    # For non-sensitive variables, show first 50 chars as before
+    return value[:50] + "..." if len(value) > 50 else value
+
 # Import network constants for validation
 try:
     from netra_backend.app.core.network_constants import (
@@ -257,12 +288,15 @@ class IsolatedEnvironment:
                 # Also preserve in os.environ if it's a tool-specific variable
                 if key in self.PRESERVE_IN_OS_ENVIRON:
                     os.environ[key] = value
-                    logger.debug(f"Set isolated var + preserved in os.environ: {key}={value[:50]}... (source: {source})")
+                    masked_value = _mask_sensitive_value(key, value)
+                    logger.debug(f"Set isolated var + preserved in os.environ: {key}={masked_value} (source: {source})")
                 else:
-                    logger.debug(f"Set isolated var: {key}={value[:50]}... (source: {source})")
+                    masked_value = _mask_sensitive_value(key, value)
+                    logger.debug(f"Set isolated var: {key}={masked_value} (source: {source})")
             else:
                 os.environ[key] = value
-                logger.debug(f"Set os.environ: {key}={value[:50]}... (source: {source})")
+                masked_value = _mask_sensitive_value(key, value)
+                logger.debug(f"Set os.environ: {key}={masked_value} (source: {source})")
             
             # Track source
             self._variable_sources[key] = source
@@ -332,6 +366,22 @@ class IsolatedEnvironment:
             
             logger.debug(f"Deleted environment variable: {key} (source: {source})")
             return True
+    
+    def exists(self, key: str) -> bool:
+        """
+        Check if an environment variable exists.
+        
+        Args:
+            key: Environment variable name
+            
+        Returns:
+            True if the variable exists, False otherwise
+        """
+        with self._lock:
+            if self._isolation_enabled:
+                return key in self._isolated_vars
+            else:
+                return key in os.environ
     
     def update(self, variables: Dict[str, str], source: str = "unknown", force: bool = False) -> Dict[str, bool]:
         """

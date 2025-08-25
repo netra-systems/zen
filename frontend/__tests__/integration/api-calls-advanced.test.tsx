@@ -22,7 +22,7 @@ const mockApiUrl = 'http://localhost:8000';
 
 const createAdvancedHandlers = () => [
   // Versioned endpoints
-  http.get(`${mockApiUrl}/api/v1/threads`, () => {
+  http.get(`${mockApiUrl}/api/threads`, () => {
     return HttpResponse.json({
       version: '1.0',
       threads: []
@@ -59,7 +59,7 @@ const createAdvancedHandlers = () => [
   http.get(`${mockApiUrl}/openapi.json`, () => {
     return HttpResponse.json({
       paths: {
-        '/api/v1/threads': {
+        '/api/threads': {
           get: { summary: 'get_threads_v1' }
         },
         '/api/v2/threads': {
@@ -267,7 +267,7 @@ describe('API Calls - API Versioning', () => {
       http.get(`${mockApiUrl}/openapi.json`, () => {
         return HttpResponse.json({
           paths: {
-            '/api/v1/threads': {
+            '/api/threads': {
               get: { summary: 'get_threads_v1' }
             },
             '/api/v2/threads': {

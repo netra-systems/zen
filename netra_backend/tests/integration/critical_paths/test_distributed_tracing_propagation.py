@@ -155,7 +155,7 @@ class DistributedTracingValidator:
                 "component": "api-gateway",
                 "operation.type": "http.request",
                 "http.method": "POST",
-                "http.url": "/api/v1/agents/execute"
+                "http.url": "/api/agents/execute"
             },
             logs=[
                 {

@@ -375,7 +375,9 @@ class DatabaseConnector:
         """Handle connection failure during validation."""
         connection.status = ConnectionStatus.RETRYING
         if attempt == self.retry_config.max_attempts - 1:
-            connection.last_error = "Connection test failed"
+            # Only set generic error message if no specific error is already set
+            if not connection.last_error:
+                connection.last_error = "Connection test failed"
     
     def _handle_connection_exception(self, connection: DatabaseConnection, exception: Exception, attempt: int) -> None:
         """Handle exception during connection validation."""

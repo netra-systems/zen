@@ -9,7 +9,7 @@ jest.unmock('@/auth/service');
 
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
 import {
   setupBasicMocks,

@@ -189,7 +189,7 @@ class TestAuthFlowComprehensiveL3:
             }
             
             # Should detect potential hijacking
-            test_response = await async_client.get("/api/v1/profile", headers=different_device_headers)
+            test_response = await async_client.get("/api/profile", headers=different_device_headers)
             # May trigger additional verification or return 401
             assert test_response.status_code in [200, 401, 403, 404]
     

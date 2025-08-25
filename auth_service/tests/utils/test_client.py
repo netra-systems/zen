@@ -182,7 +182,7 @@ class AuthTestClient:
     
     def get_auth_config(self) -> Dict[str, Any]:
         """Get authentication configuration"""
-        response = self.client.get("/api/v1/auth/config")
+        response = self.client.get("/api/auth/config")
         
         if hasattr(response, 'json'):
             return response.json()

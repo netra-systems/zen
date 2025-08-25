@@ -30,7 +30,7 @@ async def test_agent_supervisor_availability():
                     
                     if startup_complete:
                         # Try to access a route that would require agent_supervisor
-                        agent_url = "http://localhost:8000/api/v1/agents/supervisor/status"
+                        agent_url = "http://localhost:8000/api/agents/supervisor/status"
                         
                         try:
                             async with session.get(agent_url) as agent_response:

@@ -108,44 +108,35 @@ class TestBasicSystemColdStartup:
         """Test 3: Services should initialize in correct order."""
         initialization_order = []
         
-        # Mock initialization functions to track order
-        async def mock_postgres_init():
+        # Test demonstrates startup order by calling init functions sequentially
+        # In real startup, these would be called by the startup manager
+        async def postgres_init():
             initialization_order.append("postgres")
             return True
         
-        async def mock_clickhouse_init():
+        async def clickhouse_init():
             initialization_order.append("clickhouse")
             return True
         
-        async def mock_redis_init():
+        async def redis_init():
             initialization_order.append("redis")
             return True
         
-        async def mock_cache_init():
+        async def cache_init():
             initialization_order.append("cache")
             return True
         
-        # Simulate startup sequence
-        # Mock: PostgreSQL database isolation for testing without real database connections
-        with patch('app.db.postgres.init_db', mock_postgres_init):
-            # Mock: ClickHouse database isolation for fast testing without external database dependency
-            with patch('app.db.client_clickhouse.ClickHouseClient.initialize', mock_clickhouse_init):
-                # Mock: Redis external service isolation for fast, reliable tests without network dependency
-                with patch('app.cache.redis_manager.RedisManager.initialize', mock_redis_init):
-                    # Mock: Component isolation for testing without external dependencies
-                    with patch('app.cache.cache_manager.CacheManager.initialize', mock_cache_init):
-                        
-                        # Run initialization
-                        await mock_postgres_init()
-                        await mock_clickhouse_init()
-                        await mock_redis_init()
-                        await mock_cache_init()
-                        
-                        # Verify order: databases first, then cache layers
-                        assert initialization_order[0] == "postgres"
-                        assert initialization_order[1] == "clickhouse"
-                        assert initialization_order[2] == "redis"
-                        assert initialization_order[3] == "cache"
+        # Simulate correct startup sequence: databases first, then cache layers
+        await postgres_init()
+        await clickhouse_init()
+        await redis_init()
+        await cache_init()
+        
+        # Verify order: databases first, then cache layers
+        assert initialization_order[0] == "postgres"
+        assert initialization_order[1] == "clickhouse"
+        assert initialization_order[2] == "redis"
+        assert initialization_order[3] == "cache"
     
     @pytest.mark.integration
     @pytest.mark.L3
@@ -157,16 +148,20 @@ class TestBasicSystemColdStartup:
         
         # Test individual component checks
         postgres_health = await health_checker.check_postgres()
-        assert "postgres" in postgres_health
+        assert isinstance(postgres_health, dict)
+        assert "healthy" in postgres_health
         
         clickhouse_health = await health_checker.check_clickhouse()
-        assert "clickhouse" in clickhouse_health
+        assert isinstance(clickhouse_health, dict)
+        assert "healthy" in clickhouse_health
         
         redis_health = await health_checker.check_redis()
-        assert "redis" in redis_health
+        assert isinstance(redis_health, dict)
+        assert "healthy" in redis_health
         
         # Full health check should include all components
         full_health = await health_checker.check_health()
+        assert "components" in full_health
         assert "postgres" in full_health["components"]
         assert "clickhouse" in full_health["components"]
         assert "redis" in full_health["components"]
@@ -192,7 +187,7 @@ class TestBasicSystemColdStartup:
                 # Mock dependencies as needed
                 if endpoint == "/health":
                     # Mock: Component isolation for testing without external dependencies
-                    with patch('app.core.health_checkers.HealthChecker.check_health', 
+                    with patch('netra_backend.app.core.health_checkers.HealthChecker.check_health', 
                               return_value={"status": "healthy", "components": {}}):
                         response = await async_client.get(endpoint)
                         assert response.status_code == expected_status, f"Endpoint {endpoint} failed"
@@ -229,7 +224,7 @@ class TestBasicSystemColdStartup:
         """Test 7: System should handle startup failures gracefully."""
         # Simulate database connection failure
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.db.postgres.init_db', side_effect=Exception("Database connection failed")):
+        with patch('netra_backend.app.db.postgres.init_db', side_effect=Exception("Database connection failed")):
             
             # Startup should catch and log the error
             try:
@@ -271,7 +266,7 @@ class TestBasicSystemColdStartup:
         
         # Mock initialization that tracks calls
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.cache.cache_manager.CacheManager.initialize', mock_init):
+        with patch('netra_backend.app.cache.cache_manager.CacheManager.initialize', mock_init):
             # First initialization
             await mock_init()
             first_count = initialization_count["count"]
@@ -290,10 +285,10 @@ class TestBasicSystemColdStartup:
         """Test 10: System should start even if optional services are unavailable."""
         # Mock optional service failures
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.notification_service.NotificationService.initialize', 
+        with patch('netra_backend.app.services.notification_service.NotificationService.initialize', 
                   side_effect=Exception("Notification service unavailable")):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.analytics_service.AnalyticsService.initialize',
+            with patch('netra_backend.app.services.analytics_service.AnalyticsService.initialize',
                       side_effect=Exception("Analytics service unavailable")):
                 
                 # System should still be healthy (degraded mode)
@@ -302,7 +297,7 @@ class TestBasicSystemColdStartup:
                     
                     # Core services mocked as healthy
                     # Mock: Component isolation for testing without external dependencies
-                    with patch('app.core.health_checkers.HealthChecker.check_health',
+                    with patch('netra_backend.app.core.health_checkers.HealthChecker.check_health',
                               return_value={
                                   "status": "degraded",
                                   "components": {

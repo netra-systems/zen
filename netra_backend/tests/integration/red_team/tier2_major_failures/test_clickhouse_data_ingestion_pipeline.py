@@ -129,7 +129,7 @@ class TestClickHouseDataIngestionPipeline:
                     "metric_type": "histogram",
                     "value": 125.5,
                     "labels": {
-                        "endpoint": "/api/v1/agents",
+                        "endpoint": "/api/agents",
                         "method": "POST",
                         "status_code": "200"
                     },

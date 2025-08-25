@@ -142,7 +142,7 @@
             </contract>
             
             <contract service="Backend">
-                <endpoint>/api/v1/threads</endpoint>
+                <endpoint>/api/threads</endpoint>
                 <method>GET</method>
                 <auth>Bearer token required</auth>
                 <response>{"threads": [], "total": 0}</response>

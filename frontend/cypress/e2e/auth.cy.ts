@@ -19,7 +19,7 @@ describe('Authentication', () => {
         endpoints: {
           login: '/api/auth/login',
           logout: '/api/auth/logout',
-          user: '/api/me',
+          user: '/api/auth/me',
           dev_login: '/api/auth/dev/login'
         }
       }

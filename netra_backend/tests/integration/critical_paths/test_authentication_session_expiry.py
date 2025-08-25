@@ -97,7 +97,7 @@ class AuthenticationSessionTester:
         headers = {"Authorization": f"Bearer {self.access_token}"}
         
         async with self.session.get(
-            f"{DEV_BACKEND_URL}/api/v1/user/profile",
+            f"{DEV_BACKEND_URL}/api/user/profile",
             headers=headers
         ) as response:
             if response.status == 200:
@@ -155,7 +155,7 @@ class AuthenticationSessionTester:
         headers = {"Authorization": f"Bearer {invalid_token}"}
         
         async with self.session.get(
-            f"{DEV_BACKEND_URL}/api/v1/user/profile",
+            f"{DEV_BACKEND_URL}/api/user/profile",
             headers=headers
         ) as response:
             if response.status == 401:
@@ -225,7 +225,7 @@ class AuthenticationSessionTester:
                 
                 # Try to use token after logout
                 async with self.session.get(
-                    f"{DEV_BACKEND_URL}/api/v1/user/profile",
+                    f"{DEV_BACKEND_URL}/api/user/profile",
                     headers=headers
                 ) as profile_response:
                     if profile_response.status == 401:
@@ -284,7 +284,7 @@ class AuthenticationSessionTester:
                     for sess in sessions[1:]:
                         headers = {"Authorization": f"Bearer {sess['token']}"}
                         async with self.session.get(
-                            f"{DEV_BACKEND_URL}/api/v1/user/profile",
+                            f"{DEV_BACKEND_URL}/api/user/profile",
                             headers=headers
                         ) as check_response:
                             if check_response.status != 200:

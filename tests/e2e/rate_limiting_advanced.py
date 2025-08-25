@@ -57,7 +57,7 @@ class APIRateLimitTester:
         
         # Test chat message endpoint rate limiting
         rate_limited = await self._hit_endpoint_until_limited(
-            f"{self.backend_base_url}/api/v1/chat/message", 
+            f"{self.backend_base_url}/api/chat/message", 
             headers, 
             method="POST",
             json_data={"message": "test", "timestamp": datetime.now(timezone.utc).isoformat()}
@@ -163,7 +163,7 @@ class AgentThrottleTester:
             for i in range(total_requests):
                 try:
                     response = await client.post(
-                        f"{self.backend_url}/api/v1/agent/execute",
+                        f"{self.backend_url}/api/agent/execute",
                         headers=headers,
                         json={"agent_type": "triage", "query": f"Test query {i+1}"}
                     )
@@ -311,7 +311,7 @@ class ResponseHeaderValidator:
             for _ in range(15):  # Try multiple requests to trigger rate limit
                 try:
                     response = await client.post(
-                        f"{self.backend_url}/api/v1/chat/message",
+                        f"{self.backend_url}/api/chat/message",
                         headers=headers,
                         json={"message": "Rate limit test", "timestamp": datetime.now(timezone.utc).isoformat()}
                     )

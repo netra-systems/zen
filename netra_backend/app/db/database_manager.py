@@ -26,6 +26,7 @@ from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
+from urllib.parse import urlparse
 
 
 class DatabaseManager:
@@ -644,6 +645,47 @@ class DatabaseManager:
                 url = url.replace("sslmode=require", "ssl=require")
         return url
     
+    @staticmethod
+    def validate_database_credentials(url: str) -> bool:
+        """Validate database URL has proper credentials before connection attempts.
+        
+        Args:
+            url: Database URL to validate
+            
+        Returns:
+            True if credentials are valid
+            
+        Raises:
+            ValueError: If credentials are missing or invalid
+        """
+        if not url:
+            raise ValueError("Database URL cannot be empty")
+            
+        parsed = urlparse(url)
+        
+        # Check for missing credentials
+        if not parsed.username:
+            if "sqlite" not in url:
+                raise ValueError("Database URL missing username credentials")
+        
+        # For PostgreSQL, password is generally required (except for Cloud SQL with IAM)
+        if parsed.scheme and "postgresql" in parsed.scheme:
+            is_cloud_sql = "/cloudsql/" in url or "@/cloudsql/" in url
+            
+            # Cloud SQL with Unix sockets may not need explicit password
+            if not is_cloud_sql and not parsed.password:
+                raise ValueError("Database URL missing password credentials for PostgreSQL connection")
+        
+        # Check for obviously empty credentials
+        if parsed.username == "":
+            raise ValueError("Database username cannot be empty string")
+            
+        if parsed.password == "":
+            if "postgresql" in parsed.scheme and "/cloudsql/" not in url:
+                raise ValueError("Database password cannot be empty string for non-Cloud SQL PostgreSQL")
+        
+        return True
+
     @staticmethod
     def _get_default_auth_url() -> str:
         """Get default database URL for current environment."""

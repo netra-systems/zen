@@ -188,7 +188,7 @@ class TestUserStateSynchronization:
         
         # Try to update profile - will likely fail
         response = real_test_client.put(
-            f"/api/v1/user/profile",
+            f"/api/user/profile",
             json=profile_update,
             headers=auth_headers
         )
@@ -277,7 +277,7 @@ class TestUserStateSynchronization:
             
             # Deactivate user via admin API
             deactivation_response = await auth_service_connection.put(
-                f"http://localhost:8000/api/v1/admin/users/{test_user_id}/deactivate",
+                f"http://localhost:8000/api/admin/users/{test_user_id}/deactivate",
                 headers={"Authorization": f"Bearer {admin_token}"}
             )
             
@@ -429,7 +429,7 @@ class TestUserStateSynchronization:
         
         # Try to access premium feature (should fail)
         premium_response = real_test_client.get(
-            "/api/v1/premium/advanced-analytics",
+            "/api/premium/advanced-analytics",
             headers=auth_headers
         )
         
@@ -454,7 +454,7 @@ class TestUserStateSynchronization:
         
         # Try to access premium feature again - should work now
         premium_response_2 = real_test_client.get(
-            "/api/v1/premium/advanced-analytics",
+            "/api/premium/advanced-analytics",
             headers=premium_headers
         )
         
@@ -502,7 +502,7 @@ class TestUserStateSynchronization:
         
         # Request user data export
         export_response = real_test_client.get(
-            "/api/v1/user/export",
+            "/api/user/export",
             headers=auth_headers
         )
         
@@ -572,7 +572,7 @@ class TestUserStateSynchronization:
             backend_auth_headers = {"Authorization": f"Bearer {access_token}"}
             
             backend_response = TestClient(app).get(
-                "/api/v1/user/profile",
+                "/api/user/profile",
                 headers=backend_auth_headers
             )
             
@@ -593,7 +593,7 @@ class TestUserStateSynchronization:
             if logout_response.status_code in [200, 204]:
                 # Try to use token with backend after logout
                 post_logout_response = TestClient(app).get(
-                    "/api/v1/user/profile",
+                    "/api/user/profile",
                     headers=backend_auth_headers
                 )
                 
@@ -663,7 +663,7 @@ class TestUserStateSynchronization:
         try:
             # Delete user via admin API
             deletion_response = await auth_service_connection.delete(
-                f"http://localhost:8000/api/v1/admin/users/{test_user_id}",
+                f"http://localhost:8000/api/admin/users/{test_user_id}",
                 headers={"Authorization": f"Bearer {admin_token}"}
             )
             

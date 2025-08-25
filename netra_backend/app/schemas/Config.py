@@ -359,6 +359,57 @@ class AppConfig(BaseModel):
     startup_circuit_breaker_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
     startup_recovery_timeout: int = Field(default=300, description="Circuit breaker recovery timeout in seconds")
     
+    @field_validator('secret_key')
+    @classmethod
+    def validate_secret_key(cls, v):
+        """CRITICAL: Validate SECRET_KEY security requirements for FastAPI sessions."""
+        if v is None or v == "":
+            raise ValueError("SECRET_KEY is required and cannot be empty")
+        
+        # Validate minimum length for security
+        if len(v) < 32:
+            raise ValueError(f"SECRET_KEY must be at least 32 characters for security, got {len(v)} characters")
+        
+        # Check environment - stricter validation for production environments
+        env = get_env()
+        current_env = env.get("ENVIRONMENT", "development").lower()
+        
+        if current_env in ["staging", "production"]:
+            # Additional security checks for production environments
+            insecure_patterns = ['default', 'secret', 'password', 'dev', 'test', 'demo', 'example', 'change', 'admin']
+            if any(pattern in v.lower() for pattern in insecure_patterns):
+                raise ValueError(f"SECRET_KEY contains insecure pattern for {current_env} environment - not allowed")
+            
+            # Check for low entropy (basic check)
+            if len(set(v)) < 8:
+                raise ValueError("SECRET_KEY has insufficient entropy - too few unique characters for production")
+        
+        return v
+
+    @field_validator('jwt_secret_key')
+    @classmethod
+    def validate_jwt_secret_key(cls, v):
+        """CRITICAL: Validate JWT_SECRET_KEY security requirements."""
+        if v is None or v == "":
+            # JWT secret key is optional in some contexts, but warn if missing
+            return v
+        
+        # Validate minimum length for security
+        if len(v) < 32:
+            raise ValueError(f"JWT_SECRET_KEY must be at least 32 characters for security, got {len(v)} characters")
+        
+        # Check environment - stricter validation for production environments
+        env = get_env()
+        current_env = env.get("ENVIRONMENT", "development").lower()
+        
+        if current_env in ["staging", "production"]:
+            # Additional security checks for production environments
+            insecure_patterns = ['default', 'secret', 'password', 'dev', 'test', 'demo', 'example', 'change', 'jwt']
+            if any(pattern in v.lower() for pattern in insecure_patterns):
+                raise ValueError(f"JWT_SECRET_KEY contains insecure pattern for {current_env} environment - not allowed")
+        
+        return v
+
     @field_validator('service_secret')
     @classmethod
     def validate_service_secret(cls, v):

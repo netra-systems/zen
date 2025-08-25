@@ -36,7 +36,7 @@ from netra_backend.app.routes.database_monitoring.transaction_routes import (
     get_transaction_stats_handler,
 )
 
-router = APIRouter(prefix="/api/v1/database", tags=["database-monitoring"])
+router = APIRouter(prefix="/api/database", tags=["database-monitoring"])
 
 
 @router.get("/dashboard", response_model=Dict[str, Any])

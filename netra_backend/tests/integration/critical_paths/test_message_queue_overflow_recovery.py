@@ -26,7 +26,7 @@ import pytest
 
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
-QUEUE_API_URL = f"{DEV_BACKEND_URL}/api/v1/queue"
+QUEUE_API_URL = f"{DEV_BACKEND_URL}/api/queue"
 AUTH_SERVICE_URL = "http://localhost:8081"
 
 class MessageQueueOverflowTester:

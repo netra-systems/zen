@@ -186,7 +186,7 @@ class DevModeTester:
                 }
                 
                 response = await client.post(
-                    f"http://localhost:{self.backend_port}/api/v1/messages",
+                    f"http://localhost:{self.backend_port}/api/messages",
                     json=test_message,
                     timeout=10.0
                 )
@@ -241,7 +241,7 @@ class DevModeTester:
                 }
                 
                 agent_response = await client.post(
-                    f"http://localhost:{self.backend_port}/api/v1/agents/supervisor/process",
+                    f"http://localhost:{self.backend_port}/api/agents/supervisor/process",
                     json=agent_test,
                     timeout=15.0
                 )
@@ -285,7 +285,7 @@ class DevModeTester:
             # Test CORS headers
             async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.options(
-                    f"http://localhost:{self.backend_port}/api/v1/messages",
+                    f"http://localhost:{self.backend_port}/api/messages",
                     headers={
                         "Origin": "http://localhost:3000",
                         "Access-Control-Request-Method": "POST"
@@ -357,7 +357,7 @@ class DevModeTester:
             # Check if services are discoverable
             async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(
-                    f"http://localhost:{self.backend_port}/api/v1/services"
+                    f"http://localhost:{self.backend_port}/api/services"
                 )
                 return response.status_code in [200, 404]  # 404 if endpoint doesn't exist yet
         except:

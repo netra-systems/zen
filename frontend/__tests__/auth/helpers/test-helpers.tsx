@@ -7,7 +7,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { AuthProvider, AuthContext } from '@/auth/context';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';

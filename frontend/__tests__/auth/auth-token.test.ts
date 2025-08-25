@@ -30,6 +30,8 @@ import {
 import { mockUseContext } from './auth-test-setup';
 import { AuthContext } from '@/auth';
 
+import { useAuth } from '@/auth/context';
+
 describe('Auth Token Management', () => {
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockToken: string;
@@ -267,7 +269,7 @@ describe('Auth Token Management', () => {
       const mockContext = createMockAuthContext();
       mockUseContext.mockReturnValue(mockContext);
 
-      const result = authService.useAuth();
+      const result = useAuth();
 
       expect(mockUseContext).toHaveBeenCalledWith(AuthContext);
       expect(result).toBe(mockContext);
@@ -276,26 +278,26 @@ describe('Auth Token Management', () => {
     it('should throw error when used outside provider', () => {
       mockUseContext.mockReturnValue(undefined);
 
-      expect(() => authService.useAuth())
+      expect(() => useAuth())
         .toThrow('useAuth must be used within an AuthProvider');
     });
 
     it('should handle null context', () => {
       mockUseContext.mockReturnValue(null);
 
-      expect(() => authService.useAuth())
+      expect(() => useAuth())
         .toThrow('useAuth must be used within an AuthProvider');
     });
 
     it('should return context with all required properties', () => {
       const mockContext = setupMockAuthContext();
-      const result = authService.useAuth();
+      const result = useAuth();
       verifyContextProperties(result);
     });
 
     it('should handle context with user data', () => {
       const mockContext = setupMockContextWithUser();
-      const result = authService.useAuth();
+      const result = useAuth();
       verifyContextWithUserData(result);
     });
 
@@ -306,7 +308,7 @@ describe('Auth Token Management', () => {
       };
       mockUseContext.mockReturnValue(mockContext);
 
-      const result = authService.useAuth();
+      const result = useAuth();
 
       expect(result.loading).toBe(true);
     });

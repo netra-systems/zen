@@ -483,7 +483,7 @@ groups:
    kubectl get deployments -o wide
    
    # Review recent alerts
-   curl http://prometheus:9090/api/v1/alerts
+   curl http://prometheus:9090/api/alerts
    
    # Check error logs
    kubectl logs -l app=netra-backend --since=10m | grep ERROR
@@ -537,10 +537,10 @@ receivers:
 **Investigation Steps:**
 ```bash
 # 1. Check current latency
-curl "http://prometheus:9090/api/v1/query?query=histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))"
+curl "http://prometheus:9090/api/query?query=histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))"
 
 # 2. Identify slow endpoints
-curl "http://prometheus:9090/api/v1/query?query=topk(5, histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{endpoint!~'/health.*'}[5m])))"
+curl "http://prometheus:9090/api/query?query=topk(5, histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{endpoint!~'/health.*'}[5m])))"
 
 # 3. Check database performance
 psql -h postgres -c "SELECT query, calls, mean_time FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;"
@@ -605,13 +605,13 @@ kubectl rollout restart deployment netra-backend
 **Investigation Steps:**
 ```bash
 # 1. Check agent success rate
-curl "http://prometheus:9090/api/v1/query?query=rate(netra_agent_failures_total[5m])"
+curl "http://prometheus:9090/api/query?query=rate(netra_agent_failures_total[5m])"
 
 # 2. Review agent logs
 kubectl logs -l app=netra-backend --since=15m | grep "agent_service"
 
 # 3. Check LLM provider status
-curl -H "Authorization: Bearer $GEMINI_API_KEY" https://generativelanguage.googleapis.com/v1/models
+curl -H "Authorization: Bearer $GEMINI_API_KEY" https://generativelanguage.googleapis.com/models
 
 # 4. Verify external connectivity
 kubectl exec -it netra-backend-pod -- curl -I https://api.openai.com
@@ -664,7 +664,7 @@ python scripts/error_budget_status.py
 
 # 5. Recent alerts summary
 echo "5. Recent alerts summary..."
-curl -s "http://prometheus:9090/api/v1/alerts" | jq '.data.alerts[].labels.alertname' | sort | uniq -c
+curl -s "http://prometheus:9090/api/alerts" | jq '.data.alerts[].labels.alertname' | sort | uniq -c
 
 # 6. Database health
 echo "6. Database health check..."

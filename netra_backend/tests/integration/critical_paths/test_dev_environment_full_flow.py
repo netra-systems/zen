@@ -65,7 +65,7 @@ class DevEnvironmentTester:
         # First check if services are already running
         try:
             import requests
-            response = requests.get(f"{DEV_BACKEND_URL}/api/v1/health", timeout=2)
+            response = requests.get(f"{DEV_BACKEND_URL}/api/health", timeout=2)
             if response.status_code == 200:
                 print("[OK] Backend service is already running")
                 print("[INFO] Using existing dev environment")
@@ -99,7 +99,7 @@ class DevEnvironmentTester:
                 # Try to check if services are up
                 try:
                     import requests
-                    response = requests.get(f"{DEV_BACKEND_URL}/api/v1/health", timeout=1)
+                    response = requests.get(f"{DEV_BACKEND_URL}/api/health", timeout=1)
                     if response.status_code == 200:
                         print("[OK] Backend service is running")
                         return True
@@ -121,7 +121,7 @@ class DevEnvironmentTester:
         print("\n[HEALTH] STEP 2: Testing backend health...")
         
         try:
-            async with self.session.get(f"{DEV_BACKEND_URL}/api/v1/health") as response:
+            async with self.session.get(f"{DEV_BACKEND_URL}/api/health") as response:
                 if response.status == 200:
                     data = await response.json()
                     print(f"[OK] Backend healthy: {data}")
@@ -226,7 +226,7 @@ class DevEnvironmentTester:
             
             # Try to get user profile
             async with self.session.get(
-                f"{DEV_BACKEND_URL}/api/v1/user/profile",
+                f"{DEV_BACKEND_URL}/api/user/profile",
                 headers=headers
             ) as response:
                 if response.status == 200:

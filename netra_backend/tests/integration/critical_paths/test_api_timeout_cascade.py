@@ -232,7 +232,7 @@ class ApiTimeoutManager:
             if len(path_parts) < 3:
                 return web.Response(status=404, json={"error": "Invalid path"})
             
-            service_type = path_parts[2]  # /api/v1/{service_type}
+            service_type = path_parts[2]  # /api/{service_type}
             
             # Map service types to backend services
             service_mapping = {
@@ -263,8 +263,8 @@ class ApiTimeoutManager:
         app = web.Application(middlewares=[timeout_middleware])
         
         # Register API routes
-        app.router.add_route('*', '/api/v1/{service_type}', handle_api_request)
-        app.router.add_route('*', '/api/v1/{service_type}/{path:.*}', handle_api_request)
+        app.router.add_route('*', '/api/{service_type}', handle_api_request)
+        app.router.add_route('*', '/api/{service_type}/{path:.*}', handle_api_request)
         
         self.gateway_server = await asyncio.create_task(
             aiohttp.web.create_server(app, "localhost", 0)
@@ -512,32 +512,32 @@ class ApiTimeoutManager:
         if cascade_scenario == "auth_service_overload":
             # Simulate auth service being slow, affecting dependent services
             test_requests = [
-                ("/api/v1/auth", {"delay": "2.0"}),  # Exceed auth timeout
-                ("/api/v1/users", {}),  # Depends on auth
-                ("/api/v1/data", {}),   # Also depends on auth
+                ("/api/auth", {"delay": "2.0"}),  # Exceed auth timeout
+                ("/api/users", {}),  # Depends on auth
+                ("/api/data", {}),   # Also depends on auth
             ]
             
         elif cascade_scenario == "data_service_timeout":
             # Simulate data service timing out
             test_requests = [
-                ("/api/v1/data", {"delay": "6.0"}),  # Exceed data timeout
-                ("/api/v1/users", {}),
-                ("/api/v1/notifications", {}),
+                ("/api/data", {"delay": "6.0"}),  # Exceed data timeout
+                ("/api/users", {}),
+                ("/api/notifications", {}),
             ]
             
         elif cascade_scenario == "network_partition":
             # Simulate network issues affecting multiple services
             test_requests = [
-                ("/api/v1/auth", {"fail": "timeout"}),
-                ("/api/v1/users", {"fail": "timeout"}),
-                ("/api/v1/data", {"fail": "timeout"}),
+                ("/api/auth", {"fail": "timeout"}),
+                ("/api/users", {"fail": "timeout"}),
+                ("/api/data", {"fail": "timeout"}),
             ]
             
         else:
             # Default scenario
             test_requests = [
-                ("/api/v1/users", {"delay": "1.0"}),
-                ("/api/v1/auth", {}),
+                ("/api/users", {"delay": "1.0"}),
+                ("/api/auth", {}),
             ]
         
         # Execute test requests
@@ -648,7 +648,7 @@ async def test_service_timeout_handling(timeout_manager):
     """Test basic service timeout handling."""
     # Test request that should timeout
     result = await timeout_manager.make_timeout_request(
-        "/api/v1/auth", query_params={"delay": "2.0"}
+        "/api/auth", query_params={"delay": "2.0"}
     )
     
     assert result["status_code"] == 504
@@ -664,7 +664,7 @@ async def test_timeout_retry_mechanism(timeout_manager):
     """Test timeout retry mechanisms."""
     # Test request that times out but should retry
     result = await timeout_manager.make_timeout_request(
-        "/api/v1/users", query_params={"delay": "3.0"}
+        "/api/users", query_params={"delay": "3.0"}
     )
     
     # Should eventually timeout after retries
@@ -682,7 +682,7 @@ async def test_timeout_retry_mechanism(timeout_manager):
 async def test_circuit_breaker_activation(timeout_manager):
     """Test circuit breaker activation on repeated timeouts."""
     # Make multiple requests to trigger circuit breaker
-    service_path = "/api/v1/auth"
+    service_path = "/api/auth"
     
     for i in range(5):  # Exceed circuit breaker threshold
         result = await timeout_manager.make_timeout_request(
@@ -723,9 +723,9 @@ async def test_timeout_cascade_detection(timeout_manager):
 async def test_different_timeout_types(timeout_manager):
     """Test different types of timeouts."""
     timeout_scenarios = [
-        ("connection", "/api/v1/users", {"fail": "timeout"}),
-        ("read", "/api/v1/data", {"delay": "6.0"}),
-        ("request", "/api/v1/notifications", {"delay": "4.0"})
+        ("connection", "/api/users", {"fail": "timeout"}),
+        ("read", "/api/data", {"delay": "6.0"}),
+        ("request", "/api/notifications", {"delay": "4.0"})
     ]
     
     for timeout_type, path, params in timeout_scenarios:
@@ -741,7 +741,7 @@ async def test_different_timeout_types(timeout_manager):
 @pytest.mark.asyncio
 async def test_service_recovery_after_timeout(timeout_manager):
     """Test service recovery after timeout issues."""
-    service_path = "/api/v1/users"
+    service_path = "/api/users"
     
     # First, cause some timeouts
     for i in range(3):
@@ -770,7 +770,7 @@ async def test_concurrent_timeout_handling(timeout_manager):
     for i in range(10):
         delay = "1.0" if i % 3 == 0 else "0.1"  # Some will timeout
         task = timeout_manager.make_timeout_request(
-            "/api/v1/users", query_params={"delay": delay}
+            "/api/users", query_params={"delay": delay}
         )
         concurrent_tasks.append(task)
     
@@ -807,9 +807,9 @@ async def test_timeout_metrics_accuracy(timeout_manager):
     """Test accuracy of timeout metrics collection."""
     # Generate timeout events
     test_requests = [
-        ("/api/v1/auth", {"delay": "2.0"}),    # Should timeout
-        ("/api/v1/users", {}),                 # Should succeed
-        ("/api/v1/data", {"delay": "6.0"}),    # Should timeout
+        ("/api/auth", {"delay": "2.0"}),    # Should timeout
+        ("/api/users", {}),                 # Should succeed
+        ("/api/data", {"delay": "6.0"}),    # Should timeout
     ]
     
     for path, params in test_requests * 2:  # 6 total requests
@@ -846,7 +846,7 @@ async def test_timeout_performance_requirements(timeout_manager):
     start_time = time.time()
     
     result = await timeout_manager.make_timeout_request(
-        "/api/v1/auth", query_params={"delay": "2.0"}
+        "/api/auth", query_params={"delay": "2.0"}
     )
     
     timeout_detection_time = time.time() - start_time
@@ -858,7 +858,7 @@ async def test_timeout_performance_requirements(timeout_manager):
     # Test successful request performance
     start_time = time.time()
     
-    success_result = await timeout_manager.make_timeout_request("/api/v1/users")
+    success_result = await timeout_manager.make_timeout_request("/api/users")
     
     success_time = time.time() - start_time
     

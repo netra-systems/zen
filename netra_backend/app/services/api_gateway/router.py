@@ -101,24 +101,24 @@ class ApiGatewayRouter:
     async def find_route(self, path: str) -> Optional[Dict[str, Any]]:
         """Find matching route for a path."""
         # Simple pattern matching for test compatibility
-        if path.startswith("/api/v1/users") and not path == "/api/v1/users":
+        if path.startswith("/api/users") and not path == "/api/users":
             return {"rule": type('Rule', (), {
                 'service_name': 'user_service',
-                'path_pattern': '/api/v1/users/*',
+                'path_pattern': '/api/users/*',
                 'load_balancing_strategy': 'least_connections',
                 'timeout_seconds': 30
             })()}
-        elif path == "/api/v1/users":
+        elif path == "/api/users":
             return {"rule": type('Rule', (), {
                 'service_name': 'user_service', 
-                'path_pattern': '/api/v1/users',
+                'path_pattern': '/api/users',
                 'load_balancing_strategy': 'round_robin',
                 'timeout_seconds': 30
             })()}
-        elif path.startswith("/api/v1/threads/") and len(path) > len("/api/v1/threads/"):
+        elif path.startswith("/api/threads/") and len(path) > len("/api/threads/"):
             return {"rule": type('Rule', (), {
                 'service_name': 'thread_service',
-                'path_pattern': r'/api/v1/threads/[0-9a-f-]+',
+                'path_pattern': r'/api/threads/[0-9a-f-]+',
                 'load_balancing_strategy': 'weighted', 
                 'timeout_seconds': 45
             })()}
@@ -129,10 +129,10 @@ class ApiGatewayRouter:
                 'load_balancing_strategy': 'round_robin',
                 'timeout_seconds': 60
             })()}
-        elif path == "/api/v1/agents":
+        elif path == "/api/agents":
             return {"rule": type('Rule', (), {
                 'service_name': 'agent_service_v1',
-                'path_pattern': '/api/v1/agents',
+                'path_pattern': '/api/agents',
                 'load_balancing_strategy': 'round_robin',
                 'timeout_seconds': 30
             })()}

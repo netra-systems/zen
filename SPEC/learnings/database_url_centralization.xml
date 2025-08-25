@@ -6,7 +6,8 @@
     <insight>
       Centralized all database URL construction logic into a single, comprehensive
       DatabaseURLBuilder class that handles all possible environment and configuration
-      combinations.
+      combinations. CRITICAL: All URL normalization must be done through DatabaseURLBuilder
+      to prevent inconsistencies across services.
     </insight>
     
     <problem>
@@ -108,5 +109,158 @@
     </references>
     
     <tags>database, configuration, url-construction, centralization, builder-pattern</tags>
+  </learning>
+  
+  <learning id="database-url-normalization-regression" date="2025-08-25">
+    <title>URL Normalization Must Be Centralized</title>
+    <category>Database,Configuration,Architecture,Regression</category>
+    <insight>
+      CRITICAL REGRESSION: AuthDatabaseManager had scattered URL normalization logic
+      that was different from CoreDatabaseManager, causing staging deployment failures.
+      ALL URL normalization MUST go through DatabaseURLBuilder.
+    </insight>
+    
+    <problem>
+      AuthDatabaseManager contained duplicate URL normalization logic:
+      - Cloud SQL SSL parameter removal in get_base_database_url()
+      - SSL to sslmode conversion in get_migration_url_sync_format()
+      - Driver prefix handling scattered throughout
+      - Validation logic that checked for sslmode in asyncpg URLs
+      
+      This duplication caused:
+      - Inconsistent behavior between services
+      - Staging deployment failures
+      - Hard to maintain and debug
+    </problem>
+    
+    <solution>
+      Added comprehensive URL operations to DatabaseURLBuilder:
+      1. normalize_postgres_url() - Single place for all normalization
+      2. format_url_for_driver() - Driver-specific formatting
+      3. validate_url_for_driver() - Driver-specific validation
+      
+      Updated AuthDatabaseManager to ONLY use DatabaseURLBuilder:
+      - No inline URL manipulation
+      - All normalization through DatabaseURLBuilder
+      - All validation through DatabaseURLBuilder
+    </solution>
+    
+    <antipattern>
+      NEVER add URL manipulation logic outside DatabaseURLBuilder:
+      - No inline regex for SSL parameters
+      - No direct string replacement for drivers
+      - No local normalization methods
+      - No scattered validation logic
+    </antipattern>
+    
+    <enforcement>
+      - Architecture compliance must check for scattered URL logic
+      - Any PR adding URL manipulation outside DatabaseURLBuilder must be rejected
+      - Services should only import from DatabaseURLBuilder for URL operations
+    </enforcement>
+    
+    <tags>database, regression, url-normalization, centralization, critical</tags>
+  </learning>
+  
+  <learning id="no-fallback-url-handling" date="2025-08-25">
+    <title>Fallback URL Handling is FORBIDDEN</title>
+    <category>Database,Configuration,Architecture,Critical</category>
+    <insight>
+      CRITICAL: Fallback URL handling is absolutely forbidden. ALL database URL
+      operations MUST go through DatabaseURLBuilder with NO EXCEPTIONS. Fallback
+      logic creates inconsistencies that cause production failures.
+    </insight>
+    
+    <problem>
+      Fallback logic creates multiple critical issues:
+      1. Inconsistent behavior between primary and fallback paths
+      2. Incomplete implementations miss edge cases (SSL parameters, Cloud SQL)
+      3. Multiple versions of the same logic diverge over time
+      4. Staging/production failures when imports fail
+      5. Impossible to maintain and test all code paths
+      
+      Real example: AuthDatabaseManager had fallback logic that:
+      - Only changed driver prefix but missed SSL parameter conversion
+      - Caused "unexpected keyword argument 'sslmode'" errors in staging
+      - Was different from CoreDatabaseManager's fallback
+      - Created impossible-to-debug inconsistencies
+    </problem>
+    
+    <solution>
+      NO FALLBACKS - ALL URL operations through DatabaseURLBuilder:
+      
+      ```python
+      # CORRECT - No fallbacks
+      from shared.database_url_builder import DatabaseURLBuilder
+      url = DatabaseURLBuilder.format_url_for_driver(url, 'asyncpg')
+      
+      # WRONG - Never do this
+      try:
+          from shared.database_url_builder import DatabaseURLBuilder
+          url = DatabaseURLBuilder.format_url_for_driver(url, 'asyncpg')
+      except ImportError:
+          # NO! This creates inconsistencies
+          url = url.replace("postgresql://", "postgresql+asyncpg://")
+      ```
+      
+      If DatabaseURLBuilder cannot be imported, the system should FAIL FAST
+      rather than attempt to continue with partial functionality.
+    </solution>
+    
+    <best_practices>
+      <practice>
+        <rule>NO FALLBACKS - DatabaseURLBuilder is mandatory</rule>
+        <rationale>
+          DatabaseURLBuilder is a core shared component. If it cannot be imported,
+          the system has fundamental issues that must be fixed, not worked around.
+        </rationale>
+      </practice>
+      <practice>
+        <rule>Fail fast on import errors</rule>
+        <rationale>
+          Better to fail immediately with clear error than continue with
+          partial functionality that will fail mysteriously later.
+        </rationale>
+      </practice>
+      <practice>
+        <rule>Use extension hooks for new requirements</rule>
+        <rationale>
+          DatabaseURLBuilder provides extension hooks (register_driver_handler,
+          register_normalization_rule) for future needs without modifying core.
+        </rationale>
+      </practice>
+    </best_practices>
+    
+    <driver_requirements>
+      <driver name="asyncpg">
+        <requirement>Uses 'ssl' parameter, NOT 'sslmode'</requirement>
+        <requirement>Cloud SQL Unix sockets don't need SSL parameters</requirement>
+      </driver>
+      <driver name="psycopg2">
+        <requirement>Uses 'sslmode' parameter, NOT 'ssl'</requirement>
+        <requirement>Used by Alembic for migrations</requirement>
+      </driver>
+      <driver name="base">
+        <requirement>Plain postgresql:// without driver prefix</requirement>
+        <requirement>Used for URL normalization</requirement>
+      </driver>
+    </driver_requirements>
+    
+    <testing_requirements>
+      <requirement>
+        Test primary path: DatabaseURLBuilder available
+      </requirement>
+      <requirement>
+        Test fallback path: Mock ImportError for DatabaseURLBuilder
+      </requirement>
+      <requirement>
+        Test SSL parameter conversion for each driver
+      </requirement>
+      <requirement>
+        Test Cloud SQL URL handling
+      </requirement>
+    </testing_requirements>
+    
+    <tags>database, fallback, ssl-parameters, asyncpg, critical</tags>
   </learning>
 </learnings>

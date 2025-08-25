@@ -48,7 +48,7 @@ class TestUserJourney:
         async with aiohttp.ClientSession() as session:
             # Step 1: Sign up
             signup_response = await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/api/auth/register",
                 json=test_user
             )
             
@@ -67,14 +67,14 @@ class TestUserJourney:
                 
                 # Verify email (mock)
                 verify_response = await session.post(
-                    f"{backend_url}/api/v1/auth/verify-email",
+                    f"{backend_url}/api/auth/verify-email",
                     json={"token": verification_token}
                 )
                 assert verify_response.status == 200, "Email verification failed"
             
             # Step 2: First login
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/api/auth/login",
                 json={
                     "email": test_user['email'],
                     "password": test_user['password']
@@ -97,7 +97,7 @@ class TestUserJourney:
             
             # Step 4: Get user profile
             profile_response = await session.get(
-                f"{backend_url}/api/v1/user/profile",
+                f"{backend_url}/api/user/profile",
                 headers={"Authorization": f"Bearer {access_token}"}
             )
             
@@ -111,7 +111,7 @@ class TestUserJourney:
             
             # Step 5: Check default workspace
             workspace_response = await session.get(
-                f"{backend_url}/api/v1/workspace",
+                f"{backend_url}/api/workspace",
                 headers={"Authorization": f"Bearer {access_token}"}
             )
             
@@ -143,7 +143,7 @@ class TestUserJourney:
         async with aiohttp.ClientSession() as session:
             # Register
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/api/auth/register",
                 json={
                     "email": test_email,
                     "password": "Profile123!",
@@ -153,7 +153,7 @@ class TestUserJourney:
             
             # Login
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/api/auth/login",
                 json={"email": test_email, "password": "Profile123!"}
             )
             
@@ -185,7 +185,7 @@ class TestUserJourney:
             }
             
             update_response = await session.put(
-                f"{backend_url}/api/v1/user/profile",
+                f"{backend_url}/api/user/profile",
                 json=profile_update,
                 headers=headers
             )
@@ -213,7 +213,7 @@ class TestUserJourney:
             # Test avatar upload (mock)
             avatar_data = b"fake_image_data_png"
             avatar_response = await session.post(
-                f"{backend_url}/api/v1/user/avatar",
+                f"{backend_url}/api/user/avatar",
                 data={'file': avatar_data},
                 headers=headers
             )
@@ -242,7 +242,7 @@ class TestUserJourney:
             # Create user
             test_email = f"workspace.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/api/auth/register",
                 json={
                     "email": test_email,
                     "password": "Workspace123!",
@@ -252,7 +252,7 @@ class TestUserJourney:
             
             # Login
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/api/auth/login",
                 json={"email": test_email, "password": "Workspace123!"}
             )
             
@@ -262,7 +262,7 @@ class TestUserJourney:
             
             # Get default workspace
             workspaces_response = await session.get(
-                f"{backend_url}/api/v1/workspaces",
+                f"{backend_url}/api/workspaces",
                 headers=headers
             )
             
@@ -298,7 +298,7 @@ class TestUserJourney:
                 }
                 
                 update_response = await session.put(
-                    f"{backend_url}/api/v1/workspace/{workspace_id}",
+                    f"{backend_url}/api/workspace/{workspace_id}",
                     json=ws_update,
                     headers=headers
                 )
@@ -313,7 +313,7 @@ class TestUserJourney:
                 
                 # Create additional workspace
                 new_ws_response = await session.post(
-                    f"{backend_url}/api/v1/workspaces",
+                    f"{backend_url}/api/workspaces",
                     json={
                         "name": "Secondary Workspace",
                         "description": "Test secondary workspace"
@@ -328,7 +328,7 @@ class TestUserJourney:
                     
                     # Switch workspace
                     switch_response = await session.post(
-                        f"{backend_url}/api/v1/workspace/switch",
+                        f"{backend_url}/api/workspace/switch",
                         json={"workspace_id": new_ws_id},
                         headers=headers
                     )
@@ -356,7 +356,7 @@ class TestUserJourney:
             # Create and login user
             test_email = f"apikey.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/api/auth/register",
                 json={
                     "email": test_email,
                     "password": "ApiKey123!",
@@ -365,7 +365,7 @@ class TestUserJourney:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/api/auth/login",
                 json={"email": test_email, "password": "ApiKey123!"}
             )
             
@@ -388,7 +388,7 @@ class TestUserJourney:
             }
             
             key_response = await session.post(
-                f"{backend_url}/api/v1/api-keys",
+                f"{backend_url}/api/api-keys",
                 json=api_key_request,
                 headers=headers
             )
@@ -405,7 +405,7 @@ class TestUserJourney:
                 
                 # Test API key authentication
                 test_response = await session.get(
-                    f"{backend_url}/api/v1/threads",
+                    f"{backend_url}/api/threads",
                     headers={"X-API-Key": api_key}
                 )
                 
@@ -414,7 +414,7 @@ class TestUserJourney:
                 
                 # List API keys
                 list_response = await session.get(
-                    f"{backend_url}/api/v1/api-keys",
+                    f"{backend_url}/api/api-keys",
                     headers=headers
                 )
                 
@@ -429,7 +429,7 @@ class TestUserJourney:
                 
                 # Revoke API key
                 revoke_response = await session.delete(
-                    f"{backend_url}/api/v1/api-keys/{api_key_id}",
+                    f"{backend_url}/api/api-keys/{api_key_id}",
                     headers=headers
                 )
                 
@@ -438,7 +438,7 @@ class TestUserJourney:
                 
                 # Verify key no longer works
                 revoked_test = await session.get(
-                    f"{backend_url}/api/v1/threads",
+                    f"{backend_url}/api/threads",
                     headers={"X-API-Key": api_key}
                 )
                 
@@ -466,7 +466,7 @@ class TestUserJourney:
             # Create and login user
             test_email = f"llm.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/api/auth/register",
                 json={
                     "email": test_email,
                     "password": "LLMTest123!",
@@ -475,7 +475,7 @@ class TestUserJourney:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/api/auth/login",
                 json={"email": test_email, "password": "LLMTest123!"}
             )
             
@@ -485,7 +485,7 @@ class TestUserJourney:
             
             # Create a thread
             thread_response = await session.post(
-                f"{backend_url}/api/v1/threads",
+                f"{backend_url}/api/threads",
                 json={
                     "title": "First AI Conversation",
                     "metadata": {
@@ -512,7 +512,7 @@ class TestUserJourney:
                 }
                 
                 message_response = await session.post(
-                    f"{backend_url}/api/v1/messages",
+                    f"{backend_url}/api/messages",
                     json=message_request,
                     headers=headers
                 )
@@ -532,7 +532,7 @@ class TestUserJourney:
                 while time.time() - start_time < max_wait:
                     # Get thread messages
                     messages_response = await session.get(
-                        f"{backend_url}/api/v1/threads/{thread_id}/messages",
+                        f"{backend_url}/api/threads/{thread_id}/messages",
                         headers=headers
                     )
                     
@@ -563,7 +563,7 @@ class TestUserJourney:
                 
                 # Check usage tracking
                 usage_response = await session.get(
-                    f"{backend_url}/api/v1/usage",
+                    f"{backend_url}/api/usage",
                     headers=headers
                 )
                 
@@ -576,7 +576,7 @@ class TestUserJourney:
                 
                 # Test streaming (if supported)
                 stream_response = await session.post(
-                    f"{backend_url}/api/v1/messages/stream",
+                    f"{backend_url}/api/messages/stream",
                     json={
                         "thread_id": thread_id,
                         "content": "Please count from 1 to 5",

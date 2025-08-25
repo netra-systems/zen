@@ -91,21 +91,27 @@ def get_free_port() -> int:
     return port
 
 
-def is_port_available(port: int) -> bool:
+def is_port_available(port: int, host: str = '0.0.0.0', allow_reuse: bool = False) -> bool:
     """
-    Check if a specific port is available.
+    Check if a specific port is available on the specified host interface.
     
     Args:
         port: Port number to check
+        host: Host interface to check (defaults to '0.0.0.0' for all interfaces)
+        allow_reuse: Whether to use SO_REUSEADDR (should match target application behavior)
     
     Returns:
         True if port is available, False otherwise
     """
     try:
         # Use bind attempt instead of connect to properly detect TIME_WAIT connections
+        # Check the same interface that will actually be used to prevent race conditions
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind(('localhost', port))
+            # Only set SO_REUSEADDR if specifically requested
+            # This matches uvicorn's default behavior (no SO_REUSEADDR initially)
+            if allow_reuse:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind((host, port))
             return True
     except OSError:
         # Port is already in use or blocked (including TIME_WAIT)
@@ -114,25 +120,32 @@ def is_port_available(port: int) -> bool:
         return False
 
 
-def find_available_port(preferred_port: int, port_range: tuple = (8081, 8090)) -> int:
+def find_available_port(preferred_port: int, port_range: tuple = (8081, 8090), host: str = '0.0.0.0') -> int:
     """
     Find an available port, preferring the specified port.
     
     Args:
         preferred_port: Preferred port to try first
         port_range: Range of ports to try (min, max)
+        host: Host interface to check (defaults to '0.0.0.0' for all interfaces)
     
     Returns:
         Available port number
     """
     # Try preferred port first
-    if is_port_available(preferred_port):
+    if is_port_available(preferred_port, host):
+        # Add small delay on Windows to prevent race condition
+        if sys.platform == "win32":
+            time.sleep(0.01)
         return preferred_port
     
     # Try ports in the specified range
     for port in range(port_range[0], port_range[1] + 1):
-        if port != preferred_port and is_port_available(port):
+        if port != preferred_port and is_port_available(port, host):
             logger.info(f"Port {preferred_port} unavailable, using {port} instead")
+            # Add small delay on Windows to prevent race condition
+            if sys.platform == "win32":
+                time.sleep(0.01)
             return port
     
     # If all ports in range are taken, get a random free port

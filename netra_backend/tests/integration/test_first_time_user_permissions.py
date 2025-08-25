@@ -45,7 +45,7 @@ async def test_openai_provider_connection(
     # Add OpenAI credentials
     provider_configs = get_mock_provider_configs()
     response = await async_client.post(
-        "/api/v1/providers/openai/connect",
+        "/api/providers/openai/connect",
         json=provider_configs["openai"],
         headers=headers
     )
@@ -54,7 +54,7 @@ async def test_openai_provider_connection(
     assert response.json()["status"] == "connected"
     
     # Test provider connection
-    response = await async_client.post("/api/v1/providers/openai/test", headers=headers)
+    response = await async_client.post("/api/providers/openai/test", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     test_result = response.json()
     assert test_result["connection_valid"] is True
@@ -75,7 +75,7 @@ async def test_anthropic_provider_connection(
     # Add Anthropic credentials
     provider_configs = get_mock_provider_configs()
     response = await async_client.post(
-        "/api/v1/providers/anthropic/connect",
+        "/api/providers/anthropic/connect",
         json=provider_configs["anthropic"],
         headers=headers
     )
@@ -97,13 +97,13 @@ async def test_provider_listing_and_management(
     
     # Connect multiple providers
     provider_configs = get_mock_provider_configs()
-    await async_client.post("/api/v1/providers/openai/connect", 
+    await async_client.post("/api/providers/openai/connect", 
                            json=provider_configs["openai"], headers=headers)
-    await async_client.post("/api/v1/providers/anthropic/connect", 
+    await async_client.post("/api/providers/anthropic/connect", 
                            json=provider_configs["anthropic"], headers=headers)
     
     # List connected providers
-    response = await async_client.get("/api/v1/providers", headers=headers)
+    response = await async_client.get("/api/providers", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     providers = response.json()
     assert len(providers) >= 2
@@ -124,7 +124,7 @@ async def test_provider_settings_update(
     
     # Connect OpenAI first
     provider_configs = get_mock_provider_configs()
-    await async_client.post("/api/v1/providers/openai/connect", 
+    await async_client.post("/api/providers/openai/connect", 
                            json=provider_configs["openai"], headers=headers)
     
     # Update provider settings
@@ -135,7 +135,7 @@ async def test_provider_settings_update(
     }
     # Mock: Component isolation for testing without external dependencies
     response = await async_client.patch(
-        "/api/v1/providers/openai/settings",
+        "/api/providers/openai/settings",
         json=settings_update,
         headers=headers
     )
@@ -155,12 +155,12 @@ async def test_provider_key_rotation(
     
     # Connect provider
     provider_configs = get_mock_provider_configs()
-    await async_client.post("/api/v1/providers/openai/connect", 
+    await async_client.post("/api/providers/openai/connect", 
                            json=provider_configs["openai"], headers=headers)
     
     # Rotate API key
     response = await async_client.post(
-        "/api/v1/providers/openai/rotate-key",
+        "/api/providers/openai/rotate-key",
         json={"new_api_key": "sk-test-new-key-9876543210"},
         headers=headers
     )
@@ -181,15 +181,15 @@ async def test_provider_disconnection(
     
     # Connect and then disconnect
     provider_configs = get_mock_provider_configs()
-    await async_client.post("/api/v1/providers/anthropic/connect", 
+    await async_client.post("/api/providers/anthropic/connect", 
                            json=provider_configs["anthropic"], headers=headers)
     
     # Disconnect provider
-    response = await async_client.delete("/api/v1/providers/anthropic/disconnect", headers=headers)
+    response = await async_client.delete("/api/providers/anthropic/disconnect", headers=headers)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     
     # Verify disconnection
-    response = await async_client.get("/api/v1/providers", headers=headers)
+    response = await async_client.get("/api/providers", headers=headers)
     providers = response.json()
     anthropic_providers = [p for p in providers if p["name"] == "anthropic"]
     assert len(anthropic_providers) == 0 or anthropic_providers[0]["status"] == "disconnected"
@@ -207,7 +207,7 @@ async def test_google_oauth_provider_flow(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Initiate Google OAuth flow
-    response = await async_client.get("/api/v1/providers/google/oauth/authorize", headers=headers)
+    response = await async_client.get("/api/providers/google/oauth/authorize", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     oauth_data = response.json()
     assert "authorization_url" in oauth_data
@@ -224,7 +224,7 @@ async def test_google_oauth_provider_flow(
         }
         
         response = await async_client.get(
-            "/api/v1/providers/google/oauth/callback",
+            "/api/providers/google/oauth/callback",
             params={"code": "test-auth-code", "state": oauth_data["state"]},
             headers=headers
         )
@@ -247,13 +247,13 @@ async def test_optimization_workflow_with_providers(
     
     # Connect providers first
     provider_configs = get_mock_provider_configs()
-    await async_client.post("/api/v1/providers/openai/connect", 
+    await async_client.post("/api/providers/openai/connect", 
                            json=provider_configs["openai"], headers=headers)
     
     # Submit optimization request
     optimization_request = get_mock_optimization_request()
     response = await async_client.post(
-        "/api/v1/optimizations/analyze",
+        "/api/optimizations/analyze",
         json=optimization_request,
         headers=headers
     )
@@ -267,7 +267,7 @@ async def test_optimization_workflow_with_providers(
     analysis_complete = False
     
     for _ in range(max_polls):
-        response = await async_client.get(f"/api/v1/optimizations/status/{job_id}", headers=headers)
+        response = await async_client.get(f"/api/optimizations/status/{job_id}", headers=headers)
         assert response.status_code == status.HTTP_200_OK
         status_data = response.json()
         
@@ -320,7 +320,7 @@ async def test_optimization_results_validation(
     with patch("app.services.optimization_service.get_results") as mock_get:
         mock_get.return_value = mock_results
         
-        response = await async_client.get(f"/api/v1/optimizations/results/{job_id}", headers=headers)
+        response = await async_client.get(f"/api/optimizations/results/{job_id}", headers=headers)
         assert response.status_code == status.HTTP_200_OK
         results = response.json()
         
@@ -355,7 +355,7 @@ async def test_optimization_follow_up_workflow(
     
     # Submit follow-up response
     response = await async_client.post(
-        f"/api/v1/optimizations/{job_id}/follow-up",
+        f"/api/optimizations/{job_id}/follow-up",
         json={
             "question": "What are your peak hours?",
             "additional_context": {"peak_hours": "9am-5pm PST"}
@@ -365,7 +365,7 @@ async def test_optimization_follow_up_workflow(
     assert response.status_code == status.HTTP_200_OK
     
     # Verify optimization saved to history
-    response = await async_client.get("/api/v1/optimizations/history", headers=headers)
+    response = await async_client.get("/api/optimizations/history", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     history = response.json()
     assert len(history) >= 1

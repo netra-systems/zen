@@ -41,13 +41,13 @@ class TestConcurrentUpdates:
             tasks = [
                 # Mock: Component isolation for testing without external dependencies
                 client.patch(
-                    f"{BACKEND_URL}/api/v1/users/{user_id}",
+                    f"{BACKEND_URL}/api/users/{user_id}",
                     json=payload1,
                     headers=headers,
                 ),
                 # Mock: Component isolation for testing without external dependencies
                 client.patch(
-                    f"{BACKEND_URL}/api/v1/users/{user_id}",
+                    f"{BACKEND_URL}/api/users/{user_id}",
                     json=payload2,
                     headers=headers,
                 ),
@@ -61,7 +61,7 @@ class TestConcurrentUpdates:
         # Fetch the user profile to verify the updates
         with httpx.Client() as client:
             response = client.get(
-                f"{BACKEND_URL}/api/v1/users/{user_id}", headers=headers
+                f"{BACKEND_URL}/api/users/{user_id}", headers=headers
             )
             response.raise_for_status()
             user_profile = response.json()

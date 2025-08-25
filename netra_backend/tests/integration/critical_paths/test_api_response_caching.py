@@ -89,8 +89,8 @@ class ApiCacheManager:
         """Configure caching rules for different API endpoints."""
         self.cache_rules = {
             # User data - time-based caching
-            "/api/v1/users/{user_id}": CacheRule(
-                endpoint_pattern="/api/v1/users/{user_id}",
+            "/api/users/{user_id}": CacheRule(
+                endpoint_pattern="/api/users/{user_id}",
                 cache_strategy="time_based",
                 ttl_seconds=300,  # 5 minutes
                 cache_key_params=["user_id"],
@@ -99,8 +99,8 @@ class ApiCacheManager:
                 max_cache_size_mb=10.0
             ),
             # Thread list - user-based caching
-            "/api/v1/threads": CacheRule(
-                endpoint_pattern="/api/v1/threads",
+            "/api/threads": CacheRule(
+                endpoint_pattern="/api/threads",
                 cache_strategy="user_based",
                 ttl_seconds=600,  # 10 minutes
                 cache_key_params=["user_id", "limit", "offset"],
@@ -109,8 +109,8 @@ class ApiCacheManager:
                 max_cache_size_mb=50.0
             ),
             # Agent configurations - content-based caching
-            "/api/v1/agents/config": CacheRule(
-                endpoint_pattern="/api/v1/agents/config",
+            "/api/agents/config": CacheRule(
+                endpoint_pattern="/api/agents/config",
                 cache_strategy="content_based",
                 ttl_seconds=3600,  # 1 hour
                 cache_key_params=["version", "feature_flags"],
@@ -119,8 +119,8 @@ class ApiCacheManager:
                 max_cache_size_mb=5.0
             ),
             # Metrics data - short-term caching
-            "/api/v1/metrics": CacheRule(
-                endpoint_pattern="/api/v1/metrics",
+            "/api/metrics": CacheRule(
+                endpoint_pattern="/api/metrics",
                 cache_strategy="time_based",
                 ttl_seconds=60,  # 1 minute
                 cache_key_params=["timerange", "granularity"],
@@ -129,8 +129,8 @@ class ApiCacheManager:
                 max_cache_size_mb=100.0
             ),
             # Real-time data - no caching
-            "/api/v1/websocket/status": CacheRule(
-                endpoint_pattern="/api/v1/websocket/status",
+            "/api/websocket/status": CacheRule(
+                endpoint_pattern="/api/websocket/status",
                 cache_strategy="no_cache",
                 ttl_seconds=0,
                 cache_key_params=[],
@@ -139,8 +139,8 @@ class ApiCacheManager:
                 max_cache_size_mb=0.0
             ),
             # Static content - long-term caching
-            "/api/v1/static/{resource}": CacheRule(
-                endpoint_pattern="/api/v1/static/{resource}",
+            "/api/static/{resource}": CacheRule(
+                endpoint_pattern="/api/static/{resource}",
                 cache_strategy="content_based",
                 ttl_seconds=86400,  # 24 hours
                 cache_key_params=["resource", "version"],
@@ -343,12 +343,12 @@ class ApiCacheManager:
         app = web.Application(middlewares=[cache_middleware])
         
         # Register routes
-        app.router.add_get('/api/v1/users/{user_id}', handle_users)
-        app.router.add_get('/api/v1/threads', handle_threads)
-        app.router.add_get('/api/v1/agents/config', handle_agent_config)
-        app.router.add_get('/api/v1/metrics', handle_metrics)
-        app.router.add_get('/api/v1/websocket/status', handle_websocket_status)
-        app.router.add_get('/api/v1/static/{resource}', handle_static_resource)
+        app.router.add_get('/api/users/{user_id}', handle_users)
+        app.router.add_get('/api/threads', handle_threads)
+        app.router.add_get('/api/agents/config', handle_agent_config)
+        app.router.add_get('/api/metrics', handle_metrics)
+        app.router.add_get('/api/websocket/status', handle_websocket_status)
+        app.router.add_get('/api/static/{resource}', handle_static_resource)
         
         # Start server
         self.test_server = await asyncio.create_task(
@@ -667,7 +667,7 @@ async def api_cache_manager():
 @pytest.mark.asyncio
 async def test_time_based_caching(api_cache_manager):
     """Test time-based caching with TTL."""
-    path = "/api/v1/users/123"
+    path = "/api/users/123"
     
     # Test cache hit ratio with repeated requests
     cache_test = await api_cache_manager.test_cache_hit_ratio(path, 5)
@@ -690,7 +690,7 @@ async def test_time_based_caching(api_cache_manager):
 @pytest.mark.asyncio
 async def test_user_based_caching(api_cache_manager):
     """Test user-based caching with different users."""
-    path = "/api/v1/threads"
+    path = "/api/threads"
     
     # Test with different users
     user1_headers = {"X-User-ID": "user1"}
@@ -719,7 +719,7 @@ async def test_user_based_caching(api_cache_manager):
 @pytest.mark.asyncio
 async def test_content_based_caching(api_cache_manager):
     """Test content-based caching with different parameters."""
-    path = "/api/v1/agents/config"
+    path = "/api/agents/config"
     
     # Test with different parameters
     params1 = {"version": "v1", "feature_flags": "default"}
@@ -744,7 +744,7 @@ async def test_content_based_caching(api_cache_manager):
 @pytest.mark.asyncio
 async def test_no_cache_strategy(api_cache_manager):
     """Test endpoints configured for no caching."""
-    path = "/api/v1/websocket/status"
+    path = "/api/websocket/status"
     
     # Make multiple requests - should never cache
     results = []
@@ -766,7 +766,7 @@ async def test_no_cache_strategy(api_cache_manager):
 @pytest.mark.asyncio
 async def test_cache_performance_improvement(api_cache_manager):
     """Test performance improvement from caching."""
-    path = "/api/v1/metrics"
+    path = "/api/metrics"
     query_params = {"timerange": "1h", "granularity": "5m"}
     
     # Test performance improvement
@@ -786,7 +786,7 @@ async def test_cache_performance_improvement(api_cache_manager):
 @pytest.mark.asyncio
 async def test_cache_invalidation(api_cache_manager):
     """Test cache invalidation on triggers."""
-    path = "/api/v1/users/456"
+    path = "/api/users/456"
     
     # Populate cache
     result1 = await api_cache_manager.make_cached_request(path)
@@ -810,7 +810,7 @@ async def test_cache_invalidation(api_cache_manager):
 async def test_cache_ttl_expiration(api_cache_manager):
     """Test cache TTL expiration."""
     # Use metrics endpoint with 60-second TTL
-    path = "/api/v1/metrics"
+    path = "/api/metrics"
     
     # Make initial request
     result1 = await api_cache_manager.make_cached_request(path)
@@ -835,7 +835,7 @@ async def test_cache_ttl_expiration(api_cache_manager):
 @pytest.mark.asyncio
 async def test_concurrent_cache_requests(api_cache_manager):
     """Test concurrent requests to cached endpoints."""
-    path = "/api/v1/static/config.json"
+    path = "/api/static/config.json"
     query_params = {"version": "v1"}
     
     # Make concurrent requests
@@ -870,11 +870,11 @@ async def test_cache_size_limits(api_cache_manager):
     
     # Make requests to different endpoints to populate cache
     endpoints = [
-        "/api/v1/users/100",
-        "/api/v1/users/101", 
-        "/api/v1/users/102",
-        "/api/v1/agents/config",
-        "/api/v1/metrics"
+        "/api/users/100",
+        "/api/users/101", 
+        "/api/users/102",
+        "/api/agents/config",
+        "/api/metrics"
     ]
     
     for endpoint in endpoints:
@@ -895,9 +895,9 @@ async def test_cache_metrics_accuracy(api_cache_manager):
     """Test accuracy of cache metrics collection."""
     # Generate test traffic with known patterns
     test_scenarios = [
-        ("/api/v1/users/200", 3),  # 1 miss, 2 hits
-        ("/api/v1/agents/config", 2),  # 1 miss, 1 hit
-        ("/api/v1/websocket/status", 2),  # 2 requests, no cache
+        ("/api/users/200", 3),  # 1 miss, 2 hits
+        ("/api/agents/config", 2),  # 1 miss, 1 hit
+        ("/api/websocket/status", 2),  # 2 requests, no cache
     ]
     
     for path, count in test_scenarios:
@@ -927,9 +927,9 @@ async def test_cache_strategy_effectiveness(api_cache_manager):
     """Test effectiveness of different caching strategies."""
     # Test different strategies
     strategy_tests = [
-        ("/api/v1/users/300", "time_based", 5),
-        ("/api/v1/threads", "user_based", 4),
-        ("/api/v1/agents/config", "content_based", 3)
+        ("/api/users/300", "time_based", 5),
+        ("/api/threads", "user_based", 4),
+        ("/api/agents/config", "content_based", 3)
     ]
     
     strategy_results = {}

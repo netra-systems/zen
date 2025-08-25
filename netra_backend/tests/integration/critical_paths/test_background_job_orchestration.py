@@ -26,7 +26,7 @@ import pytest
 
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
-JOBS_API_URL = f"{DEV_BACKEND_URL}/api/v1/jobs"
+JOBS_API_URL = f"{DEV_BACKEND_URL}/api/jobs"
 AUTH_SERVICE_URL = "http://localhost:8081"
 
 class BackgroundJobOrchestrationTester:

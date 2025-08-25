@@ -262,7 +262,7 @@ class TestStagingAuthentication(StagingEnvironmentE2ETests):
         response = await self.retry_request(
             staging_client,
             "GET",
-            f"{STAGING_CONFIG['api_base_url']}/api/v1/user/me",
+            f"{STAGING_CONFIG['api_base_url']}/api/user/me",
             headers=headers
         )
         
@@ -311,7 +311,7 @@ class TestStagingAgentWorkflows(StagingEnvironmentE2ETests):
         submit_response = await self.retry_request(
             staging_client,
             "POST",
-            f"{STAGING_CONFIG['api_base_url']}/api/v1/agent/submit",
+            f"{STAGING_CONFIG['api_base_url']}/api/agent/submit",
             json=optimization_request,
             headers=headers
         )
@@ -329,7 +329,7 @@ class TestStagingAgentWorkflows(StagingEnvironmentE2ETests):
                 status_response = await self.retry_request(
                     staging_client,
                     "GET",
-                    f"{STAGING_CONFIG['api_base_url']}/api/v1/agent/status/{request_id}",
+                    f"{STAGING_CONFIG['api_base_url']}/api/agent/status/{request_id}",
                     headers=headers
                 )
                 
@@ -364,7 +364,7 @@ class TestStagingAgentWorkflows(StagingEnvironmentE2ETests):
         }
         
         response = await staging_client.post(
-            f"{STAGING_CONFIG['api_base_url']}/api/v1/agent/submit",
+            f"{STAGING_CONFIG['api_base_url']}/api/agent/submit",
             json=invalid_request,
             headers=headers
         )
@@ -429,9 +429,9 @@ class TestStagingPerformance(StagingEnvironmentE2ETests):
             pytest.skip("Could not authenticate with staging")
         
         endpoints = [
-            "/api/v1/user/me",
-            "/api/v1/threads",
-            "/api/v1/agents/list"
+            "/api/user/me",
+            "/api/threads",
+            "/api/agents/list"
         ]
         
         response_times = {}
@@ -483,7 +483,7 @@ class TestStagingPerformance(StagingEnvironmentE2ETests):
         async def make_request():
             try:
                 response = await staging_client.get(
-                    f"{STAGING_CONFIG['api_base_url']}/api/v1/health",
+                    f"{STAGING_CONFIG['api_base_url']}/api/health",
                     headers=headers
                 )
                 return response.status_code == 200
@@ -526,7 +526,7 @@ class TestStagingDataIntegrity(StagingEnvironmentE2ETests):
         
         # Create entity
         create_response = await staging_client.post(
-            f"{STAGING_CONFIG['api_base_url']}/api/v1/entities",
+            f"{STAGING_CONFIG['api_base_url']}/api/entities",
             json=test_data,
             headers=headers
         )
@@ -537,7 +537,7 @@ class TestStagingDataIntegrity(StagingEnvironmentE2ETests):
             
             # Read back entity
             read_response = await staging_client.get(
-                f"{STAGING_CONFIG['api_base_url']}/api/v1/entities/{entity_id}",
+                f"{STAGING_CONFIG['api_base_url']}/api/entities/{entity_id}",
                 headers=headers
             )
             
@@ -548,7 +548,7 @@ class TestStagingDataIntegrity(StagingEnvironmentE2ETests):
             
             # Clean up
             await staging_client.delete(
-                f"{STAGING_CONFIG['api_base_url']}/api/v1/entities/{entity_id}",
+                f"{STAGING_CONFIG['api_base_url']}/api/entities/{entity_id}",
                 headers=headers
             )
 
@@ -571,7 +571,7 @@ class TestStagingEndToEndScenarios(StagingEnvironmentE2ETests):
         
         # 1. Get user profile
         profile_response = await staging_client.get(
-            f"{STAGING_CONFIG['api_base_url']}/api/v1/user/me",
+            f"{STAGING_CONFIG['api_base_url']}/api/user/me",
             headers=headers
         )
         assert profile_response.status_code == 200
@@ -583,7 +583,7 @@ class TestStagingEndToEndScenarios(StagingEnvironmentE2ETests):
         }
         
         thread_response = await staging_client.post(
-            f"{STAGING_CONFIG['api_base_url']}/api/v1/threads",
+            f"{STAGING_CONFIG['api_base_url']}/api/threads",
             json=thread_data,
             headers=headers
         )
@@ -599,7 +599,7 @@ class TestStagingEndToEndScenarios(StagingEnvironmentE2ETests):
             }
             
             message_response = await staging_client.post(
-                f"{STAGING_CONFIG['api_base_url']}/api/v1/messages",
+                f"{STAGING_CONFIG['api_base_url']}/api/messages",
                 json=message_data,
                 headers=headers
             )
@@ -608,7 +608,7 @@ class TestStagingEndToEndScenarios(StagingEnvironmentE2ETests):
             
             # 4. Retrieve thread history
             history_response = await staging_client.get(
-                f"{STAGING_CONFIG['api_base_url']}/api/v1/threads/{thread_id}/messages",
+                f"{STAGING_CONFIG['api_base_url']}/api/threads/{thread_id}/messages",
                 headers=headers
             )
             
@@ -633,8 +633,8 @@ class TestStagingEndToEndScenarios(StagingEnvironmentE2ETests):
             
             # Critical path: Authentication -> Profile -> Basic Operation
             critical_paths = [
-                ("GET", "/api/v1/user/me"),
-                ("GET", "/api/v1/agents/available"),
+                ("GET", "/api/user/me"),
+                ("GET", "/api/agents/available"),
                 ("GET", "/health")
             ]
             

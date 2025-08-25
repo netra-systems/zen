@@ -165,7 +165,7 @@ class MultiTenantIsolationTester:
                 }
                 
                 async with tenant.session.post(
-                    f"{DEV_BACKEND_URL}/api/v1/threads",
+                    f"{DEV_BACKEND_URL}/api/threads",
                     json=thread_data,
                     headers=headers
                 ) as response:
@@ -195,7 +195,7 @@ class MultiTenantIsolationTester:
                     
                 for thread_id in other_tenant.thread_ids:
                     async with tenant.session.get(
-                        f"{DEV_BACKEND_URL}/api/v1/threads/{thread_id}",
+                        f"{DEV_BACKEND_URL}/api/threads/{thread_id}",
                         headers=headers
                     ) as response:
                         if response.status == 200:
@@ -232,7 +232,7 @@ class MultiTenantIsolationTester:
                     }
                     
                     async with tenant.session.post(
-                        f"{DEV_BACKEND_URL}/api/v1/messages",
+                        f"{DEV_BACKEND_URL}/api/messages",
                         json=message_data,
                         headers=headers
                     ) as response:
@@ -344,7 +344,7 @@ class MultiTenantIsolationTester:
             
             # Check current resource usage
             async with tenant.session.get(
-                f"{DEV_BACKEND_URL}/api/v1/usage",
+                f"{DEV_BACKEND_URL}/api/usage",
                 headers=headers
             ) as response:
                 if response.status == 200:
@@ -360,7 +360,7 @@ class MultiTenantIsolationTester:
                 }
                 
                 async with tenant.session.post(
-                    f"{DEV_BACKEND_URL}/api/v1/threads",
+                    f"{DEV_BACKEND_URL}/api/threads",
                     json=thread_data,
                     headers=headers
                 ) as response:
@@ -397,7 +397,7 @@ class MultiTenantIsolationTester:
                     
             # Try to use the old token
             async with tenant.session.get(
-                f"{DEV_BACKEND_URL}/api/v1/threads",
+                f"{DEV_BACKEND_URL}/api/threads",
                 headers=headers
             ) as response:
                 if response.status == 401:
@@ -425,19 +425,19 @@ class MultiTenantIsolationTester:
         attack_vectors = [
             # SQL injection attempt
             {
-                "endpoint": f"{DEV_BACKEND_URL}/api/v1/threads",
+                "endpoint": f"{DEV_BACKEND_URL}/api/threads",
                 "method": "GET",
                 "params": {"filter": f"'; DROP TABLE threads; --"}
             },
             # Path traversal attempt
             {
-                "endpoint": f"{DEV_BACKEND_URL}/api/v1/threads/../../../{victim.thread_ids[0] if victim.thread_ids else 'test'}",
+                "endpoint": f"{DEV_BACKEND_URL}/api/threads/../../../{victim.thread_ids[0] if victim.thread_ids else 'test'}",
                 "method": "GET",
                 "params": {}
             },
             # Token manipulation attempt
             {
-                "endpoint": f"{DEV_BACKEND_URL}/api/v1/threads",
+                "endpoint": f"{DEV_BACKEND_URL}/api/threads",
                 "method": "GET",
                 "headers_override": {"Authorization": f"Bearer {victim.auth_token[:20]}fake"}
             }
@@ -482,7 +482,7 @@ class MultiTenantIsolationTester:
             # Delete all threads
             for thread_id in tenant.thread_ids:
                 async with tenant.session.delete(
-                    f"{DEV_BACKEND_URL}/api/v1/threads/{thread_id}",
+                    f"{DEV_BACKEND_URL}/api/threads/{thread_id}",
                     headers=headers
                 ) as response:
                     if response.status not in [200, 204]:
@@ -490,7 +490,7 @@ class MultiTenantIsolationTester:
                         
             # Verify deletion
             async with tenant.session.get(
-                f"{DEV_BACKEND_URL}/api/v1/threads",
+                f"{DEV_BACKEND_URL}/api/threads",
                 headers=headers
             ) as response:
                 if response.status == 200:

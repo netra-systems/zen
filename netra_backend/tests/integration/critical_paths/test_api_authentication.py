@@ -29,7 +29,7 @@ class TestAPIAuthenticationL3:
         async with httpx.AsyncClient() as client:
             # Request without auth header
             response = await client.get(
-                f"{get_config().API_BASE_URL}/api/v1/resources"
+                f"{get_config().API_BASE_URL}/api/resources"
             )
             
             assert response.status_code == 401
@@ -51,7 +51,7 @@ class TestAPIAuthenticationL3:
             )
             
             response = await client.get(
-                f"{get_config().API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/resources",
                 headers={"Authorization": f"Bearer {valid_token}"}
             )
             
@@ -66,7 +66,7 @@ class TestAPIAuthenticationL3:
         async with httpx.AsyncClient() as client:
             # API key auth
             response = await client.get(
-                f"{get_config().API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/resources",
                 headers={"X-API-Key": "test_api_key_123"}
             )
             
@@ -89,7 +89,7 @@ class TestAPIAuthenticationL3:
             )
             
             response = await client.get(
-                f"{get_config().API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/resources",
                 headers={"Authorization": f"Bearer {expired_token}"}
             )
             
@@ -106,7 +106,7 @@ class TestAPIAuthenticationL3:
         async with httpx.AsyncClient() as client:
             # Malformed token
             response = await client.get(
-                f"{get_config().API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/resources",
                 headers={"Authorization": "Bearer invalid.token.format"}
             )
             
@@ -114,7 +114,7 @@ class TestAPIAuthenticationL3:
             
             # Wrong auth scheme
             response = await client.get(
-                f"{get_config().API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/resources",
                 headers={"Authorization": "Basic dXNlcjpwYXNz"}  # Basic auth
             )
             

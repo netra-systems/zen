@@ -252,7 +252,7 @@ class TestDevLauncherCriticalPath:
             
             async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Backend CORS
-                response = await client.options(f"{BACKEND_URL}/api/v1/chat", headers=headers)
+                response = await client.options(f"{BACKEND_URL}/api/chat", headers=headers)
                 assert response.status_code == 200, f"Backend CORS preflight failed: {response.status_code}"
                 assert "Access-Control-Allow-Origin" in response.headers, "Missing CORS headers in backend"
                 
@@ -327,7 +327,7 @@ class TestDevLauncherCriticalPath:
                 
                 # Test authenticated API call to backend
                 headers = {"Authorization": f"Bearer {token}"}
-                response = await client.get(f"{BACKEND_URL}/api/v1/user/profile", headers=headers)
+                response = await client.get(f"{BACKEND_URL}/api/user/profile", headers=headers)
                 
                 assert response.status_code == 200, f"Authenticated API call failed: {response.status_code}"
                 
@@ -347,7 +347,7 @@ class TestDevLauncherCriticalPath:
         try:
             async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Test backend can access databases
-                response = await client.get(f"{BACKEND_URL}/api/v1/system/database-status")
+                response = await client.get(f"{BACKEND_URL}/api/system/database-status")
                 
                 if response.status_code == 404:
                     # If endpoint doesn't exist, check via health endpoint
@@ -415,7 +415,7 @@ class TestDevLauncherCriticalPath:
                 # Step 6: Verify conversation is saved
                 async with httpx.AsyncClient(follow_redirects=True) as client:
                     response = await client.get(
-                        f"{BACKEND_URL}/api/v1/threads/test-thread-123",
+                        f"{BACKEND_URL}/api/threads/test-thread-123",
                         headers={"Authorization": f"Bearer {token}"}
                     )
                     
@@ -553,7 +553,7 @@ class TestDevLauncherCriticalPath:
             # Services should not share state
             # Test by checking they have separate configurations
             async with httpx.AsyncClient(follow_redirects=True) as client:
-                backend_config = await client.get(f"{BACKEND_URL}/api/v1/config")
+                backend_config = await client.get(f"{BACKEND_URL}/api/config")
                 auth_config = await client.get(f"{AUTH_URL}/config")
                 
                 # Verify services have independent configurations

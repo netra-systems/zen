@@ -65,7 +65,7 @@
       <category name="paths">
         <description>File paths, directories, and URL paths</description>
         <examples>
-          - "/api/v1/threads", "/websocket"
+          - "/api/threads", "/websocket"
           - "logs/", "configs/", ".env"
         </examples>
       </category>

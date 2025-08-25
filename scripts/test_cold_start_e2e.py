@@ -321,7 +321,7 @@ class ColdStartE2ETest:
                 headers = {'Authorization': f"Bearer {self.auth_token}"}
                 
                 # Create thread
-                thread_url = f"{api_url}/api/v1/threads"
+                thread_url = f"{api_url}/api/threads"
                 thread_data = {
                     'name': 'E2E Test Thread',
                     'description': 'Automated test thread'
@@ -343,7 +343,7 @@ class ColdStartE2ETest:
                     logger.info(f"✅ Thread created: {thread_id}")
                     
                 # Send message
-                message_url = f"{api_url}/api/v1/threads/{thread_id}/messages"
+                message_url = f"{api_url}/api/threads/{thread_id}/messages"
                 message_data = {
                     'content': TEST_CONFIG['test_message'],
                     'role': 'user'

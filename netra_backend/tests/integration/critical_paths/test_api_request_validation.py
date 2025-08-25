@@ -33,7 +33,7 @@ class TestAPIRequestValidationL3:
             }
             
             response = await client.post(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 json=incomplete_data,
                 headers={"Authorization": "Bearer test_token"}
             )
@@ -57,7 +57,7 @@ class TestAPIRequestValidationL3:
             }
             
             response = await client.post(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 json=invalid_data,
                 headers={"Authorization": "Bearer test_token"}
             )
@@ -81,7 +81,7 @@ class TestAPIRequestValidationL3:
             }
             
             response = await client.post(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 json=long_data,
                 headers={"Authorization": "Bearer test_token"}
             )
@@ -105,7 +105,7 @@ class TestAPIRequestValidationL3:
             }
             
             response = await client.post(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 json=invalid_enum,
                 headers={"Authorization": "Bearer test_token"}
             )
@@ -129,7 +129,7 @@ class TestAPIRequestValidationL3:
             }
             
             response = await client.post(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 json=malicious_data,
                 headers={"Authorization": "Bearer test_token"}
             )

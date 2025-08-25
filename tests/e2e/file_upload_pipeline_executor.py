@@ -55,7 +55,7 @@ class FileUploadPipelineExecutor:
     def _get_upload_endpoint_url(self) -> str:
         """Get file upload endpoint URL."""
         backend_url = self.context.harness.get_service_url('backend')
-        return f"{backend_url}/api/v1/corpus/extract"
+        return f"{backend_url}/api/corpus/extract"
     
     async def _prepare_file_upload_data(self, file_path: Path) -> aiohttp.FormData:
         """Prepare file upload form data."""

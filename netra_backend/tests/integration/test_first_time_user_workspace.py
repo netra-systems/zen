@@ -44,7 +44,7 @@ async def test_user_profile_setup_and_update(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Get initial profile
-    response = await async_client.get("/api/v1/user/profile", headers=headers)
+    response = await async_client.get("/api/user/profile", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     initial_profile = response.json()
     
@@ -58,7 +58,7 @@ async def test_user_profile_setup_and_update(
     }
     
     # Mock: Component isolation for testing without external dependencies
-    response = await async_client.patch("/api/v1/user/profile", json=profile_update, headers=headers)
+    response = await async_client.patch("/api/user/profile", json=profile_update, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     updated_profile = response.json()
     assert updated_profile["full_name"] == profile_update["full_name"]
@@ -78,11 +78,11 @@ async def test_user_preferences_management(
     
     # Set comprehensive preferences
     preferences = get_mock_user_preferences()
-    response = await async_client.put("/api/v1/user/preferences", json=preferences, headers=headers)
+    response = await async_client.put("/api/user/preferences", json=preferences, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     
     # Verify preferences persisted
-    response = await async_client.get("/api/v1/user/preferences", headers=headers)
+    response = await async_client.get("/api/user/preferences", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     saved_prefs = response.json()
     assert saved_prefs["theme"] == "dark"
@@ -125,17 +125,17 @@ async def test_privacy_settings_enforcement(
         "allow_analytics": False,
         "share_usage_data": False
     }
-    response = await async_client.put("/api/v1/user/privacy", json=privacy_settings, headers=headers)
+    response = await async_client.put("/api/user/privacy", json=privacy_settings, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     
     # Test analytics access blocked
-    response = await async_client.get("/api/v1/analytics/user-data", headers=headers)
+    response = await async_client.get("/api/analytics/user-data", headers=headers)
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert "analytics disabled" in response.json()["detail"].lower()
     
     # Test notification preferences respected
     response = await async_client.post(
-        "/api/v1/test/trigger-notification",
+        "/api/test/trigger-notification",
         json={"type": "usage_warning"},
         headers=headers
     )
@@ -157,7 +157,7 @@ async def test_api_key_generation_and_usage(
     
     # Generate development API key
     response = await async_client.post(
-        "/api/v1/api-keys/generate",
+        "/api/api-keys/generate",
         json={
             "name": "Development Key",
             "type": "development",
@@ -173,7 +173,7 @@ async def test_api_key_generation_and_usage(
     key_id = key_data["key_id"]
     
     # Test API key authentication
-    response = await async_client.get("/api/v1/user/profile", headers={"X-API-Key": api_key})
+    response = await async_client.get("/api/user/profile", headers={"X-API-Key": api_key})
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["user_id"] == user_id
 
@@ -191,7 +191,7 @@ async def test_api_key_rate_limiting(
     
     # Generate API key
     response = await async_client.post(
-        "/api/v1/api-keys/generate",
+        "/api/api-keys/generate",
         json={"name": "Rate Test Key", "type": "development"},
         headers=headers
     )
@@ -199,7 +199,7 @@ async def test_api_key_rate_limiting(
     
     # Test rate limiting (free tier: 100/hour)
     rate_limited = await verify_rate_limiting(
-        async_client, "/api/v1/usage/current", {"X-API-Key": api_key}, limit=100
+        async_client, "/api/usage/current", {"X-API-Key": api_key}, limit=100
     )
     assert rate_limited > 0
 
@@ -217,7 +217,7 @@ async def test_api_key_management_operations(
     
     # Create API key
     response = await async_client.post(
-        "/api/v1/api-keys/generate",
+        "/api/api-keys/generate",
         json={"name": "Test Key", "type": "development"},
         headers=headers
     )
@@ -226,23 +226,23 @@ async def test_api_key_management_operations(
     key_id = key_data["key_id"]
     
     # List API keys
-    response = await async_client.get("/api/v1/api-keys", headers=headers)
+    response = await async_client.get("/api/api-keys", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     keys = response.json()
     assert any(k["key_id"] == key_id for k in keys)
     
     # Rotate API key
-    response = await async_client.post(f"/api/v1/api-keys/{key_id}/rotate", headers=headers)
+    response = await async_client.post(f"/api/api-keys/{key_id}/rotate", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     new_api_key = response.json()["key"]
     assert new_api_key != api_key
     
     # Verify old key invalidated
-    response = await async_client.get("/api/v1/user/profile", headers={"X-API-Key": api_key})
+    response = await async_client.get("/api/user/profile", headers={"X-API-Key": api_key})
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     
     # Delete API key
-    response = await async_client.delete(f"/api/v1/api-keys/{key_id}", headers=headers)
+    response = await async_client.delete(f"/api/api-keys/{key_id}", headers=headers)
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
 @pytest.mark.integration
@@ -260,14 +260,14 @@ async def test_data_export_capabilities(
     # Generate some activity data
     for i in range(5):
         await async_client.post(
-            "/api/v1/chat/message",
+            "/api/chat/message",
             json={"content": f"Export test message {i}", "thread_id": str(uuid.uuid4())},
             headers=headers
         )
     
     # Export usage data
     response = await async_client.post(
-        "/api/v1/export/usage",
+        "/api/export/usage",
         json={
             "format": "csv",
             "date_range": "last_30_days",
@@ -279,7 +279,7 @@ async def test_data_export_capabilities(
     
     # Export conversation history
     response = await async_client.post(
-        "/api/v1/export/conversations",
+        "/api/export/conversations",
         json={"format": "json", "include_agent_analysis": False},
         headers=headers
     )
@@ -302,7 +302,7 @@ async def test_workspace_analytics_access(
     
     # Get basic analytics summary
     response = await async_client.get(
-        "/api/v1/analytics/summary",
+        "/api/analytics/summary",
         params={"period": "last_7_days"},
         headers=headers
     )
@@ -314,7 +314,7 @@ async def test_workspace_analytics_access(
     
     # Get cost trends
     response = await async_client.get(
-        "/api/v1/analytics/cost-trends",
+        "/api/analytics/cost-trends",
         params={"granularity": "daily"},
         headers=headers
     )
@@ -323,6 +323,6 @@ async def test_workspace_analytics_access(
     assert "data_points" in trends
     
     # Advanced analytics should be restricted
-    response = await async_client.get("/api/v1/analytics/advanced/ml-insights", headers=headers)
+    response = await async_client.get("/api/analytics/advanced/ml-insights", headers=headers)
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert "upgrade" in response.json()["detail"].lower()

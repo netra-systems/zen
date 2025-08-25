@@ -37,19 +37,19 @@ class TestDatabaseConnectorConsistency:
                 name='main_postgres',
                 url='postgresql://user:pass@localhost:5432/testdb',
                 db_type=DatabaseType.POSTGRESQL,
-                status=ConnectionStatus.PENDING
+                status=ConnectionStatus.UNKNOWN
             ),
             'main_redis': DatabaseConnection(
                 name='main_redis',
                 url='redis://localhost:6379/0',
                 db_type=DatabaseType.REDIS,
-                status=ConnectionStatus.PENDING
+                status=ConnectionStatus.UNKNOWN
             ),
             'main_clickhouse': DatabaseConnection(
                 name='main_clickhouse',
                 url='clickhouse://localhost:9000/default',
                 db_type=DatabaseType.CLICKHOUSE,
-                status=ConnectionStatus.PENDING
+                status=ConnectionStatus.UNKNOWN
             )
         }
     
@@ -81,14 +81,14 @@ class TestDatabaseConnectorConsistency:
             assert mock_connections['main_redis'].status == ConnectionStatus.FAILED
             assert mock_connections['main_clickhouse'].status == ConnectionStatus.CONNECTED
             
-            # Result should still be True (partial success in development)
-            assert result is True
+            # Result should be False since one connection failed
+            assert result is False
     
     @pytest.mark.asyncio
     async def test_retry_count_tracking(self, database_connector, mock_connections):
         """Test that retry counts are accurately tracked."""
         database_connector.connections = mock_connections
-        database_connector.retry_config = RetryConfig(max_retries=3, retry_delay=0.01)
+        database_connector.retry_config = RetryConfig(max_attempts=3, initial_delay=0.01)
         
         attempt_counts = {}
         
@@ -100,19 +100,18 @@ class TestDatabaseConnectorConsistency:
             
             # Fail first 2 attempts for PostgreSQL
             if connection.name == 'main_postgres' and attempt_counts[connection.name] < 3:
-                connection.retry_count += 1
                 raise Exception("Connection timeout")
             
             connection.status = ConnectionStatus.CONNECTED
             return True
         
         with patch.object(database_connector, '_test_database_connection', mock_test):
-            await database_connector._validate_single_connection(
+            await database_connector._validate_connection_with_retry(
                 mock_connections['main_postgres']
             )
             
-            # Should have retried twice before succeeding
-            assert mock_connections['main_postgres'].retry_count == 2
+            # Should have made 3 attempts total (2 failures + 1 success)
+            assert mock_connections['main_postgres'].retry_count == 3
             assert mock_connections['main_postgres'].status == ConnectionStatus.CONNECTED
             assert attempt_counts['main_postgres'] == 3
     
@@ -250,10 +249,10 @@ class TestDatabaseConnectorConsistency:
         """Test that validation continues checking all connections even after failures."""
         database_connector.connections = mock_connections
         
-        validated_connections = []
+        validated_connections = set()
         
         async def mock_test(connection):
-            validated_connections.append(connection.name)
+            validated_connections.add(connection.name)
             if connection.name == 'main_postgres':
                 # First connection fails
                 connection.status = ConnectionStatus.FAILED
@@ -264,14 +263,14 @@ class TestDatabaseConnectorConsistency:
         with patch.object(database_connector, '_test_database_connection', mock_test):
             result = await database_connector.validate_all_connections()
         
-        # All connections should have been validated
+        # All connections should have been validated (unique connections, ignoring retries)
         assert len(validated_connections) == 3
         assert 'main_postgres' in validated_connections
         assert 'main_redis' in validated_connections
         assert 'main_clickhouse' in validated_connections
         
-        # Result should still be True (partial success)
-        assert result is True
+        # Result should be False since one connection failed
+        assert result is False
 
 
 class TestDatabaseInitializationConsistency:

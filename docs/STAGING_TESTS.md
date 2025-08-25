@@ -242,7 +242,7 @@ class TestNewFeature(StagingConfigTestBase):
         # Test uses self.staging_api_url automatically
         response = await self.assert_service_healthy(
             self.staging_api_url, 
-            '/api/v1/feature'
+            '/api/feature'
         )
         self.assertEqual(response['status'], 'healthy')
 ```

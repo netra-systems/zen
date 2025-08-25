@@ -55,7 +55,7 @@ async def test_enterprise_onboarding_with_sso_setup(
     
     # Create organization
     response = await async_client.post(
-        "/api/v1/organizations/create",
+        "/api/organizations/create",
         json={
             "name": "Enterprise Corp",
             "domain": "enterprise-corp.com",
@@ -83,7 +83,7 @@ async def test_enterprise_onboarding_with_sso_setup(
     }
     
     response = await async_client.post(
-        f"/api/v1/organizations/{org_id}/sso/configure",
+        f"/api/organizations/{org_id}/sso/configure",
         json=saml_config,
         headers=headers
     )
@@ -93,7 +93,7 @@ async def test_enterprise_onboarding_with_sso_setup(
     
     # Test SSO metadata endpoint
     response = await async_client.get(
-        f"/api/v1/organizations/{org_id}/sso/metadata"
+        f"/api/organizations/{org_id}/sso/metadata"
     )
     assert response.status_code == status.HTTP_200_OK
     assert "application/xml" in response.headers["content-type"]
@@ -116,11 +116,11 @@ async def test_enterprise_audit_logging_and_compliance(
     
     # Perform auditable actions
     actions = [
-        async_client.post("/api/v1/chat/message", 
+        async_client.post("/api/chat/message", 
                          json={"content": "Audit test", "thread_id": str(uuid.uuid4())},
                          headers=headers),
-        async_client.get("/api/v1/usage/detailed", headers=headers),
-        async_client.post("/api/v1/export/usage", 
+        async_client.get("/api/usage/detailed", headers=headers),
+        async_client.post("/api/export/usage", 
                          json={"format": "csv"}, headers=headers)
     ]
     
@@ -128,7 +128,7 @@ async def test_enterprise_audit_logging_and_compliance(
     
     # Access audit logs
     response = await async_client.get(
-        "/api/v1/audit/logs",
+        "/api/audit/logs",
         params={
             "start_date": datetime.utcnow().isoformat(),
             "end_date": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
@@ -166,7 +166,7 @@ async def test_enterprise_dedicated_support_access(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Get enterprise support options
-    response = await async_client.get("/api/v1/support/options", headers=headers)
+    response = await async_client.get("/api/support/options", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     support = response.json()
     assert support["support_level"] == "dedicated"
@@ -175,7 +175,7 @@ async def test_enterprise_dedicated_support_access(
     
     # Create priority ticket
     response = await async_client.post(
-        "/api/v1/support/ticket",
+        "/api/support/ticket",
         json={
             "subject": "Enterprise integration assistance",
             "description": "Need help with custom SAML configuration",
@@ -192,7 +192,7 @@ async def test_enterprise_dedicated_support_access(
     
     # Request dedicated consultation
     response = await async_client.post(
-        "/api/v1/support/consultation/schedule",
+        "/api/support/consultation/schedule",
         json={
             "topic": "AI cost optimization strategy",
             "duration_minutes": 60,
@@ -223,7 +223,7 @@ async def test_enterprise_advanced_api_access(
     
     # Generate enterprise API key
     response = await async_client.post(
-        "/api/v1/api-keys/generate",
+        "/api/api-keys/generate",
         json={"name": "Enterprise API", "type": "enterprise", "rate_limit_override": True},
         headers=headers
     )
@@ -234,7 +234,7 @@ async def test_enterprise_advanced_api_access(
     successful_requests = 0
     for i in range(500):  # Test high volume
         response = await async_client.get(
-            "/api/v1/usage/current",
+            "/api/usage/current",
             headers={"X-API-Key": api_key}
         )
         if response.status_code == status.HTTP_200_OK:
@@ -246,7 +246,7 @@ async def test_enterprise_advanced_api_access(
     
     # Test bulk operations
     response = await async_client.post(
-        "/api/v1/bulk/analyze",
+        "/api/bulk/analyze",
         json={"requests": [{"content": "test", "context": {"cost": 100}}]},
         headers={"X-API-Key": api_key}
     )
@@ -270,7 +270,7 @@ async def test_enterprise_privacy_and_integrations(
     
     # Configure data residency
     response = await async_client.post(
-        "/api/v1/privacy/data-residency",
+        "/api/privacy/data-residency",
         json={"preferred_regions": ["us-east-1"], "data_retention_days": 2555},
         headers=headers
     )
@@ -278,7 +278,7 @@ async def test_enterprise_privacy_and_integrations(
     
     # Create custom webhook
     response = await async_client.post(
-        "/api/v1/integrations/custom/webhook",
+        "/api/integrations/custom/webhook",
         json={"name": "Enterprise Monitoring", "endpoint": "https://internal.com/webhook"},
         headers=headers
     )
@@ -302,7 +302,7 @@ async def test_enterprise_cost_management_and_deployment(
     
     # Set up budget controls
     response = await async_client.post(
-        "/api/v1/billing/budget-controls",
+        "/api/billing/budget-controls",
         json={"monthly_budget": 50000, "cost_centers": [{"name": "R&D", "budget": 30000}]},
         headers=headers
     )
@@ -310,7 +310,7 @@ async def test_enterprise_cost_management_and_deployment(
     
     # Test cost anomaly detection
     response = await async_client.get(
-        "/api/v1/analytics/cost-anomalies",
+        "/api/analytics/cost-anomalies",
         params={"sensitivity": "high", "lookback_days": 30},
         headers=headers
     )
@@ -318,7 +318,7 @@ async def test_enterprise_cost_management_and_deployment(
     
     # Configure multi-region deployment
     response = await async_client.post(
-        "/api/v1/deployment/multi-region",
+        "/api/deployment/multi-region",
         json={"primary_region": "us-east-1", "secondary_regions": ["eu-west-1"]},
         headers=headers
     )

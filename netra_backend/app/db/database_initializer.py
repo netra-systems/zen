@@ -163,7 +163,11 @@ class DatabaseInitializer:
             return False
     
     async def _initialize_postgresql_schema(self, config: DatabaseConfig) -> bool:
-        """Initialize PostgreSQL schema and tables"""
+        """Initialize PostgreSQL schema and tables
+        
+        Now works cooperatively with MigrationTracker - only creates tables
+        if they don't already exist from Alembic migrations.
+        """
         try:
             # First ensure database exists
             if not await self._create_postgresql_database(config):
@@ -179,47 +183,22 @@ class DatabaseInitializer:
                 timeout=config.connection_timeout
             )
             
-            # Check for schema version table
-            schema_exists = await conn.fetchval("""
+            # Check if Alembic migrations have already created the schema
+            alembic_version_exists = await conn.fetchval("""
                 SELECT EXISTS (
                     SELECT 1 FROM information_schema.tables 
                     WHERE table_schema = 'public' 
-                    AND table_name = 'schema_version'
+                    AND table_name = 'alembic_version'
                 )
             """)
             
-            if not schema_exists:
-                logger.info("Creating schema version table")
-                await conn.execute("""
-                    CREATE TABLE IF NOT EXISTS schema_version (
-                        version VARCHAR(50) PRIMARY KEY,
-                        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        description TEXT
-                    )
-                """)
-                
-                # Run initialization scripts if they exist
-                init_script = Path("database_scripts/postgres_init.sql")
-                if init_script.exists():
-                    logger.info("Running PostgreSQL initialization script")
-                    sql_content = init_script.read_text()
-                    await conn.execute(sql_content)
-                else:
-                    # Create basic tables if no script exists
-                    await self._create_default_postgresql_tables(conn)
-            
-            # Record current version
-            current_version = await conn.fetchval(
-                "SELECT version FROM schema_version ORDER BY applied_at DESC LIMIT 1"
-            )
-            
-            self.schema_versions[DatabaseType.POSTGRESQL] = SchemaVersion(
-                current_version=current_version or "0.0.0",
-                required_version="1.0.0",  # Should come from config
-                migrations_pending=[],
-                last_migration=current_version,
-                status=SchemaStatus.UP_TO_DATE
-            )
+            if alembic_version_exists:
+                # Alembic has already created the schema - just verify and record status
+                logger.info("Database schema managed by Alembic migrations - skipping direct table creation")
+                await self._record_alembic_managed_schema(conn)
+            else:
+                # No Alembic schema exists - proceed with direct initialization
+                await self._initialize_schema_directly(conn)
             
             await conn.close()
             return True
@@ -229,42 +208,154 @@ class DatabaseInitializer:
             self._trip_circuit_breaker(DatabaseType.POSTGRESQL)
             return False
     
-    async def _create_default_postgresql_tables(self, conn) -> None:
-        """Create default PostgreSQL tables for the application"""
-        default_tables = [
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                email VARCHAR(255) UNIQUE NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS sessions (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-                token TEXT NOT NULL,
-                expires_at TIMESTAMP NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS api_keys (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-                key_hash VARCHAR(255) UNIQUE NOT NULL,
-                name VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_used TIMESTAMP
-            )
-            """
-        ]
+    async def _record_alembic_managed_schema(self, conn) -> None:
+        """Record that schema is managed by Alembic migrations"""
+        # Get current Alembic revision
+        current_alembic_version = await conn.fetchval(
+            "SELECT version_num FROM alembic_version LIMIT 1"
+        )
         
-        for table_sql in default_tables:
-            await conn.execute(table_sql)
+        # Create or update schema version table to record Alembic management
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS schema_version (
+                version VARCHAR(50) PRIMARY KEY,
+                applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                description TEXT
+            )
+        """)
         
-        logger.info("Created default PostgreSQL tables")
+        # Record the current state as managed by Alembic
+        if current_alembic_version:
+            await conn.execute("""
+                INSERT INTO schema_version (version, description) 
+                VALUES ($1, 'Managed by Alembic migrations')
+                ON CONFLICT (version) DO NOTHING
+            """, current_alembic_version)
+        
+        self.schema_versions[DatabaseType.POSTGRESQL] = SchemaVersion(
+            current_version=current_alembic_version or "alembic_managed",
+            required_version="alembic_managed",
+            migrations_pending=[],
+            last_migration=current_alembic_version,
+            status=SchemaStatus.UP_TO_DATE
+        )
+        
+        logger.info(f"Recorded Alembic-managed schema (revision: {current_alembic_version})")
+    
+    async def _initialize_schema_directly(self, conn) -> None:
+        """Initialize schema directly when Alembic is not present"""
+        # Check for schema version table
+        schema_exists = await conn.fetchval("""
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'schema_version'
+            )
+        """)
+        
+        if not schema_exists:
+            logger.info("Creating schema version table")
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS schema_version (
+                    version VARCHAR(50) PRIMARY KEY,
+                    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    description TEXT
+                )
+            """)
+            
+            # Run initialization scripts if they exist
+            init_script = Path("database_scripts/postgres_init.sql")
+            if init_script.exists():
+                logger.info("Running PostgreSQL initialization script")
+                sql_content = init_script.read_text()
+                await conn.execute(sql_content)
+            else:
+                # Create basic tables if no script exists
+                await self._create_default_postgresql_tables_with_checks(conn)
+        
+        # Record current version
+        current_version = await conn.fetchval(
+            "SELECT version FROM schema_version ORDER BY applied_at DESC LIMIT 1"
+        )
+        
+        self.schema_versions[DatabaseType.POSTGRESQL] = SchemaVersion(
+            current_version=current_version or "1.0.0",
+            required_version="1.0.0",
+            migrations_pending=[],
+            last_migration=current_version,
+            status=SchemaStatus.UP_TO_DATE
+        )
+    
+    async def _create_default_postgresql_tables_with_checks(self, conn) -> None:
+        """Create default PostgreSQL tables with existence checks
+        
+        This method ensures idempotent table creation that won't conflict
+        with tables potentially created by other systems.
+        """
+        # Check which tables already exist
+        existing_tables = set()
+        tables_query = await conn.fetch("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        """)
+        for row in tables_query:
+            existing_tables.add(row['table_name'])
+        
+        # Define tables to create only if they don't exist
+        table_definitions = {
+            "users": """
+                CREATE TABLE IF NOT EXISTS users (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """,
+            "sessions": """
+                CREATE TABLE IF NOT EXISTS sessions (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                    token TEXT NOT NULL,
+                    expires_at TIMESTAMP NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """,
+            "api_keys": """
+                CREATE TABLE IF NOT EXISTS api_keys (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                    key_hash VARCHAR(255) UNIQUE NOT NULL,
+                    name VARCHAR(255),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_used TIMESTAMP
+                )
+            """
+        }
+        
+        created_tables = []
+        skipped_tables = []
+        
+        for table_name, table_sql in table_definitions.items():
+            if table_name in existing_tables:
+                logger.info(f"Table '{table_name}' already exists - skipping creation")
+                skipped_tables.append(table_name)
+            else:
+                await conn.execute(table_sql)
+                created_tables.append(table_name)
+                logger.info(f"Created table: {table_name}")
+        
+        if created_tables:
+            logger.info(f"Created {len(created_tables)} new tables: {', '.join(created_tables)}")
+        if skipped_tables:
+            logger.info(f"Skipped {len(skipped_tables)} existing tables: {', '.join(skipped_tables)}")
+        
+        # Record the initialization
+        await conn.execute("""
+            INSERT INTO schema_version (version, description) 
+            VALUES ('1.0.0', 'Direct SQL table creation by DatabaseInitializer')
+            ON CONFLICT (version) DO NOTHING
+        """)
     
     async def _initialize_clickhouse_schema(self, config: DatabaseConfig) -> bool:
         """Initialize ClickHouse schema and tables"""

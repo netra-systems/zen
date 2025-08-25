@@ -86,7 +86,7 @@ class BaseIntegrationTest:
             thread_data = {"title": title}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -214,7 +214,7 @@ class L3IntegrationTest(BaseIntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -225,7 +225,7 @@ class L3IntegrationTest(BaseIntegrationTest):
             # Wait for processing
             async def check_message_status():
                 async with session.get(
-                    f"{self.backend_url}/api/v1/threads/{thread_id}/messages/{message_id}",
+                    f"{self.backend_url}/api/threads/{thread_id}/messages/{message_id}",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     if resp.status == 200:

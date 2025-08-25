@@ -177,7 +177,7 @@ class ApiVersioningManager:
         app = web.Application(middlewares=[version_middleware])
         
         # Register versioned routes
-        app.router.add_route('*', '/api/v1/{path:.*}', handle_versioned_request)
+        app.router.add_route('*', '/api/{path:.*}', handle_versioned_request)
         app.router.add_route('*', '/api/v2/{path:.*}', handle_versioned_request)
         app.router.add_route('*', '/api/v3/{path:.*}', handle_versioned_request)
         
@@ -193,7 +193,7 @@ class ApiVersioningManager:
     def detect_api_version(self, request) -> str:
         """Detect API version from request."""
         # URL path versioning
-        if "/api/v1/" in request.path:
+        if "/api/" in request.path:
             return "v1"
         elif "/api/v2/" in request.path:
             return "v2"

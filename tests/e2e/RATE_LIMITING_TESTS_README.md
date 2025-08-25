@@ -32,7 +32,7 @@ The comprehensive rate limiting tests validate:
 
 ### 1. API Rate Limits
 - **Auth Service Endpoints**: Tests rate limits on `/auth/me` and other auth endpoints
-- **Backend API Endpoints**: Tests rate limits on `/api/v1/chat/message` and other backend endpoints
+- **Backend API Endpoints**: Tests rate limits on `/api/chat/message` and other backend endpoints
 - **Per-User Rate Limiting**: Validates individual user rate limit enforcement
 - **Cross-Service Rate Limiting**: Tests rate limits across different services
 

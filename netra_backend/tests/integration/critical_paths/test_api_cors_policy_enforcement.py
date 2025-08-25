@@ -66,7 +66,7 @@ class ApiCorsManager:
     async def setup_cors_policies(self):
         """Configure CORS policies for different API endpoints."""
         self.cors_policies = {
-            "/api/v1/public": CorsPolicy(
+            "/api/public": CorsPolicy(
                 allowed_origins=["*"],
                 allowed_methods=["GET", "POST", "OPTIONS"],
                 allowed_headers=["Content-Type", "Authorization", "X-Requested-With"],
@@ -74,7 +74,7 @@ class ApiCorsManager:
                 allow_credentials=False,
                 max_age=3600
             ),
-            "/api/v1/auth": CorsPolicy(
+            "/api/auth": CorsPolicy(
                 allowed_origins=["https://app.netrasystems.ai", "https://staging.netrasystems.ai"],
                 allowed_methods=["GET", "POST", "OPTIONS"],
                 allowed_headers=["Content-Type", "Authorization"],
@@ -82,7 +82,7 @@ class ApiCorsManager:
                 allow_credentials=True,
                 max_age=1800
             ),
-            "/api/v1/admin": CorsPolicy(
+            "/api/admin": CorsPolicy(
                 allowed_origins=["https://admin.netrasystems.ai"],
                 allowed_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                 allowed_headers=["Content-Type", "Authorization", "X-Admin-Key"],
@@ -90,7 +90,7 @@ class ApiCorsManager:
                 allow_credentials=True,
                 max_age=600
             ),
-            "/api/v1/webhooks": CorsPolicy(
+            "/api/webhooks": CorsPolicy(
                 allowed_origins=[],  # No CORS for webhooks
                 allowed_methods=["POST"],
                 allowed_headers=["Content-Type"],
@@ -98,7 +98,7 @@ class ApiCorsManager:
                 allow_credentials=False,
                 max_age=0
             ),
-            "/api/v1/embed": CorsPolicy(
+            "/api/embed": CorsPolicy(
                 allowed_origins=["*"],
                 allowed_methods=["GET", "POST", "OPTIONS"],
                 allowed_headers=["Content-Type", "X-API-Key"],
@@ -214,15 +214,15 @@ class ApiCorsManager:
         app = web.Application(middlewares=[cors_middleware])
         
         # Register routes
-        app.router.add_route('*', '/api/v1/public', handle_public_api)
-        app.router.add_route('*', '/api/v1/public/{path:.*}', handle_public_api)
-        app.router.add_route('*', '/api/v1/auth', handle_auth_api)
+        app.router.add_route('*', '/api/public', handle_public_api)
+        app.router.add_route('*', '/api/public/{path:.*}', handle_public_api)
+        app.router.add_route('*', '/api/auth', handle_auth_api)
         app.router.add_route('*', '/auth/{path:.*}', handle_auth_api)
-        app.router.add_route('*', '/api/v1/admin', handle_admin_api)
-        app.router.add_route('*', '/api/v1/admin/{path:.*}', handle_admin_api)
-        app.router.add_post('/api/v1/webhooks', handle_webhooks)
-        app.router.add_route('*', '/api/v1/embed', handle_embed_api)
-        app.router.add_route('*', '/api/v1/embed/{path:.*}', handle_embed_api)
+        app.router.add_route('*', '/api/admin', handle_admin_api)
+        app.router.add_route('*', '/api/admin/{path:.*}', handle_admin_api)
+        app.router.add_post('/api/webhooks', handle_webhooks)
+        app.router.add_route('*', '/api/embed', handle_embed_api)
+        app.router.add_route('*', '/api/embed/{path:.*}', handle_embed_api)
         
         self.test_server = await asyncio.create_task(
             aiohttp.web.create_server(app, "localhost", 0)
@@ -601,7 +601,7 @@ async def test_public_api_wildcard_cors(cors_manager):
     ]
     
     compliance_result = await cors_manager.test_cors_policy_compliance(
-        "/api/v1/public", test_scenarios
+        "/api/public", test_scenarios
     )
     
     assert compliance_result["compliance_score"] == 100
@@ -645,7 +645,7 @@ async def test_auth_api_restricted_origins(cors_manager):
     ]
     
     compliance_result = await cors_manager.test_cors_policy_compliance(
-        "/api/v1/auth", test_scenarios
+        "/api/auth", test_scenarios
     )
     
     assert compliance_result["compliance_score"] == 100
@@ -677,7 +677,7 @@ async def test_preflight_request_handling(cors_manager):
     """Test CORS preflight request handling."""
     # Test valid preflight
     preflight_result = await cors_manager.make_cors_request(
-        "/api/v1/public",
+        "/api/public",
         method="POST",
         origin="https://example.com",
         headers={"Access-Control-Request-Headers": "Content-Type,Authorization"},
@@ -725,7 +725,7 @@ async def test_admin_api_strict_policy(cors_manager):
     ]
     
     compliance_result = await cors_manager.test_cors_policy_compliance(
-        "/api/v1/admin", test_scenarios
+        "/api/admin", test_scenarios
     )
     
     assert compliance_result["compliance_score"] == 100
@@ -754,7 +754,7 @@ async def test_webhook_no_cors_policy(cors_manager):
     """Test webhook endpoint with no CORS policy."""
     # Webhooks should not have CORS headers
     result = await cors_manager.make_cors_request(
-        "/api/v1/webhooks",
+        "/api/webhooks",
         method="POST",
         origin="https://external-service.com"
     )
@@ -785,7 +785,7 @@ async def test_embed_api_permissive_policy(cors_manager):
     ]
     
     compliance_result = await cors_manager.test_cors_policy_compliance(
-        "/api/v1/embed", test_scenarios
+        "/api/embed", test_scenarios
     )
     
     assert compliance_result["compliance_score"] == 100
@@ -810,7 +810,7 @@ async def test_complex_preflight_scenarios(cors_manager):
     """Test complex preflight scenarios with custom headers."""
     # Test preflight with custom headers
     complex_preflight = await cors_manager.make_cors_request(
-        "/api/v1/auth",
+        "/api/auth",
         method="POST",
         origin="https://app.netrasystems.ai",
         headers={
@@ -838,9 +838,9 @@ async def test_cors_policy_violation_tracking(cors_manager):
     """Test tracking of CORS policy violations."""
     # Make requests that should violate policies
     violation_scenarios = [
-        ("/api/v1/auth", "https://malicious.com", "GET"),
-        ("/api/v1/admin", "https://wrong-admin.com", "POST"),
-        ("/api/v1/auth", "https://app.netrasystems.ai", "PATCH")  # Wrong method
+        ("/api/auth", "https://malicious.com", "GET"),
+        ("/api/admin", "https://wrong-admin.com", "POST"),
+        ("/api/auth", "https://app.netrasystems.ai", "PATCH")  # Wrong method
     ]
     
     for endpoint, origin, method in violation_scenarios:
@@ -868,7 +868,7 @@ async def test_cors_performance_requirements(cors_manager):
     
     for i in range(20):
         result = await cors_manager.make_cors_request(
-            "/api/v1/public",
+            "/api/public",
             "GET",
             "https://example.com"
         )
@@ -884,7 +884,7 @@ async def test_cors_performance_requirements(cors_manager):
     concurrent_tasks = []
     for i in range(15):
         task = cors_manager.make_cors_request(
-            "/api/v1/public",
+            "/api/public",
             "GET", 
             f"https://example{i}.com"
         )
@@ -907,10 +907,10 @@ async def test_cors_metrics_accuracy(cors_manager):
     """Test accuracy of CORS metrics collection."""
     # Generate test traffic
     test_requests = [
-        ("/api/v1/public", "https://example.com", "GET"),
-        ("/api/v1/auth", "https://app.netrasystems.ai", "POST"),
-        ("/api/v1/admin", "https://admin.netrasystems.ai", "DELETE"),
-        ("/api/v1/embed", "https://customer.com", "GET"),
+        ("/api/public", "https://example.com", "GET"),
+        ("/api/auth", "https://app.netrasystems.ai", "POST"),
+        ("/api/admin", "https://admin.netrasystems.ai", "DELETE"),
+        ("/api/embed", "https://customer.com", "GET"),
     ]
     
     for endpoint, origin, method in test_requests * 2:  # 8 total requests
@@ -931,5 +931,5 @@ async def test_cors_metrics_accuracy(cors_manager):
     
     # Check pattern breakdown
     pattern_breakdown = metrics["pattern_breakdown"]
-    assert "/api/v1/public" in pattern_breakdown
-    assert "/api/v1/auth" in pattern_breakdown
+    assert "/api/public" in pattern_breakdown
+    assert "/api/auth" in pattern_breakdown

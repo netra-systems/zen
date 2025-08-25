@@ -83,7 +83,7 @@ class MessageSender:
         
         async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
-                f"{self.backend_url}/api/v1/chat/message",
+                f"{self.backend_url}/api/chat/message",
                 headers=headers,
                 json=payload,
                 timeout=10.0
@@ -155,7 +155,7 @@ class UserManager:
             # Then upgrade to paid plan
             headers = {"Authorization": f"Bearer {access_token}"}
             upgrade_response = await client.post(
-                f"{self.backend_base_url}/api/v1/user/upgrade",
+                f"{self.backend_base_url}/api/user/upgrade",
                 headers=headers,
                 json={"plan": plan}
             )
@@ -173,7 +173,7 @@ class UserManager:
         
         async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
-                f"{self.backend_base_url}/api/v1/user/upgrade",
+                f"{self.backend_base_url}/api/user/upgrade",
                 headers=headers,
                 json=payload
             )

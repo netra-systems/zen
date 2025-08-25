@@ -524,7 +524,7 @@ class TestRootCauseAnalysis:
         potential_conflicts = [
             ('/ws', '/api/mcp/ws'),  # Different message formats
             ('/ws', '/ws'),    # Security differences
-            ('/ws/{user_id}', '/ws/v1/{user_id}')  # Parameter handling
+            ('/ws/{user_id}', '/ws/{user_id}')  # Parameter handling
         ]
         
         for path1, path2 in potential_conflicts:

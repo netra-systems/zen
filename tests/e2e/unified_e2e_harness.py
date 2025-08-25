@@ -75,7 +75,7 @@ class UnifiedE2ETestHarness:
         """Start complete test environment."""
         logger.info("Starting unified E2E test environment")
         
-        await self.orchestrator.start_test_environment(
+        await self.orchestrator.test_start_test_environment(
             self.session.test_database_name
         )
         
@@ -149,7 +149,7 @@ class UnifiedE2ETestHarness:
         logger.info("Cleaning up E2E test environment")
         
         await self.journey_executor.cleanup_users_and_connections()
-        await self.orchestrator.stop_test_environment(
+        await self.orchestrator.test_stop_test_environment(
             self.session.test_database_name
         )
         

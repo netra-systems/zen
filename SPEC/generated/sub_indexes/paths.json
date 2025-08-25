@@ -652,59 +652,59 @@
         "auth_service/main.py:474"
       ]
     },
-    "/api/v1/agents": {
-      "value": "/api/v1/agents",
+    "/api/agents": {
+      "value": "/api/agents",
       "category": "paths",
       "locations": [
         "netra_backend/app/services/api_gateway/router.py:132",
         "netra_backend/app/services/api_gateway/router.py:135"
       ]
     },
-    "/api/v1/database": {
-      "value": "/api/v1/database",
+    "/api/database": {
+      "value": "/api/database",
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/database_monitoring/router.py:39"
       ]
     },
-    "/api/v1/discovery": {
-      "value": "/api/v1/discovery",
+    "/api/discovery": {
+      "value": "/api/discovery",
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/discovery.py:17"
       ]
     },
-    "/api/v1/example-messages": {
-      "value": "/api/v1/example-messages",
+    "/api/example-messages": {
+      "value": "/api/example-messages",
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/example_messages.py:25"
       ]
     },
-    "/api/v1/status": {
-      "value": "/api/v1/status",
+    "/api/status": {
+      "value": "/api/status",
       "category": "paths",
       "locations": [
         "scripts/gcp_health_diagnostics.py:54"
       ]
     },
-    "/api/v1/threads/": {
-      "value": "/api/v1/threads/",
+    "/api/threads/": {
+      "value": "/api/threads/",
       "category": "paths",
       "locations": [
         "netra_backend/app/services/api_gateway/router.py:118",
         "netra_backend/app/services/api_gateway/router.py:118"
       ]
     },
-    "/api/v1/threads/[0-9a-f-]+": {
-      "value": "/api/v1/threads/[0-9a-f-]+",
+    "/api/threads/[0-9a-f-]+": {
+      "value": "/api/threads/[0-9a-f-]+",
       "category": "paths",
       "locations": [
         "netra_backend/app/services/api_gateway/router.py:121"
       ]
     },
-    "/api/v1/users": {
-      "value": "/api/v1/users",
+    "/api/users": {
+      "value": "/api/users",
       "category": "paths",
       "locations": [
         "netra_backend/app/services/api_gateway/router.py:104",
@@ -713,8 +713,8 @@
         "netra_backend/app/services/api_gateway/router.py:114"
       ]
     },
-    "/api/v1/users/*": {
-      "value": "/api/v1/users/*",
+    "/api/users/*": {
+      "value": "/api/users/*",
       "category": "paths",
       "locations": [
         "netra_backend/app/services/api_gateway/router.py:107"
@@ -756,8 +756,8 @@
         "scripts/compliance/mock_justification_checker.py:62"
       ]
     },
-    "/v1/": {
-      "value": "/v1/",
+    "/": {
+      "value": "/",
       "category": "paths",
       "locations": [
         "scripts/scan_string_literals.py:115"

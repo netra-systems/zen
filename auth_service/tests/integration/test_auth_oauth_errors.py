@@ -93,9 +93,9 @@ class TestOAuthErrorHandling:
         
         for invalid_state in invalid_states:
             if invalid_state is None:
-                url = "/api/v1/auth/callback?code=test_code"
+                url = "/api/auth/callback?code=test_code"
             else:
-                url = f"/api/v1/auth/callback?code=test_code&state={invalid_state}"
+                url = f"/api/auth/callback?code=test_code&state={invalid_state}"
             
             response = client.get(url)
             
@@ -131,7 +131,7 @@ class TestOAuthErrorHandling:
         
         for scenario in denial_scenarios:
             params = "&".join([f"{k}={v}" for k, v in scenario.items()])
-            response = client.get(f"/api/v1/auth/callback?{params}")
+            response = client.get(f"/api/auth/callback?{params}")
             
             # Should handle OAuth denial gracefully
             assert response.status_code in [302, 401, 400, 422]
@@ -202,7 +202,7 @@ class TestOAuthErrorHandling:
             mock_async_client.post.return_value = token_response
             
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/api/auth/callback?code={oauth_code}&state={oauth_state}"
             )
             
             assert response.status_code in scenario["expected_status"]
@@ -272,7 +272,7 @@ class TestOAuthErrorHandling:
             mock_async_client.get.return_value = user_response
             
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/api/auth/callback?code={oauth_code}&state={oauth_state}"
             )
             
             # Should handle user info failures gracefully
@@ -337,7 +337,7 @@ class TestOAuthErrorHandling:
                 mock_async_client.get.side_effect = failure["exception"]
             
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/api/auth/callback?code={oauth_code}&state={oauth_state}"
             )
             
             # Should handle network failures gracefully
@@ -359,25 +359,25 @@ class TestOAuthErrorHandling:
         # Test various malformed OAuth requests
         malformed_requests = [
             # Missing required parameters
-            "/api/v1/auth/callback",
-            "/api/v1/auth/callback?code=",
-            "/api/v1/auth/callback?state=test",
+            "/api/auth/callback",
+            "/api/auth/callback?code=",
+            "/api/auth/callback?state=test",
             
             # Invalid parameter values
-            "/api/v1/auth/callback?code=" + "x" * 1000,  # Very long code
-            "/api/v1/auth/callback?code=test&state=" + "x" * 1000,  # Very long state
-            "/api/v1/auth/callback?code=test%00&state=test",  # Null byte injection
-            "/api/v1/auth/callback?code=<script>&state=test",  # XSS attempt
-            "/api/v1/auth/callback?code=../../../etc/passwd",  # Path traversal attempt
+            "/api/auth/callback?code=" + "x" * 1000,  # Very long code
+            "/api/auth/callback?code=test&state=" + "x" * 1000,  # Very long state
+            "/api/auth/callback?code=test%00&state=test",  # Null byte injection
+            "/api/auth/callback?code=<script>&state=test",  # XSS attempt
+            "/api/auth/callback?code=../../../etc/passwd",  # Path traversal attempt
             
             # Invalid provider
-            "/api/v1/auth/login?provider=invalid_provider",
-            "/api/v1/auth/login?provider=",
-            "/api/v1/auth/login?provider=" + "x" * 100,
+            "/api/auth/login?provider=invalid_provider",
+            "/api/auth/login?provider=",
+            "/api/auth/login?provider=" + "x" * 100,
             
             # SQL injection attempts
-            "/api/v1/auth/callback?code=test' OR '1'='1&state=test",
-            "/api/v1/auth/callback?code=test; DROP TABLE users;&state=test",
+            "/api/auth/callback?code=test' OR '1'='1&state=test",
+            "/api/auth/callback?code=test; DROP TABLE users;&state=test",
         ]
         
         for malformed_url in malformed_requests:
@@ -426,7 +426,7 @@ class TestOAuthErrorHandling:
         responses = []
         for i in range(20):  # Make 20 rapid requests
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}_{i}&state={oauth_state}_{i}"
+                f"/api/auth/callback?code={oauth_code}_{i}&state={oauth_state}_{i}"
             )
             responses.append(response.status_code)
         
@@ -461,18 +461,18 @@ class TestOAuthErrorHandling:
         # Test CSRF attack scenarios
         csrf_scenarios = [
             # No state parameter (CSRF vulnerable)
-            f"/api/v1/auth/callback?code={oauth_code}",
+            f"/api/auth/callback?code={oauth_code}",
             
             # Predictable state parameter
-            f"/api/v1/auth/callback?code={oauth_code}&state=123456",
-            f"/api/v1/auth/callback?code={oauth_code}&state=predictable_state",
+            f"/api/auth/callback?code={oauth_code}&state=123456",
+            f"/api/auth/callback?code={oauth_code}&state=predictable_state",
             
             # Reused state parameter
-            f"/api/v1/auth/callback?code={oauth_code}&state=reused_state_123",
-            f"/api/v1/auth/callback?code={oauth_code}&state=reused_state_123",  # Same state twice
+            f"/api/auth/callback?code={oauth_code}&state=reused_state_123",
+            f"/api/auth/callback?code={oauth_code}&state=reused_state_123",  # Same state twice
             
             # State parameter from different session
-            f"/api/v1/auth/callback?code={oauth_code}&state=other_session_state",
+            f"/api/auth/callback?code={oauth_code}&state=other_session_state",
         ]
         
         for scenario_url in csrf_scenarios:

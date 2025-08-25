@@ -56,35 +56,35 @@ class TestAPIRequestLifecycleCompleteL4:
             # Valid request
             {
                 'method': 'POST',
-                'path': '/api/v1/users',
+                'path': '/api/users',
                 'headers': {'Content-Type': 'application/json', 'Authorization': 'Bearer token123'},
                 'body': {'email': 'user@test.com', 'password': 'Test123!'}
             },
             # Missing required header
             {
                 'method': 'POST',
-                'path': '/api/v1/users',
+                'path': '/api/users',
                 'headers': {'Content-Type': 'application/json'},
                 'body': {'email': 'user@test.com', 'password': 'Test123!'}
             },
             # Invalid body schema
             {
                 'method': 'POST',
-                'path': '/api/v1/users',
+                'path': '/api/users',
                 'headers': {'Content-Type': 'application/json', 'Authorization': 'Bearer token123'},
                 'body': {'email': 'invalid-email', 'password': '123'}
             },
             # SQL injection attempt
             {
                 'method': 'GET',
-                'path': '/api/v1/users',
+                'path': '/api/users',
                 'query': "id=1' OR '1'='1",
                 'headers': {'Authorization': 'Bearer token123'}
             },
             # XSS attempt
             {
                 'method': 'POST',
-                'path': '/api/v1/comments',
+                'path': '/api/comments',
                 'headers': {'Content-Type': 'application/json', 'Authorization': 'Bearer token123'},
                 'body': {'text': '<script>alert("xss")</script>'}
             }
@@ -154,7 +154,7 @@ class TestAPIRequestLifecycleCompleteL4:
         # Test request through middleware
         request = {
             'method': 'GET',
-            'path': '/api/v1/data',
+            'path': '/api/data',
             'headers': {'Authorization': 'Bearer token123'}
         }
         
@@ -184,9 +184,9 @@ class TestAPIRequestLifecycleCompleteL4:
         
         # Configure different limits
         limits = {
-            '/api/v1/expensive': {'requests': 5, 'window': 60},
-            '/api/v1/normal': {'requests': 30, 'window': 60},
-            '/api/v1/public': {'requests': 100, 'window': 60}
+            '/api/expensive': {'requests': 5, 'window': 60},
+            '/api/normal': {'requests': 30, 'window': 60},
+            '/api/public': {'requests': 100, 'window': 60}
         }
         
         api_infrastructure['rate_limiter'].configure_limits(limits)
@@ -198,7 +198,7 @@ class TestAPIRequestLifecycleCompleteL4:
         for i in range(10):
             result = await api_infrastructure['rate_limiter'].check_limit(
                 user_id=user_id,
-                endpoint='/api/v1/expensive'
+                endpoint='/api/expensive'
             )
             expensive_results.append(result)
         
@@ -212,7 +212,7 @@ class TestAPIRequestLifecycleCompleteL4:
         for i in range(35):
             result = await api_infrastructure['rate_limiter'].check_limit(
                 user_id=user_id,
-                endpoint='/api/v1/normal'
+                endpoint='/api/normal'
             )
             normal_results.append(result)
         
@@ -229,8 +229,8 @@ class TestAPIRequestLifecycleCompleteL4:
         timeout_config = {
             'default': 5,
             'endpoints': {
-                '/api/v1/quick': 1,
-                '/api/v1/slow': 30
+                '/api/quick': 1,
+                '/api/slow': 30
             }
         }
         
@@ -241,13 +241,13 @@ class TestAPIRequestLifecycleCompleteL4:
             await asyncio.sleep(2)  # Exceeds 1 second timeout
             return {'data': 'should_not_return'}
         
-        quick_request = {'path': '/api/v1/quick'}
+        quick_request = {'path': '/api/quick'}
         
         with pytest.raises(asyncio.TimeoutError):
             await api_infrastructure['gateway'].handle_request(
                 request=quick_request,
                 handler=slow_handler,
-                timeout=timeout_config['endpoints']['/api/v1/quick']
+                timeout=timeout_config['endpoints']['/api/quick']
             )
         
         # Test slow endpoint (should not timeout)
@@ -255,12 +255,12 @@ class TestAPIRequestLifecycleCompleteL4:
             await asyncio.sleep(2)
             return {'data': 'success'}
         
-        slow_request = {'path': '/api/v1/slow'}
+        slow_request = {'path': '/api/slow'}
         
         result = await api_infrastructure['gateway'].handle_request(
             request=slow_request,
             handler=medium_handler,
-            timeout=timeout_config['endpoints']['/api/v1/slow']
+            timeout=timeout_config['endpoints']['/api/slow']
         )
         
         assert result['data'] == 'success'
@@ -314,8 +314,8 @@ class TestAPIRequestLifecycleCompleteL4:
         size_limits = {
             'default': 1024 * 1024,  # 1MB
             'endpoints': {
-                '/api/v1/upload': 10 * 1024 * 1024,  # 10MB
-                '/api/v1/webhook': 64 * 1024  # 64KB
+                '/api/upload': 10 * 1024 * 1024,  # 10MB
+                '/api/webhook': 64 * 1024  # 64KB
             }
         }
         
@@ -323,7 +323,7 @@ class TestAPIRequestLifecycleCompleteL4:
         
         # Test small request (should pass)
         small_request = {
-            'path': '/api/v1/data',
+            'path': '/api/data',
             'body': 'x' * 1000  # 1KB
         }
         
@@ -332,7 +332,7 @@ class TestAPIRequestLifecycleCompleteL4:
         
         # Test large request on default endpoint (should fail)
         large_request = {
-            'path': '/api/v1/data',
+            'path': '/api/data',
             'body': 'x' * (2 * 1024 * 1024)  # 2MB
         }
         
@@ -342,7 +342,7 @@ class TestAPIRequestLifecycleCompleteL4:
         
         # Test large request on upload endpoint (should pass)
         upload_request = {
-            'path': '/api/v1/upload',
+            'path': '/api/upload',
             'body': 'x' * (5 * 1024 * 1024)  # 5MB
         }
         
@@ -371,7 +371,7 @@ class TestAPIRequestLifecycleCompleteL4:
         tasks = []
         for _ in range(5):
             request = {
-                'path': '/api/v1/process',
+                'path': '/api/process',
                 'headers': {'X-Request-ID': request_id},
                 'body': {'data': 'test'}
             }
@@ -436,9 +436,9 @@ class TestAPIRequestLifecycleCompleteL4:
             'enabled': True,
             'ttl': 60,
             'endpoints': {
-                '/api/v1/static': {'ttl': 3600},
-                '/api/v1/dynamic': {'ttl': 5},
-                '/api/v1/realtime': {'cache': False}
+                '/api/static': {'ttl': 3600},
+                '/api/dynamic': {'ttl': 5},
+                '/api/realtime': {'cache': False}
             }
         }
         
@@ -452,11 +452,11 @@ class TestAPIRequestLifecycleCompleteL4:
             return {'data': f'response_{execution_count}', 'timestamp': time.time()}
         
         # First request - cache miss
-        request1 = {'path': '/api/v1/static', 'method': 'GET'}
+        request1 = {'path': '/api/static', 'method': 'GET'}
         response1 = await api_infrastructure['gateway'].handle_request(request1, data_handler)
         
         # Second request - cache hit
-        request2 = {'path': '/api/v1/static', 'method': 'GET'}
+        request2 = {'path': '/api/static', 'method': 'GET'}
         response2 = await api_infrastructure['gateway'].handle_request(request2, data_handler)
         
         # Should return cached response
@@ -464,10 +464,10 @@ class TestAPIRequestLifecycleCompleteL4:
         assert execution_count == 1  # Handler called only once
         
         # Test cache invalidation
-        await api_infrastructure['gateway'].invalidate_cache('/api/v1/static')
+        await api_infrastructure['gateway'].invalidate_cache('/api/static')
         
         # Third request - cache miss after invalidation
-        request3 = {'path': '/api/v1/static', 'method': 'GET'}
+        request3 = {'path': '/api/static', 'method': 'GET'}
         response3 = await api_infrastructure['gateway'].handle_request(request3, data_handler)
         
         assert response3['data'] != response1['data']
@@ -483,7 +483,7 @@ class TestAPIRequestLifecycleCompleteL4:
         api_infrastructure['gateway'].enable_tracing()
         
         parent_request = {
-            'path': '/api/v1/aggregate',
+            'path': '/api/aggregate',
             'headers': {'X-Trace-ID': 'trace_123', 'X-Span-ID': 'span_456'}
         }
         

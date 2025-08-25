@@ -5310,22 +5310,22 @@
         "scripts/test_auth_integration.py:70"
       ]
     },
-    "/api/v1/agents": {
-      "value": "/api/v1/agents",
+    "/api/agents": {
+      "value": "/api/agents",
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_deployment.py:108"
       ]
     },
-    "/api/v1/auth/callback": {
-      "value": "/api/v1/auth/callback",
+    "/api/auth/callback": {
+      "value": "/api/auth/callback",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:362"
       ]
     },
-    "/api/v1/auth/callback/google": {
-      "value": "/api/v1/auth/callback/google",
+    "/api/auth/callback/google": {
+      "value": "/api/auth/callback/google",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:141",
@@ -5340,15 +5340,15 @@
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:481"
       ]
     },
-    "/api/v1/auth/callback?": {
-      "value": "/api/v1/auth/callback?",
+    "/api/auth/callback?": {
+      "value": "/api/auth/callback?",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:134"
       ]
     },
-    "/api/v1/auth/callback?code=": {
-      "value": "/api/v1/auth/callback?code=",
+    "/api/auth/callback?code=": {
+      "value": "/api/auth/callback?code=",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:205",
@@ -5363,93 +5363,93 @@
         "auth_service/tests/integration/test_auth_oauth_errors.py:471"
       ]
     },
-    "/api/v1/auth/callback?code=../../../etc/passwd": {
-      "value": "/api/v1/auth/callback?code=../../../etc/passwd",
+    "/api/auth/callback?code=../../../etc/passwd": {
+      "value": "/api/auth/callback?code=../../../etc/passwd",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:371"
       ]
     },
-    "/api/v1/auth/callback?code=<script>&state=test": {
-      "value": "/api/v1/auth/callback?code=<script>&state=test",
+    "/api/auth/callback?code=<script>&state=test": {
+      "value": "/api/auth/callback?code=<script>&state=test",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:370"
       ]
     },
-    "/api/v1/auth/callback?code=test%00&state=test": {
-      "value": "/api/v1/auth/callback?code=test%00&state=test",
+    "/api/auth/callback?code=test%00&state=test": {
+      "value": "/api/auth/callback?code=test%00&state=test",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:369"
       ]
     },
-    "/api/v1/auth/callback?code=test&state=": {
-      "value": "/api/v1/auth/callback?code=test&state=",
+    "/api/auth/callback?code=test&state=": {
+      "value": "/api/auth/callback?code=test&state=",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:368"
       ]
     },
-    "/api/v1/auth/callback?code=test' OR '1'='1&state=test": {
-      "value": "/api/v1/auth/callback?code=test' OR '1'='1&state=test",
+    "/api/auth/callback?code=test' OR '1'='1&state=test": {
+      "value": "/api/auth/callback?code=test' OR '1'='1&state=test",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:379"
       ]
     },
-    "/api/v1/auth/callback?code=test; DROP TABLE users;&state=test": {
-      "value": "/api/v1/auth/callback?code=test; DROP TABLE users;&state=test",
+    "/api/auth/callback?code=test; DROP TABLE users;&state=test": {
+      "value": "/api/auth/callback?code=test; DROP TABLE users;&state=test",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:380"
       ]
     },
-    "/api/v1/auth/callback?code=test_code": {
-      "value": "/api/v1/auth/callback?code=test_code",
+    "/api/auth/callback?code=test_code": {
+      "value": "/api/auth/callback?code=test_code",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:96",
         "auth_service/tests/integration/test_oauth_flows_sync.py:54"
       ]
     },
-    "/api/v1/auth/callback?code=test_code&state=": {
-      "value": "/api/v1/auth/callback?code=test_code&state=",
+    "/api/auth/callback?code=test_code&state=": {
+      "value": "/api/auth/callback?code=test_code&state=",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:98"
       ]
     },
-    "/api/v1/auth/callback?code=test_code&state=test_state": {
-      "value": "/api/v1/auth/callback?code=test_code&state=test_state",
+    "/api/auth/callback?code=test_code&state=test_state": {
+      "value": "/api/auth/callback?code=test_code&state=test_state",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:184"
       ]
     },
-    "/api/v1/auth/callback?error=access_denied&state=test_state": {
-      "value": "/api/v1/auth/callback?error=access_denied&state=test_state",
+    "/api/auth/callback?error=access_denied&state=test_state": {
+      "value": "/api/auth/callback?error=access_denied&state=test_state",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:74"
       ]
     },
-    "/api/v1/auth/callback?state=test": {
-      "value": "/api/v1/auth/callback?state=test",
+    "/api/auth/callback?state=test": {
+      "value": "/api/auth/callback?state=test",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:364"
       ]
     },
-    "/api/v1/auth/callback?state=test_state": {
-      "value": "/api/v1/auth/callback?state=test_state",
+    "/api/auth/callback?state=test_state": {
+      "value": "/api/auth/callback?state=test_state",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:50"
       ]
     },
-    "/api/v1/auth/config": {
-      "value": "/api/v1/auth/config",
+    "/api/auth/config": {
+      "value": "/api/auth/config",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_auth.py:31",
@@ -5461,51 +5461,51 @@
         "auth_service/tests/utils/test_client.py:185"
       ]
     },
-    "/api/v1/auth/health": {
-      "value": "/api/v1/auth/health",
+    "/api/auth/health": {
+      "value": "/api/auth/health",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:61"
       ]
     },
-    "/api/v1/auth/login?provider=": {
-      "value": "/api/v1/auth/login?provider=",
+    "/api/auth/login?provider=": {
+      "value": "/api/auth/login?provider=",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:375",
         "auth_service/tests/integration/test_auth_oauth_errors.py:376"
       ]
     },
-    "/api/v1/auth/login?provider=google": {
-      "value": "/api/v1/auth/login?provider=google",
+    "/api/auth/login?provider=google": {
+      "value": "/api/auth/login?provider=google",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:37"
       ]
     },
-    "/api/v1/auth/login?provider=invalid_provider": {
-      "value": "/api/v1/auth/login?provider=invalid_provider",
+    "/api/auth/login?provider=invalid_provider": {
+      "value": "/api/auth/login?provider=invalid_provider",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:374"
       ]
     },
-    "/api/v1/auth/logout": {
-      "value": "/api/v1/auth/logout",
+    "/api/auth/logout": {
+      "value": "/api/auth/logout",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:83"
       ]
     },
-    "/api/v1/auth/verify": {
-      "value": "/api/v1/auth/verify",
+    "/api/auth/verify": {
+      "value": "/api/auth/verify",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:91"
       ]
     },
-    "/api/v1/threads": {
-      "value": "/api/v1/threads",
+    "/api/threads": {
+      "value": "/api/threads",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1401",
@@ -5513,22 +5513,22 @@
         "scripts/test_staging_deployment.py:104"
       ]
     },
-    "/api/v1/threads/": {
-      "value": "/api/v1/threads/",
+    "/api/threads/": {
+      "value": "/api/threads/",
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:346"
       ]
     },
-    "/api/v1/user/profile": {
-      "value": "/api/v1/user/profile",
+    "/api/user/profile": {
+      "value": "/api/user/profile",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1348"
       ]
     },
-    "/api/v1/workspaces": {
-      "value": "/api/v1/workspaces",
+    "/api/workspaces": {
+      "value": "/api/workspaces",
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_deployment.py:106"

@@ -317,7 +317,7 @@ class TestAdvancedUserManagement:
                 },
                 {
                     "activity_type": "api_call",
-                    "activity_data": {"endpoint": "/api/v1/analyze", "response_time_ms": 250},
+                    "activity_data": {"endpoint": "/api/analyze", "response_time_ms": 250},
                     "privacy_level": "performance"
                 }
             ]

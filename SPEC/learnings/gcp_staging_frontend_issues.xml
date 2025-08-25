@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>GcpStagingFrontendIssues</name>
+        <type>SystemLearning</type>
+        <version>1.0</version>
+        <date>2025-08-25</date>
+        <description>Comprehensive analysis and test coverage for GCP staging frontend issues</description>
+    </metadata>
+
+    <analysis>
+        <summary>
+            Created comprehensive failing tests to replicate the exact issues found in GCP staging logs for the Frontend service.
+            The tests document current problems and provide clear expectations for fixes.
+        </summary>
+
+        <primary_issues>
+            <issue id="1">
+                <title>API Proxy Configuration Failures</title>
+                <description>
+                    Frontend service incorrectly trying to proxy requests to localhost:8000 instead of 
+                    using direct staging backend URLs (https://api.staging.netrasystems.ai)
+                </description>
+                <root_cause>
+                    - Next.js rewrites still enabled in production/staging
+                    - Environment detection not properly disabling development proxy behavior
+                    - Configuration using localhost URLs even in staging environment
+                </root_cause>
+                <test_coverage>
+                    gcp-staging-issues-replication.test.tsx - Issue #1 section
+                </test_coverage>
+            </issue>
+
+            <issue id="2">
+                <title>Missing Health Endpoints (404 Errors)</title>
+                <description>
+                    Health endpoints /health and /health/ready returning 404 errors in staging,
+                    indicating requests are hitting frontend service instead of backend service
+                </description>
+                <root_cause>
+                    - Kubernetes health probes misconfigured to hit frontend service
+                    - Load balancer/ingress routing health requests to wrong service
+                    - Frontend service attempting to handle backend health endpoints locally
+                </root_cause>
+                <test_coverage>
+                    - gcp-staging-issues-replication.test.tsx - Issue #2 section
+                    - health-endpoints-404-errors.test.tsx - comprehensive health endpoint testing
+                </test_coverage>
+            </issue>
+
+            <issue id="3">
+                <title>Missing API Routes (404 Errors)</title>
+                <description>
+                    Critical API endpoints returning 404: /api/config/public, /api/threads, /api/threads
+                    These are essential for frontend initialization and core chat functionality
+                </description>
+                <root_cause>
+                    - API endpoints not properly registered or accessible in backend service
+                    - Ingress configuration directing API calls to frontend instead of backend
+                    - Backend service might not be running or accessible in staging
+                    - API client making requests to incorrect URLs
+                </root_cause>
+                <test_coverage>
+                    - gcp-staging-issues-replication.test.tsx - Issue #3 section
+                    - missing-api-routes.test.tsx - comprehensive API endpoint testing
+                </test_coverage>
+            </issue>
+
+            <issue id="4">
+                <title>Missing Static Assets</title>
+                <description>
+                    Static assets like favicon.ico returning 404 errors, causing browser console errors
+                    and impacting application polish
+                </description>
+                <root_cause>
+                    - Static assets not properly built/copied in staging deployment
+                    - Next.js static file serving not configured correctly for staging
+                    - Docker build process not including static assets
+                    - CDN or static file serving misconfiguration
+                </root_cause>
+                <test_coverage>
+                    - gcp-staging-issues-replication.test.tsx - Issue #4 section
+                    - missing-static-assets.test.tsx - comprehensive static asset testing
+                </test_coverage>
+            </issue>
+        </primary_issues>
+
+        <test_strategy>
+            <approach>
+                Each test is designed to FAIL initially, demonstrating the current broken state.
+                Tests include detailed comments explaining root causes and expected behavior.
+                Tests are organized by issue type for easy navigation and fixes.
+            </approach>
+
+            <test_structure>
+                <file name="gcp-staging-issues-replication.test.tsx">
+                    <purpose>Main test file covering all four primary issues</purpose>
+                    <location>frontend/__tests__/staging/</location>
+                    <coverage>
+                        - API proxy configuration failures
+                        - Health endpoint 404 errors
+                        - API route 404 errors
+                        - Static asset 404 errors
+                        - Additional staging configuration issues
+                    </coverage>
+                </file>
+
+                <file name="health-endpoints-404-errors.test.tsx">
+                    <purpose>Deep dive into health endpoint routing problems</purpose>
+                    <location>frontend/__tests__/staging/</location>
+                    <coverage>
+                        - Frontend vs backend health endpoint confusion
+                        - Kubernetes health probe misconfiguration
+                        - Service mesh/ingress routing issues
+                        - Network configuration diagnosis
+                    </coverage>
+                </file>
+
+                <file name="missing-api-routes.test.tsx">
+                    <purpose>Comprehensive testing of API endpoint failures</purpose>
+                    <location>frontend/__tests__/staging/</location>
+                    <coverage>
+                        - /api/config/public endpoint missing
+                        - /api/threads endpoint failures
+                        - API client wrapper integration issues
+                        - Backend service availability problems
+                        - Ingress/load balancer misconfigurations
+                    </coverage>
+                </file>
+
+                <file name="missing-static-assets.test.tsx">
+                    <purpose>Static asset serving and optimization issues</purpose>
+                    <location>frontend/__tests__/staging/</location>
+                    <coverage>
+                        - favicon.ico and standard web assets
+                        - Next.js static asset generation
+                        - CDN and static file serving configuration
+                        - Deployment-specific static asset issues
+                        - Performance impact analysis
+                    </coverage>
+                </file>
+            </test_structure>
+        </test_strategy>
+    </analysis>
+
+    <technical_details>
+        <environment_detection>
+            <finding>
+                Environment detection logic in unified-api-config.ts correctly identifies staging
+                but proxy configuration in next.config.ts may still be active in production builds
+            </finding>
+            <configuration>
+                NODE_ENV: 'production'
+                NEXT_PUBLIC_ENVIRONMENT: 'staging'
+            </configuration>
+        </environment_detection>
+
+        <url_configuration>
+            <staging_urls>
+                <api>https://api.staging.netrasystems.ai</api>
+                <websocket>wss://api.staging.netrasystems.ai</websocket>
+                <auth>https://auth.staging.netrasystems.ai</auth>
+                <frontend>https://app.staging.netrasystems.ai</frontend>
+            </staging_urls>
+            <problem>
+                Tests suggest some components may still be using localhost URLs or proxy paths
+                instead of the correct direct staging URLs
+            </problem>
+        </url_configuration>
+
+        <routing_issues>
+            <health_endpoints>
+                Expected: https://api.staging.netrasystems.ai/health/ready
+                Actual: https://app.staging.netrasystems.ai/health/ready (404)
+                Problem: Health requests hitting frontend service instead of backend
+            </health_endpoints>
+            <api_endpoints>
+                Expected: https://api.staging.netrasystems.ai/api/threads
+                Actual: Requests may be going to wrong service or backend not accessible
+                Problem: API routing misconfiguration or backend service issues
+            </api_endpoints>
+        </routing_issues>
+
+        <static_assets>
+            <missing_files>
+                - favicon.ico (most critical - browsers automatically request this)
+                - robots.txt (SEO impact)
+                - manifest.json (PWA support, optional)
+                - apple-touch-icon.png (mobile support, optional)
+            </missing_files>
+            <build_configuration>
+                Next.js output: 'standalone' mode may affect static asset serving
+                Docker build process may not be copying public directory correctly
+            </build_configuration>
+        </static_assets>
+    </technical_details>
+
+    <fixes_required>
+        <immediate_priority>
+            <fix id="1" priority="critical">
+                <title>Fix Health Endpoint Routing</title>
+                <description>
+                    Ensure Kubernetes health probes and load balancer health checks
+                    target backend service directly, not frontend service
+                </description>
+                <action>
+                    Update Kubernetes deployment configurations and ingress rules
+                    to route /health/* requests to backend service pods
+                </action>
+            </fix>
+
+            <fix id="2" priority="critical">
+                <title>Fix API Endpoint Routing</title>
+                <description>
+                    Ensure all /api/* requests are routed to backend service,
+                    and backend service is accessible in staging
+                </description>
+                <action>
+                    - Verify backend service deployment in staging
+                    - Update ingress/load balancer configuration
+                    - Ensure API client uses correct staging URLs
+                </action>
+            </fix>
+
+            <fix id="3" priority="high">
+                <title>Add Missing Static Assets</title>
+                <description>
+                    Add favicon.ico and other standard web assets to eliminate 404 errors
+                </description>
+                <action>
+                    - Add favicon.ico to public directory
+                    - Verify Docker build includes static assets
+                    - Test static asset serving in staging
+                </action>
+            </fix>
+
+            <fix id="4" priority="medium">
+                <title>Disable Development Proxy in Staging</title>
+                <description>
+                    Ensure Next.js rewrites are completely disabled in production/staging
+                </description>
+                <action>
+                    - Verify next.config.ts rewrites() returns empty array in production
+                    - Ensure environment detection works correctly in build process
+                </action>
+            </fix>
+        </immediate_priority>
+    </fixes_required>
+
+    <test_execution>
+        <running_tests>
+            <command>cd frontend && npm test -- __tests__/staging/</command>
+            <expected_result>All tests should FAIL initially, documenting current issues</expected_result>
+            <after_fixes>Tests should PASS after implementing the required fixes</after_fixes>
+        </running_tests>
+
+        <continuous_monitoring>
+            <integration>
+                Add these tests to CI/CD pipeline to prevent regression of staging issues
+            </integration>
+            <staging_validation>
+                Run these tests against live staging environment to validate fixes
+            </staging_validation>
+        </continuous_monitoring>
+    </test_execution>
+
+    <architectural_learnings>
+        <service_separation>
+            <principle>
+                Frontend and backend services must be clearly separated in staging/production.
+                Frontend should never attempt to serve backend endpoints locally.
+            </principle>
+            <implementation>
+                - Frontend: Serves UI, handles client-side routing
+                - Backend: Serves API endpoints, handles business logic
+                - Clear separation prevents routing confusion
+            </implementation>
+        </service_separation>
+
+        <health_check_patterns>
+            <principle>
+                Health checks should target the appropriate service directly.
+                Frontend health checks ≠ Backend health checks.
+            </principle>
+            <implementation>
+                - Backend health: /health, /health/ready on api.staging.netrasystems.ai
+                - Frontend health: Custom Next.js health endpoint on app.staging.netrasystems.ai (if needed)
+                - Kubernetes probes should be service-specific
+            </implementation>
+        </health_check_patterns>
+
+        <environment_configuration>
+            <principle>
+                Environment detection must be reliable and consistent across all components.
+                Development proxy behavior must be completely disabled in production.
+            </principle>
+            <implementation>
+                - Use NEXT_PUBLIC_ENVIRONMENT for explicit environment control
+                - Disable all development features in production/staging
+                - Validate configuration in tests
+            </implementation>
+        </environment_configuration>
+    </architectural_learnings>
+
+    <prevention_measures>
+        <testing>
+            <environment_specific_tests>
+                Run staging-specific tests in CI/CD to catch configuration issues early
+            </environment_specific_tests>
+            <end_to_end_validation>
+                Include health endpoint and API endpoint validation in deployment process
+            </end_to_end_validation>
+        </testing>
+
+        <monitoring>
+            <error_tracking>
+                Monitor 404 errors in staging to quickly identify new configuration issues
+            </error_tracking>
+            <health_monitoring>
+                Set up proper health check monitoring for both frontend and backend services
+            </health_monitoring>
+        </monitoring>
+
+        <deployment>
+            <validation_checks>
+                Add pre-deployment validation that verifies:
+                - Static assets are included in build
+                - Environment configuration is correct
+                - Health endpoints are accessible
+                - API endpoints respond correctly
+            </validation_checks>
+        </deployment>
+    </prevention_measures>
+</specification>

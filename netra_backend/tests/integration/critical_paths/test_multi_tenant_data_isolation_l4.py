@@ -139,7 +139,7 @@ class MultiTenantIsolationTester:
                 }
                 
                 async with self.session.post(
-                    f"{BASE_URL}/api/v1/admin/tenants",
+                    f"{BASE_URL}/api/admin/tenants",
                     json=tenant_data,
                     headers={"Authorization": f"Bearer {self.admin_token}"}
                 ) as response:
@@ -244,7 +244,7 @@ class MultiTenantIsolationTester:
                 
                 try:
                     async with self.session.post(
-                        f"{BASE_URL}/api/v1/threads",
+                        f"{BASE_URL}/api/threads",
                         json=resource_data,
                         headers={"Authorization": f"Bearer {token}"}
                     ) as response:
@@ -284,7 +284,7 @@ class MultiTenantIsolationTester:
                 for resource_id in tenant_b.resources:
                     try:
                         async with self.session.get(
-                            f"{BASE_URL}/api/v1/threads/{resource_id}",
+                            f"{BASE_URL}/api/threads/{resource_id}",
                             headers={"Authorization": f"Bearer {tenant_a.tokens[0]}"}
                         ) as response:
                             if response.status == 200:
@@ -321,7 +321,7 @@ class MultiTenantIsolationTester:
             try:
                 # Set cache value
                 async with self.session.post(
-                    f"{BASE_URL}/api/v1/cache/set",
+                    f"{BASE_URL}/api/cache/set",
                     json={"key": cache_key, "value": cache_value},
                     headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
                 ) as response:
@@ -345,7 +345,7 @@ class MultiTenantIsolationTester:
                 try:
                     # Try to get other tenant's cache
                     async with self.session.get(
-                        f"{BASE_URL}/api/v1/cache/get?key={cache_key}",
+                        f"{BASE_URL}/api/cache/get?key={cache_key}",
                         headers={"Authorization": f"Bearer {tenant_a.tokens[0]}"}
                     ) as response:
                         if response.status == 200:
@@ -451,7 +451,7 @@ class MultiTenantIsolationTester:
             try:
                 # Check current usage
                 async with self.session.get(
-                    f"{BASE_URL}/api/v1/tenant/usage",
+                    f"{BASE_URL}/api/tenant/usage",
                     headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
                 ) as response:
                     if response.status == 200:
@@ -469,7 +469,7 @@ class MultiTenantIsolationTester:
                 for _ in range(100):
                     rapid_requests.append(
                         self.session.get(
-                            f"{BASE_URL}/api/v1/health",
+                            f"{BASE_URL}/api/health",
                             headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
                         )
                     )
@@ -508,7 +508,7 @@ class MultiTenantIsolationTester:
                 }
                 
                 async with self.session.post(
-                    f"{BASE_URL}/api/v1/secure/store",
+                    f"{BASE_URL}/api/secure/store",
                     json=sensitive_data,
                     headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
                 ) as response:
@@ -518,7 +518,7 @@ class MultiTenantIsolationTester:
                         
                         # Verify data is encrypted with tenant key
                         async with self.session.get(
-                            f"{BASE_URL}/api/v1/secure/retrieve/{stored_id}",
+                            f"{BASE_URL}/api/secure/retrieve/{stored_id}",
                             headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
                         ) as retrieve_response:
                             if retrieve_response.status == 200:
@@ -545,7 +545,7 @@ class MultiTenantIsolationTester:
             try:
                 # Get audit logs for tenant
                 async with self.session.get(
-                    f"{BASE_URL}/api/v1/audit/logs",
+                    f"{BASE_URL}/api/audit/logs",
                     headers={"Authorization": f"Bearer {tenant.tokens[0]}"}
                 ) as response:
                     if response.status == 200:
@@ -578,7 +578,7 @@ class MultiTenantIsolationTester:
         try:
             # Admin check for partition configuration
             async with self.session.get(
-                f"{BASE_URL}/api/v1/admin/database/partitions",
+                f"{BASE_URL}/api/admin/database/partitions",
                 headers={"Authorization": f"Bearer {self.admin_token}"}
             ) as response:
                 if response.status == 200:

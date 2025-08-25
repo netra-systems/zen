@@ -3,8 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/auth';
 
+import { useAuth } from '@/auth/context';
+
 const TestLoginComponent = () => {
-  const { login, loading, user, logout } = authService.useAuth();
+  const { login, loading, user, logout } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;

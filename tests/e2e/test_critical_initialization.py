@@ -264,7 +264,7 @@ class TestCriticalPath(SystemInitializationTestBase):
             assert self.wait_for_service(f"{self.auth_url}/health", timeout=20)
             
             # Verify cross-service communication works
-            response = httpx.get(f"{self.backend_url}/api/v1/auth/verify")
+            response = httpx.get(f"{self.backend_url}/api/auth/verify")
             assert response.status_code in [200, 401], "Cross-service auth check failed"
         finally:
             backend_proc.terminate()
@@ -318,7 +318,7 @@ class TestCriticalPath(SystemInitializationTestBase):
                 
                 # Validate token in backend service
                 backend_response = httpx.get(
-                    f"{self.backend_url}/api/v1/me",
+                    f"{self.backend_url}/api/me",
                     headers={"Authorization": f"Bearer {token}"}
                 )
                 assert backend_response.status_code in [200, 401], "Token validation failed"
@@ -431,7 +431,7 @@ class TestCriticalPath(SystemInitializationTestBase):
             # Verify frontend can reach backend
             # This would normally be done through the browser, but we can check CORS
             response = httpx.options(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 headers={
                     "Origin": self.frontend_url,
                     "Access-Control-Request-Method": "GET"
@@ -482,7 +482,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             assert self.wait_for_service(f"{self.backend_url}/health"), "Backend failed without Redis"
             
             # Test fallback caching behavior
-            response = httpx.get(f"{self.backend_url}/api/v1/cache/test")
+            response = httpx.get(f"{self.backend_url}/api/cache/test")
             assert response.status_code in [200, 501], "Cache fallback not working"
             
     def test_10_clickhouse_port_configuration_matrix(self):
@@ -522,7 +522,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             
             # Validate token in backend
             backend_response = httpx.get(
-                f"{self.backend_url}/api/v1/me",
+                f"{self.backend_url}/api/me",
                 headers={"Authorization": f"Bearer {auth_token}"}
             )
             
@@ -531,7 +531,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             
             # Test with invalid token
             invalid_response = httpx.get(
-                f"{self.backend_url}/api/v1/me",
+                f"{self.backend_url}/api/me",
                 headers={"Authorization": "Bearer invalid_token_12345"}
             )
             assert invalid_response.status_code == 401, "Invalid token not rejected"
@@ -574,7 +574,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             
             def make_db_request(index):
                 try:
-                    response = httpx.get(f"{self.backend_url}/api/v1/threads", timeout=5)
+                    response = httpx.get(f"{self.backend_url}/api/threads", timeout=5)
                     return response.status_code
                 except Exception as e:
                     return str(e)
@@ -603,7 +603,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             
             # Test token in different services
             services_to_test = [
-                (f"{self.backend_url}/api/v1/me", "backend"),
+                (f"{self.backend_url}/api/me", "backend"),
                 (f"{self.auth_url}/api/auth/me", "auth"),
             ]
             
@@ -691,7 +691,7 @@ class TestUserJourney(SystemInitializationTestBase):
             
             # Create chat thread
             thread_response = httpx.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 headers={"Authorization": f"Bearer {token}"},
                 json={"title": "My First Chat"}
             )
@@ -702,7 +702,7 @@ class TestUserJourney(SystemInitializationTestBase):
             
             # Send first message
             message_response = httpx.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 headers={"Authorization": f"Bearer {token}"},
                 json={"content": "Hello, this is my first message!"}
             )
@@ -792,7 +792,7 @@ class TestUserJourney(SystemInitializationTestBase):
                 
                 # Verify new token works
                 me_response = httpx.get(
-                    f"{self.backend_url}/api/v1/me",
+                    f"{self.backend_url}/api/me",
                     headers={"Authorization": f"Bearer {new_token}"}
                 )
                 assert me_response.status_code in [200, 404], "New token not valid"
@@ -870,7 +870,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             
             # Create thread
             thread_response = httpx.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 headers={"Authorization": f"Bearer {token}"},
                 json={"title": "Persistent Thread"}
             )
@@ -882,7 +882,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             
             # Verify thread still exists after "restart"
             get_thread_response = httpx.get(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 headers={"Authorization": f"Bearer {token}"}
             )
             
@@ -919,7 +919,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             
             # Token should still be valid (JWT is stateless)
             me_response = httpx.get(
-                f"{self.backend_url}/api/v1/me",
+                f"{self.backend_url}/api/me",
                 headers={"Authorization": f"Bearer {token}"}
             )
             
@@ -999,7 +999,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
                 
             # Test CORS headers
             response = httpx.options(
-                f"http://localhost:{backend_port}/api/v1/threads",
+                f"http://localhost:{backend_port}/api/threads",
                 headers={
                     "Origin": "http://localhost:3000",
                     "Access-Control-Request-Method": "GET",

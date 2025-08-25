@@ -112,7 +112,7 @@ class StringLiteralScanner:
         
         # API paths and routes
         if (literal.startswith('/') and 
-            any(segment in literal for segment in ['/api/', '/v1/', '/v2/', '/ws/', '/websocket/'])):
+            any(segment in literal for segment in ['/api/', '/', '/v2/', '/ws/', '/websocket/'])):
             return 'paths'
         
         # File paths
