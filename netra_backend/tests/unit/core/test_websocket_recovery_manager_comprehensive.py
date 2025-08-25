@@ -41,7 +41,7 @@ class TestConnectionManagement:
     """Test WebSocket connection creation and management."""
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.websocket_recovery_manager.WebSocketConnectionManager')
+    @patch('netra_backend.app.core.websocket_recovery_strategies.WebSocketConnectionManager')
     async def test_create_connection_new(self, mock_ws_manager_class):
         """Test creating a new WebSocket connection."""
         mock_manager = Mock()
@@ -61,7 +61,7 @@ class TestConnectionManagement:
         )
         
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.websocket_recovery_manager.WebSocketConnectionManager')
+    @patch('netra_backend.app.core.websocket_recovery_strategies.WebSocketConnectionManager')
     async def test_create_connection_with_custom_config(self, mock_ws_manager_class):
         """Test creating connection with custom configuration."""
         mock_manager = Mock()
@@ -79,7 +79,7 @@ class TestConnectionManagement:
         )
         
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.websocket_recovery_manager.WebSocketConnectionManager')
+    @patch('netra_backend.app.core.websocket_recovery_strategies.WebSocketConnectionManager')
     async def test_create_connection_replaces_existing(self, mock_ws_manager_class):
         """Test creating connection replaces existing connection."""
         old_manager = Mock()
@@ -335,7 +335,7 @@ class TestCleanupOperations:
 class TestPrivateHelperMethods:
     """Test private helper methods."""
     
-    @patch('netra_backend.app.core.websocket_recovery_manager.WebSocketConnectionManager')
+    @patch('netra_backend.app.core.websocket_recovery_strategies.WebSocketConnectionManager')
     def test_create_connection_manager(self, mock_ws_manager_class):
         """Test creation of WebSocket connection manager."""
         mock_manager = Mock()
@@ -424,7 +424,7 @@ class TestWebSocketRecoveryManagerIntegration:
     """Integration tests for WebSocketRecoveryManager with real components."""
     
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.websocket_recovery_manager.WebSocketConnectionManager')
+    @patch('netra_backend.app.core.websocket_recovery_strategies.WebSocketConnectionManager')
     async def test_full_connection_lifecycle(self, mock_ws_manager_class):
         """Test complete connection lifecycle: create, recover, cleanup."""
         # Mock WebSocket manager
@@ -463,7 +463,7 @@ class TestWebSocketRecoveryManagerIntegration:
         assert len(recovery_manager.connections) == 0
         
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.websocket_recovery_manager.WebSocketConnectionManager')
+    @patch('netra_backend.app.core.websocket_recovery_strategies.WebSocketConnectionManager')
     async def test_concurrent_operations(self, mock_ws_manager_class):
         """Test concurrent operations on recovery manager."""
         # Create multiple mock managers
@@ -518,7 +518,7 @@ class TestGlobalInstance:
         
     def test_global_instance_singleton(self):
         """Test global instance is singleton-like."""
-        from netra_backend.app.core.websocket_recovery_manager import websocket_recovery_manager as wm2
+        from netra_backend.app.core.websocket_recovery_strategies import websocket_recovery_manager as wm2
         
         # Should be the same instance
         assert websocket_recovery_manager is wm2
@@ -530,7 +530,7 @@ class TestGlobalInstance:
         local_manager = WebSocketRecoveryManager()
         
         # Add connection to local instance
-        with patch('netra_backend.app.core.websocket_recovery_manager.WebSocketConnectionManager') as mock_ws:
+        with patch('netra_backend.app.core.websocket_recovery_strategies.WebSocketConnectionManager') as mock_ws:
             mock_ws.return_value = Mock()
             await local_manager.create_connection("local", "ws://local")
         
