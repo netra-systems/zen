@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-24T12:45:21.685305",
+    "generated_at": "2025-08-24T17:28:32.117351",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 576
+    "total_literals": 578
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -186,6 +186,13 @@
       "locations": [
         "scripts/code_review_reporter.py:140",
         "scripts/review/report_generator.py:178"
+      ]
+    },
+    "- This issue has occurred before (see SPEC/learnings/auth_service_staging_errors_five_whys.xml)": {
+      "value": "- This issue has occurred before (see SPEC/learnings/auth_service_staging_errors_five_whys.xml)",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_staging_database_url.py:97"
       ]
     },
     ".*:\"\nfiles = list(pathlib.Path(\"netra_backend/app\").rglob(\"*.py\"))\nfiles.extend(list(pathlib.Path(\"auth_service\").rglob(\"*.py\")))\nmatches = []\nfor f in files[:100]:  # Limit for speed\n    try:\n        if \"": {
@@ -405,7 +412,7 @@
       "value": "/api/corpus",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:75",
+        "netra_backend/app/core/app_factory_route_configs.py:76",
         "netra_backend/app/middleware/transaction_middleware.py:30"
       ]
     },
@@ -449,7 +456,7 @@
       "value": "/api/generation",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:49",
+        "netra_backend/app/core/app_factory_route_configs.py:50",
         "netra_backend/app/middleware/transaction_middleware.py:33"
       ]
     },
@@ -482,14 +489,14 @@
       "value": "/api/llm-cache",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:21"
+        "netra_backend/app/core/app_factory_route_configs.py:22"
       ]
     },
     "/api/mcp": {
       "value": "/api/mcp",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:22",
+        "netra_backend/app/core/app_factory_route_configs.py:23",
         "netra_backend/app/routes/mcp/config.py:84"
       ]
     },
@@ -518,7 +525,7 @@
       "value": "/api/mcp/ws (MCP-specific)",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:386"
+        "netra_backend/app/routes/websocket.py:389"
       ]
     },
     "/api/poll": {
@@ -539,7 +546,7 @@
       "value": "/api/supply",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:48"
+        "netra_backend/app/core/app_factory_route_configs.py:49"
       ]
     },
     "/api/supply/compare": {
@@ -598,7 +605,7 @@
       "value": "/api/tools",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/app_factory_route_configs.py:101",
+        "netra_backend/app/core/app_factory_route_configs.py:102",
         "netra_backend/app/middleware/security_middleware.py:165"
       ]
     },
@@ -641,6 +648,7 @@
       "value": "/api/v1",
       "category": "paths",
       "locations": [
+        "netra_backend/app/core/app_factory_route_configs.py:20",
         "auth_service/main.py:474"
       ]
     },
@@ -794,28 +802,28 @@
       "value": "/ws/config",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:352"
+        "netra_backend/app/routes/websocket.py:355"
       ]
     },
     "/ws/health": {
       "value": "/ws/health",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:394"
+        "netra_backend/app/routes/websocket.py:397"
       ]
     },
     "/ws/stats": {
       "value": "/ws/stats",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:584"
+        "netra_backend/app/routes/websocket.py:587"
       ]
     },
     "/ws/test": {
       "value": "/ws/test",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:476"
+        "netra_backend/app/routes/websocket.py:479"
       ]
     },
     "/ws/{user_id}": {
@@ -1117,6 +1125,13 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/main.py:1"
+      ]
+    },
+    "Migrate staging PostgreSQL secrets from URL format to individual variables.\n\nThis script creates/updates individual PostgreSQL secrets in GCP Secret Manager\nfor staging environment to use individual variables instead of DATABASE_URL.\n\nUsage:\n    python scripts/migrate_staging_postgres_secrets.py": {
+      "value": "Migrate staging PostgreSQL secrets from URL format to individual variables.\n\nThis script creates/updates individual PostgreSQL secrets in GCP Secret Manager\nfor staging environment to use individual variables instead of DATABASE_URL.\n\nUsage:\n    python scripts/migrate_staging_postgres_secrets.py",
+      "category": "paths",
+      "locations": [
+        "scripts/migrate_staging_postgres_secrets.py:2"
       ]
     },
     "Network Constants Validation Script\n\nValidates the new centralized network configuration module.\nBusiness Value: Platform/Internal - Configuration Validation - Ensures consistent network\nconfiguration across all environments and services.\n\nUsage:\n    python scripts/validate_network_constants.py\n    python scripts/validate_network_constants.py --environment production": {
@@ -1929,6 +1944,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/core/schema_sync/utils.py:116",
+        "scripts/generate_frontend_types.py:30",
         "scripts/schema_sync.py:147"
       ]
     },
@@ -3008,6 +3024,7 @@
       "category": "paths",
       "locations": [
         "scripts/create_staging_secrets_complete.py:37",
+        "scripts/fix_staging_database_url.py:85",
         "scripts/setup_gcp_service_account.py:195"
       ]
     },

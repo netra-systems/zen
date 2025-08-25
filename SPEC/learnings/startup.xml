@@ -55,7 +55,7 @@
       <problem>
         <description>Secrets not loading due to incorrect environment variable names</description>
         <symptoms>
-          <symptom>Missing secrets: CLICKHOUSE_DEFAULT_PASSWORD</symptom>
+          <symptom>Missing secrets: CLICKHOUSE_PASSWORD</symptom>
           <symptom>GEMINI_API_KEY not loading from .env.development.local</symptom>
           <symptom>Google Secret Manager fallback being triggered unnecessarily</symptom>
         </symptoms>

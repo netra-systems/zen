@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-08-24T12:45:21.222129",
+    "generated_at": "2025-08-24T17:28:31.866744",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 26
   },
@@ -188,7 +188,7 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:141",
         "netra_backend/app/routes/utils/websocket_helpers.py:206",
         "netra_backend/app/routes/utils/websocket_helpers.py:277",
-        "netra_backend/app/routes/websocket.py:529",
+        "netra_backend/app/routes/websocket.py:532",
         "netra_backend/app/schemas/core_enums.py:62",
         "netra_backend/app/schemas/core_enums.py:162",
         "netra_backend/app/services/external_api_client.py:172"
@@ -202,8 +202,8 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:145",
         "netra_backend/app/routes/utils/websocket_helpers.py:198",
         "netra_backend/app/routes/utils/websocket_helpers.py:310",
-        "netra_backend/app/routes/websocket.py:249",
-        "netra_backend/app/routes/websocket.py:532",
+        "netra_backend/app/routes/websocket.py:252",
+        "netra_backend/app/routes/websocket.py:535",
         "netra_backend/app/schemas/core_enums.py:63",
         "netra_backend/app/schemas/core_enums.py:163",
         "netra_backend/app/websocket_core/manager.py:353",
@@ -225,7 +225,7 @@
       "value": "trigger_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:382"
+        "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:384"
       ]
     },
     "unsubscribe": {

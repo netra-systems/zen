@@ -150,7 +150,7 @@
       <variable>CLICKHOUSE_HOST</variable>
       <variable>CLICKHOUSE_PORT</variable>
       <variable>CLICKHOUSE_USER</variable>
-      <variable>CLICKHOUSE_DEFAULT_PASSWORD</variable>
+      <variable>CLICKHOUSE_PASSWORD</variable>
       <variable>REDIS_HOST</variable>
       <variable>REDIS_PORT</variable>
       <variable>REDIS_PASSWORD</variable>
