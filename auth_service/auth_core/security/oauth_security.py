@@ -655,13 +655,9 @@ class JWTSecurityValidator:
         try:
             secret = AuthSecretLoader.get_jwt_secret()
         except ValueError as e:
-            # If we're in development and no secret is configured, use a development default
+            # No fallback in any environment - require explicit JWT configuration
             env = os.getenv("ENVIRONMENT", "development").lower()
-            if env == "development":
-                logger.warning("Using development default JWT secret - NOT FOR PRODUCTION")
-                secret = "dev-secret-key-DO-NOT-USE-IN-PRODUCTION-32chars"
-            else:
-                raise ValueError(f"JWT secret not configured for {env} environment") from e
+            raise ValueError(f"JWT secret not configured for {env} environment") from e
         
         # Ensure secret is strong enough for production environments
         env = os.getenv("ENVIRONMENT", "development").lower()

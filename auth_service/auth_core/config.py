@@ -66,8 +66,15 @@ class AuthConfig:
             fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_SECRET must be set in production/staging")
-            logger.warning("Using default service secret for development")
-            return "dev-service-secret-DO-NOT-USE-IN-PRODUCTION"
+            # For test/development environments, allow empty but warn
+            if env in ["test", "development"] or fast_test_mode:
+                logger.warning(f"SERVICE_SECRET not configured for {env} environment")
+                return ""  # Return empty string for test/dev
+            # For any other environment, fail loudly
+            raise ValueError(
+                f"SERVICE_SECRET is not configured for {env} environment. "
+                "This must be explicitly set via environment variables."
+            )
         
         # Validate service secret is distinct from JWT secret
         jwt_secret = AuthSecretLoader.get_jwt_secret()
@@ -94,8 +101,15 @@ class AuthConfig:
             fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_ID must be set in production/staging")
-            logger.warning("Using default service ID for development")
-            return "netra-auth-dev-instance"
+            # For test/development environments, allow empty but warn
+            if env in ["test", "development"] or fast_test_mode:
+                logger.warning(f"SERVICE_ID not configured for {env} environment")
+                return "test-service-id"  # Return test ID for test/dev
+            # For any other environment, fail loudly
+            raise ValueError(
+                f"SERVICE_ID is not configured for {env} environment. "
+                "This must be explicitly set via environment variables."
+            )
         
         return service_id
     
@@ -188,7 +202,15 @@ class AuthConfig:
         database_url = env_manager.get("DATABASE_URL", "")
         
         if not database_url:
-            logger.warning("No database configuration found, will use in-memory SQLite")
+            env = AuthConfig.get_environment()
+            # Fail loudly in staging/production if no database config
+            if env in ["staging", "production"]:
+                raise ValueError(
+                    f"No PostgreSQL configuration found for {env} environment. "
+                    "Set either POSTGRES_HOST/USER/DB or DATABASE_URL environment variables."
+                )
+            # Only warn in development/test
+            logger.warning("No database configuration found for development/test environment")
             return database_url
         
         # Import here to avoid circular imports
@@ -241,20 +263,20 @@ class AuthConfig:
         """Get Redis URL for session management"""
         env = AuthConfig.get_environment()
         # @marked: Redis URL for session storage
-        if env == "staging":
-            # In staging, use Redis container name unless explicitly overridden
-            default_redis_url = "redis://redis:6379/1"
-        elif env == "production":
-            # In production, use Redis container name
-            default_redis_url = "redis://redis:6379/0"
-        elif env in ["development", "test"]:
-            # In development/test, use localhost
-            default_redis_url = "redis://localhost:6379/1"
-        else:
-            # Fallback for unknown environments
-            default_redis_url = "redis://redis:6379/1"
+        redis_url = get_env().get("REDIS_URL")
         
-        return get_env().get("REDIS_URL", default_redis_url)
+        if not redis_url:
+            # Fail loudly in staging/production if no Redis configuration
+            if env in ["staging", "production"]:
+                raise ValueError(
+                    f"REDIS_URL not configured for {env} environment. "
+                    "Redis is required for session management in production/staging."
+                )
+            # Only warn in development/test
+            logger.warning("REDIS_URL not configured for development/test environment")
+            return ""  # Return empty string for development/test
+        
+        return redis_url
     
     @staticmethod
     def get_session_ttl_hours() -> int:

@@ -76,13 +76,11 @@ class AuthSecretLoader:
             logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY instead)")
             return secret
         
-        # Development fallback only
-        if env == "development":
-            logger.warning("No JWT secret found, using development default")
-            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
-        
-        # No fallback in staging/production - require JWT_SECRET_KEY
-        raise ValueError(f"JWT secret not configured for {env} environment. Set JWT_SECRET_KEY (recommended) or JWT_SECRET.")
+        # No fallback in any environment - require explicit JWT secret configuration
+        raise ValueError(
+            f"JWT secret not configured for {env} environment. "
+            "Set JWT_SECRET_KEY (recommended) or JWT_SECRET environment variable."
+        )
     
     @staticmethod
     def _load_from_secret_manager(secret_name: str) -> Optional[str]:

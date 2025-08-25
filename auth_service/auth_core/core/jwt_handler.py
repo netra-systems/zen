@@ -41,10 +41,16 @@ class JWTHandler:
         env = AuthConfig.get_environment()
         
         if not secret:
+            # In staging/production, require explicit JWT configuration
             if env in ["staging", "production"]:
-                raise ValueError("JWT_SECRET_KEY must be set in production/staging")
-            logger.warning("Using default JWT secret for development")
-            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+                raise ValueError(
+                    f"JWT_SECRET_KEY must be set in {env} environment. "
+                    "JWT secrets must be explicitly configured."
+                )
+            # For test/development, warn but allow empty
+            logger.warning(f"JWT_SECRET_KEY not configured for {env} environment")
+            # Use a test secret that's clearly marked as unsafe
+            return "TEST-ONLY-SECRET-NOT-FOR-PRODUCTION-" + "x" * 32
         
         if len(secret) < 32 and env in ["staging", "production"]:
             raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production")

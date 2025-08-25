@@ -123,6 +123,48 @@ class DatabaseConfigManager:
         postgres_user = self._env.get("POSTGRES_USER")
         postgres_password = self._env.get("POSTGRES_PASSWORD")
         
+        # Validate individual PostgreSQL variables if any are set
+        if any([postgres_host, postgres_user, postgres_db]):
+            validation_errors = []
+            
+            # Check for empty string values (common configuration mistake)
+            if postgres_host == "":
+                validation_errors.append("POSTGRES_HOST is empty string")
+            if postgres_user == "":
+                validation_errors.append("POSTGRES_USER is empty string")
+            if postgres_db == "":
+                validation_errors.append("POSTGRES_DB is empty string")
+            if postgres_password == "":
+                validation_errors.append("POSTGRES_PASSWORD is empty string")
+            if postgres_port == "":
+                validation_errors.append("POSTGRES_PORT is empty string")
+                
+            # Check for placeholder values
+            if postgres_password and postgres_password.lower() in ["placeholder", "todo", "changeme"]:
+                validation_errors.append(f"POSTGRES_PASSWORD contains placeholder value: {postgres_password}")
+                
+            # Check for required fields
+            if not postgres_host:
+                validation_errors.append("POSTGRES_HOST not set when using individual PostgreSQL variables")
+            if not postgres_user:
+                validation_errors.append("POSTGRES_USER not set when using individual PostgreSQL variables")
+            if not postgres_db:
+                validation_errors.append("POSTGRES_DB not set when using individual PostgreSQL variables")
+                
+            # In staging/production, password is required
+            if self._environment in ["staging", "production"] and not postgres_password:
+                validation_errors.append(f"POSTGRES_PASSWORD required in {self._environment} environment")
+                
+            # Validate port if provided
+            if postgres_port and not postgres_port.isdigit():
+                validation_errors.append(f"POSTGRES_PORT must be numeric: {postgres_port}")
+                
+            # Fail fast if validation errors found
+            if validation_errors:
+                error_msg = f"PostgreSQL configuration validation failed: {'; '.join(validation_errors)}"
+                self._logger.error(error_msg)
+                raise ConfigurationError(error_msg)
+        
         if postgres_host and postgres_user and postgres_db:
             # Construct URL from individual variables
             port_part = f":{postgres_port}" if postgres_port else ":5432"
@@ -164,11 +206,18 @@ class DatabaseConfigManager:
                     self._logger.info(f"Loading DATABASE_URL: {masked_url}")
                     self._logged_urls.add(url)
             else:
-                url = self._get_default_postgres_url()
-                # Only log default URL once
-                if "default" not in self._logged_urls:
-                    self._logger.debug(f"Using default database URL for {self._environment}")
-                    self._logged_urls.add("default")
+                # No fallback to default values
+                # In staging/production, fail loudly
+                if self._environment in ["staging", "production"]:
+                    self._logger.error(f"PostgreSQL configuration missing for {self._environment} environment")
+                    self._logger.error("Required: Either POSTGRES_HOST/USER/DB or DATABASE_URL must be set")
+                    raise ConfigurationError(
+                        f"No PostgreSQL configuration found for {self._environment} environment. "
+                        "Set either POSTGRES_HOST/USER/DB or DATABASE_URL environment variables."
+                    )
+                # In test/development, warn but allow empty
+                self._logger.warning(f"PostgreSQL configuration missing for {self._environment} environment")
+                url = None  # Return None for test/dev environments
                 
         # Cache the URL
         self._postgres_url_cache = url
@@ -198,10 +247,15 @@ class DatabaseConfigManager:
         return url
     
     def _get_default_postgres_url(self) -> str:
-        """Get default PostgreSQL URL for environment."""
-        template_key = f"postgres_{self._environment}"
-        return self._connection_templates.get(template_key, 
-                                             self._connection_templates["postgres_dev"])
+        """DEPRECATED: No longer provide default PostgreSQL URLs.
+        
+        This method is kept for backward compatibility but should not be used.
+        Database URLs must be explicitly configured via environment variables.
+        """
+        raise ConfigurationError(
+            "Default database URLs are no longer supported. "
+            "Database configuration must be explicitly provided via environment variables."
+        )
     
     def _validate_postgres_url(self, url: str) -> None:
         """Validate database URL against environment rules."""
@@ -273,18 +327,40 @@ class DatabaseConfigManager:
                 "Database connections may fail. Please set this environment variable."
             )
         
-        # Don't default to localhost in staging/production
-        default_host = "localhost"
-        if self._environment in ["staging", "production"]:
-            # In staging/production, require explicit CLICKHOUSE_HOST
-            default_host = ""
+        # Require explicit ClickHouse configuration in staging/production
+        host = self._env.get("CLICKHOUSE_HOST")
+        if not host and self._environment in ["staging", "production"]:
+            raise ConfigurationError(
+                f"CLICKHOUSE_HOST not configured for {self._environment} environment. "
+                "ClickHouse configuration must be explicitly provided."
+            )
+        elif not host:
+            # Only warn in development/test
+            logger.warning("CLICKHOUSE_HOST not configured for development/test")
+            host = ""  # No fallback - empty host
+        
+        user = self._env.get("CLICKHOUSE_USER")
+        if not user and self._environment in ["staging", "production"]:
+            raise ConfigurationError(
+                f"CLICKHOUSE_USER not configured for {self._environment} environment."
+            )
+        elif not user:
+            user = ""  # No default fallback
+            
+        database = self._env.get("CLICKHOUSE_DB")
+        if not database and self._environment in ["staging", "production"]:
+            raise ConfigurationError(
+                f"CLICKHOUSE_DB not configured for {self._environment} environment."
+            )
+        elif not database:
+            database = ""  # No default fallback
         
         config = {
-            "host": self._env.get("CLICKHOUSE_HOST", default_host),
+            "host": host,
             "port": self._env.get("CLICKHOUSE_HTTP_PORT", default_port),
-            "user": self._env.get("CLICKHOUSE_USER", "default"),
+            "user": user,
             "password": password,
-            "database": self._env.get("CLICKHOUSE_DB", "default")
+            "database": database
         }
         # Cache the configuration
         self._clickhouse_config_cache = config
@@ -438,6 +514,48 @@ class DatabaseConfigManager:
         postgres_user = self._env.get("POSTGRES_USER")
         postgres_password = self._env.get("POSTGRES_PASSWORD")
         
+        # Validate individual PostgreSQL variables if any are set
+        if any([postgres_host, postgres_user, postgres_db]):
+            validation_errors = []
+            
+            # Check for empty string values (common configuration mistake)
+            if postgres_host == "":
+                validation_errors.append("POSTGRES_HOST is empty string")
+            if postgres_user == "":
+                validation_errors.append("POSTGRES_USER is empty string")
+            if postgres_db == "":
+                validation_errors.append("POSTGRES_DB is empty string")
+            if postgres_password == "":
+                validation_errors.append("POSTGRES_PASSWORD is empty string")
+            if postgres_port == "":
+                validation_errors.append("POSTGRES_PORT is empty string")
+                
+            # Check for placeholder values
+            if postgres_password and postgres_password.lower() in ["placeholder", "todo", "changeme"]:
+                validation_errors.append(f"POSTGRES_PASSWORD contains placeholder value: {postgres_password}")
+                
+            # Check for required fields
+            if not postgres_host:
+                validation_errors.append("POSTGRES_HOST not set when using individual PostgreSQL variables")
+            if not postgres_user:
+                validation_errors.append("POSTGRES_USER not set when using individual PostgreSQL variables")
+            if not postgres_db:
+                validation_errors.append("POSTGRES_DB not set when using individual PostgreSQL variables")
+                
+            # In staging/production, password is required
+            if self._environment in ["staging", "production"] and not postgres_password:
+                validation_errors.append(f"POSTGRES_PASSWORD required in {self._environment} environment")
+                
+            # Validate port if provided
+            if postgres_port and not postgres_port.isdigit():
+                validation_errors.append(f"POSTGRES_PORT must be numeric: {postgres_port}")
+                
+            # Fail fast if validation errors found
+            if validation_errors:
+                error_msg = f"PostgreSQL configuration validation failed: {'; '.join(validation_errors)}"
+                self._logger.error(error_msg)
+                raise ConfigurationError(error_msg)
+        
         if postgres_host and postgres_user and postgres_db:
             # Construct URL from individual variables
             port_part = f":{postgres_port}" if postgres_port else ":5432"
@@ -467,8 +585,15 @@ class DatabaseConfigManager:
                     url = url.replace("postgres://", "postgresql://")
                 return url
             else:
-                # Return default sync URL
-                return "postgresql://postgres:postgres@localhost:5432/netra"
+                # No fallback to default values
+                # In staging/production, fail loudly
+                if self._environment in ["staging", "production"]:
+                    raise ConfigurationError(
+                        f"No PostgreSQL configuration found for {self._environment} environment. "
+                        "Set either POSTGRES_HOST/USER/DB or DATABASE_URL environment variables."
+                    )
+                # In test/development, return None
+                return None
     
     def get_database_summary(self) -> Dict[str, str]:
         """Get database configuration summary for monitoring.

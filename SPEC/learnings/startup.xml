@@ -843,5 +843,96 @@
         <revenue_enablement>Core features operational for value delivery</revenue_enablement>
       </business_value>
     </learning>
+    
+    <learning>
+      <id>database-url-multi-part-migration</id>
+      <category>startup</category>
+      <date>2025-08-25</date>
+      <severity>critical</severity>
+      <title>Database URL Migration to Multi-Part Configuration</title>
+      <problem>
+        <description>Monolithic DATABASE_URL causes configuration issues across environments</description>
+        <symptoms>
+          <symptom>SSL configuration conflicts between psycopg2 and asyncpg drivers</symptom>
+          <symptom>Cloud SQL Unix socket connections require special URL formatting</symptom>
+          <symptom>URL parsing errors with special characters in passwords</symptom>
+          <symptom>Different connection types require different URL formats</symptom>
+        </symptoms>
+        <root_cause>Single DATABASE_URL string cannot handle all connection scenarios</root_cause>
+      </problem>
+      <solution>
+        <description>Migrate to individual PostgreSQL configuration variables</description>
+        <implementation>
+          <file>netra_backend/app/core/configuration/database.py</file>
+          <changes>
+            <change line="119-175">Construct URL from POSTGRES_* variables with fallback</change>
+            <change line="428-471">Add get_sync_postgres_url() for migrations</change>
+          </changes>
+          <file>auth_service/auth_core/config.py</file>
+          <changes>
+            <change line="151-198">get_database_url() constructs from individual variables</change>
+            <change line="201-237">get_raw_database_url() provides sync URL</change>
+          </changes>
+          <file>auth_service/auth_core/secret_loader.py</file>
+          <changes>
+            <change line="176-233">get_database_url() uses multi-part configuration</change>
+          </changes>
+          <file>dev_launcher/google_secret_manager.py</file>
+          <changes>
+            <change line="103-107">Map individual postgres-*-staging secrets</change>
+          </changes>
+          <file>scripts/deploy_to_gcp.py</file>
+          <changes>
+            <change line="590">Backend uses POSTGRES_* secrets instead of DATABASE_URL</change>
+            <change line="596">Auth service uses POSTGRES_* secrets</change>
+            <change line="748-753">Setup individual PostgreSQL secrets</change>
+          </changes>
+          <file>config/.env.template</file>
+          <changes>
+            <change line="9-18">Document multi-part PostgreSQL configuration</change>
+          </changes>
+        </implementation>
+        <configuration>
+          <staging>
+            <variable name="POSTGRES_HOST">/cloudsql/netra-staging:us-central1:staging-shared-postgres</variable>
+            <variable name="POSTGRES_PORT">5432</variable>
+            <variable name="POSTGRES_DB">netra_dev</variable>
+            <variable name="POSTGRES_USER">postgres</variable>
+            <variable name="POSTGRES_PASSWORD">qNdlZRHu(Mlc#)6K8LHm-lYi[7sc}25K</variable>
+          </staging>
+          <development>
+            <variable name="POSTGRES_HOST">localhost</variable>
+            <variable name="POSTGRES_PORT">5432</variable>
+            <variable name="POSTGRES_DB">netra</variable>
+            <variable name="POSTGRES_USER">postgres</variable>
+            <variable name="POSTGRES_PASSWORD">123</variable>
+          </development>
+        </configuration>
+        <verification>
+          <step>Test local development with individual variables</step>
+          <step>Deploy to staging with Cloud SQL socket connection</step>
+          <step>Verify both async and sync connections work</step>
+          <step>Run migrations with sync URL construction</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always use individual configuration variables for complex connections</guideline>
+        <guideline>Construct URLs dynamically based on connection type needed</guideline>
+        <guideline>Handle Cloud SQL Unix socket paths specially</guideline>
+        <guideline>Test all connection types in each environment</guideline>
+      </prevention>
+      <benefits>
+        <benefit>Eliminates URL parsing errors with special characters</benefit>
+        <benefit>Supports both TCP and Unix socket connections seamlessly</benefit>
+        <benefit>Allows environment-specific SSL configuration</benefit>
+        <benefit>Simplifies secret rotation and management</benefit>
+        <benefit>Enables driver-specific URL construction</benefit>
+      </benefits>
+      <business_impact>
+        <severity>Critical - Database connectivity is fundamental</severity>
+        <customer_impact>Prevents deployment failures and connection issues</customer_impact>
+        <revenue_impact>Ensures stable platform operation across environments</revenue_impact>
+      </business_impact>
+    </learning>
   </cold_start_audit_learnings>
 </specification>

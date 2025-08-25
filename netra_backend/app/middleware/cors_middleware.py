@@ -45,7 +45,8 @@ class CORSMiddleware:
         """
         self.allowed_origins = set(allowed_origins or [
             "http://localhost:3000",
-            "https://app.netra.io"
+            "https://app.netrasystems.ai",
+            "https://auth.netrasystems.ai"
         ])
         self.allowed_methods = set(allowed_methods or [
             "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
@@ -171,7 +172,7 @@ class CORSMiddleware:
         if origin in self.allowed_origins:
             return True
         
-        # Wildcard support (e.g., "https://*.netra.io")
+        # Wildcard support (e.g., "https://*.netrasystems.ai")
         for allowed in self.allowed_origins:
             if "*" in allowed:
                 pattern = allowed.replace("*", ".*")
