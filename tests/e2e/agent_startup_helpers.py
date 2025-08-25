@@ -22,7 +22,7 @@ import httpx
 import websockets
 
 from tests.e2e.config import (
-    TestTier, get_test_user,
+    CustomerTier, get_test_user,
     get_auth_service_url, get_backend_service_url
 )
 from tests.e2e.database_test_operations import (
@@ -39,7 +39,7 @@ class ContextTestManager:
         self.harness = None
         self.http_client: Optional[httpx.AsyncClient] = None
         self.ws_connection = None
-        self.test_user = get_test_user(TestTier.MID.value)  
+        self.test_user = get_test_user(CustomerTier.MID.value)  
         self.db_manager: Optional[DatabaseConnectionManager] = None
         self.user_ops: Optional[UserDataOperations] = None
         self.message_ops: Optional[ChatMessageOperations] = None
@@ -102,7 +102,7 @@ class MultiAgentTestManager:
         self.harness = None
         self.http_client: Optional[httpx.AsyncClient] = None
         self.ws_connection = None
-        self.test_user = get_test_user(TestTier.ENTERPRISE.value)
+        self.test_user = get_test_user(CustomerTier.ENTERPRISE.value)
         self.agent_responses: List[Dict[str, Any]] = []
     
     async def setup_http_client(self) -> None:

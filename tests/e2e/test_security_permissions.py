@@ -301,7 +301,7 @@ class TestAdminToolAuthorization:
         assert bulk_results["system_configurator"] == False
 
 
-class TestTierBasedFeatureGating:
+class CustomerTierBasedFeatureGating:
     """Test 3: Tier-Based Feature Gating
     
     Ensures features are properly restricted by subscription tier and usage quotas

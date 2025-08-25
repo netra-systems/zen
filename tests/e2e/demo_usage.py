@@ -12,7 +12,7 @@ from tests.e2e.config import (
     TEST_USERS,
     TestDatabaseManager,
     TestDataFactory,
-    TestTier,
+    CustomerTier,
     TestTokenManager,
     create_unified_config,
     get_test_user,
@@ -32,7 +32,7 @@ def demo_basic_config():
 def demo_tier_users():
     """Demonstrate tier-based user testing"""
     print("=== Test Users by Tier ===")
-    for tier in TestTier:
+    for tier in CustomerTier:
         user = TEST_USERS[tier.value]
         print(f"{tier.value.upper()}: {user.email}")
         print(f"  ID: {user.id}")

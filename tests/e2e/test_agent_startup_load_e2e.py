@@ -38,7 +38,7 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, WebSocketException
 
-from tests.e2e.config import TEST_CONFIG, TestTier, get_test_user
+from tests.e2e.config import TEST_CONFIG, CustomerTier, get_test_user
 from tests.e2e.harness_complete import (
     TestHarnessContext,
     UnifiedTestHarnessComplete,
@@ -70,7 +70,7 @@ class CorruptedStateTestManager:
 
         self.ws_connection = None
 
-        self.test_user = get_test_user(TestTier.EARLY.value)
+        self.test_user = get_test_user(CustomerTier.EARLY.value)
 
         self.corrupted_data_created = False
 

@@ -29,7 +29,7 @@ import psutil
 import pytest
 
 # Test infrastructure
-from tests.e2e.config import TEST_CONFIG, TestTier, get_test_user
+from tests.e2e.config import TEST_CONFIG, CustomerTier, get_test_user
 from tests.e2e.harness_complete import (
     TestHarnessContext,
     UnifiedTestHarnessComplete,

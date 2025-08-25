@@ -16,7 +16,7 @@ import time
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from tests.e2e.config import TestTier, get_test_user
+from tests.e2e.config import CustomerTier, get_test_user
 from tests.e2e.harness_complete import UnifiedE2ETestHarness
 
 
@@ -27,7 +27,7 @@ class AgentStartupE2EManager:
         """Initialize E2E manager."""
         self.test_name = test_name
         self.harness = UnifiedE2ETestHarness()
-        self.test_user = get_test_user(TestTier.EARLY.value)
+        self.test_user = get_test_user(CustomerTier.EARLY.value)
         self.auth_token: Optional[str] = None
         self.startup_metrics: Dict[str, float] = {}
     

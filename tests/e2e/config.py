@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 
-class TestTier(Enum):
+class CustomerTier(Enum):
     """Customer tier enumeration for testing"""
     FREE = "free"
     EARLY = "early" 
@@ -165,12 +165,12 @@ class UnifiedTestConfig:
     def _create_test_users(self) -> Dict[str, TestUser]:
         """Create test users for all tiers"""
         users = {}
-        for tier in TestTier:
+        for tier in CustomerTier:
             user = self._create_tier_user(tier)
             users[tier.value] = user
         return users
     
-    def _create_tier_user(self, tier: TestTier) -> TestUser:
+    def _create_tier_user(self, tier: CustomerTier) -> TestUser:
         """Create test user for specific tier"""
         user_id = f"test-{tier.value}-{str(uuid.uuid4())[:8]}"
         email = f"test-{tier.value}@unified-test.com"

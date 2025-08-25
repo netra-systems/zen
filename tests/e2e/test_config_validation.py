@@ -15,7 +15,7 @@ from tests.e2e.config import (
     TEST_USERS,
     TestDatabaseManager,
     TestDataFactory,
-    TestTier,
+    CustomerTier,
     TestTokenManager,
     create_unified_config,
     get_test_user,
@@ -33,7 +33,7 @@ def test_environment_variables_set():
 
 def test_test_users_created():
     """Test that test users are created for all tiers"""
-    for tier in TestTier:
+    for tier in CustomerTier:
         user = TEST_USERS[tier.value]
         assert user.id is not None
         assert user.email.endswith("@unified-test.com")
