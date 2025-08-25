@@ -72,6 +72,85 @@ class ApiErrorHandler(BaseErrorHandler):
     def get_http_status_code(self, error_code: ErrorCode) -> int:
         """Map error codes to HTTP status codes."""
         return self._exception_router.get_http_status_code(error_code)
+    
+    def _handle_pydantic_validation_error(
+        self,
+        exc: ValidationError,
+        trace_id: str,
+        request_id: Optional[str] = None
+    ) -> ErrorResponse:
+        """Handle Pydantic validation errors."""
+        validation_errors = []
+        if hasattr(exc, 'errors') and callable(exc.errors):
+            for error in exc.errors():
+                validation_errors.append({
+                    "field": ".".join(str(loc) for loc in error.get("loc", [])),
+                    "message": error.get("msg", "Validation error"),
+                    "type": error.get("type", "value_error")
+                })
+        
+        return ErrorResponse(
+            error_code="VALIDATION_ERROR",
+            message="Validation failed",
+            user_message="The provided data is invalid",
+            details={"validation_errors": validation_errors},
+            trace_id=trace_id,
+            request_id=request_id,
+            timestamp=datetime.now(timezone.utc).isoformat()
+        )
+    
+    def _handle_sqlalchemy_error(
+        self,
+        exc: SQLAlchemyError,
+        trace_id: str,
+        request_id: Optional[str] = None
+    ) -> ErrorResponse:
+        """Handle SQLAlchemy integrity constraint errors."""
+        return ErrorResponse(
+            error_code="DB_CONSTRAINT_VIOLATION",
+            message="Database constraint violation occurred",
+            user_message="The operation failed due to data constraints",
+            details={"original_error": str(exc)},
+            trace_id=trace_id,
+            request_id=request_id,
+            timestamp=datetime.now(timezone.utc).isoformat()
+        )
+    
+    def _handle_http_exception(
+        self,
+        exc: HTTPException,
+        trace_id: str,
+        request_id: Optional[str] = None
+    ) -> ErrorResponse:
+        """Handle HTTP exceptions."""
+        # Map 404 status to DB_RECORD_NOT_FOUND for compatibility
+        error_code = "DB_RECORD_NOT_FOUND" if exc.status_code == 404 else "HTTP_ERROR"
+        return ErrorResponse(
+            error_code=error_code,
+            message=exc.detail or "HTTP error occurred",
+            user_message="A server error occurred",
+            details={"status_code": exc.status_code},
+            trace_id=trace_id,
+            request_id=request_id,
+            timestamp=datetime.now(timezone.utc).isoformat()
+        )
+    
+    def _handle_unknown_exception(
+        self,
+        exc: Exception,
+        trace_id: str,
+        request_id: Optional[str] = None
+    ) -> ErrorResponse:
+        """Handle unknown/generic exceptions."""
+        return ErrorResponse(
+            error_code="INTERNAL_ERROR",
+            message="An internal server error occurred",
+            user_message="A server error occurred",
+            details={"exception_type": type(exc).__name__, "error": str(exc)},
+            trace_id=trace_id,
+            request_id=request_id,
+            timestamp=datetime.now(timezone.utc).isoformat()
+        )
 
 
 # Global error handler instance

@@ -19,6 +19,34 @@
     </core_principle>
 
     <architectural_components>
+        <component name="DatabaseURLBuilder">
+            <purpose>Centralized database URL construction with proper encoding and validation</purpose>
+            <location>shared/database_url_builder.py</location>
+            <responsibilities>
+                <responsibility>URL construction from environment variables</responsibility>
+                <responsibility>Password and username URL encoding for special characters</responsibility>
+                <responsibility>Environment-aware URL selection</responsibility>
+                <responsibility>SSL parameter handling for different connection types</responsibility>
+                <responsibility>Cloud SQL Unix socket URL formatting</responsibility>
+                <responsibility>Safe logging with credential masking</responsibility>
+            </responsibilities>
+            <usage>
+                <code>
+                from shared.database_url_builder import DatabaseURLBuilder
+                
+                builder = DatabaseURLBuilder(env_vars)
+                is_valid, error_msg = builder.validate()
+                
+                # Get environment-appropriate URL
+                url = builder.get_url_for_environment(sync=False)
+                
+                # Or access specific patterns
+                cloud_sql_url = builder.cloud_sql.async_url
+                tcp_ssl_url = builder.tcp.async_url_with_ssl
+                </code>
+            </usage>
+        </component>
+        
         <component name="CoreDatabaseManager">
             <purpose>Centralized database URL management and driver compatibility</purpose>
             <location>shared/database/core_database_manager.py</location>

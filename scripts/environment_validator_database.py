@@ -1,16 +1,25 @@
 """
 Database Connection Validation Module
 Tests REAL database connections for PostgreSQL and ClickHouse.
+
+**UPDATED**: Now uses DatabaseURLBuilder for centralized URL construction.
 """
 
 import asyncio
 import os
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import asyncpg
 import clickhouse_connect
 from dotenv import load_dotenv
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from shared.database_url_builder import DatabaseURLBuilder
 
 
 class DatabaseValidator:
@@ -40,38 +49,49 @@ class DatabaseValidator:
         return results
     
     def _parse_postgres_config(self) -> Dict[str, str]:
-        """Parse PostgreSQL configuration from DATABASE_URL."""
-        database_url = os.getenv("DATABASE_URL", "")
+        """Parse PostgreSQL configuration using DatabaseURLBuilder."""
+        # Build environment variables dict
+        env_vars = {
+            "ENVIRONMENT": os.getenv("ENVIRONMENT", "development"),
+            "DATABASE_URL": os.getenv("DATABASE_URL", ""),
+            "POSTGRES_HOST": os.getenv("POSTGRES_HOST"),
+            "POSTGRES_PORT": os.getenv("POSTGRES_PORT"),
+            "POSTGRES_DB": os.getenv("POSTGRES_DB"),
+            "POSTGRES_USER": os.getenv("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        }
         
-        if not database_url:
-            return {}
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
         
-        # Parse postgresql+asyncpg://user:pass@host:port/db
-        try:
-            url_parts = database_url.replace("postgresql+asyncpg://", "").split("/")
-            host_info = url_parts[0]
-            database = url_parts[1] if len(url_parts) > 1 else "netra_dev"
-            
-            if "@" in host_info:
-                auth_part, host_part = host_info.split("@")
-                host, port = host_part.split(":") if ":" in host_part else (host_part, "5432")
-                
-                if ":" in auth_part:
-                    username, password = auth_part.split(":", 1)
-                else:
-                    username, password = auth_part, ""
-            else:
-                host, port = host_info.split(":") if ":" in host_info else (host_info, "5432")
-                username, password = "postgres", ""
-            
+        # Get configuration details
+        config_info = builder.debug_info()
+        
+        # Return parsed configuration if available
+        if config_info.get('has_tcp_config') or config_info.get('has_cloud_sql'):
+            # Extract from environment variables if set
             return {
-                "host": host,
-                "port": int(port),
-                "database": database,
-                "username": username,
-                "password": password
+                "host": env_vars.get("POSTGRES_HOST", "localhost"),
+                "port": int(env_vars.get("POSTGRES_PORT", "5432")),
+                "database": env_vars.get("POSTGRES_DB", "netra_dev"),
+                "username": env_vars.get("POSTGRES_USER", "postgres"),
+                "password": env_vars.get("POSTGRES_PASSWORD", "")
             }
-        except Exception:
+        elif env_vars.get("DATABASE_URL"):
+            # Parse from DATABASE_URL using builder's parsing logic
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(env_vars["DATABASE_URL"])
+                return {
+                    "host": parsed.hostname or "localhost",
+                    "port": parsed.port or 5432,
+                    "database": parsed.path.lstrip("/") if parsed.path else "netra_dev",
+                    "username": parsed.username or "postgres",
+                    "password": parsed.password or ""
+                }
+            except:
+                return {}
+        else:
             return {}
     
     def _parse_clickhouse_config(self) -> Dict[str, Any]:
@@ -112,8 +132,18 @@ class DatabaseValidator:
         start_time = datetime.now()
         
         try:
-            # Convert asyncpg URL to standard PostgreSQL URL
-            connection_string = database_url.replace("postgresql+asyncpg://", "postgresql://")
+            # Use DatabaseURLBuilder to ensure correct URL format
+            env_vars = {
+                "ENVIRONMENT": os.getenv("ENVIRONMENT", "development"),
+                "DATABASE_URL": database_url,
+            }
+            builder = DatabaseURLBuilder(env_vars)
+            
+            # Get the sync URL for asyncpg (it uses postgresql:// not postgresql+asyncpg://)
+            connection_string = builder.get_url_for_environment(sync=True)
+            if not connection_string:
+                connection_string = database_url.replace("postgresql+asyncpg://", "postgresql://")
+            
             conn = await asyncpg.connect(connection_string, timeout=10)
             
             # Test basic query
@@ -130,11 +160,26 @@ class DatabaseValidator:
             db_result["connection_time"] = (datetime.now() - start_time).total_seconds()
     
     def _build_postgres_connection_string(self) -> str:
-        """Build PostgreSQL connection string."""
-        config = self.postgres_config
-        auth_part = f"{config['username']}:{config['password']}" if config['password'] else config['username']
+        """Build PostgreSQL connection string using DatabaseURLBuilder."""
+        if not self.postgres_config:
+            return ""
         
-        return f"postgresql://{auth_part}@{config['host']}:{config['port']}/{config['database']}"
+        # Build environment variables dict
+        env_vars = {
+            "ENVIRONMENT": os.getenv("ENVIRONMENT", "development"),
+            "POSTGRES_HOST": self.postgres_config.get('host', 'localhost'),
+            "POSTGRES_PORT": str(self.postgres_config.get('port', 5432)),
+            "POSTGRES_DB": self.postgres_config.get('database', 'netra_dev'),
+            "POSTGRES_USER": self.postgres_config.get('username', 'postgres'),
+            "POSTGRES_PASSWORD": self.postgres_config.get('password', ''),
+        }
+        
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Get sync URL
+        url = builder.get_url_for_environment(sync=True)
+        return url or ""
     
     async def _test_clickhouse_connection(self, results: Dict[str, Any]) -> None:
         """Test ClickHouse database connection."""

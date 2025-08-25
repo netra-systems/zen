@@ -38,23 +38,32 @@
     </incorrect_approach>
     
     <correct_approach>
-      <description>Centralized DatabaseManager handles all URL conversions</description>
+      <description>Centralized DatabaseURLBuilder handles all URL construction</description>
       <code>
-        # CORRECT: DatabaseManager.get_application_url_async() handles all cases
-        if "/cloudsql/" in base_url:
-            # Cloud SQL Unix socket - remove ALL SSL parameters
-            base_url = re.sub(r'[&?]sslmode=[^&]*', '', base_url)
-            base_url = re.sub(r'[&?]ssl=[^&]*', '', base_url)
+        # CORRECT: Use DatabaseURLBuilder for all URL construction
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Cloud SQL Unix socket connection
+        if builder.cloud_sql.is_cloud_sql:
+            async_url = builder.cloud_sql.async_url  # Async with asyncpg
+            sync_url = builder.cloud_sql.sync_url    # Sync for Alembic
+        
+        # TCP connection with SSL
+        elif builder.tcp.has_config:
+            async_url = builder.tcp.async_url_with_ssl  # With SSL for staging/prod
+            sync_url = builder.tcp.sync_url_with_ssl    # Sync with SSL
+        
+        # Auto-selection based on environment
         else:
-            # CRITICAL FIX: For ALL non-Cloud SQL async connections,
-            # convert psycopg2 'sslmode=' to asyncpg 'ssl=' format
-            if "sslmode=" in base_url:
-                base_url = base_url.replace("sslmode=", "ssl=")
+            url = builder.get_url_for_environment(sync=False)  # Auto-select best URL
       </code>
       <benefits>
-        - Single source of truth for URL conversion logic
-        - Handles all driver/connection type combinations
-        - Fixed logic bug that prevented sslmode conversion
+        - Single source of truth for all URL patterns
+        - Handles URL encoding for special characters in passwords
+        - Properly manages SSL parameters for different connection types
+        - Environment-aware URL selection
       </benefits>
     </correct_approach>
   </root_cause_analysis>
@@ -211,8 +220,8 @@
     <action priority="PENDING">
       Fix incorrect database IP in staging secret (34.68.229.240 is wrong)
     </action>
-    <action priority="LOW">
-      Consider extracting common database connection logic to shared module
+    <action priority="COMPLETED">
+      Extracted common database connection logic to shared.database_url_builder.DatabaseURLBuilder
     </action>
   </action_items>
 </learnings>

@@ -2,12 +2,20 @@
 """
 Complete Staging Secrets Creation Script
 Creates all required secrets for staging deployment with proper values.
+
+**UPDATED**: Now uses DatabaseURLBuilder for centralized URL construction.
 """
 
 import subprocess
 import sys
 import os
+from pathlib import Path
 from typing import Dict, Optional
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from shared.database_url_builder import DatabaseURLBuilder
 
 
 class StagingSecretsCreator:
@@ -48,9 +56,12 @@ class StagingSecretsCreator:
         session_secret = self._generate_secure_key(32)
         fernet_key = self._generate_fernet_key()
         
+        # Generate database URL using DatabaseURLBuilder
+        database_url = self._generate_database_url()
+        
         # IMPORTANT: These need to be replaced with real values
         secrets = {
-            "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_DB_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
+            "database-url-staging": database_url,
             "jwt-secret-key-staging": jwt_secret,
             "session-secret-key-staging": session_secret,
             "fernet-key-staging": fernet_key,
@@ -59,6 +70,60 @@ class StagingSecretsCreator:
         }
         
         return secrets
+        
+    def _generate_database_url(self) -> str:
+        """Generate database URL using DatabaseURLBuilder."""
+        # Try to fetch existing password from secret manager
+        password = self._fetch_postgres_password()
+        
+        # Build environment variables dict for DatabaseURLBuilder
+        env_vars = {
+            "ENVIRONMENT": "staging",
+            "POSTGRES_HOST": f"/cloudsql/{self.project_id}:us-central1:staging-shared-postgres",
+            "POSTGRES_USER": "postgres",
+            "POSTGRES_PASSWORD": password,
+            "POSTGRES_DB": "postgres",
+        }
+        
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Validate configuration
+        is_valid, error_msg = builder.validate()
+        if not is_valid:
+            print(f"⚠️ Database configuration error: {error_msg}")
+            print("Using placeholder URL - MUST BE REPLACED WITH REAL VALUES")
+            return "postgresql://netra_user:REPLACE_WITH_REAL_DB_PASSWORD@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres"
+        
+        # Get URL for staging environment (sync version for secret)
+        database_url = builder.get_url_for_environment(sync=True)
+        
+        if not database_url:
+            print("⚠️ Failed to generate database URL")
+            print("Using placeholder URL - MUST BE REPLACED WITH REAL VALUES")
+            return "postgresql://netra_user:REPLACE_WITH_REAL_DB_PASSWORD@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres"
+        
+        return database_url
+        
+    def _fetch_postgres_password(self) -> str:
+        """Try to fetch existing PostgreSQL password from secret manager."""
+        try:
+            result = subprocess.run(
+                ["gcloud", "secrets", "versions", "access", "latest",
+                 "--secret", "postgres-password-staging",
+                 "--project", self.project_id],
+                capture_output=True, text=True, check=True
+            )
+            password = result.stdout.strip()
+            if password:
+                print("  ✅ Found existing PostgreSQL password in secret manager")
+                return password
+        except subprocess.CalledProcessError:
+            pass
+        
+        print("  ⚠️ PostgreSQL password not found in secret manager")
+        print("  ⚠️ Using placeholder - MUST BE REPLACED WITH REAL PASSWORD")
+        return "REPLACE_WITH_REAL_DB_PASSWORD"
         
     def _generate_secure_key(self, length: int = 32) -> str:
         """Generate a secure random key."""

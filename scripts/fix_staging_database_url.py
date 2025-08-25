@@ -4,11 +4,18 @@ Fix the staging DATABASE_URL secret in Google Cloud.
 
 This script generates the correct DATABASE_URL format for staging
 and provides the command to update it in Google Secret Manager.
+
+**UPDATED**: Now uses DatabaseURLBuilder for centralized URL construction.
 """
 
 import sys
+import subprocess
 from pathlib import Path
-from urllib.parse import quote
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from shared.database_url_builder import DatabaseURLBuilder
 
 # Configuration for staging
 PROJECT_ID = "netra-staging"
@@ -17,23 +24,62 @@ INSTANCE_NAME = "staging-shared-postgres"
 DATABASE_NAME = "postgres"
 USERNAME = "postgres"
 
-# The correct password (from debug script)
-# This should be replaced with the actual password from the secret manager
-PASSWORD = "qNdlZRHu(Mlc#)6K8LHm-lYi[7sc}25K"
+
+def fetch_password_from_secret():
+    """Fetch the PostgreSQL password from Google Secret Manager."""
+    try:
+        cmd = [
+            "gcloud", "secrets", "versions", "access", "latest",
+            "--secret", "postgres-password-staging",
+            "--project", PROJECT_ID
+        ]
+        
+        result = subprocess.run(
+            cmd, 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
+        
+        return result.stdout.strip()
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to fetch password from secret manager: {e}")
+        print("Using fallback password (may be outdated)")
+        return "qNdlZRHu(Mlc#)6K8LHm-lYi[7sc}25K"
 
 
 def generate_correct_database_url():
-    """Generate the correct DATABASE_URL for staging Cloud SQL."""
+    """Generate the correct DATABASE_URL for staging Cloud SQL using DatabaseURLBuilder."""
     
-    # URL-encode the password to handle special characters
-    encoded_password = quote(PASSWORD, safe='')
+    # Fetch the password from secret manager
+    password = fetch_password_from_secret()
     
-    # Build the Unix socket path for Cloud SQL
-    socket_path = f"/cloudsql/{PROJECT_ID}:{REGION}:{INSTANCE_NAME}"
+    # Build environment variables dict for DatabaseURLBuilder
+    env_vars = {
+        "ENVIRONMENT": "staging",
+        "POSTGRES_HOST": f"/cloudsql/{PROJECT_ID}:{REGION}:{INSTANCE_NAME}",
+        "POSTGRES_USER": USERNAME,
+        "POSTGRES_PASSWORD": password,
+        "POSTGRES_DB": DATABASE_NAME,
+        # Don't set DATABASE_URL to force builder to construct from parts
+    }
     
-    # Format: postgresql://username:password@/database?host=socket_path
-    # This is the correct format for Cloud SQL Unix socket connections
-    database_url = f"postgresql://{USERNAME}:{encoded_password}@/{DATABASE_NAME}?host={socket_path}"
+    # Create builder
+    builder = DatabaseURLBuilder(env_vars)
+    
+    # Validate configuration
+    is_valid, error_msg = builder.validate()
+    if not is_valid:
+        print(f"Configuration error: {error_msg}")
+        sys.exit(1)
+    
+    # Get URL for staging environment (sync version for the secret)
+    database_url = builder.get_url_for_environment(sync=True)
+    
+    if not database_url:
+        print("Failed to generate database URL")
+        sys.exit(1)
     
     return database_url
 
@@ -45,20 +91,19 @@ def main():
     print("STAGING DATABASE_URL FIX")
     print("="*70)
     
-    # Generate the correct URL
+    # Generate the correct URL using DatabaseURLBuilder
     database_url = generate_correct_database_url()
+    
+    # Use DatabaseURLBuilder's masking utility
+    masked_url = DatabaseURLBuilder.mask_url_for_logging(database_url)
     
     print("\n1. CORRECT DATABASE_URL FORMAT:")
     print("-" * 40)
     print(f"postgresql://{USERNAME}:[ENCODED_PASSWORD]@/{DATABASE_NAME}?host=/cloudsql/{PROJECT_ID}:{REGION}:{INSTANCE_NAME}")
     
-    print("\n2. GENERATED DATABASE_URL:")
+    print("\n2. GENERATED DATABASE_URL (masked):")
     print("-" * 40)
-    # Show first part and mask the password
-    url_parts = database_url.split(':')
-    if len(url_parts) >= 3:
-        masked_url = f"{url_parts[0]}:{url_parts[1]}:***@{url_parts[2].split('@')[1]}"
-        print(masked_url)
+    print(masked_url)
     
     print("\n3. KEY POINTS:")
     print("-" * 40)
@@ -66,7 +111,8 @@ def main():
     print("- Database: postgres")
     print("- Connection: Unix socket (/cloudsql/...)")
     print("- SSL: NOT needed for Unix socket connections")
-    print("- Password: URL-encoded to handle special characters")
+    print("- Password: URL-encoded by DatabaseURLBuilder")
+    print("- Using centralized DatabaseURLBuilder for consistency")
     
     print("\n4. UPDATE SECRET IN GOOGLE CLOUD:")
     print("-" * 40)

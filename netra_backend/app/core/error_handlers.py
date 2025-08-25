@@ -5,11 +5,16 @@ in app.core.error_handlers. This file now provides backward compatibility.
 """
 
 # Import from consolidated error handlers for backward compatibility
-from netra_backend.app.core.error_handlers import (
+from netra_backend.app.core.error_handlers.handler import (
     ApiErrorHandler,
-    general_exception_handler,
-    get_http_status_code,
+    api_error_handler,
     handle_exception,
+    get_http_status_code,
+)
+
+# Import exception handlers from appropriate modules
+from netra_backend.app.core.error_handlers.fastapi_handlers import (
+    general_exception_handler,
     http_exception_handler,
     netra_exception_handler,
     validation_exception_handler,

@@ -1,4 +1,7 @@
-"""Direct test of staging database connection using migrated secrets."""
+"""Direct test of staging database connection using migrated secrets.
+
+**UPDATED**: Now uses DatabaseURLBuilder for centralized URL construction.
+"""
 
 import asyncio
 import sys
@@ -6,10 +9,11 @@ from pathlib import Path
 from google.cloud import secretmanager
 import asyncpg
 import psycopg2
-from urllib.parse import quote_plus
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from shared.database_url_builder import DatabaseURLBuilder
 
 def fetch_secret(secret_id: str, project: str = "netra-staging") -> str:
     """Fetch a secret from Google Secret Manager."""
@@ -43,27 +47,43 @@ async def test_connection():
         print(f"   User: {user}")
         print(f"   Password: {'*' * len(password)}")
         
-        # URL-encode the password to handle special characters
-        encoded_password = quote_plus(password)
+        # Build connection URLs using DatabaseURLBuilder
+        print("\n2. Building database URLs using DatabaseURLBuilder...")
         
-        # Build connection URLs
-        if "/cloudsql/" in host:
-            # Unix socket connection
-            print("\n2. Detected Cloud SQL Unix socket connection")
-            sync_url = f"postgresql://{user}:{encoded_password}@/{db}?host={host}"
-            async_url = f"postgresql+asyncpg://{user}:{encoded_password}@/{db}?host={host}"
-            
-            # For direct connection testing
-            async_dsn = f"postgresql://{user}:{encoded_password}@/{db}?host={host}"
-        else:
-            # TCP connection
-            print("\n2. Using TCP connection")
-            sync_url = f"postgresql://{user}:{encoded_password}@{host}:{port}/{db}"
-            async_url = f"postgresql+asyncpg://{user}:{encoded_password}@{host}:{port}/{db}"
-            async_dsn = async_url.replace("postgresql+asyncpg://", "postgresql://")
+        # Build environment variables dict
+        env_vars = {
+            "ENVIRONMENT": "staging",
+            "POSTGRES_HOST": host,
+            "POSTGRES_PORT": port,
+            "POSTGRES_DB": db,
+            "POSTGRES_USER": user,
+            "POSTGRES_PASSWORD": password,
+        }
+        
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Validate configuration
+        is_valid, error_msg = builder.validate()
+        if not is_valid:
+            print(f"   Configuration error: {error_msg}")
+            return False
+        
+        # Get URLs for different purposes
+        sync_url = builder.get_url_for_environment(sync=True)
+        async_url = builder.get_url_for_environment(sync=False)
+        
+        # For direct asyncpg connection, we need the base postgresql:// format
+        async_dsn = sync_url  # asyncpg uses postgresql:// not postgresql+asyncpg://
+        
+        debug_info = builder.debug_info()
+        print(f"   Connection type: {'Cloud SQL' if debug_info['has_cloud_sql'] else 'TCP'}")
+        print(f"   Environment: {debug_info['environment']}")
+        print(f"   SSL configured: {debug_info.get('has_ssl', False)}")
         
         print(f"\n3. Testing async connection with asyncpg...")
-        print(f"   DSN: {async_dsn[:50]}...")
+        masked_dsn = DatabaseURLBuilder.mask_url_for_logging(async_dsn)
+        print(f"   DSN: {masked_dsn}")
         
         # Test async connection
         try:
@@ -76,7 +96,8 @@ async def test_connection():
             return False
         
         print(f"\n4. Testing sync connection with psycopg2...")
-        print(f"   URL: {sync_url[:50]}...")
+        masked_url = DatabaseURLBuilder.mask_url_for_logging(sync_url)
+        print(f"   URL: {masked_url}")
         
         # Test sync connection
         try:

@@ -19,6 +19,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 from dev_launcher.isolated_environment import get_env
+from shared.database_url_builder import DatabaseURLBuilder
 
 from dev_launcher.utils import print_with_emoji
 
@@ -76,11 +77,17 @@ class DatabaseInitializer:
             return False
     
     async def _initialize_postgresql(self) -> bool:
-        """Initialize PostgreSQL database."""
+        """Initialize PostgreSQL database using DatabaseURLBuilder."""
         env = get_env()
-        database_url = env.get('DATABASE_URL')
+        
+        # Use DatabaseURLBuilder for proper URL construction
+        builder = DatabaseURLBuilder(env.get_all())
+        
+        # Get the appropriate URL for the environment (sync URL for psycopg2)
+        database_url = builder.get_url_for_environment(sync=True)
+        
         if not database_url:
-            self._print("ℹ️", "POSTGRES", "No DATABASE_URL configured, skipping PostgreSQL initialization")
+            self._print("ℹ️", "POSTGRES", "No PostgreSQL configuration found, skipping initialization")
             return True
             
         try:

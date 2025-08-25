@@ -81,16 +81,25 @@
             </bad_practice>
             <good_practice>
                 <code>
-                # GOOD: Build from validated components
-                def build_database_url(host, port, db, user, password, is_cloud_sql=False):
-                    if is_cloud_sql:
-                        # Unix socket format for Cloud SQL
-                        return f"postgresql://{user}:{password}@/{db}?host={host}"
-                    else:
-                        # Standard TCP connection
-                        port_part = f":{port}" if port else ":5432"
-                        pass_part = f":{password}" if password else ""
-                        return f"postgresql://{user}{pass_part}@{host}{port_part}/{db}"
+                # GOOD: Use centralized DatabaseURLBuilder
+                from shared.database_url_builder import DatabaseURLBuilder
+                
+                # Build from environment variables
+                builder = DatabaseURLBuilder(os.environ)
+                
+                # Validate configuration
+                is_valid, error_msg = builder.validate()
+                if not is_valid:
+                    raise ConfigurationError(error_msg)
+                
+                # Get appropriate URL for environment
+                url = builder.get_url_for_environment(sync=False)  # async URL
+                
+                # Or access specific URL patterns directly
+                if builder.cloud_sql.is_cloud_sql:
+                    url = builder.cloud_sql.async_url
+                elif builder.tcp.has_config:
+                    url = builder.tcp.async_url_with_ssl
                 </code>
             </good_practice>
             <rationale>
@@ -157,24 +166,22 @@
             </description>
             <implementation>
                 <code>
-                def get_database_password():
-                    password = os.getenv("POSTGRES_PASSWORD")
-                    
-                    if password is not None:
-                        return password
-                    
-                    # Environment-specific handling
-                    if ENVIRONMENT == "development":
-                        # Development: use default password
-                        return "postgres"
-                    elif ENVIRONMENT == "testing":
-                        # Testing: use test password
-                        return "test"
-                    else:
-                        # Staging/Production: fail fast
-                        raise ConfigurationError(
-                            f"POSTGRES_PASSWORD required in {ENVIRONMENT} environment"
-                        )
+                # Use DatabaseURLBuilder for environment-aware defaults
+                from shared.database_url_builder import DatabaseURLBuilder
+                
+                builder = DatabaseURLBuilder(os.environ)
+                
+                # Builder handles environment-specific logic:
+                # - Development: Uses defaults if not configured
+                # - Testing: Can use memory DB or test PostgreSQL
+                # - Staging/Production: Validates required fields
+                
+                is_valid, error_msg = builder.validate()
+                if not is_valid:
+                    raise ConfigurationError(error_msg)
+                
+                # Get environment-appropriate URL
+                url = builder.get_url_for_environment()
                 </code>
             </implementation>
         </learning>
@@ -188,14 +195,24 @@
             <implementation>
                 <code>
                 # scripts/test_database_connection.py
+                from shared.database_url_builder import DatabaseURLBuilder
+                
                 async def test_connection():
                     """Test database connection with current configuration."""
                     try:
-                        # Validate configuration
-                        validate_database_config()
+                        # Build and validate using DatabaseURLBuilder
+                        builder = DatabaseURLBuilder(os.environ)
                         
-                        # Build URL from components
-                        url = build_database_url(...)
+                        # Validate configuration
+                        is_valid, error_msg = builder.validate()
+                        if not is_valid:
+                            raise ConfigurationError(error_msg)
+                        
+                        # Get URL from builder
+                        url = builder.get_url_for_environment(sync=False)
+                        
+                        # Log safely
+                        logger.info(builder.get_safe_log_message())
                         
                         # Attempt connection
                         engine = create_async_engine(url)

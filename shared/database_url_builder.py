@@ -5,6 +5,7 @@ Provides clear access to all possible URL combinations.
 """
 from typing import Optional, Dict, Any
 import logging
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +66,12 @@ class DatabaseURLBuilder:
             if not self.is_cloud_sql:
                 return None
             
-            password_part = f":{self.parent.postgres_password}" if self.parent.postgres_password else ""
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user, safe='') if self.parent.postgres_user else ""
+            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql+asyncpg://"
-                f"{self.parent.postgres_user}{password_part}"
+                f"{user}{password_part}"
                 f"@/{self.parent.postgres_db}"
                 f"?host={self.parent.postgres_host}"
             )
@@ -79,10 +82,12 @@ class DatabaseURLBuilder:
             if not self.is_cloud_sql:
                 return None
             
-            password_part = f":{self.parent.postgres_password}" if self.parent.postgres_password else ""
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user, safe='') if self.parent.postgres_user else ""
+            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql://"
-                f"{self.parent.postgres_user}{password_part}"
+                f"{user}{password_part}"
                 f"@/{self.parent.postgres_db}"
                 f"?host={self.parent.postgres_host}"
             )
@@ -93,10 +98,12 @@ class DatabaseURLBuilder:
             if not self.is_cloud_sql:
                 return None
             
-            password_part = f":{self.parent.postgres_password}" if self.parent.postgres_password else ""
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user, safe='') if self.parent.postgres_user else ""
+            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql+psycopg://"
-                f"{self.parent.postgres_user}{password_part}"
+                f"{user}{password_part}"
                 f"@/{self.parent.postgres_db}"
                 f"?host={self.parent.postgres_host}"
             )
@@ -118,10 +125,12 @@ class DatabaseURLBuilder:
             if not self.has_config:
                 return None
             
-            password_part = f":{self.parent.postgres_password}" if self.parent.postgres_password else ""
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user or 'postgres', safe='')
+            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql+asyncpg://"
-                f"{self.parent.postgres_user or 'postgres'}{password_part}"
+                f"{user}{password_part}"
                 f"@{self.parent.postgres_host}"
                 f":{self.parent.postgres_port}"
                 f"/{self.parent.postgres_db or 'netra_dev'}"
@@ -133,10 +142,12 @@ class DatabaseURLBuilder:
             if not self.has_config:
                 return None
             
-            password_part = f":{self.parent.postgres_password}" if self.parent.postgres_password else ""
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user or 'postgres', safe='')
+            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql://"
-                f"{self.parent.postgres_user or 'postgres'}{password_part}"
+                f"{user}{password_part}"
                 f"@{self.parent.postgres_host}"
                 f":{self.parent.postgres_port}"
                 f"/{self.parent.postgres_db or 'netra_dev'}"
@@ -148,7 +159,9 @@ class DatabaseURLBuilder:
             base_url = self.async_url
             if not base_url:
                 return None
-            return f"{base_url}?sslmode=require"
+            # Properly append SSL parameter
+            separator = "&" if "?" in base_url else "?"
+            return f"{base_url}{separator}sslmode=require"
         
         @property
         def sync_url_with_ssl(self) -> Optional[str]:
@@ -156,7 +169,9 @@ class DatabaseURLBuilder:
             base_url = self.sync_url
             if not base_url:
                 return None
-            return f"{base_url}?sslmode=require"
+            # Properly append SSL parameter
+            separator = "&" if "?" in base_url else "?"
+            return f"{base_url}{separator}sslmode=require"
         
         @property
         def async_url_psycopg(self) -> Optional[str]:
@@ -164,10 +179,12 @@ class DatabaseURLBuilder:
             if not self.has_config:
                 return None
             
-            password_part = f":{self.parent.postgres_password}" if self.parent.postgres_password else ""
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user or 'postgres', safe='')
+            password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
             return (
                 f"postgresql+psycopg://"
-                f"{self.parent.postgres_user or 'postgres'}{password_part}"
+                f"{user}{password_part}"
                 f"@{self.parent.postgres_host}"
                 f":{self.parent.postgres_port}"
                 f"/{self.parent.postgres_db or 'netra_dev'}"
@@ -216,10 +233,12 @@ class DatabaseURLBuilder:
         def postgres_url(self) -> Optional[str]:
             """PostgreSQL URL for test environment."""
             if self.parent.tcp.has_config:
-                password_part = f":{self.parent.postgres_password}" if self.parent.postgres_password else ""
+                # URL encode user and password for safety
+                user = quote(self.parent.postgres_user or 'postgres', safe='')
+                password_part = f":{quote(self.parent.postgres_password, safe='')}" if self.parent.postgres_password else ""
                 return (
                     f"postgresql+asyncpg://"
-                    f"{self.parent.postgres_user or 'postgres'}{password_part}"
+                    f"{user}{password_part}"
                     f"@{self.parent.postgres_host}"
                     f":{self.parent.postgres_port}"
                     f"/{self.parent.postgres_db or 'netra_test'}"
@@ -247,8 +266,9 @@ class DatabaseURLBuilder:
         @property
         def compose_url(self) -> str:
             """URL for Docker Compose environment."""
-            password = self.parent.postgres_password or "postgres"
-            user = self.parent.postgres_user or "postgres"
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user or "postgres", safe='')
+            password = quote(self.parent.postgres_password or "postgres", safe='')
             host = self.parent.postgres_host or "postgres"  # Docker service name
             port = self.parent.postgres_port or "5432"
             db = self.parent.postgres_db or "netra_dev"
@@ -258,8 +278,9 @@ class DatabaseURLBuilder:
         @property
         def compose_sync_url(self) -> str:
             """Sync URL for Docker Compose environment."""
-            password = self.parent.postgres_password or "postgres"
-            user = self.parent.postgres_user or "postgres"
+            # URL encode user and password for safety
+            user = quote(self.parent.postgres_user or "postgres", safe='')
+            password = quote(self.parent.postgres_password or "postgres", safe='')
             host = self.parent.postgres_host or "postgres"  # Docker service name
             port = self.parent.postgres_port or "5432"
             db = self.parent.postgres_db or "netra_dev"

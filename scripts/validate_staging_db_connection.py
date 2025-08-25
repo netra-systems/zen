@@ -2,6 +2,8 @@
 """
 Validates and tests the database connection for staging environment.
 Fetches the actual secret from Google Cloud and tests connectivity.
+
+**UPDATED**: Now uses DatabaseURLBuilder for centralized URL construction.
 """
 
 import asyncio
@@ -11,13 +13,14 @@ import json
 import subprocess
 import logging
 from pathlib import Path
-from urllib.parse import urlparse, quote, unquote
+from urllib.parse import urlparse, unquote
 from typing import Optional, Tuple
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dev_launcher.isolated_environment import get_env
+from shared.database_url_builder import DatabaseURLBuilder
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -97,15 +100,31 @@ class StagingDatabaseValidator:
             return {}
     
     def build_correct_database_url(self, username: str, password: str) -> str:
-        """Build the correct database URL for Cloud SQL."""
-        # URL-encode the password to handle special characters
-        encoded_password = quote(password, safe='')
+        """Build the correct database URL for Cloud SQL using DatabaseURLBuilder."""
+        # Build environment variables dict for DatabaseURLBuilder
+        env_vars = {
+            "ENVIRONMENT": "staging",
+            "POSTGRES_HOST": f"/cloudsql/{self.project_id}:{self.region}:{self.instance_name}",
+            "POSTGRES_USER": username,
+            "POSTGRES_PASSWORD": password,
+            "POSTGRES_DB": self.database_name,
+        }
         
-        # Build the Unix socket URL format for Cloud SQL
-        socket_path = f"/cloudsql/{self.project_id}:{self.region}:{self.instance_name}"
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
         
-        # Format: postgresql://username:password@/database?host=socket_path
-        url = f"postgresql://{username}:{encoded_password}@/{self.database_name}?host={socket_path}"
+        # Validate configuration
+        is_valid, error_msg = builder.validate()
+        if not is_valid:
+            logger.error(f"Database configuration error: {error_msg}")
+            return ""
+        
+        # Get URL for staging environment (sync version)
+        url = builder.get_url_for_environment(sync=True)
+        
+        if not url:
+            logger.error("Failed to generate database URL")
+            return ""
         
         return url
     
@@ -153,8 +172,13 @@ class StagingDatabaseValidator:
             from sqlalchemy.ext.asyncio import create_async_engine
             from sqlalchemy import text
             
-            # Convert to asyncpg URL format
-            async_url = url.replace("postgresql://", "postgresql+asyncpg://")
+            # Convert to asyncpg URL format using DatabaseURLBuilder
+            env_vars = {
+                "ENVIRONMENT": "staging",
+                "DATABASE_URL": url,
+            }
+            builder = DatabaseURLBuilder(env_vars)
+            async_url = builder.get_url_for_environment(sync=False)
             
             # Remove SSL parameters for Unix socket connections
             if '/cloudsql/' in async_url:
