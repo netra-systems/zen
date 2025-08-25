@@ -364,6 +364,16 @@
             <critical-takeaway>Environment-specific CORS behavior verified: development allows localhost, staging allows staging domains, production blocks all but production domains</critical-takeaway>
         </category>
         
+        <category name="Configuration Issues Resolution [RESOLVED]" path="SPEC/learnings/configuration_fixes_20250825.xml" keywords="Configuration, Database URL, PostgreSQL, AsyncPG, Auth Service, Startup Import, WebSocket Deprecation">
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed AUTH service DATABASE_URL configuration by changing from postgresql:// to postgresql+asyncpg:// format</critical-takeaway>
+            <critical-takeaway>Auth service requires postgresql+asyncpg:// driver format for async operations, not plain postgresql://</critical-takeaway>
+            <critical-takeaway>Database connectivity errors often manifest as "connection refused" when service configuration is correct but infrastructure (Docker PostgreSQL) is not running</critical-takeaway>
+            <critical-takeaway>Fixed startup module import error: ErrorAggregator import from netra_backend.app.error_aggregator should be netra_backend.app.startup.error_aggregator</critical-takeaway>
+            <critical-takeaway>WebSocket deprecation warnings fixed by replacing websockets.WebSocketServerProtocol with websockets.ServerConnection</critical-takeaway>
+            <critical-takeaway>Test imports must be updated when module structure changes - comprehensive grep search needed for all import references</critical-takeaway>
+            <critical-takeaway>Infrastructure dependencies (Docker services) are prerequisites for auth service database tests to pass</critical-takeaway>
+        </category>
+        
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
             <critical-takeaway>Standard import tests miss indirect circular imports through 4+ modules.</critical-takeaway>
             <critical-takeaway>Use lazy imports (inside methods) for WebSocket manager in job/task managers.</critical-takeaway>
