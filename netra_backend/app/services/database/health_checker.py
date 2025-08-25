@@ -205,7 +205,7 @@ class ConnectionHealthChecker:
         engine = DatabaseManager.create_application_engine()
         try:
             start_time = time.time()
-            async with engine.connect() as conn:
+            async with engine.begin() as conn:
                 result = await conn.execute(query)
                 result.fetchall()
             end_time = time.time()
@@ -216,7 +216,7 @@ class ConnectionHealthChecker:
     async def _time_query_with_engine(self, query, engine) -> float:
         """Time a single query execution with provided engine"""
         start_time = time.time()
-        async with engine.connect() as conn:
+        async with engine.begin() as conn:
             result = await conn.execute(query)
             result.fetchall()
         end_time = time.time()

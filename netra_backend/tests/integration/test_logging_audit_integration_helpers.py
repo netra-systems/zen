@@ -23,8 +23,8 @@ from netra_backend.app.core.logging_context import (
 )
 from test_framework.mock_utils import mock_justified
 
-class TestSyntaxFix:
-    """Test class for orphaned methods"""
+class AuditEventHelper:
+    """Helper class for audit events (renamed from TestSyntaxFix to avoid pytest collection)"""
 
     def __init__(self, event_type: str, user_id: str, resource: str, action: str):
         self.event_type = event_type

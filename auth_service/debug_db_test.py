@@ -16,8 +16,8 @@ async def test_database_setup():
     """Test database initialization and table creation"""
     print("Starting database test...")
     
-    from auth_core.database.connection import auth_db
-    from auth_core.database.models import Base, AuthSession
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.models import Base, AuthSession
     from datetime import datetime, timezone, timedelta
     
     try:

@@ -12,7 +12,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

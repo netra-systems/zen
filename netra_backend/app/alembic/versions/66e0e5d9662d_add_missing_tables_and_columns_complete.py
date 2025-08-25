@@ -237,9 +237,11 @@ def _add_agent_state_snapshots_recovery_columns() -> None:
 
 def _add_agent_state_snapshots_constraints_final() -> None:
     """Add final constraints to agent_state_snapshots."""
+    # Create primary key FIRST before foreign keys
+    op.create_primary_key('agent_state_snapshots_pkey', 'agent_state_snapshots', ['id'])
+    # Now create foreign keys that reference the primary key
     op.create_foreign_key(None, 'agent_state_snapshots', 'agent_state_snapshots', ['parent_snapshot_id'], ['id'])
     op.create_foreign_key(None, 'agent_state_snapshots', 'userbase', ['user_id'], ['id'])
-    op.create_primary_key('agent_state_snapshots_pkey', 'agent_state_snapshots', ['id'])
 
 
 def _create_agent_state_snapshots_indexes() -> None:

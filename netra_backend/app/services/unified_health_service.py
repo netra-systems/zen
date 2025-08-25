@@ -163,12 +163,18 @@ class UnifiedHealthService:
             message = str(result) if result else config.description
             details = None
         
+        # Determine success and health score based on status
+        success = status == HealthStatus.HEALTHY.value
+        health_score = 1.0 if success else 0.0
+        
         return HealthCheckResult(
             component_name=config.name,
-            status=status,
+            success=success,
+            health_score=health_score,
             response_time_ms=response_time_ms,
+            status=status,
             message=message,
-            details=details,
+            details=details or {},
             labels=config.labels
         )
     
@@ -181,7 +187,9 @@ class UnifiedHealthService:
             component_name=check_name,
             status=HealthStatus.UNHEALTHY.value,
             response_time_ms=response_time_ms,
-            message=f"Check failed: {error}",
+            success=False,
+            health_score=0.0,
+            error_message=f"Check failed: {error}",
             details={"error": error}
         )
     

@@ -41,7 +41,7 @@ class TestCreateThread:
     @pytest.mark.asyncio
     async def test_create_thread_success(self, mock_db, mock_user):
         """Test successful thread creation"""
-        mock_thread = create_mock_thread(title="New Thread")
+        mock_thread = create_mock_thread(thread_id="thread_abc123", title="New Thread")
         
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:

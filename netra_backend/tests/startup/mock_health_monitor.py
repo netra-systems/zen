@@ -63,6 +63,24 @@ class ServiceConfig:
     full_health_check: Optional[Callable[[], bool]] = None
 
 
+@dataclass
+class ServiceStateObject:
+    """State object for a service being monitored."""
+    name: str
+    state: ServiceState = ServiceState.STARTING
+    start_time: Optional[datetime] = None
+    current_stage: HealthStage = HealthStage.INITIALIZATION
+    failure_count: int = 0
+    last_check: Optional[datetime] = None
+    check_history: List[HealthCheckResult] = field(default_factory=list)
+    grace_multiplier: float = 1.0
+    
+    def __post_init__(self):
+        """Initialize default start_time if not provided."""
+        if self.start_time is None:
+            self.start_time = datetime.now()
+
+
 class StagedHealthMonitor:
     """
     Mock implementation of StagedHealthMonitor for testing.
@@ -74,7 +92,7 @@ class StagedHealthMonitor:
     def __init__(self) -> None:
         """Initialize the mock health monitor."""
         self._services: Dict[str, ServiceConfig] = {}
-        self._states: Dict[str, ServiceState] = {}
+        self._states: Dict[str, ServiceStateObject] = {}
         self._monitoring_tasks: Dict[str, Any] = {}
         self._running: bool = False
         
@@ -89,7 +107,7 @@ class StagedHealthMonitor:
     def register_service(self, service_config: ServiceConfig) -> None:
         """Register a service for monitoring."""
         self._services[service_config.name] = service_config
-        self._states[service_config.name] = ServiceState.STARTING
+        self._states[service_config.name] = ServiceStateObject(name=service_config.name)
     
     def unregister_service(self, service_name: str) -> None:
         """Unregister a service from monitoring."""
@@ -117,18 +135,22 @@ class StagedHealthMonitor:
     async def stop_monitoring(self) -> None:
         """Stop all monitoring tasks."""
         self._running = False
+    
+    async def apply_adaptive_rules(self, service_name: str) -> None:
+        """Apply adaptive rules to a service (mock implementation)."""
+        if service_name not in self._states:
+            return
         
-        # Cancel all tasks
-        tasks = list(self._monitoring_tasks.values())
-        for task in tasks:
-            if hasattr(task, 'cancel'):
-                task.cancel()
+        state = self._states[service_name]
         
-        if tasks:
-            # Mock the asyncio.gather call
-            await asyncio.sleep(0)  # Yield to event loop
+        # Always set to test if method is being called
+        state.grace_multiplier = 99.9  # Test value
         
-        self._monitoring_tasks.clear()
+        # Mock adaptive rule: if service has been initializing for > 60 seconds, increase grace_multiplier  
+        if (state.current_stage == HealthStage.INITIALIZATION and 
+            state.start_time and 
+            (datetime.now() - state.start_time).total_seconds() > 60):
+            state.grace_multiplier = 1.5
     
     async def check_service_health(self, service_name: str, stage: HealthStage) -> HealthCheckResult:
         """Check the health of a service at a specific stage."""

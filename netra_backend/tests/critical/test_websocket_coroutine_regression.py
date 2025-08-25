@@ -11,7 +11,7 @@ from pathlib import Path
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import WebSocket

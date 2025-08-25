@@ -31,13 +31,13 @@ from netra_backend.app.core.network_constants import (
     ServicePorts,
     URLConstants,
 )
-from netra_backend.app.routes.websocket import connection_manager
+from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.schemas.websocket_models import (
     AgentUpdatePayload,
     UserMessagePayload,
 )
 
-from netra_backend.tests.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 
 class WebSocketE2EClient:
     """E2E WebSocket test client with auth and message handling."""
@@ -51,7 +51,7 @@ class WebSocketE2EClient:
     async def connect_with_auth(self, user_id: str = "test_user") -> str:
         """Connect with JWT authentication."""
         token = self.jwt_helper.create_test_user_token(user_id, f"{user_id}@test.com")
-        url = f"ws://localhost:8001/ws/enhanced?token={token}"
+        url = f"ws://localhost:8001/ws?token={token}"
         self.websocket = await websockets.connect(url)
         self.connected = True
         asyncio.create_task(self._listen_messages())
@@ -131,14 +131,14 @@ class TestWebSocketAuthenticationFlow:
     async def test_connection_rejected_invalid_jwt(self):
         """Test connection rejected with invalid JWT."""
         with pytest.raises(Exception):
-            ws = await websockets.connect("ws://localhost:8001/ws/enhanced?token=invalid")
+            ws = await websockets.connect("ws://localhost:8001/ws?token=invalid")
             await ws.close()
             
     @pytest.mark.asyncio
     async def test_connection_rejected_missing_jwt(self):
         """Test connection rejected without JWT."""  
         with pytest.raises(Exception):
-            ws = await websockets.connect("ws://localhost:8001/ws/enhanced")
+            ws = await websockets.connect("ws://localhost:8001/ws")
             await ws.close()
 
 @pytest.mark.asyncio
@@ -290,7 +290,7 @@ class TestServiceDiscovery:
         ws_config = config["websocket_config"]
         assert ws_config["features"]["json_first"] is True
         assert ws_config["features"]["auth_required"] is True
-        assert "/ws/enhanced" in ws_config["endpoints"]["websocket"]
+        assert "/ws" in ws_config["endpoints"]["websocket"]
 
 @pytest.mark.asyncio 
 class TestErrorHandlingAndLogging:
@@ -306,7 +306,7 @@ class TestErrorHandlingAndLogging:
             mock_logger.get_logger.return_value = mock_log
             
             try:
-                await websockets.connect("ws://localhost:8001/ws/enhanced?token=bad_token")
+                await websockets.connect("ws://localhost:8001/ws?token=bad_token")
             except Exception:
                 pass
             
@@ -352,8 +352,10 @@ class TestConcurrentConnections:
                 assert client.connected
                 
             # Connection manager enforces limits (max 5 per user)
-            stats = connection_manager.get_connection_stats()
-            assert stats["total_connections"] <= 5
+            ws_manager = get_websocket_manager()
+            stats = ws_manager.get_stats()
+            total_connections = stats.total_connections if hasattr(stats, 'total_connections') else len(getattr(stats, 'connections', {}))
+            assert total_connections <= 5
             
         finally:
             for client in clients:
@@ -418,7 +420,7 @@ class TestManualDatabaseSessions:
             assert mock_db.called
             
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
+    @patch('netra_backend.app.db.postgres_session.get_async_db')
     @pytest.mark.asyncio
     async def test_auth_validation_manual_session(self, mock_db):
         """Test auth validation uses manual database session."""

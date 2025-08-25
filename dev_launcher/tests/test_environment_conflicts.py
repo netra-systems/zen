@@ -483,11 +483,15 @@ class TestIntegrationScenarios:
     
     def test_isolation_mode_integration(self):
         """Test that isolation mode works correctly in integration scenarios."""
+        # Get manager and ensure isolation is disabled first
+        dev_manager = get_environment_manager()
+        dev_manager.disable_isolation()
+        
         # Test development environment (isolation mode)
         os.environ["ENVIRONMENT"] = "development"
         os.environ["EXISTING_VAR"] = "should_be_ignored"
         
-        dev_manager = get_environment_manager()
+        # Now enable isolation - this should capture the env vars we just set
         dev_manager.enable_isolation()
         assert dev_manager.is_isolation_enabled() is True
         

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>PostgreSQL Configuration Migration from DATABASE_URL to Individual Variables</title>
+    <version>1.0.0</version>
+    <created>2025-08-25</created>
+    <category>database_configuration</category>
+    <tags>
+      <tag>database</tag>
+      <tag>postgresql</tag>
+      <tag>staging</tag>
+      <tag>configuration</tag>
+      <tag>secrets</tag>
+    </tags>
+  </metadata>
+
+  <overview>
+    <summary>
+      Migrates PostgreSQL configuration from monolithic DATABASE_URL to individual
+      environment variables (POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, 
+      POSTGRES_PASSWORD) for better flexibility and compatibility across different
+      connection types (async, sync, with/without SSL).
+    </summary>
+    
+    <rationale>
+      <item>DATABASE_URL parsing is error-prone and inconsistent across drivers</item>
+      <item>Different connection types require different URL formats (asyncpg vs psycopg2)</item>
+      <item>Cloud SQL Unix socket connections have special formatting requirements</item>
+      <item>SSL configuration varies between environments and connection types</item>
+      <item>Individual variables allow dynamic URL construction for each use case</item>
+    </rationale>
+  </overview>
+
+  <configuration>
+    <environment_variables>
+      <variable name="POSTGRES_HOST" required="true">
+        <description>PostgreSQL host address or Unix socket path</description>
+        <examples>
+          <example env="development">localhost</example>
+          <example env="staging">/cloudsql/netra-staging:us-central1:staging-shared-postgres</example>
+          <example env="production">/cloudsql/netra-prod:us-central1:prod-postgres</example>
+        </examples>
+      </variable>
+      
+      <variable name="POSTGRES_PORT" required="false">
+        <description>PostgreSQL port number (defaults to 5432)</description>
+        <examples>
+          <example env="development">5432</example>
+          <example env="staging">5432</example>
+          <example env="cloud_sql">Not needed for Unix socket</example>
+        </examples>
+      </variable>
+      
+      <variable name="POSTGRES_DB" required="true">
+        <description>PostgreSQL database name</description>
+        <examples>
+          <example env="development">netra_dev</example>
+          <example env="staging">netra_staging</example>
+          <example env="production">netra_prod</example>
+        </examples>
+      </variable>
+      
+      <variable name="POSTGRES_USER" required="true">
+        <description>PostgreSQL username</description>
+        <examples>
+          <example env="development">postgres</example>
+          <example env="staging">postgres</example>
+          <example env="production">netra_app</example>
+        </examples>
+      </variable>
+      
+      <variable name="POSTGRES_PASSWORD" required="false">
+        <description>PostgreSQL password (may be empty for local development)</description>
+        <examples>
+          <example env="development">postgres</example>
+          <example env="staging">DTprdt5KoQXlEG4Gh9lF</example>
+          <example env="production">[secure_password]</example>
+        </examples>
+      </variable>
+    </environment_variables>
+    
+    <legacy_support>
+      <variable name="DATABASE_URL">
+        <description>
+          Legacy monolithic database URL. System falls back to this if individual
+          variables are not set. Will be deprecated in future versions.
+        </description>
+        <status>deprecated</status>
+      </variable>
+    </legacy_support>
+  </configuration>
+
+  <implementation>
+    <service name="netra_backend">
+      <file>netra_backend/app/core/configuration/database.py</file>
+      <changes>
+        <change>DatabaseConfigManager._get_postgres_url() now constructs URL from individual variables</change>
+        <change>Added get_sync_postgres_url() for synchronous connections (migrations)</change>
+        <change>Falls back to DATABASE_URL if individual variables not set</change>
+      </changes>
+    </service>
+    
+    <service name="auth_service">
+      <file>auth_service/auth_core/config.py</file>
+      <changes>
+        <change>AuthConfig.get_database_url() constructs URL from individual variables</change>
+        <change>AuthConfig.get_raw_database_url() provides raw URL without driver</change>
+      </changes>
+      
+      <file>auth_service/auth_core/secret_loader.py</file>
+      <changes>
+        <change>AuthSecretLoader.get_database_url() constructs URL from individual variables</change>
+      </changes>
+    </service>
+    
+    <service name="dev_launcher">
+      <file>dev_launcher/google_secret_manager.py</file>
+      <changes>
+        <change>Updated secret mappings to use individual PostgreSQL variables</change>
+        <change>Removed database-url-staging mapping</change>
+        <change>Added postgres-*-staging mappings</change>
+      </changes>
+    </service>
+  </implementation>
+
+  <url_construction>
+    <async_connection>
+      <description>For SQLAlchemy async operations</description>
+      <format>postgresql+asyncpg://USER:PASS@HOST:PORT/DB</format>
+      <cloud_sql_format>postgresql+asyncpg://USER:PASS@/DB?host=/cloudsql/...</cloud_sql_format>
+    </async_connection>
+    
+    <sync_connection>
+      <description>For migrations and synchronous operations</description>
+      <format>postgresql://USER:PASS@HOST:PORT/DB</format>
+      <cloud_sql_format>postgresql://USER:PASS@/DB?host=/cloudsql/...</cloud_sql_format>
+    </sync_connection>
+    
+    <ssl_handling>
+      <rule env="development">No SSL required</rule>
+      <rule env="staging">Add ?sslmode=require for TCP connections</rule>
+      <rule env="production">Add ?sslmode=require for TCP connections</rule>
+      <rule env="cloud_sql">No SSL parameters for Unix socket connections</rule>
+    </ssl_handling>
+  </url_construction>
+
+  <migration_steps>
+    <step number="1">
+      <action>Run migration script to create individual secrets in GCP</action>
+      <command>python scripts/migrate_staging_postgres_secrets.py</command>
+    </step>
+    
+    <step number="2">
+      <action>Update local .env files with individual variables</action>
+      <example>
+        POSTGRES_HOST=localhost
+        POSTGRES_PORT=5432
+        POSTGRES_DB=netra_dev
+        POSTGRES_USER=postgres
+        POSTGRES_PASSWORD=postgres
+      </example>
+    </step>
+    
+    <step number="3">
+      <action>Deploy updated services</action>
+      <command>python scripts/deploy_to_gcp.py --project netra-staging --build-local</command>
+    </step>
+    
+    <step number="4">
+      <action>Verify connectivity</action>
+      <command>python scripts/validate_staging_db_connection.py</command>
+    </step>
+  </migration_steps>
+
+  <testing>
+    <test_file>tests/unit/test_database_url_construction.py</test_file>
+    <test_scenarios>
+      <scenario>Construct URL from individual variables</scenario>
+      <scenario>Fall back to DATABASE_URL when variables not set</scenario>
+      <scenario>Handle Cloud SQL Unix socket paths</scenario>
+      <scenario>Add SSL parameters for staging/production</scenario>
+      <scenario>Generate both async and sync URLs</scenario>
+    </test_scenarios>
+  </testing>
+
+  <validation>
+    <script>scripts/validate_postgres_config.py</script>
+    <checks>
+      <check>All services can construct valid URLs</check>
+      <check>URLs are properly formatted for each driver</check>
+      <check>SSL is configured correctly per environment</check>
+      <check>Cloud SQL connections use Unix socket format</check>
+    </checks>
+  </validation>
+</specification>

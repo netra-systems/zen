@@ -87,11 +87,35 @@ class StagingSecretsManager:
     def get_required_secrets(self):
         """Get the list of required secrets and their recommended values."""
         return {
-            "database-url-staging": {
-                "description": "PostgreSQL connection URL for Cloud SQL",
-                "format": "postgresql://USER:PASSWORD@/DATABASE?host=/cloudsql/PROJECT:REGION:INSTANCE",
-                "example": "postgresql://postgres:PASSWORD@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres",
-                "notes": "Use Unix socket format for Cloud SQL proxy. No sslmode needed for Unix sockets."
+            "postgres-host-staging": {
+                "description": "PostgreSQL host (use /cloudsql/... for Cloud SQL)",
+                "format": "/cloudsql/PROJECT:REGION:INSTANCE or hostname",
+                "example": "/cloudsql/netra-staging:us-central1:staging-shared-postgres",
+                "notes": "Use Unix socket path for Cloud SQL, or hostname for TCP connection"
+            },
+            "postgres-port-staging": {
+                "description": "PostgreSQL port (omit for Unix socket)",
+                "format": "Port number (5432 default)",
+                "example": "5432",
+                "notes": "Not needed when using Unix socket for Cloud SQL"
+            },
+            "postgres-db-staging": {
+                "description": "PostgreSQL database name",
+                "format": "Database name",
+                "example": "netra_dev",
+                "notes": "The database to connect to"
+            },
+            "postgres-user-staging": {
+                "description": "PostgreSQL username",
+                "format": "Username",
+                "example": "postgres",
+                "notes": "Database user for authentication"
+            },
+            "postgres-password-staging": {
+                "description": "PostgreSQL password",
+                "format": "Password string",
+                "example": "DTprdt5KoQXlEG4Gh9lF",
+                "notes": "Database password for authentication"
             },
             "clickhouse-url-staging": {
                 "description": "ClickHouse HTTP endpoint URL",
@@ -172,7 +196,11 @@ class StagingSecretsManager:
         print("\n=== Update Staging Secrets ===\n")
         
         secrets_to_update = {
-            "database-url-staging": None,
+            "postgres-host-staging": None,
+            "postgres-port-staging": None,
+            "postgres-db-staging": None,
+            "postgres-user-staging": None,
+            "postgres-password-staging": None,
             "jwt-secret-key-staging": None,
             "jwt-secret-staging": None,
             "service-secret-staging": None,

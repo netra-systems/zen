@@ -32,15 +32,15 @@ jest.mock('@/lib/auth-service-config', () => {
     getAuthServiceConfig: jest.fn().mockReturnValue({
       baseUrl: 'http://localhost:8081',
       endpoints: {
-        login: 'http://localhost:8081/auth/login',
-        logout: 'http://localhost:8081/auth/logout',
-        callback: 'http://localhost:8081/auth/callback',
-        token: 'http://localhost:8081/auth/token',
-        refresh: 'http://localhost:8081/auth/refresh',
-        validate_token: 'http://localhost:8081/auth/validate',
-        config: 'http://localhost:8081/auth/config',
-        session: 'http://localhost:8081/auth/session',
-        me: 'http://localhost:8081/auth/me'
+        login: 'http://localhost:8081/api/v1/auth/login',
+        logout: 'http://localhost:8081/api/v1/auth/logout',
+        callback: 'http://localhost:8081/api/v1/auth/callback',
+        token: 'http://localhost:8081/api/v1/auth/token',
+        refresh: 'http://localhost:8081/api/v1/auth/refresh',
+        validate_token: 'http://localhost:8081/api/v1/auth/validate',
+        config: 'http://localhost:8081/api/v1/auth/config',
+        session: 'http://localhost:8081/api/v1/auth/session',
+        me: 'http://localhost:8081/api/v1/auth/me'
       },
       oauth: {
         googleClientId: 'mock-google-client-id',
@@ -56,7 +56,7 @@ global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
   const urlStr = url.toString();
   
   // Auth service config endpoint
-  if (urlStr.includes('/auth/config')) {
+  if (urlStr.includes('/api/v1/auth/config')) {
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockAuthServiceResponses.config)
@@ -64,7 +64,7 @@ global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
   }
   
   // Auth service session endpoint
-  if (urlStr.includes('/auth/session')) {
+  if (urlStr.includes('/api/v1/auth/session')) {
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockAuthServiceResponses.session)
@@ -72,7 +72,7 @@ global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
   }
   
   // Auth service user endpoint
-  if (urlStr.includes('/auth/me')) {
+  if (urlStr.includes('/api/v1/auth/me')) {
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockAuthServiceResponses.user)
@@ -80,7 +80,7 @@ global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
   }
   
   // Dev login endpoint
-  if (urlStr.includes('/auth/dev/login')) {
+  if (urlStr.includes('/api/v1/auth/dev/login')) {
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockAuthServiceResponses.devLogin)
@@ -88,7 +88,7 @@ global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
   }
   
   // Token refresh endpoint
-  if (urlStr.includes('/auth/refresh')) {
+  if (urlStr.includes('/api/v1/auth/refresh')) {
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockAuthServiceResponses.token)
@@ -96,7 +96,7 @@ global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
   }
   
   // Token validation endpoint
-  if (urlStr.includes('/auth/validate')) {
+  if (urlStr.includes('/api/v1/auth/validate')) {
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve({ valid: true })
@@ -104,7 +104,7 @@ global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
   }
   
   // Logout endpoint
-  if (urlStr.includes('/auth/logout')) {
+  if (urlStr.includes('/api/v1/auth/logout')) {
     return Promise.resolve({
       ok: true,
       json: () => Promise.resolve({ success: true })

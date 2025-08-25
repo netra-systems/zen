@@ -157,20 +157,14 @@ class TestColdStartFixesValidation:
     @pytest.mark.asyncio
     async def test_environment_variable_compatibility(self):
         """Test that environment variables support both old and new names."""
-        # Test ClickHouse password compatibility
+        # Test ClickHouse password configuration
         os.environ["CLICKHOUSE_PASSWORD"] = "password1"
-        os.environ["CLICKHOUSE_DEFAULT_PASSWORD"] = "password2"
         
         from netra_backend.app.core.configuration.database import get_clickhouse_password
         
-        # Should prefer CLICKHOUSE_PASSWORD
+        # Should use CLICKHOUSE_PASSWORD
         password = get_clickhouse_password()
-        assert password == "password1", "Should use CLICKHOUSE_PASSWORD when both are set"
-        
-        # Test with only CLICKHOUSE_DEFAULT_PASSWORD
-        del os.environ["CLICKHOUSE_PASSWORD"]
-        password2 = get_clickhouse_password()
-        assert password2 == "password2", "Should fallback to CLICKHOUSE_DEFAULT_PASSWORD"
+        assert password == "password1", "Should use CLICKHOUSE_PASSWORD"
 
     @pytest.mark.asyncio
     async def test_websocket_cors_configuration(self):

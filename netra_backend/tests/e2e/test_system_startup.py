@@ -42,9 +42,7 @@ from test_framework.environment_markers import (
 )
 
 from dev_launcher.config import LauncherConfig
-# Removed broken import statement
-# Removed broken import statement
-# Removed broken import statement
+from dev_launcher.health_monitor import HealthMonitor
 class ServiceInfo:
     """Service information container."""
     
@@ -167,21 +165,21 @@ class TestSystemStartup:
     async def test_health_monitoring_active(self):
         """Test health monitoring system is properly active."""
         health_monitor = HealthMonitor(check_interval=5)
-        await health_monitor.start()
+        health_monitor.start()  # This is not async
         
         try:
             # Verify health monitor is running
-            assert health_monitor.is_running
+            assert health_monitor.running
             
             # Wait for at least one health check cycle
             await asyncio.sleep(6)
             
             # Verify health status is available
-            health_status = await health_monitor.get_health_status()
+            health_status = health_monitor.get_cross_service_health_status()
             assert health_status is not None
             
         finally:
-            await health_monitor.stop()
+            health_monitor.stop()
     
     @pytest.mark.asyncio
     async def test_port_allocation_succeeds(self, launcher_config):

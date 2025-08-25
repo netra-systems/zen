@@ -18,7 +18,7 @@ class AgentError(NetraException):
     """
     
     def __init__(self, message: str = None, agent_name: str = None, severity: ErrorSeverity = None, 
-                 category=None, original_error=None, context=None, metadata=None, **kwargs):
+                 category=None, original_error=None, context=None, metadata=None, recoverable=True, **kwargs):
         from netra_backend.app.schemas.core_enums import ErrorCategory
         
         message = self._handle_message_fallback(message, agent_name)
@@ -30,6 +30,7 @@ class AgentError(NetraException):
         self._original_error = original_error
         self._context = context or {}
         self._metadata = metadata or {}
+        self.recoverable = recoverable
         
         init_params = self._build_init_params(agent_msg, final_severity, agent_name, kwargs)
         super().__init__(**init_params)

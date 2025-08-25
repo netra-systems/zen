@@ -196,7 +196,7 @@ class EnvironmentValidator:
         ch_host = env_vars.get("CLICKHOUSE_HOST") or os.environ.get("CLICKHOUSE_HOST")
         ch_port = env_vars.get("CLICKHOUSE_PORT", "8443")
         ch_user = env_vars.get("CLICKHOUSE_USER", "default")
-        ch_password = env_vars.get("CLICKHOUSE_DEFAULT_PASSWORD") or env_vars.get("CLICKHOUSE_DEVELOPMENT_PASSWORD")
+        ch_password = env_vars.get("CLICKHOUSE_PASSWORD")
         
         if not ch_host:
             self._add_result("clickhouse_connection", "FAIL", 

@@ -1438,23 +1438,41 @@ class DevLauncher:
                 timeout_per_attempt=15.0
             )
             
+            # Get database URLs from environment
+            env = get_env()
+            db_configs = {
+                'postgres': (env.get('DATABASE_URL'), 'postgresql'),
+                'redis': (env.get('REDIS_URL'), 'redis'),
+                'clickhouse': (env.get('CLICKHOUSE_URL'), 'clickhouse')
+            }
+            
             # Check individual database services with resilience
-            db_services = ['postgres', 'redis', 'clickhouse']
             successful_connections = []
             failed_connections = []
             
-            for db_service in db_services:
+            for service_name, (db_url, db_type) in db_configs.items():
+                if not db_url:
+                    self._print("ℹ️", "DB-RESILIENT", f"No {service_name.upper()}_URL configured, skipping")
+                    continue
+                    
+                # Skip mock databases
+                if 'mock' in db_url.lower():
+                    self._print("🎭", "DB-RESILIENT", f"{service_name.capitalize()} in mock mode, skipping")
+                    successful_connections.append(service_name)
+                    continue
+                
                 success, error = await self.network_client.resilient_database_check(
-                    db_service,
+                    db_url,
+                    db_type=db_type,
                     retry_policy=db_policy
                 )
                 
                 if success:
-                    successful_connections.append(db_service)
-                    self._print("✅", "DB-RESILIENT", f"{db_service.capitalize()} connection validated")
+                    successful_connections.append(service_name)
+                    self._print("✅", "DB-RESILIENT", f"{service_name.capitalize()} connection validated")
                 else:
-                    failed_connections.append((db_service, error))
-                    self._print("⚠️", "DB-RESILIENT", f"{db_service.capitalize()} connection failed: {error}")
+                    failed_connections.append((service_name, error))
+                    self._print("⚠️", "DB-RESILIENT", f"{service_name.capitalize()} connection failed: {error}")
             
             # Report resilience results
             if successful_connections:
@@ -1555,7 +1573,8 @@ class DevLauncher:
     
     def _verify_auth_system(self, timeout: int = 15) -> bool:
         """Verify auth system /api/auth/config per SPEC step 9 with resilient networking."""
-        auth_port = 8081  # Auth service port
+        # Get the actual allocated auth port instead of hardcoded 8081
+        auth_port = getattr(self.service_startup, 'allocated_ports', {}).get('auth', 8081)
         auth_config_url = f"http://localhost:{auth_port}/api/auth/config"
         
         # Use resilient network client
@@ -1576,11 +1595,25 @@ class DevLauncher:
             return success
         
         try:
-            # Run async check
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            verified = loop.run_until_complete(verify_auth())
-            loop.close()
+            # Run async check with proper event loop handling
+            try:
+                # Try to get the running loop first
+                loop = asyncio.get_running_loop()
+                # If we're in an async context, create a task
+                task = asyncio.create_task(verify_auth())
+                verified = asyncio.run_coroutine_threadsafe(verify_auth(), loop).result(timeout=timeout)
+            except RuntimeError:
+                # No running loop, create a new one safely
+                try:
+                    verified = asyncio.run(verify_auth())
+                except RuntimeError:
+                    # Fallback: use new event loop in thread
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        verified = loop.run_until_complete(verify_auth())
+                    finally:
+                        loop.close()
             
             if verified:
                 self._print("✅", "READY", "Auth system verified")

@@ -48,7 +48,7 @@ export class UnifiedAuthService {
             callback: unifiedApiConfig.endpoints.authCallback,
             token: unifiedApiConfig.endpoints.authToken,
             user: unifiedApiConfig.endpoints.authMe,
-            dev_login: `${unifiedApiConfig.urls.auth}/auth/dev/login`
+            dev_login: `${unifiedApiConfig.urls.auth}/api/v1/auth/dev/login`
           },
           authorized_javascript_origins: [unifiedApiConfig.urls.frontend],
           authorized_redirect_uris: [`${unifiedApiConfig.urls.frontend}/auth/callback`]

@@ -31,7 +31,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+
+# Initialize auth client instance
+auth_client = AuthServiceClient()
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.database import get_db_session
 from netra_backend.app.dependencies import get_db_dependency as get_db
@@ -121,9 +124,10 @@ OptionalUserDep = Annotated[Optional[User], Depends(get_current_user_optional)]
 # Permission-based dependencies
 async def require_admin(user: User = Depends(get_current_user)) -> User:
     """Require admin permissions"""
-    # Check both is_superuser and role for admin permissions
+    # Check both is_superuser, role, and legacy is_admin for admin permissions
     is_admin = (hasattr(user, 'is_superuser') and user.is_superuser) or \
-               (hasattr(user, 'role') and user.role in ['admin', 'super_admin'])
+               (hasattr(user, 'role') and user.role in ['admin', 'super_admin']) or \
+               (hasattr(user, 'is_admin') and user.is_admin)
     if not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

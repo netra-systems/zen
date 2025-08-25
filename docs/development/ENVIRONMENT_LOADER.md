@@ -99,7 +99,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 CLICKHOUSE_HOST=localhost
 CLICKHOUSE_PORT=9000
 CLICKHOUSE_USER=default
-CLICKHOUSE_DEFAULT_PASSWORD=your-password
+CLICKHOUSE_PASSWORD=your-password
 CLICKHOUSE_DB=default
 
 # Redis
@@ -286,7 +286,7 @@ This means your `.env` file contains auto-generation markers. Create a fresh `.e
 
 ### Database Configuration
 - `CLICKHOUSE_HOST`, `CLICKHOUSE_PORT`, `CLICKHOUSE_USER`
-- `CLICKHOUSE_DEFAULT_PASSWORD` or `CLICKHOUSE_DEVELOPMENT_PASSWORD`
+- `CLICKHOUSE_PASSWORD`
 - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
 
 ### Optional Services

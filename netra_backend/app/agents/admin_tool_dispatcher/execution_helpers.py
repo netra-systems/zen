@@ -9,7 +9,7 @@ Business Value: Standardizes admin tool execution patterns across all tools.
 from datetime import UTC, datetime
 from typing import Any, Dict, Optional, Union
 
-from netra_backend.app.agents.base.interface import ExecutionResult
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.admin_tool_types import (

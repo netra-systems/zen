@@ -51,7 +51,10 @@ class TestEnvironmentSecretsLoadingValidation:
         # Container setup based on test requirements
         containers = {}
         
-        if 'database' in test_def['name'].lower() or 'connection' in test_def['name'].lower():
+        # Based on test class name, set up containers
+        test_class_name = self.__class__.__name__.lower()
+        
+        if 'database' in test_class_name or 'connection' in test_class_name:
             # PostgreSQL container
             containers["postgres"] = {
                 "url": "postgresql://test:test@localhost:5433/netra_test",
@@ -59,7 +62,7 @@ class TestEnvironmentSecretsLoadingValidation:
                 "pool_size": 20
             }
         
-        if 'clickhouse' in test_def['name'].lower():
+        if 'clickhouse' in test_class_name:
             # ClickHouse container
             containers["clickhouse"] = {
                 "url": "http://localhost:8124",
@@ -67,7 +70,7 @@ class TestEnvironmentSecretsLoadingValidation:
                 "max_connections": 100
             }
         
-        if 'redis' in test_def['name'].lower() or 'session' in test_def['name'].lower():
+        if 'redis' in test_class_name or 'session' in test_class_name:
             # Redis container
             containers["redis"] = {
                 "url": "redis://localhost:6380",

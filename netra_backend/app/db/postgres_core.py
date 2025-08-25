@@ -61,6 +61,13 @@ class Database:
     def _create_engine(self, db_url: str, pool_class):
         """Create database engine with resilient pooling configuration."""
         config = get_unified_config()
+        
+        # Determine connect_args based on connection type
+        # Cloud SQL connections may not support PostgreSQL options parameter
+        connect_args = {}
+        if "cloudsql" not in db_url.lower():
+            connect_args = {"options": "-c default_transaction_isolation=read_committed"}
+        
         return create_engine(
             db_url, echo=config.db_echo, echo_pool=config.db_echo_pool,
             poolclass=pool_class, pool_size=self._get_pool_size(pool_class),
@@ -70,7 +77,7 @@ class Database:
             pool_pre_ping=True,  # Always enable pre-ping for resilience
             # Additional resilience settings
             pool_reset_on_return='rollback',  # Reset connections safely
-            connect_args={"options": "-c default_transaction_isolation=read_committed"}
+            connect_args=connect_args
         )
     
     def _create_session_factory(self):
@@ -206,7 +213,8 @@ class AsyncDatabase:
             raise RuntimeError(f"Database URL validation failed for asyncpg: {self.db_url}")
         
         engine_args = {
-            "echo": False,  # Disable for production resilience
+            "echo": False,  # Disable to reduce logging noise
+            "echo_pool": False,  # Disable pool logging to reduce noise
             "poolclass": pool_class,
             "pool_pre_ping": True,  # Enable connection health checks
             "pool_reset_on_return": "rollback",  # Safe connection resets
@@ -216,9 +224,9 @@ class AsyncDatabase:
         if pool_class != NullPool:
             config = get_unified_config()
             engine_args.update({
-                "pool_size": max(config.db_pool_size, 15),  # Increased for cold start resilience
-                "max_overflow": max(config.db_max_overflow, 25),  # Handle concurrent startup
-                "pool_timeout": max(config.db_pool_timeout, 90),  # Longer timeout for startup
+                "pool_size": max(config.db_pool_size, 8),  # Optimized for dev efficiency
+                "max_overflow": max(config.db_max_overflow, 12),  # Reduced for dev efficiency
+                "pool_timeout": max(config.db_pool_timeout, 45),  # Shorter timeout for faster feedback
                 "pool_recycle": config.db_pool_recycle,
             })
             
@@ -357,8 +365,8 @@ def _get_base_engine_args(pool_class):
     """Get base engine arguments for all pool types."""
     config = get_unified_config()
     return {
-        "echo": config.db_echo,
-        "echo_pool": config.db_echo_pool,
+        "echo": False,  # Disable to reduce logging noise in dev
+        "echo_pool": False,  # Disable pool logging to reduce noise
         "poolclass": pool_class,
     }
 

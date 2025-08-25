@@ -38,6 +38,23 @@ from netra_backend.app.services.unified_health_service import UnifiedHealthServi
 class TestBackendHealthChecks:
     """Test comprehensive backend health check functionality."""
 
+    @pytest.fixture(autouse=True)
+    def setup_clickhouse_env(self):
+        """Set up ClickHouse environment variables for testing."""
+        # Save original values
+        original_password = os.environ.get('CLICKHOUSE_PASSWORD')
+        
+        # Set development password for testing
+        os.environ['CLICKHOUSE_PASSWORD'] = 'netra_dev_password'
+        
+        yield
+        
+        # Restore original values
+        if original_password is None:
+            os.environ.pop('CLICKHOUSE_PASSWORD', None)
+        else:
+            os.environ['CLICKHOUSE_PASSWORD'] = original_password
+
     @pytest.fixture
     def health_service(self):
         """Create health service instance for testing."""
@@ -61,13 +78,12 @@ class TestBackendHealthChecks:
         """Test successful database health check."""
         # Arrange
         expected_result = HealthCheckResult(
+            component_name="database_postgres",
+            success=True,
+            health_score=1.0,
+            response_time_ms=50.0,
             status="healthy",
-            response_time=0.05,
-            details={
-                "component_name": "database_postgres",
-                "success": True,
-                "health_score": 1.0
-            }
+            response_time=0.05  # Legacy field for compatibility
         )
         mock_database_checker.check_health.return_value = expected_result
 
@@ -76,21 +92,22 @@ class TestBackendHealthChecks:
 
         # Assert
         assert result.status == "healthy"
-        assert result.details["success"] is True
-        assert result.details["health_score"] == 1.0
+        assert result.success is True
+        assert result.component_name == "database_postgres"
+        assert result.health_score == 1.0
         assert result.response_time == 0.05
 
     async def test_database_health_check_failure(self, mock_database_checker):
         """Test database health check failure with Five Whys analysis."""
         # Arrange - simulate database connection failure
         failure_result = HealthCheckResult(
+            component_name="database_postgres",
+            success=False,
+            health_score=0.0,
+            response_time_ms=5000.0,
             status="unhealthy",
-            response_time=5.0,
+            error_message="Connection timeout",
             details={
-                "component_name": "database_postgres",
-                "success": False,
-                "health_score": 0.0,
-                "error_message": "Connection timeout",
                 "five_whys_analysis": {
                     "why_1": "Database connection timed out after 5s",
                     "why_2": "Database server is overloaded or unreachable",
@@ -108,15 +125,19 @@ class TestBackendHealthChecks:
 
         # Assert
         assert result.status == "unhealthy"
-        assert result.details["success"] is False
+        assert result.success is False
         assert "five_whys_analysis" in result.details
         assert "root_cause" in result.details["five_whys_analysis"]
 
     async def test_redis_connectivity_check(self):
         """Test Redis connectivity health check."""
-        with patch('netra_backend.app.core.health_checkers.check_redis_health') as mock_redis:
+        with patch('netra_backend.app.core.health.checks.check_redis_health') as mock_redis:
             # Arrange
             mock_redis.return_value = HealthCheckResult(
+                component_name="redis",
+                success=True,
+                health_score=1.0,
+                response_time_ms=20.0,
                 status="healthy",
                 response_time=0.02,
                 details={"success": True, "health_score": 1.0}
@@ -133,9 +154,13 @@ class TestBackendHealthChecks:
 
     async def test_clickhouse_health_check(self):
         """Test ClickHouse database health check."""
-        with patch('netra_backend.app.core.health_checkers.check_clickhouse_health') as mock_ch:
+        with patch('netra_backend.app.core.health.checks.check_clickhouse_health') as mock_ch:
             # Arrange
             mock_ch.return_value = HealthCheckResult(
+                component_name="clickhouse",
+                success=True,
+                health_score=0.9,
+                response_time_ms=100.0,
                 status="healthy",
                 response_time=0.1,
                 details={"success": True, "health_score": 0.9}
@@ -149,6 +174,31 @@ class TestBackendHealthChecks:
             # Assert
             assert result.status == "healthy"
             assert result.details["health_score"] == 0.9
+
+    async def test_clickhouse_mock_client_behavior(self):
+        """
+        Test ClickHouse health check with MOCK client behavior.
+        
+        In testing environment, ClickHouse uses a MOCK client which should always return healthy.
+        This validates that the MOCK behavior is working correctly.
+        """
+        from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+        
+        # Use testing environment which should use MOCK ClickHouse client
+        env = IsolatedEnvironment()
+        
+        # Create ClickHouse health checker (should use MOCK client in test environment)
+        checker = UnifiedDatabaseHealthChecker("clickhouse")
+        
+        # Act - test MOCK ClickHouse connection
+        result = await checker.check_health()
+        
+        # Verify the MOCK client returns healthy status
+        assert result.status == "healthy", f"Expected 'healthy' status from MOCK client but got: {result.status}"
+        assert result.details.get("success") is True, f"Expected success=True from MOCK client but got: {result.details}"
+        
+        # Verify MOCK-specific indicators
+        assert "mock" in str(result.details).lower() or result.status == "healthy", "Should indicate MOCK client usage"
 
     async def test_websocket_health_check(self):
         """Test WebSocket endpoint health check."""
@@ -189,10 +239,8 @@ class TestBackendHealthChecks:
         """Test MCP (Model Context Protocol) integration health."""
         dependency_checker = DependencyHealthChecker("llm")
         
-        with patch('netra_backend.app.llm.llm_manager.llm_manager') as mock_llm:
-            # Arrange
-            mock_llm.is_healthy.return_value = True
-            
+        # Mock the _check_llm_connectivity method directly to avoid import issues
+        with patch.object(dependency_checker, '_check_llm_connectivity', return_value=True):
             # Act
             result = await dependency_checker.check_health()
             
@@ -211,7 +259,13 @@ class TestBackendHealthChecks:
         
         # Test normal operation
         base_checker.check_health.return_value = HealthCheckResult(
-            status="healthy", response_time=0.1, details={"success": True}
+            component_name="test_component",
+            success=True,
+            health_score=1.0,
+            response_time_ms=100.0,
+            status="healthy", 
+            response_time=0.1, 
+            details={"success": True}
         )
         
         result = await cb_checker.check_health()
@@ -229,7 +283,13 @@ class TestBackendHealthChecks:
         
         # Simulate failures
         base_checker.check_health.return_value = HealthCheckResult(
-            status="unhealthy", response_time=5.0, details={"success": False}
+            component_name="test_component",
+            success=False,
+            health_score=0.0,
+            response_time_ms=5000.0,
+            status="unhealthy", 
+            response_time=5.0, 
+            details={"success": False}
         )
         
         # First failure
@@ -267,36 +327,46 @@ class TestBackendHealthChecks:
         """Test detailed status reporting with metrics."""
         from netra_backend.app.core.health_types import CheckType, HealthCheckConfig
         
-        # Register multiple health checks
+        # Create a fresh health service instance to avoid conflicts
+        fresh_health_service = UnifiedHealthService("test_backend", "1.0.0")
+        
+        # Register multiple health checks with proper AsyncMock configuration
+        postgres_mock = AsyncMock(return_value={"status": "healthy"})
+        redis_mock = AsyncMock(return_value={"status": "healthy"})  
+        websocket_mock = AsyncMock(return_value={"status": "healthy"})
+        
         checks = [
             HealthCheckConfig(
-                name="postgres",
-                check_function=AsyncMock(return_value={"status": "healthy"}),
+                name="postgres_test",
+                check_function=postgres_mock,
                 check_type=CheckType.READINESS,
-                priority=1
+                priority=1,
+                description="Test Postgres health check"
             ),
             HealthCheckConfig(
-                name="redis", 
-                check_function=AsyncMock(return_value={"status": "healthy"}),
+                name="redis_test", 
+                check_function=redis_mock,
                 check_type=CheckType.READINESS,
-                priority=2
+                priority=2,
+                description="Test Redis health check"
             ),
             HealthCheckConfig(
-                name="websocket",
-                check_function=AsyncMock(return_value={"status": "healthy"}),
+                name="websocket_test",
+                check_function=websocket_mock,
                 check_type=CheckType.LIVENESS,
-                priority=3
+                priority=3,
+                description="Test WebSocket health check"
             )
         ]
         
         for check in checks:
-            await health_service.register_check(check)
+            await fresh_health_service.register_check(check)
         
         # Get comprehensive health status
-        health_response = await health_service.get_health()
+        health_response = await fresh_health_service.get_health()
         
         # Assert comprehensive reporting
-        assert health_response.status == "healthy"
+        assert health_response.status == "healthy", f"Expected healthy, got {health_response.status}"
         assert len(health_response.checks) == 3
         assert health_response.summary["total_checks"] == 3
         assert health_response.summary["healthy"] == 3
@@ -411,6 +481,11 @@ class TestHealthCheckFailureAnalysis:
 class TestHealthCheckReliabilityImprovement:
     """Test reliability improvements for health checks."""
 
+    @pytest.fixture
+    def health_service(self):
+        """Create health service instance for testing."""
+        return UnifiedHealthService("test_backend", "1.0.0")
+
     def test_health_check_timeout_handling(self):
         """Test proper timeout handling in health checks."""
         checker = UnifiedDatabaseHealthChecker(timeout=1.0)
@@ -418,10 +493,19 @@ class TestHealthCheckReliabilityImprovement:
         # Verify timeout is properly set
         assert checker.timeout == 1.0
         
-        # Test timeout configuration
-        with patch.dict(os.environ, {'HEALTH_CHECK_TIMEOUT': '2.5'}):
+        # Test timeout configuration using IsolatedEnvironment system
+        from dev_launcher.isolated_environment import get_env
+        env = get_env()
+        
+        # Set environment variable through IsolatedEnvironment
+        env.set('HEALTH_CHECK_TIMEOUT', '2.5', 'test_health_check_timeout_handling')
+        
+        try:
             checker_with_env = UnifiedDatabaseHealthChecker()
             assert checker_with_env.timeout == 2.5
+        finally:
+            # Clean up the environment variable
+            env.delete('HEALTH_CHECK_TIMEOUT')
 
     def test_health_check_retry_logic(self):
         """Test retry logic for transient failures."""
@@ -437,7 +521,7 @@ class TestHealthCheckReliabilityImprovement:
             # This would test retry logic if implemented in ServiceHealthChecker
             assert service_checker is not None
 
-    def test_health_check_caching(self, health_service):
+    async def test_health_check_caching(self, health_service):
         """Test health check result caching."""
         from netra_backend.app.core.health_types import CheckType, HealthCheckConfig
         
@@ -448,23 +532,23 @@ class TestHealthCheckReliabilityImprovement:
             check_type=CheckType.LIVENESS
         )
         
-        health_service.register_check(config)
+        await health_service.register_check(config)
         
         # First call should execute check
-        result1 = health_service.run_check("cached_test")
+        result1 = await health_service.run_check("cached_test")
         
         # Second call within cache TTL should use cache
-        result2 = health_service.run_check("cached_test")
+        result2 = await health_service.run_check("cached_test")
         
         # Verify caching behavior exists
         assert health_service._cache_ttl == 30  # Default cache TTL
 
-    def test_detailed_status_reporting(self):
+    async def test_detailed_status_reporting(self):
         """Test comprehensive status reporting with metrics."""
         health_service = UnifiedHealthService("test_backend", "1.0.0")
         
         # Test basic health response structure
-        basic_response = health_service.get_liveness()
+        basic_response = await health_service.get_liveness()
         
         # Should return proper structure even with no checks
         assert basic_response is not None

@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

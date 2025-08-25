@@ -1,17 +1,3 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
 """
 LLM Manager Test Helpers - Reusable functions for LLM testing
 Extracted from test_llm_manager_provider_switching.py for 25-line function compliance
@@ -19,7 +5,6 @@ Extracted from test_llm_manager_provider_switching.py for 25-line function compl
 
 import asyncio
 import json
-import os
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
@@ -28,6 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from pydantic import BaseModel
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.schemas.Config import AppConfig, LLMConfig
 
 class LLMProvider(Enum):

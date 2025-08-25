@@ -73,8 +73,18 @@ class AuthDatabase:
             # Local development with PostgreSQL
             from auth_service.auth_core.config import AuthConfig
             database_url = AuthConfig.get_database_url()
-            pool_class = AsyncAdaptedQueuePool
-            connect_args = self._get_local_connect_args()
+            
+            # If no DATABASE_URL is configured, fall back to SQLite for tests
+            if not database_url and is_pytest:
+                logger.info("No DATABASE_URL configured in test, falling back to SQLite")
+                database_url = "sqlite+aiosqlite:///:memory:"
+                pool_class = NullPool
+                connect_args = {"check_same_thread": False}
+            elif not database_url:
+                raise ValueError("DATABASE_URL must be configured for local development")
+            else:
+                pool_class = AsyncAdaptedQueuePool
+                connect_args = self._get_local_connect_args()
         
         logger.info(f"Creating async engine for environment: {self.environment}")
         

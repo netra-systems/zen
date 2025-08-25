@@ -1,17 +1,3 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
 """Unified Configuration Management System
 
 Enterprise-grade configuration management for Netra Apex.
@@ -35,6 +21,7 @@ Architecture:
 All files ≤300 lines, all functions ≤8 lines.
 """
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import (
     ActualSecretManager as SecretManager,
 )
@@ -80,7 +67,6 @@ def reload_configuration():
 
 def get_environment():
     """Get environment."""
-    import os
     return get_env().get("ENVIRONMENT", "development")
 
 def is_production():
@@ -97,7 +83,6 @@ def load_secrets():
 
 def get_secret(key: str):
     """Get secret by key."""
-    import os
     return get_env().get(key)
 
 # Placeholder classes for compatibility

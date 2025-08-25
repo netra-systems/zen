@@ -32,7 +32,7 @@ import os
 import secrets
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -130,11 +130,12 @@ class UserLoginFlowTestSuite:
     
     def generate_oauth_token(self, email: str, provider: AuthProvider) -> str:
         """Generate mock OAuth token."""
+        now = datetime.now(timezone.utc)
         payload = {
             "email": email,
             "provider": provider,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "iat": now.timestamp(),  # Use timestamp with microseconds for uniqueness
+            "exp": (now + timedelta(hours=1)).timestamp()
         }
         return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
     
@@ -148,22 +149,24 @@ class UserLoginFlowTestSuite:
         expires_in: int = 3600
     ) -> str:
         """Generate JWT access token."""
+        now = datetime.now(timezone.utc)
         payload = {
             "sub": user.email,
             "email": user.email,
             "tier": user.tier,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(seconds=expires_in)
+            "iat": now.timestamp(),  # Use timestamp with microseconds for uniqueness
+            "exp": (now + timedelta(seconds=expires_in)).timestamp()
         }
         return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
     
     def generate_refresh_token(self, user: LoginTestUser) -> str:
         """Generate refresh token."""
+        now = datetime.now(timezone.utc)
         payload = {
             "sub": user.email,
             "type": "refresh",
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(days=7)
+            "iat": now.timestamp(),  # Use timestamp with microseconds for uniqueness
+            "exp": (now + timedelta(days=7)).timestamp()
         }
         return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
     
@@ -201,8 +204,8 @@ class UserLoginFlowTestSuite:
                 session = SessionInfo(
                     session_id=session_id,
                     user_id=user.email,
-                    created_at=datetime.utcnow(),
-                    last_activity=datetime.utcnow(),
+                    created_at=datetime.now(timezone.utc),
+                    last_activity=datetime.now(timezone.utc),
                     metadata={"device_id": device_id} if device_id else {}
                 )
                 self.active_sessions[session_id] = session
@@ -567,11 +570,11 @@ class TestUserLoginFlowsL3:
         for _ in range(3):
             await asyncio.sleep(0.5)
             # Update last activity
-            session.last_activity = datetime.utcnow()
+            session.last_activity = datetime.now(timezone.utc)
         
         # Check if session still valid
-        time_since_creation = (datetime.utcnow() - session.created_at).total_seconds()
-        time_since_activity = (datetime.utcnow() - session.last_activity).total_seconds()
+        time_since_creation = (datetime.now(timezone.utc) - session.created_at).total_seconds()
+        time_since_activity = (datetime.now(timezone.utc) - session.last_activity).total_seconds()
         
         assert time_since_activity < 60  # Should have recent activity
     
@@ -611,7 +614,7 @@ class TestUserLoginFlowsL3:
         
         # Mock password reset request
         reset_token = secrets.token_urlsafe(32)
-        reset_expiry = datetime.utcnow() + timedelta(hours=1)
+        reset_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
         
         # Mock email sent
         email_sent = True
@@ -620,7 +623,7 @@ class TestUserLoginFlowsL3:
         new_password = "NewSecure@Password456"
         
         # Validate reset token
-        token_valid = datetime.utcnow() < reset_expiry
+        token_valid = datetime.now(timezone.utc) < reset_expiry
         
         if token_valid:
             # Update password
@@ -773,7 +776,7 @@ class TestUserLoginFlowsL3:
             ip = f"192.168.{i}.{i}"
             suspicious_attempts.append({
                 "ip": ip,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "success": False
             })
         
@@ -876,13 +879,14 @@ class TestUserLoginFlowsL3:
         }
         
         # Generate token with custom claims
+        now = datetime.now(timezone.utc)
         payload = {
             "sub": user.email,
             "email": user.email,
             "tier": user.tier,
             **custom_claims,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "iat": now.timestamp(),  # Use timestamp with microseconds for uniqueness
+            "exp": (now + timedelta(hours=1)).timestamp()
         }
         
         custom_token = jwt.encode(payload, login_suite.jwt_secret, algorithm="HS256")

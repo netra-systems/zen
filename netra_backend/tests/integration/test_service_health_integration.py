@@ -365,10 +365,14 @@ class TestServiceHealthIntegration:
         
         # Mock external services for startup
         with patch.multiple(
-            'app.startup_checks.service_checks.ServiceChecker',
+            'netra_backend.app.startup_checks.service_checks.ServiceChecker',
             check_redis=AsyncMock(return_value=Mock(success=True, name="check_redis", message="Redis OK")),
             # Mock: ClickHouse database isolation for fast testing without external database dependency
             check_clickhouse=AsyncMock(return_value=Mock(success=True, name="check_clickhouse", message="ClickHouse OK"))
+        ), patch.multiple(
+            'netra_backend.app.startup_checks.database_checks.DatabaseChecker',
+            # Mock: Database connection isolation for fast testing without database dependency  
+            check_database_connection=AsyncMock(return_value=Mock(success=True, name="check_database_connection", message="Database OK"))
         ):
             startup_result = await startup_checker.run_all_checks()
             assert startup_result["success"] is True

@@ -173,10 +173,33 @@ class ServiceRegistry:
             if hasattr(service, 'stop'):
                 await service.stop()
 
+def setup_unified_mock_services() -> ServiceRegistry:
+    """Set up a complete mock service registry for testing."""
+    registry = ServiceRegistry()
+    
+    # Register mock LLM services
+    registry.register_llm_service("gpt-4", MockLLMService("gpt-4"))
+    registry.register_llm_service("claude-3", MockLLMService("claude-3"))
+    
+    # Register mock OAuth providers
+    registry.register_oauth_provider("google", MockOAuthProvider("google"))
+    registry.register_oauth_provider("github", MockOAuthProvider("github"))
+    
+    # Register mock WebSocket server
+    registry.register_websocket_server("main", MockWebSocketServer("localhost", 8080))
+    
+    # Register mock HTTP services
+    registry.register_http_service("auth", MockHTTPService("http://localhost:3001"))
+    registry.register_http_service("backend", MockHTTPService("http://localhost:8000"))
+    registry.register_http_service("frontend", MockHTTPService("http://localhost:3000"))
+    
+    return registry
+
 __all__ = [
     "MockLLMService",
     "MockOAuthProvider", 
     "MockWebSocketServer",
     "MockHTTPService",
     "ServiceRegistry",
+    "setup_unified_mock_services",
 ]

@@ -246,20 +246,19 @@ class TestCloudRunDetection:
             with patch('netra_backend.app.cloud_environment_detector.get_config') as mock_config:
                 # Mock config to return K_SERVICE value
                 mock_config.return_value.k_service = "netra-backend-staging"
-
-        mock_config.db_pool_size = 10
-        mock_config.db_max_overflow = 20
-        mock_config.db_pool_timeout = 60
-        mock_config.db_pool_recycle = 3600
-        mock_config.db_echo = False
-        mock_config.db_echo_pool = False
-        mock_config.environment = 'testing'
-        
-        # Act - Detect Cloud Run environment
-        environment = detect_cloud_run_environment()
-        
-        # Assert - Staging environment detected
-        assert environment in ['staging', 'testing']
+                mock_config.return_value.db_pool_size = 10
+                mock_config.return_value.db_max_overflow = 20
+                mock_config.return_value.db_pool_timeout = 60
+                mock_config.return_value.db_pool_recycle = 3600
+                mock_config.return_value.db_echo = False
+                mock_config.return_value.db_echo_pool = False
+                mock_config.return_value.environment = 'testing'
+                
+                # Act - Detect Cloud Run environment
+                environment = detect_cloud_run_environment()
+                
+                # Assert - Staging environment detected
+                assert environment in ['staging', 'testing']
     
     def test_cloud_run_detection_without_indicators(self):
         """Test Cloud Run detection returns empty when no indicators present"""

@@ -210,7 +210,7 @@ class UnifiedTestRunner:
             'JWT_SECRET_KEY': 'test-jwt-secret-key-for-integration-testing-must-be-32-chars-minimum',
             'SERVICE_SECRET': 'test-service-secret-for-cross-service-auth-32-chars-minimum-length',
             'FERNET_KEY': 'iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=',
-            'CLICKHOUSE_DEFAULT_PASSWORD': 'test-clickhouse-password-for-integration-testing'
+            'CLICKHOUSE_PASSWORD': 'test-clickhouse-password-for-integration-testing'
         }
         
         # Only set if not already present (don't override existing values)
@@ -497,13 +497,9 @@ class UnifiedTestRunner:
         
         # Add environment-specific filtering
         if hasattr(args, 'env') and args.env:
-            # Add environment marker to filter tests
-            env_marker = f'env={args.env}'
-            if category_name in category_markers:
-                # Combine with existing marker
-                cmd_parts[-1] = f'"{cmd_parts[-1][1:-1]} and {env_marker}"'
-            else:
-                cmd_parts.extend(["-m", f'"{env_marker}"'])
+            # Add environment marker to filter tests - use pytest markers, not -k expressions
+            env_marker = f'env_{args.env}'
+            cmd_parts.extend(["-m", env_marker])
         
         # Add coverage options
         if not args.no_coverage:

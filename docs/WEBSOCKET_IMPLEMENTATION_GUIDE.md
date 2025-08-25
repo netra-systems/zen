@@ -47,9 +47,10 @@ Frontend (React)                Backend (FastAPI)
 
 ```
 Backend Implementation:
-├── app/routes/websocket_enhanced.py          # Enhanced WebSocket endpoint
+├── app/routes/websocket.py                   # Unified WebSocket endpoint
+├── app/routes/websocket_unified.py           # Backward compatibility shim
 ├── app/core/websocket_cors.py                # CORS handling and security
-└── app/websocket/unified/                    # Integration with existing system
+└── app/websocket_core/                       # Core WebSocket infrastructure
 
 Frontend Implementation:
 └── frontend/providers/EnhancedWebSocketProvider.tsx  # React WebSocket provider
@@ -63,7 +64,7 @@ Test Suite:
 
 ## Implementation Details
 
-### Backend Endpoint (`/ws/enhanced`)
+### Backend Endpoint (`/ws`)
 
 **Key Features:**
 - JWT token validation BEFORE WebSocket upgrade
@@ -123,7 +124,7 @@ Provides frontend with WebSocket configuration:
       "reconnection_supported": true
     },
     "endpoints": {
-      "websocket": "/ws/enhanced"
+      "websocket": "/ws"
     },
     "connection_limits": {
       "max_connections_per_user": 5,
@@ -288,7 +289,7 @@ function ChatComponent() {
 ### Backend Message Processing
 
 ```python
-@router.websocket("/ws/enhanced") 
+@router.websocket("/ws") 
 async def enhanced_websocket_endpoint(websocket: WebSocket):
     """Enhanced WebSocket with all features."""
     # Token validation before connection acceptance

@@ -505,3 +505,29 @@ def check_rate_limit(client_id: str, max_requests: int = 60, window_seconds: int
     rate_limiter = RateLimiter(max_requests=max_requests, window_seconds=window_seconds)
     allowed, _ = rate_limiter.is_allowed(client_id)
     return allowed
+
+
+# Compression utility functions (stub implementations for backward compatibility)
+
+def compress(data: Union[str, bytes]) -> bytes:
+    """
+    Stub compression function for backward compatibility.
+    
+    Currently returns data as-is (no compression).
+    Can be extended with actual compression logic when needed.
+    """
+    if isinstance(data, str):
+        return data.encode('utf-8')
+    return data
+
+
+def decompress(data: bytes) -> str:
+    """
+    Stub decompression function for backward compatibility.
+    
+    Currently returns data as-is (no decompression).
+    Can be extended with actual decompression logic when needed.
+    """
+    if isinstance(data, bytes):
+        return data.decode('utf-8')
+    return data

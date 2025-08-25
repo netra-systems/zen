@@ -14,7 +14,7 @@ import sys
 import asyncio
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 

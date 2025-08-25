@@ -95,7 +95,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
         # Set test values for all required secrets from SecretManager
         env.set("GOOGLE_CLIENT_ID", "test-google-client-id-for-integration-testing", source="netra_backend_conftest")
         env.set("GOOGLE_CLIENT_SECRET", "test-google-client-secret-for-integration-testing", source="netra_backend_conftest")
-        env.set("CLICKHOUSE_DEFAULT_PASSWORD", "test-clickhouse-password-for-integration-testing", source="netra_backend_conftest")
+        env.set("CLICKHOUSE_PASSWORD", "test-clickhouse-password-for-integration-testing", source="netra_backend_conftest")
         env.set("ENVIRONMENT", "testing", source="netra_backend_conftest")
         env.set("LOG_LEVEL", "ERROR", source="netra_backend_conftest")
         

@@ -64,7 +64,6 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
             'netra_backend.app.db.postgres_core',
             'netra_backend.app.db.clickhouse_init',
             'netra_backend.app.db.clickhouse_reliable_manager',
-            'netra_backend.app.db.fast_startup_connection_manager',
         ]
         
         for module_path in db_modules:
@@ -75,7 +74,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
         """Test core service modules can be imported"""
         service_modules = [
             'netra_backend.app.services.agent_service',
-            'netra_backend.app.services.websocket_service',
+            'netra_backend.app.services.websocket.message_handler',  # Fixed: use actual websocket module
             'netra_backend.app.services.thread_service',
             'netra_backend.app.services.corpus_service',
             'netra_backend.app.services.generation_service',
@@ -126,7 +125,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
     def test_core_infrastructure(self):
         """Test core infrastructure modules"""
         core_modules = [
-            'netra_backend.app.core.websocket_connection_manager',
+            'netra_backend.app.core.websocket_message_handler',  # Fixed: use actual websocket module
             'netra_backend.app.core.error_handlers',
             'netra_backend.app.core.configuration.base',
             'netra_backend.app.core.configuration.database',

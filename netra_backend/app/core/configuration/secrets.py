@@ -18,20 +18,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.Config import AppConfig
@@ -167,14 +154,17 @@ class SecretManager:
         """Get database-related secret mappings."""
         clickhouse_mapping = self._get_clickhouse_password_mapping()
         redis_mapping = self._get_redis_password_mapping()
-        return {"CLICKHOUSE_DEFAULT_PASSWORD": clickhouse_mapping, "REDIS_PASSWORD": redis_mapping}
+        return {"CLICKHOUSE_PASSWORD": clickhouse_mapping, "REDIS_PASSWORD": redis_mapping}
     
     def _get_clickhouse_password_mapping(self) -> Dict[str, Any]:
         """Get ClickHouse password mapping."""
+        # ClickHouse password is only required in production environments
+        # For development, ClickHouse containers may not require authentication
+        is_required = self._environment in ["production", "staging"]
         return {
             "target_models": ["clickhouse_native", "clickhouse_https"],
             "target_field": "password",
-            "required": True,
+            "required": is_required,
             "rotation_enabled": True
         }
     
@@ -369,7 +359,7 @@ class SecretManager:
             "JWT_SECRET_KEY": "JWT_SECRET_KEY",
             "FERNET_KEY": "FERNET_KEY",
             "SERVICE_SECRET": "SERVICE_SECRET",
-            "CLICKHOUSE_DEFAULT_PASSWORD": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "CLICKHOUSE_PASSWORD": "CLICKHOUSE_PASSWORD",
             "REDIS_PASSWORD": "REDIS_PASSWORD",
             "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
             "OPENAI_API_KEY": "OPENAI_API_KEY"

@@ -42,7 +42,6 @@ class DatabaseManager:
         """
         # Check if we're in a test environment and should bypass config caching
         import sys
-        import os
         is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
         
         raw_url = ""
@@ -71,22 +70,36 @@ class DatabaseManager:
             return DatabaseManager._get_default_database_url()
         
         # Normalize URL by removing driver-specific prefixes
-        normalized = raw_url
-        if raw_url.startswith("postgresql+"):
-            normalized = "postgresql://" + raw_url[len("postgresql+"):].split("://", 1)[-1]
+        normalized = DatabaseManager._normalize_postgres_url(raw_url)
         
-        # Handle SSL parameters - remove them for Cloud SQL connections
+        # Handle SSL parameters and add schema search_path
+        from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+        parsed = urlparse(normalized)
+        query_params = parse_qs(parsed.query)
+        
+        # Handle Cloud SQL connections
         if "/cloudsql/" in normalized or "@/cloudsql/" in normalized:
-            # For Cloud SQL, remove SSL parameters
-            from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-            parsed = urlparse(normalized)
-            query_params = parse_qs(parsed.query)
             # Remove SSL-related parameters for Cloud SQL
             ssl_params = ['sslmode', 'sslcert', 'sslkey', 'sslrootcert', 'ssl']
             for param in ssl_params:
                 query_params.pop(param, None)
-            new_query = urlencode(query_params, doseq=True)
-            normalized = urlunparse(parsed._replace(query=new_query))
+        
+        # Add search_path option if not already present (but not for Cloud SQL)
+        is_cloud_sql = "/cloudsql/" in normalized or "@/cloudsql/" in normalized
+        if 'options' not in query_params and normalized.startswith("postgresql://") and not is_cloud_sql:
+            current_env = get_current_environment()
+            if current_env == "development":
+                # Use netra_dev schema for development
+                query_params['options'] = ['-c search_path=netra_dev,public']
+            elif current_env in ["testing", "test"]:
+                # Use netra_test schema for testing
+                query_params['options'] = ['-c search_path=netra_test,public']
+            else:
+                # Use public schema for staging/production
+                query_params['options'] = ['-c search_path=public']
+        
+        new_query = urlencode(query_params, doseq=True)
+        normalized = urlunparse(parsed._replace(query=new_query))
         
         return normalized
     
@@ -97,13 +110,63 @@ class DatabaseManager:
         Returns:
             Database URL compatible with synchronous drivers
         """
-        base_url = DatabaseManager.get_base_database_url()
-        # For sync driver, ensure postgresql:// prefix
-        if base_url.startswith("sqlite"):
-            return base_url
-        if not base_url.startswith("postgresql://"):
-            base_url = "postgresql://" + base_url.split("://", 1)[-1]
-        return base_url
+        # Get raw URL without search_path additions that get_base_database_url() adds
+        import sys
+        from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+        
+        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
+        
+        raw_url = ""
+        
+        if is_pytest:
+            # In pytest mode, directly check environment to handle dynamic test env changes
+            raw_url = get_env().get("DATABASE_URL", "")
+        else:
+            # Get from unified configuration - single source of truth for non-test environments
+            try:
+                config = get_unified_config()
+                raw_url = config.database_url or ""
+            except Exception:
+                # Fallback for bootstrap or when config not available
+                raw_url = get_env().get("DATABASE_URL", "")
+        
+        if not raw_url:
+            return "sqlite:///:memory:"
+        
+        # For sqlite, return as-is
+        if raw_url.startswith("sqlite"):
+            return raw_url
+        
+        # Parse the URL for conversion
+        parsed = urlparse(raw_url)
+        
+        # Convert async driver to sync and handle SSL conversion
+        scheme = parsed.scheme
+        if scheme in ["postgresql+asyncpg", "postgres+asyncpg"]:
+            scheme = "postgresql"
+        elif scheme == "postgres":
+            scheme = "postgresql"
+        
+        # Handle SSL parameter conversion for sync drivers
+        query_params = parse_qs(parsed.query)
+        
+        # Check if this is a Cloud SQL connection
+        is_cloud_sql = "/cloudsql/" in raw_url or "@/cloudsql/" in raw_url
+        
+        if is_cloud_sql:
+            # Remove SSL-related parameters for Cloud SQL
+            ssl_params = ['sslmode', 'sslcert', 'sslkey', 'sslrootcert', 'ssl']
+            for param in ssl_params:
+                query_params.pop(param, None)
+        else:
+            # Convert ssl=require to sslmode=require for sync drivers (non-Cloud SQL)
+            if 'ssl' in query_params and 'sslmode' not in query_params:
+                query_params['sslmode'] = query_params.pop('ssl')
+        
+        new_query = urlencode(query_params, doseq=True)
+        normalized = urlunparse(parsed._replace(scheme=scheme, query=new_query))
+        
+        return normalized
     
     @staticmethod
     def get_application_url_async() -> str:
@@ -118,6 +181,20 @@ class DatabaseManager:
             return base_url.replace("sqlite://", "sqlite+aiosqlite://")
         if not base_url.startswith("postgresql+asyncpg://"):
             base_url = "postgresql+asyncpg://" + base_url.split("://", 1)[-1]
+        # Convert SSL parameters for asyncpg compatibility
+        base_url = DatabaseManager._convert_sslmode_to_ssl(base_url)
+        
+        # Remove search_path options from URL - handled via server_settings in connect_args
+        from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+        parsed = urlparse(base_url)
+        query_params = parse_qs(parsed.query)
+        
+        # Remove options parameter for async connections (handled via server_settings)
+        query_params.pop('options', None)
+        
+        new_query = urlencode(query_params, doseq=True)
+        base_url = urlunparse(parsed._replace(query=new_query))
+        
         return base_url
     
     @staticmethod
@@ -222,6 +299,16 @@ class DatabaseManager:
         
         connect_args = {}
         if "/cloudsql/" not in app_url and pool_class != NullPool:
+            # Get appropriate search path for environment
+            from netra_backend.app.core.environment_constants import get_current_environment
+            current_env = get_current_environment()
+            if current_env == "development":
+                search_path = "netra_dev,public"
+            elif current_env in ["testing", "test"]:
+                search_path = "netra_test,public"
+            else:
+                search_path = "public"
+                
             # Standard connection settings for PostgreSQL
             connect_args = {
                 "server_settings": {
@@ -232,6 +319,8 @@ class DatabaseManager:
                     # Add connection limits to prevent startup contention
                     "lock_timeout": "60s",
                     "statement_timeout": "120s",
+                    # CRITICAL FIX: Set search_path via server_settings instead of URL options
+                    "search_path": search_path,
                 }
             }
         
@@ -295,7 +384,6 @@ class DatabaseManager:
         """
         # Check if we're in pytest mode and should directly read environment
         import sys
-        import os
         is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
         
         if is_pytest:
@@ -356,10 +444,11 @@ class DatabaseManager:
         for attempt in range(max_retries):
             try:
                 # Use a timeout to avoid hanging indefinitely
-                async with asyncio.wait_for(engine.begin(), timeout=10.0) as conn:
-                    await conn.execute("SELECT 1")
-                    logger.debug(f"Database connection test successful on attempt {attempt + 1}")
-                    return True
+                async with asyncio.timeout(10.0):
+                    async with engine.begin() as conn:
+                        await conn.execute(text("SELECT 1"))
+                        logger.debug(f"Database connection test successful on attempt {attempt + 1}")
+                        return True
             except (OperationalError, DisconnectionError, asyncio.TimeoutError) as e:
                 if attempt < max_retries - 1:
                     logger.warning(f"Connection attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
@@ -440,7 +529,7 @@ class DatabaseManager:
         """Get default database URL for current environment.
         
         Returns:
-            Default PostgreSQL URL based on environment
+            Default PostgreSQL URL based on environment with schema search_path
         """
         current_env = get_current_environment()
         
@@ -450,15 +539,15 @@ class DatabaseManager:
         
         if is_pytest:
             # When running in pytest, tests expect this specific URL format regardless of current_env
-            return "postgresql://test:test@localhost:5432/netra_test"
+            return "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
         elif current_env in ["testing", "test"]:
-            return "postgresql://test:test@localhost:5432/netra_test"
+            return "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
         elif current_env == "development":
-            return "postgresql://postgres:password@localhost:5432/netra"
+            return "postgresql://postgres:password@localhost:5432/netra?options=-c%20search_path%3Dnetra_dev,public"
         else:
             # Staging/production should always have DATABASE_URL set
             logger.warning(f"No DATABASE_URL found for {current_env} environment")
-            return "postgresql://postgres:password@localhost:5432/netra"
+            return "postgresql://postgres:password@localhost:5432/netra?options=-c%20search_path%3Dpublic"
     
     # AUTH SERVICE COMPATIBILITY METHODS
     # These methods provide auth service compatibility while using CoreDatabaseManager

@@ -73,10 +73,21 @@ class IsolatedEnvironment:
     - Source tracking for debugging
     - Backwards compatibility with existing code
     - Subprocess environment management
+    - Pytest integration compatibility
     """
     
     _instance: Optional['IsolatedEnvironment'] = None
     _lock = threading.RLock()
+    
+    # Variables that must always remain in os.environ for external tool compatibility
+    PRESERVE_IN_OS_ENVIRON = {
+        "PYTEST_CURRENT_TEST",
+        "PYTEST_VERSION", 
+        "_PYTEST_RAISE",
+        "PYTEST_PLUGINS",
+        "PYTEST_TIMEOUT",
+        # Add other tool-specific variables as needed
+    }
     
     def __new__(cls) -> 'IsolatedEnvironment':
         """Ensure singleton behavior with thread safety."""
@@ -140,27 +151,50 @@ class IsolatedEnvironment:
         """Get the singleton instance."""
         return cls()
     
-    def enable_isolation(self, backup_original: bool = True) -> None:
+    def enable_isolation(self, backup_original: bool = True, refresh_vars: bool = True) -> None:
         """
         Enable isolation mode to prevent os.environ pollution.
         
         Args:
             backup_original: Whether to backup current os.environ state
+            refresh_vars: Whether to refresh isolated vars from current os.environ state
         """
         with self._lock:
-            if self._isolation_enabled:
-                logger.debug("Isolation already enabled")
+            was_already_enabled = self._isolation_enabled
+            
+            if was_already_enabled and not refresh_vars:
+                logger.debug("Isolation already enabled, no refresh requested")
                 return
                 
             self._isolation_enabled = True
             
-            if backup_original:
+            if backup_original and not was_already_enabled:
                 self._original_environ_backup = dict(os.environ)
                 
-            # Copy current os.environ to isolated vars
-            self._isolated_vars = dict(os.environ)
+            # Always refresh isolated vars when explicitly requested or first time enabling
+            if refresh_vars or not was_already_enabled:
+                # ALWAYS copy current os.environ to isolated vars when enabling isolation
+                # This ensures all variables that exist at the time of enabling isolation are captured
+                # regardless of any previous reset operations
+                self._isolated_vars = dict(os.environ)
+                logger.debug(f"Refreshed isolated vars from os.environ: {len(self._isolated_vars)} variables captured")
             
-            logger.info("Environment isolation enabled")
+            # Ensure preserved variables remain in os.environ
+            # This is critical for tools like pytest that manage their own variables
+            for key in self.PRESERVE_IN_OS_ENVIRON:
+                if key in self._isolated_vars and key not in os.environ:
+                    # Variable is in isolated vars but not in os.environ, restore it
+                    os.environ[key] = self._isolated_vars[key]
+                    logger.debug(f"Preserved {key} in os.environ during isolation")
+                elif key in os.environ and key not in self._isolated_vars:
+                    # Variable is in os.environ but not in isolated vars, capture it
+                    self._isolated_vars[key] = os.environ[key]
+                    logger.debug(f"Captured {key} from os.environ during isolation")
+            
+            if was_already_enabled:
+                logger.debug(f"Environment isolation refreshed with {len(self._isolated_vars)} variables")
+            else:
+                logger.info("Environment isolation enabled")
     
     def disable_isolation(self, restore_original: bool = False) -> None:
         """
@@ -191,18 +225,21 @@ class IsolatedEnvironment:
         """Check if isolation mode is enabled."""
         return self._isolation_enabled
     
-    def set(self, key: str, value: str, source: str = "unknown", force: bool = False) -> bool:
+    def set(self, key: str, value: str, source: str, force: bool = False) -> bool:
         """
-        Set an environment variable.
+        Set an environment variable with mandatory source tracking.
         
         Args:
             key: Environment variable name
             value: Environment variable value
-            source: Source of the variable (for debugging)
+            source: Source of the variable (REQUIRED for debugging - no default)
             force: Whether to overwrite protected variables
             
         Returns:
             True if variable was set, False if blocked by protection
+            
+        Raises:
+            TypeError: If source parameter is not provided (enforces spec requirement)
         """
         with self._lock:
             # Check protection
@@ -214,8 +251,15 @@ class IsolatedEnvironment:
             
             # Set in appropriate location
             if self._isolation_enabled:
+                # Always set in isolated vars
                 self._isolated_vars[key] = value
-                logger.debug(f"Set isolated var: {key}={value[:50]}... (source: {source})")
+                
+                # Also preserve in os.environ if it's a tool-specific variable
+                if key in self.PRESERVE_IN_OS_ENVIRON:
+                    os.environ[key] = value
+                    logger.debug(f"Set isolated var + preserved in os.environ: {key}={value[:50]}... (source: {source})")
+                else:
+                    logger.debug(f"Set isolated var: {key}={value[:50]}... (source: {source})")
             else:
                 os.environ[key] = value
                 logger.debug(f"Set os.environ: {key}={value[:50]}... (source: {source})")
@@ -268,6 +312,10 @@ class IsolatedEnvironment:
             if self._isolation_enabled:
                 if key in self._isolated_vars:
                     del self._isolated_vars[key]
+                    
+                # Also delete from os.environ if it was preserved there
+                if key in self.PRESERVE_IN_OS_ENVIRON and key in os.environ:
+                    del os.environ[key]
             else:
                 if key in os.environ:
                     del os.environ[key]
@@ -815,7 +863,27 @@ class IsolatedEnvironment:
     
     def _generate_database_url_fallback(self) -> str:
         """Generate a fallback database URL for development."""
-        return "sqlite:///./netra_dev.db"
+        try:
+            # Import DatabaseURLBuilder to construct PostgreSQL URLs from components
+            from shared.database_url_builder import DatabaseURLBuilder
+            
+            # Use DatabaseURLBuilder to construct URL from environment variables
+            builder = DatabaseURLBuilder(self.get_all())
+            
+            # Get the appropriate URL for the environment
+            postgres_url = builder.get_url_for_environment(sync=False)
+            
+            if postgres_url:
+                logger.info(f"Generated PostgreSQL fallback URL using DatabaseURLBuilder")
+                return postgres_url
+            else:
+                logger.warning("DatabaseURLBuilder could not generate URL, falling back to development default")
+                return builder.development.default_url
+                
+        except Exception as e:
+            logger.warning(f"Failed to use DatabaseURLBuilder for fallback: {e}")
+            # Fallback to the development default if DatabaseURLBuilder fails
+            return "postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev"
     
     def _generate_jwt_secret_fallback(self) -> str:
         """Generate a secure JWT secret key."""

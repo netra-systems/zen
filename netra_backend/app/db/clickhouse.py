@@ -63,6 +63,11 @@ class MockClickHouseDatabase:
 
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
+    from netra_backend.app.core.isolated_environment import get_env
+    # Check TESTING environment variable directly for pytest compatibility
+    if get_env().get("TESTING"):
+        return True
+    # Fallback to configuration-based detection
     config = get_configuration()
     return config.environment == "testing"
 

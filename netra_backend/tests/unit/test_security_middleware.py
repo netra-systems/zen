@@ -20,7 +20,7 @@ from pathlib import Path
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException, Request, Response, status
@@ -218,6 +218,7 @@ class TestSecurityMiddleware:
         # Mock: Component isolation for controlled unit testing
         request.url = Mock(spec=URL)
         request.url.path = "/api/test"
+        request.url.__str__ = Mock(return_value="https://example.com/api/test")
         request.headers = Headers({"user-agent": "test-browser"})
         # Mock: Generic component isolation for controlled unit testing
         request.client = Mock()
@@ -311,7 +312,7 @@ class TestSecurityMiddleware:
         """Test request size validation within limits."""
         # Mock small request
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.middleware.security_validation_helpers.RequestValidators.validate_request_size') as mock_validate:
+        with patch('netra_backend.app.middleware.security_validation_helpers.RequestValidators.validate_request_size') as mock_validate:
             middleware._validate_request_size(mock_request)
             mock_validate.assert_called_once()
 

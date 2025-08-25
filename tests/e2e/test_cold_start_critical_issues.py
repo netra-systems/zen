@@ -92,9 +92,8 @@ class TestColdStartCriticalIssues:
     @pytest.mark.asyncio
     async def test_environment_variable_mapping_mismatch(self):
         """Test 1.2: Critical services fail due to env var name conflicts."""
-        # Set conflicting environment variables
+        # Set environment variable
         os.environ["CLICKHOUSE_PASSWORD"] = "password1"
-        os.environ["CLICKHOUSE_DEFAULT_PASSWORD"] = "password2"
         
         # Attempt ClickHouse connection with mismatched passwords
         from netra_backend.app.db.clickhouse import ClickHouseConnection

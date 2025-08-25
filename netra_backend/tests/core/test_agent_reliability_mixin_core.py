@@ -29,7 +29,7 @@ class TestAgentReliabilityMixinExecution:
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing
@@ -164,7 +164,7 @@ class TestAgentReliabilityMixinErrorHandling:
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing
@@ -214,7 +214,7 @@ class TestDefaultRecoveryStrategies:
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing
@@ -263,7 +263,7 @@ class TestDefaultRecoveryStrategies:
         error = TimeoutError("API timeout")
         context = {"endpoint": "/api/test"}
         
-        result = await mock_agent._default_api_recovery(error, context)
+        result = await mock_agent.recovery_manager._default_api_recovery(error, context)
         
         assert result["result"] == "limited"
         assert result["data"] == {}

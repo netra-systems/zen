@@ -20,7 +20,7 @@ from netra_backend.app.agents.error_handler import (
     NetworkError,
 )
 
-from netra_backend.app.agents.error_handler import (
+from netra_backend.app.core.error_handlers import (
     AgentErrorHandler as ErrorHandler,
 )
 from netra_backend.app.agents.error_handler import (
@@ -41,17 +41,17 @@ class TestErrorHandler:
     def sample_context(self):
         """Create sample error context for testing."""
         return ErrorContext(
+            trace_id="test_trace_123",
+            operation="test_operation", 
             agent_name="TestAgent",
-            operation_name="test_operation",
-            run_id="test_run",
-            timestamp=time.time()
+            operation_name="test_operation"
         )
     
     def _assert_error_handler_initialization(self, handler):
         """Assert error handler initialization"""
-        assert handler.max_history_size == 1000
+        assert handler.max_history == 100  # Default value as seen in BaseErrorHandler
         assert len(handler.error_history) == 0
-        assert handler.total_errors == 0
+        assert handler._error_metrics['total_errors'] == 0
 
     def test_error_handler_initialization(self, error_handler):
         """Test ErrorHandler initialization."""

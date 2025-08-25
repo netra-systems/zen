@@ -10,7 +10,7 @@ from pathlib import Path
 import asyncio
 import re
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

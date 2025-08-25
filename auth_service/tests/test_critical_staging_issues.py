@@ -61,7 +61,6 @@ class TestAuthDatabaseInitialization:
         # Backend pattern methods that should exist
         backend_pattern_methods = [
             'get_auth_database_url_async',  # Should be renamed or implemented correctly
-            '_normalize_postgres_url',
             '_convert_sslmode_to_ssl',
             'validate_auth_url'
         ]

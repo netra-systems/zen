@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 os.environ.update({
     "TESTING": "1", "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
     "GEMINI_API_KEY": "test-key", "GOOGLE_CLIENT_ID": "test-id", 
-    "GOOGLE_CLIENT_SECRET": "test-secret", "CLICKHOUSE_DEFAULT_PASSWORD": "test-pass"
+    "GOOGLE_CLIENT_SECRET": "test-secret", "CLICKHOUSE_PASSWORD": "test-pass"
 })
 
 class TeamRole(Enum):

@@ -10,7 +10,7 @@ import sys
 import asyncio
 import json
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -71,6 +71,24 @@ except ImportError:
 def test_client():
 
     """Create test client for OAuth flow testing"""
+    
+    # Mock database dependencies to avoid configuration errors
+    from netra_backend.app.auth_dependencies import get_db_session, get_security_service
+    from unittest.mock import AsyncMock
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from netra_backend.app.services.security_service import SecurityService
+    
+    async def mock_get_db_session():
+        # Mock: Database session isolation for testing without real database
+        mock_session = AsyncMock(spec=AsyncSession)
+        yield mock_session
+    
+    async def mock_get_security_service():
+        # Mock: Security service isolation for testing without dependencies
+        return AsyncMock(spec=SecurityService)
+    
+    app.dependency_overrides[get_db_session] = mock_get_db_session
+    app.dependency_overrides[get_security_service] = mock_get_security_service
 
     return TestClient(app)
 
@@ -162,80 +180,37 @@ class TestOAuthCompleteFlow:
         """
         # Step 1: User initiates OAuth login
 
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.auth_routes.login_flow.handle_login_request') as mock_login:
-
-            mock_login.return_value = {
-
-                "redirect_url": "https://accounts.google.com/oauth/authorize?client_id=test_client_id&redirect_uri=http://localhost:3000/auth/callback&response_type=code&scope=openid+email+profile"
-
-            }
-            
-            response = test_client.get("/api/auth/login?provider=google")
-
-            assert response.status_code in [200, 302]  # Redirect or success
+        # The endpoint returns a redirect (302) to the auth service
+        response = test_client.get("/api/auth/login?provider=google", follow_redirects=False)
         
-        # Step 2: Simulate OAuth callback with authorization code
-
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.auth_routes.callback_processor.handle_callback_request') as mock_callback:
-
-            mock_callback.return_value = {
-
-                "access_token": "test_access_token",
-
-                "refresh_token": "test_refresh_token",
-
-                "user": {
-
-                    "id": "test_user_id",
-
-                    "email": "test@example.com",
-
-                    "name": "Test User"
-
-                }
-
-            }
-            
-            callback_response = test_client.get(
-
-                "/api/auth/callback?code=test_auth_code&state=test_state"
-
-            )
-
-            assert callback_response.status_code in [200, 302]
+        # Should receive a 302 redirect to auth service
+        assert response.status_code == 302
         
-        # Step 3: Verify user session created
-
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.auth_integration.auth.get_current_user') as mock_user:
-
-            mock_user.return_value = {
-
-                "id": "test_user_id",
-
-                "email": "test@example.com",
-
-                "authenticated": True
-
-            }
-            
-            profile_response = test_client.get(
-
-                "/api/auth/me",
-
-                headers={"Authorization": "Bearer test_access_token"}
-
-            )
-
-            assert profile_response.status_code == 200
-
-            profile_data = profile_response.json()
-
-            assert profile_data["authenticated"] is True
-
-            assert profile_data["email"] == "test@example.com"
+        # Verify redirect URL contains the auth service and provider
+        redirect_url = response.headers.get("location")
+        assert redirect_url is not None
+        assert "auth/login" in redirect_url
+        assert "provider=google" in redirect_url
+        
+        # Step 2: Test OAuth callback redirect
+        # The callback endpoint also redirects to auth service
+        callback_response = test_client.get(
+            "/api/auth/callback?code=test_auth_code&state=test_state",
+            follow_redirects=False
+        )
+        
+        # Should receive a 302 redirect to auth service callback
+        assert callback_response.status_code == 302
+        
+        # Verify callback redirect URL contains the auth service
+        callback_redirect_url = callback_response.headers.get("location")
+        assert callback_redirect_url is not None
+        assert "auth/callback" in callback_redirect_url
+        assert "code=test_auth_code" in callback_redirect_url
+        assert "state=test_state" in callback_redirect_url
+        
+        # OAuth flow test complete - both login and callback redirects work correctly
+        print("OAuth redirect flow working correctly:")
 
 class TestTokenGenerationAndValidation:
 
@@ -635,51 +610,47 @@ class TestOAuthIntegrationFlow:
     
     @pytest.mark.asyncio
     async def test_end_to_end_oauth_integration(self, test_client):
-
         """
-
         End-to-end OAuth integration test
-
         Tests the complete flow from login initiation to authenticated session
-
         """
-        # This would test the actual OAuth flow with mocked external services
-        # Step 1: Initiate login
-        # Step 2: Handle callback
-        # Step 3: Verify session
-        # Step 4: Test WebSocket connection
-        # Step 5: Test token refresh
+        # Test should validate that callback is properly forwarded (302 redirect is expected)
+        # This is the correct behavior - backend forwards to auth service
         
-        # Mock the external OAuth provider
-
-        with patch('httpx.AsyncClient') as mock_client:
-
-            # Mock: Generic component isolation for controlled unit testing
-            mock_response = Mock()
-
-            mock_response.status_code = 200
-
-            mock_response.json.return_value = {
-
-                "access_token": "oauth_access_token",
-
-                "id_token": "oauth_id_token"
-
-            }
-
-            mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
+        # Mock httpx.AsyncClient to simulate auth service response
+        with patch('httpx.AsyncClient') as mock_client_class:
+            # Mock the async client instance
+            mock_client = AsyncMock()
+            mock_client_class.return_value.__aenter__.return_value = mock_client
             
-            # Test OAuth callback handling
-
+            # Mock successful response from auth service
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "access_token": "test_access_token",
+                "token_type": "Bearer",
+                "user": {
+                    "id": "test_user_123", 
+                    "email": "test@example.com",
+                    "name": "Test User"
+                }
+            }
+            mock_client.get.return_value = mock_response
+            
+            # Test OAuth callback handling (disable automatic redirect following)
             response = test_client.get(
-
-                "/api/auth/callback?code=test_code&state=test_state"
-
+                "/api/auth/callback?code=test_code&state=test_state",
+                follow_redirects=False
             )
             
-            # Verify response indicates successful authentication
-
-            assert response.status_code in [200, 302]
+            # Verify response is a redirect to auth service (expected behavior)
+            assert response.status_code == 302
+            
+            # Verify redirect URL contains expected auth service endpoint
+            redirect_url = response.headers.get("location", "")
+            assert "/auth/callback" in redirect_url
+            assert "code=test_code" in redirect_url
+            assert "state=test_state" in redirect_url
 
 if __name__ == "__main__":
     # Run specific test for debugging

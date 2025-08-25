@@ -1,2 +1,5 @@
 # Shim module for pagination test helpers
-from test_framework.utils.pagination import *
+from netra_backend.tests.helpers.network_pagination_test_helpers import (
+    NetworkTestHelpers,
+    PaginationTestHelpers
+)

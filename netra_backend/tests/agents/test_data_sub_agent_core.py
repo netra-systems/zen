@@ -88,7 +88,6 @@ class TestDataSubAgentInitialization:
         # Use real tool dispatcher
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         tool_dispatcher = ToolDispatcher()
-        await tool_dispatcher.initialize()
         
         try:
             agent = DataSubAgent(llm_manager, tool_dispatcher)
@@ -104,9 +103,6 @@ class TestDataSubAgentInitialization:
                 
         except Exception as e:
             pytest.skip(f"Real Redis not available for testing: {e}")
-        finally:
-            if 'tool_dispatcher' in locals():
-                await tool_dispatcher.cleanup()
 
 class TestDataProcessing:
     """Test data processing capabilities"""

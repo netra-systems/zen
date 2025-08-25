@@ -120,15 +120,20 @@ class TestFirstUserJourney:
         user_data = self._create_test_user_data()
         verification_token = f"verify_{uuid.uuid4().hex}"
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.services.email_service.EmailService') as mock_email_service:
-            # Mock: Async component isolation for testing without real async operations
-            mock_email_service.return_value.send_verification = AsyncMock(return_value=True)
-            # Mock: Async component isolation for testing without real async operations
-            mock_email_service.return_value.verify_token = AsyncMock(return_value=True)
+        # Import and mock the EmailService directly
+        from netra_backend.app.services.email_service import EmailService
+        # Mock: Component isolation for testing without external dependencies  
+        with patch.object(EmailService, 'send_verification', new_callable=AsyncMock) as mock_send_verification, \
+             patch.object(EmailService, 'verify_token', new_callable=AsyncMock) as mock_verify_token:
             
-            email_sent = await mock_email_service.return_value.send_verification(user_data["email"], verification_token)
-            verified = await mock_email_service.return_value.verify_token(verification_token)
+            # Configure mock returns
+            mock_send_verification.return_value = True
+            mock_verify_token.return_value = True
+            
+            # Test email service functionality
+            email_service = EmailService()
+            email_sent = await email_service.send_verification(user_data["email"], verification_token)
+            verified = await email_service.verify_token(verification_token)
             assert email_sent and verified
 
     async def test_profile_creation_sync(self, app):

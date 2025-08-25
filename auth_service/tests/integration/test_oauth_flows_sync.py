@@ -24,7 +24,7 @@ class TestOAuthBasicEndpoints:
     
     def test_auth_config_endpoint(self):
         """Test OAuth configuration endpoint"""
-        response = client.get("/auth/config")
+        response = client.get("/api/v1/auth/config")
         assert response.status_code == 200
         
         config = response.json()
@@ -34,7 +34,7 @@ class TestOAuthBasicEndpoints:
     
     def test_google_oauth_initiate_redirect(self):
         """Test Google OAuth initiation returns redirect"""
-        response = client.get("/auth/login?provider=google", follow_redirects=False)
+        response = client.get("/api/v1/auth/login?provider=google", follow_redirects=False)
         
         assert response.status_code == 302
         location = response.headers["location"]
@@ -47,18 +47,18 @@ class TestOAuthBasicEndpoints:
     def test_oauth_callback_missing_params(self):
         """Test OAuth callback with missing parameters"""
         # Test missing code parameter
-        response = client.get("/auth/callback?state=test_state")
+        response = client.get("/api/v1/auth/callback?state=test_state")
         assert response.status_code == 422  # FastAPI validation error
         
         # Test missing state parameter  
-        response = client.get("/auth/callback?code=test_code")
+        response = client.get("/api/v1/auth/callback?code=test_code")
         # Should handle gracefully (current implementation doesn't validate state)
         # 422 indicates validation error for missing state parameter
         assert response.status_code in [302, 401, 422, 500]
 
     def test_health_endpoint(self):
         """Test OAuth health endpoint"""
-        response = client.get("/auth/health")
+        response = client.get("/api/v1/auth/health")
         assert response.status_code == 200
         
         health = response.json()
@@ -71,7 +71,7 @@ class TestOAuthErrorScenarios:
     def test_oauth_access_denied(self):
         """Test OAuth when user denies access"""
         response = client.get(
-            "/auth/callback?error=access_denied&state=test_state"
+            "/api/v1/auth/callback?error=access_denied&state=test_state"
         )
         
         # Should handle OAuth denial gracefully
@@ -80,7 +80,7 @@ class TestOAuthErrorScenarios:
 
     def test_logout_without_token(self):
         """Test logout without authorization token"""
-        response = client.post("/auth/logout")
+        response = client.post("/api/v1/auth/logout")
         assert response.status_code == 401
         
         response_data = response.json()
@@ -88,7 +88,7 @@ class TestOAuthErrorScenarios:
 
     def test_verify_without_token(self):
         """Test verify endpoint without token"""
-        response = client.get("/auth/verify")
+        response = client.get("/api/v1/auth/verify")
         assert response.status_code == 401
         
         response_data = response.json()
@@ -129,7 +129,7 @@ class TestOAuthProviderSupport:
     
     def test_oauth_endpoints_configured(self):
         """Test OAuth endpoints are properly configured"""
-        response = client.get("/auth/config")
+        response = client.get("/api/v1/auth/config")
         assert response.status_code == 200
         
         config = response.json()
@@ -181,7 +181,7 @@ def test_oauth_token_exchange_mocked(mock_client):
     mock_async_client.get.return_value = user_response
     
     # Test callback with mocked responses
-    response = client.get("/auth/callback?code=test_code&state=test_state", follow_redirects=False)
+    response = client.get("/api/v1/auth/callback?code=test_code&state=test_state", follow_redirects=False)
     
     # Should handle the mocked OAuth flow
     assert response.status_code in [302, 500]  # Redirect or server error

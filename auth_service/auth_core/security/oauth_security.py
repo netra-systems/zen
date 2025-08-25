@@ -10,6 +10,7 @@ import logging
 import os
 import secrets
 import time
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, Tuple
 from auth_service.auth_core.redis_manager import auth_redis_manager
 
@@ -23,11 +24,20 @@ class OAuthSecurityManager:
         # Use unified Redis manager instead of passed client
         self.redis_manager = auth_redis_manager
         self.hmac_secret = self._get_hmac_secret()
+        # In-memory storage for testing when Redis not available
+        self._memory_store = {}
         
     @property
     def redis_client(self):
         """Get Redis client from unified manager."""
         return self.redis_manager.get_client()
+    
+    def _use_memory_store(self) -> bool:
+        """Check if we should use in-memory storage (for testing)"""
+        try:
+            return not self.redis_manager.is_available() or self.redis_client is None
+        except:
+            return True
         
     def _get_hmac_secret(self) -> str:
         """Get HMAC secret for state signing"""
@@ -259,6 +269,351 @@ class OAuthSecurityManager:
         """
         return secrets.token_urlsafe(32)
     
+    def generate_state_parameter(self) -> str:
+        """
+        Generate a cryptographically secure OAuth state parameter
+        
+        Returns:
+            A secure URL-safe base64 encoded state parameter
+        """
+        return secrets.token_urlsafe(32)
+    
+    def store_state_parameter(self, state: str, session_id: str) -> bool:
+        """
+        Store OAuth state parameter with session binding
+        
+        Args:
+            state: The state parameter to store
+            session_id: Session ID to bind the state to
+            
+        Returns:
+            True if state was stored successfully
+        """
+        state_data = {
+            "session_id": session_id,
+            "timestamp": time.time()
+        }
+        
+        # Use memory store if Redis not available (for testing)
+        if self._use_memory_store():
+            state_key = f"oauth_state:{state}"
+            # Check if already exists (nx=True behavior)
+            if state_key in self._memory_store:
+                return False
+            self._memory_store[state_key] = state_data
+            return True
+        
+        # Use Redis for production
+        try:
+            if not self.redis_manager.is_available():
+                self.redis_manager.connect()
+                
+            redis_client = self.redis_client
+            if not redis_client:
+                logger.warning("Redis not available for state storage")
+                return False
+                
+            state_key = f"oauth_state:{state}"
+            # Store with 10 minute expiration
+            result = redis_client.set(
+                state_key, 
+                json.dumps(state_data), 
+                ex=600,  # 10 minutes
+                nx=True  # Only set if not exists
+            )
+            
+            return bool(result)
+            
+        except Exception as e:
+            logger.error(f"State parameter storage error: {e}")
+            return False
+    
+    def validate_state_parameter(self, state: str, session_id: str) -> bool:
+        """
+        Validate and consume OAuth state parameter (timing-safe)
+        
+        Args:
+            state: The state parameter to validate
+            session_id: Expected session ID
+            
+        Returns:
+            True if state is valid and matches session
+        """
+        state_key = f"oauth_state:{state}"
+        
+        # Use memory store if Redis not available (for testing)
+        if self._use_memory_store():
+            if state_key not in self._memory_store:
+                return False
+                
+            state_data = self._memory_store[state_key]
+            stored_session_id = state_data.get("session_id", "")
+            stored_timestamp = state_data.get("timestamp", 0)
+            
+            # Check expiration (10 minutes)
+            if time.time() - stored_timestamp > 600:
+                del self._memory_store[state_key]
+                return False
+            
+            # Delete state on validation attempt (single use)
+            del self._memory_store[state_key]
+            
+            # Timing-safe session comparison
+            return hmac.compare_digest(stored_session_id, session_id)
+        
+        # Use Redis for production
+        try:
+            if not self.redis_manager.is_available():
+                self.redis_manager.connect()
+                
+            redis_client = self.redis_client
+            if not redis_client:
+                logger.warning("Redis not available for state validation")
+                return False
+                
+            # Get and delete atomically
+            state_data_json = redis_client.get(state_key)
+            if not state_data_json:
+                return False
+                
+            # Parse stored data
+            state_data = json.loads(state_data_json)
+            stored_session_id = state_data.get("session_id", "")
+            stored_timestamp = state_data.get("timestamp", 0)
+            
+            # Check expiration (10 minutes)
+            if time.time() - stored_timestamp > 600:
+                redis_client.delete(state_key)
+                return False
+            
+            # Timing-safe session comparison
+            session_match = hmac.compare_digest(stored_session_id, session_id)
+            
+            # Delete state on any validation attempt (single use)
+            redis_client.delete(state_key)
+            
+            return session_match
+            
+        except Exception as e:
+            logger.error(f"State parameter validation error: {e}")
+            return False
+    
+    def generate_state_parameter_with_hmac(self, session_id: str) -> str:
+        """
+        Generate state parameter with HMAC signature
+        
+        Args:
+            session_id: Session ID to include in HMAC
+            
+        Returns:
+            State parameter with HMAC signature
+        """
+        # Generate base state
+        state_data = secrets.token_urlsafe(24)
+        
+        # Create HMAC signature
+        signature = hmac.new(
+            self.hmac_secret.encode(),
+            f"{state_data}:{session_id}".encode(),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return f"{state_data}.{signature}"
+    
+    def generate_provider_state(self, provider: 'AuthProvider', session_id: str) -> str:
+        """
+        Generate provider-specific OAuth state parameter
+        
+        Args:
+            provider: OAuth provider enum
+            session_id: Session ID to bind state to
+            
+        Returns:
+            Provider-specific state parameter
+        """
+        # Generate base state with provider prefix
+        base_state = secrets.token_urlsafe(24)
+        provider_state = f"{provider.value}:{base_state}"
+        
+        # Create HMAC signature including provider
+        signature = hmac.new(
+            self.hmac_secret.encode(),
+            f"{provider_state}:{session_id}".encode(),
+            hashlib.sha256
+        ).hexdigest()[:16]  # Truncate for readability
+        
+        return f"{base_state}_{signature}"
+    
+    def store_provider_state(self, provider: 'AuthProvider', state: str, session_id: str) -> bool:
+        """
+        Store provider-specific OAuth state
+        
+        Args:
+            provider: OAuth provider
+            state: State parameter to store
+            session_id: Session ID to bind to
+            
+        Returns:
+            True if stored successfully
+        """
+        provider_state_key = f"oauth_state:{provider.value}:{state}"
+        state_data = {
+            "session_id": session_id,
+            "provider": provider.value,
+            "timestamp": time.time()
+        }
+        
+        # Use memory store if Redis not available (for testing)
+        if self._use_memory_store():
+            if provider_state_key in self._memory_store:
+                return False
+            self._memory_store[provider_state_key] = state_data
+            return True
+        
+        # Use Redis for production
+        try:
+            if not self.redis_manager.is_available():
+                self.redis_manager.connect()
+                
+            redis_client = self.redis_client
+            if not redis_client:
+                return False
+                
+            result = redis_client.set(
+                provider_state_key,
+                json.dumps(state_data),
+                ex=600,  # 10 minutes
+                nx=True
+            )
+            
+            return bool(result)
+            
+        except Exception as e:
+            logger.error(f"Provider state storage error: {e}")
+            return False
+    
+    def validate_provider_state(self, provider: 'AuthProvider', state: str, session_id: str) -> bool:
+        """
+        Validate provider-specific OAuth state
+        
+        Args:
+            provider: OAuth provider
+            state: State parameter to validate
+            session_id: Expected session ID
+            
+        Returns:
+            True if valid and matches provider/session
+        """
+        provider_state_key = f"oauth_state:{provider.value}:{state}"
+        
+        # Use memory store if Redis not available (for testing)
+        if self._use_memory_store():
+            if provider_state_key not in self._memory_store:
+                return False
+                
+            state_data = self._memory_store[provider_state_key]
+            stored_session_id = state_data.get("session_id", "")
+            stored_provider = state_data.get("provider", "")
+            stored_timestamp = state_data.get("timestamp", 0)
+            
+            # Check expiration
+            if time.time() - stored_timestamp > 600:
+                del self._memory_store[provider_state_key]
+                return False
+            
+            # Delete on validation attempt (single use)
+            del self._memory_store[provider_state_key]
+            
+            # Validate provider and session (timing-safe)
+            provider_match = hmac.compare_digest(stored_provider, provider.value)
+            session_match = hmac.compare_digest(stored_session_id, session_id)
+            
+            return provider_match and session_match
+        
+        # Use Redis for production
+        try:
+            if not self.redis_manager.is_available():
+                self.redis_manager.connect()
+                
+            redis_client = self.redis_client
+            if not redis_client:
+                return False
+                
+            state_data_json = redis_client.get(provider_state_key)
+            if not state_data_json:
+                return False
+                
+            state_data = json.loads(state_data_json)
+            stored_session_id = state_data.get("session_id", "")
+            stored_provider = state_data.get("provider", "")
+            stored_timestamp = state_data.get("timestamp", 0)
+            
+            # Check expiration
+            if time.time() - stored_timestamp > 600:
+                redis_client.delete(provider_state_key)
+                return False
+            
+            # Validate provider and session (timing-safe)
+            provider_match = hmac.compare_digest(stored_provider, provider.value)
+            session_match = hmac.compare_digest(stored_session_id, session_id)
+            
+            # Delete on validation attempt (single use)
+            redis_client.delete(provider_state_key)
+            
+            return provider_match and session_match
+            
+        except Exception as e:
+            logger.error(f"Provider state validation error: {e}")
+            return False
+    
+    def handle_oauth_failure(self, state: str, session_id: str, error: str) -> None:
+        """
+        Handle OAuth failure by cleaning up state
+        
+        Args:
+            state: State parameter to clean up
+            session_id: Session ID
+            error: Error description for logging
+        """
+        # Use memory store if Redis not available (for testing)
+        if self._use_memory_store():
+            # Clean up regular state
+            state_key = f"oauth_state:{state}"
+            if state_key in self._memory_store:
+                del self._memory_store[state_key]
+            
+            # Clean up provider-specific states
+            for provider in ['google', 'github', 'local']:
+                provider_state_key = f"oauth_state:{provider}:{state}"
+                if provider_state_key in self._memory_store:
+                    del self._memory_store[provider_state_key]
+                    
+            logger.info(f"Cleaned up OAuth state after failure: {error}")
+            return
+        
+        # Use Redis for production
+        try:
+            if not self.redis_manager.is_available():
+                self.redis_manager.connect()
+                
+            redis_client = self.redis_client
+            if not redis_client:
+                return
+                
+            # Clean up regular state
+            state_key = f"oauth_state:{state}"
+            redis_client.delete(state_key)
+            
+            # Clean up provider-specific states
+            for provider in ['google', 'github', 'local']:
+                provider_state_key = f"oauth_state:{provider}:{state}"
+                redis_client.delete(provider_state_key)
+                
+            logger.info(f"Cleaned up OAuth state after failure: {error}")
+            
+        except Exception as e:
+            logger.error(f"OAuth failure cleanup error: {e}")
+    
     def _decode_state(self, state: str) -> Optional[Dict]:
         """Decode and parse state parameter"""
         try:
@@ -300,13 +655,9 @@ class JWTSecurityValidator:
         try:
             secret = AuthSecretLoader.get_jwt_secret()
         except ValueError as e:
-            # If we're in development and no secret is configured, use a development default
+            # No fallback in any environment - require explicit JWT configuration
             env = os.getenv("ENVIRONMENT", "development").lower()
-            if env == "development":
-                logger.warning("Using development default JWT secret - NOT FOR PRODUCTION")
-                secret = "dev-secret-key-DO-NOT-USE-IN-PRODUCTION-32chars"
-            else:
-                raise ValueError(f"JWT secret not configured for {env} environment") from e
+            raise ValueError(f"JWT secret not configured for {env} environment") from e
         
         # Ensure secret is strong enough for production environments
         env = os.getenv("ENVIRONMENT", "development").lower()

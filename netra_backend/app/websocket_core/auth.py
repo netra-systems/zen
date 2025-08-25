@@ -173,7 +173,7 @@ class WebSocketAuthenticator:
                 
                 # Use HTTP-based auth client for microservice independence
                 from netra_backend.app.clients.auth_client_core import auth_client
-                validation_result = await auth_client.validate_token(token)
+                validation_result = await auth_client.validate_token_jwt(token)
                 
                 if not validation_result or not validation_result.get("valid"):
                     self.auth_stats["failed_auths"] += 1

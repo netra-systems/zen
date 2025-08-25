@@ -76,13 +76,11 @@ class AuthSecretLoader:
             logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY instead)")
             return secret
         
-        # Development fallback only
-        if env == "development":
-            logger.warning("No JWT secret found, using development default")
-            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
-        
-        # No fallback in staging/production - require JWT_SECRET_KEY
-        raise ValueError(f"JWT secret not configured for {env} environment. Set JWT_SECRET_KEY (recommended) or JWT_SECRET.")
+        # No fallback in any environment - require explicit JWT secret configuration
+        raise ValueError(
+            f"JWT secret not configured for {env} environment. "
+            "Set JWT_SECRET_KEY (recommended) or JWT_SECRET environment variable."
+        )
     
     @staticmethod
     def _load_from_secret_manager(secret_name: str) -> Optional[str]:
@@ -176,13 +174,43 @@ class AuthSecretLoader:
     def get_database_url() -> str:
         """Get database URL from secrets with proper normalization.
         
+        Constructs URL from individual POSTGRES_* environment variables.
+        Falls back to DATABASE_URL if individual variables not set.
+        
         Returns:
             Database URL normalized for auth service compatibility
         """
         env_manager = get_env()
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
-        # First try to load from Secret Manager in staging/production
+        # Try to construct URL from individual PostgreSQL variables
+        postgres_host = env_manager.get("POSTGRES_HOST")
+        postgres_port = env_manager.get("POSTGRES_PORT")
+        postgres_db = env_manager.get("POSTGRES_DB")
+        postgres_user = env_manager.get("POSTGRES_USER")
+        postgres_password = env_manager.get("POSTGRES_PASSWORD")
+        
+        if postgres_host and postgres_user and postgres_db:
+            # Construct URL from individual variables
+            port_part = f":{postgres_port}" if postgres_port else ":5432"
+            pass_part = f":{postgres_password}" if postgres_password else ""
+            
+            # Check for Cloud SQL Unix socket (staging/production)
+            if "/cloudsql/" in postgres_host:
+                # Unix socket format for Cloud SQL
+                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@/{postgres_db}?host={postgres_host}"
+            else:
+                # Standard TCP connection
+                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@{postgres_host}{port_part}/{postgres_db}"
+                
+                # Add SSL mode for staging/production
+                if env in ["staging", "production"]:
+                    database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
+            
+            logger.info(f"Constructed database URL from individual PostgreSQL variables")
+            return database_url
+        
+        # Try to load from Secret Manager in staging/production (legacy support)
         if env in ["staging", "production"]:
             secret_name = f"{env}-database-url"
             secret_url = AuthSecretLoader._load_from_secret_manager(secret_name)
@@ -192,10 +220,10 @@ class AuthSecretLoader:
                 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
                 return AuthDatabaseManager._normalize_database_url(secret_url)
         
-        # Fall back to environment variable
+        # Fall back to DATABASE_URL environment variable
         database_url = env_manager.get("DATABASE_URL", "")
         if not database_url:
-            logger.warning("No database URL found in secrets or environment")
+            logger.warning("No database configuration found in secrets or environment")
             return ""
         
         # Import here to avoid circular imports

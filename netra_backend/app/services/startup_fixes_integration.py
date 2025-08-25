@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Ensures consistent, reliable system initialization
 
 Fixes Integrated:
-1. Environment Variable Mapping Mismatch (CLICKHOUSE_PASSWORD vs CLICKHOUSE_DEFAULT_PASSWORD)
+1. Environment Variable Mapping (Legacy support - to be removed)
 2. Service Port Conflicts (Hard-coded ports causing failures)
 3. Database User Transaction Rollback (Partial user records on failure)
 4. Background Task Timeout Crash (4-minute crash from background tasks)
@@ -42,18 +42,8 @@ class StartupFixesIntegration:
         """
         fixes = {}
         
-        # FIX 1: ClickHouse password environment variable mapping
-        clickhouse_password = get_env().get("CLICKHOUSE_PASSWORD")
-        clickhouse_default_password = get_env().get("CLICKHOUSE_DEFAULT_PASSWORD")
-        
-        if clickhouse_default_password and not clickhouse_password:
-            get_env().set("CLICKHOUSE_PASSWORD", clickhouse_default_password, "startup_fixes")
-            fixes["clickhouse_password_mapping"] = f"Mapped CLICKHOUSE_DEFAULT_PASSWORD to CLICKHOUSE_PASSWORD"
-            logger.info("Applied ClickHouse password environment variable mapping fix")
-        elif clickhouse_password and not clickhouse_default_password:
-            get_env().set("CLICKHOUSE_DEFAULT_PASSWORD", clickhouse_password, "startup_fixes")
-            fixes["clickhouse_default_password_mapping"] = f"Mapped CLICKHOUSE_PASSWORD to CLICKHOUSE_DEFAULT_PASSWORD"
-            logger.info("Applied reverse ClickHouse password environment variable mapping fix")
+        # FIX 1: ClickHouse password - using unified CLICKHOUSE_PASSWORD
+        # (Legacy mapping removed - now uses single CLICKHOUSE_PASSWORD variable)
         
         # FIX 5: Redis mode local fallback
         redis_mode = get_env().get("REDIS_MODE")

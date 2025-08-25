@@ -21,9 +21,9 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
 
-from .actions_agent_execution import ActionsAgentExecutionManager
-from .actions_agent_llm import ActionsAgentLLMHandler
-from .actions_agent_monitoring import ActionsAgentMonitoringService
+from netra_backend.app.agents.actions_agent_execution import ActionsAgentExecutionManager
+from netra_backend.app.agents.actions_agent_llm import ActionsAgentLLMHandler
+from netra_backend.app.agents.actions_agent_monitoring import ActionsAgentMonitoringService
 
 
 class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):

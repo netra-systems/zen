@@ -21,6 +21,7 @@ from dev_launcher.utils import (
     get_free_port,
     print_with_emoji,
 )
+from shared.database_url_builder import DatabaseURLBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -149,13 +150,25 @@ class AuthStarter:
             # Use local Redis without authentication
             env["REDIS_URL"] = f"redis://{redis_config['host']}:{redis_config['port']}/{redis_config.get('db', 0)}"
         
-        # Add PostgreSQL configuration - use the same DATABASE_URL from .env
-        # The DATABASE_URL is already loaded from .env file in the launcher's _load_env_file method
-        if "DATABASE_URL" not in env:
-            # Fallback to constructing from config if not in env
+        # Add PostgreSQL configuration using DatabaseURLBuilder
+        # Use DatabaseURLBuilder for proper URL construction
+        builder = DatabaseURLBuilder(env)
+        
+        # Get the appropriate URL for auth service (sync URL for psycopg2)
+        database_url = builder.get_url_for_environment(sync=True)
+        
+        # If no URL from builder, try to construct from services config
+        if not database_url:
             postgres_config = self.services_config.postgres.get_config()
-            database_url = f"postgresql://{postgres_config['user']}:{postgres_config['password']}@{postgres_config['host']}:{postgres_config['port']}/{postgres_config['database']}"
+            if postgres_config.get('host') and postgres_config.get('database'):
+                database_url = f"postgresql://{postgres_config.get('user', 'postgres')}:{postgres_config.get('password', 'postgres')}@{postgres_config['host']}:{postgres_config.get('port', '5432')}/{postgres_config['database']}"
+        
+        # Set DATABASE_URL if we have one
+        if database_url:
             env["DATABASE_URL"] = database_url
+        else:
+            # Use a development default if nothing else is available
+            env["DATABASE_URL"] = builder.development.default_sync_url
         
         # Add service discovery path
         env["SERVICE_DISCOVERY_PATH"] = str(self.config.project_root / ".service_discovery")

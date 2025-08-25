@@ -18,6 +18,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from fastapi import FastAPI, HTTPException
+from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from test_framework.decorators import mock_justified
@@ -51,6 +52,11 @@ def mock_app():
     # Mock: Generic component isolation for controlled unit testing
     app.get = Mock()
     return app
+
+@pytest.fixture
+def minimal_app():
+    """Real minimal FastAPI app for lifecycle testing."""
+    return FastAPI()
 
 @pytest.fixture
 def real_app():

@@ -67,12 +67,9 @@ def initialize_test_database():
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
-        # No running loop, create a new one
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        # No running loop, create a new one (avoid deprecated get_event_loop)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
     
     # Run the setup
     if not loop.is_running():
@@ -83,12 +80,21 @@ def initialize_test_database():
     
     yield auth_db
     
-    # Cleanup
+    # Cleanup with proper async resource handling
+    async def cleanup():
+        try:
+            await auth_db.close()
+        except Exception:
+            pass  # Ignore cleanup errors
+    
     try:
         if not loop.is_running():
-            loop.run_until_complete(auth_db.close())
-    except:
-        pass
+            loop.run_until_complete(cleanup())
+        else:
+            # Schedule cleanup task if in async context
+            asyncio.create_task(cleanup())
+    except Exception:
+        pass  # Ignore cleanup errors
 
 # REMOVED: Duplicate auth_db fixture - use initialized_test_db or test_db_session instead
 
@@ -102,12 +108,9 @@ def initialized_test_db():
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
-        # No running loop, create a new one
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        # No running loop, create a new one (avoid deprecated get_event_loop)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
     
     # Initialize database synchronously
     if not loop.is_running():
@@ -119,18 +122,27 @@ def initialized_test_db():
     
     yield auth_db
     
-    # Cleanup
+    # Cleanup with proper async resource handling
+    async def cleanup():
+        try:
+            await auth_db.close()
+        except Exception:
+            pass  # Ignore cleanup errors
+    
     try:
         if not loop.is_running():
-            loop.run_until_complete(auth_db.close())
-    except:
-        pass
+            loop.run_until_complete(cleanup())
+        else:
+            # Schedule cleanup task if in async context
+            asyncio.create_task(cleanup())
+    except Exception:
+        pass  # Ignore cleanup errors
 
 @pytest.fixture
 def mock_auth_redis():
     """Auth-specific Redis mock for session management"""
     # Mock: Redis caching isolation to prevent test interference and external dependencies
-    with patch('auth_service.auth_core.core.session_manager.redis') as mock:
+    with patch('auth_service.auth_core.redis_manager.auth_redis_manager') as mock:
         mock.ping.return_value = True
         mock.get.return_value = None
         mock.set.return_value = True
@@ -160,18 +172,4 @@ def clean_environment():
     os.environ.clear()
     os.environ.update(original_env)
 
-@pytest.fixture
-def mock_auth_redis():
-    """Mock Redis client for OAuth security testing"""
-    from unittest.mock import Mock
-    
-    # Mock: Redis caching isolation to prevent test interference and external dependencies
-    redis_mock = Mock()
-    
-    # Set up default mock behaviors
-    redis_mock.exists.return_value = False  # By default, keys don't exist
-    redis_mock.get.return_value = None
-    redis_mock.setex.return_value = True
-    redis_mock.ping.return_value = True
-    
-    return redis_mock
+# REMOVED: Duplicate mock_auth_redis fixture - use the one above at line 130

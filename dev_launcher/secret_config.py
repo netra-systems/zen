@@ -34,8 +34,7 @@ class SecretConfig:
             "GOOGLE_CLIENT_SECRET",
             "LANGFUSE_SECRET_KEY",
             "LANGFUSE_PUBLIC_KEY",
-            "CLICKHOUSE_DEFAULT_PASSWORD",
-            "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "CLICKHOUSE_PASSWORD",
             "JWT_SECRET_KEY",
             "FERNET_KEY",
             "REDIS_PASSWORD",
@@ -64,8 +63,7 @@ class SecretConfig:
             "API Keys": ["GEMINI_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"],
             "ClickHouse": [
                 "CLICKHOUSE_HOST", "CLICKHOUSE_PORT", "CLICKHOUSE_USER",
-                "CLICKHOUSE_DEFAULT_PASSWORD", "CLICKHOUSE_DEVELOPMENT_PASSWORD", 
-                "CLICKHOUSE_DB"
+                "CLICKHOUSE_PASSWORD", "CLICKHOUSE_DB"
             ],
             "Redis": ["REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD"],
             "Langfuse": ["LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY"],

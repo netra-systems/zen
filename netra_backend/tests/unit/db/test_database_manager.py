@@ -18,6 +18,13 @@ from test_framework.decorators import mock_justified
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.environment_constants import Environment
 
+# Test markers for unified test runner
+pytestmark = [
+    pytest.mark.env_test,  # For test environment compatibility
+    pytest.mark.database,  # Database category marker
+    pytest.mark.unit       # Unit test marker
+]
+
 
 class TestDatabaseManagerURLConversion:
     """Test URL conversion between sync and async formats."""
@@ -28,25 +35,25 @@ class TestDatabaseManagerURLConversion:
         os.environ.pop("DATABASE_URL", None)
     
     @pytest.mark.parametrize("input_url,expected_output", [
-        # Basic PostgreSQL URL conversion
-        ("postgresql://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db"),
+        # Basic PostgreSQL URL conversion (search_path option automatically added in test environment)
+        ("postgresql://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db?options=-c+search_path%3Dnetra_test%2Cpublic"),
         
-        # Remove async driver prefixes
-        ("postgresql+asyncpg://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db"),
-        ("postgres+asyncpg://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db"),
-        ("postgres://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db"),
+        # Remove async driver prefixes (search_path option automatically added in test environment)
+        ("postgresql+asyncpg://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db?options=-c+search_path%3Dnetra_test%2Cpublic"),
+        ("postgres+asyncpg://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db?options=-c+search_path%3Dnetra_test%2Cpublic"),
+        ("postgres://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db?options=-c+search_path%3Dnetra_test%2Cpublic"),
         
-        # Cloud SQL Unix socket (SSL parameters removed)
+        # Cloud SQL Unix socket (SSL parameters removed, no search_path added)
         ("postgresql://user:pass@host/cloudsql/project:region:instance/db?sslmode=require", 
          "postgresql://user:pass@host/cloudsql/project:region:instance/db"),
         ("postgresql://user:pass@host/cloudsql/project:region:instance/db?ssl=require&sslmode=disable", 
          "postgresql://user:pass@host/cloudsql/project:region:instance/db"),
         
-        # Regular URL with SSL parameters preserved (base URL doesn't change them)
+        # Regular URL with SSL parameters preserved and search_path added
         ("postgresql://user:pass@host:5432/db?sslmode=require", 
-         "postgresql://user:pass@host:5432/db?sslmode=require"),
+         "postgresql://user:pass@host:5432/db?sslmode=require&options=-c+search_path%3Dnetra_test%2Cpublic"),
         ("postgresql://user:pass@host:5432/db?ssl=require", 
-         "postgresql://user:pass@host:5432/db?ssl=require"),
+         "postgresql://user:pass@host:5432/db?ssl=require&options=-c+search_path%3Dnetra_test%2Cpublic"),
     ])
     def test_get_base_database_url_conversion(self, input_url, expected_output):
         """Test base URL conversion removes driver prefixes and handles SSL."""
@@ -64,8 +71,8 @@ class TestDatabaseManagerURLConversion:
                 with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
                     mock_config.return_value.database_url = None
                     result = DatabaseManager.get_base_database_url()
-                    # In test environment, we expect the test database URL
-                    assert result == "postgresql://test:test@localhost:5432/netra_test"
+                    # In test environment (pytest context), we expect the test database URL with search path
+                    assert result == "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
     
     @pytest.mark.parametrize("base_url,expected_migration_url", [
         # Standard sync URL conversion
@@ -87,15 +94,15 @@ class TestDatabaseManagerURLConversion:
             assert result == expected_migration_url
     
     @pytest.mark.parametrize("base_url,expected_app_url", [
-        # Standard async URL conversion
+        # Standard async URL conversion (search_path handled via server_settings, not URL options)
         ("postgresql://user:pass@host:5432/db?sslmode=require", 
          "postgresql+asyncpg://user:pass@host:5432/db?ssl=require"),
         
-        # Already async - preserve
+        # Already async - preserve URL format (search_path handled via server_settings, not URL options)
         ("postgresql+asyncpg://user:pass@host:5432/db?ssl=require", 
          "postgresql+asyncpg://user:pass@host:5432/db?ssl=require"),
         
-        # Cloud SQL - no SSL conversion needed
+        # Cloud SQL - no SSL conversion needed (no search_path for Cloud SQL)
         ("postgresql://user:pass@host/cloudsql/project:region:instance/db", 
          "postgresql+asyncpg://user:pass@host/cloudsql/project:region:instance/db"),
     ])
@@ -275,9 +282,7 @@ class TestDatabaseManagerEngineCreation:
             assert engine.url.database == "test_db"
             assert engine.url.username == "user"
             
-            # The application URL method only converts existing SSL parameters,
-            # it doesn't add new ones. For a basic URL without SSL params,
-            # we shouldn't expect SSL params in the output.
+            # The application URL method converts SSL parameters (search_path handled via server_settings)
             app_url = DatabaseManager.get_application_url_async()
             assert app_url == "postgresql+asyncpg://user:pass@localhost:5432/test_db"
             
@@ -361,8 +366,8 @@ class TestDatabaseManagerErrorHandling:
                 with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
                     mock_config.return_value.database_url = None
                     result = DatabaseManager.get_base_database_url()
-                    # In test environment, we expect the test database URL
-                    assert result == "postgresql://test:test@localhost:5432/netra_test"
+                    # In test environment (pytest context), we expect the test database URL with search path
+                    assert result == "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
     
     def test_missing_database_url_handling(self):
         """Test handling when DATABASE_URL is not set."""
@@ -373,8 +378,8 @@ class TestDatabaseManagerErrorHandling:
                 with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
                     mock_config.return_value.database_url = None
                     result = DatabaseManager.get_base_database_url()
-                    # In test environment, we expect the test database URL
-                    assert result == "postgresql://test:test@localhost:5432/netra_test"
+                    # In test environment (pytest context), we expect the test database URL with search path
+                    assert result == "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
     
     def test_driver_mismatch_validation(self):
         """Test validation catches driver mismatches."""
@@ -408,8 +413,8 @@ class TestDatabaseManagerErrorHandling:
                     # Mock: Component isolation for testing without external dependencies
                     with patch("sys.argv", ["python"]):
                         result = DatabaseManager._get_default_database_url()
-                        # Should default to development settings
-                        assert result == "postgresql://postgres:password@localhost:5432/netra"
+                        # Should default to development settings with public schema search_path
+                        assert result == "postgresql://postgres:password@localhost:5432/netra?options=-c%20search_path%3Dpublic"
 
 
 class TestDatabaseManagerIntegration:
@@ -461,16 +466,16 @@ class TestDatabaseManagerIntegration:
         original_url = "postgresql+asyncpg://user:pass@host:5432/db?ssl=require"
         
         with patch.dict(os.environ, {"DATABASE_URL": original_url}):
-            # Get base URL (should clean driver prefix but preserve SSL params)
+            # Get base URL (should clean driver prefix but preserve SSL params and add search_path)
             base_url = DatabaseManager.get_base_database_url()
-            assert base_url == "postgresql://user:pass@host:5432/db?ssl=require"
+            assert base_url == "postgresql://user:pass@host:5432/db?ssl=require&options=-c+search_path%3Dnetra_test%2Cpublic"
             
             # Get migration URL (should be sync compatible with SSL converted)
             migration_url = DatabaseManager.get_migration_url_sync_format()
             assert migration_url == "postgresql://user:pass@host:5432/db?sslmode=require"
             assert DatabaseManager.validate_migration_url_sync_format(migration_url) is True
             
-            # Get application URL (should be async compatible)
+            # Get application URL (should be async compatible, search_path handled via server_settings)
             app_url = DatabaseManager.get_application_url_async()
             assert app_url == "postgresql+asyncpg://user:pass@host:5432/db?ssl=require"
             assert DatabaseManager.validate_application_url(app_url) is True
@@ -479,23 +484,41 @@ class TestDatabaseManagerIntegration:
         """Test complete Cloud SQL URL handling."""
         cloud_url = "postgresql://user:pass@host/cloudsql/project:region:instance/db?sslmode=disable&ssl=require"
         
+        # Patch both os.environ and the isolated environment directly
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        # Save original value
+        env_instance = get_env()
+        original_value = env_instance.get("DATABASE_URL")
+        
         with patch.dict(os.environ, {"DATABASE_URL": cloud_url}):
-            # Base URL should strip SSL params for Cloud SQL
-            base_url = DatabaseManager.get_base_database_url()
-            assert base_url == "postgresql://user:pass@host/cloudsql/project:region:instance/db"
+            # Also set directly in isolated environment
+            env_instance.set("DATABASE_URL", cloud_url, "test")
             
-            # Migration URL should work as-is
-            migration_url = DatabaseManager.get_migration_url_sync_format()
-            assert migration_url == "postgresql://user:pass@host/cloudsql/project:region:instance/db"
-            assert DatabaseManager.validate_migration_url_sync_format(migration_url) is True
-            
-            # Application URL should add async driver
-            app_url = DatabaseManager.get_application_url_async()
-            assert app_url == "postgresql+asyncpg://user:pass@host/cloudsql/project:region:instance/db"
-            assert DatabaseManager.validate_application_url(app_url) is True
-            
-            # Should detect Cloud SQL environment
-            assert DatabaseManager.is_cloud_sql_environment() is True
+            try:
+                # Base URL should strip SSL params for Cloud SQL
+                base_url = DatabaseManager.get_base_database_url()
+                assert base_url == "postgresql://user:pass@host/cloudsql/project:region:instance/db"
+                
+                # Migration URL should work as-is
+                migration_url = DatabaseManager.get_migration_url_sync_format()
+                assert migration_url == "postgresql://user:pass@host/cloudsql/project:region:instance/db"
+                assert DatabaseManager.validate_migration_url_sync_format(migration_url) is True
+                
+                # Application URL should add async driver
+                app_url = DatabaseManager.get_application_url_async()
+                assert app_url == "postgresql+asyncpg://user:pass@host/cloudsql/project:region:instance/db"
+                assert DatabaseManager.validate_application_url(app_url) is True
+                
+                # Should detect Cloud SQL environment
+                assert DatabaseManager.is_cloud_sql_environment() is True
+                
+            finally:
+                # Restore original value
+                if original_value:
+                    env_instance.set("DATABASE_URL", original_value, "test_restore")
+                else:
+                    env_instance.delete("DATABASE_URL")
 
 
 class TestDatabaseManagerEdgeCases:

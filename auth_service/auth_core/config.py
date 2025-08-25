@@ -11,6 +11,7 @@ import logging
 # Use auth_service's own isolated environment management - NEVER import from dev_launcher or netra_backend
 from auth_service.auth_core.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
+from shared.database_url_builder import DatabaseURLBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +67,15 @@ class AuthConfig:
             fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_SECRET must be set in production/staging")
-            logger.warning("Using default service secret for development")
-            return "dev-service-secret-DO-NOT-USE-IN-PRODUCTION"
+            # For test/development environments, allow empty but warn
+            if env in ["test", "development"] or fast_test_mode:
+                logger.warning(f"SERVICE_SECRET not configured for {env} environment")
+                return ""  # Return empty string for test/dev
+            # For any other environment, fail loudly
+            raise ValueError(
+                f"SERVICE_SECRET is not configured for {env} environment. "
+                "This must be explicitly set via environment variables."
+            )
         
         # Validate service secret is distinct from JWT secret
         jwt_secret = AuthSecretLoader.get_jwt_secret()
@@ -94,8 +102,15 @@ class AuthConfig:
             fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_ID must be set in production/staging")
-            logger.warning("Using default service ID for development")
-            return "netra-auth-dev-instance"
+            # For test/development environments, allow empty but warn
+            if env in ["test", "development"] or fast_test_mode:
+                logger.warning(f"SERVICE_ID not configured for {env} environment")
+                return "test-service-id"  # Return test ID for test/dev
+            # For any other environment, fail loudly
+            raise ValueError(
+                f"SERVICE_ID is not configured for {env} environment. "
+                "This must be explicitly set via environment variables."
+            )
         
         return service_id
     
@@ -149,45 +164,85 @@ class AuthConfig:
     
     @staticmethod
     def get_database_url() -> str:
-        """Get database URL for auth service"""
-        # Use the same DATABASE_URL as the main application
-        # @marked: Database URL for auth service data persistence
-        database_url = get_env().get("DATABASE_URL", "")
+        """Get database URL for auth service using comprehensive URL builder."""
+        env_manager = get_env()
+        
+        # Build all environment variables dict
+        env_vars = {
+            "ENVIRONMENT": AuthConfig.get_environment(),
+            "POSTGRES_HOST": env_manager.get("POSTGRES_HOST"),
+            "POSTGRES_PORT": env_manager.get("POSTGRES_PORT"),
+            "POSTGRES_DB": env_manager.get("POSTGRES_DB"),
+            "POSTGRES_USER": env_manager.get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD")
+        }
+        
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Validate configuration
+        is_valid, error_msg = builder.validate()
+        if not is_valid:
+            raise ValueError(f"Database configuration error: {error_msg}")
+        
+        # Get URL for current environment
+        database_url = builder.get_url_for_environment(sync=False)
         
         if not database_url:
-            logger.warning("No database URL configured, will use in-memory SQLite")
-            return database_url
+            env = AuthConfig.get_environment()
+            if env in ["development", "staging", "production"]:
+                raise ValueError(
+                    f"No PostgreSQL configuration found for {env} environment. "
+                    "Set POSTGRES_HOST/USER/DB environment variables."
+                )
+            logger.warning("No database configuration found for test environment")
+            return ""
         
-        # Import here to avoid circular imports
-        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-        
-        # Return normalized URL for auth service compatibility
-        return AuthDatabaseManager._normalize_database_url(database_url)
+        logger.info(f"Using database URL from {builder.debug_info()['environment']} configuration")
+        return database_url
     
     @staticmethod
     def get_raw_database_url() -> str:
-        """Get raw database URL from environment without normalization"""
-        return get_env().get("DATABASE_URL", "")
+        """Get raw database URL for synchronous operations (like alembic)."""
+        env_manager = get_env()
+        
+        # Build all environment variables dict
+        env_vars = {
+            "ENVIRONMENT": AuthConfig.get_environment(),
+            "POSTGRES_HOST": env_manager.get("POSTGRES_HOST"),
+            "POSTGRES_PORT": env_manager.get("POSTGRES_PORT"),
+            "POSTGRES_DB": env_manager.get("POSTGRES_DB"),
+            "POSTGRES_USER": env_manager.get("POSTGRES_USER"),
+            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD")
+        }
+        
+        # Create builder
+        builder = DatabaseURLBuilder(env_vars)
+        
+        # Get synchronous URL for current environment
+        database_url = builder.get_url_for_environment(sync=True)
+        
+        return database_url or ""
     
     @staticmethod
     def get_redis_url() -> str:
         """Get Redis URL for session management"""
         env = AuthConfig.get_environment()
         # @marked: Redis URL for session storage
-        if env == "staging":
-            # In staging, use Redis container name unless explicitly overridden
-            default_redis_url = "redis://redis:6379/1"
-        elif env == "production":
-            # In production, use Redis container name
-            default_redis_url = "redis://redis:6379/0"
-        elif env in ["development", "test"]:
-            # In development/test, use localhost
-            default_redis_url = "redis://localhost:6379/1"
-        else:
-            # Fallback for unknown environments
-            default_redis_url = "redis://redis:6379/1"
+        redis_url = get_env().get("REDIS_URL")
         
-        return get_env().get("REDIS_URL", default_redis_url)
+        if not redis_url:
+            # Fail loudly in staging/production if no Redis configuration
+            if env in ["staging", "production"]:
+                raise ValueError(
+                    f"REDIS_URL not configured for {env} environment. "
+                    "Redis is required for session management in production/staging."
+                )
+            # Only warn in development/test
+            logger.warning("REDIS_URL not configured for development/test environment")
+            return ""  # Return empty string for development/test
+        
+        return redis_url
     
     @staticmethod
     def get_session_ttl_hours() -> int:
@@ -221,19 +276,8 @@ class AuthConfig:
         
         # Log database URL (masked)
         db_url = AuthConfig.get_database_url()
-        if db_url:
-            # Mask credentials in database URL for logging
-            if "://" in db_url:
-                protocol, rest = db_url.split("://", 1)
-                if "@" in rest:
-                    _, host_part = rest.split("@", 1)
-                    logger.info(f"  Database URL: {protocol}://***@{host_part}")
-                else:
-                    logger.info(f"  Database URL: {db_url}")
-            else:
-                logger.info(f"  Database URL: {'*' * 10 if db_url else 'NOT SET'}")
-        else:
-            logger.info(f"  Database URL: NOT SET (will use in-memory SQLite)")
+        masked_url = DatabaseURLBuilder.mask_url_for_logging(db_url)
+        logger.info(f"  Database URL: {masked_url}")
 
 
 def get_config() -> AuthConfig:

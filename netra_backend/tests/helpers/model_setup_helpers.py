@@ -24,3 +24,7 @@ def create_mock_llm_response(content: str = "Test response") -> MagicMock:
     mock = MagicMock()
     mock.content = content
     return mock
+
+async def get_test_token(user_id: str = "test-user-id") -> str:
+    """Get a test authentication token."""
+    return f"test-token-{user_id}"

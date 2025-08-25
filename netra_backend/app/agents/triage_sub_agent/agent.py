@@ -101,6 +101,12 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
         self.llm_processor = TriageLLMProcessor(self)
         self.result_processor = TriageResultProcessor(self)
         self.prompt_builder = TriagePromptBuilder(self)
+        self._init_llm_fallback_handler()
+    
+    def _init_llm_fallback_handler(self) -> None:
+        """Initialize LLM fallback handler for structured calls."""
+        from netra_backend.app.llm.fallback_handler import LLMFallbackHandler
+        self.llm_fallback_handler = LLMFallbackHandler()
 
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have a user request to triage."""

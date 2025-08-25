@@ -29,6 +29,7 @@ from netra_backend.app.core.network_constants import (
     ServicePorts,
 )
 from dev_launcher.isolated_environment import get_env
+from shared.database_url_builder import DatabaseURLBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -129,12 +130,16 @@ class DatabaseConnector:
         logger.info(f"Discovered {len(self.connections)} database connections")
     
     def _discover_postgres_connection(self) -> None:
-        """Discover PostgreSQL connection."""
+        """Discover PostgreSQL connection using DatabaseURLBuilder."""
         env_manager = get_env()
-        postgres_url = env_manager.get(DatabaseConstants.DATABASE_URL)
-        if postgres_url:
-            # Use the URL directly - normalization can be done if needed
-            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
+        
+        # Use DatabaseURLBuilder for proper URL construction
+        builder = DatabaseURLBuilder(env_manager.get_all())
+        
+        # Get the appropriate URL for the environment (async URL for asyncpg)
+        postgres_url = builder.get_url_for_environment(sync=False)
+        
+        self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
     
     def _discover_clickhouse_connection(self) -> None:
         """Discover ClickHouse connection."""
@@ -224,13 +229,17 @@ class DatabaseConnector:
             return url
     
     def _normalize_postgres_url(self, url: str) -> str:
-        """Normalize PostgreSQL URL format for asyncpg compatibility."""
+        """Normalize PostgreSQL URL format for asyncpg compatibility.
+        
+        DatabaseURLBuilder already provides properly formatted URLs,
+        but we keep this for backward compatibility and edge cases.
+        """
         if not url:
             return url
         # Convert postgres:// to postgresql://
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://")
-        # Strip async driver prefixes for asyncpg
+        # Strip async driver prefixes for asyncpg (asyncpg expects plain postgresql://)
         url = url.replace("postgresql+asyncpg://", "postgresql://")
         url = url.replace("postgres+asyncpg://", "postgresql://")
         return url

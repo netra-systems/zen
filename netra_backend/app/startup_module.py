@@ -538,8 +538,12 @@ def _build_supervisor_agent(app: FastAPI):
 def _setup_agent_state(app: FastAPI, supervisor) -> None:
     """Setup agent state in app."""
     from netra_backend.app.services.agent_service import AgentService
+    from netra_backend.app.services.thread_service import ThreadService
+    from netra_backend.app.services.corpus_service import CorpusService
     app.state.agent_supervisor = supervisor
     app.state.agent_service = AgentService(supervisor)
+    app.state.thread_service = ThreadService()
+    app.state.corpus_service = CorpusService()
 
 
 async def initialize_websocket_components(logger: logging.Logger) -> None:
@@ -762,12 +766,25 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
         logger.info("Using robust startup manager with dependency resolution...")
         
         try:
-            # Initialize the startup manager and run the startup sequence
+            # Set startup in progress flags at the beginning
             start_time = time.time()
+            app.state.startup_complete = False
+            app.state.startup_in_progress = True
+            app.state.startup_failed = False
+            app.state.startup_error = None
+            app.state.startup_start_time = start_time
+            logger.info("Startup in progress flags set - health endpoint will report startup in progress")
+            
+            # Initialize the startup manager and run the startup sequence
             success = await startup_manager.initialize_system(app)
             
             if not success:
                 logger.error("Startup manager reported initialization failure")
+                # Set startup failure flags
+                app.state.startup_complete = False
+                app.state.startup_in_progress = False
+                app.state.startup_failed = True
+                app.state.startup_error = "Robust startup manager initialization failed"
                 # Fall back to legacy startup if robust startup fails
                 logger.warning("Falling back to legacy startup sequence...")
                 return await _run_legacy_startup(app)
@@ -775,11 +792,23 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
             # Store the startup manager in app state for health monitoring
             app.state.startup_manager = startup_manager
             
+            # CRITICAL: Set startup_complete flag for health endpoint
+            app.state.startup_complete = True
+            app.state.startup_in_progress = False
+            app.state.startup_failed = False
+            app.state.startup_error = None
+            logger.info("Startup completion flags set - health endpoint will report healthy")
+            
             log_startup_complete(start_time, logger)
             return start_time, logger
             
         except Exception as e:
             logger.error(f"Error in robust startup: {e}")
+            # Set startup failure flags
+            app.state.startup_complete = False
+            app.state.startup_in_progress = False
+            app.state.startup_failed = True
+            app.state.startup_error = f"Robust startup exception: {str(e)}"
             logger.warning("Falling back to legacy startup sequence...")
             return await _run_legacy_startup(app)
     else:
@@ -790,7 +819,24 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
 async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     """Run legacy startup sequence (fallback)."""
     start_time, logger = await _run_startup_phase_one(app)
+    
+    # Set startup in progress flags if not already set
+    if not hasattr(app.state, 'startup_in_progress') or not app.state.startup_in_progress:
+        app.state.startup_complete = False
+        app.state.startup_in_progress = True
+        app.state.startup_failed = False
+        app.state.startup_error = None
+        app.state.startup_start_time = start_time
+        logger.info("Legacy startup in progress flags set")
     await _run_startup_phase_two(app, logger)
     await _run_startup_phase_three(app, logger)
+    
+    # CRITICAL: Set startup_complete flag for health endpoint
+    app.state.startup_complete = True
+    app.state.startup_in_progress = False
+    app.state.startup_failed = False
+    app.state.startup_error = None
+    logger.info("Legacy startup completion flags set - health endpoint will report healthy")
+    
     log_startup_complete(start_time, logger)
     return start_time, logger

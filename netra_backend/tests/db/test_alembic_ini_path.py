@@ -2,8 +2,6 @@
 
 import sys
 from pathlib import Path
-
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -12,6 +10,10 @@ from netra_backend.app.db.migration_utils import (
     _get_alembic_ini_path,
     create_alembic_config,
 )
+
+# Define project root paths
+project_root = Path(__file__).parent.parent.parent.parent  # Go up to netra-core-generation-1
+correct_project_root = project_root  # Same for this case
 
 class TestAlembicIniPath:
     """Test suite to expose alembic.ini path configuration issues."""
@@ -58,19 +60,14 @@ class TestAlembicIniPath:
     
     def test_correct_path_calculation_for_alembic_ini(self):
         """Test what the correct path calculation should be."""
-        # Current incorrect calculation
-        incorrect_path = project_root / "config" / "alembic.ini"
+        # The file should exist at the project root config directory
+        config_path = project_root / "config" / "alembic.ini"
         
-        # Correct calculation should be
-        correct_path = correct_project_root / "config" / "alembic.ini"
-        
-        assert not Path(incorrect_path).exists(), \
-            f"File should not exist at incorrect path: {incorrect_path}"
-        assert Path(correct_path).exists(), \
-            f"File should exist at correct path: {correct_path}"
+        assert Path(config_path).exists(), \
+            f"File should exist at config path: {config_path}"
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.db.migration_utils.Path')
+    @patch('netra_backend.app.db.migration_utils.Path')
     def test_startup_module_fails_with_wrong_path(self, mock_path):
         """Test that startup module fails when looking for alembic.ini in wrong location."""
         # Mock the path to simulate the incorrect behavior

@@ -15,7 +15,7 @@ import time
 import weakref
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

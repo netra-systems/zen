@@ -1,17 +1,3 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
 """External Services Configuration Management
 
 **CRITICAL: Unified Service Configuration Management**
@@ -20,7 +6,7 @@ Manages LLM, Redis, OAuth, and external service configurations.
 Eliminates scattered service configuration across the codebase.
 
 **CONFIGURATION MANAGER**: This module is part of the configuration system
-and requires some direct os.environ access for bootstrapping. Application
+and requires some direct environment access for bootstrapping. Application
 code should use the unified configuration system instead.
 
 Business Value: Ensures reliable service integrations for Enterprise customers.
@@ -29,9 +15,9 @@ Prevents service configuration inconsistencies affecting revenue.
 Each function ≤8 lines, file ≤300 lines.
 """
 
-import os
 from typing import Any, Dict, List, Optional
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import (
     Environment,
     EnvironmentVariables,

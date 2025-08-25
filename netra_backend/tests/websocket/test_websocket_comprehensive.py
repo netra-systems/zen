@@ -28,8 +28,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-import websockets
-from fastapi import WebSocket
+from fastapi import WebSocket, HTTPException
 from fastapi.testclient import TestClient
 
 from netra_backend.app.core.websocket_cors import (
@@ -47,45 +46,45 @@ from netra_backend.app.routes.utils.websocket_helpers import (
     authenticate_websocket_user,
     accept_websocket_connection,
 )
+from netra_backend.app.websocket_core.auth import WebSocketAuthenticator
+from netra_backend.app.routes.websocket import authenticate_websocket_with_database
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.tests.conftest import create_test_user, get_test_token
+from netra_backend.tests.helpers.model_setup_helpers import create_test_user, get_test_token
 
 class WebSocketTestClient:
-    """Test client for WebSocket connections."""
+    """Test client for WebSocket connections using FastAPI TestClient."""
     
-    def __init__(self, base_url: str = "ws://localhost:8000"):
-        self.base_url = base_url
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+    def __init__(self, test_client: TestClient):
+        self.test_client = test_client
+        self.websocket = None
         self.messages: List[Dict] = []
         self.connected = False
         
-    async def connect(self, endpoint: str, token: str):
+    def connect(self, endpoint: str, token: str):
         """Connect to WebSocket endpoint."""
-        url = f"{self.base_url}{endpoint}?token={token}"
-        self.websocket = await websockets.connect(url)
+        # Use TestClient's websocket_connect with proper authorization headers
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+        self.websocket = self.test_client.websocket_connect(endpoint, headers=headers)
         self.connected = True
+        return self.websocket
         
-        # Start message listener
-        asyncio.create_task(self._listen_messages())
-        
-    async def _listen_messages(self):
-        """Listen for incoming messages."""
-        try:
-            async for message in self.websocket:
-                data = json.loads(message)
-                self.messages.append(data)
-        except websockets.exceptions.ConnectionClosed:
-            self.connected = False
-            
-    async def send_message(self, message: Dict):
+    def send_message(self, message: Dict):
         """Send message to WebSocket."""
         if self.websocket:
-            await self.websocket.send(json.dumps(message))
+            self.websocket.send_json(message)
             
-    async def disconnect(self):
+    def receive_message(self) -> Dict:
+        """Receive message from WebSocket."""
+        if self.websocket:
+            return self.websocket.receive_json()
+        return {}
+        
+    def disconnect(self):
         """Disconnect from WebSocket."""
         if self.websocket:
-            await self.websocket.close()
+            self.websocket.close()
             self.connected = False
             
     def get_messages_by_type(self, message_type: str) -> List[Dict]:
@@ -97,33 +96,29 @@ class WebSocketTestClient:
         self.messages.clear()
 
 @pytest.fixture
-async def websocket_client():
+def websocket_client():
     """WebSocket test client fixture."""
-    client = WebSocketTestClient()
+    test_client = TestClient(app)
+    client = WebSocketTestClient(test_client)
     yield client
     if client.connected:
-        await client.disconnect()
+        client.disconnect()
 
 @pytest.fixture
-async def authenticated_token(test_user):
+def authenticated_token(common_test_user):
     """Get authenticated token for testing."""
-    yield await get_test_token(test_user.id)
+    import asyncio
+    return asyncio.run(get_test_token(common_test_user["id"]))
 
-@pytest.mark.asyncio
 class TestWebSocketConnection:
     """Test WebSocket connection establishment."""
     
-    @pytest.mark.asyncio
-    async def test_connection_establishment_success(self, websocket_client, authenticated_token):
+    def test_connection_establishment_success(self, websocket_client, authenticated_token):
         """Test successful WebSocket connection establishment."""
         # Test connection with valid token
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
-        
-        # Wait for connection established message
-        await asyncio.sleep(0.1)
-        
-        # Verify connection
-        assert websocket_client.connected
+        with websocket_client.connect("/ws", authenticated_token) as websocket:
+            # Verify connection is established
+            assert websocket_client.connected
         
         # Check for connection_established message
         connection_msgs = websocket_client.get_messages_by_type("connection_established")
@@ -139,13 +134,13 @@ class TestWebSocketConnection:
     async def test_connection_establishment_invalid_token(self, websocket_client):
         """Test connection fails with invalid token."""
         with pytest.raises(Exception):  # Connection should fail
-            await websocket_client.connect("/ws/enhanced", "invalid_token")
+            await websocket_client.connect("/ws", "invalid_token")
             
     @pytest.mark.asyncio
     async def test_connection_establishment_no_token(self, websocket_client):
         """Test connection fails without token."""
         with pytest.raises(Exception):  # Connection should fail
-            await websocket_client.connect("/ws/enhanced", "")
+            await websocket_client.connect("/ws", "")
 
 @pytest.mark.asyncio
 class TestWebSocketAuthentication:
@@ -160,17 +155,29 @@ class TestWebSocketAuthentication:
         mock_websocket.query_params = {"token": authenticated_token}
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
+        mock_websocket.headers = {
+            "origin": "http://localhost:3000",
+            "authorization": f"Bearer {authenticated_token}"
+        }
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = "127.0.0.1"
         
-        # Test token validation
-        session_info = await validate_websocket_token_enhanced(mock_websocket)
-        
-        assert session_info["user_id"]
-        assert session_info["authenticated_at"]
-        assert session_info["auth_method"] == "jwt_query_param"
-        
-        # Test database authentication
-        user_id = await authenticate_websocket_with_database(session_info)
-        assert user_id == session_info["user_id"]
+        # Use actual WebSocket authenticator
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth_client, \
+             patch('netra_backend.app.websocket_core.auth.check_websocket_cors', return_value=True):
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
+                "user_id": "test_user_id",
+                "email": "test@example.com",
+                "is_active": True,
+                "valid": True
+            })
+            
+            authenticator = WebSocketAuthenticator()
+            auth_info = await authenticator.authenticate_websocket(mock_websocket)
+            
+            # Websocket authentication completed successfully
+            assert auth_info.user_id == "test_user_id"
+            assert auth_info.email == "test@example.com"
         
     @pytest.mark.asyncio
     async def test_token_validation_expired_token(self):
@@ -178,12 +185,26 @@ class TestWebSocketAuthentication:
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.query_params = {"token": "expired.token.here"}
+        mock_websocket.headers = {
+            "origin": "http://localhost:3000",
+            "authorization": "Bearer expired.token.here"
+        }
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = "127.0.0.1"
         
-        with pytest.raises(Exception):
-            await validate_websocket_token_enhanced(mock_websocket)
+        # Mock auth service to return expired token error
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth_client, \
+             patch('netra_backend.app.websocket_core.auth.check_websocket_cors', return_value=True):
+            mock_auth_client.validate_token_jwt = AsyncMock(side_effect=HTTPException(
+                status_code=401, detail="Token expired"
+            ))
+            
+            authenticator = WebSocketAuthenticator()
+            with pytest.raises(HTTPException):
+                await authenticator.authenticate_websocket(mock_websocket)
             
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
+    @patch('netra_backend.app.db.postgres_session.get_async_db')
     @pytest.mark.asyncio
     async def test_manual_database_session_handling(self, mock_db):
         """Test manual database session handling (not using Depends())."""
@@ -222,7 +243,7 @@ class TestWebSocketMessaging:
     @pytest.mark.asyncio
     async def test_message_send_receive_json_first(self, websocket_client, authenticated_token):
         """Test message send/receive with JSON-first validation."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)  # Wait for connection
         
         # Clear connection messages
@@ -247,7 +268,7 @@ class TestWebSocketMessaging:
     @pytest.mark.asyncio
     async def test_message_json_validation_errors(self, websocket_client, authenticated_token):
         """Test JSON validation error handling."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -264,7 +285,7 @@ class TestWebSocketMessaging:
     @pytest.mark.asyncio
     async def test_ping_pong_system_messages(self, websocket_client, authenticated_token):
         """Test ping/pong system message handling."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -337,7 +358,7 @@ class TestWebSocketErrorHandling:
     @pytest.mark.asyncio
     async def test_error_message_format(self, websocket_client, authenticated_token):
         """Test error messages follow correct format."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -359,7 +380,7 @@ class TestWebSocketErrorHandling:
     @pytest.mark.asyncio
     async def test_connection_resilience_to_errors(self, websocket_client, authenticated_token):
         """Test connection stays alive after recoverable errors."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         
         # Send multiple invalid messages
@@ -415,7 +436,7 @@ class TestWebSocketServiceDiscovery:
         ws_config = config["websocket_config"]
         assert "endpoints" in ws_config
         assert "websocket" in ws_config["endpoints"]
-        assert ws_config["endpoints"]["websocket"] == "/ws/enhanced"
+        assert ws_config["endpoints"]["websocket"] == "/ws"
 
 @pytest.mark.asyncio
 class TestWebSocketConcurrency:
@@ -430,7 +451,7 @@ class TestWebSocketConcurrency:
             # Create multiple concurrent connections
             for i in range(3):
                 client = WebSocketTestClient()
-                await client.connect("/ws/enhanced", authenticated_token)
+                await client.connect("/ws", authenticated_token)
                 clients.append(client)
                 await asyncio.sleep(0.05)
             
@@ -546,7 +567,7 @@ class TestWebSocketHeartbeat:
     @pytest.mark.asyncio
     async def test_heartbeat_messages(self, websocket_client, authenticated_token):
         """Test server sends heartbeat messages."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -590,7 +611,7 @@ class TestWebSocketResilience:
     async def test_connection_survives_component_rerender(self, websocket_client, authenticated_token):
         """Test connection persists through component re-renders."""
         # Establish connection
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         
         original_connection_count = len(websocket_client.messages)
@@ -650,7 +671,7 @@ class TestWebSocketIntegration:
         assert config_response["status"] == "success"
         
         # 2. Connection Establishment
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         assert websocket_client.connected
         
@@ -697,7 +718,7 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_message_throughput(self, websocket_client, authenticated_token):
         """Test message handling throughput."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -727,7 +748,7 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_large_message_handling(self, websocket_client, authenticated_token):
         """Test handling of large messages within limits."""
-        await websocket_client.connect("/ws/enhanced", authenticated_token)
+        await websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         

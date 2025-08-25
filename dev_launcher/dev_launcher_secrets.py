@@ -106,8 +106,7 @@ class EnhancedSecretLoader:
             "google-client-secret": "GOOGLE_CLIENT_SECRET",
             "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
             "langfuse-public-key": "LANGFUSE_PUBLIC_KEY",
-            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "clickhouse-password": "CLICKHOUSE_PASSWORD",
             "jwt-secret-key": "JWT_SECRET_KEY",
             "fernet-key": "FERNET_KEY",
             "redis-default": "REDIS_PASSWORD"
