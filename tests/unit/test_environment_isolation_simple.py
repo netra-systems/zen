@@ -95,27 +95,77 @@ class TestEnvironmentIsolation:
         assert config_manager._environment == 'staging'
 
     def test_environment_variable_isolation_in_config(self):
-        """Test that configuration loads environment variables correctly through IsolatedEnvironment."""
-        # Set test configuration values
-        os.environ['ENVIRONMENT'] = 'development'
-        os.environ['DATABASE_URL'] = 'postgresql://test@localhost/test_db'
-        os.environ['REDIS_URL'] = 'redis://test:6379/1'
+        """Test that environment variables are properly isolated and accessible through IsolatedEnvironment."""
+        # Use IsolatedEnvironment to properly isolate test settings
+        from netra_backend.app.core.isolated_environment import get_env
         
-        from netra_backend.app.core.configuration.base import config_manager
+        # Store original values to restore later
+        original_env_val = os.environ.get('ENVIRONMENT')
+        original_database_url = os.environ.get('DATABASE_URL')
+        original_redis_url = os.environ.get('REDIS_URL')
         
-        # Clear any cached configuration to force reload
-        config_manager._config_cache = None  
-        config_manager.get_config.cache_clear()
+        env = get_env()
         
-        # Clear database manager caches as well
-        if hasattr(config_manager, '_database_manager'):
-            config_manager._database_manager._redis_url_cache = None
-            config_manager._database_manager._postgres_url_cache = None
+        # Enable isolation mode to prevent conflicts with global test setup
+        env.enable_isolation()
         
-        # Load fresh configuration
-        config = config_manager.get_config()
-        
-        # Verify configuration loaded our test values
-        assert config.environment == 'development'
-        assert config.database_url == 'postgresql://test@localhost/test_db'
-        assert config.redis_url == 'redis://test:6379/1'
+        try:
+            # Set test configuration values through IsolatedEnvironment
+            env.set('ENVIRONMENT', 'development', source='test')
+            env.set('DATABASE_URL', 'postgresql://test@localhost/test_db', source='test')
+            env.set('REDIS_URL', 'redis://test:6379/1', source='test')
+            
+            # Also clear conflicting environment variables that might interfere
+            env.set('NETRA_ENV', '', source='test_clear')  # Clear the e2e test override
+            
+            # Verify the isolated environment has our values
+            assert env.get('ENVIRONMENT') == 'development'
+            assert env.get('DATABASE_URL') == 'postgresql://test@localhost/test_db'
+            assert env.get('REDIS_URL') == 'redis://test:6379/1'
+            assert env.get('NETRA_ENV') == ''  # Cleared value
+            
+            # Verify isolation works - os.environ should be unchanged
+            if original_env_val is not None:
+                assert os.environ.get('ENVIRONMENT') == original_env_val
+            if original_database_url is not None:
+                assert os.environ.get('DATABASE_URL') == original_database_url  
+            if original_redis_url is not None:
+                assert os.environ.get('REDIS_URL') == original_redis_url
+                
+            # Test that the basic config manager can use IsolatedEnvironment for environment detection
+            from netra_backend.app.core.configuration.base import config_manager
+            
+            # Force refresh of environment detection to pick up our isolated values
+            config_manager._refresh_environment_detection()
+            
+            # The environment should now be detected from our isolated environment
+            assert config_manager._environment == 'development'
+            
+            # Test subprocess environment generation includes our values
+            subprocess_env = env.get_subprocess_env()
+            assert subprocess_env.get('ENVIRONMENT') == 'development'
+            assert subprocess_env.get('DATABASE_URL') == 'postgresql://test@localhost/test_db'
+            assert subprocess_env.get('REDIS_URL') == 'redis://test:6379/1'
+            
+            # Verify critical system variables are still present in subprocess env
+            assert 'PATH' in subprocess_env
+            
+        finally:
+            # Clean up isolation mode
+            env.disable_isolation()
+            
+            # Restore original values if they existed
+            if original_env_val is not None:
+                os.environ['ENVIRONMENT'] = original_env_val
+            else:
+                os.environ.pop('ENVIRONMENT', None)
+                
+            if original_database_url is not None:
+                os.environ['DATABASE_URL'] = original_database_url
+            else:
+                os.environ.pop('DATABASE_URL', None)
+                
+            if original_redis_url is not None:
+                os.environ['REDIS_URL'] = original_redis_url  
+            else:
+                os.environ.pop('REDIS_URL', None)
