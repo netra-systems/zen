@@ -371,7 +371,7 @@ class ConfigurationLoader:
 |----------|-------------|---------|----------|---------|
 | **`GOOGLE_CLIENT_ID`** | Google OAuth client ID | None | ✅ | `123456-abcdef.apps.googleusercontent.com` |
 | **`GOOGLE_CLIENT_SECRET`** | Google OAuth client secret | None | ✅ | `GOCSPX-abc123def456...` |
-| **`OAUTH_REDIRECT_URI`** | OAuth callback URL | Auto-generated | ❌ | `https://api.yourdomain.com/api/auth/callback` |
+| **`OAUTH_REDIRECT_URI`** | OAuth callback URL | Auto-generated | ❌ | `https://api.yourdomain.com/auth/callback` |
 
 ### LLM Provider Configuration
 
@@ -1053,7 +1053,7 @@ echo $ENVIRONMENT
 echo $K_SERVICE
 
 # Force environment detection
-python -c "from netra_backend.app.core.configuration.environment_detector import detect_environment; print(detect_environment())"
+python -c "from netra_backend.app.core.environment_constants import get_current_environment; print(get_current_environment())"
 
 # Override environment detection
 export ENVIRONMENT=staging  # or development, production

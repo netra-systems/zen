@@ -295,9 +295,9 @@ def _configure_e2e_pipeline(supervisor):
     )
     # Mock: Async component isolation for testing without real async operations
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
-        AgentExecutionResult(success=True, state=None),
-        AgentExecutionResult(success=True, state=None),
-        AgentExecutionResult(success=True, state=None)
+        AgentExecutionResult(success=True, result=None),
+        AgentExecutionResult(success=True, result=None),
+        AgentExecutionResult(success=True, result=None)
     ])
 
 async def _execute_e2e_flow(supervisor):

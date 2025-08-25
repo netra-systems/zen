@@ -101,18 +101,16 @@ class ClickHouseClient:
                    arrayElement(metrics.value, arrayFirstIndex(x -> x = 'cost_cents', metrics.name)),
                    0.0)) as total_cost_cents
         FROM workload_events 
-        WHERE timestamp >= now() - INTERVAL {timeframe:String}
+        WHERE timestamp >= now() - INTERVAL {timeframe}
         {user_filter}
         GROUP BY user_id, workload_type
         ORDER BY total_cost_cents DESC
         """
         
-        user_filter = "AND user_id = {user_id:String}" if user_id else ""
-        final_query = query.format(user_filter=user_filter)
+        user_filter = f"AND user_id = '{user_id}'" if user_id else ""
+        final_query = query.format(user_filter=user_filter, timeframe=timeframe)
         
-        parameters = {"timeframe": timeframe}
-        if user_id:
-            parameters["user_id"] = user_id
+        parameters = {}
             
         return await self.execute_query(final_query, parameters)
     

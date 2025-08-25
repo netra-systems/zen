@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "messages",
-    "generated_at": "2025-08-24T21:09:43.085580",
+    "generated_at": "2025-08-25T02:39:32.209981",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 13516
+    "total_literals": 13722
   },
   "literals": {
     "! Found LLMCostOptimizer - updating imports to use correct name": {
@@ -2848,6 +2848,7 @@
       "locations": [
         "scripts/check_e2e_imports.py:27",
         "scripts/comprehensive_e2e_import_fixer.py:28",
+        "scripts/fix_authentication_system.py:37",
         "scripts/fix_comprehensive_imports.py:17",
         "scripts/fix_e2e_imports.py:25",
         "scripts/fix_netra_backend_imports.py:20",
@@ -2960,7 +2961,7 @@
       "value": "' - appears to be a malformed user identifier",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:419"
+        "shared/database_url_builder.py:499"
       ]
     },
     "' - appears to be misconfigured": {
@@ -2988,7 +2989,7 @@
       "value": "' - this user is known to cause authentication failures",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:415"
+        "shared/database_url_builder.py:495"
       ]
     },
     "' - verify this is correct for staging": {
@@ -2996,6 +2997,20 @@
       "category": "messages",
       "locations": [
         "auth_service/auth_core/isolated_environment.py:238"
+      ]
+    },
+    "' -> CLOSED": {
+      "value": "' -> CLOSED",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:439"
+      ]
+    },
+    "' -> HALF_OPEN": {
+      "value": "' -> HALF_OPEN",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:456"
       ]
     },
     "' . | grep -v test | head -5": {
@@ -3481,6 +3496,13 @@
         "netra_backend/app/core/service_resilience.py:41"
       ]
     },
+    "' ready for recovery attempt": {
+      "value": "' ready for recovery attempt",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:477"
+      ]
+    },
     "' registered successfully": {
       "value": "' registered successfully",
       "category": "messages",
@@ -3676,7 +3698,7 @@
       "value": "'. Check POSTGRES_USER and POSTGRES_PASSWORD environment variables. Original error:",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:124"
+        "auth_service/auth_core/database/connection.py:121"
       ]
     },
     "'. Falling back to default corpus.": {
@@ -4037,9 +4059,7 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/redis_manager.py:389",
-        "netra_backend/app/redis_manager.py:440",
-        "netra_backend/app/services/redis_service.py:150",
-        "netra_backend/app/services/redis_service.py:201"
+        "netra_backend/app/redis_manager.py:440"
       ]
     },
     "(total fixed:": {
@@ -4137,7 +4157,7 @@
       "value": ") cannot exceed limit (",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/tenant.py:73"
+        "netra_backend/app/schemas/tenant.py:74"
       ]
     },
     ") exceeded:": {
@@ -4214,7 +4234,7 @@
       "value": "). Password lacks sufficient randomness.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:842"
+        "netra_backend/app/db/database_manager.py:826"
       ]
     },
     "):\n        \"\"\"Test": {
@@ -4545,7 +4565,7 @@
       "value": "+ K for search",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/components/KeyboardShortcutsHint.tsx:23"
+        "frontend/components/chat/components/KeyboardShortcutsHint.tsx:25"
       ]
     },
     "+ SUCCESSFULLY FIXED (": {
@@ -4694,13 +4714,6 @@
         "netra_backend/app/agents/corpus_admin/agent.py:289"
       ]
     },
-    ", allowed_origins=": {
-      "value": ", allowed_origins=",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:451"
-      ]
-    },
     ", assuming verified": {
       "value": ", assuming verified",
       "category": "messages",
@@ -4741,16 +4754,14 @@
       "value": ", cannot release",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:468",
-        "netra_backend/app/services/redis_service.py:229"
+        "netra_backend/app/redis_manager.py:468"
       ]
     },
     ", cannot release (test mode)": {
       "value": ", cannot release (test mode)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:443",
-        "netra_backend/app/services/redis_service.py:204"
+        "netra_backend/app/redis_manager.py:443"
       ]
     },
     ", capping to maximum": {
@@ -4781,6 +4792,13 @@
       "locations": [
         "netra_backend/app/agents/triage_sub_agent/llm_processor.py:342",
         "netra_backend/app/agents/triage_sub_agent/processing_monitoring.py:74"
+      ]
+    },
+    ", consider reducing to under": {
+      "value": ", consider reducing to under",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:360"
       ]
     },
     ", content_type=": {
@@ -4831,7 +4849,7 @@
       "value": ", environment=",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/middleware_setup.py:513"
+        "netra_backend/app/core/middleware_setup.py:114"
       ]
     },
     ", error[\"error_message\"][:500],": {
@@ -4881,7 +4899,14 @@
       "value": ", https_only=",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/middleware_setup.py:512"
+        "netra_backend/app/core/middleware_setup.py:113"
+      ]
+    },
+    ", is_db_error:": {
+      "value": ", is_db_error:",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/routes/utils/websocket_helpers.py:345"
       ]
     },
     ", may attempt reset": {
@@ -4926,13 +4951,6 @@
         "netra_backend/app/security/audit_compliance.py:74"
       ]
     },
-    ", request_id=": {
-      "value": ", request_id=",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:450"
-      ]
-    },
     ", required=": {
       "value": ", required=",
       "category": "messages",
@@ -4973,7 +4991,7 @@
       "value": ", sanitized length:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:681"
+        "netra_backend/app/db/database_manager.py:665"
       ]
     },
     ", skipping initialization": {
@@ -4988,6 +5006,14 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/database/migration_rollback_service.py:626"
+      ]
+    },
+    ", target under": {
+      "value": ", target under",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:362",
+        "scripts/validate_deployment_performance.py:364"
       ]
     },
     ", the team:\n- Completed **": {
@@ -5037,13 +5063,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/data_sub_agent/query_operations.py:49"
-      ]
-    },
-    ", user_agent=": {
-      "value": ", user_agent=",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:450"
       ]
     },
     ", using default": {
@@ -7249,21 +7268,21 @@
       "value": "-c search_path=netra_dev,public",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:85"
+        "netra_backend/app/db/database_manager.py:97"
       ]
     },
     "-c search_path=netra_test,public": {
       "value": "-c search_path=netra_test,public",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:88"
+        "netra_backend/app/db/database_manager.py:100"
       ]
     },
     "-c search_path=public": {
       "value": "-c search_path=public",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:91"
+        "netra_backend/app/db/database_manager.py:103"
       ]
     },
     "-specific best practices and industry standards.": {
@@ -7370,7 +7389,7 @@
       "value": ". Retry after",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/exceptions_agent.py:293"
+        "netra_backend/app/core/exceptions_agent.py:303"
       ]
     },
     ". Retrying in": {
@@ -7383,7 +7402,7 @@
         "netra_backend/app/core/resilience/unified_retry_handler.py:237",
         "netra_backend/app/core/resilience/unified_retry_handler.py:319",
         "netra_backend/app/db/connection_pool_manager.py:320",
-        "netra_backend/app/db/database_manager.py:427",
+        "netra_backend/app/db/database_manager.py:457",
         "netra_backend/app/db/postgres_core.py:278",
         "netra_backend/app/db/postgres_core.py:318",
         "netra_backend/app/llm/enhanced_retry.py:197"
@@ -8099,7 +8118,7 @@
         "netra_backend/app/core/websocket_cors.py:251",
         "netra_backend/app/middleware/security_headers_config.py:31",
         "netra_backend/app/middleware/security_middleware.py:48",
-        "auth_service/main.py:469"
+        "auth_service/main.py:277"
       ]
     },
     "1px solid rgba(228, 228, 231, 0.5)": {
@@ -9155,6 +9174,27 @@
       "category": "messages",
       "locations": [
         "frontend/components/demo/DemoHeader.tsx:21"
+      ]
+    },
+    "401 Authentication Error Handling": {
+      "value": "401 Authentication Error Handling",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:934",
+        "scripts/staging_validation_part2_user_flows.py:944",
+        "scripts/staging_validation_part2_user_flows.py:954",
+        "scripts/staging_validation_part2_user_flows.py:967"
+      ]
+    },
+    "404 Error Handling": {
+      "value": "404 Error Handling",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:689",
+        "scripts/staging_validation_part2_corrected.py:700",
+        "scripts/staging_validation_part2_user_flows.py:878",
+        "scripts/staging_validation_part2_user_flows.py:888",
+        "scripts/staging_validation_part2_user_flows.py:901"
       ]
     },
     "404 errors suggest routing or deployment configuration issues": {
@@ -11030,7 +11070,7 @@
       "value": "AI service is temporarily unavailable. Please try again",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/exceptions_agent.py:228"
+        "netra_backend/app/core/exceptions_agent.py:238"
       ]
     },
     "AI service temporarily unavailable. Request queued for retry.": {
@@ -11112,13 +11152,7 @@
       "value": "AND user_id = '",
       "category": "messages",
       "locations": [
-        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:83"
-      ]
-    },
-    "AND user_id = {user_id:String}": {
-      "value": "AND user_id = {user_id:String}",
-      "category": "messages",
-      "locations": [
+        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:83",
         "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:110"
       ]
     },
@@ -11340,7 +11374,7 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/redis_manager.py:372",
-        "netra_backend/app/services/redis_service.py:133"
+        "netra_backend/app/services/redis_service.py:82"
       ]
     },
     "Acquire distributed lock for migrations to prevent concurrent execution": {
@@ -11418,7 +11452,7 @@
       "value": "Acquired migration lock - performing initialization",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:901"
+        "netra_backend/app/db/database_manager.py:885"
       ]
     },
     "Action Planning Agent Prompts\n\nThis module contains prompt templates for the action planning agent.": {
@@ -11610,6 +11644,13 @@
         "netra_backend/app/core/performance_batch_processor.py:28"
       ]
     },
+    "Add members to set.": {
+      "value": "Add members to set.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:189"
+      ]
+    },
     "Add message to Redis queue.": {
       "value": "Add message to Redis queue.",
       "category": "messages",
@@ -11727,7 +11768,7 @@
       "value": "Add security checks, request size limits, and service identification headers",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:436"
+        "auth_service/main.py:244"
       ]
     },
     "Add security headers to all responses.": {
@@ -11743,13 +11784,6 @@
       "locations": [
         "netra_backend/app/core/interfaces_quality.py:223",
         "netra_backend/app/core/quality_validator_impl.py:243"
-      ]
-    },
-    "Added service discovery origins, total:": {
-      "value": "Added service discovery origins, total:",
-      "category": "messages",
-      "locations": [
-        "auth_service/main.py:309"
       ]
     },
     "Additional 15% for future growth": {
@@ -12037,7 +12071,14 @@
       "value": "Agent coordination failed. Please try again",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/exceptions_agent.py:339"
+        "netra_backend/app/core/exceptions_agent.py:349"
+      ]
+    },
+    "Agent error detected, not retrying:": {
+      "value": "Agent error detected, not retrying:",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/routes/utils/websocket_helpers.py:359"
       ]
     },
     "Agent error handling and classification functionality.\n\nThis module provides error recording, classification, and logging capabilities.": {
@@ -12467,7 +12508,7 @@
       "value": "Alias for get_async_db() for compatibility with existing code.\n    Get a PostgreSQL async database session with proper transaction handling.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_session.py:179"
+        "netra_backend/app/db/postgres_session.py:194"
       ]
     },
     "Alias for send_to_user for backward compatibility.": {
@@ -14134,14 +14175,20 @@
       "value": "Async context manager entry.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/mcp_client/transports/base.py:65"
+        "netra_backend/app/mcp_client/transports/base.py:65",
+        "scripts/staging_validation_e2e.py:92",
+        "scripts/staging_validation_part2_corrected.py:96",
+        "scripts/staging_validation_part2_user_flows.py:102"
       ]
     },
     "Async context manager exit.": {
       "value": "Async context manager exit.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/mcp_client/transports/base.py:70"
+        "netra_backend/app/mcp_client/transports/base.py:70",
+        "scripts/staging_validation_e2e.py:97",
+        "scripts/staging_validation_part2_corrected.py:101",
+        "scripts/staging_validation_part2_user_flows.py:107"
       ]
     },
     "Async context manager for execution contexts.\n    \n    Args:\n        context_id: Unique identifier for context\n        metadata: Execution metadata\n        timeout: Execution timeout\n        \n    Yields:\n        Execution context instance": {
@@ -14482,13 +14529,6 @@
         "netra_backend/app/agents/agent_communication.py:169"
       ]
     },
-    "Attempt single execution with error handling.": {
-      "value": "Attempt single execution with error handling.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/agents/error_decorators.py:76"
-      ]
-    },
     "Attempt single execution with retry preparation.": {
       "value": "Attempt single execution with retry preparation.",
       "category": "messages",
@@ -14586,7 +14626,7 @@
       "value": "Attempt to recover from network partition.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:469"
+        "netra_backend/app/core/network_handler.py:482"
       ]
     },
     "Attempt to recover from operation failure.": {
@@ -15151,6 +15191,13 @@
         "netra_backend/app/core/configuration/validator_auth.py:1"
       ]
     },
+    "Authentication System Fix Script\n\nFixes the critical authentication issues identified in the Iteration 2 audit:\n1. Service-to-service authentication failures (100% 403 rate)\n2. Missing auth service configuration\n3. JWT token validation issues\n4. Service account credentials problems\n5. High authentication latency (6.2+ seconds)\n\nThis script ensures all authentication components are properly configured and running.": {
+      "value": "Authentication System Fix Script\n\nFixes the critical authentication issues identified in the Iteration 2 audit:\n1. Service-to-service authentication failures (100% 403 rate)\n2. Missing auth service configuration\n3. JWT token validation issues\n4. Service account credentials problems\n5. High authentication latency (6.2+ seconds)\n\nThis script ensures all authentication components are properly configured and running.",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:2"
+      ]
+    },
     "Authentication and authorization exceptions - compliant with 25-line function limit.": {
       "value": "Authentication and authorization exceptions - compliant with 25-line function limit.",
       "category": "messages",
@@ -15200,6 +15247,13 @@
         "netra_backend/app/core/resilience/external_services.py:80"
       ]
     },
+    "Authentication services are now properly configured and running.": {
+      "value": "Authentication services are now properly configured and running.",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:75"
+      ]
+    },
     "Authorization code reuse attack detected or concurrent use:": {
       "value": "Authorization code reuse attack detected or concurrent use:",
       "category": "messages",
@@ -15232,17 +15286,7 @@
       "value": "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/middleware_setup.py:165"
-      ]
-    },
-    "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth": {
-      "value": "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:332",
-        "netra_backend/app/core/middleware_setup.py:425",
-        "auth_service/main.py:403",
-        "auth_service/main.py:416"
+        "netra_backend/app/core/middleware_setup.py:46"
       ]
     },
     "Auto-reset ClickHouse script - drops all tables without prompts.": {
@@ -15525,6 +15569,13 @@
         "netra_backend/app/core/adaptive_circuit_breaker_core.py:230"
       ]
     },
+    "Background health check monitoring loop.": {
+      "value": "Background health check monitoring loop.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:482"
+      ]
+    },
     "Background index optimization timed out after 2 minutes - continuing without optimization": {
       "value": "Background index optimization timed out after 2 minutes - continuing without optimization",
       "category": "messages",
@@ -15558,7 +15609,7 @@
       "value": "Background network monitoring loop.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:497"
+        "netra_backend/app/core/network_handler.py:510"
       ]
     },
     "Background processing loop for periodic analysis.": {
@@ -15573,6 +15624,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/error_aggregation_service.py:89"
+      ]
+    },
+    "Background recovery monitoring loop.": {
+      "value": "Background recovery monitoring loop.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:473"
       ]
     },
     "Background task '": {
@@ -16086,7 +16144,7 @@
       "value": "Broadcast message to multiple WebSockets.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/websocket_core/utils.py:409"
+        "netra_backend/app/websocket_core/utils.py:548"
       ]
     },
     "Broadcast message to subscribers or targeted users.": {
@@ -16518,20 +16576,6 @@
         "scripts/fix_deployment_logging.py:174"
       ]
     },
-    "CORS Synchronizer\n\nBusiness Value Justification:\n- Segment: Platform/Internal\n- Business Goal: Development velocity & system stability\n- Value Impact: Ensures consistent CORS configuration across all services\n- Strategic Impact: Prevents CORS mismatches that block frontend/backend communication\n\nImplements CORS configuration synchronization and validation across services.": {
-      "value": "CORS Synchronizer\n\nBusiness Value Justification:\n- Segment: Platform/Internal\n- Business Goal: Development velocity & system stability\n- Value Impact: Ensures consistent CORS configuration across all services\n- Strategic Impact: Prevents CORS mismatches that block frontend/backend communication\n\nImplements CORS configuration synchronization and validation across services.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_synchronizer.py:1"
-      ]
-    },
-    "CORS rejection: origin=": {
-      "value": "CORS rejection: origin=",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:450"
-      ]
-    },
     "CPU overload, throttling request": {
       "value": "CPU overload, throttling request",
       "category": "messages",
@@ -16711,7 +16755,7 @@
       "value": "CRITICAL FIX: Restore session from database when Redis is unavailable",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/core/session_manager.py:423"
+        "auth_service/auth_core/core/session_manager.py:427"
       ]
     },
     "CRITICAL ISSUES (showing first 5):": {
@@ -17503,6 +17547,13 @@
         "netra_backend/app/agents/corpus_admin/corpus_creation_storage.py:29"
       ]
     },
+    "Call operation handling both sync and async functions.": {
+      "value": "Call operation handling both sync and async functions.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:267"
+      ]
+    },
     "Call operation handling both sync and async.": {
       "value": "Call operation handling both sync and async.",
       "category": "messages",
@@ -17936,6 +17987,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/circuit_breaker_health_checkers.py:27"
+      ]
+    },
+    "Check CPU threshold.": {
+      "value": "Check CPU threshold.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:500"
       ]
     },
     "Check ClickHouse database connection (non-blocking for readiness).": {
@@ -18388,6 +18446,13 @@
         "netra_backend/app/db/comprehensive_health_monitor.py:407"
       ]
     },
+    "Check error rate threshold.": {
+      "value": "Check error rate threshold.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:492"
+      ]
+    },
     "Check exit conditions per unified spec.": {
       "value": "Check exit conditions per unified spec.",
       "category": "messages",
@@ -18464,13 +18529,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/data_sub_agent/insights_usage_analyzer.py:27"
-      ]
-    },
-    "Check for origin configuration inconsistencies across services.": {
-      "value": "Check for origin configuration inconsistencies across services.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_synchronizer.py:459"
       ]
     },
     "Check for pending migrations.": {
@@ -18885,6 +18943,13 @@
         "netra_backend/app/core/fallback_coordinator.py:109"
       ]
     },
+    "Check if circuit should attempt recovery.": {
+      "value": "Check if circuit should attempt recovery.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:405"
+      ]
+    },
     "Check if circuit should attempt to reset to half-open.": {
       "value": "Check if circuit should attempt to reset to half-open.",
       "category": "messages",
@@ -19049,6 +19114,13 @@
         "netra_backend/app/services/synthetic_data/core_service_base.py:58"
       ]
     },
+    "Check if health status allows recovery attempt.": {
+      "value": "Check if health status allows recovery attempt.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:430"
+      ]
+    },
     "Check if key exists in Redis.": {
       "value": "Check if key exists in Redis.",
       "category": "messages",
@@ -19060,7 +19132,7 @@
       "value": "Check if key exists.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/services/redis_service.py:113"
+        "netra_backend/app/services/redis_service.py:74"
       ]
     },
     "Check if memory pressure has improved after recovery.": {
@@ -19147,6 +19219,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/service_mesh/circuit_breaker.py:52"
+      ]
+    },
+    "Check if request can be executed based on current state.": {
+      "value": "Check if request can be executed based on current state.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:219"
       ]
     },
     "Check if request is allowed under rate limit.": {
@@ -19495,6 +19574,13 @@
         "netra_backend/app/core/memory_recovery_strategies.py:115"
       ]
     },
+    "Check memory threshold.": {
+      "value": "Check memory threshold.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:488"
+      ]
+    },
     "Check network connectivity and service availability": {
       "value": "Check network connectivity and service availability",
       "category": "messages",
@@ -19506,7 +19592,7 @@
       "value": "Check network connectivity status.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:522"
+        "netra_backend/app/core/network_handler.py:535"
       ]
     },
     "Check new files only - applies strict standards to newly created files\nwhile ignoring existing legacy files entirely.": {
@@ -19605,6 +19691,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/system_health_monitor.py:236"
+      ]
+    },
+    "Check response time threshold.": {
+      "value": "Check response time threshold.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:484"
       ]
     },
     "Check rule and process if alert is triggered.": {
@@ -19710,6 +19803,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/base.py:126"
+      ]
+    },
+    "Check throughput threshold.": {
+      "value": "Check throughput threshold.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:496"
       ]
     },
     "Check tool permission using permission service.": {
@@ -20027,6 +20127,10 @@
       "locations": [
         "netra_backend/app/core/circuit_breaker_core.py:265",
         "netra_backend/app/core/circuit_breaker_types.py:112",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:439",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:447",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:456",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:477",
         "netra_backend/app/schemas/reliability_types.py:112"
       ]
     },
@@ -20372,7 +20476,7 @@
       "value": "Clean up expired DNS cache entries.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:545"
+        "netra_backend/app/core/network_handler.py:558"
       ]
     },
     "Clean up expired cache entries.": {
@@ -20428,7 +20532,7 @@
       "value": "Clean up network handler resources.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:610"
+        "netra_backend/app/core/network_handler.py:623"
       ]
     },
     "Clean up old cache entries with monitoring.": {
@@ -20629,6 +20733,21 @@
         "scripts/cleanup_staging_environments.py:163"
       ]
     },
+    "Cleanup HTTP clients and test data.": {
+      "value": "Cleanup HTTP clients and test data.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:124",
+        "scripts/staging_validation_part2_user_flows.py:133"
+      ]
+    },
+    "Cleanup HTTP clients.": {
+      "value": "Cleanup HTTP clients.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:121"
+      ]
+    },
     "Cleanup Redis connections.": {
       "value": "Cleanup Redis connections.",
       "category": "messages",
@@ -20725,7 +20844,7 @@
       "value": "Cleanup timeout exceeded, some connections may not have closed gracefully",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:196"
+        "auth_service/main.py:197"
       ]
     },
     "Clear LLM cache entries.": {
@@ -21231,7 +21350,7 @@
       "value": "Close ClickHouse connection - no-op since using shared client.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:161"
+        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:159"
       ]
     },
     "Close ClickHouse connection.": {
@@ -21281,7 +21400,7 @@
       "value": "Close WebSocket connection with authentication error.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:403"
+        "netra_backend/app/routes/utils/websocket_helpers.py:423"
       ]
     },
     "Close WebSocket connection.": {
@@ -21358,7 +21477,7 @@
       "value": "Close all database connections with timeout handling.\n        \n        Args:\n            timeout: Maximum time to wait for graceful shutdown in seconds",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:284"
+        "auth_service/auth_core/database/connection.py:281"
       ]
     },
     "Close any remaining active connections.": {
@@ -22863,7 +22982,7 @@
       "value": "Connect to Redis.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/services/redis_service.py:35"
+        "netra_backend/app/services/redis_service.py:36"
       ]
     },
     "Connect to a specific MCP server.": {
@@ -23247,13 +23366,6 @@
         "netra_backend/app/db/models_content.py:1"
       ]
     },
-    "Content-Length, Content-Type": {
-      "value": "Content-Length, Content-Type",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_middleware.py:157"
-      ]
-    },
     "Content-Type, Authorization": {
       "value": "Content-Type, Authorization",
       "category": "messages",
@@ -23295,14 +23407,14 @@
       "value": "Context manager for WebSocket heartbeat.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/websocket_core/utils.py:485"
+        "netra_backend/app/websocket_core/utils.py:624"
       ]
     },
     "Context manager for WebSocket message queue.": {
       "value": "Context manager for WebSocket message queue.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/websocket_core/utils.py:475"
+        "netra_backend/app/websocket_core/utils.py:614"
       ]
     },
     "Context manager for WebSocket operations with automatic cleanup.": {
@@ -23394,7 +23506,7 @@
       "value": "Context manager for network handler lifecycle.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:639"
+        "netra_backend/app/core/network_handler.py:652"
       ]
     },
     "Context manager for resilient service initialization.": {
@@ -23437,6 +23549,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/observability/tracing_service.py:186"
+      ]
+    },
+    "Context manager for unified circuit breaker protection.": {
+      "value": "Context manager for unified circuit breaker protection.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:737"
       ]
     },
     "Context manager for unit of work without existing session": {
@@ -24540,7 +24659,7 @@
       "value": "Could not acquire migration lock - using existing initialization",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:916"
+        "netra_backend/app/db/database_manager.py:900"
       ]
     },
     "Could not acquire migration lock to set schema version": {
@@ -24709,7 +24828,7 @@
       "value": "Create HTTP connection pool with configured settings.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:266"
+        "netra_backend/app/core/network_handler.py:273"
       ]
     },
     "Create HTTP transport for HTTP-based connections.": {
@@ -25383,7 +25502,7 @@
       "value": "Create database tables if they don't exist",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:235"
+        "auth_service/auth_core/database/connection.py:232"
       ]
     },
     "Create default PostgreSQL tables with existence checks\n        \n        This method ensures idempotent table creation that won't conflict\n        with tables potentially created by other systems.": {
@@ -25918,7 +26037,7 @@
       "value": "Create user with proper transaction rollback handling.\n        \n        FIX: Ensures complete rollback on failure to prevent partial user records.\n        \n        Args:\n            user_data: User data dictionary with email, name, etc.\n            \n        Returns:\n            Created user data or raises exception with cleanup",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:456"
+        "netra_backend/app/db/database_manager.py:486"
       ]
     },
     "Create validation report for manual review.": {
@@ -26302,7 +26421,7 @@
       "value": "DATABASE_URL must be configured for local development",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:84"
+        "auth_service/auth_core/database/connection.py:81"
       ]
     },
     "DATABASE_URL not configured in unified configuration": {
@@ -26902,7 +27021,7 @@
       "value": "Database URL (",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:530"
+        "shared/database_url_builder.py:610"
       ]
     },
     "Database URL Builder\nComprehensive utility for constructing database URLs from environment variables.\nProvides clear access to all possible URL combinations.": {
@@ -26916,7 +27035,7 @@
       "value": "Database URL missing password credentials for PostgreSQL connection",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:649"
+        "netra_backend/app/db/database_manager.py:633"
       ]
     },
     "Database URL must be a PostgreSQL connection string": {
@@ -26965,14 +27084,14 @@
       "value": "Database authentication failed for user '",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:124"
+        "auth_service/auth_core/database/connection.py:121"
       ]
     },
     "Database check failed but continuing in development mode": {
       "value": "Database check failed but continuing in development mode",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:525"
+        "auth_service/main.py:333"
       ]
     },
     "Database config: Cloud SQL=": {
@@ -27166,7 +27285,7 @@
       "value": "Database password cannot be empty string for non-Cloud SQL PostgreSQL",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:657"
+        "netra_backend/app/db/database_manager.py:641"
       ]
     },
     "Database query optimization and caching for performance enhancement.\n\nThis module provides intelligent query caching and performance metrics\ntracking for database operations.": {
@@ -27259,7 +27378,7 @@
       "value": "Database shutdown timeout exceeded (",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:299"
+        "auth_service/auth_core/database/connection.py:296"
       ]
     },
     "Database tables created/verified for OAuth POST callback": {
@@ -27359,6 +27478,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/api_gateway/route_manager.py:212"
+      ]
+    },
+    "Decrement key value.": {
+      "value": "Decrement key value.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:140"
       ]
     },
     "Decrement session counter and log closure.": {
@@ -27785,7 +27911,7 @@
       "value": "Delete keys.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/services/redis_service.py:93"
+        "netra_backend/app/services/redis_service.py:66"
       ]
     },
     "Delete multiple files in batch.\n        \n        Args:\n            file_ids: List of file identifiers to delete\n            \n        Returns:\n            Dictionary with batch deletion results": {
@@ -28620,7 +28746,7 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/redis/redis_cache.py:108",
-        "netra_backend/app/services/redis_service.py:45"
+        "netra_backend/app/services/redis_service.py:40"
       ]
     },
     "Disconnect from all databases.": {
@@ -28966,7 +29092,7 @@
       "value": "Driver registration will be implemented when needed",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:685"
+        "shared/database_url_builder.py:765"
       ]
     },
     "Dropped existing table `": {
@@ -29320,7 +29446,7 @@
       "value": "Empty password detected - database connection will fail",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:745"
+        "netra_backend/app/db/database_manager.py:729"
       ]
     },
     "Empty segment in module path (consecutive dots):": {
@@ -29631,7 +29757,7 @@
       "value": "Ensure comprehensive connection cleanup happens, including abnormal disconnects.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:357"
+        "netra_backend/app/routes/utils/websocket_helpers.py:377"
       ]
     },
     "Ensure connection pool is initialized with thread-safe lazy loading.": {
@@ -29907,6 +30033,13 @@
       "category": "messages",
       "locations": [
         "scripts/validate_network_constants.py:210"
+      ]
+    },
+    "Environment to validate (default: local)": {
+      "value": "Environment to validate (default: local)",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:438"
       ]
     },
     "Environment variable being set with potential secret": {
@@ -30547,6 +30680,13 @@
       "locations": [
         "netra_backend/app/monitoring/alert_evaluator.py:58",
         "netra_backend/app/monitoring/alert_manager_core.py:184"
+      ]
+    },
+    "Evaluate whether execution should be permitted.": {
+      "value": "Evaluate whether execution should be permitted.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:224"
       ]
     },
     "Evaluating trade-offs and generating optimal configuration...": {
@@ -32887,7 +33027,7 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/base/retry_manager.py:35",
-        "netra_backend/app/agents/error_decorators.py:54",
+        "netra_backend/app/agents/error_decorators.py:137",
         "netra_backend/app/core/resilience/retry_manager.py:86"
       ]
     },
@@ -33340,7 +33480,22 @@
       "value": "Execute operation with circuit breaker protection.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/adaptive_circuit_breaker_core.py:61"
+        "netra_backend/app/core/adaptive_circuit_breaker_core.py:61",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:659"
+      ]
+    },
+    "Execute operation with comprehensive circuit breaker protection.": {
+      "value": "Execute operation with comprehensive circuit breaker protection.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:211"
+      ]
+    },
+    "Execute operation with configured timeout.": {
+      "value": "Execute operation with configured timeout.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:260"
       ]
     },
     "Execute operation with coordinated fallback handling": {
@@ -33489,6 +33644,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/reliability.py:155"
+      ]
+    },
+    "Execute operation with timeout, monitoring, and fallback support.": {
+      "value": "Execute operation with timeout, monitoring, and fallback support.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:242"
       ]
     },
     "Execute operation with timing and error handling.": {
@@ -35951,6 +36113,20 @@
         "netra_backend/app/agents/corpus_admin/value_based_corpus/create_value_corpus.py:247"
       ]
     },
+    "Expected 401, got": {
+      "value": "Expected 401, got",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:960"
+      ]
+    },
+    "Expected 404, got": {
+      "value": "Expected 404, got",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:894"
+      ]
+    },
     "Expected AsyncSession or compatible mock, got": {
       "value": "Expected AsyncSession or compatible mock, got",
       "category": "messages",
@@ -36421,7 +36597,7 @@
       "value": "Failed to clean up engine during initialization error:",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:164"
+        "auth_service/auth_core/database/connection.py:161"
       ]
     },
     "Failed to clear circuit breaker state from Redis for": {
@@ -36499,6 +36675,20 @@
       "category": "messages",
       "locations": [
         "frontend/components/synthetic-data-generator.tsx:86"
+      ]
+    },
+    "Failed to initialize database during session creation:": {
+      "value": "Failed to initialize database during session creation:",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/db/postgres_session.py:155"
+      ]
+    },
+    "Failed to initialize database: initialize_postgres() returned None": {
+      "value": "Failed to initialize database: initialize_postgres() returned None",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/db/postgres_session.py:150"
       ]
     },
     "Failed to load ${threadName}": {
@@ -38661,11 +38851,7 @@
       "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/middleware_setup.py:164",
-        "netra_backend/app/core/middleware_setup.py:331",
-        "netra_backend/app/core/middleware_setup.py:424",
-        "auth_service/main.py:402",
-        "auth_service/main.py:415"
+        "netra_backend/app/core/middleware_setup.py:45"
       ]
     },
     "GPT-3.5 Turbo": {
@@ -39614,6 +39800,13 @@
         "netra_backend/app/services/state_persistence.py:233"
       ]
     },
+    "Get JSON value from Redis.": {
+      "value": "Get JSON value from Redis.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:119"
+      ]
+    },
     "Get LLM cache statistics.": {
       "value": "Get LLM cache statistics.",
       "category": "messages",
@@ -40027,6 +40220,20 @@
         "netra_backend/app/services/metrics/gateway_metrics.py:86"
       ]
     },
+    "Get all hash fields and values.": {
+      "value": "Get all hash fields and values.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:231"
+      ]
+    },
+    "Get all members of set.": {
+      "value": "Get all members of set.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:211"
+      ]
+    },
     "Get all messages for a thread.": {
       "value": "Get all messages for a thread.",
       "category": "messages",
@@ -40226,7 +40433,7 @@
       "locations": [
         "netra_backend/app/db/postgres_async.py:96",
         "netra_backend/app/db/postgres_cloud.py:129",
-        "auth_service/auth_core/database/connection.py:249"
+        "auth_service/auth_core/database/connection.py:246"
       ]
     },
     "Get async database session with connection validation.\n        \n        Returns:\n            Configured AsyncSession instance": {
@@ -41473,6 +41680,13 @@
         "netra_backend/app/services/factory_status/metrics_collectors.py:56"
       ]
     },
+    "Get hash field value.": {
+      "value": "Get hash field value.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:227"
+      ]
+    },
     "Get health check components for LLM and circuit.": {
       "value": "Get health check components for LLM and circuit.",
       "category": "messages",
@@ -41606,7 +41820,7 @@
       "value": "Get keys matching pattern.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/services/redis_service.py:103"
+        "netra_backend/app/services/redis_service.py:70"
       ]
     },
     "Get latest agent state for run.": {
@@ -41628,6 +41842,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/routes/factory_status/report_routes.py:28"
+      ]
+    },
+    "Get length of list.": {
+      "value": "Get length of list.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:174"
       ]
     },
     "Get list of all tools available to the current user": {
@@ -42061,6 +42282,13 @@
       "locations": [
         "netra_backend/app/routes/database_monitoring/cache_routes.py:24",
         "netra_backend/app/routes/database_monitoring/router.py:75"
+      ]
+    },
+    "Get range of items from list.": {
+      "value": "Get range of items from list.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:178"
       ]
     },
     "Get raw connection with proper validation.": {
@@ -42782,6 +43010,13 @@
         "netra_backend/app/routes/utils/thread_validators.py:23"
       ]
     },
+    "Get time to live for key.": {
+      "value": "Get time to live for key.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:235"
+      ]
+    },
     "Get timeout-related parameters.": {
       "value": "Get timeout-related parameters.",
       "category": "messages",
@@ -42985,7 +43220,7 @@
       "value": "Get value by key.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/services/redis_service.py:61"
+        "netra_backend/app/services/redis_service.py:48"
       ]
     },
     "Get value from Redis.": {
@@ -43408,14 +43643,7 @@
       "value": "Handle CORS for redirects (e.g., trailing slash redirects).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/middleware_setup.py:179"
-      ]
-    },
-    "Handle CORS with wildcard support and service discovery integration.": {
-      "value": "Handle CORS with wildcard support and service discovery integration.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:295"
+        "netra_backend/app/core/middleware_setup.py:60"
       ]
     },
     "Handle CSP violation reports.": {
@@ -43676,6 +43904,13 @@
       "locations": [
         "netra_backend/app/services/service_interfaces.py:59",
         "netra_backend/app/websocket_core/handlers.py:52"
+      ]
+    },
+    "Handle a failed check.": {
+      "value": "Handle a failed check.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:431"
       ]
     },
     "Handle a lost connection and start reconnection process.": {
@@ -44196,7 +44431,7 @@
       "value": "Handle detected network partition.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:455"
+        "netra_backend/app/core/network_handler.py:468"
       ]
     },
     "Handle detection error with fallback strategies.": {
@@ -44327,14 +44562,14 @@
       "value": "Handle error on final attempt.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/agents/error_decorators.py:109"
+        "netra_backend/app/agents/error_decorators.py:178"
       ]
     },
-    "Handle error on retry attempt.": {
-      "value": "Handle error on retry attempt.",
+    "Handle error on retry attempt. Returns True to continue retry, False to stop.": {
+      "value": "Handle error on retry attempt. Returns True to continue retry, False to stop.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/agents/error_decorators.py:121"
+        "netra_backend/app/agents/error_decorators.py:204"
       ]
     },
     "Handle error request processing.": {
@@ -44407,6 +44642,13 @@
         "netra_backend/app/agents/data_sub_agent/extended_operations.py:160"
       ]
     },
+    "Handle execution check when circuit is open.": {
+      "value": "Handle execution check when circuit is open.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:233"
+      ]
+    },
     "Handle execution error and create error result.": {
       "value": "Handle execution error and create error result.",
       "category": "messages",
@@ -44448,13 +44690,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/corpus_admin/agent.py:238"
-      ]
-    },
-    "Handle execution error with retry or fallback logic.": {
-      "value": "Handle execution error with retry or fallback logic.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/agents/error_decorators.py:93"
       ]
     },
     "Handle execution errors and send notifications.": {
@@ -45135,13 +45370,6 @@
         "netra_backend/app/routes/utils/websocket_helpers.py:196"
       ]
     },
-    "Handle preflight requests with service discovery awareness.": {
-      "value": "Handle preflight requests with service discovery awareness.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:315"
-      ]
-    },
     "Handle processing error with modern error handling.": {
       "value": "Handle processing error with modern error handling.",
       "category": "messages",
@@ -45275,13 +45503,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/github_analyzer/agent.py:352"
-      ]
-    },
-    "Handle request and return response with enhanced preflight support.": {
-      "value": "Handle request and return response with enhanced preflight support.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:309"
       ]
     },
     "Handle request error and return recovery response if needed.": {
@@ -45466,6 +45687,20 @@
         "netra_backend/app/startup_module.py:611"
       ]
     },
+    "Handle state transitions after failure.": {
+      "value": "Handle state transitions after failure.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:384"
+      ]
+    },
+    "Handle state transitions after successful execution.": {
+      "value": "Handle state transitions after successful execution.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:330"
+      ]
+    },
     "Handle stop monitoring request.": {
       "value": "Handle stop monitoring request.",
       "category": "messages",
@@ -45626,6 +45861,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/database_recovery_strategies.py:100"
+      ]
+    },
+    "Handle the results of performance checks.": {
+      "value": "Handle the results of performance checks.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:410"
       ]
     },
     "Handle thread message types, return True if handled.": {
@@ -45916,6 +46158,20 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/routes/health.py:162"
+      ]
+    },
+    "Health check error for '": {
+      "value": "Health check error for '",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:490"
+      ]
+    },
+    "Health check failed for '": {
+      "value": "Health check failed for '",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:501"
       ]
     },
     "Health check for all HTTP clients.": {
@@ -46534,14 +46790,14 @@
       "value": "INSERT INTO user_profiles (user_id, data, created_at) VALUES (:user_id, :data, NOW())",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:483"
+        "netra_backend/app/db/database_manager.py:513"
       ]
     },
     "INSERT INTO users (email, name, created_at) VALUES (:email, :name, NOW()) RETURNING id": {
       "value": "INSERT INTO users (email, name, created_at) VALUES (:email, :name, NOW()) RETURNING id",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:475"
+        "netra_backend/app/db/database_manager.py:505"
       ]
     },
     "INSERT OR REPLACE INTO error_patterns (pattern, frequency, last_seen, suggested_fix) VALUES (?, ?, ?, ?)": {
@@ -47007,6 +47263,13 @@
         "netra_backend/app/services/rate_limiter.py:126"
       ]
     },
+    "Increment key value.": {
+      "value": "Increment key value.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:129"
+      ]
+    },
     "Increment service counter.": {
       "value": "Increment service counter.",
       "category": "messages",
@@ -47191,6 +47454,15 @@
         "scripts/staging_error_monitor.py:172"
       ]
     },
+    "Initialize HTTP clients and test environment.": {
+      "value": "Initialize HTTP clients and test environment.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:101",
+        "scripts/staging_validation_part2_corrected.py:105",
+        "scripts/staging_validation_part2_user_flows.py:111"
+      ]
+    },
     "Initialize MCP client infrastructure.": {
       "value": "Initialize MCP client infrastructure.",
       "category": "messages",
@@ -47237,7 +47509,7 @@
       "value": "Initialize SSL context based on configuration.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:228"
+        "netra_backend/app/core/network_handler.py:235"
       ]
     },
     "Initialize WebSocket components that require async context (optional service).": {
@@ -47384,7 +47656,7 @@
       "value": "Initialize database with migration lock management for cold starts.\n        \n        Returns:\n            Tuple of (engine, session_factory, migration_manager)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:880"
+        "netra_backend/app/db/database_manager.py:864"
       ]
     },
     "Initialize execution with status updates.": {
@@ -47433,7 +47705,7 @@
       "value": "Initialize network handler and start monitoring.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:204"
+        "netra_backend/app/core/network_handler.py:211"
       ]
     },
     "Initialize operation-specific resources.": {
@@ -47683,7 +47955,7 @@
       "value": "Initializing database with migration lock management",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:888"
+        "netra_backend/app/db/database_manager.py:872"
       ]
     },
     "Initializing engine with URL...": {
@@ -47726,6 +47998,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/auth_failover_service.py:28"
+      ]
+    },
+    "Initiate recovery for a connection with specified strategies.": {
+      "value": "Initiate recovery for a connection with specified strategies.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/websocket_recovery_manager.py:101"
       ]
     },
     "Innovation metrics calculator.\n\nCalculates innovation vs maintenance metrics.\nFollows 450-line limit with 25-line function limit.": {
@@ -48027,7 +48306,7 @@
       "value": "Invalid Cloud SQL format. Expected /cloudsql/PROJECT:REGION:INSTANCE",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:397"
+        "shared/database_url_builder.py:477"
       ]
     },
     "Invalid JSON-RPC format. Expected: {\"jsonrpc\": \"2.0\", \"method\": \"...\", \"id\": ...}": {
@@ -48083,14 +48362,14 @@
       "value": "Invalid database user '",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:415"
+        "shared/database_url_builder.py:495"
       ]
     },
     "Invalid database user pattern '": {
       "value": "Invalid database user pattern '",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:419"
+        "shared/database_url_builder.py:499"
       ]
     },
     "Invalid format. Must be one of:": {
@@ -48104,7 +48383,7 @@
       "value": "Invalid host 'localhost' for",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:440"
+        "shared/database_url_builder.py:520"
       ]
     },
     "Invalid message format. Please try a different example.": {
@@ -48319,7 +48598,7 @@
       "value": "Isolation identifiers must be alphanumeric with underscores/hyphens",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/tenant.py:143"
+        "netra_backend/app/schemas/tenant.py:147"
       ]
     },
     "Issue identified and resolved using diagnostic tools.": {
@@ -48812,7 +49091,7 @@
       "value": "LLM request failed (",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/exceptions_agent.py:221"
+        "netra_backend/app/core/exceptions_agent.py:231"
       ]
     },
     "LLM service mode: local, shared, or disabled": {
@@ -50351,6 +50630,13 @@
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:137"
       ]
     },
+    "Main entry point for corrected user flow validation.": {
+      "value": "Main entry point for corrected user flow validation.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:910"
+      ]
+    },
     "Main entry point for diagnostics.": {
       "value": "Main entry point for diagnostics.",
       "category": "messages",
@@ -50372,11 +50658,25 @@
         "scripts/staging_error_monitor.py:265"
       ]
     },
+    "Main entry point for staging validation.": {
+      "value": "Main entry point for staging validation.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:859"
+      ]
+    },
     "Main entry point for system initialization (deprecated - use initialize_system)": {
       "value": "Main entry point for system initialization (deprecated - use initialize_system)",
       "category": "messages",
       "locations": [
         "netra_backend/app/core/startup_manager.py:729"
+      ]
+    },
+    "Main entry point for user flow validation.": {
+      "value": "Main entry point for user flow validation.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:1194"
       ]
     },
     "Main environment validation execution.": {
@@ -50548,13 +50848,6 @@
         "netra_backend/app/agents/agent_lifecycle.py:59"
       ]
     },
-    "Main synchronization loop.": {
-      "value": "Main synchronization loop.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_synchronizer.py:359"
-      ]
-    },
     "Main system performance monitoring orchestrator for Netra platform.\n\nThis module provides the main SystemPerformanceMonitor class that orchestrates\nall monitoring components including metrics collection, alerting, and dashboard reporting.": {
       "value": "Main system performance monitoring orchestrator for Netra platform.\n\nThis module provides the main SystemPerformanceMonitor class that orchestrates\nall monitoring components including metrics collection, alerting, and dashboard reporting.",
       "category": "messages",
@@ -50574,6 +50867,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/triage_sub_agent/llm_processor.py:36"
+      ]
+    },
+    "Main validation entry point.": {
+      "value": "Main validation entry point.",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:418"
       ]
     },
     "Maintain CI/CD boundary gates": {
@@ -50603,7 +50903,16 @@
       "value": "Make HTTP request with comprehensive error handling.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:394"
+        "netra_backend/app/core/network_handler.py:407"
+      ]
+    },
+    "Make HTTP request with error handling and timing.": {
+      "value": "Make HTTP request with error handling and timing.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:156",
+        "scripts/staging_validation_part2_corrected.py:163",
+        "scripts/staging_validation_part2_user_flows.py:176"
       ]
     },
     "Make LLM request for reporting with error handling.": {
@@ -50666,7 +50975,7 @@
       "value": "Manage application lifecycle with optimized startup and graceful shutdown",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:101"
+        "auth_service/main.py:102"
       ]
     },
     "Manage client context with proper cleanup.": {
@@ -50732,6 +51041,13 @@
         "netra_backend/app/services/api_gateway/circuit_breaker_manager.py:213"
       ]
     },
+    "Manually force circuit breaker open.": {
+      "value": "Manually force circuit breaker open.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:574"
+      ]
+    },
     "Manually force the circuit breaker open.": {
       "value": "Manually force the circuit breaker open.",
       "category": "messages",
@@ -50746,11 +51062,32 @@
         "netra_backend/app/services/api_gateway/circuit_breaker_manager.py:231"
       ]
     },
+    "Manually forcing circuit breaker '": {
+      "value": "Manually forcing circuit breaker '",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:576"
+      ]
+    },
+    "Manually reset circuit breaker to closed state.": {
+      "value": "Manually reset circuit breaker to closed state.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:562"
+      ]
+    },
     "Manually reset the circuit breaker.": {
       "value": "Manually reset the circuit breaker.",
       "category": "messages",
       "locations": [
         "netra_backend/app/services/circuit_breaker.py:297"
+      ]
+    },
+    "Manually resetting circuit breaker '": {
+      "value": "Manually resetting circuit breaker '",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:564"
       ]
     },
     "Manually set health status (for testing purposes).\n        \n        Args:\n            service: Service name\n            instance: Instance name\n            healthy: Health status\n            response_time: Response time in seconds": {
@@ -51141,7 +51478,7 @@
       "value": "Message 'type' field must be a non-empty string",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:430"
+        "netra_backend/app/routes/utils/websocket_helpers.py:450"
       ]
     },
     "Message 'type' field must be a string": {
@@ -51162,14 +51499,14 @@
       "value": "Message missing required 'type' field",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:424"
+        "netra_backend/app/routes/utils/websocket_helpers.py:444"
       ]
     },
     "Message must be a JSON object, received": {
       "value": "Message must be a JSON object, received",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:418"
+        "netra_backend/app/routes/utils/websocket_helpers.py:438"
       ]
     },
     "Message must contain 'type' field": {
@@ -51523,6 +51860,13 @@
         "netra_backend/app/auth_dependencies.py:1"
       ]
     },
+    "Minimal output (just pass/fail)": {
+      "value": "Minimal output (just pass/fail)",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:447"
+      ]
+    },
     "Minimum compliance score (0-100) to pass": {
       "value": "Minimum compliance score (0-100) to pass",
       "category": "messages",
@@ -51612,7 +51956,7 @@
       "value": "Missing password - database connection requires authentication",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:749"
+        "netra_backend/app/db/database_manager.py:733"
       ]
     },
     "Missing required field '": {
@@ -52576,7 +52920,7 @@
       "value": "Monitor WebSocket connection health.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:562"
+        "netra_backend/app/core/network_handler.py:575"
       ]
     },
     "Monitor agent execution with typed status.": {
@@ -53025,7 +53369,7 @@
       "value": "No DATABASE_URL configured in test, falling back to SQLite",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:79"
+        "auth_service/auth_core/database/connection.py:76"
       ]
     },
     "No FERNET_KEY found, generating new key for development": {
@@ -53366,7 +53710,7 @@
       "value": "Normalization rule registration will be implemented when needed",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:708"
+        "shared/database_url_builder.py:788"
       ]
     },
     "Not configured (may be intentional)": {
@@ -54465,28 +54809,28 @@
       "value": "Password contains URL encoding - ensure this is intentional",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:722"
+        "netra_backend/app/db/database_manager.py:706"
       ]
     },
     "Password corrupted during sanitization - authentication will fail. Original length:": {
       "value": "Password corrupted during sanitization - authentication will fail. Original length:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:680"
+        "netra_backend/app/db/database_manager.py:664"
       ]
     },
     "Password entropy validation failed - empty password": {
       "value": "Password entropy validation failed - empty password",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:824"
+        "netra_backend/app/db/database_manager.py:808"
       ]
     },
     "Password integrity compromised - password was completely removed during sanitization": {
       "value": "Password integrity compromised - password was completely removed during sanitization",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:685"
+        "netra_backend/app/db/database_manager.py:669"
       ]
     },
     "Password is set, but automatic cloud reset not implemented in this version": {
@@ -54500,7 +54844,7 @@
       "value": "Password length validation failed - password too short after sanitization:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:779"
+        "netra_backend/app/db/database_manager.py:763"
       ]
     },
     "Password missing for local auth. Consider enabling fallback auth methods.": {
@@ -55122,7 +55466,8 @@
       "value": "Perform health check and update status.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/adaptive_circuit_breaker_core.py:239"
+        "netra_backend/app/core/adaptive_circuit_breaker_core.py:239",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:493"
       ]
     },
     "Perform health check of LLM manager.": {
@@ -55913,7 +56258,7 @@
       "value": "Please include a 'type' field in your message, e.g. {'type': 'ping'}",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:490"
+        "netra_backend/app/routes/utils/websocket_helpers.py:510"
       ]
     },
     "Please install: https://cloud.google.com/sdk/docs/install": {
@@ -55990,7 +56335,7 @@
       "value": "Please send a valid JSON object with curly braces {}",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:489"
+        "netra_backend/app/routes/utils/websocket_helpers.py:509"
       ]
     },
     "Please use absolute imports instead.": {
@@ -56005,6 +56350,20 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/resource_pool.py:43"
+      ]
+    },
+    "Pop item from left side of list.": {
+      "value": "Pop item from left side of list.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:166"
+      ]
+    },
+    "Pop item from right side of list.": {
+      "value": "Pop item from right side of list.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:170"
       ]
     },
     "Populate all report sections.": {
@@ -56634,20 +56993,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/error_recovery_integration.py:207"
-      ]
-    },
-    "Process CORS for the request.\n        \n        Args:\n            context: Request context\n            handler: Next handler in the chain\n            \n        Returns:\n            Handler result with CORS headers applied\n            \n        Raises:\n            AuthenticationError: If origin is not allowed": {
-      "value": "Process CORS for the request.\n        \n        Args:\n            context: Request context\n            handler: Next handler in the chain\n            \n        Returns:\n            Handler result with CORS headers applied\n            \n        Raises:\n            AuthenticationError: If origin is not allowed",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_middleware.py:64"
-      ]
-    },
-    "Process CORS headers for response with enhanced validation.": {
-      "value": "Process CORS headers for response with enhanced validation.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:337"
       ]
     },
     "Process CSP violation report.": {
@@ -58563,6 +58908,20 @@
         "netra_backend/app/redis_manager.py:188"
       ]
     },
+    "Push items to left side of list.": {
+      "value": "Push items to left side of list.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:151"
+      ]
+    },
+    "Push items to right side of list.": {
+      "value": "Push items to right side of list.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:155"
+      ]
+    },
     "Python 3.8+": {
       "value": "Python 3.8+",
       "category": "messages",
@@ -59271,7 +59630,7 @@
       "value": "Readiness probe to check if the service is ready to serve requests",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:495"
+        "auth_service/main.py:303"
       ]
     },
     "Real LLM manager: FAILED (": {
@@ -59614,6 +59973,13 @@
         "netra_backend/app/core/interfaces_tools.py:198"
       ]
     },
+    "Record failed execution with comprehensive tracking.": {
+      "value": "Record failed execution with comprehensive tracking.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:339"
+      ]
+    },
     "Record failed operation.": {
       "value": "Record failed operation.",
       "category": "messages",
@@ -59750,6 +60116,13 @@
         "netra_backend/app/core/circuit_breaker_core.py:185"
       ]
     },
+    "Record successful execution with comprehensive metrics.": {
+      "value": "Record successful execution with comprehensive metrics.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:276"
+      ]
+    },
     "Record successful operation with performance metrics.": {
       "value": "Record successful operation with performance metrics.",
       "category": "messages",
@@ -59797,7 +60170,8 @@
       "value": "Record timeout as failure.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/circuit_breaker_core.py:231"
+        "netra_backend/app/core/circuit_breaker_core.py:231",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:400"
       ]
     },
     "Record validation metrics for monitoring and analysis.": {
@@ -59877,6 +60251,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/supervisor/state_recovery_manager.py:1"
+      ]
+    },
+    "Recovery task cancelled for '": {
+      "value": "Recovery task cancelled for '",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:479"
       ]
     },
     "Recreate the connection pool.": {
@@ -59971,13 +60352,6 @@
         "netra_backend/app/startup_checks/service_checks.py:78"
       ]
     },
-    "Redis service for session and cache management.\n\nProvides Redis connection and operations for auth and caching.\nAll functions ≤8 lines (MANDATORY). File ≤300 lines (MANDATORY).\n\nBusiness Value Justification (BVJ):\n1. Segment: All customer segments (Free through Enterprise)\n2. Business Goal: Fast session and cache management\n3. Value Impact: Enables scalable authentication and caching\n4. Revenue Impact: Critical for performance and user experience": {
-      "value": "Redis service for session and cache management.\n\nProvides Redis connection and operations for auth and caching.\nAll functions ≤8 lines (MANDATORY). File ≤300 lines (MANDATORY).\n\nBusiness Value Justification (BVJ):\n1. Segment: All customer segments (Free through Enterprise)\n2. Business Goal: Fast session and cache management\n3. Value Impact: Enables scalable authentication and caching\n4. Revenue Impact: Critical for performance and user experience",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/services/redis_service.py:1"
-      ]
-    },
     "Redis service mode: local, shared, or disabled": {
       "value": "Redis service mode: local, shared, or disabled",
       "category": "messages",
@@ -59990,6 +60364,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/schemas/Config.py:221"
+      ]
+    },
+    "Redis service wrapper - delegates to unified redis_manager.\n\nProvides backward compatibility interface while consolidating Redis functionality.\nAll functions ≤8 lines (MANDATORY). File ≤300 lines (MANDATORY).\n\nBusiness Value Justification (BVJ):\n1. Segment: All customer segments (Free through Enterprise)\n2. Business Goal: Fast session and cache management\n3. Value Impact: Enables scalable authentication and caching\n4. Revenue Impact: Critical for performance and user experience": {
+      "value": "Redis service wrapper - delegates to unified redis_manager.\n\nProvides backward compatibility interface while consolidating Redis functionality.\nAll functions ≤8 lines (MANDATORY). File ≤300 lines (MANDATORY).\n\nBusiness Value Justification (BVJ):\n1. Segment: All customer segments (Free through Enterprise)\n2. Business Goal: Fast session and cache management\n3. Value Impact: Enables scalable authentication and caching\n4. Revenue Impact: Critical for performance and user experience",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:1"
       ]
     },
     "Redis services module.\n\nThis module provides Redis-based services including session management,\ncaching, and state management functionality.": {
@@ -60337,7 +60718,7 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/redis_manager.py:425",
-        "netra_backend/app/services/redis_service.py:186"
+        "netra_backend/app/services/redis_service.py:95"
       ]
     },
     "Release resources for an agent.": {
@@ -60514,6 +60895,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/mcp_service.py:362"
+      ]
+    },
+    "Remove members from set.": {
+      "value": "Remove members from set.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:200"
       ]
     },
     "Remove original file? (y/N):": {
@@ -60753,7 +61141,7 @@
       "value": "Request payload too large. Maximum size:",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:450"
+        "auth_service/main.py:258"
       ]
     },
     "Request processed by triage agent - would route to specialized agents in production": {
@@ -60810,6 +61198,15 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/fallback_response/templates_system.py:104"
+      ]
+    },
+    "Request timeout in seconds (default: 30)": {
+      "value": "Request timeout in seconds (default: 30)",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:887",
+        "scripts/staging_validation_part2_corrected.py:938",
+        "scripts/staging_validation_part2_user_flows.py:1222"
       ]
     },
     "Request tools list from server.": {
@@ -60907,6 +61304,7 @@
       "value": "Reset all circuit breakers.",
       "category": "messages",
       "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:680",
         "netra_backend/app/services/circuit_breaker.py:381"
       ]
     },
@@ -61020,7 +61418,7 @@
       "value": "Resolve DNS with fallback nameservers.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:369"
+        "netra_backend/app/core/network_handler.py:382"
       ]
     },
     "Resolve an alert.": {
@@ -61041,7 +61439,7 @@
       "value": "Resolve hostname to IP addresses with caching.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:331"
+        "netra_backend/app/core/network_handler.py:344"
       ]
     },
     "Resource Limiter\n\nBusiness Value Justification:\n- Segment: Platform/Internal\n- Business Goal: System stability & cost control\n- Value Impact: Prevents resource exhaustion through proactive limiting\n- Strategic Impact: Ensures system availability and prevents cascading failures\n\nImplements resource limiting with load shedding and throttling mechanisms.": {
@@ -62130,11 +62528,33 @@
         "netra_backend/app/services/database/run_repository.py:1"
       ]
     },
+    "Run WebSocket functionality validation tests.": {
+      "value": "Run WebSocket functionality validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:748",
+        "scripts/staging_validation_part2_user_flows.py:1028"
+      ]
+    },
+    "Run WebSocket validation tests.": {
+      "value": "Run WebSocket validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:746"
+      ]
+    },
     "Run a background task with resource limits.": {
       "value": "Run a background task with resource limits.",
       "category": "messages",
       "locations": [
         "netra_backend/app/core/async_resource_manager.py:125"
+      ]
+    },
+    "Run a check method safely, catching exceptions.": {
+      "value": "Run a check method safely, catching exceptions.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:400"
       ]
     },
     "Run a quick startup test to see if services can start.": {
@@ -62193,6 +62613,14 @@
         "netra_backend/app/agents/supervisor/agent_execution_core.py:43"
       ]
     },
+    "Run agent functionality validation tests.": {
+      "value": "Run agent functionality validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:758",
+        "scripts/staging_validation_part2_user_flows.py:1039"
+      ]
+    },
     "Run agent in background task.": {
       "value": "Run agent in background task.",
       "category": "messages",
@@ -62219,6 +62647,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/health_checkers.py:489"
+      ]
+    },
+    "Run all performance threshold checks.": {
+      "value": "Run all performance threshold checks.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/utils.py:372"
       ]
     },
     "Run all phases sequentially.": {
@@ -62256,6 +62691,21 @@
         "netra_backend/app/startup_checks/utils.py:18"
       ]
     },
+    "Run all user flow validation tests.": {
+      "value": "Run all user flow validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:770",
+        "scripts/staging_validation_part2_user_flows.py:1054"
+      ]
+    },
+    "Run all validation tests.": {
+      "value": "Run all validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:755"
+      ]
+    },
     "Run all validators and collect results.": {
       "value": "Run all validators and collect results.",
       "category": "messages",
@@ -62282,6 +62732,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/startup_module.py:576"
+      ]
+    },
+    "Run authentication validation tests.": {
+      "value": "Run authentication validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:741"
       ]
     },
     "Run background cache cleanup worker.": {
@@ -62368,6 +62825,13 @@
         "netra_backend/app/core/cross_service_validators/validation_orchestrator.py:436"
       ]
     },
+    "Run comprehensive deployment validation.": {
+      "value": "Run comprehensive deployment validation.",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:87"
+      ]
+    },
     "Run comprehensive diagnostics on all services.": {
       "value": "Run comprehensive diagnostics on all services.",
       "category": "messages",
@@ -62403,6 +62867,14 @@
         "netra_backend/app/services/startup_fixes_integration.py:181"
       ]
     },
+    "Run configuration management validation tests.": {
+      "value": "Run configuration management validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:762",
+        "scripts/staging_validation_part2_user_flows.py:1044"
+      ]
+    },
     "Run continuous monitoring cycle.": {
       "value": "Run continuous monitoring cycle.",
       "category": "messages",
@@ -62431,6 +62903,28 @@
         "netra_backend/app/startup_module.py:225"
       ]
     },
+    "Run detailed validation including integration tests": {
+      "value": "Run detailed validation including integration tests",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:441"
+      ]
+    },
+    "Run error handling validation tests.": {
+      "value": "Run error handling validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:766",
+        "scripts/staging_validation_part2_user_flows.py:1048"
+      ]
+    },
+    "Run frontend validation tests.": {
+      "value": "Run frontend validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:736"
+      ]
+    },
     "Run full cold start verification.": {
       "value": "Run full cold start verification.",
       "category": "messages",
@@ -62452,11 +62946,25 @@
         "netra_backend/app/core/health_checkers.py:504"
       ]
     },
+    "Run health check validation tests.": {
+      "value": "Run health check validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:731"
+      ]
+    },
     "Run initial startup phase.": {
       "value": "Run initial startup phase.",
       "category": "messages",
       "locations": [
         "netra_backend/app/startup_module.py:707"
+      ]
+    },
+    "Run integration validation tests.": {
+      "value": "Run integration validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:751"
       ]
     },
     "Run legacy startup sequence (fallback).": {
@@ -62700,6 +63208,14 @@
         "netra_backend/app/agents/supervisor_consolidated.py:303"
       ]
     },
+    "Run thread management validation tests.": {
+      "value": "Run thread management validation tests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:753",
+        "scripts/staging_validation_part2_user_flows.py:1033"
+      ]
+    },
     "Run tool based on its interface type.": {
       "value": "Run tool based on its interface type.",
       "category": "messages",
@@ -62770,6 +63286,27 @@
         "scripts/validate_mock_real_spectrum_compliance.py:295"
       ]
     },
+    "Running Selected Staging Validation Tests...": {
+      "value": "Running Selected Staging Validation Tests...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:902"
+      ]
+    },
+    "Running Selected User Flow Validation Tests (CORRECTED)...": {
+      "value": "Running Selected User Flow Validation Tests (CORRECTED)...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:953"
+      ]
+    },
+    "Running Selected User Flow Validation Tests...": {
+      "value": "Running Selected User Flow Validation Tests...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:1237"
+      ]
+    },
     "Running Tests...": {
       "value": "Running Tests...",
       "category": "messages",
@@ -62830,7 +63367,7 @@
       "value": "Running in fast test mode - skipping database initialization",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:122"
+        "auth_service/main.py:123"
       ]
     },
     "Running integration tests...": {
@@ -63578,7 +64115,7 @@
       "value": "SSL initialization failed, continuing without SSL",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:260"
+        "netra_backend/app/core/network_handler.py:267"
       ]
     },
     "SSL parameters not properly removed for Cloud SQL after conversion": {
@@ -65262,7 +65799,7 @@
       "value": "Send parsing error message to user with connection safety.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:438"
+        "netra_backend/app/routes/utils/websocket_helpers.py:458"
       ]
     },
     "Send partial result notification via WebSocket.": {
@@ -65320,7 +65857,7 @@
       "value": "Send processing error message to user.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:470"
+        "netra_backend/app/routes/utils/websocket_helpers.py:490"
       ]
     },
     "Send processing status update via WebSocket.": {
@@ -65547,7 +66084,7 @@
       "value": "Send validation error message to user with helpful information.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:454"
+        "netra_backend/app/routes/utils/websocket_helpers.py:474"
       ]
     },
     "Send validation request with distributed tracing headers.": {
@@ -65926,7 +66463,7 @@
       "value": "Session middleware config: same_site=",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/middleware_setup.py:512"
+        "netra_backend/app/core/middleware_setup.py:113"
       ]
     },
     "Session storage service unavailable, continuing with stateless authentication": {
@@ -65956,6 +66493,13 @@
       "locations": [
         "scripts/reset_clickhouse.py:71",
         "scripts/reset_clickhouse.py:106"
+      ]
+    },
+    "Set JSON value in Redis.": {
+      "value": "Set JSON value in Redis.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:113"
       ]
     },
     "Set TTL for an existing key.": {
@@ -65993,26 +66537,39 @@
         "netra_backend/app/redis_manager.py:256"
       ]
     },
+    "Set hash field(s).": {
+      "value": "Set hash field(s).",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:223"
+      ]
+    },
     "Set key expiration.": {
       "value": "Set key expiration.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/services/redis_service.py:123"
+        "netra_backend/app/services/redis_service.py:78"
+      ]
+    },
+    "Set key-value pair with expiration - support multiple parameter formats.": {
+      "value": "Set key-value pair with expiration - support multiple parameter formats.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/redis_service.py:57"
       ]
     },
     "Set key-value pair with expiration.": {
       "value": "Set key-value pair with expiration.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:351",
-        "netra_backend/app/services/redis_service.py:82"
+        "netra_backend/app/redis_manager.py:351"
       ]
     },
     "Set key-value pair.": {
       "value": "Set key-value pair.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/services/redis_service.py:71"
+        "netra_backend/app/services/redis_service.py:52"
       ]
     },
     "Set multiple key-value pairs.": {
@@ -66148,6 +66705,13 @@
         "scripts/install_dev_env.py:114"
       ]
     },
+    "Setting up corrected user flow validation environment...": {
+      "value": "Setting up corrected user flow validation environment...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:112"
+      ]
+    },
     "Setting up database connections...": {
       "value": "Setting up database connections...",
       "category": "messages",
@@ -66160,6 +66724,20 @@
       "category": "messages",
       "locations": [
         "scripts/setup_import_hooks.py:22"
+      ]
+    },
+    "Setting up staging validation environment...": {
+      "value": "Setting up staging validation environment...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:113"
+      ]
+    },
+    "Setting up user flow validation environment...": {
+      "value": "Setting up user flow validation environment...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:123"
       ]
     },
     "Setting update simulated (would require restart)": {
@@ -66477,7 +67055,7 @@
       "value": "Shutdown signal received, proceeding with cleanup",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:160"
+        "auth_service/main.py:161"
       ]
     },
     "Shutdown the API gateway router.": {
@@ -66592,14 +67170,14 @@
       "value": "Shutdown timeout exceeded, forcing cleanup",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:162"
+        "auth_service/main.py:163"
       ]
     },
     "Shutting down Auth Service...": {
       "value": "Shutting down Auth Service...",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:151"
+        "auth_service/main.py:152"
       ]
     },
     "Shutting down BackgroundTaskManager...": {
@@ -67026,7 +67604,7 @@
       "value": "Skipping table creation due to error (likely in test):",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:153"
+        "auth_service/auth_core/database/connection.py:150"
       ]
     },
     "Sleep before the next health check cycle.": {
@@ -67047,7 +67625,7 @@
       "value": "Slug must be alphanumeric with hyphens and underscores only",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/tenant.py:183"
+        "netra_backend/app/schemas/tenant.py:188"
       ]
     },
     "Smart caching: -20% redundant requests": {
@@ -67266,14 +67844,14 @@
       "value": "Staging password integrity check failed - password corrupted during processing. This indicates a sanitization error that must be fixed.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:803"
+        "netra_backend/app/db/database_manager.py:787"
       ]
     },
     "Staging validation failed - password missing in URL": {
       "value": "Staging validation failed - password missing in URL",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:799"
+        "netra_backend/app/db/database_manager.py:783"
       ]
     },
     "Standard compliance rule implementations.\nImplements NIST, authentication, data protection, API, and infrastructure checks.": {
@@ -67309,13 +67887,6 @@
       "category": "messages",
       "locations": [
         "scripts/start_auth_service.py:2"
-      ]
-    },
-    "Start CORS synchronizer.": {
-      "value": "Start CORS synchronizer.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_synchronizer.py:200"
       ]
     },
     "Start JWT rotation manager.": {
@@ -67862,7 +68433,28 @@
       "value": "Starting Auth Service...",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:102"
+        "auth_service/main.py:103"
+      ]
+    },
+    "Starting Comprehensive Staging Validation...": {
+      "value": "Starting Comprehensive Staging Validation...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:756"
+      ]
+    },
+    "Starting Comprehensive User Flow Validation (CORRECTED)...": {
+      "value": "Starting Comprehensive User Flow Validation (CORRECTED)...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:771"
+      ]
+    },
+    "Starting Comprehensive User Flow Validation...": {
+      "value": "Starting Comprehensive User Flow Validation...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:1055"
       ]
     },
     "Starting Netra MCP Server with FastMCP 2...": {
@@ -68439,13 +69031,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/middleware/api_gateway_coordinator.py:160"
-      ]
-    },
-    "Stop CORS synchronizer.": {
-      "value": "Stop CORS synchronizer.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_synchronizer.py:210"
       ]
     },
     "Stop JWT rotation manager.": {
@@ -69572,13 +70157,6 @@
         "scripts/generate_openapi_spec.py:298"
       ]
     },
-    "Synchronize CORS configurations for all services.": {
-      "value": "Synchronize CORS configurations for all services.",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_synchronizer.py:370"
-      ]
-    },
     "Synchronize connection state with optional callbacks.\n        \n        Args:\n            callbacks: Optional list of callbacks to execute": {
       "value": "Synchronize connection state with optional callbacks.\n        \n        Args:\n            callbacks: Optional list of callbacks to execute",
       "category": "messages",
@@ -70082,7 +70660,7 @@
       "value": "Tenant status (active, suspended, deactivated)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/tenant.py:154"
+        "netra_backend/app/schemas/tenant.py:158"
       ]
     },
     "Tenant-related schema definitions for multi-tenant isolation and management.\n\nThis module defines the data structures for tenant management, permissions,\nresources, and isolation boundaries in the Netra platform.": {
@@ -70113,6 +70691,34 @@
         "netra_backend/app/mcp_client/transports/stdio_client.py:247"
       ]
     },
+    "Test 401 authentication error handling.": {
+      "value": "Test 401 authentication error handling.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:912"
+      ]
+    },
+    "Test 404 error handling.": {
+      "value": "Test 404 error handling.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:860"
+      ]
+    },
+    "Test API configuration and basic endpoints.": {
+      "value": "Test API configuration and basic endpoints.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:255"
+      ]
+    },
+    "Test CORS configuration for cross-origin requests.": {
+      "value": "Test CORS configuration for cross-origin requests.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:484"
+      ]
+    },
     "Test Categorization Script - Analyzes and categorizes tests based on their dependencies\nSeparates real service tests from mock/plumbing tests": {
       "value": "Test Categorization Script - Analyzes and categorizes tests based on their dependencies\nSeparates real service tests from mock/plumbing tests",
       "category": "messages",
@@ -70131,7 +70737,7 @@
       "value": "Test ClickHouse connection health using shared client.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:120"
+        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:118"
       ]
     },
     "Test ClickHouse database connection.": {
@@ -70161,7 +70767,7 @@
       "locations": [
         "netra_backend/app/redis_manager.py:87",
         "netra_backend/app/redis_manager.py:476",
-        "netra_backend/app/services/redis_service.py:51"
+        "netra_backend/app/services/redis_service.py:44"
       ]
     },
     "Test Redis connectivity if configured.": {
@@ -70185,6 +70791,20 @@
         "scripts/validate_workflow_config.py:195"
       ]
     },
+    "Test WebSocket config endpoint functionality via HTTP.": {
+      "value": "Test WebSocket config endpoint functionality via HTTP.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:265"
+      ]
+    },
+    "Test WebSocket config endpoint functionality.": {
+      "value": "Test WebSocket config endpoint functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:294"
+      ]
+    },
     "Test WebSocket connection accepted (no auth)": {
       "value": "Test WebSocket connection accepted (no auth)",
       "category": "messages",
@@ -70192,11 +70812,32 @@
         "netra_backend/app/routes/websocket.py:492"
       ]
     },
+    "Test WebSocket health endpoint functionality via HTTP.": {
+      "value": "Test WebSocket health endpoint functionality via HTTP.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:193"
+      ]
+    },
+    "Test WebSocket health endpoint functionality.": {
+      "value": "Test WebSocket health endpoint functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:206"
+      ]
+    },
     "Test WebSocket manager health.": {
       "value": "Test WebSocket manager health.",
       "category": "messages",
       "locations": [
         "netra_backend/app/core/degradation_strategies.py:224"
+      ]
+    },
+    "Test WebSocket service connectivity.": {
+      "value": "Test WebSocket service connectivity.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:542"
       ]
     },
     "Test a mapping with sample data.": {
@@ -70227,6 +70868,41 @@
         "scripts/environment_validator.py:145"
       ]
     },
+    "Test actual WebSocket connection attempt.": {
+      "value": "Test actual WebSocket connection attempt.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:599"
+      ]
+    },
+    "Test agent functionality.": {
+      "value": "Test agent functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:502"
+      ]
+    },
+    "Test agent listing functionality.": {
+      "value": "Test agent listing functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:635"
+      ]
+    },
+    "Test agent status functionality.": {
+      "value": "Test agent status functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:708"
+      ]
+    },
+    "Test authentication service endpoints.": {
+      "value": "Test authentication service endpoints.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:433"
+      ]
+    },
     "Test basic ClickHouse connectivity.": {
       "value": "Test basic ClickHouse connectivity.",
       "category": "messages",
@@ -70239,6 +70915,27 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/external_api_client.py:362"
+      ]
+    },
+    "Test communication between services.": {
+      "value": "Test communication between services.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:671"
+      ]
+    },
+    "Test configuration management functionality.": {
+      "value": "Test configuration management functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:598"
+      ]
+    },
+    "Test configuration retrieval functionality.": {
+      "value": "Test configuration retrieval functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:782"
       ]
     },
     "Test connection (always succeeds with mock fallback).": {
@@ -70329,7 +71026,7 @@
       "value": "Test database connection with retry logic and connection pool awareness.\n        \n        Args:\n            engine: SQLAlchemy async engine\n            max_retries: Maximum number of retry attempts\n            delay: Delay between retries in seconds\n            \n        Returns:\n            True if connection successful, False otherwise",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:407"
+        "netra_backend/app/db/database_manager.py:437"
       ]
     },
     "Test database connection.": {
@@ -70360,6 +71057,34 @@
       "locations": [
         "netra_backend/app/routes/factory_status/dashboard_routes.py:79",
         "netra_backend/app/routes/factory_status/router.py:98"
+      ]
+    },
+    "Test error handling functionality.": {
+      "value": "Test error handling functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:677"
+      ]
+    },
+    "Test frontend homepage accessibility and basic content.": {
+      "value": "Test frontend homepage accessibility and basic content.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:309"
+      ]
+    },
+    "Test frontend static asset accessibility.": {
+      "value": "Test frontend static asset accessibility.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:376"
+      ]
+    },
+    "Test health endpoints for all services.": {
+      "value": "Test health endpoints for all services.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:186"
       ]
     },
     "Test if port can be bound (is available).": {
@@ -70397,6 +71122,13 @@
         "netra_backend/app/core/degradation_strategies.py:51"
       ]
     },
+    "Test rate limiting functionality.": {
+      "value": "Test rate limiting functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:978"
+      ]
+    },
     "Test stub compliance checker.\nEnforces CLAUDE.md no test stubs in production rule.": {
       "value": "Test stub compliance checker.\nEnforces CLAUDE.md no test stubs in production rule.",
       "category": "messages",
@@ -70411,6 +71143,29 @@
         "scripts/debug_connection.py:15"
       ]
     },
+    "Test thread creation functionality.": {
+      "value": "Test thread creation functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:341",
+        "scripts/staging_validation_part2_user_flows.py:387"
+      ]
+    },
+    "Test thread listing functionality.": {
+      "value": "Test thread listing functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:425",
+        "scripts/staging_validation_part2_user_flows.py:471"
+      ]
+    },
+    "Test thread update functionality.": {
+      "value": "Test thread update functionality.",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:543"
+      ]
+    },
     "Testcontainers import issues have been resolved!": {
       "value": "Testcontainers import issues have been resolved!",
       "category": "messages",
@@ -70418,11 +71173,109 @@
         "scripts/fix_testcontainers_imports.py:133"
       ]
     },
+    "Testing 401 Authentication Error Handling...": {
+      "value": "Testing 401 Authentication Error Handling...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:913"
+      ]
+    },
+    "Testing 404 Error Handling...": {
+      "value": "Testing 404 Error Handling...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:861"
+      ]
+    },
+    "Testing API Configuration...": {
+      "value": "Testing API Configuration...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:256"
+      ]
+    },
+    "Testing Agent Functionality...": {
+      "value": "Testing Agent Functionality...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:503"
+      ]
+    },
+    "Testing Agent List...": {
+      "value": "Testing Agent List...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:636"
+      ]
+    },
+    "Testing Agent Status...": {
+      "value": "Testing Agent Status...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:709"
+      ]
+    },
+    "Testing Authentication Service...": {
+      "value": "Testing Authentication Service...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:434"
+      ]
+    },
+    "Testing CORS Configuration...": {
+      "value": "Testing CORS Configuration...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:485"
+      ]
+    },
     "Testing ClickHouse connectivity...": {
       "value": "Testing ClickHouse connectivity...",
       "category": "messages",
       "locations": [
         "scripts/environment_validator.py:192"
+      ]
+    },
+    "Testing Configuration Management...": {
+      "value": "Testing Configuration Management...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:599"
+      ]
+    },
+    "Testing Configuration Retrieval...": {
+      "value": "Testing Configuration Retrieval...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:783"
+      ]
+    },
+    "Testing Cross-Service Communication...": {
+      "value": "Testing Cross-Service Communication...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:672"
+      ]
+    },
+    "Testing Error Handling...": {
+      "value": "Testing Error Handling...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:678"
+      ]
+    },
+    "Testing Frontend Homepage Access...": {
+      "value": "Testing Frontend Homepage Access...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:310"
+      ]
+    },
+    "Testing Frontend Static Assets...": {
+      "value": "Testing Frontend Static Assets...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:377"
       ]
     },
     "Testing PostgreSQL connection...": {
@@ -70439,11 +71292,90 @@
         "scripts/environment_validator.py:146"
       ]
     },
+    "Testing Rate Limiting...": {
+      "value": "Testing Rate Limiting...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:979"
+      ]
+    },
     "Testing Redis connectivity...": {
       "value": "Testing Redis connectivity...",
       "category": "messages",
       "locations": [
         "scripts/environment_validator.py:241"
+      ]
+    },
+    "Testing Service Health Endpoints...": {
+      "value": "Testing Service Health Endpoints...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:187"
+      ]
+    },
+    "Testing Thread Creation...": {
+      "value": "Testing Thread Creation...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:342",
+        "scripts/staging_validation_part2_user_flows.py:388"
+      ]
+    },
+    "Testing Thread Listing...": {
+      "value": "Testing Thread Listing...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:426",
+        "scripts/staging_validation_part2_user_flows.py:472"
+      ]
+    },
+    "Testing Thread Update...": {
+      "value": "Testing Thread Update...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:544"
+      ]
+    },
+    "Testing WebSocket Config Endpoint (via HTTP)...": {
+      "value": "Testing WebSocket Config Endpoint (via HTTP)...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:266"
+      ]
+    },
+    "Testing WebSocket Config Endpoint...": {
+      "value": "Testing WebSocket Config Endpoint...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:295"
+      ]
+    },
+    "Testing WebSocket Connection...": {
+      "value": "Testing WebSocket Connection...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:600"
+      ]
+    },
+    "Testing WebSocket Connectivity...": {
+      "value": "Testing WebSocket Connectivity...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:543"
+      ]
+    },
+    "Testing WebSocket Health Endpoint (via HTTP)...": {
+      "value": "Testing WebSocket Health Endpoint (via HTTP)...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:194"
+      ]
+    },
+    "Testing WebSocket Health Endpoint...": {
+      "value": "Testing WebSocket Health Endpoint...",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_user_flows.py:207"
       ]
     },
     "Testing complexity, maintenance burden": {
@@ -70513,21 +71445,21 @@
       "value": "The 'type' field must be a non-empty string",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:491"
+        "netra_backend/app/routes/utils/websocket_helpers.py:511"
       ]
     },
     "The AI agent encountered an error. Please try again": {
       "value": "The AI agent encountered an error. Please try again",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/exceptions_agent.py:156"
+        "netra_backend/app/core/exceptions_agent.py:166"
       ]
     },
     "The AI operation is taking longer than expected. Please try again": {
       "value": "The AI operation is taking longer than expected. Please try again",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/exceptions_agent.py:191"
+        "netra_backend/app/core/exceptions_agent.py:201"
       ]
     },
     "The API key for the LLM provider.": {
@@ -71634,7 +72566,7 @@
       "value": "Too many requests. Please wait a moment and try again",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/exceptions_agent.py:301",
+        "netra_backend/app/core/exceptions_agent.py:311",
         "netra_backend/app/core/exceptions_service.py:94"
       ]
     },
@@ -72148,6 +73080,27 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/api_gateway/circuit_breaker_manager.py:251"
+      ]
+    },
+    "Transition circuit to closed state.": {
+      "value": "Transition circuit to closed state.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:438"
+      ]
+    },
+    "Transition circuit to half-open state.": {
+      "value": "Transition circuit to half-open state.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:455"
+      ]
+    },
+    "Transition circuit to open state.": {
+      "value": "Transition circuit to open state.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:446"
       ]
     },
     "Transition to CLOSED state.": {
@@ -72980,7 +73933,7 @@
       "value": "URL encoding corruption detected - double encoding may corrupt passwords",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:710"
+        "netra_backend/app/db/database_manager.py:694"
       ]
     },
     "URL must start with http:// or https://": {
@@ -72994,28 +73947,28 @@
       "value": "URL must start with postgresql+asyncpg:// for asyncpg driver",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:641"
+        "shared/database_url_builder.py:721"
       ]
     },
     "URL must start with postgresql+psycopg2:// for psycopg2 driver": {
       "value": "URL must start with postgresql+psycopg2:// for psycopg2 driver",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:646"
+        "shared/database_url_builder.py:726"
       ]
     },
     "URL must start with postgresql+psycopg:// for psycopg driver": {
       "value": "URL must start with postgresql+psycopg:// for psycopg driver",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:651"
+        "shared/database_url_builder.py:731"
       ]
     },
     "URL must start with postgresql:// for base/sync operations": {
       "value": "URL must start with postgresql:// for base/sync operations",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:656"
+        "shared/database_url_builder.py:736"
       ]
     },
     "URL: http://localhost:8081": {
@@ -73023,6 +73976,13 @@
       "category": "messages",
       "locations": [
         "scripts/start_auth_service.py:112"
+      ]
+    },
+    "USER FLOW VALIDATION SUMMARY (CORRECTED)": {
+      "value": "USER FLOW VALIDATION SUMMARY (CORRECTED)",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:834"
       ]
     },
     "USR-${Math.floor(Math.random() * 100000)}": {
@@ -74292,7 +75252,14 @@
       "value": "Used amount (",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/tenant.py:73"
+        "netra_backend/app/schemas/tenant.py:74"
+      ]
+    },
+    "User Flow and Advanced Features Staging Validation (CORRECTED)": {
+      "value": "User Flow and Advanced Features Staging Validation (CORRECTED)",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:912"
       ]
     },
     "User Management Routes - Profile, Settings, Preferences, API Keys, Sessions\n\nHandles comprehensive user profile and account management endpoints \nthat the frontend expects but were missing from the backend.": {
@@ -74661,13 +75628,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/cross_service_validators/performance_validators.py:404"
-      ]
-    },
-    "Validate CORS configuration for a service.\n        \n        Args:\n            service_name: Service name\n            config: CORS configuration\n            \n        Returns:\n            True if validation passed": {
-      "value": "Validate CORS configuration for a service.\n        \n        Args:\n            service_name: Service name\n            config: CORS configuration\n            \n        Returns:\n            True if validation passed",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/middleware/cors_synchronizer.py:382"
       ]
     },
     "Validate GCP connection and permissions.": {
@@ -75055,7 +76015,7 @@
       "value": "Validate basic message structure and send appropriate error response.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/utils/websocket_helpers.py:411"
+        "netra_backend/app/routes/utils/websocket_helpers.py:431"
       ]
     },
     "Validate cache operation preconditions.": {
@@ -75579,6 +76539,13 @@
         "netra_backend/app/services/factory_status/architecture_analyzer.py:54"
       ]
     },
+    "Validate health endpoint performance (<100ms requirement).": {
+      "value": "Validate health endpoint performance (<100ms requirement).",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:219"
+      ]
+    },
     "Validate if provider is available for authentication.": {
       "value": "Validate if provider is available for authentication.",
       "category": "messages",
@@ -75590,7 +76557,7 @@
       "value": "Validate initial database connection to catch authentication issues early.",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:170"
+        "auth_service/auth_core/database/connection.py:167"
       ]
     },
     "Validate input parameters.": {
@@ -75797,6 +76764,13 @@
         "netra_backend/app/agents/supervisor_consolidated.py:222"
       ]
     },
+    "Validate resource optimization (memory/CPU).": {
+      "value": "Validate resource optimization (memory/CPU).",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:174"
+      ]
+    },
     "Validate resource request.": {
       "value": "Validate resource request.",
       "category": "messages",
@@ -75888,6 +76862,13 @@
         "netra_backend/app/core/cross_service_validators/security_validators.py:1138"
       ]
     },
+    "Validate service integration performance.": {
+      "value": "Validate service integration performance.",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:269"
+      ]
+    },
     "Validate service-specific resource usage.": {
       "value": "Validate service-specific resource usage.",
       "category": "messages",
@@ -75951,6 +76932,13 @@
       "locations": [
         "scripts/validate_staging_config.py:2",
         "scripts/validate_staging_config_partial.py:2"
+      ]
+    },
+    "Validate startup performance metrics.": {
+      "value": "Validate startup performance metrics.",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:127"
       ]
     },
     "Validate state for a specific session.": {
@@ -76104,7 +77092,7 @@
       "value": "Validate the current database URL configuration.\n        \n        Returns:\n            True if URL is valid, False otherwise",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:200"
+        "auth_service/auth_core/database/connection.py:197"
       ]
     },
     "Validate thread context is established.": {
@@ -77791,20 +78779,6 @@
         "scripts/fix_e2e_syntax_comprehensive.py:286"
       ]
     },
-    "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, X-Service-Name, X-Service-Version": {
-      "value": "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, X-Service-Name, X-Service-Version",
-      "category": "messages",
-      "locations": [
-        "auth_service/main.py:417"
-      ]
-    },
-    "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, X-Service-Response-Time": {
-      "value": "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, X-Service-Response-Time",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/middleware_setup.py:426"
-      ]
-    },
     "X-Trace-ID, X-Request-ID, X-Service-Name, X-Service-Version": {
       "value": "X-Trace-ID, X-Request-ID, X-Service-Name, X-Service-Version",
       "category": "messages",
@@ -78316,6 +79290,13 @@
         "scripts/workflow_config_utils.py:44"
       ]
     },
+    "[CRITICAL] Deployment has performance issues that need attention!": {
+      "value": "[CRITICAL] Deployment has performance issues that need attention!",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:414"
+      ]
+    },
     "[CRITICAL] EMERGENCY ACTIONS REQUIRED - Build failing": {
       "value": "[CRITICAL] EMERGENCY ACTIONS REQUIRED - Build failing",
       "category": "messages",
@@ -78336,6 +79317,21 @@
       "category": "messages",
       "locations": [
         "scripts/audit_permissions.py:103"
+      ]
+    },
+    "[CRITICAL] STAGING ENVIRONMENT: NEEDS ATTENTION (": {
+      "value": "[CRITICAL] STAGING ENVIRONMENT: NEEDS ATTENTION (",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:884",
+        "scripts/staging_validation_part2_user_flows.py:1168"
+      ]
+    },
+    "[CRITICAL] STAGING ENVIRONMENT: NEEDS ATTENTION (Issues:": {
+      "value": "[CRITICAL] STAGING ENVIRONMENT: NEEDS ATTENTION (Issues:",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:834"
       ]
     },
     "[Circuit breaker open - streaming unavailable]": {
@@ -78793,6 +79789,15 @@
         "scripts/metadata_tracking/enabler.py:64"
       ]
     },
+    "[ERROR] Suite failed with error:": {
+      "value": "[ERROR] Suite failed with error:",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:773",
+        "scripts/staging_validation_part2_corrected.py:788",
+        "scripts/staging_validation_part2_user_flows.py:1072"
+      ]
+    },
     "[ERROR] Test config file not found:": {
       "value": "[ERROR] Test config file not found:",
       "category": "messages",
@@ -78828,6 +79833,13 @@
       "category": "messages",
       "locations": [
         "scripts/workflow_presets.py:88"
+      ]
+    },
+    "[ERROR] Validation failed with error:": {
+      "value": "[ERROR] Validation failed with error:",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:478"
       ]
     },
     "[ERROR] Validation failed:": {
@@ -79043,6 +80055,27 @@
         "scripts/fix_all_import_errors.py:185"
       ]
     },
+    "[FIX] Optimize health endpoint: Currently": {
+      "value": "[FIX] Optimize health endpoint: Currently",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:364"
+      ]
+    },
+    "[FIX] Optimize memory usage: Currently": {
+      "value": "[FIX] Optimize memory usage: Currently",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:360"
+      ]
+    },
+    "[FIX] Optimize startup time: Currently": {
+      "value": "[FIX] Optimize startup time: Currently",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:362"
+      ]
+    },
     "[FRONTEND] Testing Frontend...": {
       "value": "[FRONTEND] Testing Frontend...",
       "category": "messages",
@@ -79064,6 +80097,20 @@
       "locations": [
         "scripts/code_review_analysis.py:39",
         "scripts/review/git_analyzer.py:22"
+      ]
+    },
+    "[GOOD] Memory usage is optimal": {
+      "value": "[GOOD] Memory usage is optimal",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:374"
+      ]
+    },
+    "[GOOD] Startup performance is good": {
+      "value": "[GOOD] Startup performance is good",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:377"
       ]
     },
     "[HIGH] Priority Issues:": {
@@ -79180,6 +80227,13 @@
         "scripts/fix_malformed_imports.py:266"
       ]
     },
+    "[INFO] Results saved to": {
+      "value": "[INFO] Results saved to",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:460"
+      ]
+    },
     "[INFO] Staging all changes...": {
       "value": "[INFO] Staging all changes...",
       "category": "messages",
@@ -79206,6 +80260,41 @@
       "category": "messages",
       "locations": [
         "scripts/verify_staging_tests.py:111"
+      ]
+    },
+    "[INFO] Validating": {
+      "value": "[INFO] Validating",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:88"
+      ]
+    },
+    "[INFO] Validating health endpoint performance...": {
+      "value": "[INFO] Validating health endpoint performance...",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:220"
+      ]
+    },
+    "[INFO] Validating resource optimization...": {
+      "value": "[INFO] Validating resource optimization...",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:175"
+      ]
+    },
+    "[INFO] Validating service integration...": {
+      "value": "[INFO] Validating service integration...",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:270"
+      ]
+    },
+    "[INFO] Validating startup performance...": {
+      "value": "[INFO] Validating startup performance...",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:128"
       ]
     },
     "[INVALID] '": {
@@ -79297,6 +80386,20 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/db/clickhouse.py:30"
+      ]
+    },
+    "[MONITOR] Check service availability:": {
+      "value": "[MONITOR] Check service availability:",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:370"
+      ]
+    },
+    "[MONITOR] Monitor CPU usage: Currently": {
+      "value": "[MONITOR] Monitor CPU usage: Currently",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:368"
       ]
     },
     "[MONITOR] Starting GCP Health Monitoring System": {
@@ -80173,6 +81276,13 @@
         "scripts/fetch_secrets_to_env.py:192"
       ]
     },
+    "[SUCCESS] Deployment is performing well! No critical issues detected.": {
+      "value": "[SUCCESS] Deployment is performing well! No critical issues detected.",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:410"
+      ]
+    },
     "[SUCCESS] Fixed": {
       "value": "[SUCCESS] Fixed",
       "category": "messages",
@@ -80250,6 +81360,21 @@
       "category": "messages",
       "locations": [
         "scripts/manage_precommit.py:49"
+      ]
+    },
+    "[SUCCESS] STAGING ENVIRONMENT: HEALTHY": {
+      "value": "[SUCCESS] STAGING ENVIRONMENT: HEALTHY",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:830"
+      ]
+    },
+    "[SUCCESS] STAGING ENVIRONMENT: READY FOR PRODUCTION": {
+      "value": "[SUCCESS] STAGING ENVIRONMENT: READY FOR PRODUCTION",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:880",
+        "scripts/staging_validation_part2_user_flows.py:1164"
       ]
     },
     "[SUCCESS] SYSTEM READY FOR COLD START!": {
@@ -80512,6 +81637,13 @@
         "scripts/setup_claude_hooks.py:46"
       ]
     },
+    "[WARNING] Deployment has some performance concerns. Review recommendations.": {
+      "value": "[WARNING] Deployment has some performance concerns. Review recommendations.",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:412"
+      ]
+    },
     "[WARNING] Docker container 'netra-clickhouse-dev' not found or not running": {
       "value": "[WARNING] Docker container 'netra-clickhouse-dev' not found or not running",
       "category": "messages",
@@ -80600,6 +81732,21 @@
         "scripts/review/cli.py:126"
       ]
     },
+    "[WARNING] STAGING ENVIRONMENT: MINOR ISSUES (": {
+      "value": "[WARNING] STAGING ENVIRONMENT: MINOR ISSUES (",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:882",
+        "scripts/staging_validation_part2_user_flows.py:1166"
+      ]
+    },
+    "[WARNING] STAGING ENVIRONMENT: MOSTLY HEALTHY (Issues:": {
+      "value": "[WARNING] STAGING ENVIRONMENT: MOSTLY HEALTHY (Issues:",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_e2e.py:832"
+      ]
+    },
     "[WARNING] Some components are missing. Run with --activate to enable them.": {
       "value": "[WARNING] Some components are missing. Run with --activate to enable them.",
       "category": "messages",
@@ -80619,6 +81766,13 @@
       "category": "messages",
       "locations": [
         "scripts/startup_environment.py:164"
+      ]
+    },
+    "[WARNING] Validation interrupted by user": {
+      "value": "[WARNING] Validation interrupted by user",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:475"
       ]
     },
     "[WARN] Cloud SQL Proxy not found (needed for migrations)": {
@@ -82133,7 +83287,7 @@
       "value": "absolute -top-8 left-0 flex items-center gap-4 text-xs text-gray-400",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/components/KeyboardShortcutsHint.tsx:54"
+        "frontend/components/chat/components/KeyboardShortcutsHint.tsx:60"
       ]
     },
     "absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden": {
@@ -82250,6 +83404,13 @@
         "netra_backend/app/core/fallback_coordinator_health.py:151"
       ]
     },
+    "aiohttp-cors not available, CORS setup skipped": {
+      "value": "aiohttp-cors not available, CORS setup skipped",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/network_handler.py:308"
+      ]
+    },
     "all, delete-orphan": {
       "value": "all, delete-orphan",
       "category": "messages",
@@ -82324,7 +83485,7 @@
       "value": "animate-spin w-8 h-8 mx-auto mb-2 border-2 border-gray-300 border-t-emerald-500 rounded-full",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ChatSidebarThreadList.tsx:188"
+        "frontend/components/chat/ChatSidebarThreadList.tsx:191"
       ]
     },
     "app = FastAPI(": {
@@ -82485,19 +83646,32 @@
         "scripts/fix_e2e_tests_comprehensive.py:262"
       ]
     },
+    "async_session_factory is not initialized, attempting to initialize database...": {
+      "value": "async_session_factory is not initialized, attempting to initialize database...",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/db/postgres_session.py:145"
+      ]
+    },
     "async_session_factory is not initialized.": {
       "value": "async_session_factory is not initialized.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_session.py:79",
-        "netra_backend/app/db/postgres_session.py:145"
+        "netra_backend/app/db/postgres_session.py:79"
+      ]
+    },
+    "async_session_factory is still None after initialization attempt": {
+      "value": "async_session_factory is still None after initialization attempt",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/db/postgres_session.py:160"
       ]
     },
     "asyncpg driver doesn't support sslmode parameter, use ssl= instead": {
       "value": "asyncpg driver doesn't support sslmode parameter, use ssl= instead",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:643"
+        "shared/database_url_builder.py:723"
       ]
     },
     "at stage: [yellow]": {
@@ -83074,7 +84248,7 @@
       "value": "bytes (max:",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:447"
+        "auth_service/main.py:255"
       ]
     },
     "cache entries matching pattern '": {
@@ -83141,7 +84315,7 @@
       "value": "characters (minimum:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:780"
+        "netra_backend/app/db/database_manager.py:764"
       ]
     },
     "chars), should be 64+": {
@@ -83406,6 +84580,14 @@
         "scripts/status_section_renderers.py:236"
       ]
     },
+    "critical issues)": {
+      "value": "critical issues)",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:884",
+        "scripts/staging_validation_part2_user_flows.py:1168"
+      ]
+    },
     "critical test files\nTests:": {
       "value": "critical test files\nTests:",
       "category": "messages",
@@ -83626,6 +84808,13 @@
         "netra_backend/app/middleware/security_middleware.py:51"
       ]
     },
+    "deployment performance...": {
+      "value": "deployment performance...",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:88"
+      ]
+    },
     "detect_environment via shim is DEPRECATED. Use auth_client_core directly": {
       "value": "detect_environment via shim is DEPRECATED. Use auth_client_core directly",
       "category": "messages",
@@ -83637,7 +84826,7 @@
       "value": "disabled (staging environment)",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:113"
+        "auth_service/main.py:114"
       ]
     },
     "disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none": {
@@ -83787,7 +84976,7 @@
       "value": "environment - appears to be a development/test password",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:433"
+        "shared/database_url_builder.py:513"
       ]
     },
     "environment. Add ?sslmode=require to DATABASE_URL": {
@@ -83996,8 +85185,7 @@
       "value": "failed to acquire (test mode)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:394",
-        "netra_backend/app/services/redis_service.py:155"
+        "netra_backend/app/redis_manager.py:394"
       ]
     },
     "failed with service '": {
@@ -84261,7 +85449,7 @@
       "value": "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ThreadSidebarComponents.tsx:124"
+        "frontend/components/chat/ThreadSidebarComponents.tsx:150"
       ]
     },
     "flex items-center gap-1 text-xs ${color}": {
@@ -84619,7 +85807,7 @@
       "value": "flex-1 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ThreadSidebarComponents.tsx:67"
+        "frontend/components/chat/ThreadSidebarComponents.tsx:91"
       ]
     },
     "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180": {
@@ -86891,7 +88079,7 @@
       "value": "gzip, deflate",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/network_handler.py:287"
+        "netra_backend/app/core/network_handler.py:294"
       ]
     },
     "h-1.5 rounded-full ${getConfidenceColor(metrics.confidenceScore)}": {
@@ -87095,8 +88283,7 @@
       "value": "if redis.call(\"GET\", KEYS[1]) == ARGV[1] then\n                return redis.call(\"DEL\", KEYS[1])\n            else\n                return 0\n            end",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:454",
-        "netra_backend/app/services/redis_service.py:215"
+        "netra_backend/app/redis_manager.py:454"
       ]
     },
     "if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value, if(idx2 > 0, arrayElement(metrics.value, idx2), 0.0) as throughput_value, if(idx3 > 0, arrayElement(metrics.value, idx3), 0.0) as cost_value": {
@@ -87519,6 +88706,13 @@
       "category": "messages",
       "locations": [
         "scripts/validate_integration_tests.py:57"
+      ]
+    },
+    "invalid json{": {
+      "value": "invalid json{",
+      "category": "messages",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:717"
       ]
     },
     "is enabled in the GCP Console.": {
@@ -87950,6 +89144,13 @@
         "netra_backend/app/services/demo/response_generator.py:19"
       ]
     },
+    "ms (status:": {
+      "value": "ms (status:",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_deployment_performance.py:239"
+      ]
+    },
     "ms, cache_hit=": {
       "value": "ms, cache_hit=",
       "category": "messages",
@@ -87990,7 +89191,7 @@
       "value": "mt-2 text-xs text-red-700 underline hover:no-underline",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ChatSidebarThreadList.tsx:179"
+        "frontend/components/chat/ChatSidebarThreadList.tsx:182"
       ]
     },
     "mt-3 pt-3 border-t ${borderClass.replace('border-b', 'border-t')}": {
@@ -88415,7 +89616,7 @@
       "value": "p-4 mx-4 mt-2 bg-red-50 border border-red-200 rounded-lg",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ChatSidebarThreadList.tsx:175"
+        "frontend/components/chat/ChatSidebarThreadList.tsx:178"
       ]
     },
     "p-4 rounded-lg bg-red-500/10 border border-red-500/20": {
@@ -88595,14 +89796,14 @@
       "value": "psycopg driver uses sslmode= parameter, not ssl=",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:653"
+        "shared/database_url_builder.py:733"
       ]
     },
     "psycopg2 driver uses sslmode= parameter, not ssl=": {
       "value": "psycopg2 driver uses sslmode= parameter, not ssl=",
       "category": "messages",
       "locations": [
-        "shared/database_url_builder.py:648"
+        "shared/database_url_builder.py:728"
       ]
     },
     "pt-2 border-t ${borderClass}": {
@@ -89297,7 +90498,7 @@
       "value": "s), forcing closure",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:299"
+        "auth_service/auth_core/database/connection.py:296"
       ]
     },
     "scaling capacity through integrated optimization approach.": {
@@ -89332,7 +90533,7 @@
       "value": "seconds for graceful shutdown...",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:157"
+        "auth_service/main.py:158"
       ]
     },
     "seconds, recommended >= 300": {
@@ -89417,7 +90618,7 @@
       "value": "signal, initiating graceful shutdown...",
       "category": "messages",
       "locations": [
-        "auth_service/main.py:53"
+        "auth_service/main.py:54"
       ]
     },
     "space-y-2 ${className}": {
@@ -89591,6 +90792,13 @@
       "category": "messages",
       "locations": [
         "scripts/generate_wip_report.py:297"
+      ]
+    },
+    "tests still failing. Partial fix achieved.": {
+      "value": "tests still failing. Partial fix achieved.",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:442"
       ]
     },
     "tests)\n- **Coverage**:": {
@@ -90601,7 +91809,7 @@
       "value": "w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0 animate-spin",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ThreadSidebarComponents.tsx:196"
+        "frontend/components/chat/ThreadSidebarComponents.tsx:224"
       ]
     },
     "w-5 h-5 text-blue-600 mt-0.5": {
@@ -90615,7 +91823,7 @@
       "value": "w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ThreadSidebarComponents.tsx:198"
+        "frontend/components/chat/ThreadSidebarComponents.tsx:226"
       ]
     },
     "w-5 h-5 text-purple-400 mt-0.5": {
@@ -90653,7 +91861,7 @@
       "category": "messages",
       "locations": [
         "frontend/components/chat/ThreadSidebar.tsx:70",
-        "frontend/components/chat/ThreadSidebarComponents.tsx:236"
+        "frontend/components/chat/ThreadSidebarComponents.tsx:264"
       ]
     },
     "w-80 h-full bg-white/95 backdrop-blur-md border-r border-gray-200 flex flex-col": {
@@ -90703,7 +91911,7 @@
       "value": "w-full flex items-center justify-center gap-2 px-4 py-2 glass-button-primary rounded-lg transition-all disabled:glass-disabled",
       "category": "messages",
       "locations": [
-        "frontend/components/chat/ThreadSidebarComponents.tsx:32"
+        "frontend/components/chat/ThreadSidebarComponents.tsx:55"
       ]
     },
     "w-full flex items-center justify-center space-x-2 px-4 py-3": {
@@ -90956,13 +92164,6 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/logging_formatters.py:210"
-      ]
-    },
-    "{} severity error: {}": {
-      "value": "{} severity error: {}",
-      "category": "messages",
-      "locations": [
-        "netra_backend/app/core/error_handlers/api/response_builder.py:168"
       ]
     },
     "|\n\n## Validation Results": {
@@ -91782,11 +92983,25 @@
         "frontend/components/SubAgentStatus.tsx:102"
       ]
     },
+    "⏰ Test timed out:": {
+      "value": "⏰ Test timed out:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:377"
+      ]
+    },
     "⏰ Timeout after": {
       "value": "⏰ Timeout after",
       "category": "messages",
       "locations": [
         "scripts/fix_staging_deployment.py:322"
+      ]
+    },
+    "⏱️ Auth request latency:": {
+      "value": "⏱️ Auth request latency:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:316"
       ]
     },
     "⏱️ Claude Code timeout - using fallback": {
@@ -91816,6 +93031,13 @@
       "locations": [
         "scripts/deploy_to_gcp.py:630",
         "scripts/fix_staging_deployment.py:354"
+      ]
+    },
+    "⏳ Waiting for auth service to start on port": {
+      "value": "⏳ Waiting for auth service to start on port",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:197"
       ]
     },
     "⚙️ Consider increasing parallel workers if system resources allow.": {
@@ -92105,6 +93327,20 @@
         "scripts/permissive_hooks/audit_duplicates_hook.py:116"
       ]
     },
+    "⚠️ Auth service docs returned": {
+      "value": "⚠️ Auth service docs returned",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:272"
+      ]
+    },
+    "⚠️ Auth service returned status": {
+      "value": "⚠️ Auth service returned status",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:326"
+      ]
+    },
     "⚠️ Claude analysis error:": {
       "value": "⚠️ Claude analysis error:",
       "category": "messages",
@@ -92254,6 +93490,13 @@
         "scripts/ci/generate_security_report.py:293"
       ]
     },
+    "⚠️ High authentication latency detected:": {
+      "value": "⚠️ High authentication latency detected:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:319"
+      ]
+    },
     "⚠️ Hook file not found. Please ensure .git/hooks/prepare-commit-msg exists": {
       "value": "⚠️ Hook file not found. Please ensure .git/hooks/prepare-commit-msg exists",
       "category": "messages",
@@ -92350,6 +93593,13 @@
       "category": "messages",
       "locations": [
         "scripts/schema_sync.py:198"
+      ]
+    },
+    "⚠️ Test failed:": {
+      "value": "⚠️ Test failed:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:370"
       ]
     },
     "⚠️ Using hardcoded password - this should be updated!": {
@@ -92598,11 +93848,53 @@
         "auth_service/init_database.py:66"
       ]
     },
+    "✅ Auth service API documentation accessible": {
+      "value": "✅ Auth service API documentation accessible",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:270"
+      ]
+    },
     "✅ Auth service already has graceful shutdown": {
       "value": "✅ Auth service already has graceful shutdown",
       "category": "messages",
       "locations": [
         "scripts/setup_graceful_shutdown.py:32"
+      ]
+    },
+    "✅ Auth service health check passed": {
+      "value": "✅ Auth service health check passed",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:247"
+      ]
+    },
+    "✅ Auth service is responding to requests": {
+      "value": "✅ Auth service is responding to requests",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:324"
+      ]
+    },
+    "✅ Auth service started on port": {
+      "value": "✅ Auth service started on port",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:208"
+      ]
+    },
+    "✅ Authentication System Fix completed successfully!": {
+      "value": "✅ Authentication System Fix completed successfully!",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:74"
+      ]
+    },
+    "✅ Authentication latency is acceptable": {
+      "value": "✅ Authentication latency is acceptable",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:321"
       ]
     },
     "✅ Authentication setup successful!": {
@@ -92617,6 +93909,13 @@
       "category": "messages",
       "locations": [
         "scripts/setup_graceful_shutdown.py:123"
+      ]
+    },
+    "✅ Backend configured to use auth service at": {
+      "value": "✅ Backend configured to use auth service at",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:289"
       ]
     },
     "✅ Backend image built successfully": {
@@ -92799,6 +94098,13 @@
       "category": "messages",
       "locations": [
         "scripts/demo_feature_flag_system.py:44"
+      ]
+    },
+    "✅ Environment configuration validated and fixed": {
+      "value": "✅ Environment configuration validated and fixed",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:111"
       ]
     },
     "✅ Faster Feature Delivery:": {
@@ -93104,6 +94410,13 @@
       "category": "messages",
       "locations": [
         "scripts/team_updates.py:78"
+      ]
+    },
+    "✅ Test passed:": {
+      "value": "✅ Test passed:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:368"
       ]
     },
     "✅ Test successful! Generated message:": {
@@ -93583,11 +94896,39 @@
         "auth_service/init_database.py:69"
       ]
     },
+    "❌ Auth service API test failed:": {
+      "value": "❌ Auth service API test failed:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:275"
+      ]
+    },
+    "❌ Auth service failed to start. Output:": {
+      "value": "❌ Auth service failed to start. Output:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:204"
+      ]
+    },
     "❌ Auth service main.py not found at": {
       "value": "❌ Auth service main.py not found at",
       "category": "messages",
       "locations": [
         "scripts/setup_graceful_shutdown.py:24"
+      ]
+    },
+    "❌ Authentication System Fix failed:": {
+      "value": "❌ Authentication System Fix failed:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:78"
+      ]
+    },
+    "❌ Authentication flow test failed:": {
+      "value": "❌ Authentication flow test failed:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:329"
       ]
     },
     "❌ Authentication setup failed!": {
@@ -93651,6 +94992,13 @@
       "category": "messages",
       "locations": [
         "scripts/validate_staging_deployment.py:100"
+      ]
+    },
+    "❌ Cannot connect to auth service:": {
+      "value": "❌ Cannot connect to auth service:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:252"
       ]
     },
     "❌ Cannot import shared logging:": {
@@ -93964,6 +95312,13 @@
       "category": "messages",
       "locations": [
         "scripts/validate_staging_db_connection.py:277"
+      ]
+    },
+    "❌ Failed to start auth service:": {
+      "value": "❌ Failed to start auth service:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:211"
       ]
     },
     "❌ Failed to start environment": {
@@ -94309,6 +95664,13 @@
         "netra_backend/app/agents/synthetic_data_metrics_handler.py:95"
       ]
     },
+    "❌ Test execution failed:": {
+      "value": "❌ Test execution failed:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:380"
+      ]
+    },
     "❌ Test failed. Check your Claude CLI installation.": {
       "value": "❌ Test failed. Check your Claude CLI installation.",
       "category": "messages",
@@ -94420,6 +95782,13 @@
       "category": "messages",
       "locations": [
         "scripts/validate_staging_deployment.py:173"
+      ]
+    },
+    "🎉 All authentication tests passed! System is now working.": {
+      "value": "🎉 All authentication tests passed! System is now working.",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:440"
       ]
     },
     "🎉 All graceful shutdown components setup successfully!": {
@@ -94898,7 +96267,8 @@
       "value": "📊 Test Results:",
       "category": "messages",
       "locations": [
-        "scripts/configure_audit.py:235"
+        "scripts/configure_audit.py:235",
+        "scripts/fix_authentication_system.py:387"
       ]
     },
     "📊 Thresholds:": {
@@ -95136,6 +96506,13 @@
         "scripts/restart_services_with_config.py:21"
       ]
     },
+    "🔄 Services are running. Press Ctrl+C to stop.": {
+      "value": "🔄 Services are running. Press Ctrl+C to stop.",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:445"
+      ]
+    },
     "🔄 TDD WORKFLOW PROCESS:": {
       "value": "🔄 TDD WORKFLOW PROCESS:",
       "category": "messages",
@@ -95248,6 +96625,13 @@
         "scripts/code_audit_orchestrator.py:64"
       ]
     },
+    "🔍 Testing JWT functionality...": {
+      "value": "🔍 Testing JWT functionality...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:260"
+      ]
+    },
     "🔍 Using centralized authentication configuration...": {
       "value": "🔍 Using centralized authentication configuration...",
       "category": "messages",
@@ -95260,6 +96644,20 @@
       "category": "messages",
       "locations": [
         "scripts/create_staging_secrets_complete.py:200"
+      ]
+    },
+    "🔍 Validating and fixing environment configuration...": {
+      "value": "🔍 Validating and fixing environment configuration...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:84"
+      ]
+    },
+    "🔍 Validating auth service...": {
+      "value": "🔍 Validating auth service...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:238"
       ]
     },
     "🔍 Validating canonical import paths...": {
@@ -95340,6 +96738,13 @@
         "scripts/fix_deployment_logging.py:124"
       ]
     },
+    "🔧 Configuring backend authentication...": {
+      "value": "🔧 Configuring backend authentication...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:280"
+      ]
+    },
     "🔧 Enabling required GCP APIs...": {
       "value": "🔧 Enabling required GCP APIs...",
       "category": "messages",
@@ -95375,11 +96780,25 @@
         "scripts/demo_feature_flag_system.py:91"
       ]
     },
+    "🔧 Setting missing environment variable:": {
+      "value": "🔧 Setting missing environment variable:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:102"
+      ]
+    },
     "🔧 Setting up graceful shutdown for Cloud Run...": {
       "value": "🔧 Setting up graceful shutdown for Cloud Run...",
       "category": "messages",
       "locations": [
         "scripts/setup_graceful_shutdown.py:257"
+      ]
+    },
+    "🔧 Starting Authentication System Fix...": {
+      "value": "🔧 Starting Authentication System Fix...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:54"
       ]
     },
     "🔧 TEST SPLITTING SUGGESTIONS": {
@@ -95429,6 +96848,20 @@
       "category": "messages",
       "locations": [
         "scripts/build_staging.py:82"
+      ]
+    },
+    "🔪 Killing existing auth service process (PID:": {
+      "value": "🔪 Killing existing auth service process (PID:",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:127"
+      ]
+    },
+    "🔪 Killing process on port": {
+      "value": "🔪 Killing process on port",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:142"
       ]
     },
     "🔬 STARTING COMPREHENSIVE TEST EXECUTION BENCHMARK": {
@@ -95606,6 +97039,13 @@
         "scripts/build_staging.py:325"
       ]
     },
+    "🚀 Starting auth service...": {
+      "value": "🚀 Starting auth service...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:153"
+      ]
+    },
     "🚀 Starting staging environment...": {
       "value": "🚀 Starting staging environment...",
       "category": "messages",
@@ -95702,6 +97142,13 @@
       "category": "messages",
       "locations": [
         "scripts/compliance/enhanced_reporter.py:111"
+      ]
+    },
+    "🛑 Received interrupt signal, cleaning up...": {
+      "value": "🛑 Received interrupt signal, cleaning up...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:422"
       ]
     },
     "🛑 Stopping staging environment...": {
@@ -95844,6 +97291,13 @@
         "scripts/demo_feature_flag_system.py:47"
       ]
     },
+    "🧪 Running authentication validation tests...": {
+      "value": "🧪 Running authentication validation tests...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:334"
+      ]
+    },
     "🧪 Running staging tests...": {
       "value": "🧪 Running staging tests...",
       "category": "messages",
@@ -95879,6 +97333,13 @@
         "scripts/configure_claude_commit.py:92"
       ]
     },
+    "🧪 Testing authentication flow...": {
+      "value": "🧪 Testing authentication flow...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:293"
+      ]
+    },
     "🧪 Testing configuration...": {
       "value": "🧪 Testing configuration...",
       "category": "messages",
@@ -95898,6 +97359,20 @@
       "category": "messages",
       "locations": [
         "scripts/deploy_to_gcp.py:933"
+      ]
+    },
+    "🧹 Cleaning up existing processes...": {
+      "value": "🧹 Cleaning up existing processes...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:115"
+      ]
+    },
+    "🧹 Cleaning up processes...": {
+      "value": "🧹 Cleaning up processes...",
+      "category": "messages",
+      "locations": [
+        "scripts/fix_authentication_system.py:397"
       ]
     },
     "🧹 NETRA APEX CLEAN SLATE EXECUTOR": {

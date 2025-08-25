@@ -96,11 +96,11 @@ class TestColdStartCriticalIssues:
         os.environ["CLICKHOUSE_PASSWORD"] = "password1"
         
         # Attempt ClickHouse connection with mismatched passwords
-        from netra_backend.app.db.clickhouse import ClickHouseConnection
+        from netra_backend.app.db.clickhouse import ClickHouseService
         
         with pytest.raises(Exception) as exc_info:
-            ch_conn = ClickHouseConnection()
-            await ch_conn.connect()
+            ch_service = ClickHouseService()
+            await ch_service.test_connection()
             
         assert "missing secrets" in str(exc_info.value).lower() or \
                "authentication" in str(exc_info.value).lower()

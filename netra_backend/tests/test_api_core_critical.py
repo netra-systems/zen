@@ -74,7 +74,7 @@ class TestAPICoreEndpointsCritical:
             }
         })
         
-        response = await mock_client.post("/api/auth/login", json=login_data)
+        response = await mock_client.post("/auth/login", json=login_data)
         assert response["status_code"] == 200
         assert "access_token" in response["json"]
     @pytest.mark.asyncio
@@ -96,7 +96,7 @@ class TestAPICoreEndpointsCritical:
             "json": {"id": 2, "email": "newuser@example.com", "username": "newuser"}
         })
         
-        response = await mock_client.post("/api/auth/register", json=register_data)
+        response = await mock_client.post("/auth/register", json=register_data)
         assert response["status_code"] == 201
         assert response["json"]["email"] == "newuser@example.com"
     @pytest.mark.asyncio
@@ -220,7 +220,7 @@ class TestAPICoreEndpointsCritical:
             }
         })
         
-        response = await mock_client.post("/api/auth/login", json=login_data)
+        response = await mock_client.post("/auth/login", json=login_data)
         assert response["json"]["token_type"] == "bearer"
         assert "user" in response["json"]
     @pytest.mark.asyncio
@@ -259,7 +259,7 @@ class TestAPICoreEndpointsCritical:
             "json": {"detail": "Invalid credentials"}
         })
         
-        response = await mock_client.post("/api/auth/login", json={
+        response = await mock_client.post("/auth/login", json={
             "email": "invalid@example.com",
             "password": "wrong_password"
         })
@@ -278,7 +278,7 @@ class TestAPICoreEndpointsCritical:
             "json": {"detail": "Missing required fields"}
         })
         
-        response = await mock_client.post("/api/auth/register", json={
+        response = await mock_client.post("/auth/register", json={
             "email": "incomplete@example.com"
         })
         assert response["status_code"] == 400

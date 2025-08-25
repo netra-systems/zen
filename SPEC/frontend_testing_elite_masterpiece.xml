@@ -972,7 +972,7 @@ export const createMockWebSocket = () => {
                     <implementation><![CDATA[
 // mocks/api.ts
 export const handlers = [
-  rest.post('/api/auth/login', (req, res, ctx) => {
+  rest.post('/auth/login', (req, res, ctx) => {
     return res(ctx.json({ token: 'mock-token', user: mockUser }));
   }),
   rest.post('/api/threads', (req, res, ctx) => {

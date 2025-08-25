@@ -44,7 +44,7 @@ async def test_sql_injection_prevention():
         # Test injection in various endpoints
         test_endpoints = [
             {"url": f"{backend_url}/api/user/profile", "param": "user_id"},
-            {"url": f"{auth_url}/api/auth/user", "param": "email"},
+            {"url": f"{auth_url}/auth/user", "param": "email"},
             {"url": f"{backend_url}/api/threads", "param": "search"},
             {"url": f"{backend_url}/api/agent/run_agent", "param": "query"}
         ]
@@ -211,7 +211,7 @@ async def test_authentication_bypass_attempts():
             f"{backend_url}/api/user/profile",
             f"{backend_url}/api/threads",
             f"{backend_url}/api/agent/run_agent",
-            f"{auth_url}/api/auth/user"
+            f"{auth_url}/auth/user"
         ]
         
         for url in protected_endpoints:
@@ -294,7 +294,7 @@ async def test_rate_limiting_enforcement():
             f"{backend_url}/health",
             f"{auth_url}/health",
             f"{backend_url}/api/agent/run_agent",
-            f"{auth_url}/api/auth/login"
+            f"{auth_url}/auth/login"
         ]
         
         for url in test_endpoints:

@@ -339,7 +339,8 @@ class TestClickHouseClientCostBreakdown:
             
             assert "GROUP BY user_id, workload_type" in query_call
             assert "ORDER BY total_cost_cents DESC" in query_call
-            assert parameters["timeframe"] == "1 DAY"
+            assert "1 DAY" in query_call  # Timeframe is now embedded in query
+            assert parameters == {}  # No parameters passed
 
 
 class TestClickHouseClientMockData:

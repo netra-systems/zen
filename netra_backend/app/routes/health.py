@@ -52,12 +52,17 @@ def _create_error_response(status_code: int, response_data: Dict[str, Any]) -> R
     )
 
 @router.get("/")
+@router.options("/")
 async def health(request: Request, response: Response) -> Dict[str, Any]:
     """
     Basic health check endpoint - returns healthy if the application is running.
     Checks startup state to ensure proper readiness signaling during cold starts.
     Supports API versioning through Accept-Version and API-Version headers.
     """
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        return {"status": "ok", "message": "CORS preflight"}
+    
     # Handle API versioning
     requested_version = request.headers.get("Accept-Version") or request.headers.get("API-Version", "current")
     response.headers["API-Version"] = requested_version
@@ -165,10 +170,15 @@ async def health_no_slash(request: Request, response: Response) -> Dict[str, Any
     return await health(request, response)
 
 @router.get("/live")
-async def live() -> Dict[str, Any]:
+@router.options("/live")
+async def live(request: Request) -> Dict[str, Any]:
     """
     Liveness probe to check if the application is running.
     """
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        return {"status": "ok", "message": "CORS preflight"}
+    
     return response_builder.create_basic_response("healthy")
 
 async def _check_postgres_connection(db: AsyncSession) -> None:
@@ -222,40 +232,58 @@ async def _check_database_connection(db: AsyncSession) -> None:
 async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
     """Check application readiness including core database connectivity."""
     try:
-        # Fast check - only verify PostgreSQL is accessible (core requirement)
-        await asyncio.wait_for(_check_postgres_connection(db), timeout=5.0)
+        # Run all checks concurrently with shorter timeouts for faster response
+        postgres_task = asyncio.create_task(_check_postgres_connection(db))
+        clickhouse_task = asyncio.create_task(_check_clickhouse_connection())
+        health_task = asyncio.create_task(health_interface.get_health_status(HealthLevel.BASIC))
         
-        # Optional: Check ClickHouse with short timeout (non-blocking)
+        # Wait for core PostgreSQL check (required)
         try:
-            await asyncio.wait_for(_check_clickhouse_connection(), timeout=3.0)
+            await asyncio.wait_for(postgres_task, timeout=3.0)  # Reduced from 5.0s
+            postgres_status = "connected"
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.error(f"PostgreSQL readiness check failed: {e}")
+            raise HTTPException(status_code=503, detail="Core database unavailable")
+        
+        # Wait for other checks with shorter timeouts (optional)
+        clickhouse_status = "unavailable"
+        try:
+            await asyncio.wait_for(clickhouse_task, timeout=2.0)  # Reduced from 3.0s
+            clickhouse_status = "connected"
         except (asyncio.TimeoutError, Exception) as e:
             logger.debug(f"ClickHouse not available during readiness (non-critical): {e}")
         
-        # Basic health status check (fast)
-        health_status = await asyncio.wait_for(
-            health_interface.get_health_status(HealthLevel.BASIC), 
-            timeout=2.0
-        )
+        health_status = {}
+        try:
+            health_status = await asyncio.wait_for(health_task, timeout=1.5)  # Reduced from 2.0s
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.debug(f"Health interface check failed (non-critical): {e}")
+            health_status = {"status": "healthy", "message": "Basic health check bypassed"}
         
         # Return ready if core services are available
         return {
             "status": "ready", 
             "service": "netra-ai-platform", 
             "timestamp": time.time(),
-            "core_db": "connected",
+            "core_db": postgres_status,
+            "clickhouse_db": clickhouse_status,
             "details": health_status
         }
         
-    except asyncio.TimeoutError:
-        logger.error("Readiness check timed out")
-        raise HTTPException(status_code=503, detail="Service readiness timeout")
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Core database readiness check failed: {e}")
-        raise HTTPException(status_code=503, detail="Core database unavailable")
+        logger.error(f"Readiness check failed: {e}")
+        raise HTTPException(status_code=503, detail="Service readiness check failed")
 
 @router.get("/ready")
+@router.options("/ready")
 async def ready(request: Request) -> Dict[str, Any]:
     """Readiness probe to check if the application is ready to serve requests."""
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        return {"status": "ok", "message": "CORS preflight"}
+    
     try:
         # Check startup state first - readiness requires startup completion
         app_state = getattr(request.app, 'state', None)
@@ -298,8 +326,16 @@ async def ready(request: Request) -> Dict[str, Any]:
             # Use async for to properly handle session lifecycle
             async for db in get_db_dependency():
                 try:
-                    result = await _check_readiness_status(db)
+                    # Wrap the entire readiness check with timeout to prevent probe timeout
+                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=8.0)
                     return result
+                except asyncio.TimeoutError:
+                    logger.error("Readiness check exceeded 8 second timeout")
+                    return _create_error_response(503, {
+                        "status": "unhealthy",
+                        "message": "Readiness check timeout",
+                        "timeout_seconds": 8
+                    })
                 except Exception as check_error:
                     logger.error(f"Readiness check failed: {check_error}")
                     raise check_error

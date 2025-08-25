@@ -26,7 +26,7 @@ jest.mock('@/store/authStore', () => ({
 // Mock the auth service client
 const mockRefreshToken = jest.fn();
 
-jest.mock('@/auth/auth-service-client', () => ({
+jest.mock('@/lib/auth-service-client', () => ({
   AuthServiceClient: jest.fn().mockImplementation(() => ({
     refreshToken: mockRefreshToken,
   }))

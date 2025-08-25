@@ -1592,10 +1592,10 @@ class DevLauncher:
             return False
     
     def _verify_auth_system(self, timeout: int = 15) -> bool:
-        """Verify auth system /api/auth/config per SPEC step 9 with resilient networking."""
+        """Verify auth system /auth/config per SPEC step 9 with resilient networking."""
         # Get the actual allocated auth port instead of hardcoded 8081
         auth_port = getattr(self.service_startup, 'allocated_ports', {}).get('auth', 8081)
-        auth_config_url = f"http://localhost:{auth_port}/api/auth/config"
+        auth_config_url = f"http://localhost:{auth_port}/auth/config"
         
         # Use resilient network client
         auth_policy = RetryPolicy(

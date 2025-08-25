@@ -46,7 +46,7 @@ sequenceDiagram
     participant Database
 
     User->>Frontend: Login Request
-    Frontend->>Backend: POST /api/auth/login
+    Frontend->>Backend: POST /auth/login
     
     alt Email/Password
         Backend->>Database: Verify Credentials
@@ -80,7 +80,7 @@ GOOGLE_OAUTH_CONFIG = {
     "token_url": "https://oauth2.googleapis.com/token",
     "userinfo_url": "https://www.googleapis.com/oauth2/userinfo",
     "scopes": ["openid", "email", "profile"],
-    "redirect_uri": "http://localhost:8000/api/auth/google/callback"
+    "redirect_uri": "http://localhost:8000/auth/google/callback"
 }
 ```
 

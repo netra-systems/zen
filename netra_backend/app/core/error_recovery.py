@@ -167,7 +167,7 @@ class RetryStrategy:
 
 
 # Import CircuitBreaker from canonical location - CONSOLIDATED
-from netra_backend.app.core.circuit_breaker_core import (
+from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker as CoreCircuitBreaker,
 )
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig

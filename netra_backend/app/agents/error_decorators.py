@@ -5,6 +5,7 @@ Manages retry logic and error context creation.
 """
 
 import asyncio
+import functools
 from typing import Any, Optional
 from uuid import uuid4
 
@@ -26,7 +27,8 @@ def handle_agent_error(
 ):
     """Decorator to handle agent errors with recovery."""
     def decorator(func):
-        async def wrapper(*args, **kwargs):
+        @functools.wraps(func)
+        async def async_wrapper(*args, **kwargs):
             # Handle both bound methods and standalone functions
             if args and hasattr(args[0], '__class__'):
                 self = args[0]
@@ -52,7 +54,41 @@ def handle_agent_error(
                 func, self, func_args, kwargs, context, 
                 operation_name or func.__name__, max_retries, retry_delay, handler
             )
-        return wrapper
+
+        @functools.wraps(func)  
+        def sync_wrapper(*args, **kwargs):
+            # Handle both bound methods and standalone functions
+            if args and hasattr(args[0], '__class__'):
+                self = args[0]
+                func_args = args[1:]
+            else:
+                self = None
+                func_args = args
+            
+            # Create context
+            context = _create_error_context(
+                operation_name or func.__name__, 
+                self, 
+                agent_name, 
+                kwargs, 
+                context_data
+            )
+            
+            # Use custom handler or global
+            handler = error_handler or global_error_handler
+            
+            # For sync functions, run the async retry logic in event loop
+            return asyncio.run(_execute_with_retry(
+                func, self, func_args, kwargs, context, 
+                operation_name or func.__name__, max_retries, retry_delay, handler
+            ))
+        
+        # Return appropriate wrapper based on function type
+        if asyncio.iscoroutinefunction(func):
+            return async_wrapper
+        else:
+            return sync_wrapper
+            
     return decorator
 
 
@@ -81,10 +117,8 @@ def _create_error_context(
         run_id=kwargs.get('run_id', 'unknown')
     )
     
-    # Add any additional context data
-    if context_data:
-        for key, value in context_data.items():
-            setattr(context, key, value)
+    # Note: Additional context data is not supported by ErrorContext model
+    # context_data parameter is kept for backward compatibility but ignored
     
     return context
 
@@ -153,8 +187,12 @@ async def _handle_final_attempt_error(
             # Handler returned an error object at max retries, re-raise original
             raise error
         return result
-    except Exception:
-        # If handler doesn't resolve it, re-raise the original error
+    except Exception as handler_error:
+        # If handler throws an exception, still re-raise the original error
+        # but log the handler error for debugging (this is expected for some error types)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug(f"Error handler threw exception: {handler_error}")
         raise error
 
 
@@ -168,7 +206,8 @@ async def _handle_retry_attempt_error(
     retry_delay: float
 ) -> bool:
     """Handle error on retry attempt. Returns True to continue retry, False to stop."""
-    agent_error = handler._convert_to_agent_error(error, context)
+    # Always process the error to record metrics, even if we won't retry
+    agent_error = handler._process_error(error, context)
     
     # Check if should retry based on error type and retry count
     if not handler.recovery_coordinator.strategy.should_retry(agent_error):

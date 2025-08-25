@@ -127,7 +127,7 @@ class TestDevLoginColdStart:
         
         # Attempt dev login
         dev_login_data = {"email": "test@example.com"}
-        response = await async_client.post("/api/auth/dev_login", json=dev_login_data)
+        response = await async_client.post("/auth/dev_login", json=dev_login_data)
         
         # When dev login is enabled (fallback scenario), it will fail with 503
         # When dev login is disabled, it will return 403
@@ -155,7 +155,7 @@ class TestDevLoginColdStart:
         
         # Attempt dev login (will fail due to missing auth service, but should not return 403)
         dev_login_data = {"email": "dev@example.com"}
-        response = await async_client.post("/api/auth/dev_login", json=dev_login_data)
+        response = await async_client.post("/auth/dev_login", json=dev_login_data)
         
         # In dev environment with auth service unavailable, expect 503
         # With missing credentials but dev login enabled, may also get other errors
@@ -170,7 +170,7 @@ class TestDevLoginColdStart:
         auth_client._cached_config = None if hasattr(auth_client, '_cached_config') else None
         
         # First request after cold start - check auth config
-        config_response = await async_client.get("/api/auth/config")
+        config_response = await async_client.get("/auth/config")
         assert config_response.status_code == 200
         
         config_data = config_response.json()
@@ -266,7 +266,7 @@ class TestDevLoginColdStart:
         unique_email = f"newuser_{int(time.time())}@example.com"
         dev_login_data = {"email": unique_email}
         
-        response = await async_client.post("/api/auth/dev_login", json=dev_login_data)
+        response = await async_client.post("/auth/dev_login", json=dev_login_data)
         
         # In dev environment with mocked services, should attempt user creation
         # Will fail due to missing services but should not return 403
@@ -280,7 +280,7 @@ class TestDevLoginColdStart:
         # Measure cold start time for auth config
         start_time = time.perf_counter()
         
-        response = await async_client.get("/api/auth/config")
+        response = await async_client.get("/auth/config")
         
         response_time = time.perf_counter() - start_time
         
@@ -296,7 +296,7 @@ class TestDevLoginColdStart:
         # Create multiple concurrent requests
         async def attempt_dev_login(email: str):
             data = {"email": email}
-            return await async_client.post("/api/auth/dev_login", json=data)
+            return await async_client.post("/auth/dev_login", json=data)
         
         # Send 5 concurrent requests
         emails = [f"concurrent_{i}@example.com" for i in range(5)]
@@ -317,13 +317,13 @@ class TestDevLoginColdStart:
     async def test_auth_config_caching(self, async_client):
         """Test 10: Auth config should be properly cached after first call."""
         # First call - cold start
-        response1 = await async_client.get("/api/auth/config")
+        response1 = await async_client.get("/auth/config")
         assert response1.status_code == 200
         config1 = response1.json()
         
         # Second call - should use cache
         start_time = time.perf_counter()
-        response2 = await async_client.get("/api/auth/config")
+        response2 = await async_client.get("/auth/config")
         cached_time = time.perf_counter() - start_time
         
         assert response2.status_code == 200

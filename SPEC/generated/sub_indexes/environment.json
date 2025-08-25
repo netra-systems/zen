@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-08-24T21:09:42.685532",
+    "generated_at": "2025-08-25T02:39:31.839056",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 93
+    "total_literals": 98
   },
   "literals": {
     "AI21_API_KEY": {
@@ -121,7 +121,15 @@
       "value": "AUTH_CACHE_TTL_SECONDS",
       "category": "environment",
       "locations": [
-        "netra_backend/app/core/configuration/services.py:343"
+        "netra_backend/app/core/configuration/services.py:343",
+        "scripts/fix_authentication_system.py:93"
+      ]
+    },
+    "AUTH_ENV": {
+      "value": "AUTH_ENV",
+      "category": "environment",
+      "locations": [
+        "shared/cors_config.py:102"
       ]
     },
     "AUTH_ERROR": {
@@ -149,7 +157,8 @@
         "auth_service/auth_core/database/connection.py:34",
         "auth_service/auth_core/validation/pre_deployment_validator.py:593",
         "auth_service/auth_core/validation/pre_deployment_validator.py:708",
-        "auth_service/main.py:118"
+        "auth_service/main.py:119",
+        "scripts/fix_authentication_system.py:92"
       ]
     },
     "AUTH_MODE": {
@@ -163,7 +172,16 @@
       "value": "AUTH_SERVICE_ENABLED",
       "category": "environment",
       "locations": [
-        "netra_backend/app/core/configuration/services.py:341"
+        "netra_backend/app/core/configuration/services.py:341",
+        "scripts/fix_authentication_system.py:91",
+        "scripts/fix_authentication_system.py:286"
+      ]
+    },
+    "AUTH_SERVICE_PORT": {
+      "value": "AUTH_SERVICE_PORT",
+      "category": "environment",
+      "locations": [
+        "scripts/fix_authentication_system.py:175"
       ]
     },
     "AUTH_SERVICE_URL": {
@@ -176,8 +194,10 @@
         "scripts/deploy_to_gcp.py:89",
         "scripts/fetch_secrets_to_env.py:93",
         "scripts/fetch_secrets_to_env.py:170",
-        "scripts/verify_cold_start.py:141",
-        "scripts/verify_cold_start.py:165"
+        "scripts/fix_authentication_system.py:160",
+        "scripts/fix_authentication_system.py:240",
+        "scripts/fix_authentication_system.py:262",
+        "scripts/fix_authentication_system.py:283"
       ]
     },
     "AUTH_TOKEN_EXPIRED": {
@@ -205,7 +225,7 @@
       "value": "AUTH_USE_FILE_DB",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/database/connection.py:55"
+        "auth_service/auth_core/database/connection.py:52"
       ]
     },
     "CLAUDE_API_KEY": {
@@ -534,6 +554,13 @@
         "netra_backend/app/routes/mcp/config.py:53"
       ]
     },
+    "NETRA_ENV": {
+      "value": "NETRA_ENV",
+      "category": "environment",
+      "locations": [
+        "shared/cors_config.py:101"
+      ]
+    },
     "NETRA_ENVIRONMENT": {
       "value": "NETRA_ENVIRONMENT",
       "category": "environment",
@@ -569,6 +596,20 @@
       "locations": [
         "auth_service/auth_core/security/oauth_security.py:265",
         "auth_service/auth_core/validation/pre_deployment_validator.py:388"
+      ]
+    },
+    "OAUTH_CLIENT_ID": {
+      "value": "OAUTH_CLIENT_ID",
+      "category": "environment",
+      "locations": [
+        "scripts/fix_authentication_system.py:94"
+      ]
+    },
+    "OAUTH_CLIENT_SECRET": {
+      "value": "OAUTH_CLIENT_SECRET",
+      "category": "environment",
+      "locations": [
+        "scripts/fix_authentication_system.py:95"
       ]
     },
     "OAUTH_HMAC_SECRET": {

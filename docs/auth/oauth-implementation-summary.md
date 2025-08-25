@@ -13,11 +13,11 @@ The Google OAuth implementation has been successfully configured for the Netra A
    - Development mode with auto-login capability
 
 2. **Authentication Routes** (`app/routes/auth/auth.py`)
-   - `/api/auth/login` - Initiates OAuth flow
-   - `/api/auth/callback` - Handles OAuth callback
-   - `/api/auth/logout` - Handles user logout
-   - `/api/auth/dev_login` - Development mode auto-login
-   - `/api/auth/config` - Returns auth configuration to frontend
+   - `/auth/login` - Initiates OAuth flow
+   - `/auth/callback` - Handles OAuth callback
+   - `/auth/logout` - Handles user logout
+   - `/auth/dev_login` - Development mode auto-login
+   - `/auth/config` - Returns auth configuration to frontend
 
 3. **OAuth Initialization** (`app/auth/auth.py`)
    - Authlib integration with Google OAuth
@@ -79,7 +79,7 @@ GOOGLE_CLIENT_SECRET=your_client_secret
    - `http://localhost:8000`
 
 2. Authorized redirect URIs:
-   - `http://localhost:8000/api/auth/callback`
+   - `http://localhost:8000/auth/callback`
    - `http://localhost:3000/auth/callback`
 
 ## Testing OAuth Flow
@@ -102,7 +102,7 @@ GOOGLE_CLIENT_SECRET=your_client_secret
 
 ### Authentication Configuration
 ```
-GET /api/auth/config
+GET /auth/config
 ```
 Returns:
 - `development_mode`: boolean
@@ -113,11 +113,11 @@ Returns:
 
 ### OAuth Flow
 ```
-GET /api/auth/login          # Initiates OAuth
-GET /api/auth/callback       # Handles callback
-GET /api/auth/logout         # Logs out user
-POST /api/auth/dev_login     # Dev mode login
-POST /api/auth/token         # Token endpoint
+GET /auth/login          # Initiates OAuth
+GET /auth/callback       # Handles callback
+GET /auth/logout         # Logs out user
+POST /auth/dev_login     # Dev mode login
+POST /auth/token         # Token endpoint
 ```
 
 ## Next Steps

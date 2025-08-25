@@ -55,8 +55,8 @@ class TestPostgresCompliance:
         ]
         
         for async_url, expected_sync_url in test_cases:
-            with patch.object(AuthDatabaseManager, '_get_base_auth_url', return_value=async_url):
-                sync_url = AuthDatabaseManager.get_auth_database_url_sync()
+            with patch.dict(os.environ, {'DATABASE_URL': async_url}):
+                sync_url = AuthDatabaseManager.get_migration_url_sync_format()
                 assert sync_url == expected_sync_url, f"Failed to convert {async_url} to sync"
     
     def test_ssl_mode_conversion(self):
@@ -67,20 +67,19 @@ class TestPostgresCompliance:
         assert "ssl=require" in converted
         assert "sslmode=" not in converted
         
-        # Test Cloud SQL URL (should keep sslmode)
+        # Test Cloud SQL URL (SSL parameters are removed for Cloud SQL)
         cloud_url = "postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance&sslmode=require"
         cloud_converted = AuthDatabaseManager._convert_sslmode_to_ssl(cloud_url)
-        # Cloud SQL URLs should keep their original sslmode parameter
-        assert "sslmode=require" in cloud_converted
+        # Cloud SQL URLs have SSL parameters removed (managed by Cloud SQL)
+        assert "sslmode=" not in cloud_converted and "ssl=" not in cloud_converted
     
     def test_url_validation(self):
         """Test URL validation for async and sync operations."""
-        # Valid async URLs
+        # Valid async URLs (excluding SQLite for production auth service)
         valid_async_urls = [
             "postgresql+asyncpg://user:pass@host:5432/db",
             "postgresql+asyncpg://user:pass@host:5432/db?ssl=require",
-            "postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance&sslmode=require",
-            "sqlite+aiosqlite:///:memory:",
+            "postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance",  # Cloud SQL without sslmode
         ]
         
         for url in valid_async_urls:
@@ -90,12 +89,13 @@ class TestPostgresCompliance:
         invalid_async_urls = [
             "postgresql+asyncpg://user:pass@host:5432/db?sslmode=require",  # Should use ssl=
             "postgresql+psycopg2://user:pass@host:5432/db",  # Wrong driver
+            "sqlite+aiosqlite:///:memory:",  # SQLite not valid for production auth service
         ]
         
         for url in invalid_async_urls:
             assert AuthDatabaseManager.validate_auth_url(url) is False, f"Should not validate {url}"
         
-        # Valid sync URLs
+        # Valid sync URLs - test with migration URL validation
         valid_sync_urls = [
             "postgresql+psycopg2://user:pass@host:5432/db",
             "postgresql+psycopg2://user:pass@host:5432/db?sslmode=require",
@@ -103,7 +103,7 @@ class TestPostgresCompliance:
         ]
         
         for url in valid_sync_urls:
-            assert AuthDatabaseManager.validate_sync_url(url) is True, f"Failed to validate sync {url}"
+            assert AuthDatabaseManager.validate_migration_url_sync_format(url) is True, f"Failed to validate sync {url}"
         
         # Invalid sync URLs
         invalid_sync_urls = [
@@ -112,7 +112,7 @@ class TestPostgresCompliance:
         ]
         
         for url in invalid_sync_urls:
-            assert AuthDatabaseManager.validate_sync_url(url) is False, f"Should not validate sync {url}"
+            assert AuthDatabaseManager.validate_migration_url_sync_format(url) is False, f"Should not validate sync {url}"
     
     def test_settings_initialization(self):
         """Test settings initialization pattern."""
@@ -215,10 +215,19 @@ class TestPostgresCompliance:
         ]
         
         for env, expected_pattern in test_cases:
-            with patch.dict(os.environ, {'ENVIRONMENT': env, 'DATABASE_URL': ''}):
+            # Set appropriate DATABASE_URL for each environment
+            database_url_for_env = expected_pattern
+            if env == 'test':
+                database_url_for_env = 'sqlite+aiosqlite:///:memory:'
+            elif env == 'development':
+                database_url_for_env = 'postgresql://postgres:password@localhost:5432/auth'
+            elif env == 'staging':
+                database_url_for_env = 'postgresql://netra_staging:password@35.223.209.195:5432/netra_staging'
+                
+            with patch.dict(os.environ, {'ENVIRONMENT': env, 'DATABASE_URL': database_url_for_env}):
                 # Mock is_test_environment to return False for non-test environments
                 with patch.object(AuthDatabaseManager, 'is_test_environment', return_value=(env == 'test')):
-                    url = AuthDatabaseManager.get_auth_database_url()
+                    url = AuthDatabaseManager.get_auth_database_url_async()
                     assert expected_pattern in url or url.startswith(expected_pattern.split('://')[0]), \
                         f"Failed for {env}: got {url}, expected pattern {expected_pattern}"
     

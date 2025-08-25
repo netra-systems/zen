@@ -624,5 +624,157 @@ class TestDatabaseManagerEdgeCases:
             assert f"/{expected_db}" in result
 
 
+class TestDatabaseManagerAdvancedErrorHandling:
+    """Test advanced error handling scenarios."""
+    
+    def setup_method(self):
+        """Reset environment for each test."""
+        os.environ.pop("DATABASE_URL", None)
+        os.environ.pop("ENVIRONMENT", None)
+    
+    @mock_justified("L1 Unit Test: Mocking urllib.parse.urlparse to test malformed URL handling", "L1")
+    def test_malformed_url_parsing_error(self):
+        """Test handling of URLs that cause parsing errors."""
+        manager = DatabaseManager()
+        
+        # Test with various malformed URLs
+        malformed_urls = [
+            "not-a-url",
+            "ftp://invalid:protocol@host:5432/db",
+            "postgresql://user:pass@:5432/db",  # Missing host
+            "postgresql://user:pass@host:abc/db",  # Invalid port
+            "postgresql://user@host:5432",  # Missing database
+            "",  # Empty string
+            None,  # None value
+        ]
+        
+        for bad_url in malformed_urls:
+            if bad_url is None:
+                continue
+                
+            with patch.dict(os.environ, {"DATABASE_URL": str(bad_url)}, clear=False):
+                try:
+                    # Should either handle gracefully or raise informative error
+                    result = manager.get_base_database_url()
+                    # If it doesn't raise, result should be valid or default
+                    assert result is not None
+                except (ValueError, AttributeError, KeyError) as e:
+                    # Expected behavior for malformed URLs
+                    assert "url" in str(e).lower() or "database" in str(e).lower()
+    
+    @mock_justified("L1 Unit Test: Testing connection pool configuration error handling", "L1")
+    def test_connection_pool_configuration_errors(self):
+        """Test error handling in connection pool configuration."""
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
+            # Test with invalid pool configuration
+            with patch('netra_backend.app.db.database_manager.create_engine') as mock_create_engine:
+                mock_create_engine.side_effect = Exception("Pool configuration error")
+                
+                with pytest.raises(Exception):
+                    from netra_backend.app.db.database_manager import create_migration_engine
+                    create_migration_engine()
+    
+    @mock_justified("L1 Unit Test: Testing engine creation with connection timeouts", "L1")
+    def test_engine_creation_with_timeout_errors(self):
+        """Test engine creation with connection timeout scenarios."""
+        manager = DatabaseManager()
+        
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
+            # Mock sqlalchemy to simulate timeout errors
+            with patch('sqlalchemy.create_engine') as mock_create_engine:
+                mock_engine = MagicMock()
+                mock_engine.connect.side_effect = TimeoutError("Connection timeout")
+                mock_create_engine.return_value = mock_engine
+                
+                # Engine creation should succeed even if connection testing fails
+                result = manager.create_migration_engine()
+                assert result is not None
+    
+    @mock_justified("L1 Unit Test: Testing session factory error handling", "L1")
+    def test_session_factory_error_handling(self):
+        """Test error handling in session factory creation."""
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
+            # Mock sessionmaker to fail
+            with patch('netra_backend.app.db.database_manager.sessionmaker') as mock_sessionmaker:
+                mock_sessionmaker.side_effect = Exception("Session configuration error")
+                
+                with pytest.raises(Exception):
+                    from netra_backend.app.db.database_manager import get_migration_session
+                    get_migration_session()
+    
+    @mock_justified("L1 Unit Test: Testing concurrent access to database manager", "L1")
+    def test_concurrent_access_error_handling(self):
+        """Test database manager behavior under simulated concurrent access."""
+        manager = DatabaseManager()
+        
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host:5432/db"}):
+            # Test multiple rapid calls to various methods
+            results = []
+            
+            for _ in range(10):
+                try:
+                    # Should handle concurrent access gracefully
+                    base_url = manager.get_base_database_url()
+                    migration_url = manager.get_migration_url_sync_format()
+                    app_url = manager.get_application_url_async()
+                    
+                    results.append((base_url, migration_url, app_url))
+                except Exception as e:
+                    # Should not fail under normal concurrent access
+                    pytest.fail(f"Concurrent access failed: {e}")
+            
+            # All results should be consistent
+            assert len(results) == 10
+            assert all(r[0] == results[0][0] for r in results)  # Base URLs consistent
+    
+    @mock_justified("L1 Unit Test: Testing environment variable handling with unusual characters", "L1")
+    def test_environment_variable_handling_with_special_chars(self):
+        """Test handling of environment variables with unusual characters."""
+        manager = DatabaseManager()
+        
+        # Test with various potentially problematic URLs that should be handled gracefully
+        test_urls = [
+            "postgresql://user:pass@host:5432/db_safe",  # Safe baseline
+            "postgresql://user%40domain:pass@host:5432/db",  # URL-encoded username
+            "postgresql://user:p%40ssword@host:5432/db",  # URL-encoded password
+            "postgresql://user:pass@host:5432/db?application_name=test%20app",  # URL-encoded params
+        ]
+        
+        for test_url in test_urls:
+            with patch.dict(os.environ, {"DATABASE_URL": test_url}, clear=False):
+                try:
+                    result = manager.get_base_database_url()
+                    # URL should be handled and result should be valid
+                    assert result is not None
+                    assert "postgresql://" in result
+                except (ValueError, AttributeError) as e:
+                    # Document any issues with specific URL formats
+                    pytest.fail(f"Failed to handle URL: {test_url}, error: {e}")
+    
+    @mock_justified("L1 Unit Test: Testing database manager state consistency", "L1")
+    def test_database_manager_state_consistency(self):
+        """Test that database manager maintains consistent state."""
+        manager = DatabaseManager()
+        
+        # Test state consistency across different environment changes
+        environments = ["development", "testing", "staging", "production"]
+        
+        for env in environments:
+            with patch.dict(os.environ, {
+                "ENVIRONMENT": env,
+                "DATABASE_URL": f"postgresql://user:pass@host:5432/{env}_db"
+            }, clear=False):
+                
+                # Multiple calls should return consistent results
+                url1 = manager.get_base_database_url()
+                url2 = manager.get_base_database_url()
+                assert url1 == url2
+                
+                # Environment detection should be consistent
+                is_local1 = manager.is_local_development()
+                is_local2 = manager.is_local_development()
+                assert is_local1 == is_local2
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

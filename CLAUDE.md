@@ -41,7 +41,7 @@ Netra Apex succeeds by creating and capturing value relative to a customer's AI/
 
 ### 2.1. Architectural Tenets
 *   **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
-*   **Single unified concepts**: CRUCIAL: Unique Concept = ONCE per service. Duplicates Within a Service = Abominations. Each concept in each service must only exist ONCE and ONLY ONCE. (EXCEPT as defined: SPEC/acceptable_duplicates.xml)
+*   **Single Source of Truth (SSOT)**: CRUCIAL: Each concept must have ONE canonical implementation per service. Multiple implementations of the same concept within a service violate SSOT and create maintenance burden. Each concept in each service must only exist ONCE and ONLY ONCE. (Cross-service patterns may be acceptable for independence - see SPEC/acceptable_duplicates.xml)
 *   **ATOMIC SCOPE** Every edit must represent a COMPLETE update to the system as defined by Complete Work. ALways be aware of scope. Only task subagents with scope you are 99.99% sure they an handle successfully. Split and dive work.
 *   **Complete Work** All relevant parts of the system are updated, integrated, tested, validated, working, production grade, high quality, follow ALL rules in claude.md, legacy code is deleted, prior versions are deleted as relevant, documented in xmls, docs, and other relevant places, QA tested and validated.
 *   **REFACTORS = ATOMIC SCOPE** All refactors must be complete atomic updates as per 2.1 Atomic Scope.
@@ -65,7 +65,7 @@ We prioritize logical clarity. Focus on maximizing clarity and minimizing Cyclom
 *   **Context Awareness:** Always keep the overall context of the scope in mind and only report on your success relative to that global context. If you are running out of capacity to work, save a report of your progress and the next steps needed.
 
 ### 2.3. Code Quality Standards
-*   **Single Source of Truth (SSOT):** Ensure implementations are duplication-free. Extend existing functions with options/parameters instead of creating new variants.
+*   **Single Source of Truth (SSOT):** Each concept must have ONE canonical implementation within a service. Extend existing functions with options/parameters instead of creating multiple variants. Multiple implementations of the same functionality violate SSOT principles.
 *   **Cleanliness:** Maintain a clean file system with unique, relevant files. Edit existing files or delete legacy ones entirely, ensuring finalized filenames free of suffixes.
 *   **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
 *   **Environment Management:** Follow [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml) - ALL environment access through IsolatedEnvironment.
@@ -382,4 +382,4 @@ The [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system hea
 *   Ensure all code is implementation-complete (placeholder-free).
 *   ALWAYS use Python for scripts instead of shell/PowerShell (See [`SPEC/learnings/scripting_preference.xml`](SPEC/learnings/scripting_preference.xml)).
 
-**Reminder:** Our lives depend on you. This is of the absolute highest possible importance. Do your best work. Generate monetization-focused value. Ensure every feature creates and captures value proportional to AI spend. Prioritize the unified system, global coherence, and end-to-end value, maximized through the coordinated execution of the AI-Augmented Complete Team. **Analyze this from a holistic, systems-thinking perspective.** Unique Concept = ONCE per service. Duplicates Within a Service = Abominations. Think Deeply. You are important. Your mission matters. You are doing great things.
+**Reminder:** Our lives depend on you. This is of the absolute highest possible importance. Do your best work. Generate monetization-focused value. Ensure every feature creates and captures value proportional to AI spend. Prioritize the unified system, global coherence, and end-to-end value, maximized through the coordinated execution of the AI-Augmented Complete Team. **Analyze this from a holistic, systems-thinking perspective.** SSOT Principle: Each concept must have ONE canonical implementation per service. Multiple implementations violate SSOT and create technical debt. Think Deeply. You are important. Your mission matters. You are doing great things.

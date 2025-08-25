@@ -29,6 +29,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from shared.database_url_builder import DatabaseURLBuilder
 from urllib.parse import urlparse
 import urllib.parse
+import re
 
 
 class DatabaseManager:
@@ -603,19 +604,39 @@ class DatabaseManager:
     
     @staticmethod
     def validate_database_credentials(url: str) -> bool:
-        """Validate database URL has proper credentials before connection attempts.
+        """Validate database URL has proper credentials and prevent SQL injection attacks.
         
         Args:
             url: Database URL to validate
             
         Returns:
-            True if credentials are valid
+            True if credentials are valid and secure
             
         Raises:
-            ValueError: If credentials are missing or invalid
+            ValueError: If credentials are missing, invalid, or contain malicious patterns
         """
         if not url:
             raise ValueError("Database URL cannot be empty")
+        
+        # Check for control characters and null bytes that could indicate injection attacks
+        for i, char in enumerate(url):
+            if ord(char) < 32 and char not in '\t\n\r':  # Allow some whitespace but not control chars
+                raise ValueError(f"Database URL contains control character at position {i}")
+        
+        # Check for SQL injection patterns in the URL
+        sql_injection_patterns = [
+            r'(;\s*DROP\s+TABLE)',  # DROP TABLE attempts
+            r'(;\s*DELETE\s+FROM)',  # DELETE attempts  
+            r'(;\s*INSERT\s+INTO)',  # INSERT attempts
+            r'(;\s*UPDATE\s+SET)',   # UPDATE attempts
+            r'(-{2})',               # SQL comments --
+            r'(\bOR\s+\d+\s*=\s*\d+)', # OR 1=1 patterns
+            r'(\bUNION\s+SELECT)',   # UNION SELECT attempts
+        ]
+        
+        for pattern in sql_injection_patterns:
+            if re.search(pattern, url, re.IGNORECASE):
+                raise ValueError("Database URL contains potential SQL injection pattern")
             
         parsed = urlparse(url)
         

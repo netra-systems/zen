@@ -21,7 +21,7 @@ from contextlib import asynccontextmanager
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.startup_module import startup_orchestrator
+from netra_backend.app.startup_module import run_complete_startup
 
 
 class TestGCPStagingEdgeCases:

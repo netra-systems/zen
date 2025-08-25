@@ -10,6 +10,10 @@
       NOTE: This protocol applies to backend services only. Frontend is excluded from these isolation requirements.
     </description>
     <last_edited>2025-08-21T08:47:28.493818</last_edited>
+    <cross_references>
+      <spec>shared_component_architecture.xml</spec>
+      <spec>acceptable_duplicates.xml</spec>
+    </cross_references>
   </metadata>
   <critical-principle id="MS-P1">
     <title>Absolute Independence (Backend Services Only)</title>
@@ -20,6 +24,11 @@
       See SPEC/learnings/microservice_independence.xml for detailed explanation of "Unique Concept = ONCE per service" principle.
       See SPEC/acceptable_duplicates.xml for the canonical list of acceptable cross-service duplicates.
     </clarification>
+    <shared_component_exception>
+      Services MAY import from the /shared directory for truly universal utilities that act like external libraries.
+      See SPEC/shared_component_architecture.xml for strict criteria on what belongs in /shared.
+      CRITICAL: The existence of /shared does NOT change independence requirements - services must remain independently deployable.
+    </shared_component_exception>
   </critical-principle>
   <scope-clarification id="MS-SCOPE-001">
     <title>Backend-Only Application</title>

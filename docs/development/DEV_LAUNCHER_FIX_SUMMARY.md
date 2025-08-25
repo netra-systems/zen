@@ -128,7 +128,7 @@ python scripts/dev_launcher.py
 - Frontend: http://localhost:[dynamic_port] (shown in logs)
 - Backend API: http://localhost:[dynamic_port] (shown in logs)
 - Health Check: http://localhost:[backend_port]/health/ready
-- Auth Config: http://localhost:[backend_port]/api/auth/config
+- Auth Config: http://localhost:[backend_port]/auth/config
 
 ## Notes for Production
 - Replace placeholder API keys with real ones for production

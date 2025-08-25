@@ -10,6 +10,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import sys
+import os
+from pathlib import Path
+# Ensure absolute imports work
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.user_journey_executor import TestUser, UserJourneyExecutor
 from tests.e2e.config import (

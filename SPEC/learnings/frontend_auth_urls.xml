@@ -9,14 +9,14 @@
 
     <problem-statement>
         Frontend was calling https://auth.staging.netrasystems.ai/auth/config which returned 404.
-        The auth service actually serves endpoints at /api/auth/* not /auth/*.
+        The auth service actually serves endpoints at /auth/* not /auth/*.
     </problem-statement>
 
     <root-cause>
         <issue>URL Path Mismatch</issue>
         <details>
             Auth service mounts auth_router with prefix="/api/v1" (auth_service/main.py:474).
-            This means all auth endpoints are at /api/auth/* paths.
+            This means all auth endpoints are at /auth/* paths.
             Frontend was configured to call /auth/* directly without the /api/v1 prefix.
         </details>
     </root-cause>
@@ -25,7 +25,7 @@
         <learning id="auth-api-versioning">
             <title>Auth Service Always Uses API Versioning</title>
             <description>
-                The auth service ALWAYS mounts routes at /api/auth/*.
+                The auth service ALWAYS mounts routes at /auth/*.
                 Never use /auth/* directly - always include the /api/v1 prefix.
             </description>
             <critical>true</critical>
@@ -40,15 +40,15 @@
             <title>Frontend Auth Endpoint Configuration</title>
             <description>
                 All auth endpoints in frontend must be configured with full paths including API version:
-                - authConfig: https://auth.{env}.netrasystems.ai/api/auth/config
-                - authLogin: https://auth.{env}.netrasystems.ai/api/auth/login  
-                - authCallback: https://auth.{env}.netrasystems.ai/api/auth/callback
-                - authToken: https://auth.{env}.netrasystems.ai/api/auth/token
-                - authRefresh: https://auth.{env}.netrasystems.ai/api/auth/refresh
-                - authValidate: https://auth.{env}.netrasystems.ai/api/auth/validate
-                - authSession: https://auth.{env}.netrasystems.ai/api/auth/session
-                - authMe: https://auth.{env}.netrasystems.ai/api/auth/me
-                - dev_login: https://auth.{env}.netrasystems.ai/api/auth/dev/login
+                - authConfig: https://auth.{env}.netrasystems.ai/auth/config
+                - authLogin: https://auth.{env}.netrasystems.ai/auth/login  
+                - authCallback: https://auth.{env}.netrasystems.ai/auth/callback
+                - authToken: https://auth.{env}.netrasystems.ai/auth/token
+                - authRefresh: https://auth.{env}.netrasystems.ai/auth/refresh
+                - authValidate: https://auth.{env}.netrasystems.ai/auth/validate
+                - authSession: https://auth.{env}.netrasystems.ai/auth/session
+                - authMe: https://auth.{env}.netrasystems.ai/auth/me
+                - dev_login: https://auth.{env}.netrasystems.ai/auth/dev/login
             </description>
             <critical>true</critical>
         </learning>
@@ -56,7 +56,7 @@
         <learning id="test-mock-configuration">
             <title>Test Mock Configuration Must Match Production URLs</title>
             <description>
-                All test mocks and fixtures must use the same /api/auth/* paths.
+                All test mocks and fixtures must use the same /auth/* paths.
                 This ensures tests accurately reflect production behavior.
                 Update mock interceptors, fetch mocks, and test configurations accordingly.
             </description>
@@ -94,7 +94,7 @@
     <implementation-checklist>
         <item status="completed">Update unified-api-config.ts with /api/v1 prefix for all environments</item>
         <item status="completed">Update unified-auth-service.ts dev_login endpoint</item>
-        <item status="completed">Fix test mock configurations to use /api/auth/*</item>
+        <item status="completed">Fix test mock configurations to use /auth/*</item>
         <item status="completed">Update Cypress interceptors with correct paths</item>
         <item status="completed">Fix incorrect @/auth/service imports</item>
         <item status="completed">Remove useAuth() method from service class</item>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Command, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface KeyboardShortcutsHintProps {
@@ -19,16 +19,14 @@ function ShortcutItem({ icon, text }: {
   );
 }
 
-const SearchShortcut = React.memo(() => (
+const SearchShortcut = () => (
   <ShortcutItem 
-    icon={<Command className="w-3 h-3" />}
+    icon={<span className="w-3 h-3 flex items-center justify-center text-xs">⌘</span>}
     text="+ K for search"
   />
-));
+);
 
-SearchShortcut.displayName = 'SearchShortcut';
-
-const HistoryShortcut = React.memo(() => (
+const HistoryShortcut = () => (
   <ShortcutItem 
     icon={
       <>
@@ -38,9 +36,7 @@ const HistoryShortcut = React.memo(() => (
     }
     text="for history"
   />
-));
-
-HistoryShortcut.displayName = 'HistoryShortcut';
+);
 
 const shouldShowHint = (isAuthenticated: boolean, hasMessage: boolean): boolean => {
   return isAuthenticated && !hasMessage;

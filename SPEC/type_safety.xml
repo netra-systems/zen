@@ -10,7 +10,7 @@
   <core-principles>
     <principle id="TS-P1" priority="CRITICAL">
       <title>Single Source of Truth (SSOT)</title>
-      <instruction>Every type MUST be defined in exactly ONE canonical location. Duplication is forbidden WITHIN a service boundary. Cross-service duplicates may be acceptable for independence - see SPEC/acceptable_duplicates.xml.</instruction>
+      <instruction>Every type MUST be defined in exactly ONE canonical location. Multiple implementations of the same type or concept WITHIN a service boundary violate SSOT principles and create maintenance burden. Cross-service implementations may be acceptable for service independence - see SPEC/acceptable_duplicates.xml.</instruction>
       <ai-workflow id="AI-TYPE-CREATION-CHECK">
         <step>1. Determine the canonical location (See `Canonical Type Locations`).</step>
         <step>2. Search for an existing type matching the requirements.</step>

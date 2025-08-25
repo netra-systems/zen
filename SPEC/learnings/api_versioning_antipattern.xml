@@ -60,7 +60,7 @@
                 <clean-paths>
                     - /api/threads (direct, no version)
                     - /api/discovery (discovery router)
-                    - /api/auth/* (auth_router)
+                    - /auth/* (auth_router)
                     - /api/agent/* (agent_router)
                     - /api/supply/* (supply router)
                     - /api/generation/* (generation router)
@@ -123,7 +123,7 @@
             <title>URL Pollution</title>
             <description>
                 URLs become longer and less readable:
-                BAD:  https://auth.staging.netrasystems.ai/api/auth/config
+                BAD:  https://auth.staging.netrasystems.ai/auth/config
                 GOOD: https://auth.staging.netrasystems.ai/auth/config
                 
                 The service subdomain already indicates the service version.
@@ -146,9 +146,9 @@
                 <current>app.include_router(auth_router, prefix="/api/v1")</current>
                 <proposed>app.include_router(auth_router, prefix="")</proposed>
                 <result>
-                    - /auth/config (not /api/auth/config)
-                    - /auth/login (not /api/auth/login)
-                    - /auth/token (not /api/auth/token)
+                    - /auth/config (not /auth/config)
+                    - /auth/login (not /auth/login)
+                    - /auth/token (not /auth/token)
                 </result>
             </service>
 
@@ -157,7 +157,7 @@
                 <proposed>All routes at /api/* without version</proposed>
                 <result>
                     - /api/threads (not /api/threads)
-                    - /api/auth/* (already correct)
+                    - /auth/* (already correct)
                     - /api/users/* (already correct)
                     - Consistent across all endpoints
                 </result>

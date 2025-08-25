@@ -213,7 +213,9 @@ class AuthDatabaseManager:
         """Normalize PostgreSQL URL using shared DatabaseURLBuilder."""
         # ONLY use centralized DatabaseURLBuilder - NO FALLBACKS
         from shared.database_url_builder import DatabaseURLBuilder
-        return DatabaseURLBuilder.normalize_postgres_url(url)
+        # Normalize and format for asyncpg driver (auth service needs async URLs)
+        normalized = DatabaseURLBuilder.normalize_postgres_url(url)
+        return DatabaseURLBuilder.format_url_for_driver(normalized, 'asyncpg')
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:

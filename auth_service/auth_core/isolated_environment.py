@@ -63,6 +63,101 @@ class IsolatedEnvironment:
             self._initialized = True
             logger.debug("IsolatedEnvironment (auth_service) initialized")
     
+    def _expand_shell_commands(self, value: str) -> str:
+        """
+        Expand shell commands in environment variable values.
+        
+        This handles cases where SERVICE_ID contains shell commands like:
+        - $(whoami)
+        - $(hostname)
+        - $(date +%Y%m%d-%H%M%S)
+        - ${VARIABLE}
+        
+        Args:
+            value: The environment variable value to expand
+            
+        Returns:
+            Expanded value with shell commands executed
+        """
+        if not value or not isinstance(value, str):
+            return value
+        
+        # Skip expansion during pytest to avoid side effects in tests
+        import sys
+        if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+            logger.debug("Skipping shell expansion during pytest")
+            return value
+        
+        # Skip if explicitly disabled
+        if os.environ.get("DISABLE_SHELL_EXPANSION", "false").lower() == "true":
+            return value
+        
+        import re
+        import subprocess
+        
+        # Pattern to match shell command substitutions: $(command) or `command`
+        shell_patterns = [
+            (r'\$\(([^)]+)\)', 'dollar_paren'),      # $(command)
+            (r'`([^`]+)`', 'backtick'),              # `command`
+        ]
+        
+        expanded_value = value
+        
+        for pattern, pattern_type in shell_patterns:
+            matches = re.finditer(pattern, expanded_value)
+            
+            for match in matches:
+                full_match = match.group(0)  # Full matched text like $(whoami)
+                command = match.group(1)     # Just the command like whoami
+                
+                try:
+                    # Execute the command safely
+                    result = subprocess.run(
+                        command,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        timeout=5,  # 5 second timeout
+                        check=False  # Don't raise on non-zero exit
+                    )
+                    
+                    if result.returncode == 0:
+                        # Success - use the output (strip whitespace)
+                        command_output = result.stdout.strip()
+                        expanded_value = expanded_value.replace(full_match, command_output)
+                        logger.debug(f"Expanded shell command '{command}' to '{command_output}'")
+                    else:
+                        # Command failed - log error but keep original
+                        logger.warning(f"Shell command '{command}' failed with code {result.returncode}: {result.stderr}")
+                        # Keep the original unexpanded form to indicate the issue
+                        
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"Shell command '{command}' timed out after 5 seconds")
+                    # Keep original unexpanded form
+                except Exception as e:
+                    logger.warning(f"Error executing shell command '{command}': {e}")
+                    # Keep original unexpanded form
+        
+        # Also expand environment variable references like ${VARIABLE}
+        # This is safer than full shell expansion
+        env_var_pattern = r'\$\{([^}]+)\}'
+        
+        def replace_env_var(match):
+            var_name = match.group(1)
+            # Get the variable value, but don't recursively expand to avoid loops
+            var_value = os.environ.get(var_name, '')
+            if var_value:
+                logger.debug(f"Expanded environment variable ${{{var_name}}} to '{var_value}'")
+            return var_value
+        
+        expanded_value = re.sub(env_var_pattern, replace_env_var, expanded_value)
+        
+        # If the value changed, log the expansion
+        if expanded_value != value:
+            logger.info(f"Expanded environment value for shell commands")
+        
+        return expanded_value
+    
     def _auto_load_env_file(self) -> None:
         """Automatically load .env or .secrets file if it exists."""
         import sys
@@ -118,11 +213,15 @@ class IsolatedEnvironment:
             logger.debug("Isolation mode disabled")
     
     def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
-        """Get an environment variable value."""
+        """Get an environment variable value with shell command expansion."""
         with self._lock:
             if self._isolation_enabled:
-                return self._isolated_vars.get(key, default)
-            return os.environ.get(key, default)
+                value = self._isolated_vars.get(key, default)
+            else:
+                value = os.environ.get(key, default)
+            
+            # Expand shell commands in the value if present
+            return self._expand_shell_commands(value) if value else value
     
     def set(self, key: str, value: str, source: str = "runtime") -> None:
         """Set an environment variable value."""

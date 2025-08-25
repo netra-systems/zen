@@ -174,7 +174,7 @@ describe('Authentication Integration Tests', () => {
         
         const fetchWithBadToken = async () => {
           try {
-            const response = await fetch('/api/auth/verify', {
+            const response = await fetch('/auth/verify', {
               headers: {
                 'Authorization': 'Bearer invalid_token'
               }

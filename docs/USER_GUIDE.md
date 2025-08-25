@@ -303,7 +303,7 @@ Threads organize your optimization conversations and maintain context.
 #### 1. Authentication Errors
 **Problem**: "401 Unauthorized" or "Token expired"
 **Solution**: 
-- Refresh your token via `/api/auth/refresh`
+- Refresh your token via `/auth/refresh`
 - Re-authenticate if refresh fails
 - Check token expiry in JWT payload
 

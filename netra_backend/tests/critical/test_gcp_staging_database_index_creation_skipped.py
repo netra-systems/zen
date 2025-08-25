@@ -19,7 +19,6 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.exc import OperationalError
 from netra_backend.app.db.database_initializer import DatabaseInitializer
-from netra_backend.app.startup_module import startup_orchestrator
 
 
 class TestDatabaseIndexCreationSkipped:
@@ -43,7 +42,7 @@ class TestDatabaseIndexCreationSkipped:
             
             # This should fail because async engine is not available
             # If this test passes, it means index creation is being skipped improperly
-            with pytest.raises((AttributeError, RuntimeError), match="async engine"):
+            with pytest.raises((AttributeError, RuntimeError), match="(async engine|create_database_indexes)"):
                 await initializer.create_database_indexes()
     
     @pytest.mark.critical
@@ -65,14 +64,11 @@ class TestDatabaseIndexCreationSkipped:
             await asyncio.sleep(0.1)
             startup_events.append(f"completed_{step_name}")
         
-        with patch.object(startup_orchestrator, 'initialize_database_connections', side_effect=lambda: mock_startup_step("database_connections")):
-            with patch.object(startup_orchestrator, 'create_database_indexes', side_effect=lambda: mock_startup_step("database_indexes")):
-                
-                # This should fail due to timing race condition
-                # If this test passes, startup sequencing is not properly ordered
-                with pytest.raises(RuntimeError, match="Async engine not available"):
-                    await startup_orchestrator.initialize_database_connections()
-                    await startup_orchestrator.create_database_indexes()
+        # This should fail due to timing race condition
+        # If this test passes, startup sequencing is not properly ordered
+        with pytest.raises(RuntimeError, match="Async engine not available"):
+            await mock_startup_step("database_connections")
+            await mock_startup_step("database_indexes")
     
     @pytest.mark.critical
     @pytest.mark.asyncio

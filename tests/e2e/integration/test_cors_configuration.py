@@ -132,7 +132,7 @@ class TestCORSConfiguration:
             "/health",
             "/health/ready", 
             "/api/threads",
-            "/api/auth/status",
+            "/auth/status",
             "/api/config"
         ]
         

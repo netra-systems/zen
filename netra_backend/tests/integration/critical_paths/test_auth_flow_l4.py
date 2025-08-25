@@ -239,7 +239,7 @@ class AuthFlowL4TestSuite:
                 "api_user": {
                     "client_id": "netra_api_client",
                     "scope": "api:read api:write",
-                    "redirect_uri": f"{self.service_endpoints['backend']}/api/auth/callback"
+                    "redirect_uri": f"{self.service_endpoints['backend']}/auth/callback"
                 }
             }
             
@@ -599,7 +599,7 @@ class AuthFlowL4TestSuite:
                     return {"success": False, "error": f"Missing session field: {field}"}
             
             # Test session validation endpoint
-            validation_endpoint = f"{self.service_endpoints['backend']}/api/auth/validate_session"
+            validation_endpoint = f"{self.service_endpoints['backend']}/auth/validate_session"
             
             validation_data = {"session_id": session_id}
             

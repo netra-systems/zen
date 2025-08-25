@@ -182,7 +182,7 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         # Test network connectivity between services
         service_connections = [
             ('frontend', 'backend', '/api/health'),
-            ('backend', 'auth_service', '/api/auth/health'),
+            ('backend', 'auth_service', '/auth/health'),
             ('backend', 'backend', '/api/health')  # Self-connectivity check
         ]
         

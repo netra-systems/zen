@@ -32,7 +32,7 @@ class TestAPIErrorHandlingCritical:
             "json": {"detail": "Invalid request data"}
         })
         
-        response = await mock_client.post("/api/auth/login", json={})
+        response = await mock_client.post("/auth/login", json={})
         assert response["status_code"] == 400
         assert "detail" in response["json"]
     @pytest.mark.asyncio
@@ -115,7 +115,7 @@ class TestAPIErrorHandlingCritical:
             }
         })
         
-        response = await mock_client.post("/api/auth/register", json={})
+        response = await mock_client.post("/auth/register", json={})
         assert response["status_code"] == 422
         assert "detail" in response["json"]
     @pytest.mark.asyncio
@@ -130,7 +130,7 @@ class TestAPIErrorHandlingCritical:
             "json": {"detail": "Invalid email or password"}
         })
         
-        response = await mock_client.post("/api/auth/login", json={
+        response = await mock_client.post("/auth/login", json={
             "email": "wrong@example.com",
             "password": "wrongpassword"
         })

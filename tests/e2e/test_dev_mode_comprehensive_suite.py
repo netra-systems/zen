@@ -297,7 +297,7 @@ class DevModeTester:
                 
                 # Test cross-service auth
                 auth_response = await client.get(
-                    f"http://localhost:{self.backend_port}/api/auth/config"
+                    f"http://localhost:{self.backend_port}/auth/config"
                 )
                 
                 auth_configured = auth_response.status_code in [200, 404]  # 404 if auth service separate

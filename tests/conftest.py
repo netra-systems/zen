@@ -321,7 +321,7 @@ def app(
     try:
         from netra_backend.app.routes.auth import router as auth_router
 
-        app.include_router(auth_router, prefix="/api/auth")
+        app.include_router(auth_router, prefix="/auth")
     except ImportError:
         pass
 

@@ -270,6 +270,7 @@ class DatabaseConfigManager:
     def _apply_clickhouse_config(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
         """Apply ClickHouse configuration to config objects."""
         self._apply_to_clickhouse_native(config, ch_config)
+        self._apply_to_clickhouse_http(config, ch_config)
         self._apply_to_clickhouse_https(config, ch_config)
     
     def _apply_to_clickhouse_native(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
@@ -284,6 +285,15 @@ class DatabaseConfigManager:
             config.clickhouse_native.user = ch_config["user"]
             config.clickhouse_native.password = ch_config["password"]
             config.clickhouse_native.database = ch_config["database"]
+    
+    def _apply_to_clickhouse_http(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
+        """Apply configuration to ClickHouse HTTP connection."""
+        if hasattr(config, 'clickhouse_http'):
+            config.clickhouse_http.host = ch_config["host"]
+            config.clickhouse_http.port = int(ch_config["port"])
+            config.clickhouse_http.user = ch_config["user"]
+            config.clickhouse_http.password = ch_config["password"]
+            config.clickhouse_http.database = ch_config["database"]
     
     def _apply_to_clickhouse_https(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
         """Apply configuration to ClickHouse HTTPS connection."""

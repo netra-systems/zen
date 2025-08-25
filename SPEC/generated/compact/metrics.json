@@ -142,6 +142,7 @@
     "tcp_keepalives_count",
     "test_count",
     "test_request_count",
+    "thread_count",
     "threads_count",
     "threshold_count",
     "time_bucket",

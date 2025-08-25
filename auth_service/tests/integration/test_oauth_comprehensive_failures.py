@@ -176,15 +176,23 @@ class TestOAuthComprehensiveFailures:
             hashlib.sha256("wrong_verifier".encode()).digest()
         ).decode().rstrip("=")
         
-        response = client.post(
-            "/auth/callback/google",
-            json={
-                "code": f"valid_code_with_pkce_{secrets.token_urlsafe(8)}",
-                "state": secrets.token_urlsafe(32),
-                "code_verifier": code_verifier,
-                "code_challenge": invalid_challenge,
-            }
-        )
+        # Generate session ID for testing
+        session_id = f"test_session_{secrets.token_urlsafe(8)}"
+        
+        # Mock state parameter validation to pass CSRF checks and reach PKCE validation
+        with patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter') as mock_validate_state:
+            mock_validate_state.return_value = True
+            
+            response = client.post(
+                "/auth/callback/google",
+                json={
+                    "code": f"valid_code_with_pkce_{secrets.token_urlsafe(8)}",
+                    "state": secrets.token_urlsafe(32),
+                    "code_verifier": code_verifier,
+                    "code_challenge": invalid_challenge,
+                },
+                cookies={"session_id": session_id}
+            )
         # Handle endpoint not implemented (404) during development
         if response.status_code == 404:
             # Endpoint not implemented yet - this is expected during development
@@ -828,13 +836,21 @@ class TestOAuthComprehensiveFailures:
             with patch("auth_service.auth_core.database.connection.auth_db.get_session") as mock_db:
                 mock_db.side_effect = Exception("Database connection failed")
                 
-                response = client.post(
-                    "/auth/callback/google",
-                    json={
-                        "code": f"valid_code_{secrets.token_urlsafe(8)}",
-                        "state": secrets.token_urlsafe(32),
-                    }
-                )
+                # Mock state validation to pass CSRF checks
+                with patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter') as mock_validate_state:
+                    mock_validate_state.return_value = True
+                    
+                    # Generate session ID for testing
+                    session_id = f"test_session_{secrets.token_urlsafe(8)}"
+                    
+                    response = client.post(
+                        "/auth/callback/google",
+                        json={
+                            "code": f"valid_code_{secrets.token_urlsafe(8)}",
+                            "state": secrets.token_urlsafe(32),
+                        },
+                        cookies={"session_id": session_id}
+                    )
         
         assert response.status_code == 503
         assert "database" in response.json()["detail"].lower()

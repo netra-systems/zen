@@ -156,8 +156,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     def _get_auth_endpoints(self) -> set:
         """Get authentication-related endpoints."""
         return {
-            "/api/auth/login", "/api/auth/logout", "/api/auth/token",
-            "/api/auth/callback", "/api/auth/refresh"
+            "/auth/login", "/auth/logout", "/auth/token",
+            "/auth/callback", "/auth/refresh"
         }
     
     def _get_admin_endpoints(self) -> set:

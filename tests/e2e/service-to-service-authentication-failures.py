@@ -113,7 +113,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
             # Backend trying to validate token with Auth Service
             try:
                 response = await client.post(
-                    f"{self.services['auth_service']}/api/auth/validate",
+                    f"{self.services['auth_service']}/auth/validate",
                     json={
                         'token': 'test-user-token-from-backend',
                         'requesting_service': 'netra-backend',
@@ -158,7 +158,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
             # 1. Create user authentication state
             try:
                 create_response = await client.post(
-                    f"{self.services['auth_service']}/api/auth/users",
+                    f"{self.services['auth_service']}/auth/users",
                     json={
                         'user_id': test_user_id,
                         'email': 'test-auth-state@example.com',
@@ -173,7 +173,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                 
                 # 2. Retrieve authentication state
                 retrieve_response = await client.get(
-                    f"{self.services['auth_service']}/api/auth/users/{test_user_id}/state",
+                    f"{self.services['auth_service']}/auth/users/{test_user_id}/state",
                     timeout=5.0
                 )
                 
@@ -201,9 +201,9 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
         """
         service_pairs = [
             ('frontend', 'backend', '/api/threads'),
-            ('backend', 'auth_service', '/api/auth/validate'), 
+            ('backend', 'auth_service', '/auth/validate'), 
             ('backend', 'backend', '/api/health'),  # Self-check
-            ('frontend', 'auth_service', '/api/auth/config')
+            ('frontend', 'auth_service', '/auth/config')
         ]
         
         latency_results = {}

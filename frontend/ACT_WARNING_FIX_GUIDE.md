@@ -16,7 +16,7 @@ const mockJWTToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzd
 **Problem**: Auth endpoints didn't return proper JWT tokens
 **Solution**: Updated handlers to return complete auth responses:
 ```typescript
-// /api/auth/login now returns:
+// /auth/login now returns:
 {
   token: mockJWTToken,
   user: { id: 'test-user-123', email: 'test@example.com', full_name: 'Test User' },
@@ -24,7 +24,7 @@ const mockJWTToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzd
   token_type: 'Bearer'
 }
 
-// /api/auth/verify validates JWT tokens properly
+// /auth/verify validates JWT tokens properly
 // /api/protected-data requires Bearer token authentication
 ```
 

@@ -209,7 +209,7 @@ class CircuitBreakerRetryStrategy:
     def __init__(self, retry_strategy: RetryStrategy):
         self.retry_strategy = retry_strategy
         # Use canonical circuit breaker implementation
-        from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+        from netra_backend.app.core.circuit_breaker import CircuitBreaker
         from netra_backend.app.core.circuit_breaker_types import CircuitConfig
         
         circuit_config = CircuitConfig(

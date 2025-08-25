@@ -325,7 +325,7 @@ class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
                 f"{self.service_endpoints.backend}/api/threads",
                 f"{self.service_endpoints.backend}/api/chat",
                 f"{self.service_endpoints.backend}/api/agents",
-                f"{self.service_endpoints.auth}/api/auth/token",
+                f"{self.service_endpoints.auth}/auth/token",
                 f"{self.service_endpoints.backend}/api/metrics"
             ]
             

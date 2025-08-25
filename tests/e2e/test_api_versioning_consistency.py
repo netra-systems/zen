@@ -40,7 +40,7 @@ class TestAPIVersioningConsistency:
         """
         services = [
             {"name": "main_backend", "url": "http://localhost:8000", "expected_prefix": "/api"},
-            {"name": "auth_service", "url": "http://localhost:8081", "expected_prefix": "/api/auth"}
+            {"name": "auth_service", "url": "http://localhost:8081", "expected_prefix": "/auth"}
         ]
         
         version_patterns = set()
@@ -270,7 +270,7 @@ class TestAPIVersioningConsistency:
                     protected_endpoints = [
                         "/api/user/profile",
                         "/api/user/me", 
-                        "/api/auth/me",
+                        "/auth/me",
                         "/api/threads"
                     ]
                     

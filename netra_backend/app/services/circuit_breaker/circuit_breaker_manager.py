@@ -14,8 +14,12 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
-# Import from the core circuit breaker implementation
-from netra_backend.app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker
+# Import from the unified circuit breaker implementation
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    get_unified_circuit_breaker_manager
+)
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerState
 
 
@@ -41,9 +45,10 @@ class CircuitBreakerManager:
     """Manager for circuit breakers across services."""
     
     def __init__(self):
-        """Initialize circuit breaker manager."""
-        self._circuit_breakers: Dict[str, CoreCircuitBreaker] = {}
+        """Initialize circuit breaker manager with unified implementation."""
+        self._circuit_breakers: Dict[str, UnifiedCircuitBreaker] = {}
         self._service_configs: Dict[str, ServiceConfig] = {}
+        self._unified_manager = get_unified_circuit_breaker_manager()
         self._lock = asyncio.Lock()
         self._monitoring_task: Optional[asyncio.Task] = None
         self._running = False
@@ -68,18 +73,21 @@ class CircuitBreakerManager:
         async with self._lock:
             self._service_configs[service_config.name] = service_config
             
-            # Create circuit breaker for the service
+            # Create unified circuit breaker for the service
             config = service_config.circuit_breaker_config
-            from netra_backend.app.core.circuit_breaker_types import CircuitConfig
             
-            circuit_config = CircuitConfig(
+            unified_config = UnifiedCircuitConfig(
                 name=service_config.name,
                 failure_threshold=config.failure_threshold,
-                recovery_timeout=config.recovery_timeout_seconds,
+                recovery_timeout=float(config.recovery_timeout_seconds),
                 timeout_seconds=config.timeout_seconds,
-                half_open_max_calls=config.half_open_max_calls
+                half_open_max_calls=config.half_open_max_calls,
+                adaptive_threshold=True,
+                exponential_backoff=True
             )
-            circuit_breaker = CoreCircuitBreaker(circuit_config)
+            circuit_breaker = self._unified_manager.create_circuit_breaker(
+                service_config.name, unified_config
+            )
             self._circuit_breakers[service_config.name] = circuit_breaker
     
     async def unregister_service(self, service_name: str) -> None:

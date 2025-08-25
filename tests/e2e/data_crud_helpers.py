@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 
 from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.service_manager import RealServicesManager
+from tests.e2e.real_services_manager import RealServicesManager
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
@@ -37,7 +37,9 @@ class DataCRUDManager:
     """Manager for executing data CRUD operations across all services."""
     
     def __init__(self):
-        self.services_manager = RealServicesManager()
+        from pathlib import Path
+        project_root = Path(__file__).parent.parent.parent
+        self.services_manager = RealServicesManager(project_root)
         self.db_validator = DatabaseSyncValidator()
         self.websocket_client: Optional[RealWebSocketClient] = None
         self.jwt_helper = JWTTestHelper()

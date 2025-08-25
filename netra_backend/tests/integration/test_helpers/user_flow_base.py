@@ -50,7 +50,7 @@ class UserFlowTestBase:
         """Create and verify a user account."""
         # Register
 
-        response = await async_client.post("/api/auth/register", json=user_data)
+        response = await async_client.post("/auth/register", json=user_data)
 
         assert response.status_code == status.HTTP_201_CREATED
 
@@ -60,7 +60,7 @@ class UserFlowTestBase:
 
         response = await async_client.post(
 
-            f"/api/auth/verify-email/{reg_data['verification_token']}"
+            f"/auth/verify-email/{reg_data['verification_token']}"
 
         )
 
@@ -70,7 +70,7 @@ class UserFlowTestBase:
 
         response = await async_client.post(
 
-            "/api/auth/login",
+            "/auth/login",
 
             json={"email": user_data["email"], "password": user_data["password"]}
 
@@ -453,7 +453,7 @@ class UserFlowTestBase:
 
         response = await async_client.post(
 
-            "/api/auth/refresh", json={"refresh_token": refresh_token}
+            "/auth/refresh", json={"refresh_token": refresh_token}
 
         )
 

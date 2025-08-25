@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional, Callable
 from unittest.mock import Mock, AsyncMock
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class MockRequest:
@@ -102,7 +102,7 @@ class MockRouteHandler:
             "path": request.path,
             "headers": request.headers,
             "query_params": request.query_params,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
         # Apply middleware
@@ -146,11 +146,11 @@ class MockAPIClient:
         key = f"{method.upper()}:{path}"
         self.mock_responses[key] = response
     
-    async def request(self, method: str, path: str, 
-                     headers: Dict[str, str] = None,
-                     json_data: Dict[str, Any] = None,
-                     query_params: Dict[str, str] = None) -> MockResponse:
-        """Make a mock HTTP request."""
+    async def async_request(self, method: str, path: str, 
+                           headers: Dict[str, str] = None,
+                           json_data: Dict[str, Any] = None,
+                           query_params: Dict[str, str] = None) -> MockResponse:
+        """Make a mock HTTP request asynchronously."""
         full_headers = {**self.default_headers}
         if headers:
             full_headers.update(headers)
@@ -161,7 +161,7 @@ class MockAPIClient:
             "headers": full_headers,
             "json_data": json_data,
             "query_params": query_params,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
         # Check for mock response
@@ -172,21 +172,120 @@ class MockAPIClient:
         # Default successful response
         return MockResponse(200, {"status": "success", "method": method, "path": path})
     
-    async def get(self, path: str, **kwargs) -> MockResponse:
+    def request(self, method: str, path: str, 
+                headers: Dict[str, str] = None,
+                json_data: Dict[str, Any] = None,
+                json: Dict[str, Any] = None,  # Support both json_data and json parameter names
+                query_params: Dict[str, str] = None) -> MockResponse:
+        """Make a mock HTTP request synchronously."""
+        # Handle both json_data and json parameter names
+        if json is not None:
+            json_data = json
+        
+        # Run the async method in the current event loop or create one if none exists
+        try:
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is already running, we need to run in a new thread
+                import threading
+                import concurrent.futures
+                
+                def run_async():
+                    new_loop = asyncio.new_event_loop()
+                    try:
+                        return new_loop.run_until_complete(
+                            self.async_request(method, path, headers, json_data, query_params)
+                        )
+                    finally:
+                        new_loop.close()
+                
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(run_async)
+                    return future.result()
+            else:
+                return loop.run_until_complete(
+                    self.async_request(method, path, headers, json_data, query_params)
+                )
+        except RuntimeError:
+            # No event loop exists, create one
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(
+                    self.async_request(method, path, headers, json_data, query_params)
+                )
+            finally:
+                loop.close()
+    
+    # Synchronous HTTP methods
+    def get(self, path: str, **kwargs) -> MockResponse:
         """Make a GET request."""
-        return await self.request("GET", path, **kwargs)
+        return self.request("GET", path, **kwargs)
     
-    async def post(self, path: str, **kwargs) -> MockResponse:
+    def post(self, path: str, **kwargs) -> MockResponse:
         """Make a POST request."""
-        return await self.request("POST", path, **kwargs)
+        return self.request("POST", path, **kwargs)
     
-    async def put(self, path: str, **kwargs) -> MockResponse:
+    def put(self, path: str, **kwargs) -> MockResponse:
         """Make a PUT request."""
-        return await self.request("PUT", path, **kwargs)
+        return self.request("PUT", path, **kwargs)
     
-    async def delete(self, path: str, **kwargs) -> MockResponse:
+    def delete(self, path: str, **kwargs) -> MockResponse:
         """Make a DELETE request."""
-        return await self.request("DELETE", path, **kwargs)
+        return self.request("DELETE", path, **kwargs)
+    
+    def patch(self, path: str, **kwargs) -> MockResponse:
+        """Make a PATCH request."""
+        return self.request("PATCH", path, **kwargs)
+    
+    # Keep async methods for backward compatibility
+    async def async_get(self, path: str, **kwargs) -> MockResponse:
+        """Make a GET request asynchronously."""
+        return await self.async_request("GET", path, **kwargs)
+    
+    async def async_post(self, path: str, **kwargs) -> MockResponse:
+        """Make a POST request asynchronously."""
+        return await self.async_request("POST", path, **kwargs)
+    
+    async def async_put(self, path: str, **kwargs) -> MockResponse:
+        """Make a PUT request asynchronously."""
+        return await self.async_request("PUT", path, **kwargs)
+    
+    async def async_delete(self, path: str, **kwargs) -> MockResponse:
+        """Make a DELETE request asynchronously."""
+        return await self.async_request("DELETE", path, **kwargs)
+    
+    def websocket_connect(self, path: str) -> 'MockWebSocketContext':
+        """Context manager for WebSocket connections."""
+        class MockWebSocketContext:
+            def __init__(self, client):
+                self.client = client
+                self.websocket = None
+            
+            def __enter__(self):
+                self.websocket = MockWebSocketConnection()
+                return self.websocket
+            
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                if self.websocket:
+                    try:
+                        # Try to run in existing event loop
+                        try:
+                            loop = asyncio.get_running_loop()
+                        except RuntimeError:
+                            loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            # Can't use run_until_complete in running loop, just mark as disconnected
+                            self.websocket.is_connected = False
+                        else:
+                            loop.run_until_complete(self.websocket.close())
+                    except RuntimeError:
+                        # No event loop, just mark as disconnected
+                        self.websocket.is_connected = False
+        
+        return MockWebSocketContext(self)
 
 
 class MockWebSocketConnection:
@@ -206,7 +305,7 @@ class MockWebSocketConnection:
         
         self.messages_sent.append({
             "data": data,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
     
     async def receive_json(self) -> Dict[str, Any]:
@@ -230,7 +329,7 @@ class MockWebSocketConnection:
         """Add a message to the received queue."""
         self.messages_received.append({
             "data": data,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
 
 
@@ -466,8 +565,15 @@ class CommonResponseValidators:
                 assert key in content, f"Expected key '{key}' not found in response"
     
     @staticmethod
-    def validate_error_response(response: MockResponse, expected_status: int = 400):
+    def validate_error_response(response: MockResponse, expected_status = None):
         """Validate an error response."""
+        if expected_status is None:
+            expected_status = 400
+        elif isinstance(expected_status, list):
+            # Support list of acceptable status codes
+            assert response.status_code in expected_status, f"Expected status in {expected_status}, got {response.status_code}"
+            return
+        
         assert response.status_code == expected_status
         content = response.json()
         assert "error" in content or "message" in content

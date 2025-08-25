@@ -388,12 +388,20 @@ class UnifiedCircuitBreaker:
             
     def _should_open_circuit(self) -> bool:
         """Determine if circuit should open based on failure conditions."""
+        # Handle compatibility with different metrics types
+        consecutive_failures = getattr(self.metrics, 'consecutive_failures', 0)
+        adaptive_threshold = getattr(self.metrics, 'adaptive_failure_threshold', 5)
+        
         threshold_exceeded = (
-            self.metrics.consecutive_failures >= self.metrics.adaptive_failure_threshold
+            consecutive_failures >= adaptive_threshold
         )
+        # Handle compatibility with different config types
+        min_threshold = getattr(self.config, 'min_requests_threshold', 3)  # Default fallback
+        error_threshold = getattr(self.config, 'error_rate_threshold', 0.5)  # Default fallback
+        
         error_rate_exceeded = (
-            len(self._sliding_window) >= self.config.min_requests_threshold and
-            self.metrics.current_error_rate >= self.config.error_rate_threshold
+            len(self._sliding_window) >= min_threshold and
+            self.metrics.current_error_rate >= error_threshold
         )
         return threshold_exceeded or error_rate_exceeded
         
@@ -473,7 +481,11 @@ class UnifiedCircuitBreaker:
     async def _recovery_loop(self) -> None:
         """Background recovery monitoring loop."""
         try:
-            recovery_time = self._calculate_backoff_time() if self.config.exponential_backoff else self.config.recovery_timeout
+            # Handle compatibility with different config types
+            has_exponential_backoff = getattr(self.config, 'exponential_backoff', False)
+            recovery_timeout = getattr(self.config, 'recovery_timeout', 30.0)
+            
+            recovery_time = self._calculate_backoff_time() if has_exponential_backoff else recovery_timeout
             await asyncio.sleep(recovery_time)
             logger.debug(f"Circuit breaker '{self.config.name}' ready for recovery attempt")
         except asyncio.CancelledError:

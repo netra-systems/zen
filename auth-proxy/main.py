@@ -11,43 +11,20 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
+# Import unified CORS configuration
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from shared.cors_config import get_fastapi_cors_config
+
 app = FastAPI()
 
-# CORS configuration with regex support for wildcard subdomains
-import re
-
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
-
-
-class WildcardCORSMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        origin = request.headers.get("origin")
-        
-        # Handle preflight
-        if request.method == "OPTIONS":
-            response = Response(status_code=200)
-        else:
-            response = await call_next(request)
-        
-        # Check if origin matches allowed patterns
-        if origin:
-            # Allow any subdomain of staging.netrasystems.ai
-            if re.match(r'^https://[a-zA-Z0-9\-]+\.staging\.netrasystems\.ai$', origin):
-                response.headers["Access-Control-Allow-Origin"] = origin
-                response.headers["Access-Control-Allow-Credentials"] = "true"
-                response.headers["Access-Control-Allow-Methods"] = "*"
-                response.headers["Access-Control-Allow-Headers"] = "*"
-            # Also allow localhost for development
-            elif origin in ["http://localhost:3000", "http://localhost:3001"]:
-                response.headers["Access-Control-Allow-Origin"] = origin
-                response.headers["Access-Control-Allow-Credentials"] = "true"
-                response.headers["Access-Control-Allow-Methods"] = "*"
-                response.headers["Access-Control-Allow-Headers"] = "*"
-        
-        return response
-
-app.add_middleware(WildcardCORSMiddleware)
+# Use unified CORS configuration from shared module
+cors_config = get_fastapi_cors_config()
+app.add_middleware(
+    CORSMiddleware,
+    **cors_config
+)
 
 BACKEND_URL = os.getenv("BACKEND_URL", "https://api.staging.netrasystems.ai")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://app.staging.netrasystems.ai")
@@ -96,7 +73,7 @@ async def oauth_login(provider: str, request: Request):
     params = dict(request.query_params)
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{BACKEND_URL}/api/auth/{provider}/login",
+            f"{BACKEND_URL}/auth/{provider}/login",
             params=params,
             follow_redirects=False
         )
@@ -113,7 +90,7 @@ async def oauth_callback(provider: str, request: Request):
     params = dict(request.query_params)
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{BACKEND_URL}/api/auth/{provider}/callback",
+            f"{BACKEND_URL}/auth/{provider}/callback",
             params=params,
             follow_redirects=False
         )

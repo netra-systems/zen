@@ -47,9 +47,9 @@ def build_redirect_uri(request: Request) -> str:
     """Build redirect URI based on request and environment."""
     base_url = str(request.base_url).rstrip('/')
     if "localhost" in base_url or "127.0.0.1" in base_url:
-        return f"{base_url}/api/auth/callback"
+        return f"{base_url}/auth/callback"
     base_url = ensure_https_for_production(base_url)
-    return f"{base_url}/api/auth/callback"
+    return f"{base_url}/auth/callback"
 
 
 def ensure_https_for_production(base_url: str) -> str:

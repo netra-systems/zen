@@ -166,7 +166,7 @@
         <pattern name="url_fixer">
             ```python
             # Fix auth URLs
-            content = re.sub(r'/api/auth/', '/auth/', content)
+            content = re.sub(r'/auth/', '/auth/', content)
             ```
         </pattern>
         <effectiveness>

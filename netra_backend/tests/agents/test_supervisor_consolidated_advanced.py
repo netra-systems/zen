@@ -76,7 +76,7 @@ class TestSupervisorAgentEdgeCases:
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock components with delays to test locking
-        async def slow_initialize(prompt, thread_id, user_id):
+        async def slow_initialize(prompt, thread_id, user_id, run_id):
             await asyncio.sleep(0.1)
             return DeepAgentState(user_request=prompt)
         

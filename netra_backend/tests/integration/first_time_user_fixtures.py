@@ -135,7 +135,7 @@ async def create_verified_user(
 
     response = await async_client.post(
 
-        "/api/auth/register",
+        "/auth/register",
 
         json=user_data
 
@@ -149,7 +149,7 @@ async def create_verified_user(
 
     response = await async_client.post(
 
-        f"/api/auth/verify-email/{reg_data['verification_token']}"
+        f"/auth/verify-email/{reg_data['verification_token']}"
 
     )
 
@@ -159,7 +159,7 @@ async def create_verified_user(
 
     response = await async_client.post(
 
-        "/api/auth/login",
+        "/auth/login",
 
         json={
 

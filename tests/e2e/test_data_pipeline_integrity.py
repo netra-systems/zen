@@ -179,7 +179,7 @@ async def test_user_data_consistency_across_services():
             }
             
             # Step 1: Create user via auth service
-            async with session.post(f"{auth_url}/api/auth/register", json=user_data) as response:
+            async with session.post(f"{auth_url}/auth/register", json=user_data) as response:
                 if response.status in [200, 201]:
                     auth_response = await response.json()
                     user_id = auth_response.get("user_id") or auth_response.get("id")
@@ -219,7 +219,7 @@ async def test_user_data_consistency_across_services():
                     print("⚠️ Backend requires authentication - checking if this is expected")
                     
                     # Try to get user info from auth service to compare
-                    async with session.get(f"{auth_url}/api/auth/user", headers=headers) as auth_check:
+                    async with session.get(f"{auth_url}/auth/user", headers=headers) as auth_check:
                         if auth_check.status == 200:
                             auth_user = await auth_check.json()
                             # If auth service has the user but backend doesn't recognize token,
@@ -240,7 +240,7 @@ async def test_user_data_consistency_across_services():
                                 if updated_profile.get("name") != profile_update["name"]:
                                     consistency_issues.append("Profile update did not persist in backend")
                         
-                        async with session.get(f"{auth_url}/api/auth/user", headers=headers) as auth_check:
+                        async with session.get(f"{auth_url}/auth/user", headers=headers) as auth_check:
                             if auth_check.status == 200:
                                 auth_profile = await auth_check.json()
                                 if auth_profile.get("name") != profile_update["name"]:

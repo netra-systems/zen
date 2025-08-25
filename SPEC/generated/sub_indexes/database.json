@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-08-24T21:09:42.680520",
+    "generated_at": "2025-08-25T02:39:31.835609",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 216
   },
@@ -445,8 +445,8 @@
       "category": "database",
       "locations": [
         "netra_backend/app/websocket_core/manager.py:95",
-        "netra_backend/app/websocket_core/utils.py:267",
-        "netra_backend/app/websocket_core/utils.py:324"
+        "netra_backend/app/websocket_core/utils.py:274",
+        "netra_backend/app/websocket_core/utils.py:331"
       ]
     },
     "connection_id": {
@@ -461,7 +461,7 @@
         "netra_backend/app/websocket_core/heartbeat_manager.py:209",
         "netra_backend/app/websocket_core/manager.py:91",
         "netra_backend/app/websocket_core/state_synchronizer.py:90",
-        "netra_backend/app/websocket_core/utils.py:316"
+        "netra_backend/app/websocket_core/utils.py:323"
       ]
     },
     "context_id": {
@@ -1631,7 +1631,7 @@
         "netra_backend/app/agents/corpus_admin/corpus_validation_handlers.py:344",
         "netra_backend/app/agents/data_sub_agent/agent_execution.py:81",
         "netra_backend/app/agents/data_sub_agent/performance_analyzer.py:278",
-        "netra_backend/app/agents/error_decorators.py:42",
+        "netra_backend/app/agents/error_decorators.py:117",
         "netra_backend/app/agents/example_message_processor.py:67"
       ]
     },
@@ -2101,7 +2101,7 @@
       "value": "workload_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:133",
+        "netra_backend/app/agents/data_sub_agent/clickhouse_client.py:131",
         "netra_backend/app/agents/data_sub_agent/data_fetching.py:137",
         "netra_backend/app/agents/data_sub_agent/data_operations.py:201",
         "netra_backend/app/agents/data_sub_agent/delegation.py:205",

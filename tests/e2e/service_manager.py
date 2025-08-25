@@ -68,7 +68,7 @@ class ServiceManager:
         """Get command to start backend service."""
         return [
             sys.executable, "-m", "uvicorn",
-            "app.main:app",
+            "netra_backend.app.main:app",
             "--host", "0.0.0.0",
             "--port", "8000",
             "--log-level", "warning"

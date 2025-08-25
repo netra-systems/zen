@@ -93,7 +93,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
             try:
                 # Attempt authentication request that requires auth service
                 response = await client.post(
-                    f"{self.auth_service_url}/api/auth/validate",
+                    f"{self.auth_service_url}/auth/validate",
                     json={'token': 'test-token-when-service-down'},
                     timeout=8.0  # Allow time to detect the observed 6.2+ second issue
                 )
@@ -137,7 +137,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
             async with httpx.AsyncClient() as client:
                 try:
                     response = await client.post(
-                        f"{self.auth_service_url}/api/auth/validate",
+                        f"{self.auth_service_url}/auth/validate",
                         json={'token': 'test-token-server-error'},
                         timeout=5.0
                     )
@@ -262,7 +262,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
             try:
                 start_time = time.time()
                 response = await session.post(
-                    f"{self.auth_service_url}/api/auth/validate",
+                    f"{self.auth_service_url}/auth/validate",
                     json={'token': f'overload-test-token-{request_id}'},
                     timeout=3.0
                 )
@@ -320,7 +320,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                     # Attempt multiple requests during network partition
                     for attempt in range(3):
                         response = await client.post(
-                            f"{self.auth_service_url}/api/auth/validate",
+                            f"{self.auth_service_url}/auth/validate",
                             json={'token': f'partition-test-token-{attempt}'},
                             timeout=2.0
                         )
@@ -392,7 +392,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                 try:
                     # Attempt OAuth login when provider is unreachable
                     response = await client.get(
-                        f"{self.auth_service_url}/api/auth/login?provider=google",
+                        f"{self.auth_service_url}/auth/login?provider=google",
                         timeout=5.0
                     )
                     
@@ -430,7 +430,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
                     try:
                         # Auth service should continue operating without cache
                         response = await client.post(
-                            f"{self.auth_service_url}/api/auth/validate",
+                            f"{self.auth_service_url}/auth/validate",
                             json={'token': 'test-token-no-redis'},
                             timeout=5.0
                         )
@@ -462,7 +462,7 @@ class TestAuthServiceDownCriticalScenarios(BaseIntegrationTest):
             # Start long-running request
             shutdown_test_task = asyncio.create_task(
                 client.post(
-                    f"{self.auth_service_url}/api/auth/validate",
+                    f"{self.auth_service_url}/auth/validate",
                     json={'token': 'long-running-token-for-shutdown-test'},
                     timeout=10.0
                 )

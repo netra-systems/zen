@@ -539,10 +539,10 @@ class AuthServiceReadinessChecker(BaseReadinessChecker):
     
     def __init__(self, port: int = 8081):
         self.port = port
-        self.config_url = f"http://localhost:{port}/api/auth/config"
+        self.config_url = f"http://localhost:{port}/auth/config"
     
     async def check_ready(self) -> bool:
-        """Check if auth service is ready using the /api/auth/config endpoint."""
+        """Check if auth service is ready using the /auth/config endpoint."""
         try:
             import aiohttp
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
@@ -592,7 +592,7 @@ def create_standard_readiness_checks(service_name: str, port: int = None) -> Lis
         port = port or 8081
         checks.append(ReadinessCheck(
             name="auth_config",
-            check_function=lambda: http_endpoint_ready(f"http://localhost:{port}/api/auth/config"),
+            check_function=lambda: http_endpoint_ready(f"http://localhost:{port}/auth/config"),
             timeout=5.0,
             retry_count=2,
             description="Check auth service config endpoint"

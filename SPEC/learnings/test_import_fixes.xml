@@ -30,18 +30,18 @@
     </learning>
 
     <learning id="auth-service-endpoints">
-        <title>Auth service uses /auth prefix not /api/auth</title>
+        <title>Auth service uses /auth prefix not /auth</title>
         <problem>
             Tests failing with 404 errors when calling auth service at
-            /api/auth/register or /api/auth/login
+            /auth/register or /auth/login
         </problem>
         <root_cause>
-            Auth service router configured with prefix="/auth" not "/api/auth"
+            Auth service router configured with prefix="/auth" not "/auth"
             Router definition: router = APIRouter(prefix="/auth", tags=["authentication"])
         </root_cause>
         <solution>
             Update all auth service calls to use correct prefix:
-            - Change: http://localhost:8081/api/auth/login
+            - Change: http://localhost:8081/auth/login
             - To: http://localhost:8081/auth/login
         </solution>
         <prevention>
@@ -177,7 +177,7 @@
     <summary>
         Key testing fixes required:
         1. Use netra_backend namespace for all test imports
-        2. Use correct auth service endpoints (/auth not /api/auth)
+        2. Use correct auth service endpoints (/auth not /auth)
         3. Use dev login for testing instead of registration
         4. Use absolute imports with netra_backend.app.* for application code
         5. Use absolute imports with netra_backend.tests.* for test code (NOT netra_backend.app.tests.*)

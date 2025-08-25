@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-24T21:09:43.300787",
+    "generated_at": "2025-08-25T02:39:32.411161",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 162
+    "total_literals": 163
   },
   "literals": {
     "(timestamp) as time_bucket, count() as event_count": {
@@ -74,7 +74,8 @@
       "locations": [
         "netra_backend/app/agents/github_analyzer/metrics_calculator.py:22",
         "netra_backend/app/agents/supervisor/observability_flow_builders.py:110",
-        "netra_backend/app/core/interfaces_observability.py:253"
+        "netra_backend/app/core/interfaces_observability.py:253",
+        "scripts/staging_validation_part2_user_flows.py:658"
       ]
     },
     "agent_execution_count": {
@@ -1173,14 +1174,14 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/db/connection_pool_manager.py:273",
-        "netra_backend/app/db/database_manager.py:291",
+        "netra_backend/app/db/database_manager.py:326",
         "netra_backend/app/db/postgres_async.py:74",
         "netra_backend/app/db/postgres_cloud.py:102",
         "netra_backend/app/db/postgres_core.py:239",
         "netra_backend/app/db/postgres_core.py:468",
         "netra_backend/app/services/database/connection_manager.py:127",
-        "auth_service/auth_core/database/connection.py:218",
-        "auth_service/auth_core/database/connection.py:230"
+        "auth_service/auth_core/database/connection.py:215",
+        "auth_service/auth_core/database/connection.py:227"
       ]
     },
     "test_count": {
@@ -1213,6 +1214,14 @@
         "netra_backend/app/services/service_mesh/circuit_breaker.py:160",
         "netra_backend/app/services/service_mesh/circuit_breaker.py:160",
         "netra_backend/app/services/service_mesh/circuit_breaker.py:181"
+      ]
+    },
+    "thread_count": {
+      "value": "thread_count",
+      "category": "metrics",
+      "locations": [
+        "scripts/staging_validation_part2_corrected.py:448",
+        "scripts/staging_validation_part2_user_flows.py:494"
       ]
     },
     "threads_count": {

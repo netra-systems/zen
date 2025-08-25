@@ -44,6 +44,10 @@ class ClickHouseService:
         except Exception as e:
             logger.error(f"ClickHouse health check failed: {e}")
             return False
+    
+    async def test_connection(self) -> bool:
+        """Test ClickHouse database connection."""
+        return await self.execute_health_check()
 
 
 # Singleton instance

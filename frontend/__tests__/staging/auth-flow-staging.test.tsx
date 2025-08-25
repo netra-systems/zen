@@ -92,11 +92,11 @@ describe('Authentication Flow - Staging Environment', () => {
           development_mode: false,
           google_client_id: 'test-client-id',
           endpoints: {
-            login: '/api/auth/login',
-            logout: '/api/auth/logout',
-            callback: '/api/auth/callback',
-            token: '/api/auth/token',
-            user: '/api/auth/me'
+            login: '/auth/login',
+            logout: '/auth/logout',
+            callback: '/auth/callback',
+            token: '/auth/token',
+            user: '/auth/me'
           }
         })
       } as Response);
@@ -127,11 +127,11 @@ describe('Authentication Flow - Staging Environment', () => {
           development_mode: false,
           google_client_id: 'test-client-id',
           endpoints: {
-            login: '/api/auth/login',
-            logout: '/api/auth/logout',
-            callback: '/api/auth/callback',
-            token: '/api/auth/token',
-            user: '/api/auth/me'
+            login: '/auth/login',
+            logout: '/auth/logout',
+            callback: '/auth/callback',
+            token: '/auth/token',
+            user: '/auth/me'
           }
         })
       } as Response);
@@ -160,11 +160,11 @@ describe('Authentication Flow - Staging Environment', () => {
         development_mode: false,
         google_client_id: 'staging-client-id',
         endpoints: {
-          login: '/api/auth/login',
-          logout: '/api/auth/logout',
-          callback: '/api/auth/callback',
-          token: '/api/auth/token',
-          user: '/api/auth/me'
+          login: '/auth/login',
+          logout: '/auth/logout',
+          callback: '/auth/callback',
+          token: '/auth/token',
+          user: '/auth/me'
         },
         authorized_redirect_uris: ['https://app.staging.netrasystems.ai/auth/callback']
       };
@@ -221,7 +221,7 @@ describe('Authentication Flow - Staging Environment', () => {
       // Mock processing OAuth callback
       const authConfig = {
         development_mode: false,
-        endpoints: { callback: '/api/auth/callback' }
+        endpoints: { callback: '/auth/callback' }
       };
 
       const authorizationCode = 'test-auth-code';
@@ -231,7 +231,7 @@ describe('Authentication Flow - Staging Environment', () => {
       
       expect(result).toEqual(mockAuthResponse);
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/auth/callback'),
+        expect.stringContaining('/auth/callback'),
         expect.objectContaining({
           method: 'POST',
           body: expect.stringContaining(authorizationCode)
@@ -388,7 +388,7 @@ describe('Authentication Flow - Staging Environment', () => {
           ok: true,
           json: async () => ({
             development_mode: false,
-            endpoints: { token: '/api/auth/token' }
+            endpoints: { token: '/auth/token' }
           })
         } as Response)
         .mockResolvedValueOnce({
@@ -419,7 +419,7 @@ describe('Authentication Flow - Staging Environment', () => {
           ok: true,
           json: async () => ({
             development_mode: false,
-            endpoints: { token: '/api/auth/token' }
+            endpoints: { token: '/auth/token' }
           })
         } as Response)
         .mockResolvedValueOnce({
@@ -563,7 +563,7 @@ describe('Authentication Flow - Staging Environment', () => {
           ok: true,
           json: async () => ({
             development_mode: false,
-            endpoints: { logout: '/api/auth/logout' }
+            endpoints: { logout: '/auth/logout' }
           })
         } as Response)
         .mockResolvedValueOnce({
@@ -593,7 +593,7 @@ describe('Authentication Flow - Staging Environment', () => {
 
       // Verify logout API was called
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/auth/logout'),
+        expect.stringContaining('/auth/logout'),
         expect.objectContaining({
           method: 'POST'
         })
@@ -610,7 +610,7 @@ describe('Authentication Flow - Staging Environment', () => {
           ok: true,
           json: async () => ({
             development_mode: false,
-            endpoints: { logout: '/api/auth/logout' }
+            endpoints: { logout: '/auth/logout' }
           })
         } as Response)
         .mockResolvedValueOnce({

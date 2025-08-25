@@ -140,7 +140,7 @@ class OAuthLocalTester:
         console.print("\n[bold cyan]3. Testing OAuth Config Endpoint[/bold cyan]")
         
         try:
-            response = await self.session.get(f"{self.backend_url}/api/auth/config")
+            response = await self.session.get(f"{self.backend_url}/auth/config")
             
             if response.status_code == 200:
                 config = response.json()
@@ -183,7 +183,7 @@ class OAuthLocalTester:
         try:
             # Test login endpoint
             response = await self.session.get(
-                f"{self.backend_url}/api/auth/login?provider=google",
+                f"{self.backend_url}/auth/login?provider=google",
                 follow_redirects=False
             )
             
@@ -240,7 +240,7 @@ class OAuthLocalTester:
         if os.getenv('ALLOW_DEV_LOGIN') == 'true':
             try:
                 response = await self.session.post(
-                    f"{self.backend_url}/api/auth/dev_login",
+                    f"{self.backend_url}/auth/dev_login",
                     json={
                         "email": "test@example.com",
                         "provider": "dev"
@@ -299,7 +299,7 @@ class OAuthLocalTester:
         try:
             # Test with backend /me endpoint
             response = await self.session.get(
-                f"{self.backend_url}/api/auth/me",
+                f"{self.backend_url}/auth/me",
                 headers={"Authorization": f"Bearer {token}"}
             )
             

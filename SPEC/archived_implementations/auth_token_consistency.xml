@@ -32,7 +32,7 @@
         <change>Update localStorage key from 'auth_token' to 'jwt_token'</change>
       </file>
       <file path="app/auth/auth_dependencies.py">
-        <change>Update OAuth2PasswordBearer tokenUrl from '/auth/token' to '/api/auth/token'</change>
+        <change>Update OAuth2PasswordBearer tokenUrl from '/auth/token' to '/auth/token'</change>
         <change>Use get_db_session from netra_backend.app.dependencies instead of get_async_db</change>
       </file>
     </affected_files>
@@ -63,8 +63,8 @@
   <backend_issues_fixed>
     <issue>
       <description>OAuth2PasswordBearer tokenUrl path mismatch</description>
-      <problem>tokenUrl was set to '/auth/token' instead of '/api/auth/token'</problem>
-      <solution>Updated to use full API path '/api/auth/token'</solution>
+      <problem>tokenUrl was set to '/auth/token' instead of '/auth/token'</problem>
+      <solution>Updated to use full API path '/auth/token'</solution>
     </issue>
     <issue>
       <description>Database session dependency inconsistency</description>

@@ -5,7 +5,7 @@ describe('Authentication and Session Token Lifecycle (L4)', () => {
   const TEST_PASSWORD = Cypress.env('CYPRESS_TEST_PASSWORD');
   const LOGIN_URL = '/login';
   const PROTECTED_API_ENDPOINT = '/api/user/profile'; // Example protected endpoint
-  const AUTH_SERVICE_URL = 'http://localhost:8001/api/auth/token'; // Example auth service URL
+  const AUTH_SERVICE_URL = 'http://localhost:8001/auth/token'; // Example auth service URL
 
   beforeEach(() => {
     cy.visit(LOGIN_URL);

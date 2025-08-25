@@ -62,7 +62,7 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
             auth_service_url = self.get_service_url('auth_service', 'http://localhost:8081')
             
             # Try to initiate OAuth flow from frontend
-            oauth_initiation_url = f"{frontend_url}/api/auth/signin"
+            oauth_initiation_url = f"{frontend_url}/auth/signin"
             
             try:
                 # Frontend should attempt to redirect to auth service
@@ -273,12 +273,12 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
                     '/auth/verify'         # Token verification
                 ],
                 'backend': [
-                    '/api/auth/session',   # Session validation
+                    '/auth/session',   # Session validation
                     '/api/user/profile'    # User profile (requires auth)
                 ],
                 'frontend': [
-                    '/api/auth/signin',    # Sign in initiation
-                    '/api/auth/signout'    # Sign out
+                    '/auth/signin',    # Sign in initiation
+                    '/auth/signout'    # Sign out
                 ]
             }
             

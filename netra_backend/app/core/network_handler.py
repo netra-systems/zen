@@ -37,7 +37,11 @@ try:
 except ImportError:
     AIOHTTP_CORS_AVAILABLE = False
 
-from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    get_unified_circuit_breaker_manager
+)
 from netra_backend.app.agents.agent_error_types import NetworkError
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.unified_logging import get_logger
@@ -179,20 +183,26 @@ class NetworkHandler:
         self.websocket_connections: Set[Any] = set()
         self.websocket_pools: Dict[str, List[Any]] = {}
         
-        # Circuit breakers
-        dns_config = CircuitConfig(
+        # Circuit breakers using unified implementation
+        manager = get_unified_circuit_breaker_manager()
+        
+        dns_config = UnifiedCircuitConfig(
             name="dns_resolver",
             failure_threshold=5,
-            recovery_timeout=60.0
+            recovery_timeout=60.0,
+            timeout_seconds=self.dns_config.timeout,
+            adaptive_threshold=True
         )
-        self.dns_breaker = CircuitBreaker(dns_config)
+        self.dns_breaker = manager.create_circuit_breaker("dns_resolver", dns_config)
         
-        ssl_config = CircuitConfig(
+        ssl_config = UnifiedCircuitConfig(
             name="ssl_handler",  
             failure_threshold=3,
-            recovery_timeout=120.0
+            recovery_timeout=120.0,
+            timeout_seconds=30.0,
+            adaptive_threshold=True
         )
-        self.ssl_breaker = CircuitBreaker(ssl_config)
+        self.ssl_breaker = manager.create_circuit_breaker("ssl_handler", ssl_config)
         
         # Monitoring
         self.monitor_task: Optional[asyncio.Task] = None
@@ -349,24 +359,23 @@ class NetworkHandler:
                 return ips
         
         try:
-            async with self.dns_breaker:
-                ips = await self._resolve_dns_with_fallback(hostname)
-                
-                # Cache the result
-                if len(self.dns_cache) >= self.dns_config.max_cache_size:
-                    # Remove oldest entry
-                    oldest = min(self.dns_cache.items(), key=lambda x: x[1][1])
-                    del self.dns_cache[oldest[0]]
-                
-                self.dns_cache[hostname] = (ips, datetime.utcnow())
-                
-                self.logger.debug("DNS resolution successful", extra={
-                    "hostname": hostname,
-                    "ips": ips,
-                    "cached": use_cache
-                })
-                
-                return ips
+            ips = await self.dns_breaker.call(self._resolve_dns_with_fallback, hostname)
+            
+            # Cache the result
+            if len(self.dns_cache) >= self.dns_config.max_cache_size:
+                # Remove oldest entry
+                oldest = min(self.dns_cache.items(), key=lambda x: x[1][1])
+                del self.dns_cache[oldest[0]]
+            
+            self.dns_cache[hostname] = (ips, datetime.utcnow())
+            
+            self.logger.debug("DNS resolution successful", extra={
+                "hostname": hostname,
+                "ips": ips,
+                "cached": use_cache
+            })
+            
+            return ips
                 
         except Exception as e:
             self.logger.warning("DNS resolution failed", extra={

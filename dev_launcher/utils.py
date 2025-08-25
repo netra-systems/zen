@@ -122,7 +122,7 @@ def is_port_available(port: int, host: str = '0.0.0.0', allow_reuse: bool = Fals
 
 def find_available_port(preferred_port: int, port_range: tuple = (8081, 8090), host: str = '0.0.0.0') -> int:
     """
-    Find an available port, preferring the specified port.
+    Find an available port, preferring the specified port with enhanced fallback mechanisms.
     
     Args:
         preferred_port: Preferred port to try first
@@ -132,26 +132,208 @@ def find_available_port(preferred_port: int, port_range: tuple = (8081, 8090), h
     Returns:
         Available port number
     """
-    # Try preferred port first
-    if is_port_available(preferred_port, host):
+    # Log port allocation attempt for debugging
+    logger.debug(f"Finding available port: preferred={preferred_port}, range={port_range}, host={host}")
+    
+    # Try preferred port first with race condition protection
+    if _is_port_available_with_retry(preferred_port, host):
+        logger.info(f"Using preferred port {preferred_port}")
         # Add small delay on Windows to prevent race condition
         if sys.platform == "win32":
             time.sleep(0.01)
         return preferred_port
+    else:
+        # Log why preferred port failed
+        process_info = _get_process_using_port(preferred_port)
+        if process_info:
+            logger.info(f"Port {preferred_port} unavailable (used by: {process_info})")
+        else:
+            logger.info(f"Port {preferred_port} unavailable")
     
-    # Try ports in the specified range
+    # Try ports in the specified range with improved fallback
+    available_ports = []
     for port in range(port_range[0], port_range[1] + 1):
-        if port != preferred_port and is_port_available(port, host):
-            logger.info(f"Port {preferred_port} unavailable, using {port} instead")
-            # Add small delay on Windows to prevent race condition
-            if sys.platform == "win32":
-                time.sleep(0.01)
-            return port
+        if port != preferred_port and _is_port_available_with_retry(port, host):
+            available_ports.append(port)
     
-    # If all ports in range are taken, get a random free port
-    free_port = get_free_port()
-    logger.warning(f"All ports in range {port_range} taken, using {free_port}")
-    return free_port
+    # Use first available port in range
+    if available_ports:
+        selected_port = available_ports[0]
+        logger.info(f"Port {preferred_port} unavailable, using {selected_port} instead")
+        # Add small delay on Windows to prevent race condition
+        if sys.platform == "win32":
+            time.sleep(0.01)
+        return selected_port
+    
+    # Extended fallback: try wider range for frontend (3000-3999), auth (8000-8999), etc.
+    extended_range = _get_extended_port_range(preferred_port, port_range)
+    if extended_range != port_range:
+        logger.info(f"Trying extended port range {extended_range}")
+        for port in range(extended_range[0], extended_range[1] + 1):
+            if port not in range(port_range[0], port_range[1] + 1) and _is_port_available_with_retry(port, host):
+                logger.warning(f"Using extended range port {port}")
+                if sys.platform == "win32":
+                    time.sleep(0.01)
+                return port
+    
+    # Final fallback: get a random free port from OS
+    try:
+        free_port = get_free_port()
+        logger.warning(f"All ports in range {port_range} and extended range taken, using OS-allocated port {free_port}")
+        return free_port
+    except Exception as e:
+        logger.error(f"Failed to get free port from OS: {e}")
+        # Ultimate fallback: try high numbered ports
+        for port in range(50000, 60000):
+            if _is_port_available_with_retry(port, host):
+                logger.error(f"Emergency fallback to high-numbered port {port}")
+                return port
+        
+        # This should almost never happen
+        raise RuntimeError(f"Unable to find any available port after extensive search")
+
+
+def _is_port_available_with_retry(port: int, host: str, max_retries: int = 3) -> bool:
+    """
+    Check port availability with retry mechanism for race conditions.
+    
+    Args:
+        port: Port number to check
+        host: Host interface to check
+        max_retries: Maximum number of retries
+        
+    Returns:
+        True if port is available, False otherwise
+    """
+    for attempt in range(max_retries):
+        if is_port_available(port, host):
+            # Double-check with small delay to catch race conditions
+            if sys.platform == "win32":
+                time.sleep(0.02)
+                # Re-verify on Windows due to timing issues
+                return is_port_available(port, host)
+            return True
+        
+        if attempt < max_retries - 1:
+            # Small delay between retries
+            time.sleep(0.05 * (attempt + 1))
+    
+    return False
+
+
+def _get_extended_port_range(preferred_port: int, original_range: tuple) -> tuple:
+    """
+    Get extended port range based on service type.
+    
+    Args:
+        preferred_port: Original preferred port
+        original_range: Original port range
+        
+    Returns:
+        Extended port range tuple
+    """
+    # Frontend ports (3000-3999)
+    if 3000 <= preferred_port <= 3999:
+        return (3000, 3099)
+    
+    # Backend API ports (8000-8999)  
+    elif 8000 <= preferred_port <= 8999:
+        return (8000, 8099)
+    
+    # Auth service ports (8080-8199)
+    elif 8080 <= preferred_port <= 8199:
+        return (8080, 8199)
+    
+    # Database ports (5400-5499)
+    elif 5400 <= preferred_port <= 5499:
+        return (5400, 5499)
+    
+    # Redis ports (6300-6399)
+    elif 6300 <= preferred_port <= 6399:
+        return (6300, 6399)
+    
+    # Default: extend original range by 50 ports
+    else:
+        start, end = original_range
+        return (start, min(end + 50, 65535))
+
+
+def _get_process_using_port(port: int) -> Optional[str]:
+    """
+    Get information about process using a specific port.
+    
+    Args:
+        port: Port number to check
+        
+    Returns:
+        Process information string or None
+    """
+    try:
+        if sys.platform == "win32":
+            return _get_windows_process_info(port)
+        else:
+            return _get_unix_process_info(port)
+    except Exception as e:
+        logger.debug(f"Failed to get process info for port {port}: {e}")
+        return None
+
+
+def _get_windows_process_info(port: int) -> Optional[str]:
+    """Get process info on Windows using netstat."""
+    try:
+        result = subprocess.run(
+            ["netstat", "-ano"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        
+        if result.returncode == 0:
+            for line in result.stdout.splitlines():
+                if f":{port} " in line and "LISTENING" in line:
+                    parts = line.split()
+                    if parts:
+                        pid = parts[-1]
+                        # Try to get process name
+                        try:
+                            name_result = subprocess.run(
+                                ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV"],
+                                capture_output=True,
+                                text=True,
+                                timeout=3
+                            )
+                            if name_result.returncode == 0:
+                                lines = name_result.stdout.strip().split('\n')
+                                if len(lines) > 1:
+                                    process_name = lines[1].split(',')[0].strip('"')
+                                    return f"{process_name} (PID: {pid})"
+                        except Exception:
+                            pass
+                        return f"PID: {pid}"
+    except Exception:
+        pass
+    return None
+
+
+def _get_unix_process_info(port: int) -> Optional[str]:
+    """Get process info on Unix systems using lsof."""
+    try:
+        result = subprocess.run(
+            ["lsof", "-i", f":{port}"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        
+        if result.returncode == 0 and result.stdout.strip():
+            lines = result.stdout.strip().split('\n')
+            if len(lines) > 1:  # Skip header
+                parts = lines[1].split()
+                if len(parts) >= 2:
+                    return f"{parts[0]} (PID: {parts[1]})"
+    except Exception:
+        pass
+    return None
 
 
 def wait_for_service(url: str, timeout: int = 30, check_interval: int = 2) -> bool:

@@ -152,7 +152,7 @@ class CrossServiceSessionSyncTester:
         try:
             async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
                 response = await client.post(
-                    f"{self.backend_service_url}/api/auth/dev_login",
+                    f"{self.backend_service_url}/auth/dev_login",
                     json={
                         "email": self.test_email,
                         "name": "Test User"
@@ -222,7 +222,7 @@ class CrossServiceSessionSyncTester:
             async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                 # Test protected endpoint that requires session validation
                 response = await client.get(
-                    f"{self.backend_service_url}/api/auth/me",
+                    f"{self.backend_service_url}/auth/me",
                     headers={"Authorization": f"Bearer {token}"}
                 )
                 
@@ -316,7 +316,7 @@ class CrossServiceSessionSyncTester:
         try:
             async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                 response = await client.post(
-                    f"{self.backend_service_url}/api/auth/logout",
+                    f"{self.backend_service_url}/auth/logout",
                     headers={"Authorization": f"Bearer {token}"}
                 )
                 
@@ -337,7 +337,7 @@ class CrossServiceSessionSyncTester:
             async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                 # Test protected endpoint should now fail
                 response = await client.get(
-                    f"{self.backend_service_url}/api/auth/me",
+                    f"{self.backend_service_url}/auth/me",
                     headers={"Authorization": f"Bearer {token}"}
                 )
                 

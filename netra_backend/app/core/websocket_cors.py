@@ -15,53 +15,8 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-def _get_default_websocket_origins():
-    """Get default WebSocket origins from unified configuration."""
-    try:
-        from netra_backend.app.core.configuration.base import get_unified_config
-        config = get_unified_config()
-        
-        # Start with configured frontend URL
-        default_origins = []
-        if hasattr(config, 'frontend_url') and config.frontend_url:
-            default_origins.append(config.frontend_url)
-            # Add HTTPS variant
-            if config.frontend_url.startswith("http://"):
-                https_url = config.frontend_url.replace("http://", "https://", 1)
-                default_origins.append(https_url)
-        
-        # Add common development ports if in development
-        environment = getattr(config, 'environment', 'development').lower()
-        if environment in ['development', 'testing']:
-            dev_ports = [3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174]
-            for port in dev_ports:
-                default_origins.extend([
-                    f"http://localhost:{port}",
-                    f"https://localhost:{port}",
-                    f"http://127.0.0.1:{port}",
-                    f"https://127.0.0.1:{port}"
-                ])
-        
-        return default_origins
-    except Exception:
-        # Fallback to minimal origins if config fails
-        return [
-            "http://localhost:3000",
-            "https://localhost:3000",
-            "http://localhost:3010"  # Common frontend port
-        ]
-
-
-# Default allowed origins for WebSocket connections - loaded from configuration
-DEFAULT_WEBSOCKET_ORIGINS = _get_default_websocket_origins()
-
-# Production origins (should be configured via environment variables)
-PRODUCTION_ORIGINS = [
-    "https://netrasystems.ai",
-    "https://www.netrasystems.ai", 
-    "https://app.netrasystems.ai",
-    "https://staging.netrasystems.ai"
-]
+# WebSocket CORS now uses unified configuration from shared/cors_config.py
+# No need for separate WebSocket origin management
 
 # Security configuration constants
 SECURITY_CONFIG = {
@@ -86,7 +41,7 @@ SUSPICIOUS_PATTERNS = [
 
 
 class WebSocketCORSHandler:
-    """Handle CORS for WebSocket connections with enhanced security."""
+    """Handle CORS for WebSocket connections with enhanced security using unified configuration."""
     
     def __init__(self, allowed_origins: Optional[List[str]] = None, 
                  environment: str = "development"):
@@ -94,10 +49,14 @@ class WebSocketCORSHandler:
         
         Args:
             allowed_origins: List of allowed origins for WebSocket connections.
-                            If None, uses default development origins.
+                            If None, uses unified CORS configuration.
             environment: Current environment (development, staging, production)
         """
-        self.allowed_origins = allowed_origins or DEFAULT_WEBSOCKET_ORIGINS
+        if allowed_origins is None:
+            from shared.cors_config import get_websocket_cors_origins
+            allowed_origins = get_websocket_cors_origins(environment)
+        
+        self.allowed_origins = allowed_origins
         self.environment = environment
         self._origin_patterns = self._compile_origin_patterns()
         self._suspicious_patterns = self._compile_suspicious_patterns()
@@ -312,49 +271,16 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
 
 
 def get_environment_origins() -> List[str]:
-    """Get allowed origins based on environment configuration and service discovery."""
+    """Get allowed origins based on environment using unified CORS configuration."""
+    from shared.cors_config import get_websocket_cors_origins
     from netra_backend.app.core.configuration.base import get_unified_config
-    config = get_unified_config()
     
+    config = get_unified_config()
     env = getattr(config, 'environment', 'development').lower()
     
-    # Get CORS origins from unified config
-    cors_origins = getattr(config, 'cors_origins', None)
-    if cors_origins:
-        # Handle both list and comma-separated string formats
-        if isinstance(cors_origins, str):
-            custom_list = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
-        elif isinstance(cors_origins, list):
-            custom_list = [str(origin).strip() for origin in cors_origins if origin]
-        else:
-            custom_list = []
-    else:
-        custom_list = []
-    
-    if env == "production":
-        # Production environment: use production origins + custom
-        allowed_origins = PRODUCTION_ORIGINS + custom_list
-    elif env == "staging":
-        # Staging environment: use staging + development origins + custom
-        staging_origins = [origin for origin in PRODUCTION_ORIGINS if "staging" in origin]
-        allowed_origins = staging_origins + DEFAULT_WEBSOCKET_ORIGINS + custom_list
-    else:
-        # Development/test environment: use development origins + custom + service discovery
-        allowed_origins = DEFAULT_WEBSOCKET_ORIGINS + custom_list
-        
-        # Service discovery removed for microservice independence
-        # Origins are managed through configuration only
-    
-    # Remove duplicates while preserving order
-    unique_origins = []
-    seen = set()
-    for origin in allowed_origins:
-        if origin and origin not in seen:
-            unique_origins.append(origin)
-            seen.add(origin)
-    
-    logger.info(f"WebSocket CORS configured for environment '{env}' with {len(unique_origins)} allowed origins")
-    return unique_origins
+    origins = get_websocket_cors_origins(env)
+    logger.info(f"WebSocket CORS configured for environment '{env}' with {len(origins)} allowed origins")
+    return origins
 
 
 class WebSocketCORSMiddleware:

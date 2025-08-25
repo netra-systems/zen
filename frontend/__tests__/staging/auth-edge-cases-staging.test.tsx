@@ -117,7 +117,7 @@ describe('Authentication Edge Cases - Staging Environment', () => {
 
       while (retryAttempt < maxRetries && !refreshResult) {
         try {
-          const response = await mockFetch(`/api/auth/refresh`, {
+          const response = await mockFetch(`/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
           });

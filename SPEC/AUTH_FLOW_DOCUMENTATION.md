@@ -39,9 +39,9 @@ Netra uses JWT-based authentication with Google OAuth for production and auto-lo
 
 ### OAuth Flow
 1. User clicks "Login with Google"
-2. Redirected to `/api/auth/login` endpoint
+2. Redirected to `/auth/login` endpoint
 3. Backend redirects to Google OAuth consent screen
-4. Google redirects back to `/api/auth/callback`
+4. Google redirects back to `/auth/callback`
 5. Backend:
    - Validates OAuth token
    - Creates/updates user in database
@@ -54,7 +54,7 @@ Netra uses JWT-based authentication with Google OAuth for production and auto-lo
 
 ### Logout Flow
 1. User clicks logout
-2. Frontend calls `/api/auth/logout` endpoint
+2. Frontend calls `/auth/logout` endpoint
 3. Token removed from localStorage
 4. User redirected to home page
 5. WebSocket connection closed
@@ -178,9 +178,9 @@ These errors indicate incorrect use of database session in WebSocket endpoints.
 
 ## API Endpoints
 
-- `GET /api/auth/config` - Get auth configuration
-- `GET /api/auth/login` - Initiate OAuth login
-- `GET /api/auth/callback` - OAuth callback handler
-- `POST /api/auth/logout` - Logout user
-- `POST /api/auth/dev_login` - Dev mode login
-- `POST /api/auth/token` - Get JWT token (form-based auth)
+- `GET /auth/config` - Get auth configuration
+- `GET /auth/login` - Initiate OAuth login
+- `GET /auth/callback` - OAuth callback handler
+- `POST /auth/logout` - Logout user
+- `POST /auth/dev_login` - Dev mode login
+- `POST /auth/token` - Get JWT token (form-based auth)

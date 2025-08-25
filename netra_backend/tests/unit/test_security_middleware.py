@@ -244,7 +244,7 @@ class TestSecurityMiddleware:
         """Test sensitive endpoints are properly configured."""
         sensitive = middleware.sensitive_endpoints
         expected_endpoints = [
-            "/api/auth/login", "/api/admin", "/api/tools",
+            "/auth/login", "/api/admin", "/api/tools",
             "/api/users/create", "/api/synthetic-data"
         ]
         
@@ -292,7 +292,7 @@ class TestSecurityMiddleware:
     @pytest.mark.asyncio
     async def test_security_middleware_rate_limiting_sensitive_endpoint(self, middleware, mock_request):
         """Test stricter rate limiting for sensitive endpoints."""
-        mock_request.url.path = "/api/auth/login"
+        mock_request.url.path = "/auth/login"
         
         # Should use strict rate limit
         limit = middleware._determine_rate_limit(mock_request)

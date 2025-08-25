@@ -12,20 +12,20 @@ describe('Authentication', () => {
       },
     }).as('getUserRequest');
 
-    cy.intercept('GET', '**/api/auth/config', {
+    cy.intercept('GET', '**/auth/config', {
       statusCode: 200,
       body: {
         auth_enabled: true,
         endpoints: {
-          login: '/api/auth/login',
-          logout: '/api/auth/logout',
-          user: '/api/auth/me',
-          dev_login: '/api/auth/dev/login'
+          login: '/auth/login',
+          logout: '/auth/logout',
+          user: '/auth/me',
+          dev_login: '/auth/dev/login'
         }
       }
     }).as('authConfig');
 
-    cy.intercept('POST', '**/api/auth/logout', {
+    cy.intercept('POST', '**/auth/logout', {
       statusCode: 200,
       body: { success: true }
     }).as('logoutRequest');

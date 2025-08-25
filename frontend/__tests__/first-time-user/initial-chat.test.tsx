@@ -45,6 +45,9 @@ jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: mockUseWebSocket
 }));
 
+// Mock the WebSocket provider completely
+jest.mock('@/providers/WebSocketProvider', () => require('@/__mocks__/providers/WebSocketProvider'));
+
 jest.mock('@/hooks/useLoadingState', () => ({
   useLoadingState: mockUseLoadingState
 }));
@@ -106,15 +109,7 @@ jest.mock('@/components/chat/components/MessageActionButtons', () => ({
   MessageActionButtons: () => React.createElement('div', { 'data-testid': 'action-buttons' }, 'Actions')
 }));
 
-jest.mock('@/components/chat/components/KeyboardShortcutsHint', () => {
-  const React = require('react');
-  return {
-    __esModule: true,
-    KeyboardShortcutsHint: () => React.createElement('div', { 'data-testid': 'keyboard-shortcuts-hint' }, 'Shortcuts'),
-    SearchShortcut: () => React.createElement('div', { 'data-testid': 'search-shortcut' }, 'Search'),
-    HistoryShortcut: () => React.createElement('div', { 'data-testid': 'history-shortcut' }, 'History')
-  };
-});
+// No mock needed for KeyboardShortcutsHint - using simple icon replacement
 
 
 jest.mock('@/utils/debug-logger', () => ({
@@ -186,7 +181,12 @@ describe('First-Time User Initial Chat', () => {
     });
     
     mockUseWebSocket.mockReturnValue({
-      messages: []
+      messages: [],
+      status: 'OPEN',
+      connect: jest.fn(),
+      disconnect: jest.fn(),
+      send: jest.fn(),
+      isConnected: true
     });
     
     mockUseLoadingState.mockReturnValue({
@@ -225,10 +225,8 @@ describe('First-Time User Initial Chat', () => {
       handleSend: mockHandleSend
     });
     
-    // Setup remaining hooks that the working test has
-    mockUseWebSocket.mockReturnValue({
-      messages: []
-    });
+    // Setup remaining hooks that the working test has - already set above
+    // mockUseWebSocket already configured with complete mock
     
     mockUseEventProcessor.mockReturnValue({
       processedCount: 0,
@@ -270,12 +268,24 @@ describe('First-Time User Initial Chat', () => {
   });
 
   it('shows example prompts for first-time users', async () => {
-    // Explicitly set up loading state for first-time user
+    // Force the loading state to immediately show example prompts
     mockUseLoadingState.mockReturnValue({
+      loadingState: 'THREAD_READY',
       shouldShowLoading: false,
       shouldShowEmptyState: true,
       shouldShowExamplePrompts: true,
-      loadingMessage: ''
+      loadingMessage: '',
+      isInitialized: true
+    });
+    
+    // Ensure WebSocket is properly mocked as connected
+    mockUseWebSocket.mockReturnValue({
+      messages: [],
+      status: 'OPEN',
+      connect: jest.fn(),
+      disconnect: jest.fn(),
+      send: jest.fn(),
+      isConnected: true
     });
     
     render(<MainChat />);

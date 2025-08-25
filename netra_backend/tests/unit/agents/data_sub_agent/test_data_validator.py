@@ -599,5 +599,88 @@ class TestTimeSpanValidation:
         assert result["time_span_hours"] == 1.0
 
 
+class TestDataValidatorEdgeCases:
+    """Test edge cases and boundary conditions."""
+    
+    @pytest.fixture
+    def validator(self):
+        """Create DataValidator instance."""
+        return DataValidator()
+    
+    def test_validate_extremely_large_dataset(self, validator):
+        """Test validation with very large dataset."""
+        # Generate large dataset
+        now = datetime.now()
+        data = []
+        for i in range(1000):  # Large dataset
+            data.append({
+                "timestamp": now - timedelta(minutes=i),
+                "user_id": f"user_{i % 100}",
+                "workload_id": f"workload_{i % 50}",
+                "latency_ms": 100.0 + (i % 50),
+                "cost_cents": 2.0 + (i % 10) * 0.1,
+                "throughput": 95.0 + (i % 20)
+            })
+        
+        metrics = ["latency_ms", "cost_cents", "throughput"]
+        is_valid, result = validator.validate_raw_data(data, metrics)
+        
+        # Should handle large datasets efficiently
+        assert is_valid  # Performance shouldn't cause validation errors
+        
+    def test_validate_unicode_and_special_characters(self, validator):
+        """Test validation with unicode and special characters."""
+        now = datetime.now()
+        data = [
+            {
+                "timestamp": now - timedelta(minutes=10),
+                "user_id": "用户_测试_123",  # Chinese characters
+                "workload_id": "wörk-löad_ñoñé",  # Accented characters
+                "latency_ms": 150.0,
+                "cost_cents": 2.3,
+                "throughput": 100.0
+            }
+        ] * 15  # Ensure minimum data points
+        
+        metrics = ["latency_ms", "cost_cents", "throughput"]
+        is_valid, result = validator.validate_raw_data(data, metrics)
+        
+        # Should handle unicode characters without issues
+        assert is_valid
+        assert len(result.get("errors", [])) == 0
+        
+    def test_validate_boundary_metric_values(self, validator):
+        """Test validation with boundary metric values."""
+        now = datetime.now()
+        data = []
+        
+        # Test boundary values for each metric type
+        boundary_cases = [
+            {"latency_ms": 0.1},     # Small but positive
+            {"latency_ms": 999.9},   # Large but within range
+            {"cost_cents": 0.01},    # Small cost
+            {"cost_cents": 99.99},   # Large cost
+            {"throughput": 1.0},     # Low throughput
+            {"throughput": 1999.9},  # High throughput
+        ]
+        
+        for i, metrics in enumerate(boundary_cases * 3):  # Ensure minimum data points
+            record = {
+                "timestamp": now - timedelta(minutes=i * 10),
+                "user_id": f"user_{i}",
+                "workload_id": f"workload_{i}",
+                "latency_ms": metrics.get("latency_ms", 150.0),
+                "cost_cents": metrics.get("cost_cents", 2.3),
+                "throughput": metrics.get("throughput", 100.0)
+            }
+            data.append(record)
+        
+        metrics = ["latency_ms", "cost_cents", "throughput"]
+        is_valid, result = validator.validate_raw_data(data, metrics)
+        
+        # Boundary values within ranges should be valid
+        assert is_valid
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

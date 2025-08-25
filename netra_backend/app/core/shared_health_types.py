@@ -115,6 +115,7 @@ class SystemAlert:
     severity: str
     message: str
     timestamp: datetime
+    resolved: bool = False
     metadata: Dict[str, Any] = None
     
     def __post_init__(self):

@@ -14,17 +14,23 @@
     </root_cause>
     
     <solution>
-        Make DatabaseInitializer check for Alembic-managed schema first.
-        If Alembic has run, skip direct table creation.
-        For now, keep initialization linear/sequential to avoid complexity.
+        Implement comprehensive coordination between DatabaseInitializer and Alembic systems.
+        Instead of complete avoidance, create intelligent supplementary table management.
+        DatabaseInitializer creates only tables that Alembic doesn't provide.
+        All operations are completely idempotent and handle concurrent creation gracefully.
     </solution>
     
     <implementation>
-        Added check in DatabaseInitializer._initialize_postgresql_schema():
-        - Check if alembic_version table exists
-        - If yes, schema is Alembic-managed, skip table creation
-        - If no, proceed with direct table creation
-        - Make all operations idempotent with IF NOT EXISTS
+        Enhanced DatabaseInitializer._initialize_postgresql_schema():
+        - Check if alembic_version table exists to detect Alembic management
+        - If Alembic-managed: Create only supplementary tables (sessions, api_keys)
+        - Avoid creating tables that Alembic already created (users, secrets, etc.)
+        - Use schema-compatible table definitions (VARCHAR(255) for user IDs)
+        - Add comprehensive error handling for "relation already exists" errors
+        - Record coordination state in schema_version table
+        - Create foreign key constraints safely with existence checks
+        - Add database indexes for optimal performance
+        - All operations use IF NOT EXISTS and proper error recovery
     </implementation>
     
     <future_improvement>

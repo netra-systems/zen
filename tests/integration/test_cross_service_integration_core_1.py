@@ -17,10 +17,9 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
-from netra_backend.app.core.middleware_setup import (
-    CustomCORSMiddleware,
-    setup_cors_middleware,
-)
+from netra_backend.app.core.middleware_setup import setup_cors_middleware
+from fastapi.middleware.cors import CORSMiddleware
+from shared.cors_config import get_fastapi_cors_config
 
 
 class TestSyntaxFix:
@@ -181,17 +180,13 @@ class TestSyntaxFix:
             yield discovery
 
     def test_cors_middleware_initialization(self, app, service_discovery):
-        """Test CORS middleware initializes with service discovery."""
-        middleware = CustomCORSMiddleware(
-            app,
-            service_discovery=service_discovery,
-            enable_metrics=True
-        )
-        
-        assert middleware._service_discovery is service_discovery
-        assert middleware._metrics_enabled is True
-        assert middleware._cors_metrics is not None
-        assert 'requests_processed' in middleware._cors_metrics
+        """Test CORS middleware initializes with unified configuration."""
+        # CORS now handled by FastAPI's built-in CORSMiddleware with unified config
+        cors_config = get_fastapi_cors_config("development")
+        # Just verify the configuration is valid
+        assert "allow_origins" in cors_config
+        assert "allow_credentials" in cors_config
+        assert isinstance(cors_config["allow_origins"], list)
 
     def test_service_discovery_origins(self, service_discovery):
         """Test service discovery provides correct origins."""
@@ -331,17 +326,13 @@ class TestSyntaxFix:
             yield discovery
 
     def test_cors_middleware_initialization(self, app, service_discovery):
-        """Test CORS middleware initializes with service discovery."""
-        middleware = CustomCORSMiddleware(
-            app,
-            service_discovery=service_discovery,
-            enable_metrics=True
-        )
-        
-        assert middleware._service_discovery is service_discovery
-        assert middleware._metrics_enabled is True
-        assert middleware._cors_metrics is not None
-        assert 'requests_processed' in middleware._cors_metrics
+        """Test CORS middleware initializes with unified configuration."""
+        # CORS now handled by FastAPI's built-in CORSMiddleware with unified config
+        cors_config = get_fastapi_cors_config("development")
+        # Just verify the configuration is valid
+        assert "allow_origins" in cors_config
+        assert "allow_credentials" in cors_config
+        assert isinstance(cors_config["allow_origins"], list)
 
     def test_service_discovery_origins(self, service_discovery):
         """Test service discovery provides correct origins."""

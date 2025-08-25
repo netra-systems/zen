@@ -14,28 +14,39 @@ jest.mock('@/components/auth/AuthGate', () => ({
   }
 }));
 
-// Mock ThreadSidebarComponents - CRITICAL: Must be before ChatSidebar import
-jest.mock('@/components/chat/ThreadSidebarComponents', () => ({
-  ThreadItem: ({ thread, currentThreadId, isLoading, onClick }: any) => (
+// Mock ChatSidebarThreadList ThreadItem - CRITICAL: Must be before ChatSidebar import
+jest.mock('@/components/chat/ChatSidebarThreadList', () => ({
+  ThreadItem: ({ thread, isActive, isProcessing, onClick }: any) => (
     React.createElement('div', {
       'data-testid': `thread-item-${thread.id}`,
-      'data-current': thread.id === currentThreadId,
-      'data-loading': isLoading,
-      onClick: () => onClick?.(thread),
+      'data-active': isActive,
+      'data-processing': isProcessing,
+      onClick: onClick,
       style: { cursor: 'pointer' }
     }, [
       React.createElement('div', { 'data-testid': 'thread-title', key: 'title' }, thread.title),
       React.createElement('div', { 'data-testid': 'thread-metadata', key: 'metadata' },
-        thread.metadata?.messageCount ? `${thread.metadata.messageCount} messages` : '0 messages')
+        thread.message_count ? `${thread.message_count} messages` : '0 messages')
     ])
   ),
-  ThreadSidebarHeader: ({ onNewThread }: any) => (
-    React.createElement('div', { 'data-testid': 'thread-sidebar-header' }, [
-      React.createElement('button', { 'data-testid': 'new-thread-btn', onClick: onNewThread, key: 'btn' }, 'New Thread')
-    ])
-  ),
-  ThreadEmptyState: () => React.createElement('div', { 'data-testid': 'thread-empty-state' }, 'No threads found'),
-  ThreadAuthRequiredState: () => React.createElement('div', { 'data-testid': 'thread-auth-required' }, 'Please log in')
+  ThreadList: ({ threads, activeThreadId, isProcessing, onThreadClick }: any) => (
+    React.createElement('div', { 'data-testid': 'thread-list' }, 
+      threads.map((thread: any) => 
+        React.createElement('div', {
+          key: thread.id,
+          'data-testid': `thread-item-${thread.id}`,
+          'data-active': activeThreadId === thread.id,
+          'data-processing': isProcessing,
+          onClick: () => onThreadClick(thread.id),
+          style: { cursor: 'pointer' }
+        }, [
+          React.createElement('div', { 'data-testid': 'thread-title', key: 'title' }, thread.title),
+          React.createElement('div', { 'data-testid': 'thread-metadata', key: 'metadata' },
+            thread.message_count ? `${thread.message_count} messages` : '0 messages')
+        ])
+      )
+    )
+  )
 }));
 
 // CRITICAL: Mock ChatSidebar hooks directly in this file to ensure they work

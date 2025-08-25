@@ -15,7 +15,8 @@ from fastapi.testclient import TestClient
 
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.service_discovery import ServiceDiscovery
-from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
+from shared.cors_config import get_fastapi_cors_config
 
 
 def test_fastapi_app():
@@ -142,19 +143,10 @@ def test_fastapi_app():
     return app
 
 def test_app_with_cors(test_fastapi_app, test_service_discovery):
-    """Create test app with enhanced CORS middleware."""
-    # Add enhanced CORS middleware
-    cors_middleware = CustomCORSMiddleware(
-        test_fastapi_app,
-        service_discovery=test_service_discovery,
-        enable_metrics=True
-    )
-    
-    test_fastapi_app.add_middleware(
-        type(cors_middleware),
-        service_discovery=test_service_discovery,
-        enable_metrics=True
-    )
+    """Create test app with unified CORS configuration."""
+    # Add CORS middleware using unified configuration
+    cors_config = get_fastapi_cors_config("development")  # Use development config for testing
+    test_fastapi_app.add_middleware(CORSMiddleware, **cors_config)
     
     return test_fastapi_app
 

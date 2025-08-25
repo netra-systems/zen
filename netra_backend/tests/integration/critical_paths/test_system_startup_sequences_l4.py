@@ -106,7 +106,7 @@ class SystemStartupL4TestSuite:
                 "critical": True
             },
             "auth_service": {
-                "health": "/api/auth/health",
+                "health": "/auth/health",
                 "dependencies": ["postgres", "redis"],
                 "critical": True
             },

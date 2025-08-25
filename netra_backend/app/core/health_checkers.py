@@ -429,10 +429,10 @@ def _build_websocket_health_details(stats: Dict[str, Any], health_score: float) 
 
 
 def _is_development_mode() -> bool:
-    """Check if running in development mode using environment detector."""
+    """Check if running in development mode using unified environment detection."""
     try:
-        from netra_backend.app.core.configuration.environment_detector import get_current_environment, Environment
-        return get_current_environment() == Environment.DEVELOPMENT
+        from netra_backend.app.core.environment_constants import get_current_environment, Environment
+        return get_current_environment() == Environment.DEVELOPMENT.value
     except Exception:
         # Fallback to config if environment detector fails
         config = unified_config_manager.get_config()
@@ -440,13 +440,13 @@ def _is_development_mode() -> bool:
 
 
 def _is_clickhouse_disabled() -> bool:
-    """Check if ClickHouse is disabled in environment using environment detector."""
+    """Check if ClickHouse is disabled in environment using unified environment detection."""
     try:
-        from netra_backend.app.core.configuration.environment_detector import get_environment_detector
-        detector = get_environment_detector()
+        from netra_backend.app.core.environment_constants import get_current_environment, Environment
         
-        # Use environment-aware service requirement check
-        if not detector.should_require_service("clickhouse"):
+        # ClickHouse is optional in development and testing
+        current_env = get_current_environment()
+        if current_env in [Environment.DEVELOPMENT.value, Environment.TESTING.value]:
             return True
             
         # Also check config for explicit disabling
@@ -465,9 +465,17 @@ def _is_clickhouse_disabled() -> bool:
 def _get_health_check_timeout() -> float:
     """Get environment-appropriate health check timeout."""
     try:
-        from netra_backend.app.core.configuration.environment_detector import get_environment_detector
-        detector = get_environment_detector()
-        return detector.get_health_check_timeout()
+        from netra_backend.app.core.environment_constants import get_current_environment, Environment
+        
+        # Environment-specific timeouts
+        current_env = get_current_environment()
+        timeout_map = {
+            Environment.PRODUCTION.value: 5.0,
+            Environment.STAGING.value: 8.0,
+            Environment.DEVELOPMENT.value: 10.0,
+            Environment.TESTING.value: 30.0
+        }
+        return timeout_map.get(current_env, 5.0)
     except Exception:
         # Fallback to conservative default
         return 5.0

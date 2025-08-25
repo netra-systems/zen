@@ -48,7 +48,7 @@ class TestUserJourney:
         async with aiohttp.ClientSession() as session:
             # Step 1: Sign up
             signup_response = await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json=test_user
             )
             
@@ -67,14 +67,14 @@ class TestUserJourney:
                 
                 # Verify email (mock)
                 verify_response = await session.post(
-                    f"{backend_url}/api/auth/verify-email",
+                    f"{backend_url}/auth/verify-email",
                     json={"token": verification_token}
                 )
                 assert verify_response.status == 200, "Email verification failed"
             
             # Step 2: First login
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={
                     "email": test_user['email'],
                     "password": test_user['password']
@@ -143,7 +143,7 @@ class TestUserJourney:
         async with aiohttp.ClientSession() as session:
             # Register
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "Profile123!",
@@ -153,7 +153,7 @@ class TestUserJourney:
             
             # Login
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "Profile123!"}
             )
             
@@ -242,7 +242,7 @@ class TestUserJourney:
             # Create user
             test_email = f"workspace.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "Workspace123!",
@@ -252,7 +252,7 @@ class TestUserJourney:
             
             # Login
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "Workspace123!"}
             )
             
@@ -356,7 +356,7 @@ class TestUserJourney:
             # Create and login user
             test_email = f"apikey.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "ApiKey123!",
@@ -365,7 +365,7 @@ class TestUserJourney:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "ApiKey123!"}
             )
             
@@ -466,7 +466,7 @@ class TestUserJourney:
             # Create and login user
             test_email = f"llm.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "LLMTest123!",
@@ -475,7 +475,7 @@ class TestUserJourney:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "LLMTest123!"}
             )
             

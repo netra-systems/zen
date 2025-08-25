@@ -37,7 +37,11 @@ from typing import Any, Dict, List, Optional, Set, Callable, Union
 from weakref import WeakSet
 import tracemalloc
 
-from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    get_unified_circuit_breaker_manager
+)
 from netra_backend.app.core.error_types import ResourceError
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.unified_logging import get_logger
@@ -167,13 +171,17 @@ class ResourceManager:
         self.resource_lock = asyncio.Lock()
         self.cleanup_lock = asyncio.Lock()
         
-        # Circuit breakers for resource protection
-        memory_config = CircuitConfig(
+        # Circuit breakers for resource protection using unified implementation
+        manager = get_unified_circuit_breaker_manager()
+        memory_config = UnifiedCircuitConfig(
             name="memory_protection",
             failure_threshold=3,
-            recovery_timeout=60.0
+            recovery_timeout=60.0,
+            timeout_seconds=30.0,
+            adaptive_threshold=True,
+            error_rate_threshold=0.7
         )
-        self.memory_breaker = CircuitBreaker(memory_config)
+        self.memory_breaker = manager.create_circuit_breaker("memory_protection", memory_config)
         
         # Initialize tracemalloc if enabled
         if self.enable_tracemalloc:

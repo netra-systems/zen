@@ -21,6 +21,11 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from pydantic import BaseModel
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    get_unified_circuit_breaker_manager
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -76,41 +81,79 @@ class CircuitTimeoutException(CircuitBreakerException):
 
 
 class CircuitBreaker:
-    """Circuit breaker implementation with sliding window error rate calculation."""
+    """DEPRECATED: Legacy circuit breaker implementation. Use UnifiedCircuitBreaker instead.
+    
+    This class is maintained for backward compatibility only. All new code should
+    use netra_backend.app.core.resilience.unified_circuit_breaker.UnifiedCircuitBreaker
+    or the appropriate domain-specific wrapper from domain_circuit_breakers.py.
+    """
     
     def __init__(self, name: str, config: CircuitBreakerConfig):
+        logger.warning(f"Using deprecated CircuitBreaker for {name}. Migrate to UnifiedCircuitBreaker.")
         self.name = name
         self.config = config
-        self.state = CircuitState.CLOSED
+        
+        # Create unified circuit breaker with legacy config mapping
+        unified_config = self._convert_to_unified_config(name, config)
+        manager = get_unified_circuit_breaker_manager()
+        self._unified_breaker = manager.create_circuit_breaker(name, unified_config)
+        
+        # Legacy compatibility properties
         self.metrics = CircuitBreakerMetrics()
         self._state_lock = asyncio.Lock()
         self._last_state_change = datetime.utcnow()
         self._sliding_window: List[Dict[str, Any]] = []
         self._recovery_task: Optional[asyncio.Task] = None
         
+    def _convert_to_unified_config(self, name: str, config: CircuitBreakerConfig) -> UnifiedCircuitConfig:
+        """Convert legacy config to unified config."""
+        return UnifiedCircuitConfig(
+            name=name,
+            failure_threshold=config.failure_threshold,
+            recovery_timeout=float(config.recovery_timeout),
+            success_threshold=config.success_threshold,
+            timeout_seconds=config.timeout,
+            sliding_window_size=config.sliding_window_size,
+            error_rate_threshold=config.error_rate_threshold,
+            min_requests_threshold=config.min_requests_threshold,
+            expected_exception_types=config.expected_exception_types
+        )
+    
+    @property
+    def state(self) -> CircuitState:
+        """Get current state from unified breaker."""
+        unified_state = self._unified_breaker.state.value
+        return CircuitState(unified_state)
+    
     async def call(self, func: Callable, *args, **kwargs) -> Any:
-        """Execute function with circuit breaker protection."""
-        async with self._state_lock:
-            # Check if circuit should be opened based on error rate
-            await self._check_error_rate()
-            
-            # Handle circuit state
-            if self.state == CircuitState.OPEN:
-                if await self._should_attempt_recovery():
-                    self.state = CircuitState.HALF_OPEN
-                    self._last_state_change = datetime.utcnow()
-                    logger.info(f"Circuit breaker {self.name} moved to HALF_OPEN")
-                else:
-                    self.metrics.total_requests += 1
-                    raise CircuitOpenException(f"Circuit breaker {self.name} is OPEN")
-            
-            elif self.state == CircuitState.HALF_OPEN:
-                # In half-open state, only allow limited requests
-                if self.metrics.current_consecutive_successes >= self.config.success_threshold:
-                    await self._close_circuit()
+        """Execute function with circuit breaker protection - delegates to unified breaker."""
+        try:
+            result = await self._unified_breaker.call(func, *args, **kwargs)
+            # Update legacy metrics for backward compatibility
+            self._update_legacy_metrics_on_success()
+            return result
+        except Exception as e:
+            self._update_legacy_metrics_on_failure()
+            # Map unified breaker exceptions to legacy exceptions for compatibility
+            if "CircuitBreakerOpenError" in str(type(e).__name__):
+                raise CircuitOpenException(str(e))
+            raise
+    
+    def _update_legacy_metrics_on_success(self) -> None:
+        """Update legacy metrics on successful call for backward compatibility."""
+        self.metrics.total_requests += 1
+        self.metrics.successful_requests += 1
+        self.metrics.current_consecutive_successes += 1
+        self.metrics.current_consecutive_failures = 0
+        self.metrics.last_success_time = datetime.utcnow()
         
-        # Execute the actual function call
-        return await self._execute_call(func, *args, **kwargs)
+    def _update_legacy_metrics_on_failure(self) -> None:
+        """Update legacy metrics on failed call for backward compatibility."""
+        self.metrics.total_requests += 1
+        self.metrics.failed_requests += 1
+        self.metrics.current_consecutive_failures += 1
+        self.metrics.current_consecutive_successes = 0
+        self.metrics.last_failure_time = datetime.utcnow()
     
     async def _execute_call(self, func: Callable, *args, **kwargs) -> Any:
         """Execute the actual function call with timeout and error handling."""

@@ -30,34 +30,40 @@ jest.mock('@/components/auth/AuthGate', () => ({
   }
 }));
 
-// Mock ThreadSidebarComponents
-jest.mock('@/components/chat/ThreadSidebarComponents', () => ({
-  ThreadItem: ({ thread, currentThreadId, isLoading, onClick }: any) => (
+// Mock ChatSidebarThreadList - ThreadItem is actually from this file for ChatSidebar
+jest.mock('@/components/chat/ChatSidebarThreadList', () => ({
+  ThreadItem: ({ thread, isActive, isProcessing, onClick }: any) => (
     <div 
       data-testid={`thread-item-${thread.id}`}
-      data-current={thread.id === currentThreadId}
-      data-loading={isLoading}
-      onClick={() => onClick?.(thread)}
+      data-active={isActive}
+      data-processing={isProcessing}
+      onClick={onClick}
       style={{ cursor: 'pointer' }}
     >
       <div data-testid="thread-title">{thread.title}</div>
       <div data-testid="thread-metadata">
-        {thread.metadata?.messageCount ? `${thread.metadata.messageCount} messages` : '0 messages'}
+        {thread.message_count ? `${thread.message_count} messages` : '0 messages'}
       </div>
     </div>
   ),
-  ThreadSidebarHeader: ({ onNewThread }: any) => (
-    <div data-testid="thread-sidebar-header">
-      <button data-testid="new-thread-btn" onClick={onNewThread}>
-        New Thread
-      </button>
+  ThreadList: ({ threads, activeThreadId, isProcessing, onThreadClick }: any) => (
+    <div data-testid="thread-list">
+      {threads.map((thread: any) => (
+        <div
+          key={thread.id}
+          data-testid={`thread-item-${thread.id}`}
+          data-active={activeThreadId === thread.id}
+          data-processing={isProcessing}
+          onClick={() => onThreadClick(thread.id)}
+          style={{ cursor: 'pointer' }}
+        >
+          <div data-testid="thread-title">{thread.title}</div>
+          <div data-testid="thread-metadata">
+            {thread.message_count ? `${thread.message_count} messages` : '0 messages'}
+          </div>
+        </div>
+      ))}
     </div>
-  ),
-  ThreadEmptyState: () => (
-    <div data-testid="thread-empty-state">No threads found</div>
-  ),
-  ThreadAuthRequiredState: () => (
-    <div data-testid="thread-auth-required">Please log in</div>
   )
 }));
 
@@ -192,17 +198,21 @@ jest.mock('@/components/ui/input', () => ({
   )
 }));
 
+// Track render triggers for forcing component updates
+let renderTriggerCount = 0;
+
 export const mockChatStore = {
   isProcessing: false,
   activeThreadId: 'thread-1', // Default to first sample thread
+  threads: [] as any[],
+  currentThreadId: null as string | null,
+  _renderTrigger: 0, // Add render trigger to detect changes
   setActiveThread: jest.fn((threadId: string) => {
     mockChatStore.activeThreadId = threadId;
-    console.log('🎯 setActiveThread called with:', threadId);
+    mockChatStore._renderTrigger = renderTriggerCount++;
   }),
   clearMessages: jest.fn(),
   resetLayers: jest.fn(),
-  threads: [] as any[],
-  currentThreadId: null as string | null,
   loadMessages: jest.fn(),
   setThreadLoading: jest.fn()
 };
@@ -364,8 +374,24 @@ export class ChatSidebarTestSetup {
     (useAuthState as jest.Mock).mockReturnValue(mockAuthState);
     jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
     
+    // Reset the mock store state
+    mockChatStore.activeThreadId = 'thread-1';
+    mockChatStore.isProcessing = false;
+    
     // Configure other store mocks - CRITICAL: Mock both hook and getState()
-    jest.mocked(useUnifiedChatStore).mockReturnValue(mockChatStore);
+    // Use mockImplementation to always return current values
+    jest.mocked(useUnifiedChatStore).mockImplementation(() => ({
+      isProcessing: mockChatStore.isProcessing,
+      activeThreadId: mockChatStore.activeThreadId,
+      setActiveThread: mockChatStore.setActiveThread,
+      clearMessages: mockChatStore.clearMessages,
+      resetLayers: mockChatStore.resetLayers,
+      threads: mockChatStore.threads,
+      currentThreadId: mockChatStore.currentThreadId,
+      loadMessages: mockChatStore.loadMessages,
+      setThreadLoading: mockChatStore.setThreadLoading,
+      _renderTrigger: mockChatStore._renderTrigger // Include render trigger to force re-renders
+    }));
     // CRITICAL: Mock getState() method for handlers that use useUnifiedChatStore.getState()
     (useUnifiedChatStore as any).getState = jest.fn().mockReturnValue(mockChatStore);
     
@@ -419,12 +445,21 @@ export class ChatSidebarTestSetup {
 
   // Configure store with custom data
   configureStore(overrides: Partial<typeof mockChatStore>) {
-    const storeConfig = { ...mockChatStore, ...overrides };
+    Object.assign(mockChatStore, overrides);
     
-    // CRITICAL: Update the original mockChatStore object so setActiveThread changes persist
-    Object.assign(mockChatStore, storeConfig);
-    
-    jest.mocked(useUnifiedChatStore).mockReturnValue(mockChatStore);
+    // Use mockImplementation to always return current values
+    jest.mocked(useUnifiedChatStore).mockImplementation(() => ({
+      isProcessing: mockChatStore.isProcessing,
+      activeThreadId: mockChatStore.activeThreadId,
+      setActiveThread: mockChatStore.setActiveThread,
+      clearMessages: mockChatStore.clearMessages,
+      resetLayers: mockChatStore.resetLayers,
+      threads: mockChatStore.threads,
+      currentThreadId: mockChatStore.currentThreadId,
+      loadMessages: mockChatStore.loadMessages,
+      setThreadLoading: mockChatStore.setThreadLoading,
+      _renderTrigger: mockChatStore._renderTrigger // Include render trigger to force re-renders
+    }));
     // CRITICAL: Also update getState() mock for handlers
     (useUnifiedChatStore as any).getState = jest.fn().mockReturnValue(mockChatStore);
     return mockChatStore;
@@ -633,6 +668,7 @@ export const createTestSetup = () => new ChatSidebarTestSetup();
 
 // Create a test-specific ChatSidebar that bypasses AuthGate issues
 export const TestChatSidebar: React.FC = () => {
+
   // Use store's activeThreadId to ensure test configuration changes are reflected
   const { isProcessing, setActiveThread, activeThreadId: storeActiveThreadId } = useUnifiedChatStore();
   // Use React state for searchQuery to make filtering work in tests
@@ -695,7 +731,7 @@ export const TestChatSidebar: React.FC = () => {
   
   // Custom ThreadList for tests with preloading and virtual scrolling
   const TestThreadList = ({ threads, onThreadClick, onRetryLoad, ...props }: any) => {
-    // Virtual scrolling: limit to 50 visible threads for large lists
+      // Virtual scrolling: limit to 50 visible threads for large lists
     const visibleThreads = threads.length > 100 ? threads.slice(0, 50) : threads;
     
     // Handle thread hover for preloading
@@ -711,7 +747,6 @@ export const TestChatSidebar: React.FC = () => {
     const handleThreadClickWithCaching = async (threadId: string) => {
       const hookSetup = (window as any).testHookSetup;
       if (hookSetup?.threadLoader?.getCachedThread) {
-        console.log('🗄️ Getting cached thread:', threadId);
         hookSetup.threadLoader.getCachedThread(threadId);
       }
       
@@ -746,8 +781,7 @@ export const TestChatSidebar: React.FC = () => {
           ) : (
             visibleThreads.map((thread: any) => {
               const isActive = props.activeThreadId === thread.id;
-              console.log(`🎯 Rendering thread ${thread.id}, activeThreadId: ${props.activeThreadId}, isActive: ${isActive}`);
-              
+                          
               return (
                 <button
                   key={thread.id}
@@ -822,9 +856,9 @@ export const TestChatSidebar: React.FC = () => {
   
   // Create enhanced thread click handler for tests that includes URL navigation and debouncing
   const handleThreadClick = React.useCallback(async (threadId: string) => {
-    if (threadId === activeThreadId || isProcessing) return;
-    
-    console.log('🎯 TestChatSidebar handleThreadClick called with:', threadId);
+    if (threadId === activeThreadId || isProcessing) {
+      return;
+    }
     
     // Update localStorage for multi-tab sync
     localStorage.setItem('activeThreadId', threadId);

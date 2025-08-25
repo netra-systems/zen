@@ -22,7 +22,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker, CircuitConfig
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitConfig
 from netra_backend.app.core.degradation_manager import (
     DegradationLevel,
     GracefulDegradationManager,

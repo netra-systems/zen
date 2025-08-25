@@ -18,6 +18,8 @@
 |-----------|----------|---------|-----------|
 | **Unified Environment** | `/dev_launcher/isolated_environment.py` | Central environment management | [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml) |
 | **Database Connectivity** | `/shared/database/core_database_manager.py` | SSL resolution & driver compatibility | [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) |
+| **CORS Configuration** | `/shared/cors_config.py` | **Unified CORS configuration for all services** | [`SPEC/cors_configuration.xml`](SPEC/cors_configuration.xml) |
+| **Shared Component Library** | `/shared/` | Universal utilities & schemas | [`SPEC/shared_component_architecture.xml`](SPEC/shared_component_architecture.xml) |
 | **Test Infrastructure** | `/test_framework/` | Unified test utilities | [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) |
 | **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
 | **Deployment System** | `/scripts/deploy_to_gcp.py` | Official deployment script | [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) |
@@ -31,6 +33,7 @@
 | `database.py` | `/netra_backend/app/core/configuration/database.py` | Database configs | All DB settings unified |
 | `services.py` | `/netra_backend/app/core/configuration/services.py` | External services | API endpoints, OAuth, etc |
 | `secrets.py` | `/netra_backend/app/core/configuration/secrets.py` | Secret management | GCP Secret Manager integration |
+| **🔴 CORS CONFIG** | `/shared/cors_config.py` | **UNIFIED CORS for ALL services** | **CRITICAL: Single source for CORS - consolidated from 5 implementations** |
 
 ### Database Files (Similar Names, Different DBs)
 | File | Location | Purpose | Key Functions |
@@ -184,6 +187,7 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 - [`SPEC/core.xml`](SPEC/core.xml) - Core architecture
 - [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml) - Environment management
 - [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) - Database patterns
+- [`SPEC/cors_configuration.xml`](SPEC/cors_configuration.xml) - **UNIFIED CORS architecture (consolidated 5→1)**
 - [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) - Import rules
 
 ---

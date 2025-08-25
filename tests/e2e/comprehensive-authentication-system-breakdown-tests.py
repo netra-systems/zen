@@ -291,7 +291,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
                 # Step 1: Frontend requests authentication configuration
                 flow_step_start = time.time()
                 auth_config_response = await client.get(
-                    f"{self.services['auth_service']}/api/auth/config",
+                    f"{self.services['auth_service']}/auth/config",
                     timeout=5.0
                 )
                 flow_step_end = time.time()
@@ -307,7 +307,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
                 # Step 2: User initiates OAuth login
                 flow_step_start = time.time()
                 oauth_login_response = await client.get(
-                    f"{self.services['auth_service']}/api/auth/login?provider=google",
+                    f"{self.services['auth_service']}/auth/login?provider=google",
                     timeout=5.0
                 )
                 flow_step_end = time.time()
@@ -344,7 +344,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
                 # Step 4: Backend queries database with authenticated user context
                 flow_step_start = time.time()
                 user_data_response = await client.get(
-                    f"{self.services['backend']}/api/auth/me",
+                    f"{self.services['backend']}/auth/me",
                     headers={
                         'Authorization': 'Bearer end-to-end-test-token',
                         'Content-Type': 'application/json'
@@ -401,9 +401,9 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
         # Test authentication performance across multiple scenarios
         performance_test_scenarios = [
             ('simple_token_validation', f"{self.services['backend']}/api/threads", {'Authorization': 'Bearer perf-test-token'}),
-            ('user_profile_request', f"{self.services['backend']}/api/auth/me", {'Authorization': 'Bearer perf-test-token'}),
-            ('auth_service_validation', f"{self.services['auth_service']}/api/auth/validate", {'Content-Type': 'application/json'}),
-            ('oauth_config_request', f"{self.services['auth_service']}/api/auth/config", {}),
+            ('user_profile_request', f"{self.services['backend']}/auth/me", {'Authorization': 'Bearer perf-test-token'}),
+            ('auth_service_validation', f"{self.services['auth_service']}/auth/validate", {'Content-Type': 'application/json'}),
+            ('oauth_config_request', f"{self.services['auth_service']}/auth/config", {}),
         ]
         
         performance_issues = []
@@ -518,7 +518,7 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
                 try:
                     # Simulate failure scenario and test recovery
                     response = await client.post(
-                        f"{self.services['backend']}/api/auth/recovery-test",
+                        f"{self.services['backend']}/auth/recovery-test",
                         json={
                             'scenario': scenario_name,
                             'failure_type': failure_type,

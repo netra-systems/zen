@@ -26,8 +26,8 @@
       <action-on-violation>Execute 'Extract Function Protocol'. Decompose logic into smaller, named helper functions.</action-on-violation>
     </constraint>
     <constraint id="ARC-003" priority="CRITICAL">
-      <title>Prohibition of Duplication</title>
-      <instruction>Do not create duplicate functionality or types. Extend existing implementations.</instruction>
+      <title>Single Source of Truth (SSOT)</title>
+      <instruction>Maintain ONE canonical implementation per concept within a service. Extend existing implementations with options/parameters instead of creating variants.</instruction>
       <ai-directive>Before generating new code or types, search the codebase for existing implementations. If found, IMPORT and USE it. Do not redefine.</ai-directive>
     </constraint>
     <constraint id="ARC-004" priority="CRITICAL">

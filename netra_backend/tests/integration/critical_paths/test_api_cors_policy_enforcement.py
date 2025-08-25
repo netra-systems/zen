@@ -74,7 +74,7 @@ class ApiCorsManager:
                 allow_credentials=False,
                 max_age=3600
             ),
-            "/api/auth": CorsPolicy(
+            "/auth": CorsPolicy(
                 allowed_origins=["https://app.netrasystems.ai", "https://staging.netrasystems.ai"],
                 allowed_methods=["GET", "POST", "OPTIONS"],
                 allowed_headers=["Content-Type", "Authorization"],
@@ -216,7 +216,7 @@ class ApiCorsManager:
         # Register routes
         app.router.add_route('*', '/api/public', handle_public_api)
         app.router.add_route('*', '/api/public/{path:.*}', handle_public_api)
-        app.router.add_route('*', '/api/auth', handle_auth_api)
+        app.router.add_route('*', '/auth', handle_auth_api)
         app.router.add_route('*', '/auth/{path:.*}', handle_auth_api)
         app.router.add_route('*', '/api/admin', handle_admin_api)
         app.router.add_route('*', '/api/admin/{path:.*}', handle_admin_api)
@@ -645,7 +645,7 @@ async def test_auth_api_restricted_origins(cors_manager):
     ]
     
     compliance_result = await cors_manager.test_cors_policy_compliance(
-        "/api/auth", test_scenarios
+        "/auth", test_scenarios
     )
     
     assert compliance_result["compliance_score"] == 100
@@ -810,7 +810,7 @@ async def test_complex_preflight_scenarios(cors_manager):
     """Test complex preflight scenarios with custom headers."""
     # Test preflight with custom headers
     complex_preflight = await cors_manager.make_cors_request(
-        "/api/auth",
+        "/auth",
         method="POST",
         origin="https://app.netrasystems.ai",
         headers={
@@ -838,9 +838,9 @@ async def test_cors_policy_violation_tracking(cors_manager):
     """Test tracking of CORS policy violations."""
     # Make requests that should violate policies
     violation_scenarios = [
-        ("/api/auth", "https://malicious.com", "GET"),
+        ("/auth", "https://malicious.com", "GET"),
         ("/api/admin", "https://wrong-admin.com", "POST"),
-        ("/api/auth", "https://app.netrasystems.ai", "PATCH")  # Wrong method
+        ("/auth", "https://app.netrasystems.ai", "PATCH")  # Wrong method
     ]
     
     for endpoint, origin, method in violation_scenarios:
@@ -908,7 +908,7 @@ async def test_cors_metrics_accuracy(cors_manager):
     # Generate test traffic
     test_requests = [
         ("/api/public", "https://example.com", "GET"),
-        ("/api/auth", "https://app.netrasystems.ai", "POST"),
+        ("/auth", "https://app.netrasystems.ai", "POST"),
         ("/api/admin", "https://admin.netrasystems.ai", "DELETE"),
         ("/api/embed", "https://customer.com", "GET"),
     ]
@@ -932,4 +932,4 @@ async def test_cors_metrics_accuracy(cors_manager):
     # Check pattern breakdown
     pattern_breakdown = metrics["pattern_breakdown"]
     assert "/api/public" in pattern_breakdown
-    assert "/api/auth" in pattern_breakdown
+    assert "/auth" in pattern_breakdown

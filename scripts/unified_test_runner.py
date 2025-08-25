@@ -75,22 +75,22 @@ class UnifiedTestRunner:
         self.fail_fast_strategy = None
         self.execution_plan = None
         
-        # Test configurations
+        # Test configurations - Use project root as working directory to fix import issues
         self.test_configs = {
             "backend": {
-                "path": self.backend_path,
-                "test_dir": "tests",
-                "config": "pytest.ini",
+                "path": self.project_root,  # Changed from backend_path to project_root
+                "test_dir": "netra_backend/tests",  # Updated to full path from root
+                "config": "netra_backend/pytest.ini",  # Updated to full path from root
                 "command": "pytest"
             },
             "auth": {
-                "path": self.auth_path,
-                "test_dir": "tests",
-                "config": "pytest.ini",
+                "path": self.project_root,  # Changed from auth_path to project_root
+                "test_dir": "auth_service/tests",  # Updated to full path from root
+                "config": "auth_service/pytest.ini",  # Updated to full path from root
                 "command": "pytest"
             },
             "frontend": {
-                "path": self.frontend_path,
+                "path": self.frontend_path,  # Frontend can stay as-is since it uses npm
                 "test_dir": "__tests__",
                 "config": "jest.config.cjs",
                 "command": "npm test"
@@ -403,7 +403,7 @@ class UnifiedTestRunner:
     def _get_services_for_category(self, category_name: str) -> List[str]:
         """Determine which services to run for a category."""
         category_service_mapping = {
-            "smoke": ["backend", "auth"],
+            "smoke": ["backend"],  # Auth service has no smoke tests
             "unit": ["backend", "auth"],
             "integration": ["backend"],
             "api": ["backend"],
@@ -504,7 +504,7 @@ class UnifiedTestRunner:
             "smoke": ["-m", '"smoke"'],
             "unit": ["-m", '"not integration and not e2e"'],
             "integration": ["-m", '"integration"'],
-            "api": ["tests/test_api_core_critical.py", "tests/test_api_error_handling_critical.py", "tests/test_api_threads_messages_critical.py", "tests/test_api_agent_generation_critical.py", "tests/test_api_endpoints_critical.py"],
+            "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
             "database": ["-k", '"database or db"'],
             "websocket": ["-k", '"websocket or ws"'],
             "agent": ["-k", '"agent"'],

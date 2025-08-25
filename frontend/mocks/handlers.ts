@@ -9,7 +9,7 @@ import type {
 
 export const handlers = [
   // Mock for login - return JWT token
-  http.post('/api/auth/login', async ({ request }) => {
+  http.post('/auth/login', async ({ request }) => {
     const body = await request.json() as { username: string; password?: string; email?: string };
     if (body.username === 'testuser' || body.email === 'test@example.com') {
       const user: User = {
@@ -44,7 +44,7 @@ export const handlers = [
   }),
 
   // Mock for logout
-  http.post('/api/auth/logout', () => {
+  http.post('/auth/logout', () => {
     return HttpResponse.json({ success: true, message: 'Logged out successfully' });
   }),
 
@@ -253,7 +253,7 @@ export const handlers = [
   // These handlers are for WebSocket-related HTTP endpoints
   
   // Mock auth token verification endpoint
-  http.post('/api/auth/verify', async ({ request }) => {
+  http.post('/auth/verify', async ({ request }) => {
     const authHeader = request.headers.get('authorization');
     const body = await request.json().catch(() => ({})) as { token?: string };
     const token = body.token || authHeader?.replace('Bearer ', '');

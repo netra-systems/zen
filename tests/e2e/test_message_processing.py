@@ -46,7 +46,7 @@ class TestMessageProcessing:
             # Create test user and get auth token
             test_email = f"message.flow.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "MessageTest123!",
@@ -55,7 +55,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "MessageTest123!"}
             )
             
@@ -183,7 +183,7 @@ class TestMessageProcessing:
             # Create test user
             test_email = f"persist.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "PersistTest123!",
@@ -192,7 +192,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "PersistTest123!"}
             )
             
@@ -327,7 +327,7 @@ class TestMessageProcessing:
             # Create test user
             test_email = f"retrieval.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "RetrieveTest123!",
@@ -336,7 +336,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "RetrieveTest123!"}
             )
             
@@ -498,7 +498,7 @@ class TestMessageProcessing:
             # Create test user
             test_email = f"realtime.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "RealtimeTest123!",
@@ -507,7 +507,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "RealtimeTest123!"}
             )
             

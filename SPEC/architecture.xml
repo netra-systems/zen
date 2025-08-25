@@ -222,7 +222,7 @@
   </design_patterns>
   <authentication>
     <flow name="Standard Login">
-      <step>Frontend sends login request to /api/auth/login</step>
+      <step>Frontend sends login request to /auth/login</step>
       <step>Backend validates credentials using bcrypt hashing</step>
       <step>JWT token generated with user context</step>
       <step>Frontend stores token in localStorage/cookies</step>
@@ -231,7 +231,7 @@
     <flow name="Google OAuth">
       <step>User clicks Google login button</step>
       <step>Redirected to Google OAuth consent screen</step>
-      <step>Callback to /api/auth/google/callback with authorization code</step>
+      <step>Callback to /auth/google/callback with authorization code</step>
       <step>Backend exchanges code for user info</step>
       <step>Creates/updates user in database</step>
       <step>JWT token issued and returned to frontend</step>

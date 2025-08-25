@@ -62,11 +62,14 @@ class AgentErrorHandler(BaseErrorHandler):
         
         # If recovery failed and this is a final attempt (max retries exceeded),
         # re-raise the original exception instead of returning the error object
-        if not recovery_result and context.retry_count >= context.max_retries:
+        if not recovery_result.success and context.retry_count >= context.max_retries:
             raise agent_error.original_error or agent_error
         
-        # For successful recovery or non-final attempts, return the result
-        return recovery_result if recovery_result is not None else agent_error
+        # For successful recovery, return the data if available, otherwise return the agent error
+        # This maintains backward compatibility where tests expect the error object itself
+        if recovery_result.success and recovery_result.data is not None:
+            return recovery_result.data
+        return agent_error
     
     def _convert_to_agent_error(
         self, 

@@ -171,7 +171,7 @@ class HealthCheckResult:
     response_time_ms: float
     status: Optional[str] = None  # Using string to avoid enum dependency
     response_time: Optional[float] = None  # Legacy field for compatibility
-    error_message: Optional[str] = None
+    error_message: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)
     details: Dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))

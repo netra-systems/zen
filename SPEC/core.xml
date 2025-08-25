@@ -135,7 +135,7 @@
         
         <service_contracts>
             <contract service="Auth Service">
-                <endpoint>/api/auth/validate</endpoint>
+                <endpoint>/auth/validate</endpoint>
                 <method>POST</method>
                 <request>{"token": "jwt_token"}</request>
                 <response>{"valid": true, "user_id": "uuid", "permissions": []}</response>

@@ -269,7 +269,7 @@ class TestMixinComposition:
         
         # Verify sensitive endpoints are properly configured
         assert hasattr(middleware, 'sensitive_endpoints')
-        assert "/api/auth/login" in middleware.sensitive_endpoints
+        assert "/auth/login" in middleware.sensitive_endpoints
         assert "/api/admin" in middleware.sensitive_endpoints
     
     def test_circuit_breaker_integration(self):

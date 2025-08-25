@@ -13,7 +13,7 @@
 
 ### 2. Authentication E2E Test (integration_tests/test_e2e_dev_environment.py::TestAuthenticationE2E::test_complete_auth_lifecycle)
 **Status:** Partially Fixed
-- Updated to use `/api/auth/dev_login` endpoint instead of non-existent `/auth/register` and `/auth/login`
+- Updated to use `/auth/dev_login` endpoint instead of non-existent `/auth/register` and `/auth/login`
 - Fixed test to work with actual auth flow
 - **Remaining Issue:** Database table "userbase" doesn't exist
   - This is a database setup issue, not a test issue

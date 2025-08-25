@@ -24,7 +24,7 @@ describe('OAuth Secrets Management', () => {
       const [tokenStatus, setTokenStatus] = React.useState('');
       
       const refreshToken = async () => {
-        const response = await fetch('/api/auth/refresh', {
+        const response = await fetch('/auth/refresh', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: 'old_refresh_token' })

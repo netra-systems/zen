@@ -39,10 +39,10 @@ describe('Frontend URL Configuration - Staging/Production', () => {
       const config = getAuthServiceConfig();
       
       expect(config.baseUrl).toBe('https://auth.staging.netrasystems.ai');
-      expect(config.endpoints.config).toBe('https://auth.staging.netrasystems.ai/api/auth/config');
-      expect(config.endpoints.login).toBe('https://auth.staging.netrasystems.ai/api/auth/login');
-      expect(config.endpoints.logout).toBe('https://auth.staging.netrasystems.ai/api/auth/logout');
-      expect(config.endpoints.refresh).toBe('https://auth.staging.netrasystems.ai/api/auth/refresh');
+      expect(config.endpoints.config).toBe('https://auth.staging.netrasystems.ai/auth/config');
+      expect(config.endpoints.login).toBe('https://auth.staging.netrasystems.ai/auth/login');
+      expect(config.endpoints.logout).toBe('https://auth.staging.netrasystems.ai/auth/logout');
+      expect(config.endpoints.refresh).toBe('https://auth.staging.netrasystems.ai/auth/refresh');
       expect(config.oauth.redirectUri).toBe('https://app.staging.netrasystems.ai/auth/callback');
     });
 
@@ -80,8 +80,8 @@ describe('Frontend URL Configuration - Staging/Production', () => {
       const config = getAuthServiceConfig();
       
       expect(config.baseUrl).toBe('https://auth.netrasystems.ai');
-      expect(config.endpoints.config).toBe('https://auth.netrasystems.ai/api/auth/config');
-      expect(config.endpoints.login).toBe('https://auth.netrasystems.ai/api/auth/login');
+      expect(config.endpoints.config).toBe('https://auth.netrasystems.ai/auth/config');
+      expect(config.endpoints.login).toBe('https://auth.netrasystems.ai/auth/login');
     });
   });
 
@@ -203,7 +203,7 @@ describe('Frontend URL Configuration - Staging/Production', () => {
       // Check if fetch was called with correct URL
       if (mockFetch.mock.calls.length > 0) {
         const calledUrl = mockFetch.mock.calls[0][0];
-        expect(calledUrl).toBe('https://auth.staging.netrasystems.ai/api/auth/config');
+        expect(calledUrl).toBe('https://auth.staging.netrasystems.ai/auth/config');
       }
     });
   });

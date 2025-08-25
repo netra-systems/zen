@@ -103,6 +103,12 @@ class CircuitBreakerMetrics:
     circuit_breaker_opens: int = 0
     recovery_attempts: int = 0
     error_types: Dict[str, int] = field(default_factory=dict)
+    
+    # Additional metrics for compatibility with UnifiedCircuitMetrics
+    consecutive_failures: int = 0
+    consecutive_successes: int = 0
+    current_error_rate: float = 0.0
+    average_response_time: float = 0.0
 
 
 class CircuitBreakerOpenError(ServiceError):
