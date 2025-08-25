@@ -149,13 +149,46 @@ class AuthConfig:
     
     @staticmethod
     def get_database_url() -> str:
-        """Get database URL for auth service"""
-        # Use the same DATABASE_URL as the main application
-        # @marked: Database URL for auth service data persistence
-        database_url = get_env().get("DATABASE_URL", "")
+        """Get database URL for auth service.
+        
+        Constructs URL from individual POSTGRES_* environment variables.
+        Falls back to DATABASE_URL if individual variables not set.
+        """
+        env_manager = get_env()
+        
+        # Try to construct URL from individual PostgreSQL variables
+        postgres_host = env_manager.get("POSTGRES_HOST")
+        postgres_port = env_manager.get("POSTGRES_PORT")
+        postgres_db = env_manager.get("POSTGRES_DB")
+        postgres_user = env_manager.get("POSTGRES_USER")
+        postgres_password = env_manager.get("POSTGRES_PASSWORD")
+        
+        if postgres_host and postgres_user and postgres_db:
+            # Construct URL from individual variables
+            port_part = f":{postgres_port}" if postgres_port else ":5432"
+            pass_part = f":{postgres_password}" if postgres_password else ""
+            
+            # Check for Cloud SQL Unix socket (staging/production)
+            if "/cloudsql/" in postgres_host:
+                # Unix socket format for Cloud SQL
+                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@/{postgres_db}?host={postgres_host}"
+            else:
+                # Standard TCP connection
+                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@{postgres_host}{port_part}/{postgres_db}"
+                
+                # Add SSL mode for staging/production
+                env = AuthConfig.get_environment()
+                if env in ["staging", "production"]:
+                    database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
+            
+            logger.info(f"Constructed database URL from individual PostgreSQL variables")
+            return database_url
+        
+        # Fall back to DATABASE_URL if individual variables not set
+        database_url = env_manager.get("DATABASE_URL", "")
         
         if not database_url:
-            logger.warning("No database URL configured, will use in-memory SQLite")
+            logger.warning("No database configuration found, will use in-memory SQLite")
             return database_url
         
         # Import here to avoid circular imports
@@ -166,8 +199,42 @@ class AuthConfig:
     
     @staticmethod
     def get_raw_database_url() -> str:
-        """Get raw database URL from environment without normalization"""
-        return get_env().get("DATABASE_URL", "")
+        """Get raw database URL from environment without normalization.
+        
+        Constructs URL from individual POSTGRES_* environment variables.
+        Falls back to DATABASE_URL if individual variables not set.
+        """
+        env_manager = get_env()
+        
+        # Try to construct URL from individual PostgreSQL variables
+        postgres_host = env_manager.get("POSTGRES_HOST")
+        postgres_port = env_manager.get("POSTGRES_PORT")
+        postgres_db = env_manager.get("POSTGRES_DB")
+        postgres_user = env_manager.get("POSTGRES_USER")
+        postgres_password = env_manager.get("POSTGRES_PASSWORD")
+        
+        if postgres_host and postgres_user and postgres_db:
+            # Construct URL from individual variables
+            port_part = f":{postgres_port}" if postgres_port else ":5432"
+            pass_part = f":{postgres_password}" if postgres_password else ""
+            
+            # Check for Cloud SQL Unix socket (staging/production)
+            if "/cloudsql/" in postgres_host:
+                # Unix socket format for Cloud SQL (raw format without driver)
+                return f"postgresql://{postgres_user}{pass_part}@/{postgres_db}?host={postgres_host}"
+            else:
+                # Standard TCP connection (raw format without driver)
+                database_url = f"postgresql://{postgres_user}{pass_part}@{postgres_host}{port_part}/{postgres_db}"
+                
+                # Add SSL mode for staging/production
+                env = AuthConfig.get_environment()
+                if env in ["staging", "production"]:
+                    database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
+                
+                return database_url
+        
+        # Fall back to DATABASE_URL if individual variables not set
+        return env_manager.get("DATABASE_URL", "")
     
     @staticmethod
     def get_redis_url() -> str:
