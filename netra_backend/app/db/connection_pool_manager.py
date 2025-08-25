@@ -202,19 +202,27 @@ class CircuitBreakerOpenException(Exception):
 
 
 class ConnectionPoolManager:
-    """Manages database connection pools with circuit breaker and retry logic."""
+    """DEPRECATED: Use DatabaseManager for single source of truth.
+    
+    This class manages database connection pools with circuit breaker and retry logic,
+    but has been DEPRECATED to eliminate SSOT violations. Use DatabaseManager instead.
+    """
     
     def __init__(self, db_url: str = None):
-        """Initialize connection pool manager.
+        """DEPRECATED: Initialize connection pool manager."""
+        import warnings
+        warnings.warn(
+            "ConnectionPoolManager is deprecated. Use DatabaseManager from netra_backend.app.db.database_manager instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        Args:
-            db_url: Optional database URL override
-        """
         self.db_url = db_url or DatabaseManager.get_application_url_async()
         self._engine: Optional[AsyncEngine] = None
         self._session_factory: Optional[async_sessionmaker] = None
         self._initialization_lock = asyncio.Lock()
         self._initialized = False
+        self._database_manager = DatabaseManager.get_connection_manager()
         
         # Circuit breaker for database operations
         self.circuit_breaker = DatabaseCircuitBreaker(

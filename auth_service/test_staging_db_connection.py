@@ -224,12 +224,13 @@ def check_cloud_sql_proxy():
     logger.info("=== Checking Cloud SQL Proxy Status ===")
     
     # Check if running on GCP (where Cloud SQL proxy may not be needed)
-    metadata_server = os.environ.get("GCE_METADATA_HOST", "metadata.google.internal")
+    env = get_env()
+    metadata_server = env.get("GCE_METADATA_HOST", "metadata.google.internal")
     
     # Check for common proxy indicators
     proxy_indicators = [
-        "/cloudsql/" in str(os.environ.get("POSTGRES_HOST", "")),
-        "cloudsql" in str(os.environ.get("INSTANCE_CONNECTION_NAME", "")),
+        "/cloudsql/" in str(env.get("POSTGRES_HOST", "")),
+        "cloudsql" in str(env.get("INSTANCE_CONNECTION_NAME", "")),
     ]
     
     if any(proxy_indicators):
@@ -237,7 +238,7 @@ def check_cloud_sql_proxy():
         logger.info("This should work if running on GCP or with Cloud SQL proxy")
         
         # Check if socket path exists (unix socket)
-        socket_path = os.environ.get("POSTGRES_HOST", "")
+        socket_path = env.get("POSTGRES_HOST", "")
         if socket_path and socket_path.startswith("/cloudsql/"):
             if os.path.exists(socket_path):
                 logger.info(f"SUCCESS: Socket path exists: {socket_path}")

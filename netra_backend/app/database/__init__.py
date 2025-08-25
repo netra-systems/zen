@@ -6,16 +6,18 @@ CRITICAL: This is the ONLY location where database sessions should be defined.
 Business Value Justification (BVJ):
 - Segment: Platform stability (all tiers)
 - Business Goal: Eliminate duplicate database session management code
-- Value Impact: Ensures system integrity and prevents "Abominations" per CLAUDE.md
-- Strategic Impact: Single source of truth for database access patterns
+- Value Impact: Ensures system integrity and prevents SSOT violations per CLAUDE.md
+- Strategic Impact: Single canonical DatabaseManager implementation
 
-ATOMIC DEDUPLICATION: This remediation eliminates 200+ duplicate database connection patterns
+ATOMIC CONSOLIDATION: Uses DatabaseManager as the single source of truth
 """
 
 from typing import AsyncGenerator, Any, Dict, List, Optional
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.db.postgres_session import get_async_db
+
+# SINGLE SOURCE OF TRUTH: Use DatabaseManager exclusively
+from netra_backend.app.db.database_manager import DatabaseManager
 
 # Import ClickHouse functionality
 try:
@@ -28,18 +30,25 @@ except ImportError:
     get_clickhouse_config = None
 
 class UnifiedDatabaseManager:
-    """Unified database connection manager for all database types.
+    """Unified database connection manager using DatabaseManager as single source of truth.
     
-    This class provides the single source of truth for all database connections
-    in the netra_backend service, eliminating the duplication across 200+ files.
+    This class delegates ALL operations to the canonical DatabaseManager implementation,
+    eliminating SSOT violations across the codebase.
     """
     
     @staticmethod
     @asynccontextmanager
     async def postgres_session() -> AsyncGenerator[AsyncSession, None]:
-        """Get PostgreSQL session - single source of truth."""
-        async with get_async_db() as session:
-            yield session
+        """Get PostgreSQL session via DatabaseManager - single source of truth."""
+        # Use DatabaseManager's session factory directly
+        async_session_factory = DatabaseManager.get_application_session()
+        async with async_session_factory() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
     
     @staticmethod
     def clickhouse_client():
@@ -60,7 +69,7 @@ class SessionManager:
         self.total_sessions_created = 0
     
     async def get_session(self):
-        """Get a database session."""
+        """Get a database session via DatabaseManager."""
         async for session in get_db():
             yield session
 
@@ -68,10 +77,10 @@ session_manager = SessionManager()
 
 # SINGLE SOURCE OF TRUTH for PostgreSQL sessions in netra_backend
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Primary PostgreSQL session provider for netra_backend service.
+    """Primary PostgreSQL session provider using DatabaseManager.
     
     This is the SINGLE source of truth for PostgreSQL sessions in netra_backend.
-    All other functions must delegate to this implementation.
+    All database access delegates to DatabaseManager implementation.
     """
     async with _db_manager.postgres_session() as session:
         yield session

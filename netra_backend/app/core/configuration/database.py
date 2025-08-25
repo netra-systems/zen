@@ -215,8 +215,12 @@ class DatabaseConfigManager:
             return self._clickhouse_config_cache
             
         # CONFIG BOOTSTRAP: Direct env access for ClickHouse configuration
-        # Ensure HTTP port 8123 is used for development
-        default_port = "8123"  # Always use HTTP port for dev launcher
+        # Port selection based on environment and security requirements
+        secure = self._env.get("CLICKHOUSE_SECURE", "false").lower() == "true"
+        if secure or self._environment in ["staging", "production"]:
+            default_port = "8443"  # HTTPS port for secure environments
+        else:
+            default_port = "8123"  # HTTP port for development
         
         # Get ClickHouse password from environment
         password = self._env.get("CLICKHOUSE_PASSWORD", "")
@@ -240,13 +244,13 @@ class DatabaseConfigManager:
             logger.warning("CLICKHOUSE_HOST not configured for development/test")
             host = ""  # No fallback - empty host
         
-        user = self._env.get("CLICKHOUSE_USER")
+        user = self._env.get("CLICKHOUSE_USER") or self._env.get("CLICKHOUSE_USERNAME")
         if not user and self._environment in ["staging", "production"]:
             raise ConfigurationError(
-                f"CLICKHOUSE_USER not configured for {self._environment} environment."
+                f"CLICKHOUSE_USER or CLICKHOUSE_USERNAME not configured for {self._environment} environment."
             )
         elif not user:
-            user = ""  # No default fallback
+            user = "default"  # Safe default for development
             
         database = self._env.get("CLICKHOUSE_DB")
         if not database and self._environment in ["staging", "production"]:
@@ -254,11 +258,11 @@ class DatabaseConfigManager:
                 f"CLICKHOUSE_DB not configured for {self._environment} environment."
             )
         elif not database:
-            database = ""  # No default fallback
+            database = "default"  # Safe default for all environments
         
         config = {
             "host": host,
-            "port": self._env.get("CLICKHOUSE_HTTP_PORT", default_port),
+            "port": self._env.get("CLICKHOUSE_PORT") or self._env.get("CLICKHOUSE_HTTP_PORT", default_port),
             "user": user,
             "password": password,
             "database": database

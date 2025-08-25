@@ -46,6 +46,7 @@ class MigrationLockManager:
     async def _get_engine(self) -> AsyncEngine:
         """Get or create database engine lazily."""
         if not self._engine:
+            # MIGRATION NOTE: Consider using netra_backend.app.database for SSOT compliance
             from netra_backend.app.db.postgres_core import AsyncDatabase
             async_db = AsyncDatabase()
             await async_db._ensure_initialized()

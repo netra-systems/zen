@@ -138,34 +138,22 @@ async def _execute_session_transaction(session: AsyncSession):
 
 @asynccontextmanager
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
-    """Dependency to get async database session with resilient transaction handling."""
-    from netra_backend.app.db.postgres_core import async_session_factory, initialize_postgres
+    """DEPRECATED: Use netra_backend.app.database.get_db() for SSOT compliance.
     
-    if async_session_factory is None:
-        logger.debug("async_session_factory is not initialized, attempting to initialize database...")
-        try:
-            # Attempt to initialize the database
-            initialized_factory = initialize_postgres()
-            if initialized_factory is None:
-                logger.error("Failed to initialize database: initialize_postgres() returned None")
-                raise RuntimeError("Database not configured")
-            # Re-import the initialized factory
-            from netra_backend.app.db.postgres_core import async_session_factory
-        except Exception as e:
-            logger.error(f"Failed to initialize database during session creation: {e}")
-            raise RuntimeError("Database not configured") from e
+    This function delegates to DatabaseManager to eliminate SSOT violations.
+    All new code should import from netra_backend.app.database directly.
+    """
+    import warnings
+    warnings.warn(
+        "postgres_session.get_async_db() is deprecated. Use 'from netra_backend.app.database import get_db' instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     
-    # Check again after potential initialization    
-    if async_session_factory is None:
-        logger.error("async_session_factory is still None after initialization attempt")
-        raise RuntimeError("Database not configured")
-        
-    async with async_session_factory() as session:
+    # Delegate to DatabaseManager via the single source of truth
+    from netra_backend.app.database import get_db
+    async for session in get_db():
         try:
-            _validate_async_session(session)
-            yield session
-            await session.commit()
-            
             # Mark connection as healthy on successful completion
             try:
                 from netra_backend.app.db.postgres_resilience import postgres_resilience
@@ -173,9 +161,9 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
             except ImportError:
                 pass  # Resilience module not available
                 
+            yield session
+                
         except Exception as e:
-            await session.rollback()
-            
             # Track connection health for resilience manager
             if isinstance(e, (OperationalError, DatabaseError, DisconnectionError)):
                 try:
@@ -191,9 +179,17 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
 
 @asynccontextmanager
 async def get_postgres_session() -> AsyncGenerator[AsyncSession, None]:
+    """DEPRECATED: Use netra_backend.app.database.get_db() for SSOT compliance.
+    
+    This function delegates to DatabaseManager to eliminate SSOT violations.
+    All new code should import from netra_backend.app.database directly.
     """
-    Alias for get_async_db() for compatibility with existing code.
-    Get a PostgreSQL async database session with proper transaction handling.
-    """
+    import warnings
+    warnings.warn(
+        "postgres_session.get_postgres_session() is deprecated. Use 'from netra_backend.app.database import get_db' instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     async with get_async_db() as session:
         yield session

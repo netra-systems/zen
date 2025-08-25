@@ -6,7 +6,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, Awaitable, Callable, Dict, Optional, TypeVar
 
-from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
 
 T = TypeVar('T')

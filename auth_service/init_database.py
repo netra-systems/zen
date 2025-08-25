@@ -25,26 +25,33 @@ logger = logging.getLogger(__name__)
 
 
 async def init_auth_database():
-    """Initialize auth service database tables"""
+    """Initialize auth service database tables - idempotent operation"""
     try:
-        # Initialize the database connection
+        # Initialize the database connection (idempotent)
         await auth_db.initialize()
         logger.info("Auth database connection initialized")
         
-        # Create all tables
-        async with auth_db.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        # Create all tables (idempotent operation handled in create_tables method)
+        await auth_db.create_tables()
+        logger.info("Auth database tables created successfully (or already existed)")
         
-        logger.info("Auth database tables created successfully")
-        
-        # Test the tables by checking they exist (PostgreSQL)
+        # Test the tables by checking they exist (database-agnostic)
         async with auth_db.get_session() as session:
-            from sqlalchemy import text
-            result = await session.execute(
-                text("SELECT tablename FROM pg_tables WHERE tablename LIKE 'auth_%'")
-            )
-            tables = [row[0] for row in result.fetchall()]
-            logger.info(f"Created tables: {tables}")
+            from sqlalchemy import text, inspect
+            
+            # Use database-agnostic approach to check tables
+            try:
+                # Try to query one of our expected tables to verify creation
+                result = await session.execute(text("SELECT 1 FROM auth_users LIMIT 1"))
+                logger.info("Database tables verified successfully - auth_users table exists and is queryable")
+            except Exception as table_check_error:
+                # If direct query fails, use SQLAlchemy inspector (works on all databases)
+                inspector = inspect(auth_db.engine)
+                tables = await session.run_sync(lambda sync_session: inspector.get_table_names())
+                auth_tables = [table for table in tables if table.startswith('auth_')]
+                logger.info(f"Created auth tables: {auth_tables}")
+                if not auth_tables:
+                    raise RuntimeError("No auth tables were created successfully")
         
         await auth_db.close()
         logger.info("Database initialization complete")

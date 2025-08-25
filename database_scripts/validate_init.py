@@ -12,6 +12,18 @@ from typing import Dict, List, Tuple
 import psycopg2
 from psycopg2 import sql
 
+# Use centralized environment management
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback for standalone execution
+    class FallbackEnv:
+        def get(self, key, default=None):
+            return os.getenv(key, default)
+    
+    def get_env():
+        return FallbackEnv()
+
 
 @dataclass
 class TableValidation:
@@ -20,13 +32,14 @@ class TableValidation:
     foreign_keys: List[Tuple[str, str]]  # (column, references_table)
 
 def get_connection():
-    """Get PostgreSQL connection from environment."""
+    """Get PostgreSQL connection from environment using IsolatedEnvironment."""
+    env = get_env()
     return psycopg2.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=os.getenv("DB_PORT", 5432),
-        database=os.getenv("DB_NAME", "netra_dev"),
-        user=os.getenv("DB_USER", "netra_app"),
-        password=os.getenv("DB_PASSWORD", "changeme")
+        host=env.get("DB_HOST", "localhost"),
+        port=env.get("DB_PORT", 5432),
+        database=env.get("DB_NAME", "netra_dev"),
+        user=env.get("DB_USER", "netra_app"),
+        password=env.get("DB_PASSWORD", "changeme")
     )
 
 def validate_table_exists(cursor, table_name: str) -> bool:

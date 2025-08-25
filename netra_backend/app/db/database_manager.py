@@ -30,10 +30,58 @@ from shared.database_url_builder import DatabaseURLBuilder
 from urllib.parse import urlparse
 import urllib.parse
 import re
+from contextlib import asynccontextmanager
+from enum import Enum
+from typing import Any, Dict, Generator, List, Union
+from datetime import datetime, UTC
+from dataclasses import dataclass
+from pydantic import BaseModel
 
+
+# Additional enums and classes for consolidated functionality
+class DatabaseType(str, Enum):
+    """Database type enumeration."""
+    POSTGRESQL = "postgresql"
+    SQLITE = "sqlite"
+    CLICKHOUSE = "clickhouse"
+    REDIS = "redis"
+
+class ConnectionState(str, Enum):
+    """Database connection state."""
+    DISCONNECTED = "disconnected"
+    CONNECTING = "connecting"
+    CONNECTED = "connected"
+    ERROR = "error"
+    RECONNECTING = "reconnecting"
+
+@dataclass
+class ConnectionMetrics:
+    """Connection pool metrics and statistics."""
+    total_connections: int = 0
+    active_connections: int = 0
+    idle_connections: int = 0
+    failed_connections: int = 0
+    connection_errors: int = 0
+    pool_exhaustion_count: int = 0
+    circuit_breaker_trips: int = 0
+    successful_recoveries: int = 0
+    last_connection_time: Optional[datetime] = None
+    last_error_time: Optional[datetime] = None
+    last_error_message: Optional[str] = None
+    last_pool_exhaustion_time: Optional[datetime] = None
 
 class DatabaseManager:
-    """Unified database manager for sync and async connections."""
+    """SINGLE SOURCE OF TRUTH: Unified database manager for all database operations.
+    
+    This is the ONLY database manager implementation in netra_backend.
+    All other database managers delegate to this implementation.
+    """
+    
+    _instance = None
+    _engines: Dict[str, Any] = {}
+    _session_factories: Dict[str, Any] = {}
+    _health_status: Dict[str, bool] = {}
+    _connection_metrics: Dict[str, ConnectionMetrics] = {}
     
     @staticmethod
     def get_base_database_url() -> str:
@@ -878,6 +926,251 @@ class DatabaseManager:
             return "postgresql://netra:password@/netra_auth?host=/cloudsql/netra-staging:us-central1:netra-db"
         else:
             return "postgresql://netra:password@localhost:5432/netra_auth"
+    
+    # CONSOLIDATED FUNCTIONALITY FROM OTHER DATABASE MANAGERS
+    
+    @staticmethod
+    def get_connection_manager():
+        """Get database connection manager (singleton pattern)."""
+        if DatabaseManager._instance is None:
+            DatabaseManager._instance = DatabaseManager()
+        return DatabaseManager._instance
+    
+    @staticmethod
+    @asynccontextmanager
+    async def get_async_session(name: str = "default"):
+        """Get async database session with automatic cleanup."""
+        async_session_factory = DatabaseManager.get_application_session()
+        async with async_session_factory() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+    
+    @staticmethod
+    async def health_check_all() -> Dict[str, Dict[str, Any]]:
+        """Health check for all database clients."""
+        try:
+            # Test main database connection
+            engine = DatabaseManager.create_application_engine()
+            success = await DatabaseManager.test_connection_with_retry(engine)
+            
+            results = {
+                "postgres": {
+                    "status": "healthy" if success else "unhealthy",
+                    "connection_test": success,
+                    "pool_status": DatabaseManager.get_pool_status(engine)
+                }
+            }
+            
+            # Add ClickHouse if available
+            try:
+                from netra_backend.app.db.clickhouse import get_clickhouse_client
+                clickhouse_client = get_clickhouse_client()
+                results["clickhouse"] = {
+                    "status": "available",
+                    "client_available": True
+                }
+            except ImportError:
+                results["clickhouse"] = {
+                    "status": "unavailable", 
+                    "client_available": False
+                }
+            
+            return results
+        except Exception as e:
+            logger.error(f"Database health check failed: {e}")
+            return {
+                "postgres": {
+                    "status": "error",
+                    "error": str(e)
+                }
+            }
+    
+    @staticmethod
+    def get_all_circuit_status() -> Dict[str, Any]:
+        """Get status of all database circuits."""
+        try:
+            from netra_backend.app.core.circuit_breaker import circuit_registry
+            return circuit_registry.get_all_status()
+        except ImportError:
+            return {"status": "circuit_breaker_unavailable"}
+    
+    @staticmethod
+    async def update_supply_database(
+        supply_items: List[Dict[str, Any]],
+        research_session_id: str,
+        db_session: Optional[Any] = None
+    ) -> Dict[str, Any]:
+        """Update database with new supply information (consolidated from SupplyDatabaseManager)."""
+        if db_session is None:
+            async with DatabaseManager.get_async_session() as session:
+                return await DatabaseManager._update_supply_items_impl(supply_items, research_session_id, session)
+        else:
+            return await DatabaseManager._update_supply_items_impl(supply_items, research_session_id, db_session)
+    
+    @staticmethod
+    async def _update_supply_items_impl(
+        supply_items: List[Dict[str, Any]],
+        research_session_id: str,
+        session: Any
+    ) -> Dict[str, Any]:
+        """Implementation of supply database update."""
+        try:
+            from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
+            
+            updates_made = []
+            for item_data in supply_items:
+                try:
+                    # Find existing item
+                    existing = await session.execute(
+                        text("SELECT * FROM ai_supply_items WHERE provider = :provider AND model_name = :model_name"),
+                        {"provider": item_data["provider"], "model_name": item_data["model_name"]}
+                    )
+                    existing_item = existing.fetchone()
+                    
+                    if existing_item:
+                        # Update existing item if changes detected
+                        changes = DatabaseManager._detect_supply_changes(existing_item, item_data)
+                        if changes:
+                            await DatabaseManager._apply_supply_changes(session, existing_item, item_data, changes, research_session_id)
+                            updates_made.append({
+                                "action": "updated",
+                                "model": f"{item_data['provider']} {item_data['model_name']}",
+                                "changes": changes
+                            })
+                    else:
+                        # Create new item
+                        await session.execute(
+                            text("""
+                                INSERT INTO ai_supply_items (provider, model_name, pricing_input, pricing_output, 
+                                                           research_source, confidence_score, created_at, last_updated)
+                                VALUES (:provider, :model_name, :pricing_input, :pricing_output, 
+                                       :research_source, :confidence_score, NOW(), NOW())
+                            """),
+                            item_data
+                        )
+                        updates_made.append({
+                            "action": "created",
+                            "model": f"{item_data['provider']} {item_data['model_name']}"
+                        })
+                        
+                except Exception as e:
+                    logger.error(f"Failed to update supply item {item_data.get('provider', 'unknown')}: {e}")
+                    continue
+            
+            if updates_made:
+                await session.commit()
+            
+            return {
+                "updates_count": len(updates_made),
+                "updates": updates_made
+            }
+            
+        except Exception as e:
+            logger.error(f"Supply database update failed: {e}")
+            await session.rollback()
+            raise
+    
+    @staticmethod
+    def _detect_supply_changes(existing_item: Any, item_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Detect changes between existing and new supply data."""
+        changes = []
+        
+        # Check pricing input changes
+        if (item_data.get("pricing_input") and 
+            existing_item.pricing_input != item_data["pricing_input"]):
+            changes.append({
+                "field": "pricing_input",
+                "old": str(existing_item.pricing_input),
+                "new": str(item_data["pricing_input"])
+            })
+        
+        # Check pricing output changes
+        if (item_data.get("pricing_output") and 
+            existing_item.pricing_output != item_data["pricing_output"]):
+            changes.append({
+                "field": "pricing_output",
+                "old": str(existing_item.pricing_output),
+                "new": str(item_data["pricing_output"])
+            })
+        
+        return changes
+    
+    @staticmethod
+    async def _apply_supply_changes(
+        session: Any, 
+        existing_item: Any, 
+        item_data: Dict[str, Any], 
+        changes: List[Dict[str, Any]], 
+        research_session_id: str
+    ) -> None:
+        """Apply changes to existing supply item."""
+        # Update the item
+        await session.execute(
+            text("""
+                UPDATE ai_supply_items 
+                SET pricing_input = :pricing_input, 
+                    pricing_output = :pricing_output,
+                    research_source = :research_source,
+                    confidence_score = :confidence_score,
+                    last_updated = NOW()
+                WHERE id = :item_id
+            """),
+            {
+                "item_id": existing_item.id,
+                "pricing_input": item_data.get("pricing_input", existing_item.pricing_input),
+                "pricing_output": item_data.get("pricing_output", existing_item.pricing_output),
+                "research_source": item_data.get("research_source"),
+                "confidence_score": item_data.get("confidence_score")
+            }
+        )
+        
+        # Create update logs
+        for change in changes:
+            await session.execute(
+                text("""
+                    INSERT INTO supply_update_logs (supply_item_id, research_session_id, field_updated, 
+                                                   old_value, new_value, update_reason, updated_by, updated_at)
+                    VALUES (:supply_item_id, :research_session_id, :field_updated, 
+                           :old_value, :new_value, :update_reason, :updated_by, NOW())
+                """),
+                {
+                    "supply_item_id": existing_item.id,
+                    "research_session_id": research_session_id,
+                    "field_updated": change["field"],
+                    "old_value": change["old"],
+                    "new_value": change["new"],
+                    "update_reason": "Research update",
+                    "updated_by": "SupplyResearcherAgent"
+                }
+            )
+    
+    @staticmethod
+    def get_connection_metrics(name: str = "default") -> ConnectionMetrics:
+        """Get connection pool metrics for monitoring."""
+        if name not in DatabaseManager._connection_metrics:
+            DatabaseManager._connection_metrics[name] = ConnectionMetrics()
+        
+        # Update metrics from current engine if available
+        try:
+            if name in DatabaseManager._engines:
+                engine = DatabaseManager._engines[name]
+                pool_status = DatabaseManager.get_pool_status(engine)
+                metrics = DatabaseManager._connection_metrics[name]
+                
+                if isinstance(pool_status, dict) and "pool_size" in pool_status:
+                    metrics.total_connections = pool_status["pool_size"]
+                    metrics.active_connections = pool_status["checked_out"]
+                    metrics.idle_connections = pool_status["checked_in"]
+                
+                metrics.last_connection_time = datetime.now(UTC)
+        except Exception as e:
+            logger.warning(f"Failed to update connection metrics: {e}")
+        
+        return DatabaseManager._connection_metrics[name]
 
 
     @staticmethod
@@ -924,5 +1217,91 @@ class DatabaseManager:
                 return pool_manager._engine, pool_manager._session_factory, migration_lock_manager
 
 
+# CONSOLIDATED CLIENT MANAGER FUNCTIONALITY
+class DatabaseClientManager:
+    """Consolidated database client manager delegating to DatabaseManager."""
+    
+    def __init__(self) -> None:
+        self._manager = DatabaseManager.get_connection_manager()
+    
+    async def health_check_all(self) -> Dict[str, Dict[str, Any]]:
+        """Health check for all database clients - delegates to DatabaseManager."""
+        return await DatabaseManager.health_check_all()
+    
+    async def get_all_circuit_status(self) -> Dict[str, Any]:
+        """Get status of all database circuits - delegates to DatabaseManager.""" 
+        return DatabaseManager.get_all_circuit_status()
+
+# Global database client manager for compatibility
+db_client_manager = DatabaseClientManager()
+
+@asynccontextmanager
+async def get_db_client():
+    """Context manager for getting database client - delegates to DatabaseManager."""
+    async with DatabaseManager.get_async_session() as session:
+        yield session
+
+@asynccontextmanager  
+async def get_clickhouse_client():
+    """Context manager for getting ClickHouse client."""
+    try:
+        from netra_backend.app.db.clickhouse import get_clickhouse_client as _get_clickhouse_client
+        yield _get_clickhouse_client()
+    except ImportError:
+        raise RuntimeError("ClickHouse client not available")
+
+# CONSOLIDATED SUPPLY DATABASE MANAGER
+class SupplyDatabaseManager:
+    """Supply database manager delegating to DatabaseManager for SSOT compliance."""
+    
+    def __init__(self, db: Any):
+        self.db = db
+    
+    async def update_database(
+        self,
+        supply_items: List[Dict[str, Any]],
+        research_session_id: str
+    ) -> Dict[str, Any]:
+        """Update database with supply information - delegates to DatabaseManager."""
+        return await DatabaseManager.update_supply_database(
+            supply_items, research_session_id, self.db
+        )
+
+# UNIFIED DATABASE MANAGER (delegates to DatabaseManager)
+class UnifiedDatabaseManager:
+    """Unified manager delegating to canonical DatabaseManager."""
+    
+    @staticmethod
+    @asynccontextmanager
+    async def get_async_session(name: str = "default"):
+        """Get async session - delegates to DatabaseManager."""
+        async with DatabaseManager.get_async_session(name) as session:
+            yield session
+    
+    @staticmethod
+    async def test_connection(name: str = "default") -> bool:
+        """Test connection - delegates to DatabaseManager."""
+        try:
+            engine = DatabaseManager.create_application_engine()
+            return await DatabaseManager.test_connection_with_retry(engine)
+        except Exception:
+            return False
+    
+    @staticmethod
+    def get_connection_metrics(name: str = "default") -> ConnectionMetrics:
+        """Get metrics - delegates to DatabaseManager."""
+        return DatabaseManager.get_connection_metrics(name)
+
 # Export the main class and key functions
-__all__ = ["DatabaseManager"]
+__all__ = [
+    "DatabaseManager", 
+    "DatabaseClientManager", 
+    "SupplyDatabaseManager", 
+    "UnifiedDatabaseManager",
+    "db_client_manager",
+    "get_db_client", 
+    "get_clickhouse_client",
+    "DatabaseType",
+    "ConnectionState", 
+    "ConnectionMetrics"
+]

@@ -12,22 +12,33 @@ from netra_backend.app.db.client_postgres import ResilientDatabaseClient
 
 
 class DatabaseClientManager:
-    """Manager for all database clients."""
+    """DEPRECATED: Manager for all database clients - Use DatabaseManager instead.
+    
+    This class has been DEPRECATED to eliminate SSOT violations.
+    Use netra_backend.app.db.database_manager.DatabaseManager directly.
+    """
     
     def __init__(self) -> None:
-        self.postgres_client = ResilientDatabaseClient()
-        self.clickhouse_client = ClickHouseDatabaseClient()
+        import warnings
+        warnings.warn(
+            "DatabaseClientManager is deprecated. Use DatabaseManager from netra_backend.app.db.database_manager instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Delegate to DatabaseManager
+        from netra_backend.app.db.database_manager import DatabaseManager
+        self._database_manager = DatabaseManager.get_connection_manager()
 
     async def health_check_all(self) -> Dict[str, Dict[str, Any]]:
-        """Health check for all database clients."""
-        return {
-            "postgres": await self.postgres_client.health_check(),
-            "clickhouse": await self.clickhouse_client.health_check()
-        }
+        """DEPRECATED: Health check - delegates to DatabaseManager."""
+        from netra_backend.app.db.database_manager import DatabaseManager
+        return await DatabaseManager.health_check_all()
 
     async def get_all_circuit_status(self) -> Dict[str, Any]:
-        """Get status of all database circuits."""
-        return await circuit_registry.get_all_status()
+        """DEPRECATED: Get circuits status - delegates to DatabaseManager."""
+        from netra_backend.app.db.database_manager import DatabaseManager
+        return DatabaseManager.get_all_circuit_status()
 
 
 # Global database client manager
