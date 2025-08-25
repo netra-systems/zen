@@ -25,7 +25,7 @@ class TestDataTransformation:
         mock_tool_dispatcher = Mock()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+        with patch('netra_backend.app.redis_manager.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         input_data = {
@@ -49,7 +49,7 @@ class TestDataTransformation:
         mock_tool_dispatcher = Mock()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+        with patch('netra_backend.app.redis_manager.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         input_data = {
@@ -73,7 +73,7 @@ class TestDataTransformation:
         mock_tool_dispatcher = Mock()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+        with patch('netra_backend.app.redis_manager.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         pipeline = [
@@ -105,7 +105,7 @@ class TestDataEnrichment:
         mock_tool_dispatcher = Mock()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+        with patch('netra_backend.app.redis_manager.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         input_data = {

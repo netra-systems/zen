@@ -24,22 +24,14 @@ import websockets
 from test_framework.mock_utils import mock_justified
 
 @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def test_client():
-        """Test client for FastAPI application."""
-        return TestClient(app)
+def test_client():
+    """Test client for FastAPI application."""
+    return TestClient(app)
 
 @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def valid_jwt_token():
-        """Valid JWT token for testing."""
-        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test_payload.signature"
+def valid_jwt_token():
+    """Valid JWT token for testing."""
+    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test_payload.signature"
 
 @pytest.fixture
 
@@ -53,38 +45,18 @@ async def mock_async_db_session():
     return mock_session
 
 @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def mock_auth_client():
-
+def mock_auth_client():
     """Mock authentication client."""
-
     with patch.object(auth_client, 'validate_token', new_callable=AsyncMock) as mock:
-
         mock.return_value = {"user_id": "test_user", "valid": True}
-
         yield mock
 
 @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def websocket_cors_handler():
-
-#     """WebSocket CORS handler for testing.""" # Possibly broken comprehension
-
+def websocket_cors_handler():
+    """WebSocket CORS handler for testing."""
     return get_websocket_cors_handler()
 
 @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def secure_websocket_manager():
-
-#     """Secure WebSocket manager for testing.""" # Possibly broken comprehension
-
+def secure_websocket_manager():
+    """Secure WebSocket manager for testing."""
     return get_unified_websocket_manager()

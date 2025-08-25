@@ -32,7 +32,7 @@ import asyncio
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

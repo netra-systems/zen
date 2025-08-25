@@ -19,7 +19,7 @@ from pathlib import Path
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException, status

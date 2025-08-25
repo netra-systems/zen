@@ -62,15 +62,12 @@ class TestSystemComponentIntegration:
     async def test_http_client_with_json_parsing_integration(self):
         """Test HTTP client integration with JSON parsing."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
-             patch('app.services.external_api_client.circuit_registry') as mock_registry, \
-             patch('app.services.external_api_client.ClientSession') as mock_session_class:
+        with patch('netra_backend.app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
+             patch('netra_backend.app.services.external_api_client.circuit_registry') as mock_registry:
             
             # Setup mocks
             # Mock: Generic component isolation for controlled unit testing
-            mock_circuit = AsyncMock()
-            # Mock: Database session isolation for transaction testing without real database dependency
-            mock_session = AsyncMock()
+            mock_circuit = Mock()
             # Mock: Generic component isolation for controlled unit testing
             mock_response = AsyncMock()
             
@@ -91,17 +88,30 @@ class TestSystemComponentIntegration:
             
             mock_response.status = 200
             mock_response.json.return_value = complex_api_response
-            mock_session.request.return_value.__aenter__.return_value = mock_response
-            # Mock: Async component isolation for testing without real async operations
-            mock_circuit.call = AsyncMock(side_effect=lambda func: func())
+            
+            # Mock: Async component isolation for testing without real async operations  
+            async def mock_circuit_call(func):
+                result = await func()
+                return result
+            mock_circuit.call = mock_circuit_call
             
             mock_cb_class.return_value = mock_circuit
             # Mock: Async component isolation for testing without real async operations
-            mock_registry.get_circuit = AsyncMock(return_value=mock_circuit)
-            mock_session_class.return_value = mock_session
+            mock_registry.get_breaker = Mock(return_value=mock_circuit)
             
-            # Create HTTP client
+            # Create HTTP client and mock its _get_session method
             client = ResilientHTTPClient(base_url="https://api.external.com")
+            
+            # Mock: Database session isolation for transaction testing without real database dependency
+            mock_session = AsyncMock()
+            # Setup async context manager for session.request
+            mock_context_manager = AsyncMock()
+            mock_context_manager.__aenter__.return_value = mock_response
+            mock_context_manager.__aexit__.return_value = None
+            mock_session.request.return_value = mock_context_manager
+            
+            # Mock the client's _get_session method
+            client._get_session = AsyncMock(return_value=mock_session)
             
             # Make request
             raw_response = await client.get("/analyze", "external_api")
@@ -123,7 +133,7 @@ class TestSystemComponentIntegration:
     async def test_http_client_with_reliability_integration(self):
         """Test HTTP client integration with reliability components."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Setup reliability wrapper
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
@@ -143,29 +153,39 @@ class TestSystemComponentIntegration:
             
             # Mock HTTP client operations
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
-                 patch('app.services.external_api_client.circuit_registry') as mock_registry, \
-                 patch('app.services.external_api_client.ClientSession') as mock_session_class:
+            with patch('netra_backend.app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
+                 patch('netra_backend.app.services.external_api_client.circuit_registry') as mock_registry:
                 
                 # Mock: Generic component isolation for controlled unit testing
-                mock_circuit = AsyncMock()
-                # Mock: Database session isolation for transaction testing without real database dependency
-                mock_session = AsyncMock()
+                mock_circuit = Mock()
                 # Mock: Generic component isolation for controlled unit testing
                 mock_response = AsyncMock()
                 
                 mock_response.status = 200
                 mock_response.json.return_value = {"api_result": "success", "data": [1, 2, 3]}
-                mock_session.request.return_value.__aenter__.return_value = mock_response
-                # Mock: Async component isolation for testing without real async operations
-                mock_circuit.call = AsyncMock(side_effect=lambda func: func())
+                
+                # Mock: Async component isolation for testing without real async operations  
+                async def mock_circuit_call2(func):
+                    result = await func()
+                    return result
+                mock_circuit.call = mock_circuit_call2
                 
                 mock_cb_class.return_value = mock_circuit
                 # Mock: Async component isolation for testing without real async operations
-                mock_registry.get_circuit = AsyncMock(return_value=mock_circuit)
-                mock_session_class.return_value = mock_session
+                mock_registry.get_breaker = Mock(return_value=mock_circuit)
                 
                 client = ResilientHTTPClient(base_url="https://api.reliable.com")
+                
+                # Mock: Database session isolation for transaction testing without real database dependency
+                mock_session = AsyncMock()
+                # Setup async context manager for session.request
+                mock_context_manager2 = AsyncMock()
+                mock_context_manager2.__aenter__.return_value = mock_response
+                mock_context_manager2.__aexit__.return_value = None
+                mock_session.request.return_value = mock_context_manager2
+                
+                # Mock the client's _get_session method
+                client._get_session = AsyncMock(return_value=mock_session)
                 
                 # Execute HTTP operation with reliability protection
                 async def api_operation():
@@ -190,7 +210,7 @@ class TestSystemComponentIntegration:
     async def test_json_parsing_error_handling_integration(self):
         """Test JSON parsing error handling integration with reliability."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing
@@ -226,9 +246,16 @@ class TestSystemComponentIntegration:
             # Apply JSON fixes (should handle errors gracefully)
             fixed_result = comprehensive_json_fix(result)
             
-            # Verify error handling - malformed JSON should fall back to defaults
-            assert fixed_result["tool_recommendations"][0]["parameters"] == {}  # Fallback to empty dict
-            assert fixed_result["recommendations"] == ['["invalid json array"']  # Fallback to original string
+            # Verify error handling - malformed JSON should create appropriate wrappers
+            assert fixed_result["tool_recommendations"][0]["parameters"] == {}  # Fallback to empty dict for malformed
+            # For malformed JSON, the function creates a wrapper structure
+            expected_rec_wrapper = {
+                "type": "malformed_json",
+                "raw_response": '["invalid json array"',
+                "parsed": False,
+                "message": "Response contains malformed JSON"
+            }
+            assert fixed_result["recommendations"] == [expected_rec_wrapper]
             
             # Verify operation was still considered successful
             assert len(agent.operation_times) == 1

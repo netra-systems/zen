@@ -10,7 +10,7 @@ import sys
 import asyncio
 import json
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -610,51 +610,47 @@ class TestOAuthIntegrationFlow:
     
     @pytest.mark.asyncio
     async def test_end_to_end_oauth_integration(self, test_client):
-
         """
-
         End-to-end OAuth integration test
-
         Tests the complete flow from login initiation to authenticated session
-
         """
-        # This would test the actual OAuth flow with mocked external services
-        # Step 1: Initiate login
-        # Step 2: Handle callback
-        # Step 3: Verify session
-        # Step 4: Test WebSocket connection
-        # Step 5: Test token refresh
+        # Test should validate that callback is properly forwarded (302 redirect is expected)
+        # This is the correct behavior - backend forwards to auth service
         
-        # Mock the external OAuth provider
-
-        with patch('httpx.AsyncClient') as mock_client:
-
-            # Mock: Generic component isolation for controlled unit testing
-            mock_response = Mock()
-
-            mock_response.status_code = 200
-
-            mock_response.json.return_value = {
-
-                "access_token": "oauth_access_token",
-
-                "id_token": "oauth_id_token"
-
-            }
-
-            mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
+        # Mock httpx.AsyncClient to simulate auth service response
+        with patch('httpx.AsyncClient') as mock_client_class:
+            # Mock the async client instance
+            mock_client = AsyncMock()
+            mock_client_class.return_value.__aenter__.return_value = mock_client
             
-            # Test OAuth callback handling
-
+            # Mock successful response from auth service
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "access_token": "test_access_token",
+                "token_type": "Bearer",
+                "user": {
+                    "id": "test_user_123", 
+                    "email": "test@example.com",
+                    "name": "Test User"
+                }
+            }
+            mock_client.get.return_value = mock_response
+            
+            # Test OAuth callback handling (disable automatic redirect following)
             response = test_client.get(
-
-                "/api/auth/callback?code=test_code&state=test_state"
-
+                "/api/auth/callback?code=test_code&state=test_state",
+                follow_redirects=False
             )
             
-            # Verify response indicates successful authentication
-
-            assert response.status_code in [200, 302]
+            # Verify response is a redirect to auth service (expected behavior)
+            assert response.status_code == 302
+            
+            # Verify redirect URL contains expected auth service endpoint
+            redirect_url = response.headers.get("location", "")
+            assert "/auth/callback" in redirect_url
+            assert "code=test_code" in redirect_url
+            assert "state=test_state" in redirect_url
 
 if __name__ == "__main__":
     # Run specific test for debugging

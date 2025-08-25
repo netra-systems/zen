@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

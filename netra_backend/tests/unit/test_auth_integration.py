@@ -19,7 +19,7 @@ from pathlib import Path
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, status
@@ -55,7 +55,7 @@ class TestAuthIntegration:
     @pytest.fixture
     def mock_auth_client(self):
         """Create mock auth client with common responses."""
-        with patch.object(auth_client, 'validate_token', new_callable=AsyncMock) as mock:
+        with patch('netra_backend.app.auth_integration.auth.auth_client.validate_token_jwt', new_callable=AsyncMock) as mock:
             yield mock
     
     @pytest.fixture
@@ -127,17 +127,21 @@ class TestAuthIntegration:
         self._setup_auth_client_valid_response(mock_auth_client)
         self._setup_db_session_no_user(mock_db_session)
         
-        with pytest.raises(HTTPException) as exc_info:
-            await get_current_user(mock_credentials, mock_db_session)
-        
-        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
-        assert "User not found" in exc_info.value.detail
+        # Mock config to be production so it doesn't create dev users
+        with patch('netra_backend.app.config.get_config') as mock_config:
+            mock_config.return_value.environment = "production"
+            
+            with pytest.raises(HTTPException) as exc_info:
+                await get_current_user(mock_credentials, mock_db_session)
+            
+            assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+            assert "User not found" in exc_info.value.detail
 
     @pytest.mark.asyncio
     async def test_get_current_user_optional_valid_credentials_returns_user(self, mock_credentials, mock_auth_client, mock_db_session, sample_user):
         """Test optional auth returns user with valid credentials."""
         # Mock: Async component isolation for testing without real async operations
-        with patch('app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
+        with patch('netra_backend.app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
             mock_get_user.return_value = sample_user
             
             result = await get_current_user_optional(mock_credentials, mock_db_session)
@@ -155,7 +159,7 @@ class TestAuthIntegration:
     async def test_get_current_user_optional_invalid_credentials_returns_none(self, mock_credentials, mock_db_session):
         """Test optional auth returns None when authentication fails."""
         # Mock: Async component isolation for testing without real async operations
-        with patch('app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
+        with patch('netra_backend.app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
             mock_get_user.side_effect = HTTPException(status_code=401, detail="Invalid token")
             
             result = await get_current_user_optional(mock_credentials, mock_db_session)
@@ -220,14 +224,14 @@ class TestAuthIntegration:
         self._assert_403_forbidden(exc_info, "Permission 'admin' required")
 
     def test_password_hashing_and_verification_success(self):
-        """Test password hashing and successful verification."""
+        """Test deprecated password functions - they return empty/false values."""
         password = "test-password-123"
         
         hashed = get_password_hash(password)
         is_valid = verify_password(password, hashed)
         
-        assert isinstance(hashed, str)
-        assert is_valid is True
+        assert hashed == ""  # Deprecated function returns empty string
+        assert is_valid is False  # Deprecated function returns False
 
     def test_password_verification_wrong_password_fails(self):
         """Test password verification with wrong password."""
@@ -240,33 +244,32 @@ class TestAuthIntegration:
         assert is_valid is False
 
     def test_create_access_token_default_expiry(self):
-        """Test JWT token creation with default expiry."""
+        """Test deprecated JWT token creation - returns empty string."""
         data = {"user_id": "test-123", "email": "test@example.com"}
         
         token = create_access_token(data)
         
         assert isinstance(token, str)
-        assert len(token) > 20  # JWT tokens are longer
+        assert token == ""  # Deprecated function returns empty string
 
     def test_create_access_token_custom_expiry(self):
-        """Test JWT token creation with custom expiry."""
+        """Test deprecated JWT token creation with custom expiry - returns empty string."""
         data = {"user_id": "test-123"}
         expires_delta = timedelta(hours=1)
         
         token = create_access_token(data, expires_delta)
         
         assert isinstance(token, str)
+        assert token == ""  # Deprecated function returns empty string
 
     def test_validate_token_jwt_valid_token_success(self):
-        """Test JWT token validation with valid token."""
+        """Test deprecated JWT token validation - always returns None."""
         data = {"user_id": "test-123", "email": "test@example.com"}
         token = create_access_token(data, timedelta(minutes=5))
         
         payload = validate_token_jwt(token)
         
-        assert payload is not None
-        assert payload["user_id"] == "test-123"
-        assert payload["email"] == "test@example.com"
+        assert payload is None  # Deprecated function always returns None
 
     def test_validate_token_jwt_invalid_token_returns_none(self):
         """Test JWT token validation with invalid token."""
@@ -277,16 +280,11 @@ class TestAuthIntegration:
         assert payload is None
 
     def test_validate_token_jwt_expired_token_returns_none(self):
-        """Test JWT token validation with expired token."""
+        """Test JWT token validation with expired token - deprecated function returns None."""
         data = {"user_id": "test-123"}
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('app.auth_integration.auth.datetime') as mock_datetime:
-            past_time = datetime.utcnow() - timedelta(hours=1)
-            mock_datetime.utcnow.return_value = past_time
-            token = create_access_token(data, timedelta(minutes=5))
-        
-        payload = validate_token_jwt(token)
+        # Since validate_token_jwt is deprecated and always returns None, just test that
+        payload = validate_token_jwt("any-token")
         
         assert payload is None
 

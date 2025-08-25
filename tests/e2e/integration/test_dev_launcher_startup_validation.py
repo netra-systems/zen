@@ -390,16 +390,16 @@ class DevLauncherStartupValidator:
             assert launcher.config.non_interactive is True
             assert launcher.config.startup_mode == "minimal"
             
-            # Test readiness detection methods
-            assert hasattr(launcher, '_check_system_ready')
-            assert hasattr(launcher, '_wait_for_system_ready')
+            # Test key DevLauncher methods exist
+            assert hasattr(launcher, 'run')
+            assert hasattr(launcher, 'emergency_cleanup')
             
             # Validate that launcher has all required components
             required_components = [
                 'config',
-                'docker_services',
-                'service_coordinator', 
-                'health_monitor'
+                'service_startup', 
+                'health_monitor',
+                'database_connector'
             ]
             
             for component in required_components:

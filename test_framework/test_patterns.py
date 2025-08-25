@@ -6,6 +6,11 @@ import pytest
 class L3IntegrationTest:
     """Base class for L3 integration tests."""
     
+    @property
+    def backend_url(self):
+        """Get backend URL for testing."""
+        return "http://localhost:8000"
+    
     @pytest.fixture(autouse=True)
     async def setup_base(self):
         """Base setup for all L3 tests."""
@@ -21,6 +26,10 @@ class L3IntegrationTest:
             "name": f"Test User {email.split('@')[0]}",
             "token": f"test_token_{email.split('@')[0]}"
         }
+    
+    async def get_auth_token(self, user_data):
+        """Get authentication token for a test user."""
+        return user_data.get('token', 'test_token')
     
     async def get_auth_headers(self, user_data):
         """Get authentication headers for a test user."""

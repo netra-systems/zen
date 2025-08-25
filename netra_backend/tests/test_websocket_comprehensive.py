@@ -37,6 +37,7 @@ from fastapi import WebSocket
 
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager
 
 class TestWebSocketConnectionEstablishment:
     """Test 1: Connection establishment with auth"""
@@ -54,15 +55,15 @@ class TestWebSocketConnectionEstablishment:
         conn_manager = ConnectionManager()
         
         # Test connection establishment
-        conn_info = await conn_manager.connect("authenticated_user_123", websocket)
+        connection_id = await conn_manager.connect_user("authenticated_user_123", websocket)
         
-        assert conn_info is not None
-        assert conn_info.user_id == "authenticated_user_123"
-        assert conn_info.websocket == websocket
-        assert conn_info.connection_id is not None
-        assert "authenticated_user_123" in conn_manager.active_connections
+        assert connection_id is not None
+        assert connection_id.startswith("conn_authenticated_user_123_")
         
-        print(f"✓ Connection established with auth for user {conn_info.user_id}")
+        # Verify connection was registered
+        assert "authenticated_user_123" in conn_manager.user_connections
+        
+        print(f"✓ Connection established with auth for user authenticated_user_123")
 
 class TestWebSocketAuthValidation:
     """Test 2: Auth validation in handshake"""

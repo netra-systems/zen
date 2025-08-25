@@ -21,7 +21,7 @@ import asyncio
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -42,7 +42,7 @@ class TestCompensationEngineCore:
     def engine(self):
         """Create compensation engine with mocked logger."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.compensation_engine_core.central_logger'):
+        with patch('netra_backend.app.services.compensation_engine_core.central_logger'):
             engine = CompensationEngine()
             engine.handlers = []  # Clear default handlers for testing
             return engine

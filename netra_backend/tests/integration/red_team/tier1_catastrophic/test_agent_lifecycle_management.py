@@ -37,8 +37,8 @@ from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.agent_service import AgentService as BaseAgentService
 
-class TestAgentService(BaseAgentService):
-    """Extended agent service for lifecycle testing"""
+class MockAgentService(BaseAgentService):
+    """Extended agent service for lifecycle testing (renamed to avoid pytest collection)"""
     
     def __init__(self, db_session=None):
         # Create a mock supervisor for testing
@@ -259,7 +259,7 @@ class TestAgentLifecycleManagement:
             }
             
             # FAILURE EXPECTED HERE - agent initialization may not work
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             initialized_agent = await agent_service.initialize_agent(**agent_config)
             
             assert initialized_agent is not None, "Agent initialization returned None"
@@ -313,7 +313,7 @@ class TestAgentLifecycleManagement:
             await real_database_session.commit()
             
             # Try to execute agent via service
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             
             # FAILURE EXPECTED HERE - execution may not be implemented
             execution_result = await agent_service.execute_agent_run(agent_run_id)
@@ -396,7 +396,7 @@ class TestAgentLifecycleManagement:
             await real_database_session.commit()
             
             # Execute all agents
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             
             for agent_run in agent_runs:
                 try:
@@ -472,7 +472,7 @@ class TestAgentLifecycleManagement:
             await real_database_session.commit()
             
             # Start agent execution
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             
             # FAILURE EXPECTED HERE - agent execution may create orphaned processes
             execution_task = asyncio.create_task(
@@ -575,7 +575,7 @@ class TestAgentLifecycleManagement:
             await real_database_session.commit()
             
             # Execute agent (expecting failure)
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             
             # FAILURE EXPECTED HERE - error handling may not work properly
             try:
@@ -656,7 +656,7 @@ class TestAgentLifecycleManagement:
             await real_database_session.commit()
             
             # Execute agents concurrently
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             
             async def execute_agent(run_id: str) -> Dict[str, Any]:
                 """Execute a single agent and return result."""
@@ -741,7 +741,7 @@ class TestAgentLifecycleManagement:
             await real_database_session.commit()
             
             # Execute agent with timeout
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             start_time = time.time()
             
             try:
@@ -820,7 +820,7 @@ class TestAgentLifecycleManagement:
             await real_database_session.commit()
             
             # Start agent execution
-            agent_service = TestAgentService(real_database_session)
+            agent_service = MockAgentService(real_database_session)
             
             # FAILURE EXPECTED HERE - state persistence may not work
             if hasattr(agent_service, 'execute_agent_with_state_tracking'):
