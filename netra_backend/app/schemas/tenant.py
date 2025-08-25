@@ -7,7 +7,7 @@ resources, and isolation boundaries in the Netra platform.
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class SubscriptionTier(str, Enum):
@@ -67,10 +67,11 @@ class TenantResource(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
     
-    @validator('used')
-    def used_cannot_exceed_limit(cls, v, values):
-        if 'limit' in values and v > values['limit']:
-            raise ValueError(f'Used amount ({v}) cannot exceed limit ({values["limit"]})')
+    @field_validator('used')
+    @classmethod
+    def used_cannot_exceed_limit(cls, v, info):
+        if info.data and 'limit' in info.data and v > info.data['limit']:
+            raise ValueError(f'Used amount ({v}) cannot exceed limit ({info.data["limit"]})')
         return v
     
     @property
@@ -110,13 +111,15 @@ class TenantSettings(BaseModel):
     notification_preferences: Dict[str, bool] = Field(default_factory=dict)
     custom_branding: Optional[Dict[str, str]] = None
     
-    @validator('log_retention_days', 'metrics_retention_days', 'audit_retention_days')
+    @field_validator('log_retention_days', 'metrics_retention_days', 'audit_retention_days')
+    @classmethod
     def retention_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('Retention days must be positive')
         return v
     
-    @validator('max_concurrent_agents', 'max_agent_memory_mb')
+    @field_validator('max_concurrent_agents', 'max_agent_memory_mb')
+    @classmethod
     def limits_must_be_positive(cls, v):
         if v <= 0:
             raise ValueError('Resource limits must be positive')
@@ -137,7 +140,8 @@ class TenantIsolationConfig(BaseModel):
     data_residency_requirements: Optional[Dict[str, str]] = None
     compliance_tags: Set[str] = Field(default_factory=set)
     
-    @validator('database_schema', 'storage_prefix')
+    @field_validator('database_schema', 'storage_prefix')
+    @classmethod
     def isolation_identifiers_valid(cls, v):
         if not v or not v.replace('_', '').replace('-', '').isalnum():
             raise ValueError('Isolation identifiers must be alphanumeric with underscores/hyphens')
@@ -177,19 +181,22 @@ class Tenant(BaseModel):
     total_users: int = 0
     total_agents: int = 0
     
-    @validator('slug')
+    @field_validator('slug')
+    @classmethod
     def slug_must_be_valid(cls, v):
         if not v or not v.replace('-', '').replace('_', '').isalnum():
             raise ValueError('Slug must be alphanumeric with hyphens and underscores only')
         return v.lower()
     
-    @validator('contact_email', 'billing_email')
+    @field_validator('contact_email', 'billing_email')
+    @classmethod
     def emails_must_be_valid(cls, v):
         if v and '@' not in v:
             raise ValueError('Invalid email format')
         return v
     
-    @validator('subscription_tier', pre=True)
+    @field_validator('subscription_tier', mode='before')
+    @classmethod
     def normalize_subscription_tier(cls, v):
         if isinstance(v, str):
             return SubscriptionTier(v.lower())

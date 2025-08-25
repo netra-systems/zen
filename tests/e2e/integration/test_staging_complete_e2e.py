@@ -243,7 +243,7 @@ class StagingE2ETestSuite:
             
             # Create thread
             async with self.session.post(
-                f"{backend_url}/api/v1/threads",
+                f"{backend_url}/api/threads",
                 headers=headers,
                 json={"name": "Test Thread"}
             ) as resp:
@@ -253,7 +253,7 @@ class StagingE2ETestSuite:
             
             # Send message to agent
             async with self.session.post(
-                f"{backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{backend_url}/api/threads/{thread_id}/messages",
                 headers=headers,
                 json={
                     "content": "Analyze my AI costs and suggest optimizations",
@@ -267,7 +267,7 @@ class StagingE2ETestSuite:
             max_attempts = 30
             for _ in range(max_attempts):
                 async with self.session.get(
-                    f"{backend_url}/api/v1/threads/{thread_id}/messages",
+                    f"{backend_url}/api/threads/{thread_id}/messages",
                     headers=headers
                 ) as resp:
                     if resp.status == 200:
@@ -316,7 +316,7 @@ class StagingE2ETestSuite:
             origin = "https://app.staging.netrasystems.ai"
             
             async with self.session.options(
-                f"{backend_url}/api/v1/threads",
+                f"{backend_url}/api/threads",
                 headers={"Origin": origin}
             ) as resp:
                 cors_headers = resp.headers

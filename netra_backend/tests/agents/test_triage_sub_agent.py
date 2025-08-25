@@ -10,7 +10,7 @@ from pathlib import Path
 
 import json
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle

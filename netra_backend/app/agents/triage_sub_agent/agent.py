@@ -11,7 +11,10 @@ if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.core.resilience.domain_circuit_breakers import (
+    AgentCircuitBreaker,
+    AgentCircuitBreakerConfig
+)
 from netra_backend.app.agents.base.errors import ValidationError
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
@@ -74,10 +77,13 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
         self._init_monitoring_system()
     
     def _init_reliability_manager(self) -> None:
-        """Initialize reliability manager with circuit breaker and retry patterns."""
-        circuit_config = CircuitBreakerConfig(
-            failure_threshold=3, recovery_timeout=30.0, name="TriageSubAgent"
+        """Initialize reliability manager with unified agent circuit breaker."""
+        circuit_config = AgentCircuitBreakerConfig(
+            failure_threshold=3, 
+            recovery_timeout_seconds=30.0,
+            task_timeout_seconds=120.0
         )
+        self.circuit_breaker = AgentCircuitBreaker("TriageSubAgent", config=circuit_config)
         retry_config = RetryConfig(max_retries=2, base_delay=1.0, max_delay=10.0)
         self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
     

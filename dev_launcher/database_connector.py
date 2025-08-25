@@ -231,18 +231,13 @@ class DatabaseConnector:
     def _normalize_postgres_url(self, url: str) -> str:
         """Normalize PostgreSQL URL format for asyncpg compatibility.
         
-        DatabaseURLBuilder already provides properly formatted URLs,
-        but we keep this for backward compatibility and edge cases.
+        Uses DatabaseURLBuilder for consistent URL normalization.
         """
         if not url:
             return url
-        # Convert postgres:// to postgresql://
-        if url.startswith("postgres://"):
-            url = url.replace("postgres://", "postgresql://")
-        # Strip async driver prefixes for asyncpg (asyncpg expects plain postgresql://)
-        url = url.replace("postgresql+asyncpg://", "postgresql://")
-        url = url.replace("postgres+asyncpg://", "postgresql://")
-        return url
+        # Use centralized format_for_asyncpg_driver method for consistent handling
+        from shared.database_url_builder import DatabaseURLBuilder
+        return DatabaseURLBuilder.format_for_asyncpg_driver(url)
     
     async def validate_all_connections(self) -> bool:
         """
@@ -375,7 +370,9 @@ class DatabaseConnector:
         """Handle connection failure during validation."""
         connection.status = ConnectionStatus.RETRYING
         if attempt == self.retry_config.max_attempts - 1:
-            connection.last_error = "Connection test failed"
+            # Only set generic error message if no specific error is already set
+            if not connection.last_error:
+                connection.last_error = "Connection test failed"
     
     def _handle_connection_exception(self, connection: DatabaseConnection, exception: Exception, attempt: int) -> None:
         """Handle exception during connection validation."""
@@ -457,8 +454,10 @@ class DatabaseConnector:
     async def _connect_cloud_sql(self, connection: DatabaseConnection) -> object:
         """Connect to Cloud SQL PostgreSQL."""
         import asyncpg
+        # Normalize URL for asyncpg (remove SQLAlchemy driver prefixes)
+        clean_url = self._normalize_postgres_url(connection.url)
         return await asyncio.wait_for(
-            asyncpg.connect(connection.url),
+            asyncpg.connect(clean_url),
             timeout=self.retry_config.timeout
         )
     
@@ -484,8 +483,8 @@ class DatabaseConnector:
             import psycopg2
             from psycopg2 import OperationalError
             
-            # Convert asyncpg URL to psycopg2 format
-            url = connection.url.replace("postgresql+asyncpg://", "postgresql://")
+            # Convert URL to psycopg2 format using centralized normalization
+            url = self._normalize_postgres_url(connection.url)
             
             conn = psycopg2.connect(url)
             cursor = conn.cursor()

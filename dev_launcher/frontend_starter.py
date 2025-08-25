@@ -131,14 +131,69 @@ class FrontendStarter:
         return port
     
     def _allocate_dynamic_frontend_port(self) -> int:
-        """Allocate dynamic frontend port."""
-        # Try to get a port in a preferred range first
+        """
+        Allocate dynamic frontend port with comprehensive fallback strategy.
+        
+        Returns:
+            Allocated port number
+        """
         from dev_launcher.utils import find_available_port
         preferred_port = self.config.frontend_port or 3000
-        port = find_available_port(preferred_port, (3000, 3010))
-        logger.info(f"Allocated frontend port: {port}")
-        self.config.frontend_port = port
-        return port
+        
+        try:
+            # Use enhanced port allocation with extended fallback
+            port = find_available_port(preferred_port, (3000, 3010), host='0.0.0.0')
+            
+            # Validate the allocated port is actually available
+            if not self._verify_port_allocation(port):
+                logger.warning(f"Allocated port {port} failed verification, trying fallback")
+                # Try fallback allocation
+                port = find_available_port(preferred_port + 10, (3011, 3020), host='0.0.0.0')
+            
+            logger.info(f"Allocated frontend port: {port}")
+            self.config.frontend_port = port
+            return port
+            
+        except Exception as e:
+            logger.error(f"Failed to allocate frontend port: {e}")
+            # Emergency fallback to any available port
+            from dev_launcher.utils import get_free_port
+            emergency_port = get_free_port()
+            logger.warning(f"Emergency fallback to OS-allocated port: {emergency_port}")
+            self.config.frontend_port = emergency_port
+            return emergency_port
+    
+    def _verify_port_allocation(self, port: int) -> bool:
+        """
+        Verify that the allocated port is actually available.
+        
+        Args:
+            port: Port number to verify
+            
+        Returns:
+            True if port is available, False otherwise
+        """
+        try:
+            import socket
+            import time
+            
+            # Try to bind to the port briefly to ensure it's available
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind(('0.0.0.0', port))
+                
+                # Small delay on Windows for race condition prevention
+                if sys.platform == "win32":
+                    time.sleep(0.02)
+                
+                return True
+                
+        except OSError as e:
+            logger.debug(f"Port {port} verification failed: {e}")
+            return False
+        except Exception as e:
+            logger.debug(f"Port {port} verification error: {e}")
+            return False
     
     def _get_frontend_path(self) -> Optional[Path]:
         """Get frontend path with graceful error handling."""
@@ -264,12 +319,67 @@ class FrontendStarter:
         self._print_frontend_troubleshooting()
     
     def _print_frontend_troubleshooting(self):
-        """Print frontend troubleshooting tips."""
-        print("\nPossible causes:")
-        print("  • Port already in use (try --dynamic flag)")
-        print("  • Node modules not installed (run: cd frontend && npm install)")
-        print("  • Invalid Next.js configuration")
-        print("  • TypeScript compilation errors")
+        """Print frontend troubleshooting tips with enhanced diagnostics."""
+        print("\nFrontend Startup Troubleshooting:")
+        print("=" * 50)
+        
+        # Check if port was the issue
+        current_port = getattr(self.config, 'frontend_port', 3000)
+        print(f"• Attempted port: {current_port}")
+        
+        from dev_launcher.utils import _get_process_using_port
+        process_info = _get_process_using_port(current_port)
+        if process_info:
+            print(f"  → Port {current_port} is occupied by: {process_info}")
+            print(f"  → Solution: Kill the process or use --dynamic flag for automatic port allocation")
+        else:
+            print(f"  → Port {current_port} appears available")
+        
+        # Check frontend directory
+        try:
+            from dev_launcher.config import resolve_path
+            frontend_path = resolve_path("frontend", root=self.config.project_root)
+            if frontend_path and frontend_path.exists():
+                print(f"• Frontend directory: ✓ Found at {frontend_path}")
+                
+                # Check for package.json
+                package_json = frontend_path / "package.json"
+                if package_json.exists():
+                    print("• package.json: ✓ Found")
+                else:
+                    print("• package.json: ✗ Missing")
+                
+                # Check for node_modules
+                node_modules = frontend_path / "node_modules"
+                if node_modules.exists():
+                    print("• node_modules: ✓ Found")
+                else:
+                    print("• node_modules: ✗ Missing (run: cd frontend && npm install)")
+                    
+                # Check for Next.js config
+                next_config = frontend_path / "next.config.js"
+                next_config_mjs = frontend_path / "next.config.mjs"
+                if next_config.exists() or next_config_mjs.exists():
+                    print("• Next.js config: ✓ Found")
+                else:
+                    print("• Next.js config: ⚠ Not found (may be optional)")
+                    
+            else:
+                print(f"• Frontend directory: ✗ Not found at expected location")
+                print(f"  → Expected: {frontend_path}")
+                print(f"  → Solution: Ensure you're running from project root")
+        except Exception as e:
+            print(f"• Directory check failed: {e}")
+        
+        print("\nCommon Solutions:")
+        print("• For port conflicts: python scripts/dev_launcher.py --dynamic")
+        print("• For missing dependencies: cd frontend && npm install")  
+        print("• For TypeScript errors: cd frontend && npm run build")
+        print("• For permission issues: Run as administrator (Windows) or use sudo (Linux/Mac)")
+        print("• For firewall issues: Allow Node.js/npm through firewall")
+        
+        print(f"\nFor more help, check logs in: {self.config.log_dir}")
+        print("=" * 50)
     
     def _finalize_frontend_startup(self, port: int, process: subprocess.Popen):
         """Finalize frontend startup."""

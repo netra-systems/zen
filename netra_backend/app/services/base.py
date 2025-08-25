@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.exceptions_database import RecordNotFoundError
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.service_interfaces import (

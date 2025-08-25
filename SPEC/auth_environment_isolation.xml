@@ -34,7 +34,7 @@
         <client_id_env>GOOGLE_OAUTH_CLIENT_ID_DEV</client_id_env>
         <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_DEV</client_secret_env>
         <redirect_uris>
-          <uri>http://localhost:8000/api/auth/callback</uri>
+          <uri>http://localhost:8000/auth/callback</uri>
           <uri>http://localhost:3000/auth/callback</uri>
         </redirect_uris>
         <javascript_origins>
@@ -54,7 +54,7 @@
         <client_id_env>GOOGLE_OAUTH_CLIENT_ID_TEST</client_id_env>
         <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_TEST</client_secret_env>
         <redirect_uris>
-          <uri>http://api.test.local/api/auth/callback</uri>
+          <uri>http://api.test.local/auth/callback</uri>
         </redirect_uris>
         <javascript_origins>
           <origin>http://test.local</origin>
@@ -93,7 +93,7 @@
         <client_id_env>GOOGLE_OAUTH_CLIENT_ID_PROD</client_id_env>
         <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_PROD</client_secret_env>
         <redirect_uris>
-          <uri>https://api.netrasystems.ai/api/auth/callback</uri>
+          <uri>https://api.netrasystems.ai/auth/callback</uri>
           <uri>https://netrasystems.ai/auth/callback</uri>
         </redirect_uris>
         <javascript_origins>

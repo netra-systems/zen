@@ -144,9 +144,9 @@ class PrometheusAccuracyValidator:
             PrometheusTestMetric(
                 name="api_request_duration_seconds",
                 value=0.245,
-                labels={"endpoint": "/api/v1/agents", "method": "POST"},
+                labels={"endpoint": "/api/agents", "method": "POST"},
                 metric_type="histogram",
-                expected_prometheus_format='api_request_duration_seconds{endpoint="/api/v1/agents",method="POST"} 0.245',
+                expected_prometheus_format='api_request_duration_seconds{endpoint="/api/agents",method="POST"} 0.245',
                 tolerance=0.001
             ),
             PrometheusTestMetric(

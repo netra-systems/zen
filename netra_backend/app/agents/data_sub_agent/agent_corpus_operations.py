@@ -55,9 +55,9 @@ class CorpusOperations:
     def _compile_corpus_insights(self, analysis, patterns, anomalies) -> Dict[str, Any]:
         """Compile corpus insights from analysis components."""
         return {
-            "analysis": analysis.dict() if analysis else None,
-            "usage_patterns": [p.dict() for p in patterns] if patterns else [],
-            "anomalies": anomalies.dict() if anomalies else None,
+            "analysis": analysis.model_dump() if analysis else None,
+            "usage_patterns": [p.model_dump() for p in patterns] if patterns else [],
+            "anomalies": anomalies.model_dump() if anomalies else None,
             "summary": self._generate_corpus_summary(analysis, patterns, anomalies)
         }
     

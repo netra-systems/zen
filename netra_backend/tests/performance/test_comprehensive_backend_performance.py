@@ -29,7 +29,7 @@ import pytest
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.postgres import Database as PostgresDatabase
-from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
+from netra_backend.app.services.generation_job_manager import save_corpus_to_clickhouse
 from netra_backend.app.monitoring.system_monitor import SystemPerformanceMonitor as PerformanceMonitor
 
 class PerformanceTestMetrics:
@@ -110,20 +110,24 @@ class DatabasePerformanceTester:
         table_name = f'perf_test_{uuid.uuid4().hex[:8]}'
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+        with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
             # Mock: ClickHouse external database isolation for unit testing performance
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor:
+            with patch('netra_backend.app.db.clickhouse_query_fixer.ClickHouseQueryInterceptor') as mock_interceptor:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_interceptor_instance = AsyncMock()
                 mock_interceptor.return_value = mock_interceptor_instance
                 
-                start_time = time.perf_counter()
-                await save_corpus_to_clickhouse(test_corpus, table_name)
-                duration = time.perf_counter() - start_time
+                # Mock: WebSocket manager isolation for testing without external dependencies
+                with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
+                    mock_manager.broadcast_to_job = AsyncMock()
+                    
+                    start_time = time.perf_counter()
+                    await save_corpus_to_clickhouse(test_corpus, table_name)
+                    duration = time.perf_counter() - start_time
                 
                 self.metrics.record_metric('db_bulk_insert_50k', duration)
                 return duration
@@ -134,7 +138,7 @@ class DatabasePerformanceTester:
         tasks = []
         
         # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('app.db.clickhouse.ClickHouseDatabase') as mock_db:
+        with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db:
             # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_instance.execute_query.return_value = [

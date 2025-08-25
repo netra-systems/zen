@@ -57,7 +57,7 @@
     },
     {
       "service": "Auth",
-      "endpoint": "/api/v1/auth/login (CORS)",
+      "endpoint": "/auth/login (CORS)",
       "status": "failure",
       "message": "Request timeout",
       "response_time_ms": 30385.989900001732,

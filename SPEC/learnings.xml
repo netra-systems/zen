@@ -1327,7 +1327,7 @@
                 <symptoms>
                     <symptom>Error: "No 'Access-Control-Allow-Origin' header is present on the requested resource"</symptom>
                     <symptom>Frontend at localhost:59490 unable to call backend at localhost:59409</symptom>
-                    <symptom>Affects authentication endpoints like /api/auth/dev_login</symptom>
+                    <symptom>Affects authentication endpoints like /auth/dev_login</symptom>
                 </symptoms>
                 <root-causes>
                     <cause>CORS middleware configuration using incorrect wildcard pattern in list</cause>

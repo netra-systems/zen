@@ -345,15 +345,31 @@ def mock_justified(reason: str, level: str = "L1"):
             # Test with justified mocking
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-        
-        # Add metadata for compliance checking
-        wrapper._mock_justified = True
-        wrapper._mock_justification = reason
-        wrapper._mock_level = level
-        return wrapper
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                return await func(*args, **kwargs)
+            
+            # Add metadata for compliance checking
+            async_wrapper._mock_justified = True
+            async_wrapper._mock_justification = reason
+            async_wrapper._mock_level = level
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            
+            # Add metadata for compliance checking
+            sync_wrapper._mock_justified = True
+            sync_wrapper._mock_justification = reason
+            sync_wrapper._mock_level = level
+            return sync_wrapper
     
     return decorator

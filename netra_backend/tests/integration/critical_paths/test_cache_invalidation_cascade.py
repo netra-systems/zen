@@ -34,10 +34,10 @@ DEV_BACKEND_URL = "http://localhost:8000"
 AUTH_SERVICE_URL = "http://localhost:8081"
 REDIS_URL = "redis://localhost:6379"
 CACHE_ENDPOINTS = {
-    "user": f"{DEV_BACKEND_URL}/api/v1/cache/user",
-    "thread": f"{DEV_BACKEND_URL}/api/v1/cache/thread",
-    "agent": f"{DEV_BACKEND_URL}/api/v1/cache/agent",
-    "config": f"{DEV_BACKEND_URL}/api/v1/cache/config"
+    "user": f"{DEV_BACKEND_URL}/api/cache/user",
+    "thread": f"{DEV_BACKEND_URL}/api/cache/thread",
+    "agent": f"{DEV_BACKEND_URL}/api/cache/agent",
+    "config": f"{DEV_BACKEND_URL}/api/cache/config"
 }
 
 # Test credentials
@@ -495,7 +495,7 @@ class CacheInvalidationTester:
             }
             
             async with self.session.post(
-                f"{DEV_BACKEND_URL}/api/v1/cache/warmup",
+                f"{DEV_BACKEND_URL}/api/cache/warmup",
                 json=warmup_config,
                 headers=headers
             ) as response:

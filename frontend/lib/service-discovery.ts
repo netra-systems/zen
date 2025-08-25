@@ -72,7 +72,7 @@ class ServiceDiscoveryClient {
   private async fetchServices(): Promise<ServicesResponse | null> {
     try {
       const baseUrl = this.getDiscoveryEndpoint();
-      const discoveryUrl = `${baseUrl}/api/v1/discovery/services`;
+      const discoveryUrl = `${baseUrl}/api/discovery/services`;
       
       logger.debug(`Fetching services from discovery endpoint: ${discoveryUrl}`);
       

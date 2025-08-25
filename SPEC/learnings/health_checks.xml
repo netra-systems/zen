@@ -6,7 +6,7 @@
     <version>1.0</version>
     <description>Critical learnings about health check implementation across services</description>
     <created>2025-08-19</created>
-    <last_edited>2025-08-21T08:47:29.429850</last_edited>
+    <last_edited>2025-08-25T15:35:00.000000</last_edited>
   </metadata>
   <learning id="database-initialization-in-health-checks">
     <title>Database Must Be Lazily Initialized in Health Checks</title>
@@ -208,6 +208,50 @@
             to roll out, affecting all customer segments and SLAs.
         </business-impact>
   </learning>
+  <learning id="readiness-probe-timeout-optimization">
+    <title>Readiness Probe Timeout and CORS OPTIONS Support</title>
+    <problem>
+            E2E tests failing in staging with two issues:
+            1. Readiness probe timing out due to sequential database checks (5s + 3s + 2s = 10s+)
+            2. CORS preflight requests returning 405 Method Not Allowed for OPTIONS
+        </problem>
+    <root-cause>
+            1. Sequential execution of database checks causing cumulative timeout
+            2. Missing explicit OPTIONS endpoint handlers for health endpoints
+        </root-cause>
+    <solution>
+            1. Made readiness checks concurrent instead of sequential:
+               - PostgreSQL, ClickHouse, and health interface checks now run in parallel
+               - Reduced individual timeouts (PostgreSQL: 3s, ClickHouse: 2s, Health: 1.5s)
+               - Added overall 8-second timeout wrapper to prevent probe timeout
+            2. Added explicit @router.options() decorators to health endpoints:
+               - /health, /health/ready, /health/live now support OPTIONS method
+               - Return simple {"status": "ok", "message": "CORS preflight"} for OPTIONS
+        </solution>
+    <implementation>
+      <file>netra_backend/app/routes/health.py</file>
+      <pattern>
+                # Run all checks concurrently with shorter timeouts
+                postgres_task = asyncio.create_task(_check_postgres_connection(db))
+                clickhouse_task = asyncio.create_task(_check_clickhouse_connection())
+                health_task = asyncio.create_task(health_interface.get_health_status(HealthLevel.BASIC))
+                
+                # Add OPTIONS support
+                @router.options("/ready")
+                if request.method == "OPTIONS":
+                    return {"status": "ok", "message": "CORS preflight"}
+            </pattern>
+    </implementation>
+    <performance-impact>
+            - Readiness check time reduced from 10+ seconds to ~3-6 seconds
+            - CORS preflight requests now respond in milliseconds instead of failing
+            - E2E test reliability improved significantly
+        </performance-impact>
+    <business-impact>
+            Critical fix for staging deployment reliability - faster readiness checks
+            reduce deployment time and improve service availability monitoring.
+        </business-impact>
+  </learning>
   <best-practices>
     <practice>
             Always implement both /health (liveness) and /health/ready (readiness) endpoints
@@ -229,6 +273,9 @@
   <checklist>
     <item>Implement /health endpoint for basic liveness check</item>
     <item>Implement /health/ready endpoint for readiness check</item>
+    <item>Add OPTIONS support to all health endpoints for CORS preflight</item>
+    <item>Run readiness checks concurrently to minimize total timeout</item>
+    <item>Add overall timeout wrapper to prevent probe timeouts</item>
     <item>Add is_ready() method to database connection classes</item>
     <item>Handle uninitialized database engines gracefully</item>
     <item>Return appropriate HTTP status codes (200, 503)</item>

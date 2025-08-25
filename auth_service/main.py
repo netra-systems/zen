@@ -21,20 +21,28 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
-# Load environment variables from .env file
-# Try parent directory first (where main .env is located)
-env_path = Path(__file__).parent.parent / ".env"
-if env_path.exists():
-    load_dotenv(env_path)
-    print(f"Loaded environment from: {env_path}")
+from auth_service.auth_core.isolated_environment import get_env
+
+# Load environment variables from .env file ONLY in development
+# In staging/production, all config comes from Cloud Run env vars and Google Secret Manager
+environment = get_env().get('ENVIRONMENT', '').lower()
+if environment in ['staging', 'production', 'prod']:
+    print(f"Running in {environment} - skipping .env file loading (using GSM)")
 else:
-    # Fallback to current directory
-    load_dotenv()
-    print("Loaded environment from current directory or system")
+    # Try parent directory first (where main .env is located)
+    env_path = Path(__file__).parent.parent / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"Loaded environment from: {env_path}")
+    else:
+        # Fallback to current directory
+        load_dotenv()
+        print("Loaded environment from current directory or system")
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router
 from shared.logging import get_logger, configure_service_logging
+from shared.cors_config import get_fastapi_cors_config
 
 # Configure unified logging for auth service
 configure_service_logging({
@@ -105,7 +113,87 @@ async def lifespan(app: FastAPI):
     from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
     # @marked: Port must be read from environment for container deployment
-    logger.info(f"Port: {os.getenv('PORT', '8080')}")
+    logger.info(f"Port: {get_env().get('PORT', '8080')}")
+    
+    # CRITICAL OAUTH VALIDATION - FAIL FAST IF OAUTH IS BROKEN
+    env = AuthConfig.get_environment()
+    if env in ["staging", "production"]:
+        logger.info("🔐 VALIDATING CRITICAL OAUTH CONFIGURATION...")
+        oauth_validation_errors = []
+        
+        # Check Google Client ID
+        google_client_id = AuthConfig.get_google_client_id()
+        if not google_client_id:
+            oauth_validation_errors.append("GOOGLE_CLIENT_ID is not configured")
+            logger.error("❌ CRITICAL: GOOGLE_CLIENT_ID is missing!")
+        elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
+            oauth_validation_errors.append(f"GOOGLE_CLIENT_ID appears invalid: {google_client_id[:20]}...")
+            logger.error(f"❌ CRITICAL: GOOGLE_CLIENT_ID looks like a placeholder: {google_client_id[:20]}...")
+        else:
+            logger.info(f"✅ GOOGLE_CLIENT_ID configured: {google_client_id[:20]}...")
+        
+        # Check Google Client Secret
+        google_client_secret = AuthConfig.get_google_client_secret()
+        if not google_client_secret:
+            oauth_validation_errors.append("GOOGLE_CLIENT_SECRET is not configured")
+            logger.error("❌ CRITICAL: GOOGLE_CLIENT_SECRET is missing!")
+        elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
+            oauth_validation_errors.append(f"GOOGLE_CLIENT_SECRET appears invalid")
+            logger.error(f"❌ CRITICAL: GOOGLE_CLIENT_SECRET looks like a placeholder")
+        else:
+            logger.info("✅ GOOGLE_CLIENT_SECRET configured")
+        
+        # Check environment variables that were actually loaded
+        env_manager = get_env()
+        checked_env_vars = {
+            "GOOGLE_CLIENT_ID": env_manager.get("GOOGLE_CLIENT_ID"),
+            "GOOGLE_CLIENT_SECRET": env_manager.get("GOOGLE_CLIENT_SECRET"),
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": env_manager.get("GOOGLE_OAUTH_CLIENT_ID_STAGING"),
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING"),
+            "ENVIRONMENT": env_manager.get("ENVIRONMENT")
+        }
+        
+        logger.info("🔍 OAuth Environment Variables Status:")
+        for var_name, var_value in checked_env_vars.items():
+            if var_value:
+                if "SECRET" in var_name:
+                    logger.info(f"  {var_name}: [CONFIGURED - {len(var_value)} chars]")
+                else:
+                    logger.info(f"  {var_name}: {var_value[:50]}{'...' if len(var_value) > 50 else ''}")
+            else:
+                logger.warning(f"  {var_name}: [NOT SET]")
+        
+        # FAIL FAST if OAuth is broken in staging/production
+        if oauth_validation_errors:
+            error_message = f"""
+🚨🚨🚨 CRITICAL OAUTH CONFIGURATION FAILURE 🚨🚨🚨
+
+Environment: {env}
+Auth Service CANNOT START due to missing/invalid OAuth configuration!
+
+Errors found:
+{chr(10).join(f"  - {error}" for error in oauth_validation_errors)}
+
+Environment variables checked:
+{chr(10).join(f"  - {var}: {'SET' if val else 'MISSING'}" for var, val in checked_env_vars.items())}
+
+This is a FATAL ERROR in {env} environment. 
+OAuth functionality will be completely broken without proper configuration.
+
+Required actions:
+1. Set proper GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Google Secret Manager
+2. Ensure Cloud Run deployment has access to the secrets
+3. Verify OAuth credentials are valid in Google Cloud Console
+
+Auth Service startup ABORTED.
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+"""
+            logger.error(error_message)
+            raise RuntimeError(f"OAuth configuration validation failed in {env}: {', '.join(oauth_validation_errors)}")
+        
+        logger.info("✅ OAuth configuration validation PASSED")
+    else:
+        logger.info(f"Skipping OAuth validation in {env} environment")
     
     # Log Redis configuration status
     from auth_service.auth_core.routes.auth_routes import auth_service
@@ -115,7 +203,7 @@ async def lifespan(app: FastAPI):
     
     # Check if we're in fast test mode
     # @marked: Test mode flag for test infrastructure
-    fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+    fast_test_mode = get_env().get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
     env = AuthConfig.get_environment()
     
     if fast_test_mode or env == "test":
@@ -126,22 +214,32 @@ async def lifespan(app: FastAPI):
     # Initialize single database connection
     from auth_service.auth_core.database.connection import auth_db
     
-    initialization_errors = []
-    
     # Initialize auth database (uses the same DATABASE_URL as main app)
     try:
         await auth_db.initialize()
         logger.info("Auth database initialized successfully")
+        
+        # Verify database connectivity immediately
+        db_ready = await auth_db.is_ready()
+        if not db_ready:
+            raise RuntimeError("Database initialization succeeded but connectivity test failed")
+        
+        logger.info("Auth database connectivity verified successfully")
+        
     except Exception as e:
         error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
-        logger.warning(f"Auth database initialization failed: {error_msg}")
-        initialization_errors.append(f"Database: {error_msg}")
-    
-    # In development and staging, allow service to start even with DB issues for initial deployment
-    if env in ["development", "staging"] and initialization_errors:
-        logger.warning(f"Starting with {len(initialization_errors)} DB issues in {env} mode")
-    elif initialization_errors and env == "production":
-        raise RuntimeError(f"Critical database failures: {initialization_errors}")
+        logger.error(f"Auth database initialization failed: {error_msg}")
+        
+        # FAIL FAST: Do not start service if database is unavailable
+        # This prevents misleading "healthy" status when critical dependencies are down
+        if env in ["staging", "production"]:
+            raise RuntimeError(f"Database initialization failed in {env}: {error_msg}")
+        elif env == "development":
+            # Development can continue without database for basic testing
+            logger.warning(f"Development mode: continuing without database - {error_msg}")
+        else:
+            # Unknown environment - be conservative and fail
+            raise RuntimeError(f"Database initialization failed in {env}: {error_msg}")
     
     logger.info("Auth Service startup completed")
     
@@ -153,13 +251,16 @@ async def lifespan(app: FastAPI):
     # Wait for shutdown signal with timeout to prevent hanging
     try:
         # Set a timeout for graceful shutdown (Cloud Run gives 10 seconds by default)
-        shutdown_timeout = float(os.getenv("SHUTDOWN_TIMEOUT_SECONDS", "8"))
+        shutdown_timeout = float(get_env().get("SHUTDOWN_TIMEOUT_SECONDS", "8"))
         logger.info(f"Waiting up to {shutdown_timeout} seconds for graceful shutdown...")
         
+        # Use asyncio.wait_for with proper timeout handling
         await asyncio.wait_for(shutdown_event.wait(), timeout=shutdown_timeout)
         logger.info("Shutdown signal received, proceeding with cleanup")
     except asyncio.TimeoutError:
-        logger.warning("Shutdown timeout exceeded, forcing cleanup")
+        logger.warning(f"Shutdown timeout ({shutdown_timeout}s) exceeded, forcing cleanup")
+    except Exception as e:
+        logger.error(f"Error during shutdown wait: {e}, proceeding with cleanup")
     
     # Close connections gracefully
     tasks = []
@@ -188,14 +289,27 @@ async def lifespan(app: FastAPI):
     # Execute all cleanup tasks concurrently with timeout
     if tasks:
         try:
-            await asyncio.wait_for(
+            cleanup_timeout = float(get_env().get("CLEANUP_TIMEOUT_SECONDS", "5"))
+            logger.info(f"Running cleanup tasks with {cleanup_timeout}s timeout...")
+            
+            results = await asyncio.wait_for(
                 asyncio.gather(*tasks, return_exceptions=True),
-                timeout=5.0  # 5 second timeout for cleanup
+                timeout=cleanup_timeout
             )
+            
+            # Check for any exceptions in cleanup tasks
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    logger.warning(f"Cleanup task {i} failed: {result}")
+                    
+            logger.info("All cleanup tasks completed successfully")
+            
         except asyncio.TimeoutError:
-            logger.warning("Cleanup timeout exceeded, some connections may not have closed gracefully")
+            logger.warning(f"Cleanup timeout ({cleanup_timeout}s) exceeded, some connections may not have closed gracefully")
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
+    else:
+        logger.info("No cleanup tasks to execute")
     
     logger.info("Auth Service shutdown completed")
 
@@ -210,216 +324,23 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
-# Configure CORS
-# @marked: CORS configuration from environment for security
-cors_origins_env = os.getenv("CORS_ORIGINS", "")
+# Configure CORS using unified configuration
+# @marked: CORS configuration from unified shared config
 env = AuthConfig.get_environment()
+cors_config = get_fastapi_cors_config(env)
 
-# Handle wildcard CORS for development
-if cors_origins_env == "*":
-    # Allow all origins in development
-    cors_origins = ["*"]
-elif cors_origins_env:
-    # Parse comma-separated origins
-    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
-else:
-    # Default CORS origins based on environment
-    if env == "staging":
-        cors_origins = [
-            "https://app.staging.netrasystems.ai",
-            "https://auth.staging.netrasystems.ai",
-            "https://api.staging.netrasystems.ai",
-            "http://localhost:3000",
-            "http://localhost:8000",
-            "http://localhost:8080"
-        ]
-    elif env == "production":
-        cors_origins = [
-            "https://netrasystems.ai",
-            "https://app.netrasystems.ai",
-            "https://api.netrasystems.ai",
-            "https://auth.netrasystems.ai"
-        ]
-    else:
-        # Development environment - support common dynamic ports plus service discovery
-        cors_origins = [
-            "http://localhost:3000",
-            "http://localhost:3001",
-            "http://localhost:3002",
-            "http://localhost:3003",
-            "http://localhost:4000",
-            "http://localhost:4001",
-            "http://localhost:4200",
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:8000",
-            "http://localhost:8001",
-            "http://localhost:8002",
-            "http://localhost:8003",
-            "http://localhost:8080",
-            "http://localhost:8081",
-            "http://localhost:8082",
-            "http://localhost:8083",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:3001",
-            "http://127.0.0.1:3002",
-            "http://127.0.0.1:3003",
-            "http://127.0.0.1:4000",
-            "http://127.0.0.1:4001",
-            "http://127.0.0.1:4200",
-            "http://127.0.0.1:5173",
-            "http://127.0.0.1:5174",
-            "http://127.0.0.1:8000",
-            "http://127.0.0.1:8001",
-            "http://127.0.0.1:8002",
-            "http://127.0.0.1:8003",
-            "http://127.0.0.1:8080",
-            "http://127.0.0.1:8081",
-            "http://127.0.0.1:8082",
-            "http://127.0.0.1:8083"
-        ]
-        
-        # Add service discovery origins if available
-        try:
-            from pathlib import Path
-            # Look for service discovery directory
-            project_root = Path(__file__).parent.parent
-            service_discovery_dir = project_root / ".service_discovery"
-            
-            if service_discovery_dir.exists():
-                # Add discovered service origins
-                import json
-                
-                # Read backend info
-                backend_file = service_discovery_dir / "backend.json"
-                if backend_file.exists():
-                    with open(backend_file, 'r') as f:
-                        backend_info = json.load(f)
-                        if backend_info.get('api_url'):
-                            cors_origins.append(backend_info['api_url'])
-                
-                # Read frontend info
-                frontend_file = service_discovery_dir / "frontend.json"
-                if frontend_file.exists():
-                    with open(frontend_file, 'r') as f:
-                        frontend_info = json.load(f)
-                        if frontend_info.get('url'):
-                            cors_origins.append(frontend_info['url'])
-                            
-                logger.info(f"Added service discovery origins, total: {len(cors_origins)} origins")
-        except Exception as e:
-            logger.warning(f"Failed to load service discovery origins: {e}")
+# Add service-specific headers to the configuration
+cors_config["allow_headers"].extend([
+    "X-Service-ID", 
+    "X-Cross-Service-Auth"
+])
+cors_config["expose_headers"].extend([
+    "X-Service-Name", 
+    "X-Service-Version"
+])
 
-# Always use DynamicCORSMiddleware to properly handle OPTIONS requests
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
-
-
-class DynamicCORSMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, allowed_origins=None):
-        super().__init__(app)
-        self.allowed_origins = allowed_origins or []
-        self._pattern_cache = {}  # Cache compiled patterns for performance
-        
-    def is_allowed_origin(self, origin: str) -> bool:
-        """Check if origin is allowed - supports dynamic ports for localhost and service discovery."""
-        if not origin:
-            return False
-        
-        # Check if it matches explicit allowed origins
-        if self.allowed_origins and origin in self.allowed_origins:
-            return True
-            
-        # If wildcard mode
-        if "*" in self.allowed_origins:
-            return True
-            
-        # In development, accept any localhost/127.0.0.1 origin with any port
-        import re
-        
-        # Use cached pattern or compile new one
-        if 'localhost_pattern' not in self._pattern_cache:
-            self._pattern_cache['localhost_pattern'] = re.compile(
-                r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?$', 
-                re.IGNORECASE
-            )
-        
-        if self._pattern_cache['localhost_pattern'].match(origin):
-            logger.debug(f"Auth service allowing localhost origin: {origin}")
-            return True
-        
-        # Check service discovery origins if in development
-        if env == "development":
-            try:
-                from pathlib import Path
-                import json
-                
-                project_root = Path(__file__).parent.parent
-                service_discovery_dir = project_root / ".service_discovery"
-                
-                if service_discovery_dir.exists():
-                    # Check all service discovery files
-                    for service_file in service_discovery_dir.glob("*.json"):
-                        try:
-                            with open(service_file, 'r') as f:
-                                service_info = json.load(f)
-                                
-                            # Check various URL fields
-                            for url_field in ['url', 'api_url', 'ws_url']:
-                                if service_info.get(url_field):
-                                    service_origin = service_info[url_field]
-                                    # Convert WebSocket URLs to HTTP for CORS comparison
-                                    if service_origin.startswith('ws://'):
-                                        service_origin = service_origin.replace('ws://', 'http://')
-                                    elif service_origin.startswith('wss://'):
-                                        service_origin = service_origin.replace('wss://', 'https://')
-                                    
-                                    # Extract just the origin part if it has a path
-                                    if '/' in service_origin.split('://')[1]:
-                                        parts = service_origin.split('/')
-                                        service_origin = f"{parts[0]}//{parts[2]}"
-                                    
-                                    if origin == service_origin:
-                                        logger.debug(f"Auth service allowing service discovery origin: {origin}")
-                                        return True
-                        except (json.JSONDecodeError, IOError) as e:
-                            logger.debug(f"Could not read service file {service_file}: {e}")
-            except Exception as e:
-                logger.debug(f"Service discovery check failed: {e}")
-        
-        logger.debug(f"Auth service denying origin: {origin}")
-        return False
-    
-    async def dispatch(self, request, call_next):
-        origin = request.headers.get("origin")
-        
-        # Handle preflight
-        if request.method == "OPTIONS":
-            response = Response(status_code=200)
-            if origin and self.is_allowed_origin(origin):
-                response.headers["Access-Control-Allow-Origin"] = origin
-                response.headers["Access-Control-Allow-Credentials"] = "true"
-                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth"
-                response.headers["Access-Control-Max-Age"] = "3600"
-                response.headers["Vary"] = "Origin"
-            return response
-        
-        # Process request
-        response = await call_next(request)
-        
-        # Add CORS headers to response
-        if origin and self.is_allowed_origin(origin):
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth"
-            response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, X-Service-Name, X-Service-Version"
-            response.headers["Vary"] = "Origin"
-        
-        return response
-
-app.add_middleware(DynamicCORSMiddleware, allowed_origins=cors_origins)
+logger.info(f"CORS configured for {env} environment with {len(cors_config['allow_origins'])} origins")
+app.add_middleware(CORSMiddleware, **cors_config)
 
 # Security middleware for production
 if AuthConfig.get_environment() in ["staging", "production"]:
@@ -431,50 +352,35 @@ if AuthConfig.get_environment() in ["staging", "production"]:
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
 # Custom middleware for request size limiting and service identification
+from auth_service.auth_core.security.middleware import (
+    validate_request_size,
+    add_service_headers,
+    add_security_headers
+)
+
 @app.middleware("http")
 async def security_and_service_middleware(request: Request, call_next):
-    """Add security checks, request size limits, and service identification headers"""
-    # Check Content-Length for JSON payloads to prevent oversized requests
-    content_length = request.headers.get("content-length")
-    content_type = request.headers.get("content-type", "")
+    """Canonical security middleware using SSOT implementation"""
+    # Request size validation (canonical implementation)
+    size_error = await validate_request_size(request)
+    if size_error:
+        return size_error
     
-    if content_length and "json" in content_type.lower():
-        try:
-            size = int(content_length)
-            # Limit JSON payloads to 50KB for security
-            max_size = 50 * 1024  # 50KB
-            if size > max_size:
-                logger.warning(f"Request payload too large: {size} bytes (max: {max_size})")
-                return JSONResponse(
-                    status_code=413,  # Payload Too Large
-                    content={"detail": f"Request payload too large. Maximum size: {max_size} bytes"}
-                )
-        except ValueError:
-            # Invalid Content-Length header
-            logger.warning(f"Invalid Content-Length header: {content_length}")
-            return JSONResponse(
-                status_code=400,
-                content={"detail": "Invalid Content-Length header"}
-            )
-    
+    # Process request
     response = await call_next(request)
-    response.headers["X-Service-Name"] = "auth-service"
-    response.headers["X-Service-Version"] = "1.0.0"
     
-    # Security headers
-    # @marked: Security headers toggle for production environments
-    if os.getenv("SECURE_HEADERS_ENABLED", "false").lower() == "true":
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
+    # Add service and security headers (canonical implementation)
+    add_service_headers(response, "auth-service", "1.0.0")
+    add_security_headers(response)
     
     return response
 
-# Include routers with API versioning
-app.include_router(auth_router, prefix="/api/v1")
+# Include routers without API versioning
+app.include_router(auth_router, prefix="")
 
 # Root endpoint
 @app.get("/")
+@app.head("/")
 async def root():
     """Root endpoint"""
     return {
@@ -485,52 +391,130 @@ async def root():
 
 # Health check at root level
 @app.get("/health")
+@app.head("/health")
 async def health() -> Dict[str, Any]:
-    """Basic health check with unified health system"""
-    return health_interface.get_basic_health()
+    """Health check with database validation to prevent silent failures"""
+    from auth_service.auth_core.database.connection import auth_db
+    
+    basic_health = health_interface.get_basic_health()
+    
+    # For staging and production, validate database connectivity
+    env = AuthConfig.get_environment()
+    if env in ["staging", "production"]:
+        try:
+            # Check database connectivity
+            db_ready = await auth_db.is_ready() if hasattr(auth_db, 'is_ready') else False
+            if not db_ready:
+                # Return 503 Service Unavailable if database is down
+                return JSONResponse(
+                    status_code=503,
+                    content={
+                        "status": "unhealthy",
+                        "service": "auth-service",
+                        "version": "1.0.0",
+                        "timestamp": datetime.now(UTC).isoformat(),
+                        "reason": "Database connectivity failed",
+                        "environment": env
+                    }
+                )
+            
+            # Add database status to health response
+            basic_health["database_status"] = "connected"
+            basic_health["environment"] = env
+            return basic_health
+            
+        except Exception as e:
+            logger.error(f"Health check database validation failed: {e}")
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "status": "unhealthy",
+                    "service": "auth-service",
+                    "version": "1.0.0",
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "reason": f"Database validation error: {str(e)}",
+                    "environment": env
+                }
+            )
+    else:
+        # Development mode - basic health check only
+        basic_health["environment"] = env
+        return basic_health
 
 # Readiness check endpoint
 @app.get("/health/ready")
+@app.head("/health/ready")
 async def health_ready() -> Dict[str, Any]:
-    """Readiness probe to check if the service is ready to serve requests"""
-    # Check if database connections are available
+    """Readiness probe with strict database validation - fails fast if dependencies unavailable"""
     from auth_service.auth_core.database.connection import auth_db
     
+    env = AuthConfig.get_environment()
+    
     try:
-        # Try to check database connectivity
-        is_ready = await auth_db.is_ready() if hasattr(auth_db, 'is_ready') else True
+        # ALWAYS validate database connectivity for readiness checks
+        # No graceful degradation - service is NOT ready if database is down
+        is_ready = await auth_db.is_ready() if hasattr(auth_db, 'is_ready') else False
         
         if is_ready:
             return {
                 "status": "ready",
                 "service": "auth-service",
                 "version": "1.0.0",
-                "timestamp": datetime.now(UTC).isoformat()
+                "timestamp": datetime.now(UTC).isoformat(),
+                "environment": env,
+                "database_status": "connected"
             }
         else:
+            logger.error(f"Readiness check failed: Database not ready in {env} environment")
             return JSONResponse(
                 status_code=503,
-                content={"status": "not_ready", "service": "auth-service", "reason": "Database not ready"}
+                content={
+                    "status": "not_ready", 
+                    "service": "auth-service", 
+                    "reason": "Database connectivity failed",
+                    "environment": env,
+                    "timestamp": datetime.now(UTC).isoformat()
+                }
             )
+            
     except Exception as e:
-        logger.warning(f"Readiness check failed: {e}")
-        # In development, we might still be ready even if DB check fails
-        env = AuthConfig.get_environment()
-        if env == "development":
-            return {
-                "status": "ready",
-                "service": "auth-service", 
-                "version": "1.0.0",
-                "timestamp": datetime.now(UTC).isoformat(),
-                "warning": "Database check failed but continuing in development mode"
-            }
+        logger.error(f"Readiness check failed with exception: {e}")
+        # NO graceful degradation - service is not ready if database check fails
         return JSONResponse(
             status_code=503,
-            content={"status": "not_ready", "service": "auth-service", "reason": str(e)}
+            content={
+                "status": "not_ready", 
+                "service": "auth-service", 
+                "reason": f"Database validation error: {str(e)}",
+                "environment": env,
+                "timestamp": datetime.now(UTC).isoformat()
+            }
         )
+
+# Additional readiness endpoint for external health checks
+@app.get("/readiness")
+@app.head("/readiness")
+async def readiness() -> Dict[str, Any]:
+    """Alternative readiness endpoint with same validation logic"""
+    return await health_ready()
 
 if __name__ == "__main__":
     import uvicorn
-    # @marked: Port binding for container runtime
-    port = int(os.getenv("PORT", "8080"))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    # @marked: Port binding for container runtime with performance optimizations
+    # Default to 8081 to align with dev launcher expectations and E2E test configurations
+    port = int(get_env().get("PORT", "8081"))
+    
+    # Performance-optimized uvicorn settings
+    uvicorn_config = {
+        "host": "0.0.0.0",
+        "port": port,
+        "workers": 1,  # Single worker for auth service consistency
+        "loop": "uvloop" if os.name != 'nt' else "asyncio",  # Use uvloop on Unix systems
+        "http": "httptools" if os.name != 'nt' else "h11",  # Use httptools on Unix systems  
+        "access_log": False,  # Disable access log for performance
+        "server_header": False,  # Disable server header for security
+        "date_header": False  # Disable date header for slight performance gain
+    }
+    
+    logger.info(f"Starting Auth Service on port {port} with performance optimizations")
+    uvicorn.run(app, **uvicorn_config)

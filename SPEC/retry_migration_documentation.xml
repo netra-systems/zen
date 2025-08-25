@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<title>Retry Mechanisms Migration to Unified Handler</title>
+<summary>
+Comprehensive documentation of all retry implementations found in the codebase and their migration path to the enhanced unified retry handler.
+</summary>
+
+<migration_scope>
+<description>
+This document catalogs all existing retry implementations identified during the audit and provides migration guidance to consolidate them into the enhanced unified retry handler.
+</description>
+
+<key_improvements>
+- Enhanced retry strategies (Fibonacci, Adaptive backoff)
+- Integrated circuit breaker support
+- Domain-specific retry policies (DATABASE, LLM, AGENT, API, WEBSOCKET, FILE)
+- Context manager support for cleaner code
+- Decorator patterns for easy adoption
+- Comprehensive error classification
+- Metrics and monitoring integration
+</key_improvements>
+</migration_scope>
+
+<existing_implementations>
+<!-- High Priority: Core retry implementations that should be migrated first -->
+<high_priority>
+<implementation>
+<file>netra_backend/app/llm/enhanced_retry.py</file>
+<class>RetryStrategy</class>
+<description>Advanced retry strategies for LLM operations with jitter and API-specific error handling</description>
+<migration_strategy>
+Replace with LLM_RETRY_POLICY and llm_retry decorator. The enhanced_retry.py file provides:
+- APISpecificRetryStrategy for OpenAI/Anthropic
+- CircuitBreakerRetryStrategy 
+- Pre-configured strategies (FAST_LLM_RETRY, STANDARD_LLM_RETRY, etc.)
+These can be replaced with the unified LLM_RETRY_POLICY which includes similar configurations.
+</migration_strategy>
+<status>ready_to_migrate</status>
+</implementation>
+
+<implementation>
+<file>netra_backend/app/core/error_recovery.py</file>
+<class>RetryStrategy</class>
+<description>Comprehensive error recovery system with rollback capabilities and retry strategies</description>
+<migration_strategy>
+The RetryStrategy class here has similar functionality to the unified handler. The error recovery system should:
+1. Use unified retry handler for basic retries
+2. Keep compensation actions and recovery logic
+3. Integrate circuit breaker from unified system
+</migration_strategy>
+<status>complex_migration</status>
+</implementation>
+
+<implementation>
+<file>netra_backend/app/agents/error_decorators.py</file>
+<function>handle_agent_error</function>
+<description>Error decorator with retry logic for agent operations</description>
+<migration_strategy>
+Replace with agent_retry decorator from unified handler. The current implementation has:
+- Retry count management
+- Error context creation
+- Fallback strategy support
+These features align with AGENT_RETRY_POLICY configuration.
+</migration_strategy>
+<status>ready_to_migrate</status>
+</implementation>
+
+<implementation>
+<file>netra_backend/app/db/intelligent_retry_system.py</file>
+<class>IntelligentRetrySystem</class>
+<description>Database-specific retry system with exponential backoff and circuit breaker integration</description>
+<migration_strategy>
+Replace with DATABASE_RETRY_POLICY and database_retry decorator. This file provides:
+- RetryPolicy configuration
+- Error severity classification
+- RetryMetrics tracking
+The unified handler includes similar features with enhanced domain-specific policies.
+</migration_strategy>
+<status>ready_to_migrate</status>
+</implementation>
+</high_priority>
+
+<!-- Medium Priority: Service-specific implementations -->
+<medium_priority>
+<implementation>
+<file>netra_backend/app/db/database_manager.py</file>
+<description>Database connection management with retry patterns</description>
+<migration_strategy>Use database_retry_handler for connection establishment and query execution</migration_strategy>
+<status>service_integration</status>
+</implementation>
+
+<implementation>
+<file>netra_backend/app/core/async_retry_logic.py</file>
+<class>AsyncCircuitBreaker</class>
+<description>Async circuit breaker with retry integration</description>
+<migration_strategy>Already integrated with unified circuit breaker system. Verify compatibility.</migration_strategy>
+<status>verify_integration</status>
+</implementation>
+
+<implementation>
+<file>netra_backend/app/core/network_handler.py</file>
+<description>Network request handling with retry logic</description>
+<migration_strategy>Use api_retry_handler for HTTP requests and network operations</migration_strategy>
+<status>service_integration</status>
+</implementation>
+
+<implementation>
+<file>netra_backend/app/llm/retry_helpers.py</file>
+<description>Helper functions for LLM retry operations</description>
+<migration_strategy>Replace with llm_retry decorator and retry_llm_request convenience function</migration_strategy>
+<status>ready_to_migrate</status>
+</implementation>
+
+<implementation>
+<file>netra_backend/app/llm/client_retry.py</file>
+<description>LLM client-specific retry mechanisms</description>
+<migration_strategy>Integrate with LLM_RETRY_POLICY for consistent retry behavior across all LLM clients</migration_strategy>
+<status>client_integration</status>
+</implementation>
+</medium_priority>
+
+<!-- Low Priority: Test and utility implementations -->
+<low_priority>
+<implementation>
+<file>dev_launcher/utils.py</file>
+<description>Development launcher utility retry functions</description>
+<migration_strategy>Use launcher_retry_handler or appropriate domain-specific handler</migration_strategy>
+<status>utility_migration</status>
+</implementation>
+
+<implementation>
+<file>payments/gateway_manager.py</file>
+<function>charge_with_retry</function>
+<description>Payment gateway retry logic</description>
+<migration_strategy>Use api_retry_handler with custom retry configuration for payment operations</migration_strategy>
+<status>service_integration</status>
+</implementation>
+
+<implementation>
+<file>test_framework/decorators.py</file>
+<description>Test framework retry decorators</description>
+<migration_strategy>Enhance test framework to use unified retry decorators for test reliability</migration_strategy>
+<status>test_framework</status>
+</implementation>
+</low_priority>
+
+</existing_implementations>
+
+<domain_specific_policies>
+<policy name="DATABASE_RETRY_POLICY">
+<configuration>
+- max_attempts: 5
+- base_delay: 0.5s
+- max_delay: 30s
+- strategy: EXPONENTIAL_JITTER
+- circuit_breaker: enabled (5 failures, 60s recovery)
+- timeout: 60s
+</configuration>
+<exceptions>
+<retryable>
+- psycopg2.OperationalError
+- sqlalchemy.exc.DisconnectionError
+- sqlalchemy.exc.TimeoutError
+- ConnectionError
+- TimeoutError
+- OSError
+</retryable>
+<non_retryable>
+- psycopg2.ProgrammingError (SQL syntax errors)
+- psycopg2.IntegrityError (Constraint violations)
+- sqlalchemy.exc.IntegrityError
+- sqlalchemy.exc.DataError
+- ValueError
+</non_retryable>
+</exceptions>
+</policy>
+
+<policy name="LLM_RETRY_POLICY">
+<configuration>
+- max_attempts: 4
+- base_delay: 2.0s
+- max_delay: 120s
+- strategy: EXPONENTIAL_JITTER
+- circuit_breaker: enabled (3 failures, 180s recovery)
+- timeout: 300s (5 minutes)
+</configuration>
+<exceptions>
+<retryable>
+- TimeoutError
+- ConnectionError
+- httpx.TimeoutException
+- httpx.ConnectError
+- httpx.ReadError
+- OSError
+</retryable>
+<non_retryable>
+- ValueError (Invalid parameters)
+- TypeError (Type errors)
+- httpx.HTTPStatusError (HTTP 4xx errors)
+</non_retryable>
+</exceptions>
+</policy>
+
+<policy name="AGENT_RETRY_POLICY">
+<configuration>
+- max_attempts: 3
+- base_delay: 1.0s
+- max_delay: 60s
+- strategy: EXPONENTIAL
+- circuit_breaker: disabled (agents handle their own)
+- timeout: 120s
+</configuration>
+<exceptions>
+<retryable>
+- ConnectionError
+- TimeoutError
+- OSError
+- RuntimeError
+</retryable>
+<non_retryable>
+- ValueError
+- TypeError
+- AttributeError
+- ImportError
+</non_retryable>
+</exceptions>
+</policy>
+
+<policy name="API_RETRY_POLICY">
+<configuration>
+- max_attempts: 3
+- base_delay: 1.0s
+- max_delay: 30s
+- strategy: EXPONENTIAL_JITTER
+- circuit_breaker: enabled (3 failures, 30s recovery)
+- timeout: 30s
+</configuration>
+<exceptions>
+<retryable>
+- ConnectionError
+- TimeoutError
+- urllib.error.URLError
+- urllib.error.HTTPError
+- httpx.TimeoutException
+- httpx.ConnectError
+- httpx.ReadError
+- OSError
+</retryable>
+<non_retryable>
+- ValueError
+- TypeError
+</non_retryable>
+</exceptions>
+</policy>
+
+<policy name="WEBSOCKET_RETRY_POLICY">
+<configuration>
+- max_attempts: 2 (quick retry)
+- base_delay: 0.5s
+- max_delay: 5s
+- strategy: EXPONENTIAL
+- circuit_breaker: disabled (managed separately)
+- timeout: 10s
+</configuration>
+</policy>
+
+<policy name="FILE_RETRY_POLICY">
+<configuration>
+- max_attempts: 3
+- base_delay: 0.2s
+- max_delay: 2s
+- strategy: EXPONENTIAL
+- circuit_breaker: disabled
+- timeout: 30s
+</configuration>
+</policy>
+</domain_specific_policies>
+
+<migration_phases>
+<phase number="1" priority="high">
+<title>Core Retry System Migration</title>
+<tasks>
+- Migrate netra_backend/app/llm/enhanced_retry.py to use LLM_RETRY_POLICY
+- Replace netra_backend/app/agents/error_decorators.py with agent_retry decorator
+- Consolidate netra_backend/app/db/intelligent_retry_system.py into DATABASE_RETRY_POLICY
+- Update core database operations to use database_retry_handler
+</tasks>
+<testing_requirements>
+- All existing retry tests must pass
+- Circuit breaker integration tests
+- Domain-specific error classification tests
+- Performance benchmarks to ensure no regression
+</testing_requirements>
+</phase>
+
+<phase number="2" priority="medium">
+<title>Service Integration</title>
+<tasks>
+- Integrate unified retry handler with all database connection managers
+- Update LLM client implementations to use llm_retry_handler
+- Migrate network handlers to api_retry_handler
+- Update WebSocket implementations to use websocket_retry_handler
+</tasks>
+<validation>
+- End-to-end testing of all service interactions
+- Verify circuit breaker coordination across services
+- Monitor retry metrics and success rates
+</validation>
+</phase>
+
+<phase number="3" priority="low">
+<title>Cleanup and Optimization</title>
+<tasks>
+- Remove duplicate retry implementations
+- Update test framework to use unified decorators
+- Enhance monitoring and metrics collection
+- Performance optimization based on usage patterns
+</tasks>
+</phase>
+</migration_phases>
+
+<usage_examples>
+<example type="decorator">
+<title>Database Operation with Retry</title>
+<code>
+@database_retry(max_attempts=5)
+def execute_complex_query(connection, query):
+    return connection.execute(query)
+</code>
+</example>
+
+<example type="context_manager">
+<title>LLM Request with Context Manager</title>
+<code>
+async with llm_retry_handler.retry_context(llm_client.complete, prompt) as ctx:
+    result = await ctx.execute_async()
+    print(f"LLM response: {result}")
+</code>
+</example>
+
+<example type="convenience_function">
+<title>Agent Operation with Convenience Function</title>
+<code>
+result = retry_agent_operation(
+    agent.process_request,
+    max_attempts=3,
+    base_delay=1.0
+)
+</code>
+</example>
+
+<example type="global_handler">
+<title>Using Pre-configured Global Handler</title>
+<code>
+@api_retry_handler
+async def fetch_external_data(url):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        return response.json()
+</code>
+</example>
+</usage_examples>
+
+<monitoring_integration>
+<metrics>
+- Retry attempt counts by domain
+- Success/failure rates after retries
+- Circuit breaker state transitions
+- Average retry delays and backoff effectiveness
+- Error distribution by exception type
+</metrics>
+
+<alerting>
+- Circuit breaker open states
+- High retry failure rates
+- Excessive retry delays
+- Domain-specific error rate spikes
+</alerting>
+</monitoring_integration>
+
+<benefits>
+<consistency>All retry logic follows the same patterns and configurations across the entire system</consistency>
+<maintainability>Single source of truth for retry behavior reduces maintenance overhead</maintainability>
+<observability>Unified metrics and monitoring for all retry operations</observability>
+<reliability>Circuit breaker integration prevents cascade failures</reliability>
+<performance>Optimized backoff strategies and domain-specific tuning</performance>
+<developer_experience>Simple decorators and context managers for easy adoption</developer_experience>
+</benefits>
+
+<implementation_notes>
+- The enhanced unified retry handler maintains backward compatibility with existing retry patterns
+- Circuit breaker integration is optional and can be enabled per domain
+- Domain-specific policies can be customized while maintaining the unified interface
+- Comprehensive test suite ensures reliability across all retry scenarios
+- Migration can be performed incrementally without system-wide disruption
+</implementation_notes>
+</root>

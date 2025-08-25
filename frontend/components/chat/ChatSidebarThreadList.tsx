@@ -160,6 +160,9 @@ const ThreadItem: React.FC<{
   </motion.div>
 );
 
+// Export ThreadItem for testing purposes
+export { ThreadItem };
+
 export const ThreadList: React.FC<{
   threads: Thread[];
   isLoadingThreads: boolean;

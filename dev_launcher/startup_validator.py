@@ -32,7 +32,7 @@ class StartupValidator:
     
     def _verify_auth_system(self, backend_info: Dict[str, Any]) -> bool:
         """Verify auth system is operational."""
-        auth_config_url = f"{backend_info['api_url']}/api/auth/config"
+        auth_config_url = f"{backend_info['api_url']}/auth/config"
         self._print("⏳", "WAIT", "Verifying auth system...")
         if wait_for_service(auth_config_url, timeout=30):
             self._print("✅", "OK", "Auth system is ready")

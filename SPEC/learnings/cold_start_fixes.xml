@@ -44,9 +44,9 @@
       <file>netra_backend/app/routes/discovery.py</file>
       <description>Created service discovery API endpoint</description>
       <endpoints>
-        <endpoint>/api/v1/discovery/services</endpoint>
-        <endpoint>/api/v1/discovery/services/{service}</endpoint>
-        <endpoint>/api/v1/discovery/health</endpoint>
+        <endpoint>/api/discovery/services</endpoint>
+        <endpoint>/api/discovery/services/{service}</endpoint>
+        <endpoint>/api/discovery/health</endpoint>
       </endpoints>
     </change>
     

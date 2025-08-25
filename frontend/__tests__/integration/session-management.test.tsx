@@ -421,7 +421,7 @@ describe('Session Management Integration', () => {
             setRefreshStatus('refreshing');
             try {
               // Simulate token refresh API call
-              const response = await fetch('/api/auth/refresh', {
+              const response = await fetch('/auth/refresh', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
               });
@@ -524,7 +524,7 @@ describe('Session Management Integration', () => {
           if (token === sessionTestData.expiredToken) {
             setRefreshStatus('refreshing');
             try {
-              const response = await fetch('/api/auth/refresh', {
+              const response = await fetch('/auth/refresh', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
               });

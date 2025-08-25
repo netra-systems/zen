@@ -10,7 +10,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.tests.test_utilities import base_client
+from netra_backend.tests.routes.test_utilities import base_client
 
 class TestSupplyRoute:
     """Test supply chain endpoints."""
@@ -23,7 +23,7 @@ class TestSupplyRoute:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.supply.research_suppliers') as mock_research:
+        with patch('netra_backend.app.routes.supply.research_suppliers') as mock_research:
             mock_research.return_value = {
                 "suppliers": [
                     {"name": "Supplier A", "score": 0.92},
@@ -41,7 +41,7 @@ class TestSupplyRoute:
     def test_supply_data_enrichment(self, base_client):
         """Test supply data enrichment."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.supply.enrich_supplier') as mock_enrich:
+        with patch('netra_backend.app.routes.supply.enrich_supplier') as mock_enrich:
             mock_enrich.return_value = {
                 "supplier_id": "sup123",
                 "enriched_data": {
@@ -71,7 +71,7 @@ class TestSupplyRoute:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.supply.validate_supply_chain') as mock_validate:
+        with patch('netra_backend.app.routes.supply.validate_supply_chain') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
                 "issues": [],

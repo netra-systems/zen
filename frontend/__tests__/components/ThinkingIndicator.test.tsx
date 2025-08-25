@@ -1,5 +1,32 @@
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
+
+// Mock framer-motion
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: React.forwardRef<HTMLDivElement, any>(({ children, ...props }, ref) => {
+      const { initial, animate, exit, transition, ...cleanProps } = props;
+      return React.createElement('div', { ref, ...cleanProps }, children);
+    }),
+    span: React.forwardRef<HTMLSpanElement, any>(({ children, ...props }, ref) => {
+      const { initial, animate, exit, transition, ...cleanProps } = props;
+      return React.createElement('span', { ref, ...cleanProps }, children);
+    })
+  }
+}));
+
+// Mock lucide-react icons
+jest.mock('lucide-react', () => ({
+  Brain: ({ className, ...props }: any) => 
+    React.createElement('div', { 'data-testid': 'brain-icon', className, ...props }),
+  Sparkles: ({ className, ...props }: any) => 
+    React.createElement('div', { 'data-testid': 'sparkles-icon', className, ...props }),
+  Cpu: ({ className, ...props }: any) => 
+    React.createElement('div', { 'data-testid': 'cpu-icon', className, ...props }),
+  Loader2: ({ className, ...props }: any) => 
+    React.createElement('div', { 'data-testid': 'loader2-icon', className, ...props })
+}));
+
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 
 describe('ThinkingIndicator Component', () => {

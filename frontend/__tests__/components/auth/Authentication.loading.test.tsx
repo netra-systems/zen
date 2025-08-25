@@ -11,7 +11,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginButton } from '@/auth/components';
 import { AuthProvider } from '@/auth/context';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth/unified-auth-service';
 import '@testing-library/jest-dom';
 
 // Mock auth service

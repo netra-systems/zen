@@ -67,7 +67,7 @@ class ComprehensiveAuthFlowTester:
             }
             
             response = await client.post(
-                f"{self.auth_base_url}/api/v1/auth/register",
+                f"{self.auth_base_url}/auth/register",
                 json=register_data
             )
             
@@ -93,7 +93,7 @@ class ComprehensiveAuthFlowTester:
             }
             
             response = await client.post(
-                f"{self.auth_base_url}/api/v1/auth/login",
+                f"{self.auth_base_url}/auth/login",
                 json=login_data
             )
             
@@ -137,7 +137,7 @@ class ComprehensiveAuthFlowTester:
             headers = {"Authorization": f"Bearer {self.tokens['access_token']}"}
             
             response = await client.post(
-                f"{self.auth_base_url}/api/v1/auth/verify",
+                f"{self.auth_base_url}/auth/verify",
                 headers=headers
             )
             
@@ -164,7 +164,7 @@ class ComprehensiveAuthFlowTester:
             headers = {"Authorization": f"Bearer {self.tokens['access_token']}"}
             
             response = await client.get(
-                f"{self.auth_base_url}/api/v1/auth/me",
+                f"{self.auth_base_url}/auth/me",
                 headers=headers
             )
             
@@ -190,7 +190,7 @@ class ComprehensiveAuthFlowTester:
             refresh_data = {"refresh_token": self.tokens["refresh_token"]}
             
             response = await client.post(
-                f"{self.auth_base_url}/api/v1/auth/refresh",
+                f"{self.auth_base_url}/auth/refresh",
                 json=refresh_data
             )
             
@@ -224,7 +224,7 @@ class ComprehensiveAuthFlowTester:
             headers = {"Authorization": f"Bearer {self.tokens['access_token']}"}
             
             response = await client.get(
-                f"{self.auth_base_url}/api/v1/auth/session",
+                f"{self.auth_base_url}/auth/session",
                 headers=headers
             )
             
@@ -253,7 +253,7 @@ class ComprehensiveAuthFlowTester:
             headers = {"Authorization": f"Bearer {self.tokens['access_token']}"}
             
             response = await client.post(
-                f"{self.auth_base_url}/api/v1/auth/websocket/auth",
+                f"{self.auth_base_url}/auth/websocket/auth",
                 headers=headers
             )
             
@@ -281,7 +281,7 @@ class ComprehensiveAuthFlowTester:
             headers = {"Authorization": f"Bearer {self.tokens['access_token']}"}
             
             response = await client.post(
-                f"{self.auth_base_url}/api/v1/auth/logout",
+                f"{self.auth_base_url}/auth/logout",
                 headers=headers
             )
             
@@ -305,7 +305,7 @@ class ComprehensiveAuthFlowTester:
             headers = {"Authorization": f"Bearer {self.tokens['access_token']}"}
             
             response = await client.post(
-                f"{self.auth_base_url}/api/v1/auth/verify",
+                f"{self.auth_base_url}/auth/verify",
                 headers=headers
             )
             
@@ -430,7 +430,7 @@ async def test_auth_config_endpoint():
     auth_base_url = config.auth_service_url
     
     async with httpx.AsyncClient() as client:
-        response = await client.get(f"{auth_base_url}/api/v1/auth/config")
+        response = await client.get(f"{auth_base_url}/auth/config")
         assert response.status_code == 200, f"Config endpoint failed: {response.text}"
         
         result = response.json()

@@ -139,7 +139,7 @@
             │   ├── routes/
             │   │   ├── __init__.py
             │   │   ├── health.py     # REQUIRED: Health endpoints
-            │   │   └── v1/
+            │   │   └── 
             │   │       └── __init__.py
             │   └── database/
             │       ├── __init__.py

@@ -73,7 +73,7 @@ class PrometheusMetricsTester:
                             
             # Generate traffic
             for _ in range(10):
-                await self.session.get(f"{BACKEND_URL}/api/v1/health")
+                await self.session.get(f"{BACKEND_URL}/api/health")
                 
             # Check counter increased
             async with self.session.get(METRICS_URL) as response:
@@ -124,7 +124,7 @@ class PrometheusMetricsTester:
         try:
             # Generate requests with varying latencies
             for i in range(20):
-                await self.session.get(f"{BACKEND_URL}/api/v1/health")
+                await self.session.get(f"{BACKEND_URL}/api/health")
                 await asyncio.sleep(0.05 * (i % 3))  # Vary response times
                 
             async with self.session.get(METRICS_URL) as response:
@@ -184,7 +184,7 @@ class PrometheusMetricsTester:
         try:
             # Register custom metric via API
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/metrics/custom",
+                f"{BACKEND_URL}/api/metrics/custom",
                 json={
                     "name": "test_custom_metric",
                     "type": "counter",
@@ -196,7 +196,7 @@ class PrometheusMetricsTester:
                     
                     # Increment custom metric
                     async with self.session.post(
-                        f"{BACKEND_URL}/api/v1/metrics/custom/test_custom_metric/inc"
+                        f"{BACKEND_URL}/api/metrics/custom/test_custom_metric/inc"
                     ) as inc_response:
                         if inc_response.status == 200:
                             print("[OK] Custom metric incremented")
@@ -251,7 +251,7 @@ class PrometheusMetricsTester:
         try:
             # Get aggregated metrics via API
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/metrics/aggregate",
+                f"{BACKEND_URL}/api/metrics/aggregate",
                 params={"period": "5m"}
             ) as response:
                 if response.status == 200:

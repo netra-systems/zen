@@ -32,7 +32,7 @@ from fastapi.testclient import TestClient
 from fastapi import HTTPException
 
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 
 class TestOAuthJWTSecurityVulnerabilities:
@@ -92,7 +92,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
             malicious_token = f"{header_b64}.{payload_b64}.{signature_b64}"
         
         # Test that auth service rejects algorithm switching attack
-        with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth:
             # Mock auth client to simulate validation response
             mock_auth.validate_token.return_value = {
                 "valid": False,
@@ -135,7 +135,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
         malicious_token = f"{header_b64}.{payload_b64}."
         
         # Test that auth service rejects 'none' algorithm tokens
-        with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {
                 "valid": False,
                 "error": "None algorithm not allowed",
@@ -187,7 +187,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
         tampered_token = f"{header_b64}.{tampered_payload_b64}.{signature_b64}"
         
         # Test that auth service detects payload tampering
-        with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {
                 "valid": False,
                 "error": "Invalid signature",
@@ -251,7 +251,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
             malicious_token = f"{header_b64}.{payload_b64}.{fake_signature_b64}"
             
             # Test that auth service rejects malicious headers
-            with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth:
                 mock_auth.validate_token.return_value = {
                     "valid": False,
                     "error": "Invalid JWT header",
@@ -288,7 +288,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
         response_times = []
         
         # Test timing consistency for invalid tokens
-        with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth:
             for token in invalid_tokens:
                 mock_auth.validate_token.return_value = {
                     "valid": False,
@@ -375,7 +375,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
                 continue
                 
             # Test that auth service sanitizes or rejects malicious claims
-            with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth:
                 mock_auth.validate_token.return_value = {
                     "valid": False,
                     "error": "Malicious claims detected",
@@ -400,7 +400,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
         # This test will FAIL until proper JWT validation is implemented
         # It tests the actual auth client implementation
         
-        from netra_backend.app.clients.auth_client import auth_client
+        from netra_backend.app.clients.auth_client_core import auth_client
         
         # Create a malicious JWT token with 'none' algorithm
         malicious_payload = {

@@ -163,7 +163,7 @@ class ComprehensiveRateLimitTester:
         headers = {"Authorization": f"Bearer {token}"}
         
         # Test expensive operation endpoint
-        endpoint = "http://localhost:8000/api/v1/chat/message"
+        endpoint = "http://localhost:8000/api/chat/message"
         
         async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             for attempt in range(expected_limit + 10):  # Try beyond expected limit
@@ -267,7 +267,7 @@ class ComprehensiveRateLimitTester:
             try:
                 # Make initial request to check headers
                 response = await client.post(
-                    "http://localhost:8000/api/v1/chat/message",
+                    "http://localhost:8000/api/chat/message",
                     headers=headers,
                     json={
                         "message": "Header validation test",
@@ -393,7 +393,7 @@ class ComprehensiveRateLimitTester:
         try:
             start_time = time.time()
             response = await client.post(
-                "http://localhost:8000/api/v1/chat/message",
+                "http://localhost:8000/api/chat/message",
                 headers=headers,
                 json={
                     "message": f"Concurrent degradation test {request_id}",
@@ -442,7 +442,7 @@ class ComprehensiveRateLimitTester:
         async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 response = await client.post(
-                    "http://localhost:8000/api/v1/chat/message",
+                    "http://localhost:8000/api/chat/message",
                     headers=paid_headers,
                     json={
                         "message": "User isolation test",
@@ -543,7 +543,7 @@ class ComprehensiveRateLimitTester:
             for attempt in range(8):  # Try to trigger rate limit
                 try:
                     response = await client.post(
-                        "http://localhost:8000/api/v1/chat/message",
+                        "http://localhost:8000/api/chat/message",
                         headers=headers,
                         json={
                             "message": f"Error response test {attempt + 1}",
@@ -641,7 +641,7 @@ class ComprehensiveRateLimitTester:
         async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 response = await client.post(
-                    "http://localhost:8000/api/v1/chat/message",
+                    "http://localhost:8000/api/chat/message",
                     headers=headers,
                     json={
                         "message": "Recovery test after rate limit",

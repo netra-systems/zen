@@ -28,8 +28,15 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.fixture
     def mock_websocket(self):
         """Create mock WebSocket with proper application state."""
+        from starlette.websockets import WebSocketState
+        
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws = Mock(spec=WebSocket)
+        # Set up application_state for handler compatibility
+        ws.application_state = WebSocketState.CONNECTED
+        # Mock send_json method for message sending
+        ws.send_json = AsyncMock()
+        
         # Mock: Generic component isolation for controlled unit testing
         ws.app = Mock()
         # Mock: Generic component isolation for controlled unit testing
@@ -133,8 +140,14 @@ class TestCriticalMessageRoutingToAgentService:
         message = {"type": "user_message", "payload": {"content": "Test"}}
         message_str = json.dumps(message)
         
-        with pytest.raises(AttributeError):
-            await process_agent_message(user_id, message_str, None)
+        # Mock: Database session isolation for testing without database dependencies
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+            mock_session = AsyncMock()
+            mock_db.return_value.__aenter__.return_value = mock_session
+            mock_db.return_value.__aexit__.return_value = None
+            
+            with pytest.raises(AttributeError):
+                await process_agent_message(user_id, message_str, None)
     
     @pytest.mark.asyncio
     async def test_05_database_error_handled_gracefully(self, mock_agent_service):
@@ -168,10 +181,12 @@ class TestCriticalMessageRoutingToAgentService:
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
-            # Mock: Database session isolation for transaction testing without real database dependency
-            mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-            # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            
+            # Create a proper async context manager mock
+            async_context_manager = AsyncMock()
+            async_context_manager.__aenter__ = AsyncMock(return_value=mock_session)
+            async_context_manager.__aexit__ = AsyncMock(return_value=False)  # Don't suppress exceptions
+            mock_db.return_value = async_context_manager
             
             # Agent exception should be propagated
             with pytest.raises(Exception, match="Agent crashed"):
@@ -445,12 +460,14 @@ class TestCriticalMessageRoutingToAgentService:
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
-            # Mock: Database session isolation for transaction testing without real database dependency
+            mock_session.rollback = AsyncMock()
             mock_session.commit = AsyncMock()
-            # Mock: Database session isolation for transaction testing without real database dependency
-            mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-            # Mock: Generic component isolation for controlled unit testing
-            mock_db.return_value.__aexit__ = AsyncMock()
+            
+            # Create a proper async context manager mock
+            async_context_manager = AsyncMock()
+            async_context_manager.__aenter__ = AsyncMock(return_value=mock_session)
+            async_context_manager.__aexit__ = AsyncMock(return_value=False)  # Don't suppress exceptions
+            mock_db.return_value = async_context_manager
             
             # Should propagate the WebSocketDisconnect
             with pytest.raises(WebSocketDisconnect):

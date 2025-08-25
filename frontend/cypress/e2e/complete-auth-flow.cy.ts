@@ -9,7 +9,7 @@ describe('Complete Authentication Flow', () => {
     cy.visit('/login');
     
     // Mock the login API endpoint
-    cy.intercept('POST', '/api/auth/login', {
+    cy.intercept('POST', '/auth/login', {
       statusCode: 200,
       body: {
         access_token: 'test-jwt-token',
@@ -78,7 +78,7 @@ describe('Complete Authentication Flow', () => {
     cy.visit('/login');
     
     // Mock failed login
-    cy.intercept('POST', '/api/auth/login', {
+    cy.intercept('POST', '/auth/login', {
       statusCode: 401,
       body: {
         detail: 'Invalid credentials'

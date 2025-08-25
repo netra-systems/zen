@@ -29,12 +29,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
-from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, UnifiedCircuitConfig
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.core_enums import CircuitBreakerState
-from netra_backend.app.schemas.core_models import CircuitBreakerConfig
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreakerState
+# UnifiedCircuitConfig is now part of the unified system as UnifiedCircuitConfig
 
 logger = central_logger.get_logger(__name__)
 
@@ -43,21 +43,22 @@ class CircuitBreakerTestHarness:
     
     def __init__(self):
         """Initialize circuit breaker test harness."""
-        self.default_config = CircuitBreakerConfig(
+        self.default_config = UnifiedCircuitConfig(
+            name="default",
             failure_threshold=5,
             timeout_seconds=30,
             half_open_max_calls=3
         )
-        self.circuit_breakers: Dict[str, AdaptiveCircuitBreaker] = {}
+        self.circuit_breakers: Dict[str, UnifiedCircuitBreaker] = {}
     
-    def create_circuit_breaker(self, name: str, config: Optional[CircuitBreakerConfig] = None) -> AdaptiveCircuitBreaker:
+    def create_circuit_breaker(self, name: str, config: Optional[UnifiedCircuitConfig] = None) -> UnifiedCircuitBreaker:
         """Create and register a circuit breaker for testing."""
-        cb_config = config or self.default_config
-        circuit_breaker = AdaptiveCircuitBreaker(name, cb_config)
+        cb_config = config or UnifiedCircuitConfig(name=name, failure_threshold=5, timeout_seconds=30, half_open_max_calls=3)
+        circuit_breaker = UnifiedCircuitBreaker(cb_config)
         self.circuit_breakers[name] = circuit_breaker
         return circuit_breaker
     
-    async def simulate_database_failure(self, circuit_breaker: AdaptiveCircuitBreaker, failure_count: int = 5):
+    async def simulate_database_failure(self, circuit_breaker: UnifiedCircuitBreaker, failure_count: int = 5):
         """Simulate database failures to trigger circuit breaker."""
         for i in range(failure_count):
             try:
@@ -72,7 +73,7 @@ class CircuitBreakerTestHarness:
         
         return circuit_breaker.state
     
-    async def simulate_service_recovery(self, circuit_breaker: AdaptiveCircuitBreaker):
+    async def simulate_service_recovery(self, circuit_breaker: UnifiedCircuitBreaker):
         """Simulate service recovery after circuit breaker timeout."""
         # Wait for timeout period
         await asyncio.sleep(0.1)  # Shortened for testing
@@ -83,7 +84,7 @@ class CircuitBreakerTestHarness:
         
         return await circuit_breaker.call(successful_call)
     
-    def get_circuit_breaker_metrics(self, circuit_breaker: AdaptiveCircuitBreaker) -> Dict[str, Any]:
+    def get_circuit_breaker_metrics(self, circuit_breaker: UnifiedCircuitBreaker) -> Dict[str, Any]:
         """Get circuit breaker metrics for validation."""
         return {
             "state": circuit_breaker.state,
@@ -158,7 +159,7 @@ async def test_circuit_breaker_cascade(circuit_breaker_harness, degradation_simu
     final_state = await circuit_breaker_harness.simulate_database_failure(db_circuit_breaker, 5)
     
     # Validate circuit breaker opens after threshold failures
-    assert final_state == CircuitBreakerState.OPEN, \
+    assert final_state == UnifiedCircuitBreakerState.OPEN, \
         f"Circuit breaker should be OPEN after failures, but is {final_state}"
     
     metrics = circuit_breaker_harness.get_circuit_breaker_metrics(db_circuit_breaker)
@@ -253,7 +254,8 @@ async def test_circuit_breaker_thresholds(circuit_breaker_harness):
     - Half-open state behavior with limited calls
     """
     # Test custom threshold configuration
-    custom_config = CircuitBreakerConfig(
+    custom_config = UnifiedCircuitConfig(
+        name="threshold_test",
         failure_threshold=3,  # Lower threshold for testing
         timeout_seconds=0.1,  # Shorter timeout for testing
         half_open_max_calls=2
@@ -272,7 +274,7 @@ async def test_circuit_breaker_thresholds(circuit_breaker_harness):
             pass
     
     # Circuit breaker should still be closed
-    assert cb.state == CircuitBreakerState.CLOSED, \
+    assert cb.state == UnifiedCircuitBreakerState.CLOSED, \
         f"Circuit breaker should be CLOSED below threshold, got {cb.state}"
     
     # Add one more failure to exceed threshold
@@ -284,7 +286,7 @@ async def test_circuit_breaker_thresholds(circuit_breaker_harness):
         pass
     
     # Circuit breaker should now be open
-    assert cb.state == CircuitBreakerState.OPEN, \
+    assert cb.state == UnifiedCircuitBreakerState.OPEN, \
         f"Circuit breaker should be OPEN after threshold, got {cb.state}"
     
     # Test timeout period
@@ -306,7 +308,7 @@ async def test_circuit_breaker_thresholds(circuit_breaker_harness):
         result = await cb.call(recovery_call)
         
         # If successful, circuit breaker should close
-        assert cb.state in [CircuitBreakerState.HALF_OPEN, CircuitBreakerState.CLOSED], \
+        assert cb.state in [UnifiedCircuitBreakerState.HALF_OPEN, UnifiedCircuitBreakerState.CLOSED], \
             f"Circuit breaker should be HALF_OPEN or CLOSED after recovery, got {cb.state}"
         
     except CircuitBreakerOpenError:
@@ -320,7 +322,7 @@ async def test_circuit_breaker_thresholds(circuit_breaker_harness):
     half_open_cb = circuit_breaker_harness.create_circuit_breaker("half_open_test", custom_config)
     
     # Force into half-open state (simulate timeout completion)
-    half_open_cb.state = CircuitBreakerState.HALF_OPEN
+    half_open_cb.state = UnifiedCircuitBreakerState.HALF_OPEN
     half_open_cb.success_count = 0
     
     # Test limited calls in half-open state
@@ -361,7 +363,8 @@ async def test_circuit_breaker_recovery_patterns():
     harness = CircuitBreakerTestHarness()
     
     # Create circuit breaker with health checking
-    config = CircuitBreakerConfig(
+    config = UnifiedCircuitConfig(
+        name="recovery_test",
         failure_threshold=2,
         timeout_seconds=0.1,
         half_open_max_calls=1
@@ -373,7 +376,7 @@ async def test_circuit_breaker_recovery_patterns():
     # Mock: Async component isolation for testing without real async operations
     mock_health_checker.check_health = AsyncMock(return_value=True)
     
-    cb = AdaptiveCircuitBreaker("recovery_test", config, mock_health_checker)
+    cb = UnifiedCircuitBreaker(config, health_checker=mock_health_checker)
     
     # Force failures to open circuit
     for i in range(3):
@@ -385,7 +388,7 @@ async def test_circuit_breaker_recovery_patterns():
             pass
     
     # Validate circuit is open
-    assert cb.state == CircuitBreakerState.OPEN
+    assert cb.state == UnifiedCircuitBreakerState.OPEN
     
     # Test recovery timing
     recovery_start = time.time()
@@ -437,7 +440,8 @@ async def test_circuit_breaker_adaptive_behavior():
     harness = CircuitBreakerTestHarness()
     
     # Create adaptive circuit breaker
-    config = CircuitBreakerConfig(
+    config = UnifiedCircuitConfig(
+        name="adaptive_test",
         failure_threshold=5,
         timeout_seconds=0.1,
         half_open_max_calls=2

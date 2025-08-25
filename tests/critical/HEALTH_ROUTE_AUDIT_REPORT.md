@@ -8,7 +8,7 @@ A comprehensive audit of the health route implementations across the Netra platf
 ### 1. Massive Endpoint Duplication
 **Backend Service:** 16 health-related endpoints found:
 - `/ws/health`
-- `/api/v1/discovery/health`
+- `/api/discovery/health`
 - `/health/`
 - `/health/live`
 - `/health/ready`

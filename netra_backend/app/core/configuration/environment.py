@@ -3,27 +3,38 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get
 # Always export IsolatedEnvironment for imports
 __all__ = ['IsolatedEnvironment', 'get_env', 'EnvironmentDetector']
 
-"""Environment Detection Module
+"""Environment Detection Module (DEPRECATED)
 
 Handles environment detection for configuration loading.
 Supports development, staging, production, and testing environments.
+
+**DEPRECATION NOTICE**: This module is being phased out in favor of the unified
+environment management system. New code should import from environment_constants.
 
 Business Value: Ensures correct configuration loading per environment,
 preventing production incidents from misconfiguration.
 """
 
-import os
+import warnings
 from typing import Any, Dict, Optional, Type
 
 from netra_backend.app.core.environment_constants import (
     Environment,
-    EnvironmentConfig,
-    EnvironmentDetector,
+    EnvironmentConfig as EnvConstants_EnvironmentConfig,
+    EnvironmentDetector as Constants_EnvironmentDetector,
     EnvironmentVariables,
     get_current_environment,
     get_current_project_id,
 )
 from netra_backend.app.logging_config import central_logger as logger
+
+# Issue deprecation warning for this module
+warnings.warn(
+    "netra_backend.app.core.configuration.environment is deprecated. "
+    "Please use netra_backend.app.core.environment_constants instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class EnvironmentDetector:
@@ -34,22 +45,40 @@ class EnvironmentDetector:
     """
     
     def __init__(self):
-        """Initialize the environment detector."""
+        """Initialize the environment detector (DEPRECATED).
+        
+        DEPRECATED: Use environment_constants.EnvironmentDetector static methods instead.
+        """
+        warnings.warn(
+            "EnvironmentDetector class is deprecated. Use static methods from "
+            "netra_backend.app.core.environment_constants.EnvironmentDetector instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self._logger = logger
         self._cached_environment: Optional[str] = None
         
     def detect(self) -> str:
-        """Detect the current environment.
+        """Detect the current environment (DEPRECATED).
         
         Uses centralized environment detection logic.
+        
+        DEPRECATED: Use get_current_environment() from environment_constants instead.
         
         Returns:
             str: The detected environment name
         """
+        warnings.warn(
+            "EnvironmentDetector.detect() is deprecated. Use get_current_environment() "
+            "from netra_backend.app.core.environment_constants instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         if self._cached_environment:
             return self._cached_environment
             
-        environment = EnvironmentDetector.get_environment()
+        environment = get_environment()
         self._cached_environment = environment
         self._logger.info(f"Detected environment: {environment}")
         return environment
@@ -60,7 +89,7 @@ class EnvironmentDetector:
         This method is kept for backward compatibility but delegates to
         the centralized EnvironmentDetector.
         """
-        return EnvironmentDetector.get_environment()
+        return Constants_EnvironmentDetector.get_environment()
     
     def _is_testing(self) -> bool:
         """Check if running in test mode (deprecated).
@@ -70,7 +99,7 @@ class EnvironmentDetector:
         Returns:
             bool: True if in testing mode
         """
-        return EnvironmentDetector.is_testing_context()
+        return Constants_EnvironmentDetector.is_testing_context()
     
     def _detect_cloud_environment(self) -> Optional[str]:
         """Detect cloud platform environment (deprecated).
@@ -80,7 +109,7 @@ class EnvironmentDetector:
         Returns:
             Optional[str]: Environment name if cloud platform detected
         """
-        return EnvironmentDetector.detect_cloud_environment()
+        return Constants_EnvironmentDetector.detect_cloud_environment()
     
     def _is_cloud_run(self) -> bool:
         """Check if running on Google Cloud Run (deprecated).
@@ -90,7 +119,7 @@ class EnvironmentDetector:
         Returns:
             bool: True if on Cloud Run
         """
-        return EnvironmentDetector.is_cloud_run()
+        return Constants_EnvironmentDetector.is_cloud_run()
     
     def _get_cloud_run_environment(self) -> str:
         """Get environment for Cloud Run deployment (deprecated).
@@ -100,7 +129,7 @@ class EnvironmentDetector:
         Returns:
             str: Environment based on service name
         """
-        return EnvironmentDetector.get_cloud_run_environment()
+        return Constants_EnvironmentDetector.get_cloud_run_environment()
     
     def _is_app_engine(self) -> bool:
         """Check if running on Google App Engine (deprecated).
@@ -110,7 +139,7 @@ class EnvironmentDetector:
         Returns:
             bool: True if on App Engine
         """
-        return EnvironmentDetector.is_app_engine()
+        return Constants_EnvironmentDetector.is_app_engine()
     
     def _get_app_engine_environment(self) -> str:
         """Get environment for App Engine deployment (deprecated).
@@ -120,7 +149,7 @@ class EnvironmentDetector:
         Returns:
             str: Environment based on GAE settings
         """
-        return EnvironmentDetector.get_app_engine_environment()
+        return Constants_EnvironmentDetector.get_app_engine_environment()
     
     def _is_aws(self) -> bool:
         """Check if running on AWS (deprecated).
@@ -130,7 +159,7 @@ class EnvironmentDetector:
         Returns:
             bool: True if on AWS
         """
-        return ConstantsEnvironmentDetector.is_aws()
+        return Constants_EnvironmentDetector.is_aws()
     
     def _get_aws_environment(self) -> str:
         """Get environment for AWS deployment (deprecated).
@@ -140,7 +169,7 @@ class EnvironmentDetector:
         Returns:
             str: Environment based on AWS settings
         """
-        return ConstantsEnvironmentDetector.get_aws_environment()
+        return Constants_EnvironmentDetector.get_aws_environment()
     
     def is_production(self) -> bool:
         """Check if current environment is production.
@@ -175,15 +204,23 @@ class EnvironmentDetector:
         return self.detect() == Environment.TESTING.value
     
     def get_environment_config(self) -> Dict[str, Any]:
-        """Get environment-specific configuration defaults.
+        """Get environment-specific configuration defaults (DEPRECATED).
         
         Uses centralized environment configuration.
+        
+        DEPRECATED: Use EnvironmentConfig.get_environment_defaults() from environment_constants.
         
         Returns:
             Dict with environment-specific settings
         """
+        warnings.warn(
+            "EnvironmentDetector.get_environment_config() is deprecated. Use "
+            "EnvironmentConfig.get_environment_defaults() from environment_constants instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         env = self.detect()
-        return EnvironmentConfig.get_environment_defaults(env)
+        return EnvConstants_EnvironmentConfig.get_environment_defaults(env)
     
     def reset_cache(self):
         """Reset the cached environment detection."""
@@ -195,24 +232,40 @@ _environment_detector = EnvironmentDetector()
 
 
 def get_environment() -> str:
-    """Get the current environment.
+    """Get the current environment (DEPRECATED).
     
     Uses centralized environment detection.
+    
+    DEPRECATED: Use get_current_environment() from environment_constants instead.
     
     Returns:
         str: The detected environment name
     """
+    warnings.warn(
+        "get_environment() from configuration.environment is deprecated. Use "
+        "get_current_environment() from environment_constants instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return get_current_environment()
 
 
 def is_production() -> bool:
-    """Check if running in production.
+    """Check if running in production (DEPRECATED).
     
     Uses centralized environment detection.
+    
+    DEPRECATED: Use is_production() from environment_constants instead.
     
     Returns:
         bool: True if production environment
     """
+    warnings.warn(
+        "is_production() from configuration.environment is deprecated. Use "
+        "is_production() from environment_constants instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     from netra_backend.app.core.environment_constants import (
         is_production as env_is_production,
     )
@@ -220,13 +273,21 @@ def is_production() -> bool:
 
 
 def is_development() -> bool:
-    """Check if running in development.
+    """Check if running in development (DEPRECATED).
     
     Uses centralized environment detection.
+    
+    DEPRECATED: Use is_development() from environment_constants instead.
     
     Returns:
         bool: True if development environment
     """
+    warnings.warn(
+        "is_development() from configuration.environment is deprecated. Use "
+        "is_development() from environment_constants instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     from netra_backend.app.core.environment_constants import (
         is_development as env_is_development,
     )

@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 # Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
 # Import test isolation utilities
 try:

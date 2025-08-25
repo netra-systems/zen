@@ -44,7 +44,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -71,7 +71,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             thread_data = {"title": "Retrievable Thread"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -81,7 +81,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # Retrieve thread
             async with session.get(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -104,7 +104,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=original_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -121,7 +121,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # Mock: Component isolation for testing without external dependencies
             async with session.patch(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 json=update_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -144,7 +144,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             thread_data = {"title": "Thread to Delete"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -154,14 +154,14 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # Delete thread
             async with session.delete(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 204
             
             # Verify thread is deleted
             async with session.get(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 404
@@ -179,7 +179,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             for title in thread_titles:
                 async with session.post(
-                    f"{self.backend_url}/api/v1/threads",
+                    f"{self.backend_url}/api/threads",
                     json={"title": title},
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
@@ -188,7 +188,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # List threads
             async with session.get(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -212,7 +212,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             # Create many threads
             for i in range(25):
                 async with session.post(
-                    f"{self.backend_url}/api/v1/threads",
+                    f"{self.backend_url}/api/threads",
                     json={"title": f"Thread {i:02d}"},
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
@@ -220,7 +220,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # Get first page
             async with session.get(
-                f"{self.backend_url}/api/v1/threads?limit=10&offset=0",
+                f"{self.backend_url}/api/threads?limit=10&offset=0",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -232,7 +232,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # Get second page
             async with session.get(
-                f"{self.backend_url}/api/v1/threads?limit=10&offset=10",
+                f"{self.backend_url}/api/threads?limit=10&offset=10",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -262,7 +262,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             for thread_data in threads_data:
                 async with session.post(
-                    f"{self.backend_url}/api/v1/threads",
+                    f"{self.backend_url}/api/threads",
                     json=thread_data,
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
@@ -270,7 +270,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # Search for Python threads
             async with session.get(
-                f"{self.backend_url}/api/v1/threads?search=Python",
+                f"{self.backend_url}/api/threads?search=Python",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -296,7 +296,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 }
                 
                 tasks.append(session.post(
-                    f"{self.backend_url}/api/v1/threads",
+                    f"{self.backend_url}/api/threads",
                     json=thread_data,
                     headers={"Authorization": f"Bearer {token}"}
                 ))
@@ -329,7 +329,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             thread_data = {"title": "Private Thread"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token1}"}
             ) as resp:
@@ -339,7 +339,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # User2 tries to access the thread
             async with session.get(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 headers={"Authorization": f"Bearer {token2}"}
             ) as resp:
                 assert resp.status in [403, 404]  # Forbidden or Not Found
@@ -347,7 +347,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             # User2 tries to update the thread
             # Mock: Component isolation for testing without external dependencies
             async with session.patch(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 json={"title": "Hacked Title"},
                 headers={"Authorization": f"Bearer {token2}"}
             ) as resp:
@@ -355,7 +355,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # User2 tries to delete the thread
             async with session.delete(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 headers={"Authorization": f"Bearer {token2}"}
             ) as resp:
                 assert resp.status in [403, 404]
@@ -371,7 +371,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             thread_data = {"title": "Thread with Messages"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 json=thread_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -383,7 +383,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             message_data = {"content": "Test message"}
             
             async with session.post(
-                f"{self.backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{self.backend_url}/api/threads/{thread_id}/messages",
                 json=message_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -391,7 +391,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             # Delete thread
             async with session.delete(
-                f"{self.backend_url}/api/v1/threads/{thread_id}",
+                f"{self.backend_url}/api/threads/{thread_id}",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 204
@@ -400,7 +400,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             # This would require admin access or database check
             # Verify through listing - deleted thread shouldn't appear
             async with session.get(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200

@@ -75,7 +75,7 @@ This document summarizes the comprehensive critical production tests for the uni
 
 - ✅ `test_basic_ws_endpoint_routing` - Basic `/ws` endpoint
 - ✅ `test_user_specific_endpoint_forwarding` - `/ws/{user_id}` forwarding
-- ✅ `test_versioned_endpoint_forwarding` - `/ws/v1/{user_id}` forwarding
+- ✅ `test_versioned_endpoint_forwarding` - `/ws/{user_id}` forwarding
 - ✅ `test_mcp_endpoint_json_rpc_validation` - MCP protocol validation
 
 **Key Validations:**

@@ -53,7 +53,7 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
         """Validate session management endpoints in staging."""
         endpoints = [
             f"{self.service_endpoints.auth}/oauth/logout",
-            f"{self.service_endpoints.backend}/api/auth/validate_session"
+            f"{self.service_endpoints.backend}/auth/validate_session"
         ]
         
         for endpoint in endpoints:
@@ -223,7 +223,7 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
             
             # Create session in backend
             response = await self.test_client.post(
-                f"{self.service_endpoints.backend}/api/auth/create_session",
+                f"{self.service_endpoints.backend}/auth/create_session",
                 json={
                     "session_id": session.session_id,
                     "user_id": session.user_id,
@@ -283,7 +283,7 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
             
             # Call backend invalidation
             response = await self.test_client.post(
-                f"{self.service_endpoints.backend}/api/auth/invalidate_session",
+                f"{self.service_endpoints.backend}/auth/invalidate_session",
                 json={"session_id": session.session_id},
                 headers={"Authorization": f"Bearer {session.access_token}"}
             )
@@ -308,7 +308,7 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
             api_success = response.status_code == 200
             
             response = await self.test_client.post(
-                f"{self.service_endpoints.backend}/api/auth/validate_session",
+                f"{self.service_endpoints.backend}/auth/validate_session",
                 json={"session_id": session.session_id},
                 headers={"Authorization": f"Bearer {session.access_token}"}
             )
@@ -329,7 +329,7 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
             api_rejected = response.status_code == 401
             
             response = await self.test_client.post(
-                f"{self.service_endpoints.backend}/api/auth/validate_session",
+                f"{self.service_endpoints.backend}/auth/validate_session",
                 json={"session_id": session.session_id},
                 headers={"Authorization": f"Bearer {session.access_token}"}
             )

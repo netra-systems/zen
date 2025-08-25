@@ -12,12 +12,13 @@ import urllib.error
 import json
 import time
 from typing import Tuple
+from auth_service.auth_core.isolated_environment import get_env
 
 
 def check_health(port=None) -> bool:
     """Check if the auth service is healthy."""
     if port is None:
-        port = int(os.getenv('PORT', '8080'))
+        port = int(get_env().get('PORT', '8080'))
     
     try:
         url = f"http://localhost:{port}/health"
@@ -38,7 +39,7 @@ def check_health(port=None) -> bool:
 def check_readiness(port=None) -> bool:
     """Check if the auth service is ready to serve requests."""
     if port is None:
-        port = int(os.getenv('PORT', '8080'))
+        port = int(get_env().get('PORT', '8080'))
     
     try:
         url = f"http://localhost:{port}/readiness"

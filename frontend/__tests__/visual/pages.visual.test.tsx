@@ -22,6 +22,129 @@ jest.mock('next/image', () => ({
   ),
 }));
 
+// Mock demo components to avoid import issues
+jest.mock('@/components/demo/DemoHeader', () => {
+  return function MockDemoHeader() {
+    return <div data-testid="demo-header">Demo Header</div>;
+  };
+});
+
+// Mock other problematic components
+jest.mock('@/components/demo/DemoProgress', () => {
+  return function MockDemoProgress() {
+    return <div data-testid="demo-progress">Demo Progress</div>;
+  };
+});
+
+jest.mock('@/components/demo/DemoTabs', () => {
+  return function MockDemoTabs() {
+    return <div data-testid="demo-tabs">Demo Tabs</div>;
+  };
+});
+
+jest.mock('@/components/demo/IndustrySelectionCard', () => {
+  return function MockIndustrySelectionCard() {
+    return <div data-testid="industry-selection">Industry Selection</div>;
+  };
+});
+
+jest.mock('@/components/demo/DemoCompletion', () => {
+  return function MockDemoCompletion() {
+    return <div data-testid="demo-completion">Demo Completion</div>;
+  };
+});
+
+// Mock auth store to avoid dependencies
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: () => ({}),
+}));
+
+// Mock auth service
+jest.mock('@/auth', () => ({
+  authService: {
+    getCurrentUser: jest.fn().mockReturnValue(null),
+    login: jest.fn(),
+    logout: jest.fn(),
+    useAuth: () => ({
+      user: null,
+      loading: false,
+    }),
+  },
+}));
+
+// Mock Next.js router
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+  }),
+  useSearchParams: () => ({
+    get: jest.fn().mockReturnValue(null),
+    has: jest.fn().mockReturnValue(false),
+  }),
+}));
+
+// Mock corpus components
+jest.mock('@/app/corpus/components/corpus-header', () => ({
+  CorpusHeader: () => <div data-testid="corpus-header">Corpus Header</div>,
+}));
+
+jest.mock('@/app/corpus/components/corpus-stats', () => ({
+  CorpusStatsGrid: () => <div data-testid="corpus-stats">Corpus Stats</div>,
+}));
+
+jest.mock('@/app/corpus/components/corpus-storage', () => ({
+  CorpusStorage: () => <div data-testid="corpus-storage">Corpus Storage</div>,
+}));
+
+jest.mock('@/app/corpus/components/corpus-browse', () => ({
+  CorpusBrowse: () => <div data-testid="corpus-browse">Corpus Browse</div>,
+}));
+
+jest.mock('@/app/corpus/components/corpus-search', () => ({
+  CorpusSearch: () => <div data-testid="corpus-search">Corpus Search</div>,
+}));
+
+jest.mock('@/app/corpus/components/corpus-versions', () => ({
+  CorpusVersions: () => <div data-testid="corpus-versions">Corpus Versions</div>,
+}));
+
+jest.mock('@/app/corpus/components/corpus-permissions', () => ({
+  CorpusPermissions: () => <div data-testid="corpus-permissions">Corpus Permissions</div>,
+}));
+
+jest.mock('@/app/corpus/hooks/use-corpus-state', () => ({
+  useCorpusState: () => ({
+    activeTab: 'browse',
+    setActiveTab: jest.fn(),
+  }),
+}));
+
+jest.mock('@/app/corpus/data/corpus-data', () => ({
+  corpusData: [],
+  statsData: {},
+  STORAGE_USED_PERCENTAGE: 75,
+}));
+
+// Mock chat components
+jest.mock('@/components/chat/MainChat', () => {
+  return function MockMainChat() {
+    return (
+      <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin text-blue-600" data-testid="loader2-icon" data-icon="Loader2" />
+          <div className="text-sm text-gray-600">Loading chat...</div>
+        </div>
+      </div>
+    );
+  };
+});
+
+// Mock any missing functions that might be called
+global.handleOAuthTokens = jest.fn();
+global.handleThreadParameterRedirect = jest.fn();
+
 // ============================================================================
 // PAGE LAYOUT TEST WRAPPER
 // ============================================================================

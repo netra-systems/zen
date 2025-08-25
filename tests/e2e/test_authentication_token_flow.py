@@ -11,7 +11,7 @@ Coverage: JWT lifecycle, token refresh, expiry handling, WebSocket auth persiste
 
 from datetime import datetime, timedelta, timezone
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.services.user_service import user_service

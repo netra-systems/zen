@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>KnowledgeBase.ConfigurationIssues2025</name>
+        <type>LearningDocumentation</type>
+        <version>1.0</version>
+        <description>Configuration system fixes and environment management learnings from authentication integration failures.</description>
+        <date>2025-08-25</date>
+        <business-impact>Platform/Internal - Prevents staging configuration failures that indicate production readiness issues</business-impact>
+    </metadata>
+
+    <issue-category name="Database Configuration">
+        <critical-takeaway>DATABASE_URL environment variable must use Cloud SQL format in staging, not localhost fallback.</critical-takeaway>
+        <critical-takeaway>Staging environment detection via K_SERVICE and NETRA_ENVIRONMENT variables must prevent localhost database connections.</critical-takeaway>
+        <critical-takeaway>IsolatedEnvironment caching requires singleton instance reset when testing different environment configurations.</critical-takeaway>
+        
+        <fix-applied>
+            <description>Environment configuration loading properly handles staging detection</description>
+            <location>netra_backend/app/core/configuration/database.py</location>
+            <details>DatabaseURLBuilder validates environment-specific database URLs and prevents localhost in staging/production</details>
+        </fix-applied>
+        
+        <testing-requirement>Always test DATABASE_URL configuration with actual staging environment variables set (K_SERVICE, NETRA_ENVIRONMENT)</testing-requirement>
+    </issue-category>
+
+    <issue-category name="Import Path Management">
+        <critical-takeaway>Import paths must be updated from deprecated starlette.websockets to fastapi.websockets for WebSocket functionality.</critical-takeaway>
+        <critical-takeaway>ClickHouseClient moved from netra_backend.app.core.clickhouse_client to netra_backend.app.agents.data_sub_agent.clickhouse_client.</critical-takeaway>
+        <critical-takeaway>RedisClient is actually RedisManager in netra_backend.app.redis_manager - tests must use correct class and async methods.</critical-takeaway>
+        
+        <fixes-applied>
+            <fix>
+                <description>Updated WebSocket imports from starlette to fastapi</description>
+                <files>netra_backend/app/routes/websocket.py, netra_backend/app/websocket_core/manager.py</files>
+                <pattern>from starlette.websockets import WebSocketState → from fastapi.websockets import WebSocketState</pattern>
+            </fix>
+            
+            <fix>
+                <description>Fixed ClickHouse client import path</description>
+                <pattern>from netra_backend.app.core.clickhouse_client → from netra_backend.app.agents.data_sub_agent.clickhouse_client</pattern>
+            </fix>
+            
+            <fix>
+                <description>Fixed Redis client import and method usage</description>
+                <pattern>RedisClient().ping() → RedisManager() with asyncio.run(client.ping())</pattern>
+            </fix>
+        </fixes-applied>
+        
+        <testing-requirement>Integration tests must use correct import paths and async method patterns for all service clients</testing-requirement>
+    </issue-category>
+
+    <issue-category name="Redis Fallback Configuration">
+        <critical-takeaway>Redis fallback to localhost must be disabled in staging/production environments to prevent false success indications.</critical-takeaway>
+        <critical-takeaway>Environment variables REDIS_FALLBACK_ENABLED=false and REDIS_REQUIRED=true should control Redis behavior in staging.</critical-takeaway>
+        <critical-takeaway>Redis connection failures in staging should fail fast, not fall back to localhost, to surface configuration issues early.</critical-takeaway>
+        
+        <fix-applied>
+            <description>Added environment-aware Redis fallback prevention</description>
+            <location>netra_backend/app/redis_manager.py</location>
+            <code-change>
+                <before>Always attempts localhost fallback when Redis connection fails</before>
+                <after>Checks environment and REDIS_FALLBACK_ENABLED/REDIS_REQUIRED variables to prevent fallback in staging/production</after>
+            </code-change>
+            <error-handling>Logs specific fallback control settings for debugging: "fallback_enabled={redis_fallback_enabled}, required={redis_required}"</error-handling>
+        </fix-applied>
+        
+        <testing-requirement>Redis configuration tests must verify fallback is disabled in staging environment simulations</testing-requirement>
+    </issue-category>
+
+    <issue-category name="ClickHouse Connection Testing">
+        <critical-takeaway>ClickHouseClient uses async connect() method, not sync test_connection() method for connectivity testing.</critical-takeaway>
+        <critical-takeaway>ClickHouse configuration requires CLICKHOUSE_HOST, CLICKHOUSE_PORT environment variables in staging - no localhost fallback.</critical-takeaway>
+        
+        <fix-applied>
+            <description>Updated test to use correct ClickHouse connectivity method</description>
+            <pattern>client.test_connection() → asyncio.run(client.connect())</pattern>
+        </fix-applied>
+        
+        <testing-requirement>ClickHouse connectivity tests must use async patterns and check actual configured endpoints</testing-requirement>
+    </issue-category>
+
+    <architectural-learning>
+        <title>Configuration System Architecture Insights</title>
+        <insight>IsolatedEnvironment singleton pattern requires explicit instance reset when testing different environment configurations</insight>
+        <insight>Environment detection logic (K_SERVICE, NETRA_ENVIRONMENT) must be consistently applied across all configuration loading paths</insight>
+        <insight>Service client classes (ClickHouse, Redis, Database) should follow consistent async patterns for connection testing</insight>
+        <insight>Configuration validation must prevent development fallbacks (localhost, default passwords) in staging/production environments</insight>
+    </architectural-learning>
+
+    <quality-assurance>
+        <test-requirement>Integration tests must simulate staging environment variables to catch configuration cascade failures</test-requirement>
+        <test-requirement>Import path tests should validate all service client imports resolve correctly</test-requirement>
+        <test-requirement>Configuration tests should verify fallback behavior is environment-appropriate</test-requirement>
+        
+        <regression-prevention>
+            <check>Verify DATABASE_URL format matches expected staging patterns (Cloud SQL, no localhost)</check>
+            <check>Verify Redis fallback disabled when REDIS_FALLBACK_ENABLED=false or in staging environment</check>
+            <check>Verify WebSocket imports use fastapi.websockets, not starlette.websockets</check>
+            <check>Verify ClickHouse and Redis client imports resolve to correct modules and use async methods</check>
+        </regression-prevention>
+    </quality-assurance>
+
+    <business-value-justification>
+        <segment>Platform/Internal</segment>
+        <business-goal>System Stability and Configuration Reliability</business-goal>
+        <value-impact>Prevents configuration-related failures in staging that indicate production readiness issues</value-impact>
+        <strategic-impact>Ensures configuration testing catches environment-specific issues before production deployment</strategic-impact>
+        <technical-debt-reduction>Eliminates import path confusion and service client API mismatches that cause test failures</technical-debt-reduction>
+    </business-value-justification>
+</specification>

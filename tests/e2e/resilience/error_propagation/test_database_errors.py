@@ -35,7 +35,7 @@ class TestDatabaseErrorHandling:
         # Attempt operation that might timeout
         response = await real_http_client.request(
             "GET", 
-            "/api/v1/data/large_dataset?timeout=1",
+            "/api/data/large_dataset?timeout=1",
             timeout=2.0
         )
         
@@ -49,7 +49,7 @@ class TestDatabaseErrorHandling:
         # Send invalid query
         response = await real_http_client.request(
             "POST",
-            "/api/v1/query",
+            "/api/query",
             json={"query": "INVALID SQL SYNTAX HERE"}
         )
         
@@ -60,7 +60,7 @@ class TestDatabaseErrorHandling:
         # Follow up with valid query
         valid_response = await real_http_client.request(
             "GET",
-            "/api/v1/health"
+            "/api/health"
         )
         
         # Should recover
@@ -72,7 +72,7 @@ class TestDatabaseErrorHandling:
         # Attempt operation that should rollback on failure
         response = await real_http_client.request(
             "POST",
-            "/api/v1/transaction/test",
+            "/api/transaction/test",
             json={
                 "operations": [
                     {"type": "insert", "table": "test", "data": {"id": 1}},
@@ -93,7 +93,7 @@ class TestDatabaseErrorHandling:
         for i in range(5):
             task = real_http_client.request(
                 "POST",
-                "/api/v1/stress_test",
+                "/api/stress_test",
                 json={"operation_id": i}
             )
             tasks.append(task)
@@ -112,7 +112,7 @@ class TestDatabaseErrorHandling:
         for i in range(20):
             task = real_http_client.request(
                 "GET",
-                f"/api/v1/data/item/{i}",
+                f"/api/data/item/{i}",
                 timeout=10.0
             )
             tasks.append(task)
@@ -130,13 +130,13 @@ class TestDatabaseErrorHandling:
         # Attempt operations that might cause deadlock
         task1 = real_http_client.request(
             "POST",
-            "/api/v1/lock_test/resource_a",
+            "/api/lock_test/resource_a",
             json={"lock_resource_b": True}
         )
         
         task2 = real_http_client.request(
             "POST", 
-            "/api/v1/lock_test/resource_b",
+            "/api/lock_test/resource_b",
             json={"lock_resource_a": True}
         )
         

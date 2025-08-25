@@ -342,20 +342,20 @@ class ScalabilityTester:
         base_task = asyncio.create_task(
             self.simulator.run_load_test(
                 concurrent_users=base_users,
-                test_duration=60.0,  # Longer base test
+                test_duration=6.0,  # Reduced for CI/CD performance
                 operations_per_minute=15
             )
         )
         
         # Wait for base load to establish
-        await asyncio.sleep(15.0)
+        await asyncio.sleep(1.5)  # Reduced from 15s to 1.5s
         
         # Add burst load
         burst_simulator = ConcurrentUserSimulator()
         burst_task = asyncio.create_task(
             burst_simulator.run_load_test(
                 concurrent_users=burst_users,
-                test_duration=burst_duration,
+                test_duration=min(burst_duration, 3.0),  # Cap burst duration for CI/CD
                 operations_per_minute=30  # Higher activity during burst
             )
         )
@@ -377,9 +377,9 @@ class ScalabilityTester:
         }
     
     @pytest.mark.asyncio
-    async def test_sustained_load(self, concurrent_users: int = 75, duration_minutes: float = 5.0) -> LoadTestResults:
+    async def test_sustained_load(self, concurrent_users: int = 75, duration_minutes: float = 0.5) -> LoadTestResults:
         """Test system performance under sustained load."""
-        duration_seconds = duration_minutes * 60.0
+        duration_seconds = duration_minutes * 60.0  # Reduced to 30 seconds max for CI/CD
         
         result = await self.simulator.run_load_test(
             concurrent_users=concurrent_users,

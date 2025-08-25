@@ -27,7 +27,7 @@ from enum import Enum
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
-from netra_backend.app.schemas.shared_types import TestTier
+from netra_backend.app.schemas.shared_types import CustomerTier
 from tests.e2e.config import TestUser, get_test_user
 
 
@@ -107,7 +107,7 @@ class UserProfileGenerator:
         """Initialize profile generator."""
         self.factory = factory
     
-    def generate_profile(self, tier: TestTier) -> UserProfile:
+    def generate_profile(self, tier: CustomerTier) -> UserProfile:
         """Generate user profile for specific tier."""
         user = get_test_user(tier.value)
         history_length = self._get_history_length(tier)
@@ -115,35 +115,35 @@ class UserProfileGenerator:
         complexity = self._get_complexity_score(tier)
         return UserProfile(user, history_length, patterns, complexity)
     
-    def _get_history_length(self, tier: TestTier) -> int:
+    def _get_history_length(self, tier: CustomerTier) -> int:
         """Get appropriate history length for tier."""
         lengths = {
-            TestTier.FREE: random.randint(0, 5),
-            TestTier.EARLY: random.randint(5, 20),
-            TestTier.MID: random.randint(15, 50),
-            TestTier.ENTERPRISE: random.randint(30, 100)
+            CustomerTier.FREE: random.randint(0, 5),
+            CustomerTier.EARLY: random.randint(5, 20),
+            CustomerTier.MID: random.randint(15, 50),
+            CustomerTier.ENTERPRISE: random.randint(30, 100)
         }
         return lengths.get(tier, 10)
     
-    def _get_interaction_patterns(self, tier: TestTier) -> List[MessagePattern]:
+    def _get_interaction_patterns(self, tier: CustomerTier) -> List[MessagePattern]:
         """Get interaction patterns based on tier."""
         base_patterns = [MessagePattern.GREETING, MessagePattern.OPTIMIZATION_REQUEST]
-        if tier in [TestTier.MID, TestTier.ENTERPRISE]:
+        if tier in [CustomerTier.MID, CustomerTier.ENTERPRISE]:
             base_patterns.extend([MessagePattern.ANALYSIS_REQUEST, MessagePattern.REPORT_REQUEST])
         return base_patterns
     
-    def _get_complexity_score(self, tier: TestTier) -> float:
+    def _get_complexity_score(self, tier: CustomerTier) -> float:
         """Get complexity score for tier."""
         scores = {
-            TestTier.FREE: 0.3, TestTier.EARLY: 0.6,
-            TestTier.MID: 0.8, TestTier.ENTERPRISE: 1.0
+            CustomerTier.FREE: 0.3, CustomerTier.EARLY: 0.6,
+            CustomerTier.MID: 0.8, CustomerTier.ENTERPRISE: 1.0
         }
         return scores.get(tier, 0.5)
     
     def generate_batch_profiles(self, count: int) -> List[UserProfile]:
         """Generate batch of user profiles."""
         profiles = []
-        tiers = list(TestTier)
+        tiers = list(CustomerTier)
         for i in range(count):
             tier = tiers[i % len(tiers)]
             profiles.append(self.generate_profile(tier))
@@ -281,16 +281,16 @@ class LoadTestDataGenerator:
     
     def _create_load_test_profile(self, index: int) -> UserProfile:
         """Create profile for load testing."""
-        tier = list(TestTier)[index % len(TestTier)]
+        tier = list(CustomerTier)[index % len(CustomerTier)]
         profile = self.profile_gen.generate_profile(tier)
         profile.ai_spend_monthly = self._get_spend_for_tier(tier)
         return profile
     
-    def _get_spend_for_tier(self, tier: TestTier) -> float:
+    def _get_spend_for_tier(self, tier: CustomerTier) -> float:
         """Get monthly AI spend for tier."""
         spend_ranges = {
-            TestTier.FREE: 0.0, TestTier.EARLY: random.uniform(100, 1000),
-            TestTier.MID: random.uniform(1000, 10000), TestTier.ENTERPRISE: random.uniform(10000, 100000)
+            CustomerTier.FREE: 0.0, CustomerTier.EARLY: random.uniform(100, 1000),
+            CustomerTier.MID: random.uniform(1000, 10000), CustomerTier.ENTERPRISE: random.uniform(10000, 100000)
         }
         return spend_ranges.get(tier, 0.0)
     

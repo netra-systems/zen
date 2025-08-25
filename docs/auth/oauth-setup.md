@@ -28,7 +28,7 @@
    ```
 4. Authorized redirect URIs:
    ```
-   http://localhost:8000/api/auth/callback
+   http://localhost:8000/auth/callback
    http://localhost:3000/auth/callback
    ```
 5. Click **CREATE**

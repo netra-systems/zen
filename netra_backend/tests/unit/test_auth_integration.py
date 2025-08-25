@@ -38,7 +38,7 @@ from netra_backend.app.auth_integration.auth import (
     validate_token_jwt,
     verify_password,
 )
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.db.models_postgres import User
 
 class TestAuthIntegration:

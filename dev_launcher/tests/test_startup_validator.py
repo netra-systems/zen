@@ -115,7 +115,7 @@ class TestStartupValidator(unittest.TestCase):
             self.validator.verify_backend_ready(backend_info)
             calls = mock_wait.call_args_list
             self.assertEqual(calls[0][0][0], 'http://localhost:8000/health/ready')
-            self.assertEqual(calls[1][0][0], 'http://localhost:8000/api/auth/config')
+            self.assertEqual(calls[1][0][0], 'http://localhost:8000/auth/config')
 
 
 if __name__ == '__main__':

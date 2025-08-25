@@ -9,6 +9,8 @@ import { jest } from '@jest/globals';
 // Import the component
 import HomePage from '@/app/page';
 
+import { useAuth } from '@/auth/context';
+
 describe('Landing Page - Using Setup Mocks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,8 +37,8 @@ describe('Landing Page - Using Setup Mocks', () => {
     console.log('authService.useAuth:', typeof authService.useAuth);
     
     if (typeof authService.useAuth === 'function') {
-      const result = authService.useAuth();
-      console.log('authService.useAuth() result:', result);
+      const result = useAuth();
+      console.log('useAuth() result:', result);
     }
   });
   

@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from tests.e2e.config import TestTier
+from tests.e2e.config import CustomerTier
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def sample_agent_state():
         "user_request": "Optimize AI costs for Q4",
         "user_id": str(uuid.uuid4()),
         "run_id": str(uuid.uuid4()),
-        "tier": TestTier.ENTERPRISE.value,
+        "tier": CustomerTier.ENTERPRISE.value,
         "context": {"monthly_spend": 50000}
     }
 

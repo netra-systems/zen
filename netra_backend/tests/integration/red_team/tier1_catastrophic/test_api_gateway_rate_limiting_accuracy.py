@@ -104,7 +104,7 @@ class TestApiGatewayRateLimitingAccuracy:
         4. Counter accuracy issues under load
         """
         user_id = "test_user_123"
-        endpoint = "/api/v1/test"
+        endpoint = "/api/test"
         rate_limit = 5  # 5 requests per minute
         window_seconds = 60
         
@@ -171,7 +171,7 @@ class TestApiGatewayRateLimitingAccuracy:
         service_rate_limit = 7   # 7 requests per minute per service
         
         services = ["auth_service", "backend_service", "websocket_service"]
-        endpoints = ["/auth/login", "/api/v1/threads", "/ws/connect"]
+        endpoints = ["/auth/login", "/api/threads", "/ws/connect"]
         
         # Set global rate limit
         await rate_limiter.set_global_rate_limit(user_id, global_rate_limit, 60)
@@ -237,7 +237,7 @@ class TestApiGatewayRateLimitingAccuracy:
         4. Sliding vs fixed windows implemented incorrectly
         """
         user_id = "time_window_user"
-        endpoint = "/api/v1/test"
+        endpoint = "/api/test"
         rate_limit = 3
         window_seconds = 5  # Short window for testing
         
@@ -312,7 +312,7 @@ class TestApiGatewayRateLimitingAccuracy:
         4. Inaccurate counting under load
         """
         user_id = "concurrent_user"
-        endpoint = "/api/v1/concurrent"
+        endpoint = "/api/concurrent"
         rate_limit = 5
         concurrent_requests = 20
         
@@ -375,7 +375,7 @@ class TestApiGatewayRateLimitingAccuracy:
         4. Header manipulation bypasses limits
         """
         base_user_id = "bypass_test_user"
-        endpoint = "/api/v1/bypass"
+        endpoint = "/api/bypass"
         rate_limit = 2
         
         # Set up rate limit

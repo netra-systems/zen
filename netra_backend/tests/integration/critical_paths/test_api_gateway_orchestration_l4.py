@@ -170,7 +170,7 @@ class APIGatewayOrchestrationL4TestSuite:
             ),
             GatewayRoute(
                 route_id="public_route",
-                path_pattern="/api/v1/public/*",
+                path_pattern="/api/public/*",
                 target_service="main_backend",
                 auth_required=False,
                 rate_limit=1000,  # requests per minute
@@ -188,7 +188,7 @@ class APIGatewayOrchestrationL4TestSuite:
             ),
             GatewayRoute(
                 route_id="analytics_route",
-                path_pattern="/api/v1/analytics/*",
+                path_pattern="/api/analytics/*",
                 target_service="analytics_service",
                 auth_required=True,
                 rate_limit=200,  # requests per minute
@@ -197,7 +197,7 @@ class APIGatewayOrchestrationL4TestSuite:
             ),
             GatewayRoute(
                 route_id="billing_route",
-                path_pattern="/api/v1/billing/*",
+                path_pattern="/api/billing/*",
                 target_service="billing_service",
                 auth_required=True,
                 rate_limit=50,   # requests per minute
@@ -444,7 +444,7 @@ class APIGatewayOrchestrationL4TestSuite:
         session = await self.create_authenticated_session()
         
         # Test caching on analytics route (cache TTL: 600 seconds)
-        test_route = "/api/v1/analytics/dashboard"
+        test_route = "/api/analytics/dashboard"
         
         # First request should be a cache miss
         first_request = await self.execute_gateway_request_l4(
@@ -511,7 +511,7 @@ class APIGatewayOrchestrationL4TestSuite:
         session = await self.create_authenticated_session()
         
         # Target a route that might experience failures
-        test_route = "/api/v1/analytics/heavy_computation"
+        test_route = "/api/analytics/heavy_computation"
         
         # Send requests that might trigger circuit breaker
         consecutive_failures = 0
@@ -570,9 +570,9 @@ class APIGatewayOrchestrationL4TestSuite:
         # Test different route patterns
         test_routes = [
             ("/auth/profile", "auth_service"),
-            ("/api/v1/public/health", "main_backend"),
-            ("/api/v1/analytics/dashboard", "analytics_service"),
-            ("/api/v1/billing/usage", "billing_service")
+            ("/api/public/health", "main_backend"),
+            ("/api/analytics/dashboard", "analytics_service"),
+            ("/api/billing/usage", "billing_service")
         ]
         
         for route_path, expected_service in test_routes:
@@ -755,11 +755,11 @@ async def test_api_gateway_performance_under_load_l4(api_gateway_orchestration_l
         if i % 4 == 0:
             route = "/auth/profile"
         elif i % 4 == 1:
-            route = "/api/v1/public/health"
+            route = "/api/public/health"
         elif i % 4 == 2:
-            route = "/api/v1/analytics/dashboard"
+            route = "/api/analytics/dashboard"
         else:
-            route = "/api/v1/billing/usage"
+            route = "/api/billing/usage"
         
         task = api_gateway_orchestration_l4_suite.execute_gateway_request_l4(
             route,

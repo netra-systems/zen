@@ -22,6 +22,37 @@ class MockAgent(AgentReliabilityMixin):
     def __init__(self, name: str = "TestAgent"):
         self.name = name
         super().__init__()
+        # Initialize test attributes
+        self._operation_times = []
+        self._error_history = []
+    
+    def _calculate_success_rate(self):
+        """Calculate success rate from operation and error history."""
+        # Mock implementation for testing
+        successful_operations = len(getattr(self, 'operation_times', []))
+        failed_operations = len(getattr(self, 'error_history', []))
+        total_operations = successful_operations + failed_operations
+        
+        if total_operations == 0:
+            return 1.0
+        
+        return successful_operations / total_operations
+    
+    @property
+    def operation_times(self):
+        return self._operation_times
+        
+    @operation_times.setter  
+    def operation_times(self, value):
+        self._operation_times = value
+        
+    @property
+    def error_history(self):
+        return self._error_history
+        
+    @error_history.setter
+    def error_history(self, value):
+        self._error_history = value
 
 class TestAgentReliabilityMixinMetrics:
     """Test health metrics calculations."""
@@ -30,7 +61,7 @@ class TestAgentReliabilityMixinMetrics:
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing
@@ -145,7 +176,7 @@ class TestAgentReliabilityMixinHealthStatus:
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing

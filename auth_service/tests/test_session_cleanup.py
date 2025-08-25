@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.database.connection import auth_db
-from auth_service.auth_core.database.models import AuthSession, AuthUser
+from auth_service.auth_core.database.models import AuthSession, AuthUser, Base
 
 
 class SessionCleanupService:
@@ -95,10 +95,26 @@ class TestSessionCleanupJob:
         """Create session cleanup service"""
         return SessionCleanupService()
     
+    @pytest_asyncio.fixture
+    async def auth_db_session(self):
+        """Create auth database session with proper table initialization"""
+        # Initialize auth database if not already done
+        if not auth_db._initialized:
+            await auth_db.initialize()
+        
+        # Create tables and clean any existing data
+        async with auth_db.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)  # Clean slate
+            await conn.run_sync(Base.metadata.create_all)
+        
+        # Create and return session
+        async with auth_db.get_session() as session:
+            yield session
+    
     # Use test_db_session from conftest.py for proper async fixture handling
     
     @pytest.mark.asyncio
-    async def test_cleanup_expired_sessions(self, cleanup_service, test_db_session):
+    async def test_cleanup_expired_sessions(self, cleanup_service, auth_db_session):
         """Test cleanup of expired sessions"""
         # Create expired session
         expired_session = AuthSession(
@@ -114,16 +130,16 @@ class TestSessionCleanupJob:
             expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
         )
         
-        test_db_session.add(expired_session)
-        test_db_session.add(valid_session)
-        await test_db_session.commit()
+        auth_db_session.add(expired_session)
+        auth_db_session.add(valid_session)
+        await auth_db_session.commit()
         
-        cleaned_count = await cleanup_service.cleanup_expired_sessions(test_db_session)
+        cleaned_count = await cleanup_service.cleanup_expired_sessions(auth_db_session)
         
         assert cleaned_count == 1
     
     @pytest.mark.asyncio
-    async def test_cleanup_inactive_sessions(self, cleanup_service, test_db_session):
+    async def test_cleanup_inactive_sessions(self, cleanup_service, auth_db_session):
         """Test cleanup of inactive sessions"""
         # Create inactive session
         inactive_session = AuthSession(
@@ -133,26 +149,27 @@ class TestSessionCleanupJob:
             expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
         )
         
-        test_db_session.add(inactive_session)
-        await test_db_session.commit()
+        auth_db_session.add(inactive_session)
+        await auth_db_session.commit()
         
         cleaned_count = await cleanup_service.cleanup_inactive_sessions(
-            test_db_session, days_inactive=30
+            auth_db_session, days_inactive=30
         )
         
         assert cleaned_count == 1
     
     @pytest.mark.asyncio
-    async def test_enforce_session_limits(self, cleanup_service, test_db_session):
+    async def test_enforce_session_limits(self, cleanup_service, auth_db_session):
         """Test enforcement of maximum sessions per user"""
+        import uuid
+        
         # Clean up any existing sessions for user123 to ensure test isolation
-        await test_db_session.execute(
+        await auth_db_session.execute(
             delete(AuthSession).where(AuthSession.user_id == "user123")
         )
-        await test_db_session.commit()
+        await auth_db_session.commit()
         
         # Create 7 sessions for same user
-        import uuid
         sessions = []
         for i in range(7):
             session = AuthSession(
@@ -162,27 +179,28 @@ class TestSessionCleanupJob:
                 expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
             )
             sessions.append(session)
-            test_db_session.add(session)
+            auth_db_session.add(session)
         
-        await test_db_session.commit()
+        await auth_db_session.commit()
         
         cleaned_count = await cleanup_service.enforce_session_limits(
-            test_db_session, max_sessions=5
+            auth_db_session, max_sessions=5
         )
         
         assert cleaned_count == 2
     
     @pytest.mark.asyncio
-    async def test_cleanup_preserves_recent_sessions(self, cleanup_service, test_db_session):
+    async def test_cleanup_preserves_recent_sessions(self, cleanup_service, auth_db_session):
         """Test cleanup preserves most recent sessions"""
+        import uuid
+        
         # Clean up any existing sessions for user123 to ensure test isolation
-        await test_db_session.execute(
+        await auth_db_session.execute(
             delete(AuthSession).where(AuthSession.user_id == "user123")
         )
-        await test_db_session.commit()
+        await auth_db_session.commit()
         
         # Create sessions with different activity times
-        import uuid
         sessions = []
         for i in range(3):
             session = AuthSession(
@@ -192,19 +210,19 @@ class TestSessionCleanupJob:
                 expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
             )
             sessions.append(session)
-            test_db_session.add(session)
+            auth_db_session.add(session)
         
-        await test_db_session.commit()
+        await auth_db_session.commit()
         
         # Cleanup should preserve all recent sessions
         cleaned_count = await cleanup_service.enforce_session_limits(
-            test_db_session, max_sessions=5
+            auth_db_session, max_sessions=5
         )
         
         assert cleaned_count == 0
     
     @pytest.mark.asyncio
-    async def test_cleanup_job_performance(self, cleanup_service, test_db_session):
+    async def test_cleanup_job_performance(self, cleanup_service, auth_db_session):
         """Test cleanup job handles large number of sessions"""
         import time
         
@@ -215,12 +233,12 @@ class TestSessionCleanupJob:
                 user_id=f"user{i % 10}",  # 10 different users
                 expires_at=datetime.now(timezone.utc) - timedelta(hours=1)
             )
-            test_db_session.add(session)
+            auth_db_session.add(session)
         
-        await test_db_session.commit()
+        await auth_db_session.commit()
         
         start_time = time.time()
-        cleaned_count = await cleanup_service.cleanup_expired_sessions(test_db_session)
+        cleaned_count = await cleanup_service.cleanup_expired_sessions(auth_db_session)
         end_time = time.time()
         
         assert cleaned_count == 100
@@ -240,11 +258,11 @@ class TestSessionCleanupJob:
             assert str(e) == "Database error"
     
     @pytest.mark.asyncio
-    async def test_redis_session_sync(self, cleanup_service, test_db_session):
+    async def test_redis_session_sync(self, cleanup_service, auth_db_session):
         """Test Redis session synchronization with database cleanup"""
         # This would test ensuring Redis and DB sessions stay in sync
-        # Mock Redis operations for testing
-        with patch.object(cleanup_service.session_manager, 'redis_client') as mock_redis:
+        # Mock Redis operations for testing using the SessionManager class directly
+        with patch.object(cleanup_service.session_manager.__class__, 'redis_client', new_callable=lambda: MagicMock()) as mock_redis:
             mock_redis.scan_iter.return_value = ["session:expired123"]
             mock_redis.delete.return_value = 1
             
@@ -254,11 +272,11 @@ class TestSessionCleanupJob:
                 user_id="user123",
                 expires_at=datetime.now(timezone.utc) - timedelta(hours=1)
             )
-            test_db_session.add(db_session_record)
-            await test_db_session.commit()
+            auth_db_session.add(db_session_record)
+            await auth_db_session.commit()
             
             # Cleanup should handle both Redis and DB
-            cleaned_count = await cleanup_service.cleanup_expired_sessions(test_db_session)
+            cleaned_count = await cleanup_service.cleanup_expired_sessions(auth_db_session)
             
             assert cleaned_count == 1
 

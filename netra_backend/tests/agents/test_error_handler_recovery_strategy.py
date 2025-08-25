@@ -10,16 +10,14 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.app.agents.error_handler import (
-    AgentError,
+from netra_backend.app.core.exceptions_agent import AgentError
+from netra_backend.app.agents.agent_error_types import (
     DatabaseError,
-    ErrorCategory,
-    ErrorRecoveryStrategy,
     NetworkError,
-)
-from netra_backend.app.agents.error_handler import (
     AgentValidationError as ValidationError,
 )
+from netra_backend.app.schemas.core_enums import ErrorCategory
+from netra_backend.app.core.error_handlers.error_recovery import ErrorRecoveryStrategy
 from netra_backend.app.core.error_codes import ErrorSeverity
 
 class TestErrorRecoveryStrategy:
@@ -27,7 +25,7 @@ class TestErrorRecoveryStrategy:
     
     def _create_network_error_for_delay_test(self):
         """Create network error for delay testing"""
-        return NetworkError("Network timeout", severity=ErrorSeverity.MEDIUM)
+        return NetworkError("Network timeout")
 
     def test_get_recovery_delay_network_error(self):
         """Test recovery delay calculation for network errors."""

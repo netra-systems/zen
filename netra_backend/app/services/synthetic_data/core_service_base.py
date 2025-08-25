@@ -13,7 +13,7 @@ from netra_backend.app.services.synthetic_data.audit_logger import (
     SyntheticDataAuditLogger,
 )
 from netra_backend.app.services.synthetic_data.enums import GenerationStatus
-from netra_backend.app.services.synthetic_data.error_handler import ErrorHandler
+from netra_backend.app.core.error_handlers.agents.agent_error_handler import global_agent_error_handler
 from netra_backend.app.services.synthetic_data.generation_engine import GenerationEngine
 from netra_backend.app.services.synthetic_data.generation_utilities import (
     GenerationUtilities,
@@ -45,7 +45,7 @@ class CoreServiceBase(RecoveryMixin):
         self.job_manager = JobManager()
         self.generation_engine = GenerationEngine(self.default_tools)
         self.ingestion_manager = IngestionManager()
-        self.error_handler = ErrorHandler()
+        self.error_handler = global_agent_error_handler
         self.audit_interface = AuditInterface()
         self.utilities = GenerationUtilities(self.generation_engine)
     

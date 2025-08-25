@@ -46,7 +46,8 @@ interface UnifiedApiConfig {
  * Detect current environment with clear precedence
  * 1. NEXT_PUBLIC_ENVIRONMENT (explicit)
  * 2. NODE_ENV mapping
- * 3. Default to development
+ * 3. Domain-based detection for staging
+ * 4. Default to development
  */
 function detectEnvironment(): Environment {
   // Explicit environment variable takes precedence
@@ -54,6 +55,19 @@ function detectEnvironment(): Environment {
   if (explicitEnv === 'production' || explicitEnv === 'staging' || explicitEnv === 'test' || explicitEnv === 'development') {
     logger.info(`Environment detected from NEXT_PUBLIC_ENVIRONMENT: ${explicitEnv}`);
     return explicitEnv as Environment;
+  }
+  
+  // Check if running in browser and detect by domain
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.includes('staging.netrasystems.ai')) {
+      logger.info('Environment detected from hostname as staging');
+      return 'staging';
+    }
+    if (hostname.includes('netrasystems.ai') && !hostname.includes('staging')) {
+      logger.info('Environment detected from hostname as production');
+      return 'production';
+    }
   }
   
   // Fallback to NODE_ENV
@@ -91,19 +105,19 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           // Backend endpoints - direct API calls, no rewrites
           health: 'https://api.netrasystems.ai/health',
           ready: 'https://api.netrasystems.ai/health/ready',
-          threads: 'https://api.netrasystems.ai/api/v1/threads',
+          threads: 'https://api.netrasystems.ai/api/threads',
           websocket: 'wss://api.netrasystems.ai/ws',
           
           // Auth service endpoints
-          authConfig: 'https://auth.netrasystems.ai/api/v1/auth/config',
-          authLogin: 'https://auth.netrasystems.ai/api/v1/auth/login',
-          authLogout: 'https://auth.netrasystems.ai/api/v1/auth/logout',
-          authCallback: 'https://auth.netrasystems.ai/api/v1/auth/callback',
-          authToken: 'https://auth.netrasystems.ai/api/v1/auth/token',
-          authRefresh: 'https://auth.netrasystems.ai/api/v1/auth/refresh',
-          authValidate: 'https://auth.netrasystems.ai/api/v1/auth/validate',
-          authSession: 'https://auth.netrasystems.ai/api/v1/auth/session',
-          authMe: 'https://auth.netrasystems.ai/api/v1/auth/me',
+          authConfig: 'https://auth.netrasystems.ai/auth/config',
+          authLogin: 'https://auth.netrasystems.ai/auth/login',
+          authLogout: 'https://auth.netrasystems.ai/auth/logout',
+          authCallback: 'https://auth.netrasystems.ai/auth/callback',
+          authToken: 'https://auth.netrasystems.ai/auth/token',
+          authRefresh: 'https://auth.netrasystems.ai/auth/refresh',
+          authValidate: 'https://auth.netrasystems.ai/auth/validate',
+          authSession: 'https://auth.netrasystems.ai/auth/session',
+          authMe: 'https://auth.netrasystems.ai/auth/me',
         },
         features: {
           useHttps: true,
@@ -126,19 +140,19 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           // Backend endpoints - direct API calls, no rewrites
           health: 'https://api.staging.netrasystems.ai/health',
           ready: 'https://api.staging.netrasystems.ai/health/ready',
-          threads: 'https://api.staging.netrasystems.ai/api/v1/threads',
+          threads: 'https://api.staging.netrasystems.ai/api/threads',
           websocket: 'wss://api.staging.netrasystems.ai/ws',
           
           // Auth service endpoints
-          authConfig: 'https://auth.staging.netrasystems.ai/api/v1/auth/config',
-          authLogin: 'https://auth.staging.netrasystems.ai/api/v1/auth/login',
-          authLogout: 'https://auth.staging.netrasystems.ai/api/v1/auth/logout',
-          authCallback: 'https://auth.staging.netrasystems.ai/api/v1/auth/callback',
-          authToken: 'https://auth.staging.netrasystems.ai/api/v1/auth/token',
-          authRefresh: 'https://auth.staging.netrasystems.ai/api/v1/auth/refresh',
-          authValidate: 'https://auth.staging.netrasystems.ai/api/v1/auth/validate',
-          authSession: 'https://auth.staging.netrasystems.ai/api/v1/auth/session',
-          authMe: 'https://auth.staging.netrasystems.ai/api/v1/auth/me',
+          authConfig: 'https://auth.staging.netrasystems.ai/auth/config',
+          authLogin: 'https://auth.staging.netrasystems.ai/auth/login',
+          authLogout: 'https://auth.staging.netrasystems.ai/auth/logout',
+          authCallback: 'https://auth.staging.netrasystems.ai/auth/callback',
+          authToken: 'https://auth.staging.netrasystems.ai/auth/token',
+          authRefresh: 'https://auth.staging.netrasystems.ai/auth/refresh',
+          authValidate: 'https://auth.staging.netrasystems.ai/auth/validate',
+          authSession: 'https://auth.staging.netrasystems.ai/auth/session',
+          authMe: 'https://auth.staging.netrasystems.ai/auth/me',
         },
         features: {
           useHttps: true,
@@ -161,18 +175,18 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           // Test environment uses localhost with potential overrides
           health: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/health`,
           ready: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/health/ready`,
-          threads: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/threads`,
+          threads: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/threads`,
           websocket: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws`,
           
-          authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/config`,
-          authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/login`,
-          authLogout: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/logout`,
-          authCallback: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/callback`,
-          authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/token`,
-          authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/refresh`,
-          authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/validate`,
-          authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/session`,
-          authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/me`,
+          authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,
+          authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/login`,
+          authLogout: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/logout`,
+          authCallback: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/callback`,
+          authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
+          authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
+          authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
+          authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
         },
         features: {
           useHttps: false,
@@ -196,19 +210,19 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           // Development uses proxied paths for local Next.js rewrites
           health: '/health',
           ready: '/health/ready',
-          threads: '/api/v1/threads',
+          threads: '/api/threads',
           websocket: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws`,
           
           // Auth endpoints use direct URLs even in development
-          authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/config`,
-          authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/login`,
-          authLogout: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/logout`,
-          authCallback: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/callback`,
-          authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/token`,
-          authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/refresh`,
-          authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/validate`,
-          authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/session`,
-          authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/api/v1/auth/me`,
+          authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,
+          authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/login`,
+          authLogout: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/logout`,
+          authCallback: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/callback`,
+          authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
+          authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
+          authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
+          authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
         },
         features: {
           useHttps: false,

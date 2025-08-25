@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import jwt
 import pytest
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
@@ -91,7 +91,7 @@ class TestAuthTokenRefreshHighLoad:
     async def auth_client_mock(self):
         """Mock auth client for high load testing"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.clients.auth_client.auth_client') as mock_client:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_client:
             # Configure mock to simulate successful refresh responses
             async def mock_refresh_token(refresh_token: str) -> Optional[Dict]:
                 if refresh_token.startswith("invalid_"):

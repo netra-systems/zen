@@ -281,14 +281,14 @@ class TestStagingSecretsManagerIntegration:
         staging_env = {
             "NETRA_ENVIRONMENT": "staging",
             "BASE_URL": "https://staging.netrasystems.ai",
-            "API_ENDPOINT": "${BASE_URL}/api/v1"
+            "API_ENDPOINT": "${BASE_URL}/api"
         }
         
         with patch.dict(os.environ, staging_env, clear=True):
             # Mock interpolation in local secret manager
             interpolated_secrets = {
                 "BASE_URL": "https://staging.netrasystems.ai",
-                "API_ENDPOINT": "https://staging.netrasystems.ai/api/v1"
+                "API_ENDPOINT": "https://staging.netrasystems.ai/api"
             }
             
             with patch.object(secret_loader.local_secret_manager, 'load_secrets_with_fallback') as mock_local:
@@ -304,4 +304,4 @@ class TestStagingSecretsManagerIntegration:
                 assert result is True
                 
                 # Verify interpolation worked
-                assert secret_loader.loaded_secrets["API_ENDPOINT"] == "https://staging.netrasystems.ai/api/v1"
+                assert secret_loader.loaded_secrets["API_ENDPOINT"] == "https://staging.netrasystems.ai/api"

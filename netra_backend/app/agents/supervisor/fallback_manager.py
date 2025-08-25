@@ -18,7 +18,7 @@ from netra_backend.app.core.config import get_config
 from netra_backend.app.llm.fallback_handler import FallbackConfig, LLMFallbackHandler
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
-from netra_backend.app.schemas.core_models import CircuitBreakerConfig
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitConfig
 
 logger = central_logger.get_logger(__name__)
 
@@ -229,7 +229,7 @@ class FallbackManager:
         timeout = self._get_circuit_breaker_timeout()
         threshold = self._get_circuit_breaker_threshold()
         config = self._build_circuit_breaker_config(agent_name, threshold, timeout)
-        return await circuit_registry.get_circuit(f"agent_{agent_name}", config)
+        return circuit_registry.create_circuit_breaker(f"agent_{agent_name}", config)
     
     
     def _get_circuit_breaker_timeout(self) -> float:
@@ -243,9 +243,9 @@ class FallbackManager:
         return 2 if config.pytest_current_test else 3
     
     def _build_circuit_breaker_config(self, agent_name: str, threshold: int, 
-                                     timeout: float) -> CircuitBreakerConfig:
+                                     timeout: float) -> UnifiedCircuitConfig:
         """Build circuit breaker configuration."""
-        return CircuitBreakerConfig(
+        return UnifiedCircuitConfig(
             failure_threshold=threshold, recovery_timeout=timeout,
             name=f"agent_{agent_name}")
     
@@ -257,7 +257,7 @@ class FallbackManager:
     
     async def _get_circuit_breaker_status(self) -> dict:
         """Get circuit breaker status for all agents."""
-        all_status = await circuit_registry.get_all_status()
+        all_status = circuit_registry.get_all_status()
         return all_status
     
     def _create_final_result_with_metadata(self, state: DeepAgentState, 

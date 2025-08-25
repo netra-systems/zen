@@ -8,7 +8,7 @@ Business Value: Standardizes 40+ agent execute() methods.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Protocol, runtime_checkable
 
 from netra_backend.app.agents.state import DeepAgentState
@@ -223,7 +223,7 @@ class AgentExecutionMixin:
             stream_updates=stream_updates,
             thread_id=getattr(state, 'chat_thread_id', None),
             user_id=getattr(state, 'user_id', None),
-            start_time=datetime.utcnow(),
+            start_time=datetime.now(timezone.utc),
             correlation_id=getattr(self, 'correlation_id', None)
         )
     

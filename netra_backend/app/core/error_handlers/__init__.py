@@ -5,8 +5,18 @@ All error handlers follow consistent patterns and interfaces.
 """
 
 # Base components
+from netra_backend.app.core.error_handlers.base_error_handler import BaseErrorHandler
+from netra_backend.app.core.error_handlers.error_classification import (
+    ErrorClassification,
+    ErrorClassifier,
+)
+from netra_backend.app.core.error_handlers.error_recovery import (
+    ErrorRecoveryStrategy,
+    RecoveryCoordinator,
+    RecoveryResult,
+)
+
 # Agent-specific handlers
-# Global instances for backward compatibility
 from netra_backend.app.core.error_handlers.agents.agent_error_handler import (
     AgentErrorHandler,
     global_agent_error_handler,
@@ -30,7 +40,7 @@ from netra_backend.app.core.error_handlers.api.fastapi_exception_handlers import
     validation_exception_handler,
 )
 
-# Route utility handlers
+# Route utility handlers - import from route utils for backward compatibility
 from netra_backend.app.routes.utils.error_handlers import (
     handle_access_denied_error,
     handle_auth_error,
@@ -40,16 +50,6 @@ from netra_backend.app.routes.utils.error_handlers import (
     handle_not_found_error,
     handle_service_error,
     handle_validation_error,
-)
-from netra_backend.app.core.error_handlers.base_error_handler import BaseErrorHandler
-from netra_backend.app.core.error_handlers.error_classification import (
-    ErrorClassification,
-    ErrorClassifier,
-)
-from netra_backend.app.core.error_handlers.error_recovery import (
-    ErrorRecoveryStrategy,
-    RecoveryCoordinator,
-    RecoveryResult,
 )
 
 __all__ = [

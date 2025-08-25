@@ -8,6 +8,8 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import HomePage from '@/app/page';
 
+import { useAuth } from '@/auth/context';
+
 // Get the existing router mock from jest.setup.js
 const mockNavigation = require('next/navigation');
 
@@ -61,7 +63,7 @@ describe('Landing Page - Working with Setup Infrastructure', () => {
     
     // Let's try to manually trigger what should happen
     const { authService } = require('@/auth');
-    const authResult = authService.useAuth();
+    const authResult = useAuth();
     console.log('Direct auth call result:', {
       user: !!authResult.user,
       loading: authResult.loading,

@@ -118,7 +118,7 @@ class ValidationScheduler:
         report_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(report_path, 'w') as f:
-            json.dump(report.dict(), f, indent=2, default=str)
+            json.dump(report.model_dump(), f, indent=2, default=str)
         
         # Check for critical failures
         if report.failed_checks > 0:
@@ -171,7 +171,7 @@ class ValidationReporter:
         report_path = self.output_dir / f"validation_report_{timestamp}.json"
         
         with open(report_path, 'w') as f:
-            json.dump(report.dict(), f, indent=2, default=str)
+            json.dump(report.model_dump(), f, indent=2, default=str)
         
         return str(report_path)
     

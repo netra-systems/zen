@@ -7,7 +7,7 @@ describe('User Invitation and Role Assignment Flow (L4)', () => {
   const INVITED_USER_PASSWORD = 'newTestPassword123';
 
   const LOGIN_URL = '/login';
-  const INVITATION_API_ENDPOINT = '/api/v1/invitations'; // Example endpoint to get invitation tokens
+  const INVITATION_API_ENDPOINT = '/api/invitations'; // Example endpoint to get invitation tokens
 
   it('should allow an admin to invite a user, assign a role, and enforce permissions', () => {
     // 1. Log in as Admin user
@@ -63,7 +63,7 @@ describe('User Invitation and Role Assignment Flow (L4)', () => {
     // 9. Attempt to perform a write action
     // NOTE: Replace with an actual write action that a read-only user should not be able to perform
     cy.request({
-      url: '/api/v1/some-resource',
+      url: '/api/some-resource',
       method: 'POST',
       body: { data: 'test' },
       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },

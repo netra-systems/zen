@@ -84,14 +84,22 @@ const SendButton: React.FC<{
       onClick={onSend}
       disabled={!canSend || isSending}
       className={cn(
-        "rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200",
+        "rounded-full flex items-center justify-center transition-all duration-200",
         "bg-emerald-500 hover:bg-emerald-600",
         "text-white shadow-lg hover:shadow-xl",
-        "disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none"
+        "disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none",
+        isSending ? "w-auto px-4 h-12" : "w-12 h-12"
       )}
       aria-label="Send message"
     >
-      <SendButtonIcon isSending={isSending} />
+      {isSending ? (
+        <div className="flex items-center gap-2">
+          <SendButtonIcon isSending={isSending} />
+          <span>Sending...</span>
+        </div>
+      ) : (
+        <SendButtonIcon isSending={isSending} />
+      )}
     </Button>
   </motion.div>
 );

@@ -371,7 +371,7 @@ class ConfigurationLoader:
 |----------|-------------|---------|----------|---------|
 | **`GOOGLE_CLIENT_ID`** | Google OAuth client ID | None | ✅ | `123456-abcdef.apps.googleusercontent.com` |
 | **`GOOGLE_CLIENT_SECRET`** | Google OAuth client secret | None | ✅ | `GOCSPX-abc123def456...` |
-| **`OAUTH_REDIRECT_URI`** | OAuth callback URL | Auto-generated | ❌ | `https://api.yourdomain.com/api/auth/callback` |
+| **`OAUTH_REDIRECT_URI`** | OAuth callback URL | Auto-generated | ❌ | `https://api.yourdomain.com/auth/callback` |
 
 ### LLM Provider Configuration
 
@@ -914,11 +914,11 @@ gcloud secrets access latest --secret="jwt-secret-key"
 ```bash
 # Test Gemini API key
 curl -H "x-goog-api-key: YOUR_API_KEY" \
-  "https://generativelanguage.googleapis.com/v1/models"
+  "https://generativelanguage.googleapis.com/models"
 
 # Test OpenAI API key
 curl -H "Authorization: Bearer YOUR_API_KEY" \
-  "https://api.openai.com/v1/models"
+  "https://api.openai.com/models"
 ```
 
 **Issue: CORS Errors in Browser**
@@ -1026,7 +1026,7 @@ python -c "from netra_backend.app.core.configuration.base import get_unified_con
 
 # Test Gemini API key manually
 curl -H "x-goog-api-key: YOUR_API_KEY" \
-  "https://generativelanguage.googleapis.com/v1/models"
+  "https://generativelanguage.googleapis.com/models"
 ```
 
 #### Issue: CORS Errors in Browser
@@ -1053,7 +1053,7 @@ echo $ENVIRONMENT
 echo $K_SERVICE
 
 # Force environment detection
-python -c "from netra_backend.app.core.configuration.environment_detector import detect_environment; print(detect_environment())"
+python -c "from netra_backend.app.core.environment_constants import get_current_environment; print(get_current_environment())"
 
 # Override environment detection
 export ENVIRONMENT=staging  # or development, production

@@ -19,7 +19,7 @@ Authorization: Bearer <token>
 
 ### Authentication Endpoints
 
-#### POST /api/auth/login
+#### POST /auth/login
 Login with email and password.
 
 **Request Body:**
@@ -50,7 +50,7 @@ Login with email and password.
 
 ---
 
-#### GET /api/auth/config
+#### GET /auth/config
 Get authentication configuration.
 
 **Response:**
@@ -59,12 +59,12 @@ Get authentication configuration.
   "development_mode": false,
   "google_client_id": "your-google-client-id",
   "endpoints": {
-    "login": "/api/auth/login",
-    "logout": "/api/auth/logout",
-    "callback": "/api/auth/callback",
-    "token": "/api/auth/token",
+    "login": "/auth/login",
+    "logout": "/auth/logout",
+    "callback": "/auth/callback",
+    "token": "/auth/token",
     "user": "/api/users/me",
-    "dev_login": "/api/auth/dev_login"
+    "dev_login": "/auth/dev_login"
   },
   "authorized_javascript_origins": [...],
   "authorized_redirect_uris": [...]
@@ -77,7 +77,7 @@ Get authentication configuration.
 
 ---
 
-#### GET /api/auth/login
+#### GET /auth/login
 Initialize OAuth 2.0 flow with Google.
 
 Redirects to Google OAuth authorization URL.
@@ -88,7 +88,7 @@ Redirects to Google OAuth authorization URL.
 
 ---
 
-#### GET /api/auth/callback
+#### GET /auth/callback
 Handle OAuth 2.0 callback from Google.
 
 **Query Parameters:**
@@ -104,7 +104,7 @@ Redirects to frontend with token or error.
 
 ---
 
-#### POST /api/auth/logout
+#### POST /auth/logout
 Logout the current user.
 
 **Response:**
@@ -120,7 +120,7 @@ Logout the current user.
 
 ---
 
-#### POST /api/auth/dev_login
+#### POST /auth/dev_login
 Development-only login endpoint.
 
 **Request Body:**
@@ -144,7 +144,7 @@ Development-only login endpoint.
 
 ---
 
-#### POST /api/auth/token
+#### POST /auth/token
 Token endpoint for OAuth2 password flow.
 
 **Request Body (form-data):**
@@ -165,7 +165,7 @@ Token endpoint for OAuth2 password flow.
 
 ---
 
-#### GET /api/auth/me
+#### GET /auth/me
 Get current authenticated user information.
 
 **Headers:**
@@ -1718,7 +1718,7 @@ Standard error response format based on NetraException:
       "additional_context": "value"
     },
     "context": {
-      "request_path": "/api/auth/login",
+      "request_path": "/auth/login",
       "user_agent": "Mozilla/5.0..."
     }
   }
@@ -1807,7 +1807,7 @@ Paginated responses include metadata:
 The API uses URL versioning. The current version is apex-v1:
 
 ```
-https://api.netrasystems.ai/apex-v1/...
+https://api.netrasystems.ai/apex-...
 ```
 
 Version information is also available in response headers:

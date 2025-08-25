@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,
@@ -80,7 +80,7 @@ class SyntheticDataAgentCore(BaseExecutionInterface):
     
     def _setup_reliability_systems(self) -> None:
         """Setup monitoring and error handling systems."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         self.monitor = ExecutionMonitor()
     
     async def validate_preconditions(self, context: ExecutionContext) -> bool:

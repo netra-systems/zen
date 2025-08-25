@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
-from starlette.websockets import WebSocketState
+from fastapi.websockets import WebSocketState
 
 from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.logging_config import central_logger
@@ -474,6 +474,19 @@ async def websocket_health_check():
         response["errors"] = errors
     
     return response
+
+
+@router.websocket("/websocket")
+async def websocket_legacy_endpoint(websocket: WebSocket):
+    """
+    Legacy WebSocket endpoint for backward compatibility.
+    
+    This endpoint mirrors the main /ws endpoint functionality but provides
+    backward compatibility for existing tests and clients using /websocket.
+    
+    Redirects to the main websocket_endpoint implementation.
+    """
+    return await websocket_endpoint(websocket)
 
 
 @router.websocket("/ws/test")

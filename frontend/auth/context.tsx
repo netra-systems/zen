@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useEffect, ReactNode, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, ReactNode, useState, useCallback, useRef } from 'react';
 import { User } from '@/types';
 import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,18 @@ export interface AuthContextType {
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Hook to access auth context
+ * This is the primary way components should access authentication state
+ */
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -122,11 +134,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(storedToken);
         try {
           const decodedUser = jwtDecode(storedToken) as User;
-          setUser(decodedUser);
-          // Sync with Zustand store
-          syncAuthStore(decodedUser, storedToken);
-          // Start automatic token refresh cycle
-          scheduleTokenRefreshCheck(storedToken);
+          
+          // Check if token is expired
+          const now = Date.now() / 1000;
+          if (decodedUser.exp && decodedUser.exp < now) {
+            logger.warn('Stored token is expired', {
+              component: 'AuthContext',
+              action: 'expired_token_detected',
+              expiry: decodedUser.exp,
+              now
+            });
+            
+            // Try to refresh token if possible
+            try {
+              await handleTokenRefresh(storedToken);
+            } catch (refreshError) {
+              logger.warn('Could not refresh expired token', refreshError as Error);
+              unifiedAuthService.removeToken();
+              syncAuthStore(null, null);
+            }
+          } else {
+            setUser(decodedUser);
+            // Sync with Zustand store
+            syncAuthStore(decodedUser, storedToken);
+            // Start automatic token refresh cycle
+            scheduleTokenRefreshCheck(storedToken);
+          }
         } catch (e) {
           logger.error('Invalid token detected', e as Error, {
             component: 'AuthContext',

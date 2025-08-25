@@ -220,9 +220,9 @@ class SecurityConfig:
 ```
 
 #### Sensitive Endpoints:
-- `/api/auth/login`
-- `/api/auth/logout`
-- `/api/auth/token`
+- `/auth/login`
+- `/auth/logout`
+- `/auth/token`
 - `/api/admin`
 - `/api/tools`
 - `/api/synthetic-data`

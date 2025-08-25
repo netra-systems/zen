@@ -76,9 +76,9 @@ class OAuthLogAnalyzer:
             '/auth/callback',
             '/auth/token',
             '/auth/validate',
-            '/api/auth/login',
-            '/api/auth/callback',
-            '/api/auth/config'
+            '/auth/login',
+            '/auth/callback',
+            '/auth/config'
         ]
         
         # Track OAuth sessions

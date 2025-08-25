@@ -193,7 +193,7 @@ class TestRateLimitingMiddleware:
         middleware = self._create_security_middleware()
         
         sensitive_limit = middleware._determine_rate_limit(
-            self._create_mock_request(path="/api/auth/login")
+            self._create_mock_request(path="/auth/login")
         )
         normal_limit = middleware._determine_rate_limit(
             self._create_mock_request(path="/api/public")

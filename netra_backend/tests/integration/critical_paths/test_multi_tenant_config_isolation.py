@@ -770,7 +770,7 @@ class MultiTenantConfigIsolationL3Manager:
                 "event_id": f"{tenant_id}_event_{i}",
                 "timestamp": time.time(),
                 "data": {
-                    "endpoint": f"/api/v1/tenant/{tenant_id}/data",
+                    "endpoint": f"/api/tenant/{tenant_id}/data",
                     "method": "GET",
                     "response_time": 0.15 + (i * 0.01),
                     "status_code": 200

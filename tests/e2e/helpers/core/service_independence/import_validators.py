@@ -53,7 +53,7 @@ class ImportIndependenceValidator:
                 required_files=["main.py", "core/__init__.py"],
                 forbidden_patterns=["from auth_service.", "from frontend."],
                 allowed_external_deps={"fastapi", "uvicorn", "sqlalchemy", "pydantic", "httpx"},
-                api_endpoints=["/health", "/docs", "/api/v1/health"]
+                api_endpoints=["/health", "/docs", "/api/health"]
             ),
             "frontend": ServiceConfig(
                 name="frontend",

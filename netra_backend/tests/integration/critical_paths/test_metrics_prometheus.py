@@ -291,7 +291,7 @@ async def test_metrics_collection_to_prometheus_export(metrics_prometheus_manage
     metric_configs = [
         {"name": "http_requests_total", "type": "counter", "value": 5, "labels": {"method": "GET", "status": "200"}},
         {"name": "memory_usage_bytes", "type": "gauge", "value": 1024000, "labels": {"service": "api"}},
-        {"name": "request_duration_seconds", "type": "histogram", "value": 0.25, "labels": {"endpoint": "/api/v1/health"}}
+        {"name": "request_duration_seconds", "type": "histogram", "value": 0.25, "labels": {"endpoint": "/api/health"}}
     ]
     
     generation_result = await manager.generate_application_metrics(metric_configs)

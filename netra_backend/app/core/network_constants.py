@@ -16,6 +16,7 @@ Usage:
 """
 
 from typing import Dict, Final, Optional
+import re
 
 
 class ServicePorts:
@@ -89,69 +90,123 @@ class HostConstants:
 
 
 class DatabaseConstants:
-    """Database connection constants."""
+    """Database connection constants - configuration keys and schemes only.
+    
+    IMPORTANT: This class only defines constants. All URL building functionality
+    has been moved to DatabaseURLBuilder as per database_connectivity_architecture.xml.
+    """
     
     # Environment variable names
     DATABASE_URL: Final[str] = "DATABASE_URL"
     REDIS_URL: Final[str] = "REDIS_URL" 
     CLICKHOUSE_URL: Final[str] = "CLICKHOUSE_URL"
     
+    # Additional PostgreSQL environment variables
+    POSTGRES_HOST: Final[str] = "POSTGRES_HOST"
+    POSTGRES_PORT: Final[str] = "POSTGRES_PORT"
+    POSTGRES_DB: Final[str] = "POSTGRES_DB"
+    POSTGRES_USER: Final[str] = "POSTGRES_USER"
+    POSTGRES_PASSWORD: Final[str] = "POSTGRES_PASSWORD"
+    
     # Database drivers/schemes
     POSTGRES_SCHEME: Final[str] = "postgresql"
     POSTGRES_ASYNC_SCHEME: Final[str] = "postgresql+asyncpg"
+    POSTGRES_SYNC_SCHEME: Final[str] = "postgresql+psycopg2"
     REDIS_SCHEME: Final[str] = "redis"
     CLICKHOUSE_SCHEME: Final[str] = "clickhouse"
     
-    # Default database names
+    # Default database names (environment-aware, no hardcoded credentials)
     POSTGRES_DEFAULT_DB: Final[str] = "netra_db"
     POSTGRES_TEST_DB: Final[str] = "netra_test"
     CLICKHOUSE_DEFAULT_DB: Final[str] = "default"
     CLICKHOUSE_TEST_DB: Final[str] = "test"
+    CLICKHOUSE_DEFAULT_USER: Final[str] = "default"
     REDIS_DEFAULT_DB: Final[int] = 0
     REDIS_TEST_DB: Final[int] = 1
     
-    # Default credentials (for development only)
-    POSTGRES_DEFAULT_USER: Final[str] = "postgres"
-    POSTGRES_DEFAULT_PASSWORD: Final[str] = "postgres"
-    POSTGRES_TEST_USER: Final[str] = "test_user"
-    POSTGRES_TEST_PASSWORD: Final[str] = "test_password"
-    CLICKHOUSE_DEFAULT_USER: Final[str] = "default"
-    REDIS_TEST_PASSWORD: Final[str] = "test_password"
+    # SSL modes
+    SSL_MODE_DISABLE: Final[str] = "disable"
+    SSL_MODE_PREFER: Final[str] = "prefer"
+    SSL_MODE_REQUIRE: Final[str] = "require"
+    SSL_MODE_VERIFY_CA: Final[str] = "verify-ca"
+    SSL_MODE_VERIFY_FULL: Final[str] = "verify-full"
     
     @classmethod
-    def build_postgres_url(cls, 
-                          user: str = POSTGRES_DEFAULT_USER,
-                          password: str = POSTGRES_DEFAULT_PASSWORD,
-                          host: str = HostConstants.LOCALHOST,
-                          port: int = ServicePorts.POSTGRES_DEFAULT,
-                          database: str = POSTGRES_DEFAULT_DB,
-                          async_driver: bool = False) -> str:
-        """Build PostgreSQL connection URL."""
-        scheme = cls.POSTGRES_ASYNC_SCHEME if async_driver else cls.POSTGRES_SCHEME
-        return f"{scheme}://{user}:{password}@{host}:{port}/{database}"
+    def resolve_ssl_parameter_conflicts(cls, url: str) -> str:
+        """Resolve SSL parameter conflicts between database drivers.
+        
+        This implements the SSL parameter resolution as specified in
+        database_connectivity_architecture.xml.
+        
+        Rules:
+        - For asyncpg: Convert sslmode=require to ssl=require
+        - For psycopg2: Convert ssl=require to sslmode=require  
+        - For Unix sockets (/cloudsql/): Remove ALL SSL parameters
+        - Preserve other URL components unchanged
+        """
+        # Unix socket connections - no SSL parameters needed
+        if '/cloudsql/' in url:
+            url = re.sub(r'[?&]ssl(mode)?=[^&]*', '', url)
+            return url.rstrip('?&')
+        
+        # Driver-specific SSL parameter handling
+        if 'asyncpg' in url:
+            url = url.replace('sslmode=', 'ssl=')
+        elif 'psycopg2' in url or (
+            'postgresql://' in url and 
+            '+' not in url.split('://')[0]  # Plain postgresql:// without driver
+        ):
+            url = url.replace('ssl=', 'sslmode=')
+        
+        return url
     
     @classmethod
-    def build_redis_url(cls,
-                       host: str = HostConstants.LOCALHOST,
-                       port: int = ServicePorts.REDIS_DEFAULT,
-                       database: int = REDIS_DEFAULT_DB,
-                       password: Optional[str] = None) -> str:
-        """Build Redis connection URL."""
-        if password:
-            return f"{cls.REDIS_SCHEME}://:{password}@{host}:{port}/{database}"
-        return f"{cls.REDIS_SCHEME}://{host}:{port}/{database}"
-    
-    @classmethod
-    def build_clickhouse_url(cls,
-                            host: str = HostConstants.LOCALHOST,
-                            port: int = ServicePorts.CLICKHOUSE_NATIVE,
-                            database: str = CLICKHOUSE_DEFAULT_DB,
-                            user: str = CLICKHOUSE_DEFAULT_USER,
-                            password: Optional[str] = None) -> str:
-        """Build ClickHouse connection URL."""
+    def build_clickhouse_url(cls, 
+                           host: str,
+                           port: int,
+                           database: str,
+                           user: str = None,
+                           password: str = None) -> str:
+        """Build ClickHouse URL with proper formatting.
+        
+        Args:
+            host: ClickHouse host
+            port: ClickHouse port (typically 8123 for HTTP)
+            database: Database name
+            user: Username (defaults to 'default')
+            password: Password (optional)
+            
+        Returns:
+            Formatted ClickHouse URL
+        """
+        user = user or cls.CLICKHOUSE_DEFAULT_USER
+        
         if password:
             return f"{cls.CLICKHOUSE_SCHEME}://{user}:{password}@{host}:{port}/{database}"
-        return f"{cls.CLICKHOUSE_SCHEME}://{user}@{host}:{port}/{database}"
+        else:
+            return f"{cls.CLICKHOUSE_SCHEME}://{user}@{host}:{port}/{database}"
+
+    @classmethod
+    def build_redis_url(cls,
+                       host: str,
+                       port: int,
+                       database: int = 0,
+                       password: str = None) -> str:
+        """Build Redis URL with proper formatting.
+        
+        Args:
+            host: Redis host
+            port: Redis port
+            database: Database number (defaults to 0)
+            password: Password (optional)
+            
+        Returns:
+            Formatted Redis URL
+        """
+        if password:
+            return f"{cls.REDIS_SCHEME}://:{password}@{host}:{port}/{database}"
+        else:
+            return f"{cls.REDIS_SCHEME}://{host}:{port}/{database}"
 
 
 class URLConstants:
@@ -280,94 +335,125 @@ class ServiceEndpoints:
 
 
 class NetworkEnvironmentHelper:
-    """Helper for environment-based network configuration."""
+    """Helper for environment-based network configuration.
+    
+    Uses IsolatedEnvironment and DatabaseURLBuilder as per specifications.
+    """
     
     @classmethod
     def is_test_environment(cls) -> bool:
         """Check if running in test environment."""
-        from netra_backend.app.core.configuration import unified_config_manager
-        config = unified_config_manager.get_config()
-        return getattr(config, 'testing', False) or getattr(config, 'environment', '') == 'testing'
+        from dev_launcher.isolated_environment import get_env
+        env = get_env()
+        return env.get("TESTING", "false").lower() == "true" or env.get("ENVIRONMENT", "").lower() == "testing"
     
     @classmethod
     def get_environment(cls) -> str:
         """Get current environment (development, staging, production)."""
-        from netra_backend.app.core.configuration import unified_config_manager
-        config = unified_config_manager.get_config()
-        return getattr(config, 'environment', 'development').lower()
+        from dev_launcher.isolated_environment import get_env
+        env = get_env()
+        return env.get("ENVIRONMENT", "development").lower()
     
     @classmethod
     def is_cloud_environment(cls) -> bool:
         """Check if running in cloud environment."""
-        from netra_backend.app.core.configuration import unified_config_manager
-        config = unified_config_manager.get_config()
-        return getattr(config, 'cloud_environment', False)
+        from dev_launcher.isolated_environment import get_env
+        env = get_env()
+        # Check for Cloud Run or Cloud SQL indicators
+        return (env.get("K_SERVICE") is not None or 
+                env.get("CLOUD_ENVIRONMENT", "false").lower() == "true" or
+                "/cloudsql/" in env.get("POSTGRES_HOST", ""))
     
     @classmethod
     def get_database_urls_for_environment(cls) -> Dict[str, str]:
-        """Get database URLs for current environment."""
-        is_test = cls.is_test_environment()
-        env = cls.get_environment()
+        """Get database URLs for current environment using DatabaseURLBuilder.
         
-        if env == "production" or env == "staging":
-            # Use unified config for production/staging
-            from netra_backend.app.core.configuration import unified_config_manager
-            config = unified_config_manager.get_config()
-            return {
-                "postgres": getattr(config, 'database_url', ''),
-                "redis": getattr(config, 'redis_url', ''),
-                "clickhouse": getattr(config, 'clickhouse_url', '')
-            }
-        else:
-            # Generate local URLs for development
-            return {
-                "postgres": DatabaseConstants.build_postgres_url(
-                    port=ServicePorts.get_postgres_port(is_test),
-                    database=DatabaseConstants.POSTGRES_TEST_DB if is_test else DatabaseConstants.POSTGRES_DEFAULT_DB,
-                    user=DatabaseConstants.POSTGRES_TEST_USER if is_test else DatabaseConstants.POSTGRES_DEFAULT_USER,
-                    password=DatabaseConstants.POSTGRES_TEST_PASSWORD if is_test else DatabaseConstants.POSTGRES_DEFAULT_PASSWORD,
-                    async_driver=True
-                ),
-                "redis": DatabaseConstants.build_redis_url(
-                    port=ServicePorts.get_redis_port(is_test),
-                    database=DatabaseConstants.REDIS_TEST_DB if is_test else DatabaseConstants.REDIS_DEFAULT_DB,
-                    password=DatabaseConstants.REDIS_TEST_PASSWORD if is_test else None
-                ),
-                "clickhouse": DatabaseConstants.build_clickhouse_url(
-                    port=ServicePorts.get_clickhouse_native_port(is_test),
-                    database=DatabaseConstants.CLICKHOUSE_TEST_DB if is_test else DatabaseConstants.CLICKHOUSE_DEFAULT_DB
-                )
-            }
+        This delegates all URL construction to DatabaseURLBuilder as per
+        database_connectivity_architecture.xml specification.
+        """
+        from dev_launcher.isolated_environment import get_env
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        env = get_env()
+        builder = DatabaseURLBuilder(env.get_all())
+        
+        # Validate configuration
+        is_valid, error_msg = builder.validate()
+        if not is_valid and cls.get_environment() in ["staging", "production"]:
+            # Critical error for staging/production
+            import logging
+            logging.error(f"Database configuration validation failed: {error_msg}")
+        
+        # Get environment-appropriate URLs
+        postgres_url = builder.get_url_for_environment(sync=False)
+        
+        # For Redis and ClickHouse, check environment variables first
+        redis_url = env.get(DatabaseConstants.REDIS_URL)
+        clickhouse_url = env.get(DatabaseConstants.CLICKHOUSE_URL)
+        
+        # Build URLs if not provided
+        if not redis_url:
+            # Use sensible defaults based on environment
+            is_test = cls.is_test_environment()
+            redis_host = env.get("REDIS_HOST", HostConstants.LOCALHOST)
+            redis_port = ServicePorts.get_redis_port(is_test)
+            redis_db = DatabaseConstants.REDIS_TEST_DB if is_test else DatabaseConstants.REDIS_DEFAULT_DB
+            redis_password = env.get("REDIS_PASSWORD")
+            
+            if redis_password:
+                redis_url = f"{DatabaseConstants.REDIS_SCHEME}://:{redis_password}@{redis_host}:{redis_port}/{redis_db}"
+            else:
+                redis_url = f"{DatabaseConstants.REDIS_SCHEME}://{redis_host}:{redis_port}/{redis_db}"
+        
+        if not clickhouse_url:
+            # Use sensible defaults based on environment  
+            is_test = cls.is_test_environment()
+            ch_host = env.get("CLICKHOUSE_HOST", HostConstants.LOCALHOST)
+            ch_port = ServicePorts.get_clickhouse_native_port(is_test)
+            ch_db = DatabaseConstants.CLICKHOUSE_TEST_DB if is_test else DatabaseConstants.CLICKHOUSE_DEFAULT_DB
+            ch_user = env.get("CLICKHOUSE_USER", "default")
+            ch_password = env.get("CLICKHOUSE_PASSWORD")
+            
+            if ch_password:
+                clickhouse_url = f"{DatabaseConstants.CLICKHOUSE_SCHEME}://{ch_user}:{ch_password}@{ch_host}:{ch_port}/{ch_db}"
+            else:
+                clickhouse_url = f"{DatabaseConstants.CLICKHOUSE_SCHEME}://{ch_user}@{ch_host}:{ch_port}/{ch_db}"
+        
+        return {
+            "postgres": postgres_url or "",
+            "redis": redis_url or "",
+            "clickhouse": clickhouse_url or ""
+        }
     
     @classmethod
     def get_service_urls_for_environment(cls) -> Dict[str, str]:
         """Get service URLs for current environment."""
-        is_test = cls.is_test_environment()
-        env = cls.get_environment()
+        from dev_launcher.isolated_environment import get_env
         
-        if env == "production":
-            from netra_backend.app.core.configuration import unified_config_manager
-            config = unified_config_manager.get_config()
+        is_test = cls.is_test_environment()
+        environment = cls.get_environment()
+        env = get_env()
+        
+        if environment == "production":
             return {
-                "frontend": URLConstants.PRODUCTION_FRONTEND,
-                "backend": getattr(config, 'backend_service_url', URLConstants.PRODUCTION_APP),
-                "auth_service": getattr(config, 'auth_service_url', '')
+                "frontend": env.get(URLConstants.FRONTEND_URL, URLConstants.PRODUCTION_FRONTEND),
+                "backend": env.get(URLConstants.BACKEND_SERVICE_URL, URLConstants.PRODUCTION_APP),
+                "auth_service": env.get(URLConstants.AUTH_SERVICE_URL, "")
             }
-        elif env == "staging":
-            from netra_backend.app.core.configuration import unified_config_manager
-            config = unified_config_manager.get_config()
+        elif environment == "staging":
             return {
-                "frontend": URLConstants.STAGING_FRONTEND,
-                "backend": getattr(config, 'backend_service_url', URLConstants.STAGING_APP),
-                "auth_service": getattr(config, 'auth_service_url', '')
+                "frontend": env.get(URLConstants.FRONTEND_URL, URLConstants.STAGING_FRONTEND),
+                "backend": env.get(URLConstants.BACKEND_SERVICE_URL, URLConstants.STAGING_APP),
+                "auth_service": env.get(URLConstants.AUTH_SERVICE_URL, "")
             }
         else:
             # Development URLs
             return {
-                "frontend": ServiceEndpoints.build_frontend_url(),
-                "backend": ServiceEndpoints.build_backend_service_url(),
-                "auth_service": ServiceEndpoints.build_auth_service_url(
-                    port=ServicePorts.get_auth_service_port(is_test)
+                "frontend": env.get(URLConstants.FRONTEND_URL, ServiceEndpoints.build_frontend_url()),
+                "backend": env.get(URLConstants.BACKEND_SERVICE_URL, ServiceEndpoints.build_backend_service_url()),
+                "auth_service": env.get(
+                    URLConstants.AUTH_SERVICE_URL,
+                    ServiceEndpoints.build_auth_service_url(port=ServicePorts.get_auth_service_port(is_test))
                 )
             }
 

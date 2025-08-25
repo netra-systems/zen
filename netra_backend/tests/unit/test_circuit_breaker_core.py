@@ -16,12 +16,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker as AdaptiveCircuitBreaker,
+    UnifiedCircuitBreakerState as CircuitBreakerState,
+    UnifiedCircuitConfig as CircuitBreakerConfig
+)
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
-from netra_backend.app.schemas.core_enums import CircuitBreakerState
 from netra_backend.app.schemas.core_models import (
-    CircuitBreakerConfig,
     HealthCheckResult,
 )
 
@@ -48,12 +50,12 @@ def mock_health_checker():
 @pytest.fixture
 def circuit_breaker(circuit_config):
     """Circuit breaker instance without health checker."""
-    return AdaptiveCircuitBreaker("test", circuit_config)
+    return AdaptiveCircuitBreaker(circuit_config)
 
 @pytest.fixture  
 async def circuit_with_health(circuit_config, mock_health_checker):
     """Circuit breaker with health monitoring."""
-    circuit = AdaptiveCircuitBreaker("test", circuit_config, mock_health_checker)
+    circuit = AdaptiveCircuitBreaker(circuit_config, mock_health_checker)
     yield circuit
     circuit.cleanup()
 
@@ -70,7 +72,7 @@ def assert_circuit_state(circuit, expected_state):
 
 def assert_failure_count(circuit, expected_count):
     """Assert circuit has expected failure count."""
-    assert circuit.failure_count == expected_count
+    assert circuit.metrics.consecutive_failures == expected_count
 
 def simulate_operation_failure(circuit):
     """Simulate a failed operation."""
@@ -101,8 +103,10 @@ class TestCircuitBreakerInitialization:
 
     def test_circuit_breaker_name_assignment(self, circuit_config):
         """Circuit breaker stores correct name."""
-        circuit = AdaptiveCircuitBreaker("test_name", circuit_config)
-        assert circuit.name == "test_name"
+        # Update config with test name
+        circuit_config.name = "test_name"
+        circuit = AdaptiveCircuitBreaker(circuit_config)
+        assert circuit.config.name == "test_name"
 
     def test_circuit_breaker_config_storage(self, circuit_breaker, circuit_config):
         """Circuit breaker stores configuration correctly."""

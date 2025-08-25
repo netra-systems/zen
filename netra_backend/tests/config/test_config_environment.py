@@ -49,18 +49,40 @@ class TestConfigEnvironmentDetection:
     @pytest.fixture
     def clean_environment(self):
         """Clean environment variables for isolated testing"""
+        from netra_backend.app.core.isolated_environment import get_env
+        
         original_env = os.environ.copy()
-        # Clear relevant environment variables
+        env = get_env()
+        
+        # Clear relevant environment variables from both os.environ and isolated environment
         env_vars_to_clear = [
             'TESTING', 'ENVIRONMENT', 'K_SERVICE', 
-            'GAE_APPLICATION', 'GOOGLE_CLOUD_PROJECT'
+            'GAE_APPLICATION', 'GOOGLE_CLOUD_PROJECT', 'PYTEST_CURRENT_TEST'
         ]
+        
+        # Store original isolated environment values for restoration
+        original_isolated_values = {}
         for var in env_vars_to_clear:
+            if env.exists(var):
+                original_isolated_values[var] = env.get(var)
+            # Clear from both sources
             os.environ.pop(var, None)
+            env.delete(var)
+        
+        # Reset the cache in the deprecated EnvironmentDetector to ensure fresh detection
+        from netra_backend.app.core.configuration.environment import _environment_detector
+        _environment_detector.reset_cache()
+        
         yield
+        
         # Restore original environment
         os.environ.clear()
         os.environ.update(original_env)
+        
+        # Restore isolated environment values (except PYTEST_CURRENT_TEST which should remain cleared)
+        for var, value in original_isolated_values.items():
+            if value is not None and var != 'PYTEST_CURRENT_TEST':
+                env.set(var, value, source="clean_environment_restore")
 
     def test_get_environment_testing(self, config_env, clean_environment):
         """Test environment detection returns 'testing' when TESTING env var set"""
@@ -68,7 +90,7 @@ class TestConfigEnvironmentDetection:
         os.environ['TESTING'] = 'true'
         
         # Act
-        result = config_env.get_environment()
+        result = config_env.detect()
         
         # Assert
         assert result == "testing"
@@ -77,11 +99,11 @@ class TestConfigEnvironmentDetection:
         """Test environment detection with cloud run environment"""
         # Arrange
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment') as mock_detect:
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.get_environment') as mock_detect:
             mock_detect.return_value = "production"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "production"
@@ -91,11 +113,11 @@ class TestConfigEnvironmentDetection:
         """Test environment detection defaults to development"""
         # Arrange
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment') as mock_detect:
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
             mock_detect.return_value = None
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "development"
@@ -112,14 +134,14 @@ class TestConfigEnvironmentDetection:
         ]
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment') as mock_detect:
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
             mock_detect.return_value = None
             
             for env_value, expected in test_cases:
                 os.environ['ENVIRONMENT'] = env_value
                 
                 # Act
-                result = config_env.get_environment()
+                result = config_env.detect()
                 
                 # Assert
                 assert result == expected
@@ -131,11 +153,11 @@ class TestConfigEnvironmentDetection:
         os.environ['ENVIRONMENT'] = 'production'
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment') as mock_detect:
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
             mock_detect.return_value = "staging"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "testing"
@@ -153,7 +175,7 @@ class TestConfigObjectCreation:
     def test_create_config_development(self, config_env):
         """Test creation of development configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='development'):
+        with patch.object(config_env, 'detect', return_value='development'):
             
             # Act
             config = config_env.create_config()
@@ -165,7 +187,7 @@ class TestConfigObjectCreation:
     def test_create_config_production(self, config_env):
         """Test creation of production configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='production'):
+        with patch.object(config_env, 'detect', return_value='production'):
             
             # Act
             config = config_env.create_config()
@@ -178,7 +200,7 @@ class TestConfigObjectCreation:
     def test_create_config_staging(self, config_env):
         """Test creation of staging configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='staging'):
+        with patch.object(config_env, 'detect', return_value='staging'):
             
             # Act
             config = config_env.create_config()
@@ -190,7 +212,7 @@ class TestConfigObjectCreation:
     def test_create_config_testing(self, config_env):
         """Test creation of testing configuration"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='testing'):
+        with patch.object(config_env, 'detect', return_value='testing'):
             
             # Act
             config = config_env.create_config()
@@ -202,7 +224,7 @@ class TestConfigObjectCreation:
     def test_create_config_unknown_environment_defaults(self, config_env):
         """Test creation with unknown environment defaults to development"""
         # Arrange
-        with patch.object(config_env, 'get_environment', return_value='unknown'):
+        with patch.object(config_env, 'detect', return_value='unknown'):
             
             # Act
             config = config_env.create_config()
@@ -246,7 +268,7 @@ class TestEnvironmentValidation:
         }
         
         for env_name, config_class in environment_mappings.items():
-            with patch.object(config_env, 'get_environment', return_value=env_name):
+            with patch.object(config_env, 'detect', return_value=env_name):
                 config = config_env.create_config()
                 assert isinstance(config, config_class)
 
@@ -263,11 +285,11 @@ class TestCloudEnvironmentDetection:
         os.environ['K_SERVICE'] = 'netra-backend'
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment') as mock_detect:
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
             mock_detect.return_value = "production"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "production"
@@ -278,11 +300,11 @@ class TestCloudEnvironmentDetection:
         os.environ['GAE_APPLICATION'] = 'netra-project'
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment') as mock_detect:
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
             mock_detect.return_value = "staging"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "staging"
@@ -293,11 +315,11 @@ class TestCloudEnvironmentDetection:
         os.environ['GOOGLE_CLOUD_PROJECT'] = 'netra-ai-platform'
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment') as mock_detect:
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
             mock_detect.return_value = "production"
             
             # Act
-            result = config_env.get_environment()
+            result = config_env.detect()
             
             # Assert
             assert result == "production"
@@ -319,10 +341,10 @@ class TestConfigurationLogging:
         """Test logging during environment detection"""
         with patch.object(config_env, '_logger') as mock_logger:
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.config_environment.detect_cloud_run_environment', return_value=None):
+            with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment', return_value=None):
                 
                 # Act
-                config_env.get_environment()
+                config_env.detect()
                 
                 # Assert - Logger should be called for environment detection
                 assert mock_logger.debug.called or mock_logger.info.called
@@ -330,7 +352,7 @@ class TestConfigurationLogging:
     def test_config_creation_logging(self, config_env):
         """Test logging during config object creation"""
         with patch.object(config_env, '_logger') as mock_logger:
-            with patch.object(config_env, 'get_environment', return_value='development'):
+            with patch.object(config_env, 'detect', return_value='development'):
                 
                 # Act
                 config_env.create_config()
@@ -348,10 +370,10 @@ class TestPerformanceAndEdgeCases:
     def test_multiple_environment_detections_consistent(self, config_env):
         """Test that multiple calls return consistent results"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment', return_value='production'):
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment', return_value='production'):
             
             # Act - Multiple calls
-            results = [config_env.get_environment() for _ in range(10)]
+            results = [config_env.detect() for _ in range(10)]
             
             # Assert - All results should be identical
             assert len(set(results)) == 1
@@ -361,7 +383,7 @@ class TestPerformanceAndEdgeCases:
         """Test config creation performance with multiple calls"""
         import time
         
-        with patch.object(config_env, 'get_environment', return_value='development'):
+        with patch.object(config_env, 'detect', return_value='development'):
             
             # Act - Time multiple config creations
             start_time = time.time()
@@ -382,12 +404,12 @@ class TestPerformanceAndEdgeCases:
         ]
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config_environment.detect_cloud_run_environment', return_value=None):
+        with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment', return_value=None):
             for test_env in test_cases:
                 os.environ['ENVIRONMENT'] = test_env
                 
                 # Should not raise exception
-                result = config_env.get_environment()
+                result = config_env.detect()
                 
                 # Should default to development for invalid environments
                 if test_env == "production":

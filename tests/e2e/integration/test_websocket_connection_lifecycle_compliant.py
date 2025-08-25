@@ -50,7 +50,7 @@ class TestWebSocketConnectionLifecycleCompliant:
         
         try:
             # Try to create test user
-            response = await backend_client.post("/api/auth/register", json=test_user_data)
+            response = await backend_client.post("/auth/register", json=test_user_data)
             if response.status_code in [200, 201]:
                 return test_user_data
         except:

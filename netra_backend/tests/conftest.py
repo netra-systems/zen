@@ -10,6 +10,7 @@ from test_framework.conftest_base import *
 
 # Import backend-specific utilities
 from test_framework.fixtures.database_fixtures import *
+from test_framework.fixtures.service_fixtures import *
 from test_framework.mocks.service_mocks import MockClickHouseService, MockLLMService
 
 # Setup Python path for imports
@@ -30,9 +31,12 @@ if not get_env().get("TEST_COLLECTION_MODE"):
 # Use isolated values if TEST_ISOLATION is enabled
 
 # CRITICAL: Set test collection mode to skip heavy initialization during pytest collection
-# Only set if we're actually running tests to prevent affecting dev launcher
+# Only set if we're in the collection phase (pytest is imported but no test is executing)
 import sys
-if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+import os
+if "pytest" in sys.modules and not get_env().get("PYTEST_CURRENT_TEST"):
+    # Only set collection mode if pytest is imported but we're not currently executing a test
+    # PYTEST_CURRENT_TEST is set during test execution but not during collection
     get_env().set("TEST_COLLECTION_MODE", "1", source="netra_backend_conftest")
 
 # Only set environment variables if we're actually running tests

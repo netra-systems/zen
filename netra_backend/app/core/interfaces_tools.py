@@ -216,7 +216,7 @@ class ToolExecutionEngine:
     
     def _create_success_result(self, tool_input: 'ToolInput', result: Any) -> 'ToolResult':
         """Create successful tool result for simple interface."""
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Tool import (
             SimpleToolPayload,
             ToolResult,
             ToolStatus,
@@ -227,7 +227,7 @@ class ToolExecutionEngine:
     
     def _create_error_result(self, tool_input: 'ToolInput', message: str) -> 'ToolResult':
         """Create error result for simple interface."""
-        from netra_backend.app.schemas.unified_tools import ToolResult, ToolStatus
+        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
         
         return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=message)
     

@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.core.configuration import unified_config_manager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.auth_routes.utils import get_frontend_url_for_environment
@@ -47,9 +47,9 @@ def build_redirect_uri(request: Request) -> str:
     """Build redirect URI based on request and environment."""
     base_url = str(request.base_url).rstrip('/')
     if "localhost" in base_url or "127.0.0.1" in base_url:
-        return f"{base_url}/api/auth/callback"
+        return f"{base_url}/auth/callback"
     base_url = ensure_https_for_production(base_url)
-    return f"{base_url}/api/auth/callback"
+    return f"{base_url}/auth/callback"
 
 
 def ensure_https_for_production(base_url: str) -> str:

@@ -46,7 +46,7 @@ async def test_free_tier_usage_limits_enforcement(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Check initial usage and limits
-    response = await async_client.get("/api/v1/usage/current", headers=headers)
+    response = await async_client.get("/api/usage/current", headers=headers)
     usage_data = assert_billing_metrics(response, "free")
     assert usage_data["daily_message_limit"] == 50
     assert usage_data["messages_used_today"] == 0
@@ -56,7 +56,7 @@ async def test_free_tier_usage_limits_enforcement(
     
     # Send message near limit - should get warning
     response = await async_client.post(
-        "/api/v1/chat/message",
+        "/api/chat/message",
         json={"content": "Test near limit", "thread_id": str(uuid.uuid4())},
         headers=headers
     )
@@ -84,7 +84,7 @@ async def test_daily_limit_exceeded_blocking(
     
     # Attempt to exceed limit
     response = await async_client.post(
-        "/api/v1/chat/message",
+        "/api/chat/message",
         json={"content": "Beyond limit", "thread_id": str(uuid.uuid4())},
         headers=headers
     )
@@ -107,7 +107,7 @@ async def test_premium_features_access_control(
     
     # Advanced tools should be blocked
     response = await async_client.post(
-        "/api/v1/tools/enterprise-analytics",
+        "/api/tools/enterprise-analytics",
         json={"data": "test"},
         headers=headers
     )
@@ -116,7 +116,7 @@ async def test_premium_features_access_control(
     
     # Advanced features should prompt upgrade
     response = await async_client.post(
-        "/api/v1/tools/advanced-analytics/execute",
+        "/api/tools/advanced-analytics/execute",
         json={"query": "test"},
         headers=headers
     )
@@ -138,20 +138,20 @@ async def test_usage_tracking_accuracy(
     user_id = authenticated_user["user_id"]
     
     # Get baseline usage
-    response = await async_client.get("/api/v1/usage/detailed", headers=headers)
+    response = await async_client.get("/api/usage/detailed", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     baseline_usage = response.json()
     
     # Perform tracked actions
     actions = [
         async_client.post(
-            "/api/v1/chat/message",
+            "/api/chat/message",
             json={"content": "Usage test 1", "thread_id": str(uuid.uuid4())},
             headers=headers
         ),
-        async_client.get("/api/v1/user/profile", headers=headers),
+        async_client.get("/api/user/profile", headers=headers),
         async_client.post(
-            "/api/v1/tools/cost-analyzer/execute",
+            "/api/tools/cost-analyzer/execute",
             json={"data": {"cost": 1000}},
             headers=headers
         ),
@@ -159,7 +159,7 @@ async def test_usage_tracking_accuracy(
     await asyncio.gather(*actions)
     
     # Verify usage incremented
-    response = await async_client.get("/api/v1/usage/detailed", headers=headers)
+    response = await async_client.get("/api/usage/detailed", headers=headers)
     current_usage = response.json()
     assert current_usage["messages_sent"] > baseline_usage["messages_sent"]
     assert current_usage["api_calls"] > baseline_usage["api_calls"]
@@ -182,7 +182,7 @@ async def test_usage_reset_daily_cycle(
     await redis_client.delete(f"usage:{user_id}:daily")
     
     # Check usage reset
-    response = await async_client.get("/api/v1/usage/current", headers=headers)
+    response = await async_client.get("/api/usage/current", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["messages_used_today"] == 0
 
@@ -200,12 +200,12 @@ async def test_upgrade_to_pro_plan_flow(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Check current plan
-    response = await async_client.get("/api/v1/billing/subscription", headers=headers)
+    response = await async_client.get("/api/billing/subscription", headers=headers)
     current_plan = assert_billing_metrics(response, "free")
     assert current_plan["trial_days_remaining"] >= 0
     
     # Get available plans
-    response = await async_client.get("/api/v1/billing/plans")
+    response = await async_client.get("/api/billing/plans")
     assert response.status_code == status.HTTP_200_OK
     plans = response.json()
     pro_plan = next(p for p in plans if p["name"] == "pro")
@@ -221,7 +221,7 @@ async def test_upgrade_to_pro_plan_flow(
         }
         
         response = await async_client.post(
-            "/api/v1/billing/upgrade",
+            "/api/billing/upgrade",
             json={
                 "plan_id": pro_plan["id"],
                 "payment_method": "card",
@@ -252,7 +252,7 @@ async def test_pro_plan_benefits_activation(
         mock_plan.return_value = {"plan": "pro", "status": "active"}
         
         # Verify increased limits
-        response = await async_client.get("/api/v1/usage/limits", headers=headers)
+        response = await async_client.get("/api/usage/limits", headers=headers)
         assert response.status_code == status.HTTP_200_OK
         limits = response.json()
         assert limits["daily_messages"] > 50  # More than free tier
@@ -260,7 +260,7 @@ async def test_pro_plan_benefits_activation(
         
         # Test access to pro features
         response = await async_client.post(
-            "/api/v1/tools/advanced-analytics/execute",
+            "/api/tools/advanced-analytics/execute",
             json={"query": "test"},
             headers=headers
         )
@@ -284,14 +284,14 @@ async def test_billing_invoice_generation(
         mock_plan.return_value = {"plan": "pro", "status": "active", "price": 99}
         
         # Get next invoice
-        response = await async_client.get("/api/v1/billing/next-invoice", headers=headers)
+        response = await async_client.get("/api/billing/next-invoice", headers=headers)
         assert response.status_code == status.HTTP_200_OK
         next_invoice = response.json()
         assert next_invoice["amount"] == 99
         assert "due_date" in next_invoice
         
         # Get current billing period
-        response = await async_client.get("/api/v1/billing/current-period", headers=headers)
+        response = await async_client.get("/api/billing/current-period", headers=headers)
         assert response.status_code == status.HTTP_200_OK
         billing = response.json()
         assert "total_cost" in billing
@@ -316,7 +316,7 @@ async def test_downgrade_prevention_during_billing(
         
         # Attempt immediate downgrade
         response = await async_client.post(
-            "/api/v1/billing/change-plan",
+            "/api/billing/change-plan",
             json={"plan_id": "free"},
             headers=headers
         )

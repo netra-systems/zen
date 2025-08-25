@@ -80,8 +80,9 @@ class AuthStarter:
         self._print("🔐", "AUTH", f"Starting auth service ({mode_desc})...")
         
         # Get auth service configuration with dynamic port allocation
+        # Use '0.0.0.0' host to match uvicorn binding to prevent race condition
         preferred_port = auth_config.get_config().get("port", 8081)
-        port = find_available_port(preferred_port, (8081, 8090))
+        port = find_available_port(preferred_port, (8081, 8090), host='0.0.0.0')
         
         if port != preferred_port:
             self._print("⚠️", "AUTH", f"Port {preferred_port} unavailable, using port {port} instead")

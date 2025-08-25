@@ -83,31 +83,31 @@ class ApiGatewayRateLimitingManager:
     async def setup_test_endpoints(self):
         """Configure test endpoints with tier-based rate limits."""
         self.test_endpoints = {
-            "/api/v1/chat": EndpointConfig(
+            "/api/chat": EndpointConfig(
                 requests_per_minute=50,
                 requests_per_hour=1000,
                 burst_allowance=10,
                 priority_level=5  # High priority
             ),
-            "/api/v1/threads": EndpointConfig(
+            "/api/threads": EndpointConfig(
                 requests_per_minute=100,
                 requests_per_hour=2000,
                 burst_allowance=20,
                 priority_level=4
             ),
-            "/api/v1/agents": EndpointConfig(
+            "/api/agents": EndpointConfig(
                 requests_per_minute=30,
                 requests_per_hour=500,
                 burst_allowance=5,
                 priority_level=3
             ),
-            "/api/v1/metrics": EndpointConfig(
+            "/api/metrics": EndpointConfig(
                 requests_per_minute=200,
                 requests_per_hour=5000,
                 burst_allowance=50,
                 priority_level=2
             ),
-            "/api/v1/health": EndpointConfig(
+            "/api/health": EndpointConfig(
                 requests_per_minute=1000,
                 requests_per_hour=10000,
                 burst_allowance=100,
@@ -465,7 +465,7 @@ async def api_gateway_manager():
 @pytest.mark.asyncio
 async def test_endpoint_rate_limiting_enforcement(api_gateway_manager):
     """Test rate limiting enforcement at the gateway level."""
-    endpoint = "/api/v1/chat"
+    endpoint = "/api/chat"
     user_id = "test_rate_limit_user"
     user_tier = UserTier.FREE
     
@@ -498,7 +498,7 @@ async def test_endpoint_rate_limiting_enforcement(api_gateway_manager):
 @pytest.mark.asyncio
 async def test_tier_based_rate_limit_differentiation(api_gateway_manager):
     """Test that different user tiers get different rate limits."""
-    endpoint = "/api/v1/threads"
+    endpoint = "/api/threads"
     
     # Test different tiers
     tier_tests = [
@@ -536,7 +536,7 @@ async def test_tier_based_rate_limit_differentiation(api_gateway_manager):
 @pytest.mark.asyncio
 async def test_concurrent_endpoint_rate_limiting(api_gateway_manager):
     """Test rate limiting with concurrent requests across endpoints."""
-    endpoints = ["/api/v1/chat", "/api/v1/threads", "/api/v1/agents"]
+    endpoints = ["/api/chat", "/api/threads", "/api/agents"]
     concurrent_users = 10
     
     result = await api_gateway_manager.test_concurrent_endpoint_requests(
@@ -553,7 +553,7 @@ async def test_concurrent_endpoint_rate_limiting(api_gateway_manager):
         assert endpoint_stats["total_requests"] == concurrent_users
         
         # High-priority endpoints should have better success rates
-        if endpoint == "/api/v1/chat":  # Highest priority
+        if endpoint == "/api/chat":  # Highest priority
             assert endpoint_stats["success_rate"] >= 70
 
 @pytest.mark.asyncio
@@ -562,7 +562,7 @@ async def test_concurrent_endpoint_rate_limiting(api_gateway_manager):
 @pytest.mark.asyncio
 async def test_burst_traffic_circuit_breaking(api_gateway_manager):
     """Test circuit breaking behavior under extreme burst traffic."""
-    endpoint = "/api/v1/agents"
+    endpoint = "/api/agents"
     user_id = "burst_test_user"
     
     # Generate extreme burst traffic
@@ -590,7 +590,7 @@ async def test_burst_traffic_circuit_breaking(api_gateway_manager):
 @pytest.mark.asyncio
 async def test_rate_limit_header_accuracy(api_gateway_manager):
     """Test accuracy of rate limiting headers."""
-    endpoint = "/api/v1/metrics"
+    endpoint = "/api/metrics"
     user_id = "header_test_user"
     user_tier = UserTier.MID
     
@@ -622,9 +622,9 @@ async def test_gateway_metrics_collection(api_gateway_manager):
     """Test collection of gateway rate limiting metrics."""
     # Generate test traffic across endpoints
     test_scenarios = [
-        ("/api/v1/chat", "metrics_user_1", UserTier.FREE, 10),
-        ("/api/v1/threads", "metrics_user_2", UserTier.MID, 15),
-        ("/api/v1/health", "metrics_user_3", UserTier.ENTERPRISE, 20)
+        ("/api/chat", "metrics_user_1", UserTier.FREE, 10),
+        ("/api/threads", "metrics_user_2", UserTier.MID, 15),
+        ("/api/health", "metrics_user_3", UserTier.ENTERPRISE, 20)
     ]
     
     for endpoint, user_id, tier, count in test_scenarios:
@@ -639,9 +639,9 @@ async def test_gateway_metrics_collection(api_gateway_manager):
     assert metrics["configured_endpoints"] == 5
     
     # Verify endpoint breakdown
-    assert "/api/v1/chat" in metrics["endpoint_breakdown"]
-    assert "/api/v1/threads" in metrics["endpoint_breakdown"]
-    assert "/api/v1/health" in metrics["endpoint_breakdown"]
+    assert "/api/chat" in metrics["endpoint_breakdown"]
+    assert "/api/threads" in metrics["endpoint_breakdown"]
+    assert "/api/health" in metrics["endpoint_breakdown"]
     
     # Verify tier breakdown
     assert metrics["tier_breakdown"]["free"] == 10
@@ -654,7 +654,7 @@ async def test_gateway_metrics_collection(api_gateway_manager):
 @pytest.mark.asyncio
 async def test_rate_limiting_performance_requirements(api_gateway_manager):
     """Test rate limiting performance meets requirements."""
-    endpoint = "/api/v1/health"
+    endpoint = "/api/health"
     user_id = "performance_test_user"
     
     # Test response time under normal load

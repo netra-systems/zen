@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-08-24T17:28:32.121498",
+    "generated_at": "2025-08-25T02:39:32.427934",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 28
   },
@@ -19,7 +19,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/services/api_gateway/gateway_manager.py:228",
-        "scripts/deploy_to_gcp.py:851"
+        "scripts/deploy_to_gcp.py:857"
       ]
     },
     "Enabled": {
@@ -27,7 +27,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/services/api_gateway/gateway_manager.py:228",
-        "scripts/deploy_to_gcp.py:851"
+        "scripts/deploy_to_gcp.py:857"
       ]
     },
     "Error": {
@@ -61,7 +61,7 @@
         "netra_backend/app/core/configuration/secrets.py:267",
         "netra_backend/app/core/configuration/secrets.py:276",
         "netra_backend/app/core/configuration/unified_secrets.py:67",
-        "netra_backend/app/core/isolated_environment.py:179",
+        "netra_backend/app/core/isolated_environment.py:183",
         "netra_backend/app/core/secret_manager.py:317",
         "netra_backend/app/db/postgres_index_loader.py:33",
         "netra_backend/app/db/postgres_table_checker.py:34",
@@ -127,15 +127,15 @@
       "category": "states",
       "locations": [
         "netra_backend/app/core/circuit_breaker_types.py:17",
-        "netra_backend/app/core/network_handler.py:568",
+        "netra_backend/app/core/network_handler.py:581",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:53",
         "netra_backend/app/core/unified/retry_decorator.py:91",
         "netra_backend/app/db/connection_pool_manager.py:34",
         "netra_backend/app/routes/mcp/handlers_session.py:70",
         "netra_backend/app/schemas/core_enums.py:227",
         "netra_backend/app/schemas/monitoring.py:41",
         "netra_backend/app/schemas/reliability_types.py:33",
-        "netra_backend/app/services/api_gateway/circuit_breaker.py:11",
-        "netra_backend/app/services/api_gateway/circuit_breaker_manager.py:27"
+        "netra_backend/app/services/api_gateway/circuit_breaker.py:11"
       ]
     },
     "connected": {
@@ -143,11 +143,11 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/actions_agent_llm.py:76",
-        "netra_backend/app/core/network_handler.py:43",
+        "netra_backend/app/core/network_handler.py:48",
         "netra_backend/app/core/websocket_recovery_types.py:16",
         "netra_backend/app/mcp_client/models.py:31",
         "netra_backend/app/mcp_client/transports/http_client.py:304",
-        "netra_backend/app/routes/health.py:231",
+        "netra_backend/app/routes/health.py:245",
         "netra_backend/app/routes/mcp/main.py:69",
         "netra_backend/app/routes/mcp/main.py:98",
         "netra_backend/app/routes/utils/health_helpers.py:75",
@@ -166,7 +166,7 @@
         "netra_backend/app/core/health_checkers.py:456",
         "netra_backend/app/core/health_checkers.py:462",
         "netra_backend/app/core/health_configuration.py:47",
-        "netra_backend/app/core/network_handler.py:51",
+        "netra_backend/app/core/network_handler.py:56",
         "netra_backend/app/db/clickhouse_init.py:40"
       ]
     },
@@ -175,7 +175,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/actions_agent_llm.py:76",
-        "netra_backend/app/core/network_handler.py:44",
+        "netra_backend/app/core/network_handler.py:49",
         "netra_backend/app/core/websocket_recovery_types.py:17",
         "netra_backend/app/mcp_client/models.py:29",
         "netra_backend/app/schemas/core_enums.py:123",
@@ -290,14 +290,14 @@
       "locations": [
         "netra_backend/app/agents/synthetic_data_sub_agent_validation.py:54",
         "netra_backend/app/core/circuit_breaker_types.py:18",
+        "netra_backend/app/core/resilience/unified_circuit_breaker.py:54",
         "netra_backend/app/core/unified/retry_decorator.py:92",
         "netra_backend/app/db/client_clickhouse.py:219",
         "netra_backend/app/db/connection_pool_manager.py:35",
         "netra_backend/app/llm/client_health.py:64",
         "netra_backend/app/schemas/core_enums.py:228",
         "netra_backend/app/schemas/monitoring.py:42",
-        "netra_backend/app/schemas/reliability_types.py:34",
-        "netra_backend/app/services/api_gateway/circuit_breaker.py:12"
+        "netra_backend/app/schemas/reliability_types.py:34"
       ]
     },
     "pending": {
@@ -325,11 +325,11 @@
         "netra_backend/app/core/health/unified_health_checker.py:227",
         "netra_backend/app/core/health/unified_health_checker.py:313",
         "netra_backend/app/middleware/api_gateway_coordinator.py:35",
-        "netra_backend/app/routes/health.py:228",
+        "netra_backend/app/routes/health.py:242",
         "netra_backend/app/routes/monitoring.py:194",
         "netra_backend/app/schemas/shared_types.py:50",
         "auth_service/health_check.py:51",
-        "auth_service/main.py:505"
+        "auth_service/main.py:313"
       ]
     },
     "success": {

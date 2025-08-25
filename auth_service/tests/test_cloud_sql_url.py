@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# SSOT: Use AuthDatabaseManager for static methods, compatibility alias for instance methods
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from auth_service.auth_core.database.connection import AuthDatabase
 
 
@@ -22,15 +24,15 @@ async def test_cloud_sql_url_format():
     
     for original_url in test_urls:
         with patch.dict(os.environ, {"DATABASE_URL": original_url, "ENVIRONMENT": "staging"}):
-            # Mock: Database access isolation for fast, reliable unit testing
-            with patch("auth_service.auth_core.database.connection.create_async_engine") as mock_engine:
+            # Mock: Database access isolation for fast, reliable unit testing - SSOT approach
+            with patch("auth_service.auth_core.database.database_manager.create_async_engine") as mock_engine:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_engine.return_value = MagicMock()
                 
                 db = AuthDatabase()
                 await db.initialize()
                 
-                # Verify the URL was converted to asyncpg format
+                # Verify the URL was converted to asyncpg format via AuthDatabaseManager
                 mock_engine.assert_called_once()
                 call_args = mock_engine.call_args[0][0]
                 
@@ -51,8 +53,8 @@ async def test_regular_postgres_url_with_ssl():
     test_url = "postgresql://user:pass@localhost:5432/dbname?sslmode=require"
     
     with patch.dict(os.environ, {"DATABASE_URL": test_url, "ENVIRONMENT": "staging"}):
-        # Mock: Database access isolation for fast, reliable unit testing
-        with patch("auth_service.auth_core.database.connection.create_async_engine") as mock_engine:
+        # Mock: Database access isolation for fast, reliable unit testing - SSOT approach
+        with patch("auth_service.auth_core.database.database_manager.create_async_engine") as mock_engine:
             # Mock: Generic component isolation for controlled unit testing
             mock_engine.return_value = MagicMock()
             
@@ -76,8 +78,8 @@ async def test_regular_postgres_url():
     test_url = "postgresql://user:pass@localhost:5432/dbname"
     
     with patch.dict(os.environ, {"DATABASE_URL": test_url, "ENVIRONMENT": "development"}):
-        # Mock: Database access isolation for fast, reliable unit testing
-        with patch("auth_service.auth_core.database.connection.create_async_engine") as mock_engine:
+        # Mock: Database access isolation for fast, reliable unit testing - SSOT approach
+        with patch("auth_service.auth_core.database.database_manager.create_async_engine") as mock_engine:
             # Mock: Generic component isolation for controlled unit testing
             mock_engine.return_value = MagicMock()
             
@@ -99,8 +101,8 @@ async def test_heroku_style_url():
     test_url = "postgres://user:pass@host.com:5432/dbname"
     
     with patch.dict(os.environ, {"DATABASE_URL": test_url, "ENVIRONMENT": "production"}):
-        # Mock: Database access isolation for fast, reliable unit testing
-        with patch("auth_service.auth_core.database.connection.create_async_engine") as mock_engine:
+        # Mock: Database access isolation for fast, reliable unit testing - SSOT approach
+        with patch("auth_service.auth_core.database.database_manager.create_async_engine") as mock_engine:
             # Mock: Generic component isolation for controlled unit testing
             mock_engine.return_value = MagicMock()
             

@@ -137,7 +137,13 @@ class TOTPGenerator:
             }
             
             totp_key = f"user_totp:{user_id}"
-            await self.redis_client.setex(totp_key, 86400 * 30, json.dumps(totp_data))  # 30 days
+            logger.info(f"Storing TOTP data to Redis with key: {totp_key}")
+            try:
+                await self.redis_client.setex(totp_key, 86400 * 30, json.dumps(totp_data))  # 30 days
+                logger.info(f"Successfully stored TOTP data to Redis")
+            except Exception as e:
+                logger.error(f"Redis setex failed: {e}")
+                raise
             
             # Generate QR code data
             provisioning_uri = totp.provisioning_uri(
@@ -646,19 +652,48 @@ class TwoFactorAuthManager:
 class TwoFactorAuthTestManager:
     """Manages 2FA verification testing."""
     
-    def __init__(self, redis_client):
+    def __init__(self):
         self.sms_provider = MockSMSProvider()
         self.totp_generator = None
         self.sms_handler = None
         self.tfa_manager = None
-        self.redis_client = redis_client
+        self.redis_client = None
         self.jwt_handler = JWTHandler()
         self.test_users = []
 
     async def initialize_services(self):
         """Initialize real services for testing."""
         try:
-            # Initialize real components with the provided Redis client
+            # Create Redis client within the event loop context
+            import redis.asyncio as aioredis
+            import os
+            
+            # Configuration for Redis connection
+            redis_host = os.getenv("REDIS_HOST", "localhost")
+            redis_port = int(os.getenv("REDIS_PORT", "6379"))
+            redis_username = os.getenv("REDIS_USERNAME", "")
+            redis_password = os.getenv("REDIS_PASSWORD", "")
+            
+            # Use database 15 for isolated testing to avoid conflicts
+            test_database = 15
+            
+            self.redis_client = aioredis.Redis(
+                host=redis_host,
+                port=redis_port,
+                db=test_database,
+                username=redis_username or None,
+                password=redis_password or None,
+                decode_responses=True,
+                socket_connect_timeout=10,
+                socket_timeout=5,
+                health_check_interval=30
+            )
+            
+            # Test connection and clear test database
+            await self.redis_client.ping()
+            await self.redis_client.flushdb()  # Clear test database
+            
+            # Initialize real components with the Redis client
             self.totp_generator = TOTPGenerator(self.redis_client)
             self.sms_handler = SMSFallbackHandler(self.sms_provider, self.redis_client)
             self.tfa_manager = TwoFactorAuthManager(
@@ -671,8 +706,57 @@ class TwoFactorAuthTestManager:
         except Exception as e:
             logger.error(f"Service initialization failed: {e}")
             raise
+    
+    async def _create_current_loop_redis_client(self):
+        """Create a Redis client in the current event loop context."""
+        import redis.asyncio as aioredis
+        import os
+        
+        # Configuration for Redis connection
+        redis_host = os.getenv("REDIS_HOST", "localhost")
+        redis_port = int(os.getenv("REDIS_PORT", "6379"))
+        redis_username = os.getenv("REDIS_USERNAME", "")
+        redis_password = os.getenv("REDIS_PASSWORD", "")
+        
+        # Use database 15 for isolated testing to avoid conflicts
+        test_database = 15
+        
+        return aioredis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=test_database,
+            username=redis_username or None,
+            password=redis_password or None,
+            decode_responses=True,
+            socket_connect_timeout=10,
+            socket_timeout=5,
+            health_check_interval=30
+        )
+    
+    def _setup_current_loop_redis_client(self, current_loop_redis_client):
+        """Setup components to use the current loop Redis client."""
+        original_redis_client = self.redis_client
+        self.totp_generator.redis_client = current_loop_redis_client
+        self.sms_handler.redis_client = current_loop_redis_client
+        self.tfa_manager.redis_client = current_loop_redis_client
+        return original_redis_client
+    
+    async def _cleanup_current_loop_redis_client(self, current_loop_redis_client, original_redis_client):
+        """Restore original Redis client and clean up current loop client."""
+        # Restore original Redis client
+        self.totp_generator.redis_client = original_redis_client
+        self.sms_handler.redis_client = original_redis_client
+        self.tfa_manager.redis_client = original_redis_client
+        
+        # Close temporary Redis client
+        try:
+            if hasattr(current_loop_redis_client, 'aclose'):
+                await current_loop_redis_client.aclose()
+            elif hasattr(current_loop_redis_client, 'close'):
+                await current_loop_redis_client.close()
+        except Exception:
+            pass  # Ignore cleanup errors
 
-    @pytest.mark.asyncio
     async def test_complete_totp_setup_and_verification(self, user_id: str) -> Dict[str, Any]:
         """Test complete TOTP setup and verification flow."""
         totp_flow_start = time.time()
@@ -680,39 +764,53 @@ class TwoFactorAuthTestManager:
         try:
             self.test_users.append(user_id)
             
-            # Step 1: Setup TOTP
-            setup_result = await self.totp_generator.setup_totp_for_user(user_id)
+            # Create Redis client in current event loop context
+            current_loop_redis_client = await self._create_current_loop_redis_client()
+            original_redis_client = self._setup_current_loop_redis_client(current_loop_redis_client)
             
-            if not setup_result["success"]:
+            try:
+                # Step 1: Setup TOTP
+                logger.info(f"Starting TOTP setup for user {user_id}")
+                try:
+                    setup_result = await self.totp_generator.setup_totp_for_user(user_id)
+                    logger.info(f"TOTP setup result: {setup_result}")
+                except Exception as e:
+                    logger.error(f"TOTP setup failed with error: {e}")
+                    raise
+                
+                if not setup_result["success"]:
+                    return {
+                        "success": False,
+                        "error": f"TOTP setup failed: {setup_result['error']}",
+                        "totp_flow_time": time.time() - totp_flow_start
+                    }
+                
+                # Step 2: Generate current TOTP code
+                secret_key = setup_result["secret_key"]
+                totp = pyotp.TOTP(secret_key)
+                current_code = totp.now()
+                
+                # Step 3: Verify TOTP code
+                logger.info(f"Attempting to verify TOTP code {current_code} for user {user_id}")
+                verify_result = await self.totp_generator.verify_totp_code(user_id, current_code)
+                logger.info(f"TOTP verification result: {verify_result}")
+                
+                # Step 4: Test backup code
+                backup_codes = setup_result["backup_codes"]
+                backup_verify_result = await self.totp_generator.verify_backup_code(user_id, backup_codes[0])
+                
+                totp_flow_time = time.time() - totp_flow_start
+                
                 return {
-                    "success": False,
-                    "error": f"TOTP setup failed: {setup_result['error']}",
-                    "totp_flow_time": time.time() - totp_flow_start
+                    "success": True,
+                    "setup_result": setup_result,
+                    "verify_result": verify_result,
+                    "backup_verify_result": backup_verify_result,
+                    "totp_flow_time": totp_flow_time
                 }
-            
-            # Step 2: Generate current TOTP code
-            secret_key = setup_result["secret_key"]
-            totp = pyotp.TOTP(secret_key)
-            current_code = totp.now()
-            
-            # Step 3: Verify TOTP code
-            logger.info(f"Attempting to verify TOTP code {current_code} for user {user_id}")
-            verify_result = await self.totp_generator.verify_totp_code(user_id, current_code)
-            logger.info(f"TOTP verification result: {verify_result}")
-            
-            # Step 4: Test backup code
-            backup_codes = setup_result["backup_codes"]
-            backup_verify_result = await self.totp_generator.verify_backup_code(user_id, backup_codes[0])
-            
-            totp_flow_time = time.time() - totp_flow_start
-            
-            return {
-                "success": True,
-                "setup_result": setup_result,
-                "verify_result": verify_result,
-                "backup_verify_result": backup_verify_result,
-                "totp_flow_time": totp_flow_time
-            }
+            finally:
+                # Restore original Redis client and cleanup
+                await self._cleanup_current_loop_redis_client(current_loop_redis_client, original_redis_client)
             
         except Exception as e:
             return {
@@ -721,7 +819,6 @@ class TwoFactorAuthTestManager:
                 "totp_flow_time": time.time() - totp_flow_start
             }
 
-    @pytest.mark.asyncio
     async def test_sms_fallback_flow(self, user_id: str, phone_number: str) -> Dict[str, Any]:
         """Test SMS fallback verification flow."""
         sms_flow_start = time.time()
@@ -729,41 +826,49 @@ class TwoFactorAuthTestManager:
         try:
             self.test_users.append(user_id)
             
-            # Step 1: Initiate SMS verification
-            initiate_result = await self.tfa_manager.initiate_2fa_verification(user_id, "sms", phone_number)
+            # Create Redis client in current event loop context
+            current_loop_redis_client = await self._create_current_loop_redis_client()
+            original_redis_client = self._setup_current_loop_redis_client(current_loop_redis_client)
             
-            if not initiate_result["success"]:
+            try:
+                # Step 1: Initiate SMS verification
+                initiate_result = await self.tfa_manager.initiate_2fa_verification(user_id, "sms", phone_number)
+                
+                if not initiate_result["success"]:
+                    return {
+                        "success": False,
+                        "error": f"SMS initiation failed: {initiate_result['error']}",
+                        "sms_flow_time": time.time() - sms_flow_start
+                    }
+                
+                # Step 2: Get SMS code from mock provider
+                sent_messages = self.sms_provider.get_sent_messages()
+                if not sent_messages:
+                    return {
+                        "success": False,
+                        "error": "No SMS messages sent",
+                        "sms_flow_time": time.time() - sms_flow_start
+                    }
+                
+                # Extract code from last message
+                last_message = sent_messages[-1]
+                sms_code = self._extract_code_from_message(last_message["message"])
+                
+                # Step 3: Complete SMS verification
+                complete_result = await self.tfa_manager.complete_2fa_verification(user_id, "sms", sms_code)
+                
+                sms_flow_time = time.time() - sms_flow_start
+                
                 return {
-                    "success": False,
-                    "error": f"SMS initiation failed: {initiate_result['error']}",
-                    "sms_flow_time": time.time() - sms_flow_start
+                    "success": True,
+                    "initiate_result": initiate_result,
+                    "sms_sent": len(sent_messages),
+                    "complete_result": complete_result,
+                    "sms_flow_time": sms_flow_time
                 }
-            
-            # Step 2: Get SMS code from mock provider
-            sent_messages = self.sms_provider.get_sent_messages()
-            if not sent_messages:
-                return {
-                    "success": False,
-                    "error": "No SMS messages sent",
-                    "sms_flow_time": time.time() - sms_flow_start
-                }
-            
-            # Extract code from last message
-            last_message = sent_messages[-1]
-            sms_code = self._extract_code_from_message(last_message["message"])
-            
-            # Step 3: Complete SMS verification
-            complete_result = await self.tfa_manager.complete_2fa_verification(user_id, "sms", sms_code)
-            
-            sms_flow_time = time.time() - sms_flow_start
-            
-            return {
-                "success": True,
-                "initiate_result": initiate_result,
-                "sms_sent": len(sent_messages),
-                "complete_result": complete_result,
-                "sms_flow_time": sms_flow_time
-            }
+            finally:
+                # Restore original Redis client and cleanup
+                await self._cleanup_current_loop_redis_client(current_loop_redis_client, original_redis_client)
             
         except Exception as e:
             return {
@@ -779,7 +884,6 @@ class TwoFactorAuthTestManager:
         match = re.search(r'\b(\d{6})\b', message)
         return match.group(1) if match else "000000"
 
-    @pytest.mark.asyncio
     async def test_2fa_rate_limiting(self, user_id: str) -> Dict[str, Any]:
         """Test 2FA rate limiting functionality."""
         rate_limit_start = time.time()
@@ -823,7 +927,6 @@ class TwoFactorAuthTestManager:
                 "rate_limit_time": time.time() - rate_limit_start
             }
 
-    @pytest.mark.asyncio
     async def test_session_enhancement_flow(self, user_id: str) -> Dict[str, Any]:
         """Test session enhancement after 2FA completion."""
         enhancement_start = time.time()
@@ -866,7 +969,6 @@ class TwoFactorAuthTestManager:
                 "enhancement_time": time.time() - enhancement_start
             }
 
-    @pytest.mark.asyncio
     async def test_cross_method_verification(self, user_id: str, phone_number: str) -> Dict[str, Any]:
         """Test verification across different 2FA methods."""
         cross_method_start = time.time()
@@ -929,20 +1031,28 @@ class TwoFactorAuthTestManager:
                 
                 logger.info(f"Cleaned up 2FA data for {len(self.test_users)} test users")
                 
+                # Close Redis connection
+                try:
+                    if hasattr(self.redis_client, 'aclose'):
+                        await self.redis_client.aclose()
+                    elif hasattr(self.redis_client, 'close'):
+                        await self.redis_client.close()
+                except Exception:
+                    pass  # Ignore cleanup errors
+                
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
 @pytest.fixture
-async def tfa_verification_manager(isolated_redis_client):
+async def tfa_verification_manager():
     """Create 2FA verification test manager with real Redis client."""
-    manager = TwoFactorAuthTestManager(isolated_redis_client)
+    manager = TwoFactorAuthTestManager()
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.asyncio
 async def test_complete_totp_setup_and_verification_flow(tfa_verification_manager):
     """
     Test complete TOTP setup and verification flow.

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <metadata>
+    <title>OAuth Callback Missing Wires Investigation</title>
+    <category>authentication</category>
+    <tags>oauth, staging, deployment, environment-variables, missing-wires</tags>
+    <created>2025-01-25</created>
+    <severity>critical</severity>
+  </metadata>
+
+  <problem>
+    <description>
+      Frontend shows "[ERROR] No token received" after successful Google OAuth authentication in staging environment.
+      OAuth flow appears to complete on Google's side but tokens never reach the frontend.
+    </description>
+    <symptoms>
+      <symptom>Frontend error: "[ERROR] No token received"</symptom>
+      <symptom>Google OAuth consent screen shows success</symptom>
+      <symptom>Callback URL is reached but no token in query parameters</symptom>
+      <symptom>Works in development but fails in staging</symptom>
+    </symptoms>
+  </problem>
+
+  <root_causes>
+    <cause priority="1">
+      <title>Environment Variable Name Mismatch</title>
+      <description>
+        Deployment script sets GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, but auth service
+        looks for GOOGLE_OAUTH_CLIENT_ID_STAGING and GOOGLE_OAUTH_CLIENT_SECRET_STAGING
+      </description>
+      <location>scripts/deploy_to_gcp.py:602,771-772</location>
+      <impact>Auth service cannot load OAuth credentials, causing authentication to fail silently</impact>
+    </cause>
+    
+    <cause priority="2">
+      <title>Secret Loader Fallback Chain</title>
+      <description>
+        Auth service secret loader has been updated with proper fallback chain:
+        1. Environment-specific variables (GOOGLE_OAUTH_CLIENT_ID_STAGING)
+        2. Generic variables (GOOGLE_CLIENT_ID) - what Cloud Run actually sets
+        3. Secret Manager fallback
+      </description>
+      <location>auth_service/auth_core/secret_loader.py:120-172</location>
+      <impact>With updated fallback chain, OAuth should work even with deployment script mismatch</impact>
+    </cause>
+
+    <cause priority="3">
+      <title>Missing Wire - OAuth Configuration Not Initialized</title>
+      <description>
+        OAuth configuration exists but may not be properly initialized or invoked:
+        - Environment detection might fail in Cloud Run
+        - CORS might block OAuth callback
+        - Session cookies might not persist properly
+      </description>
+      <impact>Valid OAuth callbacks rejected or tokens not generated</impact>
+    </cause>
+  </root_causes>
+
+  <missing_wires>
+    <wire>
+      <name>OAuth Secret Configuration</name>
+      <issue>Deployment script variable names don't match auth service expectations</issue>
+      <fix>Update deployment script or use fallback chain in secret loader</fix>
+      <status>FIXED - Secret loader now has proper fallback chain</status>
+    </wire>
+    
+    <wire>
+      <name>Environment Detection</name>
+      <issue>ENVIRONMENT variable might not be set properly in Cloud Run</issue>
+      <fix>Ensure deployment script sets ENVIRONMENT=staging</fix>
+      <status>NEEDS_VERIFICATION</status>
+    </wire>
+    
+    <wire>
+      <name>CORS Configuration</name>
+      <issue>CORS might block OAuth callback or token exchange</issue>
+      <fix>Verify all required origins are allowed</fix>
+      <status>VERIFIED - CORS config includes staging domains</status>
+    </wire>
+    
+    <wire>
+      <name>Frontend URL Consistency</name>
+      <issue>Frontend might be deployed to different URL than configured</issue>
+      <fix>Verify app.staging.netrasystems.ai is correct</fix>
+      <status>NEEDS_VERIFICATION</status>
+    </wire>
+    
+    <wire>
+      <name>OAuth Callback Route</name>
+      <issue>Two callback implementations (GET/POST) might cause confusion</issue>
+      <fix>Ensure GET callback properly redirects with tokens</fix>
+      <status>VERIFIED - GET callback implemented correctly</status>
+    </wire>
+  </missing_wires>
+
+  <solution>
+    <step number="1">
+      <action>Updated auth service secret loader with proper fallback chain</action>
+      <details>
+        Auth service now checks:
+        1. GOOGLE_OAUTH_CLIENT_ID_STAGING (environment-specific)
+        2. GOOGLE_CLIENT_ID (generic fallback - what Cloud Run sets)
+        This ensures OAuth works regardless of deployment script configuration
+      </details>
+      <status>COMPLETED</status>
+    </step>
+    
+    <step number="2">
+      <action>Deploy auth service with updated secret loader</action>
+      <details>
+        Deploy auth service to staging with the fixed secret loader fallback chain
+      </details>
+      <status>PENDING</status>
+    </step>
+    
+    <step number="3">
+      <action>Verify OAuth flow end-to-end</action>
+      <details>
+        Test complete OAuth flow in staging after deployment
+      </details>
+      <status>PENDING</status>
+    </step>
+    
+    <step number="4">
+      <action>Update deployment script for consistency (optional)</action>
+      <details>
+        Update deploy_to_gcp.py to use consistent variable names, though not required
+        with the fallback chain fix
+      </details>
+      <status>OPTIONAL</status>
+    </step>
+  </solution>
+
+  <testing>
+    <test>
+      <name>OAuth Initiation</name>
+      <command>curl -v https://auth.staging.netrasystems.ai/auth/login</command>
+      <expected>Redirect to Google OAuth with correct client_id</expected>
+    </test>
+    
+    <test>
+      <name>Check Auth Service Logs</name>
+      <command>gcloud logs read "resource.type=cloud_run_revision AND resource.labels.service_name=auth-service" --project=netra-staging --limit=20</command>
+      <expected>Should show "Using GOOGLE_CLIENT_ID from environment" with fallback chain</expected>
+    </test>
+    
+    <test>
+      <name>End-to-End OAuth Flow</name>
+      <steps>
+        1. Navigate to https://app.staging.netrasystems.ai
+        2. Click "Login with Google"
+        3. Complete Google OAuth consent
+        4. Should redirect back with token in URL
+      </steps>
+      <expected>Successful authentication and redirect to chat interface</expected>
+    </test>
+  </testing>
+
+  <prevention>
+    <measure>
+      <title>Environment Variable Documentation</title>
+      <description>
+        Maintain clear documentation of required environment variables for each service
+        and environment. Use consistent naming patterns.
+      </description>
+    </measure>
+    
+    <measure>
+      <title>Deployment Validation</title>
+      <description>
+        Add pre-deployment checks to verify all required environment variables and
+        secrets are properly configured before deploying.
+      </description>
+    </measure>
+    
+    <measure>
+      <title>Fallback Chains</title>
+      <description>
+        Implement robust fallback chains for configuration loading to handle
+        variations in deployment configurations.
+      </description>
+    </measure>
+    
+    <measure>
+      <title>Integration Tests</title>
+      <description>
+        Add staging-specific integration tests that verify OAuth flow works
+        end-to-end after deployment.
+      </description>
+    </measure>
+  </prevention>
+
+  <references>
+    <reference>auth_service/auth_core/secret_loader.py - Secret loading with fallback chain</reference>
+    <reference>scripts/deploy_to_gcp.py - Deployment script with environment variables</reference>
+    <reference>docs/OAUTH_STAGING_CONFIGURATION.md - OAuth configuration documentation</reference>
+    <reference>SPEC/learnings/oauth_client_environment_configuration.xml - OAuth config learnings</reference>
+  </references>
+</learnings>

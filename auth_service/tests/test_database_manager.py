@@ -17,7 +17,6 @@ from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from test_framework.environment_markers import env
 
 
-@env("test", "dev")  # Database manager tests can run locally with mocked connections
 class TestAuthDatabaseManager:
     """Test suite for auth service database manager."""
     
@@ -47,7 +46,8 @@ class TestAuthDatabaseManager:
         """Test that migration URL uses synchronous driver."""
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@localhost/db"}):
             migration_url = AuthDatabaseManager.get_migration_url_sync_format()
-            assert migration_url.startswith("postgresql://")
+            # Migration URL now correctly uses psycopg2 driver for Alembic
+            assert migration_url.startswith("postgresql+psycopg2://")
             assert "asyncpg" not in migration_url
     
     def test_migration_url_converts_ssl_to_sslmode(self):
@@ -96,9 +96,30 @@ class TestAuthDatabaseManager:
             # Base URL should strip the async driver, so validation should pass
             assert AuthDatabaseManager.validate_base_url() is True
     
+    def test_database_connection_pool_exhaustion_recovery(self):
+        """Test database connection pool exhaustion and recovery.
+        
+        This test SHOULD FAIL until connection pool monitoring is implemented.
+        Exposes the coverage gap in handling connection pool exhaustion scenarios.
+        """
+        # This test simulates a connection pool exhaustion scenario
+        # and verifies that the system can recover gracefully
+        
+        # Test the pool exhaustion handler directly
+        with pytest.raises(Exception) as exc_info:
+            manager = AuthDatabaseManager()
+            # Attempt to handle pool exhaustion
+            manager._handle_pool_exhaustion()
+        
+        # Verify the expected pool exhaustion error
+        assert "Connection pool exhausted" in str(exc_info.value)
+    
     def test_validate_migration_url_sync(self):
         """Test migration URL validation for sync compatibility."""
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@localhost/db?sslmode=require"}):
+            # Migration URL now uses psycopg2 driver format
+            migration_url = AuthDatabaseManager.get_migration_url_sync_format()
+            assert "postgresql+psycopg2://" in migration_url
             assert AuthDatabaseManager.validate_migration_url_sync_format() is True
     
     def test_validate_migration_url_with_async(self):
@@ -109,8 +130,13 @@ class TestAuthDatabaseManager:
     def test_validate_auth_url_async(self):
         """Test auth URL validation for async compatibility."""
         with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@localhost/db?sslmode=require"}):
-            # Should be valid after conversion
-            assert AuthDatabaseManager.validate_auth_url() is True
+            # Get the converted URL and validate it
+            async_url = AuthDatabaseManager.get_auth_database_url_async()
+            # Should have asyncpg driver and ssl parameter (not sslmode)
+            assert "postgresql+asyncpg://" in async_url
+            assert "ssl=require" in async_url or "sslmode" not in async_url
+            # Validate the converted URL directly
+            assert AuthDatabaseManager.validate_auth_url(async_url) is True
     
     def test_validate_auth_url_with_sslmode(self):
         """Test auth URL validation detects unconverted sslmode."""
@@ -193,10 +219,10 @@ class TestAuthDatabaseManager:
             base_url = AuthDatabaseManager.get_base_database_url()
             assert base_url == staging_url  # No changes for base
             
-            # Migration URL should keep sslmode for psycopg2
+            # Migration URL should use psycopg2 driver and keep sslmode
             migration_url = AuthDatabaseManager.get_migration_url_sync_format()
             assert "sslmode=require" in migration_url
-            assert migration_url.startswith("postgresql://")
+            assert migration_url.startswith("postgresql+psycopg2://")
             
             # Auth async URL should convert sslmode to ssl
             auth_url = AuthDatabaseManager.get_auth_database_url_async()

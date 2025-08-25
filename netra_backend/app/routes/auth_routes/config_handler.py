@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import Request
 
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.core.config import get_config
 from netra_backend.app.schemas.auth_types import AuthConfigResponse, AuthEndpoints
 
@@ -28,8 +28,8 @@ def build_auth_endpoints(base_url: str, oauth_config) -> AuthEndpoints:
 def get_base_endpoints(base_url: str) -> dict:
     """Get base authentication endpoints."""
     return {
-        "login": f"{base_url}/api/auth/login", "logout": f"{base_url}/api/auth/logout",
-        "callback": f"{base_url}/api/auth/callback", "token": f"{base_url}/api/auth/token",
+        "login": f"{base_url}/auth/login", "logout": f"{base_url}/auth/logout",
+        "callback": f"{base_url}/auth/callback", "token": f"{base_url}/auth/token",
         "user": f"{base_url}/api/users/me"
     }
 
@@ -37,7 +37,7 @@ def get_base_endpoints(base_url: str) -> dict:
 def get_dev_login_endpoint(base_url: str, oauth_config) -> Optional[str]:
     """Get dev login endpoint if allowed."""
     if oauth_config.allow_dev_login:
-        return f"{base_url}/api/auth/dev_login"
+        return f"{base_url}/auth/dev_login"
     return None
 
 

@@ -256,7 +256,7 @@ class BasePermissionManager(ABC):
 
 
 # Type aliases for common use cases
-AuthClient = AuthClientProtocol
+AuthServiceClient = AuthClientProtocol
 AuthService = AuthServiceProtocol
 SessionManager = SessionManagerProtocol
 PermissionManager = PermissionManagerProtocol
@@ -272,7 +272,7 @@ class AuthDependencies:
     
     def __init__(
         self,
-        auth_client: AuthClient,
+        auth_client: AuthServiceClient,
         session_manager: SessionManager,
         permission_manager: PermissionManager,
         audit_logger: AuditLogger,
@@ -282,7 +282,7 @@ class AuthDependencies:
         self._init_core_components(auth_client, session_manager, permission_manager)
         self._init_utility_components(audit_logger, token_validator, password_manager)
 
-    def _init_core_components(self, auth_client: AuthClient, session_manager: SessionManager, permission_manager: PermissionManager) -> None:
+    def _init_core_components(self, auth_client: AuthServiceClient, session_manager: SessionManager, permission_manager: PermissionManager) -> None:
         """Initialize core auth components."""
         self.auth_client = auth_client
         self.session_manager = session_manager

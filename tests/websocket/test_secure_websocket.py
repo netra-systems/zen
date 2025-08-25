@@ -18,10 +18,8 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 from netra_backend.app.routes.websocket_unified import (
     UNIFIED_WEBSOCKET_CONFIG,
-    get_unified_websocket_manager,
 )
-from netra_backend.app.websocket.unified_websocket_manager import UnifiedWebSocketManager
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import get_websocket_manager, WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -134,7 +132,7 @@ def mock_cors_handler():
     return handler
 
 class TestUnifiedWebSocketManager:
-    """Test UnifiedWebSocketManager functionality."""
+    """Test WebSocketManager functionality."""
     
     @mock_justified("External auth service API not available in test environment - testing JWT validation flow")
 
@@ -747,10 +745,9 @@ class TestSecureWebSocketEndpoint:
         }
         
         # Test that CORS validation is called
-        from netra_backend.app.routes.websocket_unified import UnifiedWebSocketManager
         
 
-        async with get_unified_websocket_manager(mock_db_session) as manager:
+        async with get_websocket_manager(mock_db_session) as manager:
 
             result = await manager.validate_secure_auth(mock_websocket)
             

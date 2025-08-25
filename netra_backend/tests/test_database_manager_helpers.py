@@ -49,7 +49,7 @@ from netra_backend.tests.fixtures.database_test_fixtures import (
     create_mock_user,
 )
 
-class TestDatabaseManager:
+class DatabaseManagerHelper:
     """Manager for test database lifecycle and utilities."""
 
     def __init__(self):

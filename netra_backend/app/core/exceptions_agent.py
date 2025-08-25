@@ -98,10 +98,20 @@ class AgentError(NetraException):
         """Get error context."""
         return self._context
     
+    @context.setter
+    def context(self, value):
+        """Set error context."""
+        self._context = value
+    
     @property
     def metadata(self):
         """Get error metadata."""
         return self._metadata
+    
+    @property
+    def timestamp(self):
+        """Get error timestamp."""
+        return self.error_details.timestamp.timestamp() if hasattr(self.error_details.timestamp, 'timestamp') else self.error_details.timestamp
     
     def to_dict(self) -> dict:
         """Convert exception to dictionary for serialization."""

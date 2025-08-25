@@ -15,7 +15,8 @@ from fastapi.testclient import TestClient
 
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.service_discovery import ServiceDiscovery
-from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
+from shared.cors_config import get_fastapi_cors_config
 
 
 def cross_service_config():

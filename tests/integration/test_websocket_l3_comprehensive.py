@@ -1101,15 +1101,15 @@ class TestWebSocketL3Integration:
             # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
-            mock_ws.subprotocol = "chat.v2"
+            mock_ws.subprotocol = "chat.current"
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
             
 
-            await ws_client.connect_with_subprotocols(["chat.v1", "chat.v2"])
+            await ws_client.connect_with_subprotocols(["chat.legacy", "chat.current"])
             
 
-            assert ws_client.get_subprotocol() == "chat.v2"
+            assert ws_client.get_subprotocol() == "chat.current"
 
     # Test 54: WebSocket connection timeout
 

@@ -58,7 +58,16 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     
     def _add_all_headers(self, request: Request, response: Response, nonce: str) -> None:
         """Add all security headers to response."""
-        self._add_base_headers(response)
+        # Check if this is a documentation endpoint
+        is_docs_endpoint = request.url.path in ["/docs", "/redoc", "/openapi.json"]
+        
+        if not is_docs_endpoint:
+            # Only add base headers (including CSP) for non-documentation endpoints
+            self._add_base_headers(response)
+        else:
+            # For documentation endpoints, add base headers except CSP
+            self._add_base_headers_except_csp(response)
+        
         self._add_dynamic_headers(request, response, nonce)
         self._add_path_specific_headers(request, response)
     
@@ -71,6 +80,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         """Add base security headers to response."""
         for header, value in self.base_headers.items():
             if header not in response.headers:
+                response.headers[header] = value
+    
+    def _add_base_headers_except_csp(self, response: Response) -> None:
+        """Add base security headers except CSP (for documentation endpoints)."""
+        for header, value in self.base_headers.items():
+            if header != "Content-Security-Policy" and header not in response.headers:
                 response.headers[header] = value
     
     def _add_dynamic_headers(self, request: Request, response: Response, nonce: str) -> None:
@@ -109,7 +124,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     
     def _add_path_specific_headers(self, request: Request, response: Response) -> None:
         """Add path-specific headers."""
-        if request.url.path.startswith("/api/"):
+        if request.url.path in ["/docs", "/redoc", "/openapi.json"]:
+            self._add_documentation_headers(response)
+        elif request.url.path.startswith("/api/"):
             self._add_api_headers(response)
         if request.url.path.startswith("/ws"):
             self._add_websocket_headers(response)
@@ -133,6 +150,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if self.environment == "production":
             response.headers["Upgrade-Insecure-Requests"] = "1"
         response.headers["X-WebSocket-Policy"] = "authenticated-only"
+    
+    def _add_documentation_headers(self, response: Response) -> None:
+        """Add relaxed CSP headers for documentation endpoints (/docs, /redoc)."""
+        # Override CSP for documentation pages to allow inline scripts and styles
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "font-src 'self' data: https://cdn.jsdelivr.net; "
+            "img-src 'self' data: https://cdn.jsdelivr.net https://fastapi.tiangolo.com; "
+            "connect-src 'self'"
+        )
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"  # Allow embedding in same origin for docs
     
     def _add_cors_headers(self, response: Response) -> None:
         """Add CORS headers to response."""

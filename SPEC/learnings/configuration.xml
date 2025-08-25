@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Configuration Management Learnings</name>
+        <type>Learnings.Configuration</type>
+        <version>1.0</version>
+        <description>Critical learnings from configuration failures and environment management issues</description>
+        <created>2025-08-25</created>
+        <cross_references>
+            <ref>unified_environment_management.xml</ref>
+            <ref>database_connectivity_architecture.xml</ref>
+            <ref>deployment_architecture.xml</ref>
+        </cross_references>
+    </metadata>
+
+    <critical_learnings>
+        <learning category="Database Configuration" priority="CRITICAL">
+            <title>Staging Database URL Falls Back to Development Localhost</title>
+            <problem>
+                In staging environment, app uses localhost:5432/netra instead of Cloud SQL staging-shared-postgres
+                with database netra_staging. This indicates environment variable loading failure or incorrect
+                configuration cascade.
+            </problem>
+            <root_cause>
+                - DATABASE_URL environment variable not properly loaded in staging
+                - Configuration system allows localhost fallback even in staging environment
+                - No validation that staging environment uses appropriate database configuration
+                - Environment detection (NETRA_ENVIRONMENT, K_SERVICE) not enforcing staging requirements
+            </root_cause>
+            <symptoms>
+                <symptom>Database connections attempt localhost:5432 in staging</symptom>
+                <symptom>App falls back to development database name "netra" instead of "netra_staging"</symptom>
+                <symptom>No errors raised when staging uses development configuration</symptom>
+            </symptoms>
+            <prevention_measures>
+                <measure>Validate DATABASE_URL in staging startup to reject localhost patterns</measure>
+                <measure>Enforce staging-specific database names and hosts</measure>
+                <measure>Add environment detection that prevents inappropriate fallbacks</measure>
+                <measure>Create failing tests that verify staging configuration requirements</measure>
+            </prevention_measures>
+            <test_coverage>
+                <test>test_staging_database_configuration_fails_localhost_fallback</test>
+                <test>test_staging_database_configuration_environment_cascade_failure</test>
+            </test_coverage>
+        </learning>
+
+        <learning category="ClickHouse Configuration" priority="CRITICAL">
+            <title>ClickHouse Connection Timeout to Staging Service</title>
+            <problem>
+                Cannot connect to clickhouse.staging.netrasystems.ai:8123, resulting in connection timeouts
+                and ClickHouse service unavailability in staging environment.
+            </problem>
+            <root_cause>
+                - ClickHouse environment variables not properly loaded (CLICKHOUSE_URL, CLICKHOUSE_HOST, CLICKHOUSE_PORT)
+                - Connection timeout settings too aggressive for network conditions
+                - ClickHouse service may not be accessible from staging infrastructure
+                - No retry logic or connection health validation
+            </root_cause>
+            <symptoms>
+                <symptom>Socket timeouts when connecting to clickhouse.staging.netrasystems.ai:8123</symptom>
+                <symptom>ClickHouse client initialization failures</symptom>
+                <symptom>No fallback or graceful degradation for ClickHouse unavailability</symptom>
+            </symptoms>
+            <prevention_measures>
+                <measure>Validate ClickHouse connectivity during startup health checks</measure>
+                <measure>Configure appropriate timeout values for staging network conditions</measure>
+                <measure>Implement retry logic with exponential backoff</measure>
+                <measure>Add connection pool health monitoring</measure>
+                <measure>Verify ClickHouse service accessibility from staging infrastructure</measure>
+            </prevention_measures>
+            <test_coverage>
+                <test>test_clickhouse_connection_timeout_configuration_failure</test>
+                <test>test_clickhouse_connection_timeout_with_realistic_settings</test>
+            </test_coverage>
+        </learning>
+
+        <learning category="Redis Configuration" priority="CRITICAL">
+            <title>Redis Connection Failure with Fallback Mode in Staging</title>
+            <problem>
+                Redis connections fail in staging environment, causing app to fall back to no-Redis mode.
+                This fallback behavior is acceptable in development but should not be allowed in staging.
+            </problem>
+            <root_cause>
+                - Redis environment variables not properly configured (REDIS_URL, REDIS_HOST, REDIS_PORT)
+                - Redis fallback mode enabled in staging environment
+                - No enforcement that critical services must work in staging
+                - Redis connection settings inappropriate for staging infrastructure
+            </root_cause>
+            <symptoms>
+                <symptom>Redis connection attempts fail with socket errors</symptom>
+                <symptom>App continues running in no-Redis mode without failing</symptom>
+                <symptom>Caching and session management degraded silently</symptom>
+            </symptoms>
+            <prevention_measures>
+                <measure>Disable Redis fallback mode in staging environment</measure>
+                <measure>Make Redis connectivity mandatory in staging (REDIS_REQUIRED=true)</measure>
+                <measure>Validate Redis connectivity in startup health checks</measure>
+                <measure>Add Redis connection pool monitoring</measure>
+                <measure>Ensure Redis service is accessible from staging infrastructure</measure>
+            </prevention_measures>
+            <test_coverage>
+                <test>test_redis_connection_failure_configuration_issue</test>
+                <test>test_redis_fallback_mode_should_not_be_acceptable_in_staging</test>
+            </test_coverage>
+        </learning>
+
+        <learning category="Import Management" priority="MEDIUM">
+            <title>Deprecated WebSocket Import Paths Still in Use</title>
+            <problem>
+                Codebase still uses deprecated import paths like "from starlette.websockets import WebSocketDisconnect"
+                instead of modern FastAPI import patterns. This creates inconsistency and potential compatibility issues.
+            </problem>
+            <root_cause>
+                - Legacy code patterns not updated to modern FastAPI imports
+                - No enforcement of modern import patterns in pre-commit hooks
+                - Inconsistent import preferences across different modules
+                - No centralized guidance on preferred import patterns
+            </root_cause>
+            <symptoms>
+                <symptom>Mix of "from starlette.websockets" and "from fastapi" imports</symptom>
+                <symptom>Potential deprecation warnings in newer versions</symptom>
+                <symptom>Inconsistent API usage patterns</symptom>
+            </symptoms>
+            <prevention_measures>
+                <measure>Standardize on FastAPI imports for WebSocket functionality</measure>
+                <measure>Add pre-commit hooks to detect deprecated import patterns</measure>
+                <measure>Create migration guide for updating import patterns</measure>
+                <measure>Set WEBSOCKET_IMPORT_PREFERENCE=modern in environment</measure>
+                <measure>Update existing code to use modern import patterns</measure>
+            </prevention_measures>
+            <test_coverage>
+                <test>test_deprecated_websocket_import_path_usage</test>
+                <test>test_websocket_import_path_modernization_check</test>
+            </test_coverage>
+        </learning>
+    </critical_learnings>
+
+    <configuration_best_practices>
+        <practice category="Environment Validation">
+            <title>Staging Environment Enforcement</title>
+            <description>
+                Staging environment MUST enforce production-like configuration requirements
+                and reject development fallbacks to prevent configuration drift.
+            </description>
+            <implementation>
+                <step>Check NETRA_ENVIRONMENT and K_SERVICE environment variables</step>
+                <step>When staging detected, reject localhost, development database names</step>
+                <step>Require all critical services (database, Redis, ClickHouse) to be accessible</step>
+                <step>Fail fast during startup if configuration is inappropriate for environment</step>
+            </implementation>
+        </practice>
+
+        <practice category="Service Connectivity">
+            <title>Critical Service Validation</title>
+            <description>
+                All critical external services must be validated during application startup,
+                with appropriate timeout and retry configurations for the target environment.
+            </description>
+            <implementation>
+                <step>Test database connectivity with environment-appropriate SSL settings</step>
+                <step>Validate ClickHouse accessibility with realistic timeouts</step>
+                <step>Confirm Redis connectivity and disable fallback in staging</step>
+                <step>Use health check endpoints that test real service connectivity</step>
+            </implementation>
+        </practice>
+
+        <practice category="Import Consistency">
+            <title>Modern Import Pattern Enforcement</title>
+            <description>
+                Use consistent, modern import patterns throughout the codebase,
+                preferring FastAPI imports over deprecated Starlette patterns.
+            </description>
+            <implementation>
+                <step>Prefer "from fastapi import WebSocket, WebSocketDisconnect"</step>
+                <step>Use "from fastapi.websockets import WebSocketState"</step>
+                <step>Add linting rules to detect deprecated import patterns</step>
+                <step>Update legacy code during maintenance cycles</step>
+            </implementation>
+        </practice>
+    </configuration_best_practices>
+
+    <testing_requirements>
+        <requirement category="Configuration Testing">
+            <title>Environment-Specific Configuration Tests</title>
+            <description>
+                Every environment (development, staging, production) must have specific
+                tests that validate configuration requirements for that environment.
+            </description>
+            <test_patterns>
+                <pattern>Test environment variable loading from IsolatedEnvironment</pattern>
+                <pattern>Validate appropriate database URLs for each environment</pattern>
+                <pattern>Confirm service connectivity requirements</pattern>
+                <pattern>Test configuration cascade and fallback behavior</pattern>
+            </test_patterns>
+        </requirement>
+
+        <requirement category="Service Integration Testing">
+            <title>Critical Service Connectivity Tests</title>
+            <description>
+                Integration tests must validate that all critical services are accessible
+                with the loaded configuration, using realistic timeout and retry settings.
+            </description>
+            <test_patterns>
+                <pattern>Database connection tests with SSL parameter resolution</pattern>
+                <pattern>ClickHouse connectivity with staging host/port configuration</pattern>
+                <pattern>Redis connection validation and fallback mode testing</pattern>
+                <pattern>Network-level connectivity testing with socket connections</pattern>
+            </test_patterns>
+        </requirement>
+    </testing_requirements>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>System Reliability and Configuration Consistency</business_goal>
+        <value_impact>
+            <impact>Prevents configuration drift between environments</impact>
+            <impact>Ensures staging environment mirrors production configuration</impact>
+            <impact>Reduces deployment failures due to configuration issues</impact>
+            <impact>Enables reliable testing with production-like configurations</impact>
+        </value_impact>
+        <metrics>
+            <metric>Zero configuration-related deployment failures</metric>
+            <metric>100% staging environment configuration validation</metric>
+            <metric>Consistent service connectivity across environments</metric>
+            <metric>Modern import patterns adopted throughout codebase</metric>
+        </metrics>
+    </business_value>
+</specification>

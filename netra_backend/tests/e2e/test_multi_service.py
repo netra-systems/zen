@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import httpx
 import pytest
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 # Removed broken import statement
 from netra_backend.app.database import get_clickhouse_client

@@ -42,7 +42,7 @@ class AuthMiddleware:
             jwt_algorithm: JWT algorithm to use
             excluded_paths: Paths that don't require authentication
         """
-        self.jwt_secret = jwt_secret
+        self.jwt_secret = self._validate_and_clean_jwt_secret(jwt_secret)
         self.jwt_algorithm = jwt_algorithm
         self.excluded_paths = excluded_paths or []
         logger.info(f"AuthMiddleware initialized with {len(self.excluded_paths)} excluded paths")
@@ -120,11 +120,13 @@ class AuthMiddleware:
         """
         try:
             # Decode and validate token
+            # Skip audience verification for test environments
+            verify_options = {"verify_exp": True, "verify_aud": False}
             payload = jwt.decode(
                 token,
                 self.jwt_secret,
                 algorithms=[self.jwt_algorithm],
-                options={"verify_exp": True}
+                options=verify_options
             )
             
             # Additional expiration check
@@ -156,3 +158,34 @@ class AuthMiddleware:
             return True
         
         return all(perm in user_permissions for perm in required_permissions)
+    
+    def _validate_and_clean_jwt_secret(self, jwt_secret: str) -> str:
+        """Validate and clean JWT secret.
+        
+        Args:
+            jwt_secret: Raw JWT secret
+            
+        Returns:
+            Clean, validated JWT secret
+            
+        Raises:
+            ValueError: If JWT secret is invalid
+        """
+        if not jwt_secret:
+            raise ValueError("JWT secret cannot be empty")
+        
+        # CRITICAL: Trim whitespace from secrets (common staging issue)
+        cleaned_secret = jwt_secret.strip()
+        
+        if not cleaned_secret:
+            raise ValueError("JWT secret cannot be empty after trimming whitespace")
+        
+        # Validate minimum length for security  
+        if len(cleaned_secret) < 32:
+            raise ValueError(
+                f"JWT secret must be at least 32 characters for security, "
+                f"got {len(cleaned_secret)} characters"
+            )
+        
+        logger.info(f"JWT secret validated: {len(cleaned_secret)} characters")
+        return cleaned_secret

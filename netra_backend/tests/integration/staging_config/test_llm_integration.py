@@ -68,7 +68,7 @@ class TestLLMIntegration(StagingConfigTestBase):
         # Test OpenAI API
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "https://api.openai.com/v1/chat/completions",
+                "https://api.openai.com/chat/completions",
                 headers={
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json"
@@ -104,7 +104,7 @@ class TestLLMIntegration(StagingConfigTestBase):
         # Test Anthropic API
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "https://api.anthropic.com/v1/messages",
+                "https://api.anthropic.com/messages",
                 headers={
                     "x-api-key": api_key,
                     "anthropic-version": "2023-06-01",

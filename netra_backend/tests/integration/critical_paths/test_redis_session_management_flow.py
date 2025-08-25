@@ -66,7 +66,7 @@ class RedisSessionTester:
             print(f"[INFO] Used memory: {info.get('used_memory_human')}")
             
             # Check via API
-            async with self.session.get(f"{BACKEND_URL}/api/v1/redis/health") as response:
+            async with self.session.get(f"{BACKEND_URL}/api/redis/health") as response:
                 if response.status == 200:
                     data = await response.json()
                     print(f"[OK] Redis health via API: {data.get('status')}")
@@ -94,7 +94,7 @@ class RedisSessionTester:
                 
                 # Store via API
                 async with self.session.post(
-                    f"{BACKEND_URL}/api/v1/sessions",
+                    f"{BACKEND_URL}/api/sessions",
                     json={"session_id": session_id, "data": session_data}
                 ) as response:
                     if response.status in [200, 201]:
@@ -122,7 +122,7 @@ class RedisSessionTester:
             for session_id, expected_data in self.test_sessions.items():
                 # Retrieve via API
                 async with self.session.get(
-                    f"{BACKEND_URL}/api/v1/sessions/{session_id}"
+                    f"{BACKEND_URL}/api/sessions/{session_id}"
                 ) as response:
                     if response.status == 200:
                         data = await response.json()
@@ -152,7 +152,7 @@ class RedisSessionTester:
             short_session_id = f"expire_{uuid.uuid4().hex[:8]}"
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/sessions",
+                f"{BACKEND_URL}/api/sessions",
                 json={
                     "session_id": short_session_id,
                     "data": {"test": "expiration"},
@@ -171,7 +171,7 @@ class RedisSessionTester:
                     
                     # Try to retrieve expired session
                     async with self.session.get(
-                        f"{BACKEND_URL}/api/v1/sessions/{short_session_id}"
+                        f"{BACKEND_URL}/api/sessions/{short_session_id}"
                     ) as get_response:
                         if get_response.status == 404:
                             print("[OK] Session expired as expected")
@@ -197,7 +197,7 @@ class RedisSessionTester:
             async def create_session(i):
                 session_id = f"concurrent_{i}"
                 async with self.session.post(
-                    f"{BACKEND_URL}/api/v1/sessions",
+                    f"{BACKEND_URL}/api/sessions",
                     json={
                         "session_id": session_id,
                         "data": {"index": i}
@@ -220,7 +220,7 @@ class RedisSessionTester:
             async def read_session(i):
                 session_id = f"concurrent_{i}"
                 async with self.session.get(
-                    f"{BACKEND_URL}/api/v1/sessions/{session_id}"
+                    f"{BACKEND_URL}/api/sessions/{session_id}"
                 ) as response:
                     return response.status == 200
                     
@@ -251,7 +251,7 @@ class RedisSessionTester:
             
             # Create session
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/sessions",
+                f"{BACKEND_URL}/api/sessions",
                 json={"session_id": migration_session_id, "data": session_data}
             ) as response:
                 if response.status in [200, 201]:
@@ -259,14 +259,14 @@ class RedisSessionTester:
                     
                     # Simulate migration by forcing reconnection
                     async with self.session.post(
-                        f"{BACKEND_URL}/api/v1/sessions/{migration_session_id}/migrate"
+                        f"{BACKEND_URL}/api/sessions/{migration_session_id}/migrate"
                     ) as migrate_response:
                         if migrate_response.status == 200:
                             print("[OK] Session migration initiated")
                             
                             # Verify session still accessible
                             async with self.session.get(
-                                f"{BACKEND_URL}/api/v1/sessions/{migration_session_id}"
+                                f"{BACKEND_URL}/api/sessions/{migration_session_id}"
                             ) as verify_response:
                                 if verify_response.status == 200:
                                     print("[OK] Session accessible after migration")
@@ -288,7 +288,7 @@ class RedisSessionTester:
             
             # Create session
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/sessions",
+                f"{BACKEND_URL}/api/sessions",
                 json={"session_id": consistency_session_id, "data": initial_data}
             ) as response:
                 if response.status in [200, 201]:
@@ -300,7 +300,7 @@ class RedisSessionTester:
                     async def update_session(i):
                         # Mock: Component isolation for testing without external dependencies
                         async with self.session.patch(
-                            f"{BACKEND_URL}/api/v1/sessions/{consistency_session_id}",
+                            f"{BACKEND_URL}/api/sessions/{consistency_session_id}",
                             json={"increment_counter": 1, "append_value": i}
                         ) as update_response:
                             return update_response.status == 200
@@ -312,7 +312,7 @@ class RedisSessionTester:
                     
                     # Verify final state
                     async with self.session.get(
-                        f"{BACKEND_URL}/api/v1/sessions/{consistency_session_id}"
+                        f"{BACKEND_URL}/api/sessions/{consistency_session_id}"
                     ) as get_response:
                         if get_response.status == 200:
                             final_data = await get_response.json()
@@ -343,7 +343,7 @@ class RedisSessionTester:
             failover_session_id = f"failover_{uuid.uuid4().hex[:8]}"
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/sessions",
+                f"{BACKEND_URL}/api/sessions",
                 json={"session_id": failover_session_id, "data": {"test": "failover"}}
             ) as response:
                 if response.status in [200, 201]:
@@ -351,7 +351,7 @@ class RedisSessionTester:
                     
                     # Simulate failover
                     async with self.session.post(
-                        f"{BACKEND_URL}/api/v1/redis/simulate-failover"
+                        f"{BACKEND_URL}/api/redis/simulate-failover"
                     ) as failover_response:
                         if failover_response.status == 200:
                             print("[OK] Failover simulated")
@@ -361,7 +361,7 @@ class RedisSessionTester:
                             
                             # Verify session still accessible
                             async with self.session.get(
-                                f"{BACKEND_URL}/api/v1/sessions/{failover_session_id}"
+                                f"{BACKEND_URL}/api/sessions/{failover_session_id}"
                             ) as verify_response:
                                 if verify_response.status == 200:
                                     print("[OK] Session survived failover")
@@ -385,7 +385,7 @@ class RedisSessionTester:
             
             # Create session with critical section
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/sessions",
+                f"{BACKEND_URL}/api/sessions",
                 json={"session_id": lock_session_id, "data": {"balance": 100}}
             ) as response:
                 if response.status in [200, 201]:
@@ -394,7 +394,7 @@ class RedisSessionTester:
                     # Concurrent transactions with locking
                     async def transaction(amount):
                         async with self.session.post(
-                            f"{BACKEND_URL}/api/v1/sessions/{lock_session_id}/transaction",
+                            f"{BACKEND_URL}/api/sessions/{lock_session_id}/transaction",
                             json={"amount": amount, "use_lock": True}
                         ) as tx_response:
                             return tx_response.status == 200
@@ -410,7 +410,7 @@ class RedisSessionTester:
                     
                     # Verify final balance
                     async with self.session.get(
-                        f"{BACKEND_URL}/api/v1/sessions/{lock_session_id}"
+                        f"{BACKEND_URL}/api/sessions/{lock_session_id}"
                     ) as get_response:
                         if get_response.status == 200:
                             data = await get_response.json()

@@ -112,7 +112,7 @@ class TestAuthDatabaseManagerMissingMethods:
         assert callable(getattr(AuthDatabaseManager, 'validate_auth_url', None)), \
             "validate_auth_url must be callable"
     
-    @patch.dict(os.environ, {'DATABASE_URL': 'postgresql://user:pass@localhost:5432/auth_db'})
+    @patch.dict(os.environ, {'DATABASE_URL': 'postgresql+asyncpg://user:pass@localhost:5432/auth_db'})
     def test_validate_auth_url_returns_boolean(self):
         """
         Test that validate_auth_url returns boolean for valid URL.

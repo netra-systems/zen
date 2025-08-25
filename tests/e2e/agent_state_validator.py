@@ -19,7 +19,7 @@ from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from tests.e2e.config import (
-    TestTier,
+    CustomerTier,
     UnifiedTestConfig,
     get_test_user,
 )
@@ -283,7 +283,7 @@ def _create_invalid_test_state():
 
 def _create_test_metadata():
     return AgentMetadata(execution_context={'test_mode': True}, 
-                        custom_fields={'tier': TestTier.ENTERPRISE.value})
+                        custom_fields={'tier': CustomerTier.ENTERPRISE.value})
 
 def _get_context_params(test_state):
     return {'run_id': "test-run", 'agent_name': "test_agent", 'state': test_state, 

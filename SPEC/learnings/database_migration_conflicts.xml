@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning category="database">
+    <title>Database Migration Conflicts and Race Conditions</title>
+    <problem>
+        Dual competing table creation systems causing "relation already exists" errors during startup.
+        MigrationTracker (Alembic) and DatabaseInitializer both trying to create the same tables.
+    </problem>
+    
+    <root_cause>
+        Two initialization paths without coordination:
+        1. MigrationTracker using Alembic migrations
+        2. DatabaseInitializer using direct SQL CREATE TABLE
+        Both systems run during startup and compete to create tables.
+    </root_cause>
+    
+    <solution>
+        Implement comprehensive coordination between DatabaseInitializer and Alembic systems.
+        Instead of complete avoidance, create intelligent supplementary table management.
+        DatabaseInitializer creates only tables that Alembic doesn't provide.
+        All operations are completely idempotent and handle concurrent creation gracefully.
+    </solution>
+    
+    <implementation>
+        Enhanced DatabaseInitializer._initialize_postgresql_schema():
+        - Check if alembic_version table exists to detect Alembic management
+        - If Alembic-managed: Create only supplementary tables (sessions, api_keys)
+        - Avoid creating tables that Alembic already created (users, secrets, etc.)
+        - Use schema-compatible table definitions (VARCHAR(255) for user IDs)
+        - Add comprehensive error handling for "relation already exists" errors
+        - Record coordination state in schema_version table
+        - Create foreign key constraints safely with existence checks
+        - Add database indexes for optimal performance
+        - All operations use IF NOT EXISTS and proper error recovery
+    </implementation>
+    
+    <future_improvement>
+        Can optimize with proper async coordination and parallel initialization
+        once basic system is stable. For now, linear execution ensures reliability.
+    </future_improvement>
+    
+    <prevention>
+        - Always check for existing tables before creation
+        - Use CREATE TABLE IF NOT EXISTS pattern
+        - Have single source of truth for schema management
+        - Consider using only one initialization system
+    </prevention>
+    
+    <files>
+        <file>netra_backend/app/db/database_initializer.py</file>
+        <file>netra_backend/app/core/db_setup.py</file>
+        <file>netra_backend/tests/startup/test_migration_race_condition.py</file>
+    </files>
+</learning>
+</xml>

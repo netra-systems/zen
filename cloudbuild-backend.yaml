@@ -1,10 +1,10 @@
 images:
-- gcr.io/netra-staging/netra-backend:latest
+- gcr.io/netra-staging/netra-backend-staging:latest
 steps:
 - args:
   - build
   - -t
-  - gcr.io/netra-staging/netra-backend:latest
+  - gcr.io/netra-staging/netra-backend-staging:latest
   - -f
   - deployment/docker/Dockerfile.backend
   - .

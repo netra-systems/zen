@@ -106,7 +106,7 @@
             Endpoints implemented:
             - /ws: Main WebSocket endpoint
             - /ws/{user_id}: User-specific WebSocket
-            - /ws/v1/{user_id}: Versioned WebSocket API
+            - /ws/{user_id}: Versioned WebSocket API
             - /ws/config: WebSocket configuration endpoint
             - /ws/info: WebSocket information endpoint
         </implementation>

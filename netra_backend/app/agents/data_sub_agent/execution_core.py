@@ -14,7 +14,7 @@ BVJ: Growth & Enterprise | Customer Intelligence | +20% performance fee capture
 from typing import Any, Callable, Dict, Optional
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,
@@ -70,7 +70,7 @@ class ExecutionCore(BaseExecutionInterface):
         
     def _init_error_handler(self) -> None:
         """Initialize error handling."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     async def execute_analysis(
         self,

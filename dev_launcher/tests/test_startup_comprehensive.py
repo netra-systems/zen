@@ -345,7 +345,7 @@ class TestStartupSequenceIntegration:
         # 6. Start backend process (with --no-reload if flag set)
         # 7. Start auth service (with --no-reload if flag set)
         # 8. Wait for backend readiness (/health/ready)
-        # 9. Verify auth system (/api/auth/config)
+        # 9. Verify auth system (/auth/config)
         # 10. Start frontend process (optimized mode)
         # 11. Wait for frontend readiness
         # 12. Cache successful startup state

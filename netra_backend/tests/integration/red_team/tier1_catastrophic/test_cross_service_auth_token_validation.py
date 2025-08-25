@@ -185,9 +185,9 @@ class TestCrossServiceAuthTokenValidation:
         
         # Test various protected endpoints
         protected_endpoints = [
-            "/api/v1/threads",
-            "/api/v1/user/profile", 
-            "/api/v1/agents",
+            "/api/threads",
+            "/api/user/profile", 
+            "/api/agents",
             "/health/detailed"
         ]
         
@@ -226,7 +226,7 @@ class TestCrossServiceAuthTokenValidation:
         auth_headers = {"Authorization": f"Bearer {expired_token}"}
         
         # Try to access protected endpoint with expired token
-        response = real_test_client.get("/api/v1/threads", headers=auth_headers)
+        response = real_test_client.get("/api/threads", headers=auth_headers)
         
         # FAILURE EXPECTED HERE - expired tokens should be rejected
         assert response.status_code == 401, f"Expired token was accepted (should be rejected): {response.text}"
@@ -257,7 +257,7 @@ class TestCrossServiceAuthTokenValidation:
             else:
                 headers = {"Authorization": f"Bearer {malformed_token}"}
                 
-            response = real_test_client.get("/api/v1/threads", headers=headers)
+            response = real_test_client.get("/api/threads", headers=headers)
             
             # FAILURE EXPECTED HERE - malformed tokens should be rejected
             assert response.status_code == 401, f"Malformed token '{malformed_token}' was accepted: {response.text}"
@@ -335,7 +335,7 @@ class TestCrossServiceAuthTokenValidation:
             "description": "Testing user context propagation"
         }
         
-        response = real_test_client.post("/api/v1/threads", json=thread_data, headers=auth_headers)
+        response = real_test_client.post("/api/threads", json=thread_data, headers=auth_headers)
         
         # FAILURE EXPECTED HERE - user context may not be propagated
         if response.status_code == 200:
@@ -374,7 +374,7 @@ class TestCrossServiceAuthTokenValidation:
         async def validate_token(token: str) -> tuple:
             """Validate a single token and return result."""
             headers = {"Authorization": f"Bearer {token}"}
-            response = real_test_client.get("/api/v1/threads", headers=headers)
+            response = real_test_client.get("/api/threads", headers=headers)
             return (response.status_code, token[:20])
 
         # Run concurrent validations
@@ -442,7 +442,7 @@ class TestCrossServiceAuthTokenValidation:
                 new_token = refresh_data["access_token"]
                 auth_headers = {"Authorization": f"Bearer {new_token}"}
                 
-                backend_response = TestClient(app).get("/api/v1/threads", headers=auth_headers)
+                backend_response = TestClient(app).get("/api/threads", headers=auth_headers)
                 assert backend_response.status_code != 401, "Refreshed token not accepted by backend"
                 
             except httpx.ConnectError:

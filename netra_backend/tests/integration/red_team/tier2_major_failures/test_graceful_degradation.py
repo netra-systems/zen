@@ -65,9 +65,9 @@ class TestGracefulDegradation:
             
             # Test endpoints that depend on database
             database_dependent_endpoints = [
-                {"path": "/api/v1/users/profile", "method": "GET"},
-                {"path": "/api/v1/threads", "method": "GET"},
-                {"path": "/api/v1/agents/history", "method": "GET"}
+                {"path": "/api/users/profile", "method": "GET"},
+                {"path": "/api/threads", "method": "GET"},
+                {"path": "/api/agents/history", "method": "GET"}
             ]
             
             degradation_responses = []

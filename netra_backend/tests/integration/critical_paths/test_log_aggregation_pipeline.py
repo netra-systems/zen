@@ -248,7 +248,7 @@ class LogAggregationValidator:
         # Generate realistic values for template placeholders
         template_values = {
             "method": ["GET", "POST", "PUT", "DELETE"][log_index % 4],
-            "endpoint": ["/api/v1/agents", "/api/v1/users", "/api/v1/threads"][log_index % 3],
+            "endpoint": ["/api/agents", "/api/users", "/api/threads"][log_index % 3],
             "duration": 50 + (log_index % 200),
             "user_id": f"user_{1000 + (log_index % 100)}",
             "status_code": [200, 201, 400, 401, 500][log_index % 5],

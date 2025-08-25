@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Frontend Auth Service URL Configuration</name>
+        <version>1.0</version>
+        <date>2025-08-25</date>
+        <description>Critical learnings about frontend auth service URL configuration and API versioning</description>
+    </metadata>
+
+    <problem-statement>
+        Frontend was calling https://auth.staging.netrasystems.ai/auth/config which returned 404.
+        The auth service actually serves endpoints at /auth/* not /auth/*.
+    </problem-statement>
+
+    <root-cause>
+        <issue>URL Path Mismatch</issue>
+        <details>
+            Auth service mounts auth_router with prefix="/api/v1" (auth_service/main.py:474).
+            This means all auth endpoints are at /auth/* paths.
+            Frontend was configured to call /auth/* directly without the /api/v1 prefix.
+        </details>
+    </root-cause>
+
+    <learnings>
+        <learning id="auth-api-versioning">
+            <title>Auth Service Always Uses API Versioning</title>
+            <description>
+                The auth service ALWAYS mounts routes at /auth/*.
+                Never use /auth/* directly - always include the /api/v1 prefix.
+            </description>
+            <critical>true</critical>
+            <affected-files>
+                <file>frontend/lib/unified-api-config.ts</file>
+                <file>frontend/auth/unified-auth-service.ts</file>
+                <file>frontend/__tests__/**/*.ts</file>
+            </affected-files>
+        </learning>
+
+        <learning id="frontend-auth-endpoints">
+            <title>Frontend Auth Endpoint Configuration</title>
+            <description>
+                All auth endpoints in frontend must be configured with full paths including API version:
+                - authConfig: https://auth.{env}.netrasystems.ai/auth/config
+                - authLogin: https://auth.{env}.netrasystems.ai/auth/login  
+                - authCallback: https://auth.{env}.netrasystems.ai/auth/callback
+                - authToken: https://auth.{env}.netrasystems.ai/auth/token
+                - authRefresh: https://auth.{env}.netrasystems.ai/auth/refresh
+                - authValidate: https://auth.{env}.netrasystems.ai/auth/validate
+                - authSession: https://auth.{env}.netrasystems.ai/auth/session
+                - authMe: https://auth.{env}.netrasystems.ai/auth/me
+                - dev_login: https://auth.{env}.netrasystems.ai/auth/dev/login
+            </description>
+            <critical>true</critical>
+        </learning>
+
+        <learning id="test-mock-configuration">
+            <title>Test Mock Configuration Must Match Production URLs</title>
+            <description>
+                All test mocks and fixtures must use the same /auth/* paths.
+                This ensures tests accurately reflect production behavior.
+                Update mock interceptors, fetch mocks, and test configurations accordingly.
+            </description>
+            <files-updated>
+                <file>frontend/__tests__/auth/auth-test-setup.ts</file>
+                <file>frontend/__tests__/setup/auth-service-setup.ts</file>
+                <file>frontend/__tests__/mocks/auth-service-mock.ts</file>
+                <file>frontend/__tests__/staging/url-configuration.test.ts</file>
+                <file>frontend/cypress/e2e/auth.cy.ts</file>
+            </files-updated>
+        </learning>
+
+        <learning id="auth-service-import-path">
+            <title>Correct Auth Service Import Path</title>
+            <description>
+                Frontend components should import from '@/auth/unified-auth-service'.
+                The old '@/auth/service' path was incorrect and caused import errors.
+                A backward compatibility file auth/service.ts can re-export from unified-auth-service.
+            </description>
+            <resolution>Fixed 21 test files with incorrect imports</resolution>
+        </learning>
+
+        <learning id="useauth-hook-location">
+            <title>useAuth Hook Must Be Imported from Context</title>
+            <description>
+                The useAuth() React hook belongs in @/auth/context, not in the service class.
+                Service classes should not contain React hooks as they create circular dependencies.
+                Components needing useAuth should import it directly from '@/auth/context'.
+            </description>
+            <anti-pattern>unifiedAuthService.useAuth() or authService.useAuth()</anti-pattern>
+            <correct-pattern>import { useAuth } from '@/auth/context'</correct-pattern>
+        </learning>
+    </learnings>
+
+    <implementation-checklist>
+        <item status="completed">Update unified-api-config.ts with /api/v1 prefix for all environments</item>
+        <item status="completed">Update unified-auth-service.ts dev_login endpoint</item>
+        <item status="completed">Fix test mock configurations to use /auth/*</item>
+        <item status="completed">Update Cypress interceptors with correct paths</item>
+        <item status="completed">Fix incorrect @/auth/service imports</item>
+        <item status="completed">Remove useAuth() method from service class</item>
+        <item status="completed">Create backward compatibility exports</item>
+    </implementation-checklist>
+
+    <prevention>
+        <recommendation>
+            Always verify API endpoint paths match between services and clients.
+            Check how routers are mounted in the service (look for app.include_router).
+            Test actual API calls in staging before assuming URL structure.
+        </recommendation>
+        <recommendation>
+            Maintain consistency in API versioning across all services.
+            If one service uses /api/v1, all services should follow the same pattern.
+        </recommendation>
+        <recommendation>
+            Keep React hooks separate from service classes to avoid circular dependencies.
+            Service classes handle API calls, contexts handle React state management.
+        </recommendation>
+    </prevention>
+</specification>

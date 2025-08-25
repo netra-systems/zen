@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import pytest
-from netra_backend.app.schemas import ToolResult
+from netra_backend.app.schemas.Tool import ToolResult
 
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.tests.helpers.tool_dispatcher_helpers import (
@@ -41,6 +41,9 @@ class TestToolDispatcherEdgeCases:
     def _verify_dispatch_handles_none_parameters(self, result: ToolResult) -> None:
         """Verify dispatch handles None parameters without crashing."""
         assert isinstance(result, ToolResult)
+        # The test should verify the tool returns a valid response despite None parameters
+        assert result is not None
+        assert hasattr(result, 'status') and hasattr(result, 'tool_input')
     
     def _setup_dispatch_with_empty_state(self) -> tuple:
         """Setup dispatch with empty state test."""

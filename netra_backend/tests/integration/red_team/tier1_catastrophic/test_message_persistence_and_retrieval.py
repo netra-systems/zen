@@ -213,7 +213,7 @@ class TestMessagePersistenceAndRetrieval:
         
         # Try to create message via API - will likely fail
         response = real_test_client.post(
-            f"/api/v1/threads/{thread_id}/messages",
+            f"/api/threads/{thread_id}/messages",
             json=message_data,
             headers=auth_headers
         )
@@ -266,7 +266,7 @@ class TestMessagePersistenceAndRetrieval:
         
         # Try to list messages via API - will likely fail
         response = real_test_client.get(
-            f"/api/v1/threads/{thread_id}/messages",
+            f"/api/threads/{thread_id}/messages",
             headers=auth_headers
         )
         
@@ -375,7 +375,7 @@ class TestMessagePersistenceAndRetrieval:
         
         # Test pagination parameters - will likely fail
         response = real_test_client.get(
-            f"/api/v1/threads/{thread_id}/messages?limit=10&offset=0",
+            f"/api/threads/{thread_id}/messages?limit=10&offset=0",
             headers=auth_headers
         )
         

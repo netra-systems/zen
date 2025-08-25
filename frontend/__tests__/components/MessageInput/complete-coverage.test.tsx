@@ -103,18 +103,14 @@ describe('MessageInput - Core Functionality', () => {
 
     it('updates rows based on content', () => {
       // Mock the useTextareaResize hook to return 3 rows
-      const useTextareaResizeMock = require('./shared-test-setup').mockUseTextareaResize;
-      useTextareaResizeMock.mockReturnValue({ rows: 3 });
-      
-      // Mock the hook in the component module
-      jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
-        useTextareaResize: () => ({ rows: 3 })
-      }));
+      mockUseTextareaResize.mockReturnValue({ rows: 3 });
       
       render(<MessageInput />);
       
       const textarea = screen.getByRole('textbox');
       expect(textarea).toHaveAttribute('rows', '3');
+      // The component should use the rows prop from the hook
+      expect(textarea).toHaveStyle({ height: '72px' }); // 3 rows * 24px line height
     });
   });
 
@@ -122,6 +118,9 @@ describe('MessageInput - Core Functionality', () => {
     it('sends message on Enter key', async () => {
       const mockHandleSend = jest.fn();
       const mockAddToHistory = jest.fn();
+      
+      // Reset all mocks and set up fresh ones
+      setupMessageInputMocks();
       
       mockUseMessageSending.mockReturnValue({
         isSending: false,
@@ -152,7 +151,9 @@ describe('MessageInput - Core Functionality', () => {
     it('does not send empty message on Enter', async () => {
       const mockHandleSend = jest.fn();
       
-      mockHooks.mockUseMessageSending.mockReturnValue({
+      setupMessageInputMocks();
+      
+      mockUseMessageSending.mockReturnValue({
         isSending: false,
         handleSend: mockHandleSend
       });
@@ -168,6 +169,8 @@ describe('MessageInput - Core Functionality', () => {
     it('trims whitespace before sending', async () => {
       const mockHandleSend = jest.fn();
       const mockAddToHistory = jest.fn();
+      
+      setupMessageInputMocks();
       
       mockUseMessageSending.mockReturnValue({
         isSending: false,
@@ -207,6 +210,7 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('updates character count in real-time', async () => {
+      // Make shouldShowCharCount return true for short messages in this test
       const mockShouldShow = require('@/components/chat/utils/messageInputUtils').shouldShowCharCount;
       mockShouldShow.mockReturnValue(true);
       
@@ -233,12 +237,14 @@ describe('MessageInput - Core Functionality', () => {
       render(<MessageInput />);
       
       const textarea = screen.getByRole('textbox');
+      // Use fireEvent for very long text to avoid timeout
       const longText = 'a'.repeat(10001);
       
-      await user.type(textarea, longText);
+      fireEvent.change(textarea, { target: { value: longText } });
       
+      // The component should prevent input beyond limit
       expect(textarea.value.length).toBeLessThanOrEqual(10000);
-    });
+    }, 5000);
 
     it('shows warning near character limit', () => {
       const mockGetPlaceholder = require('@/components/chat/utils/messageInputUtils').getPlaceholder;
@@ -246,7 +252,8 @@ describe('MessageInput - Core Functionality', () => {
       
       render(<MessageInput />);
       
-      expect(screen.getByDisplayValue('')).toHaveAttribute('placeholder', '100 characters remaining');
+      const textarea = screen.getByRole('textbox');
+      expect(textarea).toHaveAttribute('placeholder', '100 characters remaining');
     });
   });
 
@@ -292,6 +299,10 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('disables input when processing', () => {
+      // Set up the disabled state properly
+      const mockIsDisabled = require('@/components/chat/utils/messageInputUtils').isMessageDisabled;
+      mockIsDisabled.mockReturnValue(true);
+      
       mockUseUnifiedChatStore.mockReturnValue({
         activeThreadId: 'thread-1',
         isProcessing: true
@@ -304,6 +315,10 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('disables input when not authenticated', () => {
+      // Set up the disabled state properly
+      const mockIsDisabled = require('@/components/chat/utils/messageInputUtils').isMessageDisabled;
+      mockIsDisabled.mockReturnValue(true);
+      
       mockUseAuthStore.mockReturnValue({
         isAuthenticated: false
       });

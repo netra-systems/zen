@@ -64,7 +64,7 @@ const mockUseRouter = jest.fn(() => mockRouter);
 
 // Mock implementations
 jest.mock('@/store/authStore', () => ({ useAuthStore: mockUseAuthStore }));
-jest.mock('@/services/websocket', () => ({ useWebSocket: mockUseWebSocket }));
+jest.mock('@/services/webSocketService', () => ({ useWebSocket: mockUseWebSocket }));
 jest.mock('next/navigation', () => ({ useRouter: mockUseRouter }));
 jest.mock('@/auth/service', () => ({ authService: mockAuthService }));
 

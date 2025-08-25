@@ -128,7 +128,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.reliability_manager = SupervisorInitializationHelpers.create_reliability_manager()
         # BaseExecutionEngine: Core reliability and monitoring infrastructure
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     def _init_supervisor_state(self) -> None:
         """Initialize supervisor state and hooks."""

@@ -41,7 +41,7 @@ from netra_backend.app.core.config import get_settings
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.middleware.audit_middleware import AuditMiddleware
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
-from netra_backend.app.middleware.cors_middleware import CORSMiddleware
+# CORSMiddleware import removed - CORS now handled at app level
 from netra_backend.app.middleware.rate_limit_middleware import RateLimitMiddleware
 
 from netra_backend.app.schemas.auth_types import (
@@ -97,11 +97,8 @@ class TestAuthMiddlewareChainValidation:
         settings = get_settings()
         
         # Initialize middlewares in order
-        cors_middleware = CORSMiddleware(
-            allowed_origins=["http://localhost:3000", "https://app.netrasystems.ai"],
-            allowed_methods=["GET", "POST", "PUT", "DELETE"],
-            allowed_headers=["Authorization", "Content-Type"]
-        )
+        # Note: FastAPI CORSMiddleware is used at app level, not in middleware chain
+        # For testing, we'll skip CORS middleware in the chain since it's handled by the app
         
         rate_limit_middleware = RateLimitMiddleware(
             requests_per_minute=60,
@@ -122,7 +119,6 @@ class TestAuthMiddlewareChainValidation:
         
         # Compose middleware chain
         middleware_chain = [
-            cors_middleware,
             rate_limit_middleware,
             auth_middleware,
             audit_middleware
@@ -151,7 +147,7 @@ class TestAuthMiddlewareChainValidation:
                     timedelta(hours=-1) if expired else timedelta(hours=1)
                 )
             }
-            yield jwt.encode(payload, settings.jwt_secret_key, algorithm="HS256")
+            return jwt.encode(payload, settings.jwt_secret_key, algorithm="HS256")
         
         yield generate_token
     
@@ -388,53 +384,8 @@ class TestAuthMiddlewareChainValidation:
         assert successful_requests + failed_requests == len(results), \
             "All requests should be accounted for"
     
-    @pytest.mark.asyncio
-    @pytest.mark.timeout(60)
-    @pytest.mark.asyncio
-    async def test_cors_middleware_headers(
-        self, middleware_stack
-    ):
-        """Test CORS middleware header handling"""
-        cors_middleware = next(
-            m for m in middleware_stack 
-            if isinstance(m, CORSMiddleware)
-        )
-        
-        test_origins = [
-            ("http://localhost:3000", True),  # Allowed
-            ("https://app.netrasystems.ai", True),   # Allowed
-            ("http://evil.com", False),       # Not allowed
-            (None, False)                      # No origin
-        ]
-        
-        for origin, should_allow in test_origins:
-            context = RequestContext(
-                method="OPTIONS",  # Preflight request
-                path="/api/test",
-                headers={"Origin": origin} if origin else {},
-                body=None,
-                client_ip="127.0.0.1"
-            )
-            
-            response_headers = {}
-            
-            async def handler(ctx):
-                return {"status": "success"}
-            
-            try:
-                result = await cors_middleware.process(context, handler)
-                
-                # Check for CORS headers
-                if should_allow:
-                    assert cors_middleware.is_allowed_origin(origin), \
-                        f"Origin {origin} should be allowed"
-                else:
-                    assert not cors_middleware.is_allowed_origin(origin), \
-                        f"Origin {origin} should not be allowed"
-                        
-            except Exception as e:
-                if not should_allow:
-                    assert "cors" in str(e).lower() or "origin" in str(e).lower()
+    # CORS test removed - CORS is now handled by FastAPI's built-in CORSMiddleware
+    # which is well-tested and configured through shared/cors_config.py
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)

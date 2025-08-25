@@ -52,11 +52,20 @@ def _create_error_response(status_code: int, response_data: Dict[str, Any]) -> R
     )
 
 @router.get("/")
-async def health(request: Request) -> Dict[str, Any]:
+@router.options("/")
+async def health(request: Request, response: Response) -> Dict[str, Any]:
     """
     Basic health check endpoint - returns healthy if the application is running.
     Checks startup state to ensure proper readiness signaling during cold starts.
+    Supports API versioning through Accept-Version and API-Version headers.
     """
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        return {"status": "ok", "message": "CORS preflight"}
+    
+    # Handle API versioning
+    requested_version = request.headers.get("Accept-Version") or request.headers.get("API-Version", "current")
+    response.headers["API-Version"] = requested_version
     # Check if application startup is complete
     app_state = getattr(request.app, 'state', None)
     if app_state:
@@ -139,22 +148,37 @@ async def health(request: Request) -> Dict[str, Any]:
             })
     
     # Startup is complete, proceed with normal health check
-    return await health_interface.get_health_status(HealthLevel.BASIC)
+    health_status = await health_interface.get_health_status(HealthLevel.BASIC)
+    
+    # Add version-specific fields based on requested API version
+    if requested_version in ["1.0", "2024-08-01"]:
+        health_status["version_info"] = {
+            "api_version": requested_version,
+            "service_version": "1.0.0",
+            "supported_versions": ["current", "1.0", "2024-08-01"]
+        }
+    
+    return health_status
 
 
 # Add separate endpoint for /health (without trailing slash) to handle direct requests
 @router.get("", include_in_schema=False)  # This will match /health exactly
-async def health_no_slash(request: Request) -> Dict[str, Any]:
+async def health_no_slash(request: Request, response: Response) -> Dict[str, Any]:
     """
     Health check endpoint without trailing slash - redirects to main health endpoint logic.
     """
-    return await health(request)
+    return await health(request, response)
 
 @router.get("/live")
-async def live() -> Dict[str, Any]:
+@router.options("/live")
+async def live(request: Request) -> Dict[str, Any]:
     """
     Liveness probe to check if the application is running.
     """
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        return {"status": "ok", "message": "CORS preflight"}
+    
     return response_builder.create_basic_response("healthy")
 
 async def _check_postgres_connection(db: AsyncSession) -> None:
@@ -173,12 +197,17 @@ async def _check_clickhouse_connection() -> None:
         logger.debug("ClickHouse check skipped - skip_clickhouse_init=True")
         return
     
-    # In development, make ClickHouse optional for readiness
-    if config.environment in ["development", "staging"]:
+    # CRITICAL FIX: Skip ClickHouse entirely in staging environment
+    if config.environment == "staging":
+        logger.info("ClickHouse check skipped entirely in staging environment (infrastructure not available)")
+        return  # Skip ClickHouse completely in staging
+    
+    # Environment-specific ClickHouse requirements for non-staging environments
+    if config.environment == "development":
         try:
             await asyncio.wait_for(_perform_clickhouse_check(), timeout=2.0)
         except (asyncio.TimeoutError, Exception) as e:
-            logger.warning(f"ClickHouse check failed (non-critical in {config.environment}): {e}")
+            logger.warning(f"ClickHouse check failed (non-critical in development): {e}")
             return  # Don't fail readiness for ClickHouse in development
     else:
         await _perform_clickhouse_check()
@@ -186,62 +215,143 @@ async def _check_clickhouse_connection() -> None:
 async def _perform_clickhouse_check() -> None:
     """Perform the actual ClickHouse connection check."""
     try:
-        from netra_backend.app.services.clickhouse_service import clickhouse_service
-        await clickhouse_service.execute_health_check()
+        from netra_backend.app.services.clickhouse_service import ClickHouseService
+        service = ClickHouseService()
+        result = await service.execute_health_check()
+        if not result:
+            raise Exception("ClickHouse health check returned False")
     except Exception as e:
         await _handle_clickhouse_error(e)
 
 async def _handle_clickhouse_error(error: Exception) -> None:
     """Handle ClickHouse connection errors."""
-    logger.warning(f"ClickHouse check failed (non-critical): {error}")
     config = unified_config_manager.get_config()
-    if config.environment in ["staging", "development"]:
-        logger.info(f"Ignoring ClickHouse failure in {config.environment} environment")
+    if config.environment == "development":
+        logger.warning(f"ClickHouse check failed (non-critical in development): {error}")
+    elif config.environment == "staging":
+        # CRITICAL FIX: Always treat ClickHouse as optional in staging
+        logger.warning(f"ClickHouse check failed (non-critical in staging - optional service): {error}")
+        # Never raise exception in staging - ClickHouse is always optional
     else:
+        logger.error(f"ClickHouse check failed: {error}")
         raise
+
+async def _check_redis_connection() -> None:
+    """Check Redis connection for staging environment."""
+    config = unified_config_manager.get_config()
+    
+    # Check if Redis should be skipped entirely
+    if getattr(config, 'skip_redis_init', False):
+        logger.debug("Redis check skipped - skip_redis_init=True")
+        return
+    
+    # CRITICAL FIX: Skip Redis entirely in staging environment
+    if config.environment == "staging":
+        logger.info("Redis check skipped entirely in staging environment (infrastructure not available)")
+        return  # Skip Redis completely in staging
+    
+    # Environment-specific Redis requirements for non-staging environments
+    if config.environment == "development":
+        # In development, Redis is optional
+        try:
+            from netra_backend.app.redis_manager import redis_manager
+            if redis_manager.enabled:
+                await asyncio.wait_for(redis_manager.ping(), timeout=2.0)
+        except Exception as e:
+            logger.warning(f"Redis check failed (non-critical in development): {e}")
 
 async def _check_database_connection(db: AsyncSession) -> None:
     """Check database connection using dependency injection."""
     await _check_postgres_connection(db)
     await _check_clickhouse_connection()
+    await _check_redis_connection()
 
 async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
     """Check application readiness including core database connectivity."""
     try:
-        # Fast check - only verify PostgreSQL is accessible (core requirement)
-        await asyncio.wait_for(_check_postgres_connection(db), timeout=5.0)
+        # Run all checks concurrently with shorter timeouts for faster response
+        postgres_task = asyncio.create_task(_check_postgres_connection(db))
+        clickhouse_task = asyncio.create_task(_check_clickhouse_connection())
+        redis_task = asyncio.create_task(_check_redis_connection())
+        health_task = asyncio.create_task(health_interface.get_health_status(HealthLevel.BASIC))
         
-        # Optional: Check ClickHouse with short timeout (non-blocking)
+        # Wait for core PostgreSQL check (required)
         try:
-            await asyncio.wait_for(_check_clickhouse_connection(), timeout=3.0)
+            await asyncio.wait_for(postgres_task, timeout=3.0)  # Reduced from 5.0s
+            postgres_status = "connected"
         except (asyncio.TimeoutError, Exception) as e:
-            logger.debug(f"ClickHouse not available during readiness (non-critical): {e}")
+            logger.error(f"PostgreSQL readiness check failed: {e}")
+            raise HTTPException(status_code=503, detail="Core database unavailable")
         
-        # Basic health status check (fast)
-        health_status = await asyncio.wait_for(
-            health_interface.get_health_status(HealthLevel.BASIC), 
-            timeout=2.0
-        )
+        # Wait for external service checks based on environment
+        config = unified_config_manager.get_config()
+        clickhouse_status = "unavailable"
+        redis_status = "unavailable"
+        
+        # Check ClickHouse availability with optional staging support
+        try:
+            await asyncio.wait_for(clickhouse_task, timeout=5.0)
+            clickhouse_status = "connected"
+        except (asyncio.TimeoutError, Exception) as e:
+            if config.environment == "staging":
+                clickhouse_optional = getattr(config, 'clickhouse_optional_in_staging', False)
+                if clickhouse_optional:
+                    logger.warning(f"ClickHouse unavailable in staging but optional: {e}")
+                    clickhouse_status = "optional_unavailable"
+                else:
+                    logger.error(f"ClickHouse required but unavailable in staging: {e}")
+                    raise Exception(f"ClickHouse unavailable in staging: {e}")
+            else:
+                logger.debug(f"ClickHouse not available during readiness (non-critical): {e}")
+        
+        # Check Redis availability with optional staging support
+        try:
+            await asyncio.wait_for(redis_task, timeout=3.0)
+            redis_status = "connected"
+        except (asyncio.TimeoutError, Exception) as e:
+            if config.environment == "staging":
+                redis_optional = getattr(config, 'redis_optional_in_staging', False)
+                if redis_optional:
+                    logger.warning(f"Redis unavailable in staging but optional: {e}")
+                    redis_status = "optional_unavailable"
+                else:
+                    logger.error(f"Redis required but unavailable in staging: {e}")
+                    raise Exception(f"Redis unavailable in staging: {e}")
+            else:
+                logger.debug(f"Redis not available during readiness (non-critical): {e}")
+        
+        health_status = {}
+        try:
+            health_status = await asyncio.wait_for(health_task, timeout=1.5)
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.debug(f"Health interface check failed (non-critical): {e}")
+            health_status = {"status": "healthy", "message": "Basic health check bypassed"}
         
         # Return ready if core services are available
         return {
             "status": "ready", 
             "service": "netra-ai-platform", 
             "timestamp": time.time(),
-            "core_db": "connected",
+            "core_db": postgres_status,
+            "clickhouse_db": clickhouse_status,
+            "redis_db": redis_status,
             "details": health_status
         }
         
-    except asyncio.TimeoutError:
-        logger.error("Readiness check timed out")
-        raise HTTPException(status_code=503, detail="Service readiness timeout")
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Core database readiness check failed: {e}")
-        raise HTTPException(status_code=503, detail="Core database unavailable")
+        logger.error(f"Readiness check failed: {e}")
+        raise HTTPException(status_code=503, detail="Service readiness check failed")
 
 @router.get("/ready")
+@router.options("/ready")
 async def ready(request: Request) -> Dict[str, Any]:
     """Readiness probe to check if the application is ready to serve requests."""
+    # Handle CORS preflight requests
+    if request.method == "OPTIONS":
+        return {"status": "ok", "message": "CORS preflight"}
+    
     try:
         # Check startup state first - readiness requires startup completion
         app_state = getattr(request.app, 'state', None)
@@ -284,8 +394,16 @@ async def ready(request: Request) -> Dict[str, Any]:
             # Use async for to properly handle session lifecycle
             async for db in get_db_dependency():
                 try:
-                    result = await _check_readiness_status(db)
+                    # Wrap the entire readiness check with timeout to prevent probe timeout
+                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=8.0)
                     return result
+                except asyncio.TimeoutError:
+                    logger.error("Readiness check exceeded 8 second timeout")
+                    return _create_error_response(503, {
+                        "status": "unhealthy",
+                        "message": "Readiness check timeout",
+                        "timeout_seconds": 8
+                    })
                 except Exception as check_error:
                     logger.error(f"Readiness check failed: {check_error}")
                     raise check_error

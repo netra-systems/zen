@@ -10,6 +10,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import sys
+import os
+from pathlib import Path
+# Ensure absolute imports work
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.user_journey_executor import TestUser, UserJourneyExecutor
 from tests.e2e.config import (
@@ -75,7 +83,7 @@ class UnifiedE2ETestHarness:
         """Start complete test environment."""
         logger.info("Starting unified E2E test environment")
         
-        await self.orchestrator.start_test_environment(
+        await self.orchestrator.test_start_test_environment(
             self.session.test_database_name
         )
         
@@ -118,8 +126,15 @@ class UnifiedE2ETestHarness:
     
     def get_websocket_url(self) -> str:
         """Get WebSocket URL for backend service."""
-        # Use environment-specific WebSocket URL
-        return self.env_config.services.websocket
+        # Derive WebSocket URL from backend URL
+        backend_url = self.env_config.services.backend
+        if backend_url.startswith("https://"):
+            return backend_url.replace("https://", "wss://") + "/ws"
+        elif backend_url.startswith("http://"):
+            return backend_url.replace("http://", "ws://") + "/ws"
+        else:
+            # Default to localhost WebSocket URL
+            return "ws://localhost:8000/ws"
     
     def is_environment_ready(self) -> bool:
         """Check if test environment is ready."""
@@ -149,7 +164,7 @@ class UnifiedE2ETestHarness:
         logger.info("Cleaning up E2E test environment")
         
         await self.journey_executor.cleanup_users_and_connections()
-        await self.orchestrator.stop_test_environment(
+        await self.orchestrator.test_stop_test_environment(
             self.session.test_database_name
         )
         

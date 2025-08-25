@@ -141,7 +141,7 @@ class TestAuthenticationE2E(DevEnvironmentE2ETests):
         # So we test auth health and configuration instead
         
         # 1. Check auth configuration endpoint
-        config_response = client.get("/api/auth/config")
+        config_response = client.get("/auth/config")
         assert config_response.status_code == 200
         config_data = config_response.json()
         
@@ -155,7 +155,7 @@ class TestAuthenticationE2E(DevEnvironmentE2ETests):
         assert config_data["development_mode"] == False
         
         # 2. Test that dev login returns appropriate error
-        dev_login_response = client.post("/api/auth/dev_login", json={"email": "test@example.com"})
+        dev_login_response = client.post("/auth/dev_login", json={"email": "test@example.com"})
         assert dev_login_response.status_code == 403, "Dev login should be forbidden in test environment"
         
         # For test environment, this validates that auth system is running 
@@ -169,9 +169,9 @@ class TestAuthenticationE2E(DevEnvironmentE2ETests):
         """Test authorization for different user tiers."""
         tiers = [PlanTier.FREE, PlanTier.PRO, PlanTier.ENTERPRISE]
         tier_endpoints = {
-            PlanTier.FREE: ["/api/v1/basic"],
-            PlanTier.PRO: ["/api/v1/basic", "/api/v1/advanced"],
-            PlanTier.ENTERPRISE: ["/api/v1/basic", "/api/v1/advanced", "/api/v1/enterprise"]
+            PlanTier.FREE: ["/api/basic"],
+            PlanTier.PRO: ["/api/basic", "/api/advanced"],
+            PlanTier.ENTERPRISE: ["/api/basic", "/api/advanced", "/api/enterprise"]
         }
         
         for tier in tiers:
@@ -194,7 +194,7 @@ class TestAuthenticationE2E(DevEnvironmentE2ETests):
         
         # Use existing auth endpoints instead of non-existent session endpoints
         # Test auth config (existing endpoint)
-        config_response = client.get("/api/auth/config")
+        config_response = client.get("/auth/config")
         assert config_response.status_code in [200, 201]
         
         # Test basic health endpoint as session validation
@@ -208,7 +208,7 @@ class TestAuthenticationE2E(DevEnvironmentE2ETests):
             await asyncio.sleep(0.5)
         
         # Test logout (existing endpoint) - accept any response as logout may not be fully implemented
-        logout_response = client.post("/api/auth/logout")
+        logout_response = client.post("/auth/logout")
         assert logout_response.status_code in [200, 204, 404]  # 404 is acceptable if endpoint doesn't exist
 
 
@@ -469,7 +469,7 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         
         # 1. Create entity
         create_response = await async_client.post(
-            "/api/v1/entities",
+            "/api/entities",
             json=entity_data,
             headers=headers
         )
@@ -486,7 +486,7 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         }
         
         update_response = await async_client.put(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             json=update_data,
             headers=headers
         )
@@ -494,7 +494,7 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         
         # 3. Read entity to verify consistency
         read_response = await async_client.get(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             headers=headers
         )
         assert read_response.status_code == 200
@@ -503,14 +503,14 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
         
         # 4. Delete entity
         delete_response = await async_client.delete(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             headers=headers
         )
         assert delete_response.status_code in [200, 204]
         
         # 5. Verify deletion
         verify_response = await async_client.get(
-            f"/api/v1/entities/{entity_id}",
+            f"/api/entities/{entity_id}",
             headers=headers
         )
         assert verify_response.status_code == 404
@@ -601,7 +601,7 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
     async def test_complete_optimization_journey(self, async_client, client):
         """Test complete user journey from dev login to optimization results."""
         # 1. Check environment and auth configuration first
-        auth_config_response = await async_client.get("/api/auth/config")
+        auth_config_response = await async_client.get("/auth/config")
         assert auth_config_response.status_code == 200
         auth_config = auth_config_response.json()
         
@@ -611,7 +611,7 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
             dev_login_data = {
                 "email": f"journey_{uuid.uuid4().hex[:8]}@test.com"
             }
-            dev_login_response = await async_client.post("/api/auth/dev_login", json=dev_login_data)
+            dev_login_response = await async_client.post("/auth/dev_login", json=dev_login_data)
             
             if dev_login_response.status_code in [200, 201]:
                 tokens = dev_login_response.json()
@@ -625,7 +625,7 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
             headers = {"Authorization": "Bearer mock_token_for_dev_test"}
         
         # 2. Test auth config endpoint (should always be available)
-        auth_config_response = await async_client.get("/api/auth/config")
+        auth_config_response = await async_client.get("/auth/config")
         assert auth_config_response.status_code in [200, 404], "Auth config endpoint should respond"
         
         # 3. Create optimization profile (if endpoint exists)
@@ -639,7 +639,7 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
         
         try:
             profile_response = await async_client.post(
-                "/api/v1/profiles",
+                "/api/profiles",
                 json=profile,
                 headers=headers
             )
@@ -653,7 +653,7 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
         # 4. Try to retrieve detailed results (endpoint may not exist)
         try:
             results_response = await async_client.get(
-                "/api/v1/optimizations/latest",
+                "/api/optimizations/latest",
                 headers=headers
             )
             # Accept success, not found, or unauthorized for dev environment

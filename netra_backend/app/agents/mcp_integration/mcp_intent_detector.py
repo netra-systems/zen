@@ -9,7 +9,7 @@ import time
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     AgentExecutionMixin,
     ExecutionContext,
@@ -163,7 +163,7 @@ class MCPIntentDetector(AgentExecutionMixin):
         self.server_matcher = MCPServerMatcher()
         self.parameter_extractor = MCPParameterExtractor()
         self.execution_monitor = ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     def detect_intent(self, request: str) -> MCPIntent:
         """Detect MCP intent from user request."""

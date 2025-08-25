@@ -303,7 +303,7 @@ python scripts/query_string_literals.py list --category configuration
 
 **Indexed Categories:**
 - `configuration`: Config keys, settings (e.g., "redis_url", "max_retries")
-- `paths`: API endpoints, file paths (e.g., "/api/v1/threads", "/websocket")
+- `paths`: API endpoints, file paths (e.g., "/api/threads", "/websocket")
 - `identifiers`: Service names, agent types (e.g., "supervisor_agent")
 - `database`: Table/column names (e.g., "threads", "created_at")
 - `events`: Event names, message types (e.g., "thread_created")

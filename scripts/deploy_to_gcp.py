@@ -104,6 +104,18 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "JWT_ALGORITHM": "HS256",
+                    "JWT_ACCESS_EXPIRY_MINUTES": "15",
+                    "JWT_REFRESH_EXPIRY_DAYS": "7",
+                    "JWT_SERVICE_EXPIRY_MINUTES": "60",
+                    "SESSION_TTL_HOURS": "24",
+                    "REDIS_DISABLED": "false",
+                    "SHUTDOWN_TIMEOUT_SECONDS": "10",
+                    "SECURE_HEADERS_ENABLED": "true",
+                    "LOG_ASYNC_CHECKOUT": "false",
+                    "AUTH_FAST_TEST_MODE": "false",
+                    "USE_MEMORY_DB": "false",
                 }
             ),
             ServiceConfig(
@@ -185,6 +197,13 @@ class GCPDeployer:
     def validate_deployment_configuration(self) -> bool:
         """Validate deployment configuration and environment variables."""
         print("\n🔍 Validating deployment configuration...")
+        
+        # CRITICAL: OAuth validation BEFORE deployment
+        print("🔐 Validating OAuth configuration before deployment...")
+        oauth_validation_success = self._validate_oauth_configuration()
+        if not oauth_validation_success:
+            print("🚨🚨🚨 DEPLOYMENT ABORTED - OAuth validation failed! 🚨🚨🚨")
+            return False
         
         # Required environment variables for staging deployment
         required_env_vars = [
@@ -584,16 +603,17 @@ CMD ["npm", "start"]
         
         # Add service-specific configurations
         if service.name == "backend":
-            # Backend needs connections to databases and all required secrets
+            # Backend needs connections to databases and all required secrets from GSM
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
             ])
         elif service.name == "auth":
-            # Auth service needs database, JWT secrets, OAuth credentials, and enhanced security
+            # Auth service needs database, JWT secrets, OAuth credentials from GSM only
+            # CRITICAL FIX: Use correct OAuth environment variable names expected by auth service
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest"
             ])
         
         try:
@@ -758,6 +778,7 @@ CMD ["npm", "start"]
             "jwt-secret-staging": jwt_secret_value,  # Auth service uses JWT_SECRET - MUST BE SAME VALUE!
             "google-client-id-staging": os.getenv("GOOGLE_CLIENT_ID", "REPLACE_WITH_REAL_GOOGLE_CLIENT_ID"),
             "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"),
+            "oauth-hmac-secret-staging": "oauth_hmac_secret_for_staging_at_least_32_chars_secure",
             # Enhanced JWT security for auth service
             "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
             "service-id-staging": f"netra-auth-staging-{int(time.time())}",
@@ -841,13 +862,14 @@ CMD ["npm", "start"]
         return all_healthy
     
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
-                   run_checks: bool = False) -> bool:
+                   run_checks: bool = False, service_filter: Optional[str] = None) -> bool:
         """Deploy all services to GCP.
         
         Args:
             skip_build: Skip building images (use existing)
             use_local_build: Build images locally (faster) instead of Cloud Build
             run_checks: Run pre-deployment checks
+            service_filter: Deploy only specific service (e.g., 'frontend', 'backend', 'auth')
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
@@ -872,10 +894,19 @@ CMD ["npm", "start"]
         if not self.setup_secrets():
             print("⚠️ Failed to setup secrets, continuing anyway...")
             
+        # Filter services if specified
+        services_to_deploy = self.services
+        if service_filter:
+            services_to_deploy = [s for s in self.services if s.name == service_filter]
+            if not services_to_deploy:
+                print(f"❌ Service '{service_filter}' not found. Available: {[s.name for s in self.services]}")
+                return False
+            print(f"   Service Filter: {service_filter}")
+        
         # Deploy services in order: backend, auth, frontend
         service_urls = {}
         
-        for service in self.services:
+        for service in services_to_deploy:
             # Build image
             if not skip_build:
                 if not self.build_image(service, use_local=use_local_build):
@@ -943,6 +974,57 @@ CMD ["npm", "start"]
                 print(f"  ⚠️ Could not delete {service.cloud_run_name}")
                 
         return True
+    
+    def _validate_oauth_configuration(self) -> bool:
+        """Validate OAuth configuration before deployment to prevent broken authentication."""
+        try:
+            from scripts.validate_oauth_deployment import OAuthDeploymentValidator
+            
+            # Determine environment for validation
+            if self.project_id == "netra-production":
+                environment = "production"
+            elif self.project_id == "netra-staging":
+                environment = "staging" 
+            else:
+                environment = "development"
+            
+            print(f"Validating OAuth configuration for {environment} environment...")
+            
+            # Run OAuth validation
+            validator = OAuthDeploymentValidator(environment)
+            success, report = validator.validate_all()
+            
+            # Print validation report
+            print("\n" + "="*60)
+            print("OAUTH VALIDATION REPORT")
+            print("="*60)
+            print(report)
+            print("="*60)
+            
+            if not success:
+                print("\n🚨🚨🚨 CRITICAL OAUTH VALIDATION FAILURE 🚨🚨🚨")
+                print("Deployment cannot proceed - OAuth authentication will be broken!")
+                print("Please fix OAuth configuration issues before deploying.")
+                return False
+            
+            print("\n✅ OAuth validation passed - deployment may proceed")
+            return True
+            
+        except ImportError as e:
+            print(f"⚠️  Could not import OAuth validator: {e}")
+            print("Proceeding with deployment (validation skipped)")
+            return True
+        except Exception as e:
+            print(f"🚨 OAuth validation error: {e}")
+            print("This may indicate a critical OAuth configuration problem.")
+            
+            # In staging/production, fail on validation errors
+            if self.project_id in ["netra-staging", "netra-production"]:
+                print("🚨 Failing deployment due to OAuth validation error in staging/production")
+                return False
+            else:
+                print("⚠️  Proceeding with deployment (development environment)")
+                return True
 
 
 def main():
@@ -998,6 +1080,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Clean up deployments")
     parser.add_argument("--service-account", 
                        help="Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)")
+    parser.add_argument("--service", 
+                       help="Deploy only specific service (frontend, backend, auth)")
     
     args = parser.parse_args()
     
@@ -1016,7 +1100,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
             success = deployer.deploy_all(
                 skip_build=args.skip_build,
                 use_local_build=args.build_local,
-                run_checks=args.run_checks
+                run_checks=args.run_checks,
+                service_filter=args.service
             )
             
         sys.exit(0 if success else 1)

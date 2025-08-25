@@ -566,7 +566,7 @@ class TestApiVersioningDeprecationManagement:
         # Test deprecated endpoint handling
         with pytest.raises((AttributeError, NotImplementedError)):
             deprecated_response = await mock_version_manager.handle_deprecated_endpoint(
-                endpoint="/api/v1/messages",  # Deprecated endpoint
+                endpoint="/api/messages",  # Deprecated endpoint
                 client_version="v1.2",
                 request_data={"thread_id": "test_thread"}
             )
@@ -585,7 +585,7 @@ class TestApiVersioningDeprecationManagement:
         with pytest.raises((AttributeError, NotImplementedError)):
             usage_tracking = await mock_version_manager.track_version_usage(
                 version="v1.2",
-                endpoint="/api/v1/threads",
+                endpoint="/api/threads",
                 user_id="version_test_user",
                 request_count=1
             )
@@ -610,7 +610,7 @@ class TestApiVersioningDeprecationManagement:
             migration_guide = await mock_version_manager.get_migration_guidance(
                 from_version="v1.2",
                 to_version="v2.0",
-                affected_endpoints=["/api/v1/threads", "/api/v1/messages"]
+                affected_endpoints=["/api/threads", "/api/messages"]
             )
             
             assert "migration_steps" in migration_guide

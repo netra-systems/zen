@@ -206,7 +206,7 @@ class UserOnboardingTester:
             }
             
             async with self.session.put(
-                f"{BACKEND_URL}/api/v1/user/profile",
+                f"{BACKEND_URL}/api/user/profile",
                 json=profile_data,
                 headers=headers
             ) as response:
@@ -248,7 +248,7 @@ class UserOnboardingTester:
             }
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/workspaces",
+                f"{BACKEND_URL}/api/workspaces",
                 json=workspace_data,
                 headers=headers
             ) as response:
@@ -293,7 +293,7 @@ class UserOnboardingTester:
             }
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/agents",
+                f"{BACKEND_URL}/api/agents",
                 json=agent_data,
                 headers=headers
             ) as response:
@@ -325,7 +325,7 @@ class UserOnboardingTester:
             
             # Check current usage
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/user/usage",
+                f"{BACKEND_URL}/api/user/usage",
                 headers=headers
             ) as response:
                 if response.status == 200:
@@ -347,7 +347,7 @@ class UserOnboardingTester:
                         }
                         
                         async with self.session.post(
-                            f"{BACKEND_URL}/api/v1/agents",
+                            f"{BACKEND_URL}/api/agents",
                             json=agent_data,
                             headers=headers
                         ) as limit_response:
@@ -378,7 +378,7 @@ class UserOnboardingTester:
             
             # Simulate reaching limits
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/user/simulate-limit",
+                f"{BACKEND_URL}/api/user/simulate-limit",
                 json={"limit_type": "api_calls"},
                 headers=headers
             ) as response:
@@ -416,7 +416,7 @@ class UserOnboardingTester:
             
             # Get recent activity
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/user/activity",
+                f"{BACKEND_URL}/api/user/activity",
                 headers=headers
             ) as response:
                 if response.status == 200:

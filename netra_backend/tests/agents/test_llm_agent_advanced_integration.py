@@ -59,7 +59,7 @@ async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
     db_session, llm_manager, ws_manager, mock_persistence = _setup_concurrent_infrastructure()
     
     # Mock: Agent supervisor isolation for testing without spawning real agents
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisors = create_multiple_supervisors(db_session, llm_manager, ws_manager, mock_persistence, 5)
         results = await _run_concurrent_requests(supervisors)
         verify_concurrent_results(results, 5)
@@ -149,6 +149,6 @@ async def test_end_to_end_optimization_flow():
     mock_persistence = _setup_end_to_end_persistence()
     
     # Mock: Agent supervisor isolation for testing without spawning real agents
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
         state = await _run_end_to_end_flow(supervisor)

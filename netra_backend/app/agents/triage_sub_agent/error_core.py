@@ -3,7 +3,8 @@
 import asyncio
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
+from netra_backend.app.schemas.shared_types import ErrorContext
+from netra_backend.app.core.unified_error_handler import global_agent_error_handler as global_error_handler
 from netra_backend.app.agents.triage_sub_agent.error_reporting import (
     TriageErrorReporter,
 )

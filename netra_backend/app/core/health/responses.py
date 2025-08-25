@@ -101,7 +101,7 @@ class HealthResponseBuilder:
         """Create comprehensive health response."""
         response = self.create_standard_response(status, uptime_seconds)
         response.update({
-            "checks": {name: check.dict() for name, check in detailed_checks.items()},
+            "checks": {name: check.model_dump() for name, check in detailed_checks.items()},
             "metrics": metrics,
             "sla_status": self._calculate_sla_status(detailed_checks)
         })

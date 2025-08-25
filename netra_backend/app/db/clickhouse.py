@@ -307,6 +307,18 @@ class ClickHouseService:
             await self._client.disconnect()
             self._client = None
     
+    async def ping(self) -> bool:
+        """Test ClickHouse connection availability."""
+        if not self._client:
+            await self.initialize()
+        if isinstance(self._client, MockClickHouseDatabase):
+            return True
+        try:
+            await self._client.test_connection()
+            return True
+        except Exception:
+            return False
+    
     @property
     def is_mock(self) -> bool:
         """Check if using mock client."""

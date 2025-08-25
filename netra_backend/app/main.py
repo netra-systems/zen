@@ -59,6 +59,13 @@ def _setup_environment_files() -> None:
     """Load environment files ONLY if not already loaded by dev launcher."""
     env_manager = get_env()
     
+    # CRITICAL: Never load .env files in staging or production
+    # All configuration comes from Cloud Run environment variables and Google Secret Manager
+    environment = env_manager.get('ENVIRONMENT', '').lower()
+    if environment in ['staging', 'production', 'prod']:
+        print(f"Running in {environment} - skipping all .env file loading (using GSM)")
+        return
+    
     # Check if dev launcher already loaded environment variables
     # by looking for specific environment variables that dev launcher sets
     dev_launcher_indicators = [

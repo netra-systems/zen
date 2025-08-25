@@ -623,7 +623,7 @@ async def test_complete_user_flow(async_client: AsyncClient):
     """Test complete user flow from registration to agent execution"""
     
     # 1. Register user
-    register_response = await async_client.post("/api/auth/register", json={
+    register_response = await async_client.post("/auth/register", json={
         "email": "newuser@example.com",
         "password": "SecurePass123!",
         "name": "New User"
@@ -631,7 +631,7 @@ async def test_complete_user_flow(async_client: AsyncClient):
     assert register_response.status_code == 201
     
     # 2. Login
-    login_response = await async_client.post("/api/auth/login", json={
+    login_response = await async_client.post("/auth/login", json={
         "email": "newuser@example.com",
         "password": "SecurePass123!"
     })
@@ -779,7 +779,7 @@ describe('Chat Flow', () => {
 ```typescript
 // cypress/support/commands.ts
 Cypress.Commands.add('login', (email: string, password: string) => {
-  cy.request('POST', 'http://localhost:8000/api/auth/login', {
+  cy.request('POST', 'http://localhost:8000/auth/login', {
     email,
     password
   }).then(response => {
@@ -934,7 +934,7 @@ class NetraUser(HttpUser):
     
     def on_start(self):
         """Login and get token"""
-        response = self.client.post("/api/auth/login", json={
+        response = self.client.post("/auth/login", json={
             "email": "test@example.com",
             "password": "password"
         })

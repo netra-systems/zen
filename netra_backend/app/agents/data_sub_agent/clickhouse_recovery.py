@@ -9,7 +9,7 @@ from netra_backend.app.agents.data_sub_agent.error_types import ClickHouseQueryE
 from netra_backend.app.agents.data_sub_agent.query_fix_validator import (
     validate_and_fix_query,
 )
-from netra_backend.app.agents.error_handler import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

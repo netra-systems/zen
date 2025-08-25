@@ -1,171 +1,88 @@
 """
-Test Database Configuration
-Handles database setup, isolation, and cleanup for auth service tests.
-Each test gets isolated database state with proper cleanup.
+SSOT-Compliant Test Database Configuration
+All database operations MUST use auth_service.auth_core.database.connection.auth_db
+
+This file provides SSOT-compliant helpers for test database operations.
+NO duplicate engine creation or session management.
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: SSOT compliance and reduced maintenance burden  
+- Value Impact: Eliminates duplicate database connection logic
+- Strategic Impact: Single source of truth for all auth database operations
 """
 
-import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.models import Base
-from test_framework.environment_markers import env
 
 logger = logging.getLogger(__name__)
 
 
-class AuthTestDatabaseConfig:
-    """Test database configuration and management"""
+class SSotTestDatabaseHelper:
+    """SSOT-compliant test database helper using canonical auth_db"""
     
-    def __init__(self, db_url: str = "sqlite+aiosqlite:///:memory:"):
-        self.db_url = db_url
-        self.engine = None
-        self.session_factory = None
+    @staticmethod
+    async def ensure_initialized():
+        """Ensure auth_db is initialized for tests"""
+        if not auth_db._initialized:
+            await auth_db.initialize()
     
-    async def setup_engine(self):
-        """Setup async database engine for tests"""
-        self.engine = create_async_engine(
-            self.db_url,
-            echo=False,  # Set to True for SQL debugging
-            future=True,
-            pool_pre_ping=True
-        )
-        
-        # Create session factory
-        self.session_factory = async_sessionmaker(
-            self.engine,
-            class_=AsyncSession,
-            expire_on_commit=False
-        )
-        
-        # Create all tables
-        await self._create_tables()
-        
-        logger.info(f"Test database engine setup complete: {self.db_url}")
-    
-    async def _create_tables(self):
-        """Create all database tables"""
-        if not self.engine:
-            raise RuntimeError("Engine not setup. Call setup_engine first.")
-        
-        async with self.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        
-        logger.debug("Database tables created successfully")
-    
-    async def cleanup(self):
-        """Cleanup database connections"""
-        if self.engine:
-            await self.engine.dispose()
-            logger.debug("Database engine disposed")
-    
+    @staticmethod
     @asynccontextmanager
-    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
-        """Get isolated database session with transaction rollback"""
-        if not self.session_factory:
-            await self.setup_engine()
-        
-        async with self.session_factory() as session:
-            # Start transaction for rollback isolation
-            transaction = await session.begin()
-            try:
-                yield session
-            except Exception:
-                await transaction.rollback()
-                raise
-            else:
-                # Always rollback to maintain isolation
-                await transaction.rollback()
+    async def get_test_session() -> AsyncGenerator[AsyncSession, None]:
+        """Get test session using canonical auth_db - SSOT compliant"""
+        await SSotTestDatabaseHelper.ensure_initialized()
+        async with auth_db.get_session() as session:
+            yield session
     
-    async def reset_tables(self):
-        """Reset all tables - use with caution"""
-        if not self.engine:
-            return
+    @staticmethod
+    async def reset_tables_if_needed():
+        """Reset tables using canonical auth_db if needed for test isolation"""
+        await SSotTestDatabaseHelper.ensure_initialized()
         
-        async with self.engine.begin() as conn:
-            # Drop all tables
-            await conn.run_sync(Base.metadata.drop_all)
-            # Recreate all tables
-            await conn.run_sync(Base.metadata.create_all)
-        
-        logger.debug("Database tables reset")
-
-
-class PostgresTestConfig(AuthTestDatabaseConfig):
-    """PostgreSQL-specific test configuration"""
+        # For SQLite :memory: databases, tables are automatically isolated
+        # For persistent test databases, we would need cleanup logic here
+        engine_url = str(auth_db.engine.url)
+        if ":memory:" in engine_url:
+            logger.debug("Using :memory: database - automatic isolation")
+        else:
+            logger.warning("Using persistent database - consider cleanup logic if needed")
     
-    def __init__(self, test_db_name: str = "test_auth_service"):
-        self.test_db_name = test_db_name
-        # Use environment variables for connection
-        import os
-        host = os.getenv("POSTGRES_HOST", "localhost")
-        port = os.getenv("POSTGRES_PORT", "5432")
-        user = os.getenv("POSTGRES_USER", "postgres")
-        password = os.getenv("POSTGRES_PASSWORD", "postgres")
-        
-        db_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{test_db_name}"
-        super().__init__(db_url)
-    
-    async def create_test_database(self):
-        """Create test database"""
-        # Connect to postgres database to create test database
-        import os
-        host = os.getenv("POSTGRES_HOST", "localhost")
-        port = os.getenv("POSTGRES_PORT", "5432")
-        user = os.getenv("POSTGRES_USER", "postgres")
-        password = os.getenv("POSTGRES_PASSWORD", "postgres")
-        
-        admin_db_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/postgres"
-        admin_engine = create_async_engine(admin_db_url, isolation_level="AUTOCOMMIT")
-        
-        async with admin_engine.connect() as conn:
-            # Check if database exists
-            result = await conn.execute(
-                text("SELECT 1 FROM pg_database WHERE datname = :db_name"),
-                {"db_name": self.test_db_name}
-            )
-            
-            if not result.fetchone():
-                # Create test database
-                await conn.execute(text(f'CREATE DATABASE "{self.test_db_name}"'))
-                logger.info(f"Created test database: {self.test_db_name}")
-        
-        await admin_engine.dispose()
-    
-    async def drop_test_database(self):
-        """Drop test database"""
-        import os
-        host = os.getenv("POSTGRES_HOST", "localhost")
-        port = os.getenv("POSTGRES_PORT", "5432")
-        user = os.getenv("POSTGRES_USER", "postgres")
-        password = os.getenv("POSTGRES_PASSWORD", "postgres")
-        
-        admin_db_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/postgres"
-        admin_engine = create_async_engine(admin_db_url, isolation_level="AUTOCOMMIT")
-        
-        async with admin_engine.connect() as conn:
-            # Drop database if exists
-            await conn.execute(text(f'DROP DATABASE IF EXISTS "{self.test_db_name}"'))
-            logger.info(f"Dropped test database: {self.test_db_name}")
-        
-        await admin_engine.dispose()
+    @staticmethod
+    async def verify_connection():
+        """Verify database connection using canonical auth_db"""
+        await SSotTestDatabaseHelper.ensure_initialized()
+        return await auth_db.test_connection()
 
 
-def get_test_db_config(use_postgres: bool = False) -> AuthTestDatabaseConfig:
-    """Get test database configuration"""
-    if use_postgres:
-        return PostgresTestConfig()
-    return AuthTestDatabaseConfig()
+# SSOT-compliant helper functions
+async def get_ssot_test_session() -> AsyncGenerator[AsyncSession, None]:
+    """Get test session using SSOT auth_db - preferred method"""
+    async with SSotTestDatabaseHelper.get_test_session() as session:
+        yield session
 
 
-async def setup_test_database(config: Optional[AuthTestDatabaseConfig] = None) -> AuthTestDatabaseConfig:
-    """Setup test database with proper configuration"""
-    if config is None:
-        config = get_test_db_config()
-    
-    await config.setup_engine()
-    return config
+async def setup_ssot_test_database():
+    """Setup test database using SSOT auth_db - preferred method"""
+    await SSotTestDatabaseHelper.ensure_initialized()
+    return auth_db
+
+
+# Legacy compatibility - DEPRECATED, will be removed
+def get_test_db_config(use_postgres: bool = False):
+    """DEPRECATED: Use auth_db directly instead"""
+    logger.warning("DEPRECATED: get_test_db_config violates SSOT - use auth_db directly")
+    raise DeprecationWarning("Use auth_service.auth_core.database.connection.auth_db directly")
+
+
+async def setup_test_database(config=None):
+    """DEPRECATED: Use auth_db.initialize() directly instead"""
+    logger.warning("DEPRECATED: setup_test_database violates SSOT - use auth_db.initialize() directly")
+    raise DeprecationWarning("Use auth_service.auth_core.database.connection.auth_db.initialize() directly")

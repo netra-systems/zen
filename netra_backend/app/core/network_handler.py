@@ -29,11 +29,20 @@ from urllib.parse import urlparse
 import dns.resolver
 import aiohttp
 from aiohttp import web
-from aiohttp.web_middlewares import cors_handler
-from aiohttp_cors import CorsConfig, setup as cors_setup
 
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.error_types import NetworkError
+try:
+    from aiohttp_cors import setup as cors_setup
+    import aiohttp_cors
+    AIOHTTP_CORS_AVAILABLE = True
+except ImportError:
+    AIOHTTP_CORS_AVAILABLE = False
+
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    get_unified_circuit_breaker_manager
+)
+from netra_backend.app.agents.agent_error_types import NetworkError
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.unified_logging import get_logger
 
@@ -174,18 +183,26 @@ class NetworkHandler:
         self.websocket_connections: Set[Any] = set()
         self.websocket_pools: Dict[str, List[Any]] = {}
         
-        # Circuit breakers
-        self.dns_breaker = CircuitBreaker(
+        # Circuit breakers using unified implementation
+        manager = get_unified_circuit_breaker_manager()
+        
+        dns_config = UnifiedCircuitConfig(
+            name="dns_resolver",
             failure_threshold=5,
             recovery_timeout=60.0,
-            expected_exception=(dns.resolver.NXDOMAIN, dns.resolver.Timeout)
+            timeout_seconds=self.dns_config.timeout,
+            adaptive_threshold=True
         )
+        self.dns_breaker = manager.create_circuit_breaker("dns_resolver", dns_config)
         
-        self.ssl_breaker = CircuitBreaker(
+        ssl_config = UnifiedCircuitConfig(
+            name="ssl_handler",  
             failure_threshold=3,
             recovery_timeout=120.0,
-            expected_exception=(ssl.SSLError, ssl.CertificateError)
+            timeout_seconds=30.0,
+            adaptive_threshold=True
         )
+        self.ssl_breaker = manager.create_circuit_breaker("ssl_handler", ssl_config)
         
         # Monitoring
         self.monitor_task: Optional[asyncio.Task] = None
@@ -297,6 +314,12 @@ class NetworkHandler:
         """Setup CORS middleware for web application."""
         effective_origins = self._get_effective_cors_origins()
         
+        if not AIOHTTP_CORS_AVAILABLE:
+            self.logger.warning("aiohttp-cors not available, CORS setup skipped", extra={
+                "origins": effective_origins
+            })
+            return
+        
         cors = cors_setup(app, defaults={
             "*": aiohttp_cors.ResourceOptions(
                 allow_origins=effective_origins,
@@ -336,24 +359,23 @@ class NetworkHandler:
                 return ips
         
         try:
-            async with self.dns_breaker:
-                ips = await self._resolve_dns_with_fallback(hostname)
-                
-                # Cache the result
-                if len(self.dns_cache) >= self.dns_config.max_cache_size:
-                    # Remove oldest entry
-                    oldest = min(self.dns_cache.items(), key=lambda x: x[1][1])
-                    del self.dns_cache[oldest[0]]
-                
-                self.dns_cache[hostname] = (ips, datetime.utcnow())
-                
-                self.logger.debug("DNS resolution successful", extra={
-                    "hostname": hostname,
-                    "ips": ips,
-                    "cached": use_cache
-                })
-                
-                return ips
+            ips = await self.dns_breaker.call(self._resolve_dns_with_fallback, hostname)
+            
+            # Cache the result
+            if len(self.dns_cache) >= self.dns_config.max_cache_size:
+                # Remove oldest entry
+                oldest = min(self.dns_cache.items(), key=lambda x: x[1][1])
+                del self.dns_cache[oldest[0]]
+            
+            self.dns_cache[hostname] = (ips, datetime.utcnow())
+            
+            self.logger.debug("DNS resolution successful", extra={
+                "hostname": hostname,
+                "ips": ips,
+                "cached": use_cache
+            })
+            
+            return ips
                 
         except Exception as e:
             self.logger.warning("DNS resolution failed", extra={

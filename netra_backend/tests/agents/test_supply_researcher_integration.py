@@ -184,33 +184,41 @@ class TestSupplyResearcherIntegration:
         )
         scheduler.add_schedule(custom_schedule)
         
-        # Mock database and API calls
-        # Mock: Database access isolation for fast, reliable unit testing
-        with patch('app.db.postgres.Database') as mock_db_class:
+        # Mock database and API calls - need to patch in research_executor module
+        # Mock: Database access isolation for fast, reliable unit testing  
+        with patch('netra_backend.app.services.supply_research.research_executor.Database') as mock_db_class:
             # Mock: Component isolation for controlled unit testing
-            mock_db_class.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
-            # Mock: Component isolation for controlled unit testing
-            mock_db_class.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
+            mock_db_instance = Mock()
+            mock_db_instance.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            mock_db_instance.get_db.return_value.__exit__ = Mock(return_value=None)
+            mock_db_class.return_value = mock_db_instance
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.supply_research_service.SupplyResearchService') as MockService:
+            with patch('netra_backend.app.services.supply_research_service.SupplyResearchService') as MockService:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_service = Mock()
                 mock_service.calculate_price_changes.return_value = {"all_changes": []}
                 MockService.return_value = mock_service
                 
-                with patch.object(SupplyResearcherAgent, 'process_scheduled_research', new_callable=AsyncMock) as mock_process:
-                    mock_process.return_value = {
+                # Mock the SupplyResearcherAgent constructor to prevent real dependencies
+                with patch('netra_backend.app.agents.supply_researcher.agent.SupplyResearcherAgent') as MockAgent:
+                    # Mock: Agent construction isolation for controlled testing
+                    mock_agent = AsyncMock()
+                    mock_agent.process_scheduled_research.return_value = {
+                        "research_type": "market_overview", 
+                        "providers_processed": 3,
                         "results": [{
                             "provider": "openai",
-                            "session_id": "integration_test",
-                            "status": "completed",
-                            "questions_answered": [
-                                {"question": "Market overview?", "answer": "Multiple price changes detected"}
-                            ],
-                            "citations": [{"source": "Market Report", "url": "https://example.com"}]
+                            "result": {
+                                "research_type": "market_overview",
+                                "confidence_score": 0.85,
+                                "updates_made": {"updates_count": 2},
+                                "citations": [{"source": "Market Report", "url": "https://example.com"}],
+                                "summary": "Market analysis completed successfully"
+                            }
                         }]
                     }
+                    MockAgent.return_value = mock_agent
                     
                     # Run the schedule
                     result = await scheduler.run_schedule_now("test_integration")

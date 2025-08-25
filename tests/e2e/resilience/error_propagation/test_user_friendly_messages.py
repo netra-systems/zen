@@ -56,7 +56,7 @@ class TestUserFriendlyMessages:
         # Attempt unauthorized operation
         response = await real_http_client.request(
             "DELETE",
-            "/api/v1/admin/delete_all_data",
+            "/api/admin/delete_all_data",
             headers={"Authorization": "Bearer limited_token"}
         )
         
@@ -78,7 +78,7 @@ class TestUserFriendlyMessages:
         # Send invalid data
         response = await real_http_client.request(
             "POST",
-            "/api/v1/user/create",
+            "/api/user/create",
             json={
                 "email": "invalid-email",
                 "password": "123",  # Too short
@@ -105,7 +105,7 @@ class TestUserFriendlyMessages:
         for i in range(20):
             task = real_http_client.request(
                 "GET",
-                "/api/v1/rate_limited_endpoint",
+                "/api/rate_limited_endpoint",
                 headers={"X-User-ID": error_correlation_context.user_id}
             )
             tasks.append(task)
@@ -134,7 +134,7 @@ class TestUserFriendlyMessages:
         unavailable_client = RealHTTPClient("http://localhost:9999")
         
         try:
-            response = await unavailable_client.request("GET", "/api/v1/test")
+            response = await unavailable_client.request("GET", "/api/test")
             
             if not response.success:
                 error_message = str(response.error).lower()
@@ -158,7 +158,7 @@ class TestUserFriendlyMessages:
         # Request with very short timeout
         response = await real_http_client.request(
             "GET",
-            "/api/v1/slow_operation",
+            "/api/slow_operation",
             timeout=0.1
         )
         

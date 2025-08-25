@@ -96,7 +96,7 @@ class TestErrorResponseConsistency:
             # Define test endpoints that should have validation
             validation_test_endpoints = [
                 {
-                    "path": "/api/v1/users",
+                    "path": "/api/users",
                     "method": "POST",
                     "invalid_data": {
                         "email": "invalid-email",  # Invalid email format
@@ -106,7 +106,7 @@ class TestErrorResponseConsistency:
                     "expected_fields": ["email", "password", "username"]
                 },
                 {
-                    "path": "/api/v1/threads",
+                    "path": "/api/threads",
                     "method": "POST", 
                     "invalid_data": {
                         "title": "",  # Empty title
@@ -116,7 +116,7 @@ class TestErrorResponseConsistency:
                     "expected_fields": ["title", "context", "user_id"]
                 },
                 {
-                    "path": "/api/v1/agents/execute",
+                    "path": "/api/agents/execute",
                     "method": "POST",
                     "invalid_data": {
                         "agent_type": "invalid_type",  # Invalid agent type
@@ -126,7 +126,7 @@ class TestErrorResponseConsistency:
                     "expected_fields": ["agent_type", "input", "timeout"]
                 },
                 {
-                    "path": "/api/v1/corpus",
+                    "path": "/api/corpus",
                     "method": "POST",
                     "invalid_data": {
                         "name": "",  # Empty name
@@ -250,14 +250,14 @@ class TestErrorResponseConsistency:
             status_code_tests = [
                 {
                     "name": "Not Found (404)",
-                    "path": "/api/v1/nonexistent-endpoint",
+                    "path": "/api/nonexistent-endpoint",
                     "method": "GET",
                     "expected_status": 404,
                     "expected_error_type": "not_found"
                 },
                 {
                     "name": "Unauthorized (401)",
-                    "path": "/api/v1/users/profile",
+                    "path": "/api/users/profile",
                     "method": "GET",
                     "headers": {},  # No auth header
                     "expected_status": 401,
@@ -265,7 +265,7 @@ class TestErrorResponseConsistency:
                 },
                 {
                     "name": "Forbidden (403)",
-                    "path": "/api/v1/admin/system-config",
+                    "path": "/api/admin/system-config",
                     "method": "GET", 
                     "headers": {"Authorization": "Bearer invalid-token"},
                     "expected_status": 403,
@@ -273,14 +273,14 @@ class TestErrorResponseConsistency:
                 },
                 {
                     "name": "Method Not Allowed (405)",
-                    "path": "/api/v1/users",
+                    "path": "/api/users",
                     "method": "DELETE",  # Assuming DELETE not allowed
                     "expected_status": 405,
                     "expected_error_type": "method_not_allowed"
                 },
                 {
                     "name": "Too Many Requests (429)",
-                    "path": "/api/v1/agents/execute",
+                    "path": "/api/agents/execute",
                     "method": "POST",
                     "data": {"agent_type": "test"},
                     "rate_limit_test": True,
@@ -399,14 +399,14 @@ class TestErrorResponseConsistency:
             service_error_tests = [
                 {
                     "name": "Database Connection Error",
-                    "path": "/api/v1/users",
+                    "path": "/api/users",
                     "method": "GET",
                     "simulate_error": "database_connection",
                     "expected_error_category": "database_error"
                 },
                 {
                     "name": "External API Error", 
-                    "path": "/api/v1/agents/execute",
+                    "path": "/api/agents/execute",
                     "method": "POST",
                     "data": {
                         "agent_type": "external_api_agent",
@@ -416,14 +416,14 @@ class TestErrorResponseConsistency:
                 },
                 {
                     "name": "Redis Connection Error",
-                    "path": "/api/v1/sessions",
+                    "path": "/api/sessions",
                     "method": "POST",
                     "data": {"simulate_redis_error": True},
                     "expected_error_category": "cache_error"
                 },
                 {
                     "name": "File System Error",
-                    "path": "/api/v1/corpus/upload",
+                    "path": "/api/corpus/upload",
                     "method": "POST",
                     "files": {"file": ("test.txt", b"test content", "text/plain")},
                     "data": {"simulate_fs_error": True},
@@ -431,7 +431,7 @@ class TestErrorResponseConsistency:
                 },
                 {
                     "name": "LLM Service Error",
-                    "path": "/api/v1/agents/execute",
+                    "path": "/api/agents/execute",
                     "method": "POST",
                     "data": {
                         "agent_type": "llm_agent",
@@ -562,18 +562,18 @@ class TestErrorResponseConsistency:
             # Test endpoints with intentional errors to check correlation
             correlation_test_endpoints = [
                 {
-                    "path": "/api/v1/users/invalid-user-id",
+                    "path": "/api/users/invalid-user-id",
                     "method": "GET",
                     "description": "User not found error"
                 },
                 {
-                    "path": "/api/v1/threads",
+                    "path": "/api/threads",
                     "method": "POST",
                     "data": {"invalid": "data"},
                     "description": "Validation error"
                 },
                 {
-                    "path": "/api/v1/agents/execute",
+                    "path": "/api/agents/execute",
                     "method": "POST",
                     "data": {"agent_type": "nonexistent"},
                     "description": "Agent not found error"
@@ -726,7 +726,7 @@ class TestErrorResponseConsistency:
             ]
             
             # Test endpoint that should return validation error
-            test_endpoint = "/api/v1/users"
+            test_endpoint = "/api/users"
             invalid_data = {
                 "email": "invalid-email",
                 "password": "123",

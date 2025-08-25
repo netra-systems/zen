@@ -152,7 +152,7 @@ async function sendLarkMessage(open_id, text) {
   
   // Send message
   await axios.post(
-    'https://open.larksuite.com/open-apis/im/v1/messages',
+    'https://open.larksuite.com/open-apis/im/messages',
     {
       receive_id: open_id,
       msg_type: 'text',
@@ -275,7 +275,7 @@ jobs:
           
           # Send interactive card
           curl -X POST \
-            "https://open.larksuite.com/open-apis/im/v1/messages" \
+            "https://open.larksuite.com/open-apis/im/messages" \
             -H "Authorization: Bearer ${ACCESS_TOKEN}" \
             -H "Content-Type: application/json" \
             -d '{

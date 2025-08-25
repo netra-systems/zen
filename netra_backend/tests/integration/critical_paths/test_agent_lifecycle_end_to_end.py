@@ -31,7 +31,7 @@ import websockets
 DEV_BACKEND_URL = "http://localhost:8000"
 DEV_WEBSOCKET_URL = "ws://localhost:8000/websocket"
 AUTH_SERVICE_URL = "http://localhost:8081"
-AGENT_API_URL = f"{DEV_BACKEND_URL}/api/v1/agents"
+AGENT_API_URL = f"{DEV_BACKEND_URL}/api/agents"
 
 # Test credentials
 TEST_USER_EMAIL = "agent_test@example.com"

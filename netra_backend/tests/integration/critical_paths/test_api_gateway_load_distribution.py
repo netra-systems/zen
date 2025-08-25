@@ -98,7 +98,7 @@ class APIGatewayTester:
             async def make_request(i):
                 try:
                     async with self.session.get(
-                        f"{GATEWAY_URL}/api/v1/test",
+                        f"{GATEWAY_URL}/api/test",
                         headers={"X-Request-ID": str(i)}
                     ) as response:
                         backend = response.headers.get("X-Backend-Server", "unknown")
@@ -179,7 +179,7 @@ class APIGatewayTester:
             
             for i in range(20):
                 async with self.session.get(
-                    f"{GATEWAY_URL}/api/v1/rate-limited",
+                    f"{GATEWAY_URL}/api/rate-limited",
                     headers={"X-API-Key": "test-key"}
                 ) as response:
                     if response.status == 429:
@@ -204,9 +204,9 @@ class APIGatewayTester:
         
         try:
             routes = [
-                ("/api/v1/users", "user-service"),
-                ("/api/v1/agents", "agent-service"),
-                ("/api/v1/analytics", "analytics-service")
+                ("/api/users", "user-service"),
+                ("/api/agents", "agent-service"),
+                ("/api/analytics", "analytics-service")
             ]
             
             routing_works = True
@@ -238,7 +238,7 @@ class APIGatewayTester:
             # First request (cache miss)
             start_time = time.time()
             async with self.session.get(
-                f"{GATEWAY_URL}/api/v1/cacheable",
+                f"{GATEWAY_URL}/api/cacheable",
                 params={"key": cache_key}
             ) as response:
                 first_time = time.time() - start_time
@@ -248,7 +248,7 @@ class APIGatewayTester:
             # Second request (should be cached)
             start_time = time.time()
             async with self.session.get(
-                f"{GATEWAY_URL}/api/v1/cacheable",
+                f"{GATEWAY_URL}/api/cacheable",
                 params={"key": cache_key}
             ) as response:
                 second_time = time.time() - start_time
@@ -284,7 +284,7 @@ class APIGatewayTester:
             successes = 0
             
             for i in range(10):
-                async with self.session.get(f"{GATEWAY_URL}/api/v1/test") as response:
+                async with self.session.get(f"{GATEWAY_URL}/api/test") as response:
                     if response.status == 200:
                         successes += 1
                     else:
@@ -309,7 +309,7 @@ class APIGatewayTester:
             # Make some requests to generate metrics
             for i in range(10):
                 start_time = time.time()
-                async with self.session.get(f"{GATEWAY_URL}/api/v1/test") as response:
+                async with self.session.get(f"{GATEWAY_URL}/api/test") as response:
                     self.response_times.append(time.time() - start_time)
                     
             # Get metrics

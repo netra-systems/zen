@@ -17,7 +17,7 @@ def create_test_config(**overrides):
     config.update(overrides)
     return config
 
-class TestConfigStatus:
+class ConfigStatusHelper:
     """Helper class for testing configuration status."""
     
     def __init__(self, valid: bool = True, errors: list = None):
@@ -35,7 +35,7 @@ class TestConfigStatus:
         self.valid = False
 
 
-class TestConfigValidationResult:
+class ConfigValidationResultHelper:
     """Helper class for config validation results."""
     
     def __init__(self, valid: bool = True, message: str = "", details: dict = None):
@@ -58,7 +58,7 @@ class TestConfigValidationResult:
         self.valid = False
 
 
-class TestValidationContext:
+class ValidationContextHelper:
     """Helper class for testing validation context."""
     
     def __init__(self, config_path: str = "", is_interactive: bool = True, 

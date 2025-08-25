@@ -1,0 +1,167 @@
+{
+  "test_run": {
+    "timestamp": "2025-08-25T10:23:00.537158",
+    "base_url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
+    "total_tests": 14,
+    "passed_tests": 12,
+    "failed_tests": 2,
+    "success_rate": 0.8571428571428571
+  },
+  "test_results": [
+    {
+      "test_name": "Basic Health Check",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:18.718834",
+      "details": {
+        "status_code": 200,
+        "response": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": "2025-08-25T10:22:19.633263+00:00"
+        }
+      },
+      "error": null
+    },
+    {
+      "test_name": "Liveness Probe",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:18.796768",
+      "details": {
+        "status_code": 200,
+        "response": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": "2025-08-25T10:22:19.714134Z",
+          "environment": "staging"
+        }
+      },
+      "error": null
+    },
+    {
+      "test_name": "Readiness Probe",
+      "success": false,
+      "timestamp": "2025-08-25T10:22:48.805756",
+      "details": {
+        "status_code": 0,
+        "response": {
+          "error": ""
+        }
+      },
+      "error": "Unexpected status: 0"
+    },
+    {
+      "test_name": "Database Environment Config",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:58.969433",
+      "details": {
+        "status_code": 200,
+        "database_name": "netra_staging",
+        "valid": false
+      },
+      "error": null
+    },
+    {
+      "test_name": "API Root",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:59.075960",
+      "details": {
+        "status_code": 404
+      },
+      "error": null
+    },
+    {
+      "test_name": "API Documentation",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:59.155682",
+      "details": {
+        "status_code": 200
+      },
+      "error": null
+    },
+    {
+      "test_name": "OpenAPI Schema",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:59.610382",
+      "details": {
+        "status_code": 200,
+        "has_openapi": true
+      },
+      "error": null
+    },
+    {
+      "test_name": "Google OAuth Endpoint",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:59.775011",
+      "details": {
+        "status_code": 404
+      },
+      "error": null
+    },
+    {
+      "test_name": "Login Endpoint",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:59.852263",
+      "details": {
+        "status_code": 404
+      },
+      "error": null
+    },
+    {
+      "test_name": "WebSocket Info",
+      "success": true,
+      "timestamp": "2025-08-25T10:22:59.930985",
+      "details": {
+        "note": "Endpoint not available (expected)"
+      },
+      "error": null
+    },
+    {
+      "test_name": "CORS Preflight",
+      "success": false,
+      "timestamp": "2025-08-25T10:23:00.009272",
+      "details": {
+        "status_code": 400
+      },
+      "error": "Status: 400"
+    },
+    {
+      "test_name": "Schema Validation",
+      "success": true,
+      "timestamp": "2025-08-25T10:23:00.380789",
+      "details": {
+        "status_code": 200,
+        "response": {
+          "passed": true,
+          "missing_tables": [],
+          "missing_columns": {},
+          "type_mismatches": {},
+          "warnings": []
+        }
+      },
+      "error": null
+    },
+    {
+      "test_name": "404 Error Handling",
+      "success": true,
+      "timestamp": "2025-08-25T10:23:00.463497",
+      "details": {
+        "status_code": 404,
+        "response": {
+          "detail": "Not Found"
+        }
+      },
+      "error": null
+    },
+    {
+      "test_name": "Method Not Allowed Handling",
+      "success": true,
+      "timestamp": "2025-08-25T10:23:00.537158",
+      "details": {
+        "status_code": 405
+      },
+      "error": null
+    }
+  ]
+}

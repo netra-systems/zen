@@ -63,7 +63,7 @@ After reviewing the SPEC files and comparing with the current implementation, se
 
 ### 9. 🟡 OAuth Discovery Endpoints (MEDIUM)
 **Spec Requirement**: `NETRA_SECURITY:1:0:9` - "Backend provides discovery of OAUTH endpoints to frontend"
-**Current State**: Partial implementation in `/api/auth/config` but incomplete
+**Current State**: Partial implementation in `/auth/config` but incomplete
 **Impact**: Frontend has to hardcode OAuth URLs
 
 ### 10. 🟡 Comprehensive Documentation (MEDIUM)

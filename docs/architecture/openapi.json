@@ -15,7 +15,7 @@
     }
   },
   "paths": {
-    "/api/auth/token": {
+    "/auth/token": {
       "post": {
         "tags": [
           "auth"
@@ -54,7 +54,7 @@
         }
       }
     },
-    "/api/auth/config": {
+    "/auth/config": {
       "get": {
         "tags": [
           "auth"
@@ -76,7 +76,7 @@
         }
       }
     },
-    "/api/auth/login": {
+    "/auth/login": {
       "get": {
         "tags": [
           "auth"
@@ -95,7 +95,7 @@
         }
       }
     },
-    "/api/auth/callback": {
+    "/auth/callback": {
       "get": {
         "tags": [
           "auth"
@@ -115,7 +115,7 @@
         }
       }
     },
-    "/api/auth/logout": {
+    "/auth/logout": {
       "post": {
         "tags": [
           "auth"
@@ -135,7 +135,7 @@
         }
       }
     },
-    "/api/auth/dev_login": {
+    "/auth/dev_login": {
       "post": {
         "tags": [
           "auth"
@@ -6339,7 +6339,7 @@
         "flows": {
           "password": {
             "scopes": {},
-            "tokenUrl": "/api/auth/token"
+            "tokenUrl": "/auth/token"
           }
         }
       }

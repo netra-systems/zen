@@ -21,7 +21,7 @@ def validate_user_auth(user) -> None:
 
 async def create_token_response(security_service: SecurityService, user) -> dict:
     """Create access token response for authenticated user through auth service."""
-    from netra_backend.app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client_core import auth_client
     token_data = {"user_id": str(user.id)}
     result = await auth_client.create_token(token_data)
     if not result or "access_token" not in result:
@@ -44,7 +44,7 @@ def _handle_oauth_redirect_error(e: Exception) -> RedirectResponse:
 async def execute_oauth_redirect(request, redirect_uri: str) -> RedirectResponse:
     """Execute OAuth redirect with error handling."""
     try:
-        from netra_backend.app.clients.auth_client import (
+        from netra_backend.app.clients.auth_client_core import (
             oauth_client,  # Import here to avoid circular imports
         )
         return await oauth_client.google.authorize_redirect(request, redirect_uri)

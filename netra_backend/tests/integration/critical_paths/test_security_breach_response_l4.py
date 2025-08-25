@@ -413,7 +413,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
     
     async def _execute_brute_force_attack(self, attack_vector: AttackVector) -> Dict[str, Any]:
         """Execute brute force attack simulation."""
-        login_endpoint = f"{self.service_endpoints.auth}/api/auth/login"
+        login_endpoint = f"{self.service_endpoints.auth}/auth/login"
         payload = attack_vector.payload
         username = payload["username"]
         passwords = payload["passwords"]
@@ -478,7 +478,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
         
         if "username" in payload:
             # Login-based SQL injection
-            login_endpoint = f"{self.service_endpoints.auth}/api/auth/login"
+            login_endpoint = f"{self.service_endpoints.auth}/auth/login"
             injection_data = {
                 "username": payload["username"],
                 "password": payload["password"]
@@ -650,7 +650,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
         response = await self.test_client.get(protected_endpoint, headers=headers)
         
         # Try session validation
-        session_endpoint = f"{self.service_endpoints.backend}/api/auth/validate_session"
+        session_endpoint = f"{self.service_endpoints.backend}/auth/validate_session"
         session_data = {"session_id": payload["session_id"]}
         
         session_response = await self.test_client.post(
@@ -1019,7 +1019,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
             "/.env",
             "/admin",
             "/dashboard",
-            "/api/v1/health",
+            "/api/health",
             "/api/debug"
         ]
         
@@ -1064,7 +1064,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
             ("guest", "guest")
         ]
         
-        login_endpoint = f"{self.service_endpoints.auth}/api/auth/login"
+        login_endpoint = f"{self.service_endpoints.auth}/auth/login"
         access_gained = False
         successful_login = None
         service_calls = 0

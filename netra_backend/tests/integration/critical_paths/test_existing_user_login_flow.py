@@ -122,7 +122,7 @@ class TestExistingUserLoginFlow:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=mock_tokens):
                     
-                    response = await async_client.post("/api/auth/login", json=login_data)
+                    response = await async_client.post("/auth/login", json=login_data)
                     
                     # Should return 200 with tokens
                     assert response.status_code == 200
@@ -147,7 +147,7 @@ class TestExistingUserLoginFlow:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
-            response = await async_client.post("/api/auth/login", json=login_data)
+            response = await async_client.post("/auth/login", json=login_data)
             
             # Should return 401 Unauthorized
             assert response.status_code == 401
@@ -171,7 +171,7 @@ class TestExistingUserLoginFlow:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
-            response = await async_client.post("/api/auth/login", json=login_data)
+            response = await async_client.post("/auth/login", json=login_data)
             
             # Should return 423 Locked or 403 Forbidden
             assert response.status_code in [423, 403, 401]
@@ -205,7 +205,7 @@ class TestExistingUserLoginFlow:
                 # Mock: Database session isolation for transaction testing without real database dependency
                 with patch('app.services.session_service.SessionService.create_session', return_value=mock_session) as mock_create:
                     
-                    response = await async_client.post("/api/auth/login", json=login_data)
+                    response = await async_client.post("/auth/login", json=login_data)
                     
                     if response.status_code == 200:
                         # Session should be created
@@ -234,7 +234,7 @@ class TestExistingUserLoginFlow:
             with patch('app.services.auth_service.AuthService.refresh_tokens', return_value=new_tokens):
                 
                 response = await async_client.post(
-                    "/api/auth/refresh",
+                    "/auth/refresh",
                     json={"refresh_token": refresh_token}
                 )
                 
@@ -284,7 +284,7 @@ class TestExistingUserLoginFlow:
                 with patch('app.services.session_service.SessionService.end_session', return_value=True) as mock_end:
                     
                     headers = {"Authorization": f"Bearer {access_token}"}
-                    response = await async_client.post("/api/auth/logout", headers=headers)
+                    response = await async_client.post("/auth/logout", headers=headers)
                     
                     # Should return success
                     assert response.status_code in [200, 204]
@@ -321,7 +321,7 @@ class TestExistingUserLoginFlow:
                     # Mock: Component isolation for testing without external dependencies
                     with patch('app.services.auth_service.AuthService.generate_tokens', return_value=mock_tokens):
                         
-                        response = await async_client.post("/api/auth/login", json=login_data)
+                        response = await async_client.post("/auth/login", json=login_data)
                         
                         if response.status_code == 200:
                             sessions.append(response.json())
@@ -350,7 +350,7 @@ class TestExistingUserLoginFlow:
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.user_service.UserService.update_last_login', return_value=True) as mock_update:
                     
-                    response = await async_client.post("/api/auth/login", json=login_data)
+                    response = await async_client.post("/auth/login", json=login_data)
                     
                     if response.status_code == 200:
                         # Last login should be updated
@@ -398,7 +398,7 @@ class TestExistingUserLoginFlow:
                 # Test short expiry
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=short_tokens):
-                    response_short = await async_client.post("/api/auth/login", json=login_data_short)
+                    response_short = await async_client.post("/auth/login", json=login_data_short)
                     
                     if response_short.status_code == 200:
                         data_short = response_short.json()
@@ -407,7 +407,7 @@ class TestExistingUserLoginFlow:
                 # Test long expiry
                 # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=long_tokens):
-                    response_long = await async_client.post("/api/auth/login", json=login_data_long)
+                    response_long = await async_client.post("/auth/login", json=login_data_long)
                     
                     if response_long.status_code == 200:
                         data_long = response_long.json()

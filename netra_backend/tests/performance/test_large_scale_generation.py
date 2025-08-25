@@ -14,7 +14,7 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -77,13 +77,17 @@ class TestLargeScaleGeneration:
         resource_monitor.start_monitoring()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
+        with patch('netra_backend.app.services.content_generation_service.run_generation_in_pool') as mock_pool:
             mock_pool.return_value = self._create_mock_results(100000)
             
-            start_time = time.perf_counter()
-            job_id = str(uuid.uuid4())
-            
-            await run_content_generation_job(job_id, large_corpus_params)
+            # Mock: WebSocket manager isolation for testing without external dependencies
+            with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
+                mock_manager.broadcast_to_job = AsyncMock()
+                
+                start_time = time.perf_counter()
+                job_id = str(uuid.uuid4())
+                
+                await run_content_generation_job(job_id, large_corpus_params)
             
             end_time = time.perf_counter()
             duration = end_time - start_time
@@ -126,11 +130,15 @@ class TestLargeScaleGeneration:
         perf_params = ContentGenParams(samples_per_type=100, max_cores=4)
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.generation_service.generate_content_for_worker') as mock_gen:
+        with patch('netra_backend.app.services.generation_worker.generate_content_for_worker') as mock_gen:
             mock_gen.side_effect = self._simulate_memory_efficient_generation
             
-            job_id = str(uuid.uuid4())
-            await run_content_generation_job(job_id, perf_params)
+            # Mock: WebSocket manager isolation for testing without external dependencies
+            with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
+                mock_manager.broadcast_to_job = AsyncMock()
+                
+                job_id = str(uuid.uuid4())
+                await run_content_generation_job(job_id, perf_params)
             
         monitor_task.cancel()
         
@@ -159,15 +167,21 @@ class TestLargeScaleGeneration:
             )
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
+            with patch('netra_backend.app.services.content_generation_service.run_generation_in_pool') as mock_pool:
                 mock_pool.return_value = iter([
                     {'type': 'test', 'data': ('p', 'r')} 
                     for _ in range(scale)
                 ])
                 
-                start_time = time.perf_counter()
-                job_id = str(uuid.uuid4())
-                await run_content_generation_job(job_id, test_params)
+                # Mock: WebSocket manager isolation for testing without external dependencies
+                with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
+                    mock_manager = AsyncMock()
+                    mock_manager.broadcast_to_job = AsyncMock()
+                    mock_ws_manager.return_value = mock_manager
+                    
+                    start_time = time.perf_counter()
+                    job_id = str(uuid.uuid4())
+                    await run_content_generation_job(job_id, test_params)
                 duration = time.perf_counter() - start_time
                 
                 execution_times.append(duration)

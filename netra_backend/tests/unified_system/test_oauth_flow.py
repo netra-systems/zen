@@ -39,7 +39,7 @@ except ImportError:
     SecurityService = Mock
 
 try:
-    from netra_backend.app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client_core import auth_client
 
 except ImportError:
 
@@ -99,7 +99,7 @@ def mock_auth_client():
     """Mock auth client for OAuth testing"""
 
     # Mock: Component isolation for testing without external dependencies
-    with patch('app.clients.auth_client.auth_client') as mock:
+    with patch('app.clients.auth_client_core.auth_client') as mock:
 
         mock.get_oauth_config.return_value = {
 
@@ -181,7 +181,7 @@ class TestOAuthCompleteFlow:
         # Step 1: User initiates OAuth login
 
         # The endpoint returns a redirect (302) to the auth service
-        response = test_client.get("/api/auth/login?provider=google", follow_redirects=False)
+        response = test_client.get("/auth/login?provider=google", follow_redirects=False)
         
         # Should receive a 302 redirect to auth service
         assert response.status_code == 302
@@ -195,7 +195,7 @@ class TestOAuthCompleteFlow:
         # Step 2: Test OAuth callback redirect
         # The callback endpoint also redirects to auth service
         callback_response = test_client.get(
-            "/api/auth/callback?code=test_auth_code&state=test_state",
+            "/auth/callback?code=test_auth_code&state=test_state",
             follow_redirects=False
         )
         
@@ -442,7 +442,7 @@ class TestOAuthErrorScenarios:
 
             mock_login.side_effect = Exception("OAuth provider unavailable")
             
-            response = test_client.get("/api/auth/login?provider=google")
+            response = test_client.get("/auth/login?provider=google")
             # Should handle error gracefully
 
             assert response.status_code in [500, 502, 503]
@@ -459,7 +459,7 @@ class TestOAuthErrorScenarios:
             
             response = test_client.get(
 
-                "/api/auth/callback?code=invalid_code&state=test_state"
+                "/auth/callback?code=invalid_code&state=test_state"
 
             )
             # Should handle invalid code gracefully
@@ -472,7 +472,7 @@ class TestOAuthErrorScenarios:
         """Test CSRF protection via state parameter"""
         # Test missing state parameter
 
-        response = test_client.get("/api/auth/callback?code=test_code")
+        response = test_client.get("/auth/callback?code=test_code")
         # Should reject request without state parameter
 
         assert response.status_code in [400, 403]
@@ -488,7 +488,7 @@ class TestCrossServiceTokenValidation:
         # Mock auth service token validation
 
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
             mock_validate.return_value = {
 
@@ -532,7 +532,7 @@ class TestCrossServiceTokenValidation:
 
             response = test_client.get(
 
-                "/api/auth/me",
+                "/auth/me",
 
                 headers={"Authorization": "Bearer valid_cross_service_token"}
 
@@ -588,7 +588,7 @@ class TestDevLoginFlow:
             
             response = test_client.post(
 
-                "/api/auth/dev_login",
+                "/auth/dev_login",
 
                 json=dev_request.model_dump()
 
@@ -639,7 +639,7 @@ class TestOAuthIntegrationFlow:
             
             # Test OAuth callback handling (disable automatic redirect following)
             response = test_client.get(
-                "/api/auth/callback?code=test_code&state=test_state",
+                "/auth/callback?code=test_code&state=test_state",
                 follow_redirects=False
             )
             

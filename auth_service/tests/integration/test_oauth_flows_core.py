@@ -39,7 +39,7 @@ class TestSyntaxFix:
 
     def test_google_oauth_config(self):
         """Test Google OAuth configuration"""
-        response = client.get("/api/v1/auth/config")
+        response = client.get("/auth/config")
         assert response.status_code == 200
         
         config = response.json()
@@ -49,7 +49,7 @@ class TestSyntaxFix:
 
     def test_oauth_endpoints_configuration(self):
         """Test OAuth endpoints are properly configured"""
-        response = client.get("/api/v1/auth/config") 
+        response = client.get("/auth/config") 
         assert response.status_code == 200
         
         config = response.json()

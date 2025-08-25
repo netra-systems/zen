@@ -51,7 +51,7 @@ class GCPHealthDiagnostics:
                     {"path": "/health/database", "description": "Database connectivity"},
                     {"path": "/health/system", "description": "System health"},
                     {"path": "/docs", "description": "API documentation"},
-                    {"path": "/api/v1/status", "description": "API status endpoint"}
+                    {"path": "/api/status", "description": "API status endpoint"}
                 ]
             },
             "frontend": {

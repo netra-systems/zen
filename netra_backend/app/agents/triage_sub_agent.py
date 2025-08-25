@@ -18,7 +18,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import (
     CircuitBreakerConfig as ModernCircuitConfig,
 )
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components
@@ -104,7 +104,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         monitor = ExecutionMonitor(max_history_size=1000)
         self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
         self.execution_monitor = monitor
-        self.execution_error_handler = ExecutionErrorHandler()
+        self.execution_error_handler = ExecutionErrorHandler
         self.modern_reliability = reliability_manager
         
     def _create_modern_reliability_manager(self) -> ReliabilityManager:

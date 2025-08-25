@@ -33,6 +33,7 @@ class CircuitConfig:
     timeout_seconds: float = 10.0
     adaptive_threshold: bool = True
     slow_call_threshold: float = 5.0
+    sliding_window_size: int = 100
     
     @classmethod
     def create_for_environment(cls, name: str, environment: str = "production") -> 'CircuitConfig':

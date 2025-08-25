@@ -1,5 +1,5 @@
 import React from 'react';
-import { Command, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface KeyboardShortcutsHintProps {
@@ -7,24 +7,26 @@ interface KeyboardShortcutsHintProps {
   hasMessage: boolean;
 }
 
-const ShortcutItem: React.FC<{
+function ShortcutItem({ icon, text }: {
   icon: React.ReactNode;
   text: string;
-}> = ({ icon, text }) => (
-  <span className="flex items-center gap-1">
-    {icon}
-    <span>{text}</span>
-  </span>
-);
+}) {
+  return (
+    <span className="flex items-center gap-1">
+      {icon}
+      <span>{text}</span>
+    </span>
+  );
+}
 
-const SearchShortcut: React.FC = () => (
+const SearchShortcut = () => (
   <ShortcutItem 
-    icon={<Command className="w-3 h-3" />}
+    icon={<span className="w-3 h-3 flex items-center justify-center text-xs">⌘</span>}
     text="+ K for search"
   />
 );
 
-const HistoryShortcut: React.FC = () => (
+const HistoryShortcut = () => (
   <ShortcutItem 
     icon={
       <>
@@ -59,3 +61,6 @@ export const KeyboardShortcutsHint: React.FC<KeyboardShortcutsHintProps> = ({
     )}
   </AnimatePresence>
 );
+
+// Export internal components for testing
+export { SearchShortcut, HistoryShortcut };

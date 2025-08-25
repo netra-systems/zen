@@ -149,9 +149,9 @@ class TestAlembicOperations:
     """Test Alembic configuration and operations."""
     
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.create_alembic_config')
+    @patch('netra_backend.app.db.migration_utils.create_alembic_config')
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.get_sync_database_url')
+    @patch('netra_backend.app.db.migration_utils.get_sync_database_url')
     def test_get_alembic_config(self, mock_sync_url: Mock, mock_create_config: Mock,
                                migration_tracker: MigrationTracker) -> None:
         """Test Alembic configuration creation."""
@@ -166,7 +166,7 @@ class TestAlembicOperations:
         assert config == mock_config
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.get_current_revision')
+    @patch('netra_backend.app.db.migration_utils.get_current_revision')
     def test_get_current_safely_success(self, mock_get_current: Mock,
                                        migration_tracker: MigrationTracker) -> None:
         """Test successful current revision retrieval."""
@@ -178,7 +178,7 @@ class TestAlembicOperations:
         assert result == "abc123"
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.get_current_revision')
+    @patch('netra_backend.app.db.migration_utils.get_current_revision')
     def test_get_current_safely_error(self, mock_get_current: Mock,
                                      migration_tracker: MigrationTracker) -> None:
         """Test current revision retrieval with error."""
@@ -192,9 +192,9 @@ class TestAlembicOperations:
 class TestMigrationChecking:
     """Test migration checking functionality."""
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.get_head_revision')
+    @patch('netra_backend.app.db.migration_utils.get_head_revision')
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.needs_migration')
+    @patch('netra_backend.app.db.migration_utils.needs_migration')
     @pytest.mark.asyncio
     async def test_check_migrations_pending(self, mock_needs: Mock, mock_head: Mock,
                                            migration_tracker: MigrationTracker) -> None:
@@ -209,9 +209,9 @@ class TestMigrationChecking:
                     assert len(state.pending_migrations) == 1
                     assert state.pending_migrations[0] == "def456"
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.get_head_revision')
+    @patch('netra_backend.app.db.migration_utils.get_head_revision')
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.startup.migration_tracker.needs_migration')
+    @patch('netra_backend.app.db.migration_utils.needs_migration')
     @pytest.mark.asyncio
     async def test_check_migrations_none_pending(self, mock_needs: Mock, mock_head: Mock,
                                                  migration_tracker: MigrationTracker) -> None:

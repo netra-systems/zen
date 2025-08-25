@@ -351,7 +351,7 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
     
     async def _call_logout_endpoint(self, session_id: str) -> bool:
         """Call logout endpoint."""
-        logout_endpoint = f"{self.service_endpoints.auth}/api/auth/logout"
+        logout_endpoint = f"{self.service_endpoints.auth}/auth/logout"
         logout_data = {"session_id": session_id}
         logout_response = await self.test_client.post(logout_endpoint, json=logout_data)
         return logout_response.status_code in [200, 204]

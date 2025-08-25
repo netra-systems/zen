@@ -447,7 +447,7 @@ class ServiceStartupCoordinator:
                 url=f"http://localhost:{allocated_port}",
                 port=allocated_port,
                 health_endpoint="/health",
-                ready_endpoint="/api/auth/config"
+                ready_endpoint="/auth/config"
             )]
             
             await self.service_registry.register_service(
@@ -605,13 +605,13 @@ class ServiceStartupCoordinator:
     def _check_auth_health(self) -> bool:
         """Check auth service health with dynamic port support.
         
-        Uses /api/auth/config endpoint per SPEC step 9.
+        Uses /auth/config endpoint per SPEC step 9.
         """
         try:
             import requests
             # Use dynamically allocated auth port
             auth_port = self.allocated_ports.get('auth', 8081)
-            auth_url = f"http://localhost:{auth_port}/api/auth/config"
+            auth_url = f"http://localhost:{auth_port}/auth/config"
             response = requests.get(auth_url, timeout=3)
             return response.status_code in [200, 404]  # 404 is acceptable
         except:
@@ -687,7 +687,7 @@ class ServiceStartupCoordinator:
         """Get health check URL for service."""
         if service.lower() == "auth":
             port = self.allocated_ports.get('auth', 8081)
-            return f"http://localhost:{port}/api/auth/config"
+            return f"http://localhost:{port}/auth/config"
         elif service.lower() == "backend":
             port = self.allocated_ports.get('backend', 8000)
             return f"http://localhost:{port}/health/ready"

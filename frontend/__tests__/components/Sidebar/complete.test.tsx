@@ -214,11 +214,23 @@ describe('Sidebar Complete Test Suite', () => {
 
       renderWithProvider(<TestChatSidebar />);
       
+      // Wait for threads to be rendered
+      await waitFor(() => {
+        expect(screen.getByText('AI Optimization Discussion')).toBeInTheDocument();
+      });
+      
+      // Find the thread item by looking for the first thread
       const threadItem = screen.getByTestId('thread-item-thread-1');
+      expect(threadItem).toBeInTheDocument();
+      
+      // Click the thread to test interaction
       await user.click(threadItem);
       
-      // Thread operations would be in context menu or action buttons
-      expect(threadItem).toBeInTheDocument();
+      // Wait for any DOM updates after the click
+      await waitFor(() => {
+        const updatedThreadItem = screen.getByTestId('thread-item-thread-1');
+        expect(updatedThreadItem).toBeInTheDocument();
+      });
     });
 
     it('should support thread pinning functionality', async () => {

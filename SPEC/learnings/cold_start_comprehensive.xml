@@ -75,7 +75,7 @@
       <endpoints_created>
         <endpoint>/ws - Main WebSocket endpoint</endpoint>
         <endpoint>/ws/{user_id} - User-specific WebSocket</endpoint>
-        <endpoint>/ws/v1/{user_id} - Versioned WebSocket</endpoint>
+        <endpoint>/ws/{user_id} - Versioned WebSocket</endpoint>
         <endpoint>/ws/config - WebSocket configuration</endpoint>
         <endpoint>/ws/info - WebSocket information</endpoint>
       </endpoints_created>
@@ -233,7 +233,7 @@
       <patterns>
         <pattern>/ws - Simple pattern</pattern>
         <pattern>/ws/{user_id} - User-specific</pattern>
-        <pattern>/ws/v1/{user_id} - Versioned</pattern>
+        <pattern>/ws/{user_id} - Versioned</pattern>
       </patterns>
     </improvement>
   </critical_improvements>

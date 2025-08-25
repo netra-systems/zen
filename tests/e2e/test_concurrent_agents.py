@@ -28,7 +28,7 @@ from tests.e2e.agent_orchestration_fixtures import (
 )
 from tests.e2e.config import (
     TEST_USERS,
-    TestTier,
+    CustomerTier,
     create_unified_config,
 )
 
@@ -69,7 +69,7 @@ class TestConcurrentAgentStartup:
             "user_id": f"user_{index}_{str(uuid.uuid4())[:8]}",
             "message": f"Optimize AI costs session {index}",
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "tier": TestTier.ENTERPRISE.value
+            "tier": CustomerTier.ENTERPRISE.value
         }
 
     async def _simulate_user_session(self, session: Dict[str, Any], supervisor) -> Dict[str, Any]:

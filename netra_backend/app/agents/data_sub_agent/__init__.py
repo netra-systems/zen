@@ -18,7 +18,7 @@ from netra_backend.app.agents.data_sub_agent.performance_analyzer import (
     PerformanceAnalyzer,
 )
 from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
-from netra_backend.app.database import get_clickhouse_client
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 # Import ClickHouse initialization function and client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing

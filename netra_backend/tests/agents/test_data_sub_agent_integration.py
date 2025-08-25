@@ -157,7 +157,7 @@ class TestStateManagement:
         
         # Mock Redis for state persistence
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
+        with patch('netra_backend.app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
             MockRedis.return_value = mock_redis
@@ -206,7 +206,7 @@ class TestStateManagement:
         
         # Mock Redis for state persistence
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
+        with patch('netra_backend.app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
             MockRedis.return_value = mock_redis

@@ -387,7 +387,7 @@ class TestFrontendInitialization:
             error_handled = await page.evaluate("""
                 async () => {
                     try {
-                        const response = await fetch('http://localhost:8000/api/v1/nonexistent', {
+                        const response = await fetch('http://localhost:8000/api/nonexistent', {
                             method: 'GET'
                         });
                         if (!response.ok) {

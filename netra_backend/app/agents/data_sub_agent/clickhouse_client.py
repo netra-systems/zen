@@ -10,15 +10,9 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.core.config import get_config
+from netra_backend.app.core.configuration import get_unified_config
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
-
-# ClickHouse client imports (assuming standard client available)
-try:
-    from clickhouse_connect import get_client
-except ImportError:
-    # Fallback for development/testing
-    get_client = None
 
 
 class ClickHouseClient:
@@ -26,32 +20,17 @@ class ClickHouseClient:
     
     def __init__(self):
         self.logger = central_logger.get_logger("ClickHouseClient")
-        self.client = None
-        self._connection_pool = None
         self._health_status = {"healthy": False, "last_check": None}
         
     async def connect(self) -> bool:
-        """Establish ClickHouse connection."""
+        """Establish ClickHouse connection using shared client."""
         try:
-            if get_client is None:
-                self.logger.warning("ClickHouse client not available, using mock mode")
-                self._health_status = {"healthy": True, "last_check": datetime.now(timezone.utc)}
-                return True
-                
-            config = get_config()
-            self.client = get_client(
-                host=getattr(config, 'clickhouse_host', 'localhost'),
-                port=getattr(config, 'clickhouse_port', 8123),
-                username=getattr(config, 'clickhouse_user', 'default'),
-                password=getattr(config, 'clickhouse_password', ''),
-                database=getattr(config, 'clickhouse_database', 'default')
-            )
+            # Test connection using shared client
+            async with get_clickhouse_client() as client:
+                await client.test_connection()
             
-            # Test connection
-            await self._test_connection()
             self._health_status = {"healthy": True, "last_check": datetime.now(timezone.utc)}
-            
-            self.logger.info("ClickHouse connection established")
+            self.logger.info("ClickHouse connection validated")
             return True
             
         except Exception as e:
@@ -60,19 +39,13 @@ class ClickHouseClient:
             return False
     
     async def execute_query(self, query: str, parameters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute ClickHouse query with proper error handling."""
+        """Execute ClickHouse query using shared client."""
         if not self.is_healthy():
             await self.connect()
         
         try:
-            if self.client is None:
-                return self._mock_query_result(query)
-            
-            # Execute query with parameters
-            result = self.client.query(query, parameters=parameters or {})
-            
-            # Convert to list of dictionaries
-            return [dict(row) for row in result.result_rows] if result.result_rows else []
+            async with get_clickhouse_client() as client:
+                return await client.execute(query, parameters or {})
             
         except Exception as e:
             self.logger.error(f"Query execution failed: {e}")
@@ -128,25 +101,23 @@ class ClickHouseClient:
                    arrayElement(metrics.value, arrayFirstIndex(x -> x = 'cost_cents', metrics.name)),
                    0.0)) as total_cost_cents
         FROM workload_events 
-        WHERE timestamp >= now() - INTERVAL {timeframe:String}
+        WHERE timestamp >= now() - INTERVAL {timeframe}
         {user_filter}
         GROUP BY user_id, workload_type
         ORDER BY total_cost_cents DESC
         """
         
-        user_filter = "AND user_id = {user_id:String}" if user_id else ""
-        final_query = query.format(user_filter=user_filter)
+        user_filter = f"AND user_id = '{user_id}'" if user_id else ""
+        final_query = query.format(user_filter=user_filter, timeframe=timeframe)
         
-        parameters = {"timeframe": timeframe}
-        if user_id:
-            parameters["user_id"] = user_id
+        parameters = {}
             
         return await self.execute_query(final_query, parameters)
     
     async def _test_connection(self) -> None:
-        """Test ClickHouse connection health."""
-        if self.client:
-            self.client.query("SELECT 1")
+        """Test ClickHouse connection health using shared client."""
+        async with get_clickhouse_client() as client:
+            await client.execute("SELECT 1")
     
     def _mock_query_result(self, query: str) -> List[Dict[str, Any]]:
         """Generate mock data for development/testing."""
@@ -181,17 +152,10 @@ class ClickHouseClient:
         return {
             "healthy": self.is_healthy(),
             "last_check": self._health_status["last_check"].isoformat() if self._health_status["last_check"] else None,
-            "client_available": self.client is not None or get_client is None
+            "using_shared_client": True
         }
     
     async def close(self) -> None:
-        """Close ClickHouse connection."""
-        if self.client:
-            try:
-                self.client.close()
-            except Exception as e:
-                self.logger.warning(f"Error closing ClickHouse client: {e}")
-            finally:
-                self.client = None
-        
-        self.logger.info("ClickHouse client closed")
+        """Close ClickHouse connection - no-op since using shared client."""
+        # No need to close anything since we use shared client contextmanager
+        self.logger.info("ClickHouse client connection references cleared")

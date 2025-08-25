@@ -114,7 +114,7 @@ class TestErrorContext:
     
     @pytest.fixture
     def error_context(self):
-        from netra_backend.app.core.error_context import ErrorContext
+        from netra_backend.app.schemas.shared_types import ErrorContext
         return ErrorContext()
     
     def test_trace_id_management(self, error_context):

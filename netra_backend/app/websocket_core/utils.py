@@ -61,7 +61,7 @@ def get_current_iso_timestamp() -> str:
 
 def is_websocket_connected(websocket: WebSocket) -> bool:
     """Check if WebSocket is connected."""
-    return websocket.application_state == WebSocketState.CONNECTED
+    return hasattr(websocket, 'application_state') and websocket.application_state == WebSocketState.CONNECTED
 
 
 async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], str],
@@ -257,6 +257,13 @@ class WebSocketConnectionMonitor:
             "errors_occurred": 0,
             "start_time": time.time()
         }
+        # Initialize monitoring coverage tracking
+        self.monitoring_coverage = {
+            "total_checks": 0,
+            "successful_checks": 0,
+            "failed_checks": 0,
+            "check_results": []
+        }
     
     def register_connection(self, connection_id: str, user_id: str,
                           websocket: WebSocket) -> None:
@@ -360,6 +367,138 @@ class WebSocketConnectionMonitor:
             "stale_connections": stale_count,
             "total_monitored": len(self.connections)
         }
+    
+    async def _check_performance_thresholds(self) -> None:
+        """Run all performance threshold checks."""
+        check_methods = [
+            self._check_response_time_threshold,
+            self._check_memory_threshold,
+            self._check_error_rate_threshold,
+            self._check_throughput_threshold,
+            self._check_cpu_threshold
+        ]
+        
+        check_names = [
+            "response_time",
+            "memory",
+            "error_rate", 
+            "throughput",
+            "cpu"
+        ]
+        
+        # Run checks concurrently and collect results
+        tasks = []
+        for check_method in check_methods:
+            tasks.append(asyncio.create_task(self._run_check_safely(check_method)))
+        
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Handle results
+        await self._handle_check_results(check_names, results)
+    
+    async def _run_check_safely(self, check_method) -> Any:
+        """Run a check method safely, catching exceptions."""
+        try:
+            if asyncio.iscoroutinefunction(check_method):
+                return await check_method()
+            else:
+                return check_method()
+        except Exception as e:
+            return e
+    
+    async def _handle_check_results(self, check_names, results):
+        """Handle the results of performance checks."""
+        for check_name, result in zip(check_names, results):
+            self.monitoring_coverage["total_checks"] += 1
+            
+            if isinstance(result, Exception):
+                self.monitoring_coverage["failed_checks"] += 1
+                await self._handle_check_failure(check_name, result)
+            else:
+                self.monitoring_coverage["successful_checks"] += 1
+                self._record_check_success(check_name)
+    
+    def _record_check_success(self, check_name: str) -> None:
+        """Record a successful check."""
+        self.monitoring_coverage["check_results"].append({
+            "timestamp": get_current_iso_timestamp(),
+            "check_name": check_name,
+            "success": True,
+            "error": None
+        })
+    
+    async def _handle_check_failure(self, check_name: str, error: Exception) -> None:
+        """Handle a failed check."""
+        self.monitoring_coverage["check_results"].append({
+            "timestamp": get_current_iso_timestamp(),
+            "check_name": check_name,
+            "success": False,
+            "error": str(error)
+        })
+    
+    def _get_monitoring_coverage_summary(self) -> Dict[str, Any]:
+        """Get monitoring coverage summary."""
+        total = self.monitoring_coverage["total_checks"]
+        successful = self.monitoring_coverage["successful_checks"]
+        
+        coverage_percentage = (successful / total * 100) if total > 0 else 0.0
+        
+        return {
+            "coverage_percentage": coverage_percentage,
+            "recent_failures": self._count_recent_failures()
+        }
+    
+    def _count_recent_failures(self) -> int:
+        """Count recent failures within 5 minutes."""
+        from datetime import datetime, timezone, timedelta
+        
+        cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=5)
+        recent_failures = 0
+        
+        for result in self.monitoring_coverage["check_results"]:
+            if not result["success"]:
+                result_time = datetime.fromisoformat(result["timestamp"].replace("Z", "+00:00"))
+                if result_time > cutoff_time:
+                    recent_failures += 1
+                    
+        return recent_failures
+    
+    def get_current_performance_summary(self) -> Dict[str, Any]:
+        """Get current performance summary including monitoring coverage."""
+        return {
+            **self.get_global_stats(),
+            "monitoring_coverage": self._get_monitoring_coverage_summary()
+        }
+    
+    def reset_metrics(self) -> None:
+        """Reset all monitoring metrics."""
+        self.monitoring_coverage = {
+            "total_checks": 0,
+            "successful_checks": 0,
+            "failed_checks": 0,
+            "check_results": []
+        }
+    
+    # Stub implementations of performance check methods
+    async def _check_response_time_threshold(self) -> None:
+        """Check response time threshold."""
+        pass
+    
+    async def _check_memory_threshold(self) -> None:
+        """Check memory threshold.""" 
+        pass
+    
+    async def _check_error_rate_threshold(self) -> None:
+        """Check error rate threshold."""
+        pass
+    
+    async def _check_throughput_threshold(self) -> None:
+        """Check throughput threshold."""
+        pass
+    
+    async def _check_cpu_threshold(self) -> None:
+        """Check CPU threshold."""
+        pass
 
 
 # Utility functions for message processing

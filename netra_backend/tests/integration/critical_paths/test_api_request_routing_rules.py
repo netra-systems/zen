@@ -99,8 +99,8 @@ class ApiRoutingManager:
         """Configure complex routing rules for testing."""
         self.routing_rules = {
             # Exact path matching
-            "/api/v1/users": RouteRule(
-                path_pattern="/api/v1/users",
+            "/api/users": RouteRule(
+                path_pattern="/api/users",
                 service_name="user_service",
                 load_balancing_strategy="round_robin",
                 health_check_path="/health",
@@ -109,8 +109,8 @@ class ApiRoutingManager:
                 priority=10
             ),
             # Wildcard path matching
-            "/api/v1/users/*": RouteRule(
-                path_pattern="/api/v1/users/*",
+            "/api/users/*": RouteRule(
+                path_pattern="/api/users/*",
                 service_name="user_service",
                 load_balancing_strategy="least_connections",
                 health_check_path="/health",
@@ -119,8 +119,8 @@ class ApiRoutingManager:
                 priority=9
             ),
             # Regex pattern matching
-            "/api/v1/threads/[0-9a-f-]+": RouteRule(
-                path_pattern=r"/api/v1/threads/[0-9a-f-]+",
+            "/api/threads/[0-9a-f-]+": RouteRule(
+                path_pattern=r"/api/threads/[0-9a-f-]+",
                 service_name="thread_service",
                 load_balancing_strategy="weighted",
                 health_check_path="/health",
@@ -139,8 +139,8 @@ class ApiRoutingManager:
                 priority=7
             ),
             # Legacy version routing
-            "/api/v1/agents": RouteRule(
-                path_pattern="/api/v1/agents",
+            "/api/agents": RouteRule(
+                path_pattern="/api/agents",
                 service_name="agent_service_v1",
                 load_balancing_strategy="round_robin",
                 health_check_path="/health",
@@ -376,16 +376,16 @@ class ApiRoutingManager:
         for pattern, rule in self.routing_rules.items():
             if rule.service_name == service_name:
                 # Convert pattern to test path
-                if pattern == "/api/v1/users":
-                    test_path = "/api/v1/users"
-                elif pattern == "/api/v1/users/*":
-                    test_path = "/api/v1/users/123"
-                elif pattern == "/api/v1/threads/[0-9a-f-]+":
-                    test_path = "/api/v1/threads/550e8400-e29b-41d4-a716-446655440000"
+                if pattern == "/api/users":
+                    test_path = "/api/users"
+                elif pattern == "/api/users/*":
+                    test_path = "/api/users/123"
+                elif pattern == "/api/threads/[0-9a-f-]+":
+                    test_path = "/api/threads/550e8400-e29b-41d4-a716-446655440000"
                 elif pattern == "/api/v2/agents":
                     test_path = "/api/v2/agents"
-                elif pattern == "/api/v1/agents":
-                    test_path = "/api/v1/agents"
+                elif pattern == "/api/agents":
+                    test_path = "/api/agents"
                 elif pattern == "/api/admin/*":
                     test_path = "/api/admin/users"
                 break
@@ -573,9 +573,9 @@ async def api_routing_manager():
 async def test_exact_path_routing(api_routing_manager):
     """Test exact path routing to correct services."""
     test_cases = [
-        ("/api/v1/users", "user_service"),
+        ("/api/users", "user_service"),
         ("/api/v2/agents", "agent_service_v2"),
-        ("/api/v1/agents", "agent_service_v1"),
+        ("/api/agents", "agent_service_v1"),
     ]
     
     for path, expected_service in test_cases:
@@ -593,9 +593,9 @@ async def test_exact_path_routing(api_routing_manager):
 async def test_wildcard_path_routing(api_routing_manager):
     """Test wildcard and regex pattern routing."""
     test_cases = [
-        ("/api/v1/users/123", "user_service"),
-        ("/api/v1/users/abc/profile", "user_service"),
-        ("/api/v1/threads/550e8400-e29b-41d4-a716-446655440000", "thread_service"),
+        ("/api/users/123", "user_service"),
+        ("/api/users/abc/profile", "user_service"),
+        ("/api/threads/550e8400-e29b-41d4-a716-446655440000", "thread_service"),
         ("/api/admin/users", "admin_service"),
         ("/api/admin/settings/config", "admin_service"),
     ]
@@ -606,8 +606,8 @@ async def test_wildcard_path_routing(api_routing_manager):
         assert result["status_code"] == 200
         assert result["service_name"] == expected_service
         assert result["route_pattern"] in [
-            "/api/v1/users/*", 
-            r"/api/v1/threads/[0-9a-f-]+", 
+            "/api/users/*", 
+            r"/api/threads/[0-9a-f-]+", 
             "/api/admin/*"
         ]
 
@@ -618,7 +618,7 @@ async def test_wildcard_path_routing(api_routing_manager):
 async def test_version_based_routing(api_routing_manager):
     """Test API version-based routing."""
     # Test v1 agent endpoint
-    v1_result = await api_routing_manager.make_routed_request("/api/v1/agents")
+    v1_result = await api_routing_manager.make_routed_request("/api/agents")
     assert v1_result["status_code"] == 200
     assert v1_result["service_name"] == "agent_service_v1"
     
@@ -674,11 +674,11 @@ async def test_routing_priority_handling(api_routing_manager):
     assert admin_result["route_pattern"] == "/api/admin/*"
     
     # Specific user route should match before wildcard
-    user_result = await api_routing_manager.make_routed_request("/api/v1/users")
+    user_result = await api_routing_manager.make_routed_request("/api/users")
     
     assert user_result["status_code"] == 200
     assert user_result["service_name"] == "user_service"
-    assert user_result["route_pattern"] == "/api/v1/users"  # Exact match, not wildcard
+    assert user_result["route_pattern"] == "/api/users"  # Exact match, not wildcard
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -688,10 +688,10 @@ async def test_concurrent_routing_requests(api_routing_manager):
     """Test concurrent requests across different routes."""
     # Create concurrent requests to different services
     concurrent_requests = [
-        api_routing_manager.make_routed_request("/api/v1/users"),
-        api_routing_manager.make_routed_request("/api/v1/users/123"),
+        api_routing_manager.make_routed_request("/api/users"),
+        api_routing_manager.make_routed_request("/api/users/123"),
         api_routing_manager.make_routed_request("/api/v2/agents"),
-        api_routing_manager.make_routed_request("/api/v1/threads/550e8400-e29b-41d4-a716-446655440000"),
+        api_routing_manager.make_routed_request("/api/threads/550e8400-e29b-41d4-a716-446655440000"),
         api_routing_manager.make_routed_request("/api/admin/settings"),
     ] * 5  # 25 total concurrent requests
     
@@ -718,7 +718,7 @@ async def test_route_not_found_handling(api_routing_manager):
     non_existent_paths = [
         "/api/v3/unknown",
         "/completely/invalid/path",
-        "/api/v1/nonexistent",
+        "/api/nonexistent",
         "/admin/no-api-prefix"
     ]
     
@@ -764,7 +764,7 @@ async def test_routing_performance_requirements(api_routing_manager):
     response_times = []
     
     for i in range(50):
-        result = await api_routing_manager.make_routed_request("/api/v1/users")
+        result = await api_routing_manager.make_routed_request("/api/users")
         if result["status_code"] == 200:
             response_times.append(result["response_time"])
     
@@ -778,7 +778,7 @@ async def test_routing_performance_requirements(api_routing_manager):
     # Test concurrent routing performance
     concurrent_tasks = []
     for i in range(20):
-        task = api_routing_manager.make_routed_request(f"/api/v1/users/{i}")
+        task = api_routing_manager.make_routed_request(f"/api/users/{i}")
         concurrent_tasks.append(task)
     
     start_time = time.time()
@@ -799,10 +799,10 @@ async def test_routing_metrics_accuracy(api_routing_manager):
     """Test accuracy of routing metrics collection."""
     # Generate test traffic
     test_requests = [
-        "/api/v1/users",
-        "/api/v1/users/123",
+        "/api/users",
+        "/api/users/123",
         "/api/v2/agents",
-        "/api/v1/threads/550e8400-e29b-41d4-a716-446655440000",
+        "/api/threads/550e8400-e29b-41d4-a716-446655440000",
         "/api/admin/config"
     ]
     

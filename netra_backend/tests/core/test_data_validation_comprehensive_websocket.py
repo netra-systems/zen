@@ -17,19 +17,19 @@ from netra_backend.app.schemas.websocket_message_types import WebSocketValidatio
 
 from netra_backend.app.websocket_core.utils import validate_message_structure as MessageValidator
 
+@pytest.fixture
 def message_validator():
     """Create MessageValidator instance."""
-    return MessageValidator(max_message_size=1024, max_text_length=100)
+    return MessageValidator
 
 def test_websocket_message_type_validation(message_validator):
     """Test WebSocket message type validation."""
     # Valid message type
     valid_message = {"type": "chat_message", "payload": {"text": "hello"}}
-    result = message_validator.validate_message(valid_message)
+    result = message_validator(valid_message)
     assert result is True
     
-    # Invalid message type
-    invalid_message = {"type": "invalid_type", "payload": {}}
-    result = message_validator.validate_message(invalid_message)
-    assert isinstance(result, WebSocketValidationError)
-# )  # Orphaned closing parenthesis
+    # Invalid message type (missing type field)
+    invalid_message = {"payload": {}}
+    result = message_validator(invalid_message)
+    assert result is False

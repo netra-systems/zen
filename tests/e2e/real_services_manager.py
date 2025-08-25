@@ -92,8 +92,8 @@ class RealServicesManager:
             auth_port = self._extract_port_from_url(self.env_config.services.auth, 8081)  
             frontend_port = self._extract_port_from_url(self.env_config.services.frontend, 3000)
         else:
-            # Fallback to default ports
-            backend_port = 8000
+            # Fallback to default ports - use 8200 for backend to avoid Docker conflicts
+            backend_port = 8200
             auth_port = 8081
             frontend_port = 3000
         
@@ -177,21 +177,20 @@ class RealServicesManager:
     
     def _get_auth_command(self) -> List[str]:
         """Get command to start auth service."""
-        auth_main = self.project_root / "auth_service" / "main.py"
         return [
-            sys.executable, str(auth_main),
+            sys.executable, "-m", "auth_service.main",
             "--host", "0.0.0.0",
             "--port", "8081"
         ]
     
     def _get_backend_command(self) -> List[str]:
         """Get command to start backend service."""
+        backend_port = str(self.services["backend"].port)
         return [
             sys.executable, "-m", "uvicorn",
-            "app.main:app",
+            "netra_backend.app.main:app",
             "--host", "0.0.0.0",
-            "--port", "8000",
-            "--reload", "false"
+            "--port", backend_port
         ]
     
     def _get_frontend_command(self) -> List[str]:

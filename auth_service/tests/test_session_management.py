@@ -62,10 +62,15 @@ class TestSessionValidation:
     @pytest.fixture
     def session_manager(self):
         """Setup session manager with mocked Redis"""
-        manager = SessionManager()
-        # Mock: Redis caching isolation to prevent test interference and external dependencies
-        manager.redis_client = MagicMock()
-        return manager
+        with patch('auth_service.auth_core.core.session_manager.auth_redis_manager') as mock_redis_manager:
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
+            mock_redis_client = MagicMock()
+            mock_redis_manager.get_client.return_value = mock_redis_client
+            mock_redis_manager.enabled = True
+            mock_redis_manager.connect.return_value = True
+            
+            manager = SessionManager()
+            return manager
 
     @pytest.mark.asyncio
     async def test_validate_session_success(self, session_manager):
@@ -74,12 +79,17 @@ class TestSessionValidation:
             "user_id": "user123",
             "last_activity": datetime.now(timezone.utc).isoformat()
         }
-        session_manager.redis_client.get.return_value = json.dumps(session_data)
-        session_manager.redis_client.setex.return_value = True
-        
-        is_valid = await session_manager.validate_session("session123")
-        
-        assert is_valid is True
+        with patch('auth_service.auth_core.core.session_manager.auth_redis_manager') as mock_redis_manager:
+            mock_redis_client = MagicMock()
+            mock_redis_manager.get_client.return_value = mock_redis_client
+            mock_redis_manager.enabled = True
+            
+            mock_redis_client.get.return_value = json.dumps(session_data)
+            mock_redis_client.setex.return_value = True
+            
+            is_valid = await session_manager.validate_session("session123")
+            
+            assert is_valid is True
 
     @pytest.mark.asyncio
     async def test_validate_session_expired(self, session_manager):

@@ -15,7 +15,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -39,19 +39,23 @@ class TestConcurrentProcessing:
         job_ids = [str(uuid.uuid4()) for _ in range(concurrent_jobs)]
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
+        with patch('netra_backend.app.services.content_generation_service.run_generation_in_pool') as mock_pool:
             mock_pool.return_value = iter([
                 {'type': 'test', 'data': ('p', 'r')} for _ in range(100)
             ])
             
-            start_time = time.perf_counter()
-            
-            tasks = []
-            for job_id in job_ids:
-                task = run_content_generation_job(job_id, perf_params.model_dump())
-                tasks.append(task)
-            
-            await asyncio.gather(*tasks)
+            # Mock: WebSocket manager isolation for testing without external dependencies
+            with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
+                mock_manager.broadcast_to_job = AsyncMock()
+                
+                start_time = time.perf_counter()
+                
+                tasks = []
+                for job_id in job_ids:
+                    task = run_content_generation_job(job_id, perf_params.model_dump())
+                    tasks.append(task)
+                
+                await asyncio.gather(*tasks)
             
             duration = time.perf_counter() - start_time
             
@@ -70,7 +74,7 @@ class TestConcurrentProcessing:
         # Mock: Component isolation for testing without external dependencies
         with patch('multiprocessing.cpu_count', return_value=4):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.generation_service.Pool') as mock_pool_class:
+            with patch('netra_backend.app.services.content_generation_service.Pool') as mock_pool_class:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_pool = MagicMock()
                 mock_pool_class.return_value.__enter__.return_value = mock_pool
@@ -79,8 +83,12 @@ class TestConcurrentProcessing:
                     for _ in range(100)
                 ])
                 
-                job_id = str(uuid.uuid4())
-                await run_content_generation_job(job_id, perf_params.model_dump())
+                # Mock: WebSocket manager isolation for testing without external dependencies
+                with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
+                    mock_manager.broadcast_to_job = AsyncMock()
+                    
+                    job_id = str(uuid.uuid4())
+                    await run_content_generation_job(job_id, perf_params.model_dump())
                 
                 # Should create pool with available cores
                 mock_pool_class.assert_called_once_with(
@@ -133,16 +141,20 @@ class TestConcurrentProcessing:
         )
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.generation_service.generate_content_for_worker', 
+        with patch('netra_backend.app.services.generation_worker.generate_content_for_worker', 
                    side_effect=mock_worker_with_load_tracking):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
+            with patch('netra_backend.app.services.content_generation_service.run_generation_in_pool') as mock_pool:
                 mock_pool.side_effect = lambda tasks, num_proc: [
                     mock_worker_with_load_tracking(task) for task in tasks
                 ]
                 
-                job_id = str(uuid.uuid4())
-                await run_content_generation_job(job_id, perf_params.model_dump())
+                # Mock: WebSocket manager isolation for testing without external dependencies
+                with patch('netra_backend.app.services.generation_job_manager.manager') as mock_manager:
+                    mock_manager.broadcast_to_job = AsyncMock()
+                    
+                    job_id = str(uuid.uuid4())
+                    await run_content_generation_job(job_id, perf_params.model_dump())
         
         # Load should be distributed across workers
         unique_workers = len(set(worker_loads))

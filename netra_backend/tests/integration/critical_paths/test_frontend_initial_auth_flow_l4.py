@@ -338,7 +338,7 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
                     if (window.authService && window.authService.getAuthConfig) {
                         return await window.authService.getAuthConfig();
                     }
-                    return fetch('/api/auth/config').then(r => r.json());
+                    return fetch('/auth/config').then(r => r.json());
                 }''')
                 
                 # Wait for the request to appear
@@ -518,7 +518,7 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
             # Try direct dev login API call
             dev_login_result = await self.page.evaluate('''async () => {
                 try {
-                    const response = await fetch('/api/auth/dev-login', {
+                    const response = await fetch('/auth/dev-login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: 'dev@example.com' })

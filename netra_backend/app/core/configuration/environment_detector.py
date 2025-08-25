@@ -1,5 +1,9 @@
 from netra_backend.app.core.isolated_environment import get_env
-"""Environment Detection and Configuration Consistency
+"""Environment Detection and Configuration Consistency (DEPRECATED)
+
+DEPRECATION NOTICE: This module is deprecated in favor of environment_constants.py
+which provides the unified environment management system. New code should use
+environment_constants instead.
 
 Provides unified environment detection and ensures configuration consistency
 across all services and components. Prevents environment-specific health check failures.
@@ -9,6 +13,7 @@ Ensures staging mirrors production behavior for reliable deployments.
 """
 
 import os
+import warnings
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
@@ -16,6 +21,15 @@ from typing import Any, Dict, List, Optional, Tuple
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+# Issue deprecation warning for this entire module
+warnings.warn(
+    "netra_backend.app.core.configuration.environment_detector is deprecated. "
+    "Use netra_backend.app.core.environment_constants instead for unified "
+    "environment management.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class Environment(Enum):
@@ -314,7 +328,16 @@ def get_environment_detector() -> EnvironmentDetector:
 
 
 def get_current_environment() -> Environment:
-    """Get current detected environment."""
+    """Get current detected environment (DEPRECATED).
+    
+    DEPRECATED: Use get_current_environment() from environment_constants instead.
+    """
+    warnings.warn(
+        "get_current_environment() from environment_detector is deprecated. Use "
+        "get_current_environment() from environment_constants instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return get_environment_detector().detect_environment()
 
 

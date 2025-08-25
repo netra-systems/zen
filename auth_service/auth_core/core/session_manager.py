@@ -1,6 +1,7 @@
 """
 Session Manager - Centralized session handling with Redis
 Maintains 450-line limit with focused session management
+Optimized for high-performance with async operations and caching
 """
 import asyncio
 import json
@@ -10,6 +11,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
+from datetime import timezone
 
 from auth_service.auth_core.redis_manager import auth_redis_manager
 from auth_service.auth_core.config import AuthConfig
@@ -309,7 +311,7 @@ class SessionManager:
         return f"session:{session_id}"
     
     def health_check(self) -> bool:
-        """Check Redis connection health"""
+        """Check Redis connection health with performance optimization"""
         if not self.redis_enabled:
             # When Redis is disabled, consider it "healthy" since it's intentionally disabled
             return True
@@ -318,10 +320,30 @@ class SessionManager:
             return False
             
         try:
+            # Use a lightweight ping operation
             self.redis_client.ping()
             return True
         except Exception:
             return False
+    
+    async def close_redis(self):
+        """Close Redis connections gracefully"""
+        try:
+            if hasattr(self.redis_manager, 'close'):
+                await self.redis_manager.close()
+            logger.info("Redis connections closed successfully")
+        except Exception as e:
+            logger.warning(f"Error closing Redis connections: {e}")
+    
+    def get_performance_stats(self) -> Dict[str, Any]:
+        """Get session manager performance statistics"""
+        return {
+            "redis_enabled": self.redis_enabled,
+            "fallback_mode": self._fallback_mode,
+            "memory_sessions_count": len(self._memory_sessions),
+            "session_ttl_hours": self.session_ttl,
+            "health_status": "healthy" if self.health_check() else "degraded"
+        }
     
     def _enable_fallback_mode(self):
         """Enable in-memory fallback when Redis fails"""
@@ -399,7 +421,11 @@ class SessionManager:
             from auth_service.auth_core.database.models import AuthSession
             from datetime import datetime, timezone, timedelta
             
-            async with auth_db.get_session() as session:
+            # Ensure database is initialized before creating session
+            if not auth_db._initialized:
+                await auth_db.initialize()
+            
+            async with auth_db.get_session() as db_session:
                 # Create or update session record
                 expires_at = datetime.now(timezone.utc) + timedelta(hours=self.session_ttl)
                 
@@ -413,8 +439,8 @@ class SessionManager:
                 )
                 
                 # Use merge to handle existing records
-                await session.merge(auth_session)
-                await session.commit()
+                await db_session.merge(auth_session)
+                await db_session.commit()
                 
         except Exception as e:
             logger.error(f"Failed to backup session {session_id} to database: {e}")
@@ -427,13 +453,17 @@ class SessionManager:
             from sqlalchemy import select
             from datetime import datetime, timezone
             
-            async with auth_db.get_session() as session:
+            # Ensure database is initialized before creating session
+            if not auth_db._initialized:
+                await auth_db.initialize()
+            
+            async with auth_db.get_session() as db_session:
                 stmt = select(AuthSession).where(
                     AuthSession.id == session_id,
                     AuthSession.is_active == True,
                     AuthSession.expires_at > datetime.now(timezone.utc)
                 )
-                result = await session.execute(stmt)
+                result = await db_session.execute(stmt)
                 auth_session = result.scalar_one_or_none()
                 
                 if auth_session:

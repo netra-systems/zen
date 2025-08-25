@@ -238,7 +238,7 @@ echo $GOOGLE_API_KEY
 
 # Test API key
 curl -H "Authorization: Bearer $GOOGLE_API_KEY" \
-     https://generativelanguage.googleapis.com/v1/models
+     https://generativelanguage.googleapis.com/models
 ```
 
 ### Performance Issues

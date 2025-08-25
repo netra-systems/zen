@@ -248,10 +248,10 @@ class ImportTester:
         if not package_dir.exists():
             raise ValueError(f"Package directory not found: {package_dir}")
         
-        # Add package directory to sys.path if not present
-        package_parent = str(package_dir.parent)
-        if package_parent not in sys.path:
-            sys.path.insert(0, package_parent)
+        # Add project root to sys.path if not present
+        project_root_str = str(self.root_path)
+        if project_root_str not in sys.path:
+            sys.path.insert(0, project_root_str)
             
         modules_to_test = self._discover_modules(package_path, package_dir, recursive)
         

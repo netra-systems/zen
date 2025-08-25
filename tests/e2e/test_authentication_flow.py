@@ -123,7 +123,7 @@ class TestAuthenticationFlow:
             }
             
             signup_response = await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/auth/register",
                 json=signup_data
             )
             
@@ -198,7 +198,7 @@ class TestAuthenticationFlow:
                 "name": "JWT Test User"
             }
             
-            await session.post(f"{backend_url}/api/v1/auth/register", json=signup_data)
+            await session.post(f"{backend_url}/auth/register", json=signup_data)
             
             # Login to get JWT
             login_data = {
@@ -207,7 +207,7 @@ class TestAuthenticationFlow:
             }
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json=login_data
             )
             
@@ -253,7 +253,7 @@ class TestAuthenticationFlow:
             
             # Test token validation endpoint
             validate_response = await session.post(
-                f"{backend_url}/api/v1/auth/validate",
+                f"{backend_url}/auth/validate",
                 headers={"Authorization": f"Bearer {access_token}"}
             )
             
@@ -287,10 +287,10 @@ class TestAuthenticationFlow:
                 "name": "Refresh Test User"
             }
             
-            await session.post(f"{backend_url}/api/v1/auth/register", json=signup_data)
+            await session.post(f"{backend_url}/auth/register", json=signup_data)
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "RefreshTest123!"}
             )
             
@@ -303,7 +303,7 @@ class TestAuthenticationFlow:
             
             # Use refresh token to get new access token
             refresh_response = await session.post(
-                f"{backend_url}/api/v1/auth/refresh",
+                f"{backend_url}/auth/refresh",
                 json={"refresh_token": original_refresh_token}
             )
             
@@ -319,7 +319,7 @@ class TestAuthenticationFlow:
             
             # Verify new token works
             validate_response = await session.post(
-                f"{backend_url}/api/v1/auth/validate",
+                f"{backend_url}/auth/validate",
                 headers={"Authorization": f"Bearer {new_access_token}"}
             )
             assert validate_response.status == 200, "New token validation failed"
@@ -327,7 +327,7 @@ class TestAuthenticationFlow:
             # Verify old refresh token doesn't work (if rotation enabled)
             if new_refresh_token and new_refresh_token != original_refresh_token:
                 old_refresh_response = await session.post(
-                    f"{backend_url}/api/v1/auth/refresh",
+                    f"{backend_url}/auth/refresh",
                     json={"refresh_token": original_refresh_token}
                 )
                 assert old_refresh_response.status in [401, 403], \
@@ -358,13 +358,13 @@ class TestAuthenticationFlow:
                 "name": "Session Test User"
             }
             
-            await session.post(f"{backend_url}/api/v1/auth/register", json=signup_data)
+            await session.post(f"{backend_url}/auth/register", json=signup_data)
             
             # Login from multiple "devices"
             sessions = []
             for device in ["desktop", "mobile", "tablet"]:
                 login_response = await session.post(
-                    f"{backend_url}/api/v1/auth/login",
+                    f"{backend_url}/auth/login",
                     json={
                         "email": test_email,
                         "password": "SessionTest123!",
@@ -388,7 +388,7 @@ class TestAuthenticationFlow:
             # Verify all sessions are active
             for session_info in sessions:
                 session_response = await session.get(
-                    f"{backend_url}/api/v1/auth/session/{session_info['session_id']}",
+                    f"{backend_url}/auth/session/{session_info['session_id']}",
                     headers={"Authorization": f"Bearer {session_info['access_token']}"}
                 )
                 
@@ -401,7 +401,7 @@ class TestAuthenticationFlow:
             
             # Get all sessions for user
             all_sessions_response = await session.get(
-                f"{backend_url}/api/v1/auth/sessions",
+                f"{backend_url}/auth/sessions",
                 headers={"Authorization": f"Bearer {sessions[0]['access_token']}"}
             )
             
@@ -412,14 +412,14 @@ class TestAuthenticationFlow:
             
             # Test session revocation
             revoke_response = await session.delete(
-                f"{backend_url}/api/v1/auth/session/{sessions[1]['session_id']}",
+                f"{backend_url}/auth/session/{sessions[1]['session_id']}",
                 headers={"Authorization": f"Bearer {sessions[0]['access_token']}"}
             )
             
             if revoke_response.status in [200, 204]:
                 # Verify revoked session no longer works
                 check_response = await session.get(
-                    f"{backend_url}/api/v1/auth/validate",
+                    f"{backend_url}/auth/validate",
                     headers={"Authorization": f"Bearer {sessions[1]['access_token']}"}
                 )
                 assert check_response.status in [401, 403], \
@@ -451,10 +451,10 @@ class TestAuthenticationFlow:
                 "name": "Cross Service User"
             }
             
-            await session.post(f"{backend_url}/api/v1/auth/register", json=signup_data)
+            await session.post(f"{backend_url}/auth/register", json=signup_data)
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "CrossService123!"}
             )
             
@@ -463,7 +463,7 @@ class TestAuthenticationFlow:
             
             # Test token works on backend service
             backend_test = await session.get(
-                f"{backend_url}/api/v1/user/profile",
+                f"{backend_url}/api/user/profile",
                 headers={"Authorization": f"Bearer {access_token}"}
             )
             assert backend_test.status in [200, 404], \
@@ -524,7 +524,7 @@ class TestAuthenticationFlow:
         async with aiohttp.ClientSession(cookie_jar=jar) as session:
             # Test CORS preflight
             preflight_response = await session.options(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 headers={
                     "Origin": frontend_origin,
                     "Access-Control-Request-Method": "POST",
@@ -548,13 +548,13 @@ class TestAuthenticationFlow:
             }
             
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/auth/register",
                 json=signup_data,
                 headers={"Origin": frontend_origin}
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json={
                     "email": test_email,
                     "password": "Frontend123!",
@@ -576,7 +576,7 @@ class TestAuthenticationFlow:
             
             # Test authenticated request with cookie
             profile_response = await session.get(
-                f"{backend_url}/api/v1/user/profile",
+                f"{backend_url}/api/user/profile",
                 headers={"Origin": frontend_origin}
             )
             
@@ -587,7 +587,7 @@ class TestAuthenticationFlow:
             
             # Test logout
             logout_response = await session.post(
-                f"{backend_url}/api/v1/auth/logout",
+                f"{backend_url}/auth/logout",
                 headers={"Origin": frontend_origin}
             )
             

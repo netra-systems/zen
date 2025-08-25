@@ -262,7 +262,7 @@ class TestWebSocketConnectivity:
         async with aiohttp.ClientSession() as session:
             # Simulate frontend getting auth token
             auth_response = await session.post(
-                "http://localhost:8000/api/v1/auth/login",
+                "http://localhost:8000/auth/login",
                 json={"email": "test@example.com", "password": "test123"},
                 headers={"Origin": "http://localhost:3000"}
             )
@@ -270,7 +270,7 @@ class TestWebSocketConnectivity:
             if auth_response.status != 200:
                 # Try to create test user first
                 await session.post(
-                    "http://localhost:8000/api/v1/auth/register",
+                    "http://localhost:8000/auth/register",
                     json={
                         "email": "test@example.com",
                         "password": "test123",
@@ -279,7 +279,7 @@ class TestWebSocketConnectivity:
                 )
                 # Retry login
                 auth_response = await session.post(
-                    "http://localhost:8000/api/v1/auth/login",
+                    "http://localhost:8000/auth/login",
                     json={"email": "test@example.com", "password": "test123"}
                 )
             

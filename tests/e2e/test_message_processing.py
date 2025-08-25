@@ -46,7 +46,7 @@ class TestMessageProcessing:
             # Create test user and get auth token
             test_email = f"message.flow.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "MessageTest123!",
@@ -55,7 +55,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "MessageTest123!"}
             )
             
@@ -65,7 +65,7 @@ class TestMessageProcessing:
             
             # Create a thread for messages
             thread_response = await session.post(
-                f"{backend_url}/api/v1/threads",
+                f"{backend_url}/api/threads",
                 json={"title": "Test Message Flow"},
                 headers=headers
             )
@@ -97,7 +97,7 @@ class TestMessageProcessing:
                 
                 # Send message
                 message_response = await session.post(
-                    f"{backend_url}/api/v1/messages",
+                    f"{backend_url}/api/messages",
                     json={
                         "thread_id": thread_id,
                         "content": example["content"],
@@ -124,7 +124,7 @@ class TestMessageProcessing:
                 while time.time() - start_time < max_wait:
                     # Get thread messages
                     messages_response = await session.get(
-                        f"{backend_url}/api/v1/threads/{thread_id}/messages",
+                        f"{backend_url}/api/threads/{thread_id}/messages",
                         headers=headers
                     )
                     
@@ -183,7 +183,7 @@ class TestMessageProcessing:
             # Create test user
             test_email = f"persist.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "PersistTest123!",
@@ -192,7 +192,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "PersistTest123!"}
             )
             
@@ -203,7 +203,7 @@ class TestMessageProcessing:
             
             # Create thread
             thread_response = await session.post(
-                f"{backend_url}/api/v1/threads",
+                f"{backend_url}/api/threads",
                 json={"title": "Persistence Test"},
                 headers=headers
             )
@@ -233,7 +233,7 @@ class TestMessageProcessing:
                 }
                 
                 response = await session.post(
-                    f"{backend_url}/api/v1/messages",
+                    f"{backend_url}/api/messages",
                     json=message_data,
                     headers=headers
                 )
@@ -252,7 +252,7 @@ class TestMessageProcessing:
             await asyncio.sleep(1)  # Allow time for persistence
             
             messages_response = await session.get(
-                f"{backend_url}/api/v1/threads/{thread_id}/messages",
+                f"{backend_url}/api/threads/{thread_id}/messages",
                 headers=headers
             )
             
@@ -327,7 +327,7 @@ class TestMessageProcessing:
             # Create test user
             test_email = f"retrieval.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "RetrieveTest123!",
@@ -336,7 +336,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "RetrieveTest123!"}
             )
             
@@ -348,7 +348,7 @@ class TestMessageProcessing:
             threads = []
             for t in range(2):
                 thread_response = await session.post(
-                    f"{backend_url}/api/v1/threads",
+                    f"{backend_url}/api/threads",
                     json={"title": f"Thread {t}"},
                     headers=headers
                 )
@@ -359,7 +359,7 @@ class TestMessageProcessing:
                 # Add messages to thread
                 for m in range(10):
                     await session.post(
-                        f"{backend_url}/api/v1/messages",
+                        f"{backend_url}/api/messages",
                         json={
                             "thread_id": thread_id,
                             "content": f"Thread {t} Message {m} searchterm_{t}_{m}",
@@ -370,7 +370,7 @@ class TestMessageProcessing:
             
             # Test retrieval for specific thread
             thread_messages = await session.get(
-                f"{backend_url}/api/v1/threads/{threads[0]}/messages",
+                f"{backend_url}/api/threads/{threads[0]}/messages",
                 headers=headers
             )
             
@@ -385,7 +385,7 @@ class TestMessageProcessing:
             
             # Test pagination
             page1_response = await session.get(
-                f"{backend_url}/api/v1/threads/{threads[0]}/messages?limit=5&offset=0",
+                f"{backend_url}/api/threads/{threads[0]}/messages?limit=5&offset=0",
                 headers=headers
             )
             
@@ -402,7 +402,7 @@ class TestMessageProcessing:
                 
                 # Get page 2
                 page2_response = await session.get(
-                    f"{backend_url}/api/v1/threads/{threads[0]}/messages?limit=5&offset=5",
+                    f"{backend_url}/api/threads/{threads[0]}/messages?limit=5&offset=5",
                     headers=headers
                 )
                 
@@ -423,7 +423,7 @@ class TestMessageProcessing:
             
             # Test message search
             search_response = await session.get(
-                f"{backend_url}/api/v1/messages/search?q=searchterm_0_5",
+                f"{backend_url}/api/messages/search?q=searchterm_0_5",
                 headers=headers
             )
             
@@ -446,7 +446,7 @@ class TestMessageProcessing:
             
             # Test ordering (newest first or oldest first)
             ordered_response = await session.get(
-                f"{backend_url}/api/v1/threads/{threads[0]}/messages?order=desc",
+                f"{backend_url}/api/threads/{threads[0]}/messages?order=desc",
                 headers=headers
             )
             
@@ -498,7 +498,7 @@ class TestMessageProcessing:
             # Create test user
             test_email = f"realtime.{uuid.uuid4()}@example.com"
             await session.post(
-                f"{backend_url}/api/v1/auth/register",
+                f"{backend_url}/auth/register",
                 json={
                     "email": test_email,
                     "password": "RealtimeTest123!",
@@ -507,7 +507,7 @@ class TestMessageProcessing:
             )
             
             login_response = await session.post(
-                f"{backend_url}/api/v1/auth/login",
+                f"{backend_url}/auth/login",
                 json={"email": test_email, "password": "RealtimeTest123!"}
             )
             
@@ -517,7 +517,7 @@ class TestMessageProcessing:
             
             # Create thread
             thread_response = await session.post(
-                f"{backend_url}/api/v1/threads",
+                f"{backend_url}/api/threads",
                 json={"title": "Realtime Test"},
                 headers=headers
             )
@@ -586,7 +586,7 @@ class TestMessageProcessing:
             # Send a message via HTTP API
             test_message_content = f"realtime_test_message_{uuid.uuid4()}"
             message_response = await session.post(
-                f"{backend_url}/api/v1/messages",
+                f"{backend_url}/api/messages",
                 json={
                     "thread_id": thread_id,
                     "content": test_message_content,
@@ -652,7 +652,7 @@ class TestMessageProcessing:
                 
                 # Send another message
                 await session.post(
-                    f"{backend_url}/api/v1/messages",
+                    f"{backend_url}/api/messages",
                     json={
                         "thread_id": thread_id,
                         "content": f"broadcast_test_{uuid.uuid4()}",

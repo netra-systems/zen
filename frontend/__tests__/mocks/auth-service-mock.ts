@@ -14,12 +14,12 @@ export const mockAuthServiceResponses = {
     oauth_enabled: true,
     offline_mode: false,
     endpoints: {
-      login: 'http://localhost:8081/api/v1/auth/login',
-      logout: 'http://localhost:8081/api/v1/auth/logout', 
-      callback: 'http://localhost:8081/api/v1/auth/callback',
-      token: 'http://localhost:8081/api/v1/auth/token',
-      user: 'http://localhost:8081/api/v1/auth/me',
-      dev_login: 'http://localhost:8081/api/v1/auth/dev/login'
+      login: 'http://localhost:8081/auth/login',
+      logout: 'http://localhost:8081/auth/logout', 
+      callback: 'http://localhost:8081/auth/callback',
+      token: 'http://localhost:8081/auth/token',
+      user: 'http://localhost:8081/auth/me',
+      dev_login: 'http://localhost:8081/auth/dev/login'
     }
   },
   session: {
@@ -104,49 +104,49 @@ export function mockAuthServiceFetch() {
     const urlStr = url.toString();
     
     // Mock different auth service endpoints
-    if (urlStr.includes('/api/v1/auth/config')) {
+    if (urlStr.includes('/auth/config')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockAuthServiceResponses.config)
       });
     }
     
-    if (urlStr.includes('/api/v1/auth/session')) {
+    if (urlStr.includes('/auth/session')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockAuthServiceResponses.session)
       });
     }
     
-    if (urlStr.includes('/api/v1/auth/me')) {
+    if (urlStr.includes('/auth/me')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockAuthServiceResponses.user)
       });
     }
     
-    if (urlStr.includes('/api/v1/auth/dev/login')) {
+    if (urlStr.includes('/auth/dev/login')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockAuthServiceResponses.devLogin)
       });
     }
     
-    if (urlStr.includes('/api/v1/auth/refresh')) {
+    if (urlStr.includes('/auth/refresh')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve(mockAuthServiceResponses.token)
       });
     }
     
-    if (urlStr.includes('/api/v1/auth/validate')) {
+    if (urlStr.includes('/auth/validate')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ valid: true })
       });
     }
     
-    if (urlStr.includes('/api/v1/auth/logout')) {
+    if (urlStr.includes('/auth/logout')) {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ success: true })

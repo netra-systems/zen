@@ -201,7 +201,7 @@ def validate_test_config_consistency():
     return issues
 
 
-class TestConfigValidator:
+class ConfigValidatorHelper:
     """Helper class for validating test configuration patterns."""
     
     def __init__(self):

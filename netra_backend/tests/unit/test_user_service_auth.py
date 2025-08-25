@@ -58,7 +58,7 @@ from netra_backend.app.auth_integration.auth import (
     validate_token_jwt,
     verify_password,
 )
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 from netra_backend.app.schemas.auth_types import (
     AuditLog,

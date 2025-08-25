@@ -24,6 +24,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, parse_qs
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,7 @@ class PreDeploymentValidator:
         
         try:
             # Check DATABASE_URL is set
-            database_url = os.getenv("DATABASE_URL")
+            database_url = get_env().get("DATABASE_URL")
             if not database_url:
                 validation_result["status"] = "failed"
                 validation_result["issues"].append("DATABASE_URL environment variable not set")
@@ -284,7 +285,7 @@ class PreDeploymentValidator:
             env_vars_to_check = ["JWT_SECRET_KEY", "JWT_SECRET", "JWT_SECRET_STAGING", "JWT_SECRET_PRODUCTION"]
             
             for env_var in env_vars_to_check:
-                if os.getenv(env_var):
+                if get_env().get(env_var):
                     secret_sources.append(env_var)
             
             validation_result["details"]["available_secret_sources"] = secret_sources
@@ -297,7 +298,7 @@ class PreDeploymentValidator:
             
             # Check for consistency with backend (if running on same system)
             try:
-                backend_secret = os.getenv("JWT_SECRET_KEY")
+                backend_secret = get_env().get("JWT_SECRET_KEY")
                 if backend_secret and backend_secret != auth_jwt_secret:
                     validation_result["status"] = "failed"
                     validation_result["issues"].append("JWT secrets differ between auth service and backend")
@@ -311,8 +312,8 @@ class PreDeploymentValidator:
             
             # Validate environment-specific secrets
             env = AuthConfig.get_environment()
-            if env == "staging" and os.getenv("JWT_SECRET_STAGING"):
-                if os.getenv("JWT_SECRET_STAGING") != auth_jwt_secret:
+            if env == "staging" and get_env().get("JWT_SECRET_STAGING"):
+                if get_env().get("JWT_SECRET_STAGING") != auth_jwt_secret:
                     validation_result["warnings"].append("JWT_SECRET_STAGING differs from loaded secret")
                     validation_result["details"]["staging_specific_consistency"] = False
                 else:
@@ -385,7 +386,7 @@ class PreDeploymentValidator:
             validation_result["details"]["expected_redirect_uris"] = expected_redirect_uris
             
             # Check OAUTH_ALLOWED_REDIRECT_URIS configuration
-            allowed_redirect_uris = os.getenv("OAUTH_ALLOWED_REDIRECT_URIS", "")
+            allowed_redirect_uris = get_env().get("OAUTH_ALLOWED_REDIRECT_URIS", "")
             if allowed_redirect_uris:
                 allowed_uris = [uri.strip() for uri in allowed_redirect_uris.split(",")]
                 validation_result["details"]["configured_redirect_uris"] = allowed_uris
@@ -418,7 +419,7 @@ class PreDeploymentValidator:
                     validation_result["details"]["frontend_url_mismatch"] = False
             
             # Check OAuth HMAC secret for state signing
-            hmac_secret = os.getenv("OAUTH_HMAC_SECRET")
+            hmac_secret = get_env().get("OAUTH_HMAC_SECRET")
             validation_result["details"]["hmac_secret_configured"] = bool(hmac_secret)
             
             if not hmac_secret and env in ["staging", "production"]:
@@ -464,7 +465,7 @@ class PreDeploymentValidator:
         
         try:
             # This is primarily covered in database validation, but we add specific SSL checks here
-            database_url = os.getenv("DATABASE_URL", "")
+            database_url = get_env().get("DATABASE_URL", "")
             
             if database_url:
                 # Check SSL parameter format
@@ -545,7 +546,7 @@ class PreDeploymentValidator:
                 validation_result["details"]["graceful_shutdown"] = True
             
             # Check PORT environment variable
-            port = os.getenv("PORT")
+            port = get_env().get("PORT")
             validation_result["details"]["port_configured"] = bool(port)
             
             if not port:
@@ -571,15 +572,15 @@ class PreDeploymentValidator:
             validation_result["details"]["health_endpoints_configured"] = True  # They exist in main.py
             
             # Check environment detection
-            k_service = os.getenv("K_SERVICE")
+            k_service = get_env().get("K_SERVICE")
             validation_result["details"]["k_service"] = k_service
             validation_result["details"]["cloud_run_detected"] = bool(k_service)
             
             # Check resource constraints awareness
             if k_service:
                 # In Cloud Run, check for memory/CPU limits
-                memory_limit = os.getenv("MEMORY_LIMIT")
-                cpu_limit = os.getenv("CPU_LIMIT")
+                memory_limit = get_env().get("MEMORY_LIMIT")
+                cpu_limit = get_env().get("CPU_LIMIT")
                 validation_result["details"]["memory_limit"] = memory_limit
                 validation_result["details"]["cpu_limit"] = cpu_limit
                 
@@ -590,7 +591,7 @@ class PreDeploymentValidator:
                     validation_result["details"]["resource_limits_detected"] = True
             
             # Check for fast test mode handling
-            fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+            fast_test_mode = get_env().get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             validation_result["details"]["fast_test_mode"] = fast_test_mode
             
             # Check startup sequence configuration
@@ -650,7 +651,7 @@ class PreDeploymentValidator:
         try:
             # Check environment detection
             detected_env = AuthConfig.get_environment()
-            env_var = os.getenv("ENVIRONMENT", "development").lower()
+            env_var = get_env().get("ENVIRONMENT", "development").lower()
             
             validation_result["details"]["detected_environment"] = detected_env
             validation_result["details"]["environment_variable"] = env_var
@@ -661,7 +662,7 @@ class PreDeploymentValidator:
                 validation_result["details"]["environment_consistent"] = False
             
             # Check Cloud Run environment detection
-            k_service = os.getenv("K_SERVICE")
+            k_service = get_env().get("K_SERVICE")
             if k_service:
                 validation_result["details"]["k_service"] = k_service
                 
@@ -688,12 +689,12 @@ class PreDeploymentValidator:
             ]
             
             for config_var, target_env in env_specific_configs:
-                if detected_env == target_env and not os.getenv(config_var):
+                if detected_env == target_env and not get_env().get(config_var):
                     validation_result["warnings"].append(f"Environment-specific config {config_var} not set for {target_env}")
                     validation_result["details"][f"missing_{config_var.lower()}"] = True
             
             # Validate CORS configuration for environment
-            cors_origins = os.getenv("CORS_ORIGINS", "")
+            cors_origins = get_env().get("CORS_ORIGINS", "")
             validation_result["details"]["cors_origins"] = cors_origins
             
             if detected_env == "staging" and cors_origins:
@@ -710,7 +711,7 @@ class PreDeploymentValidator:
             
             if detected_env in ["staging", "production"]:
                 for env_var, dev_value in dev_indicators:
-                    if os.getenv(env_var, "").lower() == dev_value:
+                    if get_env().get(env_var, "").lower() == dev_value:
                         validation_result["status"] = "failed"
                         validation_result["issues"].append(f"Development setting {env_var}={dev_value} active in {detected_env}")
                         self.validation_report["critical_issues"].append(f"Environment: Development setting in {detected_env}")
@@ -842,7 +843,7 @@ class PreDeploymentValidator:
                 self.validation_report["critical_issues"].append("Security: Service secret issue")
             
             # Check secure headers configuration
-            secure_headers_enabled = os.getenv("SECURE_HEADERS_ENABLED", "false").lower() == "true"
+            secure_headers_enabled = get_env().get("SECURE_HEADERS_ENABLED", "false").lower() == "true"
             validation_result["details"]["secure_headers_enabled"] = secure_headers_enabled
             
             if not secure_headers_enabled and env in ["staging", "production"]:
@@ -850,14 +851,14 @@ class PreDeploymentValidator:
                 validation_result["details"]["secure_headers_recommended"] = True
             
             # Check CORS configuration security
-            cors_origins = os.getenv("CORS_ORIGINS", "")
+            cors_origins = get_env().get("CORS_ORIGINS", "")
             if cors_origins == "*" and env in ["staging", "production"]:
                 validation_result["status"] = "failed"
                 validation_result["issues"].append("Wildcard CORS origins not allowed in production")
                 self.validation_report["critical_issues"].append("Security: Wildcard CORS in production")
             
             # Check OAuth security settings
-            oauth_hmac_secret = os.getenv("OAUTH_HMAC_SECRET")
+            oauth_hmac_secret = get_env().get("OAUTH_HMAC_SECRET")
             validation_result["details"]["oauth_hmac_secret_configured"] = bool(oauth_hmac_secret)
             
             if not oauth_hmac_secret and env in ["staging", "production"]:
@@ -872,14 +873,14 @@ class PreDeploymentValidator:
             ]
             
             for setting, insecure_value in insecure_settings:
-                if os.getenv(setting, "").lower() == insecure_value and env in ["staging", "production"]:
+                if get_env().get(setting, "").lower() == insecure_value and env in ["staging", "production"]:
                     validation_result["status"] = "failed"
                     validation_result["issues"].append(f"Insecure setting {setting}={insecure_value} in {env}")
                     self.validation_report["critical_issues"].append(f"Security: Insecure setting {setting} in {env}")
             
             # Check SSL/TLS configuration
             if env in ["staging", "production"]:
-                database_url = os.getenv("DATABASE_URL", "")
+                database_url = get_env().get("DATABASE_URL", "")
                 redis_url = AuthConfig.get_redis_url()
                 
                 # Check database SSL

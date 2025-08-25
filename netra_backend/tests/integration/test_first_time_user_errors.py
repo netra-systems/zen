@@ -36,7 +36,7 @@ async def test_validation_error_handling(
     
     # Test empty message validation
     response = await async_client.post(
-        "/api/v1/chat/message",
+        "/api/chat/message",
         json={"content": "", "thread_id": "invalid-uuid"},
         headers=headers
     )
@@ -63,7 +63,7 @@ async def test_rate_limit_error_handling(
         mock_limit.return_value = False
         
         response = await async_client.post(
-            "/api/v1/chat/message",
+            "/api/chat/message",
             json={"content": "Test", "thread_id": str(uuid.uuid4())},
             headers=headers
         )
@@ -90,7 +90,7 @@ async def test_service_unavailable_error_handling(
         mock_llm.side_effect = Exception("LLM service unavailable")
         
         response = await async_client.post(
-            "/api/v1/chat/message",
+            "/api/chat/message",
             json={"content": "Test message", "thread_id": str(uuid.uuid4())},
             headers=headers
         )
@@ -112,7 +112,7 @@ async def test_support_options_access(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Get support options
-    response = await async_client.get("/api/v1/support/options", headers=headers)
+    response = await async_client.get("/api/support/options", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     support = response.json()
     assert "contact_methods" in support
@@ -133,7 +133,7 @@ async def test_support_ticket_creation(
     
     # Create support ticket
     response = await async_client.post(
-        "/api/v1/support/ticket",
+        "/api/support/ticket",
         json={
             "subject": "Error during optimization",
             "description": "Getting 503 errors when running optimization",
@@ -173,7 +173,7 @@ async def test_error_recovery_with_retry(
                 mock_llm.return_value = {"content": "Success after retry"}
             
             response = await async_client.post(
-                "/api/v1/chat/message",
+                "/api/chat/message",
                 json={"content": "Test retry", "thread_id": str(uuid.uuid4())},
                 headers={**headers, "X-Retry-Count": str(retry_count)}
             )
@@ -200,7 +200,7 @@ async def test_error_logging_and_debugging(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Access recent error logs
-    response = await async_client.get("/api/v1/debug/recent-errors", headers=headers)
+    response = await async_client.get("/api/debug/recent-errors", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     errors = response.json()
     assert "errors" in errors
@@ -223,11 +223,11 @@ async def test_graceful_degradation_features(
         mock_feature.return_value = False
         
         # Should still allow basic functionality
-        response = await async_client.get("/api/v1/user/profile", headers=headers)
+        response = await async_client.get("/api/user/profile", headers=headers)
         assert response.status_code == status.HTTP_200_OK
         
         # Advanced features should show graceful degradation
-        response = await async_client.get("/api/v1/analytics/summary", headers=headers)
+        response = await async_client.get("/api/analytics/summary", headers=headers)
         # Should either work with basic features or provide helpful message
         assert response.status_code in [status.HTTP_200_OK, status.HTTP_503_SERVICE_UNAVAILABLE]
 
@@ -249,7 +249,7 @@ async def test_timeout_error_handling(
         mock_optimize.side_effect = asyncio.TimeoutError("Operation timed out")
         
         response = await async_client.post(
-            "/api/v1/optimizations/analyze",
+            "/api/optimizations/analyze",
             json={"type": "cost_optimization", "context": {"cost": 1000}},
             headers=headers
         )
@@ -277,7 +277,7 @@ async def test_authentication_error_recovery(
     
     # Test with invalid access token
     invalid_headers = {"Authorization": "Bearer invalid_token_12345"}
-    response = await async_client.get("/api/v1/user/profile", headers=invalid_headers)
+    response = await async_client.get("/api/user/profile", headers=invalid_headers)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     
     # Test token refresh recovery
@@ -291,5 +291,5 @@ async def test_authentication_error_recovery(
     
     # Verify new token works
     new_headers = {"Authorization": f"Bearer {new_token_data['access_token']}"}
-    response = await async_client.get("/api/v1/user/profile", headers=new_headers)
+    response = await async_client.get("/api/user/profile", headers=new_headers)
     assert response.status_code == status.HTTP_200_OK

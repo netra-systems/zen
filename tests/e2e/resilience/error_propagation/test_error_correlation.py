@@ -38,7 +38,7 @@ class TestErrorCorrelation:
         # Make request with correlation ID
         response = await real_http_client.request(
             "GET",
-            "/api/v1/test_correlation",
+            "/api/test_correlation",
             headers={"X-Correlation-ID": correlation_id}
         )
         
@@ -52,7 +52,7 @@ class TestErrorCorrelation:
         # Trigger error with context
         response = await real_http_client.request(
             "POST",
-            "/api/v1/error_test",
+            "/api/error_test",
             json={
                 "user_id": error_correlation_context.user_id,
                 "operation": error_correlation_context.operation,
@@ -100,7 +100,7 @@ class TestErrorCorrelation:
         for i in range(3):
             task = real_http_client.request(
                 "POST",
-                f"/api/v1/multi_error_test/{i}",
+                f"/api/multi_error_test/{i}",
                 json={"correlation_id": correlation_id, "should_fail": True},
                 headers={"X-Correlation-ID": correlation_id}
             )
@@ -117,9 +117,9 @@ class TestErrorCorrelation:
         """Test error severity classification."""
         # Trigger different severity errors
         severity_tests = [
-            {"endpoint": "/api/v1/warning_test", "expected_severity": "warning"},
-            {"endpoint": "/api/v1/error_test", "expected_severity": "error"},
-            {"endpoint": "/api/v1/critical_test", "expected_severity": "critical"}
+            {"endpoint": "/api/warning_test", "expected_severity": "warning"},
+            {"endpoint": "/api/error_test", "expected_severity": "error"},
+            {"endpoint": "/api/critical_test", "expected_severity": "critical"}
         ]
         
         for test in severity_tests:

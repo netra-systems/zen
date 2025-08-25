@@ -3,10 +3,23 @@ import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
+# Use centralized environment management
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback for standalone execution
+    class FallbackEnv:
+        def get(self, key, default=None):
+            return os.getenv(key, default)
+    
+    def get_env():
+        return FallbackEnv()
+
 DATABASE_NAME = "netra"
 
-# SECURITY: Get password from environment variable - never hardcode passwords
-password = os.getenv('POSTGRES_PASSWORD')
+# SECURITY: Get password from environment variable using IsolatedEnvironment
+env = get_env()
+password = env.get('POSTGRES_PASSWORD')
 if not password:
     raise ValueError("POSTGRES_PASSWORD environment variable must be set")
 

@@ -24,37 +24,52 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+# Use centralized environment management for test framework
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback for standalone execution
+    class FallbackEnv:
+        def get(self, key, default=None):
+            return os.getenv(key, default)
+        def set(self, key, value, source="test_framework"):
+            os.environ[key] = value
+        def enable_isolation(self):
+            pass
+    
+    def get_env():
+        return FallbackEnv()
+
 # =============================================================================
 # ENVIRONMENT SETUP - COMMON FOR ALL TESTS
 # =============================================================================
 
-# Set base testing environment variables
+# Set base testing environment variables using IsolatedEnvironment
 # CRITICAL: Only set test environment if we're actually running tests
-if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-    os.environ["TESTING"] = "1"
-    os.environ["NETRA_ENV"] = "testing"
-    os.environ["ENVIRONMENT"] = "testing"
-    os.environ["LOG_LEVEL"] = "ERROR"
+if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+    env = get_env()
+    env.enable_isolation()  # Enable isolation for all tests
+    
+    env.set("TESTING", "1", "test_framework_base")
+    env.set("NETRA_ENV", "testing", "test_framework_base")
+    env.set("ENVIRONMENT", "testing", "test_framework_base")
+    env.set("LOG_LEVEL", "ERROR", "test_framework_base")
     
     # Network and service configuration
-    os.environ["REDIS_HOST"] = "localhost"
-    os.environ["CLICKHOUSE_HOST"] = "localhost"
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+    env.set("REDIS_HOST", "localhost", "test_framework_base")
+    env.set("CLICKHOUSE_HOST", "localhost", "test_framework_base")
+    env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_framework_base")
     
     # Authentication secrets required for tests
-    os.environ["JWT_SECRET_KEY"] = (
-        "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
-    )
-    os.environ["SERVICE_SECRET"] = (
-        "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
-    )
-    os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
-    os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
+    env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-do-not-use-in-production", "test_framework_base")
+    env.set("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length", "test_framework_base")
+    env.set("FERNET_KEY", "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao=", "test_framework_base")
+    env.set("ENCRYPTION_KEY", "test-encryption-key-32-chars-long", "test_framework_base")
     
     # Disable heavy services for faster testing
-    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
-    os.environ["CLICKHOUSE_ENABLED"] = "false"
-    os.environ["TEST_DISABLE_REDIS"] = "true"
+    env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test_framework_base")
+    env.set("CLICKHOUSE_ENABLED", "false", "test_framework_base")
+    env.set("TEST_DISABLE_REDIS", "true", "test_framework_base")
 
 # =============================================================================
 # COMMON FIXTURES

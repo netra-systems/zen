@@ -54,7 +54,7 @@ class HealthCheckResult:
 # Service endpoints and timeout configurations
 SERVICE_ENDPOINTS = {
     "auth": {
-        "url": "http://localhost:8081/health",
+        "url": "http://localhost:8001/health",
         "timeout": 5.0,
         "expected_service": "auth-service",
         "critical": True
@@ -62,7 +62,7 @@ SERVICE_ENDPOINTS = {
     "backend": {
         "url": "http://localhost:8000/health", 
         "timeout": 5.0,
-        "expected_service": "netra-ai-platform",
+        "expected_service": "netra_backend",
         "critical": True
     },
     "frontend": {

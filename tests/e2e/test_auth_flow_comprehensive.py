@@ -526,7 +526,7 @@ class TestTokenPropagation:
         # Test token in Authorization header to backend
         try:
             backend_response = await auth_tester.client.get(
-                f"{TEST_CONFIG['backend_url']}/api/v1/user/profile",
+                f"{TEST_CONFIG['backend_url']}/api/user/profile",
                 headers={
                     **TEST_HEADERS,
                     "Authorization": f"Bearer {token}"
@@ -1041,7 +1041,7 @@ class TestCrossServiceAuthSync:
         try:
             # Attempt to access a backend endpoint that requires authentication
             backend_response = await auth_tester.client.get(
-                f"{TEST_CONFIG['backend_url']}/api/v1/health",
+                f"{TEST_CONFIG['backend_url']}/api/health",
                 headers={
                     **TEST_HEADERS,
                     "Authorization": f"Bearer {token}"

@@ -69,7 +69,7 @@ async def test_free_to_early_tier_upgrade_flow(
     
     # Verify plan activated
     headers = {"Authorization": f"Bearer {access_token}"}
-    response = await async_client.get("/api/v1/billing/subscription", headers=headers)
+    response = await async_client.get("/api/billing/subscription", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     subscription = response.json()
     assert subscription["plan"] == "early"
@@ -105,7 +105,7 @@ async def test_early_tier_increased_usage_limits(
     # Should still be able to send messages
     headers = {"Authorization": f"Bearer {access_token}"}
     response = await async_client.post(
-        "/api/v1/chat/message",
+        "/api/chat/message",
         json={"content": "Beyond free limit", "thread_id": str(uuid.uuid4())},
         headers=headers
     )
@@ -129,7 +129,7 @@ async def test_early_tier_api_key_generation(
     
     # Generate API key
     response = await async_client.post(
-        "/api/v1/api-keys/generate",
+        "/api/api-keys/generate",
         json={
             "name": "Early Tier Development Key",
             "type": "development",
@@ -145,7 +145,7 @@ async def test_early_tier_api_key_generation(
     
     # Test API key authentication
     response = await async_client.get(
-        "/api/v1/user/profile",
+        "/api/user/profile",
         headers={"X-API-Key": api_key}
     )
     assert response.status_code == status.HTTP_200_OK
@@ -171,7 +171,7 @@ async def test_early_tier_enhanced_analytics_access(
     
     # Test enhanced analytics
     response = await async_client.get(
-        "/api/v1/analytics/cost-trends",
+        "/api/analytics/cost-trends",
         params={"granularity": "hourly"},
         headers=headers
     )
@@ -181,7 +181,7 @@ async def test_early_tier_enhanced_analytics_access(
     
     # Test model performance analytics
     response = await async_client.get(
-        "/api/v1/analytics/model-performance",
+        "/api/analytics/model-performance",
         headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
@@ -206,7 +206,7 @@ async def test_early_tier_improved_export_capabilities(
     
     # Test enhanced export options
     response = await async_client.post(
-        "/api/v1/export/usage",
+        "/api/export/usage",
         json={
             "format": "csv",
             "date_range": "last_90_days",  # More than free tier
@@ -218,7 +218,7 @@ async def test_early_tier_improved_export_capabilities(
     
     # Test detailed conversation export
     response = await async_client.post(
-        "/api/v1/export/conversations",
+        "/api/export/conversations",
         json={
             "format": "json",
             "include_agent_analysis": True,  # Early tier feature
@@ -245,7 +245,7 @@ async def test_early_tier_priority_support_access(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Get support options
-    response = await async_client.get("/api/v1/support/options", headers=headers)
+    response = await async_client.get("/api/support/options", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     support = response.json()
     assert support["support_level"] == "email"
@@ -253,7 +253,7 @@ async def test_early_tier_priority_support_access(
     
     # Create priority support ticket
     response = await async_client.post(
-        "/api/v1/support/ticket",
+        "/api/support/ticket",
         json={
             "subject": "Early tier optimization question",
             "description": "Need help with cost optimization",
@@ -285,7 +285,7 @@ async def test_early_tier_advanced_optimization_features(
     
     # Test advanced cost analyzer
     response = await async_client.post(
-        "/api/v1/tools/advanced-cost-analyzer/execute",
+        "/api/tools/advanced-cost-analyzer/execute",
         json={
             "analysis_type": "detailed",
             "time_period": "last_30_days",
@@ -329,7 +329,7 @@ async def test_early_tier_concurrent_sessions_and_billing(
             await ws.close()
     
     # Test billing info
-    response = await async_client.get("/api/v1/billing/current-period", headers=headers)
+    response = await async_client.get("/api/billing/current-period", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     billing = response.json()
     assert billing["plan"] == "early"

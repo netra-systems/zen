@@ -41,9 +41,9 @@ Authorization: Bearer <your-jwt-token>
 
 Google OAuth 2.0 is supported for user authentication:
 
-1. Get configuration from `/api/auth/config`
-2. Redirect user to `/api/auth/login`
-3. Handle callback at `/api/auth/callback`
+1. Get configuration from `/auth/config`
+2. Redirect user to `/auth/login`
+3. Handle callback at `/auth/callback`
 4. Frontend receives JWT token via redirect
 
 ## REST API Endpoints
@@ -52,28 +52,28 @@ Google OAuth 2.0 is supported for user authentication:
 
 #### Authentication Configuration
 ```http
-GET /api/auth/config
+GET /auth/config
 
 Response:
 {
   "development_mode": true,
   "google_client_id": "your-google-client-id",
   "endpoints": {
-    "login": "http://localhost:8000/api/auth/login",
-    "logout": "http://localhost:8000/api/auth/logout",
-    "callback": "http://localhost:8000/api/auth/callback",
-    "token": "http://localhost:8000/api/auth/token",
+    "login": "http://localhost:8000/auth/login",
+    "logout": "http://localhost:8000/auth/logout",
+    "callback": "http://localhost:8000/auth/callback",
+    "token": "http://localhost:8000/auth/token",
     "user": "http://localhost:8000/api/users/me",
-    "dev_login": "http://localhost:8000/api/auth/dev_login"
+    "dev_login": "http://localhost:8000/auth/dev_login"
   },
   "authorized_javascript_origins": ["http://localhost:3000"],
-  "authorized_redirect_uris": ["http://localhost:8000/api/auth/callback"]
+  "authorized_redirect_uris": ["http://localhost:8000/auth/callback"]
 }
 ```
 
 #### OAuth2 Token Exchange
 ```http
-POST /api/auth/token
+POST /auth/token
 Content-Type: application/x-www-form-urlencoded
 
 username=user@example.com&password=your-password&grant_type=password
@@ -87,7 +87,7 @@ Response:
 
 #### Google OAuth Login
 ```http
-GET /api/auth/login
+GET /auth/login
 Redirects to Google OAuth consent page or proxy for PR environments
 
 Response:
@@ -96,7 +96,7 @@ Redirect to Google OAuth or proxy URL
 
 #### OAuth Callback
 ```http
-GET /api/auth/callback?code=<auth-code>&state=<state>
+GET /auth/callback?code=<auth-code>&state=<state>
 Handles OAuth callback from Google
 
 Response:
@@ -110,7 +110,7 @@ http://localhost:3000/auth/error?message=<error-message>
 
 #### Logout
 ```http
-POST /api/auth/logout
+POST /auth/logout
 
 Response:
 {
@@ -121,7 +121,7 @@ Response:
 
 #### Development Login
 ```http
-POST /api/auth/dev_login
+POST /auth/dev_login
 Content-Type: application/json
 
 {
@@ -1071,7 +1071,7 @@ import json
 
 # Authentication
 response = requests.post(
-    "http://localhost:8000/api/auth/login",
+    "http://localhost:8000/auth/login",
     json={"email": "user@example.com", "password": "password"}
 )
 token = response.json()["access_token"]
@@ -1102,7 +1102,7 @@ ws.send(json.dumps({
 ### JavaScript/TypeScript
 ```typescript
 // Authentication
-const loginResponse = await fetch('http://localhost:8000/api/auth/login', {
+const loginResponse = await fetch('http://localhost:8000/auth/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({

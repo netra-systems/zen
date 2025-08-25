@@ -173,7 +173,7 @@ scrape_configs:
         # Query Prometheus for scraped metrics
         async with aiohttp.ClientSession() as session:
             # Query counter metric
-            counter_url = f"{prometheus_container}/api/v1/query"
+            counter_url = f"{prometheus_container}/api/query"
             counter_params = {"query": "netra_scrape_test_total"}
             
             async with session.get(counter_url, params=counter_params) as response:
@@ -260,7 +260,7 @@ scrape_configs:
         
         # Verify labeled metrics in Prometheus
         async with aiohttp.ClientSession() as session:
-            query_url = f"{prometheus_container}/api/v1/query"
+            query_url = f"{prometheus_container}/api/query"
             
             # Test counter with labels
             params = {"query": 'netra_labeled_requests_total{method="GET",status="200"}'}
@@ -307,7 +307,7 @@ scrape_configs:
         
         # Test aggregation queries
         async with aiohttp.ClientSession() as session:
-            query_url = f"{prometheus_container}/api/v1/query"
+            query_url = f"{prometheus_container}/api/query"
             
             # Test rate calculation
             rate_params = {"query": "rate(netra_request_duration_seconds_count[1m])"}

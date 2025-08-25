@@ -83,7 +83,7 @@ class TestSupplyResearchScheduler:
         )
         
         # Mock: Database access isolation for fast, reliable unit testing
-        with patch('app.services.supply_research.research_executor.Database') as mock_db_manager:
+        with patch('netra_backend.app.services.supply_research.research_executor.Database') as mock_db_manager:
             # Mock: Generic component isolation for controlled unit testing
             mock_db = Mock()
             # Mock: Component isolation for controlled unit testing
@@ -160,7 +160,7 @@ class TestSupplyResearchScheduler:
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
         # Mock: Database access isolation for fast, reliable unit testing
-        with patch('app.db.postgres.Database') as mock_db_manager:
+        with patch('netra_backend.app.db.postgres.Database') as mock_db_manager:
             # Mock: Generic component isolation for controlled unit testing
             mock_db = Mock()
             # Mock: Component isolation for controlled unit testing

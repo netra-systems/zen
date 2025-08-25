@@ -20,7 +20,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -161,7 +161,7 @@ async def test_agent_registry():
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     
     # Mock: Agent supervisor isolation for testing without spawning real agents
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, tool_dispatcher)
         
         # Verify agents are registered
@@ -195,7 +195,7 @@ async def test_basic_error_handling():
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     
     # Mock: Agent supervisor isolation for testing without spawning real agents
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, tool_dispatcher)
         supervisor.thread_id = str(uuid.uuid4())
         supervisor.user_id = str(uuid.uuid4())

@@ -17,15 +17,16 @@
             <spec>type_safety.xml</spec>
             <spec>unified_environment_management.xml</spec>
             <spec>database_connectivity_architecture.xml</spec>
+            <spec>shared_component_architecture.xml</spec>
         </cross_references>
     </metadata>
 
     <core_principle id="ADP-001">
-        <title>Strategic Duplication vs Harmful Duplication</title>
+        <title>SSOT Principle vs Strategic Implementation Independence</title>
         <definition>
-            Duplication is acceptable when it preserves system boundaries, reduces coupling,
-            or maintains service independence. Duplication is harmful when it violates DRY
-            within a single service boundary or creates maintenance burden without architectural benefit.
+            Multiple implementations are acceptable when they preserve system boundaries, reduce coupling,
+            or maintain service independence. Multiple implementations violate SSOT when the same concept
+            has multiple canonical sources within a single service boundary, creating maintenance burden and inconsistency.
         </definition>
         <decision_framework>
             <question>Does this duplication preserve service independence?</question>
@@ -34,6 +35,11 @@
             <question>Does the duplication enable different evolution paths?</question>
             <question>Would the shared abstraction be more complex than the duplication?</question>
         </decision_framework>
+        <shared_component_note>
+            Some truly universal utilities may be placed in /shared following strict criteria.
+            See SPEC/shared_component_architecture.xml for when shared code is appropriate.
+            The existence of /shared does NOT change the principle that services must remain independent.
+        </shared_component_note>
     </core_principle>
 
     <category id="CAT-001" priority="CRITICAL">
@@ -309,9 +315,10 @@
 
     <anti_patterns>
         <anti_pattern id="AP-001">
-            <name>Unacceptable Within-Service Duplication</name>
+            <name>SSOT Violation Within Service</name>
             <description>
-                Multiple implementations of the same concept within a single service boundary
+                Multiple canonical sources for the same concept within a single service boundary,
+                violating the Single Source of Truth principle
             </description>
             <examples>
                 <bad_example>

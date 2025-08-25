@@ -15,6 +15,18 @@ from typing import Dict, List, Optional, Tuple
 
 import requests
 
+# Use centralized environment management
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback for standalone execution
+    class FallbackEnv:
+        def get(self, key, default=None):
+            return os.getenv(key, default)
+    
+    def get_env():
+        return FallbackEnv()
+
 
 class StagingEnvironmentCleaner:
     """Manages cleanup of staging environments"""
@@ -23,8 +35,9 @@ class StagingEnvironmentCleaner:
         self.project_id = project_id
         self.region = region
         self.dry_run = dry_run
-        self.github_token = os.getenv("GITHUB_TOKEN")
-        self.github_repo = os.getenv("GITHUB_REPOSITORY", "netra-ai/netra-platform")
+        env = get_env()
+        self.github_token = env.get("GITHUB_TOKEN")
+        self.github_repo = env.get("GITHUB_REPOSITORY", "netra-ai/netra-platform")
         self.cleanup_report = {
             "timestamp": datetime.utcnow().isoformat(),
             "environments_checked": 0,
@@ -401,8 +414,9 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
 def _add_basic_arguments(parser: argparse.ArgumentParser) -> None:
     """Add basic configuration arguments."""
-    parser.add_argument("--project-id", type=str, default=os.getenv("GCP_PROJECT_ID"), help="GCP Project ID")
-    parser.add_argument("--region", type=str, default=os.getenv("GCP_REGION", "us-central1"), help="GCP Region")
+    env = get_env()
+    parser.add_argument("--project-id", type=str, default=env.get("GCP_PROJECT_ID"), help="GCP Project ID")
+    parser.add_argument("--region", type=str, default=env.get("GCP_REGION", "us-central1"), help="GCP Region")
     parser.add_argument("--dry-run", action="store_true", help="Perform dry run without actual cleanup")
 
 

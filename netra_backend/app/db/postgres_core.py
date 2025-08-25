@@ -157,7 +157,18 @@ class Database:
 
     @contextmanager
     def get_db(self) -> Generator[Session, None, None]:
-        """Provide a transactional scope around a series of operations."""
+        """DEPRECATED: Use netra_backend.app.database.get_db() for SSOT compliance.
+        
+        This method provides a transactional scope around a series of operations
+        but violates the Single Source of Truth principle. New code should use
+        the canonical implementation from netra_backend.app.database.
+        """
+        import warnings
+        warnings.warn(
+            "Database.get_db() is deprecated. Use 'from netra_backend.app.database import get_db' instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         yield from self._manage_db_session()
 
     def close(self):

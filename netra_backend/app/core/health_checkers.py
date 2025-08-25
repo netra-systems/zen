@@ -27,12 +27,57 @@ class ServicePriority(Enum):
     OPTIONAL = "optional"      # System continues normally when unavailable
 
 
-# Service priority mapping - critical services cause system failure,
-# important services cause degraded status, optional services are ignored
+def _get_service_priority_for_environment(service: str) -> ServicePriority:
+    """Get service priority based on environment and optional service flags."""
+    config = unified_config_manager.get_config()
+    env = config.environment.lower()
+    
+    # Base priorities
+    base_priorities = {
+        "postgres": ServicePriority.CRITICAL,
+        "system_resources": ServicePriority.IMPORTANT,
+        "websocket": ServicePriority.IMPORTANT,
+    }
+    
+    if service in base_priorities:
+        return base_priorities[service]
+    
+    # Check for staging infrastructure flags (pragmatic degradation)
+    if env == 'staging':
+        # Apply pragmatic infrastructure flags for staging
+        if service == "redis" and getattr(config, 'redis_optional_in_staging', False):
+            logger.info("Redis is optional in staging - degraded operation allowed")
+            return ServicePriority.OPTIONAL
+        elif service == "clickhouse" and getattr(config, 'clickhouse_optional_in_staging', False):
+            logger.info("ClickHouse is optional in staging - degraded operation allowed")
+            return ServicePriority.OPTIONAL
+        else:
+            # Default staging priorities (strict by default)
+            staging_priorities = {
+                "redis": ServicePriority.CRITICAL,
+                "clickhouse": ServicePriority.CRITICAL,
+            }
+            return staging_priorities.get(service, ServicePriority.IMPORTANT)
+    elif env == 'production':
+        # In production, external services are always critical
+        production_priorities = {
+            "redis": ServicePriority.CRITICAL,
+            "clickhouse": ServicePriority.CRITICAL,
+        }
+        return production_priorities.get(service, ServicePriority.IMPORTANT)
+    else:
+        # In development, external services are optional
+        dev_priorities = {
+            "redis": ServicePriority.IMPORTANT,
+            "clickhouse": ServicePriority.OPTIONAL,  # Often disabled in dev
+        }
+        return dev_priorities.get(service, ServicePriority.IMPORTANT)
+
+# Legacy mapping for backward compatibility
 SERVICE_PRIORITIES = {
     "postgres": ServicePriority.CRITICAL,
     "redis": ServicePriority.IMPORTANT,
-    "clickhouse": ServicePriority.OPTIONAL,  # Often disabled in dev
+    "clickhouse": ServicePriority.OPTIONAL,
     "websocket": ServicePriority.IMPORTANT,
     "system_resources": ServicePriority.IMPORTANT,
 }
@@ -93,6 +138,13 @@ async def _execute_postgres_query() -> None:
 async def check_clickhouse_health() -> HealthCheckResult:
     """Check ClickHouse database connectivity and health."""
     start_time = time.time()
+    
+    # Check if ClickHouse should be skipped entirely
+    config = unified_config_manager.get_config()
+    if getattr(config, 'skip_clickhouse_init', False):
+        logger.info("ClickHouse health check skipped - skip_clickhouse_init=True")
+        return _create_disabled_result("clickhouse", "ClickHouse disabled by configuration")
+    
     try:
         return await _process_clickhouse_health_check(start_time)
     except Exception as e:
@@ -131,6 +183,13 @@ def _handle_clickhouse_error(error: Exception, response_time: float) -> HealthCh
 async def check_redis_health() -> HealthCheckResult:
     """Check Redis connectivity and health with graceful degradation."""
     start_time = time.time()
+    
+    # Check if Redis should be skipped entirely
+    config = unified_config_manager.get_config()
+    if getattr(config, 'skip_redis_init', False):
+        logger.info("Redis health check skipped - skip_redis_init=True")
+        return _create_disabled_result("redis", "Redis disabled by configuration")
+    
     try:
         await _execute_redis_ping()
         response_time = (time.time() - start_time) * 1000
@@ -310,7 +369,8 @@ def _create_disabled_result(component: str, reason: str) -> HealthCheckResult:
         response_time_ms=0.0,
         status="healthy",
         response_time=0.0,
-        details=details
+        details=details,
+        metadata={"status": "disabled", "reason": reason}  # Include status in metadata for tests
     )
 
 def _build_disabled_details(component: str, reason: str) -> Dict[str, Any]:
@@ -332,7 +392,7 @@ def _handle_service_failure(component: str, error: str, response_time: float = 0
     - Important services: Return degraded (reduced functionality)
     - Optional services: Return healthy with warning (system continues)
     """
-    priority = SERVICE_PRIORITIES.get(component, ServicePriority.IMPORTANT)
+    priority = _get_service_priority_for_environment(component)
     
     if priority == ServicePriority.CRITICAL:
         return _create_failed_result(component, error, response_time)
@@ -429,10 +489,10 @@ def _build_websocket_health_details(stats: Dict[str, Any], health_score: float) 
 
 
 def _is_development_mode() -> bool:
-    """Check if running in development mode using environment detector."""
+    """Check if running in development mode using unified environment detection."""
     try:
-        from netra_backend.app.core.configuration.environment_detector import get_current_environment, Environment
-        return get_current_environment() == Environment.DEVELOPMENT
+        from netra_backend.app.core.environment_constants import get_current_environment, Environment
+        return get_current_environment() == Environment.DEVELOPMENT.value
     except Exception:
         # Fallback to config if environment detector fails
         config = unified_config_manager.get_config()
@@ -440,13 +500,13 @@ def _is_development_mode() -> bool:
 
 
 def _is_clickhouse_disabled() -> bool:
-    """Check if ClickHouse is disabled in environment using environment detector."""
+    """Check if ClickHouse is disabled in environment using unified environment detection."""
     try:
-        from netra_backend.app.core.configuration.environment_detector import get_environment_detector
-        detector = get_environment_detector()
+        from netra_backend.app.core.environment_constants import get_current_environment, Environment
         
-        # Use environment-aware service requirement check
-        if not detector.should_require_service("clickhouse"):
+        # ClickHouse is optional in development and testing
+        current_env = get_current_environment()
+        if current_env in [Environment.DEVELOPMENT.value, Environment.TESTING.value]:
             return True
             
         # Also check config for explicit disabling
@@ -465,9 +525,17 @@ def _is_clickhouse_disabled() -> bool:
 def _get_health_check_timeout() -> float:
     """Get environment-appropriate health check timeout."""
     try:
-        from netra_backend.app.core.configuration.environment_detector import get_environment_detector
-        detector = get_environment_detector()
-        return detector.get_health_check_timeout()
+        from netra_backend.app.core.environment_constants import get_current_environment, Environment
+        
+        # Environment-specific timeouts
+        current_env = get_current_environment()
+        timeout_map = {
+            Environment.PRODUCTION.value: 5.0,
+            Environment.STAGING.value: 8.0,
+            Environment.DEVELOPMENT.value: 10.0,
+            Environment.TESTING.value: 30.0
+        }
+        return timeout_map.get(current_env, 5.0)
     except Exception:
         # Fallback to conservative default
         return 5.0
@@ -621,7 +689,7 @@ def _get_services_by_priority(results: Dict[str, HealthCheckResult], priority: S
     """Get services filtered by priority level."""
     return {
         name: result for name, result in results.items()
-        if SERVICE_PRIORITIES.get(name, ServicePriority.IMPORTANT) == priority
+        if _get_service_priority_for_environment(name) == priority
     }
 
 
@@ -668,7 +736,7 @@ def _calculate_weighted_health_score(results: Dict[str, HealthCheckResult]) -> f
     weighted_score = 0.0
     
     for name, result in results.items():
-        priority = SERVICE_PRIORITIES.get(name, ServicePriority.IMPORTANT)
+        priority = _get_service_priority_for_environment(name)
         weight = _get_priority_weight(priority)
         service_score = _get_service_health_score(result)
         

@@ -40,11 +40,8 @@ class DatabaseConnectionManager:
         
     async def _init_postgres(self):
         """Initialize PostgreSQL connection pool."""
-        # Use environment config if available
-        if self.env_config:
-            database_url = self.env_config.database.url
-        else:
-            database_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        # Use environment variable for database URL
+        database_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
         
         try:
             self.postgres_pool = await asyncpg.create_pool(

@@ -11,7 +11,7 @@ class WebSocketError(NetraException):
         super().__init__(
             message=message or "WebSocket error occurred",
             code=ErrorCode.WEBSOCKET_CONNECTION_FAILED,
-            severity=ErrorSeverity.HIGH,
+            severity=ErrorSeverity.MEDIUM,
             **kwargs
         )
 

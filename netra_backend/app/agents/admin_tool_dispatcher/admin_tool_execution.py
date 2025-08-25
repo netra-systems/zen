@@ -12,7 +12,10 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.core.resilience.domain_circuit_breakers import (
+    AgentCircuitBreaker,
+    AgentCircuitBreakerConfig
+)
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
@@ -53,10 +56,13 @@ class AdminToolExecutionEngine(BaseExecutionInterface):
 
 
     def _create_reliability_manager(self) -> ReliabilityManager:
-        """Create reliability manager with circuit breaker and retry."""
-        circuit_config = CircuitBreakerConfig(
-            name="admin_tool_execution", failure_threshold=3, recovery_timeout=30
+        """Create reliability manager with unified agent circuit breaker."""
+        circuit_config = AgentCircuitBreakerConfig(
+            failure_threshold=3, 
+            recovery_timeout_seconds=30.0,
+            task_timeout_seconds=180.0  # Admin tools may take longer
         )
+        self.circuit_breaker = AgentCircuitBreaker("admin_tool_execution", config=circuit_config)
         retry_config = RetryConfig(max_retries=3, base_delay=1.0, max_delay=10.0)
         return ReliabilityManager(circuit_config, retry_config)
 

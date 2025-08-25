@@ -14,7 +14,7 @@ class SupplyResearchEngine:
     """Handles deep research operations for supply information"""
     
     def __init__(self):
-        self.api_endpoint = "https://discoveryengine.googleapis.com/v1/projects/{project_id}/locations/global/collections/default_collection/engines/{app_id}/assistants/default_assistant:streamAssist"
+        self.api_endpoint = "https://discoveryengine.googleapis.com/projects/{project_id}/locations/global/collections/default_collection/engines/{app_id}/assistants/default_assistant:streamAssist"
     
     def generate_research_query(self, parsed_request: Dict[str, Any]) -> str:
         """Generate Deep Research query from parsed request"""

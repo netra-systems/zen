@@ -33,10 +33,10 @@ def main():
             "frontend_port": "3000",
             "uris": [
                 "http://localhost:8081/auth/google/callback",
-                "http://localhost:8000/api/auth/google/callback",
+                "http://localhost:8000/auth/google/callback",
                 "http://localhost:3000/auth/callback",
                 "http://127.0.0.1:8081/auth/google/callback",
-                "http://127.0.0.1:8000/api/auth/google/callback",
+                "http://127.0.0.1:8000/auth/google/callback",
                 "http://127.0.0.1:3000/auth/callback",
             ]
         },
@@ -49,11 +49,11 @@ def main():
             },
             "uris": [
                 "https://auth.staging.netrasystems.ai/auth/google/callback",
-                "https://api.staging.netrasystems.ai/api/auth/google/callback",
+                "https://api.staging.netrasystems.ai/auth/google/callback",
                 "https://app.staging.netrasystems.ai/auth/callback",
                 # Legacy Cloud Run URLs (can be removed after migration)
                 "https://netra-auth-service-cpbplcdz7q-uc.a.run.app/auth/google/callback",
-                "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app/api/auth/google/callback",
+                "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app/auth/google/callback",
                 "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app/auth/callback",
             ]
         },
@@ -66,7 +66,7 @@ def main():
             ],
             "uris": [
                 "https://auth.netrasystems.ai/auth/google/callback",
-                "https://api.netrasystems.ai/api/auth/google/callback",
+                "https://api.netrasystems.ai/auth/google/callback",
                 "https://app.netrasystems.ai/auth/callback",
                 "https://netrasystems.ai/auth/callback"
             ]
@@ -83,7 +83,7 @@ def main():
             purpose = ""
             if "/auth/google/callback" in uri:
                 purpose = "Auth Service OAuth Callback"
-            elif "/api/auth/google/callback" in uri:
+            elif "/auth/google/callback" in uri:
                 purpose = "Backend API OAuth Proxy"
             elif "/auth/callback" in uri:
                 purpose = "Frontend OAuth Callback"

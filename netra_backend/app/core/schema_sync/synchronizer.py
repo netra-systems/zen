@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.configuration.validator import SchemaValidator
-from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.schema_sync.extractor import SchemaExtractor
 from netra_backend.app.core.schema_sync.generator import TypeScriptGenerator

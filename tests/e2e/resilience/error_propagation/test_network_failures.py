@@ -35,7 +35,7 @@ class TestNetworkFailureSimulation:
         # Use very short timeout to simulate network issues
         response = await real_http_client.request(
             "GET",
-            "/api/v1/slow_endpoint",
+            "/api/slow_endpoint",
             timeout=0.1
         )
         
@@ -66,7 +66,7 @@ class TestNetworkFailureSimulation:
         invalid_client = RealHTTPClient("http://nonexistent.invalid.domain.com")
         
         try:
-            response = await invalid_client.request("GET", "/api/v1/test")
+            response = await invalid_client.request("GET", "/api/test")
             
             # Should fail gracefully
             assert not response.success
@@ -81,7 +81,7 @@ class TestNetworkFailureSimulation:
         # Make request that might need retry
         response = await real_http_client.request(
             "POST",
-            "/api/v1/retry_test",
+            "/api/retry_test",
             json={"should_fail_first": True},
             max_retries=3
         )
@@ -100,7 +100,7 @@ class TestNetworkFailureSimulation:
         for i in range(10):
             response = await real_http_client.request(
                 "GET",
-                f"/api/v1/circuit_test/{i}",
+                f"/api/circuit_test/{i}",
                 timeout=1.0
             )
             responses.append(response)
@@ -135,10 +135,10 @@ class TestNetworkFailureSimulation:
         """Test handling of partial service failures."""
         # Test multiple endpoints
         endpoints = [
-            "/api/v1/health",
-            "/api/v1/status", 
-            "/api/v1/version",
-            "/api/v1/nonexistent"
+            "/api/health",
+            "/api/status", 
+            "/api/version",
+            "/api/nonexistent"
         ]
         
         results = []

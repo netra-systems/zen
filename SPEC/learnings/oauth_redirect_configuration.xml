@@ -39,7 +39,7 @@
         The OAuth configuration in app/clients/auth_client_config.py had multiple
         redirect URIs listed, with incorrect URLs as the primary entries:
         - staging.netrasystems.ai (legacy domain, no longer used)
-        - api.staging.netrasystems.ai/api/auth/callback (backend API, not auth handler)
+        - api.staging.netrasystems.ai/auth/callback (backend API, not auth handler)
         - app.staging.netrasystems.ai/auth/callback (frontend, not auth handler)
     </root_cause>
   <solution>

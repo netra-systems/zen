@@ -6,8 +6,8 @@ to maintain backward compatibility with existing tests.
 
 # Import from actual locations and re-export
 from netra_backend.app.core.exceptions_websocket import WebSocketError
-from netra_backend.app.core.websocket_recovery_manager import WebSocketRecoveryManager
-from netra_backend.app.error_handling.example_message_errors import RecoveryStrategy
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketRecoveryManager
+from netra_backend.app.core.unified_error_handler import RecoveryStrategy
 
 # Create alias for backward compatibility
 ErrorRecoveryHandler = WebSocketRecoveryManager

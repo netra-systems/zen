@@ -14,11 +14,12 @@ Business Value Justification (BVJ):
 - Strategic Impact: Ensures reliable auth service availability
 """
 
-import os
 import re
 import logging
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, parse_qs
+
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -163,39 +164,88 @@ class StagingDatabaseValidator:
         try:
             parsed = urlparse(url)
             
-            # Check username
+            # Check username - enhanced validation for problematic patterns
             if not parsed.username:
                 results["credential_issues"].append("No username specified")
                 results["recommendations"].append("Specify username in URL")
-            elif parsed.username in ["postgres", "root", "admin"]:
-                results["warnings"].append(f"Using common username '{parsed.username}'")
-                results["recommendations"].append("Consider using service-specific username for security")
+            else:
+                # Check for specific problematic patterns found in logs
+                if parsed.username == "user_pr-4":
+                    results["credential_issues"].append("Invalid username pattern 'user_pr-4' - this will cause authentication failures")
+                    results["recommendations"].append("Use correct username - should be 'postgres' for Cloud SQL")
+                elif re.match(r'user_pr-\d+', parsed.username):
+                    results["credential_issues"].append(f"Invalid username pattern '{parsed.username}' - appears to be misconfigured PR-specific user")
+                    results["recommendations"].append("Use correct staging username - should be 'postgres' for Cloud SQL")
+                elif parsed.username in ["postgres", "root", "admin"]:
+                    # Only warn for postgres in staging, don't fail
+                    results["warnings"].append(f"Using common username '{parsed.username}'")
+                    if parsed.username == "postgres":
+                        results["recommendations"].append("Username 'postgres' is acceptable for Cloud SQL but ensure password is secure")
+                    else:
+                        results["recommendations"].append("Consider using service-specific username for security")
+                
+                # Check for other invalid patterns
+                if parsed.username.startswith("user_") and not parsed.username == "user":
+                    results["warnings"].append(f"Username pattern '{parsed.username}' may be auto-generated and incorrect")
+                    results["recommendations"].append("Verify username matches staging database configuration")
             
-            # Check password
+            # Check password - enhanced validation for weak passwords
             if not parsed.password:
                 results["credential_issues"].append("No password specified")
                 results["recommendations"].append("Specify password in URL")
-            elif parsed.password in ["password", "123456", "admin"]:
-                results["credential_issues"].append("Using insecure default password")
-                results["recommendations"].append("Use secure password")
-            elif len(parsed.password) < 8:
-                results["warnings"].append("Password is shorter than 8 characters")
-                results["recommendations"].append("Use password with at least 8 characters")
+            else:
+                # Check for insecure default passwords
+                insecure_passwords = ["password", "123456", "admin", "123", "password123", "admin123", "test"]
+                if parsed.password.lower() in insecure_passwords:
+                    results["credential_issues"].append("Using insecure default password")
+                    results["recommendations"].append("Use secure password")
+                
+                # Check for weak passwords (too short)
+                elif len(parsed.password) < 8:
+                    results["credential_issues"].append("Password is shorter than 8 characters")
+                    results["recommendations"].append("Use password with at least 8 characters for security")
+                    
+                # Check for very weak passwords (only numbers)
+                elif parsed.password.isdigit() and len(parsed.password) < 12:
+                    results["credential_issues"].append("Password contains only numbers and is too short")
+                    results["recommendations"].append("Use complex password with letters, numbers, and symbols")
+                
+                # Check for development/test passwords in staging
+                test_passwords = ["wrong_password", "test_password", "development_password", "dev_password"]
+                if any(test_pwd in parsed.password.lower() for test_pwd in test_passwords):
+                    results["credential_issues"].append("Password appears to be a test/development password")
+                    results["recommendations"].append("Use secure production password for staging")
             
-            # Check for placeholder patterns
+            # Check for placeholder patterns - expanded list
             placeholder_patterns = [
                 r'\$\([A-Z_]+\)',  # $(VARIABLE)
                 r'\${[A-Z_]+}',    # ${VARIABLE}
                 r'REPLACE_WITH_',   # REPLACE_WITH_*
-                r'your-.*-password' # your-*-password
+                r'your-.*-password', # your-*-password
+                r'CHANGE_ME',       # CHANGE_ME
+                r'TODO',            # TODO
+                r'PLACEHOLDER',     # PLACEHOLDER
+                r'EXAMPLE',         # EXAMPLE
             ]
             
             for pattern in placeholder_patterns:
-                if re.search(pattern, parsed.password or ""):
+                if re.search(pattern, parsed.password or "", re.IGNORECASE):
                     results["credential_issues"].append("Password contains placeholder text")
-                    results["recommendations"].append("Replace placeholder with actual password")
+                    results["recommendations"].append("Replace placeholder with actual secure password")
                     break
             
+            # Additional validation for staging environment
+            if "staging" in (url.lower() if url else ""):
+                # Staging-specific checks
+                if parsed.username and parsed.username.startswith("dev_"):
+                    results["warnings"].append("Username appears to be development-specific in staging environment")
+                    results["recommendations"].append("Verify username is correct for staging database")
+                    
+                if parsed.password and "dev" in parsed.password.lower():
+                    results["warnings"].append("Password contains 'dev' which may indicate development credentials")
+                    results["recommendations"].append("Ensure password is staging-appropriate, not development")
+            
+            # Mark as invalid if critical issues found
             if results["credential_issues"]:
                 results["valid"] = False
                 
@@ -216,7 +266,7 @@ class StagingDatabaseValidator:
             Complete validation report
         """
         if database_url is None:
-            database_url = os.getenv("DATABASE_URL", "")
+            database_url = get_env().get("DATABASE_URL", "")
         
         report = {
             "overall_status": "unknown",

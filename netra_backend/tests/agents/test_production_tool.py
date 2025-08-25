@@ -121,7 +121,7 @@ class TestProductionToolInternalExecution:
         """Test _try_synthetic_tools with batch generation."""
         tool = self._setup_batch_generation_test()
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.synthetic_data.synthetic_data_service.generate_batch') as mock_service:
+        with patch('netra_backend.app.services.synthetic_data.synthetic_data_service.generate_batch') as mock_service:
             mock_service.return_value = [{"data": "item1"}, {"data": "item2"}]
             result = await tool._try_synthetic_tools({"batch_size": 100})
             self._verify_batch_generation_result_real(result)
@@ -142,7 +142,7 @@ class TestProductionToolInternalExecution:
         """Test _try_corpus_tools with create operation."""
         tool = self._setup_corpus_create_test()
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.corpus.corpus_service.create_corpus') as mock_service:
+        with patch('netra_backend.app.services.corpus.corpus_service.create_corpus') as mock_service:
             from unittest.mock import Mock, AsyncMock, MagicMock
             # Mock: Generic component isolation for controlled unit testing
             mock_corpus = Mock()
@@ -156,7 +156,7 @@ class TestProductionToolInternalExecution:
         """Test _try_corpus_tools with search operation."""
         tool = self._setup_corpus_search_test()
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.corpus.corpus_service.search_corpus_content') as mock_service:
+        with patch('netra_backend.app.services.corpus.corpus_service.search_corpus_content') as mock_service:
             mock_service.return_value = {"results": ["doc1", "doc2"], "total": 2}
             result = await tool._try_corpus_tools({"corpus_id": "123", "query": "test"})
             assert_tool_execute_response_success(result)

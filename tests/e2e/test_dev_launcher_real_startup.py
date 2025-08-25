@@ -58,7 +58,7 @@ class RealDevLauncherTester:
         self.launcher_instance = None  # Store launcher instance for cleanup
         self.test_ports = {"auth": 8081, "backend": 8000, "frontend": 3000}  # Use correct auth port
         self.health_endpoints = {
-            "auth": "http://localhost:8081/api/auth/config",
+            "auth": "http://localhost:8081/auth/config",
             "backend": "http://localhost:8000/health/ready", 
             "frontend": "http://localhost:3000"
         }

@@ -22,22 +22,16 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas import SubAgentLifecycle
 
 @pytest.fixture
-def orchestration_setup(real_agent_setup):
-    """Setup orchestration environment with real agents when ENABLE_REAL_LLM_TESTING=true."""
-    import os
-
-    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-
-        return real_agent_setup
-
-    else:
-        # Fall back to mocks for regular testing
-
-        mocks = _create_mock_dependencies()
-
-        agents = _create_test_agents(mocks)
-
-        return _build_setup_dict(agents, mocks)
+def orchestration_setup():
+    """Setup orchestration environment with mocked agents for testing."""
+    # Always use mocks for consistent testing - real agent setup removed for now
+    # TODO: Implement real_agent_setup fixture when needed for integration tests
+    
+    mocks = _create_mock_dependencies()
+    
+    agents = _create_test_agents(mocks)
+    
+    return _build_setup_dict(agents, mocks)
 
 def _create_mock_dependencies():
 
@@ -52,7 +46,7 @@ def _create_websocket_mock():
     """Create websocket mock with required methods."""
 
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    websocket_mock = AsyncMock(spec=WebSocketManager)
+    websocket_mock = AsyncMock(spec=UnifiedWebSocketManager)
 
     # Mock: Generic component isolation for controlled unit testing
     websocket_mock.send_message = AsyncMock()

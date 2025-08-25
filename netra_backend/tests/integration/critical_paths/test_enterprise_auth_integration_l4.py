@@ -450,7 +450,7 @@ class EnterpriseAuthTester:
                         
                         # Test API key authentication
                         async with self.session.get(
-                            f"{BASE_URL}/api/v1/health",
+                            f"{BASE_URL}/api/health",
                             headers={"X-API-Key": api_key}
                         ) as api_response:
                             if api_response.status == 200:
@@ -466,7 +466,7 @@ class EnterpriseAuthTester:
                                         
                                         # Verify revoked key doesn't work
                                         async with self.session.get(
-                                            f"{BASE_URL}/api/v1/health",
+                                            f"{BASE_URL}/api/health",
                                             headers={"X-API-Key": api_key}
                                         ) as revoked_response:
                                             if revoked_response.status == 401:
@@ -501,9 +501,9 @@ class EnterpriseAuthTester:
                         
                         # Test session across services
                         services = [
-                            f"{BASE_URL}/api/v1/health",
+                            f"{BASE_URL}/api/health",
                             f"{AUTH_URL}/health",
-                            f"{BASE_URL}/api/v1/user/profile"
+                            f"{BASE_URL}/api/user/profile"
                         ]
                         
                         for service_url in services:
@@ -524,7 +524,7 @@ class EnterpriseAuthTester:
                                 
                                 # Verify session no longer works
                                 async with self.session.get(
-                                    f"{BASE_URL}/api/v1/health",
+                                    f"{BASE_URL}/api/health",
                                     headers={"X-Session-ID": session_id}
                                 ) as invalid_response:
                                     if invalid_response.status == 401:
@@ -594,7 +594,7 @@ class EnterpriseAuthTester:
                                             
                                             # Verify revoked token doesn't work
                                             async with self.session.get(
-                                                f"{BASE_URL}/api/v1/health",
+                                                f"{BASE_URL}/api/health",
                                                 headers={"Authorization": f"Bearer {new_access_token}"}
                                             ) as test_response:
                                                 if test_response.status == 401:

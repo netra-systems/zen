@@ -231,7 +231,7 @@ class ApiRateLimitingFirstRequestsManager:
     async def setup_test_configurations(self):
         """Setup rate limiting configurations for test endpoints."""
         self.test_configs = {
-            "/api/v1/chat": RateLimitConfig(
+            "/api/chat": RateLimitConfig(
                 requests_per_minute=10,
                 burst_allowance=5,
                 priority_level=5,
@@ -242,7 +242,7 @@ class ApiRateLimitingFirstRequestsManager:
                     "enterprise": 10.0
                 }
             ),
-            "/api/v1/threads": RateLimitConfig(
+            "/api/threads": RateLimitConfig(
                 requests_per_minute=20,
                 burst_allowance=10,
                 priority_level=4,
@@ -253,7 +253,7 @@ class ApiRateLimitingFirstRequestsManager:
                     "enterprise": 5.0
                 }
             ),
-            "/api/v1/agents": RateLimitConfig(
+            "/api/agents": RateLimitConfig(
                 requests_per_minute=5,
                 burst_allowance=2,
                 priority_level=3,
@@ -444,7 +444,7 @@ async def rate_limit_manager():
 @pytest.mark.asyncio
 async def test_first_request_always_allowed(rate_limit_manager):
     """Test that first request is always allowed regardless of limits."""
-    endpoint = "/api/v1/agents"  # Low limit endpoint (5 req/min)
+    endpoint = "/api/agents"  # Low limit endpoint (5 req/min)
     user_id = "first_request_user"
     
     # Make first request
@@ -466,7 +466,7 @@ async def test_first_request_always_allowed(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_rate_limit_enforcement_after_first_request(rate_limit_manager):
     """Test rate limiting enforcement after first request."""
-    endpoint = "/api/v1/agents"
+    endpoint = "/api/agents"
     user_id = "enforcement_user"
     
     # Make requests up to the limit
@@ -491,7 +491,7 @@ async def test_rate_limit_enforcement_after_first_request(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_burst_allowance_behavior(rate_limit_manager):
     """Test burst allowance allows temporary exceeding of base limits."""
-    endpoint = "/api/v1/chat"  # 10 req/min + 5 burst
+    endpoint = "/api/chat"  # 10 req/min + 5 burst
     user_id = "burst_user"
     
     # Make rapid burst requests
@@ -516,7 +516,7 @@ async def test_burst_allowance_behavior(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_tier_based_rate_limit_differences(rate_limit_manager):
     """Test different tiers get different rate limits."""
-    endpoint = "/api/v1/threads"  # Base: 20 req/min
+    endpoint = "/api/threads"  # Base: 20 req/min
     
     tier_tests = [
         ("free", 1.0),      # 20 req/min
@@ -557,7 +557,7 @@ async def test_tier_based_rate_limit_differences(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_per_user_rate_tracking(rate_limit_manager):
     """Test that rate limits are tracked per user independently."""
-    endpoint = "/api/v1/chat"
+    endpoint = "/api/chat"
     
     # Test multiple users concurrently
     concurrent_result = await rate_limit_manager.test_concurrent_users(
@@ -580,7 +580,7 @@ async def test_per_user_rate_tracking(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_rate_limit_headers_accuracy(rate_limit_manager):
     """Test accuracy of rate limiting headers."""
-    endpoint = "/api/v1/threads"
+    endpoint = "/api/threads"
     user_id = "header_user"
     tier = "mid"  # 60 req/min limit
     
@@ -612,7 +612,7 @@ async def test_rate_limit_headers_accuracy(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_rate_limit_recovery_after_wait(rate_limit_manager):
     """Test rate limit recovery after waiting for reset."""
-    endpoint = "/api/v1/agents"  # 5 req/min
+    endpoint = "/api/agents"  # 5 req/min
     user_id = "recovery_user"
     
     # Exhaust rate limit
@@ -637,7 +637,7 @@ async def test_rate_limit_recovery_after_wait(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_rate_limiting_performance_requirements(rate_limit_manager):
     """Test rate limiting performance meets requirements."""
-    endpoint = "/api/v1/threads"
+    endpoint = "/api/threads"
     
     # Test individual request performance
     user_id = "perf_user"
@@ -674,7 +674,7 @@ async def test_rate_limiting_performance_requirements(rate_limit_manager):
 @pytest.mark.asyncio
 async def test_redis_rate_limit_data_consistency(rate_limit_manager):
     """Test Redis data consistency for rate limiting."""
-    endpoint = "/api/v1/chat"
+    endpoint = "/api/chat"
     user_id = "consistency_user"
     
     # Make several requests
@@ -708,9 +708,9 @@ async def test_comprehensive_rate_limiting_scenario(rate_limit_manager):
     
     # Test across multiple endpoints and tiers
     test_scenarios = [
-        ("/api/v1/chat", "scenario_user_1", "free", 15),
-        ("/api/v1/threads", "scenario_user_2", "early", 25),
-        ("/api/v1/agents", "scenario_user_3", "enterprise", 10)
+        ("/api/chat", "scenario_user_1", "free", 15),
+        ("/api/threads", "scenario_user_2", "early", 25),
+        ("/api/agents", "scenario_user_3", "enterprise", 10)
     ]
     
     scenario_results = {}

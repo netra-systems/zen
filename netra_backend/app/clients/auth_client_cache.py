@@ -7,8 +7,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitConfig
 from netra_backend.app.core.config import get_config
 
 
@@ -91,13 +92,14 @@ class AuthCircuitBreakerManager:
         config = self._get_circuit_config()
         return CircuitBreaker(config)
     
-    def _get_circuit_config(self) -> CircuitConfig:
+    def _get_circuit_config(self) -> UnifiedCircuitConfig:
         """Get circuit breaker configuration."""
-        return CircuitConfig(
+        return UnifiedCircuitConfig(
             name="auth_service",
             failure_threshold=5,
             recovery_timeout=60,
-            timeout_seconds=30
+            timeout_seconds=30,
+            sliding_window_size=10  # Required by UnifiedCircuitBreaker
         )
     
     async def call_with_breaker(self, func, *args, **kwargs):
@@ -133,7 +135,9 @@ class AuthServiceSettings:
         
         self.cache_ttl = int(config.auth_cache_ttl_seconds)  # 5 min
         self.service_id = config.service_id
-        self.service_secret = config.service_secret
+        
+        # CRITICAL: Trim whitespace from service secret (common deployment issue)
+        self.service_secret = config.service_secret.strip() if config.service_secret else None
     
     def is_service_secret_configured(self) -> bool:
         """Check if service secret is configured."""
@@ -141,4 +145,6 @@ class AuthServiceSettings:
     
     def get_service_credentials(self) -> tuple[str, str]:
         """Get service ID and secret."""
-        return self.service_id, self.service_secret
+        # Ensure service secret is cleaned
+        service_secret = self.service_secret.strip() if self.service_secret else None
+        return self.service_id, service_secret

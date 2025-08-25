@@ -31,7 +31,7 @@ async def test_websocket_jwt_validation_failure():
     
     # Mock the auth client to return validation failure
     # Mock: Authentication service isolation for testing without real auth flows
-    with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth_client:
+    with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth_client:
         # Configure auth client to return invalid token response
         # Mock: Async component isolation for testing without real async operations
         mock_validate = AsyncMock(return_value={"valid": False})
@@ -160,7 +160,7 @@ async def test_websocket_auth_token_validation_flow():
     # Mock: Component isolation for testing without external dependencies
     with patch('netra_backend.app.routes.websocket_unified.logger') as mock_logger:
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             # Auth validation returns invalid
             mock_validate.return_value = {"valid": False}
             
@@ -199,7 +199,7 @@ async def test_websocket_successful_auth_dev_environment():
     # Set development environment
     with patch.dict(os.environ, {"ENVIRONMENT": "development", "DEV_MODE": "true"}):
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             # In dev mode, auth might be bypassed or always return valid
             mock_validate.return_value = {"valid": True, "user_id": "dev_user", "role": "developer"}
             

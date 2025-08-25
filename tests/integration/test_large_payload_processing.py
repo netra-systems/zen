@@ -32,7 +32,7 @@ class TestLargePayloadProcessing:
         }
         # NOTE: Assuming an endpoint like this exists for processing large
         # reports.
-        endpoint = f"{BACKEND_URL}/api/v1/reports/process"
+        endpoint = f"{BACKEND_URL}/api/reports/process"
 
         # Generate a large JSON payload (approx. 10MB)
         large_data = {

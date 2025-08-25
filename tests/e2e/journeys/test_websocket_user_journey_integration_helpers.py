@@ -30,7 +30,7 @@ import websockets
 from websockets.exceptions import ConnectionClosedError
 
 from test_framework.mock_utils import mock_justified
-from tests.e2e.config import TEST_ENDPOINTS, TEST_SECRETS, TestTier, TestUser
+from tests.e2e.config import TEST_ENDPOINTS, TEST_SECRETS, CustomerTier, TestUser
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.integration.websocket_dev_utilities import (
     ConnectionState,

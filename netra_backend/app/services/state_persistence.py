@@ -236,7 +236,7 @@ class StatePersistenceService:
             .where(AgentStateSnapshot.run_id == run_id)
             .order_by(desc(AgentStateSnapshot.created_at))
             .offset(self.max_snapshots_per_run))
-        return [row[0] for row in result.fetchall()]
+        return result.scalars().all()
     
     async def _delete_snapshots_batch(self, snapshot_ids: List[str], 
                                      db_session: AsyncSession) -> None:

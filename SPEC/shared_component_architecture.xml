@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Shared.Component.Architecture</name>
+        <version>1.0.0</version>
+        <priority>CRITICAL</priority>
+        <description>
+            Canonical specification for the /shared directory as a pseudo-service library.
+            Defines when shared code is appropriate versus when services should maintain independence.
+            Balances pragmatic code reuse with microservice isolation principles.
+        </description>
+        <created>2025-08-25</created>
+        <last_edited>2025-08-25</last_edited>
+        <cross_references>
+            <spec>independent_services.xml</spec>
+            <spec>acceptable_duplicates.xml</spec>
+            <spec>learnings/microservice_independence.xml</spec>
+            <spec>type_safety.xml</spec>
+            <spec>database_connectivity_architecture.xml</spec>
+            <spec>unified_environment_management.xml</spec>
+        </cross_references>
+    </metadata>
+
+    <core_philosophy id="SCA-PHIL-001">
+        <title>The Shared Component Philosophy</title>
+        <principle>
+            The /shared directory acts as a carefully curated library of truly universal utilities
+            that would otherwise require external dependencies. It is NOT a dumping ground for
+            avoiding duplication, nor a way to circumvent service independence.
+        </principle>
+        <key_insight>
+            Think of /shared as equivalent to importing a third-party library like 'requests' or 'pydantic'.
+            If you wouldn't create an external pip package for it, it probably doesn't belong in /shared.
+        </key_insight>
+        <warning>
+            CRITICAL: The existence of /shared does NOT change our microservice independence principles.
+            Services MUST remain independently deployable, scalable, and maintainable.
+        </warning>
+    </core_philosophy>
+
+    <section title="Decision Framework">
+        <decision_tree id="SCA-DT-001">
+            <title>Should This Code Go in /shared?</title>
+            
+            <question order="1">
+                <text>Is this truly universal across ALL services?</text>
+                <if_no>Keep in individual service → Maintain independence</if_no>
+                <if_yes>Continue to question 2</if_yes>
+            </question>
+            
+            <question order="2">
+                <text>Is this a pure data structure or interface definition (no business logic)?</text>
+                <if_yes>GOOD candidate for /shared (like schemas, type definitions)</if_yes>
+                <if_no>Continue to question 3</if_no>
+            </question>
+            
+            <question order="3">
+                <text>Is this a utility that would typically come from a standard library?</text>
+                <if_yes>Consider for /shared (like logging utilities, simple helpers)</if_yes>
+                <if_no>Continue to question 4</if_no>
+            </question>
+            
+            <question order="4">
+                <text>Does this contain ANY service-specific business logic?</text>
+                <if_yes>NEVER put in /shared → Keep in service</if_yes>
+                <if_no>Continue to question 5</if_no>
+            </question>
+            
+            <question order="5">
+                <text>Would changes to this code require coordinated deployments?</text>
+                <if_yes>DO NOT put in /shared → Violates independence</if_yes>
+                <if_no>Continue to question 6</if_no>
+            </question>
+            
+            <question order="6">
+                <text>Is this code stable and unlikely to change frequently?</text>
+                <if_no>Keep in service until stable</if_no>
+                <if_yes>May be appropriate for /shared</if_yes>
+            </question>
+        </decision_tree>
+    </section>
+
+    <section title="Good Use Cases for /shared">
+        <category id="SCA-GOOD-001">
+            <name>Pure Data Schemas</name>
+            <justification>
+                JSON schemas and type definitions that define contracts between services
+                are ideal for /shared as they ensure consistency without coupling behavior.
+            </justification>
+            <examples>
+                <example>/shared/schemas/WebSocketMessage.json</example>
+                <example>/shared/User.json</example>
+                <example>/shared/schemas.json</example>
+            </examples>
+            <benefits>
+                - Ensures consistent data contracts
+                - No behavior coupling
+                - Changes are backwards compatible
+                - Acts like a shared API specification
+            </benefits>
+        </category>
+
+        <category id="SCA-GOOD-002">
+            <name>Cross-Cutting Infrastructure Utilities</name>
+            <justification>
+                Utilities that would typically come from a standard library or common package,
+                with no business logic and stable interfaces.
+            </justification>
+            <examples>
+                <example>/shared/logging/unified_logger_factory.py</example>
+                <example>/shared/cors_config.py</example>
+            </examples>
+            <criteria>
+                - Zero business logic
+                - Stable, well-defined interface
+                - Would make sense as pip package
+                - Used identically across services
+            </criteria>
+        </category>
+
+        <category id="SCA-GOOD-003">
+            <name>Database URL Building Utilities</name>
+            <justification>
+                Complex URL construction logic that handles driver differences is a good
+                candidate when it's purely mechanical transformation with no business rules.
+            </justification>
+            <examples>
+                <example>/shared/database_url_builder.py</example>
+                <example>/shared/database/core_database_manager.py</example>
+            </examples>
+            <why_appropriate>
+                - Handles asyncpg vs psycopg2 differences
+                - Pure string manipulation
+                - No service-specific logic
+                - Prevents SSL parameter bugs
+            </why_appropriate>
+        </category>
+    </section>
+
+    <section title="Bad Use Cases for /shared">
+        <category id="SCA-BAD-001">
+            <name>Service-Specific Business Logic</name>
+            <violation_level>CRITICAL</violation_level>
+            <description>
+                NEVER put business logic in /shared, even if multiple services
+                seem to need similar logic. This creates hidden coupling.
+            </description>
+            <bad_examples>
+                <example>User authentication logic</example>
+                <example>Pricing calculations</example>
+                <example>Agent orchestration logic</example>
+                <example>Thread management business rules</example>
+            </bad_examples>
+            <correct_approach>
+                Use service APIs for shared business logic. The auth service
+                provides authentication as an API, not a shared library.
+            </correct_approach>
+        </category>
+
+        <category id="SCA-BAD-002">
+            <name>Frequently Changing Code</name>
+            <violation_level>HIGH</violation_level>
+            <description>
+                Code that changes frequently should NOT be in /shared as it
+                forces coordinated updates across services.
+            </description>
+            <bad_examples>
+                <example>Experimental features</example>
+                <example>Rapidly evolving APIs</example>
+                <example>Business rules under active development</example>
+            </bad_examples>
+            <correct_approach>
+                Keep evolving code in services until stable. Only promote
+                to /shared after the interface has stabilized for 3+ months.
+            </correct_approach>
+        </category>
+
+        <category id="SCA-BAD-003">
+            <name>Service Configuration</name>
+            <violation_level>CRITICAL</violation_level>
+            <description>
+                Each service MUST manage its own configuration. Shared config
+                creates deployment coupling and violates independence.
+            </description>
+            <bad_examples>
+                <example>Service-specific environment variables</example>
+                <example>Database connection configs</example>
+                <example>Service ports and URLs</example>
+                <example>Feature flags</example>
+            </bad_examples>
+            <correct_approach>
+                Each service maintains its own configuration system.
+                Use IsolatedEnvironment pattern per service.
+            </correct_approach>
+        </category>
+
+        <category id="SCA-BAD-004">
+            <name>Stateful Components</name>
+            <violation_level>CRITICAL</violation_level>
+            <description>
+                Stateful components like database connections, caches, or
+                singletons must NEVER be shared as they violate isolation.
+            </description>
+            <bad_examples>
+                <example>Database connection pools</example>
+                <example>Redis clients</example>
+                <example>WebSocket managers</example>
+                <example>In-memory caches</example>
+            </bad_examples>
+            <correct_approach>
+                Each service manages its own stateful resources.
+                Connection pooling is per-service, not shared.
+            </correct_approach>
+        </category>
+    </section>
+
+    <section title="Nuanced Cases">
+        <case id="SCA-NUANCE-001">
+            <name>Error Classes and Exceptions</name>
+            <complexity>MEDIUM</complexity>
+            <analysis>
+                Base error classes could be shared, but service-specific
+                errors should remain in services.
+            </analysis>
+            <guideline>
+                - Generic HTTP error bases (400, 401, 404): Could be shared
+                - Service-specific errors: Must stay in service
+                - Business domain errors: Never shared
+            </guideline>
+            <recommendation>
+                Generally keep errors service-specific unless you have
+                truly generic HTTP error handling needs.
+            </recommendation>
+        </case>
+
+        <case id="SCA-NUANCE-002">
+            <name>Type Definitions</name>
+            <complexity>MEDIUM</complexity>
+            <analysis>
+                Shared types can ensure consistency but can also create
+                coupling if they contain business logic.
+            </analysis>
+            <guideline>
+                - Pure data types (User, Thread): Can be shared
+                - Types with validators: Consider carefully
+                - Types with methods: Never share
+            </guideline>
+            <recommendation>
+                Share only pure data type definitions. Any behavior
+                or validation should be service-specific.
+            </recommendation>
+        </case>
+
+        <case id="SCA-NUANCE-003">
+            <name>Testing Utilities</name>
+            <complexity>LOW</complexity>
+            <analysis>
+                Test utilities are special - they don't affect production
+                coupling but can reduce test maintenance.
+            </analysis>
+            <guideline>
+                - E2E test utilities: Good for /test_framework
+                - Service-specific mocks: Keep in service
+                - Cross-service test clients: Can be shared
+            </guideline>
+            <recommendation>
+                Testing utilities have more flexibility for sharing
+                since they don't create production dependencies.
+            </recommendation>
+        </case>
+    </section>
+
+    <section title="Implementation Guidelines">
+        <guideline id="SCA-IMPL-001">
+            <title>Shared Code Structure</title>
+            <rules>
+                <rule>Organize by functionality, not by service consumer</rule>
+                <rule>Use clear, descriptive module names</rule>
+                <rule>Include comprehensive docstrings</rule>
+                <rule>Version interfaces carefully</rule>
+            </rules>
+            <structure>
+                /shared/
+                ├── database/          # Database utilities
+                ├── logging/           # Logging utilities
+                ├── schemas/           # JSON schemas
+                ├── types/            # Type definitions
+                └── utils/            # General utilities
+            </structure>
+        </guideline>
+
+        <guideline id="SCA-IMPL-002">
+            <title>Import Patterns</title>
+            <correct>
+                ```python
+                # Good: Import from shared like external library
+                from shared.database.database_url_builder import DatabaseURLBuilder
+                from shared.schemas import WebSocketMessage
+                ```
+            </correct>
+            <incorrect>
+                ```python
+                # Bad: Don't create service-specific paths in shared
+                from shared.netra_backend.config import Config  # WRONG!
+                from shared.auth_service.utils import helpers   # WRONG!
+                ```
+            </incorrect>
+        </guideline>
+
+        <guideline id="SCA-IMPL-003">
+            <title>Backwards Compatibility</title>
+            <requirement>
+                Code in /shared MUST maintain backwards compatibility.
+                Breaking changes require major version bumps and migration paths.
+            </requirement>
+            <practices>
+                <practice>Use deprecation warnings for changes</practice>
+                <practice>Provide migration guides</practice>
+                <practice>Never break existing interfaces</practice>
+                <practice>Add new parameters with defaults</practice>
+            </practices>
+        </guideline>
+    </section>
+
+    <section title="Migration Strategy">
+        <strategy id="SCA-MIG-001">
+            <title>Moving Code TO /shared</title>
+            <prerequisites>
+                - Code has been stable for 3+ months
+                - Used identically in 2+ services
+                - No service-specific logic
+                - Clear, documented interface
+                - Team consensus on sharing
+            </prerequisites>
+            <process>
+                1. Identify candidate code
+                2. Verify it meets ALL criteria
+                3. Extract to /shared with tests
+                4. Update services to import from /shared
+                5. Remove service-specific copies
+                6. Monitor for issues
+            </process>
+        </strategy>
+
+        <strategy id="SCA-MIG-002">
+            <title>Moving Code FROM /shared</title>
+            <when_necessary>
+                - Code becomes service-specific
+                - Frequent changes needed
+                - Services need different versions
+                - Coupling issues identified
+            </when_necessary>
+            <process>
+                1. Copy code to each service
+                2. Deprecate shared version
+                3. Update imports gradually
+                4. Remove from /shared after migration
+            </process>
+        </strategy>
+    </section>
+
+    <section title="Anti-Patterns to Avoid">
+        <anti_pattern id="SCA-AP-001">
+            <name>The Kitchen Sink</name>
+            <description>
+                Throwing everything into /shared to avoid any duplication
+            </description>
+            <symptoms>
+                - /shared grows rapidly
+                - Frequent changes to /shared
+                - Services break when /shared changes
+                - Coordinated deployments needed
+            </symptoms>
+            <fix>
+                Apply strict criteria. When in doubt, keep code in services.
+            </fix>
+        </anti_pattern>
+
+        <anti_pattern id="SCA-AP-002">
+            <name>Hidden Service Coupling</name>
+            <description>
+                Using /shared to share business logic between services
+            </description>
+            <symptoms>
+                - Business rules in /shared
+                - Services can't evolve independently
+                - Changes require testing all services
+            </symptoms>
+            <fix>
+                Extract business logic to service APIs, not shared libraries.
+            </fix>
+        </anti_pattern>
+
+        <anti_pattern id="SCA-AP-003">
+            <name>Premature Abstraction</name>
+            <description>
+                Moving code to /shared before it's stable
+            </description>
+            <symptoms>
+                - Frequent /shared changes
+                - Services pinning old versions
+                - Divergent implementations emerging
+            </symptoms>
+            <fix>
+                Wait for stability. Duplication is fine during evolution.
+            </fix>
+        </anti_pattern>
+    </section>
+
+    <section title="Validation and Compliance">
+        <validation id="SCA-VAL-001">
+            <title>Shared Component Audit</title>
+            <frequency>Weekly</frequency>
+            <checks>
+                <check>No business logic in /shared</check>
+                <check>All code has stable interfaces</check>
+                <check>No service-specific configuration</check>
+                <check>No stateful components</check>
+                <check>Proper documentation exists</check>
+            </checks>
+            <command>python scripts/audit_shared_component.py</command>
+        </validation>
+
+        <validation id="SCA-VAL-002">
+            <title>Import Analysis</title>
+            <description>
+                Verify services aren't overly dependent on /shared
+            </description>
+            <metrics>
+                <metric>Less than 10% of imports from /shared</metric>
+                <metric>Core functionality works without /shared</metric>
+                <metric>Services can deploy independently</metric>
+            </metrics>
+        </validation>
+    </section>
+
+    <section title="Practical Examples">
+        <example id="SCA-EX-001">
+            <scenario>Need to handle database URL conversion</scenario>
+            <analysis>
+                Pure string manipulation with no business logic.
+                Handles technical driver differences.
+            </analysis>
+            <decision>APPROPRIATE for /shared</decision>
+            <implementation>
+                /shared/database/database_url_builder.py
+            </implementation>
+        </example>
+
+        <example id="SCA-EX-002">
+            <scenario>User permission checking logic</scenario>
+            <analysis>
+                Business logic that defines authorization rules.
+                May evolve differently per service.
+            </analysis>
+            <decision>NOT appropriate for /shared</decision>
+            <implementation>
+                Use auth service API for permission checks
+            </implementation>
+        </example>
+
+        <example id="SCA-EX-003">
+            <scenario>WebSocket message format</scenario>
+            <analysis>
+                Pure data contract between services.
+                Needs consistency across platform.
+            </analysis>
+            <decision>APPROPRIATE for /shared</decision>
+            <implementation>
+                /shared/schemas/WebSocketMessage.json
+            </implementation>
+        </example>
+
+        <example id="SCA-EX-004">
+            <scenario>LLM cost calculation</scenario>
+            <analysis>
+                Business logic with pricing rules.
+                Will change with business needs.
+            </analysis>
+            <decision>NOT appropriate for /shared</decision>
+            <implementation>
+                Keep in billing service, expose via API
+            </implementation>
+        </example>
+    </section>
+
+    <summary>
+        <key_principle>
+            /shared is for truly universal, stable, stateless utilities that would
+            otherwise require external dependencies. It is NOT for avoiding duplication
+            or sharing business logic.
+        </key_principle>
+        
+        <golden_rules>
+            <rule>When in doubt, DON'T share</rule>
+            <rule>Business logic NEVER belongs in /shared</rule>
+            <rule>Services must remain independently deployable</rule>
+            <rule>Treat /shared like an external library</rule>
+            <rule>Stability before sharing</rule>
+        </golden_rules>
+        
+        <remember>
+            The goal is pragmatic independence, not absolute isolation.
+            Share what truly makes sense to share, but preserve the ability
+            for services to evolve independently.
+        </remember>
+    </summary>
+</specification>

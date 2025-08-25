@@ -37,7 +37,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             
             # Make request that requires database
             async with session.get(
-                f"{self.backend_url}/api/v1/threads",
+                f"{self.backend_url}/api/threads",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 # Should either work or return proper error
@@ -57,7 +57,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
         # Test continues to work with degraded functionality
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"{self.backend_url}/api/v1/users/me",
+                f"{self.backend_url}/api/users/me",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 # Should work even if Redis cache is down
@@ -76,7 +76,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             
             for i in range(20):
                 async with session.get(
-                    f"{self.backend_url}/api/v1/external/flaky",
+                    f"{self.backend_url}/api/external/flaky",
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
                     if resp.status == 503:
@@ -102,7 +102,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             
             # Make request to endpoint that requires retries
             async with session.post(
-                f"{self.backend_url}/api/v1/jobs/retry-test",
+                f"{self.backend_url}/api/jobs/retry-test",
                 json={"attempts_to_succeed": 3},
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -125,7 +125,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             # Request that takes long time
             try:
                 async with session.post(
-                    f"{self.backend_url}/api/v1/jobs/long-running",
+                    f"{self.backend_url}/api/jobs/long-running",
                     json={"duration": 10},
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
@@ -144,7 +144,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
         async with aiohttp.ClientSession() as session:
             # Request that uses optional services
             async with session.get(
-                f"{self.backend_url}/api/v1/dashboard",
+                f"{self.backend_url}/api/dashboard",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -166,7 +166,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
         async with aiohttp.ClientSession() as session:
             # Trigger error in one component
             async with session.post(
-                f"{self.backend_url}/api/v1/agents/trigger-error",
+                f"{self.backend_url}/api/agents/trigger-error",
                 json={"component": "analyzer"},
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -175,7 +175,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             
             # Other components should still work
             async with session.get(
-                f"{self.backend_url}/api/v1/health",
+                f"{self.backend_url}/api/health",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -200,14 +200,14 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             
             # Thread A needs resource 1 then 2
             tasks.append(session.post(
-                f"{self.backend_url}/api/v1/resources/lock",
+                f"{self.backend_url}/api/resources/lock",
                 json={"resources": ["resource1", "resource2"], "order": "sequential"},
                 headers={"Authorization": f"Bearer {token}"}
             ))
             
             # Thread B needs resource 2 then 1
             tasks.append(session.post(
-                f"{self.backend_url}/api/v1/resources/lock",
+                f"{self.backend_url}/api/resources/lock",
                 json={"resources": ["resource2", "resource1"], "order": "sequential"},
                 headers={"Authorization": f"Bearer {token}"}
             ))
@@ -231,7 +231,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
         async with aiohttp.ClientSession() as session:
             # Get initial memory usage
             async with session.get(
-                f"{self.backend_url}/api/v1/metrics/memory",
+                f"{self.backend_url}/api/metrics/memory",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -240,7 +240,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             # Perform memory-intensive operations
             for _ in range(10):
                 async with session.post(
-                    f"{self.backend_url}/api/v1/process/large-data",
+                    f"{self.backend_url}/api/process/large-data",
                     json={"size_mb": 10},
                     headers={"Authorization": f"Bearer {token}"}
                 ) as resp:
@@ -250,7 +250,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             await asyncio.sleep(2)  # Allow garbage collection
             
             async with session.get(
-                f"{self.backend_url}/api/v1/metrics/memory",
+                f"{self.backend_url}/api/metrics/memory",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
@@ -277,7 +277,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             }
             
             async with session.post(
-                f"{self.backend_url}/api/v1/transactions",
+                f"{self.backend_url}/api/transactions",
                 json=transaction_data,
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
@@ -287,7 +287,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             
             # Verify no partial data was committed
             async with session.get(
-                f"{self.backend_url}/api/v1/threads?search=Item",
+                f"{self.backend_url}/api/threads?search=Item",
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200

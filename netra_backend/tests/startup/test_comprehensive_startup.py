@@ -157,9 +157,9 @@ class AuthServiceValidator:
             return ValidationResult(False, f"Auth connectivity failed: {str(e)}")
     
     async def _test_config_endpoint(self, session) -> "ValidationResult":
-        """Test /api/auth/config endpoint"""
+        """Test /auth/config endpoint"""
         try:
-            url = f"{self.auth_url}/api/auth/config"
+            url = f"{self.auth_url}/auth/config"
             async with session.get(url) as response:
                 if response.status != 200:
                     return ValidationResult(False, f"Config endpoint returned {response.status}")

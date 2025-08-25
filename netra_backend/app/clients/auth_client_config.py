@@ -1,24 +1,23 @@
 """
 OAuth configuration and environment detection for auth client.
 Handles OAuth settings for different environments and deployment contexts.
+
+Updated to use unified environment management system.
 """
 
 import logging
+import warnings
 from dataclasses import dataclass
-from enum import Enum
 from typing import List
 
 from netra_backend.app.core.config import get_config
+from netra_backend.app.core.environment_constants import (
+    Environment,
+    EnvironmentDetector as Constants_EnvironmentDetector,
+    get_current_environment
+)
 
 logger = logging.getLogger(__name__)
-
-
-class Environment(Enum):
-    """Environment types for auth configuration."""
-    DEVELOPMENT = "development"
-    TESTING = "testing"
-    STAGING = "staging"
-    PRODUCTION = "production"
 
 
 @dataclass
@@ -42,17 +41,27 @@ class OAuthConfig:
 
 
 class EnvironmentDetector:
-    """Detects current deployment environment from various indicators."""
+    """Detects current deployment environment from various indicators (DEPRECATED).
+    
+    DEPRECATED: Use get_current_environment() from environment_constants instead.
+    This class is maintained for backward compatibility only.
+    """
     
     def detect_environment(self) -> Environment:
-        """Detect current environment from environment variables."""
-        config = get_config()
-        env_override = config.environment.lower() if config.environment else ""
-        if env_override:
-            return self._parse_environment(env_override)
-        if self._check_testing_flag():
-            return Environment.TESTING
-        return self._detect_from_cloud_run()
+        """Detect current environment from environment variables (DEPRECATED).
+        
+        DEPRECATED: Use get_current_environment() from environment_constants instead.
+        """
+        warnings.warn(
+            "EnvironmentDetector.detect_environment() is deprecated. Use "
+            "get_current_environment() from environment_constants instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Delegate to unified environment detection
+        env_str = get_current_environment()
+        return self._parse_environment(env_str)
     
     def _create_env_mapping(self) -> dict:
         """Create environment string to enum mapping."""
@@ -244,7 +253,7 @@ class OAuthConfigGenerator:
         """Build testing OAuth configuration."""
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
-            redirect_uris=["http://test.local:8000/api/auth/callback"],
+            redirect_uris=["http://test.local:8000/auth/callback"],
             javascript_origins=["http://test.local:3000"],
             allow_dev_login=False, allow_mock_auth=True, use_proxy=False
         )
@@ -322,9 +331,9 @@ class OAuthConfigGenerator:
     
     def _get_dev_redirect_uris(self) -> List[str]:
         """Get development redirect URIs."""
-        base_uris = ["http://localhost:8000/api/auth/callback",
-                     "http://localhost:3000/api/auth/callback",
-                     "http://localhost:3010/api/auth/callback"]
+        base_uris = ["http://localhost:8000/auth/callback",
+                     "http://localhost:3000/auth/callback",
+                     "http://localhost:3010/auth/callback"]
         auth_uris = ["http://localhost:3000/auth/callback",
                      "http://localhost:3010/auth/callback"]
         return base_uris + auth_uris
@@ -365,7 +374,7 @@ class OAuthConfigGenerator:
         return OAuthConfig(
             client_id=client_id,
             client_secret="",  # Empty but service can still start
-            redirect_uris=["https://api.staging.netrasystems.ai/api/auth/callback"],
+            redirect_uris=["https://api.staging.netrasystems.ai/auth/callback"],
             javascript_origins=["https://app.staging.netrasystems.ai"],
             allow_dev_login=False,
             allow_mock_auth=False,

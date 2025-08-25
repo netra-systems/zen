@@ -10,7 +10,7 @@ import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 
 import { AuthProvider, AuthContext } from '@/auth/context';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth/unified-auth-service';
 import { useAuthStore } from '@/store/authStore';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { logger } from '@/lib/logger';

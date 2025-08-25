@@ -135,13 +135,13 @@ sequenceDiagram
     participant Google
     
     User->>Frontend: Click "Login with Google"
-    Frontend->>Backend: GET /api/auth/login
+    Frontend->>Backend: GET /auth/login
     Backend->>Backend: Get OAuth config for environment
     Backend->>Frontend: Redirect to Google OAuth
     Frontend->>Google: Authorization request
     User->>Google: Approve permissions
     Google->>Frontend: Redirect with auth code
-    Frontend->>Backend: GET /api/auth/callback?code=xyz
+    Frontend->>Backend: GET /auth/callback?code=xyz
     Backend->>Google: Exchange code for tokens
     Google->>Backend: Return access_token + id_token
     Backend->>Backend: Extract user info from id_token
@@ -271,9 +271,9 @@ OAuthConfig(
     client_id="dev_client_id",
     client_secret="dev_secret",
     redirect_uris=[
-        "http://localhost:8000/api/auth/callback",
-        "http://localhost:3000/api/auth/callback",
-        "http://localhost:3010/api/auth/callback"
+        "http://localhost:8000/auth/callback",
+        "http://localhost:3000/auth/callback",
+        "http://localhost:3010/auth/callback"
     ],
     javascript_origins=[
         "http://localhost:3000",
@@ -293,7 +293,7 @@ OAuthConfig(
     client_id="staging_client_id",
     client_secret="staging_secret",
     redirect_uris=[
-        "https://app.staging.netrasystems.ai/api/auth/callback",
+        "https://app.staging.netrasystems.ai/auth/callback",
         "https://app.staging.netrasystems.ai/callback"
     ],
     javascript_origins=[
@@ -313,7 +313,7 @@ OAuthConfig(
     client_id="prod_client_id",
     client_secret="prod_secret",
     redirect_uris=[
-        "https://api.netrasystems.ai/api/auth/callback",
+        "https://api.netrasystems.ai/auth/callback",
         "https://netrasystems.ai/callback"
     ],
     javascript_origins=[

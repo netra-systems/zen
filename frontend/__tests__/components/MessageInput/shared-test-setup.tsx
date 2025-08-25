@@ -8,20 +8,22 @@
 import React from 'react';
 import { jest } from '@jest/globals';
 
-// Mock utility modules
-jest.mock('@/components/chat/utils/messageInputUtils', () => ({
+// Mock utility modules with proper implementations
+const mockUtils = {
   getPlaceholder: jest.fn((isAuth, isProc, msgLen) => {
     if (!isAuth) return 'Please sign in to send messages';
     if (isProc) return 'Agent is thinking...';
     if (msgLen > 9000) return `${10000 - msgLen} characters remaining`;
     return 'Start typing your AI optimization request... (Shift+Enter for new line)';
   }),
-  getTextareaClassName: jest.fn(() => 'mock-textarea-class'),
-  getCharCountClassName: jest.fn(() => 'mock-char-count-class'),
+  getTextareaClassName: jest.fn(() => 'w-full resize-none rounded-2xl px-4 py-3 pr-12 bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all duration-200 ease-in-out placeholder:text-gray-400 text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed'),
+  getCharCountClassName: jest.fn(() => 'text-xs text-gray-500 absolute bottom-2 right-2'),
   shouldShowCharCount: jest.fn((len) => len > 8000),
   isMessageDisabled: jest.fn((isProc, isAuth, isSend) => isProc || !isAuth || isSend),
   canSendMessage: jest.fn((isDis, msg, len) => !isDis && !!msg.trim() && len <= 10000)
-}));
+};
+
+jest.mock('@/components/chat/utils/messageInputUtils', () => mockUtils);
 
 jest.mock('@/components/chat/types', () => ({
   MESSAGE_INPUT_CONSTANTS: {

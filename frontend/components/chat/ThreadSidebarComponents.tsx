@@ -26,22 +26,46 @@ export const ThreadSidebarHeader: React.FC<ThreadSidebarHeaderProps> = ({
   isCreating,
   isLoading,
   isAuthenticated
-}) => (
-  <div className="p-4 border-b border-gray-200">
-    <button
-      onClick={onCreateThread}
-      disabled={isCreating || isLoading || !isAuthenticated}
-      className="w-full flex items-center justify-center gap-2 px-4 py-2 glass-button-primary rounded-lg transition-all disabled:glass-disabled"
-    >
-      {isCreating ? (
-        <Loader2 className="w-5 h-5 animate-spin" />
-      ) : (
-        <Plus className="w-5 h-5" />
-      )}
-      <span>New Conversation</span>
-    </button>
-  </div>
-);
+}) => {
+  const [isProcessing, setIsProcessing] = React.useState(false);
+  const isProcessingRef = React.useRef(false);
+
+  const handleCreateThread = async () => {
+    if (isProcessing || isProcessingRef.current || isCreating || isLoading || !isAuthenticated) {
+      return;
+    }
+    
+    isProcessingRef.current = true;
+    setIsProcessing(true);
+    try {
+      await onCreateThread();
+    } catch (error) {
+      // Error handling - could add user notification here
+      console.error('Thread creation failed:', error);
+    } finally {
+      isProcessingRef.current = false;
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="p-4 border-b border-gray-200">
+      <button
+        type="button"
+        onClick={handleCreateThread}
+        disabled={isCreating || isLoading || !isAuthenticated || isProcessing}
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 glass-button-primary rounded-lg transition-all disabled:glass-disabled"
+      >
+        {isCreating || isProcessing ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <Plus className="w-5 h-5" />
+        )}
+        <span>New Conversation</span>
+      </button>
+    </div>
+  );
+};
 
 interface ThreadEditingInputProps {
   editingTitle: string;
@@ -72,12 +96,14 @@ export const ThreadEditingInput: React.FC<ThreadEditingInputProps> = ({
       autoFocus
     />
     <button
+      type="button"
       onClick={onSave}
       className="p-1 text-green-600 hover:bg-green-50 rounded"
     >
       <Check className="w-4 h-4" />
     </button>
     <button
+      type="button"
       onClick={onCancel}
       className="p-1 text-gray-600 hover:bg-gray-100 rounded"
     >
@@ -131,6 +157,7 @@ export const ThreadActions: React.FC<ThreadActionsProps> = ({
 }) => (
   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
     <button
+      type="button"
       onClick={(e) => {
         e.stopPropagation();
         onEdit();
@@ -140,6 +167,7 @@ export const ThreadActions: React.FC<ThreadActionsProps> = ({
       <Pencil className="w-4 h-4" />
     </button>
     <button
+      type="button"
       onClick={(e) => {
         e.stopPropagation();
         onDelete();

@@ -171,12 +171,12 @@ class TestCascadingFailureScenarios:
         recovery_manager.save_state_snapshot(connection_id, test_state)
         
         # Simulate WebSocket error
-        ws_error = WebSocketError("Connection lost", ErrorSeverity.HIGH)
+        ws_error = WebSocketError("Connection lost")
         
         # Initiate recovery
         recovery_success = await recovery_manager.initiate_recovery(
             connection_id, user_id, ws_error,
-            [RecoveryStrategy.STATE_SYNC, RecoveryStrategy.EXPONENTIAL_BACKOFF]
+            [RecoveryStrategy.RETRY, RecoveryStrategy.FALLBACK]
         )
         
         assert recovery_success is True

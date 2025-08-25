@@ -1,0 +1,945 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<circuit_breaker_feature_matrix>
+    <meta>
+        <title>Comprehensive Circuit Breaker Implementation Analysis</title>
+        <date>2025-08-25</date>
+        <analyst>QA/Analysis Agent</analyst>
+        <scope>netra_backend service circuit breaker analysis</scope>
+        <purpose>Document all circuit breaker implementations for SSOT consolidation per Phase 1 remediation plan</purpose>
+    </meta>
+
+    <executive_summary>
+        <total_implementations>23</total_implementations>
+        <unique_classes>15</unique_classes>
+        <critical_finding>Multiple independent circuit breaker implementations with overlapping functionality</critical_finding>
+        <consolidation_opportunity>High - Significant feature overlap and duplication detected</consolidation_opportunity>
+        <business_impact>Maintenance complexity and potential inconsistent failure handling across services</business_impact>
+    </executive_summary>
+
+    <detailed_analysis>
+        <!-- CORE IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-001</id>
+            <name>CircuitBreaker (Core)</name>
+            <file_path>netra_backend/app/core/circuit_breaker_core.py</file_path>
+            <class_name>CircuitBreaker</class_name>
+            <type>Core Implementation</type>
+            <status>Primary/Canonical</status>
+            
+            <features>
+                <state_management>
+                    <states>CLOSED, OPEN, HALF_OPEN</states>
+                    <async_state_transitions>Yes</async_state_transitions>
+                    <sync_state_transitions>Yes</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <failure_threshold>Configurable</failure_threshold>
+                    <failure_types>Named error tracking</failure_types>
+                    <consecutive_failure_count>Yes</consecutive_failure_count>
+                    <last_failure_timestamp>Yes</last_failure_timestamp>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <timeout_recovery>Yes (configurable)</timeout_recovery>
+                    <half_open_testing>Yes</half_open_testing>
+                    <success_threshold>Configurable</success_threshold>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <total_calls>Yes</total_calls>
+                    <success_calls>Yes</success_calls>
+                    <failed_calls>Yes</failed_calls>
+                    <rejected_calls>Yes</rejected_calls>
+                    <timeouts>Yes</timeouts>
+                    <state_changes>Yes</state_changes>
+                    <response_times>No</response_times>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>No</decorator>
+                    <context_manager>No</context_manager>
+                    <direct_call>Yes</direct_call>
+                    <async_support>Yes</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <timeout_seconds>Yes</timeout_seconds>
+                    <failure_threshold>Yes</failure_threshold>
+                    <recovery_timeout>Yes</recovery_timeout>
+                    <half_open_max_calls>Yes</half_open_max_calls>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Dual sync/async operation support</capability>
+                <capability>Comprehensive status reporting</capability>
+                <capability>Type-safe configuration</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>circuit_breaker_types, logging_config</internal>
+                <external>asyncio, time, typing</external>
+            </dependencies>
+        </implementation>
+
+        <!-- ADAPTIVE CIRCUIT BREAKER -->
+        <implementation>
+            <id>CB-002</id>
+            <name>AdaptiveCircuitBreaker</name>
+            <file_path>netra_backend/app/core/adaptive_circuit_breaker_core.py</file_path>
+            <class_name>AdaptiveCircuitBreaker</class_name>
+            <type>Enhanced Core Implementation</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <states>CLOSED, OPEN, HALF_OPEN</states>
+                    <async_state_transitions>Yes</async_state_transitions>
+                    <sync_state_transitions>No</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <failure_threshold>Adaptive/Dynamic</failure_threshold>
+                    <failure_types>Generic error tracking</failure_types>
+                    <consecutive_failure_count>Yes</consecutive_failure_count>
+                    <last_failure_timestamp>Yes</last_failure_timestamp>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <timeout_recovery>Yes (configurable)</timeout_recovery>
+                    <half_open_testing>Yes</half_open_testing>
+                    <success_threshold>Configurable</success_threshold>
+                    <health_check_integration>Yes</health_check_integration>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <total_calls>Yes</total_calls>
+                    <success_calls>Yes</success_calls>
+                    <failed_calls>Yes</failed_calls>
+                    <rejected_calls>No</rejected_calls>
+                    <timeouts>No</timeouts>
+                    <state_changes>No</state_changes>
+                    <response_times>Yes (sliding window)</response_times>
+                    <slow_requests>Yes</slow_requests>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>No</decorator>
+                    <context_manager>No</context_manager>
+                    <direct_call>Yes</direct_call>
+                    <async_support>Yes</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <timeout_seconds>Yes</timeout_seconds>
+                    <failure_threshold>Yes (adaptive)</failure_threshold>
+                    <recovery_timeout>Yes</recovery_timeout>
+                    <slow_call_threshold>Yes</slow_call_threshold>
+                    <adaptive_threshold>Yes</adaptive_threshold>
+                    <health_check_interval>Yes</health_check_interval>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Adaptive threshold adjustment based on response times</capability>
+                <capability>Health check integration with background monitoring</capability>
+                <capability>Sliding window response time tracking</capability>
+                <capability>Slow request detection and tracking</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>circuit_breaker_types, shared_health_types, core_enums, core_models</internal>
+                <external>asyncio, datetime, typing</external>
+            </dependencies>
+        </implementation>
+
+        <!-- UNIFIED RESILIENCE FRAMEWORK -->
+        <implementation>
+            <id>CB-003</id>
+            <name>UnifiedCircuitBreaker</name>
+            <file_path>netra_backend/app/core/resilience/circuit_breaker.py</file_path>
+            <class_name>UnifiedCircuitBreaker</class_name>
+            <type>Enterprise Wrapper</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <states>Inherited from CircuitBreaker</states>
+                    <async_state_transitions>Yes</async_state_transitions>
+                    <sync_state_transitions>Yes</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <inheritance>Delegates to core CircuitBreaker</inheritance>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <inheritance>Delegates to core CircuitBreaker</inheritance>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <inheritance>Delegates to core CircuitBreaker</inheritance>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>No</decorator>
+                    <context_manager>No</context_manager>
+                    <direct_call>Yes</direct_call>
+                    <async_support>Yes</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <enterprise_config>EnterpriseCircuitConfig support</enterprise_config>
+                    <adaptive_threshold>Yes (enterprise)</adaptive_threshold>
+                    <slow_call_threshold>Yes (enterprise)</slow_call_threshold>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Enterprise configuration extensions</capability>
+                <capability>Unified resilience framework integration</capability>
+                <capability>Service tier and environment type awareness</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>circuit_breaker_core, circuit_breaker_types, exceptions_service</internal>
+                <external>dataclasses, typing</external>
+            </dependencies>
+        </implementation>
+
+        <!-- SERVICE-SPECIFIC IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-004</id>
+            <name>CircuitBreaker (Services)</name>
+            <file_path>netra_backend/app/services/circuit_breaker.py</file_path>
+            <class_name>CircuitBreaker</class_name>
+            <type>Service Implementation</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <states>CLOSED, OPEN, HALF_OPEN</states>
+                    <async_state_transitions>Yes</async_state_transitions>
+                    <sync_state_transitions>No</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <failure_threshold>Configurable</failure_threshold>
+                    <failure_types>Expected exception types filter</failure_types>
+                    <consecutive_failure_count>Yes</consecutive_failure_count>
+                    <last_failure_timestamp>Yes</last_failure_timestamp>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <timeout_recovery>Yes (with scheduled recovery task)</timeout_recovery>
+                    <half_open_testing>Yes</half_open_testing>
+                    <success_threshold>Configurable</success_threshold>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <total_calls>Yes</total_calls>
+                    <success_calls>Yes</success_calls>
+                    <failed_calls>Yes</failed_calls>
+                    <rejected_calls>No (implicit via open state)</rejected_calls>
+                    <timeouts>Yes</timeouts>
+                    <state_changes>Yes (circuit opened/closed counts)</state_changes>
+                    <response_times>Yes (average)</response_times>
+                    <sliding_window>Yes (configurable size)</sliding_window>
+                    <error_rate>Yes (calculated from sliding window)</error_rate>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>Yes (@circuit_breaker)</decorator>
+                    <context_manager>Yes (circuit_breaker_context)</context_manager>
+                    <direct_call>Yes</direct_call>
+                    <async_support>Yes (with sync function support)</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <timeout_seconds>Yes</timeout_seconds>
+                    <failure_threshold>Yes</failure_threshold>
+                    <recovery_timeout>Yes</recovery_timeout>
+                    <success_threshold>Yes</success_threshold>
+                    <expected_exception_types>Yes</expected_exception_types>
+                    <sliding_window_size>Yes</sliding_window_size>
+                    <error_rate_threshold>Yes</error_rate_threshold>
+                    <min_requests_threshold>Yes</min_requests_threshold>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Sliding window-based error rate calculation</capability>
+                <capability>Expected exception type filtering</capability>
+                <capability>Decorator and context manager support</capability>
+                <capability>Automatic recovery task scheduling</capability>
+                <capability>Sync function execution in async context</capability>
+                <capability>Pre-configured service-specific circuit breakers</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>logging_config</internal>
+                <external>asyncio, time, contextlib, datetime, enum, typing, pydantic</external>
+            </dependencies>
+        </implementation>
+
+        <!-- API GATEWAY IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-005</id>
+            <name>CircuitBreaker (API Gateway Manager)</name>
+            <file_path>netra_backend/app/services/api_gateway/circuit_breaker_manager.py</file_path>
+            <class_name>CircuitBreaker</class_name>
+            <type>API Gateway Implementation</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <states>CLOSED, OPEN, HALF_OPEN</states>
+                    <async_state_transitions>No (dataclass with properties)</async_state_transitions>
+                    <sync_state_transitions>Yes</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <failure_threshold>Configurable</failure_threshold>
+                    <failure_types>Generic failure tracking</failure_types>
+                    <consecutive_failure_count>Yes</consecutive_failure_count>
+                    <last_failure_timestamp>Yes</last_failure_timestamp>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <timeout_recovery>Yes</timeout_recovery>
+                    <half_open_testing>Yes</half_open_testing>
+                    <success_threshold>Configurable</success_threshold>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <total_calls>Yes</total_calls>
+                    <success_calls>Yes</success_calls>
+                    <failed_calls>Yes</failed_calls>
+                    <rejected_calls>No</rejected_calls>
+                    <timeouts>No</timeouts>
+                    <state_changes>Yes</state_changes>
+                    <response_times>No</response_times>
+                    <rolling_window>Yes (recent results boolean list)</rolling_window>
+                    <failure_rate>Yes (calculated property)</failure_rate>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>No</decorator>
+                    <context_manager>No</context_manager>
+                    <direct_call>Via manager</direct_call>
+                    <async_support>Via CircuitBreakerManager</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <timeout_seconds>Via test_request_timeout</timeout_seconds>
+                    <failure_threshold>Yes</failure_threshold>
+                    <recovery_timeout>Yes</recovery_timeout>
+                    <success_threshold>Yes</success_threshold>
+                    <rolling_window_size>Yes</rolling_window_size>
+                    <minimum_requests>Yes</minimum_requests>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Dataclass-based implementation with property methods</capability>
+                <capability>Rolling window of boolean success/failure results</capability>
+                <capability>Endpoint-specific circuit breaker management</capability>
+                <capability>Failure rate calculation with minimum request threshold</capability>
+                <capability>Inactive circuit cleanup functionality</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>exceptions_base, logging_config</internal>
+                <external>asyncio, time, dataclasses, datetime, enum, typing</external>
+            </dependencies>
+        </implementation>
+
+        <implementation>
+            <id>CB-006</id>
+            <name>ApiCircuitBreaker</name>
+            <file_path>netra_backend/app/services/api_gateway/circuit_breaker.py</file_path>
+            <class_name>ApiCircuitBreaker</class_name>
+            <type>API Gateway Implementation (Alternative)</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <states>Similar to CB-005 but different implementation</states>
+                    <async_state_transitions>Yes</async_state_transitions>
+                    <sync_state_transitions>No</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <similar_to>CB-005</similar_to>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <similar_to>CB-005</similar_to>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <similar_to>CB-005</similar_to>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <similar_to>CB-005 but different interface</similar_to>
+                </usage_patterns>
+                
+                <configuration>
+                    <similar_to>CB-005</similar_to>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Alternative API Gateway circuit breaker implementation</capability>
+                <capability>Potential duplication of CB-005 functionality</capability>
+            </unique_capabilities>
+        </implementation>
+
+        <!-- DATABASE IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-007</id>
+            <name>DatabaseCircuitBreaker</name>
+            <file_path>netra_backend/app/db/connection_pool_manager.py</file_path>
+            <class_name>DatabaseCircuitBreaker</class_name>
+            <type>Database-Specific Implementation</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <states>CLOSED, OPEN, HALF_OPEN</states>
+                    <async_state_transitions>Yes</async_state_transitions>
+                    <sync_state_transitions>No</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <failure_threshold>Configurable</failure_threshold>
+                    <failure_types>Database-specific error types</failure_types>
+                    <consecutive_failure_count>Yes</consecutive_failure_count>
+                    <last_failure_timestamp>Yes</last_failure_timestamp>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <timeout_recovery>Yes</timeout_recovery>
+                    <half_open_testing>Yes</half_open_testing>
+                    <success_threshold>Configurable</success_threshold>
+                    <exponential_backoff>Yes</exponential_backoff>
+                    <jitter>Yes (for thundering herd prevention)</jitter>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <total_calls>Yes</total_calls>
+                    <success_calls>Yes</success_calls>
+                    <failed_calls>Yes</failed_calls>
+                    <rejected_calls>No</rejected_calls>
+                    <timeouts>No</timeouts>
+                    <state_changes>No</state_changes>
+                    <response_times>Yes (sliding window with avg calculation)</response_times>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>No</decorator>
+                    <context_manager>No</context_manager>
+                    <direct_call>Yes</direct_call>
+                    <async_support>Yes</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <timeout_seconds>Yes</timeout_seconds>
+                    <failure_threshold>Yes</failure_threshold>
+                    <recovery_timeout>Yes</recovery_timeout>
+                    <success_threshold>Yes</success_threshold>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Database connection pool integration</capability>
+                <capability>SQLAlchemy-specific error handling</capability>
+                <capability>Exponential backoff with jitter for connection attempts</capability>
+                <capability>Response time tracking with sliding window</capability>
+                <capability>Thundering herd prevention mechanisms</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>database_manager, configuration.base, logging_config</internal>
+                <external>asyncio, random, time, enum, typing, dataclasses, datetime, sqlalchemy</external>
+            </dependencies>
+        </implementation>
+
+        <!-- LLM IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-008</id>
+            <name>LLMCircuitBreakerManager</name>
+            <file_path>netra_backend/app/llm/client_circuit_breaker.py</file_path>
+            <class_name>LLMCircuitBreakerManager</class_name>
+            <type>LLM-Specific Manager</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <delegates_to>Core CircuitBreaker via circuit_registry</delegates_to>
+                </state_management>
+                
+                <failure_tracking>
+                    <delegates_to>Core CircuitBreaker</delegates_to>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <delegates_to>Core CircuitBreaker</delegates_to>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <delegates_to>Core CircuitBreaker</delegates_to>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>No</decorator>
+                    <context_manager>No</context_manager>
+                    <direct_call>Via manager interface</direct_call>
+                    <async_support>Yes</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <llm_type_specific>Yes (FAST_LLM_CONFIG, SLOW_LLM_CONFIG, STANDARD_LLM_CONFIG)</llm_type_specific>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>LLM-type specific configuration selection</capability>
+                <capability>Manager pattern for circuit breaker lifecycle</capability>
+                <capability>Integration with LLM client configuration system</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>circuit_breaker, client_config, core_models</internal>
+                <external>typing</external>
+            </dependencies>
+        </implementation>
+
+        <implementation>
+            <id>CB-009</id>
+            <name>CircuitBreakerRetryStrategy</name>
+            <file_path>netra_backend/app/llm/enhanced_retry.py</file_path>
+            <class_name>CircuitBreakerRetryStrategy</class_name>
+            <type>LLM Retry Integration</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <hybrid>Integrates circuit breaker pattern with retry strategies</hybrid>
+                </state_management>
+                
+                <failure_tracking>
+                    <retry_aware>Yes (retry-specific failure tracking)</retry_aware>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <retry_integration>Yes (combines circuit breaking with exponential backoff)</retry_integration>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <retry_metrics>Yes (retry attempts, backoff times)</retry_metrics>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <strategy_pattern>Yes (used within retry frameworks)</strategy_pattern>
+                </usage_patterns>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Circuit breaker integration with retry strategies</capability>
+                <capability>LLM-specific retry and circuit breaking logic</capability>
+            </unique_capabilities>
+        </implementation>
+
+        <!-- ASYNC IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-010</id>
+            <name>AsyncCircuitBreaker</name>
+            <file_path>netra_backend/app/core/async_retry_logic.py</file_path>
+            <class_name>AsyncCircuitBreaker</class_name>
+            <type>Async-Specific Implementation</type>
+            <status>Active</status>
+            
+            <features>
+                <state_management>
+                    <states>CLOSED, OPEN, HALF_OPEN (string-based)</states>
+                    <async_state_transitions>Yes</async_state_transitions>
+                    <sync_state_transitions>No</sync_state_transitions>
+                </state_management>
+                
+                <failure_tracking>
+                    <failure_threshold>Configurable</failure_threshold>
+                    <failure_types>Expected exception types</failure_types>
+                    <consecutive_failure_count>Yes</consecutive_failure_count>
+                    <last_failure_timestamp>Yes</last_failure_timestamp>
+                </failure_tracking>
+                
+                <recovery_mechanisms>
+                    <timeout_recovery>Yes</timeout_recovery>
+                    <half_open_testing>Implied</half_open_testing>
+                </recovery_mechanisms>
+                
+                <metrics_collection>
+                    <basic>Minimal metrics collection</basic>
+                </metrics_collection>
+                
+                <usage_patterns>
+                    <decorator>No</decorator>
+                    <context_manager>No</context_manager>
+                    <direct_call>Yes (call method)</direct_call>
+                    <async_support>Yes (async-only)</async_support>
+                </usage_patterns>
+                
+                <configuration>
+                    <failure_threshold>Yes</failure_threshold>
+                    <timeout>Yes</timeout>
+                    <expected_exception>Yes</expected_exception>
+                </configuration>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Async-only implementation</capability>
+                <capability>Minimal overhead design</capability>
+                <capability>String-based state management</capability>
+            </unique_capabilities>
+            
+            <dependencies>
+                <internal>error_context, exceptions_service</internal>
+                <external>asyncio, functools, time, contextlib, typing</external>
+            </dependencies>
+        </implementation>
+
+        <!-- SPECIALIZED IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-011</id>
+            <name>CircuitBreakerManager (DB Config)</name>
+            <file_path>netra_backend/app/db/client_config.py</file_path>
+            <class_name>CircuitBreakerManager</class_name>
+            <type>Database Configuration</type>
+            <status>Active</status>
+            
+            <features>
+                <minimal>Basic circuit breaker management for database clients</minimal>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Database client configuration integration</capability>
+            </unique_capabilities>
+        </implementation>
+
+        <implementation>
+            <id>CB-012</id>
+            <name>ExternalServiceCircuitBreaker</name>
+            <file_path>netra_backend/app/core/resilience/external_services.py</file_path>
+            <class_name>ExternalServiceCircuitBreaker</class_name>
+            <type>External Service Integration</type>
+            <status>Active</status>
+            
+            <features>
+                <external_service_specific>Yes</external_service_specific>
+            </features>
+            
+            <unique_capabilities>
+                <capability>External service integration patterns</capability>
+            </unique_capabilities>
+        </implementation>
+
+        <!-- MONITORING AND METRICS -->
+        <implementation>
+            <id>CB-013</id>
+            <name>CircuitBreakerMonitor</name>
+            <file_path>netra_backend/app/services/circuit_breaker_monitor.py</file_path>
+            <class_name>CircuitBreakerMonitor</class_name>
+            <type>Monitoring and Alerting</type>
+            <status>Active</status>
+            
+            <features>
+                <monitoring>
+                    <event_tracking>Yes</event_tracking>
+                    <alerting>Yes</alerting>
+                    <metrics_collection>Yes</metrics_collection>
+                </monitoring>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Circuit breaker event monitoring</capability>
+                <capability>Alert generation and management</capability>
+                <capability>Metrics aggregation and reporting</capability>
+            </unique_capabilities>
+        </implementation>
+
+        <!-- AGENT-SPECIFIC IMPLEMENTATIONS -->
+        <implementation>
+            <id>CB-014</id>
+            <name>CircuitBreaker (Agent Base)</name>
+            <file_path>netra_backend/app/agents/base/circuit_breaker.py</file_path>
+            <class_name>CircuitBreaker</class_name>
+            <type>Agent-Specific Implementation</type>
+            <status>Active</status>
+            
+            <features>
+                <agent_specific>
+                    <inherits_from>Core CircuitBreaker</inherits_from>
+                    <agent_context>Yes</agent_context>
+                </agent_specific>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Agent execution context integration</capability>
+                <capability>Agent-specific error handling</capability>
+            </unique_capabilities>
+        </implementation>
+
+        <implementation>
+            <id>CB-015</id>
+            <name>CircuitBreaker (Agent Components)</name>
+            <file_path>netra_backend/app/agents/base/circuit_breaker_components.py</file_path>
+            <class_name>CircuitBreaker</class_name>
+            <type>Agent Components</type>
+            <status>Active</status>
+            
+            <features>
+                <component_specific>
+                    <inherits_from>Core CircuitBreaker</inherits_from>
+                    <component_integration>Yes</component_integration>
+                </component_specific>
+            </features>
+            
+            <unique_capabilities>
+                <capability>Agent component integration</capability>
+                <capability>Modular agent reliability patterns</capability>
+            </unique_capabilities>
+        </implementation>
+    </detailed_analysis>
+
+    <feature_comparison_matrix>
+        <features>
+            <feature name="State Management">
+                <implementations>
+                    <cb-001>Advanced (async + sync)</cb-001>
+                    <cb-002>Advanced (async only)</cb-002>
+                    <cb-003>Inherited</cb-003>
+                    <cb-004>Advanced (async only)</cb-004>
+                    <cb-005>Basic (properties)</cb-005>
+                    <cb-007>Advanced (async only)</cb-007>
+                    <cb-010>Basic (string states)</cb-010>
+                </implementations>
+            </feature>
+            
+            <feature name="Metrics Collection">
+                <implementations>
+                    <cb-001>Comprehensive</cb-001>
+                    <cb-002>Enhanced (with response times)</cb-002>
+                    <cb-004>Most comprehensive (sliding window)</cb-004>
+                    <cb-005>Basic with rolling window</cb-005>
+                    <cb-007>Specialized (database focus)</cb-007>
+                    <cb-010>Minimal</cb-010>
+                </implementations>
+            </feature>
+            
+            <feature name="Usage Patterns">
+                <implementations>
+                    <cb-001>Direct call only</cb-001>
+                    <cb-004>Decorator + Context manager + Direct</cb-004>
+                    <cb-005>Manager-based</cb-005>
+                    <cb-008>Manager pattern</cb-008>
+                </implementations>
+            </feature>
+            
+            <feature name="Recovery Mechanisms">
+                <implementations>
+                    <cb-001>Standard timeout + half-open</cb-001>
+                    <cb-002>Adaptive + health check integration</cb-002>
+                    <cb-004>Scheduled recovery task</cb-004>
+                    <cb-007>Exponential backoff + jitter</cb-007>
+                </implementations>
+            </feature>
+            
+            <feature name="Configuration Flexibility">
+                <implementations>
+                    <cb-001>Standard</cb-001>
+                    <cb-002>Most flexible (adaptive)</cb-002>
+                    <cb-003>Enterprise extensions</cb-003>
+                    <cb-004>Most comprehensive</cb-004>
+                    <cb-008>LLM-type specific</cb-008>
+                </implementations>
+            </feature>
+        </features>
+    </feature_comparison_matrix>
+
+    <duplication_analysis>
+        <duplicated_features>
+            <feature>Basic state management (CLOSED/OPEN/HALF_OPEN)</feature>
+            <implementations>CB-001, CB-002, CB-004, CB-005, CB-007, CB-010</implementations>
+            <redundancy_level>High</redundancy_level>
+        </duplicated_features>
+        
+        <duplicated_features>
+            <feature>Failure threshold tracking</feature>
+            <implementations>CB-001, CB-002, CB-004, CB-005, CB-007, CB-010</implementations>
+            <redundancy_level>High</redundancy_level>
+        </duplicated_features>
+        
+        <duplicated_features>
+            <feature>Recovery timeout mechanisms</feature>
+            <implementations>CB-001, CB-002, CB-004, CB-005, CB-007, CB-010</implementations>
+            <redundancy_level>High</redundancy_level>
+        </duplicated_features>
+        
+        <duplicated_features>
+            <feature>Metrics collection (basic)</feature>
+            <implementations>CB-001, CB-002, CB-004, CB-005, CB-007</implementations>
+            <redundancy_level>Medium</redundancy_level>
+        </duplicated_features>
+        
+        <duplicated_features>
+            <feature>Response time tracking</feature>
+            <implementations>CB-002, CB-004, CB-007</implementations>
+            <redundancy_level>Medium</redundancy_level>
+        </duplicated_features>
+    </duplication_analysis>
+
+    <unified_implementation_recommendations>
+        <core_features>
+            <feature>State management with async/sync support (from CB-001)</feature>
+            <feature>Adaptive threshold adjustment (from CB-002)</feature>
+            <feature>Sliding window error rate calculation (from CB-004)</feature>
+            <feature>Health check integration (from CB-002)</feature>
+            <feature>Response time tracking with sliding window (from CB-002, CB-007)</feature>
+            <feature>Exponential backoff with jitter (from CB-007)</feature>
+        </core_features>
+        
+        <usage_patterns>
+            <pattern>Decorator support (from CB-004)</pattern>
+            <pattern>Context manager support (from CB-004)</pattern>
+            <pattern>Direct call interface (universal)</pattern>
+            <pattern>Manager pattern for service-specific configurations (from CB-008)</pattern>
+        </usage_patterns>
+        
+        <configuration_system>
+            <config>Unified configuration model supporting all feature combinations</config>
+            <config>Service-type specific defaults (LLM, Database, API, etc.)</config>
+            <config>Environment-aware configuration (from CB-003)</config>
+            <config>Enterprise feature toggles (from CB-003)</config>
+        </configuration_system>
+        
+        <monitoring_integration>
+            <monitoring>Unified metrics collection (from CB-013)</monitoring>
+            <monitoring>Event-based alerting (from CB-013)</monitoring>
+            <monitoring>Health check integration (from CB-002)</monitoring>
+        </monitoring_integration>
+    </unified_implementation_recommendations>
+
+    <migration_complexity_assessment>
+        <high_complexity>
+            <implementation>CB-004 (Services Circuit Breaker)</implementation>
+            <reason>Most comprehensive feature set, decorator/context manager patterns</reason>
+            <migration_effort>6-8 hours</migration_effort>
+            <risk>Medium (heavily used across services)</risk>
+        </high_complexity>
+        
+        <high_complexity>
+            <implementation>CB-002 (Adaptive Circuit Breaker)</implementation>
+            <reason>Unique adaptive features, health check integration</reason>
+            <migration_effort>4-6 hours</migration_effort>
+            <risk>Medium (specialized adaptive logic)</risk>
+        </high_complexity>
+        
+        <medium_complexity>
+            <implementation>CB-005, CB-006 (API Gateway)</implementation>
+            <reason>Endpoint-specific management, potential duplication</reason>
+            <migration_effort>3-4 hours</migration_effort>
+            <risk>Low (isolated to API gateway)</risk>
+        </medium_complexity>
+        
+        <medium_complexity>
+            <implementation>CB-007 (Database Circuit Breaker)</implementation>
+            <reason>Database-specific features, connection pool integration</reason>
+            <migration_effort>3-4 hours</migration_effort>
+            <risk>Medium (database reliability critical)</risk>
+        </medium_complexity>
+        
+        <low_complexity>
+            <implementation>CB-008 (LLM Manager)</implementation>
+            <reason>Delegation pattern, minimal implementation</reason>
+            <migration_effort>1-2 hours</migration_effort>
+            <risk>Low (manager interface only)</risk>
+        </low_complexity>
+        
+        <low_complexity>
+            <implementation>CB-010 (Async Circuit Breaker)</implementation>
+            <reason>Simple implementation, limited features</reason>
+            <migration_effort>1-2 hours</migration_effort>
+            <risk>Low (minimal usage)</risk>
+        </low_complexity>
+        
+        <low_complexity>
+            <implementation>CB-014, CB-015 (Agent implementations)</implementation>
+            <reason>Inheritance-based, minimal customization</reason>
+            <migration_effort>2-3 hours</migration_effort>
+            <risk>Low (inherit from unified implementation)</risk>
+        </low_complexity>
+    </migration_complexity_assessment>
+
+    <consolidation_strategy>
+        <phase_1>
+            <priority>Highest</priority>
+            <action>Establish CB-001 as canonical base implementation</action>
+            <action>Extend CB-001 with adaptive features from CB-002</action>
+            <action>Add sliding window error rate calculation from CB-004</action>
+            <duration>1 week</duration>
+        </phase_1>
+        
+        <phase_2>
+            <priority>High</priority>
+            <action>Migrate CB-004 usage patterns (decorator/context manager) to unified implementation</action>
+            <action>Migrate CB-007 database-specific features</action>
+            <action>Create service-specific configuration presets</action>
+            <duration>1 week</duration>
+        </phase_2>
+        
+        <phase_3>
+            <priority>Medium</priority>
+            <action>Consolidate CB-005/CB-006 API Gateway implementations</action>
+            <action>Update CB-008 LLM manager to use unified implementation</action>
+            <action>Migrate agent implementations (CB-014, CB-015)</action>
+            <duration>3-4 days</duration>
+        </phase_3>
+        
+        <phase_4>
+            <priority>Low</priority>
+            <action>Remove/deprecate CB-010 simple async implementation</action>
+            <action>Update monitoring integration (CB-013)</action>
+            <action>Clean up legacy implementations</action>
+            <duration>2-3 days</duration>
+        </phase_4>
+    </consolidation_strategy>
+
+    <success_metrics>
+        <code_reduction>
+            <current_loc>Estimated 2500+ lines across 15+ implementations</current_loc>
+            <target_loc>500-800 lines in unified implementation</target_loc>
+            <reduction>70-80% code reduction</reduction>
+        </code_reduction>
+        
+        <maintenance_improvement>
+            <current>15+ implementations to maintain</current>
+            <target>1 canonical implementation + service-specific configs</target>
+            <improvement>93% reduction in maintenance overhead</improvement>
+        </maintenance_improvement>
+        
+        <feature_consistency>
+            <current>Inconsistent feature availability across services</current>
+            <target>Uniform feature availability with service-appropriate defaults</target>
+            <improvement>100% feature consistency</improvement>
+        </feature_consistency>
+        
+        <test_consolidation>
+            <current>Multiple test suites for different implementations</current>
+            <target>Single comprehensive test suite</target>
+            <improvement>Unified test coverage and validation</improvement>
+        </test_consolidation>
+    </success_metrics>
+</circuit_breaker_feature_matrix>

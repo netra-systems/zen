@@ -38,6 +38,20 @@ PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 # Add parent directory to path for absolute imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# Use centralized environment management
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback for standalone execution
+    class FallbackEnv:
+        def get(self, key, default=None):
+            return os.getenv(key, default)
+        def set(self, key, value, source="test_runner"):
+            os.environ[key] = value
+    
+    def get_env():
+        return FallbackEnv()
+
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
 from test_framework.test_config import configure_dev_environment, configure_real_llm
@@ -75,22 +89,22 @@ class UnifiedTestRunner:
         self.fail_fast_strategy = None
         self.execution_plan = None
         
-        # Test configurations
+        # Test configurations - Use project root as working directory to fix import issues
         self.test_configs = {
             "backend": {
-                "path": self.backend_path,
-                "test_dir": "tests",
-                "config": "pytest.ini",
+                "path": self.project_root,  # Changed from backend_path to project_root
+                "test_dir": "netra_backend/tests",  # Updated to full path from root
+                "config": "netra_backend/pytest.ini",  # Updated to full path from root
                 "command": "pytest"
             },
             "auth": {
-                "path": self.auth_path,
-                "test_dir": "tests",
-                "config": "pytest.ini",
+                "path": self.project_root,  # Changed from auth_path to project_root
+                "test_dir": "auth_service/tests",  # Updated to full path from root
+                "config": "auth_service/pytest.ini",  # Updated to full path from root
                 "command": "pytest"
             },
             "frontend": {
-                "path": self.frontend_path,
+                "path": self.frontend_path,  # Frontend can stay as-is since it uses npm
                 "test_dir": "__tests__",
                 "config": "jest.config.cjs",
                 "command": "npm test"
@@ -179,10 +193,11 @@ class UnifiedTestRunner:
             configure_dev_environment()
             # Enable real services for frontend tests
             if args.real_services:
-                os.environ['USE_REAL_SERVICES'] = 'true'
-                os.environ['BACKEND_URL'] = os.getenv('BACKEND_URL', 'http://localhost:8000')
-                os.environ['AUTH_SERVICE_URL'] = os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
-                os.environ['WEBSOCKET_URL'] = os.getenv('WEBSOCKET_URL', 'ws://localhost:8000')
+                env = get_env()
+                env.set('USE_REAL_SERVICES', 'true', 'test_runner')
+                env.set('BACKEND_URL', env.get('BACKEND_URL', 'http://localhost:8000'), 'test_runner')
+                env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8081'), 'test_runner')
+                env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
         
         if args.real_llm:
             configure_real_llm(
@@ -193,11 +208,12 @@ class UnifiedTestRunner:
                 use_dedicated_env=True
             )
         
-        # Set environment variables
-        os.environ["TEST_ENV"] = args.env
+        # Set environment variables using IsolatedEnvironment
+        env = get_env()
+        env.set("TEST_ENV", args.env, "test_runner")
         
         if args.no_coverage:
-            os.environ["COVERAGE_ENABLED"] = "false"
+            env.set("COVERAGE_ENABLED", "false", "test_runner")
     
     def _load_test_environment_secrets(self):
         """Load test environment secrets to prevent validation errors during testing."""
@@ -214,9 +230,10 @@ class UnifiedTestRunner:
         }
         
         # Only set if not already present (don't override existing values)
+        env = get_env()
         for key, value in test_env_vars.items():
-            if key not in os.environ:
-                os.environ[key] = value
+            if not env.get(key):
+                env.set(key, value, "test_runner_secrets")
         
         # Try to load .env.test file if it exists
         test_env_file = self.project_root / ".env.test"
@@ -403,7 +420,7 @@ class UnifiedTestRunner:
     def _get_services_for_category(self, category_name: str) -> List[str]:
         """Determine which services to run for a category."""
         category_service_mapping = {
-            "smoke": ["backend", "auth"],
+            "smoke": ["backend"],  # Auth service has no smoke tests
             "unit": ["backend", "auth"],
             "integration": ["backend"],
             "api": ["backend"],
@@ -442,8 +459,13 @@ class UnifiedTestRunner:
         if args.verbose:
             print(f"[DEBUG] Running command for {service}: {cmd}")
         
-        # Execute tests
+        # Execute tests with timeout
         start_time = time.time()
+        # Set timeout based on service type
+        if service == "frontend":
+            timeout_seconds = 120  # 2 minutes for frontend tests (mostly unit tests)
+        else:
+            timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
             result = subprocess.run(
                 cmd,
@@ -452,9 +474,25 @@ class UnifiedTestRunner:
                 text=True,
                 shell=True,
                 encoding='utf-8',
-                errors='replace'
+                errors='replace',
+                timeout=timeout_seconds
             )
+            # Handle unicode encoding issues by cleaning the output
+            if result.stdout:
+                result.stdout = result.stdout.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
+            if result.stderr:
+                result.stderr = result.stderr.encode('utf-8', errors='replace').decode('utf-8', errors='replace')
             success = result.returncode == 0
+        except subprocess.TimeoutExpired:
+            print(f"[ERROR] {service} tests timed out after {timeout_seconds} seconds")
+            print(f"[ERROR] Command: {cmd}")
+            success = False
+            result = subprocess.CompletedProcess(
+                args=cmd, 
+                returncode=1, 
+                stdout="", 
+                stderr=f"Tests timed out after {timeout_seconds} seconds"
+            )
         except Exception as e:
             print(f"[ERROR] Failed to run {service} tests: {e}")
             success = False
@@ -483,7 +521,7 @@ class UnifiedTestRunner:
             "smoke": ["-m", '"smoke"'],
             "unit": ["-m", '"not integration and not e2e"'],
             "integration": ["-m", '"integration"'],
-            "api": ["-k", '"api"'],
+            "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
             "database": ["-k", '"database or db"'],
             "websocket": ["-k", '"websocket or ws"'],
             "agent": ["-k", '"agent"'],
@@ -495,8 +533,8 @@ class UnifiedTestRunner:
         if category_name in category_markers:
             cmd_parts.extend(category_markers[category_name])
         
-        # Add environment-specific filtering
-        if hasattr(args, 'env') and args.env:
+        # Add environment-specific filtering (skip for API category which doesn't use env markers)
+        if hasattr(args, 'env') and args.env and category_name != "api":
             # Add environment marker to filter tests - use pytest markers, not -k expressions
             env_marker = f'env_{args.env}'
             cmd_parts.extend(["-m", env_marker])
@@ -532,12 +570,13 @@ class UnifiedTestRunner:
         # Determine which Jest setup to use
         if args.real_services or args.env in ['dev', 'staging']:
             setup_file = "jest.setup.real.js"
-            # Set environment variables for real service testing
-            os.environ['USE_REAL_SERVICES'] = 'true'
+            # Set environment variables for real service testing using IsolatedEnvironment
+            env = get_env()
+            env.set('USE_REAL_SERVICES', 'true', 'test_runner_frontend')
             if args.env == 'dev':
-                os.environ['USE_DOCKER_SERVICES'] = 'true'
+                env.set('USE_DOCKER_SERVICES', 'true', 'test_runner_frontend')
             if args.real_llm:
-                os.environ['USE_REAL_LLM'] = 'true'
+                env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
         else:
             setup_file = "jest.setup.js"
             os.environ.pop('USE_REAL_SERVICES', None)
@@ -545,10 +584,10 @@ class UnifiedTestRunner:
             os.environ.pop('USE_REAL_LLM', None)
         
         category_commands = {
-            "unit": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=unit",
-            "integration": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=integration",
-            "e2e": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=e2e",
-            "frontend": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}'"
+            "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
+            "integration": f"npm run test:integration -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
+            "e2e": f"npm run test:critical -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",
+            "frontend": f"npm run test:fast"
         }
         
         base_command = category_commands.get(category_name, f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}'")
@@ -567,15 +606,17 @@ class UnifiedTestRunner:
     
     def _set_test_environment(self, args: argparse.Namespace):
         """Set environment variables for test execution."""
-        # Set TEST_ENV for environment-aware testing
+        # Set TEST_ENV for environment-aware testing using IsolatedEnvironment
+        env = get_env()
         if hasattr(args, 'env'):
-            os.environ['TEST_ENV'] = args.env
+            env.set('TEST_ENV', args.env, 'test_runner_pytest')
         
         # Set production protection
         if hasattr(args, 'allow_prod') and args.allow_prod:
-            os.environ['ALLOW_PROD_TESTS'] = 'true'
+            env.set('ALLOW_PROD_TESTS', 'true', 'test_runner_pytest')
         else:
-            os.environ.pop('ALLOW_PROD_TESTS', None)
+            # Note: Cannot unset in IsolatedEnvironment, set to false instead
+            env.set('ALLOW_PROD_TESTS', 'false', 'test_runner_pytest')
         
         # Map env to existing env var patterns
         env_mapping = {
@@ -586,16 +627,17 @@ class UnifiedTestRunner:
         }
         
         if hasattr(args, 'env'):
+            env = get_env()
             mapped_env = env_mapping.get(args.env, args.env)
-            os.environ['ENVIRONMENT'] = mapped_env
+            env.set('ENVIRONMENT', mapped_env, 'test_runner_nodetest')
             
             # Set specific flags based on environment
             if args.env == 'test':
-                os.environ['TEST_MODE'] = 'mock'
-                os.environ['USE_TEST_DATABASE'] = 'true'
+                env.set('TEST_MODE', 'mock', 'test_runner_nodetest')
+                env.set('USE_TEST_DATABASE', 'true', 'test_runner_nodetest')
             elif args.env in ['dev', 'staging', 'prod']:
-                os.environ['TEST_MODE'] = 'real'
-                os.environ.pop('USE_TEST_DATABASE', None)
+                env.set('TEST_MODE', 'real', 'test_runner_nodetest')
+                env.set('USE_TEST_DATABASE', 'false', 'test_runner_nodetest')
     
     def _extract_test_counts_from_result(self, result: Dict) -> Dict[str, int]:
         """Extract test counts from execution result."""

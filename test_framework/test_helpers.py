@@ -310,7 +310,7 @@ def create_test_user_with_oauth(
     # This would normally go through the OAuth flow
     # For testing, we simulate with direct registration
     response = httpx.post(
-        f"{auth_url}/api/auth/register",
+        f"{auth_url}/auth/register",
         json={
             "email": email,
             "password": "OAuthTest123!",

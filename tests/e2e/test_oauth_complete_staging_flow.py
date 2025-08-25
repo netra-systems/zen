@@ -310,7 +310,7 @@ class OAuthFlowTester:
                     print("[PASS] Auth tokens work with API")
             
             # Test API -> Auth service communication
-            response = await client.get(f"{self.api_url}/api/auth/providers")
+            response = await client.get(f"{self.api_url}/auth/providers")
             if response.status_code in [200, 404, 307]:
                 results["api_to_auth"] = True
                 print("[PASS] API can communicate with Auth service")

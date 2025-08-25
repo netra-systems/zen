@@ -65,7 +65,7 @@ class TestAuthServiceSSLParameterFailures:
         Root Cause: Auth service URL normalization doesn't properly detect and 
         remove SSL parameters for Cloud SQL Unix socket connections.
         """
-        from auth_service.auth_core.database.connection import DatabaseConnection
+        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
         
         cloud_sql_urls = [
             # Various Cloud SQL URL formats that should have SSL params removed
@@ -76,8 +76,8 @@ class TestAuthServiceSSLParameterFailures:
         ]
         
         for url in cloud_sql_urls:
-            # Auth service should remove ALL SSL parameters for Cloud SQL
-            normalized = DatabaseConnection._normalize_url_for_asyncpg(url)
+            # SSOT: Use AuthDatabaseManager for URL normalization  
+            normalized = AuthDatabaseManager.convert_database_url(url)
             
             # This MUST fail - SSL parameters should be removed
             ssl_params_present = any(param in normalized for param in [
@@ -95,7 +95,7 @@ class TestAuthServiceSSLParameterFailures:
         Root Cause: Auth service incorrectly handles SSL parameter conversion 
         for non-Cloud SQL connections.
         """
-        from auth_service.auth_core.database.connection import DatabaseConnection
+        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
         
         # Regular PostgreSQL connection (not Cloud SQL)
         regular_postgres_url = "postgresql://user:pass@staging-db:5432/db?sslmode=require"
@@ -104,8 +104,8 @@ class TestAuthServiceSSLParameterFailures:
             "DATABASE_URL": regular_postgres_url,
             "ENVIRONMENT": "staging"
         }):
-            # For regular connections, sslmode should be converted to ssl
-            normalized = DatabaseConnection._normalize_url_for_asyncpg(regular_postgres_url)
+            # SSOT: Use AuthDatabaseManager for URL normalization
+            normalized = AuthDatabaseManager.convert_database_url(regular_postgres_url)
             
             # This MUST fail if conversion is incorrect
             conversion_issues = []
@@ -127,19 +127,18 @@ class TestAuthServiceSSLParameterFailures:
         different SSL parameter normalization logic.
         """
         from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-        from auth_service.auth_core.database.connection import DatabaseConnection
         
         test_url = (
             "postgresql://user:pass@/db?host=/cloudsql/instance&sslmode=require"
         )
         
-        # Get normalized URLs from both classes
+        # SSOT: Only use AuthDatabaseManager - no more duplicate implementations
         manager_normalized = AuthDatabaseManager._normalize_database_url(test_url)
-        connection_normalized = DatabaseConnection._normalize_url_for_asyncpg(test_url)
+        convert_normalized = AuthDatabaseManager.convert_database_url(test_url)
         
-        # This MUST fail - both should handle SSL consistently  
-        assert manager_normalized == connection_normalized, \
-            f"Inconsistent SSL handling: manager={manager_normalized}, connection={connection_normalized}"
+        # This verifies internal consistency within AuthDatabaseManager
+        assert manager_normalized == convert_normalized, \
+            f"Inconsistent internal SSL handling: _normalize={manager_normalized}, convert={convert_normalized}"
     
     @pytest.mark.asyncio
     async def test_staging_deployment_ssl_configuration_mismatch(self):

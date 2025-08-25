@@ -48,7 +48,7 @@ export class UnifiedAuthService {
             callback: unifiedApiConfig.endpoints.authCallback,
             token: unifiedApiConfig.endpoints.authToken,
             user: unifiedApiConfig.endpoints.authMe,
-            dev_login: `${unifiedApiConfig.urls.auth}/api/v1/auth/dev/login`
+            dev_login: `${unifiedApiConfig.urls.auth}/auth/dev/login`
           },
           authorized_javascript_origins: [unifiedApiConfig.urls.frontend],
           authorized_redirect_uris: [`${unifiedApiConfig.urls.frontend}/auth/callback`]
@@ -149,13 +149,23 @@ export class UnifiedAuthService {
     
     try {
       const result = await authServiceClient.refreshToken();
-      if (result.access_token) {
+      if (result && result.access_token) {
         this.setToken(result.access_token);
+        logger.info('Token refreshed successfully', { environment: this.environment });
+        return result;
+      } else {
+        logger.warn('Token refresh returned empty result', { environment: this.environment });
+        throw new Error('Token refresh returned empty result');
       }
-      return result;
     } catch (error) {
-      logger.error('Token refresh failed', error as Error);
-      this.removeToken();
+      logger.error('Token refresh failed', error as Error, { environment: this.environment });
+      
+      // In staging/production, don't remove token immediately on refresh failure
+      // The user might still be authenticated with the backend
+      if (this.environment === 'development' || this.environment === 'test') {
+        this.removeToken();
+      }
+      
       throw error;
     }
   }

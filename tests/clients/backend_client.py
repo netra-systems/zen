@@ -216,7 +216,7 @@ class BackendTestClient:
         """
         try:
             response = await self.client.get(
-                f"/api/auth/check-permission/{permission}",
+                f"/auth/check-permission/{permission}",
                 headers={"Authorization": f"Bearer {token}"}
             )
             return response.status_code == 200

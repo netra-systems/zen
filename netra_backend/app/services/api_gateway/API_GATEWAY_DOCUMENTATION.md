@@ -67,14 +67,14 @@ router = ApiGatewayRouter()
 
 # Add routes
 router.add_route(
-    path="/api/v1/agents",
+    path="/api/agents",
     method="GET",
     target="http://agent-service:8001",
     weight=100
 )
 
 # Route request
-target = router.route_request("/api/v1/agents", "GET")
+target = router.route_request("/api/agents", "GET")
 # Returns: "http://agent-service:8001"
 
 # Check health
@@ -118,7 +118,7 @@ enterprise_config = RateLimitConfig(
 rate_limiter.set_client_config("enterprise_client_123", enterprise_config)
 
 # Check if request allowed
-if rate_limiter.is_allowed("client_123", "/api/v1/agents"):
+if rate_limiter.is_allowed("client_123", "/api/agents"):
     # Process request
     pass
 else:
@@ -156,17 +156,17 @@ cache = ApiCacheManager(max_size=1000)
 
 # Cache a response
 cache.set(
-    request_path="/api/v1/agents",
+    request_path="/api/agents",
     params={"status": "active"},
     value={"agents": [...]},
     metadata={"cache_time": 300}
 )
 
 # Retrieve cached response
-cached_value = cache.get("/api/v1/agents", {"status": "active"})
+cached_value = cache.get("/api/agents", {"status": "active"})
 
 # Invalidate cache entries
-cache.invalidate(pattern="/api/v1/agents")
+cache.invalidate(pattern="/api/agents")
 
 # Get cache statistics
 stats = cache.get_stats()
@@ -208,14 +208,14 @@ config = CircuitBreakerConfig(
     recovery_timeout=60,
     success_threshold=3
 )
-circuit_breaker = cb_manager.get_circuit_breaker("/api/v1/agents", config)
+circuit_breaker = cb_manager.get_circuit_breaker("/api/agents", config)
 
 # Execute with circuit breaker protection
 try:
     result = circuit_breaker.call(backend_service_call, endpoint_params)
 except CircuitBreakerOpenError:
     # Return fallback response
-    result = cb_manager.fallback_service.get_fallback("/api/v1/agents")
+    result = cb_manager.fallback_service.get_fallback("/api/agents")
 
 # Get circuit breaker stats
 stats = circuit_breaker.get_stats()
@@ -304,11 +304,11 @@ API_GATEWAY_ENABLED=true
 # api_gateway_config.yaml
 router:
   routes:
-    - path: "/api/v1/agents"
+    - path: "/api/agents"
       method: "GET"
       target: "http://agent-service:8001"
       weight: 100
-    - path: "/api/v1/threads"
+    - path: "/api/threads"
       method: "POST"
       target: "http://thread-service:8002"
       weight: 100

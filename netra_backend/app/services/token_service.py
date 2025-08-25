@@ -202,7 +202,10 @@ class TokenService:
     
     async def validate_token_jwt(self, token: str) -> Dict[str, Any]:
         """
-        Validate a JWT token with comprehensive checks.
+        DEPRECATED: Validate a JWT token - delegates to canonical AuthServiceClient.
+        
+        SSOT ENFORCEMENT: This method now delegates to the canonical auth client
+        to eliminate duplicate token validation implementations.
         
         Args:
             token: JWT token to validate
@@ -210,47 +213,35 @@ class TokenService:
         Returns:
             Validation result with token data
         """
-        if not token:
-            return {'valid': False, 'error': 'empty_token'}
+        import warnings
+        warnings.warn(
+            "TokenService.validate_token_jwt is DEPRECATED. "
+            "Use netra_backend.app.clients.auth_client_core.auth_client.validate_token_jwt directly.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        try:
-            secret = self._get_jwt_secret()
+        # Delegate to canonical implementation
+        from netra_backend.app.clients.auth_client_core import auth_client
+        
+        result = await auth_client.validate_token_jwt(token)
+        
+        # Handle None result from auth service
+        if result is None:
+            return {'valid': False, 'error': 'auth_service_unavailable'}
             
-            # Decode with clock skew tolerance
-            payload = jwt.decode(
-                token, 
-                secret, 
-                algorithms=['HS256'],
-                leeway=timedelta(seconds=self._clock_skew_tolerance)
-            )
-            
-            # Check if token is revoked
-            jti = payload.get('jti')
-            if jti and await self._is_token_revoked(jti):
-                return {'valid': False, 'error': 'token_revoked'}
-            
-            # Return validation result
+        # Ensure consistent return format for backward compatibility
+        if isinstance(result, dict):
+            # Map auth service response to expected format
             return {
-                'valid': True,
-                'user_id': payload.get('sub'),
-                'email': payload.get('email'),
-                'permissions': payload.get('permissions', []),
-                'session_id': payload.get('session_id'),
-                'expires_at': datetime.fromtimestamp(payload.get('exp')),
-                'token_type': payload.get('type', 'access'),
-                'jti': jti
+                'valid': result.get('valid', False),
+                'user_id': result.get('user_id'),
+                'email': result.get('email'), 
+                'permissions': result.get('permissions', []),
+                'error': result.get('error')
             }
             
-        except jwt.ExpiredSignatureError:
-            return {'valid': False, 'error': 'token_expired'}
-        except jwt.InvalidTokenError as e:
-            # Try with old keys for signature rotation
-            if await self._validate_with_old_keys(token):
-                return await self._validate_with_old_keys(token)
-            return {'valid': False, 'error': f'invalid_token: {str(e)}'}
-        except Exception as e:
-            logger.error(f"Token validation failed: {e}")
-            return {'valid': False, 'error': 'validation_failed'}
+        return {'valid': False, 'error': 'unexpected_response_format'}
     
     async def validate_with_old_keys(self, token: str) -> bool:
         """

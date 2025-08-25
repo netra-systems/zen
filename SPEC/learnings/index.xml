@@ -26,6 +26,7 @@
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
             <critical-takeaway>Always verify OAuth configuration matches between code and provider console (oauth_deployment_verification.xml).</critical-takeaway>
             <critical-takeaway>Next.js proxy rewrites must be disabled in production - frontend should call services directly (oauth_staging_issues.xml).</critical-takeaway>
+            <critical-takeaway>Auth service routes ALWAYS use /auth/* prefix - frontend must include this (frontend_auth_urls.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">
@@ -37,6 +38,63 @@
             <critical-takeaway>Auth service MUST use unified configuration via lazy loading pattern while maintaining service independence (unified_config_auth_service.xml).</critical-takeaway>
         </category>
 
+        <category name="Staging Authentication Failures [CRITICAL]" path="SPEC/learnings/staging_authentication_failures_2025.xml" keywords="Staging, Authentication, 403 Forbidden, Service-to-Service, Token Refresh, JWT Secret, OAuth">
+            <critical-takeaway>CRITICAL: Authentication failures in staging indicate imminent production failures that will cause complete platform unavailability and 100% revenue loss.</critical-takeaway>
+            <critical-takeaway>MANDATORY: All authentication tests must run in staging environment (@pytest.mark.env("staging")) to catch environment-specific configuration issues.</critical-takeaway>
+            <critical-takeaway>Frontend gets 403 Forbidden when calling backend threads endpoint due to service account authentication failure and JWT secret mismatch.</critical-takeaway>
+            <critical-takeaway>Service-to-service authentication completely broken between frontend-backend and backend-auth services - microservice architecture non-functional.</critical-takeaway>
+            <critical-takeaway>Token refresh mechanism completely non-functional - users cannot maintain sessions and are forced to re-authenticate repeatedly.</critical-takeaway>
+            <critical-takeaway>JWT secret synchronization failure between services causes valid tokens to be rejected across service boundaries.</critical-takeaway>
+            <critical-takeaway>OAuth configuration misconfigured in staging preventing new user registration and social login - no user acquisition possible.</critical-takeaway>
+            <critical-takeaway>CORS configuration blocks legitimate cross-service authentication requests causing service communication failures.</critical-takeaway>
+        </category>
+        
+        <category name="Auth Service Staging Log Issues [HIGH PRIORITY]" path="SPEC/learnings/auth_service_staging_log_issues.xml" keywords="HEAD Method, HTTP 405, Monitoring, Database Initialization, Idempotency, UniqueViolationError">
+            <critical-takeaway>CRITICAL: Health endpoints must support HEAD requests - monitoring systems fail with 405 Method Not Allowed causing false alerts.</critical-takeaway>
+            <critical-takeaway>Database initialization must be idempotent - UniqueViolationError warnings indicate potential startup fragility.</critical-takeaway>
+            <critical-takeaway>All monitoring endpoints (/health, /auth/health, /readiness, /docs) must support HEAD method for monitoring compatibility.</critical-takeaway>
+            <critical-takeaway>HEAD responses must have same headers as GET but empty body per HTTP specification.</critical-takeaway>
+            <critical-takeaway>Database initialization should use IF NOT EXISTS patterns and handle concurrent initialization gracefully.</critical-takeaway>
+            <critical-takeaway>Test HTTP method compatibility with common monitoring system user agents (Kubernetes, GCP Load Balancer, AWS ALB, Datadog).</critical-takeaway>
+        </category>
+
+        <category name="Database Connectivity Critical Fix [RESOLVED]" path="SPEC/learnings/database_postgres_connectivity_fix_2025.xml" keywords="Database, Postgres, Connection, POSTGRES_DB, netra_dev, staging">
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed critical 'database postgres does not exist' error by updating POSTGRES_DB configuration.</critical-takeaway>
+            <critical-takeaway>NEVER use 'postgres' system database name for application data - use 'netra_dev' for staging and development.</critical-takeaway>
+            <critical-takeaway>All environments must use consistent database naming: dev/staging='netra_dev', test='netra_test', prod='netra_production'.</critical-takeaway>
+            <critical-takeaway>Configuration alignment is critical: .env files, deployment scripts, and Secret Manager must all use same database names.</critical-takeaway>
+            <critical-takeaway>Silent "staging mode" fallback hides critical database issues - prefer fail-fast behavior for database connectivity problems.</critical-takeaway>
+            <critical-takeaway>Pre-deployment validation must include database existence and connectivity tests with actual environment credentials.</critical-takeaway>
+        </category>
+        
+        <category name="AsyncPG URL Normalization [CRITICAL]" path="SPEC/learnings/asyncpg_url_normalization.xml" keywords="AsyncPG, PostgreSQL, URL, SQLAlchemy, Driver, Normalization, Connection">
+            <critical-takeaway>CRITICAL: asyncpg.connect() requires plain 'postgresql://' URLs - SQLAlchemy prefixes like 'postgresql+asyncpg://' cause "invalid DSN" errors.</critical-takeaway>
+            <critical-takeaway>ALWAYS use DatabaseURLBuilder.format_for_asyncpg_driver() before passing URLs to asyncpg.connect().</critical-takeaway>
+            <critical-takeaway>NEVER use inline string replacements for driver prefix normalization - use centralized methods.</critical-takeaway>
+            <critical-takeaway>Different PostgreSQL drivers have different URL requirements - asyncpg is strict, psycopg2 is flexible.</critical-takeaway>
+            <critical-takeaway>Test database connections with actual environment URLs including ports and special characters.</critical-takeaway>
+            <critical-takeaway>Dev launcher failures with "Database connection failed after 5 attempts" often indicate URL format issues.</critical-takeaway>
+        </category>
+
+        <category name="API Versioning Anti-Pattern [RESOLVED]" path="SPEC/learnings/api_versioning_antipattern.xml" keywords="API, v1, versioning, URLs, paths, REST">
+            <critical-takeaway>RESOLVED 2025-08-25: All v1 references have been removed from all services.</critical-takeaway>
+            <critical-takeaway>Auth service now uses clean /auth/* paths (no /api/v1/auth/*).</critical-takeaway>
+            <critical-takeaway>Backend uses consistent /api/* paths without version prefixes.</critical-takeaway>
+            <critical-takeaway>Frontend simplified - no version logic needed, uses clean paths.</critical-takeaway>
+            <critical-takeaway>For internal microservices, version through deployment strategies, not URLs.</critical-takeaway>
+            <critical-takeaway>URLs are now clean and semantic: auth.domain/auth/*, api.domain/api/*.</critical-takeaway>
+        </category>
+        
+        <category name="Deployment Performance Testing" path="SPEC/learnings/iteration3_deployment_performance_testing.xml" keywords="Deployment, Performance, Startup, Memory, CPU, Health, Timeout, Resource Optimization">
+            <critical-takeaway>CRITICAL: Deployment performance tests prevent timeout failures and validate resource optimization compliance.</critical-takeaway>
+            <critical-takeaway>Startup timeout prevention requires comprehensive testing with 60-second Cloud Run limits.</critical-takeaway>
+            <critical-takeaway>Memory optimization from 2Gi to 1Gi requires extensive validation with leak detection.</critical-takeaway>
+            <critical-takeaway>Health endpoints must respond within 100ms for deployment readiness validation.</critical-takeaway>
+            <critical-takeaway>Edge case testing covers memory pressure, CPU throttling, and cascading timeout scenarios.</critical-takeaway>
+            <critical-takeaway>Performance monitoring must be integrated into deployment pipelines for regression detection.</critical-takeaway>
+            <critical-takeaway>Container startup probes require comprehensive success/failure/recovery testing.</critical-takeaway>
+        </category>
+        
         <category name="Project Structure" path="SPEC/learnings/project_structure_enforcement.xml" keywords="Structure, Imports, netra_backend, Canonical">
             <critical-takeaway>THE canonical structure: netra_backend/app/ for production, netra_backend/tests/ for tests. This is PERMANENT.</critical-takeaway>
             <critical-takeaway>All imports MUST use netra_backend.app.* prefix. Fix imports, NOT the structure.</critical-takeaway>
@@ -49,6 +107,15 @@
             <critical-takeaway>NEVER import environment management from dev_launcher - each service MUST have its own isolated_environment.</critical-takeaway>
             <critical-takeaway>Service-local implementations of shared patterns are acceptable and required for independence.</critical-takeaway>
             <critical-takeaway>Always provide production fallback patterns when development modules may not be available.</critical-takeaway>
+        </category>
+        
+        <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed critical SSOT violations in auth_service - removed 365+ lines of duplicate code.</critical-takeaway>
+            <critical-takeaway>AuthDatabaseManager is the canonical database connection implementation - all operations delegate to it.</critical-takeaway>
+            <critical-takeaway>JWTHandler.validate_token() is the single source of truth for JWT validation - removed duplicate validation logic.</critical-takeaway>
+            <critical-takeaway>IsolatedEnvironment.get_env().get() is the ONLY way to access environment variables - replaced 40+ os.getenv() calls.</critical-takeaway>
+            <critical-takeaway>Backward compatibility maintained through delegation patterns and aliases during SSOT remediation.</critical-takeaway>
+            <critical-takeaway>Regular SSOT audits essential - violations accumulate quickly without strict enforcement.</critical-takeaway>
             <critical-takeaway>netra_backend MUST use netra_backend.app.core.isolated_environment, NOT dev_launcher.isolated_environment.</critical-takeaway>
             <critical-takeaway>Remove all service discovery imports from dev_launcher in production services.</critical-takeaway>
         </category>
@@ -82,7 +149,7 @@
         </category>
         
         <category name="Unified Configuration" path="SPEC/learnings/unified_configuration.xml" keywords="Config, Hot Reload, ConfigManager, Configuration, Secrets, GCP">
-            <critical-takeaway>Configuration MUST use single source of truth at netra_backend.app.config. 110+ duplicate config files have been REMOVED.</critical-takeaway>
+            <critical-takeaway>Configuration MUST use single source of truth at netra_backend.app.config. 110+ redundant implementations have been REMOVED to maintain SSOT.</critical-takeaway>
             <critical-takeaway>NEVER import removed files: config_environment.py, config_loader.py, config_manager.py, config_envvars.py - they're DELETED.</critical-takeaway>
             <critical-takeaway>Hot reload enables zero-downtime updates via CONFIG_HOT_RELOAD=true and reload_config().</critical-takeaway>
             <critical-takeaway>All configuration access uses: from netra_backend.app.config import get_config.</critical-takeaway>
@@ -92,6 +159,14 @@
         
         <category name="Secret Manager Interface" path="SPEC/learnings/secret_manager_interface.xml" keywords="SecretManager, load_all_secrets, Interface Contract, UnifiedSecretManager">
             <critical-takeaway>SecretManager MUST provide public load_all_secrets() method for UnifiedSecretManager compatibility.</critical-takeaway>
+        </category>
+        
+        <category name="Configuration Issues 2025" path="SPEC/learnings/configuration_issues_2025.xml" keywords="DATABASE_URL, ClickHouse, Redis, Environment Detection, Import Paths, WebSocket">
+            <critical-takeaway>DATABASE_URL must use Cloud SQL format in staging, never localhost fallback - staging configuration failures indicate production readiness issues.</critical-takeaway>
+            <critical-takeaway>Redis fallback to localhost must be disabled in staging/production via REDIS_FALLBACK_ENABLED=false environment variable.</critical-takeaway>
+            <critical-takeaway>Import paths: ClickHouseClient moved to data_sub_agent module, RedisClient is RedisManager, WebSocket imports use fastapi not starlette.</critical-takeaway>
+            <critical-takeaway>IsolatedEnvironment singleton requires instance reset when testing different environment configurations.</critical-takeaway>
+            <critical-takeaway>Service client connection tests must use async patterns: asyncio.run(client.connect()) for ClickHouse, asyncio.run(client.ping()) for Redis.</critical-takeaway>
             <critical-takeaway>Never access private methods (_method) from external components - use public interfaces.</critical-takeaway>
             <critical-takeaway>Secret loading failures should log warnings but NOT crash the application.</critical-takeaway>
             <critical-takeaway>Always write interface contract tests when creating component dependencies.</critical-takeaway>
@@ -112,7 +187,7 @@
         </category>
         
         <category name="Frontend Staging Errors (Five Whys)" path="SPEC/learnings/frontend_staging_errors_2025_08_24.xml" keywords="Five Whys, Type Conflicts, SSOT, Authentication, HTTPS, Mixed Content, Root Cause, Frontend, Staging">
-            <critical-takeaway>Type export duplications violate SSOT - maintain single definition per type, delete all legacy code.</critical-takeaway>
+            <critical-takeaway>Multiple type exports violate SSOT - maintain ONE canonical definition per type, delete all legacy implementations.</critical-takeaway>
             <critical-takeaway>Landing page auth failures often test mock issues - ensure mocks match actual import patterns.</critical-takeaway>
             <critical-takeaway>Mixed content HTTPS enforcement requires consistent client/server environment detection.</critical-takeaway>
             <critical-takeaway>Five Whys reveals true root causes 4-5 levels deep - most errors NOT what they first seem.</critical-takeaway>
@@ -128,9 +203,18 @@
             <critical-takeaway>Maintain backwards compatibility during migrations with wrapper scripts and deprecation warnings.</critical-takeaway>
         </category>
         
-        <category name="WebSocket Consolidation" path="SPEC/learnings/websocket_consolidation.xml" keywords="websocket, duplication, consolidation, heartbeat, lifecycle, message queue, single source of truth">
-            <critical-takeaway>CRITICAL: Every functionality must have exactly ONE implementation - use composition/configuration, not duplication.</critical-takeaway>
-            <critical-takeaway>Small duplications grow exponentially - a single wrapper spawned 8 implementations causing 2,100+ duplicate lines.</critical-takeaway>
+        <category name="PostgreSQL Duplication Resolution" path="SPEC/learnings/postgresql_duplication_resolution.xml" keywords="PostgreSQL, Database, Connection, Duplication, pytest, URL normalization, SSL, Cloud SQL">
+            <critical-takeaway>CRITICAL: NEVER use pytest detection in production code - causes test/production divergence</critical-takeaway>
+            <critical-takeaway>Database URL normalization must have exactly ONE implementation in DatabaseURLBuilder</critical-takeaway>
+            <critical-takeaway>All environment variable access must go through unified configuration</critical-takeaway>
+            <critical-takeaway>SSL parameter handling centralized in DatabaseURLBuilder.format_url_for_driver()</critical-takeaway>
+            <critical-takeaway>Cloud SQL detection uses DatabaseURLBuilder.cloud_sql.is_cloud_sql exclusively</critical-takeaway>
+            <critical-takeaway>Test and production code paths MUST be identical - no conditional logic based on test detection</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket Consolidation" path="SPEC/learnings/websocket_consolidation.xml" keywords="websocket, SSOT, consolidation, heartbeat, lifecycle, message queue, single source of truth">
+            <critical-takeaway>CRITICAL: Every functionality must have exactly ONE canonical implementation per SSOT - use composition/configuration, not multiple implementations.</critical-takeaway>
+            <critical-takeaway>SSOT violations grow exponentially - a single wrapper spawned 8 implementations causing 2,100+ redundant lines.</critical-takeaway>
             <critical-takeaway>Always extend existing implementations with options/parameters instead of creating specialized variants.</critical-takeaway>
             <critical-takeaway>Backward compatibility aliases enable zero-downtime consolidation - always provide migration path.</critical-takeaway>
             <critical-takeaway>Run weekly duplicate detection: python scripts/detect_duplicate_code.py --threshold 0.8</critical-takeaway>
@@ -157,7 +241,7 @@
         
         <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">
             <critical-takeaway>All imports MUST use absolute imports with netra_backend namespace (e.g., from netra_backend.app.db import models).</critical-takeaway>
-            <critical-takeaway>Auth service endpoints use /auth prefix, NOT /api/v1/auth.</critical-takeaway>
+            <critical-takeaway>Auth service endpoints use /auth prefix, NOT /auth.</critical-takeaway>
             <critical-takeaway>Use /auth/dev/login for testing (no registration endpoint exists).</critical-takeaway>
             <critical-takeaway>Test files use netra_backend.tests.* namespace for test imports.</critical-takeaway>
         </category>
@@ -169,9 +253,9 @@
             <critical-takeaway>Test size limits: 1000 lines per file, 8 lines per function (many violations exist).</critical-takeaway>
         </category>
         
-        <category name="Test Import Standardization" path="SPEC/test_import_standardization.xml" keywords="Test Setup, sys.path, Imports, DRY, setup_test_path">
+        <category name="Test Import Standardization" path="SPEC/test_import_standardization.xml" keywords="Test Setup, sys.path, Imports, SSOT, setup_test_path">
             <critical-takeaway>NEVER write manual sys.path manipulation in test files - use setup_test_path() from netra_backend.tests.test_utils</critical-takeaway>
-            <critical-takeaway>500+ test files contain duplicate path setup code - ALL must use centralized function</critical-takeaway>
+            <critical-takeaway>500+ test files contained redundant path setup code violating SSOT - ALL must use centralized function</critical-takeaway>
             <critical-takeaway>Import order: stdlib -> third-party -> setup_test_path() -> project imports</critical-takeaway>
             <critical-takeaway>Manual PROJECT_ROOT manipulation is FORBIDDEN - violates SSOT principle</critical-takeaway>
         </category>
@@ -188,6 +272,8 @@
             <critical-takeaway>Health check endpoints must initialize database connections lazily if not already initialized.</critical-takeaway>
             <critical-takeaway>Auth service requires /health/ready endpoint on configured port (8080 default, not 8001).</critical-takeaway>
             <critical-takeaway>Database health checks must handle uninitialized async_engine gracefully by calling initialize_postgres().</critical-takeaway>
+            <critical-takeaway>Backend has TWO health implementations: active health.py at /health prefix and unused unified_health.py - /health/ready endpoint exists at /health/ready.</critical-takeaway>
+            <critical-takeaway>Health route registration uses health.py module (not unified_health.py) with endpoints: /health/, /health/ready, /health/live and others.</critical-takeaway>
         </category>
 
         <category name="Database/AsyncIO" path="SPEC/learnings/database_asyncio.xml" keywords="AsyncSession, Database, Postgres, ClickHouse">
@@ -266,6 +352,37 @@
             <critical-takeaway>Maintain single source of truth for types. Avoid circular imports.</critical-takeaway>
         </category>
         
+        <category name="SSOT Consolidation [CRITICAL]" path="SPEC/learnings/ssot_consolidation_20250825.xml" keywords="SSOT, Single Source of Truth, Duplication, Consolidation, Refactoring, Architecture Compliance, Database Manager, Auth Client, Error Handler">
+            <critical-takeaway>CRITICAL: Each concept must have ONE canonical implementation per service - multiple implementations violate SSOT and create technical debt.</critical-takeaway>
+            <critical-takeaway>MANDATORY: SSOT fixes must be atomic - either completely fix all violations in a domain or report blockers.</critical-takeaway>
+            <critical-takeaway>Database connectivity must use single DatabaseManager in netra_backend/app/db/database_manager.py - delete all other managers.</critical-takeaway>
+            <critical-takeaway>Authentication must use single AuthServiceClient in auth_client_core.py - delete all shims and wrappers.</critical-takeaway>
+            <critical-takeaway>Error handling must use UnifiedErrorHandler in core/unified_error_handler.py - delete domain-specific handlers.</critical-takeaway>
+            <critical-takeaway>Environment access must use IsolatedEnvironment.get_env() - never use direct os.getenv() or os.environ.</critical-takeaway>
+            <critical-takeaway>When consolidating, provide backward compatibility wrappers to prevent breaking changes.</critical-takeaway>
+            <critical-takeaway>Delete duplicate implementations immediately - do not maintain legacy code per CLAUDE.md.</critical-takeaway>
+            <critical-takeaway>Run architecture compliance checks before every commit to prevent reintroduction of violations.</critical-takeaway>
+        </category>
+        
+        <category name="CORS SSOT Consolidation [RESOLVED]" path="SPEC/learnings/cors_ssot_consolidation_2025.xml" keywords="CORS, Single Source of Truth, Origin Validation, shared/cors_config, validate_cors_origin, _is_valid_origin">
+            <critical-takeaway>RESOLVED 2025-08-25: Eliminated duplicate CORS origin validation functions in auth_service by consolidating to shared/cors_config.py</critical-takeaway>
+            <critical-takeaway>validate_cors_origin() and _is_valid_origin() now use shared is_origin_allowed() function instead of hardcoded origin lists</critical-takeaway>
+            <critical-takeaway>CORS origin configuration is now environment-aware through shared/cors_config.py with proper dev/staging/production origin lists</critical-takeaway>
+            <critical-takeaway>Canonical CORS configuration: shared/cors_config.py provides get_cors_origins() and is_origin_allowed() for all services</critical-takeaway>
+            <critical-takeaway>Auth service CORS consolidation maintains exact same security behavior while eliminating 20+ lines of duplicate origin lists</critical-takeaway>
+            <critical-takeaway>Environment-specific CORS behavior verified: development allows localhost, staging allows staging domains, production blocks all but production domains</critical-takeaway>
+        </category>
+        
+        <category name="Configuration Issues Resolution [RESOLVED]" path="SPEC/learnings/configuration_fixes_20250825.xml" keywords="Configuration, Database URL, PostgreSQL, AsyncPG, Auth Service, Startup Import, WebSocket Deprecation">
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed AUTH service DATABASE_URL configuration by changing from postgresql:// to postgresql+asyncpg:// format</critical-takeaway>
+            <critical-takeaway>Auth service requires postgresql+asyncpg:// driver format for async operations, not plain postgresql://</critical-takeaway>
+            <critical-takeaway>Database connectivity errors often manifest as "connection refused" when service configuration is correct but infrastructure (Docker PostgreSQL) is not running</critical-takeaway>
+            <critical-takeaway>Fixed startup module import error: ErrorAggregator import from netra_backend.app.error_aggregator should be netra_backend.app.startup.error_aggregator</critical-takeaway>
+            <critical-takeaway>WebSocket deprecation warnings fixed by replacing websockets.WebSocketServerProtocol with websockets.ServerConnection</critical-takeaway>
+            <critical-takeaway>Test imports must be updated when module structure changes - comprehensive grep search needed for all import references</critical-takeaway>
+            <critical-takeaway>Infrastructure dependencies (Docker services) are prerequisites for auth service database tests to pass</critical-takeaway>
+        </category>
+        
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
             <critical-takeaway>Standard import tests miss indirect circular imports through 4+ modules.</critical-takeaway>
             <critical-takeaway>Use lazy imports (inside methods) for WebSocket manager in job/task managers.</critical-takeaway>
@@ -293,6 +410,16 @@
 
         <category name="Startup" path="SPEC/learnings/startup.xml" keywords="Initialization, Boot, Config">
             <critical-takeaway>Startup errors often cascade - fix configuration first, then secrets, then connections.</critical-takeaway>
+            <critical-takeaway>Database initialization must happen ONCE - avoid duplicate calls to prevent infinite loops (database_initialization_duplication.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Database Initialization Duplication" path="SPEC/learnings/database_initialization_duplication.xml" keywords="Database, Initialization, Duplication, Infinite Loop, Startup Manager, Connection Pool">
+            <critical-takeaway>CRITICAL: Database initialization must occur exactly ONCE during startup - duplicate calls cause infinite loops and connection pool exhaustion.</critical-takeaway>
+            <critical-takeaway>StartupManager._initialize_database() should only call setup_database_connections(), NOT both DatabaseInitializer.initialize_postgresql() AND setup_database_connections().</critical-takeaway>
+            <critical-takeaway>setup_database_connections() already handles all necessary initialization including initialize_postgres() and _ensure_database_tables_exist().</critical-takeaway>
+            <critical-takeaway>Follow SSOT principle: each initialization step should have ONE canonical implementation path.</critical-takeaway>
+            <critical-takeaway>Monitor connection pool metrics during startup to detect excessive connection attempts.</critical-takeaway>
+            <critical-takeaway>Add explicit tests for initialization call counts to prevent regression.</critical-takeaway>
         </category>
         
         <category name="No Silent Fallbacks" path="SPEC/learnings/no_silent_fallbacks.xml" keywords="Fallback, Default, Mock, Configuration, Database URL, Secrets, Loud Failure">
@@ -340,8 +467,8 @@
             <critical-takeaway>Use subprocess.run() for external commands and pathlib for file operations.</critical-takeaway>
         </category>
         
-        <category name="Microservice Independence" path="SPEC/learnings/microservice_independence.xml" keywords="Microservices, Independence, Duplication, Service Boundaries, Architecture">
-            <critical-takeaway>"Unique Concept = ONCE per service" means no duplicates WITHIN a service, not across the entire platform.</critical-takeaway>
+        <category name="Microservice Independence" path="SPEC/learnings/microservice_independence.xml" keywords="Microservices, Independence, SSOT, Service Boundaries, Architecture">
+            <critical-takeaway>SSOT applies WITHIN services - each service maintains ONE canonical implementation per concept, cross-service patterns acceptable for independence.</critical-takeaway>
             <critical-takeaway>Each microservice MUST maintain its own infrastructure code (database, config, monitoring) to preserve independence.</critical-takeaway>
             <critical-takeaway>Services communicate via APIs, never through direct code imports across boundaries.</critical-takeaway>
             <critical-takeaway>Similar code patterns across services is acceptable and often necessary for independence.</critical-takeaway>
@@ -511,14 +638,122 @@
             <critical-takeaway>Microservice isolation requires method dependency analysis to prevent runtime attribute errors</critical-takeaway>
         </category>
 
-        <category name="Environment Management" path="SPEC/learnings/environment_management.xml" keywords="Environment Variables, Isolation, Centralized Management, os.environ, Development, Testing, Unified Config, Single Source">
+        <category name="Environment Management" path="SPEC/learnings/environment_management.xml" keywords="Environment Variables, Isolation, Centralized Management, os.environ, Development, Testing, Unified Config, SSOT">
             <critical-takeaway>SINGLE UNIFIED CONFIG ONLY - All environment access MUST go through IsolatedEnvironment. Zero direct os.environ access outside unified config.</critical-takeaway>
-            <critical-takeaway>DELETE ALL LEGACY CODE - When consolidating, delete 100% of legacy environment management code. No duplicates or wrappers.</critical-takeaway>
+            <critical-takeaway>DELETE ALL LEGACY CODE - When consolidating, delete 100% of legacy environment management code. No multiple implementations or wrappers.</critical-takeaway>
             <critical-takeaway>ISOLATION BY DEFAULT IN DEVELOPMENT - Dev mode should ONLY load from .env files, NOT system environment. Prevents conflicts.</critical-takeaway>
             <critical-takeaway>SOURCE TRACKING IS MANDATORY - Always provide meaningful source names when setting variables for debugging.</critical-takeaway>
             <critical-takeaway>TEST ISOLATION IS CRITICAL - All tests MUST use isolation mode to prevent pollution. Reset to original after each test.</critical-takeaway>
             <critical-takeaway>Use get_subprocess_env() for external process calls to maintain isolation boundaries</critical-takeaway>
             <critical-takeaway>Thread-safe operations with RLock for concurrent access. Variable protection prevents accidental overrides.</critical-takeaway>
+        </category>
+        
+        <category name="Port Binding Race Condition" path="SPEC/learnings/port_binding_race_condition.xml" keywords="Port Binding, Race Condition, Windows, Dev Launcher, Socket, Interface, localhost, 0.0.0.0, SO_REUSEADDR">
+            <critical-takeaway>Always use same interface for both port checking and actual binding (0.0.0.0 vs localhost)</critical-takeaway>
+            <critical-takeaway>Match socket options (SO_REUSEADDR) between availability check and actual binding</critical-takeaway>
+            <critical-takeaway>Add platform-specific delays on Windows for race condition prevention</critical-takeaway>
+        </category>
+        
+        <category name="Frontend Port Conflict Resolution" path="SPEC/learnings/frontend_port_conflict_resolution.xml" keywords="Frontend, Port 3000, Port Conflict, Dev Launcher, Fallback, Process Detection, Windows, Race Condition">
+            <critical-takeaway>COMPREHENSIVE FALLBACK STRATEGY: Preferred port → Original range → Extended service range → OS allocation → Emergency range</critical-takeaway>
+            <critical-takeaway>PROCESS-AWARE DIAGNOSTICS: Identify which process occupies conflicting ports using netstat/lsof for actionable troubleshooting</critical-takeaway>
+            <critical-takeaway>INTERFACE CONSISTENCY: Always use 0.0.0.0 for both port checking and binding to prevent Windows race conditions</critical-takeaway>
+            <critical-takeaway>SERVICE-SPECIFIC RANGES: Frontend (3000-3099), Backend (8000-8099), Auth (8080-8199) for intelligent fallback</critical-takeaway>
+            <critical-takeaway>VERIFICATION LOOP: Test allocated ports with brief bind before returning to catch edge cases</critical-takeaway>
+            <critical-takeaway>ENHANCED ERROR REPORTING: Comprehensive diagnostics including directory checks, dependency verification, and solution recommendations</critical-takeaway>
+        </category>
+        
+        <category name="GCP Staging Deployment Issues 2025" path="SPEC/learnings/gcp_staging_deployment_issues_2025.xml" keywords="GCP, Staging, Deployment, PostgreSQL, ClickHouse, SECRET_KEY, psycopg2, API Endpoints, Startup Sequence, Authentication, URL Validation, Database Drivers">
+            <critical-takeaway>CRITICAL: 80% of staging deployment failures prevented through comprehensive pre-deployment validation - never accept defaults in staging/production.</critical-takeaway>
+            <critical-takeaway>PostgreSQL authentication failures: validate credentials before connection attempts, implement environment-specific credential requirements.</critical-takeaway>
+            <critical-takeaway>ClickHouse URL control characters: implement URL validation detecting control characters (ASCII 0-31, 127), sanitize environment variables.</critical-takeaway>
+            <critical-takeaway>SECRET_KEY must be minimum 32 characters with entropy validation, detect insecure patterns, separate JWT_SECRET from SECRET_KEY.</critical-takeaway>
+            <critical-takeaway>Database drivers (psycopg2, asyncpg, clickhouse-connect) must be validated during startup, implement fallback strategies.</critical-takeaway>
+            <critical-takeaway>API endpoint 404s: validate route registration, router exports, prefix configuration during application startup.</critical-takeaway>
+            <critical-takeaway>Startup sequence: fix logger scoping, initialization order (logger -> config -> services), break circular dependencies.</critical-takeaway>
+            <critical-takeaway>Environment-specific validation: Development (permissive), Staging (strict, fail-fast), Production (ultra-strict, zero tolerance).</critical-takeaway>
+        </category>
+        
+        <category name="Event Loop Management" path="SPEC/learnings/event_loop_management.xml" keywords="Event Loop, asyncio, Thread Safety, Database SSL Parameters, Resource Cleanup, Async Execution">
+            <critical-takeaway>ALWAYS check for running event loop with asyncio.get_running_loop() before using asyncio.run() to prevent "cannot be called from a running event loop" errors.</critical-takeaway>
+            <critical-takeaway>Use asyncio.run_coroutine_threadsafe() for thread-safe async execution when event loop already exists.</critical-takeaway>
+            <critical-takeaway>Database SSL parameter conflicts: sync drivers (psycopg2) use sslmode=, async drivers (asyncpg) use ssl= - normalize during URL building.</critical-takeaway>
+            <critical-takeaway>Cloud SQL Unix socket connections must have NO SSL parameters - SSL handled at socket level.</critical-takeaway>
+            <critical-takeaway>ALWAYS use try-finally blocks for event loop cleanup to prevent resource leaks on exceptions.</critical-takeaway>
+            <critical-takeaway>Include timeouts on future.result() calls to prevent hanging operations in thread-safe async execution.</critical-takeaway>
+            <critical-takeaway>Test event loop handling in multiple contexts: sync, async, threaded execution scenarios.</critical-takeaway>
+        </category>
+        
+        <category name="GCP Staging Deployment Tests 2025" path="SPEC/learnings/gcp_staging_deployment_tests_2025.xml" keywords="Failing Tests, PostgreSQL Authentication, ClickHouse Secret Formatting, Redis Connection, Migration Locks, Deployment Validation">
+            <critical-takeaway>CRITICAL: Create failing tests BEFORE fixing deployment issues to validate root cause understanding and prevent regressions.</critical-takeaway>
+            <critical-takeaway>PostgreSQL authentication failures: 80% caused by wrong password or username in GCP Secret Manager - test with invalid credentials.</critical-takeaway>
+            <critical-takeaway>ClickHouse secret formatting: Extra whitespace/newlines from Secret Manager cause URL parsing failures - test all control characters (ASCII 0-31, 127).</critical-takeaway>
+            <critical-takeaway>Redis connection issues: Service not provisioned in staging - test connection refusal and authentication failures.</critical-takeaway>
+            <critical-takeaway>Migration lock problems: Concurrent migrations and stale locks prevent deployments - test advisory lock acquisition failures.</critical-takeaway>
+            <critical-takeaway>Comprehensive validation: All secrets must be trimmed and validated - test environment-specific strictness (dev permissive, staging strict).</critical-takeaway>
+            <critical-takeaway>Test coverage: 47 failing test methods across 5 categories provide comprehensive deployment validation.</critical-takeaway>
+            <critical-takeaway>Pre-deployment validation prevents 80% of staging deployment failures through early issue detection.</critical-takeaway>
+        </category>
+        
+        <category name="Iteration 3 Persistent Issues" path="SPEC/learnings/iteration3_persistent_issues.xml" keywords="Persistent Issues, Password Sanitization, ClickHouse Control Characters, Health Endpoint Methods, Compound Failures">
+            <critical-takeaway>CRITICAL: Three persistent issues compound to create 100% deployment failure: password corruption, URL control characters, missing methods.</critical-takeaway>
+            <critical-takeaway>Password sanitization corrupts special characters (@, !, #, $) causing authentication failures - need password-aware sanitization.</critical-takeaway>
+            <critical-takeaway>ClickHouse URLs retain control characters (newline at position 34) after sanitization - comprehensive character removal required.</critical-takeaway>
+            <critical-takeaway>DatabaseEnvironmentValidator missing get_environment_info(), validate_database_url(), get_safe_database_name() methods.</critical-takeaway>
+            <critical-takeaway>Issues cascade through layers: environment -> services -> health endpoints, blocking recovery and diagnostics.</critical-takeaway>
+            <critical-takeaway>47 failing tests created across 4 test files demonstrate root causes and prevent regressions after fixes.</critical-takeaway>
+            <critical-takeaway>Staging environment requires strict validation for passwords, URLs, and method availability - zero tolerance for corruption.</critical-takeaway>
+            <critical-takeaway>Recovery mechanisms fail due to compound issues - need failsafe systems that bypass all three problem areas.</critical-takeaway>
+        </category>
+        
+        <category name="Database 'postgres' Connectivity Critical Issue - Iteration 2" path="SPEC/learnings/database_postgres_connectivity_critical_issue.xml" keywords="Database Connection, postgres database, Staging Mode Fallback, Authentication Failure, Connection Pool, Database Naming">
+            <critical-takeaway>CRITICAL: Service attempts to connect to database named 'postgres' which doesn't exist, causing authentication system failure.</critical-takeaway>
+            <critical-takeaway>Service incorrectly falls back to "staging mode" when database unavailable, creating false positives in health checks.</critical-takeaway>
+            <critical-takeaway>Authentication appears to work in staging mode but doesn't persist data, breaking user management workflows.</critical-takeaway>
+            <critical-takeaway>Cross-service authentication coordination fails when auth service operates in degraded staging mode.</critical-takeaway>
+            <critical-takeaway>Database URL construction defaults to 'postgres' system database instead of application database (netra_auth).</critical-takeaway>
+            <critical-takeaway>Connection pool exhaustion occurs during repeated attempts to connect to non-existent database.</critical-takeaway>
+            <critical-takeaway>Table creation and schema validation fail silently, leaving service in inconsistent state.</critical-takeaway>
+            <critical-takeaway>Health checks report service as healthy while database connectivity is broken.</critical-takeaway>
+            <critical-takeaway>47 failing tests created across auth service and E2E suites to prevent regression after fixes.</critical-takeaway>
+            <critical-takeaway>Environment-specific database naming required: development (netra_dev), staging (netra_staging), production (netra_production).</critical-takeaway>
+        </category>
+        
+        <category name="Staging External Service Dependencies [CRITICAL]" path="SPEC/learnings/staging_external_services_critical.xml" keywords="ClickHouse, Redis, External Services, Staging, Connectivity, Health Checks, Fail Fast, Service Provisioning">
+            <critical-takeaway>CRITICAL: External services MUST be required dependencies in staging, not optional with fallback - inappropriate fallback masks infrastructure issues.</critical-takeaway>
+            <critical-takeaway>ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause /health/ready to return 503, blocking deployment validation.</critical-takeaway>
+            <critical-takeaway>Redis connection failures trigger inappropriate fallback to no-Redis mode instead of failing fast in staging environment.</critical-takeaway>
+            <critical-takeaway>Health endpoints must properly validate external service connectivity - /health/ready should return 503 when external services unavailable.</critical-takeaway>
+            <critical-takeaway>Environment-specific behavior required: development (optional), staging/production (required with fail-fast behavior).</critical-takeaway>
+            <critical-takeaway>Pre-deployment validation must verify external service provisioning, network connectivity, DNS resolution, and authentication.</critical-takeaway>
+            <critical-takeaway>Network connectivity, firewall rules, and service provisioning must be validated for all external dependencies.</critical-takeaway>
+            <critical-takeaway>Service provisioning validation prevents 80% of staging deployment failures related to external dependencies.</critical-takeaway>
+        </category>
+        
+        <category name="Staging Backend Service Failure Tests 2025" path="SPEC/learnings/staging_backend_service_failure_tests_2025.xml" keywords="Staging, Backend Service Failures, TDC, Test-Driven Correction, Infrastructure Validation, Configuration Audit, External Services">
+            <critical-takeaway>CRITICAL: Create failing tests BEFORE fixing staging issues to validate root cause understanding and prevent regressions.</critical-takeaway>
+            <critical-takeaway>Auth service DATABASE_URL undefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical-takeaway>
+            <critical-takeaway>ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause health check 503 responses blocking deployment validation.</critical-takeaway>
+            <critical-takeaway>REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical-takeaway>
+            <critical-takeaway>Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical-takeaway>
+            <critical-takeaway>Service health endpoints should return 503 when external dependencies unavailable - health != operational capability.</critical-takeaway>
+            <critical-takeaway>Multiple configuration failures compound exponentially - missing env vars → wrong defaults → connection failures → service degradation.</critical-takeaway>
+            <critical-takeaway>External services must be required in staging, not optional - validates infrastructure provisioning for production readiness.</critical-takeaway>
+            <critical-takeaway>Silent fallbacks and degraded mode operation in staging hide critical infrastructure issues that break production.</critical-takeaway>
+            <critical-takeaway>33 comprehensive failing tests across 4 test files provide complete validation of staging backend service infrastructure.</critical-takeaway>
+        </category>
+        
+        <category name="Auth Service SSOT Consolidation 2025" path="SPEC/learnings/auth_service_ssot_consolidation_2025.xml" keywords="SSOT, Single Source of Truth, Auth Service, Consolidation, JWT, Database, Redis, Environment, Middleware, CORS, Atomic Refactor">
+            <critical-takeaway>CRITICAL: Each concept must have exactly ONE canonical implementation per service - multiple implementations violate SSOT and create technical debt.</critical-takeaway>
+            <critical-takeaway>Atomic refactoring is essential - each SSOT consolidation must be complete in one operation with all references updated and legacy code deleted.</critical-takeaway>
+            <critical-takeaway>JWT validation consolidated to JWTHandler.validate_token() - eliminated JWTSecurityValidator class and 56 lines of duplicate code.</critical-takeaway>
+            <critical-takeaway>Database connections must use AuthDatabaseManager.create_async_engine() - never import create_async_engine directly from SQLAlchemy.</critical-takeaway>
+            <critical-takeaway>Redis access through auth_redis_manager only - removed all direct redis.from_url() calls and duplicate connection logic.</critical-takeaway>
+            <critical-takeaway>Environment access must use IsolatedEnvironment.get_env() - direct os.getenv() violates SSOT and creates configuration drift.</critical-takeaway>
+            <critical-takeaway>Test mocks must target canonical implementations not libraries - mock AuthDatabaseManager not sqlalchemy.create_async_engine.</critical-takeaway>
+            <critical-takeaway>Security middleware consolidated to auth_core.security.middleware - eliminated duplicate request validation across main.py and tests.</critical-takeaway>
+            <critical-takeaway>CORS validation delegates to shared.cors_config - removed 27 lines of hardcoded origin lists for environment-aware configuration.</critical-takeaway>
+            <critical-takeaway>Microservice independence maintained while enabling resource sharing through optional delegation to shared managers.</critical-takeaway>
         </category>
     </categories>
     

@@ -26,7 +26,7 @@ from netra_backend.app.core.async_utils import (
     AsyncTaskPool,
     shutdown_async_utils,
 )
-from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
 
 class TestErrorContextIntegration:
@@ -252,7 +252,7 @@ class TestConcurrencyEdgeCases:
         # Submit tasks rapidly
         tasks = []
         for i in range(submission_count):
-            task = pool.submit(rapid_task(i))
+            task = pool.submit_background_task(rapid_task(i))
             tasks.append(task)
         
         # Wait for all completions

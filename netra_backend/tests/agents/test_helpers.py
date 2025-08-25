@@ -101,7 +101,7 @@ def _setup_supervisor_ids(supervisor):
 def _setup_supervisor_mocks(supervisor, mock_persistence):
     """Setup supervisor agent mocks"""
     supervisor.state_persistence = mock_persistence
-    from netra_backend.app.agents.base.execution_context import (
+    from netra_backend.app.core.interfaces_execution import (
         AgentExecutionResult,
     )
     # Mock: Async component isolation for testing without real async operations

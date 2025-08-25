@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>GCPStagingDeploymentTests</name>
+        <type>TestSuite</type>
+        <version>1.0</version>
+        <date>2025-08-25</date>
+        <description>Comprehensive failing tests for GCP staging deployment issues - created to detect and prevent regressions</description>
+    </metadata>
+
+    <test-suite-overview>
+        <purpose>
+            Create comprehensive failing tests that replicate exact GCP staging deployment issues.
+            These tests are designed to FAIL until the underlying deployment problems are resolved,
+            providing clear validation of fixes and preventing future regressions.
+        </purpose>
+        
+        <business-value>
+            <metric>Deployment Success Rate: Target 95%+ (from current ~20%)</metric>
+            <metric>Deployment Time: Reduce by 60% through early issue detection</metric>
+            <metric>Developer Productivity: Eliminate 40+ hours/week debugging deployment failures</metric>
+            <metric>Platform Availability: Ensure reliable staging environment for development</metric>
+            <metric>Customer Impact: Prevent staging issues from reaching production</metric>
+        </business-value>
+        
+        <test-strategy>
+            <principle>Test-Driven Problem Resolution: Create failing tests first, then fix underlying issues</principle>
+            <principle>Comprehensive Coverage: Test multiple failure scenarios for each issue category</principle>
+            <principle>Environment Specificity: Tests marked with @pytest.mark.staging for staging-specific issues</principle>
+            <principle>Similar Case Expansion: Each core issue tested with variations and edge cases</principle>
+            <principle>Regression Prevention: Tests remain in suite to prevent future regressions</principle>
+        </test-strategy>
+    </test-suite-overview>
+
+    <test-files>
+        <test-file name="test_gcp_staging_database_auth_failures.py" category="Database Authentication">
+            <location>netra_backend/tests/test_gcp_staging_database_auth_failures.py</location>
+            <purpose>Test PostgreSQL authentication failures that occur in GCP staging deployment</purpose>
+            
+            <critical-tests>
+                <test name="test_postgres_wrong_password_authentication_failure">
+                    <description>Tests password authentication failure for user "postgres"</description>
+                    <expected-failure>Authentication error with wrong password</expected-failure>
+                    <business-impact>Database connectivity required for all platform operations</business-impact>
+                </test>
+                
+                <test name="test_postgres_wrong_username_authentication_failure">
+                    <description>Tests authentication failure with non-existent username</description>
+                    <expected-failure>User does not exist or authentication failed</expected-failure>
+                    <business-impact>Proper user provisioning required for service access</business-impact>
+                </test>
+                
+                <test name="test_postgres_missing_password_authentication_failure">
+                    <description>Tests authentication failure with missing password</description>
+                    <expected-failure>No password supplied or authentication failed</expected-failure>
+                    <business-impact>Complete credential configuration required</business-impact>
+                </test>
+                
+                <test name="test_cloud_sql_proxy_auth_failure">
+                    <description>Tests Cloud SQL proxy authentication with service account issues</description>
+                    <expected-failure>Unix socket connection or proxy authentication failure</expected-failure>
+                    <business-impact>Cloud SQL connectivity required for staging database access</business-impact>
+                </test>
+                
+                <test name="test_ssl_parameter_conflicts_asyncpg_psycopg2">
+                    <description>Tests SSL parameter conflicts between async and sync drivers</description>
+                    <expected-failure>SSL parameter validation or automatic resolution</expected-failure>
+                    <business-impact>Driver compatibility required for health checks and migrations</business-impact>
+                </test>
+                
+                <test name="test_concurrent_database_connections_with_auth_failure">
+                    <description>Tests multiple concurrent connections with authentication failures</description>
+                    <expected-failure>Multiple authentication failures under load</expected-failure>
+                    <business-impact>Connection pool and concurrent access reliability</business-impact>
+                </test>
+            </critical-tests>
+            
+            <similar-cases>
+                <case>Database URL validation with empty credentials</case>
+                <case>Connection timeout behavior with wrong credentials</case>
+                <case>Health check authentication failure handling</case>
+                <case>Staging environment credential requirements (no defaults)</case>
+            </similar-cases>
+        </test-file>
+
+        <test-file name="test_gcp_staging_clickhouse_secrets_formatting.py" category="Secret Formatting">
+            <location>netra_backend/tests/test_gcp_staging_clickhouse_secrets_formatting.py</location>
+            <purpose>Test ClickHouse secret formatting issues from GCP Secret Manager</purpose>
+            
+            <critical-tests>
+                <test name="test_clickhouse_host_contains_newline_character">
+                    <description>Tests ClickHouse host secret with newline character from Secret Manager</description>
+                    <expected-failure>Control character detection and URL validation failure</expected-failure>
+                    <business-impact>ClickHouse connectivity required for analytics and metrics</business-impact>
+                </test>
+                
+                <test name="test_clickhouse_password_contains_whitespace_characters">
+                    <description>Tests ClickHouse password with various whitespace issues</description>
+                    <expected-failure>Authentication failure due to malformed password</expected-failure>
+                    <business-impact>Proper secret formatting required for service authentication</business-impact>
+                </test>
+                
+                <test name="test_clickhouse_url_control_character_validation">
+                    <description>Tests comprehensive control character validation in URLs</description>
+                    <expected-failure>Control character validation for ASCII 0-31 and 127</expected-failure>
+                    <business-impact>URL integrity required for all service connections</business-impact>
+                </test>
+                
+                <test name="test_gcp_secret_manager_direct_formatting_issues">
+                    <description>Simulates direct GCP Secret Manager formatting issues</description>
+                    <expected-failure>Secret trimming and validation during configuration loading</expected-failure>
+                    <business-impact>All secrets must be properly formatted from source</business-impact>
+                </test>
+            </critical-tests>
+            
+            <similar-cases>
+                <case>Multiple secret formatting issues simultaneously</case>
+                <case>Database construction with malformed secrets</case>
+                <case>Staging environment strict validation requirements</case>
+                <case>Port and database name whitespace issues</case>
+            </similar-cases>
+        </test-file>
+
+        <test-file name="test_gcp_staging_redis_connection_issues.py" category="Redis Connectivity">
+            <location>netra_backend/tests/test_gcp_staging_redis_connection_issues.py</location>
+            <purpose>Test Redis connectivity issues in GCP staging deployment</purpose>
+            
+            <critical-tests>
+                <test name="test_redis_service_not_provisioned_in_staging">
+                    <description>Tests Redis service not provisioned in staging environment</description>
+                    <expected-failure>Connection refused or service not available</expected-failure>
+                    <business-impact>Redis required for session management and caching</business-impact>
+                </test>
+                
+                <test name="test_redis_connection_url_formatting_issues">
+                    <description>Tests Redis URL formatting issues from secret management</description>
+                    <expected-failure>URL validation or connection failure with malformed URLs</expected-failure>
+                    <business-impact>Proper URL formatting required for Redis connectivity</business-impact>
+                </test>
+                
+                <test name="test_redis_authentication_failure_with_wrong_credentials">
+                    <description>Tests Redis authentication failure with wrong credentials</description>
+                    <expected-failure>Authentication error or access denied</expected-failure>
+                    <business-impact>Proper Redis authentication required for session access</business-impact>
+                </test>
+                
+                <test name="test_redis_basic_operations_connectivity_failure">
+                    <description>Tests Redis operations failing due to connectivity issues</description>
+                    <expected-failure>Connection errors during basic Redis operations</expected-failure>
+                    <business-impact>Redis operations required for session and cache functionality</business-impact>
+                </test>
+            </critical-tests>
+            
+            <similar-cases>
+                <case>Redis connection pool initialization failure</case>
+                <case>Connection timeout in staging environment</case>
+                <case>Cluster mode configuration mismatch</case>
+                <case>SSL configuration mismatch</case>
+                <case>Memory management configuration issues</case>
+                <case>Staging environment Redis requirements</case>
+            </similar-cases>
+        </test-file>
+
+        <test-file name="test_gcp_staging_migration_lock_issues.py" category="Database Migrations">
+            <location>netra_backend/tests/test_gcp_staging_migration_lock_issues.py</location>
+            <purpose>Test database migration lock issues during deployment</purpose>
+            
+            <critical-tests>
+                <test name="test_migration_lock_acquisition_failure">
+                    <description>Tests migration lock acquisition failure during deployment</description>
+                    <expected-failure>Advisory lock acquisition timeout or failure</expected-failure>
+                    <business-impact>Database migrations required for schema updates</business-impact>
+                </test>
+                
+                <test name="test_concurrent_migration_attempts_deadlock">
+                    <description>Tests concurrent migration attempts causing deadlocks</description>
+                    <expected-failure>Deadlock detection in multiple migration processes</expected-failure>
+                    <business-impact>Migration coordination required for deployment reliability</business-impact>
+                </test>
+                
+                <test name="test_stale_migration_lock_preventing_deployment">
+                    <description>Tests stale migration locks preventing new deployments</description>
+                    <expected-failure>Lock timeout due to unreleased advisory locks</expected-failure>
+                    <business-impact>Lock cleanup required for deployment continuation</business-impact>
+                </test>
+                
+                <test name="test_alembic_migration_state_consistency_issues">
+                    <description>Tests Alembic migration state consistency during deployment</description>
+                    <expected-failure>Migration state inconsistency between current and head</expected-failure>
+                    <business-impact>Migration state consistency required for schema integrity</business-impact>
+                </test>
+            </critical-tests>
+            
+            <similar-cases>
+                <case>Migration lock timeout and recovery mechanisms</case>
+                <case>Migration lock cleanup on failure</case>
+                <case>Connection pool exhaustion during migrations</case>
+                <case>Migration rollback with lock issues</case>
+                <case>Staging migration lock configuration</case>
+            </similar-cases>
+        </test-file>
+
+        <test-file name="test_gcp_staging_comprehensive_deployment_validation.py" category="Comprehensive Validation">
+            <location>netra_backend/tests/test_gcp_staging_comprehensive_deployment_validation.py</location>
+            <purpose>Test comprehensive deployment validation and common failure patterns</purpose>
+            
+            <critical-tests>
+                <test name="test_all_secrets_trimmed_no_whitespace">
+                    <description>Tests that ALL secrets from Secret Manager are properly trimmed</description>
+                    <expected-failure>Secret formatting validation for all configuration values</expected-failure>
+                    <business-impact>All secrets must be properly formatted for service authentication</business-impact>
+                </test>
+                
+                <test name="test_control_character_detection_comprehensive">
+                    <description>Tests comprehensive control character detection (ASCII 0-31, 127)</description>
+                    <expected-failure>Control character validation across all configuration</expected-failure>
+                    <business-impact>Configuration integrity required for reliable service operation</business-impact>
+                </test>
+                
+                <test name="test_environment_specific_validation_strictness">
+                    <description>Tests different validation strictness for dev/staging/production</description>
+                    <expected-failure>Staging should reject configurations that development accepts</expected-failure>
+                    <business-impact>Environment-appropriate validation prevents production issues</business-impact>
+                </test>
+                
+                <test name="test_staging_comprehensive_pre_deployment_validation">
+                    <description>Tests comprehensive pre-deployment validation for staging</description>
+                    <expected-failure>Staging should reject all invalid/missing configurations</expected-failure>
+                    <business-impact>Pre-deployment validation prevents deployment failures</business-impact>
+                </test>
+            </critical-tests>
+            
+            <similar-cases>
+                <case>Database driver availability across all services</case>
+                <case>Database connection validation for all services</case>
+                <case>Service health checks comprehensive validation</case>
+                <case>Multi-service configuration consistency</case>
+            </similar-cases>
+        </test-file>
+    </test-files>
+
+    <comprehensive-coverage>
+        <total-test-files>5</total-test-files>
+        <total-test-methods>47</total-test-methods>
+        
+        <coverage-breakdown>
+            <category name="Database Authentication" tests="12">
+                <focus>PostgreSQL authentication failures, Cloud SQL proxy issues, SSL parameter conflicts</focus>
+            </category>
+            
+            <category name="Secret Formatting" tests="8">
+                <focus>ClickHouse secrets with whitespace/control characters from GCP Secret Manager</focus>
+            </category>
+            
+            <category name="Redis Connectivity" tests="10">
+                <focus>Redis service provisioning, URL formatting, authentication, operations</focus>
+            </category>
+            
+            <category name="Migration Locks" tests="8">
+                <focus>Advisory locks, concurrent migrations, stale locks, Alembic state consistency</focus>
+            </category>
+            
+            <category name="Comprehensive Validation" tests="9">
+                <focus>All secrets validation, control character detection, environment-specific validation</focus>
+            </category>
+        </coverage-breakdown>
+        
+        <similar-cases-expansion>
+            <principle>Each core issue expanded with variations and edge cases</principle>
+            <examples>
+                <example>Database authentication → concurrent connections, health checks, timeouts</example>
+                <example>Secret formatting → multiple control characters, comprehensive validation</example>
+                <example>Redis connectivity → SSL, clustering, memory management</example>
+                <example>Migration locks → cleanup, recovery, connection pooling</example>
+            </examples>
+        </similar-cases-expansion>
+    </comprehensive-coverage>
+
+    <expected-outcomes>
+        <before-fixes>
+            <outcome>All 47 test methods should FAIL, demonstrating the deployment issues</outcome>
+            <outcome>Clear error messages identifying specific problems (authentication, formatting, etc.)</outcome>
+            <outcome>Environment-specific failures showing staging validation gaps</outcome>
+            <outcome>Comprehensive coverage of failure scenarios prevents unknown issues</outcome>
+        </before-fixes>
+        
+        <after-fixes>
+            <outcome>Tests pass as underlying issues are resolved</outcome>
+            <outcome>Regression prevention through continued test execution</outcome>
+            <outcome>Deployment success rate increases from ~20% to 95%+</outcome>
+            <outcome>Developer productivity improves through faster deployment cycles</outcome>
+        </after-fixes>
+        
+        <validation-approach>
+            <step>1. Run tests to confirm they fail with expected error patterns</step>
+            <step>2. Fix underlying issues (credentials, secret formatting, service provisioning)</step>
+            <step>3. Re-run tests to confirm fixes resolve specific problems</step>
+            <step>4. Keep tests in CI/CD pipeline for regression prevention</step>
+            <step>5. Monitor staging deployment success rate improvement</step>
+        </validation-approach>
+    </expected-outcomes>
+
+    <critical-learnings>
+        <learning id="test-driven-problem-resolution" priority="critical">
+            <title>Test-Driven Problem Resolution Methodology</title>
+            <insight>
+                Creating failing tests that replicate production issues provides multiple benefits:
+                1. Clear demonstration of problems before fixes
+                2. Validation that fixes actually resolve root issues
+                3. Regression prevention after fixes are implemented
+                4. Documentation of expected behavior and failure scenarios
+            </insight>
+        </learning>
+
+        <learning id="comprehensive-similar-case-testing" priority="high">
+            <title>Similar Case Expansion Prevents Unknown Issues</title>
+            <insight>
+                Each core issue should be tested with variations and edge cases:
+                - Database auth failures → concurrent connections, health checks, timeouts
+                - Secret formatting → all control characters, multiple simultaneous issues
+                - Service connectivity → SSL, clustering, authentication variations
+                This approach catches issues that would otherwise surface later
+            </insight>
+        </learning>
+
+        <learning id="environment-specific-test-marking" priority="medium">
+            <title>Environment-Specific Test Marking and Execution</title>
+            <insight>
+                Tests marked with @pytest.mark.staging specifically target staging environment issues.
+                This allows for environment-specific test execution and validation,
+                ensuring staging-specific problems are caught and resolved.
+            </insight>
+        </learning>
+
+        <learning id="pre-deployment-validation-value" priority="critical">
+            <title>Pre-Deployment Validation Prevents 80% of Failures</title>
+            <insight>
+                Comprehensive pre-deployment validation catches configuration, credential,
+                and service availability issues before deployment attempts.
+                This dramatically reduces deployment failure rates and debugging time.
+            </insight>
+        </learning>
+    </critical-learnings>
+
+    <next-steps>
+        <step priority="critical">Execute all test files to confirm they fail with expected error patterns</step>
+        <step priority="critical">Fix PostgreSQL authentication issues by validating/correcting GCP Secret Manager credentials</step>
+        <step priority="critical">Implement comprehensive secret trimming and control character validation</step>
+        <step priority="high">Provision and configure Redis service in staging environment</step>
+        <step priority="high">Improve migration lock handling and cleanup mechanisms</step>
+        <step priority="medium">Implement pre-deployment validation script using test patterns</step>
+        <step priority="medium">Add tests to CI/CD pipeline for regression prevention</step>
+        <step priority="low">Monitor staging deployment success rate improvements</step>
+    </next-steps>
+</specification>

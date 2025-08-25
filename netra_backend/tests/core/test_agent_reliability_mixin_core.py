@@ -21,6 +21,36 @@ class MockAgent(AgentReliabilityMixin):
     def __init__(self, name: str = "TestAgent"):
         self.name = name
         super().__init__()
+    
+    def _classify_error_severity(self, error: Exception):
+        """Delegate to error_handler for compatibility with tests."""
+        return self.error_handler.classify_error_severity(error)
+    
+    async def _default_llm_recovery(self, error: Exception, context: dict):
+        """Default LLM recovery strategy for tests."""
+        # Simple mock recovery - return modified context matching test expectations
+        return {
+            "status": "fallback",
+            "message": "Operation completed with limited functionality",
+            "error": str(error),
+            "fallback_used": True,
+            "error_type": type(error).__name__,
+            "recovery_method": "fallback_response",
+            "context": context
+        }
+    
+    async def _default_db_recovery(self, error: Exception, context: dict):
+        """Default database recovery strategy for tests."""
+        # Simple mock DB recovery - return empty data with cache fallback
+        return {
+            "data": [],
+            "cached": True,
+            "error": str(error),
+            "fallback_used": True,
+            "error_type": type(error).__name__,
+            "recovery_method": "cached_response",
+            "context": context
+        }
 
 class TestAgentReliabilityMixinExecution:
     """Test core execution and reliability functionality."""

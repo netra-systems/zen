@@ -92,6 +92,12 @@ class ErrorContext(BaseModel):
     error_code: Optional[str] = Field(default=None, description="Error code")
 
     @classmethod
+    def generate_trace_id(cls) -> str:
+        """Generate a unique trace ID for request tracking."""
+        import uuid
+        return f"trace_{uuid.uuid4().hex[:16]}"
+    
+    @classmethod
     def get_all_context(cls) -> Dict[str, Union[str, int, float, bool]]:
         """Get default context for error handling compatibility."""
         return {}

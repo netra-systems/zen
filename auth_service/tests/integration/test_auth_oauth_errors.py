@@ -93,9 +93,9 @@ class TestOAuthErrorHandling:
         
         for invalid_state in invalid_states:
             if invalid_state is None:
-                url = "/api/v1/auth/callback?code=test_code"
+                url = "/auth/callback?code=test_code"
             else:
-                url = f"/api/v1/auth/callback?code=test_code&state={invalid_state}"
+                url = f"/auth/callback?code=test_code&state={invalid_state}"
             
             response = client.get(url)
             
@@ -131,7 +131,7 @@ class TestOAuthErrorHandling:
         
         for scenario in denial_scenarios:
             params = "&".join([f"{k}={v}" for k, v in scenario.items()])
-            response = client.get(f"/api/v1/auth/callback?{params}")
+            response = client.get(f"/auth/callback?{params}")
             
             # Should handle OAuth denial gracefully
             assert response.status_code in [302, 401, 400, 422]
@@ -143,8 +143,9 @@ class TestOAuthErrorHandling:
                 assert any(page in location for page in ["error", "login", "denied"])
     
     # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
     @patch('httpx.AsyncClient')
-    def test_oauth_token_exchange_failure(self, mock_client, oauth_state, oauth_code):
+    def test_oauth_token_exchange_failure(self, mock_client, mock_validate_state, oauth_state, oauth_code):
         """
         Test OAuth token exchange failure
         
@@ -157,7 +158,11 @@ class TestOAuthErrorHandling:
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
+        # Mock session validation to pass CSRF checks (we're testing token exchange, not CSRF)
+        mock_validate_state.return_value = True
+        
         # Test various token exchange failure scenarios
+        # NOTE: All token exchange failures are normalized to 401 for security (prevent information leakage)
         failure_scenarios = [
             {
                 "status_code": 400,
@@ -165,7 +170,7 @@ class TestOAuthErrorHandling:
                     "error": "invalid_grant",
                     "error_description": "Invalid authorization code"
                 },
-                "expected_status": [401, 400, 500]
+                "expected_status": [401]  # Security: normalized to 401
             },
             {
                 "status_code": 401,
@@ -173,7 +178,7 @@ class TestOAuthErrorHandling:
                     "error": "unauthorized_client",
                     "error_description": "Unauthorized client"
                 },
-                "expected_status": [401, 500]
+                "expected_status": [401]  # Security: normalized to 401
             },
             {
                 "status_code": 500,
@@ -181,7 +186,7 @@ class TestOAuthErrorHandling:
                     "error": "server_error",
                     "error_description": "Internal server error"
                 },
-                "expected_status": [500, 502]
+                "expected_status": [401]  # Security: normalized to 401
             },
             {
                 "status_code": 429,
@@ -189,9 +194,12 @@ class TestOAuthErrorHandling:
                     "error": "rate_limit_exceeded",
                     "error_description": "Too many requests"
                 },
-                "expected_status": [429, 500]
+                "expected_status": [401]  # Security: normalized to 401
             }
         ]
+        
+        # Set session cookie on client to avoid deprecation warning
+        client.cookies.set("session_id", "test_session_123")
         
         for scenario in failure_scenarios:
             # Mock failed token exchange
@@ -202,14 +210,15 @@ class TestOAuthErrorHandling:
             mock_async_client.post.return_value = token_response
             
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/auth/callback?code={oauth_code}&state={oauth_state}"
             )
             
             assert response.status_code in scenario["expected_status"]
     
     # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
     @patch('httpx.AsyncClient')
-    def test_oauth_user_info_failure(self, mock_client, oauth_state, oauth_code):
+    def test_oauth_user_info_failure(self, mock_client, mock_validate_state, oauth_state, oauth_code):
         """
         Test OAuth user info fetch failure
         
@@ -221,6 +230,9 @@ class TestOAuthErrorHandling:
         # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
+        
+        # Mock session validation to pass CSRF checks
+        mock_validate_state.return_value = True
         
         # Mock successful token exchange
         # Mock: Generic component isolation for controlled unit testing
@@ -263,6 +275,9 @@ class TestOAuthErrorHandling:
             }
         ]
         
+        # Set session cookie for this test 
+        client.cookies.set("session_id", "test_session_123")
+        
         for failure in user_info_failures:
             # Mock failed user info fetch
             # Mock: Generic component isolation for controlled unit testing
@@ -272,15 +287,16 @@ class TestOAuthErrorHandling:
             mock_async_client.get.return_value = user_response
             
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/auth/callback?code={oauth_code}&state={oauth_state}"
             )
             
             # Should handle user info failures gracefully
             assert response.status_code in [401, 400, 422, 500, 502]
     
     # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
     @patch('httpx.AsyncClient')
-    def test_oauth_network_timeout_handling(self, mock_client, oauth_state, oauth_code):
+    def test_oauth_network_timeout_handling(self, mock_client, mock_validate_state, oauth_state, oauth_code):
         """
         Test OAuth network timeout handling
         
@@ -292,6 +308,9 @@ class TestOAuthErrorHandling:
         # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
+        
+        # Mock session validation to pass CSRF checks
+        mock_validate_state.return_value = True
         
         # Test various network failure scenarios
         network_failures = [
@@ -336,8 +355,11 @@ class TestOAuthErrorHandling:
                 mock_async_client.post.side_effect = None
                 mock_async_client.get.side_effect = failure["exception"]
             
+            # Set session cookie for this test iteration 
+            client.cookies.set("session_id", "test_session_123")
+            
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/auth/callback?code={oauth_code}&state={oauth_state}"
             )
             
             # Should handle network failures gracefully
@@ -347,7 +369,10 @@ class TestOAuthErrorHandling:
             mock_async_client.post.side_effect = None
             mock_async_client.get.side_effect = None
     
-    def test_oauth_malformed_request_handling(self):
+    # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
+    @patch('httpx.AsyncClient')
+    def test_oauth_malformed_request_handling(self, mock_client, mock_validate_state):
         """
         Test OAuth malformed request handling
         
@@ -356,35 +381,56 @@ class TestOAuthErrorHandling:
         - Tests input validation and sanitization
         - Ensures secure handling of malicious requests
         """
+        # Mock session validation to pass CSRF checks so we can test parameter validation
+        mock_validate_state.return_value = True
+        
+        # Mock: Generic component isolation for controlled unit testing
+        mock_async_client = AsyncMock()
+        mock_client.return_value.__aenter__.return_value = mock_async_client
+        
+        # Mock OAuth token exchange failure (simulating malformed requests being rejected by provider)
+        # Mock: Generic component isolation for controlled unit testing
+        token_response = Mock()
+        token_response.status_code = 400
+        token_response.json.return_value = {
+            "error": "invalid_request",
+            "error_description": "Invalid or malformed parameters"
+        }
+        mock_async_client.post.return_value = token_response
+        
+        # Set session cookie for consistency with other tests
+        client.cookies.set("session_id", "test_session_123")
+        
         # Test various malformed OAuth requests
         malformed_requests = [
             # Missing required parameters
-            "/api/v1/auth/callback",
-            "/api/v1/auth/callback?code=",
-            "/api/v1/auth/callback?state=test",
+            "/auth/callback",
+            "/auth/callback?code=",
+            "/auth/callback?state=test",
             
             # Invalid parameter values
-            "/api/v1/auth/callback?code=" + "x" * 1000,  # Very long code
-            "/api/v1/auth/callback?code=test&state=" + "x" * 1000,  # Very long state
-            "/api/v1/auth/callback?code=test%00&state=test",  # Null byte injection
-            "/api/v1/auth/callback?code=<script>&state=test",  # XSS attempt
-            "/api/v1/auth/callback?code=../../../etc/passwd",  # Path traversal attempt
+            "/auth/callback?code=" + "x" * 1000,  # Very long code
+            "/auth/callback?code=test&state=" + "x" * 1000,  # Very long state
+            "/auth/callback?code=test%00&state=test",  # Null byte injection
+            "/auth/callback?code=<script>&state=test",  # XSS attempt
+            "/auth/callback?code=../../../etc/passwd",  # Path traversal attempt
             
             # Invalid provider
-            "/api/v1/auth/login?provider=invalid_provider",
-            "/api/v1/auth/login?provider=",
-            "/api/v1/auth/login?provider=" + "x" * 100,
+            "/auth/login?provider=invalid_provider",
+            "/auth/login?provider=",
+            "/auth/login?provider=" + "x" * 100,
             
             # SQL injection attempts
-            "/api/v1/auth/callback?code=test' OR '1'='1&state=test",
-            "/api/v1/auth/callback?code=test; DROP TABLE users;&state=test",
+            "/auth/callback?code=test' OR '1'='1&state=test",
+            "/auth/callback?code=test; DROP TABLE users;&state=test",
         ]
         
         for malformed_url in malformed_requests:
             response = client.get(malformed_url)
             
             # Should handle malformed requests gracefully
-            assert response.status_code in [400, 404, 422, 500]
+            # With mocks in place, we expect either parameter validation errors (422) or OAuth errors (401/400)
+            assert response.status_code in [400, 401, 404, 422, 500]
             
             # Should not return sensitive information in error responses
             if hasattr(response, 'text'):
@@ -395,8 +441,9 @@ class TestOAuthErrorHandling:
                 assert "database" not in response_text
     
     # Mock: Component isolation for testing without external dependencies
+    @patch('auth_service.auth_core.security.oauth_security.OAuthSecurityManager.validate_state_parameter')
     @patch('httpx.AsyncClient')
-    def test_oauth_rate_limiting_behavior(self, mock_client, oauth_state, oauth_code):
+    def test_oauth_rate_limiting_behavior(self, mock_client, mock_validate_state, oauth_state, oauth_code):
         """
         Test OAuth rate limiting behavior
         
@@ -408,6 +455,9 @@ class TestOAuthErrorHandling:
         # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
+        
+        # Mock session validation to pass CSRF checks
+        mock_validate_state.return_value = True
         
         # Mock responses
         # Mock: Generic component isolation for controlled unit testing
@@ -426,18 +476,18 @@ class TestOAuthErrorHandling:
         responses = []
         for i in range(20):  # Make 20 rapid requests
             response = client.get(
-                f"/api/v1/auth/callback?code={oauth_code}_{i}&state={oauth_state}_{i}"
+                f"/auth/callback?code={oauth_code}_{i}&state={oauth_state}_{i}"
             )
             responses.append(response.status_code)
         
         # Should handle rapid requests (may rate limit, succeed, or fail gracefully)
         for status_code in responses:
-            assert status_code in [200, 302, 400, 404, 422, 429, 500]
+            assert status_code in [200, 302, 400, 401, 404, 422, 429, 500]
         
         # Count different response types
         rate_limited_count = responses.count(429)
         successful_count = len([s for s in responses if s in [200, 302]])
-        validation_error_count = len([s for s in responses if s in [400, 422]])
+        validation_error_count = len([s for s in responses if s in [400, 401, 422]])
         not_found_count = responses.count(404)
         server_error_count = responses.count(500)
         
@@ -461,18 +511,18 @@ class TestOAuthErrorHandling:
         # Test CSRF attack scenarios
         csrf_scenarios = [
             # No state parameter (CSRF vulnerable)
-            f"/api/v1/auth/callback?code={oauth_code}",
+            f"/auth/callback?code={oauth_code}",
             
             # Predictable state parameter
-            f"/api/v1/auth/callback?code={oauth_code}&state=123456",
-            f"/api/v1/auth/callback?code={oauth_code}&state=predictable_state",
+            f"/auth/callback?code={oauth_code}&state=123456",
+            f"/auth/callback?code={oauth_code}&state=predictable_state",
             
             # Reused state parameter
-            f"/api/v1/auth/callback?code={oauth_code}&state=reused_state_123",
-            f"/api/v1/auth/callback?code={oauth_code}&state=reused_state_123",  # Same state twice
+            f"/auth/callback?code={oauth_code}&state=reused_state_123",
+            f"/auth/callback?code={oauth_code}&state=reused_state_123",  # Same state twice
             
             # State parameter from different session
-            f"/api/v1/auth/callback?code={oauth_code}&state=other_session_state",
+            f"/auth/callback?code={oauth_code}&state=other_session_state",
         ]
         
         for scenario_url in csrf_scenarios:

@@ -49,72 +49,72 @@ class TestRealAgentPipeline:
         await core.teardown_pipeline_environment()
     
     @pytest_asyncio.fixture
-    async def test_supervisor_setup(self, pipeline_test_core):
+    async def test_test_supervisor_setup(self, test_pipeline_test_core):
         """Setup supervisor agent with real dependencies."""
-        return await pipeline_test_core.setup_supervisor_agent()
+        return await test_pipeline_test_core.setup_supervisor_agent()
     
     @pytest.mark.asyncio
-    async def test_complete_agent_workflow_message_to_response(self, pipeline_test_core, supervisor_setup):
+    async def test_complete_agent_workflow_message_to_response(self, test_pipeline_test_core, test_test_supervisor_setup):
         """Test complete: User message → routing → execution → response flow."""
-        session_data = await pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
+        session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
         try:
-            workflow_result = await self._execute_complete_workflow(session_data, supervisor_setup)
+            workflow_result = await self._execute_complete_workflow(session_data, test_test_supervisor_setup)
             self._assert_complete_workflow_success(workflow_result)
         finally:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
-    async def test_supervisor_routing_logic_with_real_messages(self, pipeline_test_core, supervisor_setup):
+    async def test_supervisor_routing_logic_with_real_messages(self, test_pipeline_test_core, test_supervisor_setup):
         """Test supervisor routing logic with real message patterns."""
-        session_data = await pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
+        session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
         try:
-            routing_results = await self._test_supervisor_routing_patterns(session_data, supervisor_setup)
+            routing_results = await self._test_supervisor_routing_patterns(session_data, test_supervisor_setup)
             self._assert_routing_logic_success(routing_results)
         finally:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
-    async def test_agent_execution_with_real_llm_calls(self, pipeline_test_core, supervisor_setup):
+    async def test_agent_execution_with_real_llm_calls(self, test_pipeline_test_core, test_supervisor_setup):
         """Test agent execution with real LLM calls in test mode."""
-        session_data = await pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
+        session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
         try:
-            execution_result = await self._execute_agent_with_real_llm(session_data, supervisor_setup)
+            execution_result = await self._execute_agent_with_real_llm(session_data, test_supervisor_setup)
             self._assert_real_llm_execution_success(execution_result)
         finally:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
-    async def test_streaming_response_format_validation(self, pipeline_test_core, supervisor_setup):
+    async def test_streaming_response_format_validation(self, test_pipeline_test_core, test_supervisor_setup):
         """Test response streaming format and real-time updates."""
-        session_data = await pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
+        session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
         try:
             streaming_validator = StreamingResponseValidator()
-            stream_result = await streaming_validator.validate_response_streaming(session_data, supervisor_setup)
+            stream_result = await streaming_validator.validate_response_streaming(session_data, test_supervisor_setup)
             self._assert_streaming_response_success(stream_result)
         finally:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
-    async def test_multi_agent_coordination_and_parallel_execution(self, pipeline_test_core, supervisor_setup):
+    async def test_multi_agent_coordination_and_parallel_execution(self, test_pipeline_test_core, test_supervisor_setup):
         """Test multi-agent coordination with parallel execution."""
-        session_data = await pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
+        session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
         try:
-            coordination_result = await self._test_multi_agent_coordination(session_data, supervisor_setup)
+            coordination_result = await self._test_multi_agent_coordination(session_data, test_supervisor_setup)
             self._assert_multi_agent_coordination_success(coordination_result)
         finally:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
-    async def test_agent_failure_and_recovery_scenarios(self, pipeline_test_core, supervisor_setup):
+    async def test_agent_failure_and_recovery_scenarios(self, test_pipeline_test_core, test_supervisor_setup):
         """Test agent failure handling and fallback scenarios."""
-        session_data = await pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
+        session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
         try:
-            recovery_result = await self._test_failure_recovery_scenarios(session_data, supervisor_setup)
+            recovery_result = await self._test_failure_recovery_scenarios(session_data, test_supervisor_setup)
             self._assert_failure_recovery_success(recovery_result)
         finally:
             await session_data["client"].close()
     
-    async def _execute_complete_workflow(self, session_data: Dict[str, Any], supervisor_setup: Dict) -> Dict[str, Any]:
+    async def _execute_complete_workflow(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Execute complete workflow from message to response."""
         message = AgentPipelineTestUtils.create_optimization_request(session_data["user_data"].id)
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -123,7 +123,7 @@ class TestRealAgentPipeline:
             response = await AgentPipelineTestUtils.send_pipeline_message(session_data["client"], message)
             return {"message_sent": True, "response_received": response.get("success", False), "content": response}
     
-    async def _test_supervisor_routing_patterns(self, session_data: Dict[str, Any], supervisor_setup: Dict) -> Dict[str, Any]:
+    async def _test_supervisor_routing_patterns(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test supervisor routing with different message patterns."""
         routing_results = {}
         for pattern in ["data_analysis", "cost_optimization", "admin_request"]:
@@ -131,7 +131,7 @@ class TestRealAgentPipeline:
             routing_results[pattern] = await self._test_single_routing_pattern(session_data, message)
         return routing_results
     
-    async def _execute_agent_with_real_llm(self, session_data: Dict[str, Any], supervisor_setup: Dict) -> Dict[str, Any]:
+    async def _execute_agent_with_real_llm(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Execute agent with real LLM in test mode."""
         message = AgentPipelineTestUtils.create_complex_analysis_request(session_data["user_data"].id)
         start_time = time.time()
@@ -142,16 +142,16 @@ class TestRealAgentPipeline:
             execution_time = time.time() - start_time
             return {"execution_time": execution_time, "llm_called": True, "response": response}
     
-    async def _test_multi_agent_coordination(self, session_data: Dict[str, Any], supervisor_setup: Dict) -> Dict[str, Any]:
+    async def _test_multi_agent_coordination(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test multi-agent coordination and parallel execution."""
         coordinator = MultiAgentCoordinator()
         message = AgentPipelineTestUtils.create_coordination_request(session_data["user_data"].id)
         return await coordinator.test_parallel_agent_execution(session_data, message)
     
-    async def _test_failure_recovery_scenarios(self, session_data: Dict[str, Any], supervisor_setup: Dict) -> Dict[str, Any]:
+    async def _test_failure_recovery_scenarios(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test agent failure and recovery scenarios."""
         recovery_tester = AgentFailureRecoveryTester()
-        return await recovery_tester.test_failure_scenarios(session_data, supervisor_setup)
+        return await recovery_tester.test_failure_scenarios(session_data, test_supervisor_setup)
     
     async def _test_single_routing_pattern(self, session_data: Dict[str, Any], message: Dict[str, Any]) -> Dict[str, Any]:
         """Test single routing pattern."""
@@ -279,7 +279,7 @@ class AgentPipelineTestUtils:
 class StreamingResponseValidator:
     """Validates streaming response format and real-time updates."""
     
-    async def validate_response_streaming(self, session_data: Dict[str, Any], supervisor_setup: Dict) -> Dict[str, Any]:
+    async def validate_response_streaming(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Validate response streaming format."""
         message = AgentPipelineTestUtils.create_optimization_request(session_data["user_data"].id)
         stream_monitor = StreamMonitor()
@@ -323,7 +323,7 @@ class MultiAgentCoordinator:
 class AgentFailureRecoveryTester:
     """Tests agent failure and recovery scenarios."""
     
-    async def test_failure_scenarios(self, session_data: Dict[str, Any], supervisor_setup: Dict) -> Dict[str, Any]:
+    async def test_failure_scenarios(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test various failure and recovery scenarios."""
         message = AgentPipelineTestUtils.create_optimization_request(session_data["user_data"].id)
         # Mock: LLM service isolation for fast testing without API calls or rate limits

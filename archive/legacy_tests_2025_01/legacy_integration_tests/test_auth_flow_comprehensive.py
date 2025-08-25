@@ -69,7 +69,7 @@ class TestAuthFlowComprehensiveL3:
             "code_challenge_method": "S256"
         }
         
-        init_response = await async_client.post("/api/auth/oauth/init", json=oauth_init)
+        init_response = await async_client.post("/auth/oauth/init", json=oauth_init)
         assert init_response.status_code in [200, 404, 501]  # 501 if OAuth not implemented
         
         if init_response.status_code == 200:
@@ -84,7 +84,7 @@ class TestAuthFlowComprehensiveL3:
                 "code_verifier": "test_verifier"
             }
             
-            callback_response = await async_client.post("/api/auth/oauth/callback", json=callback_data)
+            callback_response = await async_client.post("/auth/oauth/callback", json=callback_data)
             assert callback_response.status_code in [200, 400, 401]
             
             if callback_response.status_code == 200:
@@ -110,7 +110,7 @@ class TestAuthFlowComprehensiveL3:
             "refresh_token": initial_refresh
         }
         
-        refresh_response = await async_client.post("/api/auth/refresh", json=refresh_data)
+        refresh_response = await async_client.post("/auth/refresh", json=refresh_data)
         
         if refresh_response.status_code == 200:
             new_tokens = refresh_response.json()
@@ -118,7 +118,7 @@ class TestAuthFlowComprehensiveL3:
             assert "refresh_token" in new_tokens
             
             # Verify old refresh token is invalidated
-            second_refresh = await async_client.post("/api/auth/refresh", json=refresh_data)
+            second_refresh = await async_client.post("/auth/refresh", json=refresh_data)
             assert second_refresh.status_code in [401, 403]
     
     @pytest.mark.asyncio
@@ -132,7 +132,7 @@ class TestAuthFlowComprehensiveL3:
             "password": "SecurePassword123!"
         }
         
-        login_response = await async_client.post("/api/auth/login", json=login_data)
+        login_response = await async_client.post("/auth/login", json=login_data)
         
         if login_response.status_code == 202:  # MFA required
             mfa_challenge = login_response.json()
@@ -145,7 +145,7 @@ class TestAuthFlowComprehensiveL3:
                 "code": "123456"  # Mock TOTP code
             }
             
-            mfa_response = await async_client.post("/api/auth/mfa/verify", json=mfa_data)
+            mfa_response = await async_client.post("/auth/mfa/verify", json=mfa_data)
             assert mfa_response.status_code in [200, 401, 404]
             
             if mfa_response.status_code == 200:
@@ -170,7 +170,7 @@ class TestAuthFlowComprehensiveL3:
         }
         
         # Login with device fingerprint
-        login_response = await async_client.post("/api/auth/login", json=session_data)
+        login_response = await async_client.post("/auth/login", json=session_data)
         
         if login_response.status_code == 200:
             tokens = login_response.json()
@@ -189,7 +189,7 @@ class TestAuthFlowComprehensiveL3:
             }
             
             # Should detect potential hijacking
-            test_response = await async_client.get("/api/v1/profile", headers=different_device_headers)
+            test_response = await async_client.get("/api/profile", headers=different_device_headers)
             # May trigger additional verification or return 401
             assert test_response.status_code in [200, 401, 403, 404]
     
@@ -205,7 +205,7 @@ class TestAuthFlowComprehensiveL3:
                 "email": email,
                 "password": "WrongPassword123!"
             }
-            response = await async_client.post("/api/auth/login", json=login_data)
+            response = await async_client.post("/auth/login", json=login_data)
             return response.status_code
         
         # Attempt multiple concurrent logins

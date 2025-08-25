@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>HealthEndpointAudit</name>
+        <type>ArchitecturalInvestigation</type>
+        <version>1.0</version>
+        <date>2025-08-25</date>
+        <description>Investigation of /health/ready endpoint status in backend service</description>
+    </metadata>
+
+    <investigation>
+        <question>Was the /health/ready endpoint removed from the backend service?</question>
+        
+        <answer>
+            <status>NOT_REMOVED</status>
+            <summary>The /health/ready endpoint still exists and is functional in the backend service</summary>
+        </answer>
+
+        <findings>
+            <finding id="1">
+                <title>Two Health Route Implementations Exist</title>
+                <detail>
+                    The backend has TWO separate health route implementations:
+                    1. netra_backend/app/routes/health.py (ACTIVE - registered and used)
+                    2. netra_backend/app/routes/unified_health.py (INACTIVE - not registered)
+                </detail>
+                <impact>Potential confusion about which implementation is the source of truth</impact>
+            </finding>
+
+            <finding id="2">
+                <title>/health/ready Endpoint Location</title>
+                <detail>
+                    The /health/ready endpoint is defined at:
+                    - File: netra_backend/app/routes/health.py
+                    - Lines: 242-305
+                    - Full path: /health/ready (prefix "/health" + route "/ready")
+                </detail>
+                <functionality>
+                    - Checks application startup state
+                    - Validates database connectivity (Postgres required, ClickHouse optional)
+                    - Returns 503 if not ready with detailed status information
+                    - Handles startup in progress, startup failed, and startup complete states
+                </functionality>
+            </finding>
+
+            <finding id="3">
+                <title>Route Registration</title>
+                <detail>
+                    The health.py router is registered in:
+                    - app_factory_route_configs.py line 68: ("health", modules["health"].router, "/health", ["health"])
+                    - This registers all routes from health.py under the /health prefix
+                </detail>
+                <endpoints>
+                    - /health/ and /health - Basic health check
+                    - /health/ready - Readiness probe
+                    - /health/live - Liveness probe
+                    - /health/agents - Agent health
+                    - /health/agents/metrics - Agent metrics
+                    - /health/agents/{agent_name} - Specific agent health
+                    - /health/alerts - System alerts
+                    - /health/system/comprehensive - Comprehensive health
+                    - /health/database-env - Database environment info
+                    - /health/schema-validation - Schema validation
+                </endpoints>
+            </finding>
+
+            <finding id="4">
+                <title>Test Coverage</title>
+                <detail>
+                    Multiple tests still reference and expect /health/ready to work:
+                    - test_api_error_handling_critical.py
+                    - test_api_core_critical.py
+                    - test_health_route_llm_issue.py
+                    - test_auth_service_health_dependencies.py
+                    - test_cold_startup_readiness_detection.py
+                    - And others...
+                </detail>
+            </finding>
+
+            <finding id="5">
+                <title>Unified Health Module Status</title>
+                <detail>
+                    The unified_health.py module exists but is NOT currently registered:
+                    - Contains alternative implementation with /health/ready endpoint
+                    - Uses health_registry service pattern
+                    - Not imported in app_factory_route_imports.py
+                    - Appears to be a planned replacement that hasn't been activated
+                </detail>
+            </finding>
+        </findings>
+
+        <recommendations>
+            <recommendation priority="high">
+                <title>Clarify Health Route Architecture</title>
+                <description>
+                    Decide whether to keep the current health.py implementation or migrate to unified_health.py.
+                    Having two implementations creates confusion and maintenance burden.
+                </description>
+            </recommendation>
+
+            <recommendation priority="medium">
+                <title>Document Health Endpoint Architecture</title>
+                <description>
+                    Create clear documentation about which health implementation is the source of truth
+                    and the planned migration path if unified_health.py is intended as a replacement.
+                </description>
+            </recommendation>
+
+            <recommendation priority="low">
+                <title>Clean Up Unused Implementation</title>
+                <description>
+                    If unified_health.py is not being used, consider removing it or clearly marking it
+                    as experimental/future work to avoid confusion.
+                </description>
+            </recommendation>
+        </recommendations>
+
+        <conclusion>
+            The /health/ready endpoint was NOT removed. It exists and is functional at the path /health/ready
+            in the backend service, implemented in netra_backend/app/routes/health.py. The confusion may arise
+            from the existence of two health route implementations, where only one (health.py) is actively
+            registered and used.
+        </conclusion>
+    </investigation>
+</specification>

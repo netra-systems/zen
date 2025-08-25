@@ -177,7 +177,7 @@ user = UserSimulator("http://localhost:8000", "http://localhost:8081")
 login_result = await user.simulate_login()
 
 # Simulate API requests
-api_result = await user.simulate_api_request("/api/v1/threads")
+api_result = await user.simulate_api_request("/api/threads")
 
 # Execute complete journey
 journey_result = await user.simulate_user_journey(journey_steps)

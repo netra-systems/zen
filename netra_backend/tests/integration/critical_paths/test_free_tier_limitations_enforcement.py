@@ -143,7 +143,7 @@ class FreeTierLimitsTester:
                 start_time = time.time()
                 
                 async with self.session.get(
-                    f"{BACKEND_URL}/api/v1/user/profile",
+                    f"{BACKEND_URL}/api/user/profile",
                     headers=headers
                 ) as response:
                     self.api_call_times.append(time.time())
@@ -193,7 +193,7 @@ class FreeTierLimitsTester:
             
             # Check current usage
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/user/storage",
+                f"{BACKEND_URL}/api/user/storage",
                 headers=headers
             ) as response:
                 if response.status == 200:
@@ -217,7 +217,7 @@ class FreeTierLimitsTester:
                 }
                 
                 async with self.session.post(
-                    f"{BACKEND_URL}/api/v1/storage/upload",
+                    f"{BACKEND_URL}/api/storage/upload",
                     json=upload_data,
                     headers=headers
                 ) as response:
@@ -264,7 +264,7 @@ class FreeTierLimitsTester:
             }
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/workspaces",
+                f"{BACKEND_URL}/api/workspaces",
                 json=workspace_data,
                 headers=headers
             ) as response:
@@ -286,7 +286,7 @@ class FreeTierLimitsTester:
                 }
                 
                 async with self.session.post(
-                    f"{BACKEND_URL}/api/v1/agents",
+                    f"{BACKEND_URL}/api/agents",
                     json=agent_data,
                     headers=headers
                 ) as response:
@@ -413,7 +413,7 @@ class FreeTierLimitsTester:
                 }
                 
                 async with self.session.post(
-                    f"{BACKEND_URL}/api/v1/models/custom",
+                    f"{BACKEND_URL}/api/models/custom",
                     json=custom_model_data,
                     headers=headers
                 ) as response:
@@ -427,10 +427,10 @@ class FreeTierLimitsTester:
             # Test enterprise features (should be restricted)
             if not FREE_TIER_LIMITS.get("enterprise_features", True):
                 enterprise_endpoints = [
-                    ("/api/v1/enterprise/sso", "SSO"),
-                    ("/api/v1/enterprise/audit-logs", "Audit Logs"),
-                    ("/api/v1/enterprise/compliance", "Compliance"),
-                    ("/api/v1/analytics/advanced", "Advanced Analytics")
+                    ("/api/enterprise/sso", "SSO"),
+                    ("/api/enterprise/audit-logs", "Audit Logs"),
+                    ("/api/enterprise/compliance", "Compliance"),
+                    ("/api/analytics/advanced", "Advanced Analytics")
                 ]
                 
                 for endpoint, feature in enterprise_endpoints:
@@ -452,7 +452,7 @@ class FreeTierLimitsTester:
             }
             
             async with self.session.post(
-                f"{BACKEND_URL}/api/v1/team/invite",
+                f"{BACKEND_URL}/api/team/invite",
                 json=team_member_data,
                 headers=headers
             ) as response:
@@ -486,7 +486,7 @@ class FreeTierLimitsTester:
             
             # Get initial usage
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/user/usage",
+                f"{BACKEND_URL}/api/user/usage",
                 headers=headers
             ) as response:
                 if response.status == 200:
@@ -498,7 +498,7 @@ class FreeTierLimitsTester:
             tracked_calls = 5
             for i in range(tracked_calls):
                 async with self.session.get(
-                    f"{BACKEND_URL}/api/v1/user/profile",
+                    f"{BACKEND_URL}/api/user/profile",
                     headers=headers
                 ) as response:
                     if response.status == 200:
@@ -508,7 +508,7 @@ class FreeTierLimitsTester:
                 
             # Check updated usage
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/user/usage",
+                f"{BACKEND_URL}/api/user/usage",
                 headers=headers
             ) as response:
                 if response.status == 200:
@@ -544,7 +544,7 @@ class FreeTierLimitsTester:
             
             # Get upgrade options
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/billing/upgrade-options",
+                f"{BACKEND_URL}/api/billing/upgrade-options",
                 headers=headers
             ) as response:
                 if response.status == 200:
@@ -563,7 +563,7 @@ class FreeTierLimitsTester:
                     }
                     
                     async with self.session.post(
-                        f"{BACKEND_URL}/api/v1/billing/upgrade-intent",
+                        f"{BACKEND_URL}/api/billing/upgrade-intent",
                         json=upgrade_data,
                         headers=headers
                     ) as upgrade_response:
@@ -599,7 +599,7 @@ class FreeTierLimitsTester:
             
             # Get current usage and reset time
             async with self.session.get(
-                f"{BACKEND_URL}/api/v1/user/usage",
+                f"{BACKEND_URL}/api/user/usage",
                 headers=headers
             ) as response:
                 if response.status == 200:

@@ -20,98 +20,73 @@ logger = central_logger.get_logger(__name__)
 
 
 class UnifiedPostgresDB:
-    """Unified async PostgreSQL manager that auto-detects environment"""
+    """DEPRECATED: Unified async PostgreSQL manager - Use DatabaseManager instead.
+    
+    This class has been DEPRECATED to eliminate SSOT violations.
+    Use netra_backend.app.db.database_manager.DatabaseManager directly.
+    """
     
     def __init__(self):
-        # Detect environment from unified config
+        import warnings
+        warnings.warn(
+            "UnifiedPostgresDB is deprecated. Use DatabaseManager from netra_backend.app.db.database_manager instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Delegate to DatabaseManager
+        from netra_backend.app.db.database_manager import DatabaseManager
+        self._database_manager = DatabaseManager
+        
+        # Detect environment from unified config for compatibility
         config = get_unified_config()
-        self.is_cloud_run = config.deployment.is_cloud_run
+        from netra_backend.app.core.environment_constants import EnvironmentDetector
+        self.is_cloud_run = EnvironmentDetector.is_cloud_run()
         self.is_staging = config.environment == "staging"
-        self.is_production = config.environment == "production"
+        self.is_production = config.environment == "production" 
         self.is_test = config.environment == "test"
+        self._initialized = True  # Always initialized since DatabaseManager handles lazy init
         
-        # Manager will be initialized on first use
-        self.manager = None
-        self._initialized = False
-        
-        logger.info(f"Unified DB initialized - Cloud Run: {self.is_cloud_run}, "
-                   f"Staging: {self.is_staging}, Production: {self.is_production}, "
-                   f"Test: {self.is_test}")
+        logger.info(f"DEPRECATED UnifiedPostgresDB - delegating to DatabaseManager")
     
     async def initialize(self):
-        """Initialize appropriate manager based on environment"""
-        if self._initialized:
-            return
+        """DEPRECATED: DatabaseManager handles initialization automatically."""
+        logger.info("UnifiedPostgresDB.initialize() is deprecated - DatabaseManager handles initialization")
         
-        try:
-            if self.is_cloud_run or self.is_staging or self.is_production:
-                # Use Cloud SQL for Cloud Run, staging, and production
-                logger.info("Initializing Cloud SQL manager for cloud environment")
-                from netra_backend.app.db.postgres_cloud import cloud_db
-                self.manager = cloud_db
-                await self.manager.initialize_cloud_run()
-            else:
-                # Use local async for development and testing
-                logger.info("Initializing async manager for local environment")
-                from netra_backend.app.db.postgres_async import async_db
-                self.manager = async_db
-                await self.manager.initialize_local()
-            
-            self._initialized = True
-            logger.info("Unified database manager initialized successfully")
-            
-        except Exception as e:
-            logger.error(f"Failed to initialize unified database manager: {e}")
-            raise RuntimeError(f"Database initialization failed: {e}") from e
-    
     @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
-        """Get database session from appropriate manager"""
-        if not self._initialized:
-            await self.initialize()
-        
-        async with self.manager.get_session() as session:
-            yield session
+        """DEPRECATED: Get database session via DatabaseManager."""
+        session_factory = self._database_manager.get_application_session()
+        async with session_factory() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
     
     async def test_connection(self) -> bool:
-        """Test database connectivity"""
+        """DEPRECATED: Test database connectivity via DatabaseManager."""
         try:
-            if not self._initialized:
-                await self.initialize()
-            
-            return await self.manager.test_connection()
+            engine = self._database_manager.create_application_engine()
+            return await self._database_manager.test_connection_with_retry(engine)
         except Exception as e:
             logger.error(f"Connection test failed: {e}")
             return False
     
     async def close(self):
-        """Close connections"""
-        if self.manager:
-            await self.manager.close()
-            self._initialized = False
-            logger.info("Unified database connections closed")
+        """DEPRECATED: DatabaseManager handles connection lifecycle."""
+        logger.info("UnifiedPostgresDB.close() is deprecated - DatabaseManager handles lifecycle")
     
     def get_status(self) -> dict:
-        """Get current database status"""
-        if not self._initialized or not self.manager:
-            return {
-                "status": "not_initialized",
-                "environment": self._get_environment_name(),
-            }
-        
-        base_status = {
-            "status": "active",
+        """DEPRECATED: Get current database status via DatabaseManager."""
+        return {
+            "status": "deprecated_redirected_to_database_manager", 
             "environment": self._get_environment_name(),
-            "manager_type": "cloud_sql" if (self.is_cloud_run or self.is_staging or self.is_production) else "local_async",
+            "manager_type": "database_manager_delegate",
+            "is_cloud_sql": self._database_manager.is_cloud_sql_environment(),
+            "is_local_dev": self._database_manager.is_local_development(),
         }
-        
-        # Get manager-specific status
-        if hasattr(self.manager, 'get_pool_status'):
-            base_status.update(self.manager.get_pool_status())
-        elif hasattr(self.manager, 'get_connection_status'):
-            base_status.update(self.manager.get_connection_status())
-        
-        return base_status
     
     def _get_environment_name(self) -> str:
         """Get human-readable environment name"""
@@ -131,18 +106,34 @@ class UnifiedPostgresDB:
 unified_db = UnifiedPostgresDB()
 
 
-# REMOVED: get_db() duplicate implementation
-# Use netra_backend.app.database.get_db() for single source of truth
-
-# Backward compatibility redirects to single source of truth
+# DEPRECATED: Redirects to DatabaseManager-based single source of truth
 async def get_db():
-    """REDIRECTED: Delegates to single source of truth in netra_backend.app.database"""
+    """DEPRECATED: Use netra_backend.app.database.get_db() for SSOT compliance.
+    
+    This implementation has been DEPRECATED to eliminate SSOT violations.
+    All new code should import from netra_backend.app.database directly.
+    """
+    import warnings
+    warnings.warn(
+        "postgres_unified.get_db() is deprecated. Use 'from netra_backend.app.database import get_db' instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     from netra_backend.app.database import get_db as _get_db
     async for session in _get_db():
         yield session
 
-# Backward compatibility alias
-get_async_db = get_db
+# DEPRECATED: Backward compatibility alias
+def get_async_db():
+    """DEPRECATED: Use netra_backend.app.database.get_db() for SSOT compliance."""
+    import warnings
+    warnings.warn(
+        "postgres_unified.get_async_db() is deprecated. Use 'from netra_backend.app.database import get_db' instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return get_db()
 
 
 # Utility functions for lifecycle management

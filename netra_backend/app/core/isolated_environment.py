@@ -12,6 +12,7 @@ import threading
 from typing import Dict, Optional, Any, Set
 from pathlib import Path
 import logging
+import urllib.parse
 
 logger = logging.getLogger(__name__)
 
@@ -101,10 +102,13 @@ class IsolatedEnvironment:
     def set(self, key: str, value: str, source: str = "unknown") -> None:
         """Set an environment variable value."""
         with self._lock:
+            # Apply sanitization to avoid corruption of sensitive values like database URLs
+            sanitized_value = self._sanitize_value(value)
+            
             if self._isolation_enabled:
-                self._isolated_vars[key] = value
+                self._isolated_vars[key] = sanitized_value
             else:
-                os.environ[key] = value
+                os.environ[key] = sanitized_value
             logger.debug(f"Set {key} from {source}")
     
     def delete(self, key: str) -> None:
@@ -222,6 +226,154 @@ class IsolatedEnvironment:
         with self._lock:
             self._isolated_vars.clear()
             self._protected_vars.clear()
+    
+    def _sanitize_value(self, value: str) -> str:
+        """Sanitize environment variable value while preserving database credentials.
+        
+        This method removes control characters but preserves password integrity.
+        Special handling is applied for database URLs to prevent authentication failures.
+        
+        Args:
+            value: Raw environment variable value
+            
+        Returns:
+            Sanitized value with control characters removed but passwords preserved
+        """
+        if not isinstance(value, str):
+            return str(value)
+        
+        # Check if this looks like a database URL
+        is_database_url = any(proto in value.lower() for proto in ["postgresql://", "mysql://", "sqlite://", "clickhouse://"])
+        
+        if is_database_url:
+            return self._sanitize_database_url(value)
+        else:
+            return self._sanitize_generic_value(value)
+    
+    def _sanitize_database_url(self, url: str) -> str:
+        """Sanitize database URL while preserving password integrity.
+        
+        Args:
+            url: Database URL to sanitize
+            
+        Returns:
+            Sanitized URL with control characters removed but authentication preserved
+        """
+        import urllib.parse
+        
+        try:
+            # Parse the URL to handle components separately
+            parsed = urllib.parse.urlparse(url)
+            
+            # Sanitize individual components while preserving password integrity
+            scheme = self._remove_control_characters(parsed.scheme) if parsed.scheme else ""
+            
+            # For hostname, remove control characters but preserve the structure
+            hostname = self._remove_control_characters(parsed.hostname) if parsed.hostname else ""
+            
+            # For username, remove control characters
+            username = self._remove_control_characters(parsed.username) if parsed.username else ""
+            
+            # For password, PRESERVE special characters but remove only control characters
+            password = self._sanitize_password_preserving_special_chars(parsed.password) if parsed.password else ""
+            
+            # For port, keep as-is if valid
+            port = parsed.port
+            
+            # For path, remove control characters
+            path = self._remove_control_characters(parsed.path) if parsed.path else ""
+            
+            # For query parameters, remove control characters
+            query = self._remove_control_characters(parsed.query) if parsed.query else ""
+            
+            # Reconstruct the URL
+            netloc = ""
+            if username:
+                netloc += username
+                if password:
+                    netloc += f":{password}"
+                netloc += "@"
+            
+            if hostname:
+                netloc += hostname
+                if port:
+                    netloc += f":{port}"
+            
+            # Use urlunparse to reconstruct properly
+            sanitized_url = urllib.parse.urlunparse((
+                scheme, netloc, path, "", query, ""
+            ))
+            
+            return sanitized_url
+            
+        except Exception as e:
+            logger.warning(f"Database URL sanitization failed, using generic sanitization: {e}")
+            return self._sanitize_generic_value(url)
+    
+    def _sanitize_password_preserving_special_chars(self, password: str) -> str:
+        """Sanitize password by removing only control characters, preserving special chars.
+        
+        Args:
+            password: Password to sanitize
+            
+        Returns:
+            Password with only control characters removed
+        """
+        if not password:
+            return password
+        
+        # Remove only ASCII control characters (0-31 and 127) but preserve all other characters
+        sanitized = ""
+        for char in password:
+            char_code = ord(char)
+            if char_code < 32 or char_code == 127:
+                # Skip control characters but log for debugging
+                logger.debug(f"Removed control character from password: ASCII {char_code}")
+            else:
+                sanitized += char
+        
+        return sanitized
+    
+    def _remove_control_characters(self, value: str) -> str:
+        """Remove control characters from string value.
+        
+        Args:
+            value: String to clean
+            
+        Returns:
+            String with control characters removed
+        """
+        if not value:
+            return value
+        
+        # Remove ASCII control characters (0-31 and 127)
+        sanitized = ""
+        for char in value:
+            char_code = ord(char)
+            if char_code < 32 or char_code == 127:
+                # Log specific control characters for debugging
+                char_name = {
+                    10: 'newline (LF)',
+                    13: 'carriage return (CR)',
+                    9: 'tab',
+                    0: 'null byte'
+                }.get(char_code, f'control character (ASCII {char_code})')
+                logger.debug(f"Removed {char_name} from environment value")
+            else:
+                sanitized += char
+        
+        return sanitized
+    
+    def _sanitize_generic_value(self, value: str) -> str:
+        """Sanitize generic environment variable value.
+        
+        Args:
+            value: Value to sanitize
+            
+        Returns:
+            Sanitized value
+        """
+        return self._remove_control_characters(value)
 
 
 # Singleton instance

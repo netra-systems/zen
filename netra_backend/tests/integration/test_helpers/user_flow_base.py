@@ -50,7 +50,7 @@ class UserFlowTestBase:
         """Create and verify a user account."""
         # Register
 
-        response = await async_client.post("/api/v1/auth/register", json=user_data)
+        response = await async_client.post("/auth/register", json=user_data)
 
         assert response.status_code == status.HTTP_201_CREATED
 
@@ -60,7 +60,7 @@ class UserFlowTestBase:
 
         response = await async_client.post(
 
-            f"/api/v1/auth/verify-email/{reg_data['verification_token']}"
+            f"/auth/verify-email/{reg_data['verification_token']}"
 
         )
 
@@ -70,7 +70,7 @@ class UserFlowTestBase:
 
         response = await async_client.post(
 
-            "/api/v1/auth/login",
+            "/auth/login",
 
             json={"email": user_data["email"], "password": user_data["password"]}
 
@@ -102,7 +102,7 @@ class UserFlowTestBase:
 
             response = await async_client.post(
 
-                "/api/v1/chat/message",
+                "/api/chat/message",
 
                 json={
 
@@ -138,7 +138,7 @@ class UserFlowTestBase:
 
         headers = {"Authorization": f"Bearer {access_token}"}
 
-        response = await async_client.get("/api/v1/usage/current", headers=headers)
+        response = await async_client.get("/api/usage/current", headers=headers)
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -233,7 +233,7 @@ class UserFlowTestBase:
         
         # Get available plans
 
-        response = await async_client.get("/api/v1/billing/plans")
+        response = await async_client.get("/api/billing/plans")
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -259,7 +259,7 @@ class UserFlowTestBase:
 
             response = await async_client.post(
 
-                "/api/v1/billing/upgrade",
+                "/api/billing/upgrade",
 
                 json={
 
@@ -299,7 +299,7 @@ class UserFlowTestBase:
         
         # Get baseline usage
 
-        response = await async_client.get("/api/v1/usage/detailed", headers=headers)
+        response = await async_client.get("/api/usage/detailed", headers=headers)
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -309,7 +309,7 @@ class UserFlowTestBase:
 
         await async_client.post(
 
-            "/api/v1/chat/message",
+            "/api/chat/message",
 
             json={"content": "Usage test", "thread_id": str(uuid.uuid4())},
 
@@ -319,7 +319,7 @@ class UserFlowTestBase:
         
         # Verify usage incremented
 
-        response = await async_client.get("/api/v1/usage/detailed", headers=headers)
+        response = await async_client.get("/api/usage/detailed", headers=headers)
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -347,7 +347,7 @@ class UserFlowTestBase:
         
         response = await async_client.post(
 
-            "/api/v1/export/usage",
+            "/api/export/usage",
 
             json={
 
@@ -387,7 +387,7 @@ class UserFlowTestBase:
 
         response = await async_client.post(
 
-            "/api/v1/chat/message",
+            "/api/chat/message",
 
             json={"content": "", "thread_id": "invalid-uuid"},
 
@@ -405,7 +405,7 @@ class UserFlowTestBase:
 
             response = await async_client.post(
 
-                "/api/v1/chat/message",
+                "/api/chat/message",
 
                 json={"content": "Test", "thread_id": str(uuid.uuid4())},
 
@@ -443,7 +443,7 @@ class UserFlowTestBase:
 
         response = await async_client.put(
 
-            "/api/v1/session/ui-state", json=ui_state, headers=headers
+            "/api/session/ui-state", json=ui_state, headers=headers
 
         )
 
@@ -453,7 +453,7 @@ class UserFlowTestBase:
 
         response = await async_client.post(
 
-            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
+            "/auth/refresh", json={"refresh_token": refresh_token}
 
         )
 
@@ -461,7 +461,7 @@ class UserFlowTestBase:
 
         new_headers = {"Authorization": f"Bearer {new_token}"}
         
-        response = await async_client.get("/api/v1/session/restore", headers=new_headers)
+        response = await async_client.get("/api/session/restore", headers=new_headers)
 
         assert response.status_code == status.HTTP_200_OK
 

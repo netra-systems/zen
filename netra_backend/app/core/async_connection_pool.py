@@ -4,7 +4,7 @@ import asyncio
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Awaitable, Callable, Set, TypeVar
 
-from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.exceptions_service import ServiceError
 
 T = TypeVar('T')

@@ -217,7 +217,7 @@ class UnifiedRateLimitTester:
             for attempt in range(10):  # Reduced attempts for test speed
                 try:
                     response = await client.post(
-                        "http://localhost:8000/api/v1/chat/message",
+                        "http://localhost:8000/api/chat/message",
                         headers=headers,
                         json={
                             "message": f"Rate limit test message {attempt + 1}",
@@ -406,7 +406,7 @@ class UnifiedRateLimitTester:
             for attempt in range(8):  # Reduced test range for speed
                 try:
                     response = await client.post(
-                        "http://localhost:8000/api/v1/chat/message",
+                        "http://localhost:8000/api/chat/message",
                         headers=headers,
                         json={
                             "message": f"Tier test message {attempt + 1}",
@@ -486,7 +486,7 @@ class UnifiedRateLimitTester:
         try:
             async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                 response = await client.post(
-                    "http://localhost:8000/api/v1/chat/message",
+                    "http://localhost:8000/api/chat/message",
                     headers=headers,
                     json={"message": f"DDoS test {request_id}", "timestamp": time.time()}
                 )
@@ -522,7 +522,7 @@ class UnifiedRateLimitTester:
         try:
             async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.post(
-                    "http://localhost:8000/api/v1/chat/message",
+                    "http://localhost:8000/api/chat/message",
                     headers=headers,
                     json={"message": "Recovery test", "timestamp": time.time()}
                 )
@@ -572,7 +572,7 @@ async def test_rate_limiting_unified_real():
     
     Tests comprehensive rate limiting across all service boundaries:
     1. Auth service endpoint rate limits (/auth/me, /auth/refresh)
-    2. Backend API rate limits (/api/v1/chat/message)  
+    2. Backend API rate limits (/api/chat/message)  
     3. WebSocket message rate limiting (connection and message limits)
     4. Coordinated rate limiting via Redis
     5. Tier-based rate limiting (Free vs Paid)

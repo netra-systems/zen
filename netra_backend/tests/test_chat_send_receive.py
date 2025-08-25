@@ -113,6 +113,87 @@ class TestChatSendReceive:
         
         print(f"✅ Chat test passed - message was processed successfully by the system")
 
+    @pytest.mark.asyncio
+    async def test_user_message_missing_content_field(self):
+        """Test handling of user_message with missing required content field.
+        
+        This test covers a critical edge case where a user_message payload
+        is missing the required 'content' field, which should result in 
+        proper error handling and user notification.
+        """
+        sent_responses = []
+        
+        async def mock_send_message(user_id: str, message: Dict[str, Any]):
+            sent_responses.append({"user_id": user_id, "message": message})
+        
+        async def mock_send_error(user_id: str, error: str):
+            sent_responses.append({"user_id": user_id, "error": error})
+        
+        # Create mock websocket manager with proper method signatures
+        mock_websocket_manager = MagicMock()
+        mock_websocket_manager.send_message = AsyncMock(side_effect=mock_send_message)
+        mock_websocket_manager.send_error = AsyncMock(side_effect=mock_send_error)  
+        mock_websocket_manager.send_to_user = AsyncMock(side_effect=mock_send_message)
+        
+        # Add mock broadcasting object with required methods
+        mock_broadcasting = MagicMock()
+        mock_broadcasting.join_room = AsyncMock()
+        mock_broadcasting.leave_room = AsyncMock()
+        mock_websocket_manager.broadcasting = mock_broadcasting
+        
+        # Create minimal agent service setup
+        mock_db_session = AsyncMock()
+        mock_llm_manager = AsyncMock()
+        mock_tool_dispatcher = MagicMock()
+        
+        supervisor = SupervisorAgent(
+            db_session=mock_db_session,
+            llm_manager=mock_llm_manager,
+            tool_dispatcher=mock_tool_dispatcher,
+            websocket_manager=mock_websocket_manager
+        )
+        
+        agent_service = AgentService(supervisor)
+        
+        # Test user_message with missing content field - this should fail
+        invalid_message = {
+            "type": "user_message",
+            "payload": {
+                # Missing "content" field - this is required for user_message
+                "thread_id": "test_missing_content_thread"
+            }
+        }
+        
+        with patch('netra_backend.app.services.agent_service_core.manager', mock_websocket_manager):
+            with patch('netra_backend.app.websocket_core.get_websocket_manager', return_value=mock_websocket_manager):
+                await agent_service.handle_websocket_message(
+                    user_id="test_missing_content_user",
+                    message=invalid_message,
+                    db_session=mock_db_session
+                )
+        
+        # Should receive an error response for missing required field
+        print(f"Responses for missing content test: {sent_responses}")
+        
+        # Must have at least one response
+        assert len(sent_responses) > 0, "Should send error response for missing content field"
+        
+        # Should contain error indicating missing required field or invalid format
+        has_error_response = any(
+            "error" in response and (
+                "content" in response["error"].lower() or 
+                "required" in response["error"].lower() or
+                "missing" in response["error"].lower() or
+                "invalid" in response["error"].lower() or
+                "structure" in response["error"].lower()
+            )
+            for response in sent_responses
+        )
+        
+        assert has_error_response, f"Should send error about missing content field or invalid structure, got: {sent_responses}"
+        
+        print(f"✅ Missing content field test passed - properly handled missing required field")
+
     @pytest.mark.asyncio  
     async def test_empty_message_handling(self):
         """Test handling of empty or invalid messages."""

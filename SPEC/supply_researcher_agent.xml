@@ -244,7 +244,7 @@
   </workflows>
   <integration_points>
     <integration name="Google Deep Research API">
-      <endpoint>https://discoveryengine.googleapis.com/v1/projects/{project_id}/locations/global/collections/default_collection/engines/{app_id}/assistants/default_assistant:streamAssist</endpoint>
+      <endpoint>https://discoveryengine.googleapis.com/projects/{project_id}/locations/global/collections/default_collection/engines/{app_id}/assistants/default_assistant:streamAssist</endpoint>
       <authentication>Bearer token via gcloud auth</authentication>
       <rate_limits>
         <limit>100 requests per minute</limit>

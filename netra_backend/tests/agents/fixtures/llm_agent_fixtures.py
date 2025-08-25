@@ -177,7 +177,7 @@ def supervisor_agent(mock_db_session, mock_llm_manager,
                     mock_websocket_manager, mock_tool_dispatcher, mock_persistence_service):
     """Create supervisor agent with all dependencies mocked"""
     # Patch state persistence to avoid hanging
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence_service):
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence_service):
         supervisor = SupervisorAgent(
             mock_db_session,
             mock_llm_manager,

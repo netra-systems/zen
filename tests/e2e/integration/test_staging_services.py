@@ -258,7 +258,7 @@ class TestStagingServiceIntegration:
         
         # Test thread creation API (critical user functionality)
         response = await suite.test_client.post(
-            f"{backend_url}/api/v1/threads",
+            f"{backend_url}/api/threads",
             headers=headers,
             json={"name": "Service Integration Test"}
         )

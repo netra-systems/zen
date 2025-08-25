@@ -3,29 +3,46 @@
   <metadata>
     <name>CORS Configuration Specification</name>
     <type>cors_configuration</type>
-    <version>1.0</version>
+    <version>2.0</version>
     <created>2025-08-20</created>
-    <description>Comprehensive CORS configuration for all environments and services to prevent regressions</description>
+    <description>Unified CORS configuration architecture using shared/cors_config.py</description>
     <priority>CRITICAL</priority>
-    <last_edited>2025-08-21T08:47:28.408673</last_edited>
+    <last_edited>2025-08-25T15:30:00.000000</last_edited>
+    <status>IMPLEMENTED - Added explicit OPTIONS endpoint support for health endpoints</status>
   </metadata>
   <problem-statement>
-    <issue>Recurring CORS errors across local development and staging environments</issue>
-    <example>Access to fetch at 'http://localhost:8081/auth/config' from origin 'http://localhost:3001' has been blocked by CORS policy</example>
-    <root-causes>
-      <cause>Inconsistent CORS configuration between main backend and auth service</cause>
-      <cause>Missing CORS headers in auth service responses</cause>
-      <cause>Port mismatches in development environment</cause>
-      <cause>Preflight request handling issues</cause>
-      <cause>Dynamic origin validation failures</cause>
-      <cause priority="CRITICAL">Dynamic ports in development environment not properly handled in CORS configuration</cause>
-    </root-causes>
+    <issue>**RESOLVED:** Previously recurring CORS errors across environments</issue>
+    <resolution-summary>
+      <implemented>2025-08-25: Unified CORS architecture using shared/cors_config.py</implemented>
+      <eliminated-duplications>5 different CORS implementations consolidated into 1 configuration</eliminated-duplications>
+      <standardized-approach>All services now use FastAPI's built-in CORSMiddleware with unified config</standardized-approach>
+    </resolution-summary>
+    <previous-root-causes status="RESOLVED">
+      <cause status="RESOLVED">✅ Inconsistent CORS configuration - now unified via shared/cors_config.py</cause>
+      <cause status="RESOLVED">✅ Missing CORS headers - standardized FastAPI CORSMiddleware</cause>
+      <cause status="RESOLVED">✅ Port mismatches in development - dynamic port support implemented</cause>
+      <cause status="RESOLVED">✅ Preflight request handling - FastAPI handles automatically</cause>
+      <cause status="RESOLVED">✅ Dynamic origin validation - environment-aware origin detection</cause>
+    </previous-root-causes>
   </problem-statement>
+  <unified-architecture>
+    <implementation-status>✅ IMPLEMENTED - 2025-08-25</implementation-status>
+    <single-source-of-truth>shared/cors_config.py</single-source-of-truth>
+    <standardized-middleware>FastAPI CORSMiddleware</standardized-middleware>
+    <key-features>
+      <feature>Environment-aware origin detection</feature>
+      <feature>Dynamic port support for development</feature>
+      <feature>Service extensibility while maintaining unified origins</feature>
+      <feature>Production security with strict origin validation</feature>
+      <feature>Staging flexibility with Cloud Run pattern matching</feature>
+    </key-features>
+  </unified-architecture>
+  
   <core-principles>
-    <principle id="cors-consistency">
+    <principle id="cors-consistency" status="IMPLEMENTED">
       <name>Configuration Consistency</name>
       <description>All services MUST have consistent CORS configuration for the same environment</description>
-      <enforcement>Use shared configuration module or environment variables</enforcement>
+      <enforcement>✅ Implemented via shared/cors_config.py unified configuration module</enforcement>
     </principle>
     <principle id="explicit-configuration">
       <name>Explicit Configuration</name>
@@ -209,12 +226,40 @@
       </auth-service>
     </environment>
   </environment-configurations>
+  <current-implementation>
+    <unified-configuration-module>
+      <location>shared/cors_config.py</location>
+      <primary-functions>
+        <function name="get_cors_config()">Returns complete FastAPI CORSMiddleware configuration</function>
+        <function name="get_cors_origins()">Gets environment-specific allowed origins</function>
+        <function name="is_origin_allowed()">Validates if an origin is allowed</function>
+        <function name="get_websocket_cors_origins()">WebSocket-specific CORS origins (future extensibility)</function>
+      </primary-functions>
+      <environment-detection>
+        <auto-detection>Checks multiple env vars: ENVIRONMENT, ENV, NODE_ENV, NETRA_ENV, AUTH_ENV</auto-detection>
+        <fallback>Defaults to 'development' if no environment explicitly set</fallback>
+        <override>Can be explicitly overridden via function parameter</override>
+      </environment-detection>
+      <origin-patterns>
+        <development>Dynamic localhost support for any port (localhost:*, 127.0.0.1:*)</development>
+        <staging>Explicit origins plus Cloud Run pattern matching</staging>
+        <production>Strict whitelist of production domains</production>
+      </origin-patterns>
+    </unified-configuration-module>
+    
+    <service-integration>
+      <pattern>All services import from shared/cors_config and use FastAPI CORSMiddleware</pattern>
+      <extensibility>Services can add custom headers while using unified origins</extensibility>
+      <websocket-exception>WebSocket CORS handling maintained separately as acceptable exception</websocket-exception>
+    </service-integration>
+  </current-implementation>
+
   <implementation-requirements>
-    <requirement id="cors-req-001" priority="CRITICAL">
-      <description>Auth service MUST configure CORS middleware on startup</description>
-      <location>auth_service/main.py</location>
-      <validation>Check for CORSMiddleware or DynamicCORSMiddleware configuration</validation>
-      <implementation-note>Must handle CORS_ORIGINS=* with DynamicCORSMiddleware</implementation-note>
+    <requirement id="cors-req-001" priority="CRITICAL" status="IMPLEMENTED">
+      <description>✅ All services MUST use unified CORS configuration from shared/cors_config.py</description>
+      <location>shared/cors_config.py</location>
+      <validation>✅ Verified: All services now import and use get_cors_config()</validation>
+      <implementation-note>✅ Standardized on FastAPI's built-in CORSMiddleware</implementation-note>
     </requirement>
     <requirement id="cors-req-002" priority="CRITICAL">
       <description>Main backend MUST configure CORS middleware consistently</description>

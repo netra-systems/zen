@@ -115,7 +115,7 @@ class SessionSyncTestHelper:
             
             async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
                 response = await client.post(
-                    f"{self.backend_url}/api/auth/dev_login",
+                    f"{self.backend_url}/auth/dev_login",
                     json={"email": test_email, "name": test_name}
                 )
                 
@@ -144,7 +144,7 @@ class SessionSyncTestHelper:
         try:
             async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
                 response = await client.get(
-                    f"{self.backend_url}/api/auth/me",
+                    f"{self.backend_url}/auth/me",
                     headers={"Authorization": f"Bearer {user.token}"}
                 )
                 

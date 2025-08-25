@@ -17,28 +17,22 @@ import { AuthContext } from '@/auth/context';
 
 // Mock the useWebSocket hook BEFORE importing useAgent
 const mockSendMessage = jest.fn();
-const mockUseWebSocket = jest.fn(() => ({
+const mockWebSocket = {
   sendMessage: mockSendMessage,
   status: 'OPEN',
   messages: [],
-}));
+};
+
+const useWebSocketMock = jest.fn(() => mockWebSocket);
 
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: jest.fn(() => ({
-    sendMessage: jest.fn(),
-    status: 'OPEN',
-    messages: [],
-  }))
+  useWebSocket: useWebSocketMock
 }));
 
 // Now import useAgent after the mock is set up
 import { useAgent } from '@/hooks/useAgent';
 
-// Update the mock implementation after import
-const useWebSocketMock = require('@/hooks/useWebSocket').useWebSocket;
-useWebSocketMock.mockImplementation(mockUseWebSocket);
-
-describe('useAgent', () => {
+describe('useAgent (Agent Management)', () => {
   const mockAuthValue = {
     token: 'test-token',
     user: null,
@@ -57,12 +51,6 @@ describe('useAgent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSendMessage.mockClear();
-    // Reset the mock to default return value
-    useWebSocketMock.mockReturnValue({
-      sendMessage: mockSendMessage,
-      status: 'OPEN',
-      messages: [],
-    });
     localStorage.setItem('access_token', 'test-token');
   });
 
@@ -74,10 +62,13 @@ describe('useAgent', () => {
   it('should initialize with default state', () => {
     const { result } = renderHook(() => useAgent(), { wrapper });
     
-    expect(result.current.sendUserMessage).toBeDefined();
+    // The hook actually returns an agent management object, not sendUserMessage
+    expect(result.current).toBeDefined();
+    expect(result.current.agent).toBeDefined();
+    expect(result.current.isRunning).toBeDefined();
     expect(result.current.stopAgent).toBeDefined();
-    expect(typeof result.current.sendUserMessage).toBe('function');
     expect(typeof result.current.stopAgent).toBe('function');
+    expect(typeof result.current.startAgent).toBe('function');
   });
 
   it('should send message successfully', async () => {

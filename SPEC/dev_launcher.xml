@@ -209,7 +209,7 @@
     <step order="6" timeout="30s">Start backend process with cascade handling</step>
     <step order="7" timeout="20s">Start auth service with cascade handling</step>
     <step order="8" timeout="45s">Wait for backend readiness (/health/ready)</step>
-    <step order="9" timeout="30s">Verify auth system (/api/auth/config)</step>
+    <step order="9" timeout="30s">Verify auth system (/auth/config)</step>
     <step order="10" timeout="30s">Start frontend process</step>
     <step order="11" timeout="120s">Wait for frontend readiness (extended for build)</step>
     <step order="11.5" timeout="20s">Validate WebSocket endpoints (non-critical)</step>

@@ -60,7 +60,7 @@ class ConsistencyCheck:
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.db.redis_manager import get_redis_manager
 from netra_backend.app.db.postgres import get_async_db
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 # from app.core.distributed_cache import DistributedCache  # Class may not exist, commented out
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 

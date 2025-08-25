@@ -28,6 +28,7 @@ class ServiceConfigManager:
 # New service modules
 from netra_backend.app.services import (
     api_gateway,
+    auth_service_client,
     billing,
     llm_manager,
     quality_analytics,
@@ -46,6 +47,7 @@ from netra_backend.app.services import (
 supply_chain_service = supply_catalog_service
 
 __all__ = [
+    "auth_service_client",
     "quality_analytics", 
     "quality_monitor",
     "supply_optimization",

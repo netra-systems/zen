@@ -284,7 +284,23 @@ class ServicesConfiguration:
     def _add_local_postgres_url(self, env_vars: Dict[str, str]):
         """Add local PostgreSQL URL."""
         pg_config = self.postgres.get_config()
-        env_vars["DATABASE_URL"] = f"postgresql://{pg_config['user']}:{pg_config['password']}@{pg_config['host']}:{pg_config['port']}/{pg_config['database']}"
+        
+        # Use DatabaseURLBuilder for proper URL construction
+        from shared.database_url_builder import DatabaseURLBuilder
+        
+        # Create env vars for builder
+        builder_env = {
+            'POSTGRES_HOST': pg_config['host'],
+            'POSTGRES_PORT': str(pg_config['port']),
+            'POSTGRES_DB': pg_config['database'],
+            'POSTGRES_USER': pg_config['user'],
+            'POSTGRES_PASSWORD': pg_config['password'],
+            'ENVIRONMENT': 'development'
+        }
+        
+        builder = DatabaseURLBuilder(builder_env)
+        # Use TCP sync URL for dev launcher (non-async)
+        env_vars["DATABASE_URL"] = builder.tcp.sync_url or builder.development.default_sync_url
     
     def _handle_shared_postgres_warning(self):
         """Handle shared PostgreSQL mode warnings."""

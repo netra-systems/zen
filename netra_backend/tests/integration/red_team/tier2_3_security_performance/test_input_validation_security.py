@@ -136,7 +136,7 @@ class TestInputValidationSecurity:
             for sql_payload in malicious_payloads["sql_injection"]:
                 
                 # FAILURE EXPECTED HERE - SQL injection prevention may not work
-                response = real_test_client.post("/api/auth/login", json={
+                response = real_test_client.post("/auth/login", json={
                     "username": sql_payload,
                     "password": "test_password"
                 })
@@ -238,7 +238,7 @@ class TestInputValidationSecurity:
                 "Empty payload should be rejected"
 
             # Test field length validation
-            response = real_test_client.post("/api/auth/register", json={
+            response = real_test_client.post("/auth/register", json={
                 "username": "a",  # Too short
                 "password": "12345678",
                 "email": "test@example.com"
@@ -247,7 +247,7 @@ class TestInputValidationSecurity:
             assert response.status_code in [400, 422], \
                 "Username too short should be rejected"
                 
-            response = real_test_client.post("/api/auth/register", json={
+            response = real_test_client.post("/auth/register", json={
                 "username": "validuser",
                 "password": "123",  # Too short
                 "email": "test@example.com"
@@ -424,7 +424,7 @@ class TestInputValidationSecurity:
         """
         try:
             # Test missing CSRF token
-            response = real_test_client.post("/api/auth/login", 
+            response = real_test_client.post("/auth/login", 
                 json={"username": "test", "password": "test"},
                 headers={"Origin": "https://malicious-site.com"}
             )
@@ -458,7 +458,7 @@ class TestInputValidationSecurity:
                     f"Cross-origin request from {origin} should be rejected"
 
             # Test Referer header validation
-            response = real_test_client.post("/api/auth/login",
+            response = real_test_client.post("/auth/login",
                 json={"username": "test", "password": "test"},
                 headers={"Referer": "https://malicious-site.com/steal-credentials"}
             )

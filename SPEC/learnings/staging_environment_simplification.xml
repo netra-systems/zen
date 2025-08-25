@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Staging Environment Simplification - GSM-Only Secret Loading</title>
+        <type>Environment Management</type>
+        <date>2025-08-25</date>
+        <severity>CRITICAL</severity>
+        <tags>
+            <tag>staging</tag>
+            <tag>secrets</tag>
+            <tag>google-secret-manager</tag>
+            <tag>environment-variables</tag>
+            <tag>ssot</tag>
+        </tags>
+    </metadata>
+
+    <problem_statement>
+        <title>The Staging Environment Loading Paradox</title>
+        <description>
+            Staging deployment was failing despite having all secrets correctly configured in 
+            Google Secret Manager (GSM). The paradox: secrets existed in GSM but the application 
+            was using incorrect hardcoded values from .env.staging file instead.
+        </description>
+        <symptoms>
+            <symptom>Authentication failures in staging despite correct GSM secrets</symptom>
+            <symptom>Database connection failures with wrong passwords</symptom>
+            <symptom>Tests passing but staging deployment failing</symptom>
+            <symptom>Environment variable precedence issues</symptom>
+        </symptoms>
+    </problem_statement>
+
+    <root_cause_analysis>
+        <finding priority="CRITICAL">
+            <title>Precedence Inversion via .env.staging</title>
+            <description>
+                The .env.staging file contained hardcoded secrets that would override 
+                Google Secret Manager values. The application loaded .env files BEFORE 
+                checking environment context, causing local file values to win over GSM.
+            </description>
+            <evidence>
+                <file>.env.staging contained hardcoded POSTGRES_PASSWORD and JWT_SECRET_KEY</file>
+                <file>main.py loaded .env files without checking ENVIRONMENT variable first</file>
+            </evidence>
+        </finding>
+
+        <finding priority="HIGH">
+            <title>SSOT Violations in Environment Loading</title>
+            <description>
+                Multiple duplicate implementations of environment loading mechanisms:
+                - 3 different IsolatedEnvironment implementations
+                - 4 different secret loading mechanisms
+                - 2 duplicate database URL builders
+                - Environment precedence logic scattered across modules
+            </description>
+        </finding>
+
+        <finding priority="HIGH">
+            <title>Test vs Reality Gap</title>
+            <description>
+                Tests mocked environment variables and didn't load .env files, while 
+                staging loaded .env.staging which overrode correct GSM secrets.
+            </description>
+        </finding>
+    </root_cause_analysis>
+
+    <solution_implemented>
+        <step order="1">
+            <action>Deleted .env.staging file completely</action>
+            <rationale>
+                Removes the source of precedence issues. Staging should never use 
+                local environment files - all config comes from Cloud Run and GSM.
+            </rationale>
+        </step>
+
+        <step order="2">
+            <action>Updated application startup to skip .env loading in staging/production</action>
+            <code_changes>
+                <file>netra_backend/app/main.py</file>
+                <change>Added environment check before loading .env files</change>
+                <file>auth_service/main.py</file>
+                <change>Added environment check before loading .env files</change>
+            </code_changes>
+        </step>
+
+        <step order="3">
+            <action>Consolidated all staging config in deployment script</action>
+            <details>
+                Non-secret configuration moved to Cloud Run environment variables
+                in deploy_to_gcp.py. All secrets loaded exclusively from GSM.
+            </details>
+        </step>
+    </solution_implemented>
+
+    <prevention_measures>
+        <measure priority="CRITICAL">
+            <title>Never create environment-specific .env files</title>
+            <description>
+                .env.staging, .env.production files should NEVER exist. All staging/production 
+                configuration comes from deployment platform (Cloud Run env vars + GSM).
+            </description>
+        </measure>
+
+        <measure priority="HIGH">
+            <title>Environment detection must happen first</title>
+            <description>
+                Always check ENVIRONMENT variable BEFORE any .env file loading.
+                Skip all .env loading when environment is staging or production.
+            </description>
+        </measure>
+
+        <measure priority="HIGH">
+            <title>Single deployment script principle</title>
+            <description>
+                Use ONE deployment script (deploy_to_gcp.py) for all deployments.
+                Never create alternative deployment scripts that might diverge.
+            </description>
+        </measure>
+    </prevention_measures>
+
+    <testing_requirements>
+        <test>Verify .env.staging does not exist</test>
+        <test>Verify apps skip .env loading when ENVIRONMENT=staging</test>
+        <test>Verify deployment script contains all required env vars</test>
+        <test>Verify no code references .env.staging</test>
+    </testing_requirements>
+
+    <architectural_principles>
+        <principle>
+            <name>Environment Hierarchy</name>
+            <description>
+                Development: .env files allowed
+                Staging: Cloud Run env vars + GSM only
+                Production: Cloud Run env vars + GSM only
+            </description>
+        </principle>
+
+        <principle>
+            <name>Secret Management SSOT</name>
+            <description>
+                Google Secret Manager is the ONLY source of truth for secrets in 
+                staging and production. No local overrides allowed.
+            </description>
+        </principle>
+    </architectural_principles>
+
+    <related_specs>
+        <spec>unified_environment_management.xml</spec>
+        <spec>deployment_architecture.xml</spec>
+        <spec>PRODUCTION_SECRETS_ISOLATION.xml</spec>
+    </related_specs>
+</learning>

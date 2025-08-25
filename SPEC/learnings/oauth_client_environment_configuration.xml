@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oauth_client_environment_configuration>
+    <metadata>
+        <title>OAuth Client Environment Configuration</title>
+        <category>learnings</category>
+        <last_updated>2025-08-25</last_updated>
+        <related_files>
+            <file>scripts/deploy_to_gcp.py</file>
+            <file>auth_service/auth_core/secret_loader.py</file>
+            <file>auth_service/auth_core/config.py</file>
+            <file>docs/OAUTH_STAGING_CONFIGURATION.md</file>
+        </related_files>
+    </metadata>
+
+    <summary>
+        Critical learnings about OAuth client configuration for staging deployments.
+        Environment variable names must match exactly between deployment scripts and service code.
+    </summary>
+
+    <critical_fix>
+        <issue>
+            Environment variable names in deployment script didn't match auth service expectations, 
+            causing OAuth authentication failures in staging.
+        </issue>
+        
+        <root_cause>
+            Deployment script was using generic names (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) 
+            while auth service expected environment-specific names (GOOGLE_OAUTH_CLIENT_ID_STAGING, 
+            GOOGLE_OAUTH_CLIENT_SECRET_STAGING).
+        </root_cause>
+        
+        <solution>
+            Updated deployment script to use environment-specific OAuth credential names that 
+            match auth service secret loader expectations.
+        </solution>
+    </critical_fix>
+
+    <environment_variable_mapping>
+        <staging>
+            <oauth_client_id>
+                <deployment_script>GOOGLE_OAUTH_CLIENT_ID_STAGING=google-client-id-staging:latest</deployment_script>
+                <auth_service_expects>GOOGLE_OAUTH_CLIENT_ID_STAGING</auth_service_expects>
+                <secret_manager_key>google-client-id-staging</secret_manager_key>
+            </oauth_client_id>
+            
+            <oauth_client_secret>
+                <deployment_script>GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-client-secret-staging:latest</deployment_script>
+                <auth_service_expects>GOOGLE_OAUTH_CLIENT_SECRET_STAGING</auth_service_expects>
+                <secret_manager_key>google-client-secret-staging</secret_manager_key>
+            </oauth_client_secret>
+        </staging>
+        
+        <production>
+            <oauth_client_id>
+                <deployment_script>GOOGLE_OAUTH_CLIENT_ID_PRODUCTION=google-client-id-production:latest</deployment_script>
+                <auth_service_expects>GOOGLE_OAUTH_CLIENT_ID_PRODUCTION</auth_service_expects>
+                <secret_manager_key>google-client-id-production</secret_manager_key>
+            </oauth_client_id>
+            
+            <oauth_client_secret>
+                <deployment_script>GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION=google-client-secret-production:latest</deployment_script>
+                <auth_service_expects>GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION</auth_service_expects>
+                <secret_manager_key>google-client-secret-production</secret_manager_key>
+            </oauth_client_secret>
+        </production>
+    </environment_variable_mapping>
+
+    <secret_loading_priority>
+        <description>
+            Auth service follows strict priority chain for loading OAuth credentials.
+            Higher priority sources override lower priority ones.
+        </description>
+        
+        <priority_order>
+            <priority level="1">
+                <source>Environment-specific variables</source>
+                <examples>GOOGLE_OAUTH_CLIENT_ID_STAGING, GOOGLE_OAUTH_CLIENT_SECRET_STAGING</examples>
+                <usage>Primary method for staging/production deployments</usage>
+            </priority>
+            
+            <priority level="2">
+                <source>Google Secret Manager</source>
+                <examples>google-client-id-staging:latest, google-client-secret-staging:latest</examples>
+                <usage>Automatic fallback when environment variables not available</usage>
+            </priority>
+            
+            <priority level="3">
+                <source>Generic fallback variables</source>
+                <examples>GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET</examples>
+                <usage>Development environment only</usage>
+            </priority>
+        </priority_order>
+    </secret_loading_priority>
+
+    <validation_rules>
+        <rule>
+            <name>Environment Variable Naming Consistency</name>
+            <description>
+                Deployment script environment variable names MUST match exactly what 
+                the auth service secret loader expects for each environment.
+            </description>
+            <implementation>
+                Check auth_service/auth_core/secret_loader.py for expected variable names 
+                before updating deployment configurations.
+            </implementation>
+        </rule>
+        
+        <rule>
+            <name>Secret Manager Key Consistency</name>
+            <description>
+                Google Secret Manager secret names MUST be consistent between 
+                deployment script and secret loader fallback logic.
+            </description>
+            <implementation>
+                Use environment-specific naming: google-client-id-{environment}, 
+                google-client-secret-{environment}
+            </implementation>
+        </rule>
+        
+        <rule>
+            <name>Environment-Specific Isolation</name>
+            <description>
+                Each environment MUST use its own dedicated OAuth credentials 
+                to prevent cross-environment credential leakage.
+            </description>
+            <implementation>
+                Never reuse production OAuth credentials in staging environments. 
+                Always use separate Google OAuth applications.
+            </implementation>
+        </rule>
+    </validation_rules>
+
+    <testing_approach>
+        <oauth_configuration_validation>
+            <endpoint>GET /auth/config</endpoint>
+            <expected_fields>
+                <field name="google_client_id">Must contain staging-specific client ID</field>
+                <field name="endpoints.callback">Must match frontend callback URL</field>
+                <field name="authorized_redirect_uris">Must include frontend callback URL</field>
+            </expected_fields>
+        </oauth_configuration_validation>
+        
+        <end_to_end_oauth_flow>
+            <steps>
+                <step>Navigate to frontend login page</step>
+                <step>Initiate Google OAuth flow</step>
+                <step>Complete Google authentication</step>
+                <step>Verify callback redirect with tokens</step>
+                <step>Confirm user session creation</step>
+            </steps>
+        </end_to_end_oauth_flow>
+    </testing_approach>
+
+    <troubleshooting_guide>
+        <common_errors>
+            <error>
+                <message>OAuth not configured</message>
+                <cause>GOOGLE_OAUTH_CLIENT_ID_STAGING not available in environment</cause>
+                <solution>Verify Google Secret Manager secret exists and deployment script maps it correctly</solution>
+            </error>
+            
+            <error>
+                <message>Invalid redirect URI</message>
+                <cause>Google OAuth app redirect URI doesn't match frontend callback URL</cause>
+                <solution>Update Google OAuth app configuration with correct staging callback URL</solution>
+            </error>
+            
+            <error>
+                <message>Failed to exchange code</message>
+                <cause>GOOGLE_OAUTH_CLIENT_SECRET_STAGING incorrect or missing</cause>
+                <solution>Verify secret exists in Google Secret Manager and deployment script maps it correctly</solution>
+            </error>
+        </common_errors>
+        
+        <debugging_commands>
+            <command>curl https://auth.staging.netrasystems.ai/auth/config</command>
+            <command>gcloud secrets versions list google-client-id-staging --project netra-staging</command>
+            <command>gcloud run services describe netra-auth-service --region us-central1 --project netra-staging</command>
+        </debugging_commands>
+    </troubleshooting_guide>
+
+    <deployment_checklist>
+        <item>OAuth credentials exist in Google Secret Manager</item>
+        <item>Deployment script maps credentials with environment-specific names</item>
+        <item>Auth service secret loader can access mapped credentials</item>
+        <item>Frontend callback URLs match across all services</item>
+        <item>Google OAuth app configured with correct redirect URIs</item>
+        <item>End-to-end OAuth flow tested in staging environment</item>
+    </deployment_checklist>
+
+    <prevention_measures>
+        <measure>
+            <name>Pre-deployment Validation</name>
+            <description>
+                Run auth configuration validation before deploying to catch 
+                environment variable mapping issues early.
+            </description>
+            <command>python scripts/validate_oauth_config.py --env staging</command>
+        </measure>
+        
+        <measure>
+            <name>Secret Loader Unit Tests</name>
+            <description>
+                Test secret loader with different environment variable combinations 
+                to ensure proper fallback behavior.
+            </description>
+            <location>auth_service/tests/test_secret_loader.py</location>
+        </measure>
+        
+        <measure>
+            <name>Integration Test Coverage</name>
+            <description>
+                Include OAuth flow tests in staging deployment validation 
+                to catch configuration issues immediately.
+            </description>
+            <command>python unified_test_runner.py --level integration --pattern "*oauth*" --env staging</command>
+        </measure>
+    </prevention_measures>
+</oauth_client_environment_configuration>

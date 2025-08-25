@@ -51,21 +51,32 @@ logger = central_logger.get_logger(__name__)
 
 
 class DatabaseConnectivityMaster:
-    """Master controller for all database connectivity improvements."""
+    """DEPRECATED: Master controller - Use DatabaseManager for single source of truth.
+    
+    This class has been DEPRECATED to eliminate SSOT violations.
+    Use netra_backend.app.db.database_manager.DatabaseManager directly.
+    """
     
     def __init__(self):
-        """Initialize database connectivity master."""
+        """DEPRECATED: Initialize database connectivity master."""
+        import warnings
+        warnings.warn(
+            "DatabaseConnectivityMaster is deprecated. Use DatabaseManager from netra_backend.app.db.database_manager instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.initialized = False
         self.startup_time: Optional[float] = None
         self.initialization_results: Dict[str, Any] = {}
+        self._database_manager = DatabaseManager.get_connection_manager()
         self._setup_component_integration()
     
     def _setup_component_integration(self) -> None:
-        """Setup integration between all components."""
-        # Register database managers with health monitoring using unified DatabaseManager
-        database_manager = DatabaseManager()
-        register_database_for_health_monitoring("postgres", database_manager)
-        degradation_manager.register_database_manager("postgres", database_manager)
+        """DEPRECATED: Setup integration - delegates to DatabaseManager."""
+        # Register database managers with health monitoring using DatabaseManager
+        register_database_for_health_monitoring("postgres", self._database_manager)
+        degradation_manager.register_database_manager("postgres", self._database_manager)
         
         # Register ClickHouse manager when available
         if reliable_clickhouse_service.manager:
@@ -282,16 +293,10 @@ class DatabaseConnectivityMaster:
         }
     
     async def health_check(self) -> Dict[str, Any]:
-        """Perform comprehensive health check of all systems."""
-        health_results = {}
-        
+        """DEPRECATED: Perform health check - delegates to DatabaseManager."""
         try:
-            # Check database manager
-            database_manager = DatabaseManager()
-            health_results["connections"] = {
-                "status": "healthy",
-                "details": {"status": "unified_database_manager"}
-            }
+            # Delegate to DatabaseManager health check
+            health_results = await DatabaseManager.health_check_all()
             
             # Check ClickHouse service
             clickhouse_status = reliable_clickhouse_service.get_status()
@@ -309,14 +314,15 @@ class DatabaseConnectivityMaster:
             
             # Overall health
             all_healthy = all(
-                result["status"] == "healthy" 
-                for result in health_results.values()
+                result.get("status") == "healthy" 
+                for result in health_results.values() if isinstance(result, dict)
             )
             
             return {
                 "overall_status": "healthy" if all_healthy else "degraded",
                 "components": health_results,
-                "timestamp": time.time()
+                "timestamp": time.time(),
+                "deprecated_notice": "Use DatabaseManager.health_check_all() directly"
             }
             
         except Exception as e:
@@ -324,7 +330,8 @@ class DatabaseConnectivityMaster:
             return {
                 "overall_status": "unhealthy",
                 "error": str(e),
-                "timestamp": time.time()
+                "timestamp": time.time(),
+                "deprecated_notice": "Use DatabaseManager.health_check_all() directly"
             }
     
     async def shutdown_all_systems(self) -> None:

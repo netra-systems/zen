@@ -351,6 +351,12 @@ class AppConfig(BaseModel):
     skip_migrations: str = Field(default="false", description="Skip migrations flag")
     disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
     
+    # Service availability flags for staging infrastructure (pragmatic degradation)
+    redis_optional_in_staging: bool = Field(default=False, description="Allow staging to run without Redis (graceful degradation)")
+    clickhouse_optional_in_staging: bool = Field(default=False, description="Allow staging to run without ClickHouse (graceful degradation)")
+    skip_redis_init: bool = Field(default=False, description="Skip Redis initialization for optional operation")
+    skip_clickhouse_init: bool = Field(default=False, description="Skip ClickHouse initialization for optional operation")
+    
     # Robust startup configuration
     use_robust_startup: str = Field(default="true", description="Use robust startup manager with dependency resolution")
     graceful_startup_mode: str = Field(default="true", description="Allow graceful degradation during startup")
@@ -359,6 +365,64 @@ class AppConfig(BaseModel):
     startup_circuit_breaker_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
     startup_recovery_timeout: int = Field(default=300, description="Circuit breaker recovery timeout in seconds")
     
+    @field_validator('secret_key')
+    @classmethod
+    def validate_secret_key(cls, v):
+        """CRITICAL: Validate SECRET_KEY security requirements for FastAPI sessions."""
+        if v is None or v == "":
+            raise ValueError("SECRET_KEY is required and cannot be empty")
+        
+        # Validate minimum length for security
+        if len(v) < 32:
+            raise ValueError(f"SECRET_KEY must be at least 32 characters for security, got {len(v)} characters")
+        
+        # Check environment - stricter validation for production environments
+        env = get_env()
+        current_env = env.get("ENVIRONMENT", "development").lower()
+        
+        if current_env in ["staging", "production"]:
+            # Additional security checks for production environments
+            insecure_patterns = ['default', 'secret', 'password', 'dev', 'test', 'demo', 'example', 'change', 'admin']
+            if any(pattern in v.lower() for pattern in insecure_patterns):
+                raise ValueError(f"SECRET_KEY contains insecure pattern for {current_env} environment - not allowed")
+            
+            # Check for low entropy (basic check)
+            if len(set(v)) < 8:
+                raise ValueError("SECRET_KEY has insufficient entropy - too few unique characters for production")
+        
+        return v
+
+    @field_validator('jwt_secret_key')
+    @classmethod
+    def validate_jwt_secret_key(cls, v):
+        """CRITICAL: Validate JWT_SECRET_KEY security requirements."""
+        if v is None or v == "":
+            # JWT secret key is optional in some contexts, but warn if missing
+            return v
+        
+        # CRITICAL: Clean whitespace from secrets (common staging deployment issue)
+        v = v.strip() if v else v
+        
+        if not v:
+            # After trimming, if empty, return None
+            return None
+        
+        # Validate minimum length for security
+        if len(v) < 32:
+            raise ValueError(f"JWT_SECRET_KEY must be at least 32 characters for security, got {len(v)} characters")
+        
+        # Check environment - stricter validation for production environments
+        env = get_env()
+        current_env = env.get("ENVIRONMENT", "development").lower()
+        
+        if current_env in ["staging", "production"]:
+            # Additional security checks for production environments
+            insecure_patterns = ['default', 'secret', 'password', 'dev', 'test', 'demo', 'example', 'change', 'jwt']
+            if any(pattern in v.lower() for pattern in insecure_patterns):
+                raise ValueError(f"JWT_SECRET_KEY contains insecure pattern for {current_env} environment - not allowed")
+        
+        return v
+
     @field_validator('service_secret')
     @classmethod
     def validate_service_secret(cls, v):
@@ -441,16 +505,16 @@ class DevelopmentConfig(AppConfig):
         client_id="",  # Populated by SecretReference: google-client-id
         client_secret="",  # Populated by SecretReference: google-client-secret
         authorized_redirect_uris=[
-            "http://localhost:8000/api/auth/callback",
-            "http://localhost:8001/api/auth/callback",
-            "http://localhost:8002/api/auth/callback",
-            "http://localhost:8003/api/auth/callback",
-            "http://localhost:8080/api/auth/callback",
-            "http://127.0.0.1:8000/api/auth/callback",
-            "http://127.0.0.1:8001/api/auth/callback",
-            "http://127.0.0.1:8002/api/auth/callback",
-            "http://127.0.0.1:8003/api/auth/callback",
-            "http://127.0.0.1:8080/api/auth/callback",
+            "http://localhost:8000/auth/callback",
+            "http://localhost:8001/auth/callback",
+            "http://localhost:8002/auth/callback",
+            "http://localhost:8003/auth/callback",
+            "http://localhost:8080/auth/callback",
+            "http://127.0.0.1:8000/auth/callback",
+            "http://127.0.0.1:8001/auth/callback",
+            "http://127.0.0.1:8002/auth/callback",
+            "http://127.0.0.1:8003/auth/callback",
+            "http://127.0.0.1:8080/auth/callback",
             "http://localhost:3000/auth/callback",
             "http://localhost:3001/auth/callback",
             "http://localhost:3002/auth/callback"
@@ -525,6 +589,12 @@ class StagingConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     # Staging uses production-like settings but with relaxed validation
+    
+    # Pragmatic infrastructure flags for staging (allows graceful degradation)
+    redis_optional_in_staging: bool = True  # Allow staging to run without Redis
+    clickhouse_optional_in_staging: bool = True  # Allow staging to run without ClickHouse
+    skip_redis_init: bool = False  # Still try to initialize Redis but don't fail
+    skip_clickhouse_init: bool = False  # Still try to initialize ClickHouse but don't fail
     
     def __init__(self, **data):
         """Initialize staging config with environment variables.

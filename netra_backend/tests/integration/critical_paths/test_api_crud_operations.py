@@ -35,7 +35,7 @@ class TestAPICRUDOperationsL3:
             }
             
             response = await client.post(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 json=resource_data,
                 headers={"Authorization": "Bearer test_token"}
             )
@@ -56,7 +56,7 @@ class TestAPICRUDOperationsL3:
             resource_id = "test_123"
             
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources/{resource_id}",
+                f"{settings.API_BASE_URL}/api/resources/{resource_id}",
                 headers={"Authorization": "Bearer test_token"}
             )
             
@@ -81,7 +81,7 @@ class TestAPICRUDOperationsL3:
             }
             
             response = await client.put(
-                f"{settings.API_BASE_URL}/api/v1/resources/{resource_id}",
+                f"{settings.API_BASE_URL}/api/resources/{resource_id}",
                 json=update_data,
                 headers={"Authorization": "Bearer test_token"}
             )
@@ -102,7 +102,7 @@ class TestAPICRUDOperationsL3:
             
             # Delete resource
             response = await client.delete(
-                f"{settings.API_BASE_URL}/api/v1/resources/{resource_id}",
+                f"{settings.API_BASE_URL}/api/resources/{resource_id}",
                 headers={"Authorization": "Bearer test_token"}
             )
             
@@ -110,7 +110,7 @@ class TestAPICRUDOperationsL3:
             
             # Verify deleted
             get_response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources/{resource_id}",
+                f"{settings.API_BASE_URL}/api/resources/{resource_id}",
                 headers={"Authorization": "Bearer test_token"}
             )
             
@@ -124,7 +124,7 @@ class TestAPICRUDOperationsL3:
         """Test listing resources with pagination"""
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 params={"page": 1, "limit": 10},
                 headers={"Authorization": "Bearer test_token"}
             )

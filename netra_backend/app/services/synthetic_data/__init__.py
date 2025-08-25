@@ -10,7 +10,7 @@ from netra_backend.app.services.synthetic_data.enums import (
     GenerationStatus,
     WorkloadCategory,
 )
-from netra_backend.app.services.synthetic_data.error_handler import ErrorHandler
+from netra_backend.app.core.error_handlers.agents.agent_error_handler import global_agent_error_handler as ErrorHandler
 from netra_backend.app.services.synthetic_data.generation_engine import GenerationEngine
 from netra_backend.app.services.synthetic_data.ingestion_manager import IngestionManager
 from netra_backend.app.services.synthetic_data.job_manager import JobManager

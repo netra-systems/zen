@@ -27,7 +27,7 @@ class TestAPIResponseHandlingL3:
         """Test successful response format consistency"""
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/health",
+                f"{settings.API_BASE_URL}/api/health",
                 headers={"Authorization": "Bearer test_token"}
             )
             
@@ -47,7 +47,7 @@ class TestAPIResponseHandlingL3:
         async with httpx.AsyncClient() as client:
             # Request non-existent resource
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources/nonexistent",
+                f"{settings.API_BASE_URL}/api/resources/nonexistent",
                 headers={"Authorization": "Bearer test_token"}
             )
             
@@ -66,7 +66,7 @@ class TestAPIResponseHandlingL3:
         """Test required response headers"""
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 headers={"Authorization": "Bearer test_token"}
             )
             
@@ -86,7 +86,7 @@ class TestAPIResponseHandlingL3:
         """Test response compression for large payloads"""
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{settings.API_BASE_URL}/api/resources",
                 params={"limit": 100},
                 headers={
                     "Authorization": "Bearer test_token",
@@ -108,7 +108,7 @@ class TestAPIResponseHandlingL3:
         async with httpx.AsyncClient() as client:
             # GET request (should be cacheable)
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources/123",
+                f"{settings.API_BASE_URL}/api/resources/123",
                 headers={"Authorization": "Bearer test_token"}
             )
             
@@ -122,7 +122,7 @@ class TestAPIResponseHandlingL3:
                     
                     # Conditional request
                     cond_response = await client.get(
-                        f"{settings.API_BASE_URL}/api/v1/resources/123",
+                        f"{settings.API_BASE_URL}/api/resources/123",
                         headers={
                             "Authorization": "Bearer test_token",
                             "If-None-Match": etag

@@ -30,7 +30,7 @@ import jwt
 import pytest
 
 from netra_backend.app.auth_dependencies import get_security_service
-from netra_backend.app.clients.auth_client import AuthClient
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 from netra_backend.app.core.cross_service_auth import (
     AuthContext,

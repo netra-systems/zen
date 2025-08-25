@@ -23,37 +23,22 @@ from test_framework.environment_markers import env, env_safe
 
 @pytest.fixture
 def app():
-    """Create test FastAPI app with security middleware"""
+    """Create test FastAPI app with canonical security middleware"""
     from fastapi import Request
-    from fastapi.responses import JSONResponse
+    from auth_service.auth_core.security.middleware import validate_request_size
     
     app = FastAPI()
     
-    # Add security middleware for request size limiting 
+    # Use canonical security middleware implementation (SSOT compliance)
     @app.middleware("http")
     async def security_middleware(request: Request, call_next):
-        """Add security checks, request size limits"""
-        # Check Content-Length for JSON payloads to prevent oversized requests
-        content_length = request.headers.get("content-length")
-        content_type = request.headers.get("content-type", "")
+        """Test security middleware using canonical SSOT implementation"""
+        # Use canonical request size validation
+        size_error = await validate_request_size(request)
+        if size_error:
+            return size_error
         
-        if content_length and "json" in content_type.lower():
-            try:
-                size = int(content_length)
-                # Limit JSON payloads to 50KB for security
-                max_size = 50 * 1024  # 50KB
-                if size > max_size:
-                    return JSONResponse(
-                        status_code=413,  # Payload Too Large
-                        content={"detail": f"Request payload too large. Maximum size: {max_size} bytes"}
-                    )
-            except ValueError:
-                # Invalid Content-Length header
-                return JSONResponse(
-                    status_code=400,
-                    content={"detail": "Invalid Content-Length header"}
-                )
-        
+        # Process request (no service/security headers needed for tests)
         response = await call_next(request)
         return response
     

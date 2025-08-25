@@ -101,11 +101,11 @@ async def test_service_health(session: aiohttp.ClientSession) -> None:
 async def test_api_endpoints(session: aiohttp.ClientSession) -> None:
     """Test main API endpoints"""
     api_tests = [
-        ("API Threads List", f"{STAGING_API_URL}/api/v1/threads", "GET", 
+        ("API Threads List", f"{STAGING_API_URL}/api/threads", "GET", 
          {"Authorization": "Bearer test"}, [401, 403]),
-        ("API Workspaces", f"{STAGING_API_URL}/api/v1/workspaces", "GET",
+        ("API Workspaces", f"{STAGING_API_URL}/api/workspaces", "GET",
          {"Authorization": "Bearer test"}, [401, 403]),
-        ("API Agents", f"{STAGING_API_URL}/api/v1/agents", "GET",
+        ("API Agents", f"{STAGING_API_URL}/api/agents", "GET",
          {"Authorization": "Bearer test"}, [401, 403]),
     ]
     

@@ -172,7 +172,7 @@
         4. JWT tokens with user ID and permissions
         5. Dynamic CORS for development flexibility
         6. Redis sessions optional in dev/staging
-        7. Use /auth prefix, not /api/v1/auth
+        7. Use /auth prefix, not /auth
         8. Test with dev login, not registration
     </summary>
 </learnings>

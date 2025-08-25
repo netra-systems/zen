@@ -313,9 +313,9 @@ class TestWebSocketCrossSystemFailures:
             user_id = "test_user_123"
             
             # Tab 1 connection
-            with client.websocket_connect(f"/ws/v1/{user_id}") as tab1_ws:
+            with client.websocket_connect(f"/ws/{user_id}") as tab1_ws:
                 # Tab 2 connection 
-                with client.websocket_connect(f"/ws/v1/{user_id}") as tab2_ws:
+                with client.websocket_connect(f"/ws/{user_id}") as tab2_ws:
                     
                     # Send message from tab 1
                     tab1_message = {
@@ -391,7 +391,7 @@ class TestWebSocketCrossSystemFailures:
             }
             
             # Initial connection with state setup
-            with client.websocket_connect(f"/ws/v1/{user_id}") as websocket:
+            with client.websocket_connect(f"/ws/{user_id}") as websocket:
                 # Set up initial state
                 setup_message = {
                     "type": "initialize_state",
@@ -418,7 +418,7 @@ class TestWebSocketCrossSystemFailures:
                     f"Initial state not stored correctly: {state_response}"
             
             # Simulate reconnection (new WebSocket connection)
-            with client.websocket_connect(f"/ws/v1/{user_id}") as new_websocket:
+            with client.websocket_connect(f"/ws/{user_id}") as new_websocket:
                 # Try to restore state after reconnection
                 restore_message = {
                     "type": "restore_state",

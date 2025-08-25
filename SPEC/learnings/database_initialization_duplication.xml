@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <id>database-initialization-duplication</id>
+    <title>Database Initialization Duplication During Startup</title>
+    <date>2025-08-25</date>
+    <category>startup</category>
+    <severity>critical</severity>
+    
+    <problem>
+        <description>
+            Backend startup process was stuck in an infinite loop of database queries during initialization.
+            The root cause was duplicate database initialization calls in the startup sequence.
+        </description>
+        
+        <symptoms>
+            - Backend startup hangs indefinitely
+            - Multiple "SELECT 1" queries being executed repeatedly
+            - Connection pool exhaustion warnings
+            - High CPU usage during startup
+            - Startup timeout errors
+        </symptoms>
+        
+        <root_cause>
+            In StartupManager._initialize_database(), both DatabaseInitializer.initialize_postgresql() 
+            and setup_database_connections() were being called. The setup_database_connections() 
+            function already calls initialize_postgres() and _ensure_database_tables_exist(), 
+            causing duplicate initialization and potentially infinite loops of database queries.
+        </root_cause>
+        
+        <impact>
+            - Complete backend startup failure
+            - Service unavailability
+            - Connection pool exhaustion
+            - Resource waste due to repeated queries
+        </impact>
+    </problem>
+    
+    <solution>
+        <fix>
+            Removed the duplicate call to DatabaseInitializer.initialize_postgresql() from 
+            StartupManager._initialize_database(). Now only setup_database_connections() is 
+            called, which handles all necessary database initialization in one place.
+        </fix>
+        
+        <code_changes>
+            <file>netra_backend/app/core/startup_manager.py</file>
+            <change>
+                Removed lines 591-593 that called:
+                - db_initializer = DatabaseInitializer()
+                - await db_initializer.initialize_postgresql()
+                
+                Kept only the call to setup_database_connections(app) which handles
+                all database initialization including:
+                - initialize_postgres()
+                - _ensure_database_tables_exist()
+            </change>
+        </code_changes>
+    </solution>
+    
+    <prevention>
+        <testing>
+            Created comprehensive test suite in test_database_initialization_duplication.py to:
+            - Verify database is initialized only once during startup
+            - Ensure test_connection_with_retry doesn't loop infinitely
+            - Confirm _ensure_database_tables_exist is called exactly once
+            - Validate all startup components are initialized exactly once
+        </testing>
+        
+        <best_practices>
+            1. Follow Single Source of Truth (SSOT) principle for initialization
+            2. Each initialization step should have ONE canonical implementation
+            3. Avoid multiple initialization paths for the same resource
+            4. Use dependency tracking in startup manager to prevent duplicates
+            5. Add explicit tests for initialization call counts
+            6. Monitor connection pool metrics during startup
+        </best_practices>
+        
+        <monitoring>
+            - Track startup duration metrics
+            - Monitor database connection pool utilization
+            - Alert on excessive connection attempts
+            - Log initialization step timings
+        </monitoring>
+    </prevention>
+    
+    <related>
+        <spec>startup_manager.xml</spec>
+        <spec>database_connectivity_architecture.xml</spec>
+        <spec>unified_environment_management.xml</spec>
+        <learning>startup.xml</learning>
+    </related>
+    
+    <keywords>
+        startup, database, initialization, duplication, infinite-loop, 
+        connection-pool, postgresql, SSOT, startup-manager
+    </keywords>
+</learning>

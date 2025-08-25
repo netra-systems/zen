@@ -142,7 +142,7 @@ def supervisor_agent(mock_db_session, mock_llm_manager,
                     mock_websocket_manager, mock_tool_dispatcher):
         """Create supervisor agent with all dependencies mocked"""
         # Patch state persistence to avoid hanging
-        with patch('app.agents.supervisor_consolidated.state_persistence_service') as mock_persistence:
+        with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service') as mock_persistence:
             mock_persistence.save_agent_state = AsyncMock(return_value=True)
             mock_persistence.load_agent_state = AsyncMock(return_value=None)
             # Mock: Async component isolation for testing without real async operations

@@ -48,7 +48,7 @@ from netra_backend.app.schemas.auth_types import (
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.db.redis_manager import get_redis_manager
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 class PermissionLevel(Enum):
@@ -90,7 +90,7 @@ class TestAuthRoleBasedAccessFlow:
     def mock_auth_service(self, monkeypatch):
         """Force auth service to disabled mode for testing."""
         # Directly patch the global auth_client settings
-        from netra_backend.app.clients.auth_client import auth_client
+        from netra_backend.app.clients.auth_client_core import auth_client
         
         # Force disabled mode for testing
         auth_client.settings.enabled = False

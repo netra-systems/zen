@@ -78,17 +78,17 @@ def import_named_routers() -> dict:
 def _import_auth_routers() -> dict:
     """Import authentication-related routers"""
     from netra_backend.app.routes.agent_route import router as agent_router
-    from netra_backend.app.routes.auth import router as auth_router
-    return {"auth_router": auth_router, "agent_router": agent_router}
+    # Auth resilience router removed - functionality consolidated into auth_client_core
+    # Auth router not needed - auth is handled by separate auth service
+    return {"agent_router": agent_router}
 
 
 def _import_core_routers() -> dict:
     """Import core functionality routers"""
-    from netra_backend.app.routes.api_v1_compatibility import router as api_v1_router
     from netra_backend.app.routes.llm_cache import router as llm_cache_router
     from netra_backend.app.routes.mcp import router as mcp_router
     from netra_backend.app.routes.threads_route import router as threads_router
-    return {"api_v1_router": api_v1_router, "llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
+    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
 
 
 def _import_extended_routers() -> dict:

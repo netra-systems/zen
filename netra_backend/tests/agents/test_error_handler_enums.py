@@ -10,7 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.app.agents.error_handler import ErrorCategory, ErrorRecoveryStrategy
+from netra_backend.app.schemas.core_enums import ErrorCategory
+from netra_backend.app.core.error_handlers.error_recovery import ErrorRecoveryStrategy
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.tests.agents.helpers.shared_test_types import (
@@ -38,11 +39,12 @@ class TestErrorEnums:
         assert ErrorCategory.CONFIGURATION.value == "configuration"
         assert ErrorCategory.RESOURCE.value == "resource"
     
-    def test_error_recovery_strategy_values(self):
-        """Test ErrorRecoveryStrategy enum values."""
-        assert ErrorRecoveryStrategy.RETRY == "retry"
-        assert ErrorRecoveryStrategy.FALLBACK == "fallback"
-        assert ErrorRecoveryStrategy.ABORT == "abort"
+    def test_error_recovery_strategy_creation(self):
+        """Test ErrorRecoveryStrategy class instantiation."""
+        strategy = ErrorRecoveryStrategy()
+        assert strategy is not None
+        assert hasattr(strategy, '_retry_config')
+        assert hasattr(strategy, '_delay_config')
 
 class TestErrorContext:
     """Test error context functionality with inheritance."""

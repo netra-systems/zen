@@ -103,7 +103,7 @@ class TestApiRateLimitingPerSubscriptionTier:
                 with pytest.raises((AttributeError, NotImplementedError)):
                     is_allowed = await mock_rate_limiter.check_tier_limit(
                         user_id=user_id,
-                        endpoint="/api/v1/threads",
+                        endpoint="/api/threads",
                         tier=tier
                     )
                     
@@ -144,17 +144,17 @@ class TestApiRateLimitingPerSubscriptionTier:
             
             # Use up FREE tier limits
             for _ in range(100):  # FREE limit
-                await mock_rate_limiter.check_tier_limit(upgrading_user, "/api/v1/test", PlanTier.FREE)
+                await mock_rate_limiter.check_tier_limit(upgrading_user, "/api/test", PlanTier.FREE)
             
             # Should be rate limited
-            is_allowed = await mock_rate_limiter.check_tier_limit(upgrading_user, "/api/v1/test", PlanTier.FREE)
+            is_allowed = await mock_rate_limiter.check_tier_limit(upgrading_user, "/api/test", PlanTier.FREE)
             assert not is_allowed, "Should be rate limited at FREE tier"
             
             # Upgrade to EARLY tier
             await mock_rate_limiter.set_user_tier(upgrading_user, PlanTier.EARLY)
             
             # Should now be allowed again
-            is_allowed = await mock_rate_limiter.check_tier_limit(upgrading_user, "/api/v1/test", PlanTier.EARLY)
+            is_allowed = await mock_rate_limiter.check_tier_limit(upgrading_user, "/api/test", PlanTier.EARLY)
             assert is_allowed, "Should be allowed after upgrade to EARLY tier"
 
 
@@ -190,7 +190,7 @@ class TestApiResponseDataConsistency:
         """
         # Define expected response schemas for different endpoints
         expected_schemas = {
-            "/api/v1/users": {
+            "/api/users": {
                 "required_fields": ["id", "email", "created_at", "tier"],
                 "field_types": {
                     "id": str,
@@ -200,7 +200,7 @@ class TestApiResponseDataConsistency:
                     "is_active": bool
                 }
             },
-            "/api/v1/threads": {
+            "/api/threads": {
                 "required_fields": ["id", "title", "created_at", "user_id"],
                 "field_types": {
                     "id": str,
@@ -210,7 +210,7 @@ class TestApiResponseDataConsistency:
                     "message_count": int
                 }
             },
-            "/api/v1/messages": {
+            "/api/messages": {
                 "required_fields": ["id", "content", "thread_id", "timestamp"],
                 "field_types": {
                     "id": str,
@@ -261,7 +261,7 @@ class TestApiResponseDataConsistency:
         
         # Test pagination consistency
         with pytest.raises((AttributeError, NotImplementedError)):
-            paginated_endpoints = ["/api/v1/users", "/api/v1/threads", "/api/v1/messages"]
+            paginated_endpoints = ["/api/users", "/api/threads", "/api/messages"]
             
             for endpoint in paginated_endpoints:
                 pagination_response = {
@@ -376,7 +376,7 @@ class TestApiErrorHandlingAndClientRecovery:
                 
                 error_response = await mock_error_handler.handle_api_error(
                     error_type=scenario["error_type"],
-                    context={"endpoint": "/api/v1/test", "user_id": "test_user"}
+                    context={"endpoint": "/api/test", "user_id": "test_user"}
                 )
                 
                 # Validate error response format
@@ -406,7 +406,7 @@ class TestApiErrorHandlingAndClientRecovery:
         with pytest.raises((AttributeError, NotImplementedError)):
             await mock_error_handler.track_error_metrics(
                 error_code="VALIDATION_FAILED",
-                endpoint="/api/v1/test",
+                endpoint="/api/test",
                 user_tier="free",
                 response_time_ms=150
             )

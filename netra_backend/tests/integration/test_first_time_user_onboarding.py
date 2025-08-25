@@ -200,7 +200,7 @@ async def test_session_persistence_across_refresh(
     # Create session state
     thread_id = str(uuid.uuid4())
     response = await async_client.post(
-        "/api/v1/chat/message",
+        "/api/chat/message",
         json={"content": "Test persistence message", "thread_id": thread_id},
         headers=headers
     )
@@ -212,7 +212,7 @@ async def test_session_persistence_across_refresh(
         "active_thread": thread_id,
         "draft_message": "Draft message content"
     }
-    response = await async_client.put("/api/v1/session/ui-state", json=ui_state, headers=headers)
+    response = await async_client.put("/api/session/ui-state", json=ui_state, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     
     # Simulate refresh - get new token
@@ -222,7 +222,7 @@ async def test_session_persistence_across_refresh(
     new_headers = {"Authorization": f"Bearer {new_access_token}"}
     
     # Restore and verify session
-    response = await async_client.get("/api/v1/session/restore", headers=new_headers)
+    response = await async_client.get("/api/session/restore", headers=new_headers)
     assert response.status_code == status.HTTP_200_OK
     restored_session = response.json()
     assert thread_id in [t["id"] for t in restored_session["threads"]]

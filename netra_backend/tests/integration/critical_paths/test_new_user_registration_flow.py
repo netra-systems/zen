@@ -135,7 +135,7 @@ class TestNewUserRegistrationFlow:
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.send_verification_email', return_value=True):
                 
-                response = await async_client.post("/api/auth/register", json=registration_data)
+                response = await async_client.post("/auth/register", json=registration_data)
                 
                 # Should return 201 Created
                 assert response.status_code in [201, 200]  # Some implementations return 200
@@ -163,7 +163,7 @@ class TestNewUserRegistrationFlow:
         
         # Mock: Generic component isolation for controlled unit testing
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=MagicMock()):
-            response = await async_client.post("/api/auth/register", json=registration_data)
+            response = await async_client.post("/auth/register", json=registration_data)
             
             # Should return 409 Conflict or 400 Bad Request
             assert response.status_code in [409, 400]
@@ -194,7 +194,7 @@ class TestNewUserRegistrationFlow:
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.verify_email_token', return_value=user_id):
                 
-                response = await async_client.get(f"/api/auth/verify-email?token={verification_token}")
+                response = await async_client.get(f"/auth/verify-email?token={verification_token}")
                 
                 # Should return success
                 assert response.status_code in [200, 302]  # May redirect after verification
@@ -225,7 +225,7 @@ class TestNewUserRegistrationFlow:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_user):
-            response = await async_client.post("/api/auth/login", json=login_data)
+            response = await async_client.post("/auth/login", json=login_data)
             
             # Should return 403 Forbidden or 401 Unauthorized
             assert response.status_code in [403, 401]
@@ -266,7 +266,7 @@ class TestNewUserRegistrationFlow:
                     "password": "password123"
                 }
                 
-                response = await async_client.post("/api/auth/login", json=login_data)
+                response = await async_client.post("/auth/login", json=login_data)
                 
                 # Should return 200 with tokens
                 assert response.status_code == 200
@@ -297,7 +297,7 @@ class TestNewUserRegistrationFlow:
                 "full_name": "Test User"
             }
             
-            response = await async_client.post("/api/auth/register", json=registration_data)
+            response = await async_client.post("/auth/register", json=registration_data)
             
             if should_succeed:
                 # Should accept valid password
@@ -321,7 +321,7 @@ class TestNewUserRegistrationFlow:
                 "full_name": f"User {i}"
             }
             
-            response = await async_client.post("/api/auth/register", json=registration_data)
+            response = await async_client.post("/auth/register", json=registration_data)
             responses.append(response.status_code)
             
             # Small delay to avoid overwhelming
@@ -362,7 +362,7 @@ class TestNewUserRegistrationFlow:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.create_user', return_value=mock_user):
-            response = await async_client.post("/api/auth/register", json=registration_data)
+            response = await async_client.post("/auth/register", json=registration_data)
             
             # Should create user with all profile fields
             assert response.status_code in [200, 201, 503]
@@ -393,7 +393,7 @@ class TestNewUserRegistrationFlow:
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.send_welcome_email', return_value=True) as mock_welcome:
                 
-                response = await async_client.post("/api/auth/register", json=registration_data)
+                response = await async_client.post("/auth/register", json=registration_data)
                 
                 if response.status_code in [200, 201]:
                     # Verification email should be sent
@@ -426,7 +426,7 @@ class TestNewUserRegistrationFlow:
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.permission_service.PermissionService.assign_default_permissions', return_value=True):
                 
-                response = await async_client.post("/api/auth/register", json=registration_data)
+                response = await async_client.post("/auth/register", json=registration_data)
                 
                 if response.status_code in [200, 201]:
                     # User should have default free tier permissions

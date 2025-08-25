@@ -691,7 +691,7 @@ class TestAuthenticationUserFlow:
         async with httpx.AsyncClient() as client:
             try:
                 # Check OAuth providers endpoint
-                response = await client.get(f"{auth_url}/api/auth/providers")
+                response = await client.get(f"{auth_url}/auth/providers")
                 
                 if response.status_code == 200:
                     providers = response.json()
@@ -728,7 +728,7 @@ class TestAuthenticationUserFlow:
             try:
                 # Initiate OAuth signup
                 response = await client.post(
-                    f"{auth_url}/api/auth/oauth/callback",
+                    f"{auth_url}/auth/oauth/callback",
                     json=oauth_data
                 )
                 

@@ -105,7 +105,7 @@ class MetricsPipelineL4Manager:
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Check Prometheus accessibility
             try:
-                prometheus_response = await client.get(f"{self.staging_prometheus_url}/api/v1/query?query=up")
+                prometheus_response = await client.get(f"{self.staging_prometheus_url}/api/query?query=up")
                 assert prometheus_response.status_code == 200
                 assert prometheus_response.json()["status"] == "success"
             except Exception as e:
@@ -192,7 +192,7 @@ class MetricsPipelineL4Manager:
             
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(
-                    f"{self.staging_prometheus_url}/api/v1/query",
+                    f"{self.staging_prometheus_url}/api/query",
                     params={"query": query}
                 )
                 
@@ -278,7 +278,7 @@ class MetricsPipelineL4Manager:
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(
-                    f"{self.staging_prometheus_url}/api/v1/query",
+                    f"{self.staging_prometheus_url}/api/query",
                     params={"query": "prometheus_tsdb_symbol_table_size_bytes"}
                 )
                 
@@ -299,7 +299,7 @@ class MetricsPipelineL4Manager:
             # Query for high cardinality metrics
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(
-                    f"{self.staging_prometheus_url}/api/v1/query",
+                    f"{self.staging_prometheus_url}/api/query",
                     params={"query": "topk(10, count by (__name__)({__name__=~'.+'})"}
                 )
                 
@@ -411,7 +411,7 @@ class MetricsPipelineL4Manager:
             )
             
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.get(f"{alertmanager_url}/api/v1/alerts")
+                response = await client.get(f"{alertmanager_url}/api/alerts")
                 
                 if response.status_code == 200:
                     alerts = response.json()["data"]
@@ -440,7 +440,7 @@ class MetricsPipelineL4Manager:
         """Fallback: Check Prometheus alert rules."""
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.get(f"{self.staging_prometheus_url}/api/v1/rules")
+                response = await client.get(f"{self.staging_prometheus_url}/api/rules")
                 
                 if response.status_code == 200:
                     data = response.json()

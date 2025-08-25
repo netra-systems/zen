@@ -13,7 +13,13 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Import components
+# Import components - use absolute imports
+import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 
 logger = logging.getLogger(__name__)
