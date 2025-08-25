@@ -21,9 +21,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
+from auth_service.auth_core.isolated_environment import get_env
+
 # Load environment variables from .env file ONLY in development
 # In staging/production, all config comes from Cloud Run env vars and Google Secret Manager
-environment = os.getenv('ENVIRONMENT', '').lower()
+environment = get_env().get('ENVIRONMENT', '').lower()
 if environment in ['staging', 'production', 'prod']:
     print(f"Running in {environment} - skipping .env file loading (using GSM)")
 else:
@@ -111,7 +113,7 @@ async def lifespan(app: FastAPI):
     from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
     # @marked: Port must be read from environment for container deployment
-    logger.info(f"Port: {os.getenv('PORT', '8080')}")
+    logger.info(f"Port: {get_env().get('PORT', '8080')}")
     
     # Log Redis configuration status
     from auth_service.auth_core.routes.auth_routes import auth_service
@@ -121,7 +123,7 @@ async def lifespan(app: FastAPI):
     
     # Check if we're in fast test mode
     # @marked: Test mode flag for test infrastructure
-    fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+    fast_test_mode = get_env().get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
     env = AuthConfig.get_environment()
     
     if fast_test_mode or env == "test":
@@ -169,7 +171,7 @@ async def lifespan(app: FastAPI):
     # Wait for shutdown signal with timeout to prevent hanging
     try:
         # Set a timeout for graceful shutdown (Cloud Run gives 10 seconds by default)
-        shutdown_timeout = float(os.getenv("SHUTDOWN_TIMEOUT_SECONDS", "8"))
+        shutdown_timeout = float(get_env().get("SHUTDOWN_TIMEOUT_SECONDS", "8"))
         logger.info(f"Waiting up to {shutdown_timeout} seconds for graceful shutdown...")
         
         # Use asyncio.wait_for with proper timeout handling
@@ -207,7 +209,7 @@ async def lifespan(app: FastAPI):
     # Execute all cleanup tasks concurrently with timeout
     if tasks:
         try:
-            cleanup_timeout = float(os.getenv("CLEANUP_TIMEOUT_SECONDS", "5"))
+            cleanup_timeout = float(get_env().get("CLEANUP_TIMEOUT_SECONDS", "5"))
             logger.info(f"Running cleanup tasks with {cleanup_timeout}s timeout...")
             
             results = await asyncio.wait_for(
@@ -270,42 +272,26 @@ if AuthConfig.get_environment() in ["staging", "production"]:
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
 # Custom middleware for request size limiting and service identification
+from auth_service.auth_core.security.middleware import (
+    validate_request_size,
+    add_service_headers,
+    add_security_headers
+)
+
 @app.middleware("http")
 async def security_and_service_middleware(request: Request, call_next):
-    """Add security checks, request size limits, and service identification headers"""
-    # Check Content-Length for JSON payloads to prevent oversized requests
-    content_length = request.headers.get("content-length")
-    content_type = request.headers.get("content-type", "")
+    """Canonical security middleware using SSOT implementation"""
+    # Request size validation (canonical implementation)
+    size_error = await validate_request_size(request)
+    if size_error:
+        return size_error
     
-    if content_length and "json" in content_type.lower():
-        try:
-            size = int(content_length)
-            # Limit JSON payloads to 50KB for security
-            max_size = 50 * 1024  # 50KB
-            if size > max_size:
-                logger.warning(f"Request payload too large: {size} bytes (max: {max_size})")
-                return JSONResponse(
-                    status_code=413,  # Payload Too Large
-                    content={"detail": f"Request payload too large. Maximum size: {max_size} bytes"}
-                )
-        except ValueError:
-            # Invalid Content-Length header
-            logger.warning(f"Invalid Content-Length header: {content_length}")
-            return JSONResponse(
-                status_code=400,
-                content={"detail": "Invalid Content-Length header"}
-            )
-    
+    # Process request
     response = await call_next(request)
-    response.headers["X-Service-Name"] = "auth-service"
-    response.headers["X-Service-Version"] = "1.0.0"
     
-    # Security headers
-    # @marked: Security headers toggle for production environments
-    if os.getenv("SECURE_HEADERS_ENABLED", "false").lower() == "true":
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
+    # Add service and security headers (canonical implementation)
+    add_service_headers(response, "auth-service", "1.0.0")
+    add_security_headers(response)
     
     return response
 
@@ -314,6 +300,7 @@ app.include_router(auth_router, prefix="")
 
 # Root endpoint
 @app.get("/")
+@app.head("/")
 async def root():
     """Root endpoint"""
     return {
@@ -324,6 +311,7 @@ async def root():
 
 # Health check at root level
 @app.get("/health")
+@app.head("/health")
 async def health() -> Dict[str, Any]:
     """Health check with database validation to prevent silent failures"""
     from auth_service.auth_core.database.connection import auth_db
@@ -375,6 +363,7 @@ async def health() -> Dict[str, Any]:
 
 # Readiness check endpoint
 @app.get("/health/ready")
+@app.head("/health/ready")
 async def health_ready() -> Dict[str, Any]:
     """Readiness probe with strict database validation - fails fast if dependencies unavailable"""
     from auth_service.auth_core.database.connection import auth_db
@@ -424,6 +413,7 @@ async def health_ready() -> Dict[str, Any]:
 
 # Additional readiness endpoint for external health checks
 @app.get("/readiness")
+@app.head("/readiness")
 async def readiness() -> Dict[str, Any]:
     """Alternative readiness endpoint with same validation logic"""
     return await health_ready()
@@ -432,7 +422,7 @@ if __name__ == "__main__":
     import uvicorn
     # @marked: Port binding for container runtime with performance optimizations
     # Default to 8081 to align with dev launcher expectations and E2E test configurations
-    port = int(os.getenv("PORT", "8081"))
+    port = int(get_env().get("PORT", "8081"))
     
     # Performance-optimized uvicorn settings
     uvicorn_config = {

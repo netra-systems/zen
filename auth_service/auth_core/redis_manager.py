@@ -11,6 +11,7 @@ import os
 import logging
 import redis.asyncio as redis
 from typing import Optional, Any
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ class AuthRedisManager:
         
     def _check_if_enabled(self) -> bool:
         """Check if Redis is enabled for auth service"""
-        redis_url = os.getenv("REDIS_URL")
+        redis_url = get_env().get("REDIS_URL")
         return bool(redis_url and redis_url != "disabled")
     
     async def initialize(self) -> None:
@@ -58,7 +59,7 @@ class AuthRedisManager:
             return
             
         try:
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            redis_url = get_env().get("REDIS_URL", "redis://localhost:6379")
             self.redis_client = redis.from_url(
                 redis_url,
                 decode_responses=True,

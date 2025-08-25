@@ -25,7 +25,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.exceptions_auth import AuthenticationError, TokenExpiredError, TokenInvalidError
-from netra_backend.app.clients.auth_resilience_service import (
+from netra_backend.app.clients.auth_client_core import (
     get_auth_resilience_service,
     AuthOperationType,
     validate_token_with_resilience,

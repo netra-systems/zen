@@ -7,13 +7,12 @@ import os
 import secrets
 from datetime import datetime
 from typing import Optional
-import redis
-
 import httpx
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from auth_service.auth_core.config import AuthConfig
+from auth_service.auth_core.isolated_environment import get_env
 from auth_service.auth_core.security.oauth_security import (
     OAuthSecurityManager, 
     OAuthStateCleanupManager,
@@ -44,18 +43,6 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 # Initialize auth service singleton
 auth_service = AuthService()
-
-# Initialize security components
-def get_redis_client():
-    """Get Redis client for security features"""
-    try:
-        redis_url = AuthConfig.get_redis_url()
-        client = redis.from_url(redis_url, decode_responses=True)
-        client.ping()  # Test connection
-        return client
-    except Exception as e:
-        logger.warning(f"Redis connection failed for security features: {e}")
-        return None
 
 # Initialize OAuth managers (they will use unified Redis manager internally)
 oauth_security = OAuthSecurityManager()
@@ -112,7 +99,7 @@ async def get_auth_config(request: Request):
             development_mode=dev_mode,
             authorized_javascript_origins=[frontend_url],
             authorized_redirect_uris=[f"{frontend_url}/auth/callback"],
-            pr_number=os.getenv("PR_NUMBER"),
+            pr_number=get_env().get("PR_NUMBER"),
             use_proxy=False,
             proxy_url=None
         )
@@ -727,7 +714,7 @@ async def oauth_callback_post(
             # For testing environments, allow requests without session IDs to proceed with other security checks
             # This enables testing of specific OAuth security validations (nonce, code reuse, etc.)
             import os
-            env = os.getenv("ENVIRONMENT", "development").lower()
+            env = get_env().get("ENVIRONMENT", "development").lower()
             if env in ["test", "testing"]:
                 logger.warning("Proceeding without session ID in test environment")
                 session_id = "test_session_default"
@@ -1120,6 +1107,7 @@ async def oauth_callback_post(
         raise HTTPException(status_code=500, detail=f"OAuth authentication failed: {str(e)}")
 
 @router.get("/health", response_model=HealthResponse)
+@router.head("/health", response_model=HealthResponse)
 async def health_check(request: Request):
     """Health check endpoint with API versioning support"""
     # Handle API versioning

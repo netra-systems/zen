@@ -124,7 +124,7 @@ class HealthResponse(BaseModel):
     status: str
     service: str = "auth-service"
     version: str = "1.0.0"
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     redis_connected: Optional[bool] = Field(description="None when Redis is disabled by design")
     database_connected: bool
 

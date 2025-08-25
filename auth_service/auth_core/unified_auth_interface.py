@@ -129,28 +129,18 @@ class UnifiedAuthInterface:
     
     async def validate_user_token(self, token: str) -> Optional[Dict]:
         """
-        Validate user token with enhanced security - CANONICAL implementation.
-        This replaces ALL other token validation methods.
+        Validate user token - CANONICAL delegation to JWTHandler.
+        This method only provides async interface and standardized return format.
+        All validation logic is handled by the canonical JWTHandler.validate_token().
         """
         try:
-            # First check local blacklist
-            if self.is_token_blacklisted(token):
-                logger.warning("Token is locally blacklisted")
-                return None
-            
-            # Validate with JWT handler
+            # SSOT: Use ONLY the canonical JWTHandler.validate_token() - no duplicate logic
             result = self.validate_token(token, "access")
             
             if not result:
-                logger.warning("Token validation failed")
                 return None
             
-            # Additional cross-service validation
-            if not self._validate_cross_service_security(result, token):
-                logger.warning("Cross-service security validation failed")
-                return None
-            
-            # Return standardized format
+            # ONLY add unique value: standardized return format for user-facing operations
             return {
                 "valid": True,
                 "user_id": result.get("sub"),
@@ -164,28 +154,6 @@ class UnifiedAuthInterface:
             logger.error(f"Token validation error: {e}")
             return None
     
-    def _validate_cross_service_security(self, token_payload: Dict, token: str) -> bool:
-        """Enhanced cross-service security validation."""
-        try:
-            # Check issuer
-            if token_payload.get("iss") != "netra-auth-service":
-                return False
-            
-            # Check token age
-            issued_at = token_payload.get("iat", 0)
-            if time.time() - issued_at > 86400:  # 24 hours max
-                return False
-            
-            # Check user blacklist
-            user_id = token_payload.get("sub")
-            if user_id and self.is_user_blacklisted(user_id):
-                return False
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Cross-service security validation error: {e}")
-            return False
     
     # =======================
     # SESSION MANAGEMENT

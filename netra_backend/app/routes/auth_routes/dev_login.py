@@ -34,7 +34,7 @@ async def handle_dev_login(dev_login_request: DevLoginRequest, oauth_config, db:
     user = await get_or_create_dev_user(db, dev_login_request.email)
     
     # Use auth client's configured base URL
-    from netra_backend.app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client_core import auth_client
     auth_service_url = auth_client.settings.base_url
     
     async with httpx.AsyncClient() as client:

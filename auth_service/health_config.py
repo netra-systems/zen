@@ -6,6 +6,7 @@ Simplified standalone health checks for auth service.
 import os
 from typing import Dict, Any
 from enum import Enum
+from auth_service.auth_core.isolated_environment import get_env
 
 
 class HealthStatus(Enum):
@@ -40,8 +41,8 @@ async def check_oauth_providers_health() -> Dict[str, Any]:
     """Check OAuth provider connectivity and configuration."""
     try:
         # Check that OAuth providers are configured
-        google_client_id = os.getenv("GOOGLE_CLIENT_ID")
-        github_client_id = os.getenv("GITHUB_CLIENT_ID")
+        google_client_id = get_env().get("GOOGLE_CLIENT_ID")
+        github_client_id = get_env().get("GITHUB_CLIENT_ID")
         
         configured_providers = []
         if google_client_id:
@@ -71,8 +72,8 @@ async def check_oauth_providers_health() -> Dict[str, Any]:
 async def check_jwt_configuration() -> Dict[str, Any]:
     """Check JWT configuration and secret key."""
     try:
-        secret_key = os.getenv("SECRET_KEY") or os.getenv("JWT_SECRET_KEY")
-        algorithm = os.getenv("ALGORITHM", "HS256")
+        secret_key = get_env().get("SECRET_KEY") or get_env().get("JWT_SECRET_KEY")
+        algorithm = get_env().get("ALGORITHM", "HS256")
         
         if not secret_key:
             return {

@@ -14,6 +14,7 @@ from typing import Dict, Optional, Tuple
 import httpx
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.isolated_environment import get_env
 from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.database.repository import (
     AuthAuditRepository,
@@ -42,8 +43,8 @@ class AuthService:
     def __init__(self):
         self.jwt_handler = JWTHandler()
         self.session_manager = SessionManager()
-        self.max_login_attempts = int(os.getenv("MAX_LOGIN_ATTEMPTS", "5"))
-        self.lockout_duration = int(os.getenv("LOCKOUT_DURATION_MINUTES", "15"))
+        self.max_login_attempts = int(get_env().get("MAX_LOGIN_ATTEMPTS", "5"))
+        self.lockout_duration = int(get_env().get("LOCKOUT_DURATION_MINUTES", "15"))
         self.db_session = None  # Initialize as None, set later if database available
         
         # Circuit breaker for external API calls
@@ -410,7 +411,7 @@ class AuthService:
         """Validate service credentials"""
         # In real implementation, validate from database
         # This is a placeholder
-        expected_secret = os.getenv(f"SERVICE_SECRET_{service_id}")
+        expected_secret = get_env().get(f"SERVICE_SECRET_{service_id}")
         return expected_secret and service_secret == expected_secret
     
     async def _get_service_name(self, service_id: str) -> str:
@@ -497,7 +498,7 @@ class AuthService:
             return PasswordResetResponse(
                 success=True,
                 message="If email exists, reset link sent",
-                reset_token=reset_token if os.getenv("TESTING") else None
+                reset_token=reset_token if get_env().get("TESTING") else None
             )
             
         except Exception as e:
@@ -604,7 +605,7 @@ class AuthService:
     
     async def _send_password_reset_email(self, email: str, token: str):
         """Send password reset email (mocked in tests)"""
-        if os.getenv("TESTING"):
+        if get_env().get("TESTING"):
             logger.info(f"Mock email sent to {email} with token {token}")
             return
         

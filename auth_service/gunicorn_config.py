@@ -7,13 +7,24 @@ import multiprocessing
 import signal
 import sys
 
+# Import IsolatedEnvironment for consistent environment access
+try:
+    from auth_service.auth_core.isolated_environment import get_env
+except ImportError:
+    # Fallback for when imports may not be available during gunicorn setup
+    def get_env():
+        class FallbackEnv:
+            def get(self, key, default=None):
+                return os.getenv(key, default)
+        return FallbackEnv()
+
 # Server socket
-bind = f"0.0.0.0:{os.getenv('PORT', '8080')}"
+bind = f"0.0.0.0:{get_env().get('PORT', '8080')}"
 backlog = 2048
 
 # Worker processes
 # Cloud Run recommends 1-2 workers for CPU-optimized instances
-workers = int(os.getenv('GUNICORN_WORKERS', '2'))
+workers = int(get_env().get('GUNICORN_WORKERS', '2'))
 worker_class = 'uvicorn.workers.UvicornWorker'
 worker_connections = 1000
 max_requests = 1000  # Restart workers after this many requests to prevent memory leaks
@@ -23,7 +34,7 @@ graceful_timeout = 30  # Time to wait for workers to finish serving requests dur
 keepalive = 5  # Seconds to wait for requests on Keep-Alive connections
 
 # Threading
-threads = int(os.getenv('GUNICORN_THREADS', '4'))
+threads = int(get_env().get('GUNICORN_THREADS', '4'))
 thread_type = 'gthread'
 
 # Process naming
@@ -32,11 +43,11 @@ proc_name = 'netra-auth-service'
 # Logging
 accesslog = '-'
 errorlog = '-'
-loglevel = os.getenv('LOG_LEVEL', 'info').lower()
+loglevel = get_env().get('LOG_LEVEL', 'info').lower()
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 
 # Stats
-statsd_host = os.getenv('STATSD_HOST', None)
+statsd_host = get_env().get('STATSD_HOST', None)
 if statsd_host:
     statsd_prefix = 'netra.auth.gunicorn'
 

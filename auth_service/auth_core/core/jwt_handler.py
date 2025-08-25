@@ -14,8 +14,8 @@ from typing import Any, Dict, Optional
 import jwt
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.security.oauth_security import JWTSecurityValidator
 from auth_service.auth_core.core.jwt_cache import jwt_validation_cache
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,6 @@ class JWTHandler:
         self.access_expiry = AuthConfig.get_jwt_access_expiry_minutes()
         self.refresh_expiry = AuthConfig.get_jwt_refresh_expiry_days()
         self.service_expiry = AuthConfig.get_jwt_service_expiry_minutes()
-        self.security_validator = JWTSecurityValidator()
         
         # Token blacklist for immediate invalidation
         self._token_blacklist = set()
@@ -92,7 +91,7 @@ class JWTHandler:
     
     def validate_token(self, token: str, 
                       token_type: str = "access") -> Optional[Dict]:
-        """Validate and decode JWT token with enhanced security, blacklist checking, and high-performance caching"""
+        """CANONICAL JWT validation - Single Source of Truth for all JWT validation operations"""
         try:
             # Check cache first for sub-100ms performance
             cache_key = jwt_validation_cache.get_cache_key(token, token_type)
@@ -125,8 +124,8 @@ class JWTHandler:
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
             
-            # First validate token security (algorithm, etc.)
-            if not self.security_validator.validate_token_security(token):
+            # CONSOLIDATED: Validate token security (algorithm, format, etc.) - moved from oauth_security.py
+            if not self._validate_token_security_consolidated(token):
                 logger.warning("Token failed security validation")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
@@ -281,8 +280,8 @@ class JWTHandler:
                 logger.warning("Token is blacklisted")
                 return None
             
-            # First validate token security (algorithm, etc.)
-            if not self.security_validator.validate_token_security(token):
+            # CONSOLIDATED: Validate token security (algorithm, etc.)
+            if not self._validate_token_security_consolidated(token):
                 logger.warning("Token failed security validation")
                 return None
             
@@ -356,7 +355,7 @@ class JWTHandler:
         """Extract user ID from token without full validation"""
         try:
             # Still validate basic security even without signature verification
-            if not self.security_validator.validate_token_security(token):
+            if not self._validate_token_security_consolidated(token):
                 return None
             
             # Decode without verification for user ID extraction
@@ -457,7 +456,7 @@ class JWTHandler:
                 return False
             
             # For development environment, be more permissive with audiences
-            env = os.getenv("ENVIRONMENT", "development").lower()
+            env = get_env().get("ENVIRONMENT", "development").lower()
             valid_audiences = ["netra-platform", "netra-backend", "netra-auth", "netra-services", "netra-admin"]
             
             if env == "development":
@@ -679,3 +678,29 @@ class JWTHandler:
             "blacklisted_tokens": len(self._token_blacklist),
             "blacklisted_users": len(self._user_blacklist)
         }
+    
+    def _validate_token_security_consolidated(self, token: str) -> bool:
+        """CONSOLIDATED: JWT security validation - moved from oauth_security.py to eliminate SSOT violation"""
+        try:
+            import jwt
+            
+            # Decode header without verification to check algorithm
+            header = jwt.get_unverified_header(token)
+            algorithm = header.get("alg")
+            
+            # Check if algorithm is allowed
+            allowed_algorithms = ["HS256", "RS256"]
+            if algorithm not in allowed_algorithms:
+                logger.warning(f"Insecure JWT algorithm: {algorithm}")
+                return False
+            
+            # Check for algorithm confusion attacks
+            if algorithm == "none":
+                logger.warning("JWT algorithm 'none' is not allowed")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"JWT security validation error: {e}")
+            return False

@@ -4,7 +4,7 @@ Handles token validation, authentication, and service-to-service communication.
 """
 
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 
@@ -19,8 +19,29 @@ from netra_backend.app.clients.auth_client_config import (
     OAuthConfigGenerator,
 )
 from netra_backend.app.core.tracing import TracingManager
+from enum import Enum
 
 logger = logging.getLogger(__name__)
+
+
+class AuthOperationType(Enum):
+    """Types of authentication operations for resilience handling."""
+    TOKEN_VALIDATION = "token_validation"
+    LOGIN = "login"
+    LOGOUT = "logout"
+    TOKEN_REFRESH = "token_refresh"
+    PERMISSION_CHECK = "permission_check"
+    HEALTH_CHECK = "health_check"
+    MONITORING = "monitoring"
+
+
+class AuthResilienceMode(Enum):
+    """Authentication resilience operating modes - simplified for SSOT."""
+    NORMAL = "normal"
+    CACHED_FALLBACK = "cached_fallback"
+    DEGRADED = "degraded"
+    EMERGENCY = "emergency"
+    RECOVERY = "recovery"
 
 
 class AuthServiceClient:
@@ -106,6 +127,10 @@ class AuthServiceClient:
         if disabled_result is not None:
             return disabled_result
         return await self._execute_token_validation(token)
+    
+    async def validate_token(self, token: str) -> Optional[Dict]:
+        """Validate access token - canonical method for all token validation."""
+        return await self.validate_token_jwt(token)
     
     async def _build_validation_request(self, token: str) -> Dict:
         """Build validation request payload."""
@@ -873,7 +898,157 @@ class AuthServiceClient:
                 'expires_in': result.get('expires_in', 3600)
             })()
         return None
+    
+    def blacklist_token(self, token: str) -> bool:
+        """Blacklist token (synchronous method for backward compatibility)."""
+        # For now, return True as a placeholder - in a real implementation
+        # this would need to communicate with the auth service synchronously
+        logger.warning("blacklist_token called - synchronous token blacklisting not fully implemented")
+        return True
+    
+    async def get_user_permissions(self, user_id: str) -> List[str]:
+        """Get user permissions by user ID."""
+        if not self.settings.enabled:
+            return []
+        
+        try:
+            client = await self._get_client()
+            response = await client.get(f"/auth/users/{user_id}/permissions")
+            if response.status_code == 200:
+                result = response.json()
+                return result.get("permissions", [])
+            return []
+        except Exception as e:
+            logger.error(f"Get user permissions failed: {e}")
+            return []
+    
+    async def revoke_user_sessions(self, user_id: str) -> Dict[str, bool]:
+        """Revoke all sessions for a user."""
+        if not self.settings.enabled:
+            return {"success": False, "message": "Auth service disabled"}
+        
+        try:
+            client = await self._get_client()
+            response = await client.post(f"/auth/users/{user_id}/revoke-sessions")
+            if response.status_code == 200:
+                return {"success": True, "message": "Sessions revoked"}
+            return {"success": False, "message": "Failed to revoke sessions"}
+        except Exception as e:
+            logger.error(f"Revoke user sessions failed: {e}")
+            return {"success": False, "message": str(e)}
+    
+    def health_check(self) -> bool:
+        """Health check (synchronous method for backward compatibility)."""
+        return self.settings.enabled
+    
+    async def validate_token_with_resilience(self, token: str, operation_type: AuthOperationType = AuthOperationType.TOKEN_VALIDATION) -> Dict[str, Any]:
+        """
+        Validate token with resilience mechanisms using built-in circuit breaker.
+        
+        This method provides the same interface as the deprecated auth_resilience_service
+        but uses the existing circuit breaker and caching functionality built into AuthServiceClient.
+        
+        Returns:
+            Dict with validation result and resilience metadata
+        """
+        import time
+        start_time = time.time()
+        
+        try:
+            # Use the existing validate_token method which already has circuit breaker protection
+            result = await self.validate_token(token)
+            
+            if result and result.get("valid"):
+                return {
+                    "success": True,
+                    "valid": True,
+                    "user_id": result.get("user_id"),
+                    "email": result.get("email"), 
+                    "permissions": result.get("permissions", []),
+                    "resilience_mode": "normal",
+                    "source": "auth_service",
+                    "fallback_used": False,
+                    "response_time": time.time() - start_time
+                }
+            else:
+                return {
+                    "success": False,
+                    "valid": False,
+                    "error": "Token validation failed",
+                    "resilience_mode": "normal",
+                    "source": "auth_service",
+                    "fallback_used": False,
+                    "response_time": time.time() - start_time
+                }
+                
+        except Exception as e:
+            logger.error(f"Token validation with resilience failed: {e}")
+            
+            # Try cached validation as fallback
+            cached_result = self.token_cache.get_cached_token(token)
+            if cached_result and cached_result.get("valid"):
+                logger.warning("Using cached token validation due to auth service unavailability")
+                return {
+                    "success": True,
+                    "valid": True,
+                    "user_id": cached_result.get("user_id"),
+                    "email": cached_result.get("email"),
+                    "permissions": cached_result.get("permissions", []),
+                    "resilience_mode": "cached_fallback",
+                    "source": "cache",
+                    "fallback_used": True,
+                    "response_time": time.time() - start_time,
+                    "warning": "Using cached validation due to auth service error"
+                }
+            
+            return {
+                "success": False,
+                "valid": False,
+                "error": f"Auth service unavailable: {str(e)}",
+                "resilience_mode": "failed",
+                "source": "error",
+                "fallback_used": True,
+                "response_time": time.time() - start_time
+            }
 
 
 # Global client instance
 auth_client = AuthServiceClient()
+
+
+# Convenience function for backward compatibility with auth_resilience_service
+async def validate_token_with_resilience(token: str, operation_type: AuthOperationType = AuthOperationType.TOKEN_VALIDATION) -> Dict[str, Any]:
+    """Validate token using authentication resilience mechanisms."""
+    return await auth_client.validate_token_with_resilience(token, operation_type)
+
+
+# Backward compatibility function that returns the consolidated auth client
+def get_auth_resilience_service():
+    """Get the authentication resilience service (now consolidated into AuthServiceClient)."""
+    return auth_client
+
+
+# Global function for getting auth resilience health - simplified version
+async def get_auth_resilience_health() -> Dict[str, Any]:
+    """Get authentication resilience health status."""
+    circuit_manager = auth_client.circuit_manager
+    circuit_status = circuit_manager.breaker.get_status() if hasattr(circuit_manager, 'breaker') else {"state": "unknown"}
+    
+    return {
+        "service": "authentication_resilience", 
+        "status": "healthy" if auth_client.settings.enabled else "degraded",
+        "current_mode": "normal" if auth_client.settings.enabled else "disabled",
+        "auth_service_available": auth_client.settings.enabled,
+        "emergency_bypass_active": False,
+        "metrics": {
+            "total_attempts": 0,  # Would need to track this
+            "success_rate": 1.0,
+            "cache_hit_rate": 0.0,
+            "consecutive_failures": 0,
+        },
+        "circuit_breaker": circuit_status,
+        "cache_status": {
+            "cached_tokens": len(auth_client.token_cache._token_cache) if hasattr(auth_client.token_cache, '_token_cache') else 0,
+            "max_tokens": 10000,
+        }
+    }

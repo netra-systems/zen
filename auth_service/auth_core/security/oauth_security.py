@@ -13,6 +13,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, Tuple
 from auth_service.auth_core.redis_manager import auth_redis_manager
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class OAuthSecurityManager:
         
     def _get_hmac_secret(self) -> str:
         """Get HMAC secret for state signing"""
-        secret = os.getenv("OAUTH_HMAC_SECRET")
+        secret = get_env().get("OAUTH_HMAC_SECRET")
         if not secret:
             # Generate a strong secret for this session
             secret = secrets.token_hex(32)
@@ -262,7 +263,7 @@ class OAuthSecurityManager:
         """
         try:
             # Get allowed redirect URIs from environment
-            allowed_uris = os.getenv("OAUTH_ALLOWED_REDIRECT_URIS", "").split(",")
+            allowed_uris = get_env().get("OAUTH_ALLOWED_REDIRECT_URIS", "").split(",")
             
             # Default allowed URIs for development
             if not allowed_uris or not allowed_uris[0]:
@@ -658,72 +659,23 @@ class OAuthSecurityManager:
             return None
     
     def _is_valid_origin(self, origin: str) -> bool:
-        """Check if origin is in allowed list"""
-        allowed_origins = [
-            "https://app.netra.ai",
-            "https://app.staging.netra.ai",
-            "http://localhost:3000"
-        ]
-        return origin in allowed_origins
-
-
-class JWTSecurityValidator:
-    """Enhanced JWT security validation"""
-    
-    def __init__(self):
-        self.strong_secret = self._get_strong_secret()
-        self.allowed_algorithms = ["HS256", "RS256"]
-    
-    def _get_strong_secret(self) -> str:
-        """Get strong JWT secret using proper secret loading chain"""
-        from auth_service.auth_core.secret_loader import AuthSecretLoader
-        
-        try:
-            secret = AuthSecretLoader.get_jwt_secret()
-        except ValueError as e:
-            # No fallback in any environment - require explicit JWT configuration
-            env = os.getenv("ENVIRONMENT", "development").lower()
-            raise ValueError(f"JWT secret not configured for {env} environment") from e
-        
-        # Ensure secret is strong enough for production environments
-        env = os.getenv("ENVIRONMENT", "development").lower()
-        if len(secret) < 32 and env in ["staging", "production"]:
-            raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production")
-        
-        return secret
-    
-    def validate_token_security(self, token: str) -> bool:
-        """
-        Validate token uses secure algorithms and parameters
-        
-        Args:
-            token: JWT token to validate
-            
-        Returns:
-            True if token passes security validation
-        """
-        try:
-            import jwt
-            
-            # Decode header without verification to check algorithm
-            header = jwt.get_unverified_header(token)
-            algorithm = header.get("alg")
-            
-            # Check if algorithm is allowed
-            if algorithm not in self.allowed_algorithms:
-                logger.warning(f"Insecure JWT algorithm: {algorithm}")
-                return False
-            
-            # Check for algorithm confusion attacks
-            if algorithm == "none":
-                logger.warning("JWT algorithm 'none' is not allowed")
-                return False
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"JWT security validation error: {e}")
+        """Check if origin is in allowed list using shared CORS configuration (SSOT)"""
+        if not origin:
             return False
+            
+        # Use shared CORS configuration (SSOT) instead of hardcoded origins
+        from shared.cors_config import get_cors_origins, is_origin_allowed
+        from auth_service.auth_core.config import AuthConfig
+        
+        env = AuthConfig.get_environment()
+        allowed_origins = get_cors_origins(env)
+        
+        return is_origin_allowed(origin, allowed_origins, env)
+
+
+# REMOVED: JWTSecurityValidator class - consolidated into jwt_handler.py to eliminate SSOT violation
+# All JWT security validation now happens through JWTHandler._validate_token_security_consolidated()
+# This ensures Single Source of Truth for all JWT validation operations
 
 
 class SessionFixationProtector:
@@ -885,7 +837,7 @@ class OAuthStateCleanupManager:
 
 def validate_cors_origin(origin: str) -> bool:
     """
-    Validate CORS origin against whitelist with comprehensive security checks
+    Validate CORS origin against whitelist using shared CORS configuration (SSOT)
     
     Args:
         origin: Origin header value
@@ -896,34 +848,18 @@ def validate_cors_origin(origin: str) -> bool:
     if not origin:
         return False
     
-    # Strict whitelist of allowed origins
-    allowed_origins = [
-        "https://app.netra.ai",
-        "https://app.staging.netra.ai",
-        "https://app.staging.netrasystems.ai", 
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",  # Backend dev
-        "http://127.0.0.1:8000"   # Backend dev
-    ]
-    
-    # Check for exact match
-    if origin in allowed_origins:
-        logger.debug(f"CORS origin allowed: {origin}")
-        return True
-    
-    # Additional checks for development environment
+    # Use shared CORS configuration (SSOT) instead of hardcoded origins
+    from shared.cors_config import get_cors_origins, is_origin_allowed
     from auth_service.auth_core.config import AuthConfig
+    
     env = AuthConfig.get_environment()
+    allowed_origins = get_cors_origins(env)
     
-    if env == "development":
-        # Allow localhost and 127.0.0.1 with any port in development
-        import re
-        dev_pattern = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
-        if re.match(dev_pattern, origin):
-            logger.debug(f"CORS origin allowed in development: {origin}")
-            return True
+    is_allowed = is_origin_allowed(origin, allowed_origins, env)
     
-    # Log blocked origins for security monitoring
-    logger.warning(f"CORS origin blocked: {origin}")
-    return False
+    if is_allowed:
+        logger.debug(f"CORS origin allowed: {origin}")
+    else:
+        logger.warning(f"CORS origin blocked: {origin}")
+    
+    return is_allowed

@@ -17,6 +17,18 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from shared.cors_config import get_fastapi_cors_config
 
+# Use centralized environment management
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback for standalone execution
+    class FallbackEnv:
+        def get(self, key, default=None):
+            return os.getenv(key, default)
+    
+    def get_env():
+        return FallbackEnv()
+
 app = FastAPI()
 
 # Use unified CORS configuration from shared module
@@ -26,8 +38,9 @@ app.add_middleware(
     **cors_config
 )
 
-BACKEND_URL = os.getenv("BACKEND_URL", "https://api.staging.netrasystems.ai")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "https://app.staging.netrasystems.ai")
+env = get_env()
+BACKEND_URL = env.get("BACKEND_URL", "https://api.staging.netrasystems.ai")
+FRONTEND_URL = env.get("FRONTEND_URL", "https://app.staging.netrasystems.ai")
 
 # Simplified Health Interface for Auth Proxy
 class ProxyHealthInterface:

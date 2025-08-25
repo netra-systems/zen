@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.auth_dependencies import get_db_session, get_security_service
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.routes.auth_routes.callback_processor import (
     handle_callback_request,
 )

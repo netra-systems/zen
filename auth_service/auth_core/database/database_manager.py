@@ -15,6 +15,7 @@ from typing import Optional
 from urllib.parse import urlparse, urlunparse
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class AuthDatabaseManager:
         
         # Get database URL from environment if not provided
         if not database_url:
-            database_url = os.getenv("DATABASE_URL")
+            database_url = get_env().get("DATABASE_URL")
             if not database_url:
                 raise ValueError("DATABASE_URL not configured")
         
@@ -64,7 +65,7 @@ class AuthDatabaseManager:
         }
         
         # Testing environment uses NullPool
-        if os.getenv("TESTING") == "true":
+        if get_env().get("TESTING") == "true":
             default_config["poolclass"] = NullPool
             default_config.pop("pool_size", None)
             default_config.pop("max_overflow", None)
@@ -95,7 +96,7 @@ class AuthDatabaseManager:
             Database URL compatible with asyncpg driver
         """
         # Get DATABASE_URL from environment
-        database_url = os.getenv("DATABASE_URL")
+        database_url = get_env().get("DATABASE_URL")
         if not database_url:
             raise ValueError("DATABASE_URL environment variable not set")
         
@@ -120,7 +121,7 @@ class AuthDatabaseManager:
             True if URL is valid PostgreSQL URL, False otherwise
         """
         if url is None:
-            url = os.getenv("DATABASE_URL")
+            url = get_env().get("DATABASE_URL")
         
         if not url:
             logger.warning("No database URL to validate")
@@ -150,7 +151,7 @@ class AuthDatabaseManager:
             True if using Cloud SQL or running in Cloud Run
         """
         # Check if DATABASE_URL contains Cloud SQL Unix socket path
-        database_url = os.getenv("DATABASE_URL", "")
+        database_url = get_env().get("DATABASE_URL", "")
         try:
             from shared.database.core_database_manager import CoreDatabaseManager
             if CoreDatabaseManager.is_cloud_sql_connection(database_url):
@@ -163,7 +164,7 @@ class AuthDatabaseManager:
                 return True
         
         # Check if running in Cloud Run (K_SERVICE is set by Cloud Run)
-        k_service = os.getenv("K_SERVICE")
+        k_service = get_env().get("K_SERVICE")
         if k_service:
             logger.debug(f"Detected Cloud Run environment: {k_service}")
             return True
@@ -178,11 +179,11 @@ class AuthDatabaseManager:
             True if running in test environment
         """
         # Check environment variables
-        environment = os.getenv("ENVIRONMENT", "").lower()
+        environment = get_env().get("ENVIRONMENT", "").lower()
         if environment == "test":
             return True
         
-        testing_flag = os.getenv("TESTING", "false").lower()
+        testing_flag = get_env().get("TESTING", "false").lower()
         if testing_flag == "true":
             return True
         
@@ -361,7 +362,7 @@ class AuthDatabaseManager:
         Returns:
             Clean PostgreSQL URL without asyncpg/psycopg2 drivers
         """
-        database_url = os.getenv("DATABASE_URL", "")
+        database_url = get_env().get("DATABASE_URL", "")
         if not database_url:
             return AuthDatabaseManager._get_default_auth_url()
         
@@ -434,7 +435,7 @@ class AuthDatabaseManager:
             True if running in local development
         """
         # Direct environment check - no fallbacks
-        environment = os.getenv("ENVIRONMENT", "development").lower()
+        environment = get_env().get("ENVIRONMENT", "development").lower()
         return environment == "development"
     
     @staticmethod
@@ -445,7 +446,7 @@ class AuthDatabaseManager:
             True if running in staging or production
         """
         # Direct environment check - no fallbacks
-        environment = os.getenv("ENVIRONMENT", "development").lower()
+        environment = get_env().get("ENVIRONMENT", "development").lower()
         return environment in ["staging", "production"]
     
     @staticmethod

@@ -8,6 +8,7 @@ import time
 from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -91,10 +92,10 @@ class AuthServiceStartupOptimizer:
         
         try:
             import os
-            env = os.getenv("ENVIRONMENT", "development").lower()
+            env = get_env().get("ENVIRONMENT", "development").lower()
             
             # Skip database initialization in fast test mode
-            if os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true":
+            if get_env().get("AUTH_FAST_TEST_MODE", "false").lower() == "true":
                 logger.info("Skipping database initialization in fast test mode")
                 self.metrics.component_times['database'] = 0.0
                 return

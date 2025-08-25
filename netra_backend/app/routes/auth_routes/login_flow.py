@@ -4,7 +4,7 @@ OAuth Login Flow Logic
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.routes.auth_routes.oauth_validation import (
     build_redirect_uri,
     handle_pr_proxy_redirect,
