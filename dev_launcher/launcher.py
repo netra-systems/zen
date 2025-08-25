@@ -1555,7 +1555,8 @@ class DevLauncher:
     
     def _verify_auth_system(self, timeout: int = 15) -> bool:
         """Verify auth system /api/auth/config per SPEC step 9 with resilient networking."""
-        auth_port = 8081  # Auth service port
+        # Get the actual allocated auth port instead of hardcoded 8081
+        auth_port = getattr(self.service_startup, 'allocated_ports', {}).get('auth', 8081)
         auth_config_url = f"http://localhost:{auth_port}/api/auth/config"
         
         # Use resilient network client
@@ -1576,11 +1577,25 @@ class DevLauncher:
             return success
         
         try:
-            # Run async check
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            verified = loop.run_until_complete(verify_auth())
-            loop.close()
+            # Run async check with proper event loop handling
+            try:
+                # Try to get the running loop first
+                loop = asyncio.get_running_loop()
+                # If we're in an async context, create a task
+                task = asyncio.create_task(verify_auth())
+                verified = asyncio.run_coroutine_threadsafe(verify_auth(), loop).result(timeout=timeout)
+            except RuntimeError:
+                # No running loop, create a new one safely
+                try:
+                    verified = asyncio.run(verify_auth())
+                except RuntimeError:
+                    # Fallback: use new event loop in thread
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        verified = loop.run_until_complete(verify_auth())
+                    finally:
+                        loop.close()
             
             if verified:
                 self._print("✅", "READY", "Auth system verified")

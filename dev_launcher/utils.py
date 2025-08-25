@@ -102,10 +102,14 @@ def is_port_available(port: int) -> bool:
         True if port is available, False otherwise
     """
     try:
+        # Use bind attempt instead of connect to properly detect TIME_WAIT connections
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(0.1)
-            result = s.connect_ex(('localhost', port))
-            return result != 0
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind(('localhost', port))
+            return True
+    except OSError:
+        # Port is already in use or blocked (including TIME_WAIT)
+        return False
     except Exception:
         return False
 
