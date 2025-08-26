@@ -231,6 +231,7 @@ class CriticalImportsValidator:
         return circular_issues
 
 
+@pytest.mark.e2e
 class TestCriticalImportsValidation:
     """Critical imports validation test suite"""
     
@@ -244,6 +245,7 @@ class TestCriticalImportsValidation:
         """Run critical imports validation"""
         return validator.validate_critical_imports()
 
+    @pytest.mark.e2e
     def test_all_dependencies_available(self, validation_results):
         """Test that all required dependencies are installed and importable"""
         dependency_validation = validation_results["dependency_validation"]
@@ -261,6 +263,7 @@ class TestCriticalImportsValidation:
             
             pytest.fail(failure_msg)
 
+    @pytest.mark.e2e
     def test_all_critical_modules_importable(self, validation_results):
         """Test that ALL critical modules can be imported without errors"""
         failed_imports = validation_results["failed_imports"]
@@ -283,6 +286,7 @@ class TestCriticalImportsValidation:
             
             pytest.fail(failure_report)
 
+    @pytest.mark.e2e
     def test_no_circular_dependencies(self, validator):
         """Test that critical modules have no circular import dependencies"""
         circular_issues = validator.detect_circular_imports()
@@ -295,6 +299,7 @@ class TestCriticalImportsValidation:
             
             pytest.fail(failure_msg)
 
+    @pytest.mark.e2e
     def test_performance_requirement(self, validation_results):
         """Test that critical imports validation completes within 10 seconds"""
         elapsed_time = validation_results["elapsed_time_seconds"]
@@ -306,6 +311,7 @@ class TestCriticalImportsValidation:
                 f"Slow imports indicate dependency or configuration issues."
             )
 
+    @pytest.mark.e2e
     def test_100_percent_success_rate_required(self, validation_results):
         """Test that 100% of critical modules import successfully"""
         success_rate = validation_results["success_rate"]
@@ -320,6 +326,7 @@ class TestCriticalImportsValidation:
                 f"ANY critical import failure compromises entire system stability."
             )
 
+    @pytest.mark.e2e
     def test_critical_services_coverage(self, validation_results, validator):
         """Test that all essential service categories are covered"""
         successful_modules = validation_results["successful_modules"]
@@ -344,6 +351,7 @@ class TestCriticalImportsValidation:
                 "\n".join(f"  - {cat}" for cat in missing_categories)
             )
 
+    @pytest.mark.e2e
     def test_validation_summary_report(self, validation_results):
         """Generate comprehensive validation summary report"""
         print("\n" + "=" * 26 + " CRITICAL IMPORTS VALIDATION " + "=" * 26)

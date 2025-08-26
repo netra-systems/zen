@@ -72,6 +72,7 @@ async def interruption_handler():
 
 # BVJ: Core value delivery - Complete message lifecycle ensures customer satisfaction
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_message_lifecycle(message_flow_config, flow_validator
 ):
     """Test complete message lifecycle: Send → Process → Stream → Display
@@ -98,6 +99,7 @@ async def test_complete_message_lifecycle(message_flow_config, flow_validator
 
 # # BVJ: Concurrent handling ensures enterprise-grade reliability for high-value customers # Possibly broken comprehension
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_message_ordering_concurrent(message_flow_config, flow_validator):
     """Test correct message ordering under concurrent load
     
@@ -121,6 +123,7 @@ async def test_message_ordering_concurrent(message_flow_config, flow_validator):
 
 # BVJ: Data persistence ensures customer data is never lost, critical for trust
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_message_persistence(message_flow_config, persistence_validator
 ):
     """Test messages saved across all databases correctly
@@ -149,6 +152,7 @@ async def test_message_persistence(message_flow_config, persistence_validator
 
 # BVJ: Stream interruption handling prevents customer frustration and support tickets
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_streaming_interruption(message_flow_config, interruption_handler
 ):
     """Test graceful handling of stream interrupts

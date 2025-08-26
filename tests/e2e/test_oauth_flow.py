@@ -71,9 +71,11 @@ def enterprise_config():
     """Enterprise configuration fixture"""
     return get_enterprise_config()
 
+@pytest.mark.e2e
 class TestOAuthFlow:
     """OAuth integration test cases for enterprise scenarios"""
     
+    @pytest.mark.e2e
     async def test_google_oauth_complete_flow(self, oauth_manager, oauth_validator, mock_oauth_responses, enterprise_config):
         """Test Google OAuth → User creation → Dashboard access"""
         
@@ -99,6 +101,7 @@ class TestOAuthFlow:
         
         assert user_created and profile_synced and dashboard_loaded
     
+    @pytest.mark.e2e
     async def test_github_oauth_enterprise(self, oauth_manager, oauth_validator, mock_oauth_responses):
         """Test Enterprise SSO flow for GitHub"""
         
@@ -118,6 +121,7 @@ class TestOAuthFlow:
         assert enterprise_valid is True
         assert oauth_validator.enterprise_validations["sso"] is True
     
+    @pytest.mark.e2e
     async def test_oauth_error_handling(self, oauth_validator):
         """Test OAuth error scenarios and graceful recovery"""
         
@@ -135,6 +139,7 @@ class TestOAuthFlow:
         
         assert all([recovery_1, recovery_2, recovery_3])
     
+    @pytest.mark.e2e
     async def test_oauth_user_merge(self, oauth_validator):
         """Test existing user OAuth link scenario"""
         
@@ -195,9 +200,11 @@ class TestOAuthFlow:
         }
         return dashboard_data["dashboard_loaded"]
 
+@pytest.mark.e2e
 class TestOAuthDataConsistency:
     """Test data consistency across OAuth services"""
     
+    @pytest.mark.e2e
     async def test_auth_backend_sync_consistency(self, oauth_validator):
         """Test data consistency between Auth and Backend services"""
         
@@ -219,9 +226,11 @@ class TestOAuthDataConsistency:
         assert consistency_valid is True
         assert oauth_validator.enterprise_validations["data_consistency"] is True
 
+@pytest.mark.e2e
 class TestOAuthSessionManagement:
     """Test OAuth session management scenarios"""
     
+    @pytest.mark.e2e
     async def test_oauth_session_lifecycle(self, oauth_session_manager):
         """Test complete OAuth session lifecycle"""
         

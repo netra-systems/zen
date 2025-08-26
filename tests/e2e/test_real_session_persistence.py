@@ -208,6 +208,7 @@ class RealSessionPersistenceManager:
         except Exception:
             return False
     
+    @pytest.mark.e2e
     async def test_websocket_reconnection_after_restart(self) -> Dict[str, Any]:
         """Test WebSocket reconnection after simulated restart."""
         reconnection_results = {
@@ -234,6 +235,7 @@ class RealSessionPersistenceManager:
         
         return reconnection_results
     
+    @pytest.mark.e2e
     async def test_session_expiry_and_cleanup(self) -> Dict[str, Any]:
         """Test session expiry and cleanup mechanisms."""
         cleanup_results = {
@@ -269,6 +271,7 @@ class RealSessionPersistenceManager:
         
         return cleanup_results
     
+    @pytest.mark.e2e
     async def test_concurrent_multi_device_sessions(self) -> Dict[str, Any]:
         """Test concurrent sessions from multiple devices."""
         multi_device_results = {
@@ -335,6 +338,7 @@ class RealSessionPersistenceManager:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_real_session_persistence_complete_flow():
     """
     Test #6: Complete real session persistence across service restart
@@ -398,6 +402,7 @@ async def test_real_session_persistence_complete_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_real_session_expiry_and_cleanup():
     """
     Test session expiry and automatic cleanup in Redis.
@@ -424,6 +429,7 @@ async def test_real_session_expiry_and_cleanup():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_real_concurrent_multi_device_sessions():
     """
     Test concurrent sessions from multiple devices with session isolation.
@@ -452,6 +458,7 @@ async def test_real_concurrent_multi_device_sessions():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_real_session_data_integrity_validation():
     """
     Test session data integrity across restart scenarios.

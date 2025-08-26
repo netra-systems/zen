@@ -156,15 +156,18 @@ def resilience_metrics():
                    f"failover_time={metric.failover_time:.2f}s")
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_isolated_test_environment():
     """Provide isolated test environment."""
     # Simple mock environment for testing
     return {"test_mode": True, "isolated": True}
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestSystemResilience:
     """Test suite for system resilience and fallback mechanisms."""
     
+    @pytest.mark.e2e
     async def test_1_llm_provider_failover_resilience(self, test_isolated_test_environment,
                                                       failure_simulator, resilience_metrics):
         """
@@ -243,6 +246,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
+    @pytest.mark.e2e
     async def test_2_rate_limit_handling_and_backoff(self, test_isolated_test_environment,
                                                      failure_simulator, resilience_metrics):
         """
@@ -306,6 +310,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
+    @pytest.mark.e2e
     async def test_3_database_connectivity_loss_and_cache_fallback(self, test_isolated_test_environment,
                                                                    failure_simulator, resilience_metrics):
         """
@@ -398,6 +403,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
+    @pytest.mark.e2e
     async def test_4_circuit_breaker_pattern_validation(self, test_isolated_test_environment,
                                                         failure_simulator, resilience_metrics):
         """
@@ -488,6 +494,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
+    @pytest.mark.e2e
     async def test_5_multi_service_graceful_degradation(self, test_isolated_test_environment,
                                                         failure_simulator, resilience_metrics):
         """
@@ -618,6 +625,7 @@ class TestSystemResilience:
             metrics.end_time = time.time()
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_resilience_suite_integration(test_isolated_test_environment, failure_simulator, resilience_metrics):
     """
     Integration test validating all resilience mechanisms work together.

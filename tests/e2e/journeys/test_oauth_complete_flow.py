@@ -242,11 +242,13 @@ async def oauth_e2e_runner():
         await runner.backend_client.close()
 
 
+@pytest.mark.e2e
 class TestOAuthCompleteE2EFlow:
     """Critical E2E test: OAuth Login → Dashboard → Chat History"""
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(5)  # 5-second execution requirement
+    @pytest.mark.e2e
     async def test_oauth_login_dashboard_chat_history(self, oauth_e2e_runner):
         """
         CRITICAL E2E TEST: OAuth Login → Profile Sync → Dashboard → Chat History
@@ -299,6 +301,7 @@ class TestOAuthCompleteE2EFlow:
         assert dashboard_result["complete_access"], "Complete dashboard access failed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_error_recovery_flow(self, oauth_e2e_runner):
         """Test OAuth error scenarios with graceful recovery"""
         runner = oauth_e2e_runner
@@ -321,6 +324,7 @@ class TestOAuthCompleteE2EFlow:
         logger.info("OAuth error recovery test completed")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_concurrent_users(self, oauth_e2e_runner):
         """Test OAuth flow with multiple concurrent users"""
         runner = oauth_e2e_runner

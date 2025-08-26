@@ -278,6 +278,7 @@ def thread_load_tester(ws_thread_fixtures, performance_utils):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_user_load_performance(thread_load_tester):
     """Test performance with realistic concurrent user load."""
     user_count = 8
@@ -308,6 +309,7 @@ async def test_concurrent_user_load_performance(thread_load_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_sustained_load_performance(thread_load_tester):
     """Test performance under sustained load over time."""
     duration_seconds = 5
@@ -333,6 +335,7 @@ async def test_sustained_load_performance(thread_load_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_peak_load_burst_handling(ws_thread_fixtures, thread_load_tester):
     """Test handling of peak load bursts."""
     # Simulate burst load pattern
@@ -369,6 +372,7 @@ async def test_peak_load_burst_handling(ws_thread_fixtures, thread_load_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_load_performance_degradation_limits(thread_load_tester):
     """Test that performance degradation stays within acceptable limits under load."""
     # Baseline performance test
@@ -397,6 +401,7 @@ async def test_load_performance_degradation_limits(thread_load_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_memory_efficiency_under_load(ws_thread_fixtures, thread_load_tester):
     """Test memory efficiency and cleanup under load conditions."""
     # Capture initial state

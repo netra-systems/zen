@@ -4,6 +4,7 @@ Provides lightweight service startup with minimal dependencies.
 """
 
 import os
+import pytest
 import sys
 import asyncio
 import subprocess
@@ -16,6 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.e2e
 class TestServiceLauncher:
     """Lightweight service launcher for e2e tests."""
     

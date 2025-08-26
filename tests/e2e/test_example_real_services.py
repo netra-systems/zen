@@ -16,6 +16,7 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_login_flow(real_services):
     """Test real authentication login flow."""
     # Create a new test user
@@ -43,6 +44,7 @@ async def test_auth_login_flow(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_connection(real_services):
     """Test real WebSocket connection and messaging."""
     # Create WebSocket client with auth
@@ -73,6 +75,7 @@ async def test_websocket_connection(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_backend_api_with_auth(real_services):
     """Test backend API endpoints with authentication."""
     # Backend client is already authenticated
@@ -101,6 +104,7 @@ async def test_backend_api_with_auth(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_health_checks(real_services, service_discovery):
     """Test that all services are healthy."""
     # Discover all running services
@@ -121,6 +125,7 @@ async def test_service_health_checks(real_services, service_discovery):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_dynamic_port_allocation(service_discovery):
     """Test that services use dynamic ports."""
     # Get service information
@@ -140,6 +145,7 @@ async def test_dynamic_port_allocation(service_discovery):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_users_concurrent(real_services):
     """Test multiple users connecting concurrently."""
     # Create multiple test users
@@ -175,6 +181,7 @@ async def test_multiple_users_concurrent(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_restart_resilience(real_services, dev_launcher):
     """Test that services can be restarted during tests."""
     # Initial health check
@@ -194,6 +201,7 @@ async def test_service_restart_resilience(real_services, dev_launcher):
 
 # Integration test combining multiple services
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_full_user_journey(real_services):
     """Test complete user journey across all services."""
     # 1. Register new user

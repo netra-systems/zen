@@ -29,6 +29,7 @@ from tests.e2e.api_key_lifecycle_helpers import (
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_api_key_lifecycle():
     """
     Test #5: Complete API Key Lifecycle
@@ -98,6 +99,7 @@ async def test_complete_api_key_lifecycle():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_api_key_scope_permissions():
     """
     Test API key scope and permission validation
@@ -144,6 +146,7 @@ async def test_api_key_scope_permissions():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_api_key_security_validation():
     """
     Security-focused API key validation

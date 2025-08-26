@@ -8,9 +8,11 @@ Original content preserved below in comments for manual fixing.
 import pytest
 
 
+@pytest.mark.e2e
 class TestPlaceholder:
     """Placeholder test class to make file importable."""
     
+    @pytest.mark.e2e
     def test_placeholder(self):
         """Placeholder test."""
         pytest.skip("File has syntax errors - needs manual fixing")

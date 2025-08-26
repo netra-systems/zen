@@ -98,6 +98,7 @@ class SimpleServiceManager:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_simple_service_startup():
     """Test that services can start and respond to health checks."""
     manager = SimpleServiceManager()
@@ -122,6 +123,7 @@ async def test_simple_service_startup():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_communication():
     """Test basic communication between services."""
     manager = SimpleServiceManager()

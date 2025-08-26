@@ -35,10 +35,12 @@ from tests.e2e.agent_conversation_helpers import (
 )
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentConversationFlow:
     """Test #2: Complete Agent Conversation Flow with Context Preservation."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize conversation test core."""
         core = AgentConversationTestCore()
@@ -57,6 +59,7 @@ class TestAgentConversationFlow:
         return ConversationFlowValidator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_optimization_conversation_flow(self, test_core, flow_simulator:
                                                          flow_validator):
         """Test complete optimization conversation with context preservation."""
@@ -72,6 +75,7 @@ class TestAgentConversationFlow:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_orchestration_conversation(self, test_core, flow_simulator):
         """Test conversation flow across different agent types."""
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
@@ -82,6 +86,7 @@ class TestAgentConversationFlow:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_conversation_performance_requirements(self, test_core, flow_simulator):
         """Test conversation performance meets <3 second requirement."""
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
@@ -98,6 +103,7 @@ class TestAgentConversationFlow:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_context_preservation_across_turns(self, test_core, flow_simulator, flow_validator):
         """Test context preservation across multiple conversation turns."""
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
@@ -110,6 +116,7 @@ class TestAgentConversationFlow:
             await session_data["client"].close()
     
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_real_time_websocket_updates(self, test_core, flow_simulator):
         """Test real-time WebSocket updates during conversation."""
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
@@ -187,10 +194,12 @@ class TestAgentConversationFlow:
             assert result["agent_type"] == agent_type, f"Wrong agent type in {agent_type} response"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentConversationPerformance:
     """Performance validation for agent conversation operations."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize performance test core."""
         core = AgentConversationTestCore()
@@ -199,6 +208,7 @@ class TestAgentConversationPerformance:
         await core.teardown_test_environment()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_conversation_performance(self, test_core):
         """Test conversation system under concurrent load."""
         sessions = []

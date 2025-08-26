@@ -8,6 +8,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.database_sync_fixtures import create_test_user_data
 
 
+@pytest.mark.e2e
 def test_config_function_signature():
     """Test that get_test_environment_config works with both signatures"""
     # Test old signature
@@ -25,6 +26,7 @@ def test_config_function_signature():
     assert config1.services.auth == config2.services.auth
 
 
+@pytest.mark.e2e
 def test_test_services_has_frontend():
     """Test that TestServices now includes frontend attribute"""
     config = get_test_environment_config()
@@ -33,6 +35,7 @@ def test_test_services_has_frontend():
     assert config.services.frontend == "http://localhost:3000"
 
 
+@pytest.mark.e2e
 def test_harness_initialization():
     """Test that UnifiedTestHarnessComplete can be initialized without errors"""
     harness = UnifiedTestHarnessComplete("test_fixes")
@@ -46,6 +49,7 @@ def test_harness_initialization():
     assert project_root is not None
 
 
+@pytest.mark.e2e
 def test_jwt_helper_initialization():
     """Test that JWTTestHelper can be initialized"""
     jwt_helper = JWTTestHelper()
@@ -53,6 +57,7 @@ def test_jwt_helper_initialization():
     assert hasattr(jwt_helper, 'environment')
 
 
+@pytest.mark.e2e
 def test_database_fixtures():
     """Test that database fixtures work"""
     user_data = create_test_user_data("test_user")
@@ -63,6 +68,7 @@ def test_database_fixtures():
     assert user_data['id'].startswith('sync-test-')
 
 
+@pytest.mark.e2e
 def test_environment_type_attribute():
     """Test that environment_type attribute exists on config"""
     config = get_test_environment_config()

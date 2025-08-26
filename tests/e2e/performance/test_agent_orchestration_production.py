@@ -88,6 +88,7 @@ class ProductionAgentOrchestrator:
         return {"status": "success", "final_stage": state.current_stage}
 
 
+@pytest.mark.e2e
 class TestAgentOrchestrationProduction:
     """Production agent orchestration tests."""
     
@@ -98,6 +99,7 @@ class TestAgentOrchestrationProduction:
         return ProductionAgentOrchestrator(use_real_llm)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_single_agent_production_workflow(self, orchestrator):
         """Test single agent production workflow."""
         agent = await orchestrator.create_agent("optimization", "OptAgent001")
@@ -112,6 +114,7 @@ class TestAgentOrchestrationProduction:
         assert metrics["success"], "Workflow not marked successful"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_coordination(self, orchestrator):
         """Test coordinated multi-agent workflows."""
         # Create multiple agents
@@ -128,6 +131,7 @@ class TestAgentOrchestrationProduction:
         assert coordination_result["agents_coordinated"] == 3
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_state_persistence(self, orchestrator):
         """Test DeepAgentState persistence across operations."""
         agent = await orchestrator.create_agent("data", "DataAgent002")
@@ -148,6 +152,7 @@ class TestAgentOrchestrationProduction:
         assert final_metrics["final_state"] in ["validation", "execution"]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_error_recovery(self, orchestrator):
         """Test agent error recovery mechanisms."""
         agent = await orchestrator.create_agent("recovery", "RecoveryAgent001")
@@ -166,6 +171,7 @@ class TestAgentOrchestrationProduction:
             assert "error_handled" in result
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agent_execution(self, orchestrator):
         """Test concurrent agent execution."""
         # Create multiple agents for concurrent testing
@@ -190,6 +196,7 @@ class TestAgentOrchestrationProduction:
         assert total_time < 15.0, f"Concurrent execution too slow: {total_time:.2f}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_performance_under_load(self, orchestrator):
         """Test agent performance under load."""
         agent = await orchestrator.create_agent("load_test", "LoadAgent001")
@@ -251,10 +258,12 @@ class TestAgentOrchestrationProduction:
 
 
 @pytest.mark.production
+@pytest.mark.e2e
 class TestEnterpriseAgentScenarios:
     """Enterprise-specific agent scenarios."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_optimization_workflow(self):
         """Test enterprise-level optimization workflow."""
         use_real_llm = self._should_use_real_llm()

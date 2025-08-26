@@ -306,6 +306,7 @@ class OAuthRealServiceFlowRunner:
             logger.error(f"Cross-service token validation failed: {e}")
             return {"valid": False, "error": str(e)}
     
+    @pytest.mark.e2e
     async def test_cleanup_test_resources(self) -> None:
         """Clean up all test resources and real services"""
         try:
@@ -335,11 +336,13 @@ async def oauth_real_service_runner():
     await runner.cleanup_test_resources()
 
 
+@pytest.mark.e2e
 class TestOAuthRealServiceFlow:
     """Critical OAuth real service flow tests for Enterprise SSO"""
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)  # Enterprise performance requirement
+    @pytest.mark.e2e
     async def test_complete_oauth_flow_real_services(self, oauth_real_service_runner):
         """
         CRITICAL TEST: Complete OAuth flow with real Auth, Backend services
@@ -381,6 +384,7 @@ class TestOAuthRealServiceFlow:
         logger.info(f"OAuth real service flow completed in {flow_result['execution_time']:.2f}s")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_error_handling_real_services(self, oauth_real_service_runner):
         """Test OAuth error scenarios with real services"""
         runner = oauth_real_service_runner
@@ -405,6 +409,7 @@ class TestOAuthRealServiceFlow:
         logger.info("OAuth error handling validation completed")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_concurrent_users_real_services(self, oauth_real_service_runner):
         """Test OAuth flow with multiple concurrent users using real services"""
         runner = oauth_real_service_runner

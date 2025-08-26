@@ -33,10 +33,12 @@ logger = logging.getLogger(__name__)
 
 @env("staging")
 @env_requires(services=["auth_service"], features=["database_connectivity"])
+@pytest.mark.e2e
 class TestStagingFallbackDatabaseFailures:
     """E2E tests for problematic staging mode fallback when database connectivity fails."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_staging_mode_allows_service_to_appear_healthy_without_database(self):
         """FAILING E2E TEST: Staging mode incorrectly allows service to appear healthy.
         
@@ -90,6 +92,7 @@ class TestStagingFallbackDatabaseFailures:
                     logger.info(f"Service correctly failed to start due to database connectivity: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_authentication_silently_fails_in_staging_mode(self):
         """FAILING E2E TEST: Authentication silently fails when service is in staging mode.
         
@@ -143,6 +146,7 @@ class TestStagingFallbackDatabaseFailures:
                 logger.error("Authentication incorrectly succeeded in staging mode without database")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_creation_appears_successful_but_not_persisted_in_staging_mode(self):
         """FAILING E2E TEST: User creation appears successful but isn't persisted.
         
@@ -208,6 +212,7 @@ class TestStagingFallbackDatabaseFailures:
                 logger.error("User creation incorrectly succeeded in staging mode without database persistence")
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_cross_service_coordination_breaks_with_staging_mode_auth(self):
         """FAILING E2E TEST: Cross-service coordination breaks when auth service is in staging mode.
         
@@ -272,6 +277,7 @@ class TestStagingFallbackDatabaseFailures:
                 logger.error("Cross-service token validation failed due to auth service staging mode")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_session_management_inconsistency_with_staging_mode(self):
         """FAILING E2E TEST: Session management becomes inconsistent with auth service in staging mode.
         
@@ -359,10 +365,12 @@ class TestStagingFallbackDatabaseFailures:
 
 
 @env("staging")
+@pytest.mark.e2e
 class TestStagingModeHealthCheckProblems:
     """Test suite for health check problems when services are in staging mode."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_checks_report_false_positives_in_staging_mode(self):
         """FAILING E2E TEST: Health checks report false positives when service is in staging mode.
         
@@ -401,6 +409,7 @@ class TestStagingModeHealthCheckProblems:
                 
                 logger.error(f"Health check false positive in staging mode: {health_status}")
     
+    @pytest.mark.e2e
     def test_monitoring_alerts_not_triggered_by_staging_mode_degradation(self):
         """FAILING E2E TEST: Monitoring alerts not triggered when service degrades to staging mode.
         

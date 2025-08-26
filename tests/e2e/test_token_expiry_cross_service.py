@@ -20,6 +20,7 @@ from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_harness():
     harness = UnifiedE2ETestHarness()
     await harness.setup()
@@ -37,10 +38,12 @@ def security_tester():
     return JWTSecurityTester()
 
 
+@pytest.mark.e2e
 class TestTokenExpiryRejection:
     """Test expired tokens rejected by all services consistently."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_token_rejected_all_services(self, test_harness, jwt_helper, security_tester):
         """Test expired tokens rejected by all services."""
         expired_payload = jwt_helper.create_expired_payload()
@@ -53,6 +56,7 @@ class TestTokenExpiryRejection:
                 assert status_code == 401, f"{service_name} should reject expired token with 401"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_consistent_rejection_response(self, test_harness, jwt_helper, security_tester):
         """Test consistent rejection responses across services."""
         expired_payload = jwt_helper.create_expired_payload()
@@ -69,6 +73,7 @@ class TestTokenExpiryRejection:
             assert all(r == 401 for r in responses), f"Inconsistent responses for {service}: {responses}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_immediately_expired_token_rejection(self, test_harness, jwt_helper):
         """Test tokens that expire immediately are rejected."""
         payload = jwt_helper.create_valid_payload()
@@ -82,10 +87,12 @@ class TestTokenExpiryRejection:
             assert auth_result["status"] == 401, "Immediately expired token should be rejected"
 
 
+@pytest.mark.e2e
 class TestTokenRefreshCrossService:
     """Test token refresh works correctly across all services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_refresh_token_generates_valid_access_token(self, test_harness, jwt_helper):
         """Test refresh token generates new valid access token."""
         refresh_payload = jwt_helper.create_refresh_payload()
@@ -112,6 +119,7 @@ class TestTokenRefreshCrossService:
                 pytest.skip("Auth service not available for refresh test")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_refresh_token_rejected(self, test_harness, jwt_helper):
         """Test expired refresh tokens are rejected."""
         expired_refresh_payload = jwt_helper.create_refresh_payload()
@@ -133,6 +141,7 @@ class TestTokenRefreshCrossService:
                 pytest.skip("Auth service not available")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_refreshed_token_validates_across_services(self, test_harness, jwt_helper):
         """Test refreshed token validates across all services."""
         refresh_payload = jwt_helper.create_refresh_payload()
@@ -161,10 +170,12 @@ class TestTokenRefreshCrossService:
                 pytest.skip("Auth service not available")
 
 
+@pytest.mark.e2e
 class TestGracePeriodHandling:
     """Test grace period and clock skew tolerance."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_no_grace_period_enforcement(self, test_harness, jwt_helper):
         """Test tokens are rejected immediately on expiry (no grace period)."""
         payload = jwt_helper.create_valid_payload()
@@ -178,6 +189,7 @@ class TestGracePeriodHandling:
             assert result["status"] == 401, "No grace period should be allowed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_clock_skew_tolerance_small(self, test_harness, jwt_helper):
         """Test system handles minor clock skew gracefully."""
         payload = jwt_helper.create_valid_payload()
@@ -189,6 +201,7 @@ class TestGracePeriodHandling:
             assert result["status"] == 200, "Valid token with minor skew should be accepted"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_consistent_expiry_timing_across_services(self, test_harness, jwt_helper):
         """Test expiry timing is consistent across services."""
         payload = jwt_helper.create_valid_payload()
@@ -212,10 +225,12 @@ class TestGracePeriodHandling:
             assert backend_result_after["status"] == 401, "Backend should reject after expiry"
 
 
+@pytest.mark.e2e
 class TestExpiryPerformance:
     """Test performance requirements for token expiry checks."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expiry_check_performance_under_100ms(self, test_harness, jwt_helper):
         """Test expiry rejection is faster than 100ms."""
         expired_payload = jwt_helper.create_expired_payload()
@@ -230,6 +245,7 @@ class TestExpiryPerformance:
             assert result["status"] == 401, "Expired token should be rejected"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multiple_service_rejection_performance(self, test_harness, jwt_helper, security_tester):
         """Test all services reject expired tokens within performance limits."""
         expired_payload = jwt_helper.create_expired_payload()
@@ -246,6 +262,7 @@ class TestExpiryPerformance:
                 f"Total rejection time {total_time_ms:.2f}ms too slow for {available_services} services"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_expiry_performance(self, test_harness, jwt_helper):
         """Test WebSocket rejects expired tokens quickly."""
         expired_payload = jwt_helper.create_expired_payload()
@@ -269,10 +286,12 @@ class TestExpiryPerformance:
             pytest.skip("WebSocket service not available")
 
 
+@pytest.mark.e2e
 class TestWebSocketExpiryDisconnection:
     """Test WebSocket auto-disconnect on token expiry."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_disconnects_on_token_expiry(self, test_harness, jwt_helper):
         """Test WebSocket disconnects when token expires."""
         payload = jwt_helper.create_valid_payload()
@@ -295,6 +314,7 @@ class TestWebSocketExpiryDisconnection:
             pytest.skip("WebSocket service not available or token rejected at connection")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_token_websocket_connection_rejected(self, test_harness, jwt_helper):
         """Test WebSocket rejects connection with already expired token."""
         expired_payload = jwt_helper.create_expired_payload()

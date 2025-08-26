@@ -457,6 +457,7 @@ class CrossServiceJWTValidator:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_single_token_all_services():
     """
     BVJ: Segment: ALL | Goal: Security | Impact: Unified auth across services
@@ -503,6 +504,7 @@ async def test_jwt_single_token_all_services():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_token_expiry_consistency():
     """Test that token expiry is handled consistently across all services."""
     validator = CrossServiceJWTValidator()
@@ -527,6 +529,7 @@ async def test_jwt_token_expiry_consistency():
 
 @pytest.mark.critical
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_jwt_refresh_token_propagation():
     """Test that refreshed tokens work across all service boundaries."""
     validator = CrossServiceJWTValidator()
@@ -555,6 +558,7 @@ async def test_jwt_refresh_token_propagation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_invalid_token_rejection():
     """Test that invalid tokens are rejected by all services."""
     validator = CrossServiceJWTValidator()
@@ -593,6 +597,7 @@ async def test_jwt_invalid_token_rejection():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_user_context_database_consistency():
     """Test that JWT user context is consistent in database queries."""
     validator = CrossServiceJWTValidator()
@@ -624,6 +629,7 @@ async def test_jwt_user_context_database_consistency():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_service_to_service_authentication():
     """Test service-to-service JWT authentication patterns."""
     validator = CrossServiceJWTValidator()

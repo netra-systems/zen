@@ -175,6 +175,7 @@ class UserMessagePipelineTester:
         }
 
 
+@pytest.mark.e2e
 class TestUserMessageAgentPipeline:
     """Integration tests for user message to agent pipeline."""
     
@@ -184,6 +185,7 @@ class TestUserMessageAgentPipeline:
         return UserMessagePipelineTester()  # Auto-detect LLM configuration
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_user_message_pipeline(self, pipeline_tester):
         """Test complete user message to agent response pipeline."""
         supervisor = await pipeline_tester.create_test_supervisor()
@@ -210,6 +212,7 @@ class TestUserMessageAgentPipeline:
         assert len(pipeline_tester.pipeline_events) >= 4
 
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_websocket_message_routing_integration(self, pipeline_tester):
         """Test WebSocket message routing integration."""
         supervisor = await pipeline_tester.create_test_supervisor()
@@ -233,6 +236,7 @@ class TestUserMessageAgentPipeline:
         assert all(r["routed_to"] == supervisor.name for r in routing_results)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_selection_and_delegation(self, pipeline_tester):
         """Test agent selection and task delegation."""
         supervisor = await pipeline_tester.create_test_supervisor()
@@ -259,6 +263,7 @@ class TestUserMessageAgentPipeline:
         assert all(r["delegation_successful"] for r in delegation_results)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_handling_in_pipeline(self, pipeline_tester):
         """Test error handling throughout the pipeline."""
         supervisor = await pipeline_tester.create_test_supervisor()
@@ -281,6 +286,7 @@ class TestUserMessageAgentPipeline:
             assert True  # Test passes if we catch expected error types
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_message_processing(self, pipeline_tester):
         """Test concurrent message processing through pipeline."""
         supervisor = await pipeline_tester.create_test_supervisor()
@@ -308,10 +314,12 @@ class TestUserMessageAgentPipeline:
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestCriticalPipelineScenarios:
     """Critical pipeline scenarios protecting revenue."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_message_pipeline_performance(self):
         """Test enterprise-level message pipeline performance."""
         tester = UserMessagePipelineTester(use_mock_llm=True)

@@ -29,10 +29,12 @@ from tests.e2e.test_resource_usage import (
 )
 
 
+@pytest.mark.e2e
 class TestResourceEfficiencyIntegration:
     """Integration tests for resource efficiency patterns"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_resource_efficiency_under_load(self):
         """Test resource efficiency during simulated load"""
         monitor = ResourceMonitor(ResourceLimits())
@@ -49,6 +51,7 @@ class TestResourceEfficiencyIntegration:
             await monitor.stop_monitoring()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sustained_load_efficiency(self):
         """Test efficiency during sustained load over time"""
         monitor = ResourceMonitor(ResourceLimits(max_cpu_percent=75.0))
@@ -64,6 +67,7 @@ class TestResourceEfficiencyIntegration:
             await monitor.stop_monitoring()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_burst_load_handling(self):
         """Test resource handling during burst traffic"""
         monitor = ResourceMonitor(ResourceLimits(max_memory_mb=600.0))
@@ -79,6 +83,7 @@ class TestResourceEfficiencyIntegration:
             await monitor.stop_monitoring()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_user_efficiency(self):
         """Test efficiency with concurrent user simulations"""
         monitor = ResourceMonitor(ResourceLimits())
@@ -255,10 +260,12 @@ class TestResourceEfficiencyIntegration:
         assert max_threads < 50, f"Too many threads with concurrent users: {max_threads}"
 
 
+@pytest.mark.e2e
 class TestResourceStressPatterns:
     """Stress test patterns for resource usage validation"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_memory_pressure_handling(self):
         """Test system behavior under memory pressure"""
         monitor = ResourceMonitor(ResourceLimits(max_memory_mb=400.0))
@@ -273,6 +280,7 @@ class TestResourceStressPatterns:
             await monitor.stop_monitoring()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cpu_spike_recovery(self):
         """Test recovery after CPU spikes"""
         monitor = ResourceMonitor(ResourceLimits())

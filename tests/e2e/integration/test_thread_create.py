@@ -114,6 +114,7 @@ def thread_creator(ws_thread_fixtures):
     return ThreadCreationManager(ws_thread_fixtures)
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_creation_websocket_notification(ws_thread_fixtures, thread_creator):
     """Test new thread creation triggers WebSocket event and frontend updates."""
     user = TEST_USERS["free"]
@@ -137,6 +138,7 @@ async def test_thread_creation_websocket_notification(ws_thread_fixtures, thread
     assert event["user_id"] == user.id, "Event must be associated with correct user"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_threads_per_user_creation(ws_thread_fixtures, thread_creator):
     """Test multiple threads can be created per user with proper event routing."""
     user = TEST_USERS["enterprise"]
@@ -170,6 +172,7 @@ async def test_multiple_threads_per_user_creation(ws_thread_fixtures, thread_cre
         assert event["thread_id"] in created_thread_ids, "Event thread ID must match created threads"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_creation_with_metadata_preservation(ws_thread_fixtures, thread_creator):
     """Test thread creation preserves metadata correctly."""
     user = TEST_USERS["mid"]
@@ -211,6 +214,7 @@ async def test_thread_creation_with_metadata_preservation(ws_thread_fixtures, th
     assert preserved_metadata["created_by"] == user.id, "Creator metadata must be preserved"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_creation_isolation_across_users(ws_thread_fixtures, thread_creator):
     """Test thread creation maintains isolation across different users."""
     user_a = TEST_USERS["free"]
@@ -246,6 +250,7 @@ async def test_thread_creation_isolation_across_users(ws_thread_fixtures, thread
            "Users must not have access to each other's threads"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_creation_context_initialization(ws_thread_fixtures, thread_creator:
                                                        thread_context_manager):
     """Test thread creation properly initializes context for agent operations."""
@@ -285,6 +290,7 @@ async def test_thread_creation_context_initialization(ws_thread_fixtures, thread
     assert updated_context["agent_context"]["agent_id"] == "initialization_agent"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_creation_performance_under_load(ws_thread_fixtures, thread_creator):
     """Test thread creation performance under concurrent load."""
     user = TEST_USERS["enterprise"]

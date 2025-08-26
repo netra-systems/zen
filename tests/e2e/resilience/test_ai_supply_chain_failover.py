@@ -24,6 +24,7 @@ from tests.e2e.ai_supply_chain_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestAISupplyChainFailover:
     """Critical failover tests protecting revenue from provider outages."""
 
@@ -48,6 +49,7 @@ class TestAISupplyChainFailover:
         return QualityMonitor(min_quality_threshold=0.85)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_primary_provider_timeout_failover(self, provider_simulator):
         """
         Test failover when primary provider (Gemini) times out.
@@ -58,6 +60,7 @@ class TestAISupplyChainFailover:
         self._validate_successful_failover(result, "gemini")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rate_limiting_triggers_provider_switch(self, provider_simulator):
         """
         Test provider switch when rate limits are hit.
@@ -68,6 +71,7 @@ class TestAISupplyChainFailover:
         self._validate_rate_limit_failover(result, provider_simulator)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_threshold_triggers_cheaper_provider(self, provider_simulator, cost_optimizer):
         """
         Test switching to cheaper provider when cost thresholds exceeded.
@@ -79,6 +83,7 @@ class TestAISupplyChainFailover:
         self._validate_cost_optimization(result, cost_optimizer, original_spend)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quality_degradation_triggers_premium_provider(self, provider_simulator, quality_monitor):
         """
         Test switch to premium provider when quality drops.
@@ -89,6 +94,7 @@ class TestAISupplyChainFailover:
         self._validate_quality_failover(result, quality_monitor)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_provider_outage_handling(self, provider_simulator):
         """
         Test handling of complete provider outages.
@@ -101,6 +107,7 @@ class TestAISupplyChainFailover:
         self._validate_outage_recovery(result, provider_simulator)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_failover_latency_compliance(self, provider_simulator, sla_validator):
         """
         Test failover meets SLA latency requirements.
@@ -114,6 +121,7 @@ class TestAISupplyChainFailover:
         self._validate_latency_sla(latency_ms, sla_validator)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_failover_stability(self, provider_simulator):
         """
         Test system stability under concurrent failover scenarios.
@@ -126,6 +134,7 @@ class TestAISupplyChainFailover:
         self._validate_concurrent_stability(results)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_failover_cost_tracking_accuracy(self, provider_simulator, cost_optimizer):
         """
         Test accurate cost tracking during provider switches.
@@ -190,10 +199,12 @@ class TestAISupplyChainFailover:
 
 # Integration tests for end-to-end failover scenarios
 
+@pytest.mark.e2e
 class TestFailoverIntegration:
     """Integration tests for complete failover workflows."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_failover_workflow(self):
         """
         Test complete enterprise failover workflow.
@@ -210,6 +221,7 @@ class TestFailoverIntegration:
         assert sla_validator.validate_sla_compliance(simulator.metrics)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_quality_tradeoff_optimization(self):
         """
         Test optimization balancing cost and quality constraints.

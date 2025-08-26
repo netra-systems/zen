@@ -29,6 +29,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
+@pytest.mark.e2e
 class TestSupervisorLifecycleManager:
     """Test supervisor lifecycle management."""
     
@@ -49,12 +50,14 @@ class TestSupervisorLifecycleManager:
         )
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_validate_entry_conditions_success(self, lifecycle_manager, valid_context):
         """Test successful entry condition validation."""
         result = await lifecycle_manager.validate_entry_conditions(valid_context)
         assert result is True
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_validate_entry_conditions_missing_user_request(self, lifecycle_manager):
         """Test entry condition validation with missing user request."""
         state = DeepAgentState()
@@ -69,6 +72,7 @@ class TestSupervisorLifecycleManager:
             await lifecycle_manager.validate_entry_conditions(context)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_validate_entry_conditions_missing_user_id(self, lifecycle_manager):
         """Test entry condition validation with missing user_id."""
         state = DeepAgentState()
@@ -82,6 +86,7 @@ class TestSupervisorLifecycleManager:
             await lifecycle_manager.validate_entry_conditions(context)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_check_exit_conditions_completed(self, lifecycle_manager, valid_context):
         """Test exit conditions with completed result."""
         result = ExecutionResult(
@@ -93,6 +98,7 @@ class TestSupervisorLifecycleManager:
         assert should_exit is True
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_check_exit_conditions_error_threshold(self, lifecycle_manager, valid_context):
         """Test exit conditions with error threshold exceeded."""
         valid_context.retry_count = 5
@@ -106,6 +112,7 @@ class TestSupervisorLifecycleManager:
         should_exit = await lifecycle_manager.check_exit_conditions(valid_context, result)
         assert should_exit is True
     
+    @pytest.mark.e2e
     def test_register_lifecycle_hook(self, lifecycle_manager):
         """Test lifecycle hook registration."""
         # Mock: Generic component isolation for controlled unit testing
@@ -115,6 +122,7 @@ class TestSupervisorLifecycleManager:
         assert mock_handler in lifecycle_manager._lifecycle_hooks["pre_execution"]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_execute_lifecycle_hooks(self, lifecycle_manager, valid_context):
         """Test lifecycle hook execution."""
         # Mock: Generic component isolation for controlled unit testing
@@ -126,6 +134,7 @@ class TestSupervisorLifecycleManager:
         mock_handler.assert_called_once_with(valid_context)
 
 
+@pytest.mark.e2e
 class TestWorkflowOrchestrator:
     """Test workflow orchestration."""
     
@@ -161,6 +170,7 @@ class TestWorkflowOrchestrator:
             thread_id="test_thread"
         )
     
+    @pytest.mark.e2e
     def test_workflow_definition(self, orchestrator):
         """Test workflow definition follows unified spec."""
         definition = orchestrator.get_workflow_definition()
@@ -173,6 +183,7 @@ class TestWorkflowOrchestrator:
             assert agent in agent_names
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_execute_standard_workflow_success(self, orchestrator, context, mock_dependencies):
         """Test successful workflow execution."""
         # Mock successful agent execution
@@ -189,6 +200,7 @@ class TestWorkflowOrchestrator:
         mock_dependencies["websocket_manager"].send_agent_update.assert_called()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_execute_workflow_early_termination(self, orchestrator, context, mock_dependencies):
         """Test workflow early termination on failure."""
         # Mock first step success, second step failure
@@ -207,6 +219,7 @@ class TestWorkflowOrchestrator:
         assert not results[1].success
 
 
+@pytest.mark.e2e
 class TestCircuitBreakerIntegration:
     """Test circuit breaker integration."""
     
@@ -223,6 +236,7 @@ class TestCircuitBreakerIntegration:
         )
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_execute_with_circuit_protection_success(self, integration, context):
         """Test successful execution with circuit protection."""
         async def mock_execute():
@@ -232,6 +246,7 @@ class TestCircuitBreakerIntegration:
         
         assert result.success
     
+    @pytest.mark.e2e
     def test_get_circuit_breaker_status(self, integration):
         """Test circuit breaker status retrieval."""
         status = integration.get_circuit_breaker_status()
@@ -240,6 +255,7 @@ class TestCircuitBreakerIntegration:
         assert "agents" in status
         assert "overall_health" in status["supervisor"]
     
+    @pytest.mark.e2e
     def test_get_health_summary(self, integration):
         """Test health summary retrieval."""
         summary = integration.get_health_summary()
@@ -250,6 +266,7 @@ class TestCircuitBreakerIntegration:
         assert "total_agents_monitored" in summary
 
 
+@pytest.mark.e2e
 class TestSupervisorObservability:
     """Test supervisor observability."""
     
@@ -267,6 +284,7 @@ class TestSupervisorObservability:
             thread_id="test_thread"
         )
     
+    @pytest.mark.e2e
     def test_start_workflow_trace(self, observability, context):
         """Test workflow trace initialization."""
         observability.start_workflow_trace(context)
@@ -277,6 +295,7 @@ class TestSupervisorObservability:
         assert trace["agent_name"] == context.agent_name
         assert trace["status"] == "started"
     
+    @pytest.mark.e2e
     def test_add_span(self, observability, context):
         """Test adding span to trace."""
         observability.start_workflow_trace(context)
@@ -290,6 +309,7 @@ class TestSupervisorObservability:
         assert trace["spans"][0]["span_name"] == "test_span"
         assert trace["spans"][0]["duration_ms"] == 100.0
     
+    @pytest.mark.e2e
     def test_complete_workflow_trace(self, observability, context):
         """Test workflow trace completion."""
         observability.start_workflow_trace(context)
@@ -305,6 +325,7 @@ class TestSupervisorObservability:
         assert metrics["metrics"]["total_workflows"] == 1
         assert metrics["metrics"]["successful_workflows"] == 1
     
+    @pytest.mark.e2e
     def test_record_agent_error(self, observability):
         """Test agent error recording."""
         observability.record_agent_error("test_agent", "test error")
@@ -313,6 +334,7 @@ class TestSupervisorObservability:
         assert "test_agent" in metrics["metrics"]["error_counts_by_agent"]
         assert metrics["metrics"]["error_counts_by_agent"]["test_agent"] == 1
     
+    @pytest.mark.e2e
     def test_get_metrics_snapshot(self, observability):
         """Test metrics snapshot retrieval."""
         snapshot = observability.get_metrics_snapshot()
@@ -323,6 +345,7 @@ class TestSupervisorObservability:
         assert "performance_percentiles" in snapshot
 
 
+@pytest.mark.e2e
 class TestSupervisorAgent:
     """Test modern supervisor agent integration."""
     
@@ -357,6 +380,7 @@ class TestSupervisorAgent:
         return state
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_validate_preconditions_success(self, supervisor, valid_state):
         """Test successful precondition validation."""
         context = ExecutionContext(
@@ -368,6 +392,7 @@ class TestSupervisorAgent:
         assert result is True
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_execute_core_logic(self, supervisor, valid_state):
         """Test core logic execution."""
         context = ExecutionContext(
@@ -386,6 +411,7 @@ class TestSupervisorAgent:
             assert "workflow_results" in result
             assert "total_steps" in result
     
+    @pytest.mark.e2e
     def test_get_health_status(self, supervisor):
         """Test health status retrieval."""
         health = supervisor.get_health_status()
@@ -396,6 +422,7 @@ class TestSupervisorAgent:
         assert "registered_agents" in health
         assert "workflow_definition" in health
     
+    @pytest.mark.e2e
     def test_get_performance_metrics(self, supervisor):
         """Test performance metrics retrieval."""
         metrics = supervisor.get_performance_metrics()
@@ -403,6 +430,7 @@ class TestSupervisorAgent:
         assert "timestamp" in metrics
         assert "metrics" in metrics
     
+    @pytest.mark.e2e
     def test_get_circuit_breaker_status(self, supervisor):
         """Test circuit breaker status retrieval."""
         status = supervisor.get_circuit_breaker_status()

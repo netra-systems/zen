@@ -46,6 +46,7 @@ def database_initializer():
 # ========== StartupManager Integration Tests ==========
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_manager_initialization(startup_manager, app):
     """Test that StartupManager can initialize successfully."""
     assert startup_manager is not None
@@ -55,6 +56,7 @@ async def test_startup_manager_initialization(startup_manager, app):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_manager_register_component(startup_manager):
     """Test component registration in StartupManager."""
     # Create a mock component
@@ -77,6 +79,7 @@ async def test_startup_manager_register_component(startup_manager):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_manager_dependency_resolution(startup_manager):
     """Test dependency resolution in StartupManager."""
     # Register components with dependencies
@@ -114,6 +117,7 @@ async def test_startup_manager_dependency_resolution(startup_manager):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_manager_graceful_degradation(startup_manager, app):
     """Test graceful degradation when non-critical component fails."""
     # Register a critical component that succeeds
@@ -146,6 +150,7 @@ async def test_startup_manager_graceful_degradation(startup_manager, app):
 
 # ========== DatabaseInitializer Integration Tests ==========
 
+@pytest.mark.e2e
 def test_database_initializer_creation(database_initializer):
     """Test that DatabaseInitializer can be created successfully."""
     assert database_initializer is not None
@@ -155,6 +160,7 @@ def test_database_initializer_creation(database_initializer):
 
 # Mock: Component isolation for testing without external dependencies
 @patch('netra_backend.app.db.database_initializer.psycopg2.connect')
+@pytest.mark.e2e
 def test_database_initializer_check_exists(mock_connect, database_initializer):
     """Test database existence checking."""
     # Mock successful connection
@@ -175,6 +181,7 @@ def test_database_initializer_check_exists(mock_connect, database_initializer):
 
 # Mock: Component isolation for testing without external dependencies
 @patch('netra_backend.app.db.database_initializer.psycopg2.connect')
+@pytest.mark.e2e
 def test_database_initializer_create_database(mock_connect, database_initializer):
     """Test database creation."""
     # Mock connection
@@ -195,6 +202,7 @@ def test_database_initializer_create_database(mock_connect, database_initializer
 # ========== Full Integration Tests ==========
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_full_startup_integration(app):
     """Test full startup integration with all components."""
     startup_manager = StartupManager()
@@ -231,6 +239,7 @@ async def test_full_startup_integration(app):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_circuit_breaker_functionality(startup_manager):
     """Test circuit breaker pattern in startup."""
     # Create a component that fails multiple times
@@ -263,6 +272,7 @@ async def test_circuit_breaker_functionality(startup_manager):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_metrics_collection(startup_manager, app):
     """Test that startup metrics are properly collected."""
     # Register components

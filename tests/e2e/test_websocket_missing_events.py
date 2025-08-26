@@ -25,6 +25,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
+@pytest.mark.e2e
 class TestWebSocketMissingEvents:
     """Test suite for missing WebSocket events per SPEC/websocket_communication.xml."""
     
@@ -49,6 +50,7 @@ class TestWebSocketMissingEvents:
         finally:
             await ws_client.disconnect()
     
+    @pytest.mark.e2e
     async def test_agent_thinking_event_implementation(self, websocket_client):
         """Test agent_thinking event is sent during agent reasoning."""
         # Trigger complex query that should generate thinking events
@@ -103,6 +105,7 @@ class TestWebSocketMissingEvents:
             if "total_steps" in payload:
                 assert isinstance(payload["total_steps"], int), "total_steps must be integer"
     
+    @pytest.mark.e2e
     async def test_partial_result_event_implementation(self, websocket_client):
         """Test partial_result event for streaming content updates."""
         # Trigger request that should generate streaming results
@@ -166,6 +169,7 @@ class TestWebSocketMissingEvents:
         assert accumulated_content.strip(), "No content accumulated from partial_result events"
         assert has_completion_marker, "No completion marker found in partial_result stream"
     
+    @pytest.mark.e2e
     async def test_tool_executing_event_implementation(self, websocket_client):
         """Test tool_executing event when tools are invoked."""
         # Trigger request that should invoke tools
@@ -217,6 +221,7 @@ class TestWebSocketMissingEvents:
             assert "timestamp" in payload, f"tool_executing {i} missing 'timestamp' field"
             assert isinstance(payload["timestamp"], (int, float)), f"timestamp must be number in event {i}"
     
+    @pytest.mark.e2e
     async def test_final_report_event_implementation(self, websocket_client):
         """Test final_report event with comprehensive results."""
         # Trigger complete analysis that should generate final report
@@ -273,6 +278,7 @@ class TestWebSocketMissingEvents:
         if "action_plan" in payload:
             assert isinstance(payload["action_plan"], list), "action_plan must be array"
     
+    @pytest.mark.e2e
     async def test_missing_events_workflow_completeness(self, websocket_client):
         """Test complete workflow includes all missing events."""
         # Trigger comprehensive workflow
@@ -326,6 +332,7 @@ class TestWebSocketMissingEvents:
                 f"Implemented events: {sorted(implemented_events)}"
             )
     
+    @pytest.mark.e2e
     async def test_event_sequence_logical_order(self, websocket_client):
         """Test missing events appear in logical sequence when implemented."""
         # Trigger workflow to test sequence

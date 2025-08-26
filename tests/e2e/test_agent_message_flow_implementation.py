@@ -28,6 +28,7 @@ import pytest
 
 from netra_backend.app.services.agent_service_core import AgentService
 
+@pytest.mark.e2e
 class TestAgentMessageFlowImplementation:
     """Test suite for agent message flow implementation."""
     

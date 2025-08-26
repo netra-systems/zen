@@ -83,10 +83,12 @@ from test_framework.test_utils import (
 )
 
 
+@pytest.mark.e2e
 class TestDatabaseInitialization:
     """Tests for database initialization and connection management."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_01_postgresql_connection_pool_initialization_with_retries(self):
         """Test PostgreSQL connection pool initialization with retry logic."""
         # Simulate database not ready initially
@@ -126,6 +128,7 @@ class TestDatabaseInitialization:
         assert attempts == 3  # Should succeed on 3rd attempt
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_02_redis_connection_and_cache_warming(self):
         """Test Redis connection establishment and cache warming."""
         redis_client = await redis.from_url(
@@ -176,6 +179,7 @@ class TestDatabaseInitialization:
             await redis_client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_03_clickhouse_analytics_database_setup(self):
         """Test ClickHouse analytics database initialization."""
         import clickhouse_connect
@@ -230,6 +234,7 @@ class TestDatabaseInitialization:
             assert 'metrics' in table_names
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_04_database_migration_execution_order(self):
         """Test database migrations execute in correct order."""
         from alembic import command
@@ -286,6 +291,7 @@ class TestDatabaseInitialization:
         await engine.dispose()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_05_connection_pool_exhaustion_recovery(self):
         """Test recovery from connection pool exhaustion."""
         # Skip pool configuration for SQLite as it doesn't support these parameters
@@ -332,10 +338,12 @@ class TestDatabaseInitialization:
             await engine.dispose()
 
 
+@pytest.mark.e2e
 class TestServiceStartupOrder:
     """Tests for service startup order and dependencies."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_06_proper_dependency_chain(self):
         """Test services start in correct dependency order: DB -> Auth -> Backend -> Frontend."""
         # Create mock objects for ServiceStartupCoordinator
@@ -378,6 +386,7 @@ class TestServiceStartupOrder:
         assert startup_order.index('backend') < startup_order.index('frontend')
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_07_parallel_service_startup_race_conditions(self):
         """Test handling of race conditions during parallel service startup."""
         # Create mock objects for ServiceStartupCoordinator
@@ -423,6 +432,7 @@ class TestServiceStartupOrder:
         assert time_spread < 0.05, "Services should start in parallel"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_08_service_health_check_cascade(self):
         """Test cascading health checks across dependent services."""
         health_monitor = HealthMonitor()
@@ -472,6 +482,7 @@ class TestServiceStartupOrder:
         assert await check_cascade_health('backend') is False
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_09_port_allocation_conflicts(self):
         """Test handling of port allocation conflicts."""
         # PortManager already imported at module level
@@ -507,6 +518,7 @@ class TestServiceStartupOrder:
         assert new_service_port not in allocated_ports
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_10_service_restart_after_crash(self):
         """Test automatic service restart after crash."""
         # CrashRecoveryManager already imported at module level
@@ -525,10 +537,12 @@ class TestServiceStartupOrder:
             print(f"Recovery test completed with expected behavior: {e}")
 
 
+@pytest.mark.e2e
 class TestWebSocketInfrastructure:
     """Tests for WebSocket infrastructure and cross-service communication."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_11_cross_service_websocket_connections(self):
         """Test WebSocket connections between backend and auth service."""
         backend_ws_url = "ws://localhost:8000/ws"
@@ -560,6 +574,7 @@ class TestWebSocketInfrastructure:
                 pytest.skip(f"Auth WebSocket not available: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_12_websocket_reconnection_after_network_failure(self):
         """Test WebSocket reconnection after network interruption."""
         ws_url = "ws://localhost:8000/ws"
@@ -595,6 +610,7 @@ class TestWebSocketInfrastructure:
         assert result is True or reconnect_attempts > 0  # Either connected or tried to reconnect
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_13_message_routing_between_services(self):
         """Test message routing between backend and auth service via WebSocket."""
         validator = WebSocketValidator()
@@ -620,6 +636,7 @@ class TestWebSocketInfrastructure:
         assert routing_result.get('target_service') in ['backend', 'auth']
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_14_websocket_authentication_handshake(self):
         """Test WebSocket authentication handshake process."""
         ws_url = "ws://localhost:8000/ws"
@@ -646,6 +663,7 @@ class TestWebSocketInfrastructure:
                 pytest.skip(f"WebSocket auth test skipped: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_15_concurrent_websocket_connection_limits(self):
         """Test handling of concurrent WebSocket connection limits."""
         # Mock the WebSocket connection behavior instead of trying to connect to real server
@@ -680,10 +698,12 @@ class TestWebSocketInfrastructure:
         print(f"Successfully simulated {successful} connections out of {max_connections} attempts")
 
 
+@pytest.mark.e2e
 class TestAuthenticationUserFlow:
     """Tests for authentication and user signup flows."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_16_oauth_provider_initialization(self):
         """Test OAuth provider initialization and configuration."""
         auth_url = "http://localhost:8001"
@@ -711,6 +731,7 @@ class TestAuthenticationUserFlow:
                 pytest.skip(f"Auth service not available: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_17_first_time_user_signup_with_oauth(self):
         """Test first-time user signup flow with OAuth."""
         auth_url = "http://localhost:8001"
@@ -750,6 +771,7 @@ class TestAuthenticationUserFlow:
                 pytest.skip(f"Auth service not available: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_18_token_generation_and_validation(self):
         """Test JWT token generation and validation."""
         from netra_backend.app.services.token_service import token_service
@@ -784,6 +806,7 @@ class TestAuthenticationUserFlow:
         assert expired_result.get('error') == 'token_expired'
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_19_session_management_across_services(self):
         """Test session management and sharing across services."""
         redis_client = await redis.from_url(settings.REDIS_URL)
@@ -828,6 +851,7 @@ class TestAuthenticationUserFlow:
             await redis_client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_20_auth_service_availability_for_backend(self):
         """Test auth service availability and responsiveness for backend requests."""
         auth_url = "http://localhost:8001"
@@ -853,10 +877,12 @@ class TestAuthenticationUserFlow:
                 pytest.skip("Services not fully available")
 
 
+@pytest.mark.e2e
 class TestFrontendIntegration:
     """Tests for frontend loading and integration."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_21_frontend_loads_successfully(self):
         """Test that frontend loads and renders successfully."""
         frontend_url = "http://localhost:3000"
@@ -878,6 +904,7 @@ class TestFrontendIntegration:
                 pytest.skip(f"Frontend not available: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_22_api_connectivity_from_frontend(self):
         """Test API connectivity from frontend to backend."""
         frontend_url = "http://localhost:3000"
@@ -903,6 +930,7 @@ class TestFrontendIntegration:
                 pytest.skip("API connectivity test requires running services")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_23_websocket_connection_from_browser(self):
         """Test WebSocket connection from browser context."""
         ws_url = "ws://localhost:8000/ws"
@@ -931,6 +959,7 @@ class TestFrontendIntegration:
                 pytest.skip("WebSocket browser test requires running services")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_24_static_asset_serving(self):
         """Test static asset serving from frontend."""
         frontend_url = "http://localhost:3000"
@@ -958,6 +987,7 @@ class TestFrontendIntegration:
                 pytest.skip("Static asset test requires running frontend")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_25_environment_variable_propagation(self):
         """Test environment variables propagate correctly to frontend."""
         # Check critical environment variables
@@ -990,10 +1020,12 @@ class TestFrontendIntegration:
                 pass  # Config endpoint might not exist
 
 
+@pytest.mark.e2e
 class TestErrorRecovery:
     """Tests for error recovery and resilience."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_26_recovery_from_database_connection_loss(self):
         """Test recovery when database connection is lost."""
         engine = create_async_engine(
@@ -1027,6 +1059,7 @@ class TestErrorRecovery:
             await engine.dispose()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_27_service_restart_after_oom(self):
         """Test service restart after out-of-memory condition."""
         from dev_launcher.crash_recovery import CrashRecoveryManager
@@ -1055,6 +1088,7 @@ class TestErrorRecovery:
             assert result is True
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_28_network_partition_recovery(self):
         """Test recovery from network partition between services."""
         services = {
@@ -1085,6 +1119,7 @@ class TestErrorRecovery:
         assert connected_count >= 0  # At least some connections should work
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_29_disk_space_exhaustion_handling(self):
         """Test handling of disk space exhaustion."""
         import shutil
@@ -1116,6 +1151,7 @@ class TestErrorRecovery:
                 print(f"Would rotate {len(old_logs)} old log files")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_30_configuration_validation_failures(self):
         """Test handling of configuration validation failures."""
         # ConfigValidator already imported at module level

@@ -46,6 +46,7 @@ def mock_justified(reason: str):
     return decorator
 
 
+@pytest.mark.e2e
 class TestQualityGateResponseValidation:
     """Integration test for quality gate response validation system"""
 
@@ -69,6 +70,7 @@ class TestQualityGateResponseValidation:
         return QualityGateService(redis_manager=redis_manager)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_response_specificity_validation(self, quality_service):
         """Test quality gate validates agent response specificity scores"""
         test_responses = [
@@ -123,6 +125,7 @@ class TestQualityGateResponseValidation:
         logger.info(f"Specificity validation completed for {len(test_responses)} responses")
 
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_agent_response_actionability_validation(self, quality_service):
         """Test quality gate validates agent response actionability"""
         actionability_tests = [
@@ -170,6 +173,7 @@ class TestQualityGateResponseValidation:
         logger.info(f"Actionability validation completed for {len(actionability_tests)} responses")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quality_level_classification_accuracy(self, quality_service):
         """Test quality gate accurately classifies responses into quality levels"""
         classification_tests = [
@@ -226,6 +230,7 @@ class TestQualityGateResponseValidation:
         logger.info(f"Quality level classification accuracy: {accuracy_rate:.2f}")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_content_scoring_integration(self, quality_service):
         """Test integrated content scoring across multiple quality dimensions"""
         scoring_test_cases = [
@@ -285,6 +290,7 @@ class TestQualityGateResponseValidation:
         logger.info(f"Integrated scoring validated for {len(scoring_test_cases)} test cases")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_failure_scenario_handling(self, quality_service):
         """Test quality gate handles various failure scenarios appropriately"""
         failure_scenarios = [
@@ -351,6 +357,7 @@ class TestQualityGateResponseValidation:
         logger.info(f"Failure scenario handling validated for {len(failure_scenarios)} scenarios")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quality_gate_metrics_collection(self, quality_service):
         """Test quality gate collects and aggregates validation metrics"""
         metrics_test_data = [
@@ -401,6 +408,7 @@ class TestQualityGateResponseValidation:
         logger.info(f"Metrics collection validated for {len(collected_metrics)} validations")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_quality_validation(self, quality_service):
         """Test quality gate handles concurrent validation requests"""
         concurrent_test_data = [
@@ -444,6 +452,7 @@ class TestQualityGateResponseValidation:
         logger.info(f"Concurrent validation: {len(concurrent_results)} requests in {processing_time:.2f}s")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_quality_standards_compliance(self, quality_service):
         """Test quality gate enforces enterprise-grade quality standards"""
         enterprise_responses = [

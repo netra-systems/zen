@@ -23,6 +23,7 @@ from tests.e2e.llm_initialization_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestLLMInitialization:
     """Core LLM initialization tests with real API integration"""
     
@@ -31,6 +32,7 @@ class TestLLMInitialization:
         self.token_tracker = TokenTracker()
         self.helpers = LLMTestHelpers()
         
+    @pytest.mark.e2e
     async def test_agent_initialization_with_real_llm(self):
         """Test agent initialization with real Anthropic/OpenAI API
         
@@ -89,6 +91,7 @@ class TestLLMInitialization:
         successful_inits = [r for r in results.values() if r["success"]]
         assert len(successful_inits) > 0, "All LLM initializations failed - critical business risk"
     
+    @pytest.mark.e2e
     async def test_structured_response_validation(self):
         """Test LLM structured response format validation"""
         mock_manager = self.helpers.create_mock_llm_manager()
@@ -97,6 +100,7 @@ class TestLLMInitialization:
         self.helpers.validate_structured_response(response)
         return response
     
+    @pytest.mark.e2e
     async def test_token_usage_tracking(self):
         """Test token usage tracking for cost management"""
         mock_manager = self.helpers.create_mock_llm_manager()
@@ -119,6 +123,7 @@ class TestLLMInitialization:
         assert stats["total_tokens"] > 0, "Token tracking failed"
         assert stats["avg_tokens_per_request"] > 0, "Average calculation failed"
     
+    @pytest.mark.e2e
     async def test_fallback_to_secondary_llm(self):
         """Test fallback to secondary LLM on primary failure"""
         mock_manager = self.helpers.create_fallback_mock_manager()
@@ -139,6 +144,7 @@ class TestLLMInitialization:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestLLMReliabilityPatterns:
     """Test advanced LLM reliability patterns for business continuity"""
     
@@ -146,12 +152,14 @@ class TestLLMReliabilityPatterns:
         """Setup for each test method"""
         self.helpers = ReliabilityTestHelpers()
     
+    @pytest.mark.e2e
     async def test_circuit_breaker_activation(self):
         """Test circuit breaker activation on repeated failures"""
         mock_manager = self.helpers.create_failing_manager()
         failure_count = await self.helpers.test_repeated_failures(mock_manager)
         assert failure_count >= 3, "Circuit breaker failed to activate"
     
+    @pytest.mark.e2e
     async def test_performance_degradation_handling(self):
         """Test graceful performance degradation under load"""
         mock_manager = self.helpers.create_slow_manager()

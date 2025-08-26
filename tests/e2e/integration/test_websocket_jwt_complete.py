@@ -118,6 +118,7 @@ class CompleteJWTAuthTester:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_websocket_jwt_connection(self, token: str) -> Dict[str, Any]:
         """Test WebSocket connection with JWT token and performance tracking."""
         start_time = time.time()
@@ -151,6 +152,7 @@ class CompleteJWTAuthTester:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_websocket_message_with_jwt(self, ws_client, message: str) -> Dict[str, Any]:
         """Send authenticated message through WebSocket and validate response."""
         start_time = time.time()
@@ -194,6 +196,7 @@ class CompleteJWTAuthTester:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_token_refresh_flow(self, email: str, original_token: str) -> Dict[str, Any]:
         """Test token refresh and reconnection flow."""
         start_time = time.time()
@@ -228,6 +231,7 @@ class CompleteJWTAuthTester:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_unauthorized_access_blocking(self, invalid_token: str, token_type: str) -> Dict[str, Any]:
         """Test that unauthorized access is properly blocked."""
         start_time = time.time()
@@ -266,6 +270,7 @@ class CompleteJWTAuthTester:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_jwt_auth_complete_flow(real_services):
     """
     BVJ: ALL Segments | Goal: Core Security | Impact: $100K+ MRR Protection
@@ -339,6 +344,7 @@ async def test_websocket_jwt_auth_complete_flow(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_jwt_invalid_token_rejection(real_services):
     """Test that various invalid JWT tokens are properly rejected by WebSocket."""
     tester = CompleteJWTAuthTester(real_services)
@@ -372,6 +378,7 @@ async def test_websocket_jwt_invalid_token_rejection(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_jwt_token_expiry_handling(real_services):
     """Test WebSocket handling of token expiry and reconnection."""
     tester = CompleteJWTAuthTester(real_services)
@@ -432,6 +439,7 @@ async def test_websocket_jwt_token_expiry_handling(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_jwt_cross_service_consistency(real_services):
     """Test JWT token consistency across Auth, Backend, and WebSocket services."""
     tester = CompleteJWTAuthTester(real_services)
@@ -474,6 +482,7 @@ async def test_websocket_jwt_cross_service_consistency(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_jwt_concurrent_connections(real_services):
     """Test multiple concurrent WebSocket connections with different valid JWT tokens."""
     tester = CompleteJWTAuthTester(real_services)

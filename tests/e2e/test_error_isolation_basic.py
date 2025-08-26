@@ -45,6 +45,7 @@ class ErrorIsolationTester:
         self.degradation_validator = GracefulDegradationValidator()
         self.recovery_verifier = AutoRecoveryVerifier()
     
+    @pytest.mark.e2e
     async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment."""
         if self.client_factory:
@@ -62,6 +63,7 @@ async def error_tester():
     await tester.cleanup_test_environment()
 
 
+@pytest.mark.e2e
 async def test_auth_service_failure_isolation(error_tester):
     """Test 1: Backend continues when Auth service fails."""
     # Get backend client without auth dependency
@@ -81,6 +83,7 @@ async def test_auth_service_failure_isolation(error_tester):
     await error_tester.orchestrator.services_manager._start_auth_service()
 
 
+@pytest.mark.e2e
 async def test_backend_service_failure_isolation(error_tester):
     """Test 2: Auth/Frontend continue when Backend fails."""
     # Get auth client
@@ -98,6 +101,7 @@ async def test_backend_service_failure_isolation(error_tester):
     await error_tester.failure_simulator.restart_backend_service()
 
 
+@pytest.mark.e2e
 async def test_websocket_failure_isolation(error_tester):
     """Test 3: Other services continue when WebSocket fails."""
     # Create auth and backend clients
@@ -120,6 +124,7 @@ async def test_websocket_failure_isolation(error_tester):
     assert backend_health.status_code == 200
 
 
+@pytest.mark.e2e
 async def test_error_message_propagation(error_tester):
     """Test 4: Appropriate errors shown to users."""
     # Create authenticated WebSocket client
@@ -139,6 +144,7 @@ async def test_error_message_propagation(error_tester):
     await ws_client.close()
 
 
+@pytest.mark.e2e
 async def test_automatic_recovery(error_tester):
     """Test 5: Services reconnect when dependencies recover."""
     # Create WebSocket client
@@ -160,6 +166,7 @@ async def test_automatic_recovery(error_tester):
     await ws_client.close()
 
 
+@pytest.mark.e2e
 async def test_circuit_breaker_behavior(error_tester):
     """Test 6: Prevent cascade failures."""
     # Create clients for all services
@@ -181,6 +188,7 @@ async def test_circuit_breaker_behavior(error_tester):
     await error_tester.failure_simulator.restart_backend_service()
 
 
+@pytest.mark.e2e
 async def test_performance_during_failure(error_tester):
     """Test 7: Degraded but functional performance."""
     # Measure baseline performance

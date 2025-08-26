@@ -32,6 +32,7 @@ from netra_backend.app.redis_manager import RedisManager
 from database_scripts.create_postgres_tables import create_all_tables
 
 
+@pytest.mark.e2e
 class TestColdStartCriticalIssues:
     """Test suite for critical cold start initialization issues."""
 
@@ -52,6 +53,7 @@ class TestColdStartCriticalIssues:
     # Journey 1: Cold Start Development Environment Initialization
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_table_missing_on_fresh_installation(self):
         """Test 1.1: Database hangs indefinitely when tables don't exist."""
         # Drop all tables to simulate fresh installation
@@ -90,6 +92,7 @@ class TestColdStartCriticalIssues:
         assert time.time() - start_time > 25, "Should timeout after significant wait"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_environment_variable_mapping_mismatch(self):
         """Test 1.2: Critical services fail due to env var name conflicts."""
         # Set environment variable
@@ -106,6 +109,7 @@ class TestColdStartCriticalIssues:
                "authentication" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_port_conflicts_during_startup(self):
         """Test 1.3: Hard-coded port assignments cause service startup failures."""
         # Pre-bind ports to cause conflicts
@@ -137,6 +141,7 @@ class TestColdStartCriticalIssues:
     # Journey 2: Google OAuth First-Time User Registration
 
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_oauth_state_parameter_validation_race_condition(self):
         """Test 2.1: Concurrent OAuth flows cause state validation failures."""
         async def initiate_oauth_flow():
@@ -155,6 +160,7 @@ class TestColdStartCriticalIssues:
         assert len(failures) > 0, "Concurrent OAuth flows should cause state conflicts"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_secret_environment_variable_mismatch(self):
         """Test 2.2: Auth service and backend use different JWT secret variables."""
         # Set different JWT secrets
@@ -179,6 +185,7 @@ class TestColdStartCriticalIssues:
                "invalid" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_user_creation_transaction_rollback(self):
         """Test 2.3: User creation partially completes then fails."""
         db_manager = DatabaseManager()
@@ -222,6 +229,7 @@ class TestColdStartCriticalIssues:
     # Journey 3: Authenticated WebSocket Connection Setup
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_routes_not_registered(self):
         """Test 3.1: WebSocket endpoints return 404 errors."""
         # Start backend without WebSocket routes registered
@@ -236,6 +244,7 @@ class TestColdStartCriticalIssues:
                 assert exc_info.value.response.status_code == 404
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cors_blocking_websocket_upgrade_requests(self):
         """Test 3.2: CORS policies prevent WebSocket handshake completion."""
         # Configure strict CORS without WebSocket support
@@ -257,6 +266,7 @@ class TestColdStartCriticalIssues:
         assert exc_info.value.status_code == 403
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_authentication_context_missing_during_websocket(self):
         """Test 3.3: WebSocket connections fail due to missing user context."""
         # Create valid JWT but don't create user in database
@@ -282,6 +292,7 @@ class TestColdStartCriticalIssues:
     # Journey 4: Next.js Frontend Cold Start Compilation and Load
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_environment_configuration_mismatch(self):
         """Test 4.1: Frontend pointing to wrong service ports/URLs."""
         # Set frontend to use static ports
@@ -300,6 +311,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
                 await client.get("http://localhost:3000/api/health")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_provider_context_initialization_failure(self):
         """Test 4.2: React context providers fail to initialize with auth service."""
         # Stop auth service
@@ -320,6 +332,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         assert "AuthProvider" in stderr_output or "auth" in stderr_output.lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_typescript_compilation_errors_missing_types(self):
         """Test 4.3: Missing type definitions prevent compilation."""
         # Remove a critical @types package
@@ -342,6 +355,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     # Journey 5: Development Mode Quick Authentication
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_dev_mode_user_creation_without_database_setup(self):
         """Test 5.1: Create dev user fails when database tables don't exist."""
         # Drop user tables
@@ -369,6 +383,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
                    "table" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_token_generation_missing_required_claims(self):
         """Test 5.2: Generated tokens lack required 'iss' claim."""
         # Patch JWT generation to skip issuer
@@ -388,6 +403,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             assert "iss" in str(exc_info.value) or "issuer" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_session_storage_redis_connection_failure(self):
         """Test 5.3: Authentication succeeds but session storage fails."""
         # Stop Redis
@@ -414,6 +430,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     # Journey 6: PostgreSQL and ClickHouse Database Initialization
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_clickhouse_port_configuration_wrong_protocol(self):
         """Test 6.1: HTTPS port 8443 used instead of HTTP port 8123."""
         os.environ["CLICKHOUSE_PORT"] = "8443"
@@ -428,6 +445,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
                "connection" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_postgresql_connection_pool_exhaustion(self):
         """Test 6.2: Connection pool depleted during startup health checks."""
         # Set very small connection pool
@@ -448,6 +466,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
                "exhausted" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_migration_version_mismatch(self):
         """Test 6.3: Code expects newer database schema than exists."""
         # Simulate older schema by removing a column
@@ -476,6 +495,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     # Journey 7: End-to-End Message Processing with AI Agent
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_api_key_missing_or_invalid(self):
         """Test 7.1: Agent execution fails due to missing GEMINI_API_KEY."""
         # Remove API key
@@ -512,6 +532,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
                "key" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_state_persistence_database_failure(self):
         """Test 7.2: Agent state cannot be saved due to database issues."""
         # Simulate intermittent database failures
@@ -555,6 +576,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         assert "database" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_background_task_timeout_causing_crash(self):
         """Test 7.3: Background index optimization hangs causing 4-minute crash."""
         # Start backend and monitor for crash
@@ -579,6 +601,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     # Journey 8: New Chat Thread Creation and State Management
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_thread_id_generation_race_condition(self):
         """Test 8.1: Concurrent thread creation generates duplicate IDs."""
         async def create_thread():
@@ -599,6 +622,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         assert len(valid_ids) != len(set(valid_ids)), "Should have duplicate thread IDs"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_connection_state_not_synchronized(self):
         """Test 8.2: Thread created in database but WebSocket not notified."""
         # Connect WebSocket client
@@ -629,6 +653,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         assert len(thread_updates) == 0, "WebSocket should not receive thread updates"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_memory_management_large_thread_history(self):
         """Test 8.3: Large thread history causes memory exhaustion."""
         import psutil
@@ -661,6 +686,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     # Journey 9: System Health Validation Across All Services
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_check_cascade_failures(self):
         """Test 9.1: Single service failure causes all health checks to fail."""
         # Stop auth service
@@ -677,6 +703,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         assert "auth" in str(health_data).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_check_database_query_timeout(self):
         """Test 9.2: Health checks hang on database queries without timeout."""
         # Simulate slow database
@@ -700,6 +727,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             assert elapsed > 10, "Health check should timeout"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_startup_check_failure_in_staging(self):
         """Test 9.3: Non-critical failures treated as critical in staging."""
         # Set staging environment
@@ -731,6 +759,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     # Journey 10: Redis Cache Initialization and Session Storage
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_redis_remote_connection_no_local_fallback(self):
         """Test 10.1: Attempts to connect to remote Redis with no fallback."""
         # Set remote Redis URL
@@ -745,6 +774,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         assert "connection" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_redis_memory_eviction_during_session_storage(self):
         """Test 10.2: Active sessions evicted due to Redis memory limits."""
         # Connect to Redis
@@ -770,6 +800,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         assert session_data is None, "Session should be evicted"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_redis_cluster_configuration_mismatch(self):
         """Test 10.3: Single Redis client used with cluster configuration."""
         # Configure Redis as cluster but use single-node client

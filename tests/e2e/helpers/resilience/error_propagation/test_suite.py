@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestRealErrorPropagation:
     """Comprehensive real error propagation test suite."""
     

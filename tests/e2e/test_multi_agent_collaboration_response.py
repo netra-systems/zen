@@ -84,6 +84,7 @@ class MockSubAgent(BaseSubAgent):
         )
 
 
+@pytest.mark.e2e
 class TestMultiAgentCollaborationResponse:
     """Integration test for multi-agent collaboration and response coordination"""
 
@@ -126,6 +127,7 @@ class TestMultiAgentCollaborationResponse:
         return QualityGateService()
 
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_thread(self, postgres_session):
         """Create test thread for collaboration testing"""
         thread = Thread(
@@ -147,6 +149,7 @@ class TestMultiAgentCollaborationResponse:
         )
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_supervisor_coordinating_multiple_agents(self, supervisor_agent, test_thread):
         """Test supervisor coordinates multiple sub-agents for complex queries"""
         # Create mock sub-agents with different specializations
@@ -226,6 +229,7 @@ class TestMultiAgentCollaborationResponse:
         logger.info(f"Multi-agent coordination: {len(coordination_results)} agents in {coordination_time:.2f}s")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_merging_and_conflict_resolution(self, supervisor_agent, quality_service):
         """Test supervisor merges responses and resolves conflicts between agents"""
         # Create agents with potentially conflicting information
@@ -318,6 +322,7 @@ class TestMultiAgentCollaborationResponse:
         logger.info(f"Response merging: {len(conflicts_detected)} conflicts resolved, {len(merged_responses)} final responses")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_failure_handling_and_degradation(self, supervisor_agent):
         """Test supervisor handles agent failures and implements graceful degradation"""
         # Create mixed scenario: some working, some failing agents
@@ -423,6 +428,7 @@ class TestMultiAgentCollaborationResponse:
         logger.info(f"Failure handling: {len(working_agents)} succeeded, {len(failed_agents)} failed with graceful degradation")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agent_execution_coordination(self, supervisor_agent):
         """Test supervisor coordinates concurrent agent execution efficiently"""
         # Create agents for concurrent execution
@@ -482,6 +488,7 @@ class TestMultiAgentCollaborationResponse:
         logger.info(f"Concurrent execution: {len(concurrent_agents)} agents in {execution_time:.2f}s ({throughput:.1f} agents/s)")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_state_coordination_and_sharing(self, supervisor_agent, test_thread):
         """Test agents coordinate state and share information appropriately"""
         # Create agents that need to share state
@@ -577,6 +584,7 @@ class TestMultiAgentCollaborationResponse:
         logger.info(f"State coordination: {len(state_coordination_results)} agents shared state successfully")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_quality_validation_in_collaboration(self, supervisor_agent, quality_service):
         """Test quality validation integrated into multi-agent collaboration"""
         # Create agents with varying response quality
@@ -664,6 +672,7 @@ class TestMultiAgentCollaborationResponse:
         logger.info(f"Quality validation in collaboration: {collaboration_decision['quality_passed']}/{collaboration_decision['total_agents']} passed quality gates")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_multi_agent_workflow_validation(self, supervisor_agent, quality_service, test_thread):
         """Test enterprise-grade multi-agent workflow with comprehensive validation"""
         # Create enterprise workflow scenario

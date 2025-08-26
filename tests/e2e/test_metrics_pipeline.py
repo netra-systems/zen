@@ -58,6 +58,7 @@ async def event_generator():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_high_volume_event_ingestion_performance(metrics_harness, event_generator):
     """
     BVJ: Enterprise customers require 10K events/second for real-time monitoring
@@ -79,6 +80,7 @@ async def test_high_volume_event_ingestion_performance(metrics_harness, event_ge
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_real_time_aggregation_accuracy(metrics_harness, event_generator):
     """
     BVJ: Incorrect aggregation = wrong optimization decisions = customer churn
@@ -101,6 +103,7 @@ async def test_real_time_aggregation_accuracy(metrics_harness, event_generator):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_dashboard_update_latency(metrics_harness, event_generator):
     """
     BVJ: Dashboard delays > 2 seconds impact user experience and decision speed
@@ -126,6 +129,7 @@ async def test_dashboard_update_latency(metrics_harness, event_generator):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_historical_data_query_performance(metrics_harness, event_generator):
     """
     BVJ: Slow historical queries impact enterprise reporting capabilities
@@ -147,6 +151,7 @@ async def test_historical_data_query_performance(metrics_harness, event_generato
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_data_retention_policy_enforcement(metrics_harness, event_generator):
     """
     BVJ: Proper data retention prevents storage costs and compliance issues
@@ -168,6 +173,7 @@ async def test_data_retention_policy_enforcement(metrics_harness, event_generato
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_pipeline_operations(metrics_harness, event_generator):
     """
     BVJ: Enterprise workloads require concurrent operation support
@@ -199,6 +205,7 @@ async def test_concurrent_pipeline_operations(metrics_harness, event_generator):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_error_recovery_and_resilience(metrics_harness, event_generator):
     """
     BVJ: System failures cannot disrupt revenue-critical analytics
@@ -217,6 +224,7 @@ async def test_error_recovery_and_resilience(metrics_harness, event_generator):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_end_to_end_pipeline_integration(metrics_harness, event_generator):
     """
     BVJ: Complete pipeline validation ensures $35K+ MRR protection
@@ -237,6 +245,7 @@ async def test_end_to_end_pipeline_integration(metrics_harness, event_generator)
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_pipeline_performance_benchmarking(metrics_harness, event_generator):
     """
     BVJ: Performance benchmarks ensure scalability for enterprise growth

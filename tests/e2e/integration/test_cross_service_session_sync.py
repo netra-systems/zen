@@ -506,6 +506,7 @@ class CrossServiceSessionSyncTester:
 
 @pytest.mark.asyncio
 @pytest.mark.integration  
+@pytest.mark.e2e
 async def test_cross_service_session_sync():
     """
     Test #7: Cross-Service Session Consistency

@@ -102,9 +102,11 @@ async def auth_tester():
     finally:
         await tester.cleanup()
 
+@pytest.mark.e2e
 class TestDevLoginFlow:
     """Test development mode login flow - Expected to expose configuration issues"""
     
+    @pytest.mark.e2e
     async def test_dev_login_basic_flow(self, auth_tester):
         """Test basic dev login flow - Should expose CORS and endpoint issues"""
         
@@ -174,6 +176,7 @@ class TestDevLoginFlow:
         except Exception as e:
             pytest.fail(f"Dev login failed unexpectedly: {e}")
     
+    @pytest.mark.e2e
     async def test_dev_login_cors_preflight(self, auth_tester):
         """Test CORS preflight for dev login - Expected to fail with CORS errors"""
         
@@ -217,6 +220,7 @@ class TestDevLoginFlow:
         except Exception as e:
             pytest.fail(f"CORS preflight test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_dev_login_token_validation(self, auth_tester):
         """Test dev login token validation - Should expose JWT issues"""
         
@@ -259,9 +263,11 @@ class TestDevLoginFlow:
         except Exception as e:
             pytest.fail(f"Token validation test failed: {e}")
 
+@pytest.mark.e2e
 class TestOAuth2Flow:
     """Test OAuth2 Google login flow - Expected to expose OAuth configuration issues"""
     
+    @pytest.mark.e2e
     async def test_oauth_initiation(self, auth_tester):
         """Test OAuth flow initiation - Should expose redirect URI issues"""
         
@@ -307,6 +313,7 @@ class TestOAuth2Flow:
         except Exception as e:
             pytest.fail(f"OAuth initiation test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_oauth_callback_with_invalid_state(self, auth_tester):
         """Test OAuth callback with invalid state - Should expose state validation issues"""
         
@@ -337,6 +344,7 @@ class TestOAuth2Flow:
         except Exception as e:
             pytest.fail(f"OAuth callback state validation test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_oauth_callback_network_failure(self, auth_tester):
         """Test OAuth callback with network failure to Google - Should expose error handling"""
         
@@ -377,9 +385,11 @@ class TestOAuth2Flow:
         }
         return base64.urlsafe_b64encode(json.dumps(state_data).encode()).decode()
 
+@pytest.mark.e2e
 class TestJWTTokenHandling:
     """Test JWT token generation and validation - Should expose token handling issues"""
     
+    @pytest.mark.e2e
     async def test_jwt_token_structure(self, auth_tester):
         """Test JWT token structure and claims - Should expose malformed tokens"""
         
@@ -448,6 +458,7 @@ class TestJWTTokenHandling:
         except Exception as e:
             pytest.fail(f"JWT structure test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_jwt_blacklist_functionality(self, auth_tester):
         """Test JWT token blacklisting - Should expose blacklist synchronization issues"""
         
@@ -505,9 +516,11 @@ class TestJWTTokenHandling:
             if validation_result.get("valid", False):
                 pytest.fail("Blacklisted token still valid - security vulnerability")
 
+@pytest.mark.e2e
 class TestTokenPropagation:
     """Test token propagation to frontend - Should expose token delivery issues"""
     
+    @pytest.mark.e2e
     async def test_token_in_auth_headers(self, auth_tester):
         """Test token propagation via Authorization headers - Should expose header issues"""
         
@@ -546,6 +559,7 @@ class TestTokenPropagation:
         except Exception as e:
             logger.warning(f"Backend token test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_token_in_cookies(self, auth_tester):
         """Test token propagation via cookies - Should expose cookie configuration issues"""
         
@@ -580,9 +594,11 @@ class TestTokenPropagation:
             if not hasattr(cookie, 'httponly') or not cookie.httponly:
                 logger.warning(f"Cookie {cookie_name} not marked as httponly - XSS vulnerability")
 
+@pytest.mark.e2e
 class TestCORSConfiguration:
     """Test CORS configuration - Should expose cross-origin request issues"""
     
+    @pytest.mark.e2e
     async def test_cors_preflight_all_endpoints(self, auth_tester):
         """Test CORS preflight for all auth endpoints - Should expose CORS misconfigurations"""
         
@@ -624,6 +640,7 @@ class TestCORSConfiguration:
             auth_tester.cors_errors.extend(cors_failures)
             pytest.fail(f"CORS failures: {cors_failures}")
     
+    @pytest.mark.e2e
     async def test_cors_different_origins(self, auth_tester):
         """Test CORS with different origins - Should expose origin whitelist issues"""
         
@@ -666,9 +683,11 @@ class TestCORSConfiguration:
         if origin_failures:
             logger.warning(f"Origin check issues: {origin_failures}")
 
+@pytest.mark.e2e
 class TestSecurityHeaders:
     """Test security headers - Should expose security configuration issues"""
     
+    @pytest.mark.e2e
     async def test_security_headers_presence(self, auth_tester):
         """Test presence of security headers - Should expose missing security configurations"""
         
@@ -702,6 +721,7 @@ class TestSecurityHeaders:
         if incorrect_headers:
             logger.warning(f"Incorrect security headers: {incorrect_headers}")
     
+    @pytest.mark.e2e
     async def test_sensitive_info_exposure(self, auth_tester):
         """Test for sensitive information exposure - Should expose info leakage"""
         
@@ -740,9 +760,11 @@ class TestSecurityHeaders:
         if info_leaks:
             logger.warning(f"Potential information leaks: {info_leaks}")
 
+@pytest.mark.e2e
 class TestSessionManagement:
     """Test session management - Should expose session handling issues"""
     
+    @pytest.mark.e2e
     async def test_session_creation_and_cleanup(self, auth_tester):
         """Test session lifecycle - Should expose session management issues"""
         
@@ -790,6 +812,7 @@ class TestSessionManagement:
             if session_data.get("active", True):
                 pytest.fail("Session still active after logout - cleanup issue")
     
+    @pytest.mark.e2e
     async def test_concurrent_sessions(self, auth_tester):
         """Test concurrent session handling - Should expose session isolation issues"""
         
@@ -832,9 +855,11 @@ class TestSessionManagement:
             except Exception as e:
                 logger.warning(f"Session check {i} failed: {e}")
 
+@pytest.mark.e2e
 class TestTokenRefreshMechanism:
     """Test token refresh functionality - Should expose refresh token issues"""
     
+    @pytest.mark.e2e
     async def test_token_refresh_flow(self, auth_tester):
         """Test complete token refresh flow - Should expose refresh mechanism issues"""
         
@@ -897,6 +922,7 @@ class TestTokenRefreshMechanism:
         if new_token_validation.status_code != 200:
             pytest.fail("New access token is not valid")
     
+    @pytest.mark.e2e
     async def test_refresh_token_reuse(self, auth_tester):
         """Test refresh token reuse protection - Should expose security issues"""
         
@@ -936,9 +962,11 @@ class TestTokenRefreshMechanism:
         if second_refresh.status_code == 200:
             pytest.fail("Refresh token reuse allowed - security vulnerability")
 
+@pytest.mark.e2e
 class TestWebSocketAuthentication:
     """Test WebSocket authentication - Should expose WebSocket auth issues"""
     
+    @pytest.mark.e2e
     async def test_websocket_auth_handshake(self, auth_tester):
         """Test WebSocket authentication handshake - Should expose WebSocket auth problems"""
         
@@ -983,6 +1011,7 @@ class TestWebSocketAuthentication:
         except Exception as e:
             pytest.fail(f"WebSocket authentication test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_websocket_token_validation(self, auth_tester):
         """Test WebSocket token validation endpoint - Should expose validation issues"""
         
@@ -1019,9 +1048,11 @@ class TestWebSocketAuthentication:
             if missing_fields:
                 pytest.fail(f"Missing WebSocket validation fields: {missing_fields}")
 
+@pytest.mark.e2e
 class TestCrossServiceAuthSync:
     """Test cross-service authentication synchronization - Should expose sync issues"""
     
+    @pytest.mark.e2e
     async def test_auth_backend_token_sync(self, auth_tester):
         """Test token validation between auth service and backend - Should expose sync issues"""
         
@@ -1063,6 +1094,7 @@ class TestCrossServiceAuthSync:
         except Exception as e:
             logger.warning(f"Cross-service test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_user_data_consistency(self, auth_tester):
         """Test user data consistency between services - Should expose data sync issues"""
         
@@ -1103,9 +1135,11 @@ class TestCrossServiceAuthSync:
             if auth_email and me_email and auth_email != me_email:
                 pytest.fail(f"Email inconsistency: login={auth_email}, me={me_email}")
 
+@pytest.mark.e2e
 class TestMultiTabSessionHandling:
     """Test multi-tab session handling - Should expose session coordination issues"""
     
+    @pytest.mark.e2e
     async def test_multi_tab_login_logout(self, auth_tester):
         """Test login/logout across multiple tabs - Should expose session sync issues"""
         
@@ -1159,9 +1193,11 @@ class TestMultiTabSessionHandling:
             for client in clients:
                 await client.aclose()
 
+@pytest.mark.e2e
 class TestStagingEnvironmentAuth:
     """Test staging environment authentication - Should expose staging-specific issues"""
     
+    @pytest.mark.e2e
     async def test_staging_auth_config(self, auth_tester):
         """Test staging auth configuration - Should expose staging config issues"""
         
@@ -1204,6 +1240,7 @@ class TestStagingEnvironmentAuth:
             logger.warning(f"Staging auth config test failed: {e}")
 
 # Test execution summary
+@pytest.mark.e2e
 async def test_auth_comprehensive_summary(auth_tester):
     """Summary test to report all discovered issues"""
     

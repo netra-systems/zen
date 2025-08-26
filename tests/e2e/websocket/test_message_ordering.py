@@ -260,6 +260,7 @@ class WebSocketOrderingTester:
                 await client.disconnect()
 
 
+@pytest.mark.e2e
 class TestWebSocketMessageOrdering:
     """Test suite for WebSocket message ordering validation."""
     
@@ -282,6 +283,7 @@ class TestWebSocketMessageOrdering:
         # Cleanup
         await self.services.stop_all()
         
+    @pytest.mark.e2e
     async def test_basic_message_order(self):
         """Test: Messages delivered in send order (happy path)."""
         client = await self.tester.create_client("basic_order")
@@ -312,6 +314,7 @@ class TestWebSocketMessageOrdering:
         finally:
             await client.disconnect()
             
+    @pytest.mark.e2e
     async def test_sequence_number_preservation(self):
         """Test: Sequence numbers maintained correctly."""
         client = await self.tester.create_client("sequence_test")
@@ -343,6 +346,7 @@ class TestWebSocketMessageOrdering:
         finally:
             await client.disconnect()
             
+    @pytest.mark.e2e
     async def test_high_load_ordering(self):
         """Test: Order preserved under high load (100+ messages)."""
         client = await self.tester.create_client("high_load")
@@ -368,6 +372,7 @@ class TestWebSocketMessageOrdering:
         finally:
             await client.disconnect()
             
+    @pytest.mark.e2e
     async def test_concurrent_message_ordering(self):
         """Test: Concurrent messages properly ordered."""
         # Test with 3 concurrent senders, 25 messages each
@@ -386,6 +391,7 @@ class TestWebSocketMessageOrdering:
         logger.info(f"Concurrent ordering test passed: {metrics.total_received}/{metrics.total_sent} messages, "
                    f"violation rate: {violation_rate:.2%}")
                    
+    @pytest.mark.e2e
     async def test_no_message_duplication(self):
         """Test: No message duplication."""
         client = await self.tester.create_client("duplicate_test")
@@ -418,6 +424,7 @@ class TestWebSocketMessageOrdering:
             await client.disconnect()
             
     @pytest.mark.integration
+    @pytest.mark.e2e
     async def test_ordering_across_reconnection(self):
         """Test: Order preserved across reconnection."""
         client = await self.tester.create_client("reconnection_test")
@@ -457,6 +464,7 @@ class TestWebSocketMessageOrdering:
         finally:
             await client.disconnect()
             
+    @pytest.mark.e2e
     async def test_ordering_performance_benchmarks(self):
         """Test: Performance benchmarks for message ordering."""
         client = await self.tester.create_client("performance_test")

@@ -304,6 +304,7 @@ async def established_conversation(websocket_test_client, mock_agent_context, se
 # Test Cases
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_basic_reconnection_preserves_conversation_history(established_conversation, session_token):
     """
     Test Case 1: Basic reconnection with valid token preserves conversation history.
@@ -364,6 +365,7 @@ async def test_basic_reconnection_preserves_conversation_history(established_con
     logger.info(f"✓ Conversation history preserved: {len(retrieved_history)} messages in {retrieval_time:.3f}s")
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_reconnection_preserves_agent_memory_and_context(established_conversation, session_token):
     """
     Test Case 2: Reconnection preserves agent memory and context state.
@@ -424,6 +426,7 @@ async def test_reconnection_preserves_agent_memory_and_context(established_conve
     logger.info(f"✓ Agent context preserved: workflow step {restored_workflow['current_step']}, {len(restored_tools)} tool calls")
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_reconnection_same_token_different_ip_location(established_conversation, session_token):
     """
     Test Case 3: Reconnection with same token from different IP/location.
@@ -499,6 +502,7 @@ async def test_reconnection_same_token_different_ip_location(established_convers
     logger.info(f"✓ Cross-location reconnection successful in {connection_time:.3f}s")
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_reconnections_maintain_consistency(established_conversation, session_token):
     """
     Test Case 4: Multiple reconnections in sequence maintain consistency.
@@ -578,6 +582,7 @@ async def test_multiple_reconnections_maintain_consistency(established_conversat
     logger.info(f"✓ {reconnection_cycles} cycles: {consistency_rate:.1%} consistency, {memory_increase:.1%} memory growth")
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_reconnection_brief_vs_extended_disconnection_periods(established_conversation, session_token, mock_auth_service):
     """
     Test Case 5: Reconnection after brief vs extended disconnection periods.
@@ -703,6 +708,7 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(established_
 # Integration and Helper Tests
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_client_error_handling(session_token):
     """Test WebSocket client error handling and recovery."""
     client = WebSocketTestClient("ws://localhost:8000/ws", session_token)
@@ -734,6 +740,7 @@ async def test_websocket_client_error_handling(session_token):
     assert message is None
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_mock_services_functionality(mock_auth_service, mock_agent_context):
     """Test mock service functionality for proper test isolation."""
     # Test auth service
@@ -758,6 +765,7 @@ async def test_mock_services_functionality(mock_auth_service, mock_agent_context
     assert retrieved_context["conversation_history"][0]["content"] == "test message"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_performance_benchmarks(established_conversation, session_token):
     """Benchmark performance metrics for reconnection scenarios."""
     client, mock_context, _ = established_conversation

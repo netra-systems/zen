@@ -34,6 +34,7 @@ from test_framework.auth_helpers import (
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAuthTokenExpiry:
     """Authentication Token Expiry and Refresh Tests."""
     
@@ -47,6 +48,7 @@ class TestAuthTokenExpiry:
         """Initialize token expiry tester."""
         return TokenExpiryTester(auth_tester)
     
+    @pytest.mark.e2e
     async def test_token_refresh_during_connection(self, auth_tester, expiry_tester):
         """Test token refresh during active WebSocket connection."""
         try:
@@ -93,6 +95,7 @@ class TestAuthTokenExpiry:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_expired_token_rejection_performance(self, auth_tester, expiry_tester):
         """Test that expired tokens are rejected quickly and consistently."""
         try:
@@ -119,6 +122,7 @@ class TestAuthTokenExpiry:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_token_refresh_flow_validation(self, auth_tester, expiry_tester):
         """Test the complete token refresh flow functionality."""
         try:
@@ -155,6 +159,7 @@ class TestAuthTokenExpiry:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_multiple_token_expiry_scenarios(self, auth_tester, expiry_tester):
         """Test various token expiry scenarios and edge cases."""
         try:
@@ -212,6 +217,7 @@ class TestAuthTokenExpiry:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_token_validation_edge_cases(self, auth_tester, expiry_tester):
         """Test edge cases in token validation and expiry handling."""
         try:

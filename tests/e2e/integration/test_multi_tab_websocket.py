@@ -183,6 +183,7 @@ class TabStateManager:
 
 @pytest.mark.integration
 
+@pytest.mark.e2e
 class TestMultiTabWebSocket:
 
     """E2E Test #2: Multi-Tab WebSocket Session Management."""
@@ -215,6 +216,7 @@ class TestMultiTabWebSocket:
         return TabStateManager()
     
 
+    @pytest.mark.e2e
     async def test_multi_tab_websocket_broadcast(self, tab_manager, message_validator, state_manager):
 
         """Test multi-tab WebSocket with message broadcasting."""

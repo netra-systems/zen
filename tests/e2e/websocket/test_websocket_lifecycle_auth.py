@@ -114,10 +114,12 @@ async def lifecycle_tester():
     await tester.cleanup_all_clients()
 
 
+@pytest.mark.e2e
 class TestWebSocketConnectionLifecycle:
     """Test WebSocket connection lifecycle with authentication"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_establishment_before_first_message(self, lifecycle_tester):
         """Test connection established BEFORE first message (SPEC requirement)"""
         client = lifecycle_tester.create_authenticated_client("conn_test_user")
@@ -142,6 +144,7 @@ class TestWebSocketConnectionLifecycle:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_authentication_during_handshake(self, lifecycle_tester):
         """Test JWT token validation during WebSocket handshake"""
         client = lifecycle_tester.create_authenticated_client("jwt_test_user")
@@ -169,6 +172,7 @@ class TestWebSocketConnectionLifecycle:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_invalid_jwt_token_rejection(self, lifecycle_tester):
         """Test connection rejection with invalid JWT token"""
         client = lifecycle_tester.create_invalid_auth_client("invalid")
@@ -190,6 +194,7 @@ class TestWebSocketConnectionLifecycle:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_jwt_token_rejection(self, lifecycle_tester):
         """Test connection rejection with expired JWT token"""
         client = lifecycle_tester.create_invalid_auth_client("expired")
@@ -207,6 +212,7 @@ class TestWebSocketConnectionLifecycle:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_missing_auth_token_rejection(self, lifecycle_tester):
         """Test connection rejection when auth token is missing"""
         client = lifecycle_tester.create_invalid_auth_client("missing")
@@ -224,10 +230,12 @@ class TestWebSocketConnectionLifecycle:
         })
 
 
+@pytest.mark.e2e
 class TestWebSocketPersistentConnection:
     """Test WebSocket persistent connection requirements"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_persistent_connection_through_rerenders(self, lifecycle_tester):
         """Test connection persistence through component re-renders"""
         client = lifecycle_tester.create_authenticated_client("persist_test_user")
@@ -261,6 +269,7 @@ class TestWebSocketPersistentConnection:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_graceful_connection_cleanup(self, lifecycle_tester):
         """Test graceful connection cleanup on disconnect"""
         client = lifecycle_tester.create_authenticated_client("cleanup_test_user")
@@ -291,10 +300,12 @@ class TestWebSocketPersistentConnection:
         })
 
 
+@pytest.mark.e2e
 class TestWebSocketJSONFirstCommunication:
     """Test JSON-first communication requirement"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_json_first_message_structure(self, lifecycle_tester):
         """Test all messages use JSON structure (no string messages)"""
         client = lifecycle_tester.create_authenticated_client("json_test_user")
@@ -329,6 +340,7 @@ class TestWebSocketJSONFirstCommunication:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_type_payload_structure(self, lifecycle_tester):
         """Test consistent {type, payload} message structure"""
         client = lifecycle_tester.create_authenticated_client("structure_test_user")
@@ -364,10 +376,12 @@ class TestWebSocketJSONFirstCommunication:
         })
 
 
+@pytest.mark.e2e
 class TestWebSocketAuthenticationSecurity:
     """Test WebSocket authentication security requirements"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_auth_connections(self, lifecycle_tester):
         """Test multiple concurrent authenticated connections"""
         num_clients = 3
@@ -408,6 +422,7 @@ class TestWebSocketAuthenticationSecurity:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_token_validation_timing(self, lifecycle_tester):
         """Test authentication validation completes within timing requirements"""
         client = lifecycle_tester.create_authenticated_client("timing_test_user")
@@ -427,6 +442,7 @@ class TestWebSocketAuthenticationSecurity:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_comprehensive_auth_scenarios(self, lifecycle_tester):
         """Test comprehensive authentication scenarios"""
         scenarios = [
@@ -470,10 +486,12 @@ class TestWebSocketAuthenticationSecurity:
         })
 
 
+@pytest.mark.e2e
 class TestWebSocketConnectionPerformance:
     """Test WebSocket connection performance requirements"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_establishment_performance(self, lifecycle_tester):
         """Test connection establishment meets performance requirements"""
         client = lifecycle_tester.create_authenticated_client("perf_test_user")
@@ -494,6 +512,7 @@ class TestWebSocketConnectionPerformance:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_roundtrip_performance(self, lifecycle_tester):
         """Test message roundtrip performance"""
         client = lifecycle_tester.create_authenticated_client("roundtrip_test_user")

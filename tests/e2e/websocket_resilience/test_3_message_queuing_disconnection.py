@@ -275,6 +275,7 @@ def mock_queue_manager_small():
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_queue_test_client(mock_queue_manager):
     """WebSocket queue test client fixture"""
     client = WebSocketQueueTestClient("ws://mock/ws", "test_user_123", mock_queue_manager)
@@ -286,6 +287,7 @@ async def test_queue_test_client(mock_queue_manager):
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_connected_client(queue_test_client):
     """Pre-connected test client"""
     await queue_test_client.connect()
@@ -305,6 +307,7 @@ def create_test_message(content: str, priority: MessagePriority = MessagePriorit
 # Test Cases
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_single_message_queuing_during_disconnection(queue_test_client, mock_queue_manager):
     """
     Test Case 1: Single Message Queuing During Disconnection
@@ -374,6 +377,7 @@ async def test_single_message_queuing_during_disconnection(queue_test_client, mo
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_messages_queuing_with_order_preservation(queue_test_client, mock_queue_manager):
     """
     Test Case 2: Multiple Messages Queuing with Order Preservation
@@ -448,6 +452,7 @@ async def test_multiple_messages_queuing_with_order_preservation(queue_test_clie
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_queue_overflow_handling_and_limits(queue_test_client, mock_queue_manager_small):
     """
     Test Case 3: Queue Overflow Handling and Limits
@@ -519,6 +524,7 @@ async def test_queue_overflow_handling_and_limits(queue_test_client, mock_queue_
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_priority_message_handling_during_queue(queue_test_client, mock_queue_manager):
     """
     Test Case 4: Priority Message Handling During Queue
@@ -599,6 +605,7 @@ async def test_priority_message_handling_during_queue(queue_test_client, mock_qu
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_queue_expiration_and_cleanup(queue_test_client, mock_queue_manager_small):
     """
     Test Case 5: Queue Expiration and Cleanup
@@ -690,6 +697,7 @@ async def test_queue_expiration_and_cleanup(queue_test_client, mock_queue_manage
 # Additional Edge Case Tests
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_rapid_disconnect_reconnect_cycles(queue_test_client, mock_queue_manager):
     """Test behavior during multiple quick disconnection/reconnection cycles"""
     
@@ -751,6 +759,7 @@ async def test_rapid_disconnect_reconnect_cycles(queue_test_client, mock_queue_m
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_message_sending_during_disconnection(mock_queue_manager):
     """Test multiple agents sending messages to same disconnected client"""
     
@@ -808,6 +817,7 @@ async def test_concurrent_message_sending_during_disconnection(mock_queue_manage
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_system_resource_constraints_simulation(mock_queue_manager):
     """Test queue behavior under simulated resource constraints"""
     
@@ -858,6 +868,7 @@ async def test_system_resource_constraints_simulation(mock_queue_manager):
 # Performance and Metrics Test
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_queue_performance_metrics(queue_test_client, mock_queue_manager):
     """Benchmark queue performance metrics"""
     

@@ -202,6 +202,7 @@ class PerformanceTestExecutor:
             return {"response": f"Mock response for: {prompt}", "tokens_used": 50, "cost": 0.0001}
 
 
+@pytest.mark.e2e
 class TestPerformanceSLA:
 
     """Performance SLA validation tests."""
@@ -228,6 +229,7 @@ class TestPerformanceSLA:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_p99_latency_sla(self, performance_executor):
 
         """Test P99 latency meets <2s SLA."""
@@ -249,6 +251,7 @@ class TestPerformanceSLA:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_average_response_time(self, performance_executor):
 
         """Test average response time performance."""
@@ -264,6 +267,7 @@ class TestPerformanceSLA:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_throughput_requirements(self, performance_executor):
 
         """Test throughput meets requirements."""
@@ -281,6 +285,7 @@ class TestPerformanceSLA:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_per_request_limits(self, performance_executor):
 
         """Test cost per request stays within limits."""
@@ -303,6 +308,7 @@ class TestPerformanceSLA:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_performance(self, performance_executor):
 
         """Test performance under concurrent load."""
@@ -349,6 +355,7 @@ class TestPerformanceSLA:
         return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
 
 
+@pytest.mark.e2e
 class TestBusinessValueValidation:
 
     """Business value claim validation tests."""
@@ -364,6 +371,7 @@ class TestBusinessValueValidation:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_reduction_claims(self, business_validator):
 
         """Test 20-50% cost reduction claims."""
@@ -393,6 +401,7 @@ class TestBusinessValueValidation:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_roi_validation(self, business_validator):
 
         """Test ROI validation for enterprise customers."""
@@ -423,6 +432,7 @@ class TestBusinessValueValidation:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_value_protection(self):
 
         """Test enterprise value protection ($347K+ MRR)."""
@@ -464,12 +474,14 @@ class TestBusinessValueValidation:
 
 @pytest.mark.sla
 
+@pytest.mark.e2e
 class TestSLACompliance:
 
     """SLA compliance validation tests."""
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_availability_sla(self):
 
         """Test 99.9% availability SLA."""
@@ -486,6 +498,7 @@ class TestSLACompliance:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_rate_sla(self):
 
         """Test error rate SLA compliance."""

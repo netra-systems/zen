@@ -155,6 +155,7 @@ class DatabaseConsistencyTester:
         self.backend_service = BackendServiceSimulator()
         self.metrics = ConsistencyMetrics()
     
+    @pytest.mark.e2e
     async def test_user_creation_sync(self, user_data: Dict) -> bool:
         """Test user creation synchronization flow."""
         start_time = time.time()
@@ -170,6 +171,7 @@ class DatabaseConsistencyTester:
         self.metrics.sync_time = sync_time
         return sync_success and await self._verify_user_consistency(user_id)
     
+    @pytest.mark.e2e
     async def test_profile_update_propagation(self, user_id: str, updates: Dict) -> bool:
         """Test profile update propagation."""
         start_time = time.time()
@@ -178,6 +180,7 @@ class DatabaseConsistencyTester:
         self.metrics.update_time = time.time() - start_time
         return auth_success and backend_success and await self._verify_update_consistency(user_id, updates)
     
+    @pytest.mark.e2e
     async def test_deletion_cascade(self, user_id: str) -> bool:
         """Test proper deletion cascade."""
         start_time = time.time()
@@ -186,6 +189,7 @@ class DatabaseConsistencyTester:
         self.metrics.deletion_time = time.time() - start_time
         return auth_success and backend_success and await self._verify_deletion_consistency(user_id)
     
+    @pytest.mark.e2e
     async def test_transaction_consistency(self, user_data: Dict) -> bool:
         """Test transaction consistency under simulated failure."""
         user_id = await self.auth_service.create_user(user_data)
@@ -250,10 +254,12 @@ def create_test_user_data(identifier: str = None) -> Dict:
     }
 
 
+@pytest.mark.e2e
 class TestAuthBackendDatabaseConsistency:
     """Database consistency tests between Auth and Backend services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_creation_syncs_to_backend(self, consistency_tester):
         """Test user creation synchronizes to Backend within performance target."""
         user_data = create_test_user_data("sync_test")
@@ -264,6 +270,7 @@ class TestAuthBackendDatabaseConsistency:
         assert total_time < 1.0, f"Sync took {total_time:.3f}s, exceeds 1s target"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_profile_updates_propagate(self, consistency_tester):
         """Test profile updates propagate consistently."""
         user_data = create_test_user_data("update_test")
@@ -275,6 +282,7 @@ class TestAuthBackendDatabaseConsistency:
         assert consistency_tester.metrics.update_time < 1.0, "Update propagation too slow"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_deletion_cascades_properly(self, consistency_tester):
         """Test deletion cascades properly across services."""
         user_data = create_test_user_data("delete_test")
@@ -285,6 +293,7 @@ class TestAuthBackendDatabaseConsistency:
         assert consistency_tester.metrics.deletion_time < 1.0, "Deletion cascade too slow"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_transaction_consistency_success(self, consistency_tester):
         """Test transaction consistency under normal conditions."""
         user_data = create_test_user_data("transaction_test")
@@ -292,6 +301,7 @@ class TestAuthBackendDatabaseConsistency:
         assert success, "Transaction consistency failed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_transaction_consistency_failure_rollback(self, consistency_tester):
         """Test transaction consistency under failure conditions."""
         user_data = create_test_user_data("failure_test")
@@ -300,6 +310,7 @@ class TestAuthBackendDatabaseConsistency:
         assert success, "Transaction rollback consistency failed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_operations_consistency(self, consistency_tester):
         """Test consistency under concurrent operations."""
         user_count = 5
@@ -315,6 +326,7 @@ class TestAuthBackendDatabaseConsistency:
         assert success_count >= 4, f"Only {success_count}/{user_count} concurrent operations succeeded"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_performance_under_load(self, consistency_tester):
         """Test performance consistency under load."""
         start_time = time.time()
@@ -329,10 +341,12 @@ class TestAuthBackendDatabaseConsistency:
         assert total_time < 3.0, f"Load test took {total_time:.3f}s, exceeds 3s target"
 
 
+@pytest.mark.e2e
 class TestAuthBackendDataIntegrity:
     """Data integrity and edge case testing."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_duplicate_user_handling(self, consistency_tester):
         """Test handling of duplicate user creation attempts."""
         user_data = create_test_user_data("duplicate_test")
@@ -349,6 +363,7 @@ class TestAuthBackendDataIntegrity:
             assert "already exists" in str(e).lower() or "duplicate" in str(e).lower()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_orphaned_data_cleanup(self, consistency_tester):
         """Test cleanup of orphaned data after service failures."""
         user_data = create_test_user_data("orphan_test")
@@ -369,6 +384,7 @@ class TestAuthBackendDataIntegrity:
         # In real system, this would be cleaned up by a background job
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_partial_update_consistency(self, consistency_tester):
         """Test consistency when partial updates occur."""
         user_data = create_test_user_data("partial_test")

@@ -24,6 +24,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
+@pytest.mark.e2e
 class TestWebSocketServiceDiscovery:
     """Test suite for WebSocket service discovery mechanisms."""
     
@@ -48,6 +49,7 @@ class TestWebSocketServiceDiscovery:
         finally:
             await ws_client.disconnect()
     
+    @pytest.mark.e2e
     async def test_websocket_config_endpoint_exists(self, backend_client):
         """Test backend provides WebSocket configuration endpoint."""
         # Test service discovery endpoint for WebSocket config
@@ -79,6 +81,7 @@ class TestWebSocketServiceDiscovery:
         assert isinstance(config_data["heartbeat_interval"], (int, float)), "heartbeat_interval must be number"
         assert config_data["heartbeat_interval"] > 0, "heartbeat_interval must be positive"
     
+    @pytest.mark.e2e
     async def test_websocket_config_environment_specific(self, backend_client):
         """Test WebSocket config is environment-specific."""
         response = await backend_client.get("/api/config/websocket")
@@ -106,6 +109,7 @@ class TestWebSocketServiceDiscovery:
                 "Production environment must use secure WebSocket (wss://)"
             )
     
+    @pytest.mark.e2e
     async def test_websocket_config_authentication_integration(self, backend_client):
         """Test WebSocket config includes authentication parameters."""
         response = await backend_client.get("/api/config/websocket")
@@ -137,6 +141,7 @@ class TestWebSocketServiceDiscovery:
             assert isinstance(config_data["auth_header"], str), "auth_header must be string"
             assert config_data["auth_header"], "auth_header cannot be empty"
     
+    @pytest.mark.e2e
     async def test_websocket_config_connection_parameters(self, backend_client):
         """Test WebSocket config includes connection optimization parameters."""
         response = await backend_client.get("/api/config/websocket")
@@ -157,6 +162,7 @@ class TestWebSocketServiceDiscovery:
                 assert isinstance(value, expected_type), f"{param} must be {expected_type.__name__}"
                 assert validator(value), f"{param} validation failed: {value}"
     
+    @pytest.mark.e2e
     async def test_websocket_discovery_at_application_startup(self, backend_client):
         """Test WebSocket config is discoverable during application initialization."""
         # Simulate application startup config discovery
@@ -186,6 +192,7 @@ class TestWebSocketServiceDiscovery:
         finally:
             await unauth_client.close()
     
+    @pytest.mark.e2e
     async def test_websocket_config_caching_headers(self, backend_client):
         """Test WebSocket config includes appropriate caching headers."""
         response = await backend_client.get("/api/config/websocket")
@@ -207,6 +214,7 @@ class TestWebSocketServiceDiscovery:
                     "WebSocket config caching should allow reasonable cache duration"
                 )
     
+    @pytest.mark.e2e
     async def test_websocket_config_version_compatibility(self, backend_client):
         """Test WebSocket config includes version compatibility information."""
         response = await backend_client.get("/api/config/websocket")
@@ -229,6 +237,7 @@ class TestWebSocketServiceDiscovery:
                 assert isinstance(api_version, str), "api_version must be string"
                 assert any(char.isdigit() for char in api_version), "api_version should contain version numbers"
     
+    @pytest.mark.e2e
     async def test_websocket_config_load_balancing_support(self, backend_client):
         """Test WebSocket config supports load balancing scenarios."""
         response = await backend_client.get("/api/config/websocket")
@@ -255,6 +264,7 @@ class TestWebSocketServiceDiscovery:
                 f"Non-local WebSocket URL should not use development ports: {websocket_url}"
             )
     
+    @pytest.mark.e2e
     async def test_websocket_config_security_headers(self, backend_client):
         """Test WebSocket config endpoint returns appropriate security headers."""
         response = await backend_client.get("/api/config/websocket")
@@ -281,6 +291,7 @@ class TestWebSocketServiceDiscovery:
                         f"Security header {header} missing expected value: {expected_values}"
                     )
     
+    @pytest.mark.e2e
     async def test_websocket_config_error_handling(self, backend_client):
         """Test WebSocket config endpoint handles errors gracefully."""
         # Test malformed requests

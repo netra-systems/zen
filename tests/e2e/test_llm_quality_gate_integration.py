@@ -28,6 +28,7 @@ from tests.e2e.agent_response_test_utilities import (
 
 @pytest.mark.integration
 @pytest.mark.real_llm
+@pytest.mark.e2e
 class TestLLMQualityGateIntegration:
     """Test real LLM quality gate validation system."""
     
@@ -60,6 +61,7 @@ class TestLLMQualityGateIntegration:
             "config": config
         }
     
+    @pytest.mark.e2e
     async def test_example_prompt_quality_validation(self, quality_setup):
         """Test quality validation for standard example prompts."""
         llm_manager = quality_setup["llm_manager"]
@@ -97,6 +99,7 @@ class TestLLMQualityGateIntegration:
         assert all(r["quality_meets_threshold"] for r in validation_results)
         assert sum(r["quality_score"] for r in validation_results) / 3 >= 0.6
     
+    @pytest.mark.e2e
     async def test_real_llm_response_quality_scores(self, quality_setup):
         """Test quality scoring with real LLM responses."""
         llm_manager = quality_setup["llm_manager"]
@@ -136,6 +139,7 @@ class TestLLMQualityGateIntegration:
         avg_score = sum(r["overall_score"] for r in quality_results) / len(quality_results)
         assert avg_score >= 0.6
     
+    @pytest.mark.e2e
     async def test_quality_gate_threshold_enforcement(self, quality_setup):
         """Test quality gate threshold enforcement."""
         quality_validator = quality_setup["quality_validator"]
@@ -173,6 +177,7 @@ class TestLLMQualityGateIntegration:
         assert threshold_results[1]["passed"] == threshold_results[1]["expected"]
         assert threshold_results[2]["passed"] == threshold_results[2]["expected"]
     
+    @pytest.mark.e2e
     async def test_batch_quality_validation(self, quality_setup):
         """Test batch quality validation for multiple responses."""
         quality_validator = quality_setup["quality_validator"]
@@ -197,6 +202,7 @@ class TestLLMQualityGateIntegration:
         assert batch_result["average_score"] >= 0.5
         assert validation_time < 10.0  # Performance requirement
     
+    @pytest.mark.e2e
     async def test_quality_gate_integration_with_agents(self, quality_setup):
         """Test quality gate integration with agent workflows."""
         supervisor = quality_setup["supervisor"]
@@ -218,6 +224,7 @@ class TestLLMQualityGateIntegration:
         assert integration_result["response_validated"] is True
         assert integration_result["quality_threshold_met"] is True
     
+    @pytest.mark.e2e
     async def test_quality_metrics_accuracy(self, quality_setup):
         """Test accuracy of quality metrics calculation."""
         quality_validator = quality_setup["quality_validator"]
@@ -317,6 +324,7 @@ class TestLLMQualityGateIntegration:
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_quality_gate_performance():
     """Test quality gate performance requirements."""
     config = get_config()
@@ -335,6 +343,7 @@ async def test_quality_gate_performance():
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_quality_threshold_configuration():
     """Test quality threshold configuration and customization."""
     quality_validator = QualityMetricValidator()

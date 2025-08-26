@@ -91,6 +91,7 @@ class WebSocketRealConnectionTester:
             permissions=["read", "write"]
         )
     
+    @pytest.mark.e2e
     async def test_bidirectional_message_flow(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test bidirectional message flow through agent pipeline."""
         test_messages = [
@@ -152,6 +153,7 @@ class WebSocketRealConnectionTester:
         
         return responses
     
+    @pytest.mark.e2e
     async def test_reconnection_scenario(self, user_id: str) -> Dict[str, Any]:
         """Test WebSocket reconnection after disconnect."""
         # Initial connection
@@ -187,6 +189,7 @@ class WebSocketRealConnectionTester:
         
         return {"reconnection_success": False, "error": reconnection_result["error"]}
     
+    @pytest.mark.e2e
     async def test_invalid_token_rejection(self, invalid_token: str) -> Dict[str, Any]:
         """Test WebSocket properly rejects invalid authentication tokens."""
         try:
@@ -301,6 +304,7 @@ class AgentPipelineValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestWebSocketRealConnection:
     """CRITICAL: Real WebSocket Connection Test with Authentication & Agent Pipeline"""
     
@@ -309,6 +313,7 @@ class TestWebSocketRealConnection:
         """Initialize WebSocket real connection tester."""
         return WebSocketRealConnectionTester()
     
+    @pytest.mark.e2e
     async def test_websocket_authenticated_connection(self, connection_tester):
         """Test successful WebSocket connection with JWT authentication."""
         user_id = TEST_USERS["enterprise"].id
@@ -342,6 +347,7 @@ class TestWebSocketRealConnection:
                 pytest.skip("WebSocket service not available for authentication test")
             raise
     
+    @pytest.mark.e2e
     async def test_bidirectional_message_flow(self, connection_tester):
         """Test bidirectional message flow between client and server."""
         user_id = TEST_USERS["mid"].id
@@ -372,6 +378,7 @@ class TestWebSocketRealConnection:
                 pytest.skip("WebSocket service not available for message flow test")
             raise
     
+    @pytest.mark.e2e
     async def test_message_routing_to_agents(self, connection_tester):
         """Test message routing through agent pipeline."""
         user_id = TEST_USERS["enterprise"].id
@@ -407,6 +414,7 @@ class TestWebSocketRealConnection:
                 pytest.skip("WebSocket service not available for agent routing test")
             raise
     
+    @pytest.mark.e2e
     async def test_websocket_reconnection(self, connection_tester):
         """Test WebSocket reconnection after disconnect."""
         user_id = TEST_USERS["early"].id
@@ -431,6 +439,7 @@ class TestWebSocketRealConnection:
                 pytest.skip("WebSocket service not available for reconnection test")
             raise
     
+    @pytest.mark.e2e
     async def test_invalid_auth_rejection(self, connection_tester):
         """Test proper rejection of invalid authentication tokens."""
         invalid_tokens = [
@@ -464,6 +473,7 @@ class TestWebSocketRealConnection:
             assert result.get("properly_rejected", True), \
                 f"Invalid token was not rejected: {rejection['token']}"
     
+    @pytest.mark.e2e
     async def test_connection_persistence(self, connection_tester):
         """Test WebSocket connection persistence under various conditions."""
         user_id = TEST_USERS["free"].id
@@ -507,6 +517,7 @@ class TestWebSocketRealConnection:
                 pytest.skip("WebSocket service not available for persistence test")
             raise
     
+    @pytest.mark.e2e
     async def test_websocket_message_structure_validation(self, connection_tester):
         """Test WebSocket message structure validation in real connection."""
         user_id = TEST_USERS["mid"].id
@@ -548,6 +559,7 @@ class TestWebSocketRealConnection:
                 pytest.skip("WebSocket service not available for structure test")
             raise
     
+    @pytest.mark.e2e
     async def test_concurrent_websocket_connections(self, connection_tester):
         """Test multiple concurrent WebSocket connections."""
         user_ids = [TEST_USERS["free"].id, TEST_USERS["early"].id, TEST_USERS["mid"].id]

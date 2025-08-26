@@ -30,6 +30,7 @@ import websockets
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
+@pytest.mark.e2e
 class TestProtocolEdgeCases(BaseIntegrationTest):
     """Edge case test suite for protocol handling robustness."""
     
@@ -69,6 +70,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             }
         }
     
+    @pytest.mark.e2e
     def test_websocket_reconnection_protocol_upgrade_EDGE_CASE(self):
         """
         EDGE CASE: WebSocket reconnection with protocol upgrade (WS to WSS).
@@ -165,6 +167,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             f"\n\nWebSocket connections must handle protocol upgrades gracefully."
         )
     
+    @pytest.mark.e2e
     def test_oauth_redirect_uri_protocol_mismatch_EDGE_CASE(self):
         """
         EDGE CASE: OAuth redirect URIs with protocol mismatches.
@@ -242,6 +245,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             f"\n\nOAuth redirect URI mismatches must be properly detected and handled."
         )
     
+    @pytest.mark.e2e
     def test_cors_configuration_https_edge_cases_EDGE_CASE(self):
         """
         EDGE CASE: Cross-origin resource sharing (CORS) with HTTPS.
@@ -330,6 +334,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             f"\n\nCORS must handle protocol transitions and domain variations correctly."
         )
     
+    @pytest.mark.e2e
     def test_asset_loading_mixed_content_prevention_EDGE_CASE(self):
         """
         EDGE CASE: Asset loading (images, fonts) with mixed protocols.
@@ -447,6 +452,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             f"\n\nMixed content asset loading must be properly detected and handled."
         )
     
+    @pytest.mark.e2e
     def test_service_worker_https_requirements_EDGE_CASE(self):
         """
         EDGE CASE: Service worker registration with HTTPS requirements.
@@ -539,6 +545,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             f"\n\nService worker registration must enforce HTTPS requirements correctly."
         )
     
+    @pytest.mark.e2e
     def test_http_to_https_redirect_websocket_impact_EDGE_CASE(self):
         """
         EDGE CASE: HTTP to HTTPS redirects and their impact on WebSocket connections.
@@ -639,6 +646,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
         )
     
     @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    @pytest.mark.e2e
     def test_certificate_validation_staging_production_EDGE_CASE(self):
         """
         EDGE CASE: Certificate validation in staging/production environments.
@@ -731,6 +739,7 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             f"\n\nSSL certificate validation must handle all certificate scenarios correctly."
         )
     
+    @pytest.mark.e2e
     def test_load_balancer_ssl_termination_edge_cases_EDGE_CASE(self):
         """
         EDGE CASE: Load balancer SSL termination edge cases.

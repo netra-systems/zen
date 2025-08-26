@@ -23,10 +23,12 @@ from tests.e2e.quota_management_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestQuotaEnforcement:
     """Test core quota enforcement across all tiers."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_free_tier_quota_blocks_abuse(self):
         """Free tier quota strictly enforced to prevent abuse."""
         user = create_tier_user("free", usage_percentage=0.0)
@@ -40,6 +42,7 @@ class TestQuotaEnforcement:
         assert blocked_count >= 10  # Should block excessive requests
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_tier_unlimited_access(self):
         """Enterprise tier has unlimited quota access."""
         user = create_tier_user("enterprise")
@@ -49,6 +52,7 @@ class TestQuotaEnforcement:
         assert result["tier"] == "enterprise"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_tier_hierarchy_consistency(self):
         """Higher tiers have progressively higher limits."""
         free_limits = TIER_QUOTA_LIMITS["free"]
@@ -60,6 +64,7 @@ class TestQuotaEnforcement:
         assert early_limits["cost_limit_cents"] > free_limits["cost_limit_cents"]
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quota_performance_under_load(self):
         """Quota checks maintain performance under concurrent load."""
         users = [create_tier_user("mid") for _ in range(10)]
@@ -75,10 +80,12 @@ class TestQuotaEnforcement:
             assert "allowed" in result
 
 
+@pytest.mark.e2e
 class TestRateLimiting:
     """Test rate limiting enforcement."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_free_tier_rate_limiting(self):
         """Free tier has strict rate limiting."""
         user = create_tier_user("free")
@@ -86,6 +93,7 @@ class TestRateLimiting:
         assert result["rate_limited"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_request_limits(self):
         """Concurrent request limits prevent resource exhaustion."""
         for tier in ["free", "early", "mid", "enterprise"]:
@@ -100,10 +108,12 @@ class TestRateLimiting:
             assert over_result["allowed"] is False
 
 
+@pytest.mark.e2e
 class TestQuotaResets:
     """Test quota reset functionality."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_daily_quota_reset_restores_access(self):
         """Daily quota reset restores access for blocked users."""
         user = create_tier_user("free")
@@ -118,6 +128,7 @@ class TestQuotaResets:
         assert restored_result["allowed"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quota_reset_timing_accuracy(self):
         """Quota resets maintain timing accuracy."""
         user = create_tier_user("early")
@@ -127,10 +138,12 @@ class TestQuotaResets:
         assert user.current_usage["daily_requests"] == 0
 
 
+@pytest.mark.e2e
 class TestOverageNotifications:
     """Test overage notification system."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_notification_at_80_percent_threshold(self):
         """Overage notifications trigger at 80% usage threshold."""
         user = create_tier_user("free", usage_percentage=0.85)
@@ -138,6 +151,7 @@ class TestOverageNotifications:
         assert notification["should_notify"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_no_notification_below_threshold(self):
         """No notifications below 80% threshold."""
         user = create_tier_user("early", usage_percentage=0.70)
@@ -145,6 +159,7 @@ class TestOverageNotifications:
         assert notification["should_notify"] is False
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_no_standard_notifications(self):
         """Enterprise users don't get standard overage notifications."""
         user = create_tier_user("enterprise", usage_percentage=0.95)
@@ -152,10 +167,12 @@ class TestOverageNotifications:
         assert notification["should_notify"] is False
 
 
+@pytest.mark.e2e
 class TestFairUsageValidation:
     """Test fair usage enforcement across platform."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_abuse_prevention_effectiveness(self):
         """Fair usage prevents system abuse."""
         abuser = create_tier_user("free")
@@ -168,6 +185,7 @@ class TestFairUsageValidation:
             assert blocked_result["allowed"] is False
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_legitimate_usage_not_impacted(self):
         """Fair usage doesn't impact legitimate patterns."""
         user = create_tier_user("mid")
@@ -184,6 +202,7 @@ class TestFairUsageValidation:
         assert allowed_count == len(normal_results)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_tier_isolation(self):
         """Usage in one tier doesn't affect other tiers."""
         free_user = create_tier_user("free")
@@ -197,6 +216,7 @@ class TestFairUsageValidation:
         assert enterprise_result["allowed"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quota_system_reliability(self):
         """Quota system maintains reliability under concurrent load."""
         users = [create_tier_user("early") for _ in range(20)]
@@ -210,6 +230,7 @@ class TestFairUsageValidation:
             assert "tier" in result
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_upgrade_path_preservation(self):
         """Fair usage preserves clear upgrade incentives."""
         free_user = create_tier_user("free")
@@ -223,10 +244,12 @@ class TestFairUsageValidation:
         assert early_quota["cost_remaining_cents"] > free_quota["cost_remaining_cents"]
 
 
+@pytest.mark.e2e
 class TestQuotaIntegration:
     """Test integrated quota management scenarios."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_high_usage_user_workflow(self):
         """High usage user experiences appropriate quota management."""
         user = create_high_usage_scenario("free")
@@ -240,6 +263,7 @@ class TestQuotaIntegration:
         assert current_check["daily_remaining"] < 10
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_mixed_tier_concurrent_usage(self):
         """Mixed tier users can use system concurrently."""
         users = [
@@ -258,6 +282,7 @@ class TestQuotaIntegration:
             assert "allowed" in result
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quota_enforcement_end_to_end(self):
         """End-to-end quota enforcement workflow."""
         user = create_tier_user("free")

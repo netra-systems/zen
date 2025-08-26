@@ -25,6 +25,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
+@pytest.mark.e2e
 class TestWebSocketConnectionLifecycleCompliant:
     """Compliance-focused WebSocket connection lifecycle tests."""
     
@@ -39,6 +40,7 @@ class TestWebSocketConnectionLifecycleCompliant:
             await client.close()
     
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_user_credentials(self, backend_client) -> Dict[str, str]:
         """Get real test user credentials for lifecycle testing."""
         # Create or get test user for lifecycle testing
@@ -63,6 +65,7 @@ class TestWebSocketConnectionLifecycleCompliant:
             "name": "Test User"
         }
     
+    @pytest.mark.e2e
     async def test_jwt_authentication_connection_establishment(self, test_user_credentials):
         """Test WebSocket connection with real JWT authentication."""
         # Get JWT token through real auth flow
@@ -119,6 +122,7 @@ class TestWebSocketConnectionLifecycleCompliant:
             await ws_client.disconnect()
             await auth_client.close()
     
+    @pytest.mark.e2e
     async def test_database_session_handling_compliance(self, backend_client):
         """Test database session handling per SPEC/websockets.xml critical note."""
         # Get token for WebSocket connection
@@ -185,6 +189,7 @@ class TestWebSocketConnectionLifecycleCompliant:
         finally:
             await ws_client.disconnect()
     
+    @pytest.mark.e2e
     async def test_connection_lifecycle_state_transitions(self, backend_client):
         """Test real connection lifecycle state transitions."""
         jwt_token = await backend_client.get_jwt_token()
@@ -245,6 +250,7 @@ class TestWebSocketConnectionLifecycleCompliant:
                 await ws_client.disconnect()
             raise e
     
+    @pytest.mark.e2e
     async def test_concurrent_connection_handling(self, backend_client):
         """Test real concurrent WebSocket connections."""
         jwt_token = await backend_client.get_jwt_token()
@@ -308,6 +314,7 @@ class TestWebSocketConnectionLifecycleCompliant:
                 except:
                     pass  # Best effort cleanup
     
+    @pytest.mark.e2e
     async def test_connection_recovery_after_network_interruption(self, backend_client):
         """Test connection recovery mechanisms."""
         jwt_token = await backend_client.get_jwt_token()
@@ -356,6 +363,7 @@ class TestWebSocketConnectionLifecycleCompliant:
             if ws_client.is_connected():
                 await ws_client.disconnect()
     
+    @pytest.mark.e2e
     async def test_authentication_expiry_handling(self, test_user_credentials):
         """Test WebSocket handling of JWT token expiry."""
         # This test would require a short-lived token, which may not be available
@@ -414,6 +422,7 @@ class TestWebSocketConnectionLifecycleCompliant:
             if ws_client.is_connected():
                 await ws_client.disconnect()
     
+    @pytest.mark.e2e
     async def test_message_structure_compliance_during_lifecycle(self, backend_client):
         """Test message structure compliance throughout connection lifecycle."""
         jwt_token = await backend_client.get_jwt_token()

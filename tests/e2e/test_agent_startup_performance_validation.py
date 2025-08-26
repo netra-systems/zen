@@ -250,6 +250,7 @@ class BaselineValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.performance
+@pytest.mark.e2e
 async def test_agent_startup_baselines():
     """Test agent startup performance meets baseline requirements."""
     baseline_loader = PerformanceBaselineLoader()
@@ -276,6 +277,7 @@ async def _validate_startup_metrics(validator: BaselineValidator,
 
 @pytest.mark.asyncio
 @pytest.mark.performance
+@pytest.mark.e2e
 async def test_response_time_percentiles():
     """Test response time percentiles meet baseline requirements."""
     baseline_loader = PerformanceBaselineLoader()
@@ -301,6 +303,7 @@ async def _validate_percentile_metrics(validator: BaselineValidator,
 @pytest.mark.asyncio
 @pytest.mark.performance
 @pytest.mark.parametrize("tier", ["free", "early", "mid", "enterprise"])
+@pytest.mark.e2e
 async def test_tier_specific_requirements(tier: str):
     """Test performance requirements for specific customer tiers."""
     baseline_loader = PerformanceBaselineLoader()
@@ -322,6 +325,7 @@ async def test_tier_specific_requirements(tier: str):
 
 @pytest.mark.asyncio
 @pytest.mark.performance
+@pytest.mark.e2e
 async def test_resource_usage_limits():
     """Test resource usage during startup stays within limits."""
     baseline_loader = PerformanceBaselineLoader()
@@ -339,6 +343,7 @@ async def test_resource_usage_limits():
 
 @pytest.mark.asyncio
 @pytest.mark.stress
+@pytest.mark.e2e
 async def test_concurrent_startup_performance():
     """Test multiple concurrent agent startups meet performance baselines."""
     baseline_loader = PerformanceBaselineLoader()

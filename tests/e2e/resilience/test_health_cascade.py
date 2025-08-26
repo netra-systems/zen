@@ -294,6 +294,7 @@ class CircuitBreakerValidator:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestHealthCascade:
     """Health check cascade test suite."""
     
@@ -312,6 +313,7 @@ class TestHealthCascade:
         """Create circuit breaker validator."""
         return CircuitBreakerValidator()
     
+    @pytest.mark.e2e
     async def test_auth_unhealthy_affects_backend_status(self, failure_simulator, cascade_validator):
         """Test Auth unhealthy affects Backend status."""
         try:
@@ -330,6 +332,7 @@ class TestHealthCascade:
         finally:
             await failure_simulator.restore_all_services()
     
+    @pytest.mark.e2e
     async def test_backend_unhealthy_affects_frontend(self, failure_simulator, cascade_validator):
         """Test Backend unhealthy affects Frontend."""
         try:
@@ -348,6 +351,7 @@ class TestHealthCascade:
         finally:
             await failure_simulator.restore_all_services()
     
+    @pytest.mark.e2e
     async def test_partial_degradation_handled(self, failure_simulator, cascade_validator):
         """Test partial degradation handled gracefully."""
         try:
@@ -365,6 +369,7 @@ class TestHealthCascade:
         finally:
             await failure_simulator.restore_all_services()
     
+    @pytest.mark.e2e
     async def test_recovery_detected_and_propagated(self, failure_simulator, cascade_validator):
         """Test recovery detected and propagated."""
         try:
@@ -385,6 +390,7 @@ class TestHealthCascade:
         finally:
             await failure_simulator.restore_all_services()
     
+    @pytest.mark.e2e
     async def test_circuit_breakers_activate_correctly(self, circuit_validator):
         """Test circuit breakers activate correctly."""
         try:

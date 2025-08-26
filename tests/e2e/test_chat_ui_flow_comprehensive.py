@@ -96,10 +96,12 @@ class ChatUIFlowTester:
             await self.browser.close()
 
 
+@pytest.mark.e2e
 class TestFrontendLoading:
     """Test suite for frontend loading and initialization issues"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initial_page_load_performance(self):
         """Test that frontend loads within acceptable time limits - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -126,6 +128,7 @@ class TestFrontendLoading:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_javascript_bundle_loading(self):
         """Test that JavaScript bundles load without errors - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -154,6 +157,7 @@ class TestFrontendLoading:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_css_styles_loading(self):
         """Test that CSS styles load and apply correctly - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -186,10 +190,12 @@ class TestFrontendLoading:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestChatInterfaceRendering:
     """Test suite for chat interface component rendering issues"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_chat_components_render(self):
         """Test that all chat components render properly - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -226,6 +232,7 @@ class TestChatInterfaceRendering:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sidebar_rendering(self):
         """Test that chat sidebar renders with proper thread list - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -253,10 +260,12 @@ class TestChatInterfaceRendering:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestMessageInputSubmission:
     """Test suite for message input and submission functionality"""
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_message_input_functionality(self):
         """Test message input field accepts text and submits - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -298,6 +307,7 @@ class TestMessageInputSubmission:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_appears_in_chat(self):
         """Test that sent messages appear in chat history - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -329,10 +339,12 @@ class TestMessageInputSubmission:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestThreadManagement:
     """Test suite for thread creation and management functionality"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_new_thread_creation(self):
         """Test creating new chat threads - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -366,6 +378,7 @@ class TestThreadManagement:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_thread_switching(self):
         """Test switching between different threads - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -403,10 +416,12 @@ class TestThreadManagement:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestUIStateSynchronization:
     """Test suite for UI state synchronization issues"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_connection_status(self):
         """Test WebSocket connection status indicator - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -438,6 +453,7 @@ class TestUIStateSynchronization:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_ui_state_persistence(self):
         """Test UI state persists across page reloads - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -469,10 +485,12 @@ class TestUIStateSynchronization:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestLoadingStatesErrorHandling:
     """Test suite for loading states and error handling"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_loading_indicators(self):
         """Test loading indicators appear during operations - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -511,6 +529,7 @@ class TestLoadingStatesErrorHandling:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_handling_display(self):
         """Test error states display properly - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -552,10 +571,12 @@ class TestLoadingStatesErrorHandling:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestResponsiveDesignMobile:
     """Test suite for responsive design and mobile compatibility"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_mobile_layout_rendering(self):
         """Test chat interface renders properly on mobile - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -587,6 +608,7 @@ class TestResponsiveDesignMobile:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_touch_interactions(self):
         """Test touch interactions work on mobile - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -616,10 +638,12 @@ class TestResponsiveDesignMobile:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestUserFeedbackNotifications:
     """Test suite for user feedback and notification systems"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_success_notifications(self):
         """Test success notifications appear for user actions - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -657,6 +681,7 @@ class TestUserFeedbackNotifications:
             await tester.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_feedback_mechanisms(self):
         """Test user feedback collection mechanisms - SHOULD FAIL"""
         tester = ChatUIFlowTester()
@@ -695,10 +720,12 @@ class TestUserFeedbackNotifications:
             await tester.cleanup()
 
 
+@pytest.mark.e2e
 class TestFullChatFlow:
     """Integration test for complete chat flow from login to conversation"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_chat_journey(self):
         """Test complete user journey: login → chat → conversation - SHOULD FAIL"""
         tester = ChatUIFlowTester()

@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 
+@pytest.mark.e2e
 class TestAgentCompensationIntegrationCore:
     """Test class for agent_compensation_integration_core"""
     

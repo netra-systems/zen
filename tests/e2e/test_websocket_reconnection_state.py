@@ -112,6 +112,7 @@ class WebSocketReconnectionStateTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketReconnectionState:
     """Test Suite 5: WebSocket Reconnection State - Comprehensive Testing."""
     
@@ -125,6 +126,7 @@ class TestWebSocketReconnectionState:
         """Provide enterprise test user ID."""
         return TEST_USERS["enterprise"].id
     
+    @pytest.mark.e2e
     async def test_basic_reconnection_preserves_state(self, state_tester, enterprise_user_id):
         """Test Case 1: Basic reconnection flow preserves complete session state."""
         session_data = await state_tester.setup_session_with_state(enterprise_user_id)
@@ -140,6 +142,7 @@ class TestWebSocketReconnectionState:
         assert state_manager.session_state["user_id"] == enterprise_user_id
         assert state_manager.session_state["agent_context"]["current_task"] == "data_analysis"
     
+    @pytest.mark.e2e
     async def test_message_queue_preservation_and_delivery(self, state_tester, enterprise_user_id):
         """Test Case 2: Message queue preserved and delivered after reconnection."""
         session_data = await state_tester.setup_session_with_state(enterprise_user_id)
@@ -150,6 +153,7 @@ class TestWebSocketReconnectionState:
         assert recovery_result["messages_delivered"] == messages_queued
         assert len(session_data["state_manager"].message_queue) == 0
     
+    @pytest.mark.e2e
     async def test_auth_context_persistence(self, state_tester, enterprise_user_id):
         """Test Case 3: Authentication context maintained across reconnection."""
         session_data = await state_tester.setup_session_with_state(enterprise_user_id)
@@ -163,6 +167,7 @@ class TestWebSocketReconnectionState:
         restored_auth = session_data["state_manager"].session_state.get("auth_context", {})
         assert restored_auth["user_id"] == enterprise_user_id
     
+    @pytest.mark.e2e
     async def test_state_snapshot_recovery(self, state_tester, enterprise_user_id):
         """Test Case 4: Complete state snapshot restored after reconnection."""
         session_data = await state_tester.setup_session_with_state(enterprise_user_id)
@@ -175,6 +180,7 @@ class TestWebSocketReconnectionState:
         assert recovery_result["state_restored"]
         assert "workspace" in session_data["state_manager"].session_state
     
+    @pytest.mark.e2e
     async def test_multiple_reconnections_stability(self, state_tester, enterprise_user_id):
         """Test Case 5: Multiple reconnections handled gracefully without degradation."""
         session_data = await state_tester.setup_session_with_state(enterprise_user_id)
@@ -189,6 +195,7 @@ class TestWebSocketReconnectionState:
         assert all(result["reconnection_successful"] for result in reconnection_results)
         assert all(result["state_restored"] for result in reconnection_results)
     
+    @pytest.mark.e2e
     async def test_reconnection_performance_requirements(self, state_tester, enterprise_user_id):
         """Test Case 6: Reconnection performance meets <2 second requirement."""
         session_data = await state_tester.setup_session_with_state(enterprise_user_id)
@@ -202,6 +209,7 @@ class TestWebSocketReconnectionState:
         max_time = max(performance_results)
         assert max_time < 2.0, f"Reconnection time {max_time:.2f}s exceeds 2s requirement"
     
+    @pytest.mark.e2e
     async def test_concurrent_message_handling_during_reconnect(self, state_tester, enterprise_user_id):
         """Test Case 7: Messages during reconnection handled properly without loss."""
         session_data = await state_tester.setup_session_with_state(enterprise_user_id)

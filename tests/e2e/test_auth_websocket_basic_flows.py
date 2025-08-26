@@ -30,9 +30,11 @@ from auth_service.auth_core.config import AuthConfig
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.e2e
 class TestBasicAuthFlow:
     """Test 1-3: Basic authentication flow"""
     
+    @pytest.mark.e2e
     async def test_1_basic_login_creates_valid_jwt(self):
         """Test 1: Basic login creates valid JWT token"""
         jwt_helper = JWTTestHelper()
@@ -59,6 +61,7 @@ class TestBasicAuthFlow:
         assert "exp" in payload
         assert "iat" in payload
     
+    @pytest.mark.e2e
     async def test_2_jwt_token_contains_required_claims(self):
         """Test 2: JWT token contains all required claims"""
         jwt_helper = JWTTestHelper()
@@ -86,6 +89,7 @@ class TestBasicAuthFlow:
         assert isinstance(payload["iat"], (int, float))
         assert payload["type"] == "access"
     
+    @pytest.mark.e2e
     async def test_3_expired_token_rejected(self):
         """Test 3: Expired JWT token is rejected"""
         jwt_helper = JWTTestHelper()
@@ -110,9 +114,11 @@ class TestBasicAuthFlow:
             jwt.decode(expired_token, jwt_secret, algorithms=[jwt_algorithm])
 
 
+@pytest.mark.e2e
 class TestBasicWebSocketConnection:
     """Test 4-6: Basic WebSocket connection flow"""
     
+    @pytest.mark.e2e
     async def test_4_websocket_connects_with_valid_auth(self):
         """Test 4: WebSocket connects successfully with valid auth token"""
         jwt_helper = JWTTestHelper()
@@ -135,6 +141,7 @@ class TestBasicWebSocketConnection:
         assert websocket.user_id == "test_user_4"
         assert websocket.auth_token == token
     
+    @pytest.mark.e2e
     async def test_5_websocket_rejects_invalid_auth(self):
         """Test 5: WebSocket rejects connection with invalid auth"""
         websocket = MockWebSocket(user_id="test_user_5")
@@ -151,6 +158,7 @@ class TestBasicWebSocketConnection:
                 # Mock: Authentication service isolation for testing without real auth flows
                 await mock_auth(websocket, websocket.auth_token, Mock())
     
+    @pytest.mark.e2e
     async def test_6_websocket_message_round_trip(self):
         """Test 6: WebSocket can send and receive messages"""
         websocket = MockWebSocket(user_id="test_user_6")
@@ -171,9 +179,11 @@ class TestBasicWebSocketConnection:
         assert sent_data == test_message
 
 
+@pytest.mark.e2e
 class TestAuthWebSocketIntegration:
     """Test 7-8: Auth + WebSocket integration"""
     
+    @pytest.mark.e2e
     async def test_7_auth_state_persists_across_reconnect(self):
         """Test 7: Auth state persists when WebSocket reconnects"""
         jwt_helper = JWTTestHelper()
@@ -207,6 +217,7 @@ class TestAuthWebSocketIntegration:
         assert ws2.auth_token == token
         assert ws2.is_authenticated is True
     
+    @pytest.mark.e2e
     async def test_8_multiple_users_isolated_connections(self):
         """Test 8: Multiple users have isolated WebSocket connections"""
         jwt_helper = JWTTestHelper()
@@ -248,9 +259,11 @@ class TestAuthWebSocketIntegration:
             await manager.disconnect_user(user_id, ws)
 
 
+@pytest.mark.e2e
 class TestCoreServiceCommunication:
     """Test 9-10: Core service communication"""
     
+    @pytest.mark.e2e
     async def test_9_auth_service_validates_backend_requests(self):
         """Test 9: Auth service properly validates requests from backend"""
         jwt_helper = JWTTestHelper()
@@ -279,6 +292,7 @@ class TestCoreServiceCommunication:
             assert "read" in result["permissions"]
             assert "write" in result["permissions"]
     
+    @pytest.mark.e2e
     async def test_10_websocket_broadcasts_to_authenticated_users_only(self):
         """Test 10: WebSocket broadcasts messages only to authenticated users"""
         jwt_helper = JWTTestHelper()

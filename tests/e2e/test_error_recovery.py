@@ -180,6 +180,7 @@ class MockDatabasePool:
     features=["circuit_breaker", "connection_recovery", "service_monitoring"],
     data=["error_recovery_test_data"]
 )
+@pytest.mark.e2e
 class TestServiceCrashRecovery:
     """Test service crash detection and automatic recovery"""
     
@@ -189,6 +190,7 @@ class TestServiceCrashRecovery:
         return MockServiceManager("backend_service")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_crash_recovery(self, service_manager):
         """Test automatic service recovery after crash"""
         result = await self._execute_crash_recovery_test(service_manager)
@@ -223,6 +225,7 @@ class TestServiceCrashRecovery:
         assert manager.restart_count == 1, "Service should be restarted once"
 
 
+@pytest.mark.e2e
 class TestWebSocketReconnection:
     """Test WebSocket connection recovery and message preservation"""
     
@@ -232,6 +235,7 @@ class TestWebSocketReconnection:
         return MockWebSocketConnection(f"ws_{uuid.uuid4().hex[:8]}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_reconnection_flow(self, websocket_connection):
         """Test WebSocket reconnection with auth persistence"""
         result = await self._execute_websocket_recovery_test(websocket_connection)
@@ -271,6 +275,7 @@ class TestWebSocketReconnection:
         assert ws.auth_token is not None, "Auth token should be preserved"
 
 
+@pytest.mark.e2e
 class TestDatabaseConnectionRecovery:
     """Test database connection pool exhaustion and recovery"""
     
@@ -280,6 +285,7 @@ class TestDatabaseConnectionRecovery:
         return MockDatabasePool(max_connections=3)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_connection_recovery(self, database_pool):
         """Test database pool recovery from exhaustion"""
         result = await self._execute_db_recovery_test(database_pool)
@@ -322,10 +328,12 @@ class TestDatabaseConnectionRecovery:
         assert not pool.pool_exhausted, "Pool should not be exhausted after recovery"
 
 
+@pytest.mark.e2e
 class TestCircuitBreakerFunctionality:
     """Test circuit breaker patterns for failure prevention"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_circuit_breaker_functionality(self):
         """Test circuit breaker activation and recovery detection"""
         result = await self._execute_circuit_breaker_test()
@@ -377,10 +385,12 @@ class TestCircuitBreakerFunctionality:
         assert result.user_impact_prevented, "Users should be protected from cascading failures"
 
 
+@pytest.mark.e2e
 class TestCascadingFailurePrevention:
     """Test prevention of cascading failures across system components"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cascading_failure_prevention(self):
         """Test system prevents cascading failures across services"""
         result = await self._execute_cascade_prevention_test()
@@ -423,10 +433,12 @@ class TestCascadingFailurePrevention:
         assert result.recovery_time_ms < 500, "Isolation should be immediate"
 
 
+@pytest.mark.e2e
 class TestIntegratedSystemRecovery:
     """Test integrated recovery across all system components"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_system_recovery(self):
         """Test comprehensive system recovery from multiple failure scenarios"""
         results = []

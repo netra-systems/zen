@@ -35,6 +35,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_security_logging_comprehensive_audit_trail(jwt_generator, audit_logger):
     """
     Test Case 1: Security logging and comprehensive audit trail verification.
@@ -139,6 +140,7 @@ async def test_security_logging_comprehensive_audit_trail(jwt_generator, audit_l
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_security_event_correlation_and_pattern_detection(jwt_generator, audit_logger):
     """
     Test Case 2: Security event correlation and pattern detection.
@@ -268,6 +270,7 @@ async def test_security_event_correlation_and_pattern_detection(jwt_generator, a
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_audit_trail_data_integrity_and_retention(jwt_generator, audit_logger):
     """
     Test Case 3: Audit trail data integrity and retention.

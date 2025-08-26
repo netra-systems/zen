@@ -16,6 +16,7 @@ from test_framework.http_client import TestClient
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_health_metrics_collection():
     """
     Test that all services expose health metrics and monitoring data.
@@ -86,6 +87,7 @@ async def test_service_health_metrics_collection():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_log_aggregation_and_correlation():
     """
     Test that logs from different services can be correlated and aggregated.
@@ -165,6 +167,7 @@ async def test_log_aggregation_and_correlation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_error_rate_monitoring():
     """
     Test that services track and report error rates for monitoring.
@@ -238,6 +241,7 @@ async def test_error_rate_monitoring():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_performance_degradation_detection():
     """
     Test that services can detect and report performance degradation.

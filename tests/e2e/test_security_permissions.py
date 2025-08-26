@@ -38,6 +38,7 @@ from tests.clients.backend_client import BackendTestClient
 from tests.clients.websocket_client import WebSocketTestClient
 
 
+@pytest.mark.e2e
 class TestTenantIsolation:
     """Test 1: Tenant Isolation and IDOR Prevention
     
@@ -46,6 +47,7 @@ class TestTenantIsolation:
     """
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_data_isolation_comprehensive(self, db_session: Session, auth_client: AuthTestClient, backend_client: BackendTestClient):
         """Test comprehensive user data isolation across all endpoints"""
         
@@ -129,6 +131,7 @@ class TestTenantIsolation:
                 assert log.get("user_id") == user1_id, "Audit log isolation failure"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_tenant_isolation(self, auth_client: AuthTestClient, websocket_client: WebSocketTestClient):
         """Test tenant isolation in WebSocket connections"""
         
@@ -165,6 +168,7 @@ class TestTenantIsolation:
         await ws2.close()
 
 
+@pytest.mark.e2e
 class TestAdminToolAuthorization:
     """Test 2: Admin Tool Authorization
     
@@ -173,6 +177,7 @@ class TestAdminToolAuthorization:
     """
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_admin_tool_permission_enforcement(self, db_session: Session, auth_client: AuthTestClient, backend_client: BackendTestClient):
         """Test admin tool permission enforcement across different roles"""
         
@@ -245,6 +250,7 @@ class TestAdminToolAuthorization:
         assert standard_logs.status_code in [403, 401], "Standard user should not access log analyzer"
 
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_admin_permission_inheritance_and_delegation(self, db_session: Session):
         """Test complex permission inheritance and delegation scenarios"""
         
@@ -309,6 +315,7 @@ class CustomerTierBasedFeatureGating:
     """
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_feature_availability_by_subscription_tier(self, auth_client: AuthTestClient, backend_client: BackendTestClient):
         """Test feature access based on subscription tier"""
         
@@ -384,6 +391,7 @@ class CustomerTierBasedFeatureGating:
         assert len(rate_limited) > 0, "Free tier should encounter rate limiting"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_usage_quota_enforcement_and_billing(self, db_session: Session, auth_client: AuthTestClient, backend_client: BackendTestClient):
         """Test usage quota enforcement and accurate billing tracking"""
         
@@ -452,6 +460,7 @@ class CustomerTierBasedFeatureGating:
             assert "upgrade" in error_data.get("detail", "").lower()
 
 
+@pytest.mark.e2e
 class TestJWTSecurity:
     """Test 4: JWT Security and Token Validation
     
@@ -460,6 +469,7 @@ class TestJWTSecurity:
     """
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_tampering_detection_comprehensive(self, auth_client: AuthTestClient, backend_client: BackendTestClient):
         """Test comprehensive JWT tampering detection"""
         
@@ -520,6 +530,7 @@ class TestJWTSecurity:
         assert minimal_response.status_code in [401, 403], "JWT with missing claims should be rejected"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_service_token_validation_consistency(self, auth_client: AuthTestClient):
         """Test token validation consistency across different services"""
         
@@ -573,6 +584,7 @@ class TestJWTSecurity:
         assert len(unique_results) == 1, f"Inconsistent token validation across services: {validation_results}"
 
 
+@pytest.mark.e2e
 class TestPIISecretProtection:
     """Test 5: PII and Secret Protection
     
@@ -581,6 +593,7 @@ class TestPIISecretProtection:
     """
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sensitive_data_encryption_and_storage(self, db_session: Session, auth_client: AuthTestClient, backend_client: BackendTestClient):
         """Test encryption of sensitive data at rest and in transit"""
         
@@ -646,6 +659,7 @@ class TestPIISecretProtection:
                 assert "*" in phone or phone.endswith("****"), "Phone should be partially masked"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_logging_sanitization_and_audit_compliance(self, auth_client: AuthTestClient, backend_client: BackendTestClient):
         """Test PII masking in logs and audit trail compliance"""
         

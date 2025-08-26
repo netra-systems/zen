@@ -29,10 +29,12 @@ pytestmark = [
 logger = get_logger(__name__)
 
 
+@pytest.mark.e2e
 class TestComplianceSecurityValidation:
     """Test compliance and security validation patterns."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_data_sanitization_pii_detection(self):
         """
         Test that system properly detects and sanitizes PII data.
@@ -138,6 +140,7 @@ class TestComplianceSecurityValidation:
                 f"PII detection accuracy too low: {avg_accuracy:.2f}, results: {pii_detection_results}"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_audit_logging_compliance_trails(self):
         """
         Test that system maintains proper audit trails for compliance.
@@ -219,6 +222,7 @@ class TestComplianceSecurityValidation:
                 pytest.fail(f"Mandatory audit logging missing for operation: {mandatory_op}")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_encryption_at_rest_validation(self):
         """
         Test that sensitive data is properly encrypted at rest.
@@ -310,6 +314,7 @@ class TestComplianceSecurityValidation:
                     pytest.fail(f"Sensitive data type '{sensitive_type}' must be encrypted")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_input_validation_injection_prevention(self):
         """
         Test that system prevents injection attacks through input validation.
@@ -416,6 +421,7 @@ class TestComplianceSecurityValidation:
                     f"Injection prevention too weak for {attack_type}: {block_rate:.2f} block rate"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_access_control_authorization_matrix(self):
         """
         Test that system enforces proper access control and authorization.

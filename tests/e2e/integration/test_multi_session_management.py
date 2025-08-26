@@ -221,6 +221,7 @@ class MultiDeviceSimulator:
         
         return results
     
+    @pytest.mark.e2e
     async def test_cross_device_sync(self) -> Dict[str, Any]:
         """Test data synchronization across devices."""
         if not self.device_sessions["desktop"] or not self.device_sessions["mobile"]:
@@ -269,6 +270,7 @@ class MultiDeviceSimulator:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestMultiSessionManagement:
     """Comprehensive multi-session management test."""
     
@@ -285,6 +287,7 @@ class TestMultiSessionManagement:
         """Initialize multi-session manager."""
         return MultiSessionManager()
     
+    @pytest.mark.e2e
     async def test_comprehensive_multi_session_management(self, services_manager, session_manager):
         """Test comprehensive multi-session management scenarios.
         

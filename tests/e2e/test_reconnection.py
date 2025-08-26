@@ -52,10 +52,12 @@ except ImportError:
         def build(self): return self._websocket
 
 
+@pytest.mark.e2e
 class TestGracefulReconnectWithStatePreservation:
     """Test graceful reconnection while preserving application state."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_graceful_reconnect_preserves_state(self, reconnection_fixture):
         """Test graceful reconnection preserves user state and session data."""
         user_id = "enterprise_user_001"
@@ -97,10 +99,12 @@ class TestGracefulReconnectWithStatePreservation:
         assert preserved_state["message_continuity"] is True
 
 
+@pytest.mark.e2e
 class TestNetworkFailureRecovery:
     """Test reconnection scenarios after network failures."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_reconnect_after_network_failure(self, reconnection_fixture):
         """Test automatic reconnection after network failure with exponential backoff."""
         user_id = "network_test_user"
@@ -147,10 +151,12 @@ class TestNetworkFailureRecovery:
         }
 
 
+@pytest.mark.e2e
 class TestTokenExpiryReconnection:
     """Test reconnection scenarios with expired authentication tokens."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_reconnect_with_expired_token(self, reconnection_fixture):
         """Test reconnection handling when authentication token expires."""
         user_id = "token_expiry_user"
@@ -161,10 +167,12 @@ class TestTokenExpiryReconnection:
         TokenExpiryTestMethods.assert_token_refresh_success(refresh_result)
 
 
+@pytest.mark.e2e
 class TestMultipleReconnectionStability:
     """Test system stability under multiple rapid reconnection scenarios."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multiple_reconnects_stability(self, reconnection_fixture):
         """Test system stability with multiple rapid reconnections from same user."""
         user_id = "stability_test_user"
@@ -177,10 +185,12 @@ class TestMultipleReconnectionStability:
         assert len(stability_results) == reconnect_count
 
 
+@pytest.mark.e2e
 class TestReconnectionMessageIntegrity:
     """Test message integrity and no-loss guarantees during reconnection."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_no_loss_during_reconnection(self, reconnection_fixture):
         """Test that no messages are lost during reconnection process."""
         user_id = "message_integrity_user"

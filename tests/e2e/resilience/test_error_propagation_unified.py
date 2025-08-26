@@ -70,6 +70,7 @@ class ErrorPropagationTester:
             logger.error(f"Failed to setup test environment: {e}")
             return False
     
+    @pytest.mark.e2e
     async def test_cleanup_test_environment(self) -> None:
         """Clean up test resources."""
         if self.ws_client:
@@ -87,6 +88,7 @@ class AuthErrorPropagationValidator:
         self.tester = tester
         self.auth_errors: List[Dict[str, Any]] = []
     
+    @pytest.mark.e2e
     async def test_invalid_token_error_propagation(self) -> Dict[str, Any]:
         """Test that invalid token errors reach frontend with context."""
         # Create WebSocket connection with invalid token
@@ -117,6 +119,7 @@ class AuthErrorPropagationValidator:
         finally:
             await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_expired_token_error_propagation(self) -> Dict[str, Any]:
         """Test that expired token errors provide actionable messages."""
         # Create expired token (if test infrastructure supports it)
@@ -202,6 +205,7 @@ class BackendErrorStatusValidator:
         self.tester = tester
         self.status_code_tests: List[Dict[str, Any]] = []
     
+    @pytest.mark.e2e
     async def test_404_error_propagation(self) -> Dict[str, Any]:
         """Test that 404 errors propagate with proper status codes."""
         if not self.tester.http_client:
@@ -227,6 +231,7 @@ class BackendErrorStatusValidator:
                 "proper_error_handling": "404" in str(e) or "not found" in str(e).lower()
             }
     
+    @pytest.mark.e2e
     async def test_400_validation_error_propagation(self) -> Dict[str, Any]:
         """Test that validation errors return 400 status codes."""
         if not self.tester.http_client:
@@ -252,6 +257,7 @@ class BackendErrorStatusValidator:
                 "validation_error_handled": "400" in str(e) or "validation" in str(e).lower()
             }
     
+    @pytest.mark.e2e
     async def test_500_server_error_propagation(self) -> Dict[str, Any]:
         """Test that server errors return 500 status codes."""
         if not self.tester.http_client:
@@ -293,6 +299,7 @@ class WebSocketErrorRecoveryValidator:
         self.tester = tester
         self.reconnection_tests: List[Dict[str, Any]] = []
     
+    @pytest.mark.e2e
     async def test_connection_drop_recovery(self) -> Dict[str, Any]:
         """Test that WebSocket reconnects after connection drop."""
         # Setup WebSocket connection with valid auth
@@ -357,6 +364,7 @@ class WebSocketErrorRecoveryValidator:
         finally:
             await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_malformed_message_recovery(self) -> Dict[str, Any]:
         """Test that connection survives malformed message errors."""
         ws_url = self.tester.orchestrator.get_websocket_url()
@@ -414,6 +422,7 @@ class DatabaseErrorGracefulHandler:
         self.tester = tester
         self.db_error_tests: List[Dict[str, Any]] = []
     
+    @pytest.mark.e2e
     async def test_database_connection_error_handling(self) -> Dict[str, Any]:
         """Test that database connection errors don't crash the system."""
         # Test by trying to access an endpoint that requires database
@@ -460,6 +469,7 @@ class NetworkErrorAutoRecovery:
         self.tester = tester
         self.network_tests: List[Dict[str, Any]] = []
     
+    @pytest.mark.e2e
     async def test_timeout_retry_logic(self) -> Dict[str, Any]:
         """Test that timeouts trigger retry logic."""
         # Create client with very short timeout to trigger timeout errors
@@ -503,6 +513,7 @@ class UserFriendlyMessageValidator:
         self.tester = tester
         self.user_message_tests: List[Dict[str, Any]] = []
     
+    @pytest.mark.e2e
     async def test_user_friendly_auth_messages(self) -> Dict[str, Any]:
         """Test that auth errors provide user-friendly, actionable messages."""
         # Test invalid login credentials
@@ -523,6 +534,7 @@ class UserFriendlyMessageValidator:
         except Exception as e:
             return self._analyze_exception_user_friendliness(e, "auth_error")
     
+    @pytest.mark.e2e
     async def test_user_friendly_validation_messages(self) -> Dict[str, Any]:
         """Test that validation errors are user-friendly."""
         if not self.tester.http_client:
@@ -589,6 +601,7 @@ class UserFriendlyMessageValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestErrorPropagationUnified:
     """Comprehensive error propagation chain test across all service boundaries."""
     
@@ -607,6 +620,7 @@ class TestErrorPropagationUnified:
         # Cleanup
         await tester.cleanup_test_environment()
     
+    @pytest.mark.e2e
     async def test_auth_error_propagation_chain(self, error_tester):
         """
         BVJ: Segment: ALL | Goal: Support Cost | Impact: Reduce support burden
@@ -627,6 +641,7 @@ class TestErrorPropagationUnified:
                          expired_token_result.get("actionable", False))
         assert any_actionable, "Auth errors should provide actionable guidance to users"
     
+    @pytest.mark.e2e
     async def test_backend_error_status_codes(self, error_tester):
         """
         BVJ: Segment: ALL | Goal: Support Cost | Impact: Proper error classification
@@ -648,6 +663,7 @@ class TestErrorPropagationUnified:
         server_error_result = await validator.test_500_server_error_propagation()
         assert server_error_result.get("server_error_handling") == "tested", "Server error handling must be tested"
     
+    @pytest.mark.e2e
     async def test_websocket_error_recovery(self, error_tester):
         """
         BVJ: Segment: ALL | Goal: User Experience | Impact: Seamless reconnection
@@ -666,6 +682,7 @@ class TestErrorPropagationUnified:
             assert (malformed_recovery_result.get("connection_survived", False) or 
                    malformed_recovery_result.get("error_handled", False)), "Connection must survive malformed messages"
     
+    @pytest.mark.e2e
     async def test_database_error_graceful_handling(self, error_tester):
         """
         BVJ: Segment: ALL | Goal: System Stability | Impact: Prevent system crashes
@@ -681,6 +698,7 @@ class TestErrorPropagationUnified:
         graceful_handling = db_error_result.get("database_error_handled", False) or db_error_result.get("graceful_handling", False)
         assert db_working or graceful_handling, "Database errors must be handled gracefully"
     
+    @pytest.mark.e2e
     async def test_network_error_auto_recovery(self, error_tester):
         """
         BVJ: Segment: ALL | Goal: Reliability | Impact: Automatic error recovery
@@ -695,6 +713,7 @@ class TestErrorPropagationUnified:
         proper_timeout_handling = timeout_result.get("proper_timeout_handling", False)
         assert request_completed or proper_timeout_handling, "Network timeouts must be handled with retry logic"
     
+    @pytest.mark.e2e
     async def test_user_friendly_error_messages(self, error_tester):
         """
         BVJ: Segment: ALL | Goal: User Experience | Impact: Actionable error messages
@@ -719,6 +738,7 @@ class TestErrorPropagationUnified:
         assert any_user_friendly, "Error messages must be user-friendly"
         assert minimal_jargon, "Error messages should minimize technical jargon"
     
+    @pytest.mark.e2e
     async def test_complete_error_propagation_chain(self, error_tester):
         """
         BVJ: Segment: ALL | Goal: Support Cost | Impact: Comprehensive error handling

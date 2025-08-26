@@ -433,9 +433,11 @@ async def unified_test_harness():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestWebSocketConcurrentOrdering:
     """WebSocket Message Ordering Under Concurrent Load Test."""
     
+    @pytest.mark.e2e
     async def test_websocket_concurrent_ordering_complete(self, unified_test_harness):
         """Complete test of WebSocket message ordering under concurrent load."""
         manager = ConcurrentWebSocketManager(unified_test_harness)

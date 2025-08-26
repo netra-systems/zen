@@ -212,6 +212,7 @@ class ThreadOperationExecutor:
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_switching_executor(test_users):
     """Thread operation executor fixture for switching tests."""
     user = test_users["mid"]
@@ -236,9 +237,11 @@ async def prepared_threads_for_switching(switching_executor):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestThreadUISwitching:
     """Thread UI Switching Test Suite."""
     
+    @pytest.mark.e2e
     async def test_thread_switching_with_history_load(self, prepared_threads_for_switching):
         """Test Case 1: Thread switching loads message history correctly."""
         executor = prepared_threads_for_switching["executor"]
@@ -265,6 +268,7 @@ class TestThreadUISwitching:
         assert len(ui_state["message_history"]) == 5
         assert not ui_state["loading_states"]["messages"]  # Loading complete
     
+    @pytest.mark.e2e
     async def test_thread_switching_between_multiple_threads(self, prepared_threads_for_switching):
         """Test Case 2: Switching between multiple threads maintains state correctly."""
         executor = prepared_threads_for_switching["executor"]
@@ -299,6 +303,7 @@ class TestThreadUISwitching:
             assert switch_event["type"] == "thread_switched"
             assert switch_event["new_thread"] == threads[i]["id"]
     
+    @pytest.mark.e2e
     async def test_thread_switching_ui_loading_states(self, prepared_threads_for_switching):
         """Test Case 3: UI loading states managed correctly during switching."""
         executor = prepared_threads_for_switching["executor"]
@@ -329,6 +334,7 @@ class TestThreadUISwitching:
         ui_state_after = executor.ui_manager.get_current_ui_state()
         assert not ui_state_after["loading_states"]["messages"]
     
+    @pytest.mark.e2e
     async def test_pagination_state_management_during_switching(self, prepared_threads_for_switching):
         """Test Case 4: Message pagination state managed correctly during switching."""
         executor = prepared_threads_for_switching["executor"]
@@ -357,6 +363,7 @@ class TestThreadUISwitching:
         assert pagination["messages_per_page"] == 20
         assert pagination["total_pages"] == 1  # 5 messages / 20 per page = 1 page
     
+    @pytest.mark.e2e
     async def test_concurrent_thread_switching_operations(self, prepared_threads_for_switching):
         """Test Case 5: Concurrent thread switching operations handled correctly."""
         executor = prepared_threads_for_switching["executor"]
@@ -385,6 +392,7 @@ class TestThreadUISwitching:
         assert ui_state["active_thread"] is not None
         assert ui_state["active_thread"]["thread_id"] in [t["id"] for t in threads]
     
+    @pytest.mark.e2e
     async def test_thread_switching_error_recovery(self, switching_executor):
         """Test Case 6: Thread switching error handling and recovery."""
         # Create a valid thread first
@@ -409,6 +417,7 @@ class TestThreadUISwitching:
         updated_ui_state = switching_executor.ui_manager.get_current_ui_state()
         assert updated_ui_state["active_thread"]["thread_id"] == valid_thread_id
     
+    @pytest.mark.e2e
     async def test_thread_switching_websocket_event_ordering(self, prepared_threads_for_switching):
         """Test Case 7: WebSocket events maintain correct ordering during switching."""
         executor = prepared_threads_for_switching["executor"]
@@ -436,6 +445,7 @@ class TestThreadUISwitching:
         switched_threads = [event["new_thread"] for event in switch_history]
         assert switched_threads == switch_sequence, "Switch order must match expected sequence"
     
+    @pytest.mark.e2e
     async def test_thread_switching_context_preservation(self, prepared_threads_for_switching):
         """Test Case 8: Thread context preserved across switching operations."""
         executor = prepared_threads_for_switching["executor"]

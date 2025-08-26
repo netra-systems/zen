@@ -44,6 +44,7 @@ from tests.e2e.integration.websocket_message_format_validators import (
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketMessageFormatValidation:
     """Test #7: WebSocket Message Format Validation - P0 CRITICAL"""
     
@@ -67,6 +68,7 @@ class TestWebSocketMessageFormatValidation:
         """Initialize message structure validator."""
         return MessageStructureValidator()
 
+    @pytest.mark.e2e
     async def test_user_message_content_field_consistency(self, format_validator, field_checker):
         """Test that frontend 'content' field maps correctly to backend 'content' field."""
         user_id = TEST_USERS["enterprise"].id
@@ -115,6 +117,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_message_structure_type_payload_consistency(self, structure_validator):
         """Test message structure is consistent: always {type, payload} format."""
         user_id = TEST_USERS["early"].id
@@ -153,6 +156,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_coroutine_error_handling_validation(self, coroutine_detector):
         """Test that coroutine objects are properly handled (no leaked coroutines)."""
         user_id = TEST_USERS["mid"].id
@@ -196,6 +200,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_agent_event_message_formats(self, format_validator):
         """Test agent events have correct message formats with required fields."""
         user_id = TEST_USERS["enterprise"].id
@@ -248,6 +253,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_streaming_event_format_validation(self, format_validator):
         """Test streaming events (partial_result) have correct format."""
         user_id = TEST_USERS["early"].id
@@ -281,6 +287,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_system_event_format_consistency(self, structure_validator):
         """Test system events have consistent format structure."""
         user_id = TEST_USERS["mid"].id
@@ -305,6 +312,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_field_name_typescript_python_consistency(self, field_checker):
         """Test field names match between frontend TypeScript and backend Python."""
         user_id = TEST_USERS["enterprise"].id
@@ -339,6 +347,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_required_optional_fields_validation(self, format_validator):
         """Test required fields are always present, optional fields have proper defaults."""
         user_id = TEST_USERS["early"].id
@@ -374,6 +383,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_backwards_compatibility_validation(self, field_checker):
         """Test that backwards compatibility is maintained for legacy field names."""
         user_id = TEST_USERS["mid"].id
@@ -409,6 +419,7 @@ class TestWebSocketMessageFormatValidation:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_end_to_end_message_flow_validation(self, format_validator):
         """Test complete end-to-end message flow with format validation."""
         user_id = TEST_USERS["enterprise"].id

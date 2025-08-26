@@ -37,9 +37,11 @@ class SpikeLoadGenerator:
 class SpikeLoadMetrics:
     pass
 
+@pytest.mark.e2e
 class TestDatabaseConnectionPoolStress:
     """Test Case 5: Database Connection Pool Stress Testing"""
     
+    @pytest.mark.e2e
     async def test_database_placeholder(self):
         """Placeholder test to prevent collection errors."""
         # This test is temporarily disabled due to infrastructure dependencies

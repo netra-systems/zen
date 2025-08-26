@@ -256,6 +256,7 @@ class WebSocketTestClient:
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_user_with_token():
     """Create test user and get authentication token."""
     user_data = create_test_user()
@@ -289,10 +290,12 @@ async def websocket_config():
         pytest.fail(f"WebSocket config endpoint unreachable: {e}")
 
 
+@pytest.mark.e2e
 class TestWebSocketConnectionEstablishment:
     """Test WebSocket connection establishment - EXPECTED TO REVEAL AUTH ISSUES."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_config_discovery_service_availability(self):
         """Test WebSocket config discovery - EXPOSES SERVICE AVAILABILITY ISSUES."""
         try:
@@ -321,6 +324,7 @@ class TestWebSocketConnectionEstablishment:
             pytest.fail(f"CRITICAL ISSUE EXPOSED: Backend server not available on localhost:8000 - {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_config_discovery_mock(self):
         """Test WebSocket config parsing logic with mocked response."""
         # Mock a successful config response to test the logic
@@ -348,6 +352,7 @@ class TestWebSocketConnectionEstablishment:
         print("[SUCCESS] WebSocket config parsing logic works correctly")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_service_discovery(self):
         """Test discovery of backend services - EXPOSES SERVICE STARTUP ISSUES."""
         services_to_test = {
@@ -390,6 +395,7 @@ class TestWebSocketConnectionEstablishment:
             pytest.fail("CRITICAL DISCOVERY ISSUE: Not all required services are available for WebSocket testing")
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_automatic_connection_after_login(self, test_user_with_token):
         """Test that WebSocket connects automatically after user login - LIKELY TO FAIL."""
         client = WebSocketTestClient(
@@ -416,6 +422,7 @@ class TestWebSocketConnectionEstablishment:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_authentication_header_method(self, test_user_with_token):
         """Test WebSocket authentication via Authorization header - MIGHT FAIL."""
         client = WebSocketTestClient(
@@ -439,6 +446,7 @@ class TestWebSocketConnectionEstablishment:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_authentication_subprotocol_method(self, test_user_with_token):
         """Test WebSocket authentication via Sec-WebSocket-Protocol - LIKELY TO FAIL."""
         client = WebSocketTestClient(
@@ -458,6 +466,7 @@ class TestWebSocketConnectionEstablishment:
             await client.close()
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_websocket_invalid_token_rejection(self):
         """Test that invalid tokens are properly rejected - MIGHT EXPOSE AUTH BYPASS."""
         client = WebSocketTestClient(
@@ -484,10 +493,12 @@ class TestWebSocketConnectionEstablishment:
             await client.close()
 
 
+@pytest.mark.e2e
 class TestWebSocketMessageRouting:
     """Test message routing and delivery - EXPECTED TO REVEAL MESSAGE LOSS ISSUES."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_basic_message_echo(self, test_user_with_token):
         """Test basic message sending and receiving - MIGHT FAIL due to message loss."""
         client = WebSocketTestClient(
@@ -521,6 +532,7 @@ class TestWebSocketMessageRouting:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_delivery_guarantees(self, test_user_with_token):
         """Test that messages are delivered reliably - EXPECTED TO FAIL."""
         client = WebSocketTestClient(
@@ -569,10 +581,12 @@ class TestWebSocketMessageRouting:
             await client.close()
 
 
+@pytest.mark.e2e
 class TestWebSocketBroadcasting:
     """Test real-time broadcasting between multiple connections - EXPECTED TO FAIL."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_user_broadcasting(self, test_user_with_token):
         """Test broadcasting messages between multiple users - LIKELY TO FAIL."""
         # Create multiple users and connections
@@ -636,6 +650,7 @@ class TestWebSocketBroadcasting:
             )
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_connections_same_user(self, test_user_with_token):
         """Test multiple connections from same user - MIGHT FAIL due to connection limits."""
         clients = []
@@ -683,10 +698,12 @@ class TestWebSocketBroadcasting:
             )
 
 
+@pytest.mark.e2e
 class TestWebSocketReconnectionResilience:
     """Test connection resilience and reconnection - EXPECTED TO FAIL BADLY."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_automatic_reconnection_after_network_interruption(self, test_user_with_token):
         """Test automatic reconnection after network issues - EXPECTED TO FAIL."""
         client = WebSocketTestClient(
@@ -723,6 +740,7 @@ class TestWebSocketReconnectionResilience:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_state_recovery_after_reconnection(self, test_user_with_token):
         """Test that connection state is recovered after reconnection - EXPECTED TO FAIL."""
         client = WebSocketTestClient(
@@ -774,6 +792,7 @@ class TestWebSocketReconnectionResilience:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_queue_persistence_during_disconnection(self, test_user_with_token):
         """Test that messages sent during disconnection are queued - EXPECTED TO FAIL."""
         # This test requires a complex setup with message queuing
@@ -827,10 +846,12 @@ class TestWebSocketReconnectionResilience:
             await client.close()
 
 
+@pytest.mark.e2e
 class TestWebSocketErrorHandling:
     """Test error handling and recovery mechanisms - EXPECTED TO REVEAL ERROR HANDLING GAPS."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_malformed_message_handling(self, test_user_with_token):
         """Test handling of malformed JSON messages - MIGHT CRASH CONNECTION."""
         client = WebSocketTestClient(
@@ -869,6 +890,7 @@ class TestWebSocketErrorHandling:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rate_limiting_enforcement(self, test_user_with_token):
         """Test rate limiting prevents message spam - MIGHT NOT BE IMPLEMENTED."""
         client = WebSocketTestClient(
@@ -923,6 +945,7 @@ class TestWebSocketErrorHandling:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_cleanup_on_error(self, test_user_with_token):
         """Test that connections are properly cleaned up after errors - MIGHT LEAK CONNECTIONS."""
         clients = []
@@ -979,10 +1002,12 @@ class TestWebSocketErrorHandling:
             )
 
 
+@pytest.mark.e2e
 class TestWebSocketHeartbeatMonitoring:
     """Test heartbeat and connection monitoring - EXPECTED TO REVEAL MONITORING GAPS."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_heartbeat_detection_and_response(self, test_user_with_token):
         """Test heartbeat mechanism prevents zombie connections - MIGHT NOT BE IMPLEMENTED."""
         client = WebSocketTestClient(
@@ -1032,6 +1057,7 @@ class TestWebSocketHeartbeatMonitoring:
             await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_zombie_connection_detection(self, test_user_with_token):
         """Test detection of zombie connections - LIKELY TO FAIL."""
         client = WebSocketTestClient(
@@ -1093,6 +1119,7 @@ class TestWebSocketHeartbeatMonitoring:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_memory_leak_detection(test_user_with_token):
     """Test for memory leaks with rapid connection cycles - MIGHT EXPOSE MEMORY LEAKS."""
     connection_stats = {
@@ -1151,10 +1178,12 @@ async def test_websocket_memory_leak_detection(test_user_with_token):
         "At least some connection cycles should succeed"
 
 
+@pytest.mark.e2e
 class TestWebSocketIssuesSummary:
     """Summary of all WebSocket issues exposed by this test suite."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_issues_summary(self):
         """Comprehensive summary of all WebSocket issues discovered."""
         print("\n" + "="*80)

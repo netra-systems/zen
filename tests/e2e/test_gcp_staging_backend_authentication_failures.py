@@ -45,6 +45,7 @@ from tests.e2e.staging_test_helpers import (
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
+@pytest.mark.e2e
 class TestBackendAuthenticationFailures:
     """
     Test suite replicating critical backend authentication failures from GCP staging.
@@ -73,6 +74,7 @@ class TestBackendAuthenticationFailures:
             "User-Agent": "Netra-Frontend/1.0.0"
         }
 
+    @pytest.mark.e2e
     async def test_frontend_backend_api_authentication_fails_with_403(self, staging_auth_client, mock_frontend_request_headers):
         """
         EXPECTED TO FAIL - CRITICAL ISSUE
@@ -108,6 +110,7 @@ class TestBackendAuthenticationFailures:
                 assert response.status_code == 200, f"Expected 200 but got {response.status_code}"
                 assert response.json()["error_code"] != "AUTH_FAILED"
 
+    @pytest.mark.e2e
     async def test_backend_authentication_latency_exceeds_6_seconds(self, staging_auth_client):
         """
         EXPECTED TO FAIL - CRITICAL LATENCY ISSUE
@@ -140,6 +143,7 @@ class TestBackendAuthenticationFailures:
             # Authentication should complete within 2 seconds, but takes 6+ seconds
             assert duration < 2.0, f"Authentication took {duration:.2f}s (expected < 2.0s)"
 
+    @pytest.mark.e2e
     async def test_jwt_token_validation_completely_broken(self, staging_auth_client):
         """
         EXPECTED TO FAIL - JWT VALIDATION FAILURE
@@ -174,6 +178,7 @@ class TestBackendAuthenticationFailures:
             assert validation_result["details"]["signature_valid"] == True
             assert validation_result["details"]["issuer_recognized"] == True
 
+    @pytest.mark.e2e
     async def test_service_to_service_authentication_broken(self):
         """
         EXPECTED TO FAIL - SERVICE AUTH FAILURE
@@ -212,6 +217,7 @@ class TestBackendAuthenticationFailures:
             assert service_auth_response["details"]["permissions_valid"] == True
             assert service_auth_response["details"]["service_registered"] == True
 
+    @pytest.mark.e2e
     async def test_authentication_retry_mechanism_ineffective(self):
         """
         EXPECTED TO FAIL - RETRY LOGIC BROKEN
@@ -247,6 +253,7 @@ class TestBackendAuthenticationFailures:
             unique_errors = set(r["code"] for r in retry_attempts)
             assert len(unique_errors) > 1, "All retry attempts failed identically"
 
+    @pytest.mark.e2e
     async def test_auth_service_unreachable_from_backend(self):
         """
         EXPECTED TO FAIL - AUTH SERVICE CONNECTIVITY
@@ -284,6 +291,7 @@ class TestBackendAuthenticationFailures:
             assert connection_error["details"]["service_health"] == "healthy"
             assert "ECONNREFUSED" not in connection_error["error"]
 
+    @pytest.mark.e2e
     async def test_jwt_signing_key_mismatch_between_services(self):
         """
         EXPECTED TO FAIL - JWT SIGNING KEY ISSUE
@@ -316,6 +324,7 @@ class TestBackendAuthenticationFailures:
             assert jwt_validation_error["details"]["expected_key_id"] == jwt_validation_error["details"]["actual_key_id"]
             assert jwt_validation_error["details"]["environment_mismatch"] == False
 
+    @pytest.mark.e2e
     async def test_frontend_backend_cors_authentication_headers(self):
         """
         EXPECTED TO FAIL - CORS + AUTH HEADERS ISSUE
@@ -347,6 +356,7 @@ class TestBackendAuthenticationFailures:
             assert cors_response["details"]["preflight_failed"] == False
             assert "Authorization" in cors_response["details"]["allowed_headers"]
 
+    @pytest.mark.e2e
     async def test_authentication_environment_configuration_mismatch(self):
         """
         EXPECTED TO FAIL - ENVIRONMENT CONFIG MISMATCH
@@ -380,12 +390,14 @@ class TestBackendAuthenticationFailures:
             assert "staging" in env_config_error["details"]["auth_service_url"]
 
 
+@pytest.mark.e2e
 class TestAuthenticationRecoveryAndDiagnostics:
     """
     Additional tests for authentication recovery mechanisms and diagnostics.
     These tests help identify specific failure points in the auth system.
     """
 
+    @pytest.mark.e2e
     async def test_authentication_system_health_check_fails(self):
         """
         EXPECTED TO FAIL - AUTH HEALTH CHECK
@@ -414,6 +426,7 @@ class TestAuthenticationRecoveryAndDiagnostics:
             for component, health in auth_health_response["components"].items():
                 assert health["status"] in ["healthy", "ok"], f"{component} is unhealthy"
 
+    @pytest.mark.e2e
     async def test_token_refresh_mechanism_broken(self):
         """
         EXPECTED TO FAIL - TOKEN REFRESH FAILURE
@@ -443,6 +456,7 @@ class TestAuthenticationRecoveryAndDiagnostics:
             assert refresh_response["details"]["refresh_endpoint_reachable"] == True
             assert refresh_response["error"] == None
 
+    @pytest.mark.e2e
     async def test_cross_service_token_propagation_fails(self):
         """
         EXPECTED TO FAIL - TOKEN PROPAGATION

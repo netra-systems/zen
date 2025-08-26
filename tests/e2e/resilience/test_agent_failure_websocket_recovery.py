@@ -78,9 +78,11 @@ async def websocket_client():
         await client.close()
 
 
+@pytest.mark.e2e
 class TestAgentFailureRecovery:
     """Test agent failure recovery mechanisms via WebSocket."""
     
+    @pytest.mark.e2e
     async def test_agent_timeout_recovery(self, failure_simulator, error_validator):
         """Test recovery from agent timeout failures."""
         simulator = failure_simulator
@@ -117,6 +119,7 @@ class TestAgentFailureRecovery:
         
         logger.info(f"Agent timeout recovery test completed: {stats}")
     
+    @pytest.mark.e2e
     async def test_network_error_handling(self, failure_simulator, error_validator):
         """Test handling of network connectivity errors."""
         simulator = failure_simulator
@@ -155,6 +158,7 @@ class TestAgentFailureRecovery:
         assert recovery_result["success"]
         logger.info("Network error handling test completed successfully")
     
+    @pytest.mark.e2e
     async def test_processing_error_fallback(self, failure_simulator, error_validator):
         """Test fallback mechanism for processing errors."""
         simulator = failure_simulator
@@ -187,6 +191,7 @@ class TestAgentFailureRecovery:
         
         logger.info("Processing error fallback test completed")
     
+    @pytest.mark.e2e
     async def test_circuit_breaker_activation(self, failure_simulator, circuit_breaker_tester):
         """Test circuit breaker activates after multiple failures."""
         simulator = failure_simulator
@@ -219,6 +224,7 @@ class TestAgentFailureRecovery:
         
         logger.info(f"Circuit breaker test completed: {circuit_stats}")
     
+    @pytest.mark.e2e
     async def test_error_event_communication(self, failure_simulator, error_validator, websocket_client):
         """Test error events are properly communicated via WebSocket."""
         simulator = failure_simulator
@@ -267,6 +273,7 @@ class TestAgentFailureRecovery:
         
         logger.info(f"Error event communication test completed with {len(captured_events)} events")
     
+    @pytest.mark.e2e
     async def test_graceful_degradation(self, failure_simulator, error_validator):
         """Test system gracefully degrades during failures."""
         simulator = failure_simulator
@@ -308,6 +315,7 @@ class TestAgentFailureRecovery:
         logger.info("Graceful degradation test completed")
     
     @pytest.mark.performance
+    @pytest.mark.e2e
     async def test_recovery_performance(self, failure_simulator, circuit_breaker_tester):
         """Test recovery mechanisms complete within performance requirements."""
         simulator = failure_simulator
@@ -353,6 +361,7 @@ class TestAgentFailureRecovery:
                    f"Recovery: {recovery_time:.3f}s, "
                    f"Circuit: {circuit_time:.3f}s")
     
+    @pytest.mark.e2e
     async def test_multiple_concurrent_failures(self, failure_simulator, error_validator):
         """Test handling of multiple concurrent agent failures."""
         simulator = failure_simulator

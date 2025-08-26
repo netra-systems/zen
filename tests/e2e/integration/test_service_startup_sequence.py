@@ -29,6 +29,7 @@ from tests.e2e.startup_sequence_validator import ServiceStartupSequenceValidator
 # PYTEST TEST IMPLEMENTATIONS
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_service_startup_sequence():
     """
     Test #3: Complete Service Startup Sequence with Dependencies
@@ -81,6 +82,7 @@ def _print_startup_success(results):
 
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_dependency_failure_scenarios():
     """
     Test dependency failure scenarios and graceful degradation.
@@ -126,6 +128,7 @@ def _print_failure_success():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_performance_requirements():
     """
     Test performance requirements for service startup.

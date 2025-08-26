@@ -45,6 +45,7 @@ from tests.e2e.staging_test_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestStaticAssets404Failures:
     """
     Test suite replicating critical static asset 404 failures from GCP staging.
@@ -77,6 +78,7 @@ class TestStaticAssets404Failures:
             "/icons/icon-512x512.png"
         ]
 
+    @pytest.mark.e2e
     async def test_favicon_ico_returns_404_in_staging(self, staging_static_client):
         """
         EXPECTED TO FAIL - CRITICAL STATIC ASSET ISSUE
@@ -109,6 +111,7 @@ class TestStaticAssets404Failures:
             assert favicon_response["error"] != "Not Found"
             assert favicon_response["details"]["static_handler_active"] == True
 
+    @pytest.mark.e2e
     async def test_robots_txt_returns_404_missing_seo_file(self):
         """
         EXPECTED TO FAIL - SEO STATIC FILE ISSUE
@@ -140,6 +143,7 @@ class TestStaticAssets404Failures:
             assert robots_response["details"]["seo_impact"] == "none"
             assert robots_response["details"]["staging_deployment_missing_file"] == False
 
+    @pytest.mark.e2e
     async def test_nextjs_static_assets_not_served_properly(self):
         """
         EXPECTED TO FAIL - NEXT.JS STATIC ASSETS ISSUE
@@ -183,6 +187,7 @@ class TestStaticAssets404Failures:
             assert nextjs_assets_response["overall_status"] == "healthy"
             assert nextjs_assets_response["details"]["affects_app_functionality"] == False
 
+    @pytest.mark.e2e
     async def test_public_directory_images_not_accessible(self):
         """
         EXPECTED TO FAIL - PUBLIC DIRECTORY ISSUE
@@ -222,6 +227,7 @@ class TestStaticAssets404Failures:
                 assert details["status"] == 200, f"Image {image_path} not accessible"
                 assert details["served"] == True, f"Image {image_path} not served"
 
+    @pytest.mark.e2e
     async def test_manifest_json_pwa_file_missing(self):
         """
         EXPECTED TO FAIL - PWA MANIFEST ISSUE
@@ -257,6 +263,7 @@ class TestStaticAssets404Failures:
             assert manifest_response["pwa_impact"]["offline_support"] == True
             assert manifest_response["file_details"]["staging_deployment_issue"] == False
 
+    @pytest.mark.e2e
     async def test_static_asset_routing_configuration_incorrect(self):
         """
         EXPECTED TO FAIL - ROUTING CONFIGURATION ISSUE
@@ -301,6 +308,7 @@ class TestStaticAssets404Failures:
             # Overall static serving should work
             assert routing_config_response["overall_static_serving"] == "working"
 
+    @pytest.mark.e2e
     async def test_docker_container_static_files_volume_missing(self):
         """
         EXPECTED TO FAIL - DOCKER VOLUME ISSUE
@@ -350,12 +358,14 @@ class TestStaticAssets404Failures:
             assert build["docker_copy_commands_missing"] == False
 
 
+@pytest.mark.e2e
 class TestStaticAssetRecoveryAndOptimization:
     """
     Additional tests for static asset recovery mechanisms and optimizations.
     These tests help identify specific improvement opportunities.
     """
 
+    @pytest.mark.e2e
     async def test_static_asset_fallback_mechanism_missing(self):
         """
         EXPECTED TO FAIL - FALLBACK MECHANISM
@@ -392,6 +402,7 @@ class TestStaticAssetRecoveryAndOptimization:
             assert degradation["basic_functionality_available"] == True
             assert fallback_response["user_experience"] != "completely_broken"
 
+    @pytest.mark.e2e
     async def test_static_asset_caching_headers_incorrect(self):
         """
         EXPECTED TO FAIL - CACHING HEADERS ISSUE
@@ -435,6 +446,7 @@ class TestStaticAssetRecoveryAndOptimization:
             assert perf["unnecessary_downloads"] == False
             assert perf["user_experience"] != "slow_page_loads"
 
+    @pytest.mark.e2e
     async def test_static_asset_compression_not_enabled(self):
         """
         EXPECTED TO FAIL - COMPRESSION ISSUE
@@ -471,6 +483,7 @@ class TestStaticAssetRecoveryAndOptimization:
             assert compression_response["total_bandwidth_waste"] == "minimal"
             assert compression_response["performance_impact"] != "significant"
 
+    @pytest.mark.e2e
     async def test_static_asset_security_headers_missing(self):
         """
         EXPECTED TO FAIL - SECURITY HEADERS ISSUE

@@ -32,10 +32,12 @@ from tests.e2e.agent_collaboration_helpers import (
 from netra_backend.app.schemas.UserPlan import PlanTier
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestRealAgentCollaboration:
     """Test #1: Real Multi-Agent Collaboration with LLM Integration."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize collaboration test core."""
         core = AgentCollaborationTestCore()
@@ -54,6 +56,7 @@ class TestRealAgentCollaboration:
         return CollaborationFlowValidator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complex_cost_optimization_multi_agent_flow(self, test_core, flow_simulator,
                                                             flow_validator):
         """Test complex cost optimization requiring multiple agents with real LLM calls."""
@@ -69,6 +72,7 @@ class TestRealAgentCollaboration:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_supervisor_to_sub_agent_orchestration(self, test_core, flow_simulator):
         """Test supervisor orchestrating multiple sub-agents with handoff."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)
@@ -79,6 +83,7 @@ class TestRealAgentCollaboration:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_performance_requirements(self, test_core, flow_simulator):
         """Test multi-agent collaboration meets <3 second requirement."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)
@@ -97,6 +102,7 @@ class TestRealAgentCollaboration:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_handoff_and_context_preservation(self, test_core, flow_simulator, flow_validator):
         """Test agent handoff preserves context across multiple agents."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)
@@ -109,6 +115,7 @@ class TestRealAgentCollaboration:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_synthesis_from_multiple_agents(self, test_core, flow_simulator):
         """Test response synthesis from multiple agent outputs."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)
@@ -120,6 +127,7 @@ class TestRealAgentCollaboration:
             await session_data["client"].close()
     
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_quality_gate_validation_multi_agent(self, test_core, flow_simulator):
         """Test quality gate validation of synthesized multi-agent response."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)
@@ -243,10 +251,12 @@ class TestRealAgentCollaboration:
             assert len(result["agents_involved"]) >= 1, f"No agents involved in {agent_type}"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentCollaborationPerformance:
     """Performance validation for multi-agent collaboration operations."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize collaboration performance test core."""
         core = AgentCollaborationTestCore()
@@ -255,6 +265,7 @@ class TestAgentCollaborationPerformance:
         await core.teardown_test_environment()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_multi_agent_orchestration(self, test_core):
         """Test multi-agent system under concurrent orchestration load."""
         sessions = []

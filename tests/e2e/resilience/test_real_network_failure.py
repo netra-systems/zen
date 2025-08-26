@@ -149,10 +149,12 @@ class AutoReconnectionValidator:
         }
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestRealNetworkFailureWithMessageQueue:
     """Test #4: Real Network Failure with Message Queue Preservation."""
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_core(self):
         """Initialize WebSocket test core."""
         return WebSocketResilienceTestCore()
@@ -172,6 +174,7 @@ class TestRealNetworkFailureWithMessageQueue:
         """Initialize auto-reconnection validator."""
         return AutoReconnectionValidator()
     
+    @pytest.mark.e2e
     async def test_real_network_failure_complete_flow(self, test_core, message_queue:
                                                      network_simulator, reconnection_validator):
         """Test complete real network failure and recovery flow."""
@@ -243,6 +246,7 @@ class TestRealNetworkFailureWithMessageQueue:
             if success:
                 message_queue.track_post_recovery_message(message)
     
+    @pytest.mark.e2e
     async def test_network_failure_timing_validation(self, network_simulator):
         """Test that network failure timing meets requirements."""
         start_time = time.time()
@@ -256,6 +260,7 @@ class TestRealNetworkFailureWithMessageQueue:
         assert total_time < 7.0, "Failure duration too long"
         assert recovery_result["network_restored"], "Recovery validation failed"
     
+    @pytest.mark.e2e
     async def test_message_queue_logic_validation(self, message_queue):
         """Test message queue preservation logic without real connections."""
         # Test message tracking

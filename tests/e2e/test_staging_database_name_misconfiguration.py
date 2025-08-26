@@ -16,9 +16,11 @@ from unittest import mock
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 
 
+@pytest.mark.e2e
 class TestStagingDatabaseMisconfiguration:
     """Tests that demonstrate staging database name misconfiguration"""
     
+    @pytest.mark.e2e
     def test_staging_should_not_use_dev_database_name(self):
         """Staging environment MUST NOT use 'netra_dev' as database name.
         
@@ -53,6 +55,7 @@ class TestStagingDatabaseMisconfiguration:
             f"in .env.staging. Staging should use 'netra_staging' or 'postgres' database, " \
             f"NOT 'netra_dev' which is for development environment only."
     
+    @pytest.mark.e2e
     def test_staging_database_url_should_not_contain_netra_dev(self):
         """Staging DATABASE_URL should not reference netra_dev database"""
         # Simulate CORRECT staging environment - Fixed from previous misconfiguration
@@ -80,6 +83,7 @@ class TestStagingDatabaseMisconfiguration:
                 f"This is incorrect! Staging should use a staging-specific database " \
                 f"like 'netra_staging' or 'postgres', not the dev database."
     
+    @pytest.mark.e2e
     def test_database_manager_schema_for_staging(self):
         """Test that staging uses correct schema/database configuration"""
         

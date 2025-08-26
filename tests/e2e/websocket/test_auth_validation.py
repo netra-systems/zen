@@ -153,6 +153,7 @@ class WebSocketAuthTester:
         }
 
 
+@pytest.mark.e2e
 class TestWebSocketAuthValidation:
     """Critical WebSocket Authentication Validation Tests - P0 Security."""
     
@@ -162,11 +163,13 @@ class TestWebSocketAuthValidation:
         return WebSocketAuthTester()
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_client(self):
         """FastAPI test client."""
         return TestClient(app)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_valid_token_allows_connection(self, auth_tester):
         """Test #1: Valid JWT token allows WebSocket connection."""
         user_id = "test_user_valid_123"
@@ -192,6 +195,7 @@ class TestWebSocketAuthValidation:
         assert stats["total_attempts"] == 1
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_invalid_token_rejects_connection(self, auth_tester):
         """Test #2: Invalid JWT token rejects WebSocket connection."""
         user_id = "test_user_invalid_456"
@@ -216,6 +220,7 @@ class TestWebSocketAuthValidation:
         assert stats["failures"] >= 1
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_token_handling(self, auth_tester):
         """Test #3: Expired JWT token properly rejected."""
         user_id = "test_user_expired_789"
@@ -237,6 +242,7 @@ class TestWebSocketAuthValidation:
         assert result["response_time"] < 5.0
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_missing_token_rejection(self, auth_tester):
         """Test #4: Missing token properly rejects connection."""
         result = await auth_tester.simulate_websocket_auth_validation(None, expected_success=False)
@@ -251,6 +257,7 @@ class TestWebSocketAuthValidation:
         assert stats["failures"] >= 1
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_malformed_token_rejection(self, auth_tester):
         """Test #5: Malformed token properly rejected."""
         malformed_token = auth_tester.create_malformed_token()
@@ -264,6 +271,7 @@ class TestWebSocketAuthValidation:
         assert result["response_time"] < 2.0  # Should fail fast on format check
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_refresh_scenario(self, auth_tester):
         """Test #6: Token refresh scenario simulation."""
         user_id = "test_user_refresh_101"
@@ -299,6 +307,7 @@ class TestWebSocketAuthValidation:
         assert refresh_result["matches_expectation"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_auth_attempts(self, auth_tester):
         """Test #7: Concurrent authentication attempts."""
         user_ids = [f"concurrent_user_{i}" for i in range(3)]
@@ -323,6 +332,7 @@ class TestWebSocketAuthValidation:
         assert all(r["response_time"] < 5.0 for r in valid_results)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_comprehensive_auth_validation_scenarios(self, auth_tester):
         """Test #8: Complete authentication validation scenarios."""
         test_scenarios = [
@@ -361,10 +371,12 @@ class TestWebSocketAuthValidation:
 
 
 # Performance and Security Compliance Tests
+@pytest.mark.e2e
 class TestWebSocketAuthCompliance:
     """WebSocket Authentication Compliance and Performance Tests."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_validation_performance_under_5_seconds(self):
         """Ensure all auth validations complete under 5 seconds."""
         tester = WebSocketAuthTester()
@@ -383,6 +395,7 @@ class TestWebSocketAuthCompliance:
         assert result["response_time"] < 5.0
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_critical_security_scenarios_coverage(self):
         """Verify all critical security scenarios are covered."""
         tester = WebSocketAuthTester()
@@ -419,6 +432,7 @@ class TestWebSocketAuthCompliance:
         assert results["expired_token"]["auth_successful"] is False
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_auth_integration_completeness(self):
         """Test WebSocket authentication integration completeness."""
         tester = WebSocketAuthTester()

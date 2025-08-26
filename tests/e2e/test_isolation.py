@@ -141,6 +141,7 @@ async def create_isolated_user_environment(user_id: str, tenant_id: str):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_user_data_isolation():
     """Test that user data remains completely isolated between tenants."""
     if not IMPORTS_AVAILABLE:
@@ -190,6 +191,7 @@ async def _validate_mock_database_isolation(env1: Dict[str, Any], env2: Dict[str
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_agent_state_isolation():
     """Test that agent instances maintain isolated state per user."""
     validator = TenantIsolationValidator()
@@ -236,6 +238,7 @@ async def _test_agent_metadata_isolation(agent1: MockAgentInstance, agent2: Mock
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_resource_isolation():
     """Test that resource limits are enforced per tenant."""
     validator = TenantIsolationValidator()
@@ -294,6 +297,7 @@ async def _test_compute_limits(mock_manager, validator: TenantIsolationValidator
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_error_isolation():
     """Test that errors are contained within tenant boundaries."""
     validator = TenantIsolationValidator()
@@ -332,6 +336,7 @@ async def _simulate_tenant_operation(tenant_id: str) -> str:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cross_tenant_data_access_prevention():
     """Test prevention of cross-tenant data access."""
     if not IMPORTS_AVAILABLE:
@@ -347,6 +352,7 @@ async def test_cross_tenant_data_access_prevention():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_isolation_under_load():
     """Test isolation holds under concurrent load."""
     validator = TenantIsolationValidator()

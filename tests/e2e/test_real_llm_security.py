@@ -92,6 +92,7 @@ class LLMCircuitBreaker:
         return time.time() - self.last_failure_time > self.timeout
 
 
+@pytest.mark.e2e
 class TestRealLLMSecurity:
     """Security tests for real LLM integration."""
     
@@ -112,6 +113,7 @@ class TestRealLLMSecurity:
         return LLMManager(config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_limit_enforcement(self, security_manager, llm_manager):
         """Test cost limit enforcement."""
         large_token_count = 10000  # Would exceed daily limit
@@ -120,6 +122,7 @@ class TestRealLLMSecurity:
         assert not allowed, "Cost limits not enforced"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rate_limit_enforcement(self, security_manager):
         """Test rate limiting."""
         # Simulate rapid requests
@@ -130,6 +133,7 @@ class TestRealLLMSecurity:
         assert not allowed, "Rate limits not enforced"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_circuit_breaker_functionality(self, circuit_breaker):
         """Test circuit breaker prevents cascading failures."""
         # Simulate failures to trip circuit breaker
@@ -139,6 +143,7 @@ class TestRealLLMSecurity:
         assert not circuit_breaker.is_call_allowed(), "Circuit breaker not triggered"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_api_key_security(self):
         """Test API key security and rotation."""
         # Ensure API keys are not exposed
@@ -148,6 +153,7 @@ class TestRealLLMSecurity:
         assert not self._check_for_exposed_keys(config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_prompt_injection_protection(self, llm_manager):
         """Test protection against prompt injection attacks."""
         malicious_prompt = """
@@ -164,6 +170,7 @@ class TestRealLLMSecurity:
             pass  # Rejection is also acceptable
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_filtering(self, llm_manager):
         """Test filtering of sensitive information in responses."""
         if not self._should_run_real_llm_test():
@@ -179,6 +186,7 @@ class TestRealLLMSecurity:
             pytest.skip("LLM call failed - network or API issue")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_security_enforcement(self, security_manager):
         """Test security controls under concurrent load."""
         tasks = []
@@ -242,10 +250,12 @@ class TestRealLLMSecurity:
 
 
 @pytest.mark.security
+@pytest.mark.e2e
 class TestLLMComplianceValidation:
     """Test LLM compliance with security standards."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_data_residency_compliance(self):
         """Test data residency compliance."""
         # Ensure data processing complies with regulations
@@ -255,6 +265,7 @@ class TestLLMComplianceValidation:
         assert hasattr(config, 'llm_region'), "LLM region not configured"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_audit_logging_compliance(self):
         """Test audit logging for compliance."""
         # Ensure all LLM calls are logged for audit
@@ -269,6 +280,7 @@ class TestLLMComplianceValidation:
                 pytest.fail("Audit logging not working")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_retention_policy_compliance(self):
         """Test data retention policy compliance."""
         # Ensure LLM interaction data follows retention policies

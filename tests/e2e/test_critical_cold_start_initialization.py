@@ -66,10 +66,12 @@ class Settings:
 settings = Settings()
 
 
+@pytest.mark.e2e
 class TestDatabaseInitializationRaceConditions:
     """Test database initialization race conditions during cold start."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_01_connection_pool_race_during_cold_start(self):
         """Test connection pool race conditions when multiple services start simultaneously."""
         if not settings.is_postgresql():
@@ -132,6 +134,7 @@ class TestDatabaseInitializationRaceConditions:
             await engine.dispose()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_02_migration_lock_conflicts_multiple_services(self):
         """Test migration lock conflicts when multiple services try to run migrations."""
         if not settings.is_postgresql():
@@ -182,6 +185,7 @@ class TestDatabaseInitializationRaceConditions:
         assert len(waiters) == len(services) - 1, "Other services should wait for lock"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_03_transaction_isolation_concurrent_init(self):
         """Test transaction isolation during concurrent initialization."""
         if not settings.is_postgresql():
@@ -240,6 +244,7 @@ class TestDatabaseInitializationRaceConditions:
         await engine.dispose()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_04_schema_version_mismatch_detection(self):
         """Test detection of schema version mismatches between services."""
         engine = create_async_engine(settings.DATABASE_URL, poolclass=NullPool)
@@ -291,6 +296,7 @@ class TestDatabaseInitializationRaceConditions:
             await engine.dispose()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_05_connection_retry_storm_overwhelming_db(self):
         """Test connection retry storms overwhelming database during failures."""
         if not settings.is_postgresql():
@@ -357,10 +363,12 @@ class TestDatabaseInitializationRaceConditions:
         assert len(successful) > 0, "No connections succeeded during retry storm"
 
 
+@pytest.mark.e2e
 class TestServiceCoordinationFailures:
     """Test service coordination and dependency failures."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_06_services_starting_before_dependencies(self):
         """Test services starting before their dependencies are ready."""
         service_states = {}
@@ -410,6 +418,7 @@ class TestServiceCoordinationFailures:
             print(f"Dependency failures detected: {failures}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_07_health_check_false_positives_during_init(self):
         """Test health check false positives during initialization."""
         
@@ -470,6 +479,7 @@ class TestServiceCoordinationFailures:
         assert len(false_positives) > 0, "Should detect false positive health checks"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_08_port_binding_race_conditions(self):
         """Test port binding race conditions during startup."""
         import socket
@@ -535,6 +545,7 @@ class TestServiceCoordinationFailures:
             assert len(successes) <= 1, f"Multiple services bound to port {port}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_09_service_discovery_timing_issues(self):
         """Test service discovery timing issues during startup."""
         
@@ -597,6 +608,7 @@ class TestServiceCoordinationFailures:
         assert len(discovery_failures) > 0, "Should log discovery failures"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_10_graceful_degradation_optional_services(self):
         """Test graceful degradation when optional services fail."""
         
@@ -656,10 +668,12 @@ class TestServiceCoordinationFailures:
         assert len(health["missing_optional"]) > 0, "Should report missing optional services"
 
 
+@pytest.mark.e2e
 class TestWebSocketInfrastructure:
     """Test WebSocket infrastructure and cross-service communication."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_11_websocket_upgrade_failures_high_rate(self):
         """Test WebSocket upgrade failures during high connection rates."""
         
@@ -714,6 +728,7 @@ class TestWebSocketInfrastructure:
         assert success_rate > 0.8, "Success rate should be reasonable despite failures"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_12_message_buffering_reconnection_storms(self):
         """Test message buffering during reconnection storms."""
         
@@ -775,6 +790,7 @@ class TestWebSocketInfrastructure:
         assert total_buffered > 0, "Should buffer some messages despite storm"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_13_cross_origin_websocket_authentication(self):
         """Test cross-origin WebSocket authentication issues."""
         
@@ -830,6 +846,7 @@ class TestWebSocketInfrastructure:
         assert len(auth.auth_failures) == 3, "Should log authentication failures"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_14_websocket_heartbeat_synchronization(self):
         """Test WebSocket heartbeat synchronization issues."""
         
@@ -909,6 +926,7 @@ class TestWebSocketInfrastructure:
         assert alive_states["client_3"] is False, "Should detect dead connection"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_15_broadcasting_failures_during_restart(self):
         """Test broadcasting failures during service restarts."""
         
@@ -989,10 +1007,12 @@ class TestWebSocketInfrastructure:
         assert len(restart_failures) > 0, "Should detect failures during restart"
 
 
+@pytest.mark.e2e
 class TestAuthenticationSessionManagement:
     """Test authentication and session management during startup."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_16_oauth_provider_initialization_failures(self):
         """Test OAuth provider initialization failures."""
         
@@ -1067,6 +1087,7 @@ class TestAuthenticationSessionManagement:
         assert len(failures) == 2, "Should fail invalid providers"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_17_jwt_key_rotation_during_startup(self):
         """Test JWT key rotation issues during startup."""
         
@@ -1143,6 +1164,7 @@ class TestAuthenticationSessionManagement:
         assert any(f["reason"] == "rotation_in_progress" for f in manager.validation_failures)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_18_session_store_race_conditions(self):
         """Test session store race conditions during concurrent access."""
         
@@ -1209,6 +1231,7 @@ class TestAuthenticationSessionManagement:
             await redis_client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_19_token_validation_cache_warming(self):
         """Test token validation cache warming issues."""
         
@@ -1281,6 +1304,7 @@ class TestAuthenticationSessionManagement:
         assert len(early_misses) > 0, "Should have cache misses during warming"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_20_cross_service_auth_propagation(self):
         """Test cross-service authentication propagation issues."""
         
@@ -1334,10 +1358,12 @@ class TestAuthenticationSessionManagement:
         assert len(propagator.propagation_failures) == 1, "Should log propagation failures"
 
 
+@pytest.mark.e2e
 class TestFrontendAPIIntegration:
     """Test frontend and API integration issues."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_21_api_gateway_init_before_backend(self):
         """Test API gateway initialization before backend is ready."""
         
@@ -1404,6 +1430,7 @@ class TestFrontendAPIIntegration:
         assert len(gateway.request_queue) > 0, "Should queue requests"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_22_cors_configuration_mismatches(self):
         """Test CORS configuration mismatches between services."""
         
@@ -1459,6 +1486,7 @@ class TestFrontendAPIIntegration:
         assert len(gateway_errors) > 0, "Should detect API gateway CORS mismatch"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_23_static_asset_cdn_fallback_failures(self):
         """Test static asset CDN fallback mechanism failures."""
         
@@ -1538,6 +1566,7 @@ class TestFrontendAPIIntegration:
         assert all(r["loaded"] for r in critical_results), "Critical assets must load"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_24_graphql_schema_stitching_errors(self):
         """Test GraphQL schema stitching errors during startup."""
         
@@ -1622,6 +1651,7 @@ class TestFrontendAPIIntegration:
         assert len(missing_deps) > 0, "Should detect missing dependencies"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_25_ssr_hydration_mismatches(self):
         """Test SSR hydration mismatches during initial render."""
         
@@ -1687,10 +1717,12 @@ class TestFrontendAPIIntegration:
         assert len(timestamp_errors) > 0, "Should detect timestamp mismatches"
 
 
+@pytest.mark.e2e
 class TestResourceManagementLimits:
     """Test resource management and system limits."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_26_file_descriptor_exhaustion_startup(self):
         """Test file descriptor exhaustion during startup."""
         
@@ -1737,6 +1769,7 @@ class TestResourceManagementLimits:
                 pass
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_27_memory_allocation_failures(self):
         """Test memory allocation failures during startup."""
         
@@ -1773,6 +1806,7 @@ class TestResourceManagementLimits:
             memory_chunks.clear()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_28_cpu_throttling_detection(self):
         """Test CPU throttling detection during startup."""
         
@@ -1815,6 +1849,7 @@ class TestResourceManagementLimits:
         assert concurrent_duration > 0, "Should measure concurrent performance"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_29_disk_io_saturation_handling(self):
         """Test disk I/O saturation handling during startup."""
         
@@ -1875,6 +1910,7 @@ class TestResourceManagementLimits:
                 pass
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_30_network_bandwidth_limitations(self):
         """Test network bandwidth limitations during startup."""
         

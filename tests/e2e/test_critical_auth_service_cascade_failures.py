@@ -33,10 +33,12 @@ logger = logging.getLogger(__name__)
 
 @env("staging") 
 @env_requires(services=["auth_service", "backend", "frontend"], features=["full_system_configured"])
+@pytest.mark.e2e
 class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
     """E2E test suite for auth service cascade failures across the system."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_database_failure_cascades_to_frontend_login(self):
         """FAILING TEST: Tests auth database failure preventing frontend user login.
         
@@ -98,6 +100,7 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
                     raise
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_service_startup_failure_affects_backend_dependencies(self):
         """FAILING TEST: Tests auth service startup failure affecting backend service dependencies.
         
@@ -159,6 +162,7 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
                 pytest.fail(f"Auth service startup failure caused system-wide issues: {e}")
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_auth_service_shutdown_timeout_affects_deployment_pipeline(self):
         """FAILING TEST: Tests auth service shutdown timeout affecting deployment pipeline.
         
@@ -227,6 +231,7 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
                 pytest.fail(f"Auth service shutdown timeout affected deployment: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_missing_oauth_secrets_cause_system_wide_auth_breakdown(self):
         """FAILING TEST: Tests missing OAuth secrets causing complete authentication breakdown.
         
@@ -334,10 +339,12 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
 
 @env("staging")
 @env_requires(services=["auth_service", "backend"], features=["service_mesh_configured"])
+@pytest.mark.e2e
 class TestAuthServiceInterdependencyFailures(BaseE2ETest):
     """Test auth service interdependency failures in service mesh."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_service_unavailable_affects_backend_startup(self):
         """FAILING TEST: Tests auth service unavailability affecting backend service startup.
         
@@ -376,6 +383,7 @@ class TestAuthServiceInterdependencyFailures(BaseE2ETest):
                 pytest.fail(f"Auth service unavailability prevented backend startup: {e}")
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_auth_service_performance_degradation_cascade(self):
         """FAILING TEST: Tests auth service performance degradation cascading to other services.
         

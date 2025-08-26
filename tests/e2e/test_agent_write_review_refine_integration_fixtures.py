@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 
+@pytest.mark.e2e
 class TestAgentWriteReviewRefineIntegrationFixtures:
     """Test class for agent_write_review_refine_integration_fixtures"""
     
@@ -16,10 +17,12 @@ class TestAgentWriteReviewRefineIntegrationFixtures:
         """Setup for each test method"""
         pass
     
+    @pytest.mark.e2e
     def test_placeholder(self):
         """Placeholder test to ensure file is syntactically valid"""
         assert True
     
+    @pytest.mark.e2e
     def test_basic_functionality(self):
         """Basic functionality test placeholder"""
         # TODO: Implement actual tests

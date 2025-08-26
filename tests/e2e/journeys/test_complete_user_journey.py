@@ -47,6 +47,7 @@ from tests.e2e.helpers.journey.user_journey_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestCompleteUserJourney:
     """Complete user journey integration tests."""
     
@@ -56,6 +57,7 @@ class TestCompleteUserJourney:
         return UserJourneyConfig()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_single_user_complete_journey(self, journey_config):
         """Test complete user journey from login to chat response."""
         # Create test user
@@ -93,6 +95,7 @@ class TestCompleteUserJourney:
         user.journey_metrics["total_duration"] = total_duration
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_user_session_isolation(self, journey_config):
         """Test multiple users with session isolation."""
         users = []
@@ -132,6 +135,7 @@ class TestCompleteUserJourney:
             assert result["success"], f"User {i} message flow failed: {result}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_recovery_scenarios(self, journey_config):
         """Test error recovery across services."""
         user = UserCreationHelper.create_test_user()
@@ -143,6 +147,7 @@ class TestCompleteUserJourney:
         assert recovery_result["coordination_restored"], "Service coordination failed after recovery"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_performance_monitoring(self, journey_config):
         """Test performance monitoring and resource usage."""
         # Collect performance data
@@ -166,6 +171,7 @@ class TestCompleteUserJourney:
                     assert max_time < 40.0, f"Max total journey too slow: {max_time:.2f}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_startup_coordination(self, journey_config):
         """Test service startup and initialization coordination."""
         startup_metrics = await ServiceHealthHelper.test_service_startup_coordination(journey_config)

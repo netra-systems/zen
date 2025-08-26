@@ -123,6 +123,7 @@ def latency_measurer():
 
 
 @pytest.fixture
+@pytest.mark.e2e
 def test_config():
     """Create unified test configuration fixture."""
     return UnifiedTestConfig()
@@ -140,9 +141,11 @@ def mock_http_client():
     return mock_client
 
 
+@pytest.mark.e2e
 class TestFirstByteTime:
     """Test first byte time meets < 100ms target."""
     
+    @pytest.mark.e2e
     async def test_first_byte_time(self, latency_measurer, mock_http_client):
         """Test API first byte time meets 100ms target (BVJ: User perception critical)."""
         await self._run_measurements(latency_measurer, mock_http_client)
@@ -169,9 +172,11 @@ class TestFirstByteTime:
         return await http_client.get("/api/health")
 
 
+@pytest.mark.e2e
 class TestWebSocketLatency:
     """Test WebSocket real-time communication latency < 50ms."""
     
+    @pytest.mark.e2e
     async def test_websocket_message_latency(self, latency_measurer):
         """Test WebSocket message latency meets 50ms target (BVJ: Real-time experience)."""
         websocket = await self._setup_websocket("latency_test")
@@ -205,9 +210,11 @@ class TestWebSocketLatency:
         return {"sent": message, "timestamp": time.time()}
 
 
+@pytest.mark.e2e
 class TestAuthResponseTime:
     """Test authentication response time < 500ms."""
     
+    @pytest.mark.e2e
     async def test_auth_token_validation_latency(self, latency_measurer, test_config):
         """Test auth token validation meets 500ms target (BVJ: Login experience)."""
         test_user = test_config.users["free"]
@@ -236,9 +243,11 @@ class TestAuthResponseTime:
         return {"valid": True, "user_id": user.id, "token": token}
 
 
+@pytest.mark.e2e
 class TestApiP99Latency:
     """Test API P99 latency meets < 200ms target."""
     
+    @pytest.mark.e2e
     async def test_api_p99_latency_target(self, latency_measurer, mock_http_client):
         """Test API P99 latency meets 200ms target (BVJ: Enterprise SLA compliance)."""
         await self._run_api_measurements(latency_measurer, mock_http_client)
@@ -265,6 +274,7 @@ class TestApiP99Latency:
         await asyncio.sleep(processing_time)
         return await http_client.get(endpoint)
     
+    @pytest.mark.e2e
     async def test_database_query_latency(self, latency_measurer):
         """Test database query latency contributes properly to P99."""
         await self._run_db_measurements(latency_measurer)
@@ -293,6 +303,7 @@ class TestApiP99Latency:
 
 @pytest.mark.performance
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_latency_target_summary(latency_measurer):
     """Summary test validating all latency targets are met."""
     failed_targets = _check_all_targets(latency_measurer)

@@ -11,6 +11,7 @@ import asyncio
 import pytest
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_first_time_user_journey():
 
     """Test complete first-time user journey across all services."""
@@ -44,6 +45,7 @@ async def test_first_time_user_journey():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_returning_user_login():
 
     """Test returning user login flow across services."""
@@ -71,6 +73,7 @@ async def test_returning_user_login():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_basic_chat_interaction():
 
     """Test basic chat interaction through WebSocket."""
@@ -95,6 +98,7 @@ async def test_basic_chat_interaction():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_isolation():
 
     """Test that services are properly isolated but can communicate."""
@@ -126,6 +130,7 @@ async def test_service_isolation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_isolation():
 
     """Test that each test gets isolated database."""
@@ -151,6 +156,7 @@ async def test_database_isolation():
         await harness2.stop_all_services()
 
 
+@pytest.mark.e2e
 class TestRealServiceIntegration:
 
     """Test class demonstrating real service integration patterns."""
@@ -170,6 +176,7 @@ class TestRealServiceIntegration:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_to_backend_communication(self, harness):
 
         """Test communication from auth service to backend."""
@@ -196,6 +203,7 @@ class TestRealServiceIntegration:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_data_consistency(self, harness):
 
         """Test that user data is consistent across services."""
@@ -214,6 +222,7 @@ class TestRealServiceIntegration:
 # Performance and load testing examples
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_requests():
 
     """Test system behavior under concurrent load."""

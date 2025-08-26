@@ -361,6 +361,7 @@ class OAuthEndpointValidator:
             logger.error(f"JWT claims validation failed: {e}")
             return {"valid": False, "error": str(e)}
     
+    @pytest.mark.e2e
     async def test_cleanup_test_resources(self) -> None:
         """Clean up OAuth test resources and services"""
         try:
@@ -390,11 +391,13 @@ async def oauth_endpoint_validator():
     await validator.cleanup_test_resources()
 
 
+@pytest.mark.e2e
 class TestOAuthEndpointValidationReal:
     """OAuth Service Endpoint Validation Tests with Real Services"""
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)  # Enterprise performance requirement
+    @pytest.mark.e2e
     async def test_oauth_endpoint_comprehensive_validation(self, oauth_endpoint_validator):
         """
         CRITICAL TEST: Comprehensive OAuth endpoint validation with real services
@@ -437,6 +440,7 @@ class TestOAuthEndpointValidationReal:
         logger.info(f"OAuth endpoint validation completed in {validation_result['execution_time']:.2f}s")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_endpoint_error_scenarios(self, oauth_endpoint_validator):
         """Test OAuth endpoint error handling scenarios"""
         validator = oauth_endpoint_validator
@@ -465,6 +469,7 @@ class TestOAuthEndpointValidationReal:
         logger.info("OAuth endpoint error scenarios validated")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_jwt_token_claims_detailed(self, oauth_endpoint_validator):
         """Test detailed JWT token claims validation for OAuth compliance"""
         validator = oauth_endpoint_validator

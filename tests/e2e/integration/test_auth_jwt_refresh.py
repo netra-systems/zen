@@ -54,6 +54,7 @@ class JWTRefreshTestManager(JWTGenerationTestManager):
         self.refresh_history: list = []
     
 
+    @pytest.mark.e2e
     async def test_refresh_token_flow(self, token_set: TokenSet) -> TokenSet:
 
         """
@@ -164,6 +165,7 @@ class JWTRefreshTestManager(JWTGenerationTestManager):
         return new_token_set
     
 
+    @pytest.mark.e2e
     async def test_refresh_token_validation(self, refresh_token: str) -> Dict[str, Any]:
 
         """Test refresh token validation across services."""
@@ -324,6 +326,7 @@ class JWTRefreshTestManager(JWTGenerationTestManager):
 
 @pytest.mark.asyncio
 
+@pytest.mark.e2e
 class TestJWTRefresh:
 
     """JWT Token Refresh Flow Tests."""
@@ -338,6 +341,7 @@ class TestJWTRefresh:
         return JWTRefreshTestManager()
     
 
+    @pytest.mark.e2e
     async def test_complete_refresh_token_flow(self, jwt_manager):
 
         """
@@ -398,6 +402,7 @@ class TestJWTRefresh:
         logger.info("✓ Token refresh flow successful")
     
 
+    @pytest.mark.e2e
     async def test_refresh_token_validation_behavior(self, jwt_manager):
 
         """
@@ -442,6 +447,7 @@ class TestJWTRefresh:
         logger.info("✓ Refresh token validation behavior correct")
     
 
+    @pytest.mark.e2e
     async def test_expired_refresh_token_handling(self, jwt_manager):
 
         """
@@ -502,6 +508,7 @@ class TestJWTRefresh:
         logger.info("✓ Expired refresh token properly rejected")
     
 
+    @pytest.mark.e2e
     async def test_invalid_refresh_token_security(self, jwt_manager):
 
         """
@@ -563,6 +570,7 @@ class TestJWTRefresh:
         logger.info("✓ Invalid refresh token properly rejected")
     
 
+    @pytest.mark.e2e
     async def test_multiple_refresh_cycles(self, jwt_manager):
 
         """
@@ -642,6 +650,7 @@ class TestJWTRefresh:
         logger.info(f"✓ Multiple refresh cycles successful: {refresh_count} refreshes")
     
 
+    @pytest.mark.e2e
     async def test_refresh_timing_and_expiry_validation(self, jwt_manager):
 
         """

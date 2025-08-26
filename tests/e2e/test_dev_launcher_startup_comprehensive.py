@@ -172,6 +172,7 @@ class DevLauncherStartupTester:
                 
         self.original_env.clear()
         
+    @pytest.mark.e2e
     async def test_clean_startup(self, **config_overrides) -> StartupTestResult:
         """
         Test clean startup without errors.
@@ -251,6 +252,7 @@ class DevLauncherStartupTester:
             processes=processes
         )
         
+    @pytest.mark.e2e
     async def test_port_conflicts_and_resolution(self) -> StartupTestResult:
         """
         Test port conflict detection and resolution.
@@ -330,6 +332,7 @@ class DevLauncherStartupTester:
             processes=self._collect_process_info()
         )
         
+    @pytest.mark.e2e
     async def test_database_connections(self) -> Dict[str, Any]:
         """
         Test database connections and error handling.
@@ -392,6 +395,7 @@ class DevLauncherStartupTester:
             
         return results
         
+    @pytest.mark.e2e
     async def test_service_initialization_order(self) -> Dict[str, Any]:
         """
         Test service initialization order and dependencies.
@@ -455,6 +459,7 @@ class DevLauncherStartupTester:
             
         return results
         
+    @pytest.mark.e2e
     async def test_inter_service_connections(self) -> ServiceConnectivityResult:
         """
         Test connections between services.
@@ -519,6 +524,7 @@ class DevLauncherStartupTester:
             errors=errors
         )
         
+    @pytest.mark.e2e
     async def test_error_handling_missing_dependencies(self) -> Dict[str, Any]:
         """
         Test error handling when dependencies are missing.
@@ -603,6 +609,7 @@ class DevLauncherStartupTester:
             
         return results
         
+    @pytest.mark.e2e
     async def test_cleanup_on_failure(self) -> Dict[str, Any]:
         """
         Test cleanup behavior when startup fails.
@@ -1089,6 +1096,7 @@ async def startup_tester():
 # CRITICAL STARTUP TESTS - DESIGNED TO FAIL INITIALLY
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_clean_startup_comprehensive(startup_tester):
     """
     Test clean startup without errors.
@@ -1113,6 +1121,7 @@ async def test_clean_startup_comprehensive(startup_tester):
 
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_port_conflict_resolution(startup_tester):
     """
     Test port conflict detection and resolution.
@@ -1137,6 +1146,7 @@ async def test_port_conflict_resolution(startup_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_connections_comprehensive(startup_tester):
     """
     Test database connections with realistic but potentially problematic configurations.
@@ -1158,6 +1168,7 @@ async def test_database_connections_comprehensive(startup_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_initialization_order_validation(startup_tester):
     """
     Test service initialization order and dependencies.
@@ -1186,6 +1197,7 @@ async def test_service_initialization_order_validation(startup_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_inter_service_communication(startup_tester):
     """
     Test communication between services.
@@ -1208,6 +1220,7 @@ async def test_inter_service_communication(startup_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_error_handling_missing_dependencies(startup_tester):
     """
     Test error handling when dependencies are missing.
@@ -1235,6 +1248,7 @@ async def test_error_handling_missing_dependencies(startup_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cleanup_on_failure_comprehensive(startup_tester):
     """
     Test cleanup when startup fails.
@@ -1261,6 +1275,7 @@ async def test_cleanup_on_failure_comprehensive(startup_tester):
 
 # Integration test combining multiple failure modes
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_resilience_comprehensive(startup_tester):
     """
     Comprehensive startup resilience test combining multiple potential failure modes.

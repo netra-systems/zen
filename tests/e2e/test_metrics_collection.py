@@ -349,6 +349,7 @@ class MetricsCollectionTestHarness:
         self.clickhouse_validator = ClickHouseMetricsValidator()
         self.dashboard_validator = DashboardDataValidator()
     
+    @pytest.mark.e2e
     async def test_agent_metrics_collection_from_start(self) -> MetricsCollectionResult:
         """Execute comprehensive metrics collection test from agent startup"""
         agent_id, startup_time = await self._measure_agent_startup()
@@ -407,10 +408,12 @@ class MetricsCollectionTestHarness:
 
 # Test Implementation Classes
 
+@pytest.mark.e2e
 class TestAgentMetricsCollection:
     """Test agent metrics collection from startup through storage"""
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_config(self):
         """Create unified test configuration"""
         return UnifiedTestConfig()
@@ -421,6 +424,7 @@ class TestAgentMetricsCollection:
         return MetricsCollectionTestHarness(test_config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_metrics_collection_from_start(self, metrics_harness):
         """Test comprehensive agent metrics collection pipeline"""
         # Execute comprehensive metrics collection test
@@ -451,10 +455,12 @@ class TestAgentMetricsCollection:
 
 # Additional validation tests
 
+@pytest.mark.e2e
 class TestMetricsStorageValidation:
     """Test metrics storage and retrieval validation"""
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_clickhouse_metrics_storage(self):
         """Test ClickHouse metrics storage functionality"""
         validator = ClickHouseMetricsValidator()
@@ -479,10 +485,12 @@ class TestMetricsStorageValidation:
             assert isinstance(stored, bool), "Storage operation should return boolean"
 
 
+@pytest.mark.e2e
 class TestDashboardDataAccess:
     """Test dashboard data availability and access"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_dashboard_data_availability(self):
         """Test dashboard data queries and availability"""
         validator = DashboardDataValidator()

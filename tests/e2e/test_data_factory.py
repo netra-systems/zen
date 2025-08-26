@@ -16,6 +16,7 @@ Architecture:
 """
 
 import hashlib
+import pytest
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -26,6 +27,7 @@ from tests.e2e.config import UnifiedTestConfig
 
 
 @dataclass
+@pytest.mark.e2e
 class TestUserData:
     """Test user with enhanced tracking"""
     id: str
@@ -37,6 +39,7 @@ class TestUserData:
 
 
 @dataclass
+@pytest.mark.e2e
 class TestMessageData:
     """Test message with metadata"""
     id: str
@@ -49,6 +52,7 @@ class TestMessageData:
 
 
 @dataclass
+@pytest.mark.e2e
 class TestThreadData:
     """Test thread with tracking"""
     id: str
@@ -59,6 +63,7 @@ class TestThreadData:
     message_count: int = 0
 
 
+@pytest.mark.e2e
 class TestDataFactory:
     """Factory for generating unique test data for E2E tests"""
     
@@ -210,6 +215,7 @@ class DatabaseSeeder:
         self.seeded_data.append(record)
         return {"status": "seeded", "table": "threads", "id": thread_data.id}
     
+    @pytest.mark.e2e
     async def test_cleanup_test_data(self) -> Dict[str, int]:
         """Remove all seeded test data for cleanup"""
         cleanup_stats = {"users": 0, "messages": 0, "threads": 0}
@@ -302,6 +308,7 @@ def create_test_thread(user_id: str) -> TestThreadData:
     return factory.create_test_thread(user_id=user_id)
 
 
+@pytest.mark.e2e
 async def test_cleanup_test_data(seeder: DatabaseSeeder) -> Dict[str, int]:
     """Quick cleanup all test data"""
     return await seeder.cleanup_test_data()

@@ -192,9 +192,11 @@ async def agent_client(lifecycle_harness):
         await client.websocket.close()
 
 
+@pytest.mark.e2e
 class TestWebSocketAgentMessageLifecycle:
     """Test complete WebSocket-to-Agent message lifecycle with real connections."""
     
+    @pytest.mark.e2e
     async def test_websocket_agent_message_lifecycle(self, agent_client):
         """Test complete message lifecycle with performance validation."""
         tracker = WebSocketLifecycleTracker("lifecycle_test")
@@ -264,9 +266,11 @@ class TestWebSocketAgentMessageLifecycle:
             assert roundtrip_time < 3.0, f"Full roundtrip too slow: {roundtrip_time:.3f}s > 3.0s"
 
 
+@pytest.mark.e2e
 class TestAgentStateManagement:
     """Test agent state transitions during WebSocket lifecycle."""
     
+    @pytest.mark.e2e
     async def test_agent_state_lifecycle(self, agent_client):
         """Test agent state management throughout message processing."""
         await agent_client.establish_connection()
@@ -305,9 +309,11 @@ class TestAgentStateManagement:
         assert 'agent_started' in state_types, "Missing agent_started state"
 
 
+@pytest.mark.e2e
 class TestWebSocketReliability:
     """Test WebSocket connection reliability and error handling."""
     
+    @pytest.mark.e2e
     async def test_connection_resilience(self, lifecycle_harness):
         """Test connection resilience with network interruptions."""
         user_id = str(uuid.uuid4())
@@ -324,6 +330,7 @@ class TestWebSocketReliability:
         reconnect_success = await client.establish_connection()
         assert reconnect_success is True, "Reconnection failed"
     
+    @pytest.mark.e2e
     async def test_message_delivery_guarantees(self, agent_client):
         """Test message delivery reliability."""
         await agent_client.establish_connection()

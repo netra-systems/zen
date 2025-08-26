@@ -28,6 +28,7 @@ from tests.conftest import *
 
 # Add project root to path
 
+@pytest.mark.e2e
 class TestRecoverySupportE2E:
     pass
     # """Abandonment recovery and error support E2E tests"""

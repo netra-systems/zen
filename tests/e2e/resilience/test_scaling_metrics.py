@@ -38,9 +38,11 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
     # return create_scaling_setup(agents, real_llm_manager, real_websocket_manager)
     return {"agents": agents, "llm_manager": real_llm_manager, "websocket_manager": real_websocket_manager}
 
+@pytest.mark.e2e
 class TestScalingMetricsValidation:
     """Test validation of scaling metrics and projections."""
     
+    @pytest.mark.e2e
     async def test_usage_metrics_accuracy(self, scaling_analysis_setup):
         """Test accuracy of usage metrics collection and projection."""
         setup = scaling_analysis_setup
@@ -55,6 +57,7 @@ class TestScalingMetricsValidation:
         assert "triage" in setup["agents"]
         assert "data" in setup["agents"]
     
+    @pytest.mark.e2e
     async def test_cost_projection_validation(self, scaling_analysis_setup):
         """Test validation of cost projection calculations."""
         setup = scaling_analysis_setup

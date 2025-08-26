@@ -707,6 +707,7 @@ class ComprehensiveRateLimitTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_rate_limiting_complete():
     """
     CRITICAL E2E Test: Comprehensive Rate Limiting Implementation

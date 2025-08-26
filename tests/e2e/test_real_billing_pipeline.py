@@ -56,6 +56,7 @@ class BillingPipelineTestCore:
         await create_workload_events_table_if_missing()
         await self._cleanup_test_data()
 
+    @pytest.mark.e2e
     async def test_teardown_test_environment(self):
         """Clean up test environment."""
         await self._cleanup_test_data()
@@ -159,10 +160,12 @@ class ClickHouseMetricsValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestRealBillingPipeline:
     """Test #9: Real Billing Pipeline with ClickHouse Integration."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize billing test core."""
         core = BillingPipelineTestCore()
@@ -181,6 +184,7 @@ class TestRealBillingPipeline:
         return BillingCalculationValidator(CostCalculatorService())
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_billing_pipeline_accuracy(self, test_core, usage_simulator, billing_validator):
         """Test complete billing pipeline from agent usage to invoice generation."""
         workload_id = f"billing_test_{int(time.time())}"
@@ -198,6 +202,7 @@ class TestRealBillingPipeline:
         self._assert_billing_pipeline_accuracy(storage_validation, billing_validation)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_usage_tracking_accuracy(self, test_core, usage_simulator):
         """Test billing accuracy under concurrent agent usage."""
         workload_id = f"billing_concurrent_{int(time.time())}"
@@ -220,6 +225,7 @@ class TestRealBillingPipeline:
         assert len(usage_results) == 5, "Not all concurrent operations completed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_billing_cycle_meter_reset(self, test_core, usage_simulator, billing_validator):
         """Test meter reset at billing cycle boundaries."""
         workload_id = f"billing_cycle_{int(time.time())}"
@@ -238,6 +244,7 @@ class TestRealBillingPipeline:
         assert post_reset_usage["tokens_used"] > 0, "No usage tracked after reset"
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_partial_month_billing_accuracy(self, test_core, usage_simulator, billing_validator):
         """Test billing accuracy for partial month scenarios."""
         workload_id = f"billing_partial_{int(time.time())}"
@@ -348,10 +355,12 @@ class TestRealBillingPipeline:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestBillingEdgeCases:
     """Test billing edge cases and error scenarios."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize billing test core."""
         core = BillingPipelineTestCore()
@@ -360,6 +369,7 @@ class TestBillingEdgeCases:
         await core.teardown_test_environment()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_zero_usage_billing(self, test_core):
         """Test billing calculation for zero usage scenarios."""
         billing_validator = BillingCalculationValidator(CostCalculatorService())
@@ -371,6 +381,7 @@ class TestBillingEdgeCases:
         assert validation["performance_fee_cents"] == 0, "Non-zero performance fee for zero usage"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_overage_billing_accuracy(self, test_core):
         """Test billing accuracy for plan overage scenarios."""
         usage_simulator = UsageTrackingSimulator()

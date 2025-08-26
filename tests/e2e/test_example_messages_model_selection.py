@@ -56,14 +56,17 @@ async def example_handler():
 
 
 @pytest.fixture 
+@pytest.mark.e2e
 async def test_user_id():
     """Generate test user ID"""
     return f"test_user_{uuid4()}"
 
 
+@pytest.mark.e2e
 class TestModelSelectionPrompts:
     """Test model selection example prompts"""
 
+    @pytest.mark.e2e
     async def test_model_effectiveness_evaluation(self, example_handler, test_user_id):
         """Test model effectiveness evaluation prompt"""
         prompt = MODEL_SELECTION_PROMPTS[0]
@@ -76,6 +79,7 @@ class TestModelSelectionPrompts:
         assert response.result is not None
         assert "model" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_kv_cache_audit_prompt(self, example_handler, test_user_id):
         """Test KV cache audit prompt"""
         prompt = MODEL_SELECTION_PROMPTS[1]
@@ -87,6 +91,7 @@ class TestModelSelectionPrompts:
         assert response.status == "completed"
         assert response.result.get("agent_name") is not None
 
+    @pytest.mark.e2e
     async def test_multi_objective_optimization_prompt(self, example_handler, test_user_id):
         """Test multi-objective optimization prompt"""
         prompt = MODEL_SELECTION_PROMPTS[2]
@@ -98,6 +103,7 @@ class TestModelSelectionPrompts:
         assert response.status == "completed"
         assert "multi" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_gpt5_migration_prompt(self, example_handler, test_user_id):
         """Test GPT-5 migration prompt"""
         prompt = MODEL_SELECTION_PROMPTS[3]
@@ -109,6 +115,7 @@ class TestModelSelectionPrompts:
         assert response.status == "completed"
         assert response.result is not None
 
+    @pytest.mark.e2e
     async def test_upgrade_analysis_prompt(self, example_handler, test_user_id):
         """Test upgrade worth analysis prompt"""
         prompt = MODEL_SELECTION_PROMPTS[4]
@@ -137,9 +144,11 @@ class TestModelSelectionPrompts:
         }
 
 
+@pytest.mark.e2e
 class TestModelSelectionBusinessValue:
     """Test business value tracking for model selection"""
 
+    @pytest.mark.e2e
     async def test_model_selection_insights(self, example_handler, test_user_id):
         """Test business insights for model selection"""
         prompt = MODEL_SELECTION_PROMPTS[0]
@@ -153,6 +162,7 @@ class TestModelSelectionBusinessValue:
             assert "business_value_type" in response.business_insights
             assert "performance_score" in response.business_insights
 
+    @pytest.mark.e2e
     async def test_advanced_complexity_handling(self, example_handler, test_user_id):
         """Test handling of advanced complexity prompts"""
         advanced_prompts = [p for p in MODEL_SELECTION_PROMPTS if p["complexity"] == "advanced"]

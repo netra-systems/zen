@@ -100,6 +100,7 @@ async def auth_tester():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_jwt_authentication_success(auth_tester):
     """Test successful JWT authentication through WebSocket."""
     # Act
@@ -115,6 +116,7 @@ async def test_websocket_jwt_authentication_success(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_invalid_jwt_token(auth_tester):
     """Test WebSocket rejects invalid JWT tokens."""
     # Act & Assert
@@ -126,6 +128,7 @@ async def test_websocket_invalid_jwt_token(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_expired_jwt_token(auth_tester):
     """Test WebSocket handles expired JWT tokens."""
     # Arrange - Create expired token
@@ -143,6 +146,7 @@ async def test_websocket_expired_jwt_token(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_token_refresh_flow(auth_tester):
     """Test WebSocket token refresh during active connection."""
     # Arrange
@@ -159,6 +163,7 @@ async def test_websocket_token_refresh_flow(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_multi_user_authentication(auth_tester):
     """Test multiple users can authenticate simultaneously."""
     # Act - Connect multiple users
@@ -176,6 +181,7 @@ async def test_websocket_multi_user_authentication(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_role_based_permissions(auth_tester):
     """Test WebSocket enforces role-based permissions."""
     # Arrange
@@ -201,6 +207,7 @@ async def test_websocket_role_based_permissions(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_session_validation(auth_tester):
     """Test WebSocket validates session consistency."""
     # Arrange
@@ -219,6 +226,7 @@ async def test_websocket_session_validation(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_concurrent_auth_requests(auth_tester):
     """Test WebSocket handles concurrent authentication requests."""
     # Arrange
@@ -244,6 +252,7 @@ async def test_websocket_concurrent_auth_requests(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_auth_state_recovery(auth_tester):
     """Test WebSocket recovers authentication state after reconnection."""
     # Arrange
@@ -272,6 +281,7 @@ async def test_websocket_auth_state_recovery(auth_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_auth_timeout_handling(auth_tester):
     """Test WebSocket handles authentication timeouts gracefully."""
     # Arrange

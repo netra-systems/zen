@@ -33,9 +33,11 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
     # return create_scaling_setup(agents, real_llm_manager, real_websocket_manager)  # Commented out - missing import
     return {"agents": agents, "llm_manager": real_llm_manager, "websocket_manager": real_websocket_manager}
 
+@pytest.mark.e2e
 class TestScalingEdgeCases:
     """Test edge cases in scaling analysis workflows."""
     
+    @pytest.mark.e2e
     async def test_extreme_usage_increase(self, scaling_analysis_setup):
         """Test handling of extreme usage increase scenarios."""
         setup = scaling_analysis_setup
@@ -47,6 +49,7 @@ class TestScalingEdgeCases:
         assert setup is not None
         assert "agents" in setup
         
+    @pytest.mark.e2e
     async def test_declining_usage_analysis(self, scaling_analysis_setup):
         """Test analysis of declining usage scenarios."""
         setup = scaling_analysis_setup

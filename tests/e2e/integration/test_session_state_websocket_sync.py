@@ -353,6 +353,7 @@ class MultiTabSessionCoordinator:
 
 @pytest.mark.asyncio
 
+@pytest.mark.e2e
 class TestSessionStateWebSocketSync:
 
     """Session State WebSocket Sync Integration Test Suite."""
@@ -360,6 +361,7 @@ class TestSessionStateWebSocketSync:
 
     @pytest.fixture
 
+    @pytest.mark.e2e
     async def test_user_id(self):
 
         """Provide test user ID for session testing."""
@@ -369,6 +371,7 @@ class TestSessionStateWebSocketSync:
 
     @pytest.fixture
 
+    @pytest.mark.e2e
     async def test_session_manager(self, test_user_id):
 
         """Initialize session state manager with Redis."""
@@ -382,6 +385,7 @@ class TestSessionStateWebSocketSync:
 
     @pytest.fixture
 
+    @pytest.mark.e2e
     async def test_websocket_simulator(self, test_user_id):
 
         """Initialize WebSocket connection simulator."""
@@ -389,6 +393,7 @@ class TestSessionStateWebSocketSync:
         return WebSocketConnectionSimulator(test_user_id)
     
 
+    @pytest.mark.e2e
     async def test_basic_session_state_preservation(self, session_manager, websocket_simulator):
 
         """Test Case 1: Basic session state preserved across reconnection."""
@@ -427,6 +432,7 @@ class TestSessionStateWebSocketSync:
         assert sync_result["state_synchronized"]
     
 
+    @pytest.mark.e2e
     async def test_websocket_reconnection_message_delivery(self, session_manager, websocket_simulator):
 
         """Test Case 2: Messages queued during disconnection are delivered."""
@@ -456,6 +462,7 @@ class TestSessionStateWebSocketSync:
         assert len(websocket_simulator.messages_sent) >= initial_queued
     
 
+    @pytest.mark.e2e
     async def test_multi_tab_session_coordination(self, test_user_id):
 
         """Test Case 3: Multi-tab session state coordination works correctly."""
@@ -497,6 +504,7 @@ class TestSessionStateWebSocketSync:
         assert session_state["ui_mode"] == "advanced"
     
 
+    @pytest.mark.e2e
     async def test_session_version_conflict_resolution(self, session_manager):
 
         """Test Case 4: Session version conflicts resolved correctly."""
@@ -528,6 +536,7 @@ class TestSessionStateWebSocketSync:
         assert final_state["concurrent_update"] == "second"  # Last update wins
     
 
+    @pytest.mark.e2e
     async def test_reconnection_performance_requirement(self, session_manager, websocket_simulator):
 
         """Test Case 5: Reconnection meets <2 second performance requirement."""
@@ -563,6 +572,7 @@ class TestSessionStateWebSocketSync:
         assert avg_time < 1.0, f"Avg reconnection time {avg_time:.3f}s should be under 1s"
     
 
+    @pytest.mark.e2e
     async def test_session_state_expiry_handling(self, session_manager, test_user_id):
 
         """Test Case 6: Expired session state handled gracefully."""
@@ -597,6 +607,7 @@ class TestSessionStateWebSocketSync:
         assert new_state["session_version"] == 1
     
 
+    @pytest.mark.e2e
     async def test_tab_isolation_and_cleanup(self, test_user_id):
 
         """Test Case 7: Tab isolation maintained and cleanup works."""
@@ -634,6 +645,7 @@ class TestSessionStateWebSocketSync:
         assert broadcast_result["tabs_notified"] == 1
     
 
+    @pytest.mark.e2e
     async def test_concurrent_reconnection_handling(self, test_user_id):
 
         """Test Case 8: Concurrent reconnections from multiple tabs handled."""

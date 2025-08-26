@@ -237,6 +237,7 @@ async def _restore_database_connections(self) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_agent_startup_with_rate_limiting():
 
     """Test 7: Validate agent startup and behavior under rate limiting conditions.
@@ -321,6 +322,7 @@ async def _assert_rate_limiting_success_criteria(responses: List[Dict[str, Any]]
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_agent_startup_database_connectivity_failure_recovery():
 
     """Test 8: Validate agent graceful degradation and recovery from database failures.

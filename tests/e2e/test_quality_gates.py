@@ -32,6 +32,7 @@ from netra_backend.tests.helpers.quality_gate_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestResponseQualityValidation:
     """Test response quality validation functionality"""
 
@@ -41,6 +42,7 @@ class TestResponseQualityValidation:
         return create_quality_service()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_quality_validation(self, quality_service):
         """Test that quality checks pass for good responses"""
         content = self._create_high_quality_content()
@@ -51,6 +53,7 @@ class TestResponseQualityValidation:
         assert result.metrics.quality_level != QualityLevel.UNACCEPTABLE
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_low_quality_rejection(self, quality_service):
         """Test that poor responses are blocked"""
         content = "Generally speaking, you might want to consider optimizing."
@@ -60,6 +63,7 @@ class TestResponseQualityValidation:
         assert result.metrics.generic_phrase_count >= 1
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quality_metrics_tracking(self, quality_service):
         """Test metrics are stored correctly in databases"""
         content = "GPU memory reduced by 4GB through optimization"
@@ -72,6 +76,7 @@ class TestResponseQualityValidation:
         assert ContentType.OPTIMIZATION in quality_service.metrics_history
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_quality_feedback_loop(self, quality_service):
         """Test user feedback integration works"""
         content = "Moderate quality response for threshold testing"
@@ -95,6 +100,7 @@ class TestResponseQualityValidation:
         """
 
 
+@pytest.mark.e2e
 class TestQualityMetricsStorage:
     """Test quality metrics persistence functionality"""
 
@@ -104,6 +110,7 @@ class TestQualityMetricsStorage:
         return create_quality_service()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_batch_validation_tracking(self, quality_service):
         """Test batch validation properly tracks all metrics"""
         contents = [
@@ -118,6 +125,7 @@ class TestQualityMetricsStorage:
         assert all(isinstance(result, ValidationResult) for result in results)
 
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_quality_statistics_retrieval(self, quality_service):
         """Test quality statistics can be retrieved correctly"""
         # Add test data
@@ -136,6 +144,7 @@ class TestQualityMetricsStorage:
             assert 'count' in stats['optimization']
 
 
+@pytest.mark.e2e
 class TestLowQualityDetection:
     """Test low-quality content detection and handling"""
 
@@ -145,6 +154,7 @@ class TestLowQualityDetection:
         return create_quality_service()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_generic_response_detection(self, quality_service):
         """Test generic responses are properly detected"""
         content = "It is important to note that generally speaking, you should consider optimizing."
@@ -154,6 +164,7 @@ class TestLowQualityDetection:
         assert result.metrics.generic_phrase_count >= 2
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_circular_reasoning_detection(self, quality_service):
         """Test circular reasoning detection works"""
         content = "To optimize the system, you should optimize by optimizing the optimization."
@@ -163,6 +174,7 @@ class TestLowQualityDetection:
         assert result.metrics.circular_reasoning_detected == True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_retry_suggestions_provided(self, quality_service):
         """Test retry suggestions are provided for poor content"""
         content = "Generally speaking, it might be good to optimize things."
@@ -173,6 +185,7 @@ class TestLowQualityDetection:
         assert result.retry_prompt_adjustments is not None
 
 
+@pytest.mark.e2e
 class TestQualityThresholds:
     """Test quality threshold adjustments and feedback integration"""
 
@@ -185,6 +198,7 @@ class TestQualityThresholds:
         return service
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_threshold_adjustment_simulation(self, quality_service):
         """Test quality thresholds can be adjusted"""
         content = "GPU optimization reduced memory usage significantly"
@@ -200,6 +214,7 @@ class TestQualityThresholds:
         assert isinstance(result_strict, ValidationResult)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_feedback_data_structure(self, quality_service):
         """Test feedback data has expected structure for integration"""
         feedback_data = {

@@ -31,6 +31,7 @@ class JWTSecretSynchronizationTester:
         self.test_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"  # Use actual env JWT secret
         self.harness = UnifiedE2ETestHarness()  # Integration with UnifiedE2ETestHarness
     
+    @pytest.mark.e2e
     async def test_jwt_creation_and_cross_service_validation(self) -> Dict[str, Any]:
         """Test 1: Create JWT in Auth and validate across Backend and WebSocket."""
         start_time = time.time()
@@ -64,6 +65,7 @@ class JWTSecretSynchronizationTester:
             "consistent_handling": self._check_consistency(auth_result, backend_result, websocket_result)
         }
     
+    @pytest.mark.e2e
     async def test_jwt_secret_rotation(self) -> Dict[str, Any]:
         """Test 2: Simulate secret rotation and verify service behavior."""
         start_time = time.time()
@@ -113,6 +115,7 @@ class JWTSecretSynchronizationTester:
             "total_duration": duration
         }
     
+    @pytest.mark.e2e
     async def test_mismatched_secret_handling(self) -> Dict[str, Any]:
         """Test 3: Configure services with different secrets and test rejection."""
         start_time = time.time()
@@ -143,6 +146,7 @@ class JWTSecretSynchronizationTester:
             "consistent_rejection": self._check_consistent_rejection(auth_result, backend_result, websocket_result)
         }
     
+    @pytest.mark.e2e
     async def test_performance_validation(self) -> Dict[str, Any]:
         """Test 4: Measure JWT validation performance across services."""
         user_id = f"test-user-{int(time.time())}"
@@ -162,6 +166,7 @@ class JWTSecretSynchronizationTester:
             "all_services_responded": all(r.get("status") or r.get("connected") is not None for r in results)
         }
     
+    @pytest.mark.e2e
     async def test_edge_cases(self) -> Dict[str, Any]:
         """Test 5: Handle expired tokens, malformed tokens, and clock skew."""
         start_time = time.time()
@@ -263,6 +268,7 @@ class JWTSecretSynchronizationTester:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_creation_and_cross_service_validation():
     """BVJ: Segment: ALL | Goal: Security | Impact: All authenticated operations"""
     tester = JWTSecretSynchronizationTester()
@@ -275,6 +281,7 @@ async def test_jwt_creation_and_cross_service_validation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_secret_rotation():
     """Test JWT secret rotation and propagation across all services."""
     tester = JWTSecretSynchronizationTester()
@@ -286,6 +293,7 @@ async def test_jwt_secret_rotation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_mismatched_secret_handling():
     """Test that mismatched secrets cause consistent failures across all services."""
     tester = JWTSecretSynchronizationTester()
@@ -296,6 +304,7 @@ async def test_mismatched_secret_handling():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_performance_validation():
     """Test JWT validation performance meets <10s requirement across services."""
     tester = JWTSecretSynchronizationTester()
@@ -307,6 +316,7 @@ async def test_performance_validation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_edge_cases():
     """Test edge cases: expired tokens, malformed tokens, missing claims, clock skew."""
     tester = JWTSecretSynchronizationTester()

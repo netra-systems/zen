@@ -25,6 +25,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
+@pytest.mark.e2e
 class TestWebSocketMultiService:
     """Test suite for WebSocket multi-service communication."""
     
@@ -59,6 +60,7 @@ class TestWebSocketMultiService:
         finally:
             await auth_client.close()
     
+    @pytest.mark.e2e
     async def test_cross_service_authentication_flow(self, websocket_client, auth_service_client):
         """Test WebSocket authentication coordinates across services."""
         # Verify auth service is accessible
@@ -113,6 +115,7 @@ class TestWebSocketMultiService:
                 assert "type" in event, "Auth event missing type field"
                 assert "payload" in event, "Auth event missing payload field"
     
+    @pytest.mark.e2e
     async def test_service_independence_validation(self, websocket_client):
         """Test services maintain independence per SPEC/independent_services.xml."""
         # Trigger events that might involve multiple services
@@ -168,6 +171,7 @@ class TestWebSocketMultiService:
                         f"Service {service} exposing internal field {field} in WebSocket event"
                     )
     
+    @pytest.mark.e2e
     async def test_message_routing_between_services(self, websocket_client):
         """Test messages are properly routed between services."""
         # Send messages that require multi-service coordination
@@ -234,6 +238,7 @@ class TestWebSocketMultiService:
                 for response_type in response_types
             ), f"No correlated responses for {request_type}: {response_types}"
     
+    @pytest.mark.e2e
     async def test_service_failure_isolation(self, websocket_client):
         """Test WebSocket continues working when individual services have issues."""
         # Trigger comprehensive workflow
@@ -302,6 +307,7 @@ class TestWebSocketMultiService:
                     f"Service {service} stopped working after other service failures"
                 )
     
+    @pytest.mark.e2e
     async def test_websocket_load_balancing_compatibility(self, websocket_client):
         """Test WebSocket works correctly with load balancing between services."""
         # Send multiple requests to test load balancing scenarios
@@ -378,6 +384,7 @@ class TestWebSocketMultiService:
                 f"Same WebSocket connection should maintain consistent session."
             )
     
+    @pytest.mark.e2e
     async def test_service_version_compatibility(self, websocket_client, backend_client):
         """Test WebSocket handles service version mismatches gracefully."""
         # Get service version information

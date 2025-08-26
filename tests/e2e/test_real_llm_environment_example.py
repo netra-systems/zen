@@ -26,11 +26,13 @@ from test_framework.seed_data_manager import (
 from test_framework.test_environment_setup import test_session_context
 
 
+@pytest.mark.e2e
 class TestRealLLMEnvironment:
     """Test class demonstrating real LLM environment usage."""
 
     @pytest.mark.asyncio
     @pytest.mark.real_llm  # Mark for selective execution
+    @pytest.mark.e2e
     async def test_basic_optimization_with_real_llm(self):
         """Test basic optimization functionality with real LLM and seed data."""
         
@@ -93,6 +95,7 @@ class TestRealLLMEnvironment:
     
     @pytest.mark.asyncio
     @pytest.mark.real_llm
+    @pytest.mark.e2e
     async def test_complex_workflow_with_multiple_agents(self):
         """Test complex multi-agent workflow with real LLM calls."""
         
@@ -146,6 +149,7 @@ class TestRealLLMEnvironment:
                 assert len(optimization_response['content']) > 50
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_transaction_isolation(self):
         """Test that test environments are properly isolated via transactions."""
         
@@ -177,6 +181,7 @@ class TestRealLLMEnvironment:
     
     @pytest.mark.asyncio
     @pytest.mark.real_llm
+    @pytest.mark.e2e
     async def test_cost_tracking_and_budgets(self):
         """Test LLM cost tracking and budget management."""
         
@@ -218,6 +223,7 @@ class TestRealLLMEnvironment:
                 assert final_stats['cost_summary']['budget_utilization'] < 0.5  # Less than 50% of budget
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_handling_and_recovery(self):
         """Test error handling in real LLM environment."""
         
@@ -260,12 +266,14 @@ class TestRealLLMEnvironment:
 
 
 @pytest.mark.skip_if_no_real_llm
+@pytest.mark.e2e
 class TestRealLLMIntegration:
     """Integration tests that require real LLM access."""
     
     @pytest.mark.asyncio
     @pytest.mark.real_llm
     @pytest.mark.slow
+    @pytest.mark.e2e
     async def test_comprehensive_optimization_analysis(self):
         """Comprehensive test of AI optimization analysis with real LLM."""
         

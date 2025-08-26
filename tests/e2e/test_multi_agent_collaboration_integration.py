@@ -28,6 +28,7 @@ from tests.e2e.agent_response_test_utilities import (
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestMultiAgentCollaboration:
     """Test multi-agent collaborative optimization workflows."""
     
@@ -56,6 +57,7 @@ class TestMultiAgentCollaboration:
             "config": config
         }
     
+    @pytest.mark.e2e
     async def test_supervisor_to_subagent_flow(self, collaboration_setup):
         """Test complete Supervisor → SubAgent → Tool execution flow."""
         supervisor = collaboration_setup["supervisor"]
@@ -82,6 +84,7 @@ class TestMultiAgentCollaboration:
         assert result["tool_results"] is not None
         assert execution_time < 5.0  # Performance requirement
     
+    @pytest.mark.e2e
     async def test_result_aggregation_flow(self, collaboration_setup):
         """Test multi-agent result aggregation."""
         supervisor = collaboration_setup["supervisor"]
@@ -103,6 +106,7 @@ class TestMultiAgentCollaboration:
         assert all(r["success"] for r in results)
         assert "aggregated_result" in results[0]
     
+    @pytest.mark.e2e
     async def test_collaboration_error_handling(self, collaboration_setup):
         """Test error handling in collaboration flow."""
         supervisor = collaboration_setup["supervisor"]
@@ -124,6 +128,7 @@ class TestMultiAgentCollaboration:
         assert result["error_handled"] is True
         assert result["recovery_successful"] is True
     
+    @pytest.mark.e2e
     async def test_context_isolation_between_agents(self, collaboration_setup):
         """Test context isolation between collaborating agents."""
         supervisor = collaboration_setup["supervisor"]
@@ -233,6 +238,7 @@ class TestMultiAgentCollaboration:
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_tool_execution_integration():
     """Test tool execution within collaboration flow."""
     config = get_config()
@@ -252,6 +258,7 @@ async def test_tool_execution_integration():
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_supervisor_delegation_performance():
     """Test supervisor delegation performance requirements."""
     config = get_config()

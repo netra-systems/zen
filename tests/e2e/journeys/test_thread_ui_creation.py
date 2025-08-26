@@ -150,6 +150,7 @@ def thread_data_factory():
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_thread_creator(test_users):
     """Thread creation executor fixture."""
     user = test_users["mid"]
@@ -157,6 +158,7 @@ async def test_thread_creator(test_users):
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_ui_state_tracker(test_users):
     """UI state tracker fixture."""
     user = test_users["mid"]
@@ -164,9 +166,11 @@ async def test_ui_state_tracker(test_users):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestThreadUICreation:
     """Thread UI Creation Test Suite."""
     
+    @pytest.mark.e2e
     async def test_thread_creation_ui_synchronization(self, thread_creator):
         """Test Case 1: Thread creation synchronizes with UI state correctly."""
         # Create thread and verify UI update
@@ -186,6 +190,7 @@ class TestThreadUICreation:
         assert len(events) == 1
         assert events[0]["type"] == "thread_created"
     
+    @pytest.mark.e2e
     async def test_multiple_thread_creation_ui_consistency(self, thread_creator):
         """Test Case 2: Multiple thread creation maintains UI consistency."""
         thread_titles = [
@@ -217,6 +222,7 @@ class TestThreadUICreation:
             assert event["type"] == "thread_created"
             assert event["thread_id"] == created_threads[i]["thread_data"]["id"]
     
+    @pytest.mark.e2e
     async def test_thread_creation_with_metadata_preservation(self, thread_creator):
         """Test Case 3: Thread creation preserves metadata correctly."""
         thread_configs = [
@@ -257,6 +263,7 @@ class TestThreadUICreation:
             assert thread_info.get("tags") == expected_metadata["tags"]
             assert thread_info.get("department") == expected_metadata["department"]
     
+    @pytest.mark.e2e
     async def test_thread_creation_ui_state_initialization(self, ui_state_tracker):
         """Test Case 4: UI state is properly initialized for new threads."""
         # Verify initial UI state
@@ -287,6 +294,7 @@ class TestThreadUICreation:
         assert updated_state["thread_list"][0]["thread_id"] == thread_data["id"]
         assert updated_state["thread_list"][0]["title"] == thread_data["title"]
     
+    @pytest.mark.e2e
     async def test_concurrent_thread_creation_ui_handling(self, test_users):
         """Test Case 5: Concurrent thread creation handled correctly by UI."""
         user = test_users["enterprise"]
@@ -322,6 +330,7 @@ class TestThreadUICreation:
         event_thread_ids = [event["thread_id"] for event in events]
         assert set(event_thread_ids) == set(thread_ids), "Events must match created threads"
     
+    @pytest.mark.e2e
     async def test_thread_creation_error_handling_ui_state(self, thread_creator):
         """Test Case 6: UI state handles creation errors gracefully."""
         # Create a successful thread first
@@ -349,6 +358,7 @@ class TestThreadUICreation:
         assert len(final_state["thread_list"]) == 2
         assert final_state["thread_list"][1]["title"] == "Recovery Thread"
     
+    @pytest.mark.e2e
     async def test_thread_creation_websocket_event_ordering(self, thread_creator):
         """Test Case 7: WebSocket events maintain correct ordering during creation."""
         # Create threads in sequence
@@ -380,6 +390,7 @@ class TestThreadUICreation:
         
         assert created_thread_ids == event_thread_ids, "Event order must match UI thread order"
     
+    @pytest.mark.e2e
     async def test_thread_creation_ui_performance_tracking(self, thread_creator):
         """Test Case 8: Thread creation UI performance is tracked."""
         # Create threads and measure UI update performance

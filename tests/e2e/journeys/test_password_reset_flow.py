@@ -32,6 +32,7 @@ from tests.e2e.integration.password_reset_security_flow_tester import (
 
 # Pytest Test Implementations
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_password_reset_flow():
     """
     Test #8: Complete Password Reset Flow
@@ -82,6 +83,7 @@ async def test_complete_password_reset_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_password_reset_security_validation():
     """
     Password Reset Security Validation
@@ -121,6 +123,7 @@ async def test_password_reset_security_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_password_reset_performance_validation():
     """
     Performance validation for password reset flows.
@@ -151,6 +154,7 @@ async def test_password_reset_performance_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_password_reset_email_content_validation():
     """
     Email content and format validation for password reset.
@@ -197,6 +201,7 @@ async def test_password_reset_email_content_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_password_reset_edge_cases():
     """
     Edge cases for password reset flow.

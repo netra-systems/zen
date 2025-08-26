@@ -231,6 +231,7 @@ class ConnectionLimitManager:
         self.connection_limit = limit
         self.limit_test_results: Dict[str, Any] = {}
         
+    @pytest.mark.e2e
     async def test_connection_limit_enforcement(self, manager: ConcurrentConnectionManager) -> Dict[str, Any]:
         """Test that connection limits are properly enforced."""
         # Try to create more connections than the limit
@@ -265,6 +266,7 @@ class ConnectionLimitManager:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestConcurrentConnections:
     """Test #7: Concurrent Connection Test - Multiple simultaneous connections per user."""
     
@@ -288,6 +290,7 @@ class TestConcurrentConnections:
         """Initialize connection limit manager."""
         return ConnectionLimitManager(limit=5)
     
+    @pytest.mark.e2e
     async def test_concurrent_connections_core_functionality(self, connection_manager:
                                                            message_broadcaster, connection_validator):
         """Test core concurrent connection functionality."""
@@ -301,6 +304,7 @@ class TestConcurrentConnections:
         finally:
             await self._cleanup_all_connections(connection_manager)
     
+    @pytest.mark.e2e
     async def test_connection_limit_enforcement(self, connection_manager, limit_manager):
         """Test that connection limits per user are enforced."""
         start_time = time.time()
@@ -318,6 +322,7 @@ class TestConcurrentConnections:
         finally:
             await self._cleanup_all_connections(connection_manager)
     
+    @pytest.mark.e2e
     async def test_connection_failure_isolation(self, connection_manager, connection_validator):
         """Test that one connection failure doesn't affect others."""
         start_time = time.time()

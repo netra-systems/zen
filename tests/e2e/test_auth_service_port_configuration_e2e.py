@@ -154,6 +154,7 @@ class AuthServicePortConfigurationValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_service_port_consistency_validation():
     """
     FAILING TEST: Expose auth service port configuration inconsistencies
@@ -207,6 +208,7 @@ async def test_auth_service_port_consistency_validation():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_specific_port_8001_expectation():
     """
     Test that specifically checks if auth service is running on port 8001
@@ -243,6 +245,7 @@ async def test_specific_port_8001_expectation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_specific_port_8081_expectation():
     """
     Test that specifically checks if auth service is running on port 8081

@@ -34,10 +34,12 @@ def network_simulator():
     return NetworkFailureSimulator()
 
 
+@pytest.mark.e2e
 class TestNetworkPartitionHandling:
     """Test split-brain scenario handling during network partitions."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_network_partition(self, network_simulator):
         """Test system handles network partition preventing split-brain scenarios."""
         # Simulate network partition between service nodes
@@ -89,10 +91,12 @@ class TestNetworkPartitionHandling:
         }
 
 
+@pytest.mark.e2e
 class TestPacketLossRecovery:
     """Test 50% packet loss tolerance and recovery mechanisms."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_packet_loss_recovery(self, network_simulator):
         """Test system maintains functionality with 50% packet loss."""
         # Simulate high packet loss scenario
@@ -143,10 +147,12 @@ class TestPacketLossRecovery:
         }
 
 
+@pytest.mark.e2e
 class TestDnsFailureHandling:
     """Test DNS resilience mechanisms and fallback strategies."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_dns_failure_handling(self, network_simulator):
         """Test DNS resilience mechanisms handle resolution failures."""
         # Simulate DNS failure for critical domains
@@ -197,10 +203,12 @@ class TestDnsFailureHandling:
         }
 
 
+@pytest.mark.e2e
 class TestCdnFallbackMechanisms:
     """Test asset delivery fallback paths during CDN failures."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cdn_fallback(self, network_simulator):
         """Test asset delivery fallback paths when primary CDN fails."""
         # Simulate primary CDN failure with backup CDN available
@@ -253,10 +261,12 @@ class TestCdnFallbackMechanisms:
         }
 
 
+@pytest.mark.e2e
 class TestNetworkResilienceIntegration:
     """Integration tests for combined network failure scenarios."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_combined_network_failures(self, network_simulator):
         """Test system resilience under multiple simultaneous network failures."""
         # Simulate multiple concurrent network issues

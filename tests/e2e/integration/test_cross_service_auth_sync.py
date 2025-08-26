@@ -345,6 +345,7 @@ class CrossServiceAuthValidator:
 # PYTEST TEST IMPLEMENTATIONS
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cross_service_auth_token_validation():
     """
     Test: Token issued by Auth service is validated by Backend service.
@@ -370,6 +371,7 @@ async def test_cross_service_auth_token_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_auth_integration():
     """
     Test: Same token works for WebSocket connections.
@@ -394,6 +396,7 @@ async def test_websocket_auth_integration():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_persistence_across_services():
     """
     Test: Session state is consistent across all microservices.
@@ -418,6 +421,7 @@ async def test_session_persistence_across_services():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_token_lifecycle_synchronization():
     """
     Test: Token refresh and logout propagate to all services.
@@ -442,6 +446,7 @@ async def test_token_lifecycle_synchronization():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_independence_validation():
     """
     Test: Services maintain independence per SPEC/independent_services.xml.
@@ -469,6 +474,7 @@ async def test_service_independence_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_cross_service_auth_flow():
     """
     Test: Complete cross-service authentication flow validation.

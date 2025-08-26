@@ -207,6 +207,7 @@ class MalformedPayloadTestClient:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oversized_payload_handling():
     """
     Test handling of oversized JSON payloads.
@@ -274,6 +275,7 @@ async def test_oversized_payload_handling():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_malformed_json_handling():
     """
     Test handling of malformed JSON payloads.
@@ -330,6 +332,7 @@ async def test_malformed_json_handling():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_deep_nesting_attack():
     """
     Test handling of deeply nested JSON payloads.
@@ -395,6 +398,7 @@ async def test_deep_nesting_attack():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_invalid_encoding_handling():
     """
     Test handling of invalid UTF-8 encoding.
@@ -446,6 +450,7 @@ async def test_invalid_encoding_handling():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_dos_bombardment_protection():
     """
     Test DoS protection through rapid payload bombardment.

@@ -31,6 +31,7 @@ import requests
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
+@pytest.mark.e2e
 class TestAuthEdgeCases(BaseIntegrationTest):
     """Edge case test suite for authentication system robustness."""
     
@@ -57,6 +58,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         # Mock JWT secret for testing
         self.test_jwt_secret = "test_secret_key_for_edge_cases_only"
     
+    @pytest.mark.e2e
     def test_auth_token_expiration_during_active_session_EDGE_CASE(self):
         """
         EDGE CASE: Token expires while user is actively using the application.
@@ -99,6 +101,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         token_payload = self._decode_test_jwt_token(new_token)
         assert token_payload['exp'] > time.time(), "New token should have future expiration"
     
+    @pytest.mark.e2e
     def test_multiple_simultaneous_auth_requests_race_condition_EDGE_CASE(self):
         """
         EDGE CASE: Multiple simultaneous authentication requests causing race conditions.
@@ -176,6 +179,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                 f"All concurrent auth requests for same user should create consistent tokens."
             )
     
+    @pytest.mark.e2e
     def test_oauth_callback_invalid_token_handling_EDGE_CASE(self):
         """
         EDGE CASE: OAuth callback handling with invalid/malformed tokens.
@@ -254,6 +258,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
             f"\n\nOAuth callbacks must gracefully handle all invalid token scenarios."
         )
     
+    @pytest.mark.e2e
     def test_auth_service_unavailable_timeout_scenarios_EDGE_CASE(self):
         """
         EDGE CASE: Auth service unavailable/timeout scenarios.
@@ -331,6 +336,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
             f"\n\nAuth service failures must have appropriate fallback behaviors."
         )
     
+    @pytest.mark.e2e
     def test_cross_tab_authentication_synchronization_EDGE_CASE(self):
         """
         EDGE CASE: Cross-tab authentication synchronization.
@@ -415,6 +421,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
             f"\n\nLogout must be synchronized across all browser tabs."
         )
     
+    @pytest.mark.e2e
     def test_concurrent_login_attempts_same_user_EDGE_CASE(self):
         """
         EDGE CASE: Concurrent login attempts from the same user account.
@@ -485,6 +492,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
             f"\n\nConcurrent logins must be handled according to session policy."
         )
     
+    @pytest.mark.e2e
     def test_jwt_payload_manipulation_security_EDGE_CASE(self):
         """
         EDGE CASE: JWT payload manipulation and validation.
@@ -570,6 +578,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
             f"\n\nAll JWT manipulation attempts must be properly detected and rejected."
         )
     
+    @pytest.mark.e2e
     def test_session_hijacking_prevention_EDGE_CASE(self):
         """
         EDGE CASE: Session hijacking and security edge cases.

@@ -40,6 +40,7 @@ from test_framework.auth_helpers import (
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAuthWebSocketRecovery:
     """WebSocket Authentication Recovery and Message Preservation Tests."""
     
@@ -58,6 +59,7 @@ class TestAuthWebSocketRecovery:
         """Initialize message preservation tester."""
         return MessagePreservationTester(auth_tester)
     
+    @pytest.mark.e2e
     async def test_reconnection_after_expiry_with_message_preservation(
         self, auth_tester, expiry_tester, message_tester
     ):
@@ -115,6 +117,7 @@ class TestAuthWebSocketRecovery:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_rapid_reconnection_cycles(self, auth_tester):
         """Test rapid reconnection cycles to validate connection recovery robustness."""
         try:
@@ -175,6 +178,7 @@ class TestAuthWebSocketRecovery:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_message_preservation_edge_cases(self, auth_tester, message_tester):
         """Test message preservation in various edge case scenarios."""
         try:
@@ -227,6 +231,7 @@ class TestAuthWebSocketRecovery:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_connection_recovery_after_network_simulation(self, auth_tester):
         """Test connection recovery after simulated network issues."""
         try:
@@ -279,6 +284,7 @@ class TestAuthWebSocketRecovery:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_token_refresh_during_active_session_recovery(self, auth_tester, expiry_tester):
         """Test token refresh during active session and subsequent recovery."""
         try:

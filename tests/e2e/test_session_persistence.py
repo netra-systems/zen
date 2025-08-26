@@ -146,6 +146,7 @@ def token_refresh_manager(session_manager):
 # ============================================================================
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_persists_across_disconnect_reconnect(session_manager:
                                                            connection_manager):
     """Test session persistence across disconnect/reconnect."""
@@ -181,6 +182,7 @@ def _validate_session_persistence(session_manager, token, user_id, session_id):
     assert len(chat_history) == 2, "Chat history must be preserved"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_graceful_disconnect_preserves_session(session_manager, connection_manager):
     """Test graceful disconnect preserves session state."""
     user = TEST_USERS["mid"]
@@ -210,6 +212,7 @@ def _validate_graceful_disconnect(session_manager, connection_manager, token):
     assert len(disconnect_events) == 1, "Graceful disconnect must be recorded"
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_token_refresh_during_active_session(session_manager, token_refresh_manager:
                                                    connection_manager):
     """Test token refresh without session interruption."""
@@ -256,6 +259,7 @@ def _validate_token_refresh_continuity(session_manager, connection_manager,
     assert len(chat_history) == 3, "Chat history preserved during token refresh"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_disconnection_scenarios(session_manager, connection_manager):
     """Test session persistence across various disconnection types."""
     user = TEST_USERS["early"]
@@ -286,6 +290,7 @@ def _validate_scenario_persistence(session_manager, token, reason):
     assert session_data is not None, f"Session must persist after {reason}"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_session_operations(session_manager, connection_manager):
     """Test concurrent session operations don't corrupt state."""
     user = TEST_USERS["free"]

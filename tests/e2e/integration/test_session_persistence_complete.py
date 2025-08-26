@@ -111,6 +111,7 @@ class SessionPersistenceTestManager:
             print(f"WebSocket connection failed: {e}")
             return None
             
+    @pytest.mark.e2e
     async def test_send_test_messages(self, ws_client, user_id: str, count: int = 3) -> List[Dict]:
         """Send test messages to establish session state."""
         messages = []
@@ -336,6 +337,7 @@ class ServiceHealthChecker:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_token_persistence():
     """
     Test JWT token persistence across service restarts.
@@ -385,6 +387,7 @@ async def test_jwt_token_persistence():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_persistence_websocket_reconnection():
     """
     Test session survives backend restart with WebSocket reconnection.
@@ -439,6 +442,7 @@ async def test_session_persistence_websocket_reconnection():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_data_persistence_across_restart():
     """
     Test data persistence across service restarts.
@@ -504,6 +508,7 @@ async def test_data_persistence_across_restart():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_session_persistence_flow():
     """
     Complete session persistence test covering all requirements.
@@ -578,6 +583,7 @@ async def test_complete_session_persistence_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_session_persistence():
     """
     Test session persistence for multiple concurrent users.

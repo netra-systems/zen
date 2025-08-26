@@ -202,6 +202,7 @@ def state_validator(thread_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_creation_broadcast(thread_tester, broadcast_validator):
     """Test new thread appears in all connected clients."""
     # BVJ: Thread creation must broadcast to maintain engagement across devices
@@ -225,6 +226,7 @@ async def test_thread_creation_broadcast(thread_tester, broadcast_validator):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_switching_state(thread_tester, state_validator):
     """Test state consistency when switching threads."""
     # BVJ: Thread switching must maintain state to prevent user frustration
@@ -252,6 +254,7 @@ async def test_thread_switching_state(thread_tester, state_validator):
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_thread_deletion_cascade(thread_tester):
     """Test proper cleanup across all services."""
     # BVJ: Proper deletion prevents data corruption and maintains system integrity
@@ -283,6 +286,7 @@ async def test_thread_deletion_cascade(thread_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_thread_operations(thread_tester):
     """Test race condition prevention."""
     # BVJ: Race conditions cause data corruption leading to customer churn  
@@ -314,6 +318,7 @@ async def test_concurrent_thread_operations(thread_tester):
 # ============================================================================
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_metadata_consistency(thread_tester):
     """Test thread metadata remains consistent across operations."""
     user = TEST_USERS["free"]
@@ -330,6 +335,7 @@ async def test_thread_metadata_consistency(thread_tester):
 
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_thread_reconnection_recovery(thread_tester):
     """Test thread state recovery after WebSocket reconnection."""
     user = TEST_USERS["mid"]

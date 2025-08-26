@@ -127,6 +127,7 @@ class RealUnifiedFlowTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_unified_signup_login_chat_journey():
     """
     Test #1: Complete Unified User Journey
@@ -160,6 +161,7 @@ async def test_complete_unified_signup_login_chat_journey():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_unified_journey_concurrent_users():
     """
     Test #2: Concurrent User Journey Validation

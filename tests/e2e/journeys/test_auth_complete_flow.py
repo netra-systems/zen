@@ -25,6 +25,7 @@ from tests.e2e.integration.session_security_tester import SessionSecurityLogoutT
 
 # Pytest Test Implementations
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_new_user_registration_to_first_chat():
     """
     Test #1: Complete New User Registration → First Chat
@@ -68,6 +69,7 @@ async def test_complete_new_user_registration_to_first_chat():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_security_and_logout_propagation():
     """
     Test #10: Session Security and Logout
@@ -110,6 +112,7 @@ async def test_session_security_and_logout_propagation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_e2e_performance_validation():
     """
     Performance validation for critical authentication flows.

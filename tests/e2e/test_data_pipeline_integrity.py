@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_message_data_pipeline():
     """
     Test that thread and message data flows correctly through the entire pipeline.
@@ -158,6 +159,7 @@ async def test_thread_message_data_pipeline():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_user_data_consistency_across_services():
     """
     Test that user data remains consistent across auth and backend services.
@@ -270,6 +272,7 @@ async def test_user_data_consistency_across_services():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_data_validation_and_sanitization():
     """
     Test that data validation and sanitization work correctly across the pipeline.

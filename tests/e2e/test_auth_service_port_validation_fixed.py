@@ -105,6 +105,7 @@ class AuthServicePortValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_service_port_8081_accessibility():
     """
     Test that auth service is accessible on port 8081 as configured in dev launcher.
@@ -140,6 +141,7 @@ async def test_auth_service_port_8081_accessibility():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_service_endpoints_availability():
     """
     Test that key auth service endpoints are available.
@@ -176,6 +178,7 @@ async def test_auth_service_endpoints_availability():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_auth_service_timing_expectations():
     """
     Test auth service response timing meets expectations for WebSocket handshakes.

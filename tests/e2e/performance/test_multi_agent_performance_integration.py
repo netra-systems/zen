@@ -159,6 +159,7 @@ class PerformanceLoadSimulator:
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestMultiAgentPerformanceIntegration:
     """Integration tests for multi-agent performance benchmarking."""
     
@@ -173,6 +174,7 @@ class TestMultiAgentPerformanceIntegration:
         return PerformanceLoadSimulator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_p95_latency_enterprise_sla_compliance(self, benchmark_core, load_simulator):
         """Test P95 latency meets enterprise SLA requirements (<200ms)."""
         enterprise_result = await load_simulator.simulate_enterprise_load(benchmark_core, 10)
@@ -183,6 +185,7 @@ class TestMultiAgentPerformanceIntegration:
         assert enterprise_result["enterprise_sla_met"], "Enterprise SLA requirements not met"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agent_orchestration_performance(self, benchmark_core):
         """Test concurrent agent orchestration performance."""
         agents = await benchmark_core.create_agent_pool(12)
@@ -195,6 +198,7 @@ class TestMultiAgentPerformanceIntegration:
         assert orchestration_result["total_execution_time_ms"] < 5000.0, "Total orchestration time excessive"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_burst_load_handling(self, benchmark_core, load_simulator):
         """Test system handling of burst load scenarios."""
         burst_result = await load_simulator.simulate_burst_load(benchmark_core)
@@ -205,6 +209,7 @@ class TestMultiAgentPerformanceIntegration:
         assert metrics["successful_responses"] >= 12, "Too many failures during burst"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sustained_performance_validation(self, benchmark_core, load_simulator):
         """Test sustained performance over multiple iterations."""
         sustained_result = await load_simulator.validate_sustained_performance(benchmark_core, 3)
@@ -214,6 +219,7 @@ class TestMultiAgentPerformanceIntegration:
         assert sustained_result["average_p95_latency"] < 180.0, "Average P95 latency too high"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_performance_under_complex_queries(self, benchmark_core):
         """Test performance with complex, resource-intensive queries."""
         agents = await benchmark_core.create_agent_pool(8)

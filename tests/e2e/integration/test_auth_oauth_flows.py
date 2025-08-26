@@ -294,6 +294,7 @@ class OAuthFlowTestRunner:
         
         return validation_result
     
+    @pytest.mark.e2e
     async def test_oauth_state_validation(self, provider: str) -> Dict[str, Any]:
         """Test OAuth state parameter validation for security"""
         logger.info(f"Testing OAuth state validation for {provider}")
@@ -372,6 +373,7 @@ class OAuthIntegrationTestValidator:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestOAuthFlows:
     """OAuth Authentication Flow Integration Tests."""
     
@@ -385,6 +387,7 @@ class TestOAuthFlows:
         finally:
             await runner.cleanup_services()
     
+    @pytest.mark.e2e
     async def test_complete_google_oauth_flow(self, oauth_flow_runner):
         """
         Test #1: Complete Google OAuth Flow Integration
@@ -415,6 +418,7 @@ class TestOAuthFlows:
         logger.info(f"✅ Enterprise SSO capability VALIDATED")
         logger.info(f"✅ $100K+ MRR Enterprise deals PROTECTED")
     
+    @pytest.mark.e2e
     async def test_complete_github_oauth_flow(self, oauth_flow_runner):
         """
         Test #2: Complete GitHub OAuth Flow Integration
@@ -439,6 +443,7 @@ class TestOAuthFlows:
         logger.info(f"✅ Developer Enterprise SSO capability VALIDATED")
         logger.info(f"✅ $75K+ MRR Developer Enterprise deals PROTECTED")
     
+    @pytest.mark.e2e
     async def test_oauth_state_security_validation(self, oauth_flow_runner):
         """
         Test #3: OAuth State Security Validation
@@ -460,6 +465,7 @@ class TestOAuthFlows:
         logger.info("✅ OAuth security compliance VALIDATED")
         logger.info("✅ $50K+ MRR security compliance PROTECTED")
     
+    @pytest.mark.e2e
     async def test_oauth_flow_step_validation(self, oauth_flow_runner):
         """
         Test #4: OAuth Flow Step-by-Step Validation
@@ -502,6 +508,7 @@ class TestOAuthFlows:
         logger.info("✅ OAuth reliability VALIDATED")
         logger.info("✅ $60K+ MRR OAuth reliability PROTECTED")
     
+    @pytest.mark.e2e
     async def test_oauth_provider_flexibility(self, oauth_flow_runner):
         """
         Test #5: OAuth Provider Flexibility

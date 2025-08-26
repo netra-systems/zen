@@ -42,10 +42,12 @@ from tests.e2e.search_filter_helpers import (
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestSearchFilterFunctionality:
     """Test #8: Search and Filter Functionality with Performance Validation."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize search filter test core."""
         core = SearchFilterTestCore()
@@ -64,6 +66,7 @@ class TestSearchFilterFunctionality:
         return FilterValidationCore()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_conversation_search_by_title(self, test_core, search_simulator):
         """Test conversation search by title with performance validation."""
         test_data = await test_core.create_search_test_data(PlanTier.PRO)
@@ -77,6 +80,7 @@ class TestSearchFilterFunctionality:
             await test_core.cleanup_test_data(test_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_conversation_search_by_content(self, test_core, search_simulator):
         """Test conversation search by message content."""
         test_data = await test_core.create_search_test_data(PlanTier.ENTERPRISE)
@@ -90,6 +94,7 @@ class TestSearchFilterFunctionality:
             await test_core.cleanup_test_data(test_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_filter_by_date_range(self, test_core, filter_validator):
         """Test filtering conversations by date ranges."""
         test_data = await test_core.create_search_test_data(PlanTier.PRO)
@@ -103,6 +108,7 @@ class TestSearchFilterFunctionality:
             await test_core.cleanup_test_data(test_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_filter_by_agent_type(self, test_core, filter_validator):
         """Test filtering conversations by agent type."""
         test_data = await test_core.create_search_test_data(PlanTier.ENTERPRISE)
@@ -116,6 +122,7 @@ class TestSearchFilterFunctionality:
             await test_core.cleanup_test_data(test_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_filter_by_cost_range(self, test_core, filter_validator):
         """Test filtering conversations by cost ranges."""
         test_data = await test_core.create_search_test_data(PlanTier.PRO)
@@ -129,6 +136,7 @@ class TestSearchFilterFunctionality:
             await test_core.cleanup_test_data(test_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_search_pagination_performance(self, test_core):
         """Test search result pagination with performance validation."""
         test_data = await test_core.create_large_search_dataset(PlanTier.ENTERPRISE)
@@ -142,6 +150,7 @@ class TestSearchFilterFunctionality:
             await test_core.cleanup_test_data(test_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_search_performance_under_load(self, test_core):
         """Test search performance under concurrent load."""
         test_data = await test_core.create_search_test_data(PlanTier.ENTERPRISE)
@@ -221,10 +230,12 @@ class TestSearchFilterFunctionality:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestSearchFilterQueryOptimization:
     """Query optimization validation for search and filter operations."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize query optimization test core."""
         core = SearchFilterTestCore()
@@ -233,6 +244,7 @@ class TestSearchFilterQueryOptimization:
         await core.teardown_test_environment()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_query_optimization(self, test_core):
         """Test backend query optimization for search operations."""
         test_data = await test_core.create_large_search_dataset(PlanTier.ENTERPRISE)
@@ -246,6 +258,7 @@ class TestSearchFilterQueryOptimization:
             await test_core.cleanup_test_data(test_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_combined_search_filter_performance(self, test_core):
         """Test combined search and filter operations performance."""
         test_data = await test_core.create_search_test_data(PlanTier.PRO)

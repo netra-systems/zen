@@ -158,6 +158,7 @@ class StagingAuthenticationFailureReplicator:
 # Test 1: Frontend-to-Backend 403 Forbidden Error
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_frontend_backend_403_forbidden_failure():
     """
     EXPECTED TO FAIL - CRITICAL STAGING ISSUE
@@ -195,6 +196,7 @@ async def test_frontend_backend_403_forbidden_failure():
 # Test 2: Authentication Multiple Retry Failures
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_authentication_multiple_retry_failures():
     """
     EXPECTED TO FAIL - CRITICAL RETRY ISSUE
@@ -241,6 +243,7 @@ async def test_authentication_multiple_retry_failures():
 # Test 3: Service-to-Service Authentication Breakdown
 @pytest.mark.env("staging")
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_service_to_service_authentication_breakdown():
     """
     EXPECTED TO FAIL - CRITICAL INTER-SERVICE ISSUE
@@ -306,6 +309,7 @@ async def test_service_to_service_authentication_breakdown():
 # Test 4: Token Refresh Mechanism Complete Failure
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_refresh_mechanism_complete_failure():
     """
     EXPECTED TO FAIL - CRITICAL TOKEN REFRESH ISSUE
@@ -352,6 +356,7 @@ async def test_token_refresh_mechanism_complete_failure():
 # Test 5: JWT Secret Synchronization Failure
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_secret_synchronization_failure():
     """
     EXPECTED TO FAIL - CRITICAL JWT SECRET ISSUE
@@ -397,6 +402,7 @@ async def test_jwt_secret_synchronization_failure():
 # Test 6: OAuth Flow Staging Configuration Failure
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oauth_flow_staging_configuration_failure():
     """
     EXPECTED TO FAIL - CRITICAL OAUTH CONFIG ISSUE
@@ -451,6 +457,7 @@ async def test_oauth_flow_staging_configuration_failure():
 # Test 7: Cross-Service CORS Authentication Failure  
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cross_service_cors_authentication_failure():
     """
     EXPECTED TO FAIL - CRITICAL CORS ISSUE
@@ -502,6 +509,7 @@ async def test_cross_service_cors_authentication_failure():
 # Test 8: Session State Synchronization Failure
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_state_synchronization_failure():
     """
     EXPECTED TO FAIL - MEDIUM SESSION SYNC ISSUE

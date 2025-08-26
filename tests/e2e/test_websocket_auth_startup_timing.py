@@ -104,6 +104,7 @@ class WebSocketAuthStartupTester:
             print(f"Failed to create test JWT token: {e}")
             return None
     
+    @pytest.mark.e2e
     async def test_websocket_connection_with_auth(self, token: str) -> Dict[str, Any]:
         """Test WebSocket connection with authentication."""
         result = {
@@ -163,6 +164,7 @@ class WebSocketAuthStartupTester:
         
         return result
     
+    @pytest.mark.e2e
     async def test_websocket_auth_without_token(self) -> Dict[str, Any]:
         """Test WebSocket connection without authentication (should fail)."""
         result = {
@@ -193,6 +195,7 @@ class WebSocketAuthStartupTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_services_ready_before_websocket_auth():
     """
     Test that both auth and backend services are ready before WebSocket authentication is tested.
@@ -213,6 +216,7 @@ async def test_services_ready_before_websocket_auth():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_authentication_with_valid_token():
     """
     Test WebSocket authentication with a valid JWT token.
@@ -259,6 +263,7 @@ async def test_websocket_authentication_with_valid_token():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_rejects_connections_without_auth():
     """
     Test that WebSocket connections are properly rejected when no authentication is provided.
@@ -296,6 +301,7 @@ async def test_websocket_rejects_connections_without_auth():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_auth_timing_requirements():
     """
     Test WebSocket authentication timing meets requirements for real-time communication.

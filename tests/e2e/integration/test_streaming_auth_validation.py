@@ -66,6 +66,7 @@ class StreamingAuthManager:
         return jwt.encode(payload, TEST_CONFIG.secrets.jwt_secret, algorithm="HS256")
         
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
@@ -116,6 +117,7 @@ class TestSyntaxFix:
         return validation_result
         
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
@@ -142,6 +144,7 @@ class TestSyntaxFix:
         return True
         
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
@@ -322,6 +325,7 @@ def websocket_streamer(auth_manager):
     """WebSocket streamer fixture."""
     return AuthenticatedWebSocketStreamer(auth_manager)
 
+@pytest.mark.e2e
 class TestStreamingWithAuthValidation:
     # """Test real-time streaming with comprehensive auth validation."""
     pass

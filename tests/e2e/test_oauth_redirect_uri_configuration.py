@@ -16,6 +16,7 @@ from auth_service.auth_core.routes.auth_routes import _determine_urls
 
 @pytest.mark.critical
 @pytest.mark.oauth
+@pytest.mark.e2e
 class TestOAuthRedirectURIConfiguration:
     """
     CRITICAL BUG: Auth service tells Google to redirect to frontend URL instead of auth service URL
@@ -38,6 +39,7 @@ class TestOAuthRedirectURIConfiguration:
     4. Authentication fails
     """
     
+    @pytest.mark.e2e
     def test_oauth_redirect_uri_must_point_to_auth_service(self):
         """Test that OAuth redirect URI points to auth service, not frontend"""
         # Setup environment for staging
@@ -60,6 +62,7 @@ class TestOAuthRedirectURIConfiguration:
                 f"CRITICAL BUG CONFIRMED: Auth service is using frontend URL for OAuth callback. " \
                 f"Expected: {expected_redirect_uri}, Actual: {actual_redirect_uri}"
     
+    @pytest.mark.e2e
     def test_oauth_login_generates_correct_redirect_uri(self):
         """Test that /auth/login endpoint generates correct redirect URI"""
         from fastapi.testclient import TestClient
@@ -94,6 +97,7 @@ class TestOAuthRedirectURIConfiguration:
                     assert redirect_uri == 'https://auth.staging.netrasystems.ai/auth/callback', \
                         f"OAuth redirect_uri should be auth service callback, got: {redirect_uri}"
     
+    @pytest.mark.e2e
     def test_google_oauth_console_configuration_matches(self):
         """Test that the redirect URI matches what should be in Google OAuth console"""
         # Document what needs to be configured in Google OAuth Console

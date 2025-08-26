@@ -187,9 +187,11 @@ def create_shared_resources():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentHandoff:
     """Test clean agent-to-agent handoffs - BVJ: Seamless value delivery chain"""
 
+    @pytest.mark.e2e
     async def test_agent_to_agent_handoff(self, mock_sub_agents, sample_agent_state):
         """Test clean data handoff between sequential agents"""
         setup_handoff_mocks(mock_sub_agents)
@@ -199,9 +201,11 @@ class TestAgentHandoff:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestParallelExecution:
     """Test parallel agent execution patterns - BVJ: Efficiency through parallelization"""
 
+    @pytest.mark.e2e
     async def test_parallel_agent_execution(self, mock_sub_agents):
         """Test multiple agents execute concurrently for efficiency"""
         setup_parallel_agents(mock_sub_agents)
@@ -211,6 +215,7 @@ class TestParallelExecution:
         assert results[0]["data_analysis"] == "cost_trends_identified"
         assert results[1]["optimization_analysis"] == "efficiency_opportunities"
 
+    @pytest.mark.e2e
     async def test_parallel_resource_sharing(self, mock_sub_agents):
         """Test agents safely share resources during parallel execution"""
         shared_resources = create_shared_resources()
@@ -222,9 +227,11 @@ class TestParallelExecution:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestResultAggregation:
     """Test agent result aggregation patterns - BVJ: Comprehensive value delivery"""
 
+    @pytest.mark.e2e
     async def test_agent_result_aggregation(self, mock_supervisor_agent, coordination_test_data):
         """Test results from multiple agents properly combined"""
         pipeline_results = coordination_test_data["pipeline_results"]
@@ -233,6 +240,7 @@ class TestResultAggregation:
         result = await mock_supervisor_agent.execute_pipeline(["data", "optimizations"])
         assert result["combined_analysis"]["monthly_cost"] == 10000
 
+    @pytest.mark.e2e
     async def test_conditional_result_aggregation(self, mock_supervisor_agent):
         """Test results aggregated based on conditional logic"""
         conditional_results = create_conditional_inputs()
@@ -243,9 +251,11 @@ class TestResultAggregation:
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 class TestFailureIsolation:
     """Test agent failure isolation patterns - BVJ: Resilient value delivery"""
 
+    @pytest.mark.e2e
     async def test_agent_failure_isolation(self, mock_sub_agents):
         """Test individual agent failures don't cascade to other agents"""
         setup_failure_isolation(mock_sub_agents)
@@ -253,6 +263,7 @@ class TestFailureIsolation:
         assert len(results) >= 2  # At least data and optimizations tested
         validate_isolation_results(results)
 
+    @pytest.mark.e2e
     async def test_cascading_failure_prevention(self, mock_supervisor_agent):
         """Test supervisor prevents cascading failures across agent pipeline"""
         failure_scenario = create_failure_scenario()
@@ -261,6 +272,7 @@ class TestFailureIsolation:
         result = await mock_supervisor_agent.execute_pipeline(failure_scenario)
         assert result["pipeline_status"] == "partial_success"
 
+    @pytest.mark.e2e
     async def test_critical_failure_handling(self, mock_supervisor_agent):
         """Test handling of critical failures that require pipeline termination"""
         critical_failure = create_critical_failure()

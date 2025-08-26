@@ -114,6 +114,7 @@ class OAuthProxyStagingTester:
         self.test_user = OAuthUserFactory.create_enterprise_user()
         logger.info(f"Setup PR environment simulation for PR #{self.pr_number}")
     
+    @pytest.mark.e2e
     async def test_oauth_state_encoding(self) -> Dict[str, Any]:
         """Test OAuth state parameter encoding with PR information"""
         logger.info("Testing OAuth state parameter encoding...")
@@ -147,6 +148,7 @@ class OAuthProxyStagingTester:
             "validation_time": time.time() - self.start_time
         }
     
+    @pytest.mark.e2e
     async def test_oauth_proxy_initiation(self, encoded_state: str) -> Dict[str, Any]:
         """Test OAuth proxy initiation from PR environment"""
         logger.info("Testing OAuth proxy initiation...")
@@ -183,6 +185,7 @@ class OAuthProxyStagingTester:
             "validation_time": time.time() - self.start_time
         }
     
+    @pytest.mark.e2e
     async def test_oauth_proxy_callback_processing(self, encoded_state: str) -> Dict[str, Any]:
         """Test OAuth proxy callback processing and token exchange"""
         logger.info("Testing OAuth proxy callback processing...")
@@ -222,6 +225,7 @@ class OAuthProxyStagingTester:
             "validation_time": time.time() - self.start_time
         }
     
+    @pytest.mark.e2e
     async def test_secure_token_transfer(self, tokens: Dict[str, Any], pr_routing: Dict[str, Any]) -> Dict[str, Any]:
         """Test secure token transfer via cookie to PR environment"""
         logger.info("Testing secure token transfer...")
@@ -270,6 +274,7 @@ class OAuthProxyStagingTester:
             "validation_time": time.time() - self.start_time
         }
     
+    @pytest.mark.e2e
     async def test_pr_environment_token_retrieval(self, encoded_token: str) -> Dict[str, Any]:
         """Test PR environment retrieving and validating transferred token"""
         logger.info("Testing PR environment token retrieval...")
@@ -303,6 +308,7 @@ class OAuthProxyStagingTester:
             "validation_time": time.time() - self.start_time
         }
     
+    @pytest.mark.e2e
     async def test_complete_oauth_proxy_flow(self) -> Dict[str, Any]:
         """Test complete OAuth proxy flow for PR environment"""
         logger.info("Testing complete OAuth proxy flow...")
@@ -356,6 +362,7 @@ class OAuthProxyStagingTester:
 
 # Test execution
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oauth_proxy_pr_environment_complete_flow():
     """
     CRITICAL Test #8: OAuth Proxy PR Environment Validation
@@ -395,6 +402,7 @@ async def test_oauth_proxy_pr_environment_complete_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oauth_proxy_error_scenarios():
     """Test OAuth proxy error handling scenarios"""
     tester = OAuthProxyStagingTester()

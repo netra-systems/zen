@@ -401,6 +401,7 @@ class WebSocketStateSyncTester:
         
         return all(checks)
         
+    @pytest.mark.e2e
     async def test_connection_count(self) -> int:
         """Get current active connection count for testing."""
         # This would integrate with the actual connection manager
@@ -408,6 +409,7 @@ class WebSocketStateSyncTester:
         return len(self.active_states)
 
 
+@pytest.mark.e2e
 class TestWebSocketStateSynchronization:
     """WebSocket State Synchronization Test Suite."""
     
@@ -420,6 +422,7 @@ class TestWebSocketStateSynchronization:
             await tester.harness.cleanup()
         
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_user_state(self, state_tester):
         """Fixture providing test user and initial state."""
         user = TEST_USERS.get_user("enterprise")
@@ -429,6 +432,7 @@ class TestWebSocketStateSynchronization:
         return user, initial_state
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initial_state_snapshot_on_connection(self, state_tester, test_user_state):
         """Test #10.1: State snapshot sent on initial connection."""
         user, initial_state = test_user_state
@@ -460,6 +464,7 @@ class TestWebSocketStateSynchronization:
             await client.close()
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_incremental_updates_during_session(self, state_tester, test_user_state):
         """Test #10.2: Incremental updates during session."""
         user, initial_state = test_user_state
@@ -512,6 +517,7 @@ class TestWebSocketStateSynchronization:
             await client.close()
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_full_resync_after_reconnection(self, state_tester, test_user_state):
         """Test #10.3: Full resync after reconnection."""
         user, initial_state = test_user_state
@@ -562,6 +568,7 @@ class TestWebSocketStateSynchronization:
             await client2.close()
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_version_conflict_handling(self, state_tester, test_user_state):
         """Test #10.4: Version conflicts handled properly."""
         user, initial_state = test_user_state
@@ -609,6 +616,7 @@ class TestWebSocketStateSynchronization:
             await client.close()
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_partial_state_updates(self, state_tester, test_user_state):
         """Test #10.5: Partial state updates work correctly."""
         user, initial_state = test_user_state
@@ -670,6 +678,7 @@ class TestWebSocketStateSynchronization:
             await client.close()
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_state_consistency_across_multiple_connections(self, state_tester, test_user_state):
         """Test #10.6: State consistency across multiple connections."""
         user, initial_state = test_user_state
@@ -733,10 +742,12 @@ class TestWebSocketStateSynchronization:
 
 
 @pytest.mark.integration 
+@pytest.mark.e2e
 class TestWebSocketStateSyncIntegration:
     """Integration tests for WebSocket state synchronization with real backend services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_state_sync_with_agent_execution(self):
         """Integration test: State sync during real agent execution."""
         tester = WebSocketStateSyncTester()
@@ -789,6 +800,7 @@ class TestWebSocketStateSyncIntegration:
             await tester.harness.cleanup()
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_state_sync_performance_under_load(self):
         """Integration test: State sync performance with multiple concurrent users."""
         tester = WebSocketStateSyncTester()

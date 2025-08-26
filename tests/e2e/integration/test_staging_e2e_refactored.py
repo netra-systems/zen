@@ -103,9 +103,11 @@ async def staging_suite():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingSystemStartup:
     """Test system startup and basic health validation."""
     
+    @pytest.mark.e2e
     async def test_system_startup_verification(self, staging_suite):
         """Verify complete system startup within time limits."""
         start_time = time.time()
@@ -115,6 +117,7 @@ class TestStagingSystemStartup:
         duration = time.time() - start_time
         assert duration < 15, f"Startup verification too slow: {duration:.2f}s"
         
+    @pytest.mark.e2e
     async def test_service_health_endpoints(self, staging_suite):
         """Validate all service health endpoints are responsive."""
         async with aiohttp.ClientSession() as session:
@@ -122,6 +125,7 @@ class TestStagingSystemStartup:
             async with session.get(f"{backend_url}{URLConstants.HEALTH_PATH}") as resp:
                 assert resp.status == 200, "Backend health check failed"
                 
+    @pytest.mark.e2e
     async def test_database_connectivity_validation(self, staging_suite):
         """Test database connections are healthy and responsive."""
         backend_url = staging_suite.env_config.services.backend
@@ -133,9 +137,11 @@ class TestStagingSystemStartup:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestWebSocketConnectivity:
     """Test WebSocket connectivity and authentication."""
     
+    @pytest.mark.e2e
     async def test_websocket_authentication_flow(self, staging_suite):
         """Test WebSocket connection with full authentication."""
         user = await staging_suite._create_authenticated_user()
@@ -144,6 +150,7 @@ class TestWebSocketConnectivity:
         assert ws is not None, "WebSocket connection failed"
         await ws.close()
         
+    @pytest.mark.e2e
     async def test_websocket_connection_security(self, staging_suite):
         """Validate WebSocket security headers and SSL."""
         ws_url = staging_suite.harness.get_websocket_url()
@@ -157,9 +164,11 @@ class TestWebSocketConnectivity:
 
 @pytest.mark.asyncio
 @pytest.mark.staging  
+@pytest.mark.e2e
 class TestMessageHandling:
     """Test AI message handling and agent responses."""
     
+    @pytest.mark.e2e
     async def test_ai_optimization_query_flow(self, staging_suite):
         """Test complete AI optimization message flow with agent response."""
         user = await staging_suite._create_authenticated_user()
@@ -179,6 +188,7 @@ class TestMessageHandling:
         keywords = ["cost", "optimization", "ai", "llm", "efficiency"]
         assert any(word in content.lower() for word in keywords), "Response lacks relevance"
         
+    @pytest.mark.e2e
     async def test_response_time_performance(self, staging_suite):
         """Test agent response time meets performance requirements."""
         start_time = time.time()
@@ -194,9 +204,11 @@ class TestMessageHandling:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestSystemIntegration:
     """Test full system integration including CORS and loading."""
     
+    @pytest.mark.e2e
     async def test_cors_configuration_validation(self, staging_suite):
         """Validate CORS headers are properly configured for staging."""
         backend_url = staging_suite.env_config.services.backend
@@ -206,6 +218,7 @@ class TestSystemIntegration:
                 cors_header = resp.headers.get("Access-Control-Allow-Origin")
                 assert cors_header is not None, "CORS headers missing"
                 
+    @pytest.mark.e2e
     async def test_concurrent_user_handling(self, staging_suite):
         """Test system handles multiple concurrent users effectively."""
         concurrent_results = await staging_suite.harness.run_concurrent_user_test(user_count=3)
@@ -213,6 +226,7 @@ class TestSystemIntegration:
         success_rate = len(successful_results) / len(concurrent_results)
         assert success_rate >= 0.66, f"Concurrent user success rate too low: {success_rate:.2f}"
         
+    @pytest.mark.e2e
     async def test_system_resource_stability(self, staging_suite):
         """Test system maintains stability under normal load."""
         start_status = await staging_suite.harness.get_environment_status()
@@ -225,9 +239,11 @@ class TestSystemIntegration:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestOAuthAuthentication:
     """Test OAuth authentication flow and security."""
     
+    @pytest.mark.e2e
     async def test_oauth_token_validation(self, staging_suite):
         """Test OAuth token generation and validation."""
         user = await staging_suite._create_authenticated_user()
@@ -235,6 +251,7 @@ class TestOAuthAuthentication:
         assert len(token_parts) == 3, "Invalid JWT token structure"
         assert staging_suite._validate_jwt_token(user.access_token), "JWT token validation failed"
         
+    @pytest.mark.e2e
     async def test_auth_service_integration(self, staging_suite):
         """Test authentication service integration with staging environment."""
         staging_suite._validate_staging_config()
@@ -243,6 +260,7 @@ class TestOAuthAuthentication:
         user = await staging_suite._create_authenticated_user()
         assert user.email, "User email not populated"
         
+    @pytest.mark.e2e
     async def test_token_expiration_handling(self, staging_suite):
         """Test proper handling of token expiration scenarios."""
         user = await staging_suite._create_authenticated_user()
@@ -257,9 +275,11 @@ class TestOAuthAuthentication:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestComprehensiveStagingValidation:
     """Comprehensive staging environment validation."""
     
+    @pytest.mark.e2e
     async def test_end_to_end_user_journey(self, staging_suite):
         """Test complete user journey from auth to AI response."""
         user = await staging_suite._create_authenticated_user()
@@ -268,6 +288,7 @@ class TestComprehensiveStagingValidation:
         assert journey_result.get("websocket_connected"), "WebSocket connection failed in journey"
         assert journey_result.get("message_sent"), "Message sending failed in journey"
         
+    @pytest.mark.e2e
     async def test_staging_environment_summary(self, staging_suite):
         """Generate comprehensive staging test summary with metrics."""
         start_time = time.time()

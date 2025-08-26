@@ -30,6 +30,7 @@ from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 # Pytest Test Implementations
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_admin_user_management_complete_flow():
     """
     Test #9: Admin User Management Operations
@@ -86,6 +87,7 @@ async def test_admin_user_management_complete_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_admin_audit_trail_validation():
     """
     Admin Audit Trail Validation
@@ -133,6 +135,7 @@ async def test_admin_audit_trail_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_admin_rbac_security_validation():
     """
     Role-Based Access Control (RBAC) Security Validation
@@ -173,6 +176,7 @@ async def test_admin_rbac_security_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_admin_user_management_performance():
     """
     Performance validation for admin user management operations.
@@ -208,6 +212,7 @@ async def test_admin_user_management_performance():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_admin_bulk_operations_validation():
     """
     Bulk admin operations validation.

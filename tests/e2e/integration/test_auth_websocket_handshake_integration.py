@@ -40,6 +40,7 @@ class AuthWebSocketTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAuthWebSocketHandshakeIntegration:
     """P0 CRITICAL: Auth-WebSocket handshake integration tests."""
     
@@ -47,6 +48,7 @@ class TestAuthWebSocketHandshakeIntegration:
         """Setup test method."""
         self.auth_tester = AuthWebSocketTester()
     
+    @pytest.mark.e2e
     async def test_valid_jwt_token_structure_validation(self):
         """Test JWT token structure validation without requiring running services."""
         # Create valid token
@@ -66,6 +68,7 @@ class TestAuthWebSocketHandshakeIntegration:
         assert "permissions" in payload, "Token should contain permissions"
         assert payload["token_type"] == "access", "Token should be access token type"
     
+    @pytest.mark.e2e
     async def test_expired_token_structure_validation(self):
         """Test expired token detection without requiring running services."""
         # Create expired token
@@ -81,6 +84,7 @@ class TestAuthWebSocketHandshakeIntegration:
         current_timestamp = datetime.now(timezone.utc).timestamp()
         assert exp_timestamp < current_timestamp, "Token should be expired"
     
+    @pytest.mark.e2e
     async def test_websocket_connection_with_valid_token(self):
         """Test WebSocket connection attempt with valid token."""
         # Create valid token
@@ -119,6 +123,7 @@ class TestAuthWebSocketHandshakeIntegration:
         finally:
             await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_websocket_connection_with_expired_token(self):
         """Test WebSocket connection rejection with expired token."""
         # Create expired token
@@ -145,6 +150,7 @@ class TestAuthWebSocketHandshakeIntegration:
         finally:
             await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_websocket_connection_with_malformed_token(self):
         """Test WebSocket connection rejection with malformed token."""
         # Create malformed token
@@ -165,6 +171,7 @@ class TestAuthWebSocketHandshakeIntegration:
         finally:
             await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_websocket_connection_without_token(self):
         """Test WebSocket connection rejection when no token provided."""
         # Test connection without token
@@ -195,6 +202,7 @@ class TestAuthWebSocketHandshakeIntegration:
         finally:
             await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_cross_service_auth_validation_attempt(self):
         """Test cross-service authentication validation attempt."""
         # Create valid token
@@ -240,6 +248,7 @@ class TestAuthWebSocketHandshakeIntegration:
         finally:
             await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_concurrent_auth_token_validation(self):
         """Test concurrent authentication with multiple tokens."""
         # Create multiple valid tokens
@@ -292,6 +301,7 @@ class TestAuthWebSocketHandshakeIntegration:
             for ws_client in ws_clients:
                 await ws_client.close()
     
+    @pytest.mark.e2e
     async def test_token_refresh_scenario_validation(self):
         """Test token refresh scenario structure validation."""
         # Create short-lived token

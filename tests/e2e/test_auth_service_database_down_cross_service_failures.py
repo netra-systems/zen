@@ -33,6 +33,7 @@ from netra_backend.tests.unit.test_real_auth_service_integration import RealAuth
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.e2e
 class TestAuthServiceDatabaseDownCrossServiceFailures:
     """Test suite for cross-service failures when auth service database is down."""
     
@@ -65,6 +66,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
                 await fixture.cleanup()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_frontend_authentication_flow_breaks_when_auth_db_down(self, services_with_auth_db_down):
         """FAILING TEST: Frontend authentication flow completely breaks when auth database is down.
         
@@ -150,6 +152,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
                 )
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_api_token_validation_cascade_failure(self, services_with_auth_db_down):
         """FAILING TEST: Backend API token validation fails, causing cascade failure across all endpoints.
         
@@ -283,6 +286,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
                 )
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_authentication_cascade_disconnections(self, services_with_auth_db_down):
         """FAILING TEST: WebSocket connections fail authentication and cause cascade disconnections.
         
@@ -408,6 +412,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
             }
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_health_checks_dont_reflect_auth_database_dependency(self, services_with_auth_db_down):
         """FAILING TEST: Service health checks don't properly reflect auth database dependency.
         
@@ -507,6 +512,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
             )
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_session_persistence_lost_when_auth_db_down(self, services_with_auth_db_down):
         """FAILING TEST: User sessions are completely lost when auth database is down.
         
@@ -643,6 +649,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
             }
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_recovery_coordination_when_auth_database_restored(self, services_with_auth_db_down):
         """FAILING TEST: No coordination between services when auth database is restored.
         

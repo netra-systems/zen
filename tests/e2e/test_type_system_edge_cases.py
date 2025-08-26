@@ -27,6 +27,7 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
+@pytest.mark.e2e
 class TestTypeSystemEdgeCases(BaseIntegrationTest):
     """Edge case test suite for type system robustness."""
     
@@ -45,6 +46,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         self.enum_duplicates = []
         self.export_inconsistencies = []
         
+    @pytest.mark.e2e
     def test_detect_circular_type_dependencies_EDGE_CASE(self):
         """
         EDGE CASE: Detect circular dependencies in type imports.
@@ -71,6 +73,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
             f"\n\nCircular type dependencies can cause compilation failures and runtime errors."
         )
     
+    @pytest.mark.e2e
     def test_auto_generated_vs_manual_type_conflicts_EDGE_CASE(self):
         """
         EDGE CASE: Validate no conflicts between auto-generated and manually maintained types.
@@ -100,6 +103,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
             f"\n\nTypes should have single source of truth to prevent conflicts."
         )
     
+    @pytest.mark.e2e
     def test_duplicate_enum_definitions_across_modules_EDGE_CASE(self):
         """
         EDGE CASE: Check for duplicate enum definitions (MessageType, AgentStatus, etc.).
@@ -130,6 +134,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
             f"\n\nCritical enums must be defined only once to prevent system-wide conflicts."
         )
     
+    @pytest.mark.e2e
     def test_type_registry_export_consistency_EDGE_CASE(self):
         """
         EDGE CASE: Validate type registry maintains consistent exports.
@@ -159,6 +164,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
             f"\n\nType registries must only export types that actually exist."
         )
     
+    @pytest.mark.e2e
     def test_mixed_default_named_export_conflicts_EDGE_CASE(self):
         """
         EDGE CASE: Validate no conflicting default exports with named exports.
@@ -185,6 +191,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
             f"\n\nDefault and named exports should not share the same identifier."
         )
     
+    @pytest.mark.e2e
     def test_complex_inheritance_type_resolution_EDGE_CASE(self):
         """
         EDGE CASE: Test type resolution in complex inheritance chains.
@@ -226,6 +233,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
             f"\n\nCyclic inheritance prevents proper type resolution."
         )
     
+    @pytest.mark.e2e
     def test_runtime_vs_compile_time_type_consistency_EDGE_CASE(self):
         """
         EDGE CASE: Validate runtime type guards match compile-time type definitions.
@@ -268,6 +276,7 @@ class TestTypeSystemEdgeCases(BaseIntegrationTest):
         )
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_async_type_resolution_edge_cases_EDGE_CASE(self):
         """
         EDGE CASE: Test type resolution in async contexts and Promise chains.

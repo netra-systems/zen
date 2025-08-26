@@ -37,9 +37,11 @@ class SpikeLoadGenerator:
 class SpikeLoadMetrics:
     pass
 
+@pytest.mark.e2e
 class TestWebSocketConnectionAvalanche:
     """Test Case 2: WebSocket Connection Avalanche"""
     
+    @pytest.mark.e2e
     async def test_websocket_placeholder(self):
         """Placeholder test to prevent collection errors."""
         # This test is temporarily disabled due to infrastructure dependencies

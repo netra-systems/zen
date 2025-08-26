@@ -441,6 +441,7 @@ class CrossServiceDatabaseSyncValidator:
 
 @pytest.mark.critical
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_user_creation_database_sync():
     """
     Test: User creation in Auth service syncs to Backend PostgreSQL.
@@ -469,6 +470,7 @@ async def test_user_creation_database_sync():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_profile_update_propagation():
     """
     Test: Profile updates propagate across Auth and Backend services.
@@ -495,6 +497,7 @@ async def test_profile_update_propagation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_transaction_consistency_across_services():
     """
     Test: Transaction consistency maintained across databases.
@@ -520,6 +523,7 @@ async def test_transaction_consistency_across_services():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_updates_conflict_resolution():
     """
     Test: Concurrent updates handled with proper conflict resolution.
@@ -546,6 +550,7 @@ async def test_concurrent_updates_conflict_resolution():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_foreign_key_relationships():
     """
     Test: Foreign key relationships maintained across services.
@@ -571,6 +576,7 @@ async def test_foreign_key_relationships():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cache_layer_synchronization():
     """
     Test: Cache layer synchronization with database updates.
@@ -596,6 +602,7 @@ async def test_cache_layer_synchronization():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_cross_service_database_sync():
     """
     Test: Complete cross-service database synchronization validation.

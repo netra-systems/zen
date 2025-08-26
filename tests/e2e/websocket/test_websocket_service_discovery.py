@@ -282,6 +282,7 @@ class WebSocketServiceDiscoveryTester:
         search_security(config)
         return security_info if security_info else None
     
+    @pytest.mark.e2e
     async def test_websocket_url_construction(self, base_url: str) -> Dict[str, Any]:
         """Test WebSocket URL construction from discovered config"""
         construction_test = {
@@ -347,10 +348,12 @@ async def service_discovery_tester():
     await tester.cleanup_clients()
 
 
+@pytest.mark.e2e
 class TestBackendServiceDiscovery:
     """Test backend service discovery for WebSocket configuration"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_provides_websocket_config(self, service_discovery_tester):
         """Test backend provides WebSocket config via service discovery"""
         discovery_result = await service_discovery_tester.discover_websocket_config_from_backend()
@@ -370,6 +373,7 @@ class TestBackendServiceDiscovery:
             print(f"Backend service discovery not yet implemented: {discovery_result['error']}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_config_endpoint_accessibility(self, service_discovery_tester):
         """Test backend config endpoints are accessible"""
         config_endpoints = [
@@ -402,6 +406,7 @@ class TestBackendServiceDiscovery:
         assert health_accessible, "Health endpoint should be accessible for service discovery"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_url_in_health_endpoint(self, service_discovery_tester):
         """Test WebSocket URL information in health endpoint"""
         try:
@@ -429,10 +434,12 @@ class TestBackendServiceDiscovery:
             print(f"Health endpoint not accessible: {e}")
 
 
+@pytest.mark.e2e
 class TestFrontendConfigDiscovery:
     """Test frontend configuration discovery patterns"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_frontend_config_discovery_simulation(self, service_discovery_tester):
         """Test frontend config discovery simulation"""
         # Simulate how frontend would discover WebSocket configuration
@@ -465,6 +472,7 @@ class TestFrontendConfigDiscovery:
         assert validation["websocket_url"] is not None, "Default config should provide WebSocket URL"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_config_loading_at_startup(self, service_discovery_tester):
         """Test config loading at application startup simulation"""
         # Simulate frontend startup config loading
@@ -508,10 +516,12 @@ class TestFrontendConfigDiscovery:
         assert startup_config["load_time_ms"] < 5000, "Config loading should be fast (<5s)"
 
 
+@pytest.mark.e2e
 class TestAuthServiceIntegration:
     """Test auth service integration in WebSocket configuration"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_service_websocket_config(self, service_discovery_tester):
         """Test auth service provides WebSocket configuration"""
         auth_result = await service_discovery_tester.discover_websocket_config_from_auth()
@@ -528,6 +538,7 @@ class TestAuthServiceIntegration:
             print(f"Auth service WebSocket config not available: {auth_result['error']}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_security_service_integration(self, service_discovery_tester):
         """Test SecurityService integration in WebSocket config"""
         # Test that WebSocket config includes proper SecurityService integration
@@ -566,10 +577,12 @@ class TestAuthServiceIntegration:
                 print("Security integration needs configuration")
 
 
+@pytest.mark.e2e
 class TestWebSocketURLConstruction:
     """Test WebSocket URL construction and validation"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_url_construction_from_backend_config(self, service_discovery_tester):
         """Test WebSocket URL construction from backend configuration"""
         backend_url = service_discovery_tester.backend_url
@@ -586,6 +599,7 @@ class TestWebSocketURLConstruction:
         assert "/ws" in constructed_url, "Constructed URL should include WebSocket path"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_url_validation(self, service_discovery_tester):
         """Test WebSocket URL validation"""
         test_urls = [
@@ -634,6 +648,7 @@ class TestWebSocketURLConstruction:
         assert len(successful_connections) > 0, "At least one WebSocket URL should be connectable"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_discovery_complete_workflow(self, service_discovery_tester):
         """Test complete service discovery workflow"""
         workflow_result = {

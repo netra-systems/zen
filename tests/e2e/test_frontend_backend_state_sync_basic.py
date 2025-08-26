@@ -21,6 +21,7 @@ try:
     from tests.e2e.websocket.state_helpers import StateValidator
     TEST_MODE_AVAILABLE = True
 except ImportError:
+    @pytest.mark.e2e
     class TestClientFactory:
         async def create_auth_client(self): return MockClient()
         async def create_backend_client(self, token): return MockClient()
@@ -94,6 +95,7 @@ class FrontendBackendStateSyncTester:
             "backend_client": backend_client
         }
     
+    @pytest.mark.e2e
     async def test_user_profile_state_sync(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Test 1: User profile updates sync from frontend to backend."""
         start_time = time.time()
@@ -111,6 +113,7 @@ class FrontendBackendStateSyncTester:
         assert backend_response["success"], "Backend profile update failed"
         return {"sync_time": sync_time, "state_consistent": True}
     
+    @pytest.mark.e2e
     async def test_thread_state_consistency(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Test 2: Thread state remains consistent during message flow."""
         start_time = time.time()
@@ -136,6 +139,7 @@ class FrontendBackendStateSyncTester:
         assert consistency_time < 1.0, f"Thread consistency took {consistency_time:.3f}s"
         return {"consistency_time": consistency_time, "updates_received": len(thread_updates)}
     
+    @pytest.mark.e2e
     async def test_message_state_preservation(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Test 3: Message state preserved across WebSocket updates."""
         start_time = time.time()
@@ -155,6 +159,7 @@ class FrontendBackendStateSyncTester:
         assert preservation_time < 0.5, f"Message preservation took {preservation_time:.3f}s"
         return {"preservation_time": preservation_time, "states_received": 2}
     
+    @pytest.mark.e2e
     async def test_optimistic_update_rollback(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Test 4: Optimistic updates rollback correctly on failure."""
         start_time = time.time()
@@ -172,6 +177,7 @@ class FrontendBackendStateSyncTester:
         assert rollback_time < 0.1, f"Rollback took {rollback_time:.3f}s, required <100ms"
         return {"rollback_time": rollback_time, "rollback_detected": rollback_event is not None}
     
+    @pytest.mark.e2e
     async def test_websocket_state_updates(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Test 5: WebSocket state updates propagate to frontend correctly."""
         start_time = time.time()
@@ -195,6 +201,7 @@ class FrontendBackendStateSyncTester:
         assert update_time < 0.5, f"WebSocket updates took {update_time:.3f}s"
         return {"update_time": update_time, "events_received": len(events)}
     
+    @pytest.mark.e2e
     async def test_concurrent_state_changes(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Test 6: Concurrent state changes resolve without conflicts."""
         start_time = time.time()
@@ -228,6 +235,7 @@ class FrontendBackendStateSyncTester:
         assert total_updates >= 2, f"Expected updates from both clients, got {total_updates}"
         return {"concurrent_time": concurrent_time, "total_updates": total_updates}
     
+    @pytest.mark.e2e
     async def test_state_recovery_after_disconnect(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Test 7: State recovered correctly after WebSocket reconnection."""
         start_time = time.time()
@@ -251,6 +259,7 @@ class FrontendBackendStateSyncTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_frontend_backend_state_sync_complete():
     """Complete frontend-backend state synchronization test suite."""
     tester = FrontendBackendStateSyncTester()

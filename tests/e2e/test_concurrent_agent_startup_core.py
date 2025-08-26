@@ -81,6 +81,7 @@ async def validate_state_persistence_integrity(test_env, users):
     return 0  # Placeholder
 
 @dataclass
+@pytest.mark.e2e
 class TestUser:
     """Test user for concurrent agent startup testing."""
     user_id: str = ""
@@ -140,12 +141,14 @@ class ContaminationReport:
         return len(self.incidents)
 
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
 class ConcurrentTestReport:
     pass
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
@@ -161,6 +164,7 @@ class TestSyntaxFix:
     
     @property
 
+    @pytest.mark.e2e
     def test_duration(self) -> float:
 
         """Calculate test duration."""
@@ -535,6 +539,7 @@ class ConcurrentTestOrchestrator:
         return responses
     
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
@@ -735,6 +740,7 @@ class TestSyntaxFix:
             'agent_instance_id': user.agent_instance_id
         }
 
+@pytest.mark.e2e
 async def test_cross_contamination_detection(
     concurrent_test_environment, 
     isolated_test_users
@@ -789,6 +795,7 @@ async def test_cross_contamination_detection(
     
     logger.info("Test Case 2 completed: No contamination detected")
 
+@pytest.mark.e2e
 async def test_state_persistence_isolation(
     concurrent_test_environment, 
     isolated_test_users

@@ -200,6 +200,7 @@ class FrontendBackendAPITester:
         # All retries exhausted
         raise Exception(f"Request failed after {self.retry_config.max_retries + 1} attempts. Last error: {last_exception}")
     
+    @pytest.mark.e2e
     async def test_options_preflight(self, endpoint_path: str) -> Dict[str, Any]:
         """Test CORS preflight request"""
         url = f"{BACKEND_BASE_URL}{endpoint_path}"
@@ -233,6 +234,7 @@ class FrontendBackendAPITester:
 
 
 # Test Classes
+@pytest.mark.e2e
 class TestFrontendBackendAPICommunication:
     """Main test class for Frontend-Backend API communication"""
     
@@ -245,6 +247,7 @@ class TestFrontendBackendAPICommunication:
         await tester.cleanup_session()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_api_endpoints_with_authentication(self, api_tester: FrontendBackendAPITester):
         """
         Test all critical API endpoints with proper authentication headers.
@@ -329,6 +332,7 @@ class TestFrontendBackendAPICommunication:
             assert success_rate >= 0.3, f"Non-connection API failures detected: {results}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cors_headers_validation(self, api_tester: FrontendBackendAPITester):
         """
         Test CORS headers validation for cross-origin requests.
@@ -393,6 +397,7 @@ class TestFrontendBackendAPICommunication:
             assert cors_success_rate >= 0.5, f"Non-connection CORS failures detected: {cors_test_results}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_response_handling(self, api_tester: FrontendBackendAPITester):
         """
         Test error handling scenarios and proper HTTP status codes.
@@ -468,6 +473,7 @@ class TestFrontendBackendAPICommunication:
             assert error_success_rate >= 0.4, f"Non-connection error handling failures detected: {error_test_results}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_api_retry_logic(self, api_tester: FrontendBackendAPITester):
         """
         Test API retry logic for handling temporary failures.
@@ -560,6 +566,7 @@ class TestFrontendBackendAPICommunication:
             assert retry_success_rate >= 0.3, f"Non-connection retry logic failures detected: {retry_test_results}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rate_limiting_compliance(self, api_tester: FrontendBackendAPITester):
         """
         Test rate limiting compliance and proper 429 handling.
@@ -686,6 +693,7 @@ class TestFrontendBackendAPICommunication:
 
 
 # Integration test combining all aspects
+@pytest.mark.e2e
 class TestComprehensiveFrontendBackendIntegration:
     """Comprehensive integration test combining all API communication aspects"""
     
@@ -698,6 +706,7 @@ class TestComprehensiveFrontendBackendIntegration:
         await tester.cleanup_session()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_api_communication_flow(self, api_tester: FrontendBackendAPITester):
         """
         Complete end-to-end test of Frontend-Backend API communication.

@@ -31,6 +31,7 @@ class HealthEndpointTester:
             "/health/system/comprehensive"
         ]
     
+    @pytest.mark.e2e
     async def test_health_endpoints_respond(self) -> Dict[str, Any]:
         """Test that health endpoints respond when services are available."""
         results = {}
@@ -64,6 +65,7 @@ class HealthEndpointTester:
         except Exception as e:
             return {"error": str(e)}
     
+    @pytest.mark.e2e
     async def test_degraded_mode_with_clickhouse_disabled(self) -> Dict[str, Any]:
         """Test health endpoints when ClickHouse is disabled via environment."""
         # Set environment variable to simulate ClickHouse failure
@@ -119,6 +121,7 @@ class HealthEndpointTester:
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 class TestHealthCascadeIntegration:
     """Integration tests for health check cascade with real endpoints."""
     
@@ -127,6 +130,7 @@ class TestHealthCascadeIntegration:
         """Initialize health endpoint tester."""
         return HealthEndpointTester()
     
+    @pytest.mark.e2e
     async def test_health_endpoints_basic_functionality(self, health_tester):
         """Test basic health endpoint functionality."""
         results = await health_tester.test_health_endpoints_respond()
@@ -140,6 +144,7 @@ class TestHealthCascadeIntegration:
         assert responsive_count > 0, "No health endpoints responded"
         logger.info(f"Health endpoints test: {responsive_count}/{len(results)} responsive")
     
+    @pytest.mark.e2e
     async def test_degraded_mode_detection(self, health_tester):
         """Test degraded mode detection when ClickHouse is disabled."""
         # Check if backend is running first
@@ -163,6 +168,7 @@ class TestHealthCascadeIntegration:
         else:
             logger.warning("Degraded mode not detected - may need implementation")
     
+    @pytest.mark.e2e
     async def test_health_cascade_timing(self, health_tester):
         """Test that health cascade operations complete within timing requirements."""
         import time

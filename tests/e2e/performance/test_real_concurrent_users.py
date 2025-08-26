@@ -406,11 +406,13 @@ async def real_concurrent_manager():
     await manager.teardown_real_services()
 
 
+@pytest.mark.e2e
 class TestRealConcurrentUsers:
     """Test real concurrent users with data isolation and performance validation"""
     
     @pytest.mark.asyncio
     @pytest.mark.integration
+    @pytest.mark.e2e
     async def test_real_concurrent_users_data_isolation(self, real_concurrent_manager):
         """
         CRITICAL Test #10: Real concurrent users with complete data isolation
@@ -482,6 +484,7 @@ class TestRealConcurrentUsers:
     
     @pytest.mark.asyncio
     @pytest.mark.performance
+    @pytest.mark.e2e
     async def test_concurrent_user_performance_targets(self, real_concurrent_manager):
         """Test performance targets for concurrent users under sustained load"""
         manager = real_concurrent_manager
@@ -515,6 +518,7 @@ class TestRealConcurrentUsers:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_concurrent_database_connection_pooling(self, real_concurrent_manager):
         """Test database connection pooling under concurrent user load"""
         manager = real_concurrent_manager

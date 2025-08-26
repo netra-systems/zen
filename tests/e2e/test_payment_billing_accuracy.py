@@ -37,6 +37,7 @@ from tests.e2e.payment_billing_helpers import BillingAccuracyValidator
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_free_to_pro_tier_payment_accuracy():
     """
     Test #1: Free to Pro Tier Upgrade with Payment Validation
@@ -104,6 +105,7 @@ async def test_free_to_pro_tier_payment_accuracy():
 
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_usage_tracking_cost_calculation_accuracy():
     """
     Test #2: Usage Tracking and Cost Calculation Accuracy
@@ -162,6 +164,7 @@ async def test_usage_tracking_cost_calculation_accuracy():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_subscription_renewal_invoice_generation():
     """
     Test #3: Subscription Renewal and Invoice Generation
@@ -230,6 +233,7 @@ async def test_subscription_renewal_invoice_generation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_downgrade_prorated_refund_handling():
     """
     Test #4: Downgrade Handling with Prorated Refunds
@@ -293,6 +297,7 @@ async def test_downgrade_prorated_refund_handling():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_payment_failure_retry_recovery():
     """
     Test #5: Payment Failure and Retry Logic
@@ -352,6 +357,7 @@ async def test_payment_failure_retry_recovery():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_enterprise_tier_billing_accuracy_comprehensive():
     """
     Test #6: Enterprise Tier Billing Accuracy (Comprehensive)
@@ -422,6 +428,7 @@ async def test_enterprise_tier_billing_accuracy_comprehensive():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_billing_system_performance_under_load():
     """
     Test #7: Billing System Performance Under Load

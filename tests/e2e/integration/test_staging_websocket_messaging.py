@@ -71,10 +71,12 @@ async def staging_tester(staging_harness: UnifiedE2ETestHarness) -> StagingWebSo
         await tester.cleanup_websockets()
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_user(staging_harness: UnifiedE2ETestHarness) -> TestUser:
 #     """Create authenticated test user for staging tests.""" # Possibly broken comprehension
     return await staging_harness.create_test_user()
 
+@pytest.mark.e2e
 class TestStagingWebSocketConnection:
     # """Test WebSocket connection establishment in staging environment."""
     pass
@@ -103,6 +105,7 @@ class TestStagingWebSocketConnection:
     # # Connection should succeed with valid staging origin
     # assert client.state == ConnectionState.CONNECTED
 
+@pytest.mark.e2e
 class TestStagingWebSocketMessaging:
     # """Test WebSocket messaging functionality in staging environment."""
     pass
@@ -182,6 +185,7 @@ class TestStagingWebSocketMessaging:
     # assert error_response is not None
     # assert "error" in error_response.get("type", "").lower()
 
+@pytest.mark.e2e
 class TestStagingWebSocketAuthentication:
     # """Test WebSocket authentication flows in staging environment."""
     pass
@@ -216,6 +220,7 @@ class TestStagingWebSocketAuthentication:
     # assert not success
     # assert client.state in [ConnectionState.FAILED, ConnectionState.DISCONNECTED]
 
+@pytest.mark.e2e
 class TestStagingWebSocketReconnection:
     # """Test WebSocket reconnection logic in staging environment."""
     pass
@@ -271,6 +276,7 @@ class TestStagingWebSocketReconnection:
     # success = await client.send(post_reconnect_message)
     # assert success, "Should be able to send messages after reconnection"
 
+@pytest.mark.e2e
 class TestStagingWebSocketConcurrency:
     # """Test concurrent WebSocket connections in staging environment."""
     pass
@@ -343,6 +349,7 @@ class TestStagingWebSocketConcurrency:
     # # Timeout is expected - user2 shouldn't receive user1's messages
     # pass
 
+@pytest.mark.e2e
 class TestStagingWebSocketRateLimit:
     # """Test WebSocket rate limiting in staging environment."""
     pass
@@ -376,6 +383,7 @@ class TestStagingWebSocketRateLimit:
     # # If rate limiting is active, we might get fewer than 10 messages sent
     # # This test validates the rate limiting mechanism exists
 
+@pytest.mark.e2e
 class TestStagingWebSocketHeartbeat:
     # """Test WebSocket ping/pong heartbeat in staging environment."""
     pass
@@ -403,6 +411,7 @@ class TestStagingWebSocketHeartbeat:
     # # Connection should remain healthy after ping/pong
     # assert client.state == ConnectionState.CONNECTED
 
+@pytest.mark.e2e
 class TestStagingWebSocketErrorHandling:
     # """Test WebSocket error handling in staging environment."""
     pass

@@ -148,6 +148,7 @@ class WorkingConfigValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_current_working_port_configuration():
     """
     Test that the current working port configuration is accessible.
@@ -210,6 +211,7 @@ async def test_current_working_port_configuration():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_endpoint_accessibility():
     """
     Test WebSocket endpoint basic accessibility.
@@ -247,6 +249,7 @@ async def test_websocket_endpoint_accessibility():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_response_timing():
     """
     Test that services respond within acceptable timing for real-time applications.

@@ -14,6 +14,7 @@ from netra_backend.app.main import app
 from fastapi.testclient import TestClient
 
 
+@pytest.mark.e2e
 class TestMCPAPIContract:
     """Test suite demonstrating MCP API contract mismatches."""
     
@@ -25,6 +26,7 @@ class TestMCPAPIContract:
         client.headers = {"Authorization": "Bearer test-token"}
         return client
     
+    @pytest.mark.e2e
     def test_frontend_expects_servers_endpoint(self, client):
         """
         FAILING TEST: Frontend expects /api/mcp/servers endpoint.
@@ -45,6 +47,7 @@ class TestMCPAPIContract:
         assert "data" in data
         assert isinstance(data["data"], list)
     
+    @pytest.mark.e2e
     def test_frontend_expects_server_status_endpoint(self, client):
         """
         FAILING TEST: Frontend expects /api/mcp/servers/{name}/status endpoint.
@@ -60,6 +63,7 @@ class TestMCPAPIContract:
             f"Got {response.status_code}: {response.text}"
         )
     
+    @pytest.mark.e2e
     def test_frontend_expects_tools_discover_endpoint(self, client):
         """
         FAILING TEST: Frontend expects /api/mcp/tools/discover endpoint.
@@ -79,6 +83,7 @@ class TestMCPAPIContract:
         assert "data" in data
         assert isinstance(data["data"], list)
     
+    @pytest.mark.e2e
     def test_backend_has_different_endpoints(self, client):
         """
         PASSING TEST: Backend implements different MCP endpoints.
@@ -102,6 +107,7 @@ class TestMCPAPIContract:
                 f"Backend endpoint {endpoint} returned 404"
             )
     
+    @pytest.mark.e2e
     def test_architectural_mismatch_client_vs_server_model(self, client):
         """
         DEMONSTRATION TEST: Shows the architectural mismatch.
@@ -138,6 +144,7 @@ class TestMCPAPIContract:
         )
 
 
+@pytest.mark.e2e
 class TestMCPEdgeCases:
     """Additional edge case tests for similar issues."""
     
@@ -145,6 +152,7 @@ class TestMCPEdgeCases:
     def client(self):
         return TestClient(app)
     
+    @pytest.mark.e2e
     def test_mcp_feature_flag_consistency(self, client):
         """
         TEST: Verify MCP feature is consistently enabled/disabled.
@@ -163,6 +171,7 @@ class TestMCPEdgeCases:
             f"Frontend enabled={frontend_enabled}"
         )
     
+    @pytest.mark.e2e
     def test_mcp_auth_requirements(self, client):
         """
         TEST: Verify consistent auth requirements for MCP endpoints.
@@ -177,6 +186,7 @@ class TestMCPEdgeCases:
             f"Unexpected status code: {response.status_code}"
         )
     
+    @pytest.mark.e2e
     def test_mcp_error_response_format(self, client):
         """
         TEST: Verify error response format matches frontend expectations.

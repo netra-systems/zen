@@ -124,6 +124,7 @@ class ConcurrentLLMExecutor:
         )
 
 
+@pytest.mark.e2e
 class TestConcurrentLLMExecution:
     """Concurrent LLM execution tests."""
     
@@ -134,6 +135,7 @@ class TestConcurrentLLMExecution:
         return ConcurrentLLMExecutor(use_real_llm)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_moderate_concurrency(self, concurrent_executor):
         """Test moderate concurrent load (10 requests)."""
         result = await concurrent_executor.execute_concurrent_requests(10)
@@ -143,6 +145,7 @@ class TestConcurrentLLMExecution:
         assert result.throughput >= 2.0, f"Throughput too low: {result.throughput:.2f} req/s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_high_concurrency(self, concurrent_executor):
         """Test high concurrent load (25 requests)."""
         result = await concurrent_executor.execute_concurrent_requests(25)
@@ -154,6 +157,7 @@ class TestConcurrentLLMExecution:
         assert result.total_time < 30.0, f"Total execution too slow: {result.total_time:.2f}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_burst_load_handling(self, concurrent_executor):
         """Test handling of burst load patterns."""
         # Execute burst of requests
@@ -168,6 +172,7 @@ class TestConcurrentLLMExecution:
         assert burst_time < 20.0, f"Burst processing too slow: {burst_time:.2f}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agents_with_llm(self):
         """Test concurrent agents using real LLMs."""
         use_real_llm = self._should_use_real_llm()
@@ -203,6 +208,7 @@ class TestConcurrentLLMExecution:
         assert total_time < 15.0, f"Agent concurrency too slow: {total_time:.2f}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_resource_exhaustion_handling(self, concurrent_executor):
         """Test handling when resources are exhausted."""
         # Simulate resource exhaustion with many requests
@@ -215,6 +221,7 @@ class TestConcurrentLLMExecution:
         assert result.throughput > 0, "System completely overwhelmed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_mixed_workload_concurrency(self, concurrent_executor):
         """Test mixed workload with different request types."""
         # Create mixed workload
@@ -257,10 +264,12 @@ class TestConcurrentLLMExecution:
 
 
 @pytest.mark.stress
+@pytest.mark.e2e
 class TestStressConcurrency:
     """Stress testing for concurrent execution."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_extreme_concurrency(self):
         """Test extreme concurrent load (100 requests)."""
         use_real_llm = self._should_use_real_llm()

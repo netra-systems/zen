@@ -35,6 +35,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_refresh_attempts_race_conditions(jwt_generator, audit_logger, token_refresh_service):
     """
     Test Case 1: Concurrent refresh attempts and race conditions.
@@ -131,6 +132,7 @@ async def test_concurrent_refresh_attempts_race_conditions(jwt_generator, audit_
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_refresh_token_error_handling_and_fallback(jwt_generator, audit_logger, token_refresh_service):
     """
     Test Case 2: Refresh token error handling and fallback procedures.
@@ -234,6 +236,7 @@ async def test_refresh_token_error_handling_and_fallback(jwt_generator, audit_lo
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_refresh_token_performance_under_load(jwt_generator, audit_logger, token_refresh_service):
     """
     Test Case 3: Refresh token performance under high load.
@@ -350,6 +353,7 @@ async def test_refresh_token_performance_under_load(jwt_generator, audit_logger,
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_refresh_token_timeout_and_retry_logic(jwt_generator, audit_logger, token_refresh_service):
     """
     Test Case 4: Refresh token timeout and retry logic.

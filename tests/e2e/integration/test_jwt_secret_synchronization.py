@@ -245,10 +245,12 @@ class JWTSecretSynchronizationValidator:
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestJWTSecretSynchronization(JWTTestFixtures):
     """Critical JWT secret synchronization tests."""
     
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
         harness = UnifiedE2ETestHarness()
@@ -264,6 +266,7 @@ class TestJWTSecretSynchronization(JWTTestFixtures):
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_secret_consistency_across_services():
     """
     BVJ: Segment: ALL | Goal: Security | Impact: All authenticated operations
@@ -286,6 +289,7 @@ async def test_jwt_secret_consistency_across_services():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_mismatched_secret_rejection():
     """Test that mismatched secrets cause consistent failures across all services."""
     validator = JWTSecretSynchronizationValidator()
@@ -298,6 +302,7 @@ async def test_jwt_mismatched_secret_rejection():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_secret_rotation_scenario():
     """Test secret rotation propagation across all services."""
     validator = JWTSecretSynchronizationValidator()
@@ -311,6 +316,7 @@ async def test_jwt_secret_rotation_scenario():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_cross_service_token_validation():
     """Test that JWT created by Auth service works in Backend and WebSocket."""
     validator = JWTSecretSynchronizationValidator()
@@ -327,6 +333,7 @@ async def test_jwt_cross_service_token_validation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_performance_requirements():
     """Test JWT operations meet <50ms performance requirements."""
     validator = JWTSecretSynchronizationValidator()
@@ -342,6 +349,7 @@ async def test_jwt_performance_requirements():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_service_token_secret_consistency():
     """Test service-to-service authentication uses consistent secrets."""
     validator = JWTSecretSynchronizationValidator()

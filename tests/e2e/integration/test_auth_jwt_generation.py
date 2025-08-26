@@ -256,6 +256,7 @@ class JWTGenerationTestManager:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestJWTGeneration:
     """JWT Token Generation and Validation Tests."""
     
@@ -264,6 +265,7 @@ class TestJWTGeneration:
         """Provide JWT generation test manager."""
         return JWTGenerationTestManager()
     
+    @pytest.mark.e2e
     async def test_jwt_token_generation_via_auth_service(self, jwt_manager):
         """
         Test #1: JWT Token Generation via Auth Service
@@ -304,6 +306,7 @@ class TestJWTGeneration:
         
         logger.info("✓ JWT token generation successful")
     
+    @pytest.mark.e2e
     async def test_cross_service_token_validation(self, jwt_manager):
         """
         Test #2: Cross-Service Token Validation Consistency
@@ -338,6 +341,7 @@ class TestJWTGeneration:
         
         logger.info("✓ Cross-service token validation consistent")
     
+    @pytest.mark.e2e
     async def test_token_information_extraction(self, jwt_manager):
         """
         Test #3: Token Information Extraction and Validation
@@ -376,6 +380,7 @@ class TestJWTGeneration:
         
         logger.info("✓ Token information extraction validated")
     
+    @pytest.mark.e2e
     async def test_multiple_user_token_generation(self, jwt_manager):
         """
         Test #4: Multiple User Token Generation

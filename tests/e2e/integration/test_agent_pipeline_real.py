@@ -250,6 +250,7 @@ class AgentPipelinePerformanceTester:
         """Initialize performance tester."""
         self.pipeline_tester = pipeline_tester
     
+    @pytest.mark.e2e
     async def test_pipeline_performance_requirements(self, ws_client) -> Dict[str, Any]:
         """Test that agent pipeline meets performance requirements."""
         performance_results = {}
@@ -292,6 +293,7 @@ class AgentPipelinePerformanceTester:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_agent_pipeline_execution(real_services):
     """
     BVJ: Segment: ALL | Goal: Core Agent Value Delivery | Impact: $120K+ MRR
@@ -348,6 +350,7 @@ async def test_complete_agent_pipeline_execution(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_agent_pipeline_performance_requirements(real_services):
     """Test that agent pipeline meets performance requirements for different request types."""
     pipeline_tester = AgentPipelineExecutionTester(real_services)
@@ -387,6 +390,7 @@ async def test_agent_pipeline_performance_requirements(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_agent_pipeline_execution(real_services):
     """Test multiple concurrent agent pipeline executions."""
     pipeline_tester = AgentPipelineExecutionTester(real_services)
@@ -448,6 +452,7 @@ async def test_concurrent_agent_pipeline_execution(real_services):
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_agent_pipeline_error_handling(real_services):
     """Test agent pipeline error handling and recovery."""
     pipeline_tester = AgentPipelineExecutionTester(real_services)

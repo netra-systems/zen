@@ -41,10 +41,12 @@ from tests.e2e.agent_billing_test_helpers import (
 from netra_backend.app.schemas.UserPlan import PlanTier
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentBillingFlow:
     """Test #2: Agent Request → Processing → Response → Billing Record Flow."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize billing test core."""
         core = AgentBillingTestCore()
@@ -66,6 +68,7 @@ class TestAgentBillingFlow:
         return BillingFlowValidator(billing_helper)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_agent_billing_flow_triage(self, test_core, request_simulator,
                                                     billing_validator):
         """Test complete billing flow for triage agent."""
@@ -91,6 +94,7 @@ class TestAgentBillingFlow:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multiple_agent_types_billing_accuracy(self, test_core, request_simulator,
                                                        billing_validator):
         """Test billing accuracy across different agent types."""
@@ -119,6 +123,7 @@ class TestAgentBillingFlow:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_billing_performance_requirements(self, test_core, request_simulator,
                                                   billing_validator):
         """Test that billing operations meet performance requirements."""
@@ -146,6 +151,7 @@ class TestAgentBillingFlow:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_billing_error_handling(self, test_core, request_simulator):
         """Test billing flow error handling and recovery."""
         session = await test_core.establish_authenticated_user_session(PlanTier.PRO)
@@ -168,6 +174,7 @@ class TestAgentBillingFlow:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_tier_specific_billing_validation(self, test_core, request_simulator,
                                                   billing_validator):
         """Test billing validation for different user tiers."""
@@ -220,10 +227,12 @@ class TestAgentBillingFlow:
             assert result["cost_accurate"], f"{agent_type} agent cost calculation incorrect"
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 class TestAgentBillingPerformance:
     """Performance validation for agent billing operations."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize performance test core."""
         core = AgentBillingTestCore()
@@ -232,6 +241,7 @@ class TestAgentBillingPerformance:
         await core.teardown_test_environment()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_billing_record_creation_performance(self, test_core):
         """Test that billing record creation meets performance requirements."""
         session = await test_core.establish_authenticated_user_session(PlanTier.PRO)
@@ -258,6 +268,7 @@ class TestAgentBillingPerformance:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_billing_operations(self, test_core):
         """Test billing system under concurrent load."""
         sessions = []

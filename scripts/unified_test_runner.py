@@ -429,7 +429,7 @@ class UnifiedTestRunner:
             "agent": ["backend"],
             "security": ["auth"],
             "frontend": ["frontend"],
-            "e2e": ["backend", "auth", "frontend"],
+            "e2e": ["backend"],  # E2E tests run from backend but include all test directories
             "performance": ["backend", "auth"]
         }
         
@@ -514,7 +514,11 @@ class UnifiedTestRunner:
         cmd_parts = ["pytest"]
         
         # Add test directory
-        cmd_parts.append(str(config["test_dir"]))
+        # For E2E tests, include all test directories since they span services
+        if category_name == "e2e":
+            cmd_parts.extend(["tests/e2e", "netra_backend/tests", "auth_service/tests"])
+        else:
+            cmd_parts.append(str(config["test_dir"]))
         
         # Add category-specific markers
         category_markers = {

@@ -51,6 +51,7 @@ class MockAuthService:
         })
 
 
+@pytest.mark.e2e
 class TestAuthTokenCacheE2E:
     """E2E test for auth token validation caching."""
     
@@ -75,6 +76,7 @@ class TestAuthTokenCacheE2E:
         return client
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_tokens(self):
         """Provide test tokens."""
         return [
@@ -86,6 +88,7 @@ class TestAuthTokenCacheE2E:
         ]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_first_token_validation_hits_auth_service(self, auth_client, mock_auth_service, test_tokens):
         """Test that first token validation calls auth service."""
         token = test_tokens[0]
@@ -116,6 +119,7 @@ class TestAuthTokenCacheE2E:
         assert elapsed_ms >= 80  # Should take at least 80ms due to mock latency (allow some variance)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_second_validation_uses_cache_no_auth_service_call(self, auth_client, mock_auth_service, test_tokens):
         """Test that second validation uses cache without auth service call."""
         token = test_tokens[0]
@@ -148,6 +152,7 @@ class TestAuthTokenCacheE2E:
         assert elapsed_ms < 10  # Should be very fast with cache
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_ttl_expiry_after_5_minutes(self, auth_cache):
         """Test cache TTL of 5 minutes."""
         token = "test_token_ttl"
@@ -173,6 +178,7 @@ class TestAuthTokenCacheE2E:
         assert token not in auth_cache._token_cache
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_invalidation_on_logout(self, auth_cache, test_tokens):
         """Test cache invalidation when user logs out."""
         token = test_tokens[0]
@@ -194,6 +200,7 @@ class TestAuthTokenCacheE2E:
         assert token not in auth_cache._token_cache
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_size_limits_1000_tokens_max(self, auth_cache):
         """Test cache size limits (1000 tokens max)."""
         # Fill cache with 1000 tokens
@@ -220,6 +227,7 @@ class TestAuthTokenCacheE2E:
         assert len(auth_cache._token_cache) == 0
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_cache_access_thread_safety(self, auth_client, mock_auth_service, test_tokens):
         """Test cache behavior under concurrent access."""
         token = test_tokens[0]
@@ -257,6 +265,7 @@ class TestAuthTokenCacheE2E:
             assert result["user_id"] == "concurrent-user"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_performance_improvement(self, auth_client, mock_auth_service, test_tokens):
         """Test that cache provides significant performance improvement."""
         token = test_tokens[0]
@@ -286,6 +295,7 @@ class TestAuthTokenCacheE2E:
         assert second_call_time < 0.01  # 10ms
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_miss_fallback_behavior(self, auth_client, mock_auth_service, test_tokens):
         """Test behavior when cache misses and auth service is called."""
         token1 = test_tokens[0]
@@ -321,6 +331,7 @@ class TestAuthTokenCacheE2E:
         assert result3["user_id"] == "user-1"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_invalid_token_not_cached(self, auth_client, mock_auth_service, test_tokens):
         """Test that invalid tokens are not cached."""
         invalid_token = test_tokens[4]
@@ -346,6 +357,7 @@ class TestAuthTokenCacheE2E:
             assert result2.get("valid") is False
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_e2e_complete_in_under_10_seconds(self, auth_client, mock_auth_service, test_tokens):
         """Test that entire E2E test completes in under 10 seconds."""
         start_time = time.time()

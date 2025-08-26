@@ -53,6 +53,7 @@ class RealLLMTestManager:
         return estimated_cost <= self.max_cost_per_test
 
 
+@pytest.mark.e2e
 class TestRealLLMCore:
     """Core tests for real LLM integration."""
     
@@ -68,6 +69,7 @@ class TestRealLLMCore:
         return LLMManager(config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_real_openai_integration(self, llm_test_manager, llm_manager):
         """Test real OpenAI API integration."""
         if not llm_test_manager.should_use_real_llm():
@@ -82,6 +84,7 @@ class TestRealLLMCore:
             pytest.fail(f"OpenAI integration failed: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_real_anthropic_integration(self, llm_test_manager, llm_manager):
         """Test real Anthropic API integration."""
         if not llm_test_manager.should_use_real_llm():
@@ -96,6 +99,7 @@ class TestRealLLMCore:
             pytest.fail(f"Anthropic integration failed: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_performance_sla(self, llm_test_manager, llm_manager):
         """Test LLM performance meets P99 <2s SLA."""
         if not llm_test_manager.should_use_real_llm():
@@ -111,6 +115,7 @@ class TestRealLLMCore:
         self._validate_llm_response(response)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_cost_management(self, llm_test_manager, llm_manager):
         """Test LLM cost management controls."""
         if not llm_test_manager.should_use_real_llm():
@@ -124,6 +129,7 @@ class TestRealLLMCore:
         assert llm_test_manager.validate_cost_limits(tokens_used)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_real_llm_integration(self, llm_test_manager):
         """Test BaseSubAgent with real LLM."""
         if not llm_test_manager.should_use_real_llm():
@@ -136,6 +142,7 @@ class TestRealLLMCore:
         self._validate_agent_response(response)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_llm_calls(self, llm_test_manager, llm_manager):
         """Test concurrent real LLM calls."""
         if not llm_test_manager.should_use_real_llm():
@@ -221,10 +228,12 @@ class TestRealLLMCore:
 
 
 @pytest.mark.real_llm
+@pytest.mark.e2e
 class TestBusinessValueValidation:
     """Test business value claims with real LLMs."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_reduction_validation(self):
         """Validate 20-50% cost reduction claims."""
         use_real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"

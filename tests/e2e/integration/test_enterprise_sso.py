@@ -30,6 +30,7 @@ from tests.e2e.enterprise_sso_helpers import EnterpriseSSOTestHarness
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_saml_authentication_flow_with_valid_assertion():
     """
     Test #1: Complete SAML Authentication Flow
@@ -74,6 +75,7 @@ async def test_saml_authentication_flow_with_valid_assertion():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_token_generation_with_enterprise_claims():
     """
     Test #2: JWT Token Generation with Enterprise Claims
@@ -113,6 +115,7 @@ async def test_jwt_token_generation_with_enterprise_claims():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_synchronization_across_services():
     """
     Test #3: Session Synchronization Across Services
@@ -149,6 +152,7 @@ async def test_session_synchronization_across_services():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_mfa_integration_with_sso_authentication():
     """
     Test #4: MFA Integration with SSO Authentication
@@ -192,6 +196,7 @@ async def test_mfa_integration_with_sso_authentication():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_inheritance_from_idp_attributes():
     """
     Test #5: Permission Inheritance from IdP Attributes
@@ -225,6 +230,7 @@ async def test_permission_inheritance_from_idp_attributes():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_invalidation_on_idp_logout():
     """
     Test #6: Session Invalidation on IdP Logout
@@ -263,6 +269,7 @@ async def test_session_invalidation_on_idp_logout():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_enterprise_sso_performance_validation():
     """
     Performance validation for enterprise SSO flows.

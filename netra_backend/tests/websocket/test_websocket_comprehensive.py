@@ -64,25 +64,21 @@ class WebSocketTestClient:
         self.connected = False
         
     def connect(self, endpoint: str, token: str):
-        """Connect to WebSocket endpoint."""
+        """Connect to WebSocket endpoint using context manager."""
         # Use TestClient's websocket_connect with proper authorization headers
         headers = {
             "Authorization": f"Bearer {token}"
         }
-        self.websocket = self.test_client.websocket_connect(endpoint, headers=headers)
-        self.connected = True
-        return self.websocket
+        # Return the context manager directly - tests will use it in 'with' statement
+        return self.test_client.websocket_connect(endpoint, headers=headers)
         
-    def send_message(self, message: Dict):
+    def send_message(self, websocket_session, message: Dict):
         """Send message to WebSocket."""
-        if self.websocket:
-            self.websocket.send_json(message)
+        websocket_session.send_json(message)
             
-    def receive_message(self) -> Dict:
+    def receive_message(self, websocket_session) -> Dict:
         """Receive message from WebSocket."""
-        if self.websocket:
-            return self.websocket.receive_json()
-        return {}
+        return websocket_session.receive_json()
         
     def disconnect(self):
         """Disconnect from WebSocket."""
@@ -162,13 +158,13 @@ class TestWebSocketConnection:
     async def test_connection_establishment_invalid_token(self, websocket_client):
         """Test connection fails with invalid token."""
         with pytest.raises(Exception):  # Connection should fail
-            await websocket_client.connect("/ws", "invalid_token")
+            websocket_client.connect("/ws", "invalid_token")
             
     @pytest.mark.asyncio
     async def test_connection_establishment_no_token(self, websocket_client):
         """Test connection fails without token."""
         with pytest.raises(Exception):  # Connection should fail
-            await websocket_client.connect("/ws", "")
+            websocket_client.connect("/ws", "")
 
 @pytest.mark.asyncio
 class TestWebSocketAuthentication:
@@ -327,13 +323,13 @@ class TestWebSocketMessaging:
     @pytest.mark.asyncio
     async def test_ping_pong_system_messages(self, websocket_client, authenticated_token):
         """Test ping/pong system message handling."""
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
         # Send ping message
         ping_message = {"type": "ping", "timestamp": time.time()}
-        await websocket_client.send_message(ping_message)
+        websocket_client.send_message(ping_message)
         await asyncio.sleep(0.1)
         
         # Should receive pong response
@@ -400,7 +396,7 @@ class TestWebSocketErrorHandling:
     @pytest.mark.asyncio
     async def test_error_message_format(self, websocket_client, authenticated_token):
         """Test error messages follow correct format."""
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -422,7 +418,7 @@ class TestWebSocketErrorHandling:
     @pytest.mark.asyncio
     async def test_connection_resilience_to_errors(self, websocket_client, authenticated_token):
         """Test connection stays alive after recoverable errors."""
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         
         # Send multiple invalid messages
@@ -435,7 +431,7 @@ class TestWebSocketErrorHandling:
         
         # Should be able to send valid message
         valid_message = {"type": "ping"}
-        await websocket_client.send_message(valid_message)
+        websocket_client.send_message(valid_message)
         await asyncio.sleep(0.1)
         
         pong_messages = websocket_client.get_messages_by_type("pong")
@@ -609,7 +605,7 @@ class TestWebSocketHeartbeat:
     @pytest.mark.asyncio
     async def test_heartbeat_messages(self, websocket_client, authenticated_token):
         """Test server sends heartbeat messages."""
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -618,7 +614,7 @@ class TestWebSocketHeartbeat:
         
         # Send ping to test heartbeat response
         ping_message = {"type": "ping", "timestamp": time.time()}
-        await websocket_client.send_message(ping_message)
+        websocket_client.send_message(ping_message)
         await asyncio.sleep(0.1)
         
         # Should receive pong (heartbeat response)
@@ -653,7 +649,7 @@ class TestWebSocketResilience:
     async def test_connection_survives_component_rerender(self, websocket_client, authenticated_token):
         """Test connection persists through component re-renders."""
         # Establish connection
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         
         original_connection_count = len(websocket_client.messages)
@@ -666,7 +662,7 @@ class TestWebSocketResilience:
         
         # Should be able to send message after "re-render"
         test_message = {"type": "ping"}
-        await websocket_client.send_message(test_message)
+        websocket_client.send_message(test_message)
         await asyncio.sleep(0.1)
         
         # Should receive response
@@ -713,7 +709,7 @@ class TestWebSocketIntegration:
         assert config_response["status"] == "success"
         
         # 2. Connection Establishment
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         assert websocket_client.connected
         
@@ -728,11 +724,11 @@ class TestWebSocketIntegration:
             "type": "user_message", 
             "payload": {"content": "Integration test message"}
         }
-        await websocket_client.send_message(test_message)
+        websocket_client.send_message(test_message)
         
         # 5. Ping/Pong Heartbeat
         ping_message = {"type": "ping", "timestamp": time.time()}
-        await websocket_client.send_message(ping_message)
+        websocket_client.send_message(ping_message)
         await asyncio.sleep(0.1)
         
         pong_messages = websocket_client.get_messages_by_type("pong")
@@ -760,7 +756,7 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_message_throughput(self, websocket_client, authenticated_token):
         """Test message handling throughput."""
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -773,7 +769,7 @@ class TestWebSocketPerformance:
                 "type": "ping",
                 "payload": {"sequence": i}
             }
-            await websocket_client.send_message(test_message)
+            websocket_client.send_message(test_message)
             
         # Wait for all responses
         await asyncio.sleep(0.5)
@@ -790,7 +786,7 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_large_message_handling(self, websocket_client, authenticated_token):
         """Test handling of large messages within limits."""
-        await websocket_client.connect("/ws", authenticated_token)
+        websocket_client.connect("/ws", authenticated_token)
         await asyncio.sleep(0.1)
         websocket_client.clear_messages()
         
@@ -804,7 +800,7 @@ class TestWebSocketPerformance:
             }
         }
         
-        await websocket_client.send_message(large_message)
+        websocket_client.send_message(large_message)
         await asyncio.sleep(0.2)
         
         # Should not receive size error for valid large message

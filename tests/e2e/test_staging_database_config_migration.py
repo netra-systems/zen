@@ -20,9 +20,11 @@ setup_test_path()
 from netra_backend.app.core.configuration.base import get_unified_config
 
 
+@pytest.mark.e2e
 class TestDatabaseConfigMigration:
     """Test suite to verify DatabaseConfig migration and prevent staging deployment failures."""
     
+    @pytest.mark.e2e
     def test_postgres_core_uses_unified_config(self):
         """Verify postgres_core.py uses get_unified_config instead of DatabaseConfig attributes.
         
@@ -54,6 +56,7 @@ class TestDatabaseConfigMigration:
         for pattern in problematic_patterns:
             assert pattern not in content, f"Found legacy pattern '{pattern}' in postgres_core.py - migration incomplete!"
     
+    @pytest.mark.e2e
     def test_postgres_core_imports_required_dependencies(self):
         """Test that postgres_core has all required imports for database initialization."""
         import netra_backend.app.db.postgres_core as postgres_core
@@ -71,6 +74,7 @@ class TestDatabaseConfigMigration:
             assert hasattr(postgres_core, func_name), f"Missing required function: {func_name}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_initialization_with_unified_config(self):
         """Test database initialization uses unified config properly.
         
@@ -101,6 +105,7 @@ class TestDatabaseConfigMigration:
                     # Other exceptions are acceptable for this test
                     pass
     
+    @pytest.mark.e2e
     def test_no_direct_database_config_usage_in_core_files(self):
         """Verify core database files don't use DatabaseConfig class attributes directly."""
         core_db_files = [
@@ -132,6 +137,7 @@ class TestDatabaseConfigMigration:
                 # File might not exist in test environment
                 pass
     
+    @pytest.mark.e2e
     def test_unified_config_provides_all_required_attributes(self):
         """Verify get_unified_config() provides all attributes previously in DatabaseConfig."""
         config = get_unified_config()
@@ -155,10 +161,12 @@ class TestDatabaseConfigMigration:
             assert value is not None, f"Unified config attribute {new_attr} is None"
 
 
+@pytest.mark.e2e
 class TestStagingDeploymentValidation:
     """Tests to validate staging deployment configuration."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_staging_environment_database_config(self):
         """Test database configuration in staging environment.
         
@@ -175,6 +183,7 @@ class TestStagingDeploymentValidation:
             assert config.db_pool_size <= 50, "Pool size too large for Cloud Run limits"
             assert config.db_max_overflow >= 10, "Max overflow too small for staging load"
     
+    @pytest.mark.e2e
     def test_import_resolution_in_deployment(self):
         """Test that all critical imports resolve correctly as they would in deployment."""
         critical_imports = [
@@ -190,6 +199,7 @@ class TestStagingDeploymentValidation:
                 pytest.fail(f"Critical import failed (would break staging): {import_stmt}\n  Error: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_engine_creation_flow(self):
         """Test the complete flow of database engine creation as it happens in staging.
         

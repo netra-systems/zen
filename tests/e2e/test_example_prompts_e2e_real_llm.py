@@ -146,10 +146,12 @@ class ExamplePromptsTestData:
 
 @pytest.mark.real_llm
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestExamplePromptsE2ERealLLM:
     """Test all 9 example prompts with real LLM integration."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize test core with real LLM support."""
         core = AgentConversationTestCore()
@@ -163,12 +165,14 @@ class TestExamplePromptsE2ERealLLM:
         return os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_data(self):
         """Get test data for all prompts."""
         return ExamplePromptsTestData.get_all_test_cases()
     
     @pytest.mark.asyncio
     @pytest.mark.parametrize("test_case", ExamplePromptsTestData.get_all_test_cases())
+    @pytest.mark.e2e
     async def test_example_prompt_complete_workflow(self, test_core, use_real_llm, test_case):
         """Test complete workflow for each example prompt."""
         session_data = await test_core.establish_conversation_session(test_case.plan_tier)
@@ -197,6 +201,7 @@ class TestExamplePromptsE2ERealLLM:
                     pass
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_high_complexity_prompts_real_llm(self, test_core, use_real_llm, test_data):
         """Test high complexity prompts (score >= 8) with real LLM."""
         if not use_real_llm:
@@ -258,6 +263,7 @@ class TestExamplePromptsE2ERealLLM:
         return workflow_result
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_coordination_validation(self, test_core, use_real_llm):
         """Test multi-agent coordination for complex prompts."""
         # Use the most complex prompt (EP-007)
@@ -289,6 +295,7 @@ class TestExamplePromptsE2ERealLLM:
                     pass
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_tier_all_prompts(self, test_core, use_real_llm, test_data):
         """Test all enterprise-tier prompts with real LLM."""
         enterprise_cases = [tc for tc in test_data if tc.plan_tier == PlanTier.ENTERPRISE]

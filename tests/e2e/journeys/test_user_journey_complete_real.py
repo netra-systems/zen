@@ -56,6 +56,7 @@ except ImportError:
 try:
     from tests.clients.factory import TestClientFactory
 except ImportError:
+    @pytest.mark.e2e
     class TestClientFactory:
         def __init__(self, discovery):
             self.discovery = discovery
@@ -157,6 +158,7 @@ class CompleteUserJourneyRealTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_user_journey_real_services():
     """
     Test: Complete User Journey with Real Services
@@ -190,6 +192,7 @@ async def test_complete_user_journey_real_services():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_user_journey_performance_validation():
     """
     Test: User Journey Performance with Real Services

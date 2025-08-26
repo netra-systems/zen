@@ -364,6 +364,7 @@ class MultiServiceHealthChecker:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_multi_service_health_comprehensive():
     """Test comprehensive multi-service health check functionality."""
     checker = MultiServiceHealthChecker()
@@ -393,6 +394,7 @@ async def test_multi_service_health_comprehensive():
 
 @pytest.mark.asyncio
 @pytest.mark.integration 
+@pytest.mark.e2e
 async def test_critical_services_availability():
     """Test that critical services (auth, backend, postgres) are available."""
     checker = MultiServiceHealthChecker()
@@ -413,6 +415,7 @@ async def test_critical_services_availability():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_service_timeout_handling():
     """Test proper timeout handling for service health checks."""
     checker = MultiServiceHealthChecker()

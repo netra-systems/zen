@@ -217,6 +217,7 @@ class WebSocketReconnectionAuthTester:
             "max_attempts_respected": connection.attempts <= connection.max_attempts
         }
     
+    @pytest.mark.e2e
     async def test_concurrent_reconnections(self, user_id: str) -> Dict[str, Any]:
         """Test handling of concurrent reconnection attempts."""
         # Create multiple connection instances for same user
@@ -241,6 +242,7 @@ class WebSocketReconnectionAuthTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketReconnectionWithAuth:
     """Test #4: WebSocket Reconnection with Auth State - Comprehensive E2E Testing."""
     
@@ -250,10 +252,12 @@ class TestWebSocketReconnectionWithAuth:
         return WebSocketReconnectionAuthTester()
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_user_id(self):
         """Provide enterprise test user ID."""
         return TEST_USERS["enterprise"].id
     
+    @pytest.mark.e2e
     async def test_token_expiry_automatic_reconnection(self, reconnection_tester, test_user_id):
         """
         Primary Test: Token expires → Auto-reconnect with new token → Execution continues
@@ -290,6 +294,7 @@ class TestWebSocketReconnectionWithAuth:
         total_duration = time.time() - test_start_time
         assert total_duration < 30.0, f"Test took {total_duration:.1f}s, must be <30s"
     
+    @pytest.mark.e2e
     async def test_network_interruption_message_queue_preservation(self, reconnection_tester, test_user_id):
         """
         Test: Network interruption → Messages queued → Reconnection → Queued messages delivered
@@ -321,6 +326,7 @@ class TestWebSocketReconnectionWithAuth:
         assert messages_delivered == len(test_messages)
         assert len(connection.queued_messages) == 0  # Queue should be empty after delivery
     
+    @pytest.mark.e2e
     async def test_exponential_backoff_strategy(self, reconnection_tester, test_user_id):
         """
         Test: Multiple reconnection attempts with exponential backoff
@@ -343,6 +349,7 @@ class TestWebSocketReconnectionWithAuth:
         assert timings[1] > timings[0] * 1.5  # Second attempt should be significantly longer
         assert timings[2] > timings[1] * 1.5  # Third attempt should be significantly longer
     
+    @pytest.mark.e2e
     async def test_state_synchronization_after_reconnection(self, reconnection_tester, test_user_id):
         """
         Test: State synchronization after reconnection
@@ -377,6 +384,7 @@ class TestWebSocketReconnectionWithAuth:
         assert connection.user_session_state["agent_context"]["recent_actions"] == additional_context["recent_actions"]
         assert len(connection.user_session_state["agent_context"]["execution_timeline"]) == 2
     
+    @pytest.mark.e2e
     async def test_concurrent_reconnections_same_user(self, reconnection_tester, test_user_id):
         """
         Test: Concurrent reconnections from same user handled correctly
@@ -391,6 +399,7 @@ class TestWebSocketReconnectionWithAuth:
         assert concurrent_result["no_conflicts"]
         assert concurrent_result["successful_reconnections"] <= concurrent_result["total_attempts"]
     
+    @pytest.mark.e2e
     async def test_thread_context_preservation(self, reconnection_tester, test_user_id):
         """
         Test: Thread context is maintained across reconnection
@@ -429,6 +438,7 @@ class TestWebSocketReconnectionWithAuth:
         assert restored_context["conversation_summary"] == "Discussing data analysis workflow"
         assert "user_preferences" in restored_context["agent_memory"]
     
+    @pytest.mark.e2e
     async def test_no_duplicate_messages_after_reconnection(self, reconnection_tester, test_user_id):
         """
         Test: No duplicate messages after reconnection
@@ -465,6 +475,7 @@ class TestWebSocketReconnectionWithAuth:
         assert second_delivery == 0  # No duplicates
         assert len(connection.queued_messages) == 0  # Queue empty after first flush
     
+    @pytest.mark.e2e
     async def test_reconnection_performance_requirements(self, reconnection_tester, test_user_id):
         """
         Test: Reconnection performance meets requirements

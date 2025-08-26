@@ -36,6 +36,7 @@ from test_framework.http_client import ClientConfig
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_session_persistence():
     """
     BVJ: Segment: ALL | Goal: User Retention | Impact: $200K MRR
@@ -53,6 +54,7 @@ async def test_session_persistence():
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_cross_service_session_recognition():
     """
     Test session created in Auth service is recognized by Backend service.
@@ -70,6 +72,7 @@ async def test_cross_service_session_recognition():
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_websocket_session_authentication():
     """
     Test session used for WebSocket authentication across services.
@@ -87,6 +90,7 @@ async def test_websocket_session_authentication():
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_frontend_session_state_persistence():
     """
     Test Frontend maintains session state across page refreshes.
@@ -104,6 +108,7 @@ async def test_frontend_session_state_persistence():
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_unified_logout_session_cleanup():
     """
     Test logout clears session everywhere consistently.
@@ -121,6 +126,7 @@ async def test_unified_logout_session_cleanup():
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_session_timeout_consistency():
     """
     Test session timeout handled consistently across all services.
@@ -324,6 +330,7 @@ class UnifiedSessionManager:
         except Exception:
             return False
     
+    @pytest.mark.e2e
     async def test_cross_service_recognition(self) -> Dict[str, Any]:
         """Test cross-service session recognition."""
         results = {"success": False, "auth_to_backend": False, "session_data_consistent": False}
@@ -349,6 +356,7 @@ class UnifiedSessionManager:
         
         return results
     
+    @pytest.mark.e2e
     async def test_websocket_session_auth(self) -> Dict[str, Any]:
         """Test WebSocket session authentication."""
         results = {"success": False, "websocket_auth_success": False, "session_token_valid": False}
@@ -372,6 +380,7 @@ class UnifiedSessionManager:
         
         return results
     
+    @pytest.mark.e2e
     async def test_frontend_session_persistence(self) -> Dict[str, Any]:
         """Test frontend session persistence simulation."""
         results = {"success": False, "token_storage_persistent": False, "session_state_maintained": False}
@@ -392,6 +401,7 @@ class UnifiedSessionManager:
         
         return results
     
+    @pytest.mark.e2e
     async def test_logout_cleanup(self) -> Dict[str, Any]:
         """Test unified logout cleanup."""
         results = {
@@ -421,6 +431,7 @@ class UnifiedSessionManager:
         
         return results
     
+    @pytest.mark.e2e
     async def test_timeout_consistency(self) -> Dict[str, Any]:
         """Test session timeout consistency across services."""
         results = {

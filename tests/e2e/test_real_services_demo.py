@@ -13,6 +13,7 @@ from tests.e2e.real_services_manager import create_real_services_manager
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_real_services_manager_basic():
     """Test basic functionality of RealServicesManager."""
     # Test instantiation
@@ -35,6 +36,7 @@ async def test_real_services_manager_basic():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_urls():
     """Test service URL generation."""
     manager = create_real_services_manager()
@@ -55,6 +57,7 @@ async def test_service_urls():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_health_monitor():
     """Test health monitoring functionality."""
     manager = create_real_services_manager()
@@ -66,6 +69,7 @@ async def test_health_monitor():
     assert monitor.monitor_task is None
 
 
+@pytest.mark.e2e
 def test_context_manager_creation():
     """Test context manager creation."""
     context = RealServicesContext()
@@ -78,6 +82,7 @@ def test_context_manager_creation():
 """
 @pytest.mark.asyncio
 @pytest.mark.slow
+@pytest.mark.e2e
 async def test_real_services_startup():
     '''Test actual service startup (manual test only).'''
     async with RealServicesContext() as manager:

@@ -46,6 +46,7 @@ from tests.e2e.staging_test_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestHealthEndpointTimeoutFailures:
     """
     Test suite replicating critical health endpoint timeout failures from GCP staging.
@@ -62,6 +63,7 @@ class TestHealthEndpointTimeoutFailures:
             external_services_available=False
         )
 
+    @pytest.mark.e2e
     async def test_health_endpoint_exceeds_5_second_timeout_returns_503(self, staging_health_client):
         """
         EXPECTED TO FAIL - CRITICAL TIMEOUT ISSUE
@@ -102,6 +104,7 @@ class TestHealthEndpointTimeoutFailures:
             assert duration < 1.0, f"Health check took {duration:.2f}s (expected < 1.0s)"
             assert response["status"] == "healthy", f"Health check failed: {response.get('error', 'timeout')}"
 
+    @pytest.mark.e2e
     async def test_health_endpoint_blocks_on_clickhouse_in_staging(self):
         """
         EXPECTED TO FAIL - CLICKHOUSE DEPENDENCY ISSUE
@@ -134,6 +137,7 @@ class TestHealthEndpointTimeoutFailures:
             assert clickhouse_health_response["details"]["blocking_health_check"] == False
             assert clickhouse_health_response["duration_ms"] < 1000  # Should be fast
 
+    @pytest.mark.e2e
     async def test_health_endpoint_blocks_on_redis_in_staging(self):
         """
         EXPECTED TO FAIL - REDIS DEPENDENCY ISSUE
@@ -167,6 +171,7 @@ class TestHealthEndpointTimeoutFailures:
             assert redis_health_response["details"]["blocking_health_check"] == False
             assert redis_health_response["duration_ms"] < 1000
 
+    @pytest.mark.e2e
     async def test_health_ready_endpoint_not_environment_aware(self):
         """
         EXPECTED TO FAIL - READINESS CHECK ENVIRONMENT ISSUE
@@ -199,6 +204,7 @@ class TestHealthEndpointTimeoutFailures:
             assert readiness_response["details"]["clickhouse"]["required"] == False
             assert readiness_response["details"]["redis"]["required"] == False
 
+    @pytest.mark.e2e
     async def test_health_check_external_service_cascade_failure(self):
         """
         EXPECTED TO FAIL - CASCADE FAILURE ISSUE
@@ -230,6 +236,7 @@ class TestHealthEndpointTimeoutFailures:
             assert cascade_failure_response["details"]["cascade_failure"] == False
             assert cascade_failure_response["details"]["proper_isolation"] == True
 
+    @pytest.mark.e2e
     async def test_health_check_database_connection_pool_exhaustion(self):
         """
         EXPECTED TO FAIL - CONNECTION POOL ISSUE
@@ -263,6 +270,7 @@ class TestHealthEndpointTimeoutFailures:
             assert db_pool_response["details"]["timeout_waiting_for_connection"] == False
             assert db_pool_response["details"]["duration_ms"] < 1000
 
+    @pytest.mark.e2e
     async def test_health_check_synchronous_blocking_calls(self):
         """
         EXPECTED TO FAIL - SYNCHRONOUS BLOCKING ISSUE
@@ -298,6 +306,7 @@ class TestHealthEndpointTimeoutFailures:
             for op in blocking_response["details"]["blocking_operations"]:
                 assert op["blocking"] == False, f"{op['operation']} should not block"
 
+    @pytest.mark.e2e
     async def test_health_check_load_balancer_probe_frequency_overload(self):
         """
         EXPECTED TO FAIL - PROBE FREQUENCY ISSUE
@@ -333,12 +342,14 @@ class TestHealthEndpointTimeoutFailures:
             assert probe_overload_response["details"]["probe_queuing"] == False
 
 
+@pytest.mark.e2e
 class TestHealthEndpointRecoveryAndOptimization:
     """
     Additional tests for health endpoint recovery mechanisms and optimizations.
     These tests help identify specific improvement opportunities.
     """
 
+    @pytest.mark.e2e
     async def test_health_check_caching_mechanism_missing(self):
         """
         EXPECTED TO FAIL - CACHING OPTIMIZATION
@@ -366,6 +377,7 @@ class TestHealthEndpointRecoveryAndOptimization:
             assert caching_response["total_duration_ms"] < 500
             assert caching_response["checks_performed"]["database"]["cached"] == True
 
+    @pytest.mark.e2e
     async def test_health_check_circuit_breaker_missing(self):
         """
         EXPECTED TO FAIL - CIRCUIT BREAKER PATTERN
@@ -403,6 +415,7 @@ class TestHealthEndpointRecoveryAndOptimization:
                     assert details["circuit_state"] == "open", f"{service} circuit should be open"
                     assert details["still_checking"] == False, f"Should stop checking {service}"
 
+    @pytest.mark.e2e
     async def test_health_check_timeout_configuration_not_environment_specific(self):
         """
         EXPECTED TO FAIL - TIMEOUT CONFIGURATION
@@ -435,6 +448,7 @@ class TestHealthEndpointRecoveryAndOptimization:
             assert config["clickhouse"]["timeout_ms"] <= config["clickhouse"]["recommended_ms"]
             assert config["redis"]["timeout_ms"] <= config["redis"]["recommended_ms"]
 
+    @pytest.mark.e2e
     async def test_health_check_graceful_degradation_missing(self):
         """
         EXPECTED TO FAIL - GRACEFUL DEGRADATION

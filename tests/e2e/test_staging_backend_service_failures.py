@@ -85,6 +85,7 @@ class ConfigurationValidationResult:
     environment_source: str = "unknown"
 
 
+@pytest.mark.e2e
 class TestStagingBackendServiceFailures:
     """Comprehensive test suite for staging backend service failures using TDC methodology."""
 
@@ -105,6 +106,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_auth_service_database_url_not_configured_complete_failure(self):
         """
         EXPECTED TO FAIL - CRITICAL DATABASE CONFIG ISSUE
@@ -158,6 +160,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_auth_service_database_connection_attempt_fails_completely(self):
         """
         EXPECTED TO FAIL - CRITICAL DATABASE CONNECTION ISSUE
@@ -226,6 +229,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging") 
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_auth_service_environment_variable_loading_cascade_failure(self):
         """
         EXPECTED TO FAIL - CRITICAL ENV LOADING ISSUE
@@ -299,6 +303,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_clickhouse_connectivity_timeout_staging_host_unreachable(self):
         """
         EXPECTED TO FAIL - CRITICAL CLICKHOUSE CONNECTIVITY ISSUE
@@ -364,6 +369,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical 
+    @pytest.mark.e2e
     async def test_clickhouse_client_connection_timeout_health_check_failure(self):
         """
         EXPECTED TO FAIL - CRITICAL CLICKHOUSE CLIENT ISSUE
@@ -426,6 +432,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_redis_connectivity_failure_cache_session_degradation(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS CONNECTIVITY ISSUE
@@ -520,6 +527,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_redis_client_connection_fallback_mode_masking_issue(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS FALLBACK ISSUE
@@ -580,6 +588,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_redis_fallback_configuration_enforcement_staging_vs_development(self):
         """
         EXPECTED TO FAIL - CRITICAL ENVIRONMENT BEHAVIOR ISSUE
@@ -639,6 +648,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_health_endpoints_return_503_due_to_external_service_failures(self):
         """
         EXPECTED TO FAIL - CRITICAL HEALTH CHECK ISSUE
@@ -718,6 +728,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_legacy_websocket_import_warnings_deprecated_patterns(self):
         """
         EXPECTED TO FAIL - MEDIUM IMPORT MODERNIZATION ISSUE
@@ -782,6 +793,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical  
+    @pytest.mark.e2e
     def test_websocket_import_consistency_validation(self):
         """
         EXPECTED TO FAIL - MEDIUM IMPORT CONSISTENCY ISSUE
@@ -833,6 +845,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_staging_environment_detection_and_strict_validation_enforcement(self):
         """
         EXPECTED TO FAIL - CRITICAL ENVIRONMENT DETECTION ISSUE
@@ -892,6 +905,7 @@ class TestStagingBackendServiceFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.integration
+    @pytest.mark.e2e
     async def test_comprehensive_backend_service_readiness_validation(self):
         """
         EXPECTED TO FAIL - CRITICAL COMPREHENSIVE READINESS ISSUE
@@ -1025,6 +1039,7 @@ class TestStagingBackendServiceFailures:
 
 @pytest.mark.env("staging")
 @pytest.mark.critical  
+@pytest.mark.e2e
 async def test_auth_service_database_url_undefined_critical_failure():
     """
     STANDALONE CRITICAL TEST - Auth Service Database Configuration
@@ -1054,6 +1069,7 @@ async def test_auth_service_database_url_undefined_critical_failure():
 
 @pytest.mark.env("staging")
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_clickhouse_connectivity_timeout_critical_failure():
     """
     STANDALONE CRITICAL TEST - ClickHouse Connectivity
@@ -1083,6 +1099,7 @@ async def test_clickhouse_connectivity_timeout_critical_failure():
 
 @pytest.mark.env("staging")
 @pytest.mark.critical  
+@pytest.mark.e2e
 async def test_redis_connectivity_failure_fallback_masking():
     """
     STANDALONE CRITICAL TEST - Redis Connectivity and Fallback Behavior

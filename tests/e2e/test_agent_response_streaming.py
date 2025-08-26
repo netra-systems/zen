@@ -24,10 +24,12 @@ from tests.e2e.agent_orchestration_fixtures import (
 )
 
 
+@pytest.mark.e2e
 class TestAgentResponseStreaming:
     """Test real-time response delivery to frontend - BVJ: User experience"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_real_time_agent_updates_via_websocket(self, websocket_mock, streaming_test_data):
         """Test agent progress updates stream to frontend"""
         update_messages = streaming_test_data["update_messages"]
@@ -45,6 +47,7 @@ class TestAgentResponseStreaming:
         assert "agent_completed" in message_types
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_response_chunks(self, websocket_mock):
         """Test large responses stream in chunks"""
         large_response = {"data": "x" * 5000, "analysis": "detailed analysis"}
@@ -65,6 +68,7 @@ class TestAgentResponseStreaming:
         assert calls[2][0][0]["chunk"] == "final"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_streaming_to_frontend(self, websocket_mock, streaming_test_data):
         """Test error messages stream to frontend immediately"""
         error_message = streaming_test_data["error_message"]
@@ -78,6 +82,7 @@ class TestAgentResponseStreaming:
         assert call_args["fallback_activated"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_concurrent_streaming(self, websocket_mock, streaming_test_data):
         """Test multiple agents can stream simultaneously"""
         concurrent_updates = streaming_test_data["concurrent_updates"]
@@ -94,6 +99,7 @@ class TestAgentResponseStreaming:
         assert 2 in thread_ids
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_progress_indicators(self, websocket_mock):
         """Test progress indicators stream with percentage completion"""
         progress_updates = [
@@ -114,6 +120,7 @@ class TestAgentResponseStreaming:
         assert progress_values == [0, 25, 75, 100]
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_with_backpressure_handling(self, websocket_mock):
         """Test streaming handles backpressure when frontend is slow"""
         # Simulate slow frontend by making websocket slower
@@ -134,10 +141,12 @@ class TestAgentResponseStreaming:
         assert websocket_mock.send_json.call_count == 5
 
 
+@pytest.mark.e2e
 class TestStreamingReliability:
     """Test streaming reliability and connection management - BVJ: Consistent delivery"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_failure_handling(self, websocket_mock):
         """Test streaming handles websocket connection failures"""
         # Simulate connection failure
@@ -153,6 +162,7 @@ class TestStreamingReliability:
             assert str(e) == "Connection lost"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_ordering_preservation(self, websocket_mock):
         """Test message ordering is preserved during streaming"""
         ordered_messages = [
@@ -169,6 +179,7 @@ class TestStreamingReliability:
         assert sequences == [1, 2, 3]
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_duplicate_message_prevention(self, websocket_mock):
         """Test duplicate messages are prevented during streaming"""
         unique_message = {"id": "unique_123", "data": "once_only"}
@@ -181,6 +192,7 @@ class TestStreamingReliability:
         assert websocket_mock.send_json.call_count == 2  # Mock doesn't dedupe
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_timeout_handling(self, websocket_mock):
         """Test streaming operations timeout appropriately"""
         # Simulate timeout scenario
@@ -196,10 +208,12 @@ class TestStreamingReliability:
             await websocket_mock.send_json(message)
 
 
+@pytest.mark.e2e
 class TestStreamingPerformance:
     """Test streaming performance characteristics - BVJ: Responsive user experience"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_high_frequency_streaming(self, websocket_mock):
         """Test system can handle high-frequency message streaming"""
         high_freq_messages = [{"tick": i, "timestamp": datetime.now(timezone.utc).isoformat()} 
@@ -214,6 +228,7 @@ class TestStreamingPerformance:
         assert websocket_mock.send_json.call_count == 100
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_memory_efficient_streaming(self, websocket_mock):
         """Test streaming doesn't accumulate unbounded memory"""
         # Simulate streaming large dataset
@@ -225,6 +240,7 @@ class TestStreamingPerformance:
         assert websocket_mock.send_json.call_count == 10
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_adaptive_streaming_rate(self, websocket_mock):
         """Test streaming adapts rate based on frontend processing speed"""
         # Simulate varying frontend processing speeds
@@ -242,10 +258,12 @@ class TestStreamingPerformance:
         assert websocket_mock.send_json.call_count == 4
 
 
+@pytest.mark.e2e
 class TestStreamingIntegration:
     """Test streaming integration with agent lifecycle - BVJ: Seamless user experience"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_lifecycle_events(self, websocket_mock):
         """Test streaming covers complete agent lifecycle"""
         lifecycle_events = [
@@ -268,6 +286,7 @@ class TestStreamingIntegration:
         assert "agent_completed" in events
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_agent_streaming_coordination(self, websocket_mock):
         """Test streaming coordinates across multiple agents"""
         multi_agent_stream = [

@@ -37,10 +37,12 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestRealAgentPipeline:
     """Test #4: Complete Agent Pipeline with Real LLM and Supervisor Routing."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_pipeline_test_core(self):
         """Initialize agent pipeline test infrastructure."""
         core = AgentPipelineTestCore()
@@ -49,11 +51,13 @@ class TestRealAgentPipeline:
         await core.teardown_pipeline_environment()
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_test_supervisor_setup(self, test_pipeline_test_core):
         """Setup supervisor agent with real dependencies."""
         return await test_pipeline_test_core.setup_supervisor_agent()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_agent_workflow_message_to_response(self, test_pipeline_test_core, test_test_supervisor_setup):
         """Test complete: User message → routing → execution → response flow."""
         session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
@@ -64,6 +68,7 @@ class TestRealAgentPipeline:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_supervisor_routing_logic_with_real_messages(self, test_pipeline_test_core, test_supervisor_setup):
         """Test supervisor routing logic with real message patterns."""
         session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
@@ -74,6 +79,7 @@ class TestRealAgentPipeline:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_execution_with_real_llm_calls(self, test_pipeline_test_core, test_supervisor_setup):
         """Test agent execution with real LLM calls in test mode."""
         session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
@@ -84,6 +90,7 @@ class TestRealAgentPipeline:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_response_format_validation(self, test_pipeline_test_core, test_supervisor_setup):
         """Test response streaming format and real-time updates."""
         session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
@@ -95,6 +102,7 @@ class TestRealAgentPipeline:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_coordination_and_parallel_execution(self, test_pipeline_test_core, test_supervisor_setup):
         """Test multi-agent coordination with parallel execution."""
         session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.ENTERPRISE)
@@ -105,6 +113,7 @@ class TestRealAgentPipeline:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_failure_and_recovery_scenarios(self, test_pipeline_test_core, test_supervisor_setup):
         """Test agent failure handling and fallback scenarios."""
         session_data = await test_pipeline_test_core.establish_pipeline_session(PlanTier.PRO)
@@ -311,6 +320,7 @@ class StreamMonitor:
 class MultiAgentCoordinator:
     """Coordinates multi-agent execution testing."""
     
+    @pytest.mark.e2e
     async def test_parallel_agent_execution(self, session_data: Dict[str, Any], message: Dict[str, Any]) -> Dict[str, Any]:
         """Test parallel agent execution coordination."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -323,6 +333,7 @@ class MultiAgentCoordinator:
 class AgentFailureRecoveryTester:
     """Tests agent failure and recovery scenarios."""
     
+    @pytest.mark.e2e
     async def test_failure_scenarios(self, session_data: Dict[str, Any], test_supervisor_setup: Dict) -> Dict[str, Any]:
         """Test various failure and recovery scenarios."""
         message = AgentPipelineTestUtils.create_optimization_request(session_data["user_data"].id)

@@ -48,10 +48,12 @@ def sample_user_data():
     }
 
 
+@pytest.mark.e2e
 class TestDistributedTransactionRollback:
     """Test atomic rollback across all services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_distributed_transaction_rollback(self, transaction_tester, sample_user_data):
         """Test rollback atomicity across Auth DB, Backend DB, and ClickHouse."""
         # BVJ: Ensures billing data integrity during failures
@@ -88,10 +90,12 @@ class TestDistributedTransactionRollback:
         assert final_state in [TransactionState.ROLLED_BACK, TransactionState.FAILED]
 
 
+@pytest.mark.e2e
 class TestPartialFailureRecovery:
     """Test consistency maintenance during partial failures."""
     
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_partial_failure_recovery(self, transaction_tester, sample_user_data):
         """Test consistency maintained when some operations fail."""
         # BVJ: Prevents orphaned records that could impact billing accuracy
@@ -125,10 +129,12 @@ class TestPartialFailureRecovery:
         assert not commit_result  # Should fail due to partial completion
 
 
+@pytest.mark.e2e
 class TestConcurrentWriteConflicts:
     """Test proper conflict resolution under concurrent writes."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_write_conflicts(self, transaction_tester):
         """Test conflict resolution for concurrent user updates."""
         # BVJ: Prevents data corruption during high-load scenarios 
@@ -168,10 +174,12 @@ class TestConcurrentWriteConflicts:
         assert successful_commits >= 1
 
 
+@pytest.mark.e2e
 class TestEventualConsistency:
     """Test data synchronization verification across services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_eventual_consistency(self, transaction_tester, sample_user_data):
         """Test eventual consistency after distributed operations."""
         # BVJ: Ensures analytics data matches billing data for accurate reporting

@@ -33,10 +33,12 @@ from tests.e2e.config import (
 )
 
 
+@pytest.mark.e2e
 class TestConcurrentAgentStartup:
     """Test concurrent agent startup and isolation - BVJ: Multi-tenant security"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agent_startup_isolation(self, mock_supervisor_agent):
         """Test 10 concurrent user sessions with complete isolation"""
         # Setup mock execute method properly before test
@@ -142,10 +144,12 @@ class TestConcurrentAgentStartup:
         assert avg_response_time < 5000, f"Average response time too high: {avg_response_time}ms"
 
 
+@pytest.mark.e2e
 class TestAgentStateIsolation:
     """Test agent state isolation between concurrent users - BVJ: Data integrity"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_no_shared_state_between_users(self, mock_supervisor_agent):
         """Test no state contamination between concurrent users"""
         # Setup mock execute method properly before test
@@ -209,10 +213,12 @@ class TestAgentStateIsolation:
             assert expected_data == actual_data, f"State contamination: expected {expected_data}, got {actual_data}"
 
 
+@pytest.mark.e2e
 class TestConcurrentMessageRouting:
     """Test correct message routing under concurrent load - BVJ: Service reliability"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_message_routing_accuracy(self, mock_supervisor_agent, mock_sub_agents):
         """Test messages route correctly under concurrent load"""
         # Setup mock route_request method properly before test
@@ -270,10 +276,12 @@ class TestConcurrentMessageRouting:
             assert result["routing_success"], "Routing failed under concurrent load"
 
 
+@pytest.mark.e2e
 class TestPerformanceUnderConcurrentLoad:
     """Test performance metrics under concurrent agent load - BVJ: Scalability"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_performance_metrics_concurrent_agents(self, mock_supervisor_agent):
         """Test system performance under concurrent agent load"""
         # Setup mock execute method properly before test

@@ -171,6 +171,7 @@ class StartupChecker:
 # ==================== Test Fixtures ====================
 
 @pytest.fixture
+@pytest.mark.e2e
 def test_env():
     """Create isolated test environment"""
     original_env = os.environ.copy()
@@ -269,6 +270,7 @@ def limit_resource(resource_type: str, limit: int):
 # ==================== Database Initialization Tests ====================
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_missing_postgresql_tables_on_first_boot(test_env):
     """Test 1: Application should handle missing database tables gracefully"""
     # Drop all tables to simulate fresh installation
@@ -304,6 +306,7 @@ async def test_missing_postgresql_tables_on_first_boot(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_connection_pool_exhaustion_during_startup(test_env):
     """Test 2: Handle connection pool exhaustion gracefully"""
     # This test verifies the system's behavior under connection pressure
@@ -356,6 +359,7 @@ async def test_connection_pool_exhaustion_during_startup(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_schema_version_mismatch_between_services(test_env):
     """Test 3: Detect and handle schema version mismatches"""
     # Set different schema versions for different services
@@ -378,6 +382,7 @@ async def test_schema_version_mismatch_between_services(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_lock_timeout_during_concurrent_migration(test_env):
     """Test 4: Handle database locks during concurrent migrations"""
     import threading
@@ -424,6 +429,7 @@ async def test_database_lock_timeout_during_concurrent_migration(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_invalid_postgres_connection_string_format(test_env):
     """Test 5: Validate and handle invalid connection string formats"""
     invalid_urls = [
@@ -446,6 +452,7 @@ async def test_invalid_postgres_connection_string_format(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_postgresql_authentication_failure_recovery(test_env):
     """Test 6: Gracefully handle authentication failures with retry"""
     with temporary_env_var("POSTGRES_PASSWORD", "wrong_password"):
@@ -473,6 +480,7 @@ async def test_postgresql_authentication_failure_recovery(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_connection_timeout_during_network_partition(test_env):
     """Test 7: Handle connection timeouts appropriately"""
     # Point to non-existent host to simulate network partition
@@ -494,6 +502,7 @@ async def test_connection_timeout_during_network_partition(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_recovery_from_crash_during_startup(test_env):
     """Test 8: Detect and recover from database crashes during startup"""
     db = Database()
@@ -523,6 +532,7 @@ async def test_database_recovery_from_crash_during_startup(test_env):
 # ==================== Service Dependencies Tests ====================
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_redis_unavailable_at_startup(test_env):
     """Test 9: Handle Redis unavailability with graceful degradation"""
     # Point to non-existent Redis
@@ -543,6 +553,7 @@ async def test_redis_unavailable_at_startup(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_clickhouse_wrong_port_configuration(test_env):
     """Test 10: Handle ClickHouse port misconfiguration"""
     # Use HTTPS port instead of HTTP port
@@ -559,6 +570,7 @@ async def test_clickhouse_wrong_port_configuration(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_discovery_bootstrap_failure(test_env):
     """Test 11: Handle missing or corrupted service discovery files"""
     service_discovery_dir = Path(".service_discovery")
@@ -581,6 +593,7 @@ async def test_service_discovery_bootstrap_failure(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_service_unreachable_during_backend_start(test_env):
     """Test 12: Handle auth service unavailability"""
     # Point to wrong auth service port
@@ -596,6 +609,7 @@ async def test_auth_service_unreachable_during_backend_start(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_port_conflict_resolution_failure(test_env):
     """Test 13: Handle port conflicts with dynamic allocation"""
     # Occupy the default backend port
@@ -620,6 +634,7 @@ async def test_port_conflict_resolution_failure(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_health_check_cascade_timeout(test_env):
     """Test 14: Prevent circular dependency deadlocks"""
     from netra_backend.app.startup_checks.checker import StartupChecker
@@ -658,6 +673,7 @@ async def test_health_check_cascade_timeout(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_route_registration_missing(test_env):
     """Test 15: Detect missing WebSocket route registration"""
     try:
@@ -678,6 +694,7 @@ async def test_websocket_route_registration_missing(test_env):
 # ==================== Configuration & Secrets Tests ====================
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_missing_critical_environment_variables(test_env):
     """Test 16: Validate critical environment variables"""
     critical_vars = ["JWT_SECRET_KEY", "DATABASE_URL", "REDIS_URL"]
@@ -696,6 +713,7 @@ async def test_missing_critical_environment_variables(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_secret_mismatch_between_services(test_env):
     """Test 17: Detect JWT secret mismatches"""
     # Backend uses different secret than auth service
@@ -717,6 +735,7 @@ async def test_jwt_secret_mismatch_between_services(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_secrets_manager_api_timeout(test_env):
     """Test 18: Handle secrets loading timeouts"""
     # Mock: Component isolation for testing without external dependencies
@@ -743,6 +762,7 @@ async def test_secrets_manager_api_timeout(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_configuration_file_corruption(test_env):
     """Test 19: Handle corrupted configuration files"""
     config_file = Path(".service_discovery/backend.json")
@@ -762,6 +782,7 @@ async def test_configuration_file_corruption(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_environment_variable_case_sensitivity(test_env):
     """Test 20: Handle environment variable case inconsistencies"""
     # Set lowercase version
@@ -782,6 +803,7 @@ async def test_environment_variable_case_sensitivity(test_env):
 # ==================== Resource Management Tests ====================
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_memory_limit_exceeded_during_startup(test_env):
     """Test 21: Handle memory constraints during startup"""
     if sys.platform != "win32":  # Resource limits don't work the same on Windows
@@ -800,6 +822,7 @@ async def test_memory_limit_exceeded_during_startup(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_file_descriptor_limit_exceeded(test_env):
     """Test 22: Handle file descriptor exhaustion"""
     if sys.platform != "win32":  # File descriptor limits are Unix-specific
@@ -820,6 +843,7 @@ async def test_file_descriptor_limit_exceeded(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_background_task_timeout_crash(test_env):
     """Test 23: Prevent background task crashes"""
     from netra_backend.app.services.background_task_manager import BackgroundTaskManager
@@ -843,6 +867,7 @@ async def test_background_task_timeout_crash(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_pool_exhaustion_during_initialization(test_env):
     """Test 24: Handle thread pool exhaustion"""
     import concurrent.futures
@@ -876,6 +901,7 @@ async def test_thread_pool_exhaustion_during_initialization(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_zombie_process_cleanup_failure(test_env):
     """Test 25: Clean up zombie processes properly"""
     if sys.platform != "win32":
@@ -904,6 +930,7 @@ async def test_zombie_process_cleanup_failure(test_env):
 # ==================== Network & Communication Tests ====================
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cors_configuration_dynamic_port_mismatch(test_env):
     """Test 26: Handle CORS with dynamic ports"""
     from auth_service.main import create_app
@@ -926,6 +953,7 @@ async def test_cors_configuration_dynamic_port_mismatch(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_dns_resolution_failure_for_service_discovery(test_env):
     """Test 27: Handle DNS resolution failures"""
     with temporary_env_var("POSTGRES_HOST", "non.existent.host.invalid"):
@@ -939,6 +967,7 @@ async def test_dns_resolution_failure_for_service_discovery(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_ssl_tls_certificate_validation_failure(test_env):
     """Test 28: Handle certificate validation issues"""
     with temporary_env_var("DATABASE_URL", "postgresql+ssl://user:pass@localhost/db?sslmode=require"):
@@ -953,6 +982,7 @@ async def test_ssl_tls_certificate_validation_failure(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_network_partition_during_service_registration(test_env):
     """Test 29: Handle network partitions during registration"""
     
@@ -975,6 +1005,7 @@ async def test_network_partition_during_service_registration(test_env):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_connection_pool_exhaustion(test_env):
     """Test 30: Handle WebSocket connection limits"""
     try:

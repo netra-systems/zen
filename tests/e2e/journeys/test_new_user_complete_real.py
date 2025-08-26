@@ -186,6 +186,7 @@ class CompleteNewUserJourneyTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_new_user_journey_real_services():
     """
     Test #1: Complete New User Journey with Real Services
@@ -221,6 +222,7 @@ async def test_complete_new_user_journey_real_services():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_new_user_journey_performance_validation():
     """
     Test #2: New User Journey Performance Validation

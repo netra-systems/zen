@@ -29,6 +29,7 @@ from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_file_upload_pipeline():
     """Test complete file upload and processing pipeline."""
     async with create_e2e_harness().test_environment() as harness:
@@ -37,6 +38,7 @@ async def test_complete_file_upload_pipeline():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_pipeline_performance_requirements():
     """Validate pipeline meets performance requirements for enterprise customers."""
     async with create_e2e_harness().test_environment() as harness:
@@ -45,6 +47,7 @@ async def test_pipeline_performance_requirements():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_file_upload_error_handling():
     """Test file upload pipeline error handling and recovery."""
     async with create_e2e_harness().test_environment() as harness:
@@ -53,6 +56,7 @@ async def test_file_upload_error_handling():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_file_uploads():
     """Test concurrent file upload processing."""
     async with create_e2e_harness().test_environment() as harness:

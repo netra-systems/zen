@@ -71,6 +71,7 @@ class BackendFrontendStateSynchronizer:
             "backend_client": backend_client
         }
         
+    @pytest.mark.e2e
     async def test_user_state_propagation(self, user_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test user profile updates propagate from backend to frontend."""
         start_time = time.time()
@@ -120,6 +121,7 @@ class BackendFrontendStateSynchronizer:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_thread_state_consistency(self, user_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test thread state remains consistent across WebSocket updates."""
         start_time = time.time()
@@ -199,6 +201,7 @@ class BackendFrontendStateSynchronizer:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_websocket_state_reflection(self, user_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test WebSocket state updates reflect correctly in frontend store."""
         start_time = time.time()
@@ -280,6 +283,7 @@ class BackendFrontendStateSynchronizer:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_optimistic_update_success(self, user_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test optimistic update success scenario with confirmation."""
         start_time = time.time()
@@ -350,6 +354,7 @@ class BackendFrontendStateSynchronizer:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_optimistic_update_rollback(self, user_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test optimistic update rollback on failure."""
         start_time = time.time()
@@ -416,6 +421,7 @@ class BackendFrontendStateSynchronizer:
                 "error": str(e)
             }
     
+    @pytest.mark.e2e
     async def test_concurrent_state_updates(self, user_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test concurrent state update handling and resolution."""
         start_time = time.time()
@@ -528,6 +534,7 @@ class BackendFrontendStateSynchronizer:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_backend_frontend_state_synchronization_complete(real_services):
     """
     BVJ: ALL Segments | Goal: Core UX | Impact: $40K+ MRR Protection
@@ -612,6 +619,7 @@ async def test_backend_frontend_state_synchronization_complete(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_state_diff_validation(real_services):
     """Test state difference validation and reconciliation."""
     synchronizer = BackendFrontendStateSynchronizer(real_services)
@@ -662,6 +670,7 @@ async def test_state_diff_validation(real_services):
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_state_performance_benchmarks(real_services):
     """Test state synchronization performance benchmarks."""
     synchronizer = BackendFrontendStateSynchronizer(real_services)

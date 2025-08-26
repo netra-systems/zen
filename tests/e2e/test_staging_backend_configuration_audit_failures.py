@@ -101,6 +101,7 @@ class ServiceDependencyValidation:
     staging_requirement: str
 
 
+@pytest.mark.e2e
 class TestStagingBackendConfigurationAuditFailures:
     """Comprehensive configuration audit test suite for staging backend service failures."""
 
@@ -122,6 +123,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_comprehensive_backend_configuration_cascade_failure_analysis(self):
         """
         EXPECTED TO FAIL - CRITICAL CONFIGURATION CASCADE ISSUE
@@ -297,6 +299,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_service_dependency_validation_external_service_requirements(self):
         """
         EXPECTED TO FAIL - CRITICAL SERVICE DEPENDENCY VALIDATION ISSUE
@@ -389,6 +392,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_environment_behavior_enforcement_staging_vs_development_drift(self):
         """
         EXPECTED TO FAIL - CRITICAL ENVIRONMENT BEHAVIOR ENFORCEMENT ISSUE
@@ -478,6 +482,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_health_endpoint_external_service_validation_503_failure_analysis(self):
         """
         EXPECTED TO FAIL - CRITICAL HEALTH ENDPOINT VALIDATION ISSUE
@@ -608,6 +613,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_configuration_source_validation_secret_manager_vs_environment(self):
         """
         EXPECTED TO FAIL - HIGH CONFIGURATION SOURCE ISSUE
@@ -948,6 +954,7 @@ class TestStagingBackendConfigurationAuditFailures:
 
 @pytest.mark.env("staging")
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_staging_backend_comprehensive_configuration_audit():
     """
     STANDALONE COMPREHENSIVE TEST - Complete Backend Configuration Audit

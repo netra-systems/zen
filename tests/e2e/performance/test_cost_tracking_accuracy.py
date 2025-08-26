@@ -45,10 +45,12 @@ from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestCostTrackingAccuracyE2E:
     """Test #6: Complete cost tracking accuracy from operations to billing."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize cost tracking test core."""
         core = CostTrackingTestCore()
@@ -77,6 +79,7 @@ class TestCostTrackingAccuracyE2E:
         return FrontendCostDisplayValidator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_cost_tracking_flow_data_analysis(self, test_core, ai_operation_simulator:
                                                            cost_calculator_validator,
                                                            billing_accuracy_validator,
@@ -104,6 +107,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multiple_operations_cost_accuracy(self, test_core, ai_operation_simulator:
                                                    cost_calculator_validator,
                                                    billing_accuracy_validator):
@@ -133,6 +137,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_tracking_performance_requirements(self, test_core, ai_operation_simulator:
                                                         cost_calculator_validator):
         """Test cost tracking meets performance requirements."""
@@ -160,6 +165,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_frontend_cost_display_real_time_updates(self, test_core, ai_operation_simulator:
                                                          frontend_cost_validator):
         """Test frontend cost display updates in real-time."""
@@ -182,6 +188,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_billing_database_consistency_validation(self, test_core, ai_operation_simulator:
                                                          billing_accuracy_validator):
         """Test billing database consistency and integrity."""

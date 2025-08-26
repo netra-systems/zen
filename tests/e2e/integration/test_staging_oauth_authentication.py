@@ -72,6 +72,7 @@ class StagingOAuthTestHelper:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oauth_staging_config_availability():
     """Test 1: OAuth provider configuration availability in staging."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -87,6 +88,7 @@ async def test_oauth_staging_config_availability():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_google_oauth_provider_setup():
     """Test 2: Google OAuth provider setup validation."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -103,6 +105,7 @@ async def test_google_oauth_provider_setup():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oauth_authorization_url_generation():
     """Test 3: OAuth authorization URL generation."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -123,6 +126,7 @@ async def test_oauth_authorization_url_generation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oauth_callback_url_validation():
     """Test 4: OAuth callback URL validation."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -140,6 +144,7 @@ async def test_oauth_callback_url_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_token_generation_after_oauth():
     """Test 5: JWT token generation after OAuth."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -159,6 +164,7 @@ async def test_jwt_token_generation_after_oauth():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_refresh_mechanism():
     """Test 6: Token refresh mechanism."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -182,6 +188,7 @@ async def test_token_refresh_mechanism():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multi_tab_session_sync():
     """Test 7: Multi-tab authentication synchronization."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -202,6 +209,7 @@ async def test_multi_tab_session_sync():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_logout_flow_and_cleanup():
     """Test 8: Logout flow and session cleanup."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -223,6 +231,7 @@ async def test_logout_flow_and_cleanup():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_invalid_oauth_state_handling():
     """Test 9: Invalid OAuth state handling."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
@@ -246,6 +255,7 @@ async def test_invalid_oauth_state_handling():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_oauth_endpoint_rate_limiting():
     """Test 10: Rate limiting on OAuth endpoints."""
     async with create_e2e_harness(TestEnvironmentType.STAGING).test_environment() as harness:
