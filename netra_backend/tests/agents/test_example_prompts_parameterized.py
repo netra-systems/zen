@@ -99,6 +99,58 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         self.context_generator = ContextGenerator()
         self.test_runner = TestRunner()
     
+    def test_prompt_diversity_and_quality_analysis(self):
+        """Test that validates prompt diversity and content quality metrics."""
+        # Analyze all example prompts for diversity metrics
+        prompt_texts = EXAMPLE_PROMPTS  # Already a list of strings
+        
+        # Test 1: Unique prompt diversity (no exact duplicates)
+        unique_prompts = set(prompt_texts)
+        assert len(unique_prompts) == len(prompt_texts), "Found duplicate prompts in example set"
+        
+        # Test 2: Length diversity (prompts should vary in complexity)
+        lengths = [len(text.split()) for text in prompt_texts]
+        length_variance = max(lengths) - min(lengths)
+        assert length_variance > 5, f"Prompt length variance too low: {length_variance} words"
+        
+        # Test 3: Keyword diversity (different optimization focuses)
+        optimization_keywords = [
+            "cost", "latency", "performance", "capacity", "model", "function",
+            "audit", "optimize", "reduce", "improve", "evaluate", "migrate"
+        ]
+        
+        keyword_coverage = {}
+        for keyword in optimization_keywords:
+            keyword_coverage[keyword] = sum(1 for text in prompt_texts 
+                                          if keyword.lower() in text.lower())
+        
+        # At least 3 different optimization types should be covered
+        covered_keywords = sum(1 for count in keyword_coverage.values() if count > 0)
+        assert covered_keywords >= 3, f"Only {covered_keywords} optimization types covered"
+        
+        # Test 4: Context type coverage
+        context_types = set(PROMPT_CONTEXT_MAPPING.values())
+        assert len(context_types) >= 5, f"Need at least 5 different context types, got {len(context_types)}"
+        
+        # Test 5: Prompt structure validation (should contain actionable requests)
+        action_indicators = ["optimize", "reduce", "improve", "analyze", "evaluate", "migrate"]
+        actionable_prompts = 0
+        for text in prompt_texts:
+            if any(indicator in text.lower() for indicator in action_indicators):
+                actionable_prompts += 1
+        
+        actionable_ratio = actionable_prompts / len(prompt_texts)
+        assert actionable_ratio >= 0.5, f"Only {actionable_ratio:.1%} of prompts are actionable (need at least 50%)"
+        
+        # Log the actual metrics for future reference
+        print(f"Prompt Quality Analysis Results:")
+        print(f"  Total prompts: {len(prompt_texts)}")
+        print(f"  Unique prompts: {len(unique_prompts)}")
+        print(f"  Length variance: {length_variance} words")
+        print(f"  Keywords covered: {covered_keywords}/{len(optimization_keywords)}")
+        print(f"  Actionable ratio: {actionable_ratio:.1%}")
+        print(f"  Context types: {len(context_types)}")
+    
     @pytest.mark.parametrize("prompt_index", range(9))
     @pytest.mark.parametrize("variation_num", range(10))
     @pytest.mark.asyncio

@@ -452,6 +452,10 @@ def main():
         
         exit_code = asyncio.run(launcher.run())
         
+        # Mark clean exit after successful or failed launch
+        if hasattr(launcher, 'signal_handler') and launcher.signal_handler:
+            launcher.signal_handler.mark_clean_exit()
+        
         if exit_code == 0:
             print("\n✅ SUCCESS | Development environment started successfully")
             if sys.platform == "win32":

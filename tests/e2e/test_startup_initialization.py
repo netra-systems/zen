@@ -371,7 +371,7 @@ async def test_schema_version_mismatch_between_services(test_env):
         backend_db = Database()
         
         # Auth service database manager  
-        auth_db = DatabaseManager()
+        auth_db = Database()
         
         # Both should detect version mismatch
         with pytest.raises(Exception) as exc_info:

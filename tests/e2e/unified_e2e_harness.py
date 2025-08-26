@@ -96,6 +96,14 @@ class UnifiedE2ETestHarness:
         """Create and register test user."""
         return await self.journey_executor.create_test_user(email, password)
     
+    def create_test_tokens(self, user_id: str) -> Dict[str, str]:
+        """Create test tokens for user ID."""
+        return {
+            "access_token": f"test-token-{user_id[:16]}",
+            "refresh_token": f"refresh-{user_id[:16]}",
+            "expires_in": 3600
+        }
+    
     async def create_websocket_connection(self, user: TestUser):
         """Create authenticated WebSocket connection."""
         return await self.journey_executor.create_websocket_connection(user)

@@ -96,11 +96,65 @@ class SecretManager:
             return secrets
     
     def _merge_google_secrets_with_logging(self, secrets: Dict[str, Any], google_secrets: Dict[str, Any], env_secret_count: int) -> Dict[str, Any]:
-        """Merge Google secrets with comprehensive logging."""
+        """Merge Google secrets with comprehensive logging, overriding placeholders."""
+        # Define placeholder values that should always be overridden by Google Secrets
+        PLACEHOLDER_VALUES = [
+            "",  # Empty strings
+            "will-be-set-by-secrets",  # Staging placeholder pattern
+            "placeholder",  # Generic placeholder
+            "staging-jwt-secret-key-should-be-replaced-in-deployment",  # JWT staging placeholder
+            "staging-fernet-key-should-be-replaced-in-deployment",  # Fernet staging placeholder
+            None  # None values
+        ]
+        
         if google_secrets:
-            secrets.update(google_secrets)
-            self._log_successful_google_merge(google_secrets, secrets, env_secret_count)
+            # Import shared secret mappings for proper mapping
+            from shared.secret_mappings import get_secret_mappings
+            environment = getattr(self._config, 'environment', 'development').lower()
+            secret_mappings = get_secret_mappings(environment)
+            
+            # Track changes for logging
+            placeholder_overrides = []
+            new_additions = []
+            supersessions = []
+            
+            for google_secret_name, google_value in google_secrets.items():
+                # Map Google secret name to environment variable name
+                # First check if it's already in the mappings, if not use the key as-is
+                env_var_name = secret_mappings.get(google_secret_name, google_secret_name)
+                
+                # Also check if the google_secret_name itself is already an env var name
+                # (for backward compatibility with existing tests and direct mappings)
+                if google_secret_name in secrets:
+                    target_key = google_secret_name
+                elif env_var_name in secrets:
+                    target_key = env_var_name
+                else:
+                    # Use the mapped name for new additions
+                    target_key = env_var_name
+                
+                # Check if we're overriding a placeholder
+                if target_key in secrets:
+                    existing_value = secrets[target_key]
+                    if existing_value in PLACEHOLDER_VALUES:
+                        placeholder_overrides.append(target_key)
+                        self._logger.info(f"Overriding placeholder for {target_key} with Google Secret value")
+                    elif existing_value != google_value:
+                        supersessions.append(target_key)
+                        self._logger.info(f"Google Secret superseding environment value for {target_key}")
+                    # Always use Google value regardless
+                    secrets[target_key] = google_value
+                else:
+                    # New secret from Google
+                    new_additions.append(target_key)
+                    self._logger.info(f"Adding {target_key} from Google Secret")
+                    secrets[target_key] = google_value
+            
+            # Enhanced logging
+            self._log_enhanced_google_merge(google_secrets, secrets, env_secret_count, 
+                                          placeholder_overrides, new_additions, supersessions)
             return secrets
+        
         self._logger.warning("No secrets loaded from Google Secret Manager")
         return secrets
     
@@ -111,6 +165,21 @@ class SecretManager:
         superseded = [key for key in google_secrets if key in secrets]
         if superseded:
             self._logger.debug(f"Google Secrets superseded environment variables for: {', '.join(superseded)}")
+    
+    def _log_enhanced_google_merge(self, google_secrets: Dict[str, Any], secrets: Dict[str, Any], env_secret_count: int,
+                                  placeholder_overrides: List[str], new_additions: List[str], supersessions: List[str]) -> None:
+        """Log enhanced Google secrets merge with detailed statistics."""
+        self._logger.info(f"Google Secrets loaded successfully: {len(google_secrets)} secrets from Google Secret Manager")
+        self._logger.info(f"Total secrets after merge: {len(secrets)} (Base env: {env_secret_count}, Google: {len(google_secrets)})")
+        
+        if placeholder_overrides:
+            self._logger.info(f"Placeholder overrides ({len(placeholder_overrides)}): {', '.join(placeholder_overrides[:5])}{'...' if len(placeholder_overrides) > 5 else ''}")
+        
+        if new_additions:
+            self._logger.info(f"New additions from Google ({len(new_additions)}): {', '.join(new_additions[:3])}{'...' if len(new_additions) > 3 else ''}")
+        
+        if supersessions:
+            self._logger.debug(f"Value supersessions ({len(supersessions)}): {', '.join(supersessions[:3])}{'...' if len(supersessions) > 3 else ''}")
     
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
     def _get_secret_client(self) -> secretmanager.SecretManagerServiceClient:

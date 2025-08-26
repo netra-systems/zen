@@ -2421,3 +2421,12 @@ class DevLauncher:
         except Exception as e:
             logger.error(f"Health monitoring startup failed: {e}")
             return False
+    
+    def __del__(self) -> None:
+        """Destructor to mark clean exit when launcher is destroyed normally."""
+        try:
+            if hasattr(self, 'signal_handler') and self.signal_handler:
+                self.signal_handler.mark_clean_exit()
+        except Exception:
+            # Ignore errors during destruction
+            pass

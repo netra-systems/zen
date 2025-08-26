@@ -41,11 +41,11 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
                                    save_mock, load_mock, context_mock):
         """Execute with specific state persistence patches"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', save_mock):
+        with patch('netra_backend.app.services.state_persistence.state_persistence_service.save_agent_state', save_mock):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', load_mock):
+            with patch('netra_backend.app.services.state_persistence.state_persistence_service.load_agent_state', load_mock):
                 # Mock: Component isolation for testing without external dependencies
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
+                with patch('netra_backend.app.services.state_persistence.state_persistence_service.get_thread_context', context_mock):
                     return await supervisor.run(user_request, "test_thread", "test_user", run_id)
 
     @pytest.mark.asyncio
@@ -126,11 +126,11 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
     async def _execute_resilience_with_patches(self, supervisor, run_id, save_mock, load_mock, context_mock):
         """Execute resilience test with specific patches"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', save_mock):
+        with patch('netra_backend.app.services.state_persistence.state_persistence_service.save_agent_state', save_mock):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', load_mock):
+            with patch('netra_backend.app.services.state_persistence.state_persistence_service.load_agent_state', load_mock):
                 # Mock: Component isolation for testing without external dependencies
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
+                with patch('netra_backend.app.services.state_persistence.state_persistence_service.get_thread_context', context_mock):
                     try:
                         await supervisor.run("Test resilience", "test_thread", "test_user", run_id)
                     except Exception:

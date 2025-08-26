@@ -79,6 +79,7 @@ class ConnectionInfo(BaseModel):
     last_activity: datetime
     message_count: int = 0
     is_healthy: bool = True
+    is_closing: bool = False
     client_info: Optional[Dict[str, Any]] = None
 
 
@@ -141,13 +142,6 @@ class WebSocketStats(BaseModel):
     rooms_active: int
     broadcasts_sent: int
 
-
-class BroadcastResult(BaseModel):
-    """Result of broadcast operation."""
-    success: bool
-    delivered_count: int
-    failed_count: int
-    error_details: Optional[List[str]] = None
 
 
 class WebSocketValidationError(BaseModel):

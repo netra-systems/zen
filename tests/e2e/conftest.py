@@ -17,6 +17,15 @@ import sys
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
+
+def pytest_configure(config):
+    """Configure pytest for E2E tests with real LLM support."""
+    # Ensure that if TEST_USE_REAL_LLM is set, it persists throughout the test session
+    if os.getenv("TEST_USE_REAL_LLM") == "true":
+        # Re-set to ensure it's available throughout the session
+        os.environ["TEST_USE_REAL_LLM"] = "true"
+        os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
+
 # CRITICAL: Override any PostgreSQL configuration for E2E tests to use SQLite
 # E2E tests should be fast and not depend on external databases
 # This must be set BEFORE any backend modules are imported
@@ -81,8 +90,10 @@ def model_selection_setup():
 @pytest.fixture
 def real_llm_config():
     """Configuration for real LLM testing."""
+    # Check environment variable to determine if real LLM should be enabled
+    use_real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
     return {
-        "enabled": False,  # Default to disabled
+        "enabled": use_real_llm,
         "timeout": 30.0,
         "max_retries": 3
     }

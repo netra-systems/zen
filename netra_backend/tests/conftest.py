@@ -34,10 +34,30 @@ if not get_env().get("TEST_COLLECTION_MODE"):
 # Only set if we're in the collection phase (pytest is imported but no test is executing)
 import sys
 import os
+import atexit
+
+# Enhanced collection mode detection and cleanup registration
 if "pytest" in sys.modules and not get_env().get("PYTEST_CURRENT_TEST"):
     # Only set collection mode if pytest is imported but we're not currently executing a test
     # PYTEST_CURRENT_TEST is set during test execution but not during collection
     get_env().set("TEST_COLLECTION_MODE", "1", source="netra_backend_conftest")
+
+# Register cleanup for async resources at module level
+def _cleanup_async_resources():
+    """Cleanup async resources on exit"""
+    import asyncio
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            # Close any remaining event loops
+            loop = asyncio.get_event_loop()
+            if loop and not loop.is_closed():
+                loop.close()
+        except Exception:
+            pass
+
+atexit.register(_cleanup_async_resources)
 
 # Only set environment variables if we're actually running tests
 if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):

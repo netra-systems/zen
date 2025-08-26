@@ -5,6 +5,7 @@ Tests cover full launch cycles, multi-service coordination, and complex scenario
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
+import asyncio
 import os
 import subprocess
 import sys
@@ -197,7 +198,12 @@ class TestFullIntegration(unittest.TestCase):
                             'api_url': 'http://localhost:8000',
                             'ws_url': 'ws://localhost:8000/ws'
                         }
-                        return launcher.run()
+                        try:
+                            return asyncio.run(launcher.run())
+                        finally:
+                            # Mark clean exit to prevent emergency cleanup
+                            if hasattr(launcher, 'signal_handler') and launcher.signal_handler:
+                                launcher.signal_handler.mark_clean_exit()
     
     def _assert_launch_success(self, exit_code, mock_browser, mock_start_backend, mock_start_frontend):
         """Assert launch completed successfully."""

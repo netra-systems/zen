@@ -1,5 +1,4 @@
-"""
-Backend Server Startup Timeout Fix Test
+"""Backend Server Startup Timeout Fix Test
 
 Business Value Justification (BVJ):
 - Segment: All (Platform Foundation)  
@@ -10,6 +9,8 @@ Business Value Justification (BVJ):
 This test validates the timeout fixes added to prevent database initialization 
 and startup checks from hanging the server startup indefinitely.
 """
+
+from test_framework.performance_helpers import fast_test, timeout_override
 import asyncio
 import time
 from unittest.mock import AsyncMock, patch, MagicMock
@@ -27,6 +28,7 @@ from netra_backend.app.startup_module import (
 class TestServerStartupTimeouts:
     """Test timeout protections in server startup."""
     
+    @fast_test
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_database_initialization_timeout_protection(self):
@@ -59,6 +61,7 @@ class TestServerStartupTimeouts:
             
             print(f"✅ Database timeout protection working - completed in {elapsed:.1f}s")
     
+    @fast_test
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_startup_health_checks_timeout_protection(self):
@@ -90,6 +93,7 @@ class TestServerStartupTimeouts:
             
             print(f"✅ Health checks timeout protection working - completed in {elapsed:.1f}s")
     
+    @fast_test
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_async_postgres_initialization_wrapper(self):
@@ -119,6 +123,7 @@ class TestServerStartupTimeouts:
             
             print("✅ Async postgres wrapper handles failed initialization")
     
+    @fast_test
     @pytest.mark.asyncio
     @pytest.mark.unit
     async def test_database_setup_graceful_degradation(self):

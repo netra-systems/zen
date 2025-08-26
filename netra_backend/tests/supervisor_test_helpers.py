@@ -119,6 +119,8 @@ def setup_circuit_breaker(supervisor: SupervisorAgent, threshold: int = 3):
     supervisor.circuit_breaker_enabled = True
     supervisor.circuit_breaker_threshold = threshold
     supervisor.circuit_breaker_failures = {}
+    supervisor.circuit_breaker_open_time = {}
+    supervisor.circuit_breaker_cooldown = 0.1  # 100ms cooldown for testing
 
 def create_pipeline_config(agents: List[str], strategies: List[ExecutionStrategy]) -> List[tuple]:
     """Create pipeline configuration."""

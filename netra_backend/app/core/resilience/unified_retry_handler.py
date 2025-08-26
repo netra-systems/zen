@@ -215,14 +215,13 @@ class UnifiedRetryHandler:
         Returns:
             RetryResult with outcome and attempt information
         """
-        # Check circuit breaker if enabled (disabled for sync operations for now)
-        # TODO: Add proper sync circuit breaker support
-        # if self._circuit_breaker and not self._circuit_breaker.can_execute():
-        #     return RetryResult(
-        #         success=False, 
-        #         attempts=[], 
-        #         final_exception=Exception("Circuit breaker is open")
-        #     )
+        # Check circuit breaker if enabled
+        if self._circuit_breaker and not self._circuit_breaker.can_execute():
+            return RetryResult(
+                success=False, 
+                attempts=[], 
+                final_exception=Exception("Circuit breaker is open")
+            )
         
         attempts = []
         start_time = time.time()
@@ -250,10 +249,9 @@ class UnifiedRetryHandler:
                     elapsed_time=attempt_time
                 ))
                 
-                # Record success in circuit breaker (only in async context for now)
-                # TODO: Add sync circuit breaker support
-                # if self._circuit_breaker:
-                #     self._circuit_breaker.record_success()
+                # Record success in circuit breaker
+                if self._circuit_breaker:
+                    self._circuit_breaker.record_success()
                 
                 logger.debug(f"Operation succeeded on attempt {attempt_num}")
                 return RetryResult(success=True, result=result, attempts=attempts)
@@ -261,10 +259,9 @@ class UnifiedRetryHandler:
             except Exception as e:
                 attempt_time = time.time() - attempt_start
                 
-                # Record failure in circuit breaker (only in async context for now)
-                # TODO: Add sync circuit breaker support
-                # if self._circuit_breaker:
-                #     self._circuit_breaker.record_failure(type(e).__name__)
+                # Record failure in circuit breaker
+                if self._circuit_breaker:
+                    self._circuit_breaker.record_failure(type(e).__name__)
                 
                 # Decide whether to retry
                 retry_decision = self._should_retry(e, attempt_num)
@@ -350,10 +347,9 @@ class UnifiedRetryHandler:
                     elapsed_time=attempt_time
                 ))
                 
-                # Record success in circuit breaker (only in async context for now)
-                # TODO: Add sync circuit breaker support
-                # if self._circuit_breaker:
-                #     self._circuit_breaker.record_success()
+                # Record success in circuit breaker
+                if self._circuit_breaker:
+                    self._circuit_breaker.record_success()
                 
                 logger.debug(f"Async operation succeeded on attempt {attempt_num}")
                 return RetryResult(success=True, result=result, attempts=attempts)
@@ -361,10 +357,9 @@ class UnifiedRetryHandler:
             except Exception as e:
                 attempt_time = time.time() - attempt_start
                 
-                # Record failure in circuit breaker (only in async context for now)
-                # TODO: Add sync circuit breaker support
-                # if self._circuit_breaker:
-                #     self._circuit_breaker.record_failure(type(e).__name__)
+                # Record failure in circuit breaker
+                if self._circuit_breaker:
+                    self._circuit_breaker.record_failure(type(e).__name__)
                 
                 # Decide whether to retry
                 retry_decision = self._should_retry(e, attempt_num)

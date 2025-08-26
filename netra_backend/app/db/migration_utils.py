@@ -13,9 +13,37 @@ from netra_backend.app.core.unified_logging import get_logger
 
 
 def _get_alembic_ini_path() -> str:
-    """Get absolute path to alembic.ini file."""
-    project_root = Path(__file__).parent.parent.parent.parent
-    return str(project_root / "config" / "alembic.ini")
+    """Get absolute path to alembic.ini file with fallback paths for different deployment scenarios."""
+    # Try multiple possible locations for alembic.ini
+    possible_paths = [
+        # Standard development/local structure
+        Path(__file__).parent.parent.parent.parent / "config" / "alembic.ini",
+        
+        # Cloud Run deployment structure (common patterns)
+        Path("/app/config/alembic.ini"),
+        Path("/app/alembic.ini"), 
+        Path("/usr/src/app/config/alembic.ini"),
+        Path("/usr/src/app/alembic.ini"),
+        
+        # Current working directory fallbacks
+        Path.cwd() / "config" / "alembic.ini",
+        Path.cwd() / "alembic.ini",
+        
+        # Relative to migration utils file
+        Path(__file__).parent / "alembic.ini",
+        Path(__file__).parent.parent / "alembic.ini",
+        Path(__file__).parent.parent.parent / "alembic.ini",
+    ]
+    
+    # Return the first path that exists
+    for path in possible_paths:
+        if path.exists():
+            return str(path.absolute())
+    
+    # If no existing path found, return the default (development) path
+    # This maintains backward compatibility and provides a clear error message
+    default_path = Path(__file__).parent.parent.parent.parent / "config" / "alembic.ini"
+    return str(default_path.absolute())
 
 
 def get_sync_database_url(database_url: str) -> str:
@@ -61,13 +89,64 @@ def get_head_revision(alembic_cfg: alembic.config.Config) -> str:
 
 
 def create_alembic_config(database_url: str) -> alembic.config.Config:
-    """Create Alembic configuration."""
+    """Create Alembic configuration with enhanced error handling and fallback mechanisms."""
     alembic_ini_path = _get_alembic_ini_path()
+    
     if not Path(alembic_ini_path).exists():
-        raise FileNotFoundError(f"Alembic configuration file not found: {alembic_ini_path}")
-    cfg = alembic.config.Config(alembic_ini_path)
-    cfg.set_main_option("sqlalchemy.url", database_url)
-    return cfg
+        # Enhanced error message with troubleshooting information
+        error_msg = f"""
+Alembic configuration file not found at: {alembic_ini_path}
+
+This typically happens in one of these scenarios:
+1. Container deployment where alembic.ini wasn't copied to expected location
+2. Working directory changed from project root
+3. File system permissions preventing access
+
+Troubleshooting:
+- Verify alembic.ini exists in container at deployment time
+- Check if current working directory is correct: {Path.cwd()}
+- Verify file permissions allow reading alembic.ini
+
+For staging/production deployments, ensure alembic.ini is included in the container build.
+"""
+        raise FileNotFoundError(error_msg.strip())
+    
+    try:
+        cfg = alembic.config.Config(alembic_ini_path)
+        cfg.set_main_option("sqlalchemy.url", database_url)
+        return cfg
+    except Exception as e:
+        raise RuntimeError(f"Failed to create Alembic configuration from {alembic_ini_path}: {e}")
+        
+def create_alembic_config_with_fallback(database_url: str) -> alembic.config.Config:
+    """Create Alembic configuration with graceful fallback for missing alembic.ini.
+    
+    This function attempts to create a basic Alembic configuration programmatically
+    if the alembic.ini file is not found, allowing the system to continue operating
+    in environments where the configuration file is missing.
+    """
+    try:
+        return create_alembic_config(database_url)
+    except FileNotFoundError:
+        # Create a basic configuration programmatically as fallback
+        logger = get_logger(__name__)
+        logger.warning("alembic.ini not found, creating basic configuration programmatically")
+        
+        # Create a minimal Alembic configuration
+        cfg = alembic.config.Config()
+        cfg.set_main_option("sqlalchemy.url", database_url)
+        
+        # Set basic migration directory (consistent with alembic.ini)
+        project_root = Path(__file__).parent.parent.parent.parent
+        alembic_dir = project_root / "netra_backend" / "app" / "alembic"
+        cfg.set_main_option("script_location", str(alembic_dir))
+        
+        # Set other essential options
+        cfg.set_main_option("version_locations", str(alembic_dir / "versions"))
+        cfg.set_main_option("file_template", "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s")
+        
+        logger.info(f"Created fallback Alembic configuration with migrations at: {alembic_dir}")
+        return cfg
 
 
 def needs_migration(current: Optional[str], head: str) -> bool:

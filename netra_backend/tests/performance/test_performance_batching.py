@@ -13,8 +13,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from test_framework.performance import BatchingTestHelper, PerformanceBenchmark
 
 
+@pytest.mark.performance  # Performance optimization iteration 64
+@pytest.mark.fast_test
 class TestBatchProcessor:
-    """Test batch processing operations."""
+    """Test batch processing operations - Optimized for performance."""
     
     @pytest.fixture
     def batch_helper(self):

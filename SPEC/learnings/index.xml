@@ -248,6 +248,14 @@
             <critical-takeaway>Prevention: End-to-end OAuth tests in staging, pre-deployment validation of redirect URIs, explicit logging of callback receipt.</critical-takeaway>
             <critical-takeaway>Google OAuth Console must authorize auth service URLs only, never frontend URLs for callbacks.</critical-takeaway>
         </category>
+
+        <category name="GCP Staging Deployment Critical Issues [RESOLVED]" path="SPEC/learnings/gcp_staging_deployment_fixes.xml" keywords="OAuth Configuration, Redis Connection, Alembic Migration, Async Testing, Variable Scoping, get_env, staging deployment, fallback configuration">
+            <critical-takeaway>RESOLVED 2025-08-26: OAuth configuration missing due to test framework masking real staging issues - implement proper test isolation to simulate missing credentials.</critical-takeaway>
+            <critical-takeaway>Redis connection "get_env variable scoping" errors were actually async/sync method confusion - always use @pytest.mark.asyncio and await async methods in tests.</critical-takeaway>
+            <critical-takeaway>Alembic.ini missing in deployment requires multiple fallback paths and programmatic configuration as backup - enhance _get_alembic_ini_path() with deployment scenarios.</critical-takeaway>
+            <critical-takeaway>Test framework accommodation can hide real deployment issues - design fail-fast tests that fail when actual problems occur, not when test framework provides fallbacks.</critical-takeaway>
+            <critical-takeaway>Async method testing: Remove duplicate imports (get_env redundancy), use test_mode=True for controlled testing, implement proper async cleanup in fixtures.</critical-takeaway>
+        </category>
         
         <category name="Migration State Recovery [CRITICAL RESOLUTION]" path="SPEC/learnings/migration_state_recovery.xml" keywords="Migration, alembic_version, Database Schema, Startup Failure, Migration Tracking, State Recovery, System Blocker">
             <critical-takeaway>RESOLVED 2025-08-26: Fixed critical migration issue - "last major blocker preventing full system operation".</critical-takeaway>
@@ -270,13 +278,28 @@
             <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
         </category>
 
-        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner, Environment Testing">
+        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner, Environment Testing, E2E Tests, Resource Cleanup, AsyncMock">
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>
             <critical-takeaway>All test directories MUST be added to test_scanners.py for discovery (test-discovery-all-directories).</critical-takeaway>
             <critical-takeaway>Tests MUST declare environment compatibility using @env markers (environment_aware_testing.xml).</critical-takeaway>
             <critical-takeaway>Production tests require @env_safe decorator and ALLOW_PROD_TESTS flag.</critical-takeaway>
             <critical-takeaway>Test runner requires PROJECT_ROOT in sys.path for imports (test-import-project-root).</critical-takeaway>
+            <critical-takeaway>E2E tests MUST include tests/e2e directory in pytest command - not just service-specific directories (e2e_test_discovery_patterns.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: All async fixtures MUST implement proper resource cleanup with try/finally blocks and timeout handling.</critical-takeaway>
+            <critical-takeaway>Database fixtures must always call rollback() and close() in finally blocks, even for mock sessions.</critical-takeaway>
+            <critical-takeaway>Redis fixtures must implement both aclose() and close() methods with proper cleanup lifecycle.</critical-takeaway>
+            <critical-takeaway>WebSocket fixtures must close all active connections with timeout protection (max 5s) to prevent hanging tests.</critical-takeaway>
+            <critical-takeaway>Event loop stability requires SelectorEventLoop policy on Windows and proper atexit cleanup registration.</critical-takeaway>
+        </category>
+        
+        <category name="E2E Test Discovery [CRITICAL]" path="SPEC/learnings/e2e_test_discovery_patterns.xml" keywords="E2E, End-to-End, Test Discovery, Test Runner, pytest, Test Organization, Cross-Service Tests">
+            <critical-takeaway>CRITICAL: E2E tests in tests/e2e directory MUST be included in test runner - missing 588+ tests if only checking service directories.</critical-takeaway>
+            <critical-takeaway>Test runners must include ["tests/e2e", "netra_backend/tests", "auth_service/tests"] for E2E category, not just service paths.</critical-takeaway>
+            <critical-takeaway>E2E tests should run ONCE from single service context, not once per service to avoid duplication.</critical-takeaway>
+            <critical-takeaway>Cross-service tests belong in centralized tests/e2e directory, not scattered in service-specific directories.</critical-takeaway>
+            <critical-takeaway>Validate test discovery with: pytest tests/e2e -m "e2e" --collect-only to ensure all tests found.</critical-takeaway>
+            <critical-takeaway>CI/CD should assert minimum E2E test count (500+) to catch discovery regressions.</critical-takeaway>
         </category>
         
         <category name="Frontend Staging Errors (Five Whys)" path="SPEC/learnings/frontend_staging_errors_2025_08_24.xml" keywords="Five Whys, Type Conflicts, SSOT, Authentication, HTTPS, Mixed Content, Root Cause, Frontend, Staging">

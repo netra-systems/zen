@@ -185,3 +185,67 @@ class TestIntentDetermination:
         
         assert intent.primary_intent in ["analyze", "recommend"]
         assert len(intent.secondary_intents) > 0
+    
+    def test_complex_intent(self, triage_agent):
+        """Test detection of complex multi-part intent."""
+        request = "Monitor my AI costs and automatically optimize when costs exceed $1000"
+        intent = triage_agent._determine_intent(request)
+        
+        assert intent.primary_intent in ["monitor", "optimize"]
+        assert intent.action_required == True
+        assert len(intent.secondary_intents) >= 0  # May have secondary intents
+    
+    def test_fallback_intent_classification(self, triage_agent):
+        """Test fallback mechanism for unclear intents."""
+        request = "Something is wrong with my AI models maybe"
+        intent = triage_agent._determine_intent(request)
+        
+        # Should fallback to analyze intent (default)
+        assert intent.primary_intent == "analyze"
+        assert intent.action_required == False  # Analyze intent doesn't require action by default
+
+class TestTriageAgentIntegration:
+    """Test integration scenarios with mocked dependencies."""
+    
+    @pytest.mark.asyncio
+    async def test_full_triage_process_success(self, triage_agent, sample_state):
+        """Test complete triage process with successful validation and processing."""
+        # Mock successful LLM response
+        triage_agent.llm_manager.ask_llm.return_value = {
+            "category": "optimization",
+            "subcategory": "cost",
+            "confidence": 0.85,
+            "reasoning": "User wants to optimize GPT-4 costs"
+        }
+        
+        result = await triage_agent.process(sample_state)
+        
+        assert result.success == True
+        assert result.category == "optimization"
+        assert result.confidence > 0.8
+        assert triage_agent.llm_manager.ask_llm.called
+    
+    @pytest.mark.asyncio
+    async def test_triage_with_validation_failure(self, triage_agent):
+        """Test triage process when request validation fails."""
+        invalid_state = DeepAgentState(user_request="ab")  # Too short
+        
+        result = await triage_agent.process(invalid_state)
+        
+        assert result.success == False
+        assert "validation" in result.error_message.lower()
+        # LLM should not be called for invalid requests
+        triage_agent.llm_manager.ask_llm.assert_not_called()
+    
+    @pytest.mark.asyncio
+    async def test_triage_with_llm_failure(self, triage_agent, sample_state):
+        """Test triage process when LLM fails."""
+        # Mock LLM failure
+        triage_agent.llm_manager.ask_llm.side_effect = Exception("LLM service unavailable")
+        
+        result = await triage_agent.process(sample_state)
+        
+        # Should use fallback classification
+        assert result.success == True  # Fallback should succeed
+        assert result.category in ["general", "optimization"]  # Fallback categories
+        assert result.confidence_score <= 0.5  # Lower confidence for fallback

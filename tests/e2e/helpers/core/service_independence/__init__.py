@@ -26,21 +26,21 @@ from typing import Dict, List, Any, Optional, Set, Tuple
 from dataclasses import dataclass
 
 # Import all validators
-from tests.e2e.helpers.import_validators import ImportIndependenceValidator, ServiceConfig
-from tests.e2e.helpers.api_isolation_helpers import (
+from tests.e2e.helpers.core.service_independence.import_validators import ImportIndependenceValidator, ServiceConfig
+from tests.e2e.helpers.core.service_independence.api_isolation_helpers import (
     ApiIsolationValidator, BackendServiceFailureSimulator, AuthServiceFailureSimulator, NetworkIsolationTester,
     ApiIsolationValidator,
     BackendServiceFailureSimulator,
     AuthServiceFailureSimulator,
     NetworkIsolationTester
 )
-from tests.e2e.helpers.startup_isolation_helpers import (
+from tests.e2e.helpers.core.service_independence.startup_isolation_helpers import (
     StartupIsolationValidator, ConfigurationIsolationTester, DeploymentIsolationTester,
     StartupIsolationValidator,
     ConfigurationIsolationTester,
     DeploymentIsolationTester
 )
-from tests.e2e.helpers.dependency_validators import (
+from tests.e2e.helpers.core.service_independence.dependency_validators import (
     DependencyIsolationValidator, DatabaseIsolationValidator, ServiceIsolationCoordinator, PatternScanner,
     DependencyIsolationValidator,
     DatabaseIsolationValidator,
@@ -259,10 +259,14 @@ class ServiceIndependenceValidator:
         return await self.isolation_coordinator.validate_service_isolation()
 
 
+# Backward compatibility alias
+ServiceIndependenceHelper = ServiceIndependenceValidator
+
 # Export all public classes and functions
 __all__ = [
     # Main validator
     'ServiceIndependenceValidator',
+    'ServiceIndependenceHelper',  # Backward compatibility alias
     
     # Individual validators
     'ImportIndependenceValidator',

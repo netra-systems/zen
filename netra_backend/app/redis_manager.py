@@ -137,7 +137,6 @@ class RedisManager:
             environment = getattr(config, 'environment', 'development').lower()
             
             # Check environment variables for fallback control
-            from netra_backend.app.core.isolated_environment import get_env
             env = get_env()
             redis_fallback_enabled = env.get("REDIS_FALLBACK_ENABLED", "true").lower() == "true"
             redis_required = env.get("REDIS_REQUIRED", "false").lower() == "true"

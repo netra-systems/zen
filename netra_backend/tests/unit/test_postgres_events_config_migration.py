@@ -19,7 +19,7 @@ class TestPostgresEventsDatabaseConfigMigration:
     
     def test_postgres_events_should_not_import_database_config(self):
         """Test that postgres_events.py doesn't import DatabaseConfig directly"""
-        # This test should FAIL initially, proving the issue exists
+        # This test verifies the bug is fixed - postgres_events should use unified config
         try:
             # Temporarily remove DatabaseConfig from the module to simulate staging environment
             # Mock: Generic component isolation for controlled unit testing
@@ -30,14 +30,17 @@ class TestPostgresEventsDatabaseConfigMigration:
                 del mock_module.DatabaseConfig  # Ensure DatabaseConfig doesn't exist
                 sys.modules['netra_backend.app.db.postgres_config'] = mock_module
                 
-                # Try to import postgres_events - this should fail if it uses DatabaseConfig
+                # Try to import postgres_events - this should succeed since it uses unified config
                 from netra_backend.app.db import postgres_events
                 
-                # If we get here, the import succeeded (it shouldn't with the bug)
-                pytest.fail("postgres_events imported successfully without DatabaseConfig - bug may be fixed")
+                # If we get here, the import succeeded - the bug is fixed!
+                assert True, "postgres_events successfully uses unified config instead of DatabaseConfig"
         except (ImportError, AttributeError) as e:
-            # This is expected - postgres_events tries to import DatabaseConfig
-            assert "DatabaseConfig" in str(e), f"Expected DatabaseConfig error, got: {e}"
+            # This would indicate postgres_events still tries to import DatabaseConfig 
+            if "DatabaseConfig" in str(e):
+                pytest.fail(f"postgres_events still importing DatabaseConfig - bug not fixed: {e}")
+            else:
+                pytest.fail(f"Unexpected import error: {e}")
     
     def test_postgres_events_connection_handlers_use_config(self):
         """Test that connection event handlers use unified config, not DatabaseConfig"""

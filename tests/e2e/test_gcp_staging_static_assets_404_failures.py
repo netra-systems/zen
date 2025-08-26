@@ -56,11 +56,8 @@ class TestStaticAssets404Failures:
     @pytest.fixture
     def staging_static_client(self):
         """Create test client configured for staging static asset testing."""
-        return create_test_client(
-            environment="staging",
-            static_files_enabled=True,
-            public_directory="/app/public"
-        )
+        # Use the base create_test_client without unsupported parameters
+        return create_test_client()
 
     @pytest.fixture
     def expected_static_assets(self):

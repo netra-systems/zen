@@ -167,16 +167,37 @@ class MockWebSocketManager:
     def __init__(self):
         self.connections: Dict[str, MockWebSocket] = {}
         self.broadcast_messages = []
+        self._closed = False
         
     async def connect(self, websocket: MockWebSocket, user_id: str):
         """Mock connect method"""
-        self.connections[user_id] = websocket
+        if not self._closed:
+            self.connections[user_id] = websocket
         
     async def disconnect(self, user_id: str):
         """Mock disconnect method"""
         if user_id in self.connections:
             await self.connections[user_id].close()
             del self.connections[user_id]
+    
+    async def close_all_connections(self):
+        """Close all active connections"""
+        if self._closed:
+            return
+        
+        for user_id, websocket in list(self.connections.items()):
+            try:
+                await websocket.close()
+            except Exception:
+                pass
+        
+        self.connections.clear()
+        self._closed = True
+    
+    async def cleanup(self):
+        """Comprehensive cleanup of manager resources"""
+        await self.close_all_connections()
+        self.broadcast_messages.clear()
             
     async def send_message(self, user_id: str, message: Dict[str, Any]):
         """Mock send_message method"""

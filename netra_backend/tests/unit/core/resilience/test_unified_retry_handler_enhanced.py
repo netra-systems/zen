@@ -178,15 +178,16 @@ class TestCircuitBreakerIntegration:
     @patch('netra_backend.app.core.resilience.unified_retry_handler.get_unified_circuit_breaker_manager')
     def test_circuit_breaker_setup(self, mock_manager):
         """Test circuit breaker setup when enabled."""
+        # Mock justification: External circuit breaker infrastructure dependency - mocking allows isolated testing of retry logic integration without requiring circuit breaker service
         mock_cb = Mock()
-        mock_manager.return_value.get_circuit_breaker.return_value = mock_cb
+        mock_manager.return_value.create_circuit_breaker.return_value = mock_cb
         
         config = RetryConfig(circuit_breaker_enabled=True)
         handler = UnifiedRetryHandler("test", config)
         
         # Verify circuit breaker was configured
         assert handler._circuit_breaker == mock_cb
-        mock_manager.return_value.get_circuit_breaker.assert_called_once()
+        mock_manager.return_value.create_circuit_breaker.assert_called_once()
     
     def test_circuit_breaker_disabled_by_default(self):
         """Test circuit breaker is disabled by default."""
@@ -198,7 +199,7 @@ class TestCircuitBreakerIntegration:
         config = RetryConfig(circuit_breaker_enabled=True)
         handler = UnifiedRetryHandler("test", config)
         
-        # Mock circuit breaker that is open
+        # Mock justification: Testing specific circuit breaker state (open) - real circuit breaker would require complex setup to achieve this state reliably
         mock_cb = Mock()
         mock_cb.can_execute.return_value = False
         handler._circuit_breaker = mock_cb
@@ -218,7 +219,7 @@ class TestCircuitBreakerIntegration:
         config = RetryConfig(circuit_breaker_enabled=True)
         handler = UnifiedRetryHandler("test", config)
         
-        # Mock circuit breaker that is open
+        # Mock justification: Testing specific circuit breaker state (open) for async operations - real circuit breaker would require complex setup to achieve this state reliably
         mock_cb = AsyncMock()
         mock_cb.can_execute_async.return_value = False
         handler._circuit_breaker = mock_cb
@@ -237,7 +238,7 @@ class TestCircuitBreakerIntegration:
         config = RetryConfig(circuit_breaker_enabled=True, max_attempts=1)
         handler = UnifiedRetryHandler("test", config)
         
-        # Mock circuit breaker
+        # Mock justification: Testing circuit breaker success recording behavior - mocking allows verification of interaction without requiring circuit breaker infrastructure
         mock_cb = Mock()
         mock_cb.can_execute.return_value = True
         handler._circuit_breaker = mock_cb
@@ -255,7 +256,7 @@ class TestCircuitBreakerIntegration:
         config = RetryConfig(circuit_breaker_enabled=True, max_attempts=1)
         handler = UnifiedRetryHandler("test", config)
         
-        # Mock circuit breaker
+        # Mock justification: Testing circuit breaker failure recording behavior - mocking allows verification of interaction without requiring circuit breaker infrastructure
         mock_cb = Mock()
         mock_cb.can_execute.return_value = True
         handler._circuit_breaker = mock_cb
@@ -550,7 +551,7 @@ class TestEnhancedConfiguration:
         # Without circuit breaker
         assert handler.get_circuit_breaker_status() is None
         
-        # With circuit breaker (mocked)
+        # Mock justification: Testing status reporting functionality - mocking circuit breaker allows testing status retrieval without requiring circuit breaker infrastructure
         mock_cb = Mock()
         mock_cb.get_status.return_value = {"state": "closed", "failures": 0}
         handler._circuit_breaker = mock_cb

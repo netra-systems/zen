@@ -15,6 +15,9 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 
 # Add scripts directory to path
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
 
 from workflow_introspection import (
     OutputFormatter,
@@ -32,13 +35,13 @@ class TestWorkflowDataClasses:
         """Test creating WorkflowStep instance."""
         step = WorkflowStep(
             name="Run tests",
-            conclusion="success",
+            status="success",
             started_at="2024-01-20T10:00:00Z",
             completed_at="2024-01-20T10:05:00Z"
         )
         
         assert step.name == "Run tests"
-        assert step.conclusion == "success"
+        assert step.status == "success"
         assert step.started_at == "2024-01-20T10:00:00Z"
         assert step.completed_at == "2024-01-20T10:05:00Z"
     
@@ -46,13 +49,13 @@ class TestWorkflowDataClasses:
         """Test WorkflowStep with optional fields."""
         step = WorkflowStep(
             name="Pending step",
-            conclusion=None,
+            status="pending",
             started_at=None,
             completed_at=None
         )
         
         assert step.name == "Pending step"
-        assert step.conclusion is None
+        assert step.status == "pending"
         assert step.started_at is None
         assert step.completed_at is None
     
@@ -66,27 +69,24 @@ class TestWorkflowDataClasses:
         
         job = WorkflowJob(
             name="Build and Test",
-            status="completed",
-            conclusion="failure",
+            status="failure",
             started_at="2024-01-20T10:00:00Z",
             completed_at="2024-01-20T10:05:00Z",
             steps=steps
         )
         
         assert job.name == "Build and Test"
-        assert job.status == "completed"
-        assert job.conclusion == "failure"
+        assert job.status == "failure"
         assert len(job.steps) == 3
         assert job.steps[0].name == "Setup"
-        assert job.steps[2].conclusion == "failure"
+        assert job.steps[2].status == "failure"
     
     def test_workflow_run_creation(self):
         """Test creating WorkflowRun instance."""
         jobs = [
             WorkflowJob(
                 name="Test Job",
-                status="completed",
-                conclusion="success",
+                status="success",
                 started_at="2024-01-20T10:00:00Z",
                 completed_at="2024-01-20T10:05:00Z",
                 steps=[]
@@ -94,24 +94,17 @@ class TestWorkflowDataClasses:
         ]
         
         run = WorkflowRun(
-            id=123456,
+            id="123456",
             name="CI Pipeline",
-            workflow_name="ci.yml",
-            status="completed",
-            conclusion="success",
-            head_branch="main",
-            head_sha="abc123def",
-            event="push",
+            status="success",
             started_at="2024-01-20T10:00:00Z",
-            updated_at="2024-01-20T10:05:00Z",
-            html_url="https://github.com/org/repo/actions/runs/123456",
+            completed_at="2024-01-20T10:08:00Z",
             jobs=jobs
         )
         
-        assert run.id == 123456
+        assert run.id == "123456"
         assert run.name == "CI Pipeline"
-        assert run.workflow_name == "ci.yml"
-        assert run.event == "push"
+        assert run.status == "success"
         assert len(run.jobs) == 1
         assert run.jobs[0].name == "Test Job"
 
@@ -127,8 +120,8 @@ class TestWorkflowIntrospector:
     @pytest.fixture
     def mock_subprocess_run(self):
         """Mock subprocess.run for gh commands."""
-        # Mock: Component isolation for testing without external dependencies
-        with patch('workflow_introspection.subprocess.run') as mock_run:
+        # Mock justification: External service call - GitHub CLI requires authentication and real repository access
+        with patch('subprocess.run') as mock_run:
             yield mock_run
     
     def test_init_with_repo(self):
@@ -143,7 +136,7 @@ class TestWorkflowIntrospector:
     
     def test_run_gh_command_success(self, introspector, mock_subprocess_run):
         """Test successful gh command execution."""
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
         mock_result = Mock()
         mock_result.stdout = '{"test": "data"}'
         mock_subprocess_run.return_value = mock_result
@@ -167,7 +160,7 @@ class TestWorkflowIntrospector:
     
     def test_run_gh_command_invalid_json(self, introspector, mock_subprocess_run):
         """Test gh command with invalid JSON response."""
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
         mock_result = Mock()
         mock_result.stdout = "Invalid JSON"
         mock_subprocess_run.return_value = mock_result
@@ -178,7 +171,7 @@ class TestWorkflowIntrospector:
     
     def test_list_workflows(self, introspector, mock_subprocess_run):
         """Test listing available workflows."""
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
         mock_result = Mock()
         mock_result.stdout = (
             "CI Pipeline\tactive\t123456\n"
@@ -200,7 +193,7 @@ class TestWorkflowIntrospector:
     
     def test_list_workflows_empty(self, introspector, mock_subprocess_run):
         """Test listing workflows with no results."""
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
         mock_result = Mock()
         mock_result.stdout = ""
         mock_subprocess_run.return_value = mock_result
@@ -240,7 +233,7 @@ class TestWorkflowIntrospector:
             }
         ]
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         runs = introspector.get_recent_runs(limit=5, workflow="CI")
         
@@ -320,7 +313,7 @@ class TestWorkflowIntrospector:
             ]
         }
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(333)
         
@@ -331,7 +324,7 @@ class TestWorkflowIntrospector:
         
         # Check first job
         assert run.jobs[0].name == "Build"
-        assert run.jobs[0].conclusion == "success"
+        assert run.jobs[0].status == "success"
         assert len(run.jobs[0].steps) == 2
         assert run.jobs[0].steps[0].name == "Checkout"
         
@@ -342,7 +335,7 @@ class TestWorkflowIntrospector:
     
     def test_get_run_details_not_found(self, introspector):
         """Test getting details for non-existent run."""
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value={})
         
         run = introspector.get_run_details(999999)
@@ -351,7 +344,7 @@ class TestWorkflowIntrospector:
     
     def test_get_run_logs(self, introspector, mock_subprocess_run):
         """Test getting workflow run logs."""
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
         mock_result = Mock()
         mock_result.stdout = "Log line 1\nLog line 2\nLog line 3"
         mock_subprocess_run.return_value = mock_result
@@ -365,7 +358,7 @@ class TestWorkflowIntrospector:
     
     def test_get_run_logs_for_job(self, introspector, mock_subprocess_run):
         """Test getting logs for specific job."""
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
         mock_result = Mock()
         mock_result.stdout = "Job specific logs"
         mock_subprocess_run.return_value = mock_result
@@ -386,7 +379,7 @@ class TestWorkflowIntrospector:
             "check_suite_url": "https://api.github.com/repos/test/repo/check-suites/789"
         }
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         outputs = introspector.get_workflow_outputs(666)
         
@@ -448,8 +441,7 @@ class TestOutputFormatter:
                 id=100,
                 name="CI Run",
                 workflow_name="Continuous Integration Pipeline",
-                status="completed",
-                conclusion="success",
+                status="success",
                 head_branch="main",
                 head_sha="abc123",
                 event="push",
@@ -462,7 +454,6 @@ class TestOutputFormatter:
                 name="Deploy Run",
                 workflow_name="Deployment Pipeline",
                 status="in_progress",
-                conclusion=None,
                 head_branch="release",
                 head_sha="def456",
                 event="workflow_dispatch",
@@ -485,8 +476,7 @@ class TestOutputFormatter:
         jobs = [
             WorkflowJob(
                 name="Build Job",
-                status="completed",
-                conclusion="success",
+                status="success",
                 started_at="2024-01-20T12:00:00Z",
                 completed_at="2024-01-20T12:05:00Z",
                 steps=[
@@ -497,8 +487,7 @@ class TestOutputFormatter:
             ),
             WorkflowJob(
                 name="Test Job",
-                status="completed",
-                conclusion="failure",
+                status="failure",
                 started_at="2024-01-20T12:05:00Z",
                 completed_at="2024-01-20T12:10:00Z",
                 steps=[
@@ -513,8 +502,7 @@ class TestOutputFormatter:
             id=300,
             name="Full Pipeline",
             workflow_name="pipeline.yml",
-            status="completed",
-            conclusion="failure",
+            status="failure",
             head_branch="feature",
             head_sha="xyz789",
             event="pull_request",
@@ -609,7 +597,7 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(1000)
         
@@ -618,14 +606,14 @@ class TestComplexWorkflowScenarios:
         
         # Check parallel job statuses
         linux_job = next(j for j in run.jobs if j.name == "Linux Build")
-        assert linux_job.conclusion == "success"
+        assert linux_job.status == "success"
         
         windows_job = next(j for j in run.jobs if j.name == "Windows Build")
         assert windows_job.status == "in_progress"
-        assert windows_job.conclusion is None
+        assert windows_job.status is None
         
         macos_job = next(j for j in run.jobs if j.name == "macOS Build")
-        assert macos_job.conclusion == "failure"
+        assert macos_job.status == "failure"
     
     def test_matrix_strategy_jobs(self, introspector):
         """Test handling matrix strategy jobs."""
@@ -677,12 +665,12 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(2000)
         
         assert len(run.jobs) == 4
-        assert all(j.conclusion == "success" for j in run.jobs)
+        assert all(j.status == "success" for j in run.jobs)
         
         # Check matrix combinations
         job_names = [j.name for j in run.jobs]
@@ -724,13 +712,13 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(3000)
         
         # Check that retry succeeded
-        assert run.conclusion == "success"
-        assert run.jobs[0].conclusion == "success"
+        assert run.status == "success"
+        assert run.jobs[0].status == "success"
         
         # The job started 10 minutes after workflow (indicates retry)
         workflow_start = datetime.fromisoformat(run.started_at.replace('Z', '+00:00'))
@@ -773,14 +761,14 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(4000)
         
         assert len(run.jobs[0].steps) == 50
-        assert run.jobs[0].steps[48].conclusion == "success"
-        assert run.jobs[0].steps[49].conclusion == "failure"
-        assert run.conclusion == "failure"
+        assert run.jobs[0].steps[48].status == "success"
+        assert run.jobs[0].steps[49].status == "failure"
+        assert run.status == "failure"
 
 
 class TestErrorHandlingAndEdgeCases:
@@ -802,7 +790,7 @@ class TestErrorHandlingAndEdgeCases:
             }
         ]
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         
         # Should handle gracefully with KeyError
@@ -826,7 +814,7 @@ class TestErrorHandlingAndEdgeCases:
             "jobs": []
         }
         
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(6000)
         
@@ -835,7 +823,7 @@ class TestErrorHandlingAndEdgeCases:
     
     def test_handle_network_timeout(self, introspector):
         """Test handling network timeout."""
-        # Mock: Component isolation for controlled unit testing
+        # REFACTOR NEEDED: This mocks internal business logic - should use real _run_gh_command with mocked subprocess
         introspector._run_gh_command = Mock(side_effect=subprocess.TimeoutExpired(
             ["gh", "api"], timeout=30
         ))
@@ -851,8 +839,8 @@ class TestErrorHandlingAndEdgeCases:
             stderr="API rate limit exceeded"
         )
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('workflow_introspection.subprocess.run', side_effect=mock_error):
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
+        with patch('subprocess.run', side_effect=mock_error):
             result = introspector._run_gh_command(["api", "test"])
             assert result == {}
     
@@ -864,8 +852,8 @@ class TestErrorHandlingAndEdgeCases:
             stderr="Authentication required"
         )
         
-        # Mock: Component isolation for testing without external dependencies
-        with patch('workflow_introspection.subprocess.run', side_effect=mock_error):
+        # Mock justification: External service call - subprocess.run executes GitHub CLI commands
+        with patch('subprocess.run', side_effect=mock_error):
             result = introspector._run_gh_command(["api", "test"])
             assert result == {}
 

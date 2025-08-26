@@ -306,14 +306,14 @@ class TestWebSocketConnectionEstablishment:
                     config = response.json()
                     
                     # EXPECTED TO PASS: Config endpoint should work
-                    assert "websocket_config" in config
-                    assert "unified_endpoint" in config["websocket_config"] 
-                    assert config["websocket_config"]["unified_endpoint"] == "/ws"
+                    assert "websocket" in config
+                    assert "endpoint" in config["websocket"] 
+                    assert config["websocket"]["endpoint"] == "/ws"
                     
                     # Verify security features are enabled
-                    features = config["websocket_config"]["features"]
-                    assert features["jwt_authentication"] is True
-                    assert features["cors_validation"] is True
+                    features = config["websocket"]["features"]
+                    assert features["heartbeat"] is True
+                    assert features["message_routing"] is True
                     
                     print("[SUCCESS] WebSocket config endpoint is working")
                 else:

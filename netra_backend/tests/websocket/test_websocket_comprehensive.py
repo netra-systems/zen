@@ -31,8 +31,8 @@ import pytest
 from fastapi import WebSocket, HTTPException
 from fastapi.testclient import TestClient
 
-# Mark all tests in this file as env_test compatible
-pytestmark = [pytest.mark.env_test]
+# Mark all tests in this file as integration tests requiring running services
+pytestmark = [pytest.mark.env_test, pytest.mark.integration]
 
 from netra_backend.app.core.websocket_cors import (
     WebSocketCORSHandler,
@@ -158,13 +158,17 @@ class TestWebSocketConnection:
     async def test_connection_establishment_invalid_token(self, websocket_client):
         """Test connection fails with invalid token."""
         with pytest.raises(Exception):  # Connection should fail
-            websocket_client.connect("/ws", "invalid_token")
+            with websocket_client.connect("/ws", "invalid_token") as websocket_session:
+                # Authentication happens when we try to receive the first message
+                websocket_session.receive_json()
             
     @pytest.mark.asyncio
     async def test_connection_establishment_no_token(self, websocket_client):
         """Test connection fails without token."""
         with pytest.raises(Exception):  # Connection should fail
-            websocket_client.connect("/ws", "")
+            with websocket_client.connect("/ws", "") as websocket_session:
+                # Authentication happens when we try to receive the first message
+                websocket_session.receive_json()
 
 @pytest.mark.asyncio
 class TestWebSocketAuthentication:

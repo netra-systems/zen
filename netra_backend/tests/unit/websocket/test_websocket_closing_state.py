@@ -38,10 +38,12 @@ class TestWebSocketClosingState:
     @pytest.fixture
     def connection_info(self, mock_websocket):
         """Create a ConnectionInfo instance."""
+        now = datetime.now(timezone.utc)
         return ConnectionInfo(
-            websocket=mock_websocket,
+            connection_id="test_conn_123",
             user_id="test_user",
-            connection_id="test_conn_123"
+            connected_at=now,
+            last_activity=now
         )
     
     @pytest.fixture
@@ -50,9 +52,9 @@ class TestWebSocketClosingState:
         return ConnectionManager()
     
     @pytest.fixture
-    def broadcast_manager(self, connection_manager):
+    def broadcast_manager(self):
         """Create a BroadcastManager instance."""
-        return BroadcastManager(connection_manager)
+        return BroadcastManager()
     
     @pytest.mark.asyncio
     async def test_is_closing_flag_prevents_send(self, broadcast_manager, connection_info):

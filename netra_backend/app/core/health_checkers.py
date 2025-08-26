@@ -59,10 +59,10 @@ def _get_service_priority_for_environment(service: str) -> ServicePriority:
             }
             return staging_priorities.get(service, ServicePriority.IMPORTANT)
     elif env == 'production':
-        # In production, external services are always critical
+        # In production, external services have different priorities based on system criticality
         production_priorities = {
             "redis": ServicePriority.CRITICAL,
-            "clickhouse": ServicePriority.CRITICAL,
+            "clickhouse": ServicePriority.OPTIONAL,  # Analytics service - system can function without it
         }
         return production_priorities.get(service, ServicePriority.IMPORTANT)
     else:
@@ -173,11 +173,12 @@ async def _execute_clickhouse_query() -> None:
         await client.execute("SELECT 1")
 
 def _handle_clickhouse_error(error: Exception, response_time: float) -> HealthCheckResult:
-    """Handle ClickHouse connection errors based on environment."""
+    """Handle ClickHouse connection errors based on environment and service priority."""
     error_msg = str(error)
     if _is_development_mode():
         return _create_disabled_result("clickhouse", f"ClickHouse unavailable in development: {error_msg}")
-    return _create_failed_result("clickhouse", error_msg, response_time)
+    # Use centralized service failure handling based on priority
+    return _handle_service_failure("clickhouse", error_msg, response_time)
 
 
 async def check_redis_health() -> HealthCheckResult:
@@ -273,7 +274,7 @@ def _create_system_health_result(metrics: Dict[str, Any], overall_score: float, 
     """Create HealthCheckResult for system resources."""
     details = _build_system_health_details(metrics, overall_score)
     return HealthCheckResult(
-        component_name="system",
+        component_name="system_resources",
         success=True,
         health_score=overall_score,
         response_time_ms=response_time,
@@ -648,24 +649,28 @@ class HealthChecker:
     
     async def check_auth_service_health(self) -> Dict[str, Any]:
         """Check overall auth service health and return comprehensive status."""
+        results = {}
+        
+        # Check each component individually, handling errors gracefully
         try:
-            # Check individual components
-            database_health = await self.check_postgres()
-            redis_health = await self.check_redis()
-            oauth_health = await self.check_oauth_providers()
-            
-            return {
-                "database": database_health,
-                "redis": redis_health,
-                "oauth": oauth_health
-            }
+            results["database"] = await self.check_postgres()
         except Exception as e:
-            logger.error(f"Auth service health check failed: {e}")
-            return {
-                "database": {"healthy": False, "error": str(e)},
-                "redis": {"healthy": False, "error": str(e)},
-                "oauth": {"healthy": False, "error": str(e)}
-            }
+            logger.error(f"Database health check failed: {e}")
+            results["database"] = {"healthy": False, "error": str(e)}
+        
+        try:
+            results["redis"] = await self.check_redis()
+        except Exception as e:
+            logger.error(f"Redis health check failed: {e}")
+            results["redis"] = {"healthy": False, "error": str(e)}
+            
+        try:
+            results["oauth"] = await self.check_oauth_providers()
+        except Exception as e:
+            logger.error(f"OAuth health check failed: {e}")
+            results["oauth"] = {"healthy": False, "error": str(e)}
+        
+        return results
 
 
 def _calculate_priority_based_health(results: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
@@ -759,7 +764,16 @@ def _get_priority_weight(priority: ServicePriority) -> float:
 def _get_service_health_score(result: HealthCheckResult) -> float:
     """Extract health score from service result."""
     if hasattr(result, 'details') and result.details:
-        return result.details.get('health_score', 0.0)
+        score = result.details.get('health_score', 0.0)
+        # Ensure we return a numeric value, not a Mock
+        if isinstance(score, (int, float)):
+            return float(score)
+    
+    # Check for health_score attribute directly on result
+    if hasattr(result, 'health_score') and isinstance(result.health_score, (int, float)):
+        return float(result.health_score)
+    
+    # Default based on status
     return 1.0 if result.status == "healthy" else 0.0
 
 

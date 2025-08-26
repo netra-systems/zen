@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.core.environment_manager import IsolatedEnvironment
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -429,7 +429,9 @@ class LoggingMetricsTester:
                 "session_id": self.test_session_id,
                 "limit_type": "api_requests",
                 "limit_value": 100,
-                "current_count": 101
+                "current_count": 101,
+                "error_code": "RATE_LIMIT_EXCEEDED",
+                "error_class": "RateLimitError"
             }
         }
         events.append(rate_limit_event)

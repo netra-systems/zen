@@ -17,6 +17,16 @@ try:
 except ImportError:
     TestEnvironmentConfig = None
 
+# Import DatabaseConnectionTester for backward compatibility
+try:
+    from tests.e2e.integration.test_database_connections import DatabaseConnectionTester
+except ImportError:
+    # Create a fallback class if import fails
+    class DatabaseConnectionTester:
+        """Fallback database connection tester."""
+        def __init__(self):
+            pass
+
 
 class DatabaseConnectionManager:
     """Manages connections to all database types."""

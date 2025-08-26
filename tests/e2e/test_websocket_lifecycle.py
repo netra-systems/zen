@@ -94,7 +94,7 @@ class WebSocketAgentClient:
         try:
             self.websocket = await websockets.connect(
                 self.connection_url, 
-                extra_headers=headers,
+                additional_headers=headers,
                 ping_timeout=10
             )
             return True

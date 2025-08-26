@@ -7,6 +7,7 @@ from google.cloud import secretmanager
 
 from netra_backend.app.core.configuration.base import config_manager
 from netra_backend.app.logging_config import central_logger as logger
+from shared.secret_mappings import get_secret_mappings, get_secret_name_for_env_var
 
 
 def detect_environment_config() -> Tuple[str, bool]:
@@ -19,20 +20,45 @@ def detect_environment_config() -> Tuple[str, bool]:
 
 
 def get_secret_names_list() -> List[str]:
-    """Get complete list of secret names to fetch."""
+    """Get complete list of secret names to fetch based on current environment."""
+    config = config_manager.get_config()
+    environment = getattr(config, 'environment', 'development').lower()
+    
+    # Use shared secret mappings to get the proper secret names for the environment
+    secret_mappings = get_secret_mappings(environment)
+    
+    # Return the Google secret names (keys) from the mappings
+    if secret_mappings:
+        logger.debug(f"Using environment-specific secret mappings for {environment}: {len(secret_mappings)} secrets")
+        return list(secret_mappings.keys())
+    
+    # Fallback to hardcoded list for development/local environments
+    logger.debug("Using fallback hardcoded secret list for local development")
     return [
         "gemini-api-key", "anthropic-api-key", "openai-api-key",
         "cohere-api-key", "mistral-api-key", "google-client-id",
         "google-client-secret", "jwt-secret-key", "fernet-key",
-        "langfuse-secret-key", "langfuse-public-key", "clickhouse-default-password",
-        "clickhouse-development-password", "redis-default", "slack-webhook-url",
-        "sendgrid-api-key", "sentry-dsn"
+        "langfuse-secret-key", "langfuse-public-key", "clickhouse-password",
+        "redis-default", "slack-webhook-url", "sendgrid-api-key", "sentry-dsn"
     ]
 
 
 def determine_actual_secret_name(secret_name: str, is_staging: bool) -> str:
-    """Determine actual secret name with staging suffix."""
-    return f"{secret_name}-staging" if is_staging else secret_name
+    """Determine actual secret name with environment-specific handling."""
+    # Use shared mappings to determine if the secret name already has environment suffix
+    config = config_manager.get_config()
+    environment = getattr(config, 'environment', 'development').lower()
+    secret_mappings = get_secret_mappings(environment)
+    
+    # If secret name is already in the mappings, use it as-is (already has correct suffix)
+    if secret_name in secret_mappings:
+        logger.debug(f"Using exact secret name from mappings: {secret_name}")
+        return secret_name
+    
+    # Legacy fallback behavior for backwards compatibility
+    result = f"{secret_name}-staging" if is_staging else secret_name
+    logger.debug(f"Using legacy suffix logic: {secret_name} -> {result}")
+    return result
 
 
 def initialize_fetch_tracking() -> Tuple[List[str], List[str]]:

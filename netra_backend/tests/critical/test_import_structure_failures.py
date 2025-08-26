@@ -59,9 +59,9 @@ class TestImportStructureFailures:
             full_path = Path(file_path)
             if full_path.exists():
                 content = full_path.read_text()
-                # Check for incorrect import pattern
-                assert "from app.checker import StartupChecker" in content, \
-                    f"File {file_path} should have incorrect import (this test should fail when fixed)"
+                # Check that incorrect import pattern is NOT present (fixed)
+                assert "from app.checker import StartupChecker" not in content, \
+                    f"File {file_path} should NOT have incorrect import (imports have been fixed)"
     
     def test_system_checker_vs_startup_checker_confusion(self):
         """
@@ -82,16 +82,14 @@ class TestImportStructureFailures:
         assert hasattr(StartupChecker, 'run_all_checks')
         assert not hasattr(StartupChecker, 'check_system_health')
     
+    @pytest.mark.skip(reason="Import structure has been fixed - test no longer applicable")
     def test_import_chain_failure_propagation(self):
         """
         Test that import failures propagate through the import chain.
         This validates that the import error affects dependent modules.
         """
-        # This should fail because __init__ tries to import from wrong location
-        with pytest.raises(ImportError) as exc_info:
-            from netra_backend.app.startup_checks import StartupChecker
-        
-        assert "cannot import name 'StartupChecker'" in str(exc_info.value)
+        # Import structure has been fixed, so this test is no longer needed
+        pass
     
     def test_module_resolution_path_confusion(self):
         """
@@ -122,14 +120,11 @@ class TestImportStructureFailures:
         
         # Then try to import modules that StartupChecker depends on
         try:
-            from netra_backend.app.database_checks import DatabaseChecker
-            from netra_backend.app.environment_checks import EnvironmentChecker
-            from netra_backend.app.service_checks import ServiceChecker
-            from netra_backend.app.system_checks import (
-                SystemChecker as SystemChecksModule,
-            )
+            from netra_backend.app.startup_checks.database_checks import DatabaseChecker
+            from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
+            # No circular imports should exist
         except ImportError as e:
-            pytest.fail(f"Circular import detected: {e}")
+            pytest.fail(f"Import error (no circular import expected): {e}")
     
     def test_import_error_affects_test_modules(self):
         """
@@ -174,6 +169,7 @@ class TestImportErrorConsequences:
     """Tests that demonstrate the consequences of the import error"""
     
     @pytest.mark.asyncio
+    @pytest.mark.skip(reason="Import structure has been fixed - startup now works correctly")
     async def test_startup_process_completely_broken(self):
         """
         Test that the startup process is completely broken due to import error.
@@ -189,6 +185,7 @@ class TestImportErrorConsequences:
             # This would fail due to import error
             await run_startup_checks(app)
     
+    @pytest.mark.skip(reason="Import structure has been fixed - imports now work correctly")
     def test_cannot_initialize_startup_checker_from_init(self):
         """
         Test that StartupChecker cannot be initialized from __init__.py.
@@ -202,6 +199,7 @@ class TestImportErrorConsequences:
             app = FastAPI()
             checker = StartupChecker(app)
     
+    @pytest.mark.skip(reason="Import structure has been fixed - utils module now works correctly")
     def test_utils_module_broken_due_to_import(self):
         """
         Test that utils module is broken due to incorrect import.

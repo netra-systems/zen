@@ -65,6 +65,7 @@ class SignalHandler:
         self.emergency_timeout = 30.0  # Total emergency timeout
         self.shutdown_start_time: Optional[float] = None
         self._lock = threading.Lock()
+        self._emergency_cleanup_running = False  # Prevent recursive emergency cleanup
         
         # Setup platform-specific signal handling
         self._setup_signal_handlers()
@@ -235,6 +236,12 @@ class SignalHandler:
     
     def _emergency_cleanup(self, reason: str) -> None:
         """Emergency cleanup when graceful shutdown fails."""
+        # Prevent recursive emergency cleanup calls
+        if self._emergency_cleanup_running:
+            print(f" Emergency cleanup already in progress, ignoring {reason}")
+            return
+        
+        self._emergency_cleanup_running = True
         self.shutdown_phase = ShutdownPhase.EMERGENCY_CLEANUP
         
         emoji = "🚨" if self.use_emoji else ""
@@ -347,17 +354,24 @@ class SignalHandler:
     
     def _atexit_cleanup(self) -> None:
         """Last resort cleanup via atexit handler."""
-        if not self.shutdown_initiated:
+        # Only trigger emergency cleanup if we actually have cleanup handlers registered
+        # and shutdown wasn't initiated (indicates an abnormal exit)
+        if not self.shutdown_initiated and self.cleanup_handlers and not self._emergency_cleanup_running:
             logger.warning("atexit cleanup triggered - shutdown was not properly initiated")
             self._emergency_cleanup("ATEXIT")
         else:
-            logger.debug("atexit cleanup - shutdown already completed")
+            logger.debug("atexit cleanup - shutdown already completed or no handlers registered")
     
     def force_shutdown(self, reason: str = "FORCE") -> None:
         """Force immediate shutdown - use only in emergencies."""
         logger.critical(f"FORCE SHUTDOWN: {reason}")
         self._emergency_cleanup(reason)
     
+    def mark_clean_exit(self) -> None:
+        """Mark that the application is exiting cleanly (no emergency cleanup needed)."""
+        self.shutdown_initiated = True
+        logger.debug("Clean exit marked - emergency cleanup will be skipped")
+        
     def get_shutdown_status(self) -> Dict[str, any]:
         """Get current shutdown status."""
         return {

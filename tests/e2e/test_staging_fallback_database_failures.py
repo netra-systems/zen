@@ -26,7 +26,7 @@ from sqlalchemy.exc import OperationalError
 from test_framework.environment_markers import env, env_requires
 from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceIndependenceValidator as AuthServiceTestHelper
 from tests.e2e.helpers.core.service_independence_helpers import ServiceIndependenceHelper
-from tests.e2e.staging_test_helpers import StagingTestHelper
+from tests.e2e.staging_test_helpers import StagingTestSuite
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class TestStagingFallbackDatabaseFailures:
         }
         
         with patch.dict(os.environ, postgres_error_env):
-            staging_helper = StagingTestHelper()
+            staging_suite = StagingTestSuite()
             auth_helper = AuthServiceTestHelper()
             
             # Mock database connection failure but service continues in staging mode

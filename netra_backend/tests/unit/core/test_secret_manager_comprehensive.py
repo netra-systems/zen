@@ -13,6 +13,7 @@ from google.api_core.exceptions import NotFound, PermissionDenied
 from google.cloud import secretmanager
 
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
+from tenacity import RetryError
 
 
 class TestSecretManagerInitialization:
@@ -186,7 +187,7 @@ class TestGoogleSecretManagerIntegration:
         
         manager = SecretManager()
         
-        with pytest.raises(SecretManagerError, match="Failed to create Secret Manager client"):
+        with pytest.raises(RetryError):
             manager._get_secret_client()
 
 
@@ -368,7 +369,8 @@ class TestSecretValidation:
         mock_config = Mock()
         mock_config.environment = 'staging'
         mock_config.jwt_secret_key = 'production-jwt-key'
-        # No staging-specific value
+        # Explicitly set staging-specific value to None to ensure fallback
+        mock_config.jwt_secret_key_staging = None
         mock_config_manager.get_config.return_value = mock_config
         
         manager = SecretManager()

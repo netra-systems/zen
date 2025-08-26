@@ -77,6 +77,22 @@ categories:
     - websocket
     - realtime
     - communication
+  agent:
+    description: AI agent and LLM integration tests
+    priority: MEDIUM
+    category_type: functional
+    timeout_seconds: 600
+    estimated_duration_minutes: 10.0
+    dependencies:
+    - unit
+    requires_real_llm: true
+    cpu_intensive: true
+    memory_intensive: true
+    max_parallel_instances: 4
+    tags:
+    - agent
+    - llm
+    - ai
   frontend:
     description: React component and UI tests
     priority: LOW

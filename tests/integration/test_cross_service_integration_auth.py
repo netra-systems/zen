@@ -18,9 +18,9 @@ from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceStat
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.middleware_setup import (
-    CustomCORSMiddleware,
     setup_cors_middleware,
 )
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class TestSyntaxFix:

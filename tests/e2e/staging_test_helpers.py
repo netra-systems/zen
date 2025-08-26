@@ -330,6 +330,92 @@ async def validate_websocket_connection_flow(suite: StagingTestSuite, user_data:
         return False
 
 
+# Missing functions needed by failing tests
+async def create_staging_environment_context():
+    """Create staging environment context for testing."""
+    try:
+        suite = await get_staging_suite()
+        return {
+            "suite": suite,
+            "services_available": True,
+            "environment": "staging"
+        }
+    except Exception as e:
+        return {
+            "suite": None,
+            "services_available": False,
+            "environment": "staging",
+            "error": str(e)
+        }
+
+
+async def mock_staging_authentication_failure():
+    """Mock staging authentication failure for testing."""
+    return AsyncMock(side_effect=Exception("Authentication failed: 403 Forbidden"))
+
+
+async def simulate_service_timeout():
+    """Simulate service timeout for testing."""
+    await asyncio.sleep(6.0)  # Simulate the 6+ second timeout seen in logs
+    raise Exception("Service timeout after 6.2 seconds")
+
+
+async def mock_external_service_unavailable():
+    """Mock external service unavailable for testing."""
+    return AsyncMock(side_effect=Exception("External service unavailable: 503 Service Unavailable"))
+
+
+async def simulate_authentication_token_expired():
+    """Simulate expired authentication token for testing."""
+    return AsyncMock(side_effect=Exception("Authentication token expired: 401 Unauthorized"))
+
+
+async def create_mock_gcp_environment():
+    """Create mock GCP environment for testing."""
+    return {
+        "project_id": "netra-staging",
+        "region": "us-central1",
+        "cluster_name": "staging-cluster",
+        "namespace": "staging"
+    }
+
+
+async def mock_static_asset_404_error():
+    """Mock static asset 404 error for testing."""
+    from unittest.mock import AsyncMock
+    mock_response = AsyncMock()
+    mock_response.status_code = 404
+    mock_response.text = "Not Found"
+    return mock_response
+
+
+def verify_public_directory_structure():
+    """Verify public directory structure exists."""
+    import os
+    from pathlib import Path
+    
+    # Check common public directory locations
+    potential_dirs = [
+        Path(__file__).parent.parent.parent / "frontend" / "public",
+        Path(__file__).parent.parent.parent / "public",
+        Path(__file__).parent.parent.parent / "static",
+    ]
+    
+    for dir_path in potential_dirs:
+        if dir_path.exists():
+            return {
+                "exists": True,
+                "path": str(dir_path),
+                "files": list(str(f) for f in dir_path.glob("*") if f.is_file())
+            }
+    
+    return {
+        "exists": False,
+        "path": None,
+        "files": []
+    }
+
+
 if __name__ == "__main__":
     result = asyncio.run(run_staging_environment_check())
     print(json.dumps(result, indent=2))

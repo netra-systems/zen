@@ -178,7 +178,7 @@ class TestBasicSystemColdStartup:
             # Test basic endpoints
             endpoints_to_test = [
                 ("/health", 200),  # Health check
-                ("/auth/config", 200),  # Auth config
+                # ("/auth/config", 200),  # Auth config - handled by separate auth service
                 ("/docs", 200),  # API documentation
                 ("/openapi.json", 200),  # OpenAPI spec
             ]

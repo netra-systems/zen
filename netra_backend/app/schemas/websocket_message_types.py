@@ -189,12 +189,6 @@ class WebSocketStats(BaseModel):
     connections_by_user: Dict[str, int] = Field(default_factory=dict, description="Connections per user")
 
 
-class BroadcastResult(BaseModel):
-    """Result of broadcast operation."""
-    successful: int = Field(description="Number of successful sends")
-    failed: int = Field(description="Number of failed sends")
-    total_connections: int = Field(description="Total connections attempted")
-    message_type: str = Field(description="Type of message broadcast")
 
 
 class WebSocketValidationError(BaseModel):

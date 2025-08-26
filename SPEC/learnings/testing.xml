@@ -5,11 +5,38 @@
         <type>learnings</type>
         <category>Testing</category>
         <version>1.0</version>
-        <last_updated>2025-08-18</last_updated>
+        <last_updated>2025-08-26</last_updated>
         <description>Critical learnings and fixes for testing infrastructure</description>
     </metadata>
     
     <learnings>
+        <learning id="fastmcp-windows-home-directory">
+            <title>FastMCP Home Directory Resolution on Windows</title>
+            <problem>
+                RuntimeError: Could not determine home directory in fastmcp.settings.py:145
+                FastMCP Settings class calls Path.home() during import which fails on Windows in test environments
+                Caused system startup tests to fail during initialization
+            </problem>
+            <solution>
+                Added FastMCP home directory workaround in test_framework/conftest_base.py
+                - Ensures HOME environment variable is set before any FastMCP imports
+                - Falls back to USERPROFILE, HOMEDRIVE+HOMEPATH, or temp directory
+                - Includes Path.home() verification with fallback to test-safe directory
+                - Windows-specific (os.name == 'nt') to avoid affecting other platforms
+            </solution>
+            <technical_details>
+                FastMCP Settings class has: home: Path = Path.home() / ".fastmcp"
+                This executes during class definition, not instantiation
+                Windows Path.home() depends on HOME, USERPROFILE, or registry values
+                Test environments may have incomplete environment variable setup
+            </technical_details>
+            <prevention>
+                Always set HOME environment variable in test environment setup
+                Verify Path.home() works before importing MCP-related modules
+                Consider using environment variable validation in test framework
+            </prevention>
+        </learning>
+        
         <learning id="clickhouse-regex-deep-nested-fields">
             <title>ClickHouse Array Syntax Regex for Deep Nested Fields</title>
             <problem>
@@ -301,6 +328,75 @@
                 <file>netra_backend/app/netra_backend/tests/integration/test_critical_missing_integration.py</file>
             </files_affected>
             <verification>All async patterns tested with realistic workflows</verification>
+        </learning>
+        
+        <learning id="circuit-breaker-recovery-timeout">
+            <title>Circuit Breaker Recovery with Timeout Implementation</title>
+            <problem>
+                Circuit breaker test failing in test_supervisor_error_handling.py::TestRetryMechanisms::test_circuit_breaker_recovery
+                Circuit breaker was not recovering after cooldown period despite waiting 0.15 seconds
+                Test expected circuit breaker to allow requests after failures + sleep, but circuit stayed open permanently
+                Implementation missing timeout-based recovery mechanism
+            </problem>
+            <solution>
+                Fixed circuit breaker implementation in supervisor_extensions.py to include proper recovery logic:
+                1. Added timestamp tracking when circuit breaker opens
+                2. Implemented cooldown period checking (100ms default for tests)
+                3. Added half-open state for recovery attempts
+                4. Proper failure count reset on successful recovery
+                5. Updated setup helper to initialize timing state
+            </solution>
+            <implementation_details>
+                <component>netra_backend/tests/helpers/supervisor_extensions.py</component>
+                <changes>
+                    - Added time import and circuit_breaker_open_time tracking
+                    - Enhanced _route_to_agent_with_circuit_breaker with timeout logic
+                    - Cooldown period check: time.time() - open_time < cooldown_period
+                    - Half-open state: attempt request after cooldown expires
+                    - Success resets both failure count and open_time
+                    - Failure increments count and resets open_time
+                </changes>
+                <helper_updates>
+                    - setup_circuit_breaker now initializes circuit_breaker_open_time = {}
+                    - Added circuit_breaker_cooldown = 0.1 for testing
+                </helper_updates>
+            </implementation_details>
+            <key_patterns>
+                <pattern name="circuit_breaker_state_machine">
+                    # Closed -> Open (after threshold failures)
+                    if failures >= threshold:
+                        record_open_time()
+                    # Open -> Half-Open (after cooldown)
+                    elif time_since_open > cooldown:
+                        attempt_recovery()
+                    # Half-Open -> Closed (on success) or Open (on failure)
+                    if recovery_success:
+                        reset_failures()
+                    else:
+                        increment_failures_and_reset_timer()
+                </pattern>
+                <pattern name="timeout_based_recovery">
+                    open_time = self.circuit_breaker_open_time.get(agent_name)
+                    if time.time() - open_time >= cooldown_period:
+                        # Allow recovery attempt
+                </pattern>
+            </key_patterns>
+            <files_affected>
+                <file>netra_backend/tests/helpers/supervisor_extensions.py</file>
+                <file>netra_backend/tests/supervisor_test_helpers.py</file>
+            </files_affected>
+            <test_verification>
+                test_circuit_breaker_recovery now passes consistently
+                All supervisor error handling tests (9/9) passing
+                No regressions in other supervisor tests
+                Standalone verification confirms proper state transitions
+            </test_verification>
+            <business_value>
+                Critical for system resilience - circuit breakers prevent cascade failures
+                Ensures proper recovery patterns for supervisor agent routing
+                Validates error handling mechanisms work as expected under load
+                Maintains system stability during partial service outages
+            </business_value>
         </learning>
         
         <learning id="frontend-test-bash-glob-pattern">

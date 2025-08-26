@@ -41,11 +41,11 @@ class TestBusinessValueCore(BusinessValueFixtures):
                                    save_mock, load_mock, context_mock):
         """Execute with specific state persistence patches"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', save_mock):
+        with patch('netra_backend.app.services.state_persistence.state_persistence_service.save_agent_state', save_mock):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', load_mock):
+            with patch('netra_backend.app.services.state_persistence.state_persistence_service.load_agent_state', load_mock):
                 # Mock: Component isolation for testing without external dependencies
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
+                with patch('netra_backend.app.services.state_persistence.state_persistence_service.get_thread_context', context_mock):
                     return await supervisor.run(user_request, "test_thread", "test_user", run_id)
 
     def _verify_basic_result(self, result_state, user_request: str):

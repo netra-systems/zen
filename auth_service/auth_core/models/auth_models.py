@@ -28,11 +28,17 @@ class LoginRequest(BaseModel):
     password: Optional[str] = None
     provider: AuthProvider = AuthProvider.LOCAL
     oauth_token: Optional[str] = None
+    api_key: Optional[str] = None
     
     @model_validator(mode='after')
-    def validate_password_for_local(self):
+    def validate_auth_fields(self):
         if self.provider == AuthProvider.LOCAL and not self.password:
             raise ValueError('Password required for local auth')
+        elif self.provider == AuthProvider.API_KEY and not self.api_key:
+            # Allow empty API keys to reach service validation for proper error handling
+            pass
+        elif self.provider == AuthProvider.GOOGLE and not self.oauth_token:
+            raise ValueError('OAuth token required for OAuth auth')
         return self
 
 class LoginResponse(BaseModel):
