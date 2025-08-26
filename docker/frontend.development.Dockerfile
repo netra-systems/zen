@@ -46,6 +46,9 @@ COPY --from=builder --chown=1000:1000 /app/postcss.config.mjs ./
 # Copy Next.js specific directories (these may or may not exist depending on dev/prod mode)
 COPY --from=builder --chown=1000:1000 /app/ ./
 
+# Create .next directory with proper permissions
+RUN mkdir -p /app/.next && chown -R 1000:1000 /app/.next
+
 # Switch to non-root user
 USER 1000
 

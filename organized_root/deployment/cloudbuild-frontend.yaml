@@ -6,6 +6,6 @@ steps:
   - -t
   - gcr.io/netra-staging/netra-frontend-staging:latest
   - -f
-  - deployment/docker/Dockerfile.frontend
+  - deployment/docker/frontend.gcp.Dockerfile
   - .
   name: gcr.io/cloud-builders/docker

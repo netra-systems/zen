@@ -62,8 +62,6 @@ services:
       retries: 5
     networks:
       - netra-network
-    profiles:
-      - analytics
 
   # Backend Service
   backend:

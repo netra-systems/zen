@@ -83,9 +83,7 @@ class StagingBuilder:
         
         # Check which Dockerfile to use
         dockerfiles = [
-            self.project_root / "deployment" / "docker" / "frontend.gcp.Dockerfile",
-            self.project_root / "Dockerfile.frontend.staging",
-            self.project_root / "frontend" / "Dockerfile.frontend"
+            self.project_root / "deployment" / "docker" / "frontend.gcp.Dockerfile"
         ]
         
         dockerfile = None

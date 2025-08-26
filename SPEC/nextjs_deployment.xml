@@ -220,7 +220,7 @@ CMD ["node", "server.js"]
   
   <verification>
     <local_testing>
-      <step>Build Docker image: docker build -f deployment/docker/Dockerfile.frontend -t frontend-test .</step>
+      <step>Build Docker image: docker build -f deployment/docker/frontend.gcp.Dockerfile -t frontend-test .</step>
       <step>Run container: docker run -p 3000:3000 frontend-test</step>
       <step>Verify server starts and responds on http://localhost:3000</step>
       <step>Check that static assets load correctly</step>
@@ -251,7 +251,7 @@ CMD ["node", "server.js"]
     <reference>https://nextjs.org/docs/app/api-reference/next-config-js/output</reference>
     <reference>SPEC/gcp_deployment.xml</reference>
     <reference>SPEC/learnings/deployment.xml</reference>
-    <reference>Dockerfile.frontend</reference>
+    <reference>frontend.gcp.Dockerfile</reference>
     <reference>scripts/deploy_to_gcp.py</reference>
   </references>
 </specification>
