@@ -685,7 +685,14 @@ jest.mock('@/store/authStore', () => ({
         global.localStorage.setItem('token', token);
         global.localStorage.setItem('auth_token', token);
       }
-    })
+    }),
+    // Add missing permission functions to match real authStore interface
+    hasPermission: jest.fn(() => false),
+    hasAnyPermission: jest.fn(() => false),
+    hasAllPermissions: jest.fn(() => false),
+    isAdminOrHigher: jest.fn(() => false),
+    isDeveloper: jest.fn(() => false),
+    isDeveloperOrHigher: jest.fn(() => false)
   }))
 }));
 

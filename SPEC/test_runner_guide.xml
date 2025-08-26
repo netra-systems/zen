@@ -31,7 +31,7 @@
       - test_framework/__init__.py: Module initialization
       - Service tests remain in their directories (netra_backend/tests, auth_service/tests, frontend/__tests__)
       
-      COMMAND: python -m test_framework.runner [options]
+      COMMAND: python unified_test_runner.py [options]
       
       DESIGN PRINCIPLES:
       - Clear linear progression from fastest to slowest tests
@@ -65,123 +65,123 @@
       <compliance_commands>
         <command purpose="Check conftest compliance">python scripts/check_conftest_violations.py</command>
         <command purpose="Pre-commit organization check">.githooks/check-test-organization.py</command>
-        <command purpose="Discover test structure">python -m test_framework.runner --discover</command>
+        <command purpose="Discover test structure">python unified_test_runner.py --list-categories</command>
       </compliance_commands>
     </test_organization_compliance>
     <test_levels>
       <level name="smoke" time="&lt;30s" order="1">
         <purpose>Pre-commit validation</purpose>
-        <command>python -m test_framework.runner --level smoke</command>
+        <command>python unified_test_runner.py --category smoke</command>
         <when>Before every commit</when>
         <includes>Basic health checks, critical paths only</includes>
       </level>
       <level name="unit" time="1-2min" order="2">
         <purpose>Component testing</purpose>
-        <command>python -m test_framework.runner --level unit</command>
+        <command>python unified_test_runner.py --category unit</command>
         <when>During development</when>
         <includes>All isolated component tests</includes>
       </level>
       <level name="critical" time="1-2min" order="3">
         <purpose>Essential paths validation</purpose>
-        <command>python -m test_framework.runner --level critical</command>
+        <command>python unified_test_runner.py --category critical</command>
         <when>Quick validation, hotfixes</when>
         <includes>Business-critical functionality only</includes>
       </level>
       <level name="agents" time="2-3min" order="4">
         <purpose>Agent system testing</purpose>
-        <command>python -m test_framework.runner --level agents</command>
+        <command>python unified_test_runner.py --category agents</command>
         <when>After agent changes</when>
         <includes>All agent-related tests</includes>
       </level>
       <level name="agent-startup" time="1-2min" order="5">
         <purpose>Agent startup sequence validation</purpose>
-        <command>python -m test_framework.runner --level agent-startup</command>
+        <command>python unified_test_runner.py --category agent-startup</command>
         <when>After startup sequence changes</when>
         <includes>Agent initialization and startup tests</includes>
       </level>
       <level name="integration" time="3-5min" order="6" default="true">
         <purpose>DEFAULT - Feature validation</purpose>
-        <command>python -m test_framework.runner --level integration --no-coverage --fast-fail</command>
+        <command>python unified_test_runner.py --category integration --no-coverage --fast-fail</command>
         <when>After any feature change</when>
         <includes>Component interaction tests</includes>
       </level>
       <level name="mock_only" time="2-3min" order="7">
         <purpose>Fast testing with all mocks</purpose>
-        <command>python -m test_framework.runner --level mock_only</command>
+        <command>python unified_test_runner.py --category mock_only</command>
         <when>Quick validation without external dependencies</when>
         <includes>Tests with all external services mocked</includes>
       </level>
       <level name="performance" time="3-5min" order="8">
         <purpose>SLA compliance validation</purpose>
-        <command>python -m test_framework.runner --level performance</command>
+        <command>python unified_test_runner.py --category performance</command>
         <when>Before releases, after performance changes</when>
         <includes>Response time and throughput tests</includes>
       </level>
       <level name="real_e2e" time="20-30min" order="9">
         <purpose>Full end-to-end testing with real services</purpose>
-        <command>python -m test_framework.runner --level real_e2e --real-llm</command>
+        <command>python unified_test_runner.py --category real_e2e --real-llm</command>
         <when>Pre-production validation</when>
         <includes>Complete user flows with real services</includes>
         <requires>ENABLE_REAL_LLM_TESTING=true</requires>
       </level>
       <level name="real_services" time="15-20min" order="10">
         <purpose>Tests with actual external services</purpose>
-        <command>python -m test_framework.runner --level real_services --real-llm</command>
+        <command>python unified_test_runner.py --category real_services --real-llm</command>
         <when>Before releases requiring service validation</when>
         <includes>Real LLM, database, and service integrations</includes>
         <requires>ENABLE_REAL_LLM_TESTING=true</requires>
       </level>
       <level name="comprehensive" time="30-45min" order="11">
         <purpose>Full validation suite</purpose>
-        <command>python -m test_framework.runner --level comprehensive</command>
+        <command>python unified_test_runner.py --category comprehensive</command>
         <when>Before production deploy</when>
         <includes>ALL tests including unit, integration, agents, performance</includes>
       </level>
       <level name="comprehensive-backend" time="15-20min" order="12">
         <purpose>Comprehensive backend validation</purpose>
-        <command>python -m test_framework.runner --level comprehensive-backend</command>
+        <command>python unified_test_runner.py --category comprehensive-backend</command>
         <when>Backend deep testing</when>
         <includes>All backend component tests</includes>
       </level>
       <level name="comprehensive-frontend" time="15-20min" order="13">
         <purpose>Comprehensive frontend validation</purpose>
-        <command>python -m test_framework.runner --level comprehensive-frontend</command>
+        <command>python unified_test_runner.py --category comprehensive-frontend</command>
         <when>Frontend deep testing</when>
         <includes>All frontend component tests</includes>
       </level>
       <level name="comprehensive-core" time="15-20min" order="14">
         <purpose>Comprehensive core system validation</purpose>
-        <command>python -m test_framework.runner --level comprehensive-core</command>
+        <command>python unified_test_runner.py --category comprehensive-core</command>
         <when>Core system deep testing</when>
         <includes>Core functionality tests</includes>
       </level>
       <level name="comprehensive-agents" time="15-20min" order="15">
         <purpose>Comprehensive agent system validation</purpose>
-        <command>python -m test_framework.runner --level comprehensive-agents</command>
+        <command>python unified_test_runner.py --category comprehensive-agents</command>
         <when>Multi-agent system deep testing</when>
         <includes>All agent interaction tests</includes>
       </level>
       <level name="comprehensive-websocket" time="10-15min" order="16">
         <purpose>Comprehensive WebSocket validation</purpose>
-        <command>python -m test_framework.runner --level comprehensive-websocket</command>
+        <command>python unified_test_runner.py --category comprehensive-websocket</command>
         <when>WebSocket deep testing</when>
         <includes>All WebSocket communication tests</includes>
       </level>
       <level name="comprehensive-database" time="15-20min" order="17">
         <purpose>Comprehensive database validation</purpose>
-        <command>python -m test_framework.runner --level comprehensive-database</command>
+        <command>python unified_test_runner.py --category comprehensive-database</command>
         <when>Database operations deep testing</when>
         <includes>All database interaction tests</includes>
       </level>
       <level name="comprehensive-api" time="15-20min" order="18">
         <purpose>Comprehensive API validation</purpose>
-        <command>python -m test_framework.runner --level comprehensive-api</command>
+        <command>python unified_test_runner.py --category comprehensive-api</command>
         <when>API endpoints deep testing</when>
         <includes>All API endpoint tests</includes>
       </level>
       <level name="all" time="45-60min" order="19">
         <purpose>Complete system validation</purpose>
-        <command>python -m test_framework.runner --level all</command>
+        <command>python unified_test_runner.py --category all</command>
         <when>Major releases, full regression testing</when>
         <includes>Everything including E2E and frontend tests</includes>
       </level>
@@ -210,19 +210,19 @@
     </test_categories>
     <execution_modes>
       <mode name="serial">
-        <command>python -m test_framework.runner --level unit --parallel 1</command>
+        <command>python unified_test_runner.py --category unit --parallel 1</command>
         <purpose>Sequential execution for debugging</purpose>
       </mode>
       <mode name="parallel-auto">
-        <command>python -m test_framework.runner --level unit --parallel auto</command>
+        <command>python unified_test_runner.py --category unit --parallel auto</command>
         <purpose>Auto-detect optimal parallelism (default)</purpose>
       </mode>
       <mode name="parallel-fixed">
-        <command>python -m test_framework.runner --level unit --parallel 4</command>
+        <command>python unified_test_runner.py --category unit --parallel 4</command>
         <purpose>Fixed number of parallel workers</purpose>
       </mode>
       <mode name="parallel-max">
-        <command>python -m test_framework.runner --level unit --parallel max</command>
+        <command>python unified_test_runner.py --category unit --parallel max</command>
         <purpose>Maximum parallelism (CPU count - 1)</purpose>
       </mode>
     </execution_modes>
@@ -230,16 +230,16 @@
       <critical>Test with real LLMs before releases to catch integration issues</critical>
       <commands>
         <command purpose="Integration with real LLM (DEFAULT for releases)">
-          python -m test_framework.runner --level integration --real-llm
+          python unified_test_runner.py --category integration --real-llm
         </command>
         <command purpose="Specific model testing">
-          python -m test_framework.runner --level integration --real-llm --llm-model gemini-2.5-flash
+          python unified_test_runner.py --category integration --real-llm --llm-model gemini-2.5-flash
         </command>
         <command purpose="Real services with timeout control">
-          python -m test_framework.runner --level real_services --real-llm --llm-timeout 60
+          python unified_test_runner.py --category real_services --real-llm --llm-timeout 60
         </command>
         <command purpose="Agent tests with real LLM (MANDATORY for agent changes)">
-          python -m test_framework.runner --level agents --real-llm
+          python unified_test_runner.py --category agents --real-llm
         </command>
       </commands>
     </real_llm_testing>
@@ -249,8 +249,8 @@
         <safe>true</safe>
         <usage_note>Essential for development workflow - saves time by failing fast</usage_note>
         <examples>
-          <example purpose="Development testing">python -m test_framework.runner --level integration --fast-fail</example>
-          <example purpose="Pre-commit validation">python -m test_framework.runner --level smoke --fast-fail</example>
+          <example purpose="Development testing">python unified_test_runner.py --category integration --fast-fail</example>
+          <example purpose="Pre-commit validation">python unified_test_runner.py --category smoke --fast-fail</example>
         </examples>
       </flag>
       <flag name="--fail-fast">
@@ -287,14 +287,14 @@
         <parameter>integer</parameter>
         <examples>
           <example>python -m test_framework.runner --max-failures 3</example>
-          <example>python -m test_framework.runner --level integration --max-failures 5</example>
+          <example>python unified_test_runner.py --category integration --max-failures 5</example>
         </examples>
       </flag>
     </speed_optimizations>
     <test_selection>
       <flag name="--exclusive">
         <purpose>Run ONLY tests at specified level (no superset)</purpose>
-        <example>python -m test_framework.runner --level integration --exclusive</example>
+        <example>python unified_test_runner.py --category integration --exclusive</example>
       </flag>
       <flag name="--backend-only">
         <purpose>Run backend tests only</purpose>
@@ -368,10 +368,10 @@
         python -m test_framework.runner --clear-failing
       </command>
       <command purpose="Generate JSON report">
-        python -m test_framework.runner --level unit --output results.json --format json
+        python unified_test_runner.py --category unit --output results.json --format json
       </command>
       <command purpose="Generate HTML coverage report">
-        python -m test_framework.runner --level unit --coverage-html
+        python unified_test_runner.py --category unit --coverage-html
       </command>
     </discovery_reporting>
     <frontend_testing>
@@ -439,7 +439,7 @@
     </frontend_testing>
     <staging_testing>
       <command purpose="Test against staging">
-        python -m test_framework.runner --level integration --staging
+        python unified_test_runner.py --category integration --staging
       </command>
       <command purpose="Custom staging URLs">
         python -m test_framework.runner --staging --staging-url https://staging.example.com
@@ -447,53 +447,53 @@
     </staging_testing>
     <recommended_defaults>
       <default name="DEVELOPMENT">
-        <command>python -m test_framework.runner --level integration --no-coverage --fast-fail</command>
+        <command>python unified_test_runner.py --category integration --no-coverage --fast-fail</command>
         <purpose>Fast feedback during active development</purpose>
         <time>&lt;2min with early exit on failure</time>
       </default>
       <default name="PRE-COMMIT">
-        <command>python -m test_framework.runner --level smoke --fast-fail</command>
+        <command>python unified_test_runner.py --category smoke --fast-fail</command>
         <purpose>Quick validation before committing</purpose>
         <time>&lt;30s</time>
       </default>
       <default name="AGENT-CHANGES">
-        <command>python -m test_framework.runner --level agents --real-llm --fast-fail</command>
+        <command>python unified_test_runner.py --category agents --real-llm --fast-fail</command>
         <purpose>Validate agent changes with real LLMs</purpose>
         <time>2-3min with early exit</time>
       </default>
       <default name="PRE-RELEASE">
-        <command>python -m test_framework.runner --level integration --real-llm --env staging</command>
+        <command>python unified_test_runner.py --category integration --real-llm --env staging</command>
         <purpose>Full validation including staging environment</purpose>
         <time>5-10min</time>
       </default>
     </recommended_defaults>
     <workflows>
       <workflow name="development">
-        <step>1. python -m test_framework.runner --level unit --fast-fail --no-coverage</step>
-        <step>2. python -m test_framework.runner --level integration --fast-fail --no-coverage</step>
-        <step>3. python -m test_framework.runner --level smoke --fast-fail (before commit)</step>
+        <step>1. python unified_test_runner.py --category unit --fast-fail --no-coverage</step>
+        <step>2. python unified_test_runner.py --category integration --fast-fail --no-coverage</step>
+        <step>3. python unified_test_runner.py --category smoke --fast-fail (before commit)</step>
       </workflow>
       <workflow name="rapid-iteration">
         <description>For quick development cycles with immediate feedback</description>
         <step>1. python -m test_framework.runner --pattern "specific_test" --fast-fail</step>
-        <step>2. python -m test_framework.runner --level unit --max-failures 3 --no-coverage</step>
-        <step>3. python -m test_framework.runner --level critical --fast-fail</step>
+        <step>2. python unified_test_runner.py --category unit --max-failures 3 --no-coverage</step>
+        <step>3. python unified_test_runner.py --category critical --fast-fail</step>
       </workflow>
       <workflow name="agent-development">
-        <step>1. python -m test_framework.runner --level agents --fast-fail</step>
-        <step>2. python -m test_framework.runner --level agents --real-llm --fast-fail</step>
-        <step>3. python -m test_framework.runner --level integration --no-coverage</step>
+        <step>1. python unified_test_runner.py --category agents --fast-fail</step>
+        <step>2. python unified_test_runner.py --category agents --real-llm --fast-fail</step>
+        <step>3. python unified_test_runner.py --category integration --no-coverage</step>
       </workflow>
       <workflow name="pre-release">
-        <step>1. python -m test_framework.runner --level comprehensive</step>
-        <step>2. python -m test_framework.runner --level real_services --real-llm</step>
-        <step>3. python -m test_framework.runner --level performance</step>
-        <step>4. python -m test_framework.runner --level all --staging</step>
+        <step>1. python unified_test_runner.py --category comprehensive</step>
+        <step>2. python unified_test_runner.py --category real_services --real-llm</step>
+        <step>3. python unified_test_runner.py --category performance</step>
+        <step>4. python unified_test_runner.py --category all --staging</step>
       </workflow>
       <workflow name="hotfix">
-        <step>1. python -m test_framework.runner --level critical --fast-fail</step>
-        <step>2. python -m test_framework.runner --level smoke --fast-fail</step>
-        <step>3. python -m test_framework.runner --level integration --component affected --fast-fail</step>
+        <step>1. python unified_test_runner.py --category critical --fast-fail</step>
+        <step>2. python unified_test_runner.py --category smoke --fast-fail</step>
+        <step>3. python unified_test_runner.py --category integration --component affected --fast-fail</step>
       </workflow>
       <workflow name="debugging">
         <description>For investigating test failures</description>

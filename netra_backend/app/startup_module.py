@@ -379,8 +379,23 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
     logger.warning("Continuing without migrations")
 
 
+async def _async_initialize_postgres(logger: logging.Logger):
+    """Async wrapper for postgres initialization to enable timeout protection."""
+    try:
+        # Run postgres initialization in a thread to avoid blocking
+        loop = asyncio.get_event_loop()
+        async_session_factory = await loop.run_in_executor(
+            None,
+            initialize_postgres
+        )
+        return async_session_factory
+    except Exception as e:
+        logger.error(f"Error in async postgres initialization: {e}")
+        return None
+
+
 async def setup_database_connections(app: FastAPI) -> None:
-    """Setup PostgreSQL connection factory (critical service)."""
+    """Setup PostgreSQL connection factory (critical service) with timeout protection."""
     logger = central_logger.get_logger(__name__)
     logger.info("Setting up database connections...")
     config = get_config()
@@ -397,9 +412,13 @@ async def setup_database_connections(app: FastAPI) -> None:
         app.state.database_mock_mode = True
         return
     
+    # CRITICAL FIX: Wrap database initialization in timeout to prevent server startup hanging
     try:
-        logger.debug("Calling initialize_postgres()...")
-        async_session_factory = initialize_postgres()
+        logger.debug("Calling initialize_postgres() with 15s timeout...")
+        async_session_factory = await asyncio.wait_for(
+            asyncio.create_task(_async_initialize_postgres(logger)),
+            timeout=15.0
+        )
         logger.debug(f"initialize_postgres() returned: {async_session_factory}")
         
         if async_session_factory is None:
@@ -412,8 +431,12 @@ async def setup_database_connections(app: FastAPI) -> None:
             else:
                 raise RuntimeError(error_msg)
         
-        # Ensure database tables exist before proceeding
-        await _ensure_database_tables_exist(logger, graceful_startup)
+        # Ensure database tables exist with timeout protection
+        logger.debug("Ensuring database tables exist with 10s timeout...")
+        await asyncio.wait_for(
+            _ensure_database_tables_exist(logger, graceful_startup),
+            timeout=10.0
+        )
             
         app.state.db_session_factory = async_session_factory
         app.state.database_available = True
@@ -424,6 +447,18 @@ async def setup_database_connections(app: FastAPI) -> None:
             logger.debug("Verified: app.state.db_session_factory is accessible and not None")
         else:
             logger.error("ERROR: app.state.db_session_factory is None after setting!")
+            
+    except asyncio.TimeoutError:
+        # CRITICAL FIX: Handle database timeout gracefully to prevent server startup hanging
+        timeout_msg = "Database initialization timed out - continuing in graceful mode"
+        logger.error(timeout_msg)
+        if graceful_startup:
+            logger.warning("Database timeout - using mock mode for graceful degradation")
+            app.state.db_session_factory = None
+            app.state.database_available = False
+            app.state.database_mock_mode = True
+        else:
+            raise RuntimeError("Database initialization timed out and graceful mode disabled") from None
             
     except Exception as e:
         if graceful_startup:
@@ -573,7 +608,7 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
 
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
-    """Run application startup checks (graceful failure handling)."""
+    """Run application startup checks with timeout protection (graceful failure handling)."""
     config = get_config()
     disable_checks = config.disable_startup_checks.lower() == "true"
     fast_startup = config.fast_startup_mode.lower() == "true"
@@ -586,8 +621,12 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     logger.info("Starting comprehensive startup health checks...")
     from netra_backend.app.startup_checks import run_startup_checks
     try:
-        logger.debug("Calling run_startup_checks...")
-        results = await run_startup_checks(app)
+        logger.debug("Calling run_startup_checks() with 20s timeout...")
+        # CRITICAL FIX: Add timeout to prevent startup health checks from hanging server startup
+        results = await asyncio.wait_for(
+            run_startup_checks(app),
+            timeout=20.0
+        )
         passed = results.get('passed', 0)
         total = results.get('total_checks', 0)
         logger.info(f"Startup checks completed: {passed}/{total} passed")
@@ -598,6 +637,16 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
             logger.warning(f"Some startup checks failed ({failed}), but continuing in graceful mode")
         elif passed < total:
             raise RuntimeError(f"Critical startup checks failed: {failed} of {total}")
+            
+    except asyncio.TimeoutError:
+        # CRITICAL FIX: Handle startup check timeout gracefully
+        timeout_msg = "Startup health checks timed out after 20s"
+        logger.error(timeout_msg)
+        if graceful_startup:
+            logger.warning("Startup checks timeout - continuing in graceful mode")
+        else:
+            logger.error("Startup checks timeout and graceful mode disabled")
+            await _handle_startup_failure(logger, RuntimeError(timeout_msg))
             
     except Exception as e:
         if graceful_startup:

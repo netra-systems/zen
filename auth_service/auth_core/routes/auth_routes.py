@@ -239,7 +239,7 @@ Users will see 'OAuth Configuration Broken' errors.
             raise HTTPException(status_code=500, detail="Authentication state storage failed")
         
         # Build OAuth URL
-        redirect_uri = _determine_urls()[1] + "/auth/callback"
+        redirect_uri = _determine_urls()[0] + "/auth/callback"
         
         oauth_url = (
             "https://accounts.google.com/o/oauth2/v2/auth?"
@@ -673,7 +673,7 @@ async def oauth_callback(
         # Exchange code for tokens
         google_client_id = AuthConfig.get_google_client_id()
         google_client_secret = AuthConfig.get_google_client_secret()
-        redirect_uri = _determine_urls()[1] + "/auth/callback"
+        redirect_uri = _determine_urls()[0] + "/auth/callback"
         
         logger.info(f"Using redirect_uri: {redirect_uri}")
         
@@ -903,7 +903,7 @@ async def oauth_callback_post(
         # Exchange code for tokens with network error handling
         google_client_id = AuthConfig.get_google_client_id()
         google_client_secret = AuthConfig.get_google_client_secret()
-        redirect_uri = request.redirect_uri or (_determine_urls()[1] + "/auth/callback")
+        redirect_uri = request.redirect_uri or (_determine_urls()[0] + "/auth/callback")
         
         logger.info(f"Using redirect_uri: {redirect_uri}")
         

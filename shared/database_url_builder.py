@@ -298,6 +298,20 @@ class DatabaseURLBuilder:
                 return self.parent.database_url
             # Fall back to default
             return self.default_url
+        
+        @property
+        def auto_sync_url(self) -> str:
+            """Auto-select best sync URL for development."""
+            # Try TCP config first (should use sync version)
+            if self.parent.tcp.has_config:
+                return self.parent.tcp.sync_url
+            # Try to convert DATABASE_URL to sync format if available
+            if self.parent.database_url:
+                # Convert async URL to sync format
+                sync_url = self.parent.database_url.replace("postgresql+asyncpg://", "postgresql://")
+                return sync_url
+            # Fall back to default
+            return self.default_sync_url
     
     class TestBuilder:
         """Build test environment URLs."""
@@ -438,7 +452,7 @@ class DatabaseURLBuilder:
         elif self.environment == "test":
             return self.test.auto_url  # Test doesn't distinguish sync/async for SQLite
         else:  # development
-            return self.development.default_sync_url if sync else self.development.auto_url
+            return self.development.auto_sync_url if sync else self.development.auto_url
     
     def validate(self) -> tuple[bool, str]:
         """

@@ -24,7 +24,7 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.exc import OperationalError
 
 from test_framework.environment_markers import env, env_requires
-from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceTestHelper
+from tests.e2e.helpers.auth.auth_service_helpers import AuthServiceIndependenceValidator as AuthServiceTestHelper
 from tests.e2e.helpers.core.service_independence_helpers import ServiceIndependenceHelper
 from tests.e2e.staging_test_helpers import StagingTestHelper
 

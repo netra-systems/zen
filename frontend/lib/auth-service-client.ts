@@ -31,6 +31,8 @@ export class AuthServiceClient {
   private readonly environment: string;
   private readonly baseUrl: string;
   private readonly endpoints: typeof unifiedApiConfig.endpoints;
+  private lastConfigAttempt?: number;
+  private cachedConfig?: AuthConfig;
   
   constructor() {
     const config = unifiedApiConfig;
@@ -48,6 +50,16 @@ export class AuthServiceClient {
    * Get auth service configuration
    */
   async getAuthConfig(): Promise<AuthConfig> {
+    // Prevent excessive retries by tracking last attempt
+    const now = Date.now();
+    if (this.lastConfigAttempt && now - this.lastConfigAttempt < 10000) { // 10 second cooldown
+      logger.debug('Auth config fetch on cooldown, returning cached or fallback');
+      if (this.cachedConfig) {
+        return this.cachedConfig;
+      }
+    }
+    this.lastConfigAttempt = now;
+    
     try {
       logger.debug(`Fetching auth config from: ${this.endpoints.authConfig}`);
       
@@ -114,6 +126,7 @@ export class AuthServiceClient {
         environment: this.environment,
         has_client_id: !!config.google_client_id
       });
+      this.cachedConfig = config; // Cache successful config
       return config;
     } catch (error) {
       // CRITICAL: Check if this is an OAuth configuration error

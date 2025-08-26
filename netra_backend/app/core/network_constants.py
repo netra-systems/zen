@@ -122,7 +122,7 @@ class DatabaseConstants:
     CLICKHOUSE_TEST_DB: Final[str] = "test"
     CLICKHOUSE_DEFAULT_USER: Final[str] = "default"
     REDIS_DEFAULT_DB: Final[int] = 0
-    REDIS_TEST_DB: Final[int] = 1
+    REDIS_TEST_DB: Final[int] = 0
     
     # SSL modes
     SSL_MODE_DISABLE: Final[str] = "disable"

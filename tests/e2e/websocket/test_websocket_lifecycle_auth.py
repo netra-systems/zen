@@ -45,7 +45,7 @@ class WebSocketLifecycleAuthTester:
     
     def __init__(self):
         self.backend_url = "http://localhost:8001"
-        self.auth_url = "http://localhost:8083" 
+        self.auth_url = "http://localhost:8081"  # Corrected to match actual dev launcher port
         self.websocket_url = "ws://localhost:8001/ws"
         self.test_clients: List[RealWebSocketClient] = []
         self.test_results: List[Dict[str, Any]] = []

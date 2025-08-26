@@ -253,19 +253,30 @@ class ServicesConfiguration:
             env_vars["REDIS_URL"] = f"redis://{redis_config['host']}:{redis_config['port']}/{redis_config.get('db', 0)}"
     
     def _add_clickhouse_url(self, env_vars: Dict[str, str]):
-        """Add ClickHouse URL to environment variables."""
+        """Add ClickHouse URL and individual environment variables."""
         if self.clickhouse.mode == ResourceMode.DISABLED:
             return
         ch_config = self.clickhouse.get_config()
+        
+        # Set individual environment variables that the backend expects
+        env_vars["CLICKHOUSE_HOST"] = ch_config['host']
+        env_vars["CLICKHOUSE_PORT"] = str(ch_config['port'])
+        env_vars["CLICKHOUSE_USER"] = ch_config['user']
+        if ch_config.get('password'):
+            env_vars["CLICKHOUSE_PASSWORD"] = ch_config['password']
+        env_vars["CLICKHOUSE_DB"] = ch_config['database']
+        
+        # Set HTTP port for backend HTTP client
+        if 'http_port' in ch_config:
+            env_vars["CLICKHOUSE_HTTP_PORT"] = str(ch_config['http_port'])
+        
+        # Set URL for compatibility
         if self.clickhouse.mode == ResourceMode.SHARED:
             protocol = "clickhouse+https" if ch_config.get("secure") else "clickhouse"
             env_vars["CLICKHOUSE_URL"] = f"{protocol}://{ch_config['user']}:{ch_config['password']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
         elif self.clickhouse.mode == ResourceMode.LOCAL:
             password_part = f":{ch_config['password']}" if ch_config.get('password') else ""
             env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}{password_part}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
-            # Also set HTTP port for local mode
-            if 'http_port' in ch_config:
-                env_vars["CLICKHOUSE_HTTP_PORT"] = str(ch_config['http_port'])
     
     def _add_postgres_url(self, env_vars: Dict[str, str]):
         """Add PostgreSQL URL to environment variables."""

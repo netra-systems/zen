@@ -22,13 +22,25 @@
         <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
+            <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
             <critical-takeaway>OAuth redirect URIs must point to auth service (auth.staging.netrasystems.ai), not frontend (oauth_redirect_configuration.xml).</critical-takeaway>
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
             <critical-takeaway>Always verify OAuth configuration matches between code and provider console (oauth_deployment_verification.xml).</critical-takeaway>
             <critical-takeaway>Next.js proxy rewrites must be disabled in production - frontend should call services directly (oauth_staging_issues.xml).</critical-takeaway>
             <critical-takeaway>Auth service routes ALWAYS use /auth/* prefix - frontend must include this (frontend_auth_urls.xml).</critical-takeaway>
+            <critical-takeaway>Run python scripts/validate_oauth_configuration.py before every deployment to prevent OAuth redirect URI misconfigurations.</critical-takeaway>
         </category>
         
+        <category name="OAuth Redirect URI Critical Misconfiguration [CRITICAL]" path="SPEC/learnings/oauth_redirect_uri_misconfiguration.xml" keywords="OAuth, Redirect URI, No Token Received, Frontend, Auth Service, Google OAuth, Authentication Failure">
+            <critical-takeaway>CRITICAL: Lines 242, 676, 906 in auth_routes.py use _determine_urls()[1] (frontend URL) instead of _determine_urls()[0] (auth service URL) for OAuth redirect_uri.</critical-takeaway>
+            <critical-takeaway>IMPACT: Google OAuth redirects to frontend instead of auth service, causing "No token received" error and 100% OAuth authentication failure.</critical-takeaway>
+            <critical-takeaway>ROOT CAUSE: Auth service tells Google to redirect to https://app.staging.netrasystems.ai/auth/callback instead of https://auth.staging.netrasystems.ai/auth/callback.</critical-takeaway>
+            <critical-takeaway>FIX REQUIRED: Change redirect_uri = _determine_urls()[1] + "/auth/callback" to redirect_uri = _determine_urls()[0] + "/auth/callback" in all OAuth routes.</critical-takeaway>
+            <critical-takeaway>PREVENTION: Run python scripts/validate_oauth_configuration.py before every deployment to catch OAuth redirect URI misconfigurations.</critical-takeaway>
+            <critical-takeaway>TESTING: Use @pytest.mark.env("staging") tests to validate OAuth redirect URIs point to auth service URLs in staging environment.</critical-takeaway>
+            <critical-takeaway>GOOGLE CONSOLE: Only auth service URLs should be authorized redirect URIs - never add frontend URLs to Google OAuth Console.</critical-takeaway>
+        </category>
+
         <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">
             <critical-takeaway>Auth service is OAuth-first with NO /register endpoint - use OAuth or dev login.</critical-takeaway>
             <critical-takeaway>Dev login endpoint (/auth/dev/login) creates fixed dev@example.com user automatically.</critical-takeaway>
@@ -165,6 +177,25 @@
             <critical-takeaway>DATABASE_URL must use Cloud SQL format in staging, never localhost fallback - staging configuration failures indicate production readiness issues.</critical-takeaway>
             <critical-takeaway>Redis fallback to localhost must be disabled in staging/production via REDIS_FALLBACK_ENABLED=false environment variable.</critical-takeaway>
             <critical-takeaway>Import paths: ClickHouseClient moved to data_sub_agent module, RedisClient is RedisManager, WebSocket imports use fastapi not starlette.</critical-takeaway>
+        </category>
+        
+        <category name="OAuth Redirect URI Misconfiguration [CRITICAL]" path="SPEC/learnings/oauth_redirect_uri_misconfiguration.xml" keywords="OAuth, Google OAuth, redirect_uri, callback, authentication, staging failure, No token received">
+            <critical-takeaway>RESOLVED 2025-08-26: Auth service was using frontend URL for OAuth callbacks instead of auth service URL, causing 100% authentication failure.</critical-takeaway>
+            <critical-takeaway>Root cause: redirect_uri = _determine_urls()[1] should be [0] - simple array index error in lines 242, 676, 906 of auth_routes.py.</critical-takeaway>
+            <critical-takeaway>Why not caught earlier: Local dev masked issue (same domain), staging tests didn't verify OAuth flow, mocked unit tests bypassed real redirect verification.</critical-takeaway>
+            <critical-takeaway>Prevention: End-to-end OAuth tests in staging, pre-deployment validation of redirect URIs, explicit logging of callback receipt.</critical-takeaway>
+            <critical-takeaway>Google OAuth Console must authorize auth service URLs only, never frontend URLs for callbacks.</critical-takeaway>
+        </category>
+        
+        <category name="Migration State Recovery [CRITICAL RESOLUTION]" path="SPEC/learnings/migration_state_recovery.xml" keywords="Migration, alembic_version, Database Schema, Startup Failure, Migration Tracking, State Recovery, System Blocker">
+            <critical-takeaway>RESOLVED 2025-08-26: Fixed critical migration issue - "last major blocker preventing full system operation".</critical-takeaway>
+            <critical-takeaway>CRITICAL ISSUE: Databases with existing schema but no alembic_version table cause 100% startup failures.</critical-takeaway>
+            <critical-takeaway>SOLUTION: AlembicStateRecovery.initialize_alembic_version_for_existing_schema() creates missing migration tracking.</critical-takeaway>
+            <critical-takeaway>INTEGRATION: MigrationTracker automatically calls ensure_migration_state_healthy() before migration checks.</critical-takeaway>
+            <critical-takeaway>RECOVERY STRATEGIES: INITIALIZE_ALEMBIC_VERSION, COMPLETE_PARTIAL_MIGRATION, REPAIR_CORRUPTED_ALEMBIC, NO_ACTION_NEEDED.</critical-takeaway>
+            <critical-takeaway>OPERATIONAL TOOL: python scripts/diagnose_migration_state.py provides diagnosis and recovery capabilities.</critical-takeaway>
+            <critical-takeaway>PREVENTION: Comprehensive state analysis before migration operations prevents startup failures.</critical-takeaway>
+            <critical-takeaway>TESTING: Full test coverage for state detection, recovery operations, and integration scenarios.</critical-takeaway>
             <critical-takeaway>IsolatedEnvironment singleton requires instance reset when testing different environment configurations.</critical-takeaway>
             <critical-takeaway>Service client connection tests must use async patterns: asyncio.run(client.connect()) for ClickHouse, asyncio.run(client.ping()) for Redis.</critical-takeaway>
             <critical-takeaway>Never access private methods (_method) from external components - use public interfaces.</critical-takeaway>

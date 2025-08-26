@@ -18,6 +18,11 @@ from netra_backend.app.db.models_agent import (
     Thread,
 )
 
+# Import agent state models
+from netra_backend.app.db.models_agent_state import (
+    AgentStateSnapshot,
+)
+
 # Import content and corpus models
 from netra_backend.app.db.models_content import (
     Analysis,
@@ -75,6 +80,9 @@ __all__ = [
     'Step',
     'ApexOptimizerAgentRun',
     'ApexOptimizerAgentRunReport',
+    
+    # Agent state models
+    'AgentStateSnapshot',
     
     # Content models
     'CorpusAuditLog',

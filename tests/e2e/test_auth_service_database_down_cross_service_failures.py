@@ -28,7 +28,7 @@ import json
 from datetime import datetime, timezone
 
 from test_framework.environment_markers import env, staging_only, env_requires
-from test_framework.real_services_test_fixtures import RealServicesTestFixture
+from netra_backend.tests.unit.test_real_auth_service_integration import RealAuthServiceTestFixture
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class TestAuthServiceDatabaseDownCrossServiceFailures:
     @pytest.fixture
     async def services_with_auth_db_down(self):
         """Fixture that starts services with auth database unavailable."""
-        fixture = RealServicesTestFixture()
+        fixture = RealAuthServiceTestFixture()
         
         # Mock environment where auth database is unavailable
         auth_db_down_env = {

@@ -26,7 +26,7 @@ from fastapi.testclient import TestClient
 
 from test_framework.environment_markers import env, staging_only, env_requires
 from test_framework.base_e2e_test import BaseE2ETest
-from test_framework.http_client import HTTPClient
+from test_framework.http_client import UnifiedHTTPClient as HTTPClient
 
 logger = logging.getLogger(__name__)
 

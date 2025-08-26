@@ -137,7 +137,7 @@ class TestWebSocketMessageRouting:
             routed_messages.append({
                 "handler": f"{msg['type']}_handler",
                 "message": msg,
-                "connection_id": conn_info.connection_id
+                "connection_id": conn_info
             })
             
         assert len(routed_messages) == 3
@@ -165,8 +165,8 @@ class TestWebSocketBroadcasting:
             # Mock: Generic component isolation for controlled unit testing
             websocket.send_json = AsyncMock()
             
-            conn_info = await conn_manager.connect_user(f"broadcast_user_{i}", websocket)
-            connections.append(conn_info)
+            conn_id = await conn_manager.connect_user(f"broadcast_user_{i}", websocket)
+            connections.append({"connection_id": conn_id, "websocket": websocket})
             
         assert len(connections) == 3
         
@@ -176,14 +176,14 @@ class TestWebSocketBroadcasting:
         
         for conn in connections:
             # Simulate sending to each connection
-            await conn.websocket.send_json(broadcast_message)
+            await conn["websocket"].send_json(broadcast_message)
             broadcast_count += 1
             
         assert broadcast_count == 3
         
         # Verify all websockets received the message
         for conn in connections:
-            conn.websocket.send_json.assert_called_with(broadcast_message)
+            conn["websocket"].send_json.assert_called_with(broadcast_message)
             
         print("[OK] Broadcasting to multiple clients successful")
 
@@ -236,26 +236,27 @@ class TestWebSocketReconnection:
         websocket1 = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
         websocket1.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
+        websocket1.application_state = 1  # WebSocketState.CONNECTED
         
-        conn_info1 = await conn_manager.connect("reconnect_user", websocket1)
-        original_id = conn_info1.connection_id
+        original_id = await conn_manager.connect_user("reconnect_user", websocket1)
         
         # Simulate disconnect
-        await conn_manager.disconnect("reconnect_user", websocket1)
+        await conn_manager.disconnect_user("reconnect_user", websocket1)
         
         # Reconnection with new websocket
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket2 = Mock(spec=WebSocket)
         # Mock: Generic component isolation for controlled unit testing
         websocket2.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
+        websocket2.application_state = 1  # WebSocketState.CONNECTED
         
-        conn_info2 = await conn_manager.connect("reconnect_user", websocket2)
-        new_id = conn_info2.connection_id
+        new_id = await conn_manager.connect_user("reconnect_user", websocket2)
         
         # Verify reconnection
-        assert conn_info2.user_id == "reconnect_user"
         assert new_id != original_id  # New connection should have new ID
-        assert "reconnect_user" in conn_manager.active_connections
+        assert "reconnect_user" in conn_manager.user_connections
         
         print("[OK] Reconnection logic working")
 
@@ -364,23 +365,26 @@ class TestWebSocketConnectionCleanup:
         websocket.accept = AsyncMock()
         # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
+        websocket.application_state = 1  # WebSocketState.CONNECTED
         
         conn_manager = ConnectionManager()
         
         # Establish connection
-        conn_info = await conn_manager.connect_user("cleanup_user", websocket)
-        connection_id = conn_info.connection_id
+        connection_id = await conn_manager.connect_user("cleanup_user", websocket)
         
         # Verify connection exists
-        assert "cleanup_user" in conn_manager.active_connections
-        assert conn_info in conn_manager.active_connections["cleanup_user"]
+        assert "cleanup_user" in conn_manager.user_connections
+        assert connection_id in conn_manager.user_connections["cleanup_user"]
+        assert connection_id in conn_manager.connections
         
         # Disconnect and cleanup
-        await conn_manager.disconnect("cleanup_user", websocket)
+        await conn_manager.disconnect_user("cleanup_user", websocket)
         
         # Verify cleanup
-        if "cleanup_user" in conn_manager.active_connections:
-            assert conn_info not in conn_manager.active_connections["cleanup_user"]
+        if "cleanup_user" in conn_manager.user_connections:
+            assert connection_id not in conn_manager.user_connections["cleanup_user"]
+        assert connection_id not in conn_manager.connections
             
         print("[OK] Connection cleanup on disconnect working")
 
@@ -402,8 +406,10 @@ class TestWebSocketMultiRoom:
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
-            conn_info = await conn_manager.connect_user(f"room_a_user_{i}", websocket)
-            room_a_users.append(conn_info)
+            # Mock: Generic component isolation for controlled unit testing
+            websocket.send_json = AsyncMock()
+            conn_id = await conn_manager.connect_user(f"room_a_user_{i}", websocket)
+            room_a_users.append({"connection_id": conn_id, "websocket": websocket})
             
         # Room B users  
         for i in range(2):
@@ -411,8 +417,10 @@ class TestWebSocketMultiRoom:
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
-            conn_info = await conn_manager.connect_user(f"room_b_user_{i}", websocket)
-            room_b_users.append(conn_info)
+            # Mock: Generic component isolation for controlled unit testing
+            websocket.send_json = AsyncMock()
+            conn_id = await conn_manager.connect_user(f"room_b_user_{i}", websocket)
+            room_b_users.append({"connection_id": conn_id, "websocket": websocket})
             
         # Simulate room-specific broadcast
         room_a_message = {"type": "room_message", "room": "A", "data": "Room A message"}
@@ -420,19 +428,19 @@ class TestWebSocketMultiRoom:
         
         # Send to Room A users only
         for conn in room_a_users:
-            await conn.websocket.send_json(room_a_message)
+            await conn["websocket"].send_json(room_a_message)
             
         # Send to Room B users only
         for conn in room_b_users:
-            await conn.websocket.send_json(room_b_message)
+            await conn["websocket"].send_json(room_b_message)
             
         # Verify Room A users got Room A message
         for conn in room_a_users:
-            conn.websocket.send_json.assert_called_with(room_a_message)
+            conn["websocket"].send_json.assert_called_with(room_a_message)
             
         # Verify Room B users got Room B message
         for conn in room_b_users:
-            conn.websocket.send_json.assert_called_with(room_b_message)
+            conn["websocket"].send_json.assert_called_with(room_b_message)
             
         print("[OK] Multi-room support working")
 
@@ -453,9 +461,11 @@ class TestWebSocketPerformance:
             websocket = Mock(spec=WebSocket)
             # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
+            websocket.send_json = AsyncMock()
             
-            conn_info = await conn_manager.connect_user(f"perf_user_{i}", websocket)
-            connections.append(conn_info)
+            conn_id = await conn_manager.connect_user(f"perf_user_{i}", websocket)
+            connections.append({"connection_id": conn_id, "user_id": f"perf_user_{i}", "websocket": websocket})
             
         connection_time = time.time() - start_time
         
@@ -465,9 +475,9 @@ class TestWebSocketPerformance:
         
         for conn in connections:
             for j in range(5):  # 5 messages per connection
-                await conn.websocket.send_json({
+                await conn["websocket"].send_json({
                     "type": "performance_test",
-                    "user": conn.user_id,
+                    "user": conn["user_id"],
                     "message_id": j
                 })
                 message_count += 1
@@ -480,9 +490,9 @@ class TestWebSocketPerformance:
         assert connection_time < 5.0  # Should establish 10 connections in under 5 seconds
         assert message_time < 3.0    # Should send 50 messages in under 3 seconds
         
-        # Calculate rates
-        connection_rate = len(connections) / connection_time
-        message_rate = message_count / message_time
+        # Calculate rates (avoid division by zero)
+        connection_rate = len(connections) / max(connection_time, 0.001)
+        message_rate = message_count / max(message_time, 0.001)
         
         print(f"[OK] Performance test passed:")
         print(f"  Connection rate: {connection_rate:.1f} conn/sec")

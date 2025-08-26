@@ -84,7 +84,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
         else:
             # Use simple defaults during collection mode
             env.set("DATABASE_URL", "postgresql://test:test@localhost:5432/netra_test", source="netra_backend_conftest")
-            env.set("REDIS_URL", "redis://localhost:6379/1", source="netra_backend_conftest")
+            env.set("REDIS_URL", "redis://localhost:6379/0", source="netra_backend_conftest")
             env.set("REDIS_HOST", "localhost", source="netra_backend_conftest")
             env.set("REDIS_PORT", "6379", source="netra_backend_conftest")
 

@@ -177,6 +177,6 @@ def clean_environment():
     env.enable_isolation(backup_original=True)
     yield
     # Restore original environment state
-    env.disable_isolation(restore_original=True)
+    env.disable_isolation()
 
 # REMOVED: Duplicate mock_auth_redis fixture - use the one above at line 130

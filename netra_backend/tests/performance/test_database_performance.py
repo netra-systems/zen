@@ -71,33 +71,26 @@ class TestDatabasePerformance:
         """Test concurrent database read/write operations"""
         table_names = [f'perf_test_{i}' for i in range(5)]
         
-        # Mock: ClickHouse external database isolation for unit testing performance
-        with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db_class:
-            # Mock: Generic component isolation for controlled unit testing
-            mock_db = AsyncMock()
-            mock_db_class.return_value = mock_db
+        # Mock: ClickHouse connection creation for unit testing isolation
+        mock_db_connection = AsyncMock()
+        mock_db_connection.execute_query.return_value = [
+            {'workload_type': 'test', 'prompt': 'p', 'response': 'r'}
+            for _ in range(1000)
+        ]
+        mock_db_connection.disconnect.return_value = None
+        
+        with patch('netra_backend.app.services.generation_job_manager._create_clickhouse_connection', return_value=mock_db_connection):
+            tasks = []
+            for table_name in table_names:
+                task = get_corpus_from_clickhouse(table_name)
+                tasks.append(task)
             
-            # Mock: ClickHouse external database isolation for unit testing performance
-            with patch('netra_backend.app.db.clickhouse_query_fixer.ClickHouseQueryInterceptor') as mock_interceptor_class:
-                # Mock: Generic component isolation for controlled unit testing
-                mock_interceptor = AsyncMock()
-                mock_interceptor_class.return_value = mock_interceptor
-                mock_interceptor.execute_query.return_value = [
-                    {'workload_type': 'test', 'prompt': 'p', 'response': 'r'}
-                    for _ in range(1000)
-                ]
-                
-                tasks = []
-                for table_name in table_names:
-                    task = get_corpus_from_clickhouse(table_name)
-                    tasks.append(task)
-                
-                start_time = time.perf_counter()
-                results = await asyncio.gather(*tasks)
-                duration = time.perf_counter() - start_time
-                
-                assert len(results) == 5
-                assert duration < 30  # Should handle concurrent ops efficiently
+            start_time = time.perf_counter()
+            results = await asyncio.gather(*tasks)
+            duration = time.perf_counter() - start_time
+            
+            assert len(results) == 5
+            assert duration < 30  # Should handle concurrent ops efficiently
     @pytest.mark.performance
     @pytest.mark.asyncio
     async def test_batch_processing_optimization(self):
@@ -176,31 +169,23 @@ class TestDatabasePerformance:
         ]
         
         for scenario in query_scenarios:
-            # Mock: ClickHouse external database isolation for unit testing performance
-            with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase') as mock_db_class:
-                # Mock: Generic component isolation for controlled unit testing
-                mock_db = AsyncMock()
-                mock_db_class.return_value = mock_db
+            # Mock: ClickHouse connection creation for unit testing isolation
+            mock_db_connection = AsyncMock()
+            # Mock response based on table size
+            mock_db_connection.execute_query.return_value = [
+                {'workload_type': 'test', 'prompt': f'p_{i}', 'response': f'r_{i}'}
+                for i in range(min(scenario['rows'], 1000))  # Limit response size
+            ]
+            mock_db_connection.disconnect.return_value = None
+            
+            with patch('netra_backend.app.services.generation_job_manager._create_clickhouse_connection', return_value=mock_db_connection):
+                start_time = time.perf_counter()
+                result = await get_corpus_from_clickhouse(scenario['table'])
+                duration = time.perf_counter() - start_time
                 
-                # Mock: ClickHouse external database isolation for unit testing performance
-                with patch('netra_backend.app.db.clickhouse_query_fixer.ClickHouseQueryInterceptor') as mock_interceptor_class:
-                    # Mock: Generic component isolation for controlled unit testing
-                    mock_interceptor = AsyncMock()
-                    mock_interceptor_class.return_value = mock_interceptor
-                    
-                    # Mock response based on table size
-                    mock_interceptor.execute_query.return_value = [
-                        {'workload_type': 'test', 'prompt': f'p_{i}', 'response': f'r_{i}'}
-                        for i in range(min(scenario['rows'], 1000))  # Limit response size
-                    ]
-                    
-                    start_time = time.perf_counter()
-                    result = await get_corpus_from_clickhouse(scenario['table'])
-                    duration = time.perf_counter() - start_time
-                    
-                    # Query time should be reasonable regardless of table size
-                    assert duration < 5.0  # Under 5 seconds for any query
-                    assert len(result) > 0
+                # Query time should be reasonable regardless of table size
+                assert duration < 5.0  # Under 5 seconds for any query
+                assert len(result) > 0
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

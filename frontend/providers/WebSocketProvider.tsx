@@ -77,10 +77,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   }, []);
 
   useEffect(() => {
-    if (token && !isConnectingRef.current) {
-      isConnectingRef.current = true;
-      
-      const connectToWebSocket = async () => {
+    // Add a small delay to ensure auth context is fully initialized after OAuth redirect
+    // This prevents race conditions when navigating from /auth/callback to /chat
+    const connectWithDelay = () => {
+      if (token && !isConnectingRef.current) {
+        isConnectingRef.current = true;
+        
+        const connectToWebSocket = async () => {
         try {
           // Set up event handlers
           webSocketService.onStatusChange = handleStatusChange;
@@ -184,8 +187,16 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         }
       };
 
-      // Establish connection immediately on app load
-      connectToWebSocket();
+        // Establish connection immediately on app load
+        connectToWebSocket();
+      }
+    };
+    
+    // If we just received a token (OAuth callback scenario), wait a tick for auth to stabilize
+    if (token && !previousTokenRef.current) {
+      setTimeout(connectWithDelay, 100);
+    } else {
+      connectWithDelay();
     }
 
     return () => {

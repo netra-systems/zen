@@ -26,6 +26,7 @@ const createMockAuthStore = () => ({
   hasAllPermissions: jest.fn(() => false),
   isAdminOrHigher: jest.fn(() => false),
   isDeveloper: jest.fn(() => false),
+  isDeveloperOrHigher: jest.fn(() => false),
 });
 
 // Export the mock hook that returns the store

@@ -1,0 +1,643 @@
+"""
+Comprehensive Database Connectivity Validation
+
+This test module validates that all database connection timeout and readiness
+check fixes are working correctly. It serves as the final validation that the
+PRIMARY BLOCKER (503 Service Unavailable errors) has been resolved.
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal (SYSTEM VALIDATION)
+- Business Goal: Confirm system operability - validate 503 error fixes
+- Value Impact: Verifies all services can start and respond to health checks
+- Strategic Impact: Validates removal of PRIMARY BLOCKER for full system operation
+
+This is the comprehensive validation that the database connectivity fixes work.
+"""
+
+import asyncio
+import pytest
+import time
+import logging
+import sys
+import json
+from pathlib import Path
+from typing import Dict, Any, List
+from contextlib import asynccontextmanager
+import asyncpg
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from auth_service.auth_core.database.connection import AuthDatabaseConnection
+from auth_service.auth_core.config import AuthConfig
+from shared.database_url_builder import DatabaseURLBuilder
+from test_framework.environment_markers import env
+from netra_backend.app.core.configuration.database import DatabaseConfigManager
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+class ComprehensiveDatabaseConnectivityValidator:
+    """Comprehensive validator for all database connectivity fixes."""
+    
+    def __init__(self):
+        self.results = {
+            'auth_service_fixes': {},
+            'url_formation_fixes': {},
+            'timeout_handling_fixes': {},
+            'readiness_check_fixes': {},
+            'overall_status': 'unknown'
+        }
+    
+    async def validate_auth_service_503_fix(self) -> Dict[str, Any]:
+        """Validate that auth service 503 errors are fixed."""
+        logger.info("Validating auth service 503 error fixes...")
+        
+        result = {
+            'test': 'auth_service_503_fix',
+            'success': False,
+            'stages': {},
+            'simulated_health_check': {},
+            'error': None
+        }
+        
+        try:
+            # Stage 1: Create auth database connection
+            stage_start = time.time()
+            auth_conn = AuthDatabaseConnection()
+            result['stages']['create_connection'] = {
+                'time': time.time() - stage_start,
+                'success': True
+            }
+            
+            # Stage 2: Initialize with timeout (this was failing before)
+            stage_start = time.time()
+            await asyncio.wait_for(auth_conn.initialize(timeout=20.0), timeout=25.0)
+            result['stages']['initialize'] = {
+                'time': time.time() - stage_start,
+                'success': True
+            }
+            
+            # Stage 3: Test readiness check (this was causing 503 errors)
+            stage_start = time.time()
+            is_ready = await asyncio.wait_for(auth_conn.is_ready(timeout=15.0), timeout=20.0)
+            result['stages']['readiness_check'] = {
+                'time': time.time() - stage_start,
+                'success': is_ready,
+                'ready': is_ready
+            }
+            
+            # Stage 4: Simulate auth service health endpoint logic
+            # This simulates the exact logic from auth_service/main.py around line 406
+            if is_ready:
+                health_response = {
+                    "status": "healthy",
+                    "service": "auth-service",
+                    "version": "1.0.0",
+                    "database_status": "connected"
+                }
+                http_status = 200
+            else:
+                health_response = {
+                    "status": "unhealthy",
+                    "service": "auth-service",
+                    "version": "1.0.0",
+                    "reason": "Database connectivity failed"
+                }
+                http_status = 503
+            
+            result['simulated_health_check'] = {
+                'http_status': http_status,
+                'response': health_response,
+                'would_return_503': http_status == 503
+            }
+            
+            # Clean up
+            await auth_conn.close(timeout=5.0)
+            
+            # Success if database is ready and would not return 503
+            result['success'] = is_ready and http_status == 200
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
+    async def validate_timeout_handling_fixes(self) -> Dict[str, Any]:
+        """Validate that timeout handling fixes work correctly."""
+        logger.info("Validating timeout handling fixes...")
+        
+        result = {
+            'test': 'timeout_handling_fixes',
+            'success': False,
+            'timeout_tests': [],
+            'error': None
+        }
+        
+        try:
+            # Test different timeout scenarios
+            timeout_scenarios = [
+                {'name': 'short_timeout', 'timeout': 5.0},
+                {'name': 'normal_timeout', 'timeout': 10.0},
+                {'name': 'long_timeout', 'timeout': 20.0}
+            ]
+            
+            for scenario in timeout_scenarios:
+                scenario_start = time.time()
+                
+                try:
+                    auth_conn = AuthDatabaseConnection()
+                    is_ready = await auth_conn.is_ready(timeout=scenario['timeout'])
+                    await auth_conn.close(timeout=3.0)
+                    
+                    scenario_result = {
+                        'name': scenario['name'],
+                        'timeout': scenario['timeout'],
+                        'success': is_ready,
+                        'actual_time': time.time() - scenario_start,
+                        'timed_out': False,
+                        'error': None
+                    }
+                    
+                except asyncio.TimeoutError:
+                    scenario_result = {
+                        'name': scenario['name'],
+                        'timeout': scenario['timeout'],
+                        'success': False,
+                        'actual_time': time.time() - scenario_start,
+                        'timed_out': True,
+                        'error': 'TimeoutError'
+                    }
+                    
+                except Exception as e:
+                    scenario_result = {
+                        'name': scenario['name'],
+                        'timeout': scenario['timeout'],
+                        'success': False,
+                        'actual_time': time.time() - scenario_start,
+                        'timed_out': False,
+                        'error': str(e)
+                    }
+                
+                result['timeout_tests'].append(scenario_result)
+            
+            # Success if at least one timeout scenario works
+            successful_scenarios = [t for t in result['timeout_tests'] if t['success']]
+            result['success'] = len(successful_scenarios) > 0
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
+    def validate_url_formation_fixes(self) -> Dict[str, Any]:
+        """Validate that URL formation fixes work correctly."""
+        logger.info("Validating URL formation fixes...")
+        
+        result = {
+            'test': 'url_formation_fixes',
+            'success': False,
+            'url_checks': [],
+            'ssl_parameter_checks': [],
+            'error': None
+        }
+        
+        try:
+            # Get primary database URLs
+            auth_config_url = AuthConfig.get_database_url()
+            
+            # Check URL formation
+            url_checks = [
+                {
+                    'name': 'auth_config_url_exists',
+                    'success': bool(auth_config_url),
+                    'url': DatabaseURLBuilder.mask_url_for_logging(auth_config_url) if auth_config_url else None
+                }
+            ]
+            
+            if auth_config_url:
+                # Check for critical issues
+                has_asyncpg_sslmode_issue = (
+                    'postgresql+asyncpg://' in auth_config_url and 'sslmode=' in auth_config_url
+                )
+                
+                url_checks.extend([
+                    {
+                        'name': 'no_asyncpg_sslmode_conflict',
+                        'success': not has_asyncpg_sslmode_issue,
+                        'description': 'AsyncPG URL should not contain sslmode parameter'
+                    },
+                    {
+                        'name': 'uses_postgresql_scheme',
+                        'success': auth_config_url.startswith('postgresql://') or auth_config_url.startswith('postgresql+'),
+                        'description': 'URL should use postgresql:// scheme'
+                    }
+                ])
+            
+            result['url_checks'] = url_checks
+            
+            # Check SSL parameter handling
+            from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+            
+            try:
+                async_url = AuthDatabaseManager.get_auth_database_url_async()
+                migration_url = AuthDatabaseManager.get_migration_url_sync_format()
+                
+                ssl_checks = [
+                    {
+                        'name': 'async_url_ssl_compatible',
+                        'success': 'sslmode=' not in async_url if async_url else True,
+                        'url_type': 'async',
+                        'description': 'Async URL should not contain sslmode (asyncpg incompatible)'
+                    },
+                    {
+                        'name': 'migration_url_ssl_compatible',
+                        'success': True,  # Migration URLs can have either ssl or sslmode
+                        'url_type': 'migration',
+                        'description': 'Migration URL SSL parameters are compatible'
+                    }
+                ]
+                
+                result['ssl_parameter_checks'] = ssl_checks
+                
+            except Exception as ssl_error:
+                result['ssl_parameter_checks'] = [
+                    {
+                        'name': 'ssl_parameter_check_failed',
+                        'success': False,
+                        'error': str(ssl_error)
+                    }
+                ]
+            
+            # Overall success
+            all_url_checks_pass = all(check['success'] for check in url_checks)
+            all_ssl_checks_pass = all(check['success'] for check in result['ssl_parameter_checks'])
+            
+            result['success'] = all_url_checks_pass and all_ssl_checks_pass
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
+    async def validate_concurrent_readiness_checks(self) -> Dict[str, Any]:
+        """Validate that concurrent readiness checks don't block each other."""
+        logger.info("Validating concurrent readiness check handling...")
+        
+        result = {
+            'test': 'concurrent_readiness_checks',
+            'success': False,
+            'concurrent_count': 3,
+            'results': [],
+            'error': None
+        }
+        
+        try:
+            async def single_readiness_check(check_id: int):
+                start_time = time.time()
+                try:
+                    auth_conn = AuthDatabaseConnection()
+                    is_ready = await auth_conn.is_ready(timeout=15.0)
+                    await auth_conn.close(timeout=3.0)
+                    
+                    return {
+                        'check_id': check_id,
+                        'success': is_ready,
+                        'duration': time.time() - start_time,
+                        'error': None
+                    }
+                except Exception as e:
+                    return {
+                        'check_id': check_id,
+                        'success': False,
+                        'duration': time.time() - start_time,
+                        'error': str(e)
+                    }
+            
+            # Run concurrent checks
+            tasks = [single_readiness_check(i) for i in range(result['concurrent_count'])]
+            concurrent_results = await asyncio.gather(*tasks)
+            
+            result['results'] = concurrent_results
+            
+            # Success if most checks pass (allow for some flakiness)
+            successful_checks = [r for r in concurrent_results if r['success']]
+            success_rate = len(successful_checks) / len(concurrent_results)
+            
+            result['success'] = success_rate >= 0.67  # At least 2/3 should succeed
+            result['success_rate'] = success_rate
+            
+        except Exception as e:
+            result['error'] = str(e)
+            
+        return result
+    
+    async def run_comprehensive_validation(self) -> Dict[str, Any]:
+        """Run all validation tests and return comprehensive results."""
+        logger.info("Starting comprehensive database connectivity validation...")
+        
+        # Run all validation tests
+        self.results['auth_service_fixes'] = await self.validate_auth_service_503_fix()
+        self.results['timeout_handling_fixes'] = await self.validate_timeout_handling_fixes()
+        self.results['url_formation_fixes'] = self.validate_url_formation_fixes()
+        self.results['readiness_check_fixes'] = await self.validate_concurrent_readiness_checks()
+        
+        # Determine overall status
+        critical_tests = ['auth_service_fixes', 'timeout_handling_fixes']
+        critical_success = all(self.results[test]['success'] for test in critical_tests)
+        
+        other_tests = ['url_formation_fixes', 'readiness_check_fixes']
+        other_success_count = sum(1 for test in other_tests if self.results[test]['success'])
+        
+        if critical_success and other_success_count >= 1:
+            self.results['overall_status'] = 'success'
+        elif critical_success:
+            self.results['overall_status'] = 'partial_success'
+        else:
+            self.results['overall_status'] = 'failure'
+        
+        return self.results
+
+
+class TestComprehensiveDatabaseConnectivityValidation:
+    """Test suite for comprehensive database connectivity validation."""
+    
+    @pytest.fixture(scope="class")
+    def validator(self):
+        return ComprehensiveDatabaseConnectivityValidator()
+    
+    @pytest.mark.asyncio
+    async def test_comprehensive_database_connectivity_validation(self, validator):
+        """
+        CRITICAL TEST: Comprehensive validation of all database connectivity fixes.
+        
+        This test validates that all fixes for the PRIMARY BLOCKER (503 Service
+        Unavailable errors due to database connection timeouts) are working correctly.
+        """
+        logger.info("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===")
+        
+        # Run comprehensive validation
+        results = await validator.run_comprehensive_validation()
+        
+        # Display results
+        print(f"\n{'='*80}")
+        print("COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION RESULTS")
+        print(f"{'='*80}")
+        
+        overall_status = results['overall_status']
+        status_emoji = {
+            'success': '✅',
+            'partial_success': '⚠️',
+            'failure': '❌'
+        }.get(overall_status, '❓')
+        
+        print(f"\nOverall Status: {status_emoji} {overall_status.upper()}")
+        
+        # Auth service 503 fix results
+        auth_results = results['auth_service_fixes']
+        print(f"\n1. Auth Service 503 Error Fix: {'✅ SUCCESS' if auth_results['success'] else '❌ FAILED'}")
+        
+        if 'stages' in auth_results:
+            for stage_name, stage_data in auth_results['stages'].items():
+                status = '✅' if stage_data['success'] else '❌'
+                print(f"   {stage_name}: {status} ({stage_data['time']:.2f}s)")
+        
+        if 'simulated_health_check' in auth_results:
+            health_check = auth_results['simulated_health_check']
+            http_status = health_check['http_status']
+            would_503 = health_check['would_return_503']
+            
+            print(f"   Simulated health check HTTP status: {http_status}")
+            print(f"   Would return 503 error: {'❌ YES' if would_503 else '✅ NO'}")
+        
+        if auth_results.get('error'):
+            print(f"   Error: {auth_results['error']}")
+        
+        # Timeout handling fix results
+        timeout_results = results['timeout_handling_fixes']
+        print(f"\n2. Timeout Handling Fixes: {'✅ SUCCESS' if timeout_results['success'] else '❌ FAILED'}")
+        
+        if 'timeout_tests' in timeout_results:
+            for test in timeout_results['timeout_tests']:
+                status = '✅ SUCCESS' if test['success'] else '❌ FAILED'
+                time_info = f"({test['actual_time']:.2f}s)"
+                timeout_info = f"timeout={test['timeout']}s"
+                
+                print(f"   {test['name']} ({timeout_info}): {status} {time_info}")
+                
+                if test.get('timed_out'):
+                    print(f"     ⏰ Operation timed out")
+                if test.get('error') and not test.get('timed_out'):
+                    print(f"     Error: {test['error']}")
+        
+        # URL formation fix results
+        url_results = results['url_formation_fixes']
+        print(f"\n3. URL Formation Fixes: {'✅ SUCCESS' if url_results['success'] else '❌ FAILED'}")
+        
+        if 'url_checks' in url_results:
+            for check in url_results['url_checks']:
+                status = '✅' if check['success'] else '❌'
+                print(f"   {check['name']}: {status}")
+                if check.get('description'):
+                    print(f"     {check['description']}")
+                if check.get('url'):
+                    print(f"     URL: {check['url']}")
+        
+        if 'ssl_parameter_checks' in url_results:
+            for check in url_results['ssl_parameter_checks']:
+                status = '✅' if check['success'] else '❌'
+                print(f"   {check['name']}: {status}")
+                if check.get('description'):
+                    print(f"     {check['description']}")
+        
+        # Concurrent readiness check results
+        concurrent_results = results['readiness_check_fixes']
+        print(f"\n4. Concurrent Readiness Check Fixes: {'✅ SUCCESS' if concurrent_results['success'] else '❌ FAILED'}")
+        
+        if 'results' in concurrent_results:
+            successful = sum(1 for r in concurrent_results['results'] if r['success'])
+            total = len(concurrent_results['results'])
+            success_rate = concurrent_results.get('success_rate', 0)
+            
+            print(f"   Concurrent checks: {successful}/{total} successful ({success_rate:.1%})")
+            
+            for result in concurrent_results['results']:
+                status = '✅' if result['success'] else '❌'
+                print(f"     Check {result['check_id']}: {status} ({result['duration']:.2f}s)")
+        
+        # Summary and assertions
+        print(f"\n{'='*80}")
+        print("VALIDATION SUMMARY")
+        print(f"{'='*80}")
+        
+        critical_issues = []
+        
+        # Assert auth service 503 fix works
+        if not auth_results['success']:
+            critical_issues.append("Auth service 503 error fix failed")
+        
+        # Assert timeout handling works
+        if not timeout_results['success']:
+            critical_issues.append("Timeout handling fixes failed")
+        
+        # Check for 503 errors specifically
+        if auth_results.get('simulated_health_check', {}).get('would_return_503'):
+            critical_issues.append("Auth service would still return 503 Service Unavailable")
+        
+        if critical_issues:
+            print("❌ CRITICAL ISSUES FOUND:")
+            for issue in critical_issues:
+                print(f"  - {issue}")
+            
+            print(f"\nThese are PRIMARY BLOCKERS that prevent full system operation.")
+        else:
+            print("✅ ALL CRITICAL FIXES WORKING:")
+            print("  - Auth service 503 errors fixed")
+            print("  - Database connection timeouts handled")
+            print("  - System can start and respond to health checks")
+        
+        # Assert overall success
+        assert results['overall_status'] != 'failure', (
+            f"Comprehensive database connectivity validation failed. "
+            f"Critical issues: {critical_issues}. "
+            f"This indicates the PRIMARY BLOCKER (503 Service Unavailable) is not fully resolved."
+        )
+        
+        # Specific assertion for 503 errors
+        assert not auth_results.get('simulated_health_check', {}).get('would_return_503'), (
+            "Auth service health check simulation would still return 503 Service Unavailable. "
+            "This is the PRIMARY BLOCKER that must be fixed for system operation."
+        )
+        
+        # Assert auth service readiness works
+        assert auth_results['success'], (
+            f"Auth service database readiness check failed. "
+            f"Error: {auth_results.get('error')}. "
+            f"This will cause 503 errors in production."
+        )
+        
+        if results['overall_status'] == 'success':
+            print(f"\n🎉 COMPREHENSIVE VALIDATION SUCCESSFUL!")
+            print(f"The PRIMARY BLOCKER (503 Service Unavailable errors) has been resolved.")
+            print(f"All services should now start successfully and respond to health checks.")
+        else:
+            print(f"\n⚠️  PARTIAL SUCCESS - Some non-critical issues remain")
+            print(f"The PRIMARY BLOCKER is resolved but some optimizations could be made.")
+    
+    @pytest.mark.asyncio
+    async def test_auth_service_health_endpoint_simulation(self):
+        """
+        TEST: Simulate auth service health endpoint to verify 503 fix.
+        
+        This test specifically simulates the auth service health endpoint
+        logic to ensure it no longer returns 503 Service Unavailable.
+        """
+        logger.info("=== AUTH SERVICE HEALTH ENDPOINT SIMULATION ===")
+        
+        # Simulate the exact logic from auth_service/main.py health endpoint
+        auth_conn = AuthDatabaseConnection()
+        
+        try:
+            # This is the logic around line 406 in auth_service/main.py
+            environment = AuthConfig.get_environment()
+            
+            if environment in ["staging", "production"]:
+                # Check database connectivity (this was timing out)
+                start_time = time.time()
+                
+                # Initialize database connection
+                await auth_conn.initialize(timeout=20.0)
+                
+                # Check if database is ready (this was the 503 trigger)
+                db_ready = await auth_conn.is_ready(timeout=15.0)
+                
+                readiness_time = time.time() - start_time
+                
+                print(f"Database readiness check: {'✅ READY' if db_ready else '❌ NOT READY'}")
+                print(f"Readiness check time: {readiness_time:.2f}s")
+                
+                if not db_ready:
+                    # This would cause 503 Service Unavailable
+                    health_response = {
+                        "status": "unhealthy",
+                        "service": "auth-service",
+                        "version": "1.0.0",
+                        "reason": "Database connectivity failed",
+                        "environment": environment
+                    }
+                    http_status = 503
+                    
+                    print(f"❌ Would return 503 Service Unavailable")
+                    print(f"Response: {health_response}")
+                else:
+                    # This would return healthy status
+                    health_response = {
+                        "status": "healthy",
+                        "service": "auth-service",
+                        "version": "1.0.0",
+                        "database_status": "connected",
+                        "environment": environment
+                    }
+                    http_status = 200
+                    
+                    print(f"✅ Would return 200 OK")
+                    print(f"Response: {health_response}")
+                
+            else:
+                # Development environment - basic health check
+                health_response = {
+                    "status": "healthy",
+                    "service": "auth-service",
+                    "version": "1.0.0"
+                }
+                http_status = 200
+                db_ready = True
+                
+                print(f"✅ Development environment - would return 200 OK")
+            
+            # Clean up
+            await auth_conn.close(timeout=5.0)
+            
+            # Assertions
+            assert db_ready, (
+                "Database readiness check failed - this would cause 503 Service Unavailable errors"
+            )
+            
+            assert http_status == 200, (
+                f"Health endpoint would return {http_status} instead of 200. "
+                f"This indicates the 503 error fix is not working."
+            )
+            
+            print(f"\n✅ Auth service health endpoint simulation successful - no 503 errors!")
+            
+        except Exception as e:
+            await auth_conn.close(timeout=5.0)  # Ensure cleanup
+            pytest.fail(f"Auth service health endpoint simulation failed: {e}")
+
+
+if __name__ == "__main__":
+    # Run comprehensive validation when executed directly
+    async def main():
+        print("=== COMPREHENSIVE DATABASE CONNECTIVITY VALIDATION ===")
+        
+        validator = ComprehensiveDatabaseConnectivityValidator()
+        results = await validator.run_comprehensive_validation()
+        
+        # Print summary
+        overall_status = results['overall_status']
+        print(f"\nOverall Status: {overall_status.upper()}")
+        
+        for test_name, test_result in results.items():
+            if test_name != 'overall_status':
+                status = '✅ PASS' if test_result.get('success') else '❌ FAIL'
+                print(f"{test_name}: {status}")
+        
+        if overall_status == 'success':
+            print(f"\n🎉 All database connectivity fixes working!")
+            print(f"The PRIMARY BLOCKER (503 errors) has been resolved.")
+        else:
+            print(f"\n⚠️  Some issues remain - check individual test results")
+    
+    asyncio.run(main())

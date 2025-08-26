@@ -584,7 +584,7 @@ class DatabaseConnector:
             # Test Redis connection directly
             client = redis.from_url(connection.url, socket_connect_timeout=5)
             await client.ping()
-            await client.close()
+            await client.aclose()
             return True
             
         except ImportError:
