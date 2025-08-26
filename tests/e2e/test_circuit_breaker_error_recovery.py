@@ -23,10 +23,12 @@ pytestmark = [
 ]
 
 
+@pytest.mark.e2e
 class TestCircuitBreakerErrorRecovery:
     """Test circuit breaker patterns and error recovery."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_circuit_breaker_recovery_flow(self):
         """
         Test that database connections can recover from circuit breaker states.
@@ -87,6 +89,7 @@ class TestCircuitBreakerErrorRecovery:
             assert connection.metrics.successful_recoveries > 0, "Recovery should be recorded"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_retry_handler_exponential_backoff_limits(self):
         """
         Test that retry handler implements proper exponential backoff with limits.
@@ -142,6 +145,7 @@ class TestCircuitBreakerErrorRecovery:
         assert total_time <= expected_min_time + 2.0, f"Total time {total_time} should not exceed {expected_min_time + 2.0}"
 
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_cascade_failure_prevention(self):
         """
         Test that failures in one service don't cascade to other services.

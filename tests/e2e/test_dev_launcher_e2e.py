@@ -331,11 +331,11 @@ class DevLauncherE2ETester:
     async def _check_core_services_ready(self) -> bool:
         """Check if core services (auth, backend) are ready."""
         try:
-            # Check auth service
+            # Check auth service on correct port (8081)
             auth_ready = await self._is_service_healthy("auth", 8081)
             
             # Check backend service  
-            backend_ready = await self._is_service_healthy("backend", 8000)
+            backend_ready = await self._is_service_healthy("backend", 8001)  # Updated to match dev launcher
             
             # At least one core service must be ready
             return auth_ready or backend_ready
@@ -350,7 +350,7 @@ class DevLauncherE2ETester:
         
         services_to_check = [
             ("auth", 8081, "/health"),
-            ("backend", 8000, "/health"),
+            ("backend", 8001, "/health"),  # Updated to match dev launcher
         ]
         
         if self.config.test_frontend:

@@ -389,6 +389,7 @@ class HealthCascadeValidator:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestServiceStartupHealthReal:
     """Real service startup sequence and health cascade test suite."""
     
@@ -402,6 +403,7 @@ class TestServiceStartupHealthReal:
         """Create health cascade validator."""
         return HealthCascadeValidator()
     
+    @pytest.mark.e2e
     async def test_proper_startup_sequence_auth_backend_frontend(self, startup_sequencer):
         """Test proper startup sequence: Auth → Backend → Frontend."""
         logger.info("Testing service startup sequence validation")
@@ -426,6 +428,7 @@ class TestServiceStartupHealthReal:
         
         logger.info("✓ Service startup sequence validated successfully")
     
+    @pytest.mark.e2e
     async def test_health_check_propagation_between_services(self, health_cascade_validator):
         """Test health check propagation between services."""
         logger.info("Testing health check cascade propagation")
@@ -444,6 +447,7 @@ class TestServiceStartupHealthReal:
         
         logger.info("✓ Health check propagation validated successfully")
     
+    @pytest.mark.e2e
     async def test_service_discovery_with_dynamic_ports(self, startup_sequencer):
         """Test service discovery mechanism with dynamic ports."""
         logger.info("Testing service discovery with dynamic ports")
@@ -469,6 +473,7 @@ class TestServiceStartupHealthReal:
         
         logger.info("✓ Service discovery with dynamic ports validated successfully")
     
+    @pytest.mark.e2e
     async def test_failure_recovery_simulation(self, health_cascade_validator):
         """Test service failure recovery patterns."""
         logger.info("Testing failure recovery simulation")
@@ -493,6 +498,7 @@ class TestServiceStartupHealthReal:
         
         logger.info("✓ Failure recovery patterns validated successfully")
     
+    @pytest.mark.e2e
     async def test_dependent_services_handle_upstream_failures(self, startup_sequencer, health_cascade_validator):
         """Test dependent services handle upstream failures gracefully."""
         logger.info("Testing upstream failure handling")

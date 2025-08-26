@@ -66,6 +66,7 @@ class CoverageMetrics:
 
 
 @dataclass
+@pytest.mark.e2e
 class TestValidationResult:
     """Result of test validation"""
     test_file: str
@@ -97,6 +98,7 @@ class StartupTestDiscoverer:
         return list(set(self.discovered_tests))
     
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
@@ -130,6 +132,7 @@ class TestSyntaxFix:
                 
         return areas
 
+@pytest.mark.e2e
 class TestContentAnalyzer:
     """Analyzes test file content for completeness"""
     
@@ -353,6 +356,7 @@ class StartupCoverageValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation
+@pytest.mark.e2e
 async def test_validate_10_critical_startup_tests():
     """Validate all 10 critical startup tests are implemented"""
     validator = StartupCoverageValidator()
@@ -364,6 +368,7 @@ async def test_validate_10_critical_startup_tests():
 
 @pytest.mark.asyncio  
 @pytest.mark.coverage_validation
+@pytest.mark.e2e
 async def test_validate_all_startup_paths_covered():
     """Validate all agent startup paths have test coverage"""
     validator = StartupCoverageValidator()
@@ -374,6 +379,7 @@ async def test_validate_all_startup_paths_covered():
 
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation  
+@pytest.mark.e2e
 async def test_validate_no_missing_edge_cases():
     """Validate no critical edge cases are missing from tests"""
     validator = StartupCoverageValidator()
@@ -385,6 +391,7 @@ async def test_validate_no_missing_edge_cases():
 
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation
+@pytest.mark.e2e
 async def test_validate_performance_metrics_tracked():
     """Validate performance metrics are tracked across tests"""
     validator = StartupCoverageValidator()
@@ -400,6 +407,7 @@ async def test_validate_performance_metrics_tracked():
 
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation
+@pytest.mark.e2e
 async def test_validate_all_services_integration():
     """Validate all services are tested together in startup scenarios"""
     validator = StartupCoverageValidator()

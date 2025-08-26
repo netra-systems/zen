@@ -3,10 +3,15 @@ Backend-specific test configuration.
 Uses consolidated test framework infrastructure with backend-specific customizations.
 """
 
-from netra_backend.app.core.isolated_environment import get_env
-
-# Import all common fixtures from the consolidated base
+# Import all common fixtures from the consolidated base FIRST
 from test_framework.conftest_base import *
+
+# Use the SAME get_env from the test framework to avoid multiple instances
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback if dev_launcher is not available
+    from netra_backend.app.core.isolated_environment import get_env
 
 # Import backend-specific utilities
 from test_framework.fixtures.database_fixtures import *
@@ -34,10 +39,30 @@ if not get_env().get("TEST_COLLECTION_MODE"):
 # Only set if we're in the collection phase (pytest is imported but no test is executing)
 import sys
 import os
+import atexit
+
+# Enhanced collection mode detection and cleanup registration
 if "pytest" in sys.modules and not get_env().get("PYTEST_CURRENT_TEST"):
     # Only set collection mode if pytest is imported but we're not currently executing a test
     # PYTEST_CURRENT_TEST is set during test execution but not during collection
     get_env().set("TEST_COLLECTION_MODE", "1", source="netra_backend_conftest")
+
+# Register cleanup for async resources at module level
+def _cleanup_async_resources():
+    """Cleanup async resources on exit"""
+    import asyncio
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            # Close any remaining event loops
+            loop = asyncio.get_event_loop()
+            if loop and not loop.is_closed():
+                loop.close()
+        except Exception:
+            pass
+
+atexit.register(_cleanup_async_resources)
 
 # Only set environment variables if we're actually running tests
 if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
@@ -84,7 +109,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
         else:
             # Use simple defaults during collection mode
             env.set("DATABASE_URL", "postgresql://test:test@localhost:5432/netra_test", source="netra_backend_conftest")
-            env.set("REDIS_URL", "redis://localhost:6379/1", source="netra_backend_conftest")
+            env.set("REDIS_URL", "redis://localhost:6379/0", source="netra_backend_conftest")
             env.set("REDIS_HOST", "localhost", source="netra_backend_conftest")
             env.set("REDIS_PORT", "6379", source="netra_backend_conftest")
 

@@ -10,7 +10,7 @@ import clickhouse_connect
 CLOUD_CONFIG = {
     'name': 'Cloud ClickHouse',
     'host': os.environ.get('CLICKHOUSE_HOST', 'clickhouse_host_url_placeholder'),
-    'port': int(os.environ.get('CLICKHOUSE_PORT', '8443')),
+    'port': int(os.environ.get('CLICKHOUSE_PORT', '8123')),
     'user': os.environ.get('CLICKHOUSE_USER', 'development_user'),
     'password': os.environ.get('CLICKHOUSE_PASSWORD', ''),
     'database': os.environ.get('CLICKHOUSE_DATABASE', 'netra_dev'),

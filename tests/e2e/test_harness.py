@@ -5,6 +5,7 @@ Business Value: $200K+ MRR protection through comprehensive test coverage
 Provides reusable testing utilities for authentication, WebSocket, and service flows.
 """
 import asyncio
+import pytest
 import json
 import logging
 import subprocess
@@ -57,6 +58,7 @@ class DatabaseManager:
         self.initialized = False
 
 
+@pytest.mark.e2e
 class TestState:
     """State management for test harness."""
     

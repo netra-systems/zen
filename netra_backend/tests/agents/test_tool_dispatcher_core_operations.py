@@ -31,14 +31,24 @@ class TestToolDispatcherCoreOperations:
         tool, dispatcher = self._setup_successful_dispatch()
         # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("test_tool", param1="value1", param2="value2")
-        self._verify_successful_dispatch_result(result)
+        
+        # Fixed: Verify ToolResult directly instead of using helper
+        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        assert isinstance(result, ToolResult)
+        assert result.status == ToolStatus.SUCCESS
+        assert result.tool_input.tool_name == "test_tool"
+        assert result.tool_input.kwargs == {"param1": "value1", "param2": "value2"}
     @pytest.mark.asyncio
     async def test_dispatch_tool_not_found(self):
         """Test dispatch with non-existent tool."""
         dispatcher = ToolDispatcher()
         # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("nonexistent_tool", param="value")
-        verify_tool_result_error(result, "Tool nonexistent_tool not found")
+        
+        # Direct assertion instead of helper function to avoid type issues
+        assert hasattr(result, 'status'), f"Result should have status attribute, got: {type(result)}"
+        assert result.status.value == 'error', f"Status should be error, got: {result.status}"
+        assert "Tool nonexistent_tool not found" in str(result.message), f"Message should contain error, got: {result.message}"
     @pytest.mark.asyncio
     async def test_dispatch_tool_failure(self):
         """Test dispatch with failing tool."""
@@ -46,26 +56,43 @@ class TestToolDispatcherCoreOperations:
         failing_tool, dispatcher = self._setup_failing_dispatch()
         # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("failing_tool", param="value")
-        verify_tool_result_error(result, "Tool failing_tool failed")
+        
+        # Direct assertion instead of helper function to avoid type issues
+        assert hasattr(result, 'status'), f"Result should have status attribute, got: {type(result)}"
+        assert result.status.value == 'error', f"Status should be error, got: {result.status}"
+        assert "Tool failing_tool failed" in str(result.message), f"Message should contain error, got: {result.message}"
     
     def test_create_error_result(self):
         """Test _create_error_result method."""
         dispatcher = ToolDispatcher()
         tool_input, error_message = self._setup_error_result_test()
         result = dispatcher._create_error_result(tool_input, error_message)
-        self._verify_error_result(result, tool_input, error_message)
+        
+        # Direct assertion instead of helper function
+        assert hasattr(result, 'status'), f"Result should have status attribute, got: {type(result)}"
+        assert result.status.value == 'error', f"Status should be error, got: {result.status}"
+        assert error_message in str(result.message), f"Message should contain error, got: {result.message}"
+        assert result.tool_input == tool_input
     @pytest.mark.asyncio
     async def test_execute_tool_success(self):
         """Test _execute_tool method with success."""
         dispatcher, tool, tool_input, kwargs = self._setup_execute_tool_test()
-        result = await dispatcher._execute_tool(tool_input, tool, kwargs)
-        self._verify_execute_tool_success(result)
+        result = await dispatcher.executor.execute_tool_with_input(tool_input, tool, kwargs)
+        
+        # Direct assertion for success
+        assert hasattr(result, 'status'), f"Result should have status attribute, got: {type(result)}"
+        assert result.status.value == 'success', f"Status should be success, got: {result.status}"
+        assert result.tool_input.tool_name == "test_tool"
     @pytest.mark.asyncio
     async def test_execute_tool_failure(self):
         """Test _execute_tool method with failure."""
         dispatcher, failing_tool, tool_input = self._setup_execute_tool_failure_test()
-        result = await dispatcher._execute_tool(tool_input, failing_tool, {})
-        verify_tool_result_error(result, "Tool failing_tool failed")
+        result = await dispatcher.executor.execute_tool_with_input(tool_input, failing_tool, {})
+        
+        # Direct assertion for failure
+        assert hasattr(result, 'status'), f"Result should have status attribute, got: {type(result)}"
+        assert result.status.value == 'error', f"Status should be error, got: {result.status}"
+        assert "Tool failing_tool failed" in str(result.message), f"Message should contain error, got: {result.message}"
     
     def _verify_existing_tool_found(self, dispatcher: ToolDispatcher) -> None:
         """Verify existing tool is found."""
@@ -84,8 +111,11 @@ class TestToolDispatcherCoreOperations:
     
     def _verify_successful_dispatch_result(self, result) -> None:
         """Verify successful dispatch result."""
-        verify_tool_result_success(result, "test_tool")
-        assert result.tool_input.kwargs == {"param1": "value1", "param2": "value2"}
+        # Fixed: Direct verification without helper function
+        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        assert isinstance(result, ToolResult)
+        assert result.status == ToolStatus.SUCCESS
+        assert result.tool_input.tool_name == "test_tool"
     
     # Mock: Component isolation for testing without external dependencies
     def _setup_failing_dispatch(self) -> tuple:
@@ -127,3 +157,55 @@ class TestToolDispatcherCoreOperations:
         failing_tool = create_mock_tool("failing_tool", should_fail=True)
         tool_input = create_tool_input("failing_tool")
         return dispatcher, failing_tool, tool_input
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_tool_dispatch(self):
+        """Test concurrent tool dispatch operations."""
+        import asyncio
+        # Create multiple tools for concurrent testing
+        tools = [create_mock_tool(f"tool_{i}") for i in range(5)]
+        dispatcher = ToolDispatcher(tools)
+        
+        # Create concurrent dispatch tasks
+        tasks = [
+            dispatcher.dispatch(f"tool_{i}", param=f"value_{i}")
+            for i in range(5)
+        ]
+        
+        # Execute all tasks concurrently
+        results = await asyncio.gather(*tasks)
+        
+        # Verify all results are successful and contain correct data
+        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        for i, result in enumerate(results):
+            assert isinstance(result, ToolResult)
+            assert result.status == ToolStatus.SUCCESS
+            assert result.tool_input.tool_name == f"tool_{i}"
+            assert result.tool_input.kwargs == {"param": f"value_{i}"}
+            # Verify tool execution actually occurred
+            assert result.payload is not None
+            assert "result" in result.payload.result
+    
+    @pytest.mark.asyncio
+    async def test_dispatch_with_empty_kwargs(self):
+        """Test dispatch with no keyword arguments."""
+        tool = create_mock_tool("empty_tool")
+        dispatcher = ToolDispatcher([tool])
+        
+        result = await dispatcher.dispatch("empty_tool")
+        
+        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        assert isinstance(result, ToolResult)
+        assert result.status == ToolStatus.SUCCESS
+        assert result.tool_input.kwargs == {}
+    
+    def test_tool_registration_validation(self):
+        """Test tool registration with duplicate names."""
+        tool1 = create_mock_tool("duplicate_tool")
+        tool2 = create_mock_tool("duplicate_tool")  # Same name
+        
+        # Should handle duplicate names gracefully
+        dispatcher = ToolDispatcher([tool1, tool2])
+        
+        # Should have the tool registered (latest wins)
+        assert dispatcher.has_tool("duplicate_tool") == True

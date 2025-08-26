@@ -107,7 +107,9 @@ class BusinessValueFixtures:
         """Create async mock function for LLM ask_llm method"""
         async def mock_ask_llm(prompt, llm_config_name=None, *args, **kwargs):
             return self._get_llm_response_by_type(prompt, llm_config_name, mock_workload_data)
-        return mock_ask_llm
+        # Use AsyncMock so it has .called attribute for test assertions
+        mock = AsyncMock(side_effect=mock_ask_llm)
+        return mock
 
     def _create_call_llm_mock(self):
         """Create async mock for call_llm method"""
@@ -409,7 +411,7 @@ class BusinessValueFixtures:
     def mock_supervisor(self, mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher):
         """Setup mock supervisor with all dependencies"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.state_persistence_service.state_persistence_service'):
+        with patch('netra_backend.app.services.state_persistence.state_persistence_service'):
             supervisor = Supervisor(mock_db_session, mock_llm_manager, 
                                    mock_websocket_manager, mock_tool_dispatcher)
             self._configure_supervisor_basic(supervisor)

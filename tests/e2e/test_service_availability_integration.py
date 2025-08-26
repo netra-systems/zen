@@ -18,10 +18,12 @@ from tests.e2e.test_environment_config import (
 )
 
 
+@pytest.mark.e2e
 class TestServiceAvailabilityDetection:
     """Test suite for service availability detection."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_availability_basic(self):
         """Test basic service availability detection."""
         # Use short timeout for testing
@@ -46,6 +48,7 @@ class TestServiceAvailabilityDetection:
         assert 'configuration' in summary
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_real_service_config_generation(self):
         """Test real service configuration generation."""
         config = await get_real_service_config()
@@ -64,6 +67,7 @@ class TestServiceAvailabilityDetection:
         assert config.service_availability is not None
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enhanced_test_environment_config(self):
         """Test enhanced test environment configuration."""
         config = await get_test_environment_config_async()
@@ -80,6 +84,7 @@ class TestServiceAvailabilityDetection:
         assert config.service_detection_enabled is True
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_config_helpers(self):
         """Test service configuration helper functions."""
         # These should not raise exceptions
@@ -101,6 +106,7 @@ class TestServiceAvailabilityDetection:
             await ServiceConfigHelper.get_database_url("invalid_service")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_skip_helpers(self):
         """Test test skip helper functions."""
         # These should return strings (empty if no skip needed)
@@ -111,6 +117,7 @@ class TestServiceAvailabilityDetection:
         assert isinstance(skip_llm, str)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_environment_flag_detection(self):
         """Test environment flag detection."""
         checker = ServiceAvailabilityChecker()
@@ -132,6 +139,7 @@ class TestServiceAvailabilityDetection:
             assert checker._check_use_real_services_flag() is True
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_config_caching(self):
         """Test that configuration is cached appropriately."""
         from tests.e2e.real_service_config import RealServiceConfigManager
@@ -152,10 +160,12 @@ class TestServiceAvailabilityDetection:
         assert config3 is not config1
 
 
+@pytest.mark.e2e
 class TestExampleUsagePatterns:
     """Demonstrate usage patterns for the service detection system."""
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_conditional_test_execution(self):
         """Example: Skip test if real services not available."""
         # Pattern 1: Using skip helpers directly
@@ -171,6 +181,7 @@ class TestExampleUsagePatterns:
         assert True  # Placeholder test logic
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_dynamic_database_configuration(self):
         """Example: Get appropriate database URLs based on availability."""
         # Get database URLs that work with current environment
@@ -186,6 +197,7 @@ class TestExampleUsagePatterns:
         print(f"Using Redis: {redis_url}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_provider_selection(self):
         """Example: Select LLM provider based on availability."""
         provider = await ServiceConfigHelper.get_llm_provider()
@@ -203,6 +215,7 @@ class TestExampleUsagePatterns:
 
 # Integration test that can be used to verify the whole system
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_full_integration():
     """Full integration test of the service detection system."""
     print("\\n=== Service Detection Integration Test ===")

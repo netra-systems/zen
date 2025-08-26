@@ -322,6 +322,7 @@ class ServiceHealthMonitor:
 
 
 # Test class with comprehensive health monitoring scenarios
+@pytest.mark.e2e
 class TestServiceHealthMonitoring:
     """Comprehensive service health monitoring test suite."""
     
@@ -331,6 +332,7 @@ class TestServiceHealthMonitoring:
         return ServiceHealthMonitor()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_all_services_health_endpoints(self, health_monitor):
         """Test that all services report health correctly with proper response structure."""
         logger.info("Starting comprehensive service health endpoint validation...")
@@ -362,6 +364,7 @@ class TestServiceHealthMonitoring:
         logger.info(f"Service health check completed - Overall score: {overall_health_score:.2f}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_dependency_cascade(self, health_monitor):
         """Test health dependency cascade and failure propagation."""
         logger.info("Starting dependency cascade health validation...")
@@ -396,6 +399,7 @@ class TestServiceHealthMonitoring:
                    f"(Score: {overall_health['cascade_health_score']:.2f})")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_discovery_mechanism(self, health_monitor):
         """Test service discovery functionality and port detection."""
         logger.info("Starting service discovery mechanism validation...")
@@ -438,6 +442,7 @@ class TestServiceHealthMonitoring:
         logger.info(f"Service discovery completed - {len(discovery_results)} services processed")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_response_time_sla(self, health_monitor):
         """Test health check response time SLA compliance (<1 second)."""
         logger.info("Starting health response time SLA validation...")
@@ -481,6 +486,7 @@ class TestServiceHealthMonitoring:
                    f"(Total time: {total_check_time:.1f}ms)")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_check_error_handling(self, health_monitor):
         """Test health check error handling for various failure scenarios."""
         logger.info("Starting health check error handling validation...")

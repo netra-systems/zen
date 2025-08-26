@@ -120,6 +120,7 @@ class MultiServiceWebSocketTester:
         
         return health_results
     
+    @pytest.mark.e2e
     async def test_websocket_connection_to_service(self, service: str, user_id: str) -> Dict[str, Any]:
         """Test WebSocket connection to specific service"""
         connection_result = {
@@ -159,6 +160,7 @@ class MultiServiceWebSocketTester:
         
         return connection_result
     
+    @pytest.mark.e2e
     async def test_cross_service_session_isolation(self, user1_id: str, user2_id: str) -> Dict[str, Any]:
         """Test session isolation between different users across services"""
         isolation_test = {
@@ -217,6 +219,7 @@ class MultiServiceWebSocketTester:
         
         return isolation_test
     
+    @pytest.mark.e2e
     async def test_message_routing_between_services(self) -> Dict[str, Any]:
         """Test message routing between services (if applicable)"""
         routing_test = {
@@ -256,6 +259,7 @@ class MultiServiceWebSocketTester:
         
         return routing_test
     
+    @pytest.mark.e2e
     async def test_service_independence_validation(self) -> Dict[str, Any]:
         """Test that services remain 100% independent (SPEC requirement)"""
         independence_test = {
@@ -333,10 +337,12 @@ async def multi_service_tester():
     await tester.cleanup_clients()
 
 
+@pytest.mark.e2e
 class TestServiceHealthAndAvailability:
     """Test service health and availability for WebSocket communication"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_all_services_health_check(self, multi_service_tester):
         """Test all services are healthy and available"""
         health_results = await multi_service_tester.check_all_services_health()
@@ -354,6 +360,7 @@ class TestServiceHealthAndAvailability:
         assert health_results["backend"]["healthy"], "Backend service must be healthy"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_websocket_availability(self, multi_service_tester):
         """Test backend WebSocket endpoint availability"""
         connection_result = await multi_service_tester.test_websocket_connection_to_service(
@@ -369,6 +376,7 @@ class TestServiceHealthAndAvailability:
         assert connection_result.get("can_send", False), "Should be able to send messages"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_service_websocket_capability(self, multi_service_tester):
         """Test auth service WebSocket capability (if supported)"""
         try:
@@ -389,10 +397,12 @@ class TestServiceHealthAndAvailability:
             # This is acceptable for now
 
 
+@pytest.mark.e2e
 class TestCrossServiceCommunication:
     """Test communication patterns across services"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_auth_integration_via_websocket(self, multi_service_tester):
         """Test backend-auth integration through WebSocket communication"""
         # Connect to backend with valid auth
@@ -423,6 +433,7 @@ class TestCrossServiceCommunication:
         await client.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_routing_coherence(self, multi_service_tester):
         """Test message routing coherence across services"""
         routing_result = await multi_service_tester.test_message_routing_between_services()
@@ -439,6 +450,7 @@ class TestCrossServiceCommunication:
         assert routing_result.get("error") is None, f"Routing error: {routing_result.get('error')}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_frontend_backend_websocket_coherence(self, multi_service_tester):
         """Test frontend-backend WebSocket coherence"""
         # Simulate frontend connection to backend
@@ -470,10 +482,12 @@ class TestCrossServiceCommunication:
         await client.close()
 
 
+@pytest.mark.e2e
 class TestSessionIsolationAcrossServices:
     """Test session isolation across services"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_user_session_isolation(self, multi_service_tester):
         """Test session isolation between multiple users"""
         isolation_result = await multi_service_tester.test_cross_service_session_isolation(
@@ -497,6 +511,7 @@ class TestSessionIsolationAcrossServices:
             print("Session isolation test inconclusive (may need more complex test data)")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_user_websocket_sessions(self, multi_service_tester):
         """Test concurrent WebSocket sessions for multiple users"""
         num_users = 3
@@ -529,6 +544,7 @@ class TestSessionIsolationAcrossServices:
                 pass
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_service_auth_consistency(self, multi_service_tester):
         """Test authentication consistency across services"""
         user_id = "auth_consistency_test"
@@ -560,10 +576,12 @@ class TestSessionIsolationAcrossServices:
             pass
 
 
+@pytest.mark.e2e
 class TestServiceIndependenceValidation:
     """Test service independence validation (SPEC requirement)"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_microservice_independence_compliance(self, multi_service_tester):
         """Test 100% microservice independence compliance"""
         independence_result = await multi_service_tester.test_service_independence_validation()
@@ -583,6 +601,7 @@ class TestServiceIndependenceValidation:
             "Services must be able to operate independently"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_isolation_boundaries(self, multi_service_tester):
         """Test service isolation boundaries"""
         # Each service should have its own:
@@ -630,6 +649,7 @@ class TestServiceIndependenceValidation:
         assert isolation_test["no_shared_state"], "Services must maintain isolated state"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_comprehensive_multi_service_coherence(self, multi_service_tester):
         """Test comprehensive multi-service coherence"""
         # Run comprehensive test across all aspects

@@ -125,6 +125,7 @@ class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
         
         return sync_result
     
+    @pytest.mark.e2e
     async def test_existing_user_oauth_flow(self) -> Dict[str, Any]:
         """Test OAuth flow for existing user (merge scenario)"""
         logger.info("Testing existing user OAuth merge scenario")
@@ -184,6 +185,7 @@ class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
             "sessions_count": len(self.oauth_sessions)
         }
     
+    @pytest.mark.e2e
     async def test_oauth_error_scenarios(self) -> Dict[str, Any]:
         """Test various OAuth error scenarios"""
         logger.info("Testing OAuth error scenarios")
@@ -271,6 +273,7 @@ class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
             )
         }
     
+    @pytest.mark.e2e
     async def test_oauth_session_management(self) -> Dict[str, Any]:
         """Test OAuth session management and lifecycle"""
         logger.info("Testing OAuth session management")
@@ -320,6 +323,7 @@ class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestOAuthIntegration:
     """OAuth Integration and Session Management Tests."""
     
@@ -333,6 +337,7 @@ class TestOAuthIntegration:
         finally:
             await runner.cleanup_services()
     
+    @pytest.mark.e2e
     async def test_oauth_token_refresh_integration(self, oauth_integration_runner):
         """
         Test #1: OAuth Token Refresh Flow Integration
@@ -366,6 +371,7 @@ class TestOAuthIntegration:
         logger.info("✅ Enterprise session continuity VALIDATED")
         logger.info("✅ $75K+ MRR long-session support PROTECTED")
     
+    @pytest.mark.e2e
     async def test_user_profile_sync_validation(self, oauth_integration_runner):
         """
         Test #2: User Profile Sync Validation
@@ -400,6 +406,7 @@ class TestOAuthIntegration:
         logger.info("✅ Enterprise user data consistency VALIDATED")
         logger.info("✅ $50K+ MRR profile management PROTECTED")
     
+    @pytest.mark.e2e
     async def test_existing_user_oauth_merge_scenario(self, oauth_integration_runner):
         """
         Test #3: Existing User OAuth Merge Scenario
@@ -427,6 +434,7 @@ class TestOAuthIntegration:
         logger.info("✅ Enterprise user account continuity VALIDATED")
         logger.info("✅ $60K+ MRR user onboarding PROTECTED")
     
+    @pytest.mark.e2e
     async def test_oauth_error_recovery(self, oauth_integration_runner):
         """
         Test #4: OAuth Error Recovery and Resilience
@@ -455,6 +463,7 @@ class TestOAuthIntegration:
         logger.info("✅ Enterprise OAuth resilience VALIDATED")
         logger.info("✅ $40K+ MRR error handling PROTECTED")
     
+    @pytest.mark.e2e
     async def test_oauth_session_management(self, oauth_integration_runner):
         """
         Test #5: OAuth Session Management
@@ -484,6 +493,7 @@ class TestOAuthIntegration:
         logger.info("✅ Enterprise session scalability VALIDATED")
         logger.info("✅ $35K+ MRR concurrent sessions PROTECTED")
     
+    @pytest.mark.e2e
     async def test_oauth_end_to_end_enterprise_flow(self, oauth_integration_runner):
         """
         Test #6: End-to-End Enterprise OAuth Flow

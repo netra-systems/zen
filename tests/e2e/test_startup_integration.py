@@ -21,7 +21,7 @@ from fastapi import FastAPI
 
 # Add project root to path
 
-from netra_backend.app.core.startup_manager import StartupManager
+from netra_backend.app.core.startup_manager import StartupManager, ComponentPriority
 from netra_backend.app.db.database_initializer import DatabaseInitializer
 
 
@@ -46,6 +46,7 @@ def database_initializer():
 # ========== StartupManager Integration Tests ==========
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_manager_initialization(startup_manager, app):
     """Test that StartupManager can initialize successfully."""
     assert startup_manager is not None
@@ -55,6 +56,7 @@ async def test_startup_manager_initialization(startup_manager, app):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_manager_register_component(startup_manager):
     """Test component registration in StartupManager."""
     # Create a mock component
@@ -65,18 +67,19 @@ async def test_startup_manager_register_component(startup_manager):
     startup_manager.register_component(
         name="test_component",
         init_func=mock_component,
-        priority="HIGH",
+        priority=ComponentPriority.HIGH,
         dependencies=[]
     )
     
     # Verify registration
     assert "test_component" in startup_manager.components
     component = startup_manager.components["test_component"]
-    assert component["priority"] == "HIGH"
-    assert component["dependencies"] == []
+    assert component.priority == ComponentPriority.HIGH
+    assert component.dependencies == []
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_manager_dependency_resolution(startup_manager):
     """Test dependency resolution in StartupManager."""
     # Register components with dependencies
@@ -84,7 +87,7 @@ async def test_startup_manager_dependency_resolution(startup_manager):
         name="database",
         # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
-        priority="CRITICAL",
+        priority=ComponentPriority.CRITICAL,
         dependencies=[]
     )
     
@@ -92,7 +95,7 @@ async def test_startup_manager_dependency_resolution(startup_manager):
         name="cache",
         # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
-        priority="HIGH",
+        priority=ComponentPriority.HIGH,
         dependencies=["database"]
     )
     
@@ -100,7 +103,7 @@ async def test_startup_manager_dependency_resolution(startup_manager):
         name="api",
         # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
-        priority="MEDIUM",
+        priority=ComponentPriority.MEDIUM,
         dependencies=["database", "cache"]
     )
     
@@ -114,14 +117,15 @@ async def test_startup_manager_dependency_resolution(startup_manager):
 
 
 @pytest.mark.asyncio
-async def test_startup_manager_graceful_degradation(startup_manager, app):
+@pytest.mark.e2e
+async def test_startup_manager_graceful_degradation(startup_manager):
     """Test graceful degradation when non-critical component fails."""
     # Register a critical component that succeeds
     startup_manager.register_component(
         name="database",
         # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
-        priority="CRITICAL",
+        priority=ComponentPriority.CRITICAL,
         dependencies=[]
     )
     
@@ -131,82 +135,60 @@ async def test_startup_manager_graceful_degradation(startup_manager, app):
     startup_manager.register_component(
         name="monitoring",
         init_func=failing_func,
-        priority="LOW",
+        priority=ComponentPriority.LOW,
         dependencies=[]
     )
     
-    # Initialize system (should succeed despite monitoring failure)
-    success = await startup_manager.initialize_system(app)
+    # Initialize system using startup() instead of initialize_system() for isolated testing
+    success = await startup_manager.startup()
     
-    # Verify system initialized successfully
+    # Verify system initialized successfully despite non-critical component failure
     assert success is True
-    assert startup_manager.startup_metrics["database"]["status"] == "SUCCESS"
-    assert startup_manager.startup_metrics["monitoring"]["status"] == "FAILED"
+    
+    # Check component status through component objects (not metrics)
+    from netra_backend.app.core.startup_manager import ComponentStatus
+    assert startup_manager.components["database"].status == ComponentStatus.RUNNING
+    assert startup_manager.components["monitoring"].status == ComponentStatus.FAILED
+    
+    # Verify metrics contain duration and retry information
+    assert "database" in startup_manager.startup_metrics
+    assert "monitoring" in startup_manager.startup_metrics
+    assert startup_manager.startup_metrics["database"]["duration"] >= 0
+    assert startup_manager.startup_metrics["monitoring"]["duration"] >= 0
 
 
 # ========== DatabaseInitializer Integration Tests ==========
 
+@pytest.mark.e2e
 def test_database_initializer_creation(database_initializer):
     """Test that DatabaseInitializer can be created successfully."""
     assert database_initializer is not None
-    assert hasattr(database_initializer, 'ensure_database_ready')
-    assert hasattr(database_initializer, 'check_database_exists')
+    assert hasattr(database_initializer, 'initialize_database')
+    assert hasattr(database_initializer, 'initialize_all')
+    assert hasattr(database_initializer, 'health_check')
+    assert hasattr(database_initializer, 'add_database')
 
 
-# Mock: Component isolation for testing without external dependencies
-@patch('netra_backend.app.db.database_initializer.psycopg2.connect')
-def test_database_initializer_check_exists(mock_connect, database_initializer):
-    """Test database existence checking."""
-    # Mock successful connection
-    # Mock: Generic component isolation for controlled unit testing
-    mock_conn = MagicMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_cursor = MagicMock()
-    mock_conn.cursor.return_value = mock_cursor
-    mock_connect.return_value = mock_conn
-    
-    # Test database exists check
-    mock_cursor.fetchone.return_value = (True,)
-    exists = database_initializer.check_database_exists("test_db")
-    
-    assert exists is True
-    mock_cursor.execute.assert_called()
-
-
-# Mock: Component isolation for testing without external dependencies
-@patch('netra_backend.app.db.database_initializer.psycopg2.connect')
-def test_database_initializer_create_database(mock_connect, database_initializer):
-    """Test database creation."""
-    # Mock connection
-    # Mock: Generic component isolation for controlled unit testing
-    mock_conn = MagicMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_cursor = MagicMock()
-    mock_conn.cursor.return_value = mock_cursor
-    mock_connect.return_value = mock_conn
-    
-    # Test database creation
-    success = database_initializer.create_database("test_db")
-    
-    # Verify creation was attempted
-    assert mock_cursor.execute.called
+# These database initializer integration tests are simplified since they test
+# outdated methods. The DatabaseInitializer is thoroughly tested in unit tests.
 
 
 # ========== Full Integration Tests ==========
 
 @pytest.mark.asyncio
-async def test_full_startup_integration(app):
+@pytest.mark.e2e
+async def test_full_startup_integration():
     """Test full startup integration with all components."""
     startup_manager = StartupManager()
     
     # Register mock components to simulate real startup
     components = {
-        "configuration": ("CRITICAL", []),
-        "database": ("CRITICAL", ["configuration"]),
-        "redis": ("HIGH", ["configuration"]),
-        "auth": ("HIGH", ["database"]),
-        "websocket": ("MEDIUM", ["redis"]),
-        "monitoring": ("LOW", ["database", "redis"])
+        "configuration": (ComponentPriority.CRITICAL, []),
+        "database": (ComponentPriority.CRITICAL, ["configuration"]),
+        "redis": (ComponentPriority.HIGH, ["configuration"]),
+        "auth": (ComponentPriority.HIGH, ["database"]),
+        "websocket": (ComponentPriority.MEDIUM, ["redis"]),
+        "monitoring": (ComponentPriority.LOW, ["database", "redis"])
     }
     
     for name, (priority, deps) in components.items():
@@ -218,19 +200,22 @@ async def test_full_startup_integration(app):
             dependencies=deps
         )
     
-    # Initialize system
-    success = await startup_manager.initialize_system(app)
+    # Initialize system using startup() for isolated testing
+    success = await startup_manager.startup()
     
     # Verify successful initialization
     assert success is True
     
-    # Verify all components initialized
+    # Verify all components initialized successfully
+    from netra_backend.app.core.startup_manager import ComponentStatus
     for name in components:
         assert name in startup_manager.startup_metrics
-        assert startup_manager.startup_metrics[name]["status"] == "SUCCESS"
+        assert startup_manager.components[name].status == ComponentStatus.RUNNING
+        assert startup_manager.startup_metrics[name]["duration"] >= 0
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_circuit_breaker_functionality(startup_manager):
     """Test circuit breaker pattern in startup."""
     # Create a component that fails multiple times
@@ -247,7 +232,7 @@ async def test_circuit_breaker_functionality(startup_manager):
     startup_manager.register_component(
         name="flaky_service",
         init_func=failing_component,
-        priority="MEDIUM",
+        priority=ComponentPriority.MEDIUM,
         dependencies=[]
     )
     
@@ -258,19 +243,20 @@ async def test_circuit_breaker_functionality(startup_manager):
     # Circuit breaker should have tripped
     assert "flaky_service" in startup_manager.circuit_breakers
     breaker = startup_manager.circuit_breakers["flaky_service"]
-    assert breaker["failures"] >= 3
-    assert breaker["is_open"] is True
+    assert breaker.failure_count >= 3
+    assert breaker.is_open is True
 
 
 @pytest.mark.asyncio
-async def test_startup_metrics_collection(startup_manager, app):
+@pytest.mark.e2e
+async def test_startup_metrics_collection(startup_manager):
     """Test that startup metrics are properly collected."""
     # Register components
     startup_manager.register_component(
         name="fast_component",
         # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
-        priority="HIGH",
+        priority=ComponentPriority.HIGH,
         dependencies=[]
     )
     
@@ -281,19 +267,21 @@ async def test_startup_metrics_collection(startup_manager, app):
     startup_manager.register_component(
         name="slow_component",
         init_func=slow_component,
-        priority="LOW",
+        priority=ComponentPriority.LOW,
         dependencies=[]
     )
     
-    # Initialize system
-    await startup_manager.initialize_system(app)
+    # Initialize system using startup() for isolated testing
+    await startup_manager.startup()
     
     # Check metrics
     fast_metrics = startup_manager.startup_metrics["fast_component"]
     slow_metrics = startup_manager.startup_metrics["slow_component"]
     
-    assert fast_metrics["status"] == "SUCCESS"
-    assert slow_metrics["status"] == "SUCCESS"
+    # Check component status through the component objects
+    from netra_backend.app.core.startup_manager import ComponentStatus
+    assert startup_manager.components["fast_component"].status == ComponentStatus.RUNNING
+    assert startup_manager.components["slow_component"].status == ComponentStatus.RUNNING
     assert slow_metrics["duration"] >= 0.1  # Should take at least 0.1 seconds
     assert fast_metrics["duration"] < slow_metrics["duration"]
 

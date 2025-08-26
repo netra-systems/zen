@@ -40,7 +40,7 @@ else:
         print("Loaded environment from current directory or system")
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
 from shared.logging import get_logger, configure_service_logging
 from shared.cors_config import get_fastapi_cors_config
 
@@ -377,6 +377,7 @@ async def security_and_service_middleware(request: Request, call_next):
 
 # Include routers without API versioning
 app.include_router(auth_router, prefix="")
+app.include_router(oauth_router, prefix="")
 
 # Root endpoint
 @app.get("/")

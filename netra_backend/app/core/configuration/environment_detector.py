@@ -1,4 +1,3 @@
-from netra_backend.app.core.isolated_environment import get_env
 """Environment Detection and Configuration Consistency (DEPRECATED)
 
 DEPRECATION NOTICE: This module is deprecated in favor of environment_constants.py
@@ -18,6 +17,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

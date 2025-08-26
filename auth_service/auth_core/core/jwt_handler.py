@@ -2,12 +2,15 @@
 JWT Token Handler - Core authentication token management
 Maintains 450-line limit with focused single responsibility
 """
+import base64
+import json
 import logging
 import os
 import time
 import uuid
 import hmac
 import hashlib
+import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
@@ -16,6 +19,7 @@ import jwt
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.core.jwt_cache import jwt_validation_cache
 from auth_service.auth_core.isolated_environment import get_env
+from auth_service.auth_core.redis_manager import auth_redis_manager
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +38,9 @@ class JWTHandler:
         # Token blacklist for immediate invalidation
         self._token_blacklist = set()
         self._user_blacklist = set()  # For invalidating all user tokens
+        
+        # Initialize Redis blacklist on startup
+        self._initialize_blacklist_from_redis()
     
     def _get_jwt_secret(self) -> str:
         """Get JWT secret with production safety"""
@@ -93,6 +100,11 @@ class JWTHandler:
                       token_type: str = "access") -> Optional[Dict]:
         """CANONICAL JWT validation - Single Source of Truth for all JWT validation operations"""
         try:
+            # Check if token is blacklisted first - critical security check
+            if self.is_token_blacklisted(token):
+                logger.debug("Token is blacklisted")
+                return None
+            
             # Check cache first for sub-100ms performance
             cache_key = jwt_validation_cache.get_cache_key(token, token_type)
             cached_result = jwt_validation_cache.get_from_cache(cache_key)
@@ -370,8 +382,8 @@ class JWTHandler:
     def _validate_token_claims(self, payload: Dict) -> bool:
         """Validate additional token claims for security"""
         try:
-            # Check required claims
-            required_claims = ["sub", "iat", "exp", "iss"]
+            # Check required claims - jti is required for security (replay attack prevention)
+            required_claims = ["sub", "iat", "exp", "iss", "jti"]
             for claim in required_claims:
                 if claim not in payload:
                     logger.warning(f"Missing required claim: {claim}")
@@ -581,6 +593,8 @@ class JWTHandler:
         """Add token to blacklist for immediate invalidation"""
         try:
             self._token_blacklist.add(token)
+            # Also persist to Redis in background
+            self._run_async_in_background(self._persist_token_blacklist(token))
             logger.info(f"Token blacklisted successfully")
             return True
         except Exception as e:
@@ -591,11 +605,57 @@ class JWTHandler:
     
     def is_token_blacklisted(self, token: str) -> bool:
         """Check if specific token is blacklisted"""
-        return token in self._token_blacklist
+        # First check in-memory cache
+        if token in self._token_blacklist:
+            return True
+        
+        # If not in memory and Redis is available, check Redis
+        try:
+            if auth_redis_manager.enabled:
+                # Run async Redis check with proper exception handling
+                try:
+                    result = asyncio.run(self._check_token_in_redis(token))
+                    if result:
+                        # Add to in-memory cache for faster future lookups
+                        self._token_blacklist.add(token)
+                        return True
+                except RuntimeError as e:
+                    # Handle "cannot be called from a running event loop" error
+                    if "cannot be called from a running event loop" in str(e):
+                        logger.debug("Already in event loop, skipping Redis check")
+                    else:
+                        raise e
+        except Exception as e:
+            logger.debug(f"Redis blacklist check failed, using in-memory only: {e}")
+        
+        return False
     
     def is_user_blacklisted(self, user_id: str) -> bool:
         """Check if user is blacklisted"""
-        return user_id in self._user_blacklist
+        # First check in-memory cache
+        if user_id in self._user_blacklist:
+            return True
+        
+        # If not in memory and Redis is available, check Redis
+        try:
+            if auth_redis_manager.enabled:
+                # Run async Redis check with proper exception handling
+                try:
+                    result = asyncio.run(self._check_user_in_redis(user_id))
+                    if result:
+                        # Add to in-memory cache for faster future lookups
+                        self._user_blacklist.add(user_id)
+                        return True
+                except RuntimeError as e:
+                    # Handle "cannot be called from a running event loop" error
+                    if "cannot be called from a running event loop" in str(e):
+                        logger.debug("Already in event loop, skipping Redis check")
+                    else:
+                        raise e
+        except Exception as e:
+            logger.debug(f"Redis blacklist check failed, using in-memory only: {e}")
+        
+        return False
     
     def remove_from_blacklist(self, token: str) -> bool:
         """Remove token from blacklist"""
@@ -648,6 +708,8 @@ class JWTHandler:
             self._user_blacklist.add(user_id)
             # Invalidate cached tokens for this user
             jwt_validation_cache.invalidate_user_cache(user_id)
+            # Also persist to Redis in background
+            self._run_async_in_background(self._persist_user_blacklist(user_id))
             logger.info(f"User {user_id} blacklisted successfully")
             return True
         except Exception as e:
@@ -672,6 +734,121 @@ class JWTHandler:
             }
         }
     
+    def _initialize_blacklist_from_redis(self) -> None:
+        """Initialize blacklists from Redis on startup for persistence"""
+        try:
+            # Check if Redis is available in a non-async context
+            if not auth_redis_manager.enabled:
+                logger.debug("Redis not available, using in-memory blacklists only")
+                return
+            
+            # Schedule async initialization if Redis is available
+            # This will be called from async context when needed
+            logger.debug("Redis available for persistent blacklists")
+        except Exception as e:
+            logger.warning(f"Failed to initialize blacklist from Redis: {e}")
+    
+    async def _load_blacklists_from_redis(self) -> None:
+        """Load blacklists from Redis - async version"""
+        try:
+            if not auth_redis_manager.enabled:
+                return
+                
+            # Load token blacklist
+            token_blacklist_key = "auth:blacklist:tokens"
+            user_blacklist_key = "auth:blacklist:users"
+            
+            # Get all blacklisted tokens (stored as Redis set members)
+            redis_client = auth_redis_manager.get_client()
+            if redis_client:
+                # Load tokens from Redis set
+                token_members = await redis_client.smembers(token_blacklist_key) or set()
+                self._token_blacklist.update(token_members)
+                
+                # Load users from Redis set  
+                user_members = await redis_client.smembers(user_blacklist_key) or set()
+                self._user_blacklist.update(user_members)
+                
+                logger.info(f"Loaded {len(self._token_blacklist)} tokens and {len(self._user_blacklist)} users from persistent blacklist")
+        except Exception as e:
+            logger.warning(f"Failed to load blacklists from Redis: {e}")
+    
+    async def _persist_token_blacklist(self, token: str) -> bool:
+        """Persist token to Redis blacklist"""
+        try:
+            if not auth_redis_manager.enabled:
+                return True  # Fallback to in-memory only
+            
+            redis_client = auth_redis_manager.get_client()
+            if redis_client:
+                # Add to Redis set with expiration
+                token_blacklist_key = "auth:blacklist:tokens"
+                await redis_client.sadd(token_blacklist_key, token)
+                # Set expiration for the whole set (24 hours)
+                await redis_client.expire(token_blacklist_key, 86400)
+                return True
+        except Exception as e:
+            logger.warning(f"Failed to persist token blacklist to Redis: {e}")
+        return False
+    
+    async def _persist_user_blacklist(self, user_id: str) -> bool:
+        """Persist user to Redis blacklist"""
+        try:
+            if not auth_redis_manager.enabled:
+                return True  # Fallback to in-memory only
+            
+            redis_client = auth_redis_manager.get_client()
+            if redis_client:
+                # Add to Redis set
+                user_blacklist_key = "auth:blacklist:users"
+                await redis_client.sadd(user_blacklist_key, user_id)
+                # Set expiration for the whole set (7 days for user blacklists)
+                await redis_client.expire(user_blacklist_key, 604800)
+                return True
+        except Exception as e:
+            logger.warning(f"Failed to persist user blacklist to Redis: {e}")
+        return False
+    
+    def _run_async_in_background(self, coro) -> None:
+        """Run async operation in background without blocking"""
+        try:
+            # Try to get existing event loop
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # If loop is running, schedule the task
+                    asyncio.create_task(coro)
+                else:
+                    # If loop exists but not running, run it
+                    loop.run_until_complete(coro)
+            except RuntimeError:
+                # No event loop, create a new one and run
+                asyncio.run(coro)
+        except Exception as e:
+            logger.warning(f"Failed to run async operation in background: {e}")
+    
+    async def _check_token_in_redis(self, token: str) -> bool:
+        """Check if token exists in Redis blacklist"""
+        try:
+            redis_client = auth_redis_manager.get_client()
+            if redis_client:
+                token_blacklist_key = "auth:blacklist:tokens"
+                return await redis_client.sismember(token_blacklist_key, token)
+        except Exception as e:
+            logger.debug(f"Failed to check token in Redis: {e}")
+        return False
+    
+    async def _check_user_in_redis(self, user_id: str) -> bool:
+        """Check if user exists in Redis blacklist"""
+        try:
+            redis_client = auth_redis_manager.get_client()
+            if redis_client:
+                user_blacklist_key = "auth:blacklist:users"
+                return await redis_client.sismember(user_blacklist_key, user_id)
+        except Exception as e:
+            logger.debug(f"Failed to check user in Redis: {e}")
+        return False
+
     def get_blacklist_info(self) -> Dict[str, int]:
         """Get blacklist statistics"""
         return {
@@ -682,7 +859,9 @@ class JWTHandler:
     def _validate_token_security_consolidated(self, token: str) -> bool:
         """CONSOLIDATED: JWT security validation - moved from oauth_security.py to eliminate SSOT violation"""
         try:
-            import jwt
+            # First validate JWT structure (prevents "Not enough segments" errors)
+            if not self._validate_jwt_structure(token):
+                return False
             
             # Decode header without verification to check algorithm
             header = jwt.get_unverified_header(token)
@@ -702,5 +881,67 @@ class JWTHandler:
             return True
             
         except Exception as e:
-            logger.error(f"JWT security validation error: {e}")
+            logger.warning(f"JWT security validation error: {e}")
+            return False
+    
+    def _validate_jwt_structure(self, token: str) -> bool:
+        """Validate JWT token structure to prevent malformed token errors"""
+        try:
+            if not token or not isinstance(token, str):
+                logger.warning("Token is None or not a string")
+                return False
+                
+            # Check for basic JWT structure (3 parts separated by dots)
+            parts = token.split('.')
+            if len(parts) != 3:
+                logger.warning(f"Invalid JWT structure: expected 3 parts, got {len(parts)}")
+                return False
+            
+            # Check that each part is valid base64
+            for i, part in enumerate(parts):
+                if not part:  # Empty part
+                    logger.warning(f"JWT part {i} is empty")
+                    return False
+                    
+                try:
+                    # Add padding if needed for base64 decoding
+                    missing_padding = len(part) % 4
+                    if missing_padding != 0:
+                        padded = part + '=' * (4 - missing_padding)
+                    else:
+                        padded = part
+                    base64.urlsafe_b64decode(padded)
+                    logger.debug(f"JWT part {i} base64 validation successful")
+                except Exception as e:
+                    logger.warning(f"JWT part {i} is not valid base64: {e}")
+                    return False
+            
+            # Try to decode header and payload as JSON
+            try:
+                # Use corrected padding logic for header
+                missing_padding = len(parts[0]) % 4
+                if missing_padding != 0:
+                    header_padded = parts[0] + '=' * (4 - missing_padding)
+                else:
+                    header_padded = parts[0]
+                header_data = base64.urlsafe_b64decode(header_padded)
+                json.loads(header_data.decode('utf-8'))
+                
+                # Use corrected padding logic for payload
+                missing_padding = len(parts[1]) % 4
+                if missing_padding != 0:
+                    payload_padded = parts[1] + '=' * (4 - missing_padding)
+                else:
+                    payload_padded = parts[1]
+                payload_data = base64.urlsafe_b64decode(payload_padded)
+                json.loads(payload_data.decode('utf-8'))
+                
+            except Exception:
+                logger.warning("JWT header or payload contains invalid JSON")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"JWT structure validation error: {e}")
             return False

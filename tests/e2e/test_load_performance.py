@@ -45,6 +45,7 @@ class ConcurrentLoadTester:
         self.target_users = 100
         self.max_p95_response = 5.0  # seconds
     
+    @pytest.mark.e2e
     async def test_concurrent_user_handling(self) -> Dict[str, Any]:
         """Test 100 concurrent users with performance validation"""
         start_time = time.time()
@@ -83,6 +84,7 @@ class SustainedLoadTester:
         self.test_duration_hours = 24
         self.memory_leak_threshold = 50  # MB
     
+    @pytest.mark.e2e
     async def test_memory_leak_detection(self) -> Dict[str, Any]:
         """Test for memory leaks during sustained load"""
         # Abbreviated test for development (5 minutes)
@@ -114,6 +116,7 @@ class BurstTrafficTester:
         self.simulator = simulator
         self.pattern_generator = LoadPatternGenerator()
     
+    @pytest.mark.e2e
     async def test_burst_handling(self) -> Dict[str, Any]:
         """Test system response to burst traffic"""
         burst_pattern = self.pattern_generator.generate_burst_pattern()
@@ -163,6 +166,7 @@ class GracefulDegradationTester:
             "overload": 1000
         }
     
+    @pytest.mark.e2e
     async def test_feature_degradation(self) -> Dict[str, Any]:
         """Test graceful feature degradation under load"""
         degradation_results = {}
@@ -212,6 +216,7 @@ class GracefulDegradationTester:
 
 # Test Classes
 
+@pytest.mark.e2e
 class TestConcurrentUserLoad:
     """Test 100 concurrent users system handling"""
     
@@ -222,6 +227,7 @@ class TestConcurrentUserLoad:
         return LoadTestSimulator(config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_100_concurrent_users(self, load_simulator):
         """Test system handles 100 concurrent users"""
         tester = ConcurrentLoadTester(load_simulator)
@@ -233,6 +239,7 @@ class TestConcurrentUserLoad:
             f"Success rate {results['success_rate']}% below 95% threshold"
 
 
+@pytest.mark.e2e
 class TestSustainedLoad:
     """Test sustained load without memory leaks"""
     
@@ -243,6 +250,7 @@ class TestSustainedLoad:
         return LoadTestSimulator(config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sustained_load_24h(self, load_simulator):
         """Test no memory leaks over sustained period"""
         tester = SustainedLoadTester(load_simulator)
@@ -254,6 +262,7 @@ class TestSustainedLoad:
             f"Memory growth {results['memory_growth_mb']}MB exceeds 50MB limit"
 
 
+@pytest.mark.e2e
 class TestBurstTrafficHandling:
     """Test burst traffic management"""
     
@@ -264,6 +273,7 @@ class TestBurstTrafficHandling:
         return LoadTestSimulator(config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_burst_traffic_handling(self, load_simulator):
         """Test spike management capabilities"""
         tester = BurstTrafficTester(load_simulator)
@@ -275,6 +285,7 @@ class TestBurstTrafficHandling:
             f"Max load {results['max_load_handled']} below expected 50 users"
 
 
+@pytest.mark.e2e
 class TestGracefulDegradation:
     """Test graceful system degradation under extreme load"""
     
@@ -285,6 +296,7 @@ class TestGracefulDegradation:
         return LoadTestSimulator(config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_graceful_degradation(self, load_simulator):
         """Test feature disabling under extreme load"""
         tester = GracefulDegradationTester(load_simulator)

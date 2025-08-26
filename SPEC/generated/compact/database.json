@@ -1,8 +1,9 @@
 {
   "values": [
+    "Added foreign key constraint for api_keys.user_id",
+    "Added foreign key constraint for sessions.user_id",
     "Authentication not verified - missing user_id",
     "Corpus operation completed for run_id",
-    "Corpus operation failed for run_id",
     "DELETE FROM auth_users WHERE id = :old_id",
     "Data analysis execution failed for run_id",
     "From",
@@ -101,6 +102,7 @@
     "instance_id",
     "invocation_id",
     "invoice_id",
+    "item_id",
     "ix_agent_recovery_logs_run_id",
     "ix_agent_recovery_logs_thread_id",
     "ix_agent_state_snapshots_created_at",
@@ -200,7 +202,6 @@
     "thread_id",
     "timeout_at",
     "todo_id",
-    "token_id",
     "trace_id",
     "transaction_id",
     "triggered_at",

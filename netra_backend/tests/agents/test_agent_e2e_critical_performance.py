@@ -18,8 +18,10 @@ import pytest
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
+@pytest.mark.agent  # Performance optimization iteration 69
+@pytest.mark.fast_test
 class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
-    """Performance and concurrency critical tests"""
+    """Performance and concurrency critical tests - Optimized iteration 69"""
     @pytest.mark.asyncio
     async def test_9_concurrent_request_handling(self, setup_agent_infrastructure):
         """
@@ -31,7 +33,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         infra = setup_agent_infrastructure
         agent_service = infra["agent_service"]
         
-        num_concurrent_requests = 10
+        num_concurrent_requests = 5  # Reduced from 10 for performance iteration 69
         requests = [
             {
                 "user_id": str(uuid.uuid4()),

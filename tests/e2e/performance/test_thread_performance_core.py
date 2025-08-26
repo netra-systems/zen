@@ -376,6 +376,7 @@ def thread_performance_tester(ws_thread_fixtures, thread_context_manager, perfor
     return ThreadPerformanceTester(ws_thread_fixtures, thread_context_manager, performance_utils)
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_creation_performance_under_load(ws_thread_fixtures, thread_performance_tester):
     """Test thread creation performance with concurrent load."""
     user = TEST_USERS["enterprise"]
@@ -405,6 +406,7 @@ async def test_thread_creation_performance_under_load(ws_thread_fixtures, thread
                f"Max creation time must be < 2s, got {performance_data['max_creation_time']:.3f}s"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_switching_performance_rapid_switches(ws_thread_fixtures, thread_performance_tester):
     """Test thread switching performance with rapid switches."""
     user = TEST_USERS["enterprise"]
@@ -445,6 +447,7 @@ async def test_thread_switching_performance_rapid_switches(ws_thread_fixtures, t
                f"Average switch time must be < 0.2s, got {switching_data['avg_switch_time']:.3f}s"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_user_performance(ws_thread_fixtures, thread_performance_tester):
     """Test performance with multiple concurrent users."""
     user_count = 5
@@ -471,6 +474,7 @@ async def test_concurrent_user_performance(ws_thread_fixtures, thread_performanc
            f"Should complete at least 80% of operations, got {actual_operations}/{expected_total_operations}"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_comprehensive_thread_operations_performance_target(ws_thread_fixtures:
                                                                    thread_performance_tester,
                                                                    thread_context_manager):
@@ -528,6 +532,7 @@ async def test_comprehensive_thread_operations_performance_target(ws_thread_fixt
     assert len(ws_thread_fixtures.thread_events) >= 15, "All operations must generate events"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_performance_metrics_collection_and_analysis(thread_performance_tester):
     """Test performance metrics collection and analysis capabilities."""
     user = TEST_USERS["enterprise"]

@@ -26,6 +26,7 @@ class ServiceEndpoints:
     websocket_url: str = "ws://localhost:8000/ws"
 
 
+@pytest.mark.e2e
 class TestCORSCompleteAuthFlow:
     """Test complete authentication flow across services with CORS."""
     
@@ -45,6 +46,7 @@ class TestCORSCompleteAuthFlow:
         return services.frontend_url
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_config_flow_e2e(self, services, frontend_origin):
         """Test complete auth config retrieval flow with CORS."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -91,6 +93,7 @@ class TestCORSCompleteAuthFlow:
                 pytest.skip("Auth service timeout during e2e auth config test")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_oauth_login_flow_cors(self, services, frontend_origin):
         """Test complete OAuth login flow with CORS considerations."""
         async with httpx.AsyncClient(follow_redirects=False) as client:
@@ -137,6 +140,7 @@ class TestCORSCompleteAuthFlow:
                 pytest.skip("Auth service timeout during e2e OAuth flow test")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_validation_across_services_cors(self, services, frontend_origin):
         """Test token validation across services with CORS."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -180,6 +184,7 @@ class TestCORSCompleteAuthFlow:
                 pytest.skip("Service timeout during e2e token validation test")
 
 
+@pytest.mark.e2e
 class TestCORSPREnvironmentValidation:
     """Test PR environment dynamic origin validation."""
     
@@ -194,6 +199,7 @@ class TestCORSPREnvironmentValidation:
         ]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_pr_environment_dynamic_validation(self, pr_origins):
         """Test PR environment dynamic origin validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "staging"}):
@@ -227,6 +233,7 @@ class TestCORSPREnvironmentValidation:
                 assert not is_origin_allowed(origin, origins), f"Production origin should be rejected in staging: {origin}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cloud_run_pr_deployment_validation(self):
         """Test Cloud Run PR deployment URL validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "staging"}):
@@ -245,10 +252,12 @@ class TestCORSPREnvironmentValidation:
                 assert is_origin_allowed(origin, origins), f"Cloud Run PR origin should be allowed: {origin}"
 
 
+@pytest.mark.e2e
 class TestCORSProductionStrictValidation:
     """Test production strict origin enforcement."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_production_strict_origin_enforcement(self):
         """Test production environment strict origin validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "production", "CORS_ORIGINS": ""}):
@@ -279,6 +288,7 @@ class TestCORSProductionStrictValidation:
                 assert not is_origin_allowed(origin, origins), f"Non-production origin should be rejected: {origin}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_production_no_wildcard_allowed(self):
         """Test that production never allows wildcard origins."""
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
@@ -290,6 +300,7 @@ class TestCORSProductionStrictValidation:
             assert not _evaluate_wildcard_environment(), "Production should not allow wildcard origins"
 
 
+@pytest.mark.e2e
 class TestCORSDynamicPortValidation:
     """Test CORS with dynamic localhost ports."""
     
@@ -309,6 +320,7 @@ class TestCORSDynamicPortValidation:
         ]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_dynamic_localhost_ports_allowed(self, dynamic_ports):
         """Test that dynamic localhost ports are allowed in development."""
         with patch.dict(os.environ, {"ENVIRONMENT": "development", "CORS_ORIGINS": "*"}):
@@ -319,6 +331,7 @@ class TestCORSDynamicPortValidation:
                 assert is_origin_allowed(frontend_origin, origins), f"Dynamic port should be allowed: {frontend_origin}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_localhost_pattern_comprehensive(self):
         """Test comprehensive localhost pattern matching."""
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
@@ -347,6 +360,7 @@ class TestCORSDynamicPortValidation:
                 assert not _check_localhost_pattern(origin), f"Non-localhost should not match: {origin}"
 
 
+@pytest.mark.e2e
 class TestCORSCredentialRequestsAcrossServices:
     """Test credential-based requests across services."""
     
@@ -355,6 +369,7 @@ class TestCORSCredentialRequestsAcrossServices:
         return ServiceEndpoints()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cookie_based_requests_cors(self, services):
         """Test cookie-based requests with CORS."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -385,6 +400,7 @@ class TestCORSCredentialRequestsAcrossServices:
                 pytest.skip("Backend timeout for cookie CORS test")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_authorization_header_requests_cors(self, services):
         """Test Authorization header requests with CORS."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -424,6 +440,7 @@ class TestCORSCredentialRequestsAcrossServices:
                 pytest.skip("Auth service timeout for Authorization CORS test")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_auth_with_cors(self, services):
         """Test WebSocket authentication with CORS origin."""
         try:
@@ -461,6 +478,7 @@ class TestCORSCredentialRequestsAcrossServices:
             pytest.skip("WebSocket timeout for auth CORS test")
 
 
+@pytest.mark.e2e
 class TestCORSRegressionComprehensive:
     """Comprehensive regression tests for all CORS scenarios."""
     
@@ -499,6 +517,7 @@ class TestCORSRegressionComprehensive:
         ]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_all_regression_scenarios(self, regression_scenarios):
         """Test all identified regression scenarios."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -535,6 +554,7 @@ class TestCORSRegressionComprehensive:
                     pytest.skip(f"Service not available for regression scenario: {scenario['name']}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_middleware_ordering_regression(self):
         """Test that CORS middleware is ordered correctly."""
         # This tests the requirement that CORS middleware must be first
@@ -564,6 +584,7 @@ class TestCORSRegressionComprehensive:
                 pytest.skip("Backend not available for middleware ordering test")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_dev_launcher_cors_propagation(self):
         """Test that dev launcher properly propagates CORS configuration."""
         # This tests the requirement that dev launcher must set CORS_ORIGINS=*
@@ -576,10 +597,12 @@ class TestCORSRegressionComprehensive:
             assert "*" in origins, "Dev launcher should set CORS_ORIGINS=* for development"
 
 
+@pytest.mark.e2e
 class TestCORSPerformanceAndResilience:
     """Test CORS performance and resilience characteristics."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cors_preflight_caching(self):
         """Test that CORS preflight responses include proper caching headers."""
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -605,6 +628,7 @@ class TestCORSPerformanceAndResilience:
                 pytest.skip("Backend not available for preflight caching test")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cors_multiple_rapid_requests(self):
         """Test CORS handling under rapid successive requests."""
         async with httpx.AsyncClient(follow_redirects=True) as client:

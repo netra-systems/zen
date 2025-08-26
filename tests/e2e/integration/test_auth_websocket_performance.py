@@ -39,6 +39,7 @@ from test_framework.auth_helpers import (
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAuthWebSocketPerformance:
     """WebSocket Authentication Performance and Concurrent Connection Tests."""
     
@@ -47,6 +48,7 @@ class TestAuthWebSocketPerformance:
         """Initialize WebSocket auth tester."""
         return WebSocketAuthTester()
     
+    @pytest.mark.e2e
     async def test_authentication_performance_requirements(self, auth_tester):
         """Test that authentication meets performance requirements."""
         try:
@@ -87,6 +89,7 @@ class TestAuthWebSocketPerformance:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_concurrent_connections_different_tokens(self, auth_tester):
         """Test concurrent WebSocket connections with different valid tokens."""
         try:
@@ -150,6 +153,7 @@ class TestAuthWebSocketPerformance:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_high_frequency_authentication_cycles(self, auth_tester):
         """Test performance under high-frequency authentication cycles."""
         try:
@@ -209,6 +213,7 @@ class TestAuthWebSocketPerformance:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_connection_establishment_timing_consistency(self, auth_tester):
         """Test that connection establishment timing is consistent."""
         try:
@@ -263,6 +268,7 @@ class TestAuthWebSocketPerformance:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_concurrent_message_throughput(self, auth_tester):
         """Test message throughput with multiple concurrent authenticated connections."""
         try:

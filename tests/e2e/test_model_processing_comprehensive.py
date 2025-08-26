@@ -215,9 +215,11 @@ async def chat_orchestrator_with_failures(
     return orchestrator
 
 
+@pytest.mark.e2e
 class TestPromptSubmissionFlow:
     """Test prompt submission and initial processing - designed to expose failures"""
     
+    @pytest.mark.e2e
     async def test_prompt_reaches_model_basic(self, chat_orchestrator_with_failures):
         """Test that basic prompts reach the model (likely to fail initially)"""
         prompt = TEST_PROMPTS[0]
@@ -233,6 +235,7 @@ class TestPromptSubmissionFlow:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_prompt_routing_logic(self, chat_orchestrator_with_failures):
         """Test that prompts are routed to correct agents (likely to fail)"""
         complex_prompt = TEST_PROMPTS[1]
@@ -247,6 +250,7 @@ class TestPromptSubmissionFlow:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_empty_prompt_handling(self, chat_orchestrator_with_failures):
         """Test handling of edge cases like empty prompts"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -260,6 +264,7 @@ class TestPromptSubmissionFlow:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_oversized_prompt_handling(self, chat_orchestrator_with_failures):
         """Test handling of oversized prompts that exceed token limits"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -275,9 +280,11 @@ class TestPromptSubmissionFlow:
             )
 
 
+@pytest.mark.e2e
 class TestAgentSelectionAndRouting:
     """Test agent selection logic - designed to expose routing failures"""
     
+    @pytest.mark.e2e
     async def test_agent_selection_for_cost_optimization(self, chat_orchestrator_with_failures):
         """Test that cost optimization prompts select correct agent"""
         prompt = "I need to reduce my OpenAI costs by 50%"
@@ -292,6 +299,7 @@ class TestAgentSelectionAndRouting:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_fallback_agent_selection(self, chat_orchestrator_with_failures):
         """Test fallback behavior when primary agent fails"""
         prompt = "This is an ambiguous request that doesn't fit any category"
@@ -306,6 +314,7 @@ class TestAgentSelectionAndRouting:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_multi_agent_orchestration(self, chat_orchestrator_with_failures):
         """Test complex requests requiring multiple agents"""
         complex_prompt = TEST_PROMPTS[1]["content"]  # Multi-objective optimization
@@ -321,9 +330,11 @@ class TestAgentSelectionAndRouting:
             )
 
 
+@pytest.mark.e2e
 class TestLLMAPICallsAndResponseHandling:
     """Test LLM API integration - designed to expose API call failures"""
     
+    @pytest.mark.e2e
     async def test_llm_api_call_success(self, failing_llm_manager):
         """Test successful LLM API calls (likely to fail if LLM integration broken)"""
         prompt = "What is AI optimization?"
@@ -335,6 +346,7 @@ class TestLLMAPICallsAndResponseHandling:
                 llm_config_name="default"
             )
     
+    @pytest.mark.e2e
     async def test_llm_api_failure_handling(self, failing_llm_manager):
         """Test LLM API failure handling"""
         prompt = "This should fail"  # Trigger failure in mock
@@ -346,6 +358,7 @@ class TestLLMAPICallsAndResponseHandling:
                 llm_config_name="default"
             )
     
+    @pytest.mark.e2e
     async def test_llm_timeout_handling(self, failing_llm_manager):
         """Test LLM request timeout handling"""
         prompt = "This is a test prompt for timeout"
@@ -357,6 +370,7 @@ class TestLLMAPICallsAndResponseHandling:
                 timeout=0.001  # Very short timeout to force failure
             )
     
+    @pytest.mark.e2e
     async def test_llm_rate_limit_handling(self, failing_llm_manager):
         """Test handling of rate limits from LLM providers"""
         # Simulate rapid requests to trigger rate limiting
@@ -373,9 +387,11 @@ class TestLLMAPICallsAndResponseHandling:
             responses = await asyncio.gather(*tasks, return_exceptions=True)
 
 
+@pytest.mark.e2e
 class TestStreamingResponseDelivery:
     """Test streaming response functionality - designed to expose streaming failures"""
     
+    @pytest.mark.e2e
     async def test_basic_streaming_response(self, failing_llm_manager):
         """Test basic streaming response delivery"""
         prompt = "Generate a streaming response"
@@ -391,6 +407,7 @@ class TestStreamingResponseDelivery:
             async for chunk in stream:
                 chunks.append(chunk)
     
+    @pytest.mark.e2e
     async def test_streaming_interruption_recovery(self, failing_llm_manager):
         """Test recovery from streaming interruptions"""
         prompt = "stream_fail test"  # Trigger failure in mock
@@ -405,6 +422,7 @@ class TestStreamingResponseDelivery:
             async for chunk in stream:
                 pass  # Should fail during iteration
     
+    @pytest.mark.e2e
     async def test_websocket_streaming_delivery(self, failing_websocket_manager, chat_orchestrator_with_failures):
         """Test streaming responses through WebSocket"""
         prompt = TEST_PROMPTS[2]["content"]  # Streaming heavy prompt
@@ -419,6 +437,7 @@ class TestStreamingResponseDelivery:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_websocket_connection_failure_during_streaming(self, failing_websocket_manager):
         """Test handling of WebSocket disconnection during streaming"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -429,9 +448,11 @@ class TestStreamingResponseDelivery:
             await failing_websocket_manager.send_message(user_id, message)
 
 
+@pytest.mark.e2e
 class TestTokenTrackingAndCostCalculation:
     """Test token counting and cost calculation - designed to expose billing issues"""
     
+    @pytest.mark.e2e
     async def test_token_counting_accuracy(self, failing_llm_manager):
         """Test accuracy of token counting"""
         prompt = "This is a test prompt for token counting"
@@ -450,6 +471,7 @@ class TestTokenTrackingAndCostCalculation:
                 response.usage.prompt_tokens + response.usage.completion_tokens
             )
     
+    @pytest.mark.e2e
     async def test_cost_calculation_for_different_models(self, failing_llm_manager):
         """Test cost calculation across different model types"""
         prompt = "Calculate costs for this prompt"
@@ -466,6 +488,7 @@ class TestTokenTrackingAndCostCalculation:
                 # Cost calculation should be available
                 assert hasattr(response, 'estimated_cost')
     
+    @pytest.mark.e2e
     async def test_streaming_token_counting(self, failing_llm_manager):
         """Test token counting for streaming responses"""
         prompt = "Generate a streaming response for token counting"
@@ -485,9 +508,11 @@ class TestTokenTrackingAndCostCalculation:
             assert total_tokens > 0
 
 
+@pytest.mark.e2e
 class TestErrorHandlingAndRecovery:
     """Test error handling and recovery mechanisms - designed to expose resilience issues"""
     
+    @pytest.mark.e2e
     async def test_llm_api_error_recovery(self, failing_llm_manager):
         """Test recovery from LLM API errors"""
         prompt = "fail"  # Trigger API failure
@@ -500,6 +525,7 @@ class TestErrorHandlingAndRecovery:
                 use_cache=False
             )
     
+    @pytest.mark.e2e
     async def test_partial_response_handling(self, chat_orchestrator_with_failures):
         """Test handling of partial responses due to errors"""
         prompt = "Generate a long response that might be interrupted"
@@ -514,6 +540,7 @@ class TestErrorHandlingAndRecovery:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_database_error_during_processing(self, mock_db_session, chat_orchestrator_with_failures):
         """Test handling of database errors during message processing"""
         # Configure mock to fail
@@ -532,9 +559,11 @@ class TestErrorHandlingAndRecovery:
             )
 
 
+@pytest.mark.e2e
 class TestResponseCachingAndOptimization:
     """Test response caching and optimization - designed to expose caching issues"""
     
+    @pytest.mark.e2e
     async def test_response_caching_functionality(self, failing_llm_manager):
         """Test that responses are properly cached"""
         prompt = "This response should be cached"
@@ -555,6 +584,7 @@ class TestResponseCachingAndOptimization:
                 use_cache=True
             )
     
+    @pytest.mark.e2e
     async def test_cache_invalidation(self, failing_llm_manager):
         """Test cache invalidation logic"""
         prompt = "Test cache invalidation"
@@ -575,6 +605,7 @@ class TestResponseCachingAndOptimization:
                 use_cache=False
             )
     
+    @pytest.mark.e2e
     async def test_semantic_cache_performance(self, failing_llm_manager):
         """Test semantic caching performance"""
         similar_prompts = [
@@ -595,9 +626,11 @@ class TestResponseCachingAndOptimization:
                 responses.append(response)
 
 
+@pytest.mark.e2e
 class TestMultiAgentOrchestration:
     """Test multi-agent coordination - designed to expose orchestration issues"""
     
+    @pytest.mark.e2e
     async def test_agent_coordination_flow(self, chat_orchestrator_with_failures):
         """Test coordination between multiple agents"""
         complex_prompt = "I need cost analysis, performance optimization, and implementation recommendations"
@@ -612,6 +645,7 @@ class TestMultiAgentOrchestration:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_agent_state_management(self, chat_orchestrator_with_failures):
         """Test agent state management across requests"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -635,6 +669,7 @@ class TestMultiAgentOrchestration:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_agent_failure_cascade_prevention(self, chat_orchestrator_with_failures):
         """Test prevention of failure cascades across agents"""
         prompt = "tool_fail optimization analysis"  # Trigger tool failure
@@ -650,9 +685,11 @@ class TestMultiAgentOrchestration:
             )
 
 
+@pytest.mark.e2e
 class TestPerformanceUnderLoad:
     """Test performance characteristics - designed to expose scaling issues"""
     
+    @pytest.mark.e2e
     async def test_concurrent_request_handling(self, chat_orchestrator_with_failures):
         """Test handling of concurrent requests"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -672,6 +709,7 @@ class TestPerformanceUnderLoad:
         with pytest.raises((Exception, AttributeError)):
             responses = await asyncio.gather(*tasks, return_exceptions=True)
     
+    @pytest.mark.e2e
     async def test_memory_usage_under_load(self, chat_orchestrator_with_failures):
         """Test memory usage patterns under load"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -687,6 +725,7 @@ class TestPerformanceUnderLoad:
                     message_type="user_message"
                 )
     
+    @pytest.mark.e2e
     async def test_response_time_degradation(self, chat_orchestrator_with_failures):
         """Test response time under increasing load"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -712,9 +751,11 @@ class TestPerformanceUnderLoad:
                     raise TimeoutError("Response time degradation detected")
 
 
+@pytest.mark.e2e
 class TestMultiTurnConversationFlow:
     """Test multi-turn conversation handling - designed to expose context management issues"""
     
+    @pytest.mark.e2e
     async def test_conversation_context_preservation(self, chat_orchestrator_with_failures):
         """Test that conversation context is preserved across turns"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -738,6 +779,7 @@ class TestMultiTurnConversationFlow:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_conversation_memory_limits(self, chat_orchestrator_with_failures):
         """Test handling of conversation memory limits"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -754,6 +796,7 @@ class TestMultiTurnConversationFlow:
                     message_type="user_message"
                 )
     
+    @pytest.mark.e2e
     async def test_conversation_state_recovery(self, chat_orchestrator_with_failures):
         """Test recovery of conversation state after interruption"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -787,9 +830,11 @@ class TestMultiTurnConversationFlow:
 
 
 # Integration test combining multiple failure scenarios
+@pytest.mark.e2e
 class TestEndToEndIntegrationFailures:
     """End-to-end integration tests designed to expose system-wide issues"""
     
+    @pytest.mark.e2e
     async def test_complete_user_journey_with_failures(self, chat_orchestrator_with_failures):
         """Test complete user journey to expose end-to-end issues"""
         user_id = f"test_user_{uuid.uuid4()}"
@@ -821,6 +866,7 @@ class TestEndToEndIntegrationFailures:
                 message_type="user_message"
             )
     
+    @pytest.mark.e2e
     async def test_system_under_realistic_load(self, chat_orchestrator_with_failures):
         """Test system behavior under realistic production-like load"""
         # Should fail if system can't handle realistic load
@@ -843,6 +889,7 @@ class TestEndToEndIntegrationFailures:
             # Execute all tasks concurrently
             responses = await asyncio.gather(*tasks, return_exceptions=True)
     
+    @pytest.mark.e2e
     async def test_cascading_failure_scenarios(self, chat_orchestrator_with_failures):
         """Test cascading failure scenarios that could bring down the system"""
         user_id = f"test_user_{uuid.uuid4()}"

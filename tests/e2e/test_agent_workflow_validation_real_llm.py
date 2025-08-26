@@ -115,6 +115,7 @@ class AgentWorkflowTestData:
 
 @pytest.mark.real_llm
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentWorkflowValidationRealLLM:
     """Test complete agent workflow validation with real LLM."""
     
@@ -129,6 +130,7 @@ class TestAgentWorkflowValidationRealLLM:
     
     @pytest.mark.asyncio
     @pytest.mark.parametrize("workflow_case", AgentWorkflowTestData.get_workflow_test_cases())
+    @pytest.mark.e2e
     async def test_complete_workflow_execution(self, test_core, use_real_llm, workflow_validator, workflow_case):
         """Test complete workflow execution for each test case."""
         session_data = await test_core.establish_conversation_session(workflow_case.plan_tier)

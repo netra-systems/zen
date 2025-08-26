@@ -123,6 +123,7 @@ class PerformanceMetricsCollector:
         })
     
 
+@pytest.mark.e2e
 class TestSyntaxFix:
     """Generated test class"""
 
@@ -158,6 +159,7 @@ class TestSyntaxFix:
         }
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_performance_under_concurrent_load(self, 
     concurrent_test_environment, 
 

@@ -132,7 +132,7 @@ class MockOrchestrator:
         
         # Track concurrent peak
         current_active = len(self.agents)
-        if current_active > self.metrics["concurrent_peak"]:
+        if current_active > self.metrics.get("concurrent_peak", 0):
             self.metrics["concurrent_peak"] = current_active
             
         return self.agents[user_id]

@@ -10,16 +10,25 @@ import os
 import pytest
 import logging
 from unittest.mock import patch, MagicMock
+from unittest import mock
 from typing import Dict, Any
 
-from test_framework.markers import requires_auth_service
-from test_framework.fixtures.environment import IsolatedEnvironment
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from tests.clients.backend_client import BackendTestClient
+from tests.e2e.config import UnifiedTestConfig
 
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.e2e
 class TestOAuthConfigurationValidation:
     """Test OAuth configuration validation and error handling."""
+    
+    @pytest.fixture
+    async def auth_service_client(self):
+        """Get auth service test client."""
+        config = UnifiedTestConfig()
+        return BackendTestClient(base_url=config.auth_service_url)
     
     @pytest.fixture
     def mock_env_vars(self) -> Dict[str, str]:
@@ -48,9 +57,10 @@ class TestOAuthConfigurationValidation:
             "GOOGLE_CLIENT_SECRET": "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"
         }
 
+    @pytest.mark.e2e
     def test_auth_service_startup_validation_success(self, mock_env_vars):
         """Test auth service startup with valid OAuth configuration."""
-        with IsolatedEnvironment(mock_env_vars):
+        with mock.patch.dict(os.environ, mock_env_vars, clear=True):
             # Import after setting environment
             from auth_service.auth_core.config import AuthConfig
             
@@ -63,9 +73,10 @@ class TestOAuthConfigurationValidation:
             assert not client_id.startswith("REPLACE_")
             assert not client_secret.startswith("REPLACE_")
     
+    @pytest.mark.e2e
     def test_auth_service_startup_validation_missing_credentials(self, empty_env_vars):
         """Test auth service startup fails loudly with missing OAuth credentials."""
-        with IsolatedEnvironment(empty_env_vars):
+        with mock.patch.dict(os.environ, empty_env_vars, clear=True):
             from auth_service.auth_core.config import AuthConfig
             
             # Should return empty strings for missing config
@@ -75,9 +86,10 @@ class TestOAuthConfigurationValidation:
             assert client_id == ""
             assert client_secret == ""
     
+    @pytest.mark.e2e
     def test_auth_service_startup_validation_placeholder_credentials(self, placeholder_env_vars):
         """Test auth service startup detects placeholder OAuth credentials."""
-        with IsolatedEnvironment(placeholder_env_vars):
+        with mock.patch.dict(os.environ, placeholder_env_vars, clear=True):
             from auth_service.auth_core.config import AuthConfig
             
             client_id = AuthConfig.get_google_client_id()
@@ -87,11 +99,11 @@ class TestOAuthConfigurationValidation:
             assert client_id.startswith("REPLACE_")
             assert client_secret.startswith("REPLACE_")
     
-    @requires_auth_service
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_login_endpoint_missing_oauth_config(self, auth_service_client, empty_env_vars):
         """Test /auth/login endpoint fails loudly with missing OAuth config."""
-        with IsolatedEnvironment(empty_env_vars):
+        with mock.patch.dict(os.environ, empty_env_vars, clear=True):
             # Try to initiate OAuth login
             response = await auth_service_client.get("/auth/login")
             
@@ -110,11 +122,11 @@ class TestOAuthConfigurationValidation:
                 # Legacy string format
                 assert "OAuth not configured" in error_detail["detail"]
     
-    @requires_auth_service
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_login_endpoint_placeholder_oauth_config(self, auth_service_client, placeholder_env_vars):
         """Test /auth/login endpoint detects placeholder OAuth config."""
-        with IsolatedEnvironment(placeholder_env_vars):
+        with mock.patch.dict(os.environ, placeholder_env_vars, clear=True):
             response = await auth_service_client.get("/auth/login")
             
             # Should return 500 with detailed error about placeholders
@@ -127,11 +139,11 @@ class TestOAuthConfigurationValidation:
             else:
                 assert "placeholder" in error_detail["detail"].lower() or "oauth" in error_detail["detail"].lower()
     
-    @requires_auth_service
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_config_endpoint_missing_oauth_config(self, auth_service_client, empty_env_vars):
         """Test /auth/config endpoint warns about missing OAuth config."""
-        with IsolatedEnvironment(empty_env_vars):
+        with mock.patch.dict(os.environ, empty_env_vars, clear=True):
             response = await auth_service_client.get("/auth/config")
             
             if response.status_code == 500:
@@ -146,11 +158,11 @@ class TestOAuthConfigurationValidation:
                 assert config["google_client_id"] == ""
                 assert not config.get("oauth_enabled", True)
     
-    @requires_auth_service
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_config_endpoint_valid_oauth_config(self, auth_service_client, mock_env_vars):
         """Test /auth/config endpoint with valid OAuth config."""
-        with IsolatedEnvironment(mock_env_vars):
+        with mock.patch.dict(os.environ, mock_env_vars, clear=True):
             response = await auth_service_client.get("/auth/config")
             
             # Should succeed
@@ -164,9 +176,11 @@ class TestOAuthConfigurationValidation:
             assert config.get("development_mode", False) is False  # staging environment
 
 
+@pytest.mark.e2e
 class TestOAuthEnvironmentSpecificConfiguration:
     """Test OAuth configuration for different environments."""
     
+    @pytest.mark.e2e
     def test_staging_oauth_configuration_priority(self):
         """Test OAuth configuration priority in staging environment."""
         staging_env = {
@@ -177,7 +191,7 @@ class TestOAuthEnvironmentSpecificConfiguration:
             "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "staging-specific-client-secret"
         }
         
-        with IsolatedEnvironment(staging_env):
+        with mock.patch.dict(os.environ, staging_env, clear=True):
             from auth_service.auth_core.secret_loader import AuthSecretLoader
             
             # Should prefer staging-specific variables
@@ -187,6 +201,7 @@ class TestOAuthEnvironmentSpecificConfiguration:
             assert client_id == "staging-specific-client-id.apps.googleusercontent.com"
             assert client_secret == "staging-specific-client-secret"
     
+    @pytest.mark.e2e
     def test_production_oauth_configuration_priority(self):
         """Test OAuth configuration priority in production environment."""
         production_env = {
@@ -197,7 +212,7 @@ class TestOAuthEnvironmentSpecificConfiguration:
             "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION": "production-specific-client-secret"
         }
         
-        with IsolatedEnvironment(production_env):
+        with mock.patch.dict(os.environ, production_env, clear=True):
             from auth_service.auth_core.secret_loader import AuthSecretLoader
             
             # Should prefer production-specific variables
@@ -207,6 +222,7 @@ class TestOAuthEnvironmentSpecificConfiguration:
             assert client_id == "production-specific-client-id.apps.googleusercontent.com"
             assert client_secret == "production-specific-client-secret"
     
+    @pytest.mark.e2e
     def test_development_oauth_configuration_fallback(self):
         """Test OAuth configuration fallback in development environment."""
         development_env = {
@@ -215,7 +231,7 @@ class TestOAuthEnvironmentSpecificConfiguration:
             "GOOGLE_CLIENT_SECRET": "dev-client-secret"
         }
         
-        with IsolatedEnvironment(development_env):
+        with mock.patch.dict(os.environ, development_env, clear=True):
             from auth_service.auth_core.secret_loader import AuthSecretLoader
             
             # Should use generic variables in development
@@ -226,9 +242,11 @@ class TestOAuthEnvironmentSpecificConfiguration:
             assert client_secret == "dev-client-secret"
 
 
+@pytest.mark.e2e
 class TestOAuthDeploymentValidation:
     """Test the OAuth deployment validation script."""
     
+    @pytest.mark.e2e
     def test_oauth_validation_script_success(self, tmp_path, mock_env_vars):
         """Test OAuth validation script with valid configuration."""
         # Create a temporary config file
@@ -249,7 +267,7 @@ class TestOAuthDeploymentValidation:
         with open(config_file, 'w') as f:
             json.dump(oauth_config, f)
         
-        with IsolatedEnvironment(mock_env_vars):
+        with mock.patch.dict(os.environ, mock_env_vars, clear=True):
             # Mock the config file path
             with patch('pathlib.Path') as mock_path:
                 mock_path.return_value.parent.parent = tmp_path.parent
@@ -264,9 +282,10 @@ class TestOAuthDeploymentValidation:
                 assert success is True
                 assert "ALL VALIDATIONS PASSED" in report
     
+    @pytest.mark.e2e
     def test_oauth_validation_script_missing_credentials(self, empty_env_vars):
         """Test OAuth validation script fails with missing credentials."""
-        with IsolatedEnvironment(empty_env_vars):
+        with mock.patch.dict(os.environ, empty_env_vars, clear=True):
             from scripts.validate_oauth_deployment import OAuthDeploymentValidator
             
             validator = OAuthDeploymentValidator("staging")
@@ -276,9 +295,10 @@ class TestOAuthDeploymentValidation:
             assert "CRITICAL ERRORS" in report
             assert "GOOGLE_CLIENT_ID" in report or "Google Client ID" in report
     
+    @pytest.mark.e2e
     def test_oauth_validation_script_placeholder_credentials(self, placeholder_env_vars):
         """Test OAuth validation script detects placeholder credentials."""
-        with IsolatedEnvironment(placeholder_env_vars):
+        with mock.patch.dict(os.environ, placeholder_env_vars, clear=True):
             from scripts.validate_oauth_deployment import OAuthDeploymentValidator
             
             validator = OAuthDeploymentValidator("staging")
@@ -289,9 +309,11 @@ class TestOAuthDeploymentValidation:
             assert "placeholder" in report.lower()
 
 
+@pytest.mark.e2e
 class TestOAuthFrontendErrorHandling:
     """Test frontend OAuth error handling and display."""
     
+    @pytest.mark.e2e
     def test_frontend_oauth_config_error_handling(self):
         """Test frontend handles OAuth configuration errors gracefully."""
         # This would typically be a frontend integration test
@@ -317,9 +339,11 @@ class TestOAuthFrontendErrorHandling:
         assert error_response["detail"]["user_message"].startswith("OAuth Configuration Error")
 
 
+@pytest.mark.e2e
 class TestOAuthRedirectConfiguration:
     """Test OAuth redirect URI configuration and validation."""
     
+    @pytest.mark.e2e
     def test_oauth_redirect_uris_config_loading(self):
         """Test loading OAuth redirect URIs configuration."""
         config_path = os.path.join(os.path.dirname(__file__), "..", "..", "config", "oauth_redirect_uris.json")
@@ -346,6 +370,7 @@ class TestOAuthRedirectConfiguration:
         else:
             pytest.skip("OAuth redirect URIs config file not found")
     
+    @pytest.mark.e2e
     def test_oauth_redirect_uris_environment_coverage(self):
         """Test OAuth redirect URIs cover expected environments."""
         config_path = os.path.join(os.path.dirname(__file__), "..", "..", "config", "oauth_redirect_uris.json")
@@ -368,14 +393,39 @@ class TestOAuthRedirectConfiguration:
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestOAuthIntegration:
     """Integration tests for OAuth configuration across services."""
     
-    @requires_auth_service  
+    @pytest.fixture
+    async def auth_service_client(self):
+        """Get auth service test client."""
+        config = UnifiedTestConfig()
+        return BackendTestClient(base_url=config.auth_service_url)
+    
+    @pytest.fixture
+    def mock_env_vars(self) -> Dict[str, str]:
+        """Mock environment variables for testing."""
+        return {
+            "ENVIRONMENT": "staging",
+            "GOOGLE_CLIENT_ID": "test-client-id-123456789.apps.googleusercontent.com",
+            "GOOGLE_CLIENT_SECRET": "test-client-secret-12345678901234567890",
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "staging-client-id-123456789.apps.googleusercontent.com", 
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "staging-client-secret-12345678901234567890"
+        }
+    
+    @pytest.fixture
+    def empty_env_vars(self) -> Dict[str, str]:
+        """Empty environment variables for testing missing config."""
+        return {
+            "ENVIRONMENT": "staging"
+        }
+    
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_configuration_end_to_end(self, auth_service_client, mock_env_vars):
         """Test OAuth configuration from auth service through to frontend."""
-        with IsolatedEnvironment(mock_env_vars):
+        with mock.patch.dict(os.environ, mock_env_vars, clear=True):
             # 1. Test auth service configuration endpoint
             config_response = await auth_service_client.get("/auth/config")
             assert config_response.status_code == 200
@@ -398,11 +448,11 @@ class TestOAuthIntegration:
                 # Should not be a configuration error
                 assert login_response.status_code != 500 or "OAUTH_CONFIGURATION" not in str(login_response.json())
     
-    @requires_auth_service
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_oauth_configuration_failure_propagation(self, auth_service_client, empty_env_vars):
         """Test OAuth configuration errors propagate properly through the system."""
-        with IsolatedEnvironment(empty_env_vars):
+        with mock.patch.dict(os.environ, empty_env_vars, clear=True):
             # Test configuration endpoint
             config_response = await auth_service_client.get("/auth/config")
             

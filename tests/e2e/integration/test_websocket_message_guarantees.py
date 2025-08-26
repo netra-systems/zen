@@ -34,6 +34,7 @@ from tests.e2e.websocket_message_guarantee_helpers import (
 )
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestConcurrentMessageDeliveryGuarantees:
     """Test #5.1: Concurrent Message Delivery with Ordering."""
     
@@ -52,6 +53,7 @@ class TestConcurrentMessageDeliveryGuarantees:
         """Initialize message ordering validator."""
         return OrderingValidator()
     
+    @pytest.mark.e2e
     async def test_concurrent_100_messages_zero_loss(self, delivery_core:
                                                    concurrent_sender, ordering_validator):
         """Test 100 concurrent messages with 0% loss guarantee."""
@@ -81,6 +83,7 @@ class TestConcurrentMessageDeliveryGuarantees:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
     
+    @pytest.mark.e2e
     async def test_ordering_preservation_under_load(self, delivery_core, ordering_validator):
         """Test message ordering preservation under concurrent load."""
         user_id = TEST_USERS["enterprise"].id
@@ -103,6 +106,7 @@ class TestConcurrentMessageDeliveryGuarantees:
             raise
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestNetworkInterruptionResilience:
     """Test #5.2: Network Interruption Handling."""
     
@@ -121,6 +125,7 @@ class TestNetworkInterruptionResilience:
         """Initialize message loss detector."""
         return MessageLossDetector()
     
+    @pytest.mark.e2e
     async def test_message_delivery_during_network_interruption(self, delivery_core:
                                                               interruption_simulator, loss_detector):
         """Test message delivery guarantee during network interruptions."""
@@ -153,6 +158,7 @@ class TestNetworkInterruptionResilience:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
     
+    @pytest.mark.e2e
     async def test_recovery_and_message_queue_integrity(self, delivery_core:
                                                       interruption_simulator):
         """Test message queue integrity after network recovery."""
@@ -180,6 +186,7 @@ class TestNetworkInterruptionResilience:
             raise
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAcknowledmentAndTrackingSystem:
     """Test #5.3: Message Acknowledgment System."""
     
@@ -193,6 +200,7 @@ class TestAcknowledmentAndTrackingSystem:
         """Initialize acknowledgment tracker."""
         return AcknowledmentTracker()
     
+    @pytest.mark.e2e
     async def test_acknowledgment_tracking_system(self, delivery_core, ack_tracker):
         """Test comprehensive acknowledgment tracking."""
         user_id = TEST_USERS["enterprise"].id
@@ -221,6 +229,7 @@ class TestAcknowledmentAndTrackingSystem:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
     
+    @pytest.mark.e2e
     async def test_performance_under_load(self, delivery_core, ack_tracker):
         """Test acknowledgment performance under concurrent load."""
         start_time = time.time()
@@ -243,6 +252,7 @@ class TestAcknowledmentAndTrackingSystem:
             raise
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 class TestEndToEndMessageGuarantees:
     """Test #5.4: Complete End-to-End Message Delivery Guarantees."""
     
@@ -251,6 +261,7 @@ class TestEndToEndMessageGuarantees:
         """Initialize message delivery test core."""
         return MessageDeliveryGuaranteeCore()
     
+    @pytest.mark.e2e
     async def test_complete_delivery_guarantee_scenario(self, delivery_core):
         """Test complete message delivery guarantee scenario."""
         user_id = TEST_USERS["enterprise"].id

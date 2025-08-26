@@ -180,6 +180,8 @@ ALL relevent changes must update [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md).
 *   **Learnings:** Document insights in specs (using positive wording) to ensure continuous improvement and stability.
 *   Refactors must delete all legacy code. Refactors must be complete system wide and "atomic" operations that leave a clean and better system.
 
+*   **Learnings vs Reports:** Learnings in SPEC/*.xml files are permanent knowledge stored in version control. Reports (*.md files) are ephemeral snapshots documenting specific work sessions and can be deleted after value extraction.
+
 ### 4.1. String Literals Index: Preventing Hallucination
 
 The **String Literals Index** is a critical system for maintaining consistency and preventing LLM hallucination of platform-specific values.
@@ -301,9 +303,9 @@ python unified_test_runner.py
 ### 6.2. Unified Test Runner
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml), [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml), and [`SPEC/environment_aware_testing.xml`](SPEC/environment_aware_testing.xml).
 
-*   **DEFAULT (Fast Feedback):** `python unified_test_runner.py --level integration --no-coverage --fast-fail`
-*   **AGENT CHANGES:** `python unified_test_runner.py --level agents --real-llm`
-*   **BEFORE RELEASES (Includes Staging Validation):** `python unified_test_runner.py --level comprehensive --real-llm --env staging`
+*   **DEFAULT (Fast Feedback):** `python unified_test_runner.py --category integration --no-coverage --fast-fail`
+*   **AGENT CHANGES:** `python unified_test_runner.py --category agent --real-llm`
+*   **BEFORE RELEASES (Includes Staging Validation):** `python unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
 *   **ENVIRONMENT-SPECIFIC:** `python unified_test_runner.py --env staging` (runs only staging-compatible tests)
 *   **PRODUCTION SAFE:** `python unified_test_runner.py --env prod --allow-prod` (requires explicit flag)
 
@@ -387,7 +389,7 @@ The [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system hea
 3.  **CHECK LEARNINGS** [`learnings/index.xml`](SPEC/learnings/index.xml) - Search for related insights.
 4.  **VERIFY** String literals using `python scripts/query_string_literals.py validate "literal_value"` to prevent hallucination.
 5.  **REVIEW** [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-6.  **RUN** `python unified_test_runner.py --level integration --no-coverage --fast-fail`.
+6.  **RUN** `python unified_test_runner.py --category integration --no-coverage --fast-fail`.
 7.  **VALIDATE** changes in Dev and Staging environments as required (See 3.4).
 8.  **UPDATE** specs and documentation to reflect the implemented reality.
 9.  **REFRESH** String literals index if adding new constants: `python scripts/scan_string_literals.py`

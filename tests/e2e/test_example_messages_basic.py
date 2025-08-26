@@ -25,6 +25,7 @@ from tests.e2e.example_message_test_helpers import (
 
 
 @pytest.fixture 
+@pytest.mark.e2e
 async def test_user_id():
     """Generate test user ID"""
     return f"test_user_{uuid4()}"
@@ -136,9 +137,11 @@ async def example_handler():
     return MockExampleMessageHandler()
 
 
+@pytest.mark.e2e
 class TestExampleMessageBasicFlow:
     """Test basic example message processing flow"""
 
+    @pytest.mark.e2e
     async def test_cost_optimization_prompt(self, example_handler, test_user_id):
         """Test cost optimization prompt"""
         request = create_example_message_request(
@@ -150,6 +153,7 @@ class TestExampleMessageBasicFlow:
         assert_completed_response(response)
         assert "cost" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_latency_optimization_prompt(self, example_handler, test_user_id):
         """Test latency optimization prompt"""
         request = create_example_message_request(
@@ -161,6 +165,7 @@ class TestExampleMessageBasicFlow:
         assert_completed_response(response)
         assert "latency" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_scaling_analysis_prompt(self, example_handler, test_user_id):
         """Test scaling analysis prompt"""
         request = create_example_message_request(
@@ -172,6 +177,7 @@ class TestExampleMessageBasicFlow:
         assert_completed_response(response)
         assert "scaling" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_model_selection_prompt(self, example_handler, test_user_id):
         """Test model selection prompt"""
         request = create_example_message_request(
@@ -184,27 +190,32 @@ class TestExampleMessageBasicFlow:
         assert "model" in response.result.get("optimization_type", "").lower()
 
 
+@pytest.mark.e2e
 class TestMessageValidation:
     """Test message validation"""
 
+    @pytest.mark.e2e
     async def test_valid_message_processing(self, example_handler, test_user_id):
         """Test processing of valid message"""
         request = create_example_message_request(BASIC_COST_OPTIMIZATION, user_id=test_user_id)
         response = await example_handler.handle_example_message(request)
         assert_completed_response(response)
 
+    @pytest.mark.e2e
     async def test_invalid_message_structure(self, example_handler):
         """Test handling of invalid message structure"""
         invalid_request = {"invalid": "structure"}
         response = await example_handler.handle_example_message(invalid_request)
         assert_error_response(response)
 
+    @pytest.mark.e2e
     async def test_missing_content_field(self, example_handler):
         """Test handling of missing content"""
         incomplete_request = {"example_message_id": str(uuid4())}
         response = await example_handler.handle_example_message(incomplete_request)
         assert_error_response(response)
 
+    @pytest.mark.e2e
     async def test_invalid_category_validation(self, example_handler, test_user_id):
         """Test validation of invalid category"""
         request = create_example_message_request(
@@ -216,9 +227,11 @@ class TestMessageValidation:
         assert_error_response(response)
 
 
+@pytest.mark.e2e
 class TestBusinessValueTracking:
     """Test business value tracking"""
 
+    @pytest.mark.e2e
     async def test_business_insights_generation(self, example_handler, test_user_id):
         """Test business insights are generated"""
         request = create_example_message_request(
@@ -231,6 +244,7 @@ class TestBusinessValueTracking:
         assert response.business_insights is not None
         assert "business_value_type" in response.business_insights
 
+    @pytest.mark.e2e
     async def test_performance_tracking(self, example_handler, test_user_id):
         """Test processing time tracking"""
         request = create_example_message_request(BASIC_COST_OPTIMIZATION, user_id=test_user_id)

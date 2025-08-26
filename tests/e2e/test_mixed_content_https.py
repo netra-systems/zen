@@ -30,6 +30,7 @@ from test_framework.environment_markers import env, env_requires, dev_and_stagin
     features=["https_configured", "cors_configured", "ssl_enabled"],
     data=["staging_domain_config", "ssl_certificates"]
 )
+@pytest.mark.e2e
 class TestMixedContentHTTPS(BaseIntegrationTest):
     """Test suite for mixed content and HTTPS protocol enforcement issues."""
     
@@ -41,6 +42,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         self.protocol_inconsistencies = []
         
     @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    @pytest.mark.e2e
     def test_staging_environment_https_detection_FAILING(self):
         """
         FAILING TEST: secure-api-config.ts should detect staging as secure environment.
@@ -81,6 +83,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                 f"secure-api-config.ts should detect HTTPS protocol as secure environment."
             )
     
+    @pytest.mark.e2e
     def test_api_urls_use_https_in_staging_FAILING(self):
         """
         FAILING TEST: All API URLs should use HTTPS protocol in staging environment.
@@ -119,6 +122,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
                 f"\n\nAll URLs must use HTTPS/WSS in staging to prevent mixed content errors."
             )
     
+    @pytest.mark.e2e
     def test_websocket_urls_use_wss_in_staging_FAILING(self):
         """
         FAILING TEST: WebSocket URLs should use WSS protocol in staging environment.
@@ -173,6 +177,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             f"\n\nWebSocket URLs must use WSS in secure environments to prevent connection failures."
         )
     
+    @pytest.mark.e2e
     def test_server_client_protocol_consistency_FAILING(self):
         """
         FAILING TEST: Server-side and client-side should produce consistent protocol decisions.
@@ -221,6 +226,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             f"\n\nServer and client must generate consistent protocols to prevent hydration errors."
         )
     
+    @pytest.mark.e2e
     def test_environment_detection_edge_cases_FAILING(self):
         """
         FAILING TEST: Environment detection should handle edge cases correctly.
@@ -283,6 +289,7 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
             f"\n\nEnvironment detection must handle complex deployment scenarios correctly."
         )
 
+    @pytest.mark.e2e
     def test_similar_edge_case_cors_origin_protocol_mismatch_FAILING(self):
         """
         FAILING TEST: Similar pattern - CORS origins should match frontend protocol.

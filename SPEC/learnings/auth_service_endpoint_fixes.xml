@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <title>Auth Service API Endpoint and Configuration Fixes</title>
+    <category>Authentication, API Design, JWT Security</category>
+    <importance>High</importance>
+    <summary>Critical fixes for Auth service including missing OAuth endpoints, HEAD method support, configuration improvements, and JWT validation enhancements</summary>
+    
+    <context>
+        <situation>Auth service had several critical issues identified by failing tests</situation>
+        <problems>
+            <problem>Missing OAuth endpoints (/auth/google, /oauth/config) causing 404 errors</problem>
+            <problem>HEAD method not supported on authentication endpoints</problem>
+            <problem>OAuth configuration naming inconsistencies with staging-specific variables</problem>
+            <problem>Database connection issues with SQLite test environments</problem>
+            <problem>JWT validation lacking proper malformed token handling</problem>
+        </problems>
+        <impact>Authentication failures, incomplete API coverage, poor test reliability</impact>
+    </context>
+    
+    <solution>
+        <approach>Systematic fix of System Under Test (SUT) issues, not test modifications</approach>
+        <key_changes>
+            <change>
+                <area>Database Connection Configuration</area>
+                <description>Fixed SQLite connection args to prevent 'command_timeout' parameter errors</description>
+                <implementation>Made connect_args conditional on database type (PostgreSQL vs SQLite)</implementation>
+                <file>auth_service/auth_core/database/connection.py</file>
+            </change>
+            
+            <change>
+                <area>OAuth API Endpoints</area>
+                <description>Added missing OAuth endpoints required by frontend and tests</description>
+                <implementation>
+                    - Added GET /auth/google endpoint for direct Google OAuth initiation
+                    - Added GET /oauth/config endpoint as alias to /auth/config  
+                    - Added GET /oauth/providers endpoint to list available OAuth providers
+                    - All endpoints properly integrated with existing OAuth flow
+                </implementation>
+                <file>auth_service/auth_core/routes/auth_routes.py</file>
+            </change>
+            
+            <change>
+                <area>HTTP Method Support</area>
+                <description>Added HEAD method support to authentication endpoints</description>
+                <implementation>
+                    - Added @router.head() decorators to /auth/login, /auth/verify, /auth/me
+                    - Enables CORS preflight requests and health checking
+                    - Maintains same response logic as GET methods
+                </implementation>
+                <file>auth_service/auth_core/routes/auth_routes.py</file>
+            </change>
+            
+            <change>
+                <area>OAuth Configuration Priority</area>
+                <description>Fixed environment-specific OAuth variable fallback chain</description>
+                <implementation>
+                    - Prioritize GOOGLE_OAUTH_CLIENT_ID_STAGING over GOOGLE_CLIENT_ID in staging
+                    - Fixed return type consistency (return "" instead of None)
+                    - Proper logging of which configuration source is used
+                </implementation>
+                <file>auth_service/auth_core/secret_loader.py</file>
+            </change>
+            
+            <change>
+                <area>JWT Validation Security</area>
+                <description>Enhanced JWT validation with comprehensive malformed token handling</description>
+                <implementation>
+                    - Added _validate_jwt_structure() method for structure validation
+                    - Validates 3-part JWT format before processing
+                    - Validates base64 encoding of each JWT part
+                    - Validates JSON format of header and payload
+                    - Prevents "Not enough segments" and malformed token errors
+                </implementation>
+                <file>auth_service/auth_core/core/jwt_handler.py</file>
+            </change>
+        </key_changes>
+    </solution>
+    
+    <testing>
+        <validation_approach>Run specific failing tests to confirm fixes</validation_approach>
+        <test_results>
+            <result>✅ Database connection errors resolved - SQLite tests now run</result>
+            <result>✅ JWT malformed token handling test passes</result>
+            <result>✅ OAuth endpoint detection working (found /auth/google endpoint)</result>
+            <result>✅ Configuration loading follows correct priority chain</result>
+        </test_results>
+        <test_commands>
+            <command>AUTH_FAST_TEST_MODE=true python -m pytest tests/test_jwt_validation_failures.py::TestJWTMalformedTokenHandling::test_malformed_token_not_enough_segments_fails -v</command>
+            <command>AUTH_FAST_TEST_MODE=true python -m pytest tests/test_api_endpoints.py::TestMissingAPIEndpoints::test_auth_google_endpoint_exists_fails -v</command>
+        </test_commands>
+    </testing>
+    
+    <lessons_learned>
+        <lesson>
+            <title>Database-Specific Connection Parameters</title>
+            <description>Connection parameters like 'command_timeout' are database-specific and cause errors with SQLite</description>
+            <best_practice>Always make connection args conditional on database type for test compatibility</best_practice>
+        </lesson>
+        
+        <lesson>
+            <title>API Completeness for Frontend Integration</title>
+            <description>Frontend expects specific endpoint names (/auth/google vs /auth/login?provider=google)</description>
+            <best_practice>Provide both generic and provider-specific endpoints for better API ergonomics</best_practice>
+        </lesson>
+        
+        <lesson>
+            <title>HTTP Method Support for CORS</title>
+            <description>Missing HEAD/OPTIONS support breaks CORS preflight requests and health checks</description>
+            <best_practice>Always add HEAD method support to GET endpoints, especially for authentication</best_practice>
+        </lesson>
+        
+        <lesson>
+            <title>Environment-Specific Configuration Priority</title>
+            <description>Staging-specific variables (GOOGLE_OAUTH_CLIENT_ID_STAGING) should have higher priority than generic ones</description>
+            <best_practice>Implement clear fallback chains: env-specific → generic → defaults</best_practice>
+        </lesson>
+        
+        <lesson>
+            <title>JWT Security Validation Layers</title>
+            <description>JWT validation needs multiple security layers: structure, algorithm, claims, cross-service</description>
+            <best_practice>Validate JWT structure before attempting to decode to prevent malformed token errors</best_practice>
+        </lesson>
+    </lessons_learned>
+    
+    <implementation_patterns>
+        <pattern>
+            <name>Conditional Database Configuration</name>
+            <code_example>
+                # Only add PostgreSQL-specific connection args for PostgreSQL databases
+                if not database_url.startswith('sqlite'):
+                    connect_args = {
+                        "command_timeout": 15,
+                        "server_settings": {"application_name": f"netra_auth_{environment}"}
+                    }
+                else:
+                    connect_args = {}
+            </code_example>
+        </pattern>
+        
+        <pattern>
+            <name>OAuth Endpoint Delegation</name>
+            <code_example>
+                @router.get("/google")
+                async def google_oauth_initiate(return_url: Optional[str] = None, request: Request = None):
+                    """Initiate Google OAuth login flow - dedicated endpoint"""
+                    return await initiate_oauth_login(provider="google", return_url=return_url, request=request)
+            </code_example>
+        </pattern>
+        
+        <pattern>
+            <name>JWT Structure Validation</name>
+            <code_example>
+                def _validate_jwt_structure(self, token: str) -> bool:
+                    if not token or not isinstance(token, str):
+                        return False
+                    parts = token.split('.')
+                    if len(parts) != 3:
+                        return False
+                    # Validate base64 and JSON structure
+                    return True
+            </code_example>
+        </pattern>
+    </implementation_patterns>
+    
+    <security_implications>
+        <implication>Proper JWT structure validation prevents parsing errors that could be exploited</implication>
+        <implication>Environment-specific OAuth configuration prevents credential leakage between environments</implication>
+        <implication>Cross-service JWT validation ensures tokens can't be used outside intended scope</implication>
+    </security_implications>
+    
+    <future_considerations>
+        <consideration>Consider adding more OAuth providers (GitHub, Microsoft) using same endpoint pattern</consideration>
+        <consideration>Implement OAuth configuration validation on startup for early failure detection</consideration>
+        <consideration>Add metrics/monitoring for OAuth endpoint usage and failure rates</consideration>
+        <consideration>Consider rate limiting OAuth endpoints to prevent abuse</consideration>
+    </future_considerations>
+</learnings>

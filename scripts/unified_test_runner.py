@@ -54,7 +54,7 @@ except ImportError:
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
-from test_framework.test_config import configure_dev_environment, configure_real_llm
+from test_framework.test_config import configure_dev_environment, configure_test_environment, configure_real_llm
 from test_framework.test_discovery import TestDiscovery
 from test_framework.test_validation import TestValidation
 
@@ -198,6 +198,9 @@ class UnifiedTestRunner:
                 env.set('BACKEND_URL', env.get('BACKEND_URL', 'http://localhost:8000'), 'test_runner')
                 env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8081'), 'test_runner')
                 env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
+        else:
+            # Default: Configure testing environment for unit/integration tests
+            configure_test_environment()
         
         if args.real_llm:
             configure_real_llm(
@@ -429,7 +432,7 @@ class UnifiedTestRunner:
             "agent": ["backend"],
             "security": ["auth"],
             "frontend": ["frontend"],
-            "e2e": ["backend", "auth", "frontend"],
+            "e2e": ["backend"],  # E2E tests run from backend but include all test directories
             "performance": ["backend", "auth"]
         }
         
@@ -513,31 +516,33 @@ class UnifiedTestRunner:
         
         cmd_parts = ["pytest"]
         
-        # Add test directory
-        cmd_parts.append(str(config["test_dir"]))
-        
-        # Add category-specific markers
+        # Add category-specific selection (simplified to avoid marker hang issues)
         category_markers = {
-            "smoke": ["-m", '"smoke"'],
-            "unit": ["-m", '"not integration and not e2e"'],
-            "integration": ["-m", '"integration"'],
+            "smoke": [str(config["test_dir"]), "-k", "smoke"],
+            "unit": ["netra_backend/tests/unit", "netra_backend/tests/core"],
+            "integration": ["netra_backend/tests/integration", "netra_backend/tests/startup"],
             "api": ["netra_backend/tests/test_api_core_critical.py", "netra_backend/tests/test_api_error_handling_critical.py", "netra_backend/tests/test_api_threads_messages_critical.py", "netra_backend/tests/test_api_agent_generation_critical.py", "netra_backend/tests/test_api_endpoints_critical.py"],
-            "database": ["-k", '"database or db"'],
-            "websocket": ["-k", '"websocket or ws"'],
-            "agent": ["-k", '"agent"'],
-            "security": ["-k", '"auth or security"'],
-            "e2e": ["-m", '"e2e"'],
-            "performance": ["-m", '"performance"']
+            "database": [str(config["test_dir"]), "-k", '"database or db"'],
+            "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
+            "agent": ["netra_backend/tests/agents"],
+            "security": [str(config["test_dir"]), "-k", '"auth or security"'],
+            "e2e": ["tests/e2e", "netra_backend/tests", "auth_service/tests"],
+            "performance": [str(config["test_dir"]), "-k", "performance"]
         }
         
         if category_name in category_markers:
             cmd_parts.extend(category_markers[category_name])
+        else:
+            # Default: use the test directory
+            cmd_parts.append(str(config["test_dir"]))
         
         # Add environment-specific filtering (skip for API category which doesn't use env markers)
-        if hasattr(args, 'env') and args.env and category_name != "api":
-            # Add environment marker to filter tests - use pytest markers, not -k expressions
-            env_marker = f'env_{args.env}'
-            cmd_parts.extend(["-m", env_marker])
+        # TEMPORARILY DISABLED: Environment markers cause pytest to hang when no matching tests exist
+        # TODO: Implement smarter environment marker detection
+        # if hasattr(args, 'env') and args.env and category_name != "api":
+        #     # Add environment marker to filter tests - use pytest markers, not -k expressions
+        #     env_marker = f'env_{args.env}'
+        #     cmd_parts.extend(["-m", env_marker])
         
         # Add coverage options
         if not args.no_coverage:
@@ -561,7 +566,10 @@ class UnifiedTestRunner:
         
         # Add specific test pattern
         if args.pattern:
-            cmd_parts.extend(["-k", f'"{args.pattern}"'])
+            # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
+            # pytest -k expects Python-like expressions, not glob patterns
+            clean_pattern = args.pattern.strip('*')
+            cmd_parts.extend(["-k", f'"{clean_pattern}"'])
         
         return " ".join(cmd_parts)
     

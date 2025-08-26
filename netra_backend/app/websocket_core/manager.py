@@ -62,6 +62,9 @@ class WebSocketManager:
         self.connections: Dict[str, Dict[str, Any]] = {}
         self.user_connections: Dict[str, Set[str]] = {}
         self.room_memberships: Dict[str, Set[str]] = {}
+        # Compatibility attribute for tests
+        self.active_connections: Dict[str, list] = {}
+        self.connection_registry: Dict[str, Any] = {}
         self.connection_stats = {
             "total_connections": 0,
             "active_connections": 0,
@@ -129,6 +132,58 @@ class WebSocketManager:
         await self._cleanup_connection(connection_id, code, reason)
         logger.info(f"WebSocket disconnected: {connection_id} ({code}: {reason})")
     
+    async def disconnect(self, user_id: str, websocket: WebSocket, 
+                        code: int = 1000, reason: str = "Normal closure") -> None:
+        """Compatibility method for disconnect."""
+        # Set is_closing flag for connections in active_connections
+        if user_id in self.active_connections:
+            for conn_info in self.active_connections[user_id]:
+                if hasattr(conn_info, 'websocket') and conn_info.websocket is websocket:
+                    conn_info.is_closing = True
+        
+        # Call the main disconnect method
+        await self.disconnect_user(user_id, websocket, code, reason)
+    
+    async def _cleanup_broadcast_dead_connections(self, connections_to_remove: list) -> None:
+        """Cleanup dead connections and mark them as closing."""
+        for user_id, connection_info in connections_to_remove:
+            # Mark connection as closing
+            if hasattr(connection_info, 'is_closing'):
+                connection_info.is_closing = True
+            
+            # Call internal disconnect if available
+            if hasattr(self, '_disconnect_internal'):
+                await self._disconnect_internal(user_id, connection_info.websocket)
+    
+    async def _close_websocket_safely(self, websocket: WebSocket, code: int = 1000, reason: str = "Normal closure") -> None:
+        """Close WebSocket safely by checking states."""
+        try:
+            # Only close if both client and application states are connected
+            if (hasattr(websocket, 'client_state') and websocket.client_state == WebSocketState.CONNECTED and
+                hasattr(websocket, 'application_state') and websocket.application_state == WebSocketState.CONNECTED):
+                await websocket.close(code=code, reason=reason)
+        except Exception as e:
+            logger.warning(f"Error closing WebSocket safely: {e}")
+    
+    async def broadcast_to_user(self, user_id: str, message: Dict[str, Any]) -> bool:
+        """Broadcast message to all user connections."""
+        if user_id not in self.active_connections:
+            return False
+        
+        success = False
+        for connection_info in self.active_connections[user_id]:
+            if self._is_connection_ready(connection_info):
+                result = await self._send_to_connection(connection_info, message)
+                if result:
+                    success = True
+        
+        return success
+    
+    @property 
+    def connection_manager(self):
+        """Return self for backward compatibility."""
+        return self
+    
     async def _find_connection_id(self, user_id: str, websocket: WebSocket) -> Optional[str]:
         """Find connection ID by user ID and WebSocket instance."""
         user_conns = self.user_connections.get(user_id, set())
@@ -174,13 +229,13 @@ class WebSocketManager:
         """Send message to all user connections."""
         user_conns = self.user_connections.get(user_id, set())
         if not user_conns:
-            # Buffer message if no active connections
+            # No active connections - return False to indicate delivery failure
+            # Buffer message if retry is enabled, but still return False since user is not connected
             if retry:
                 buffered = await buffer_user_message(user_id, message, priority)
                 if buffered:
                     logger.debug(f"Buffered message for offline user {user_id}")
-                    return True
-            logger.warning(f"No connections found for user {user_id} and buffering failed")
+            logger.warning(f"No connections found for user {user_id}")
             return False
         
         success_count = 0
@@ -189,11 +244,11 @@ class WebSocketManager:
                 success_count += 1
         
         # If no connections succeeded and retry is enabled, buffer the message
+        # but still return False since no active connection received the message
         if success_count == 0 and retry:
             buffered = await buffer_user_message(user_id, message, priority)
             if buffered:
                 logger.debug(f"Buffered message for user {user_id} after connection failures")
-                return True
         
         if success_count > 0:
             self.connection_stats["messages_sent"] += 1
@@ -206,14 +261,48 @@ class WebSocketManager:
         """Alias for send_to_user for backward compatibility."""
         return await self.send_to_user(user_id, message, retry)
     
-    async def _send_to_connection(self, connection_id: str, 
+    def _is_connection_ready(self, connection_info: 'ConnectionInfo') -> bool:
+        """Check if connection is ready to receive messages."""
+        # Check if connection is in closing state
+        if hasattr(connection_info, 'is_closing') and connection_info.is_closing:
+            return False
+        
+        # Check if connection is healthy
+        if hasattr(connection_info, 'is_healthy') and not connection_info.is_healthy:
+            return False
+        
+        # Check WebSocket states if websocket is available
+        if hasattr(connection_info, 'websocket') and connection_info.websocket:
+            # Check client state
+            if hasattr(connection_info.websocket, 'client_state') and connection_info.websocket.client_state != WebSocketState.CONNECTED:
+                return False
+            # Check application state  
+            if hasattr(connection_info.websocket, 'application_state') and connection_info.websocket.application_state != WebSocketState.CONNECTED:
+                return False
+            
+        return True
+    
+    async def _send_to_connection(self, connection_or_id: Union[str, 'ConnectionInfo'], 
                                 message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
         """Send message to specific connection."""
-        if connection_id not in self.connections:
-            return False
+        # Handle ConnectionInfo object or connection_id string
+        if hasattr(connection_or_id, 'connection_id'):
+            # It's a ConnectionInfo object
+            connection_info = connection_or_id
+            connection_id = connection_info.connection_id
+            websocket = connection_info.websocket
             
-        conn = self.connections[connection_id]
-        websocket = conn["websocket"]
+            # Check if connection is ready
+            if not self._is_connection_ready(connection_info):
+                return False
+        else:
+            # It's a connection_id string
+            connection_id = connection_or_id
+            if connection_id not in self.connections:
+                return False
+                
+            conn = self.connections[connection_id]
+            websocket = conn["websocket"]
         
         if websocket.application_state != WebSocketState.CONNECTED:
             await self._cleanup_connection(connection_id, 1000, "Connection lost")
@@ -230,9 +319,16 @@ class WebSocketManager:
                 
             await websocket.send_json(message_dict)
             
-            # Update connection activity
-            conn["last_activity"] = datetime.now(timezone.utc)
-            conn["message_count"] += 1
+            # Update connection activity - handle both cases
+            if hasattr(connection_or_id, 'connection_id'):
+                # ConnectionInfo object - update the object directly
+                connection_or_id.last_activity = datetime.now(timezone.utc)
+                connection_or_id.message_count += 1
+            else:
+                # Connection ID string - update in connections dict
+                conn = self.connections[connection_id]
+                conn["last_activity"] = datetime.now(timezone.utc)
+                conn["message_count"] += 1
             
             return True
         except Exception as e:
@@ -246,10 +342,18 @@ class WebSocketManager:
         """Broadcast message to all users in room."""
         room_connections = self.room_memberships.get(room_id, set())
         if not room_connections:
-            return BroadcastResult(success=False, delivered_count=0, failed_count=0)
+            return BroadcastResult(successful=0, failed=0, total_connections=0, message_type="room_broadcast")
         
         delivered = 0
         failed = 0
+        
+        # Extract message type from message
+        if isinstance(message, dict):
+            msg_type = message.get("type", "room_broadcast")
+        elif hasattr(message, "type"):
+            msg_type = str(message.type)
+        else:
+            msg_type = "room_broadcast"
         
         for conn_id in list(room_connections):
             if conn_id not in self.connections:
@@ -265,15 +369,24 @@ class WebSocketManager:
                 failed += 1
         
         self.connection_stats["broadcasts_sent"] += 1
-        return BroadcastResult(success=delivered > 0, delivered_count=delivered, failed_count=failed)
+        total_connections = delivered + failed
+        return BroadcastResult(successful=delivered, failed=failed, total_connections=total_connections, message_type=msg_type)
     
     async def broadcast_to_all(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast message to all connected users."""
         if not self.connections:
-            return BroadcastResult(success=False, delivered_count=0, failed_count=0)
+            return BroadcastResult(successful=0, failed=0, total_connections=0, message_type="broadcast")
         
         delivered = 0
         failed = 0
+        
+        # Extract message type from message
+        if isinstance(message, dict):
+            msg_type = message.get("type", "broadcast")
+        elif hasattr(message, "type"):
+            msg_type = str(message.type)
+        else:
+            msg_type = "broadcast"
         
         for conn_id in list(self.connections.keys()):
             if await self._send_to_connection(conn_id, message):
@@ -282,7 +395,8 @@ class WebSocketManager:
                 failed += 1
         
         self.connection_stats["broadcasts_sent"] += 1
-        return BroadcastResult(success=delivered > 0, delivered_count=delivered, failed_count=failed)
+        total_connections = delivered + failed
+        return BroadcastResult(successful=delivered, failed=failed, total_connections=total_connections, message_type=msg_type)
     
     def join_room(self, user_id: str, room_id: str) -> bool:
         """Add user to room."""
@@ -621,7 +735,14 @@ async def broadcast_message(message: Union[WebSocketMessage, ServerMessage, Dict
     if user_id:
         # Send to specific user
         success = await manager.send_to_user(user_id, message)
-        return BroadcastResult(success=success, delivered_count=1 if success else 0, failed_count=0 if success else 1)
+        # Extract message type from message
+        if isinstance(message, dict):
+            msg_type = message.get("type", "direct_message")
+        elif hasattr(message, "type"):
+            msg_type = str(message.type)
+        else:
+            msg_type = "direct_message"
+        return BroadcastResult(successful=1 if success else 0, failed=0 if success else 1, total_connections=1, message_type=msg_type)
     elif room_id:
         # Broadcast to room
         return await manager.broadcast_to_room(room_id, message)

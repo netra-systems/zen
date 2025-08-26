@@ -100,6 +100,7 @@ async def messaging_tester():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_basic_message_sending(messaging_tester):
     """Test basic message sending and receiving."""
     # Arrange
@@ -116,6 +117,7 @@ async def test_websocket_basic_message_sending(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_message_routing(messaging_tester):
     """Test message routing between multiple connections."""
     # Arrange
@@ -136,6 +138,7 @@ async def test_websocket_message_routing(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_state_synchronization(messaging_tester):
     """Test state synchronization across WebSocket connections."""
     # Arrange
@@ -160,6 +163,7 @@ async def test_websocket_state_synchronization(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_reconnection_message_recovery(messaging_tester):
     """Test message recovery after reconnection."""
     # Arrange
@@ -187,6 +191,7 @@ async def test_websocket_reconnection_message_recovery(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_error_handling(messaging_tester):
     """Test WebSocket error handling and recovery."""
     # Arrange
@@ -211,6 +216,7 @@ async def test_websocket_error_handling(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_concurrent_messaging(messaging_tester):
     """Test concurrent message sending and ordering."""
     # Arrange
@@ -237,6 +243,7 @@ async def test_websocket_concurrent_messaging(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_message_validation(messaging_tester):
     """Test message validation and type checking."""
     # Arrange
@@ -260,6 +267,7 @@ async def test_websocket_message_validation(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_heartbeat_mechanism(messaging_tester):
     """Test WebSocket heartbeat and keepalive functionality."""
     # Arrange
@@ -276,6 +284,7 @@ async def test_websocket_heartbeat_mechanism(messaging_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_agent_communication(messaging_tester):
     """Test frontend-agent communication through WebSocket."""
     # Arrange

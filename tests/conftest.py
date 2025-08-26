@@ -71,6 +71,16 @@ pytest_plugins = ["pytest_asyncio"]
 # Remove custom event_loop fixture to let pytest-asyncio handle it properly
 # The --asyncio-mode=auto setting in pytest.ini will provide the event loop
 
+# Enhanced event loop management for tests
+@pytest.fixture(scope="session")
+def event_loop_policy():
+    """Set consistent event loop policy for all tests"""
+    import asyncio
+    if hasattr(asyncio, 'WindowsSelectorEventLoopPolicy'):
+        # Use SelectorEventLoop on Windows for better compatibility
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    return asyncio.get_event_loop_policy()
+
 
 # =============================================================================
 # E2E PERFORMANCE TESTING FIXTURES
@@ -114,6 +124,7 @@ async def high_volume_server():
 @pytest.fixture
 async def throughput_client(test_user_token, high_volume_server):
     """High-volume throughput client fixture."""
+    client = None
     try:
         from tests.e2e.test_helpers.performance_base import HighVolumeThroughputClient
         websocket_uri = E2E_TEST_CONFIG["websocket_url"]
@@ -132,16 +143,29 @@ async def throughput_client(test_user_token, high_volume_server):
         
         yield client
         
-        # Cleanup
-        try:
-            await client.disconnect()
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning(f"Client cleanup error: {e}")
     except ImportError:
         # Mock client if performance_base not available
         # Mock: Performance test client isolation when performance_base module unavailable
-        yield AsyncMock()
+        mock_client = AsyncMock()
+        mock_client.disconnect = AsyncMock()
+        mock_client.close = AsyncMock()
+        try:
+            yield mock_client
+        finally:
+            await mock_client.disconnect()
+            await mock_client.close()
+    finally:
+        # Enhanced cleanup with timeout
+        if client:
+            try:
+                # Force disconnect with timeout
+                await asyncio.wait_for(client.disconnect(), timeout=5.0)
+            except asyncio.TimeoutError:
+                import logging
+                logging.getLogger(__name__).warning(f"Client disconnect timed out")
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Client cleanup error: {e}")
 
 
 # =============================================================================
@@ -150,8 +174,8 @@ async def throughput_client(test_user_token, high_volume_server):
 # =============================================================================
 
 @pytest.fixture
-def mock_redis_client():
-    """Common Redis client mock for all tests"""
+async def mock_redis_client():
+    """Common Redis client mock for all tests with proper async cleanup"""
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock = MagicMock()
     mock.connect = AsyncMock(return_value=None)
@@ -168,12 +192,25 @@ def mock_redis_client():
     mock.ping = AsyncMock(return_value=True)
     # Mock: Async component isolation for testing without real async operations
     mock.aclose = AsyncMock(return_value=None)
-    return mock
+    mock.close = AsyncMock(return_value=None)
+    
+    try:
+        yield mock
+    finally:
+        # Ensure proper cleanup of mock Redis resources
+        try:
+            await mock.aclose()
+        except Exception:
+            pass
+        try:
+            await mock.close()  
+        except Exception:
+            pass
 
 
 @pytest.fixture
-def mock_redis_manager():
-    """Common Redis manager mock"""
+async def mock_redis_manager():
+    """Common Redis manager mock with proper cleanup"""
     # Mock: Redis cache isolation to prevent test interference and external dependencies
     mock = MagicMock()
     mock.enabled = True
@@ -184,7 +221,21 @@ def mock_redis_manager():
     mock.delete = AsyncMock(return_value=None)
     # Mock: Async component isolation for testing without real async operations
     mock.exists = AsyncMock(return_value=False)
-    return mock
+    mock.close = AsyncMock(return_value=None)
+    mock.cleanup = AsyncMock(return_value=None)
+    
+    try:
+        yield mock
+    finally:
+        # Proper cleanup for Redis manager
+        try:
+            await mock.cleanup()
+        except Exception:
+            pass
+        try:
+            await mock.close()
+        except Exception:
+            pass
 
 
 @pytest.fixture
@@ -219,7 +270,7 @@ def mock_llm_manager():
 
 
 @pytest.fixture
-def mock_websocket_manager():
+async def mock_websocket_manager():
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock = MagicMock()
     mock.active_connections = {}
@@ -232,7 +283,25 @@ def mock_websocket_manager():
     mock.broadcast = AsyncMock(return_value=None)
     # Mock: Async component isolation for testing without real async operations
     mock.shutdown = AsyncMock(return_value=None)
-    return mock
+    mock.close_all_connections = AsyncMock(return_value=None)
+    mock.cleanup = AsyncMock(return_value=None)
+    
+    try:
+        yield mock
+    finally:
+        # Proper WebSocket manager cleanup
+        try:
+            await mock.close_all_connections()
+        except Exception:
+            pass
+        try:
+            await mock.cleanup()
+        except Exception:
+            pass
+        try:
+            await mock.shutdown()
+        except Exception:
+            pass
 
 
 @pytest.fixture
@@ -516,12 +585,14 @@ class E2EEnvironmentValidator:
         except Exception:
             service_status["backend"] = False
         
-        # Check Redis
+        # Check Redis with proper async handling
         try:
             redis_client = redis.Redis.from_url(E2E_CONFIG["redis_url"], decode_responses=True)
-            await redis_client.ping()
+            # Use sync ping for sync Redis client, with timeout
+            redis_client.ping()
             service_status["redis"] = True
-            await redis_client.aclose() if hasattr(redis_client, 'aclose') else None
+            # Proper cleanup for sync Redis client
+            redis_client.close()
         except Exception:
             service_status["redis"] = False
         

@@ -433,5 +433,5 @@ def mock_state_persistence():
     service_mock = ThreadTestMocks.create_mock_state_persistence()
     
     # Mock: Component isolation for testing without external dependencies
-    with patch('app.services.state_persistence_service.state_persistence_service', service_mock):
+    with patch('netra_backend.app.services.state_persistence.state_persistence_service', service_mock):
         yield service_mock

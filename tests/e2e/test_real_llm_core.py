@@ -53,6 +53,7 @@ class RealLLMTestManager:
         return estimated_cost <= self.max_cost_per_test
 
 
+@pytest.mark.e2e
 class TestRealLLMCore:
     """Core tests for real LLM integration."""
     
@@ -68,8 +69,9 @@ class TestRealLLMCore:
         return LLMManager(config)
     
     @pytest.mark.asyncio
-    async def test_real_openai_integration(self, llm_test_manager, llm_manager):
-        """Test real OpenAI API integration."""
+    @pytest.mark.e2e
+    async def test_real_google_ai_integration(self, llm_test_manager, llm_manager):
+        """Test real Google AI API integration."""
         if not llm_test_manager.should_use_real_llm():
             pytest.skip("Real LLM testing not enabled")
             
@@ -79,11 +81,12 @@ class TestRealLLMCore:
             )
             self._validate_llm_response(response)
         except Exception as e:
-            pytest.fail(f"OpenAI integration failed: {e}")
+            pytest.fail(f"Google AI integration failed: {e}")
     
     @pytest.mark.asyncio
-    async def test_real_anthropic_integration(self, llm_test_manager, llm_manager):
-        """Test real Anthropic API integration."""
+    @pytest.mark.e2e
+    async def test_real_default_model_integration(self, llm_test_manager, llm_manager):
+        """Test real default model API integration."""
         if not llm_test_manager.should_use_real_llm():
             pytest.skip("Real LLM testing not enabled")
             
@@ -93,9 +96,10 @@ class TestRealLLMCore:
             )
             self._validate_llm_response(response)
         except Exception as e:
-            pytest.fail(f"Anthropic integration failed: {e}")
+            pytest.fail(f"Default model integration failed: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_performance_sla(self, llm_test_manager, llm_manager):
         """Test LLM performance meets P99 <2s SLA."""
         if not llm_test_manager.should_use_real_llm():
@@ -111,6 +115,7 @@ class TestRealLLMCore:
         self._validate_llm_response(response)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_cost_management(self, llm_test_manager, llm_manager):
         """Test LLM cost management controls."""
         if not llm_test_manager.should_use_real_llm():
@@ -124,6 +129,7 @@ class TestRealLLMCore:
         assert llm_test_manager.validate_cost_limits(tokens_used)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_real_llm_integration(self, llm_test_manager):
         """Test BaseSubAgent with real LLM."""
         if not llm_test_manager.should_use_real_llm():
@@ -136,6 +142,7 @@ class TestRealLLMCore:
         self._validate_agent_response(response)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_llm_calls(self, llm_test_manager, llm_manager):
         """Test concurrent real LLM calls."""
         if not llm_test_manager.should_use_real_llm():
@@ -153,21 +160,21 @@ class TestRealLLMCore:
     # Helper methods (each ≤8 lines per CLAUDE.md)
     
     async def _execute_openai_call(self, llm_manager, test_manager) -> Dict[str, Any]:
-        """Execute OpenAI API call."""
+        """Execute Google AI call (using available config instead of OpenAI)."""
         prompt = "Analyze cost optimization for AI infrastructure (brief)"
         timeout = test_manager.get_llm_timeout()
         response = await asyncio.wait_for(
-            llm_manager.ask_llm_full(prompt, "gpt-4-turbo-preview"),
+            llm_manager.ask_llm_full(prompt, "analysis"),
             timeout=timeout
         )
         return response.dict() if hasattr(response, 'dict') else response
     
     async def _execute_anthropic_call(self, llm_manager, test_manager) -> Dict[str, Any]:
-        """Execute Anthropic API call."""
+        """Execute Google AI call (using available config instead of Anthropic)."""
         prompt = "Provide infrastructure optimization recommendations"
         timeout = test_manager.get_llm_timeout()
         response = await asyncio.wait_for(
-            llm_manager.ask_llm_full(prompt, "claude-3-haiku"),
+            llm_manager.ask_llm_full(prompt, "default"),
             timeout=timeout
         )
         return response.dict() if hasattr(response, 'dict') else response
@@ -175,13 +182,13 @@ class TestRealLLMCore:
     async def _execute_performance_test(self, llm_manager, test_manager) -> Dict[str, Any]:
         """Execute performance test with strict timing."""
         prompt = "Quick analysis"
-        response = await llm_manager.ask_llm_full(prompt, "gpt-3.5-turbo")
+        response = await llm_manager.ask_llm_full(prompt, "triage")
         return response.dict() if hasattr(response, 'dict') else response
     
     async def _execute_cost_test(self, llm_manager, test_manager) -> Dict[str, Any]:
         """Execute cost-controlled test."""
         prompt = "Brief cost analysis"
-        response = await llm_manager.ask_llm_full(prompt, "gpt-3.5-turbo")
+        response = await llm_manager.ask_llm_full(prompt, "reporting")
         return response.dict() if hasattr(response, 'dict') else response
     
     async def _create_test_agent(self, test_manager) -> BaseSubAgent:
@@ -203,7 +210,7 @@ class TestRealLLMCore:
     async def _execute_concurrent_call(self, llm_manager, test_manager, task_id: int):
         """Execute concurrent LLM call."""
         prompt = f"Concurrent task {task_id}"
-        response = await llm_manager.ask_llm_full(prompt, "gpt-3.5-turbo")
+        response = await llm_manager.ask_llm_full(prompt, "data")
         return response.dict() if hasattr(response, 'dict') else response
     
     def _validate_llm_response(self, response: Dict[str, Any]):
@@ -221,10 +228,12 @@ class TestRealLLMCore:
 
 
 @pytest.mark.real_llm
+@pytest.mark.e2e
 class TestBusinessValueValidation:
     """Test business value claims with real LLMs."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cost_reduction_validation(self):
         """Validate 20-50% cost reduction claims."""
         use_real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"

@@ -29,6 +29,7 @@ from tests.e2e.integration.payment_upgrade_flow_tester import PaymentUpgradeFlow
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_payment_upgrade_flow_pro_tier():
     """
     Test #1: Complete User Signup → Payment → Pro Tier Upgrade Flow
@@ -91,6 +92,7 @@ async def test_complete_payment_upgrade_flow_pro_tier():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_payment_upgrade_flow_enterprise_tier():
     """
     Test #2: Complete User Signup → Payment → Enterprise Tier Upgrade Flow
@@ -135,6 +137,7 @@ async def test_complete_payment_upgrade_flow_enterprise_tier():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_payment_failure_handling():
     """
     Test #3: Payment Failure Handling and Recovery
@@ -166,6 +169,7 @@ async def test_payment_failure_handling():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_payment_upgrade_performance_validation():
     """
     Test #4: Payment Upgrade Flow Performance Validation
@@ -205,6 +209,7 @@ async def test_payment_upgrade_performance_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_billing_record_data_integrity():
     """
     Test #5: Billing Record Data Integrity Validation

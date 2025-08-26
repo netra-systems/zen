@@ -21,10 +21,12 @@ from tests.e2e.agent_orchestration_fixtures import (
 )
 
 
+@pytest.mark.e2e
 class TestAgentFailureRecovery:
     """Test graceful degradation when agents fail - BVJ: System reliability"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_single_agent_failure_graceful_degradation(self, mock_supervisor_agent, failure_recovery_data):
         """Test system continues when one agent fails"""
         failure_response = failure_recovery_data["partial_failure"]
@@ -37,6 +39,7 @@ class TestAgentFailureRecovery:
         assert "result" in result
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_fallback_agent_activation(self, mock_supervisor_agent, failure_recovery_data):
         """Test fallback agent activates when primary agent fails"""
         fallback_result = failure_recovery_data["fallback_result"]
@@ -49,6 +52,7 @@ class TestAgentFailureRecovery:
         assert "data" in result
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_pipeline_recovery_skip_failed_agent(self, mock_supervisor_agent, failure_recovery_data):
         """Test pipeline continues by skipping failed agent"""
         recovery_result = failure_recovery_data["recovery_result"]
@@ -61,6 +65,7 @@ class TestAgentFailureRecovery:
         assert len(result["completed"]) == 2
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_critical_agent_failure_stops_pipeline(self, mock_supervisor_agent, failure_recovery_data):
         """Test critical agent failure stops entire pipeline"""
         critical_failure = failure_recovery_data["critical_failure"]
@@ -73,6 +78,7 @@ class TestAgentFailureRecovery:
         assert result["reason"] == "critical_agent_failed"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cascade_failure_prevention(self, mock_supervisor_agent):
         """Test system prevents cascade failures"""
         cascade_prevention = {
@@ -90,6 +96,7 @@ class TestAgentFailureRecovery:
         assert len(result["protected_agents"]) == 2
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_partial_result_recovery(self, mock_supervisor_agent):
         """Test system can recover partial results from failed operations"""
         partial_recovery = {
@@ -107,10 +114,12 @@ class TestAgentFailureRecovery:
         assert result["confidence_reduced"] is True
 
 
+@pytest.mark.e2e
 class TestFailureDetection:
     """Test failure detection mechanisms - BVJ: Early problem identification"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_timeout_based_failure_detection(self, mock_supervisor_agent):
         """Test failures detected through timeout mechanisms"""
         timeout_detection = {
@@ -127,6 +136,7 @@ class TestFailureDetection:
         assert result["timeout_duration"] == 30.0
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_check_failure_detection(self, mock_supervisor_agent):
         """Test failures detected through health check failures"""
         health_check_failure = {
@@ -143,6 +153,7 @@ class TestFailureDetection:
         assert result["consecutive_failures"] == 3
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_exception_based_failure_detection(self, mock_supervisor_agent):
         """Test failures detected through exception handling"""
         exception_detection = {
@@ -159,10 +170,12 @@ class TestFailureDetection:
         assert result["recoverable"] is True
 
 
+@pytest.mark.e2e
 class TestFailureRecoveryStrategies:
     """Test different recovery strategies - BVJ: Flexible resilience approaches"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_retry_with_exponential_backoff(self, mock_supervisor_agent):
         """Test retry strategy with exponential backoff"""
         retry_strategy = {
@@ -180,6 +193,7 @@ class TestFailureRecoveryStrategies:
         assert result["final_result"] == "success_on_retry"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_circuit_breaker_activation(self, mock_supervisor_agent):
         """Test circuit breaker prevents repeated failures"""
         circuit_breaker = {
@@ -198,6 +212,7 @@ class TestFailureRecoveryStrategies:
         assert result["fallback_active"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_degraded_mode_operation(self, mock_supervisor_agent):
         """Test system operates in degraded mode during failures"""
         degraded_mode = {
@@ -215,6 +230,7 @@ class TestFailureRecoveryStrategies:
         assert len(result["disabled_features"]) == 2
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_failover_to_backup_instance(self, mock_supervisor_agent):
         """Test failover to backup agent instance"""
         failover_strategy = {
@@ -233,10 +249,12 @@ class TestFailureRecoveryStrategies:
         assert result["data_sync_status"] == "complete"
 
 
+@pytest.mark.e2e
 class TestRecoveryValidation:
     """Test recovery validation and success criteria - BVJ: Ensure recovery effectiveness"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_recovery_success_validation(self, mock_supervisor_agent):
         """Test recovery success is properly validated"""
         recovery_validation = {
@@ -255,6 +273,7 @@ class TestRecoveryValidation:
         assert result["system_stability_confirmed"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_recovery_monitoring_setup(self, mock_supervisor_agent):
         """Test enhanced monitoring is established after recovery"""
         monitoring_setup = {

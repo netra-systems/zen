@@ -39,7 +39,6 @@ from netra_backend.app.websocket_core.types import (
     
     # Statistics and metrics
     WebSocketStats,
-    BroadcastResult,
     WebSocketValidationError,
     RateLimitInfo,
     ConnectionMetrics,
@@ -65,6 +64,9 @@ from netra_backend.app.websocket_core.types import (
     is_jsonrpc_message,
     convert_jsonrpc_to_websocket_message
 )
+
+# Import BroadcastResult from the single source of truth
+from netra_backend.app.schemas.websocket_models import BroadcastResult
 
 # Message Handlers
 from netra_backend.app.websocket_core.handlers import (

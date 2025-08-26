@@ -62,6 +62,32 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     
     # Authentication secrets required for tests
     env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-do-not-use-in-production", "test_framework_base")
+    
+    # FastMCP home directory workaround for Windows compatibility
+    # Ensures Path.home() works correctly in FastMCP settings initialization
+    import os
+    from pathlib import Path
+    if os.name == 'nt':  # Windows
+        # Ensure HOME is set for FastMCP compatibility
+        if not env.get("HOME"):
+            userprofile = env.get("USERPROFILE") 
+            if userprofile:
+                env.set("HOME", userprofile, "test_framework_fastmcp_workaround")
+            else:
+                # Last resort fallback
+                homedrive = env.get("HOMEDRIVE", "C:")
+                homepath = env.get("HOMEPATH", "\\Users\\Default")
+                env.set("HOME", f"{homedrive}{homepath}", "test_framework_fastmcp_workaround")
+        
+        # Verify Path.home() will work before FastMCP imports
+        try:
+            Path.home()
+        except (OSError, RuntimeError) as e:
+            # If Path.home() still fails, set a test-safe directory
+            import tempfile
+            test_home = os.path.join(tempfile.gettempdir(), "test_home")
+            os.makedirs(test_home, exist_ok=True)
+            env.set("HOME", test_home, "test_framework_fastmcp_fallback")
     env.set("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length", "test_framework_base")
     env.set("FERNET_KEY", "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao=", "test_framework_base")
     env.set("ENCRYPTION_KEY", "test-encryption-key-32-chars-long", "test_framework_base")
@@ -410,6 +436,26 @@ def e2e_logger():
             self.logger.info(f"[BUSINESS] {message}")
     
     return E2ELogger(logger)
+
+# =============================================================================
+# PYTEST HOOKS FOR SERVICE ENABLEMENT
+# =============================================================================
+
+def pytest_collection_modifyitems(config, items):
+    """Enable services for tests that require them."""
+    env = get_env()
+    
+    # Check if any tests need ClickHouse (marked with real_database)
+    needs_clickhouse = False
+    for item in items:
+        if item.get_closest_marker('real_database'):
+            needs_clickhouse = True
+            break
+    
+    # Enable ClickHouse if needed
+    if needs_clickhouse:
+        env.set("CLICKHOUSE_ENABLED", "true", "test_framework_real_database")
+        env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", "test_framework_real_database")
 
 # =============================================================================
 # ASYNC UTILITIES

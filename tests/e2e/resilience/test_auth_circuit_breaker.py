@@ -74,6 +74,7 @@ class AuthCircuitBreakerTester:
         )
         return CircuitBreaker(config)
 
+    @pytest.mark.e2e
     async def test_circuit_breaker_opens_after_failures(self) -> Dict[str, Any]:
         """Test circuit breaker opens after 5 consecutive failures."""
         results = {"passed": False, "failures_to_open": 0, "final_state": None}
@@ -98,6 +99,7 @@ class AuthCircuitBreakerTester:
             
         return results
 
+    @pytest.mark.e2e
     async def test_fallback_authentication_activates(self) -> Dict[str, Any]:
         """Test fallback auth mechanism when circuit is open."""
         results = {"passed": False, "fallback_used": False, "token_valid": False}
@@ -123,6 +125,7 @@ class AuthCircuitBreakerTester:
             
         return results
 
+    @pytest.mark.e2e
     async def test_circuit_breaker_closes_after_timeout(self) -> Dict[str, Any]:
         """Test circuit breaker transitions to half-open after timeout."""
         results = {"passed": False, "initial_state": None, "final_state": None, "timeout_works": False}
@@ -153,6 +156,7 @@ class AuthCircuitBreakerTester:
             
         return results
 
+    @pytest.mark.e2e
     async def test_cached_tokens_work_when_auth_down(self) -> Dict[str, Any]:
         """Test cached tokens are served when auth service is unavailable."""
         results = {"passed": False, "token_cached": False, "cache_hit": False, "auth_bypassed": False}
@@ -197,6 +201,7 @@ class AuthCircuitBreakerTester:
             
         return results
 
+    @pytest.mark.e2e
     async def test_performance_within_limits(self) -> Dict[str, Any]:
         """Test all operations complete within performance limits."""
         results = {"passed": False, "elapsed_time": 0, "within_limit": False}
@@ -270,6 +275,7 @@ class AuthCircuitBreakerTester:
 # PYTEST TEST IMPLEMENTATIONS
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_circuit_breaker_comprehensive():
     """
     Test #5: Auth Service Circuit Breaker Comprehensive Test
@@ -344,6 +350,7 @@ def _print_circuit_breaker_success(results: Dict[str, Any]) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_circuit_breaker_failure_threshold():
     """
     Test circuit breaker opens after exactly 5 failures.
@@ -361,6 +368,7 @@ async def test_circuit_breaker_failure_threshold():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_fallback_authentication_mechanism():
     """
     Test fallback authentication activates when circuit is open.
@@ -378,6 +386,7 @@ async def test_fallback_authentication_mechanism():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cached_tokens_during_outage():
     """
     Test cached tokens work when auth service is down.

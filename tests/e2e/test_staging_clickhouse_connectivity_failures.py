@@ -67,6 +67,7 @@ class ClickHouseConnectivityResult:
     business_impact: str = "unknown"
 
 
+@pytest.mark.e2e
 class TestStagingClickHouseConnectivityFailures:
     """Test suite for ClickHouse connectivity failures in staging environment."""
 
@@ -83,6 +84,7 @@ class TestStagingClickHouseConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_clickhouse_staging_host_network_connectivity_timeout(self):
         """
         EXPECTED TO FAIL - CRITICAL NETWORK CONNECTIVITY ISSUE
@@ -176,6 +178,7 @@ class TestStagingClickHouseConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_clickhouse_application_client_connection_timeout_failure(self):
         """
         EXPECTED TO FAIL - CRITICAL APPLICATION CLIENT ISSUE
@@ -275,6 +278,7 @@ class TestStagingClickHouseConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_clickhouse_health_check_endpoint_503_failure_analysis(self):
         """
         EXPECTED TO FAIL - CRITICAL HEALTH CHECK ISSUE
@@ -366,6 +370,7 @@ class TestStagingClickHouseConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_clickhouse_configuration_loading_missing_environment_variables(self):
         """
         EXPECTED TO FAIL - CRITICAL CONFIGURATION LOADING ISSUE
@@ -457,6 +462,7 @@ class TestStagingClickHouseConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_clickhouse_service_provisioning_staging_infrastructure_gap(self):
         """
         EXPECTED TO FAIL - CRITICAL SERVICE PROVISIONING ISSUE
@@ -519,6 +525,7 @@ class TestStagingClickHouseConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_clickhouse_timeout_configuration_too_aggressive_for_staging(self):
         """
         EXPECTED TO FAIL - CRITICAL TIMEOUT CONFIGURATION ISSUE
@@ -746,6 +753,7 @@ class TestStagingClickHouseConnectivityFailures:
 
 @pytest.mark.env("staging")
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_clickhouse_staging_connectivity_quick_validation():
     """
     STANDALONE CRITICAL TEST - ClickHouse Connectivity

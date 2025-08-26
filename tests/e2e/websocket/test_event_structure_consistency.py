@@ -156,10 +156,12 @@ async def structure_validator():
     await validator.cleanup_clients()
 
 
+@pytest.mark.e2e
 class TestMessageStructureConsistency:
     """Test WebSocket message structure consistency"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_outbound_message_structure(self, structure_validator):
         """Test outbound messages follow {type, payload} structure"""
         client = structure_validator.create_authenticated_client("outbound_test")
@@ -191,6 +193,7 @@ class TestMessageStructureConsistency:
         assert valid_messages == len(test_messages), "Not all messages sent successfully"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_inbound_message_structure(self, structure_validator):
         """Test inbound messages follow {type, payload} structure"""
         client = structure_validator.create_authenticated_client("inbound_test")
@@ -223,6 +226,7 @@ class TestMessageStructureConsistency:
         assert len(responses) > 0, "No responses received to validate"
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_json_wrapping_prevention(self, structure_validator):
         """Test prevention of double/triple JSON wrapping"""
         client = structure_validator.create_authenticated_client("wrapping_test")
@@ -255,10 +259,12 @@ class TestMessageStructureConsistency:
         assert wrapping_check["wrapping_level"] == 0
 
 
+@pytest.mark.e2e
 class TestEventCatalogStructureCompliance:
     """Test event catalog structure compliance"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_lifecycle_events_structure(self, structure_validator):
         """Test agent lifecycle events follow required structure"""
         client = structure_validator.create_authenticated_client("lifecycle_test")
@@ -301,6 +307,7 @@ class TestEventCatalogStructureCompliance:
             await client.send(event)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_tool_events_structure(self, structure_validator):
         """Test tool events follow required structure"""
         client = structure_validator.create_authenticated_client("tool_test")
@@ -332,6 +339,7 @@ class TestEventCatalogStructureCompliance:
             await client.send(event)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_progress_events_structure(self, structure_validator):
         """Test progress events follow required structure"""
         client = structure_validator.create_authenticated_client("progress_test")
@@ -363,10 +371,12 @@ class TestEventCatalogStructureCompliance:
             await client.send(event)
 
 
+@pytest.mark.e2e
 class TestLegacyPatternDetection:
     """Test detection and prevention of legacy message patterns"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_legacy_event_data_pattern_detection(self, structure_validator):
         """Test detection of legacy {event, data} pattern"""
         client = structure_validator.create_authenticated_client("legacy_test")
@@ -386,6 +396,7 @@ class TestLegacyPatternDetection:
         assert any("event" in issue for issue in validation["issues"])
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_mixed_pattern_detection(self, structure_validator):
         """Test detection of mixed legacy and new patterns"""
         client = structure_validator.create_authenticated_client("mixed_test")
@@ -406,6 +417,7 @@ class TestLegacyPatternDetection:
         assert any("Unexpected top-level fields" in issue for issue in validation["issues"])
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_string_message_prevention(self, structure_validator):
         """Test prevention of string messages (JSON-first requirement)"""
         client = structure_validator.create_authenticated_client("string_test")
@@ -421,10 +433,12 @@ class TestLegacyPatternDetection:
         assert any("not dict" in issue for issue in validation["issues"])
 
 
+@pytest.mark.e2e
 class TestStructureValidationReporting:
     """Test structure validation reporting and metrics"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_comprehensive_structure_validation(self, structure_validator):
         """Test comprehensive validation across all message types"""
         client = structure_validator.create_authenticated_client("comprehensive_test")
@@ -466,6 +480,7 @@ class TestStructureValidationReporting:
         assert len(structure_validator.validated_events) == valid_count
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_validation_metrics_collection(self, structure_validator):
         """Test collection of validation metrics"""
         client = structure_validator.create_authenticated_client("metrics_test")
@@ -497,6 +512,7 @@ class TestStructureValidationReporting:
         assert violations_added + validated_added == len(messages), "All messages should be categorized"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_structure_issue_detailed_reporting(self, structure_validator):
         """Test detailed reporting of structure issues"""
         client = structure_validator.create_authenticated_client("reporting_test")

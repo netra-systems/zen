@@ -48,6 +48,7 @@ class ConnectionStatus(Enum):
     CONNECTED = "connected"
     FAILED = "failed"
     RETRYING = "retrying"
+    FALLBACK_AVAILABLE = "fallback_available"
 
 
 @dataclass
@@ -345,9 +346,13 @@ class DatabaseConnector:
                 delay = self._calculate_retry_delay(attempt)
                 await asyncio.sleep(delay)
         
-        # All retries failed
-        connection.status = ConnectionStatus.FAILED
-        self._print_connection_failed(connection)
+        # All retries failed - provide clear status communication
+        # For ClickHouse, mark as fallback available instead of failed
+        if connection.db_type == DatabaseType.CLICKHOUSE:
+            connection.status = ConnectionStatus.FALLBACK_AVAILABLE
+        else:
+            connection.status = ConnectionStatus.FAILED
+        self._print_connection_failed_with_fallback_info(connection)
         return False
     
     def _print_connection_attempt(self, connection: DatabaseConnection, attempt: int) -> None:
@@ -365,6 +370,18 @@ class DatabaseConnector:
         emoji = "❌" if self.use_emoji else ""
         error_msg = connection.last_error or "Connection failed"
         print(f"{emoji} CONNECT | {connection.name}: Failed after {self.retry_config.max_attempts} attempts - {error_msg}")
+    
+    def _print_connection_failed_with_fallback_info(self, connection: DatabaseConnection) -> None:
+        """Print connection failure message with fallback behavior information."""
+        emoji = "❌" if self.use_emoji else ""
+        error_msg = connection.last_error or "Connection failed"
+        print(f"{emoji} CONNECT | {connection.name}: Failed after {self.retry_config.max_attempts} attempts - {error_msg}")
+        
+        # Provide fallback communication for ClickHouse
+        if connection.db_type == DatabaseType.CLICKHOUSE:
+            fallback_emoji = "🔄" if self.use_emoji else ""
+            print(f"{fallback_emoji} FALLBACK | ClickHouse unavailable - system will continue with mock/local mode")
+            print(f"{fallback_emoji} FALLBACK | Application startup will proceed normally with reduced analytics capabilities")
     
     def _handle_connection_failure(self, connection: DatabaseConnection, attempt: int) -> None:
         """Handle connection failure during validation."""
@@ -584,7 +601,7 @@ class DatabaseConnector:
             # Test Redis connection directly
             client = redis.from_url(connection.url, socket_connect_timeout=5)
             await client.ping()
-            await client.close()
+            await client.aclose()
             return True
             
         except ImportError:

@@ -117,23 +117,23 @@ class TestHealthCheckersCore:
         assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
     
     @test_only  # Unit test with mocked dependencies
-    @mock_justified("L1 Unit Test: Mocking database manager to test connection failure scenarios. Real connectivity tested in L3 integration tests.", "L1")
+    @mock_justified("L1 Unit Test: Mocking postgres query execution to test connection failure scenarios.", "L1")
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
+    @patch('netra_backend.app.core.health_checkers._execute_postgres_query')
     @pytest.mark.asyncio
-    async def test_check_postgres_health_connection_error(self, mock_db_manager):
+    async def test_check_postgres_health_connection_error(self, mock_execute_query):
         """Test PostgreSQL health check with connection error."""
-        # Mock db_manager to raise connection error
-        mock_db_manager.get_async_session.side_effect = Exception("Connection failed")
+        # Mock _execute_postgres_query to raise connection error
+        mock_execute_query.side_effect = Exception("Connection failed")
         
         result = await check_postgres_health()
         
         # Postgres is critical service, so it should return unhealthy
         assert result.status == "unhealthy"
         assert result.details["success"] is False
-        # The error could be from the connection failure or the fallback engine path
+        # The error should contain the connection failure message
         error_msg = result.details["error_message"]
-        assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
+        assert "Connection failed" in error_msg
     
     @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking ClickHouse client and environment detection to isolate health check logic. Real ClickHouse tested in L3 integration tests.", "L1")
@@ -175,6 +175,7 @@ class TestHealthCheckersCore:
         assert result.details["status"] == "disabled"
         assert "ClickHouse disabled in development" in result.details["reason"]
     
+    @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking ClickHouse client to test connection error handling. Real connection failures tested in L3 integration tests.", "L1")
     # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')

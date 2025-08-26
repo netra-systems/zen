@@ -294,7 +294,8 @@ class DatabaseConfigManager:
         """Apply configuration to ClickHouse HTTP connection."""
         if hasattr(config, 'clickhouse_http'):
             config.clickhouse_http.host = ch_config["host"]
-            config.clickhouse_http.port = int(ch_config["port"])
+            # Use HTTP port 8123 for dev launcher compatibility
+            config.clickhouse_http.port = int(self._env.get("CLICKHOUSE_HTTP_PORT", "8123"))
             config.clickhouse_http.user = ch_config["user"]
             config.clickhouse_http.password = ch_config["password"]
             config.clickhouse_http.database = ch_config["database"]
@@ -303,8 +304,8 @@ class DatabaseConfigManager:
         """Apply configuration to ClickHouse HTTPS connection."""
         if hasattr(config, 'clickhouse_https'):
             config.clickhouse_https.host = ch_config["host"]
-            # Force HTTP port 8123 for dev launcher compatibility
-            config.clickhouse_https.port = 8123 if self._environment == "development" else int(ch_config["port"])
+            # Use native port for HTTPS in development, production port otherwise
+            config.clickhouse_https.port = int(ch_config["port"]) if self._environment == "development" else 8443
             config.clickhouse_https.user = ch_config["user"]
             config.clickhouse_https.password = ch_config["password"]
             config.clickhouse_https.database = ch_config["database"]

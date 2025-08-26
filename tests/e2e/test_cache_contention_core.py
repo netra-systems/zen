@@ -168,6 +168,7 @@ class RedisTestClient:
         if self.connection_pool:
             await self.connection_pool.disconnect()
             
+    @pytest.mark.e2e
     async def test_flush_test_data(self):
         """Flush all test data from Redis."""
         if self.client:
@@ -202,6 +203,7 @@ class CacheContentionTestSuite:
         
         logger.info(f"Test environment setup complete. {len(self.test_keys)} keys prepared.")
         
+    @pytest.mark.e2e
     async def test_teardown_test_environment(self):
         """Cleanup test environment."""
         try:
@@ -247,6 +249,7 @@ class CacheContentionTestSuite:
             
         return list(self.test_keys)[key_idx]
 
+@pytest.mark.e2e
 class TestCacheContentionSuite:
     """Cache contention test suite implementation."""
     
@@ -258,6 +261,7 @@ class TestCacheContentionSuite:
         yield
         await self.suite.teardown_test_environment()
         
+    @pytest.mark.e2e
     async def test_concurrent_counter_operations(self):
         """
         Test Case 1: Validate Redis atomic INCR/DECR operations under high concurrency.
@@ -317,6 +321,7 @@ class TestCacheContentionSuite:
             
         logger.info(f"Concurrent counter test passed: final_count={final_count}, p95_latency={p95_latency:.2f}ms")
         
+    @pytest.mark.e2e
     async def test_cache_stampede_prevention(self):
         """
         Test Case 2: Test system behavior when cache expires under heavy load.
@@ -476,6 +481,7 @@ class TestCacheContentionSuite:
             
         logger.info(f"Cache stampede test passed: computations={computation_count}, success_rate={len(successful_results)/num_workers*100:.1f}%")
         
+    @pytest.mark.e2e
     async def test_multi_key_transaction_atomicity(self):
         """
         Test Case 3: Validate MULTI/EXEC atomic transactions under contention.
@@ -572,6 +578,7 @@ class TestCacheContentionSuite:
             
         logger.info(f"Transaction atomicity test passed: success_rate={success_rate:.1f}%, consistency_errors={consistency_errors}")
         
+    @pytest.mark.e2e
     async def test_cache_invalidation_consistency(self):
         """
         Test Case 4: Test cache invalidation under concurrent read/write operations.
@@ -718,6 +725,7 @@ class TestCacheContentionSuite:
         
         logger.info(f"Cache invalidation test passed: invalidations={total_invalidations}, stale_data={stale_data_count}")
         
+    @pytest.mark.e2e
     async def test_lock_free_performance_validation(self):
         """
         Test Case 5: Compare lock-free Redis operations vs traditional locking.
@@ -800,6 +808,7 @@ class TestCacheContentionSuite:
         self.suite.metrics.record_operation("lock_free_avg", lock_free_avg, True)
         self.suite.metrics.record_operation("locked_avg", locked_avg, True)
         
+    @pytest.mark.e2e
     async def test_memory_pressure_cache_eviction(self):
         """
         Test Case 7: Validate cache behavior under memory pressure.
@@ -910,6 +919,7 @@ class TestCacheContentionSuite:
         if keys_created:
             await self.suite.redis_client.client.delete(*keys_created[:1000])  # Delete in batches
 
+@pytest.mark.e2e
 async def test_comprehensive_cache_contention_validation():
     """
     Comprehensive validation test that runs multiple cache contention scenarios

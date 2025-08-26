@@ -11,6 +11,9 @@ class RedisSessionManager:
     
     def __init__(self, redis_client=None):
         """Initialize session manager with Redis client."""
+        # Initialize memory store for fallback
+        self._memory_store = {}
+        
         # Import redis service if available
         try:
             from netra_backend.app.services.redis_service import redis_service
@@ -18,7 +21,6 @@ class RedisSessionManager:
         except ImportError:
             # Fallback to in-memory storage for tests
             self.redis = None
-            self._memory_store = {}
         
         self.session_prefix = "session:"
         self.user_sessions_prefix = "user_sessions:"
@@ -50,27 +52,28 @@ class RedisSessionManager:
         
         session_ttl = ttl or self.default_ttl
         
+        redis_success = False
         if self.redis:
             # Store in Redis
             try:
-                await self.redis.setex(
+                setex_result = await self.redis.setex(
                     session_key, 
                     session_ttl, 
                     json.dumps(full_session_data)
                 )
                 
-                # Add to user sessions list
-                await self.redis.sadd(user_sessions_key, session_id)
-                await self.redis.expire(user_sessions_key, session_ttl)
+                if setex_result:
+                    # Add to user sessions list
+                    await self.redis.sadd(user_sessions_key, session_id)
+                    await self.redis.expire(user_sessions_key, session_ttl)
+                    redis_success = True
                 
-            except Exception as e:
-                # Fallback to memory store
-                self._memory_store[session_key] = {
-                    "data": full_session_data,
-                    "expires_at": time.time() + session_ttl
-                }
-        else:
-            # Use memory store
+            except Exception:
+                # Redis operation failed, will use memory store
+                pass
+        
+        # Use memory store if Redis is not available or failed
+        if not redis_success:
             self._memory_store[session_key] = {
                 "data": full_session_data,
                 "expires_at": time.time() + session_ttl
@@ -89,11 +92,12 @@ class RedisSessionManager:
                     data = json.loads(session_data)
                     # Update last accessed time
                     data["last_accessed"] = datetime.now().isoformat()
-                    await self.redis.setex(
+                    update_result = await self.redis.setex(
                         session_key, 
                         self.default_ttl, 
                         json.dumps(data)
                     )
+                    # Return data even if update failed
                     return data
             except Exception:
                 pass

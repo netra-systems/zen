@@ -239,6 +239,7 @@ class TokenExpiryReconnectionTester:
             "no_data_loss": conversation_result["chat_context_preserved"]
         }
     
+    @pytest.mark.e2e
     async def test_message_queue_resilience(self, session_data: Dict[str, Any]) -> Dict[str, Any]:
         """Test that message queues are handled properly during reconnection."""
         session_manager = session_data["session_manager"]
@@ -267,6 +268,7 @@ class TokenExpiryReconnectionTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketTokenExpiryReconnect:
     """Test #6: WebSocket Token Expiry Reconnection - P1 User Experience."""
     
@@ -276,10 +278,12 @@ class TestWebSocketTokenExpiryReconnect:
         return TokenExpiryReconnectionTester()
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_user_id(self):
         """Provide test user ID from enterprise tier."""
         return TEST_USERS["enterprise"].id
     
+    @pytest.mark.e2e
     async def test_automatic_reconnection_on_token_expiry(self, reconnection_tester, test_user_id):
         """
         Primary Test: Token expires during chat → Auto-reconnect with refreshed token → Chat continues
@@ -320,6 +324,7 @@ class TestWebSocketTokenExpiryReconnect:
         # Cleanup
         await session_data["session_manager"].close()
     
+    @pytest.mark.e2e
     async def test_message_queue_handling_during_disconnection(self, reconnection_tester, test_user_id):
         """
         Test: Messages sent during disconnection are handled gracefully
@@ -342,6 +347,7 @@ class TestWebSocketTokenExpiryReconnect:
         # Cleanup
         await session_data["session_manager"].close()
     
+    @pytest.mark.e2e
     async def test_token_refresh_before_expiry_prevention(self, reconnection_tester, test_user_id):
         """
         Test: System should ideally refresh token BEFORE expiry to prevent disconnection
@@ -370,6 +376,7 @@ class TestWebSocketTokenExpiryReconnect:
         # Cleanup
         await session_data["session_manager"].close()
     
+    @pytest.mark.e2e
     async def test_multiple_expiry_cycles_resilience(self, reconnection_tester, test_user_id):
         """
         Test: System handles multiple token expiry and refresh cycles
@@ -403,6 +410,7 @@ class TestWebSocketTokenExpiryReconnect:
         # Cleanup
         await session_data["session_manager"].close()
     
+    @pytest.mark.e2e
     async def test_concurrent_user_expiry_handling(self, reconnection_tester):
         """
         Test: System handles token expiry for multiple concurrent users
@@ -443,6 +451,7 @@ class TestWebSocketTokenExpiryReconnect:
         for tier, session in user_sessions:
             await session["session_manager"].close()
     
+    @pytest.mark.e2e
     async def test_performance_requirements_token_expiry_flow(self, reconnection_tester, test_user_id):
         """
         Test: Token expiry and reconnection flow meets performance requirements

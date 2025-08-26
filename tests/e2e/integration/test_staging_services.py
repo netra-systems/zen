@@ -33,9 +33,11 @@ from tests.e2e.staging_test_helpers import (
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingServiceHealth:
     """Test health endpoints for all staging services."""
     
+    @pytest.mark.e2e
     async def test_backend_service_health(self):
         """Test backend service health endpoint is accessible and healthy."""
         suite = await get_staging_suite()
@@ -48,6 +50,7 @@ class TestStagingServiceHealth:
         assert health_status.response_time_ms < 5000  # 5 second timeout
         assert health_status.details.get("status") == "healthy"
     
+    @pytest.mark.e2e
     async def test_auth_service_health(self):
         """Test auth service health endpoint is accessible and healthy."""
         suite = await get_staging_suite()
@@ -60,6 +63,7 @@ class TestStagingServiceHealth:
         assert health_status.response_time_ms < 5000
         assert health_status.details.get("status") == "healthy"
     
+    @pytest.mark.e2e
     async def test_frontend_service_accessibility(self):
         """Test frontend service serves content and is accessible."""
         suite = await get_staging_suite()
@@ -76,9 +80,11 @@ class TestStagingServiceHealth:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingWebSocketConnectivity:
     """Test WebSocket service connectivity and protocol support."""
     
+    @pytest.mark.e2e
     async def test_websocket_service_configuration(self):
         """Test WebSocket service URL configuration and format."""
         suite = await get_staging_suite()
@@ -88,6 +94,7 @@ class TestStagingWebSocketConnectivity:
         assert ws_url.startswith("wss://"), f"Invalid WebSocket URL: {ws_url}"
         assert "staging" in ws_url, "WebSocket URL should contain 'staging'"
     
+    @pytest.mark.e2e
     async def test_websocket_health_endpoint(self):
         """Test WebSocket health endpoint via HTTP upgrade check."""
         suite = await get_staging_suite()
@@ -99,6 +106,7 @@ class TestStagingWebSocketConnectivity:
         response = await suite.test_client.get(http_url)
         assert response.status_code == 200, f"WebSocket health check failed: {response.status_code}"
     
+    @pytest.mark.e2e
     async def test_websocket_connection_with_auth(self):
         """Test WebSocket connection with proper authentication flow."""
         suite = await get_staging_suite()
@@ -131,9 +139,11 @@ class TestStagingWebSocketConnectivity:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingDatabaseHealth:
     """Test database connections and health for staging environment."""
     
+    @pytest.mark.e2e
     async def test_database_connection_health(self):
         """Test database connections are healthy and responsive."""
         suite = await get_staging_suite()
@@ -156,6 +166,7 @@ class TestStagingDatabaseHealth:
         except httpx.RequestError as e:
             pytest.fail(f"Database health check failed with network error: {e}")
     
+    @pytest.mark.e2e
     async def test_database_configuration_validation(self):
         """Test database configurations meet staging requirements."""
         # PostgreSQL configuration
@@ -176,9 +187,11 @@ class TestStagingDatabaseHealth:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingServiceRecovery:
     """Test service recovery mechanisms and resilience."""
     
+    @pytest.mark.e2e
     async def test_service_health_stability(self):
         """Test service health checks are stable over multiple attempts."""
         suite = await get_staging_suite()
@@ -199,6 +212,7 @@ class TestStagingServiceRecovery:
         passed_checks = sum(health_results)
         assert passed_checks >= 2, f"Health check stability failed: {health_results}"
     
+    @pytest.mark.e2e
     async def test_concurrent_service_access(self):
         """Test services handle concurrent access properly."""
         suite = await get_staging_suite()
@@ -223,9 +237,11 @@ class TestStagingServiceRecovery:
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.comprehensive
+@pytest.mark.e2e
 class TestStagingServiceIntegration:
     """Test service integration and communication patterns."""
     
+    @pytest.mark.e2e
     async def test_service_initialization_order(self):
         """Test services initialize in correct dependency order."""
         suite = await get_staging_suite()
@@ -246,6 +262,7 @@ class TestStagingServiceIntegration:
         assert auth_health.details.get("status") == "healthy"
         assert backend_health.details.get("status") == "healthy"
     
+    @pytest.mark.e2e
     async def test_api_endpoint_accessibility(self):
         """Test critical API endpoints are accessible through backend."""
         suite = await get_staging_suite()
@@ -269,6 +286,7 @@ class TestStagingServiceIntegration:
         thread_data = response.json()
         assert "id" in thread_data, "Thread creation response missing ID"
     
+    @pytest.mark.e2e
     async def test_complete_user_journey_flow(self):
         """Test complete user journey through all services."""
         suite = await get_staging_suite()

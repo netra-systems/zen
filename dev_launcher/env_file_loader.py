@@ -4,6 +4,7 @@ Loads from single .env file only with strict user control.
 """
 
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
 
@@ -18,6 +19,10 @@ class EnvFileLoader:
     
     Loads ONLY from .env file - strictly user-defined.
     Never overwrites or modifies the .env file.
+    
+    WARNING: .env.staging file should NEVER exist as it violates
+    unified environment management and can override Google Secret Manager
+    values with invalid placeholders.
     """
     
     def __init__(self, project_root: Path, verbose: bool = False):
@@ -25,9 +30,15 @@ class EnvFileLoader:
         self.project_root = project_root
         self.verbose = verbose
         self.env_file = project_root / ".env"
+        
+        # Check for .env.staging immediately upon initialization
+        self._check_staging_file()
     
     def load_env_file(self) -> Dict[str, Tuple[str, str]]:
         """Load from .env file (single source)."""
+        # Check for problematic .env.staging file before loading
+        self._check_staging_file()
+        
         logger.info("\n[ENV LOADER] Loading from .env file...")
         logger.info(f"  [FILE] Path: {self.env_file}")
         
@@ -74,12 +85,50 @@ class EnvFileLoader:
         else:
             return "***"
     
+    def _check_staging_file(self):
+        """Check for problematic .env.staging file and warn/error."""
+        staging_file = self.project_root / ".env.staging"
+        
+        if staging_file.exists():
+            # Get current environment to determine severity
+            current_env = os.environ.get('ENVIRONMENT', '').lower()
+            is_staging_env = current_env in ['staging', 'stage']
+            
+            # Log critical warnings
+            logger.critical("\n" + "="*80)
+            logger.critical("🚨 CRITICAL: .env.staging FILE DETECTED 🚨")
+            logger.critical("="*80)
+            logger.critical("The .env.staging file violates unified environment management!")
+            logger.critical("It can override Google Secret Manager values with invalid placeholders.")
+            logger.critical("")
+            logger.critical("IMMEDIATE ACTION REQUIRED:")
+            logger.critical(f"  Delete the file: rm {staging_file}")
+            logger.critical("  OR on Windows: del .env.staging")
+            logger.critical("")
+            logger.critical("WHY THIS IS CRITICAL:")
+            logger.critical("• Overrides production secret management")
+            logger.critical("• Contains placeholder values instead of real secrets")
+            logger.critical("• Breaks environment isolation")
+            logger.critical("• Violates SPEC/unified_environment_management.xml")
+            logger.critical("="*80)
+            
+            # In staging environment, consider raising an exception
+            if is_staging_env:
+                logger.critical("")
+                logger.critical("STAGING ENVIRONMENT DETECTED: This is especially dangerous!")
+                logger.critical("The .env.staging file will override Google Secret Manager.")
+                logger.critical("")
+                # Could raise an exception here if we want to be more strict:
+                # raise RuntimeError("Cannot proceed with .env.staging file in staging environment")
+    
     def _show_env_file_help(self):
         """Show help for creating .env file."""
         logger.info("\n  [HELP] To create a .env file:")
         logger.info("    1. Copy from example: cp .env.example .env")
         logger.info("    2. Copy from local: cp .env.local .env")
         logger.info("    3. Create manually with required variables")
+        logger.info("")
+        logger.info("  [WARNING] NEVER create .env.staging - it violates environment management!")
     
     def get_missing_variables(self, loaded: Dict, required: Set[str]) -> Set[str]:
         """Get missing required variables."""

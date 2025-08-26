@@ -38,6 +38,7 @@ from tests.e2e.account_deletion_helpers import (
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_account_deletion_flow():
     """
     Test #6: Complete Account Deletion → Data Cleanup Across All Services
@@ -83,6 +84,7 @@ async def test_complete_account_deletion_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_gdpr_compliance_validation():
     """
     Test GDPR compliance for account deletion.
@@ -123,6 +125,7 @@ async def test_gdpr_compliance_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_orphaned_data_detection():
     """
     Test detection and cleanup of orphaned data after deletion.
@@ -189,6 +192,7 @@ async def _verify_no_websocket_orphans(deletion_tester, user_id: str):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_account_deletion_performance():
     """
     Performance validation for account deletion flow.
@@ -218,6 +222,7 @@ async def test_account_deletion_performance():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_concurrent_account_deletions():
     """
     Test concurrent account deletions to ensure isolation.

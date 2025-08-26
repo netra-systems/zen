@@ -38,10 +38,12 @@ from tests.e2e.agent_conversation_helpers import (
 
 @pytest.mark.real_llm
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentOrchestrationRealLLM:
     """Test agent orchestration with real LLM integration."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize test core with real LLM support."""
         core = AgentConversationTestCore()
@@ -60,6 +62,7 @@ class TestAgentOrchestrationRealLLM:
         return int(os.getenv("TEST_LLM_TIMEOUT", "30"))
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_single_agent_real_llm_execution(self, test_core, use_real_llm, llm_timeout):
         """Test single agent execution with real LLM."""
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
@@ -74,6 +77,7 @@ class TestAgentOrchestrationRealLLM:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_coordination_real_llm(self, test_core, use_real_llm, llm_timeout):
         """Test multi-agent coordination with real LLM."""
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
@@ -88,6 +92,7 @@ class TestAgentOrchestrationRealLLM:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_context_preservation_real_llm(self, test_core, use_real_llm, llm_timeout):
         """Test context preservation across agent interactions with real LLM."""
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
@@ -119,6 +124,7 @@ class TestAgentOrchestrationRealLLM:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_performance_with_real_llm(self, test_core, use_real_llm, llm_timeout):
         """Test agent performance meets SLA with real LLM."""
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
@@ -144,6 +150,7 @@ class TestAgentOrchestrationRealLLM:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_chain_execution_real_llm(self, test_core, use_real_llm, llm_timeout):
         """Test agent chain execution with real LLM."""
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
@@ -183,6 +190,7 @@ class TestAgentOrchestrationRealLLM:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agent_orchestration_real_llm(self, test_core, use_real_llm):
         """Test concurrent agent orchestration with real LLM."""
         sessions = []
@@ -224,6 +232,7 @@ class TestAgentOrchestrationRealLLM:
                 await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_error_handling_real_llm(self, test_core, use_real_llm):
         """Test agent error handling with real LLM."""
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
@@ -429,10 +438,12 @@ class TestAgentOrchestrationRealLLM:
 
 @pytest.mark.real_llm
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 class TestAgentOrchestrationPerformance:
     """Performance tests for agent orchestration with real LLM."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_throughput_real_llm(self):
         """Test agent throughput with real LLM."""
         use_real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"

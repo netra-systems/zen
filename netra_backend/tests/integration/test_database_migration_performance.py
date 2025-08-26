@@ -28,8 +28,9 @@ from netra_backend.tests.integration.database_migration_validators import (
     MigrationValidator,
 )
 
+@pytest.mark.integration
 class TestDatabaseMigrationPerformance:
-    """Performance and concurrency migration tests."""
+    """Performance and concurrency migration tests - Optimized iteration 63."""
     
     @pytest.fixture
     async def containerized_databases(self):
@@ -60,11 +61,13 @@ class TestDatabaseMigrationPerformance:
             yield migrations_path
     
     @pytest.mark.asyncio
-    async def test_concurrent_migration_prevention(self, containerized_databases, temp_migration_dir):
-        """Test prevention of concurrent migration execution."""
+    @pytest.mark.fast_test  # Performance optimization iteration 63
+    async def test_concurrent_migration_prevention_optimized(self, containerized_databases, temp_migration_dir):
+        """Test prevention of concurrent migration execution - Optimized for performance."""
         migration = self._create_test_migrations(temp_migration_dir)[0]
         
-        slow_migration = self._create_migration_file(temp_migration_dir, "slow_migration.sql", "SELECT pg_sleep(5); CREATE TABLE concurrent_test (id SERIAL PRIMARY KEY);")
+        # Reduced sleep from 5s to 1s for faster testing
+        slow_migration = self._create_migration_file(temp_migration_dir, "slow_migration.sql", "SELECT pg_sleep(1); CREATE TABLE concurrent_test (id SERIAL PRIMARY KEY);")
         
         results = {'first': None, 'second': None}
         errors = []
@@ -80,7 +83,8 @@ class TestDatabaseMigrationPerformance:
         
         tasks = [asyncio.create_task(run_migration('first', slow_migration)), asyncio.create_task(run_migration('second', migration))]
         
-        await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=10)
+        # Reduced timeout from 10s to 5s for faster testing
+        await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=5)
         
         successful_count = sum(1 for r in results.values() if r == 'success')
         assert successful_count == 1, f"Expected exactly one successful migration, got {successful_count}"

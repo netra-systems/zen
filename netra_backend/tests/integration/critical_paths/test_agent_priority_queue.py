@@ -28,6 +28,9 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
+# Import performance optimization helpers
+from test_framework.performance_helpers import fast_test, timeout_override
+
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
@@ -500,6 +503,7 @@ async def priority_queue_manager():
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
+@fast_test
 async def test_basic_priority_queue_operations(priority_queue_manager):
     """Test basic priority queue enqueue/dequeue operations."""
     manager = priority_queue_manager
@@ -533,6 +537,7 @@ async def test_basic_priority_queue_operations(priority_queue_manager):
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
+@fast_test
 async def test_task_scheduling_and_execution(priority_queue_manager):
     """Test task scheduling and execution by the scheduler."""
     manager = priority_queue_manager
@@ -561,6 +566,7 @@ async def test_task_scheduling_and_execution(priority_queue_manager):
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
+@fast_test
 async def test_priority_ordering_with_age_factor(priority_queue_manager):
     """Test that older tasks get priority boost."""
     manager = priority_queue_manager
@@ -587,6 +593,7 @@ async def test_priority_ordering_with_age_factor(priority_queue_manager):
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
+@fast_test
 async def test_deadline_based_priority_boost(priority_queue_manager):
     """Test deadline-based priority boost."""
     manager = priority_queue_manager
@@ -609,6 +616,7 @@ async def test_deadline_based_priority_boost(priority_queue_manager):
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
+@fast_test
 async def test_starvation_prevention(priority_queue_manager):
     """Test starvation prevention mechanism."""
     manager = priority_queue_manager
@@ -636,6 +644,7 @@ async def test_starvation_prevention(priority_queue_manager):
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
+@fast_test
 async def test_task_retry_mechanism(priority_queue_manager):
     """Test task retry mechanism for failed tasks."""
     manager = priority_queue_manager

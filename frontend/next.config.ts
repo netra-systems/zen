@@ -21,9 +21,49 @@ const nextConfig: NextConfig = {
     const isDevelopment = process.env.NODE_ENV === 'development';
     const isStaging = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging';
     
+    // Static file caching headers for all environments
+    const staticFileHeaders = [
+      {
+        source: '/favicon.ico',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
+      },
+      {
+        source: '/robots.txt',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400' },
+          { key: 'Content-Type', value: 'text/plain' },
+        ],
+      },
+      {
+        source: '/sitemap.xml',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400' },
+          { key: 'Content-Type', value: 'application/xml' },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400' },
+          { key: 'Content-Type', value: 'application/manifest+json' },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
+      },
+    ];
+    
     if (isDevelopment) {
       // In development, use a more permissive CSP without nonces
       return [
+        ...staticFileHeaders,
         {
           source: '/:path*',
           headers: [
@@ -48,6 +88,7 @@ const nextConfig: NextConfig = {
     if (isStaging) {
       // Staging-specific security headers
       return [
+        ...staticFileHeaders,
         {
           source: '/:path*',
           headers: [
@@ -81,8 +122,8 @@ const nextConfig: NextConfig = {
       ];
     }
     
-    // For production, return empty array - CSP will be handled by middleware with proper nonce support
-    return [];
+    // For production, return static file headers - CSP will be handled by middleware with proper nonce support
+    return staticFileHeaders;
   },
   async rewrites() {
     // Only use proxy rewrites in development

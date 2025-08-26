@@ -22,6 +22,7 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 
 
+@pytest.mark.e2e
 class TestTypeExportConflicts(BaseIntegrationTest):
     """Test suite for detecting and validating type export conflicts in the frontend."""
     
@@ -33,6 +34,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         self.conflicting_types = []
         self.duplicate_definitions = {}
         
+    @pytest.mark.e2e
     def test_detect_base_websocket_payload_duplicates_FAILING(self):
         """
         FAILING TEST: Detects duplicate BaseWebSocketPayload definitions.
@@ -104,6 +106,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
             f"BaseWebSocketPayload should be defined once in a canonical location."
         )
     
+    @pytest.mark.e2e
     def test_typescript_compilation_with_duplicate_types_FAILING(self):
         """
         FAILING TEST: TypeScript compilation should pass without type conflicts.
@@ -143,6 +146,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
         except FileNotFoundError:
             pytest.skip("TypeScript compiler (tsc) not found in PATH")
     
+    @pytest.mark.e2e
     def test_scan_all_duplicate_type_definitions_FAILING(self):
         """
         FAILING TEST: Scans entire frontend for duplicate type definitions.
@@ -162,6 +166,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
             f"\n\nEach type should be defined exactly once in a canonical location."
         )
     
+    @pytest.mark.e2e
     def test_mixed_export_styles_consistency_FAILING(self):
         """
         FAILING TEST: Validates consistent export styles across type files.
@@ -184,6 +189,7 @@ class TestTypeExportConflicts(BaseIntegrationTest):
             f"\n\nAll exports for a type should use consistent style (prefer type-only exports)."
         )
 
+    @pytest.mark.e2e
     def test_similar_edge_case_interface_naming_conflicts_FAILING(self):
         """
         FAILING TEST: Similar pattern - tests for interface naming conflicts.

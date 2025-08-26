@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>ClickHouse Development Configuration</name>
+        <type>CriticalLearning</type>
+        <version>1.0</version>
+        <description>Critical learnings about ClickHouse configuration for local development and testing environments.</description>
+        <created-date>2025-08-26</created-date>
+        <updated-date>2025-08-26</updated-date>
+    </metadata>
+
+    <critical-issue>
+        <title>ClickHouse Port Configuration Mismatch in Development</title>
+        <severity>HIGH</severity>
+        <impact>Test failures, connection errors in development environment</impact>
+        
+        <problem-description>
+            Many configuration files and scripts had hardcoded defaults to port 8443 (ClickHouse Cloud HTTPS port),
+            but the local development ClickHouse container runs on port 8123 (standard HTTP port).
+            This caused tests to attempt connections to https://localhost:8443 when they should connect to http://localhost:8123.
+        </problem-description>
+
+        <root-cause>
+            The codebase was initially configured for ClickHouse Cloud (which uses HTTPS on port 8443) but the local
+            development environment uses a Docker container with standard ClickHouse configuration (HTTP on port 8123).
+            Many files had "8443" as the default fallback port instead of "8123".
+        </root-cause>
+
+        <affected-files>
+            <file>tests/e2e/database_test_connections.py</file>
+            <file>scripts/environment_validator_database.py</file>
+            <file>scripts/environment_validator.py</file>
+            <file>scripts/reset_clickhouse_auto.py</file>
+            <file>scripts/reset_clickhouse.py</file>
+            <file>netra_backend/.env.test</file>
+        </affected-files>
+    </critical-issue>
+
+    <solution>
+        <title>Correct ClickHouse Development Configuration</title>
+        
+        <configuration-principles>
+            <principle>Local development uses HTTP port 8123 (container: netra-clickhouse-dev)</principle>
+            <principle>Production/staging uses HTTPS port 8443 (ClickHouse Cloud)</principle>
+            <principle>Environment variables should specify the correct port for each environment</principle>
+            <principle>Default fallbacks should use development-friendly values (8123, not 8443)</principle>
+        </configuration-principles>
+
+        <correct-configuration>
+            <development>
+                <host>localhost</host>
+                <http-port>8123</http-port>
+                <native-port>9000</native-port>
+                <protocol>http</protocol>
+                <user>default</user>
+                <password>netra_dev_password</password>
+                <database>netra_dev</database>
+                <secure>false</secure>
+                <url>clickhouse://default:netra_dev_password@localhost:9000/netra_dev</url>
+                <http-url>http://localhost:8123</http-url>
+            </development>
+
+            <staging-production>
+                <host>staging-clickhouse.netrasystems.ai (or cloud URL)</host>
+                <http-port>8443</http-port>
+                <native-port>9440</native-port>
+                <protocol>https</protocol>
+                <user>default</user>
+                <password>from-secrets</password>
+                <database>default</database>
+                <secure>true</secure>
+            </staging-production>
+        </correct-configuration>
+
+        <environment-variables>
+            <development-env>
+                CLICKHOUSE_HOST=localhost
+                CLICKHOUSE_HTTP_PORT=8123
+                CLICKHOUSE_NATIVE_PORT=9000
+                CLICKHOUSE_PORT=8123
+                CLICKHOUSE_DB=netra_dev
+                CLICKHOUSE_USER=default
+                CLICKHOUSE_PASSWORD=netra_dev_password
+                CLICKHOUSE_MODE=local
+                CLICKHOUSE_ENABLED=true
+                DEV_MODE_DISABLE_CLICKHOUSE=false
+            </development-env>
+
+            <test-env>
+                CLICKHOUSE_URL=http://localhost:8123
+                CLICKHOUSE_HOST=localhost
+                CLICKHOUSE_HTTP_PORT=8123
+                CLICKHOUSE_NATIVE_PORT=9000
+                CLICKHOUSE_PORT=8123
+                CLICKHOUSE_DB=netra_dev
+                CLICKHOUSE_USER=default
+                CLICKHOUSE_PASSWORD=netra_dev_password
+                CLICKHOUSE_MODE=local
+                CLICKHOUSE_ENABLED=true
+                DEV_MODE_DISABLE_CLICKHOUSE=false
+            </test-env>
+        </environment-variables>
+    </solution>
+
+    <implementation-changes>
+        <change file="netra_backend/.env.test">
+            <description>Updated to enable ClickHouse and use correct local configuration</description>
+            <before>
+                DEV_MODE_DISABLE_CLICKHOUSE=true
+                CLICKHOUSE_ENABLED=false
+            </before>
+            <after>
+                CLICKHOUSE_HOST=localhost
+                CLICKHOUSE_HTTP_PORT=8123
+                CLICKHOUSE_NATIVE_PORT=9000
+                CLICKHOUSE_PORT=8123
+                CLICKHOUSE_DB=netra_dev
+                CLICKHOUSE_USER=default
+                CLICKHOUSE_PASSWORD=netra_dev_password
+                CLICKHOUSE_MODE=local
+                DEV_MODE_DISABLE_CLICKHOUSE=false
+                CLICKHOUSE_ENABLED=true
+            </after>
+        </change>
+
+        <change file="tests/e2e/database_test_connections.py">
+            <description>Changed default port from 8443 to 8123</description>
+            <before>port = int(os.getenv("CLICKHOUSE_PORT", "8443"))</before>
+            <after>port = int(os.getenv("CLICKHOUSE_PORT", "8123"))</after>
+        </change>
+
+        <change file="scripts/environment_validator_database.py">
+            <description>Changed default port from 8443 to 8123</description>
+            <before>"port": int(os.getenv("CLICKHOUSE_PORT", "8443")),</before>
+            <after>"port": int(os.getenv("CLICKHOUSE_PORT", "8123")),</after>
+        </change>
+
+        <change file="scripts/environment_validator.py">
+            <description>Changed default port from 8443 to 8123</description>
+            <before>ch_port = env_vars.get("CLICKHOUSE_PORT", "8443")</before>
+            <after>ch_port = env_vars.get("CLICKHOUSE_PORT", "8123")</after>
+        </change>
+
+        <change file="scripts/reset_clickhouse_auto.py">
+            <description>Changed default port from 8443 to 8123</description>
+            <before>'port': int(os.environ.get('CLICKHOUSE_PORT', '8443')),</before>
+            <after>'port': int(os.environ.get('CLICKHOUSE_PORT', '8123')),</after>
+        </change>
+
+        <change file="scripts/reset_clickhouse.py">
+            <description>Changed default port from 8443 to 8123</description>
+            <before>'port': int(os.environ.get('CLICKHOUSE_PORT', '8443')),</before>
+            <after>'port': int(os.environ.get('CLICKHOUSE_PORT', '8123')),</after>
+        </change>
+
+        <change file="tests/integration/test_database_connectivity_validation.py">
+            <description>Removed skip logic since ClickHouse is now properly configured</description>
+            <before>
+                if config['host'] and config['host'] != '':
+                    assert result['success'], (...)
+                else:
+                    pytest.skip("ClickHouse not configured for this test environment")
+            </before>
+            <after>
+                # ClickHouse is now properly configured for local development
+                assert result['success'], (...)
+            </after>
+        </change>
+    </implementation-changes>
+
+    <container-verification>
+        <title>ClickHouse Docker Container Status</title>
+        <container-name>netra-clickhouse-dev</container-name>
+        <container-id>59eea7d2135c</container-id>
+        <http-port>8123</http-port>
+        <native-port>9000</native-port>
+        <protocol>http</protocol>
+        <status>running</status>
+        <verification-command>docker ps | grep clickhouse</verification-command>
+    </container-verification>
+
+    <prevention-measures>
+        <measure>
+            <title>Environment-Aware Defaults</title>
+            <description>Use environment-aware logic in scripts to default to development-friendly values</description>
+            <example>
+                port = int(os.getenv("CLICKHOUSE_PORT", "8123" if env == "development" else "8443"))
+            </example>
+        </measure>
+
+        <measure>
+            <title>Configuration Validation</title>
+            <description>Add validation to ensure ClickHouse configuration matches the expected environment</description>
+            <validation-script>scripts/environment_validator.py</validation-script>
+        </measure>
+
+        <measure>
+            <title>Container Health Checks</title>
+            <description>Verify ClickHouse container is running and accessible before running tests</description>
+            <health-check-url>http://localhost:8123/ping</health-check-url>
+        </measure>
+    </prevention-measures>
+
+    <critical-takeaways>
+        <takeaway>Local development ClickHouse runs on HTTP port 8123, not HTTPS port 8443</takeaway>
+        <takeaway>Container name is netra-clickhouse-dev with standard ClickHouse configuration</takeaway>
+        <takeaway>Default port fallbacks in scripts should use development-friendly values (8123)</takeaway>
+        <takeaway>Test environment should enable ClickHouse since container is available and configured</takeaway>
+        <takeaway>Environment variables must specify correct ports for each deployment target</takeaway>
+        <takeaway>Skip logic in tests can be removed when services are properly configured</takeaway>
+    </critical-takeaways>
+</specification>

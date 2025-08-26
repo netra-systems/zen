@@ -229,6 +229,7 @@ class CompleteOAuthChatJourneyTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_oauth_chat_journey():
     """
     Test: Complete OAuth Login → User Creation → Chat Interaction Journey

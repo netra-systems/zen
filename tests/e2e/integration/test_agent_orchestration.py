@@ -27,6 +27,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.Agent import SubAgentLifecycle
 
 
+@pytest.mark.e2e
 class TestSubAgent(BaseSubAgent):
     """Concrete test implementation of BaseSubAgent for testing."""
     
@@ -84,6 +85,7 @@ class AgentOrchestrationTester:
         self.active_agents[name] = sub_agent
         return sub_agent
     
+    @pytest.mark.e2e
     async def test_agent_coordination(self, supervisor: SupervisorAgent,
                                     sub_agents: List[TestSubAgent], task: str) -> Dict[str, Any]:
         """Test multi-agent coordination workflow."""
@@ -122,6 +124,7 @@ class AgentOrchestrationTester:
             return False
         return all(all(key in r for key in ["agent_name", "response_data"]) for r in responses)
     
+    @pytest.mark.e2e
     async def test_agent_error_propagation(self, supervisor: SupervisorAgent,
                                          failing_agent: str) -> Dict[str, Any]:
         """Test error propagation through agent hierarchy."""
@@ -209,6 +212,7 @@ class AgentOrchestrationTester:
         }
 
 
+@pytest.mark.e2e
 class TestAgentOrchestration:
     """E2E tests for agent orchestration."""
     
@@ -218,6 +222,7 @@ class TestAgentOrchestration:
         return AgentOrchestrationTester(use_mock_llm=True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_supervisor_sub_agent_coordination(self, orchestration_tester):
         """Test supervisor coordinating multiple sub-agents."""
         supervisor = await orchestration_tester.create_supervisor_agent("TestSupervisor001")
@@ -234,6 +239,7 @@ class TestAgentOrchestration:
         assert len(orchestration_tester.coordination_events) > 0
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sub_agent_invocation_flow(self, orchestration_tester):
         """Test supervisor invoking specific sub-agents."""
         supervisor = await orchestration_tester.create_supervisor_agent("InvokeSupervisor001")
@@ -252,6 +258,7 @@ class TestAgentOrchestration:
         assert len(orchestration_tester.coordination_events) == 2
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_layer_accumulation(self, orchestration_tester):
         """Test response accumulation across agent layers."""
         supervisor = await orchestration_tester.create_supervisor_agent("AccumSupervisor001")
@@ -269,6 +276,7 @@ class TestAgentOrchestration:
         assert len(coordination_result["sub_agent_responses"]) == 4
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_error_handling_propagation(self, orchestration_tester):
         """Test error propagation through agent hierarchy."""
         supervisor = await orchestration_tester.create_supervisor_agent("ErrorSupervisor001")
@@ -280,6 +288,7 @@ class TestAgentOrchestration:
         assert "recovery_strategy" in error_result or error_result.get("fallback_triggered")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agent_orchestration(self, orchestration_tester):
         """Test concurrent agent orchestration scenarios."""
         supervisor = await orchestration_tester.create_supervisor_agent("ConcurrentSupervisor001")
@@ -303,10 +312,12 @@ class TestAgentOrchestration:
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestCriticalOrchestrationScenarios:
     """Critical orchestration scenarios."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_scale_orchestration(self):
         """Test enterprise-scale agent orchestration."""
         tester = AgentOrchestrationTester(use_mock_llm=True)

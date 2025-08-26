@@ -51,6 +51,7 @@ from tests.e2e.database_sync_helpers import (
 )
 
 
+@pytest.mark.e2e
 class TestDatabaseSync:
     """Phase 5: Database sync consistency tests."""
     
@@ -60,11 +61,13 @@ class TestDatabaseSync:
         return DatabaseSyncValidator()
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_user_data(self):
         """Generate test user data."""
         return create_test_user_data()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_backend_user_sync(self, sync_validator, test_user_data):
         """Test 1: User data consistency between Auth and Backend."""
         user_id = await sync_validator.auth_service.create_user(test_user_data)
@@ -74,6 +77,7 @@ class TestDatabaseSync:
         await test_verify_backend_user_exists(sync_validator, user_id, test_user_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_clickhouse_metrics_sync(self, sync_validator, test_user_data):
         """Test 2: Metrics data accuracy in ClickHouse."""
         user_id = await sync_validator.auth_service.create_user(test_user_data)
@@ -90,6 +94,7 @@ class TestDatabaseSync:
         await sync_validator.clickhouse.insert_user_event(user_id, event_data)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_redis_cache_invalidation(self, sync_validator, test_user_data):
         """Test 3: Cache consistency with database changes."""
         user_id = await sync_validator.auth_service.create_user(test_user_data)
@@ -99,6 +104,7 @@ class TestDatabaseSync:
         await verify_cache_invalidation(sync_validator, cache_key)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_migration_integrity(self, sync_validator):
         """Test 4: Migration safety and rollback."""
         test_users = await create_migration_users(sync_validator)
@@ -107,10 +113,12 @@ class TestDatabaseSync:
         await test_verify_migration_integrity(sync_validator, test_users)
 
 
+@pytest.mark.e2e
 class TestDatabaseSyncPerformance:
     """Performance tests for database synchronization."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_user_sync_performance(self):
         """Test concurrent user synchronization performance."""
         validator = DatabaseSyncValidator()
@@ -121,10 +129,12 @@ class TestDatabaseSyncPerformance:
         validate_performance_results(duration, results, 20)
 
 
+@pytest.mark.e2e
 class TestEventualConsistency:
     """Test eventual consistency patterns."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_eventual_consistency_convergence(self):
         """Test eventual consistency convergence across services."""
         validator = DatabaseSyncValidator()

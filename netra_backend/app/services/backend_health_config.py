@@ -21,15 +21,24 @@ from netra_backend.app.core.health_checkers import (
 
 async def setup_backend_health_service() -> UnifiedHealthService:
     """Configure health checks for the backend service."""
+    from netra_backend.app.core.isolated_environment import get_env
     
     health_service = UnifiedHealthService("netra_backend", "1.0.0")
+    
+    # Environment-aware timeout configuration for fast staging readiness
+    env = get_env().get('ENVIRONMENT', 'development').lower()
+    is_staging = env == 'staging'
+    
+    # Use faster timeouts for staging to prevent readiness probe timeouts
+    postgres_timeout = 3.0 if is_staging else 10.0
+    redis_timeout = 2.0 if is_staging else 5.0
     
     # Critical infrastructure checks (Readiness)
     await health_service.register_check(HealthCheckConfig(
         name="postgres",
         description="PostgreSQL database connectivity",
         check_function=check_postgres_health,
-        timeout_seconds=10.0,
+        timeout_seconds=postgres_timeout,
         check_type=CheckType.READINESS,
         critical=True,
         priority=1,  # Critical
@@ -40,19 +49,21 @@ async def setup_backend_health_service() -> UnifiedHealthService:
         name="redis",
         description="Redis cache connectivity",
         check_function=check_redis_health,
-        timeout_seconds=5.0,
+        timeout_seconds=redis_timeout,
         check_type=CheckType.READINESS,
         critical=False,
         priority=2,  # Important but not critical
         labels={"component": "cache", "infrastructure": "true"}
     ))
     
-    # Optional services
+    # Optional services - faster timeouts for staging
+    clickhouse_timeout = 3.0 if is_staging else 10.0
+    
     await health_service.register_check(HealthCheckConfig(
         name="clickhouse",
         description="ClickHouse analytics database",
         check_function=check_clickhouse_health,
-        timeout_seconds=10.0,
+        timeout_seconds=clickhouse_timeout,
         check_type=CheckType.COMPONENT,
         critical=False,
         priority=3,  # Optional
@@ -83,12 +94,14 @@ async def setup_backend_health_service() -> UnifiedHealthService:
         labels={"component": "system", "layer": "infrastructure"}
     ))
     
-    # Auth service health check
+    # Auth service health check - reduced timeout for staging
+    auth_service_timeout = 3.0 if is_staging else 8.0
+    
     await health_service.register_check(HealthCheckConfig(
         name="auth_service",
         description="Auth service connectivity and configuration",
         check_function=check_auth_service_health,
-        timeout_seconds=8.0,
+        timeout_seconds=auth_service_timeout,
         check_type=CheckType.COMPONENT,
         critical=False,
         priority=2,

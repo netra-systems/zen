@@ -215,6 +215,7 @@ def mock_db_session():
     return session
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_agent_state_persistence_across_reconnect(persistence_tester, context_validator:
                                                        reconnection_manager, mock_db_session):
     """Test agent remembers context across WebSocket reconnection."""
@@ -272,6 +273,7 @@ async def test_agent_state_persistence_across_reconnect(persistence_tester, cont
     assert len(message_history) == len(unique_messages), "No duplicate message processing"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_conversation_history_continuity(persistence_tester, context_validator:
                                               mock_db_session):
     """Test conversation history remains accessible after reconnection."""
@@ -308,6 +310,7 @@ async def test_conversation_history_continuity(persistence_tester, context_valid
             "Latest context must be preserved"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_user_preferences_persistence(persistence_tester, mock_db_session):
     """Test user preferences maintained across sessions."""
     # BVJ: Preference persistence improves user satisfaction and retention
@@ -341,6 +344,7 @@ async def test_user_preferences_persistence(persistence_tester, mock_db_session)
         assert restored_context["analysis_frequency"] == "daily", "Updated preferences must be saved"
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_agent_decision_consistency(persistence_tester, reconnection_manager:
                                          mock_db_session):
     """Test agent decisions remain consistent after reconnection."""  
@@ -377,6 +381,7 @@ async def test_agent_decision_consistency(persistence_tester, reconnection_manag
             "Decision confidence must be preserved"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_state_operations(persistence_tester, mock_db_session):
     """Test concurrent state save/restore operations."""
     # BVJ: Concurrent operation safety prevents data corruption

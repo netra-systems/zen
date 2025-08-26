@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>E2E Test Discovery Patterns</title>
+    <date>2025-08-26</date>
+    <category>testing</category>
+    <priority>CRITICAL</priority>
+    
+    <problem>
+        <description>
+            The unified test runner was failing to discover hundreds of E2E tests located in the 
+            tests/e2e directory. Only E2E tests in service-specific directories (netra_backend/tests, 
+            auth_service/tests) were being discovered, missing ~588 tests in the main E2E directory.
+        </description>
+        <impact>
+            - Missing critical E2E test coverage
+            - False confidence in system stability
+            - Incomplete validation of cross-service functionality
+            - E2E tests not running in CI/CD pipelines
+        </impact>
+        <root_cause>
+            The test runner's _build_pytest_command method only included service-specific test 
+            directories in the pytest command, not the root-level tests/e2e directory where 
+            cross-service E2E tests naturally belong.
+        </root_cause>
+    </problem>
+    
+    <solution>
+        <approach>
+            Modified the unified test runner to include all relevant test directories when 
+            running E2E category tests, recognizing that E2E tests span multiple services 
+            and belong in a centralized location.
+        </approach>
+        <implementation>
+            <code_change file="scripts/unified_test_runner.py">
+                # In _build_pytest_command method:
+                # For E2E tests, include all test directories since they span services
+                if category_name == "e2e":
+                    cmd_parts.extend(["tests/e2e", "netra_backend/tests", "auth_service/tests"])
+                else:
+                    cmd_parts.append(str(config["test_dir"]))
+                    
+                # Also updated service mapping to prevent duplicate runs:
+                "e2e": ["backend"],  # E2E tests run from backend but include all test directories
+            </code_change>
+        </implementation>
+    </solution>
+    
+    <patterns>
+        <pattern name="test_directory_organization">
+            <principle>
+                E2E tests that span multiple services should live in a centralized tests/e2e 
+                directory, not scattered across service-specific test directories.
+            </principle>
+            <correct>
+                tests/
+                ├── e2e/                  # Cross-service E2E tests
+                │   ├── test_auth_flow.py
+                │   ├── test_user_journey.py
+                │   └── test_websocket_integration.py
+                ├── integration/          # Cross-service integration tests
+                netra_backend/tests/      # Backend-specific tests
+                auth_service/tests/       # Auth-specific tests
+            </correct>
+            <incorrect>
+                netra_backend/tests/e2e/  # E2E tests hidden in service directory
+                auth_service/tests/e2e/   # Duplicate E2E test directories
+            </incorrect>
+        </pattern>
+        
+        <pattern name="test_runner_configuration">
+            <principle>
+                Test runners must be aware of the project's test organization structure and 
+                include all relevant directories based on test category.
+            </principle>
+            <correct>
+                # E2E tests should search all test locations
+                if category == "e2e":
+                    test_paths = ["tests/e2e", "netra_backend/tests", "auth_service/tests"]
+                    
+                # Service-specific tests only search their directory
+                if category == "unit" and service == "backend":
+                    test_paths = ["netra_backend/tests"]
+            </correct>
+            <incorrect>
+                # Always using service-specific paths regardless of category
+                test_paths = [config["test_dir"]]  # Misses root-level tests
+            </incorrect>
+        </pattern>
+        
+        <pattern name="test_discovery_validation">
+            <principle>
+                Always validate that test discovery is finding the expected number of tests, 
+                especially after modifying test organization or runner configuration.
+            </principle>
+            <validation_commands>
+                # Direct pytest collection to verify expected tests
+                pytest tests/e2e -m "e2e" --collect-only -q | grep -c "test_"
+                
+                # Compare with test runner collection
+                python unified_test_runner.py --category e2e --collect-only
+                
+                # Verify no tests are being missed
+                find tests/e2e -name "test_*.py" -exec grep -l "@pytest.mark.e2e\|mark.e2e" {} \;
+            </validation_commands>
+        </pattern>
+    </patterns>
+    
+    <best_practices>
+        <practice>
+            <name>Centralized E2E Test Location</name>
+            <description>
+                Keep all E2E tests in tests/e2e directory for better organization and discovery.
+                Service-specific directories should only contain unit and integration tests 
+                specific to that service.
+            </description>
+        </practice>
+        <practice>
+            <name>Test Category Awareness</name>
+            <description>
+                Test runners must understand that different test categories may require different 
+                search paths. E2E tests by definition span services and need broader search scope.
+            </description>
+        </practice>
+        <practice>
+            <name>Regular Test Discovery Audits</name>
+            <description>
+                Periodically audit test discovery to ensure all tests are being found:
+                - Count tests by category using pytest --collect-only
+                - Compare with filesystem test count
+                - Verify CI/CD is running expected test count
+            </description>
+        </practice>
+        <practice>
+            <name>Single Execution for Cross-Service Tests</name>
+            <description>
+                E2E tests should only run once per test session, not once per service. 
+                Configure test runner to execute E2E category from a single service context.
+            </description>
+        </practice>
+    </best_practices>
+    
+    <prevention>
+        <check name="test_count_validation">
+            <description>
+                Add assertions in CI/CD to verify minimum expected test counts per category
+            </description>
+            <implementation>
+                # In CI pipeline
+                E2E_COUNT=$(pytest tests/e2e -m "e2e" --collect-only -q | grep -c "::")
+                if [ $E2E_COUNT -lt 500 ]; then
+                    echo "ERROR: Only found $E2E_COUNT E2E tests, expected 500+"
+                    exit 1
+                fi
+            </implementation>
+        </check>
+        <check name="test_runner_audit">
+            <description>
+                Regular audit script to verify test runner discovers all tests
+            </description>
+            <script_location>scripts/audit_test_discovery.py</script_location>
+        </check>
+    </prevention>
+    
+    <related_specs>
+        <spec>test_infrastructure_architecture.xml</spec>
+        <spec>test_runner_guide.xml</spec>
+        <spec>folder_structure_rules.md</spec>
+    </related_specs>
+    
+    <metrics>
+        <before>
+            - E2E tests discovered: ~50 (only service-specific)
+            - E2E tests missed: ~588
+            - Test coverage: Incomplete
+        </before>
+        <after>
+            - E2E tests discovered: 588
+            - E2E tests missed: 0
+            - Test coverage: Complete
+        </after>
+    </metrics>
+</learning>

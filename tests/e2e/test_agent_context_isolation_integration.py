@@ -28,6 +28,7 @@ from tests.e2e.agent_response_test_utilities import (
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestAgentContextIsolation:
     """Test agent context window isolation and management."""
     
@@ -56,6 +57,7 @@ class TestAgentContextIsolation:
             "config": config
         }
     
+    @pytest.mark.e2e
     async def test_fresh_context_window_creation(self, context_setup):
         """Test that each spawned agent gets a fresh context window."""
         supervisor = context_setup["supervisor"]
@@ -89,6 +91,7 @@ class TestAgentContextIsolation:
         assert isolation_result["no_context_bleeding"] is True
         assert isolation_result["fresh_window_count"] == 3
     
+    @pytest.mark.e2e
     async def test_context_window_cleanup(self, context_setup):
         """Test proper cleanup of context windows."""
         supervisor = context_setup["supervisor"]
@@ -114,6 +117,7 @@ class TestAgentContextIsolation:
         assert cleanup_result["context_cleared"] is True
         assert cleanup_result["memory_released"] is True
     
+    @pytest.mark.e2e
     async def test_concurrent_context_isolation(self, context_setup):
         """Test context isolation under concurrent execution."""
         supervisor = context_setup["supervisor"]
@@ -142,6 +146,7 @@ class TestAgentContextIsolation:
         assert concurrent_result["no_cross_contamination"] is True
         assert execution_time < 10.0  # Performance requirement
     
+    @pytest.mark.e2e
     async def test_context_window_size_limits(self, context_setup):
         """Test context window size management and limits."""
         supervisor = context_setup["supervisor"]
@@ -167,6 +172,7 @@ class TestAgentContextIsolation:
         assert size_result["within_limits"] is True
         assert size_result["memory_efficient"] is True
     
+    @pytest.mark.e2e
     async def test_context_persistence_across_tasks(self, context_setup):
         """Test context persistence for agent task continuity."""
         supervisor = context_setup["supervisor"]
@@ -294,6 +300,7 @@ class TestAgentContextIsolation:
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_memory_isolation_validation():
     """Test memory isolation between agent contexts."""
     config = get_config()
@@ -313,6 +320,7 @@ async def test_memory_isolation_validation():
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_context_window_refresh():
     """Test context window refresh mechanism."""
     config = get_config()

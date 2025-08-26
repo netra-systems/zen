@@ -14,6 +14,7 @@ from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 from tests.e2e.integration.user_journey_executor import TestUser
 
 
+@pytest.mark.e2e
 class TestMultiServiceIntegrationCore:
     """Test class for core multi-service integration functionality."""
     
@@ -22,6 +23,7 @@ class TestMultiServiceIntegrationCore:
         self.test_id = str(uuid.uuid4())[:8]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_basic_service_communication(self):
         """Test basic communication between services."""
         # Create harness without starting real services
@@ -42,6 +44,7 @@ class TestMultiServiceIntegrationCore:
         print(f"WebSocket URL: {websocket_url}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_creation_and_auth_flow(self):
         """Test user creation and authentication infrastructure."""
         # Test harness creation without real service startup
@@ -62,6 +65,7 @@ class TestMultiServiceIntegrationCore:
         print(f"Service URLs configured: {list(status['service_urls'].keys())}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_connection_establishment(self):
         """Test WebSocket connection infrastructure setup."""
         # Test WebSocket URL generation
@@ -78,6 +82,7 @@ class TestMultiServiceIntegrationCore:
         print("WebSocket infrastructure validated")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_user_operations(self):
         """Test concurrent operations infrastructure."""
         # Test harness concurrent operation capabilities
@@ -96,6 +101,7 @@ class TestMultiServiceIntegrationCore:
         print(f"Initial WebSocket connections: {len(harness.journey_executor.websocket_connections)}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_environment_status_reporting(self):
         """Test environment status reporting functionality."""
         # Test status reporting without starting services
@@ -125,6 +131,7 @@ class TestMultiServiceIntegrationCore:
         print(f"Service URLs: {service_urls}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_resilience(self):
         """Test system resilience to configuration errors."""
         # Test invalid service name handling
@@ -142,6 +149,7 @@ class TestMultiServiceIntegrationCore:
         print("Error resilience validated")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_independence_validation(self):
         """Test that services maintain independence per SPEC/independent_services.xml."""
         harness = create_e2e_harness()

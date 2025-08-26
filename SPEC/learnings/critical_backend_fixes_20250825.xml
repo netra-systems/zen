@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings domain="backend_infrastructure" category="critical_fixes">
+    <metadata>
+        <title>Critical Backend Infrastructure Fixes</title>
+        <date>2025-08-25</date>
+        <context>Staging deployment failures - Redis and ClickHouse issues</context>
+        <business_impact>System Stability</business_impact>
+    </metadata>
+    
+    <!-- REDIS INITIALIZATION FIX -->
+    <learning id="redis_import_order_fix">
+        <title>Redis get_env Import Order Issue Resolution</title>
+        <problem>
+            <description>Redis initialization failures in staging due to 'get_env' referenced before assignment</description>
+            <symptoms>
+                <item>NameError: name 'get_env' is not defined during Redis initialization</item>
+                <item>Service startup failures in environment_detector.py</item>
+                <item>Import ordering issues when modules loaded in specific sequences</item>
+            </symptoms>
+            <root_cause>
+                Import statement for get_env was placed BEFORE the module docstring in environment_detector.py,
+                causing import ordering issues when modules are loaded in specific sequences during service initialization.
+            </root_cause>
+        </problem>
+        <solution>
+            <description>Fixed import order in environment_detector.py</description>
+            <implementation>
+                <change>
+                    <file>netra_backend/app/core/configuration/environment_detector.py</file>
+                    <action>Move get_env import from line 1 to after module docstring (line 20)</action>
+                    <details>
+                        Moved: from netra_backend.app.core.isolated_environment import get_env
+                        From: Before docstring (line 1)  
+                        To: After proper imports section (line 20)
+                    </details>
+                </change>
+            </implementation>
+            <verification>
+                <test>Direct import test confirms get_env accessible</test>
+                <test>EnvironmentDetector instantiation works</test>
+                <test>REDIS_URL access successful</test>
+            </verification>
+        </solution>
+        <lessons>
+            <item>Module imports must always come AFTER module docstrings</item>
+            <item>Import order matters for circular dependency avoidance</item>
+            <item>Service initialization dependencies need careful ordering</item>
+        </lessons>
+    </learning>
+    
+    <!-- CLICKHOUSE CONNECTION HANDLING FIX -->
+    <learning id="clickhouse_timeout_graceful_degradation">
+        <title>ClickHouse Connection Timeout and Graceful Degradation</title>
+        <problem>
+            <description>ClickHouse connections hanging indefinitely in staging environment</description>
+            <symptoms>
+                <item>Connection timeouts to clickhouse.staging.netrasystems.ai:8443</item>
+                <item>SSL/TLS handshake failures on HTTPS port</item>
+                <item>Service hanging during startup waiting for ClickHouse</item>
+                <item>No fallback mechanism for missing ClickHouse infrastructure</item>
+            </symptoms>
+            <root_cause>
+                ClickHouse client connections lacked proper timeout handling and graceful degradation
+                for staging environments where ClickHouse infrastructure may not be available.
+            </root_cause>
+        </problem>
+        <solution>
+            <description>Enhanced ClickHouse connection handling with timeouts and graceful degradation</description>
+            <implementation>
+                <change>
+                    <file>netra_backend/app/db/clickhouse.py</file>
+                    <action>Add connection timeout handling in _test_and_yield_client()</action>
+                    <details>
+                        Added asyncio.wait_for() with 30-second timeout for connection tests
+                        Prevents indefinite hanging during connection establishment
+                    </details>
+                </change>
+                <change>
+                    <file>netra_backend/app/db/clickhouse.py</file>
+                    <action>Implement environment-aware error handling in _handle_connection_error()</action>
+                    <details>
+                        Added staging environment detection
+                        Check CLICKHOUSE_REQUIRED environment variable
+                        Enable graceful degradation when ClickHouse not required in staging
+                    </details>
+                </change>
+                <change>
+                    <file>netra_backend/app/db/clickhouse.py</file>
+                    <action>Add fallback to mock client in _create_real_client()</action>
+                    <details>
+                        When connection fails in staging and ClickHouse not required,
+                        automatically fall back to mock client to maintain service functionality
+                    </details>
+                </change>
+                <change>
+                    <file>netra_backend/app/db/clickhouse.py</file>
+                    <action>Implement retry logic in ClickHouseService._initialize_real_client()</action>
+                    <details>
+                        Added 3 retry attempts with exponential backoff (1s, 2s, 4s)
+                        Each connection attempt has 30-second timeout
+                        Proper error logging for troubleshooting
+                    </details>
+                </change>
+            </implementation>
+            <verification>
+                <test>Connection timeout handling prevents hanging</test>
+                <test>Graceful degradation works in staging environment</test>
+                <test>Mock client fallback functional</test>
+                <test>Production compatibility maintained</test>
+            </verification>
+        </solution>
+        <lessons>
+            <item>Always implement connection timeouts for external services</item>
+            <item>Staging environments need graceful degradation when infrastructure is missing</item>
+            <item>Retry logic with exponential backoff improves resilience</item>
+            <item>Environment-aware error handling enables flexible deployment</item>
+            <item>Fallback to mock clients maintains service functionality during outages</item>
+        </lessons>
+    </learning>
+    
+    <!-- ENVIRONMENT CONFIGURATION -->
+    <learning id="staging_environment_configuration">
+        <title>Staging Environment Configuration Best Practices</title>
+        <problem>
+            <description>Staging deployment issues due to infrastructure assumptions</description>
+            <symptoms>
+                <item>Services expecting all infrastructure to be available</item>
+                <item>Hard failures when optional services unavailable</item>
+                <item>No differentiation between required and optional services per environment</item>
+            </symptoms>
+        </problem>
+        <solution>
+            <description>Implement environment-aware service requirements</description>
+            <implementation>
+                <configuration>
+                    <env_var>CLICKHOUSE_REQUIRED=false (staging)</env_var>
+                    <env_var>CLICKHOUSE_REQUIRED=true (production)</env_var>
+                    <env_var>REDIS_REQUIRED=false (staging)</env_var>
+                    <env_var>REDIS_REQUIRED=true (production)</env_var>
+                </configuration>
+            </implementation>
+        </solution>
+        <lessons>
+            <item>Use environment variables to control service requirements</item>
+            <item>Staging should be forgiving of missing optional services</item>
+            <item>Production should enforce all required services</item>
+            <item>Clear distinction between required and optional per environment</item>
+        </lessons>
+    </learning>
+    
+    <!-- TESTING STRATEGY -->
+    <learning id="infrastructure_failure_testing">
+        <title>Infrastructure Failure Testing Strategy</title>
+        <problem>
+            <description>Need systematic way to test infrastructure failure scenarios</description>
+        </problem>
+        <solution>
+            <description>Create comprehensive failure scenario tests</description>
+            <implementation>
+                <test_categories>
+                    <category>Connection timeouts</category>
+                    <category>DNS resolution failures</category>
+                    <category>SSL handshake failures</category>
+                    <category>Port unreachable scenarios</category>
+                    <category>Service initialization race conditions</category>
+                </test_categories>
+                <test_locations>
+                    <location>netra_backend/tests/integration/staging/test_redis_initialization_failures.py</location>
+                    <location>netra_backend/tests/integration/staging/test_clickhouse_connection_failures.py</location>
+                </test_locations>
+            </implementation>
+        </solution>
+        <lessons>
+            <item>Test failure scenarios explicitly with dedicated test suites</item>
+            <item>Mock external infrastructure failures to validate error handling</item>
+            <item>Verify graceful degradation behavior</item>
+            <item>Test environment-specific configuration handling</item>
+        </lessons>
+    </learning>
+    
+    <!-- DEPLOYMENT READINESS -->
+    <learning id="deployment_readiness_validation">
+        <title>Deployment Readiness Validation Process</title>
+        <solution>
+            <description>Systematic validation of critical fixes before deployment</description>
+            <validation_checklist>
+                <item>Import order and circular dependency checks</item>
+                <item>Connection timeout behavior verification</item>
+                <item>Graceful degradation testing</item>
+                <item>Environment-specific configuration validation</item>
+                <item>Production compatibility confirmation</item>
+                <item>Service instantiation and initialization testing</item>
+            </validation_checklist>
+        </solution>
+    </learning>
+</learnings>

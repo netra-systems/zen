@@ -233,10 +233,12 @@ class CrossServiceJWTValidator:
 
 
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestJWTCrossServiceFlow(JWTTestFixtures):
     """Critical JWT cross-service flow tests."""
     
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_harness(self):
         """Setup test harness."""
         harness = UnifiedE2ETestHarness()
@@ -252,6 +254,7 @@ class TestJWTCrossServiceFlow(JWTTestFixtures):
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_cross_service():
     """
     BVJ: Segment: ALL | Goal: Security | Impact: All authenticated ops
@@ -272,6 +275,7 @@ async def test_jwt_cross_service():
 
 @pytest.mark.critical  
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_websocket_validation():
     """Test token validation for WebSocket connections."""
     validator = CrossServiceJWTValidator()
@@ -292,6 +296,7 @@ async def test_jwt_websocket_validation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_jwt_token_refresh_propagation():
     """Test token refresh propagation across services."""
     validator = CrossServiceJWTValidator()
@@ -308,6 +313,7 @@ async def test_jwt_token_refresh_propagation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_token_revocation_effects():
     """Test token revocation affects all services."""
     validator = CrossServiceJWTValidator()
@@ -322,6 +328,7 @@ async def test_jwt_token_revocation_effects():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_service_to_service_auth():
     """Test service-to-service authentication tokens."""
     validator = CrossServiceJWTValidator()
@@ -340,6 +347,7 @@ async def test_jwt_service_to_service_auth():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_performance_requirements():
     """Test JWT operations meet performance requirements (<50ms)."""
     jwt_helper = JWTTestHelper()
@@ -367,6 +375,7 @@ async def test_jwt_performance_requirements():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_security_consistency():
     """Test JWT security is consistent across all services."""
     security_tester = JWTSecurityTester()

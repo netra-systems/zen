@@ -32,10 +32,12 @@ from tests.e2e.websocket_resilience_core import (
 )
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketReconnectionWithStateRecovery:
     """Test #3: WebSocket Reconnection with State Recovery."""
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_core(self):
         """Initialize test core components."""
         return WebSocketResilienceTestCore()
@@ -50,6 +52,7 @@ class TestWebSocketReconnectionWithStateRecovery:
         """Initialize message continuity validator."""
         return MessageContinuityValidator()
     
+    @pytest.mark.e2e
     async def test_real_connection_drop_and_recovery(self, test_core, state_manager:
                                                    continuity_validator):
         """Test real connection drop with automatic reconnection and state recovery."""
@@ -85,6 +88,7 @@ class TestWebSocketReconnectionWithStateRecovery:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
     
+    @pytest.mark.e2e
     async def test_reconnection_logic_validation(self, test_core, state_manager):
         """Test reconnection logic without requiring real server."""
         user_id = TEST_USERS["enterprise"].id
@@ -99,10 +103,12 @@ class TestWebSocketReconnectionWithStateRecovery:
         assert state_data["user_id"] == user_id
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestErrorMessageToUserNotificationRecovery:
     """Test #6: Error Message → User Notification → Recovery."""
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_core(self):
         """Initialize test core components.""" 
         return WebSocketResilienceTestCore()
@@ -112,6 +118,7 @@ class TestErrorMessageToUserNotificationRecovery:
         """Initialize agent error simulator."""
         return AgentErrorSimulator()
     
+    @pytest.mark.e2e
     async def test_agent_failure_error_flow(self, test_core, error_simulator):
         """Test complete error flow: agent failure → user notification → retry."""
         user_id = TEST_USERS["early"].id
@@ -144,6 +151,7 @@ class TestErrorMessageToUserNotificationRecovery:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
     
+    @pytest.mark.e2e
     async def test_error_simulation_logic(self, error_simulator):
         """Test error simulation and notification logic without real server."""
         user_id = TEST_USERS["early"].id
@@ -161,6 +169,7 @@ class TestErrorMessageToUserNotificationRecovery:
         assert "failure_type" in failure_data
         assert failure_data["failure_type"] == "agent_processing_error"
     
+    @pytest.mark.e2e
     async def test_error_recovery_within_time_limit(self, test_core, error_simulator):
         """Test that error recovery completes within acceptable time limits."""
         start_time = time.time()
@@ -182,6 +191,7 @@ class TestErrorMessageToUserNotificationRecovery:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
     
+    @pytest.mark.e2e
     async def test_timing_requirements_validation(self):
         """Test that timing requirements are validated correctly."""
         start_time = time.time()

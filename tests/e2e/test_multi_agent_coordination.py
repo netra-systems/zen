@@ -24,10 +24,12 @@ from tests.e2e.agent_orchestration_fixtures import (
 )
 
 
+@pytest.mark.e2e
 class TestMultiAgentCoordination:
     """Test parallel agent execution and result aggregation - BVJ: Value delivery"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_parallel_agent_execution(self, mock_supervisor_agent, coordination_test_data):
         """Test multiple agents execute in parallel"""
         pipeline = ["data", "optimizations"]
@@ -41,6 +43,7 @@ class TestMultiAgentCoordination:
         mock_supervisor_agent.execute_pipeline.assert_called_once_with(pipeline)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_result_aggregation_across_agents(self, mock_supervisor_agent, coordination_test_data):
         """Test results from multiple agents are properly aggregated"""
         pipeline_results = coordination_test_data["pipeline_results"]
@@ -54,6 +57,7 @@ class TestMultiAgentCoordination:
         assert result["optimizations"]["potential_savings"] == 3000
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sequential_dependency_execution(self, mock_supervisor_agent):
         """Test agents execute in dependency order when required"""
         dependencies = [("data", []), ("optimizations", ["data"]), ("actions", ["optimizations"])]
@@ -65,6 +69,7 @@ class TestMultiAgentCoordination:
         assert result["order"] == "sequential"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_output_to_next_agent_input(self, mock_sub_agents):
         """Test agent output correctly flows to next agent as input"""
         data_output = {"analysis": "high_costs", "metrics": {"spend": 5000}}
@@ -82,6 +87,7 @@ class TestMultiAgentCoordination:
         assert opt_result["savings"] == 1500
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_pipeline_state_management(self, mock_supervisor_agent):
         """Test pipeline maintains state across agent executions"""
         pipeline_state = {
@@ -100,6 +106,7 @@ class TestMultiAgentCoordination:
         assert len(result["agents_executed"]) == 2
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_agent_resource_sharing(self, mock_sub_agents):
         """Test agents can safely share resources during concurrent execution"""
         shared_resource = {"database_pool": "shared", "cache": "memory"}
@@ -118,6 +125,7 @@ class TestMultiAgentCoordination:
         assert opt_result["resource_used"] == "cache"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_orchestration_startup(self, mock_supervisor_agent, mock_sub_agents):
         """Test complex query requiring multiple agents with real coordination.
         
@@ -166,10 +174,12 @@ class TestMultiAgentCoordination:
         }
 
 
+@pytest.mark.e2e
 class TestAgentSynchronization:
     """Test agent synchronization mechanisms - BVJ: Coordinated value delivery"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_synchronization_points_in_pipeline(self, mock_supervisor_agent):
         """Test pipeline waits at synchronization points"""
         sync_pipeline = {
@@ -190,6 +200,7 @@ class TestAgentSynchronization:
         assert result["phase1_complete"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_barrier_synchronization(self, mock_supervisor_agent):
         """Test all agents wait at barrier before proceeding"""
         barrier_config = {
@@ -209,6 +220,7 @@ class TestAgentSynchronization:
         assert len(result["agents_at_barrier"]) == 2
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_conditional_agent_execution(self, mock_supervisor_agent):
         """Test agents execute based on conditions from previous agents"""
         conditional_pipeline = {
@@ -228,10 +240,12 @@ class TestAgentSynchronization:
         assert "reporting_agent" in result["skipped_agents"]
 
 
+@pytest.mark.e2e
 class TestDataFlowOrchestration:
     """Test data flow between agents - BVJ: Information fidelity and completeness"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_data_transformation_pipeline(self, mock_sub_agents):
         """Test data transforms correctly as it flows through agents"""
         # Raw data -> Processed data -> Optimization recommendations
@@ -250,6 +264,7 @@ class TestDataFlowOrchestration:
         assert step2_result["savings"] == 40
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_data_validation_between_agents(self, mock_sub_agents):
         """Test data validation occurs between agent handoffs"""
         valid_data = {"cost_data": 5000, "validation": "passed"}
@@ -267,6 +282,7 @@ class TestDataFlowOrchestration:
         assert opt_result["processed"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_context_preservation_across_agents(self, mock_supervisor_agent):
         """Test user context preserved throughout multi-agent execution"""
         user_context = {

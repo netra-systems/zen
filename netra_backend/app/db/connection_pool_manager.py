@@ -408,8 +408,11 @@ class ConnectionPoolManager:
                     "checked_in": self._engine.pool.checkedin(),
                     "checked_out": self._engine.pool.checkedout(),
                     "overflow": self._engine.pool.overflow(),
-                    "invalid": self._engine.pool.invalid(),
                 }
+                
+                # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() or invalidated() methods
+                # These methods only exist on synchronous pools
+                pool_status["pool_type"] = type(self._engine.pool).__name__
             
             return {
                 "status": "healthy",

@@ -1,4 +1,6 @@
 """Agent Metrics Collection L2 Integration Tests
+from test_framework.performance_helpers import fast_test, timeout_override
+
 
 Business Value Justification (BVJ):
 - Segment: Mid/Enterprise (operational excellence and monitoring)
@@ -13,7 +15,7 @@ Coverage: Real metric collectors, aggregators, exporters, dashboard integration
 import sys
 from pathlib import Path
 
-# Test framework import - using pytest fixtures instead
+from test_framework.performance_helpers import fast_test, timeout_override
 
 import asyncio
 import hashlib
@@ -747,6 +749,7 @@ async def metrics_collection_manager():
     await manager.cleanup()
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_basic_metric_recording(metrics_collection_manager):
@@ -767,6 +770,7 @@ async def test_basic_metric_recording(metrics_collection_manager):
     assert points[0].labels["source"] == "test"
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_metric_buffer_operations(metrics_collection_manager):
@@ -789,6 +793,7 @@ async def test_metric_buffer_operations(metrics_collection_manager):
     assert stats["total_points"] == 15
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_metric_aggregation(metrics_collection_manager):
@@ -821,6 +826,7 @@ async def test_metric_aggregation(metrics_collection_manager):
     assert avg_point.value == 30.0  # Average of [10, 20, 30, 40, 50]
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_metric_export_functionality(metrics_collection_manager):
@@ -849,6 +855,7 @@ async def test_metric_export_functionality(metrics_collection_manager):
     assert stats["successful_exports"] > 0
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_alert_rule_evaluation(metrics_collection_manager):
@@ -879,6 +886,7 @@ async def test_alert_rule_evaluation(metrics_collection_manager):
     assert alert_status["active_alerts"] > 0
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_prometheus_format_export(metrics_collection_manager):
@@ -904,6 +912,7 @@ async def test_prometheus_format_export(metrics_collection_manager):
     assert "100" in prometheus_line
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_dashboard_integration(metrics_collection_manager):
@@ -941,6 +950,7 @@ async def test_dashboard_integration(metrics_collection_manager):
     assert widget_data["latest_value"] == 40  # Last recorded value
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_system_metrics_collection(metrics_collection_manager):
@@ -965,6 +975,7 @@ async def test_system_metrics_collection(metrics_collection_manager):
     assert 0 <= latest_utilization <= 100
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_agent_metrics_simulation(metrics_collection_manager):
@@ -992,6 +1003,7 @@ async def test_agent_metrics_simulation(metrics_collection_manager):
     assert agent_ids == set(agents)
 
 @pytest.mark.asyncio
+@fast_test
 @pytest.mark.l2_integration
 @pytest.mark.asyncio
 async def test_concurrent_metric_collection(metrics_collection_manager):

@@ -371,6 +371,7 @@ class SessionPersistenceValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_persistence_backend_restart_real():
     """
     Test session persistence through real backend service restart.
@@ -453,6 +454,7 @@ async def test_session_persistence_backend_restart_real():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_rolling_deployment_simulation():
     """
     Test session persistence through rolling deployment simulation.
@@ -531,6 +533,7 @@ async def test_rolling_deployment_simulation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_service_restart_impact():
     """
     Test session persistence when auth service restarts.
@@ -596,6 +599,7 @@ async def test_auth_service_restart_impact():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_user_session_persistence():
     """
     Test session persistence with multiple concurrent users during restart.

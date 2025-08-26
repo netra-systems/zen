@@ -18,6 +18,7 @@ from statistics import mean, median
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_response_time_monitoring_endpoints():
     """
     Test that services expose response time monitoring and performance metrics.
@@ -121,6 +122,7 @@ async def _test_timing_headers(session: aiohttp.ClientSession, base_url: str, se
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_throughput_monitoring_capabilities():
     """
     Test that services can monitor and report throughput metrics.
@@ -243,6 +245,7 @@ async def _test_concurrent_request_tracking(session: aiohttp.ClientSession, base
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_resource_usage_monitoring():
     """
     Test that services expose resource usage metrics (CPU, memory, etc.).
@@ -321,6 +324,7 @@ async def test_resource_usage_monitoring():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_sla_compliance_tracking():
     """
     Test that services can track and report SLA compliance metrics.

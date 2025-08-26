@@ -77,6 +77,7 @@ class UnifiedE2ETestHarness:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAuthE2EFlow:
     """E2E Authentication Flow Test Suite"""
     
@@ -89,6 +90,7 @@ class TestAuthE2EFlow:
         # Mock: WebSocket connection isolation for testing without network overhead
         self.harness.websocket_manager = MagicMock()
     
+    @pytest.mark.e2e
     async def test_complete_login_to_chat_ready(self):
         """
         BVJ: $25K MRR protection - Complete login flow validation
@@ -127,6 +129,7 @@ class TestAuthE2EFlow:
         assert mock_auth.called
         assert user_id is not None
     
+    @pytest.mark.e2e
     async def test_token_refresh_across_services(self):
         """
         BVJ: $15K MRR protection - Token refresh prevents session loss
@@ -164,6 +167,7 @@ class TestAuthE2EFlow:
         assert result[1] == new_tokens["refresh_token"]
         assert mock_auth_service.refresh_tokens.called
     
+    @pytest.mark.e2e
     async def test_logout_cleanup_all_services(self):
         """
         BVJ: $10K MRR protection - Clean logout prevents security issues
@@ -199,6 +203,7 @@ class TestAuthE2EFlow:
         assert mock_auth_service.logout.called
         assert mock_cleanup.called
     
+    @pytest.mark.e2e
     async def test_multi_tab_auth_sync(self):
         """
         BVJ: $20K MRR protection - Multi-tab consistency prevents user confusion
@@ -224,6 +229,7 @@ class TestAuthE2EFlow:
         assert user_id_tab1 == user_id_tab2
         assert mock_auth.call_count == 2
     
+    @pytest.mark.e2e
     async def test_auth_error_recovery(self):
         """
         BVJ: $30K MRR protection - Graceful error handling
@@ -244,6 +250,7 @@ class TestAuthE2EFlow:
             assert "Invalid token" in str(e)
             assert mock_auth.called
     
+    @pytest.mark.e2e
     async def test_websocket_auth_performance(self):
         """
         BVJ: $40K MRR protection - Fast authentication prevents timeout
@@ -265,6 +272,7 @@ class TestAuthE2EFlow:
         assert user_id == self.harness.test_user_id
         assert mock_auth.called
     
+    @pytest.mark.e2e
     async def test_concurrent_auth_requests(self):
         """
         BVJ: $25K MRR protection - Handle concurrent authentication
@@ -295,6 +303,7 @@ class TestAuthE2EFlow:
         # Verify all calls were made
         assert mock_auth.call_count == 3
     
+    @pytest.mark.e2e
     async def test_session_persistence_validation(self):
         """
         BVJ: $35K MRR protection - Session persistence prevents re-login

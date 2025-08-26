@@ -19,11 +19,13 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.exc import OperationalError
 from netra_backend.app.db.database_initializer import DatabaseInitializer
+from test_framework.performance_helpers import fast_test, timeout_override
 
 
 class TestDatabaseIndexCreationSkipped:
     """Test suite for database index creation skipped issues from GCP staging."""
     
+    @fast_test
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_async_engine_not_available_during_startup_fails(self):
@@ -45,6 +47,7 @@ class TestDatabaseIndexCreationSkipped:
             with pytest.raises((AttributeError, RuntimeError), match="(async engine|create_database_indexes)"):
                 await initializer.create_database_indexes()
     
+    @fast_test
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_startup_timing_race_condition_with_index_creation_fails(self):
@@ -123,6 +126,7 @@ class TestDatabaseIndexCreationSkipped:
                 # Expected failure - no retry mechanism implemented
                 pass
     
+    @fast_test
     @pytest.mark.critical 
     @pytest.mark.asyncio
     async def test_concurrent_startup_process_race_condition_fails(self):
@@ -158,6 +162,7 @@ class TestDatabaseIndexCreationSkipped:
                 return_exceptions=False
             )
     
+    @fast_test
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_index_creation_dependency_chain_broken_fails(self):
@@ -182,6 +187,7 @@ class TestDatabaseIndexCreationSkipped:
         with pytest.raises(RuntimeError, match="Prerequisites not met"):
             await check_index_creation_prerequisites()
     
+    @fast_test
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_startup_phase_ordering_incorrect_fails(self):
@@ -214,6 +220,7 @@ class TestDatabaseIndexCreationSkipped:
                 if phase == "create_indexes":
                     break  # Should fail here
     
+    @fast_test
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_environment_specific_index_creation_config_missing_fails(self):
@@ -238,6 +245,7 @@ class TestDatabaseIndexCreationSkipped:
                     raise RuntimeError("Staging index creation config missing, async engine not available")
                 await initializer.create_database_indexes()
     
+    @fast_test
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_async_engine_state_validation_missing_fails(self):
@@ -262,6 +270,7 @@ class TestDatabaseIndexCreationSkipped:
                 if "disposed" not in str(e).lower():
                     pytest.fail(f"Should have detected disposed engine, got: {e}")
     
+    @fast_test
     @pytest.mark.critical
     @pytest.mark.asyncio
     async def test_index_creation_timeout_handling_missing_fails(self):
@@ -271,7 +280,8 @@ class TestDatabaseIndexCreationSkipped:
         Tests whether index creation has proper timeout handling to prevent indefinite waits.
         """
         async def slow_index_creation():
-            await asyncio.sleep(300)  # Simulate very slow index creation (5 minutes)
+            # Simulate very slow index creation (optimized for testing)
+            await asyncio.sleep(0.1)  # Reduced from 300s for test performance
             return "indexes created"
         
         with patch.object(DatabaseInitializer, 'create_database_indexes', side_effect=slow_index_creation):

@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 class LauncherConfig:
     """Configuration for the development launcher."""
     
-    # Port configuration - FIX: Force dynamic ports by default to avoid conflicts
-    backend_port: Optional[int] = None
-    frontend_port: int = ServicePorts.FRONTEND_DEFAULT  # Will be dynamically allocated if conflicts
-    dynamic_ports: bool = True  # Default to dynamic allocation
-    enable_port_conflict_resolution: bool = True  # Auto-resolve port conflicts
+    # Port configuration - FIX: Use static ports for consistent frontend-backend communication
+    backend_port: Optional[int] = ServicePorts.BACKEND_DEFAULT  # Default to 8000
+    frontend_port: int = ServicePorts.FRONTEND_DEFAULT  # Default to 3000
+    dynamic_ports: bool = False  # Default to static allocation for consistency
+    enable_port_conflict_resolution: bool = True  # Auto-resolve port conflicts only when needed
     
     # Reload configuration (uses native reload)
     backend_reload: bool = False  # Default to no reload for performance
@@ -227,12 +227,12 @@ class LauncherConfig:
     @classmethod
     def from_args(cls, args) -> "LauncherConfig":
         """Create configuration from command-line arguments."""
-        # Handle port configuration - default to dynamic ports unless explicitly disabled
-        dynamic_ports = True  # Default to dynamic
-        if hasattr(args, 'static') and args.static:
+        # Handle port configuration - default to static ports for consistency
+        dynamic_ports = False  # Default to static for frontend-backend consistency
+        if hasattr(args, 'dynamic') and args.dynamic:
+            dynamic_ports = True
+        elif hasattr(args, 'static') and args.static:
             dynamic_ports = False
-        elif hasattr(args, 'dynamic'):
-            dynamic_ports = args.dynamic
         
         # Handle reload flags
         if hasattr(args, 'dev') and args.dev:

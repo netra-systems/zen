@@ -13,6 +13,7 @@ class CheckpointType(str, Enum):
     AUTO = "auto"
     RECOVERY = "recovery"
     PHASE_TRANSITION = "phase_transition"
+    FULL = "full"
 
 
 class RecoveryType(str, Enum):

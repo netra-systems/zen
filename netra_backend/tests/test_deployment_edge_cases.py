@@ -1,4 +1,6 @@
 """
+from test_framework.performance_helpers import fast_test, timeout_override
+
 Deployment Edge Cases and Failure Scenarios Tests
 
 Based on Iteration 3 audit findings, tests edge cases:
@@ -21,12 +23,14 @@ from typing import Dict, Any, Optional
 
 from netra_backend.app.core.configuration import unified_config_manager
 from test_framework.base import BaseTestCase
+from test_framework.performance_helpers import fast_test
 
 
 class TestStartupTimeoutEdgeCases(BaseTestCase):
     """Test edge cases related to startup timeouts."""
 
     @pytest.mark.asyncio
+    @fast_test
     async def test_startup_exceeds_cloud_run_timeout(self):
         """Test scenario where startup takes longer than Cloud Run allows."""
         cloud_run_timeout = 60  # seconds
@@ -50,6 +54,7 @@ class TestStartupTimeoutEdgeCases(BaseTestCase):
         self.record_metric("timeout_detection_working", True)
 
     @pytest.mark.asyncio
+    @fast_test
     async def test_database_connection_timeout_during_startup(self):
         """Test database connection timeout during startup."""
         # Simulate database connection hanging
@@ -68,6 +73,7 @@ class TestStartupTimeoutEdgeCases(BaseTestCase):
                 )
 
     @pytest.mark.asyncio
+    @fast_test
     async def test_service_registration_timeout(self):
         """Test service registration timeout during startup."""
         # Simulate service registry being unresponsive
@@ -86,6 +92,7 @@ class TestStartupTimeoutEdgeCases(BaseTestCase):
                 )
 
     @pytest.mark.asyncio
+    @fast_test
     async def test_health_check_timeout_cascade(self):
         """Test cascading failures when health checks timeout."""
         # Simulate health checks that hang
@@ -183,6 +190,7 @@ class TestMemoryInsufficientEdgeCases(BaseTestCase):
             # Clean up large objects
             large_objects.clear()
 
+    @fast_test
     def test_out_of_memory_recovery(self):
         """Test recovery from out-of-memory conditions."""
         process = psutil.Process()
@@ -477,6 +485,7 @@ class TestHealthCheckTimeoutEdgeCases(BaseTestCase):
     """Test edge cases when health checks timeout."""
 
     @pytest.mark.asyncio
+    @fast_test
     async def test_health_check_cascade_timeout(self):
         """Test cascading timeouts in health check chain."""
         # Simulate health checks with different timeout characteristics
@@ -519,6 +528,7 @@ class TestHealthCheckTimeoutEdgeCases(BaseTestCase):
         self.record_metric("health_check_success_rate_with_timeouts", success_rate)
 
     @pytest.mark.asyncio
+    @fast_test
     async def test_health_check_timeout_recovery(self):
         """Test recovery after health check timeouts."""
         # Initial health check that times out
@@ -544,6 +554,7 @@ class TestHealthCheckTimeoutEdgeCases(BaseTestCase):
             pytest.fail("Recovery health check should not timeout")
 
     @pytest.mark.asyncio
+    @fast_test
     async def test_partial_health_check_failure(self):
         """Test system behavior with partial health check failures."""
         # Mix of passing and failing health checks

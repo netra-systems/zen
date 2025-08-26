@@ -25,6 +25,7 @@ pytestmark = [
 ]
 
 @dataclass
+@pytest.mark.e2e
 class TestUser:
     """Test user data"""
     email: str
@@ -110,6 +111,7 @@ class UnifiedE2ETestHarness:
                 return False
 
 
+@pytest.mark.e2e
 class TestCriticalUnifiedFlows:
     """
     Test critical user journeys across unified system.
@@ -128,6 +130,7 @@ class TestCriticalUnifiedFlows:
         return self._services_ready
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_signup_login_chat_flow(self):
         """
         Test #1: Complete user journey from signup to chat
@@ -159,6 +162,7 @@ class TestCriticalUnifiedFlows:
         assert "message_id" in response or "id" in response
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_token_cross_service_validation(self):
         """
         Test #2: JWT token validation across services
@@ -191,6 +195,7 @@ class TestCriticalUnifiedFlows:
                 assert resp.status == 401, "Invalid token not rejected"
                 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_user_isolation(self):
         """
         Test #3: Concurrent users with data isolation
@@ -222,6 +227,7 @@ class TestCriticalUnifiedFlows:
         assert all(r is not None for r in responses), "Some messages failed"
         
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_service_health_and_recovery(self):
         """
         Test #4: Service health checks and recovery
@@ -244,6 +250,7 @@ class TestCriticalUnifiedFlows:
                     assert data.get("status") == "healthy" or "ok" in str(data)
                     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rate_limiting_enforcement(self):
         """
         Test #5: Rate limiting across services
@@ -276,6 +283,7 @@ class TestCriticalUnifiedFlows:
         assert True, "Rate limiting check completed"
         
 
+@pytest.mark.e2e
 class TestDataConsistency:
     """Test data consistency across services"""
     
@@ -291,6 +299,7 @@ class TestDataConsistency:
         return self._services_ready
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_data_consistency(self):
         """
         Test #6: User data consistency across databases

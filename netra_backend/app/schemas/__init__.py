@@ -659,7 +659,6 @@ from netra_backend.app.schemas.UserPlan import (
     UserPlan,
 )
 from netra_backend.app.schemas.websocket_message_types import (
-    BroadcastResult,
     ClientMessage,
     ConnectionInfo,
     CreateThreadMessage,

@@ -42,6 +42,7 @@ async def database_manager():
 
 
 @pytest.fixture
+@pytest.mark.e2e
 def test_user_data():
     """Generate test user data."""
     user_id = f"test-{uuid.uuid4().hex[:8]}"
@@ -55,10 +56,12 @@ def test_user_data():
     }
 
 
+@pytest.mark.e2e
 class TestDatabaseDataFlow:
     """Main test class for database data flow validation."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_user_flow(self, database_manager, test_user_data):
         """Test 1: Complete user creation and sync flow."""
         user_ops = UserDataOperations(database_manager)
@@ -72,6 +75,7 @@ class TestDatabaseDataFlow:
         assert sync_success is True
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_chat_message_storage_flow(self, database_manager, test_user_data):
         """Test 2: Chat message storage in ClickHouse."""
         user_ops = UserDataOperations(database_manager)
@@ -96,6 +100,7 @@ class TestDatabaseDataFlow:
         }
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_session_caching_flow(self, database_manager, test_user_data):
         """Test 3: Session caching in Redis."""
         user_ops = UserDataOperations(database_manager)
@@ -120,6 +125,7 @@ class TestDatabaseDataFlow:
         }
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_database_consistency(self, database_manager, test_user_data):
         """Test 4: Data consistency across all databases."""
         operations = await self._setup_all_operations(database_manager)
@@ -161,6 +167,7 @@ class TestDatabaseDataFlow:
         assert len(user_messages) >= 0  # May be mock or real data
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_transaction_rollback_scenario(self, database_manager, test_user_data):
         """Test 5: Transaction rollback and data integrity."""
         user_ops = UserDataOperations(database_manager)
@@ -190,6 +197,7 @@ class TestDatabaseDataFlow:
             pass  # Expected for invalid data
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_operations(self, database_manager):
         """Test 6: Concurrent database operations."""
         user_ops = UserDataOperations(database_manager)
@@ -223,10 +231,12 @@ class TestDatabaseDataFlow:
             assert result is not None
 
 
+@pytest.mark.e2e
 class TestDatabasePerformance:
     """Performance tests for database operations."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_bulk_user_creation_performance(self, database_manager):
         """Test 7: Bulk user creation performance."""
         user_ops = UserDataOperations(database_manager)

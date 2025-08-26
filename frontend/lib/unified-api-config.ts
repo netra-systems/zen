@@ -166,17 +166,17 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
       return {
         environment: 'test',
         urls: {
-          api: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-          websocket: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000',
+          api: 'http://localhost:8000', // Force port 8000 for backend API
+          websocket: 'ws://localhost:8000', // Force port 8000 for WebSocket
           auth: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081',
           frontend: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
         },
         endpoints: {
-          // Test environment uses localhost with potential overrides
-          health: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/health`,
-          ready: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/health/ready`,
-          threads: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/threads`,
-          websocket: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws`,
+          // Test environment uses hardcoded localhost:8000
+          health: 'http://localhost:8000/health',
+          ready: 'http://localhost:8000/health/ready',
+          threads: 'http://localhost:8000/api/threads',
+          websocket: 'ws://localhost:8000/ws',
           
           authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,
           authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/login`,
@@ -201,8 +201,8 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
       return {
         environment: 'development',
         urls: {
-          api: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-          websocket: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000',
+          api: 'http://localhost:8000', // Force port 8000 for backend API
+          websocket: 'ws://localhost:8000', // Force port 8000 for WebSocket
           auth: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081',
           frontend: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
         },
@@ -211,7 +211,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           health: '/health',
           ready: '/health/ready',
           threads: '/api/threads',
-          websocket: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws`,
+          websocket: 'ws://localhost:8000/ws', // Force port 8000 for WebSocket endpoint
           
           // Auth endpoints use direct URLs even in development
           authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,

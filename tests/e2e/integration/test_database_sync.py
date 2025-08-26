@@ -65,11 +65,13 @@ async def sync_validator():
     yield validator
 
 
+@pytest.mark.e2e
 class TestDatabaseSyncE2E:
     """E2E Tests for database synchronization across services."""
     
     @pytest.mark.critical
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_sync(self, sync_validator):
         """
         BVJ: Segment: ALL | Goal: Data Integrity | Impact: $100K MRR
@@ -95,6 +97,7 @@ class TestDatabaseSyncE2E:
     
     @pytest.mark.critical
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_profile_sync_consistency(self, sync_validator):
         """Test user profile data consistency across Auth and Backend."""
         test_user_data = create_test_user_data("profile_sync")
@@ -113,6 +116,7 @@ class TestDatabaseSyncE2E:
     
     @pytest.mark.critical 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_workspace_data_consistency(self, sync_validator):
         """Test workspace data consistency across databases."""
         test_user_data = create_test_user_data("workspace_sync")
@@ -141,6 +145,7 @@ class TestDatabaseSyncE2E:
     
     @pytest.mark.critical
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_transaction_rollback_partial_failure(self, sync_validator):
         """Test transaction rollback on partial failures."""
         test_user_data = create_test_user_data("rollback_test")
@@ -178,6 +183,7 @@ class TestDatabaseSyncE2E:
     
     @pytest.mark.critical
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_eventual_consistency_timing(self, sync_validator):
         """Test eventual consistency achieved <1 second."""
         test_user_data = create_eventual_consistency_user()
@@ -213,11 +219,13 @@ class TestDatabaseSyncE2E:
         return False
 
 
+@pytest.mark.e2e
 class TestDatabaseSyncPerformance:
     """Performance tests for database synchronization."""
     
     @pytest.mark.performance
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_bulk_sync_performance(self, sync_validator):
         """Test bulk synchronization performance."""
         start_time = datetime.now()
@@ -238,6 +246,7 @@ class TestDatabaseSyncPerformance:
     
     @pytest.mark.performance
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_user_sync_isolation(self, sync_validator):
         """Test concurrent user synchronization isolation."""
         # Create concurrent user sync operations
@@ -265,11 +274,13 @@ class TestDatabaseSyncPerformance:
         return await validator.verify_auth_backend_sync(user_id)
 
 
+@pytest.mark.e2e
 class TestDatabaseSyncResilience:
     """Resilience tests for database synchronization."""
     
     @pytest.mark.resilience
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sync_retry_on_temporary_failure(self, sync_validator):
         """Test synchronization retry mechanism on temporary failures."""
         test_user_data = create_test_user_data("retry_test")
@@ -294,6 +305,7 @@ class TestDatabaseSyncResilience:
     
     @pytest.mark.resilience
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_data_integrity_under_load(self, sync_validator):
         """Test data integrity maintained under concurrent load."""
         # Create high-concurrency scenario

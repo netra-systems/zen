@@ -350,6 +350,7 @@ class ConcurrentCreditDeductionTool:
         
         raise Exception("Transaction failed after maximum retries")
 
+@pytest.mark.e2e
 class TestConcurrentToolExecutionConflicts:
     """Test suite for concurrent tool execution conflicts."""
     
@@ -361,6 +362,7 @@ class TestConcurrentToolExecutionConflicts:
         yield
         await self.framework.teardown()
     
+    @pytest.mark.e2e
     async def test_database_record_modification_conflicts(self):
         """Test Case 1: Validate transaction isolation when multiple agents modify the same database record."""
         logger.info("=== Test Case 1: Database Record Modification Conflicts ===")
@@ -431,6 +433,7 @@ class TestConcurrentToolExecutionConflicts:
                     f"Conflict rate {self.framework.metrics.conflict_rate} exceeded threshold"
                 )
     
+    @pytest.mark.e2e
     async def test_agent_tool_resource_pool_exhaustion(self):
         """Test Case 2: Test behavior when concurrent tool executions exhaust shared resource pools."""
         logger.info("=== Test Case 2: Agent Tool Resource Pool Exhaustion ===")
@@ -517,6 +520,7 @@ class TestConcurrentToolExecutionConflicts:
         # Validate no connection leaks
         # This would be monitored through pool metrics in real implementation
     
+    @pytest.mark.e2e
     async def test_optimistic_locking_version_conflicts(self):
         """Test Case 3: Validate optimistic concurrency control using version-based locking."""
         logger.info("=== Test Case 3: Optimistic Locking Version Conflicts ===")
@@ -646,6 +650,7 @@ class TestConcurrentToolExecutionConflicts:
         # Validate version progression
         assert final_config["version"] > 1, "Version was not incremented"
     
+    @pytest.mark.e2e
     async def test_deadlock_detection_and_recovery_cascade(self):
         """Test Case 5: Test system behavior during complex deadlock scenarios."""
         logger.info("=== Test Case 5: Deadlock Detection and Recovery Cascade ===")
@@ -764,6 +769,7 @@ class TestConcurrentToolExecutionConflicts:
         # Clean up resources
         await self._cleanup_test_resources(resource_ids)
     
+    @pytest.mark.e2e
     async def test_tool_execution_queue_management_under_load(self):
         """Test Case 7: Test tool execution queue behavior under high concurrent load."""
         logger.info("=== Test Case 7: Tool Execution Queue Management Under Load ===")

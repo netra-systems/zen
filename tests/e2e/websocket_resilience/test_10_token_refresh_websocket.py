@@ -246,6 +246,7 @@ class TokenRefreshTestClient:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_basic_token_refresh():
     """
     Test basic token refresh functionality.
@@ -313,6 +314,7 @@ async def test_basic_token_refresh():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_refresh_near_expiry():
     """
     Test token refresh when approaching expiry.
@@ -371,6 +373,7 @@ async def test_token_refresh_near_expiry():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_token_refreshes():
     """
     Test multiple sequential token refreshes.
@@ -445,6 +448,7 @@ async def test_multiple_token_refreshes():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_refresh_failure_handling():
     """
     Test handling of token refresh failures.

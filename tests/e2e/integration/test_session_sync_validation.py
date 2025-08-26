@@ -46,6 +46,7 @@ class SessionSyncValidator:
         if self.redis_client:
             await self.redis_client.aclose()
     
+    @pytest.mark.e2e
     async def test_backend_health(self) -> Tuple[bool, str]:
         """Test backend service health."""
         try:
@@ -58,6 +59,7 @@ class SessionSyncValidator:
         except Exception as e:
             return False, f"Backend unreachable: {e}"
     
+    @pytest.mark.e2e
     async def test_redis_session_operations(self) -> Tuple[bool, str]:
         """Test basic Redis session operations."""
         if not self.redis_client:
@@ -90,6 +92,7 @@ class SessionSyncValidator:
         except Exception as e:
             return False, f"Redis session operations failed: {e}"
     
+    @pytest.mark.e2e
     async def test_websocket_connectivity(self) -> Tuple[bool, str]:
         """Test WebSocket connectivity without authentication."""
         try:
@@ -133,6 +136,7 @@ class SessionSyncValidator:
         except Exception as e:
             return False, f"WebSocket connection failed: {e}"
     
+    @pytest.mark.e2e
     async def test_jwt_token_creation(self) -> Tuple[bool, str]:
         """Test JWT token creation and validation."""
         try:
@@ -153,6 +157,7 @@ class SessionSyncValidator:
         except Exception as e:
             return False, f"JWT token creation error: {e}"
     
+    @pytest.mark.e2e
     async def test_session_component_integration(self) -> Tuple[bool, str]:
         """Test integration between session components."""
         try:
@@ -297,6 +302,7 @@ class SessionSyncValidator:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_session_synchronization_validation():
     """
     Practical session synchronization validation test.
@@ -334,6 +340,7 @@ async def test_session_synchronization_validation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_component_health_check():
     """
     Quick health check for session management components.

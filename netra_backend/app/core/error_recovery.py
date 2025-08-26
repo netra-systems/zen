@@ -157,7 +157,7 @@ class RetryStrategy:
         """Check if error type is retryable."""
         if isinstance(context.error, ValueError):
             return False
-        if context.severity == ErrorSeverity.CRITICAL:
+        if context.severity in (ErrorSeverity.CRITICAL, ErrorSeverity.HIGH):
             return False
         return True
     
@@ -349,8 +349,13 @@ class RecoveryExecutor:
     
     async def _execute_compensation(self, context: RecoveryContext) -> bool:
         """Execute applicable compensation actions."""
-        compensation_success = True
         applicable_actions = self._get_applicable_actions(context)
+        
+        # If no compensation actions are available, compensation fails
+        if not applicable_actions:
+            return False
+            
+        compensation_success = True
         for action in applicable_actions:
             action_result = await self._execute_single_compensation(action, context)
             compensation_success = compensation_success and action_result

@@ -36,6 +36,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 
 
+@pytest.mark.e2e
 class TestResponseAgent(BaseSubAgent):
     """Test implementation of BaseSubAgent for response flow testing."""
     
@@ -133,6 +134,7 @@ class AgentResponseFlowTester:
         
         return self.streaming_events
     
+    @pytest.mark.e2e
     async def test_response_persistence(self, response_data: Dict[str, Any]) -> bool:
         """Test response persistence and state management."""
         if not response_data.get("response"):
@@ -179,6 +181,7 @@ class AgentResponseFlowTester:
     features=["agent_processing", "response_streaming", "quality_validation"],
     data=["test_agents", "mock_llm_responses"]
 )
+@pytest.mark.e2e
 class TestAgentResponseFlow:
     """E2E tests for agent response flow."""
     
@@ -188,6 +191,7 @@ class TestAgentResponseFlow:
         return AgentResponseFlowTester(use_mock_llm=True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_basic_response_generation(self, response_tester):
         """Test basic agent response generation."""
         agent = await response_tester.create_test_agent("optimization", "ResponseAgent001")
@@ -201,6 +205,7 @@ class TestAgentResponseFlow:
         assert len(response_tester.response_history) == 1
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_quality_validation(self, response_tester):
         """Test response quality gate validation."""
         agent = await response_tester.create_test_agent("data", "QualityAgent001")
@@ -214,6 +219,7 @@ class TestAgentResponseFlow:
         assert isinstance(quality_passed, bool)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_streaming_flow(self, response_tester):
         """Test WebSocket response streaming."""
         agent = await response_tester.create_test_agent("streaming", "StreamAgent001")
@@ -228,6 +234,7 @@ class TestAgentResponseFlow:
         assert all(e["user_id"] == "test_user_response_001" for e in streaming_events)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_persistence_flow(self, response_tester):
         """Test response persistence and state management."""
         agent = await response_tester.create_test_agent("persistence", "PersistAgent001")
@@ -239,6 +246,7 @@ class TestAgentResponseFlow:
         assert persistence_success is True, "Response persistence failed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_response_generation(self, response_tester):
         """Test concurrent agent response generation."""
         agents = []
@@ -261,6 +269,7 @@ class TestAgentResponseFlow:
         assert total_time < 10.0, f"Concurrent responses too slow: {total_time:.2f}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_error_handling_in_response_flow(self, response_tester):
         """Test error handling during response generation."""
         agent = await response_tester.create_test_agent("error_test", "ErrorAgent001")
@@ -278,6 +287,7 @@ class TestAgentResponseFlow:
             assert "error" in response_data, "Error details should be present"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_flow_performance(self, response_tester):
         """Test response flow performance metrics."""
         agent = await response_tester.create_test_agent("perf_test", "PerfAgent001")
@@ -306,10 +316,12 @@ class TestAgentResponseFlow:
     data=["enterprise_test_data"]
 )
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestCriticalResponseFlows:
     """Critical response flow scenarios."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_response_quality_standards(self):
         """Test enterprise-level response quality standards."""
         tester = AgentResponseFlowTester(use_mock_llm=True)

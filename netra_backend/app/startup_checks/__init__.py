@@ -11,10 +11,14 @@ from netra_backend.app.startup_checks.environment_checks import EnvironmentCheck
 from netra_backend.app.startup_checks.models import StartupCheckResult
 from netra_backend.app.startup_checks.utils import run_startup_checks
 
+# Backward compatibility alias
+startup_checks = run_startup_checks
+
 __all__ = [
     "StartupCheckResult",
-    "StartupChecker",
+    "StartupChecker", 
     "run_startup_checks",
+    "startup_checks",
     "EnvironmentChecker",
     "DatabaseChecker"
 ]

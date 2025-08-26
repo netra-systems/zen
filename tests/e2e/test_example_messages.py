@@ -54,14 +54,17 @@ async def example_handler():
 
 
 @pytest.fixture 
+@pytest.mark.e2e
 async def test_user_id():
     """Generate test user ID"""
     return f"test_user_{uuid4()}"
 
 
+@pytest.mark.e2e
 class TestExampleMessageBasicFlow:
     """Test basic example message processing flow"""
 
+    @pytest.mark.e2e
     async def test_cost_reduction_prompt(self, example_handler, test_user_id):
         """Test cost reduction with quality preservation prompt"""
         prompt = EXAMPLE_PROMPTS[0]
@@ -70,6 +73,7 @@ class TestExampleMessageBasicFlow:
         assert response.status == "completed"
         assert "cost" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_latency_optimization_prompt(self, example_handler, test_user_id):
         """Test 3x latency improvement prompt"""
         prompt = EXAMPLE_PROMPTS[1]
@@ -78,6 +82,7 @@ class TestExampleMessageBasicFlow:
         assert response.status == "completed"
         assert "latency" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_scaling_analysis_prompt(self, example_handler, test_user_id):
         """Test 50% usage increase impact analysis"""
         prompt = EXAMPLE_PROMPTS[2]
@@ -86,6 +91,7 @@ class TestExampleMessageBasicFlow:
         assert response.status == "completed"
         assert "scaling" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_function_optimization_prompt(self, example_handler, test_user_id):
         """Test advanced function optimization methods"""
         prompt = EXAMPLE_PROMPTS[3]
@@ -111,9 +117,11 @@ class TestExampleMessageBasicFlow:
         }
 
 
+@pytest.mark.e2e
 class TestExampleMessageAdvanced:
     """Test advanced example message scenarios"""
 
+    @pytest.mark.e2e
     async def test_model_selection_prompts(self, example_handler, test_user_id):
         """Test all model selection related prompts"""
         model_prompts = [p for p in EXAMPLE_PROMPTS if p["category"] == "model-selection"]
@@ -126,6 +134,7 @@ class TestExampleMessageAdvanced:
             assert response.status == "completed"
             assert response.result is not None
 
+    @pytest.mark.e2e
     async def test_multi_objective_optimization(self, example_handler, test_user_id):
         """Test complex multi-objective optimization"""
         prompt = EXAMPLE_PROMPTS[6]  # Multi-objective prompt
@@ -137,6 +146,7 @@ class TestExampleMessageAdvanced:
         assert response.status == "completed"
         assert "multi" in response.result.get("optimization_type", "").lower()
 
+    @pytest.mark.e2e
     async def test_kv_cache_audit(self, example_handler, test_user_id):
         """Test KV cache audit functionality"""
         prompt = EXAMPLE_PROMPTS[5]  # KV cache audit
@@ -165,9 +175,11 @@ class TestExampleMessageAdvanced:
         }
 
 
+@pytest.mark.e2e
 class TestExampleMessageValidation:
     """Test message validation and error handling"""
 
+    @pytest.mark.e2e
     async def test_invalid_message_structure(self, example_handler):
         """Test handling of invalid message structure"""
         invalid_request = {"invalid": "structure"}
@@ -177,6 +189,7 @@ class TestExampleMessageValidation:
         assert response.status == "error"
         assert response.error is not None
 
+    @pytest.mark.e2e
     async def test_missing_required_fields(self, example_handler):
         """Test handling of missing required fields"""
         incomplete_request = {
@@ -188,6 +201,7 @@ class TestExampleMessageValidation:
         
         assert response.status == "error"
 
+    @pytest.mark.e2e
     async def test_invalid_category(self, example_handler, test_user_id):
         """Test handling of invalid category"""
         request = {
@@ -209,9 +223,11 @@ class TestExampleMessageValidation:
         assert response.status == "error"
 
 
+@pytest.mark.e2e
 class TestExampleMessageBusiness:
     """Test business value and insights generation"""
 
+    @pytest.mark.e2e
     async def test_business_insights_generation(self, example_handler, test_user_id):
         """Test business insights are generated correctly"""
         prompt = EXAMPLE_PROMPTS[0]
@@ -225,6 +241,7 @@ class TestExampleMessageBusiness:
         assert "business_value_type" in response.business_insights
         assert "performance_score" in response.business_insights
 
+    @pytest.mark.e2e
     async def test_conversion_tracking(self, example_handler, test_user_id):
         """Test conversion-focused business value tracking"""
         prompt = EXAMPLE_PROMPTS[1]

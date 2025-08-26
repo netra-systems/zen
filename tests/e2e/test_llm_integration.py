@@ -117,9 +117,11 @@ class MockNetraException(Exception):
     pass
 
 
+@pytest.mark.e2e
 class TestLLMFallbackChain:
     """Test LLM fallback chain: Primary → Fallback model switching"""
     
+    @pytest.mark.e2e
     async def test_llm_fallback_chain_success_primary(self, llm_tester):
         """Test successful primary provider execution"""
         provider = llm_tester.providers["gpt"]
@@ -127,6 +129,7 @@ class TestLLMFallbackChain:
         assert result["content"] == "Response from gpt"
         assert provider.call_count == 1
     
+    @pytest.mark.e2e
     async def test_llm_fallback_chain_primary_to_secondary(self, llm_tester):
         """Test fallback from primary to secondary provider"""
         primary = llm_tester.providers["failed_gpt"]
@@ -134,6 +137,7 @@ class TestLLMFallbackChain:
         result = await self._execute_fallback_sequence([primary, secondary])
         assert result["content"] == "Response from gemini"
     
+    @pytest.mark.e2e
     async def test_llm_fallback_chain_full_sequence(self, llm_tester):
         """Test full fallback sequence: GPT → Gemini → Claude"""
         providers = self._create_failing_providers(llm_tester)
@@ -141,6 +145,7 @@ class TestLLMFallbackChain:
         result = await self._execute_full_fallback(providers)
         assert "claude" in result["content"]
     
+    @pytest.mark.e2e
     async def test_llm_fallback_chain_all_providers_fail(self, llm_tester):
         """Test behavior when all providers fail"""
         providers = self._create_all_failing_providers(llm_tester)
@@ -175,9 +180,11 @@ class TestLLMFallbackChain:
         return await self._execute_fallback_sequence(sequence)
 
 
+@pytest.mark.e2e
 class TestLLMRateLimitHandling:
     """Test LLM rate limit handling with exponential backoff"""
     
+    @pytest.mark.e2e
     async def test_llm_rate_limit_handling_exponential_backoff(self, llm_tester):
         """Test rate limit handling with exponential backoff and jitter"""
         strategy = llm_tester.retry_strategy
@@ -187,12 +194,14 @@ class TestLLMRateLimitHandling:
         delays = [strategy.calculate_delay(2) for _ in range(10)]
         assert len(set(delays)) > 1  # Jitter creates variance
     
+    @pytest.mark.e2e
     async def test_llm_rate_limit_handling_max_delay_cap(self, llm_tester):
         """Test maximum delay cap prevents excessive waits"""
         strategy = MockRetryStrategy(max_delay=5.0)
         high_attempt_delay = strategy.calculate_delay(10)
         assert high_attempt_delay <= 5.0
     
+    @pytest.mark.e2e
     async def test_llm_rate_limit_handling_queue_processing(self, llm_tester):
         """Test proper queueing during rate limit scenarios"""
         provider = MockLLMProvider("rate_limited", should_fail=False)
@@ -213,9 +222,11 @@ class TestLLMRateLimitHandling:
         return results
 
 
+@pytest.mark.e2e
 class TestLLMTimeoutRecovery:
     """Test LLM timeout handling and recovery across services"""
     
+    @pytest.mark.e2e
     async def test_llm_timeout_recovery_single_service(self, llm_tester):
         """Test timeout recovery in single LLM service"""
         provider = MockLLMProvider("timeout_prone")
@@ -224,12 +235,14 @@ class TestLLMTimeoutRecovery:
         execution_time = time.time() - start_time
         assert execution_time < 1.5  # Includes timeout handling overhead
     
+    @pytest.mark.e2e
     async def test_llm_timeout_recovery_service_chain(self, llm_tester):
         """Test timeout recovery across service chain"""
         providers = [MockLLMProvider(f"service{i}") for i in range(1, 4)]
         results = await self._execute_service_chain(providers, timeout=0.5)
         assert len(results) == 3
     
+    @pytest.mark.e2e
     async def test_llm_timeout_recovery_circuit_breaker(self, llm_tester):
         """Test circuit breaker activation on repeated timeouts"""
         provider = MockLLMProvider("unreliable", should_fail=True)
@@ -241,6 +254,7 @@ class TestLLMTimeoutRecovery:
                 failure_count += 1
         assert failure_count >= 3  # Circuit breaker should activate
     
+    @pytest.mark.e2e
     async def test_llm_timeout_recovery_graceful_degradation(self, llm_tester):
         """Test graceful degradation during timeout scenarios"""
         provider = MockLLMProvider("degraded")
@@ -267,9 +281,11 @@ class TestLLMTimeoutRecovery:
             return {"content": "graceful_fallback", "degraded": True}
 
 
+@pytest.mark.e2e
 class TestLLMCostTracking:
     """Test LLM cost tracking for accurate billing"""
     
+    @pytest.mark.e2e
     def test_llm_cost_tracking_token_calculation(self, llm_tester, sample_token_usage):
         """Test accurate token cost calculation"""
         cost = llm_tester.cost_calculator.calculate_cost(
@@ -278,6 +294,7 @@ class TestLLMCostTracking:
         assert isinstance(cost, Decimal)
         assert cost > 0
     
+    @pytest.mark.e2e
     def test_llm_cost_tracking_provider_and_tier_variance(self, llm_tester, sample_token_usage):
         """Test cost variance across providers and model tiers"""
         openai_cost = self._calculate_provider_cost(llm_tester, "openai", sample_token_usage)
@@ -288,6 +305,7 @@ class TestLLMCostTracking:
         premium_model = llm_tester.cost_calculator.get_cost_optimal_model("openai", "premium")
         assert economy_model != premium_model
     
+    @pytest.mark.e2e
     def test_llm_cost_tracking_budget_impact_estimation(self, llm_tester):
         """Test budget impact estimation for usage planning"""
         impact = llm_tester.cost_calculator.estimate_budget_impact(
@@ -296,6 +314,7 @@ class TestLLMCostTracking:
         assert isinstance(impact, Decimal)
         assert impact > 0
     
+    @pytest.mark.e2e
     def test_llm_cost_tracking_cached_token_discount(self, llm_tester):
         """Test cost calculation includes cached token discounts"""
         cached_usage = MockTokenUsage(1000, 500, 1500, cached_tokens=200)

@@ -34,6 +34,7 @@ from tests.e2e.session_persistence_manager import (
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_persistence_across_service_restart():
     """
     Test #4: Complete session persistence across backend service restart
@@ -83,6 +84,7 @@ def _print_session_persistence_success(results: Dict[str, Any]) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_token_persistence_during_restart():
     """
     Test JWT token remains valid during simulated service restart.
@@ -114,6 +116,7 @@ def _validate_jwt_persistence_results(results: Dict[str, Any]) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_auto_reconnection_after_restart():
     """
     Test WebSocket automatically reconnects after service restart.
@@ -146,6 +149,7 @@ def _validate_websocket_reconnection_results(results: Dict[str, Any]) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_chat_message_continuity_across_restart():
     """
     Test chat messages continue seamlessly across restart.
@@ -178,6 +182,7 @@ def _validate_chat_continuity_results(results: Dict[str, Any]) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_data_integrity_during_restart():
     """
     Test no data loss occurs during service restart.
@@ -210,6 +215,7 @@ def _validate_data_integrity_results(results: Dict[str, Any]) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_performance_requirements_session_persistence():
     """
     Test performance requirements for session persistence.

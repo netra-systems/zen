@@ -54,11 +54,10 @@ function startFrontend() {
   const command = process.argv[2] || 'dev';  // 'dev' for hot reload, 'start' for production mode
   // console output removed: console.log(`   Mode: ${command === 'dev' ? 'Development (with hot reload)' : 'Production (no hot reload)'}`);
   
-  // Start Next.js
+  // Start Next.js - Security: removed shell: true to prevent shell injection attacks
   const child = spawn('npm', ['run', command], {
     env,
-    stdio: 'inherit',
-    shell: true
+    stdio: 'inherit'
   });
   
   child.on('error', (error) => {

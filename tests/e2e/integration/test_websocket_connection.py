@@ -77,6 +77,7 @@ async def connection_tester():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_handshake_success(connection_tester):
     """Test successful WebSocket handshake with valid auth token."""
     # Arrange
@@ -91,6 +92,7 @@ async def test_websocket_handshake_success(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_handshake_invalid_auth(connection_tester):
     """Test WebSocket handshake fails with invalid auth token."""
     # Act & Assert
@@ -99,6 +101,7 @@ async def test_websocket_handshake_invalid_auth(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_handshake_no_auth(connection_tester):
     """Test WebSocket handshake fails without auth token."""
     # Act & Assert
@@ -107,6 +110,7 @@ async def test_websocket_handshake_no_auth(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_upgrade_protocol(connection_tester):
     """Test WebSocket protocol upgrade headers are correct."""
     # Arrange
@@ -121,6 +125,7 @@ async def test_websocket_upgrade_protocol(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_connection_timeout(connection_tester):
     """Test WebSocket connection respects timeout settings."""
     # Arrange
@@ -139,6 +144,7 @@ async def test_websocket_connection_timeout(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_connection_lifecycle(connection_tester):
     """Test complete WebSocket connection lifecycle."""
     # Arrange
@@ -156,6 +162,7 @@ async def test_websocket_connection_lifecycle(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_multiple_connections(connection_tester):
     """Test multiple simultaneous WebSocket connections."""
     # Arrange
@@ -173,6 +180,7 @@ async def test_websocket_multiple_connections(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_cors_headers(connection_tester):
     """Test WebSocket connection respects CORS configuration."""
     # Arrange
@@ -194,6 +202,7 @@ async def test_websocket_cors_headers(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_subprotocol_negotiation(connection_tester):
     """Test WebSocket subprotocol negotiation for frontend clients."""
     # Arrange
@@ -212,6 +221,7 @@ async def test_websocket_subprotocol_negotiation(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_connection_error_recovery(connection_tester):
     """Test WebSocket connection handles network interruption gracefully."""
     # Arrange
@@ -232,6 +242,7 @@ async def test_websocket_connection_error_recovery(connection_tester):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_dev_mode_features(connection_tester):
     """Test WebSocket connection includes dev mode specific features."""
     # Arrange

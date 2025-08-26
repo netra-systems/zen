@@ -32,6 +32,7 @@ except ImportError:
     TEST_CONFIG = {}
     TEST_USERS = {}
     TEST_ENDPOINTS = {}
+    @pytest.mark.e2e
     class TestDataFactory:
         pass
 
@@ -190,6 +191,7 @@ async def event_tester(real_websocket_client):
     return EventPropagationTester(real_websocket_client)
 
 
+@pytest.mark.e2e
 async def test_agent_thinking_event_propagation(event_tester):
     """Test agent_thinking event reaches frontend with correct payload"""
     # BVJ: Medium UI layer | Agent reasoning visibility | $20K+ MRR impact
@@ -215,6 +217,7 @@ async def test_agent_thinking_event_propagation(event_tester):
         assert event.get("received_at", 0) <= 1.0, "Should arrive within medium layer timing"
 
 
+@pytest.mark.e2e
 async def test_partial_result_streaming_updates(event_tester):
     """Test partial_result streaming with content accumulation"""
     # BVJ: Medium UI layer | Real-time content updates | $25K+ MRR impact
@@ -247,6 +250,7 @@ async def test_partial_result_streaming_updates(event_tester):
     assert len(received_times) > 1, "Should receive multiple streaming updates"
 
 
+@pytest.mark.e2e
 async def test_tool_executing_notifications(event_tester):
     """Test tool_executing events with tool details and timing"""
     # BVJ: Fast UI layer | Immediate tool feedback | $15K+ MRR impact
@@ -277,6 +281,7 @@ async def test_tool_executing_notifications(event_tester):
         assert isinstance(payload["agent_name"], str) and len(payload["agent_name"]) > 0
 
 
+@pytest.mark.e2e
 async def test_final_report_delivery(event_tester):
     """Test final_report with complete results and metrics"""
     # BVJ: Slow UI layer | Complete analysis results | $30K+ MRR impact
@@ -307,6 +312,7 @@ async def test_final_report_delivery(event_tester):
         assert event_time >= 1.0, f"final_report arrived too early at {event_time}s"
 
 
+@pytest.mark.e2e
 async def test_ui_layer_timing_validation(event_tester):
     """Test UI layer timing requirements (Fast/Medium/Slow)"""
     # BVJ: All UI layers | Performance requirements | $20K+ MRR impact
@@ -317,6 +323,7 @@ async def test_ui_layer_timing_validation(event_tester):
         assert result.timing_valid, f"{result.event_type} timing invalid: {result.received_at}s"
 
 
+@pytest.mark.e2e
 async def test_event_ordering_consistency(event_tester):
     """Test event ordering and payload structure consistency"""
     # BVJ: All UI layers | Event flow consistency | $15K+ MRR impact
@@ -339,6 +346,7 @@ async def test_event_ordering_consistency(event_tester):
         logger.warning(f"Missing event types: {missing_types}")
 
 
+@pytest.mark.e2e
 async def test_websocket_event_structure_compliance(event_tester):
     """Test all events follow consistent message structure {type, payload}"""
     # BVJ: All UI layers | Message structure consistency | $10K+ MRR impact
@@ -367,6 +375,7 @@ async def test_websocket_event_structure_compliance(event_tester):
     assert len(structure_violations) == 0, f"Message structure violations: {structure_violations}"
 
 
+@pytest.mark.e2e
 async def test_event_propagation_performance_targets(event_tester):
     """Test event propagation meets business performance requirements"""
     # BVJ: All UI layers | User experience optimization | $25K+ MRR impact

@@ -87,6 +87,7 @@ class CORSValidator:
             "max_age": headers.get("access-control-max-age")
         }
     
+    @pytest.mark.e2e
     async def test_preflight_request(self, url: str, origin: str) -> Dict[str, Any]:
         """Test OPTIONS preflight request."""
         async with self.http_client() as client:
@@ -112,6 +113,7 @@ class CORSValidator:
             }
 
 
+@pytest.mark.e2e
 class TestCORSConfiguration:
     """Comprehensive CORS configuration tests."""
     
@@ -126,6 +128,7 @@ class TestCORSConfiguration:
         return CORSValidator(cors_config)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_cors_endpoints(self, cors_validator):
         """Test CORS headers on all backend endpoints."""
         backend_endpoints = [
@@ -183,6 +186,7 @@ class TestCORSConfiguration:
             f"CORS success rate {success_rate:.2%} below 80% threshold"
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_auth_service_cors_endpoints(self, cors_validator):
         """Test CORS headers on auth service endpoints."""
         auth_endpoints = [
@@ -230,6 +234,7 @@ class TestCORSConfiguration:
             "Auth config endpoint CORS must work for all origins"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_preflight_options_requests(self, cors_validator):
         """Test OPTIONS preflight requests across services."""
         test_urls = [
@@ -248,6 +253,7 @@ class TestCORSConfiguration:
                     f"Preflight too slow ({result['response_time']:.2f}s) for {url}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_cors_validation(self, cors_validator):
         """Test WebSocket connection with CORS validation."""
         # Note: WebSocket CORS is handled during the initial HTTP upgrade
@@ -278,6 +284,7 @@ class TestCORSConfiguration:
                     f"Unexpected WebSocket CORS error: {e}"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_service_cors_coordination(self, cors_validator):
         """Test CORS coordination between services."""
         # Simulate frontend making requests to both services
@@ -311,6 +318,7 @@ class TestCORSConfiguration:
                 "Inconsistent credentials policy between services"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cors_performance_monitoring(self, cors_validator):
         """Test CORS performance and resource usage."""
         metrics = {
@@ -353,6 +361,7 @@ class TestCORSConfiguration:
         assert metrics["total_requests"] == 20, "Request count mismatch"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cors_error_scenarios(self, cors_validator):
         """Test CORS error handling and recovery."""
         # Test with invalid origin
@@ -374,6 +383,7 @@ class TestCORSConfiguration:
                     "Dev mode should allow any origin with CORS_ORIGINS=*"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cors_compliance_validation(self, cors_validator):
         """Validate CORS implementation compliance with spec."""
         compliance_results = {

@@ -263,7 +263,7 @@ class TestMetricsPipelineIntegration:
     
     @mock_justified("Alert manager service not available in test environment")
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.alerting.AlertManager')
+    @patch('netra_backend.app.services.alerting.AlertManager')
     @pytest.mark.asyncio
     async def test_alert_rule_evaluation(self, mock_alert_manager):
         """Test alert rule evaluation based on metrics."""

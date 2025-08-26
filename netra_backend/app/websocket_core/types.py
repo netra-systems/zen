@@ -10,10 +10,11 @@ Business Value Justification:
 Consolidated types from 20+ files into single module.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 import time
+import uuid
 from pydantic import BaseModel, Field
 
 
@@ -72,13 +73,17 @@ class MessageType(str, Enum):
 
 class ConnectionInfo(BaseModel):
     """WebSocket connection information."""
-    connection_id: str
+    model_config = {"arbitrary_types_allowed": True}
+    
+    connection_id: str = Field(default_factory=lambda: f"conn_{uuid.uuid4().hex[:8]}")
     user_id: str
+    websocket: Optional[Any] = None  # WebSocket instance
     thread_id: Optional[str] = None
-    connected_at: datetime
-    last_activity: datetime
+    connected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_activity: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     message_count: int = 0
     is_healthy: bool = True
+    is_closing: bool = False
     client_info: Optional[Dict[str, Any]] = None
 
 
@@ -141,13 +146,6 @@ class WebSocketStats(BaseModel):
     rooms_active: int
     broadcasts_sent: int
 
-
-class BroadcastResult(BaseModel):
-    """Result of broadcast operation."""
-    success: bool
-    delivered_count: int
-    failed_count: int
-    error_details: Optional[List[str]] = None
 
 
 class WebSocketValidationError(BaseModel):
@@ -412,3 +410,7 @@ class MessageBatch(BaseModel):
     created_at: float = Field(default_factory=time.time)
     total_size_bytes: int = 0
     compression_enabled: bool = False
+
+
+# Backward compatibility aliases
+ConnectionState = WebSocketConnectionState

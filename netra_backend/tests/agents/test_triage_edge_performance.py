@@ -53,7 +53,8 @@ class TestEdgeCasesAndBoundaryConditions:
             # Empty/whitespace requests may be handled differently
             assert result is not None
             if state.triage_result:
-                assert "error" in state.triage_result
+                # Check validation status for errors instead of looking for "error" field
+                assert state.triage_result.validation_status.validation_errors
     @pytest.mark.asyncio
     async def test_unicode_and_special_characters(self, triage_agent):
         """Test handling of Unicode and special characters"""

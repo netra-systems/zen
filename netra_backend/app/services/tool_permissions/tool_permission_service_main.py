@@ -10,7 +10,7 @@ from netra_backend.app.schemas.ToolPermission import (
     ToolExecutionContext,
 )
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
-from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
+from netra_backend.app.services.tool_permissions.rate_limiter import RateLimiter
 from netra_backend.app.services.tool_permissions.permission_checker import (
     PermissionChecker,
 )
@@ -63,9 +63,24 @@ class ToolPermissionService:
         """Record tool usage for rate limiting and analytics"""
         await self.rate_limiter.record_tool_usage(user_id, tool_name, execution_time_ms, status)
 
-    async def _get_user_plan(self, user_id: str) -> UserPlan:
+    async def _get_user_plan(self, user_id: str, context: Optional[ToolExecutionContext] = None) -> UserPlan:
         """Get user's current plan"""
         from netra_backend.app.schemas.UserPlan import PlanFeatures
+        
+        # Use the plan from context if available, otherwise default to FREE
+        if context and context.user_plan:
+            try:
+                tier = PlanTier(context.user_plan)
+                return UserPlan(
+                    user_id=user_id,
+                    tier=tier,
+                    features=PLAN_DEFINITIONS[tier].features
+                )
+            except (ValueError, KeyError):
+                # Invalid tier, fallback to FREE
+                pass
+        
+        # Default fallback
         return UserPlan(
             user_id=user_id,
             tier=PlanTier.FREE,
@@ -77,7 +92,7 @@ class ToolPermissionService:
         required_permissions = self.permission_checker.get_tool_required_permissions(context.tool_name)
         if not required_permissions:
             return PermissionCheckResult(allowed=True)
-        user_plan = await self._get_user_plan(context.user_id)
+        user_plan = await self._get_user_plan(context.user_id, context)
         user_permissions = self.permission_checker.get_user_permissions(context, user_plan)
         missing_permissions = self.permission_checker.check_missing_permissions(required_permissions, user_permissions, context, user_plan)
         return self._create_permission_denied_result(missing_permissions, required_permissions, user_plan) if missing_permissions else None
@@ -85,7 +100,7 @@ class ToolPermissionService:
     async def _process_permission_check(self, context: ToolExecutionContext) -> PermissionCheckResult:
         """Process permission check after validation"""
         required_permissions = self.permission_checker.get_tool_required_permissions(context.tool_name)
-        user_plan = await self._get_user_plan(context.user_id)
+        user_plan = await self._get_user_plan(context.user_id, context)
         rate_limit_result = await self.rate_limiter.check_rate_limits(context, required_permissions, self._permission_definitions)
         if not rate_limit_result["allowed"]:
             return self._create_rate_limit_denied_result(rate_limit_result, user_plan)

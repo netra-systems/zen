@@ -25,6 +25,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
+@pytest.mark.e2e
 class TestWebSocketUITiming:
     """Test suite for WebSocket UI layer timing requirements."""
     
@@ -49,6 +50,7 @@ class TestWebSocketUITiming:
         finally:
             await ws_client.disconnect()
     
+    @pytest.mark.e2e
     async def test_fast_layer_timing_compliance(self, websocket_client):
         """Test Fast Layer events arrive within 0-100ms for immediate feedback."""
         # Fast layer events per SPEC/websocket_communication.xml
@@ -107,6 +109,7 @@ class TestWebSocketUITiming:
                     f"agent_started should be ultra-fast (≤50ms), got {latency:.1f}ms"
                 )
     
+    @pytest.mark.e2e
     async def test_medium_layer_timing_compliance(self, websocket_client):
         """Test Medium Layer events arrive within 100ms-1s for progressive updates."""
         # Medium layer events per spec
@@ -158,6 +161,7 @@ class TestWebSocketUITiming:
                     f"(expected 100-1000ms). This impacts progressive update perception."
                 )
     
+    @pytest.mark.e2e
     async def test_slow_layer_timing_compliance(self, websocket_client):
         """Test Slow Layer events arrive after 1s for final results."""
         # Slow layer events per spec  
@@ -210,6 +214,7 @@ class TestWebSocketUITiming:
                 f"(expected ≥1000ms). This may indicate insufficient processing depth."
             )
     
+    @pytest.mark.e2e
     async def test_event_timing_layer_segregation(self, websocket_client):
         """Test events are properly segregated into correct timing layers."""
         # Expected layer assignments per SPEC/websocket_communication.xml
@@ -290,6 +295,7 @@ class TestWebSocketUITiming:
                 f"This impacts UI responsiveness perception."
             )
     
+    @pytest.mark.e2e
     async def test_progressive_timing_sequence(self, websocket_client):
         """Test events follow progressive timing sequence (fast→medium→slow)."""
         # Trigger workflow with full timing spectrum
@@ -345,6 +351,7 @@ class TestWebSocketUITiming:
                     f"Last fast event at order {last_fast_order}, first slow at {first_slow_order}"
                 )
     
+    @pytest.mark.e2e
     async def test_timing_consistency_across_requests(self, websocket_client):
         """Test timing consistency across multiple requests."""
         timing_measurements = []

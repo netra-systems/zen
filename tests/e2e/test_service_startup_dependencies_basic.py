@@ -205,6 +205,7 @@ class ServiceStartupValidator:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestServiceStartupDependenciesBasic:
     """Basic service startup dependencies test suite."""
     
@@ -215,6 +216,7 @@ class TestServiceStartupDependenciesBasic:
         yield validator
         await validator.cleanup()
     
+    @pytest.mark.e2e
     async def test_sequential_startup_order(self, startup_validator):
         """Test 1: Verify correct service startup sequence."""
         result = await startup_validator.validate_sequential_startup_order()
@@ -226,6 +228,7 @@ class TestServiceStartupDependenciesBasic:
         
         logger.info("✓ Sequential startup order validated")
     
+    @pytest.mark.e2e
     async def test_health_check_validation(self, startup_validator):
         """Test 2: All health endpoints return proper status."""
         result = await startup_validator.validate_health_endpoints()
@@ -238,6 +241,7 @@ class TestServiceStartupDependenciesBasic:
         
         logger.info("✓ Health check validation completed")
     
+    @pytest.mark.e2e
     async def test_dependency_failure_handling(self, startup_validator):
         """Test 3: Backend handles Auth unavailability gracefully."""
         result = await startup_validator.validate_dependency_failure_handling()
@@ -246,6 +250,7 @@ class TestServiceStartupDependenciesBasic:
         
         logger.info("✓ Dependency failure handling validated")
     
+    @pytest.mark.e2e
     async def test_startup_performance(self, startup_validator):
         """Test 4: Total startup time < 30 seconds."""
         result = await startup_validator.validate_startup_performance()
@@ -254,6 +259,7 @@ class TestServiceStartupDependenciesBasic:
         
         logger.info(f"✓ Startup performance: {result['startup_time_ms']:.0f}ms ({result['performance_rating']})")
     
+    @pytest.mark.e2e
     async def test_recovery_after_failure(self, startup_validator):
         """Test 5: Services recover when dependencies come online."""
         result = await startup_validator.validate_recovery_after_failure()
@@ -262,6 +268,7 @@ class TestServiceStartupDependenciesBasic:
         
         logger.info("✓ Recovery after failure validated")
     
+    @pytest.mark.e2e
     async def test_concurrent_health_checks(self, startup_validator):
         """Test 6: Multiple health checks don't cause race conditions."""
         result = await startup_validator.validate_concurrent_health_checks()
@@ -271,6 +278,7 @@ class TestServiceStartupDependenciesBasic:
         
         logger.info("✓ Concurrent health checks validated")
     
+    @pytest.mark.e2e
     async def test_startup_state_consistency(self, startup_validator):
         """Test 7: Services maintain correct state after startup."""
         result = await startup_validator.validate_startup_state_consistency()

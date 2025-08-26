@@ -28,6 +28,7 @@ from netra_backend.app.services.audit_service import get_recent_logs, log_admin_
 from tests.e2e.audit_trail_factories import AuditTestDataFactory
 
 
+@pytest.mark.e2e
 class TestCompleteAuditTrail:
     """Test complete audit trail logging across all services.
     
@@ -36,6 +37,7 @@ class TestCompleteAuditTrail:
     """
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_action_logging_coverage(self):
         """Test all user actions are properly logged to audit trail."""
         await self._test_authentication_actions_logged()
@@ -72,6 +74,7 @@ class TestCompleteAuditTrail:
             mock_persist.assert_called_once()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_audit_log_completeness_validation(self):
         """Test audit logs contain all required compliance fields."""
         mock_logs = AuditTestDataFactory.create_sample_audit_logs()
@@ -91,6 +94,7 @@ class TestCompleteAuditTrail:
             assert field in log_entry, f"Missing required field: {field}"
 
 
+@pytest.mark.e2e
 class TestAuditDataIntegrity:
     """Test audit data integrity and tamper-proof logging verification.
     
@@ -99,6 +103,7 @@ class TestAuditDataIntegrity:
     """
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_audit_log_hash_verification(self):
         """Test audit logs include integrity hashes to prevent tampering."""
         original_log = AuditTestDataFactory.create_test_log_entry()
@@ -123,6 +128,7 @@ class TestAuditDataIntegrity:
         return calculated_hash == expected_hash
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sequential_audit_log_validation(self):
         """Test audit logs maintain sequential integrity chain."""
         log_sequence = self._create_log_sequence()

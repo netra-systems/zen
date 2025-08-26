@@ -131,6 +131,7 @@ class JWTPermissionPropagationTester:
             "revocation_results": revocation_results
         }
     
+    @pytest.mark.e2e
     async def test_admin_elevation_cross_service(self, user_email: str) -> Dict[str, Any]:
         """Test admin elevation and verify cross-service access."""
         user = self.test_users[user_email]
@@ -169,6 +170,7 @@ class JWTPermissionPropagationTester:
             "propagation_time": elevation_result["propagation_time"]
         }
     
+    @pytest.mark.e2e
     async def test_concurrent_permission_changes(self, num_users: int = 3) -> Dict[str, Any]:
         """Test concurrent permission changes don't conflict."""
         # Create multiple test users
@@ -203,6 +205,7 @@ class JWTPermissionPropagationTester:
             "average_propagation": total_time / num_users if num_users > 0 else 0
         }
     
+    @pytest.mark.e2e
     async def test_websocket_permission_enforcement(self, user_email: str) -> Dict[str, Any]:
         """Test WebSocket enforces permission changes immediately."""
         user = self.test_users[user_email]
@@ -303,6 +306,7 @@ class JWTPermissionPropagationTester:
 # Test Cases
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_update_propagation():
     """Test Case 1: Permission updates propagate to all services."""
     tester = JWTPermissionPropagationTester()
@@ -324,6 +328,7 @@ async def test_permission_update_propagation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_admin_elevation_cross_service():
     """Test Case 2: Admin elevation works across all services."""
     tester = JWTPermissionPropagationTester()
@@ -339,6 +344,7 @@ async def test_admin_elevation_cross_service():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_revocation_immediate():
     """Test Case 3: Permission revocation takes effect immediately."""
     tester = JWTPermissionPropagationTester()
@@ -352,6 +358,7 @@ async def test_permission_revocation_immediate():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_permission_enforcement():
     """Test Case 4: WebSocket enforces permission changes immediately."""
     tester = JWTPermissionPropagationTester()
@@ -366,6 +373,7 @@ async def test_websocket_permission_enforcement():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_permission_changes():
     """Test Case 5: Concurrent permission changes don't conflict."""
     tester = JWTPermissionPropagationTester()
@@ -379,6 +387,7 @@ async def test_concurrent_permission_changes():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_propagation_performance_validation():
     """Test Case 6: All operations meet <500ms performance requirement."""
     tester = JWTPermissionPropagationTester()

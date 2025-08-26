@@ -12,8 +12,12 @@ from test_framework.fixtures.real_services import *
 # Import additional classes and functions
 from test_framework.fixtures.service_fixtures import _ConfigManagerHelper as ConfigManagerHelper, create_test_app
 
+# Import create_test_client from backend route helpers
+from netra_backend.tests.helpers.route_test_helpers import create_test_client
+
 __all__ = [
     # Re-export all fixtures from submodules
     "ConfigManagerHelper",
     "create_test_app",
+    "create_test_client",
 ]

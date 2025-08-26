@@ -239,6 +239,7 @@ async def prepared_threads(ws_thread_fixtures):
     return {"user": user, "threads": threads}
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_switching_loads_correct_history(prepared_threads, thread_switcher:
                                                        thread_context_manager):
     """Test thread switching loads correct message history and restores context."""
@@ -279,6 +280,7 @@ async def test_thread_switching_loads_correct_history(prepared_threads, thread_s
     assert len(switch_events) == 2, "Both thread switches must generate events"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_agent_context_maintained_per_thread(prepared_threads, thread_switcher:
                                                     thread_context_manager):
     """Test agent context is maintained per thread without cross-contamination."""
@@ -329,6 +331,7 @@ async def test_agent_context_maintained_per_thread(prepared_threads, thread_swit
     assert context_preserved, "Agent context must be preserved when returning to thread"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_historical_message_loading_with_pagination(ws_thread_fixtures, message_loader):
     """Test historical message loading with proper pagination support."""
     user = TEST_USERS["enterprise"]
@@ -359,6 +362,7 @@ async def test_historical_message_loading_with_pagination(ws_thread_fixtures, me
     assert len(page_1_ids.intersection(page_2_ids)) == 0, "Pages must not contain duplicate messages"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_reconnection_preserves_thread_state(ws_thread_fixtures, thread_switcher:
                                                              thread_context_manager):
     """Test WebSocket reconnection preserves thread state and context."""
@@ -407,6 +411,7 @@ async def test_websocket_reconnection_preserves_thread_state(ws_thread_fixtures,
     assert new_connection["connected"], "New connection must be established successfully"
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_switching_performance_optimization(ws_thread_fixtures, thread_switcher):
     """Test thread switching performance with multiple rapid switches."""
     user = TEST_USERS["enterprise"]

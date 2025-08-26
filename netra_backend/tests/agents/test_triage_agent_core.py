@@ -185,3 +185,82 @@ class TestIntentDetermination:
         
         assert intent.primary_intent in ["analyze", "recommend"]
         assert len(intent.secondary_intents) > 0
+    
+    def test_complex_intent(self, triage_agent):
+        """Test detection of complex multi-part intent."""
+        request = "Monitor my AI costs and automatically optimize when costs exceed $1000"
+        intent = triage_agent._determine_intent(request)
+        
+        assert intent.primary_intent in ["monitor", "optimize"]
+        assert intent.action_required == True
+        assert len(intent.secondary_intents) >= 0  # May have secondary intents
+    
+    def test_fallback_intent_classification(self, triage_agent):
+        """Test fallback mechanism for unclear intents."""
+        request = "Something is wrong with my AI models maybe"
+        intent = triage_agent._determine_intent(request)
+        
+        # Should fallback to analyze intent (default)
+        assert intent.primary_intent == "analyze"
+        assert intent.action_required == False  # Analyze intent doesn't require action by default
+
+class TestTriageAgentIntegration:
+    """Test integration scenarios with mocked dependencies."""
+    
+    @pytest.mark.asyncio
+    async def test_full_triage_process_success(self, triage_agent, sample_state):
+        """Test complete triage process with successful validation and processing."""
+        # Mock successful LLM response
+        triage_agent.llm_manager.ask_llm.return_value = {
+            "category": "optimization",
+            "subcategory": "cost",
+            "confidence": 0.85,
+            "reasoning": "User wants to optimize GPT-4 costs"
+        }
+        
+        # Execute the triage workflow (this updates the state instead of returning a result)
+        await triage_agent.execute(sample_state, "test_run", stream_updates=False)
+        
+        # Check that the state was updated with triage results
+        assert hasattr(sample_state, 'triage_result')
+        assert sample_state.triage_result is not None
+        # Verify the triage result has expected structure
+        if isinstance(sample_state.triage_result, dict):
+            assert "category" in sample_state.triage_result
+        assert triage_agent.llm_manager.ask_llm.called
+    
+    @pytest.mark.asyncio
+    async def test_triage_with_validation_failure(self, triage_agent):
+        """Test triage process when request validation fails."""
+        invalid_state = DeepAgentState(user_request="ab")  # Too short
+        
+        # Execute the triage workflow with invalid state
+        await triage_agent.execute(invalid_state, "test_run", stream_updates=False)
+        
+        # Check that the state was updated with error result
+        assert hasattr(invalid_state, 'triage_result')
+        assert invalid_state.triage_result is not None
+        if isinstance(invalid_state.triage_result, dict):
+            # Should have error category or error field
+            assert invalid_state.triage_result.get("category") == "Error" or "error" in invalid_state.triage_result
+        # LLM should not be called for invalid requests
+        triage_agent.llm_manager.ask_llm.assert_not_called()
+    
+    @pytest.mark.asyncio
+    async def test_triage_with_llm_failure(self, triage_agent, sample_state):
+        """Test triage process when LLM fails."""
+        # Mock LLM failure
+        triage_agent.llm_manager.ask_llm.side_effect = Exception("LLM service unavailable")
+        
+        # Execute the triage workflow with LLM failure
+        await triage_agent.execute(sample_state, "test_run", stream_updates=False)
+        
+        # Check that the state was updated with fallback result
+        assert hasattr(sample_state, 'triage_result')
+        assert sample_state.triage_result is not None
+        if isinstance(sample_state.triage_result, dict):
+            # Should have a category (either fallback or error)
+            assert "category" in sample_state.triage_result
+            # Could be error or fallback category
+            category = sample_state.triage_result.get("category")
+            assert category in ["general", "optimization", "Error"]

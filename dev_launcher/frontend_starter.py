@@ -314,9 +314,123 @@ class FrontendStarter:
         return process, log_streamer
     
     def _handle_frontend_startup_failure(self, process: subprocess.Popen):
-        """Handle frontend startup failure."""
-        self._print("❌", "ERROR", "Frontend failed to start")
+        """Handle frontend startup failure with detailed error capture."""
+        exit_code = process.poll()
+        self._print("❌", "ERROR", f"Frontend failed to start (exit code: {exit_code})")
+        
+        # Capture detailed error information
+        detailed_errors = self._capture_frontend_build_errors(process)
+        if detailed_errors:
+            self._print("📋", "DETAILS", "Frontend build errors:")
+            for error in detailed_errors[:5]:  # Show max 5 most relevant errors
+                print(f"  → {error}")
+        
         self._print_frontend_troubleshooting()
+    
+    def _capture_frontend_build_errors(self, process: subprocess.Popen) -> list:
+        """Capture detailed frontend build errors from process output and logs."""
+        errors = []
+        
+        try:
+            # Try to read from stderr if available
+            if hasattr(process, 'stderr') and process.stderr:
+                stderr_output = process.stderr.read()
+                if stderr_output:
+                    errors.extend(self._parse_frontend_errors(stderr_output.decode('utf-8', errors='ignore')))
+        except Exception as e:
+            logger.debug(f"Failed to read process stderr: {e}")
+        
+        # Try to capture errors from frontend log files
+        try:
+            frontend_log_path = self.config.log_dir / "frontend.log"
+            if frontend_log_path.exists():
+                with open(frontend_log_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    log_content = f.read()
+                    errors.extend(self._parse_frontend_errors(log_content))
+        except Exception as e:
+            logger.debug(f"Failed to read frontend log file: {e}")
+        
+        # Try to capture build errors from Next.js build output
+        try:
+            from dev_launcher.config import resolve_path
+            frontend_path = resolve_path("frontend", root=self.config.project_root)
+            if frontend_path:
+                # Check for build errors in common locations
+                build_log_path = frontend_path / ".next" / "trace"
+                if build_log_path.exists():
+                    # This is where Next.js might store build information
+                    pass
+                    
+                # Check package.json for common script issues
+                package_json_path = frontend_path / "package.json"
+                if package_json_path.exists():
+                    errors.extend(self._check_package_json_issues(package_json_path))
+                    
+        except Exception as e:
+            logger.debug(f"Failed to check frontend build files: {e}")
+        
+        return list(set(errors))  # Remove duplicates
+    
+    def _parse_frontend_errors(self, output: str) -> list:
+        """Parse frontend errors from output text."""
+        errors = []
+        lines = output.split('\n')
+        
+        # Common error patterns in frontend builds
+        error_patterns = [
+            r'Error: .+',
+            r'TypeError: .+',
+            r'Module not found: .+',
+            r'Failed to compile .+',
+            r'Syntax error: .+',
+            r'npm ERR! .+',
+            r'Cannot resolve .+',
+            r'Module build failed: .+',
+            r'Build failed .+',
+        ]
+        
+        import re
+        for line in lines:
+            line = line.strip()
+            if line:
+                for pattern in error_patterns:
+                    if re.search(pattern, line, re.IGNORECASE):
+                        errors.append(line[:200])  # Truncate very long errors
+                        break
+        
+        return errors[:10]  # Return max 10 errors
+    
+    def _check_package_json_issues(self, package_json_path: Path) -> list:
+        """Check for common package.json issues that could cause build failures."""
+        issues = []
+        
+        try:
+            import json
+            with open(package_json_path, 'r', encoding='utf-8') as f:
+                package_data = json.load(f)
+            
+            # Check for missing scripts
+            scripts = package_data.get('scripts', {})
+            if 'dev' not in scripts:
+                issues.append("Missing 'dev' script in package.json")
+            if 'build' not in scripts:
+                issues.append("Missing 'build' script in package.json")
+                
+            # Check for Next.js dependency
+            dependencies = {**package_data.get('dependencies', {}), **package_data.get('devDependencies', {})}
+            if 'next' not in dependencies:
+                issues.append("Next.js not found in dependencies")
+                
+            # Check for React dependencies
+            if 'react' not in dependencies:
+                issues.append("React not found in dependencies")
+            if 'react-dom' not in dependencies:
+                issues.append("React DOM not found in dependencies")
+                
+        except Exception as e:
+            issues.append(f"Failed to parse package.json: {e}")
+            
+        return issues
     
     def _print_frontend_troubleshooting(self):
         """Print frontend troubleshooting tips with enhanced diagnostics."""

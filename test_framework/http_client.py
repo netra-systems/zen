@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Optional, Union
 import httpx
+import websockets
+from websockets.exceptions import ConnectionClosedError
 from pathlib import Path
 
 
@@ -84,6 +86,10 @@ class UnifiedHTTPClient:
         self.config = config or ClientConfig(base_url=base_url)
         self.metrics = ConnectionMetrics()
         self._client = self._create_client()
+        
+        # WebSocket support attributes
+        self._websocket = None
+        self._websocket_state = ConnectionState.DISCONNECTED
     
     def _create_client(self) -> httpx.AsyncClient:
         """Create configured HTTP client."""
@@ -180,8 +186,112 @@ class UnifiedHTTPClient:
         self.metrics.last_error = error
         self.metrics.retry_count += 1
     
+    async def connect(self, headers: Optional[Dict[str, str]] = None) -> bool:
+        """Connect to WebSocket with retry logic."""
+        self._websocket_state = ConnectionState.CONNECTING
+        
+        # Convert HTTP URL to WebSocket URL if needed
+        ws_url = self.base_url
+        if ws_url.startswith("http://"):
+            ws_url = ws_url.replace("http://", "ws://", 1)
+        elif ws_url.startswith("https://"):
+            ws_url = ws_url.replace("https://", "wss://", 1)
+        
+        for attempt in range(self.config.max_retries + 1):
+            try:
+                self._websocket = await self._establish_websocket_connection(ws_url, headers)
+                self._websocket_state = ConnectionState.CONNECTED
+                return True
+            except Exception as e:
+                if attempt == self.config.max_retries:
+                    self._handle_websocket_error(str(e))
+                    return False
+                delay = self.config.get_retry_delay(attempt)
+                await asyncio.sleep(delay)
+        return False
+    
+    async def _establish_websocket_connection(self, ws_url: str, headers: Optional[Dict[str, str]]):
+        """Establish WebSocket connection."""
+        # Extract token from Authorization header and convert to query param
+        token = None
+        if headers and "Authorization" in headers:
+            auth_header = headers["Authorization"]
+            if auth_header.startswith("Bearer "):
+                token = auth_header[7:]  # Remove "Bearer " prefix
+        
+        # Build WebSocket URL with token as query parameter
+        if token:
+            ws_url = f"{ws_url}?token={token}"
+        
+        # Connection kwargs with timeout
+        connection_kwargs = {"ping_timeout": self.config.timeout}
+        
+        # Only use SSL context for wss:// URLs
+        if ws_url.startswith("wss://"):
+            connection_kwargs["ssl"] = self.config.verify_ssl
+        
+        return await websockets.connect(ws_url, **connection_kwargs)
+    
+    async def send(self, message: Union[Dict[str, Any], str]) -> bool:
+        """Send message through WebSocket."""
+        if not self._websocket or self._websocket_state != ConnectionState.CONNECTED:
+            return False
+        
+        try:
+            message_str = self._prepare_websocket_message(message)
+            await self._websocket.send(message_str)
+            self.metrics.requests_sent += 1
+            return True
+        except (ConnectionClosedError, Exception) as e:
+            self._handle_websocket_error(str(e))
+            return False
+    
+    def _prepare_websocket_message(self, message: Union[Dict[str, Any], str]) -> str:
+        """Prepare message for WebSocket sending."""
+        return json.dumps(message) if isinstance(message, dict) else message
+    
+    async def send_message(self, message: Union[Dict[str, Any], str]) -> bool:
+        """Send message to WebSocket server (alias for send)."""
+        return await self.send(message)
+    
+    async def send_and_wait(self, message: Union[Dict[str, Any], str],
+                           timeout: Optional[float] = None) -> Optional[Dict[str, Any]]:
+        """Send message and wait for response."""
+        success = await self.send(message)
+        if not success:
+            return None
+        return await self.receive(timeout)
+    
+    async def receive(self, timeout: Optional[float] = None) -> Optional[Dict[str, Any]]:
+        """Receive message from WebSocket."""
+        if not self._websocket:
+            return None
+        
+        try:
+            timeout_value = timeout or self.config.timeout
+            message = await asyncio.wait_for(
+                self._websocket.recv(), timeout=timeout_value
+            )
+            self.metrics.responses_received += 1
+            return json.loads(message)
+        except (asyncio.TimeoutError, ConnectionClosedError) as e:
+            self._handle_websocket_error(str(e))
+            return None
+        except Exception as e:
+            self._handle_websocket_error(str(e))
+            return None
+    
+    def _handle_websocket_error(self, error: str) -> None:
+        """Handle WebSocket error."""
+        self._websocket_state = ConnectionState.FAILED
+        self.metrics.last_error = error
+        self.metrics.retry_count += 1
+    
     async def close(self) -> None:
-        """Close HTTP client."""
+        """Close HTTP client and WebSocket connection."""
+        if self._websocket:
+            await self._websocket.close()
+            self._websocket_state = ConnectionState.DISCONNECTED
         await self._client.aclose()
     
     async def __aenter__(self):

@@ -24,6 +24,7 @@ from test_framework.websocket_helpers import MockWebSocket
 from tests.e2e.real_services_manager import RealServicesManager
 
 
+@pytest.mark.e2e
 class TestLandingPageAuthRedirect(BaseIntegrationTest):
     """Test suite for landing page authentication and redirect logic."""
     
@@ -35,6 +36,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         self.auth_redirect_times = []
         self.auth_state_changes = []
         
+    @pytest.mark.e2e
     async def test_unauthenticated_user_redirect_to_login_FAILING(self):
         """
         FAILING TEST: Unauthenticated user should redirect to /login within 200ms.
@@ -77,6 +79,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
                 f"Landing page authentication logic is not working correctly."
             )
     
+    @pytest.mark.e2e
     async def test_authenticated_user_redirect_to_chat_FAILING(self):
         """
         FAILING TEST: Authenticated user should redirect to /chat within 200ms.
@@ -115,6 +118,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
                 f"Landing page fails to handle authenticated users correctly."
             )
     
+    @pytest.mark.e2e
     async def test_auth_loading_state_handling_FAILING(self):
         """
         FAILING TEST: Landing page should handle loading states without premature redirects.
@@ -146,6 +150,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
             f"{redirects_during_loading}. Should wait for loading to complete before redirecting."
         )
     
+    @pytest.mark.e2e
     async def test_rapid_auth_state_changes_no_loops_FAILING(self):
         """
         FAILING TEST: Rapid auth state changes shouldn't cause redirect loops.
@@ -191,6 +196,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
             f"Rapid auth state changes are causing unstable routing behavior."
         )
     
+    @pytest.mark.e2e
     async def test_auth_service_mock_integration_consistency_FAILING(self):
         """
         FAILING TEST: Auth service mocks should behave consistently with real service.
@@ -235,6 +241,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
             f"\n\nMocks should accurately reflect real service behavior to ensure test validity."
         )
 
+    @pytest.mark.e2e
     async def test_similar_edge_case_logout_redirect_behavior_FAILING(self):
         """
         FAILING TEST: Similar pattern - logout should properly redirect users.

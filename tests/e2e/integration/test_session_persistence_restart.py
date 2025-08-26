@@ -431,6 +431,7 @@ class SessionPersistenceValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_persistence_across_simulated_restart():
     """
     Test session persistence during simulated service restart.
@@ -519,6 +520,7 @@ async def test_session_persistence_across_simulated_restart():
 
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_concurrent_session_persistence():
     """
     Test session persistence with multiple concurrent enterprise users.
@@ -577,6 +579,7 @@ async def test_concurrent_session_persistence():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_jwt_token_persistence():
     """
     Test JWT token persistence across service restart.

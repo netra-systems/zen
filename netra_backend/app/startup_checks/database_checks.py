@@ -29,7 +29,8 @@ class DatabaseChecker:
     
     async def check_database_connection(self) -> StartupCheckResult:
         """Check PostgreSQL database connection and schema"""
-        if self.is_mock:
+        # Check for mock mode from both config URL and runtime app state
+        if self.is_mock or (hasattr(self.app.state, 'database_mock_mode') and self.app.state.database_mock_mode):
             return self._create_mock_result("database_connection")
         return await self._perform_database_connection_check()
     
@@ -43,7 +44,8 @@ class DatabaseChecker:
     
     async def check_or_create_assistant(self) -> StartupCheckResult:
         """Check if Netra assistant exists, create if not"""
-        if self.is_mock:
+        # Check for mock mode from both config URL and runtime app state
+        if self.is_mock or (hasattr(self.app.state, 'database_mock_mode') and self.app.state.database_mock_mode):
             return self._create_mock_result("netra_assistant")
         return await self._perform_assistant_check()
     
@@ -160,6 +162,11 @@ class DatabaseChecker:
     
     async def _execute_database_tests(self) -> List[str]:
         """Execute database connectivity and schema tests, return missing tables"""
+        # Check if database is in mock mode (set by startup sequence)
+        if hasattr(self.app.state, 'database_mock_mode') and self.app.state.database_mock_mode:
+            # In mock mode, db_session_factory is legitimately None
+            return []  # No missing tables in mock mode
+            
         if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
             raise RuntimeError("Database session factory not initialized. Check database setup.")
         async with self.app.state.db_session_factory() as db:
@@ -193,6 +200,14 @@ class DatabaseChecker:
         
         logger.debug(f"Checking app.state for db_session_factory...")
         logger.debug(f"hasattr(self.app.state, 'db_session_factory'): {hasattr(self.app.state, 'db_session_factory')}")
+        
+        # Check if database is in mock mode (set by startup sequence)
+        if hasattr(self.app.state, 'database_mock_mode') and self.app.state.database_mock_mode:
+            logger.debug("Database is in mock mode - skipping assistant check")
+            return StartupCheckResult(
+                name="netra_assistant", success=True, critical=False,
+                message="PostgreSQL in mock mode - skipping assistant check"
+            )
         
         if hasattr(self.app.state, 'db_session_factory'):
             logger.debug(f"self.app.state.db_session_factory: {self.app.state.db_session_factory}")

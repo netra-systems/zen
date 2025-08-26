@@ -72,10 +72,12 @@ def degradation_manager():
     return GracefulDegradationManager()
 
 
+@pytest.mark.e2e
 class TestLLMFallbackChain:
     """Test LLM fallback chain mechanisms - BVJ: Critical service availability"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_fallback_chain(self, fallback_coordinator):
         """Test primary LLM fails, secondary LLM activates"""
         agent_name = "test_llm_agent"
@@ -90,6 +92,7 @@ class TestLLMFallbackChain:
         assert result.fallback_triggered
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_llm_rate_limit_fallback(self, fallback_coordinator):
         """Test rate limit handling with alternative LLM providers"""
         agent_name = "rate_limited_agent"  
@@ -125,10 +128,12 @@ class TestLLMFallbackChain:
         )
 
 
+@pytest.mark.e2e
 class TestDatabaseFallback:
     """Test database fallback mechanisms - BVJ: Data availability assurance"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_fallback(self):
         """Test database connection failure triggers cache fallback"""
         fallback_chain = UnifiedFallbackChain("database_test")
@@ -142,6 +147,7 @@ class TestDatabaseFallback:
         assert result["result"] == "cached_data"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_timeout_recovery(self):
         """Test database timeout with automatic recovery"""
         circuit_breaker = self._create_db_circuit_breaker()
@@ -172,10 +178,12 @@ class TestDatabaseFallback:
         return CircuitBreaker(config)
 
 
+@pytest.mark.e2e
 class TestCacheFallback:
     """Test cache layer fallback mechanisms - BVJ: Performance continuity"""
 
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_cache_fallback(self):
         """Test cache miss triggers database fallback"""
         fallback_chain = UnifiedFallbackChain("cache_test")
@@ -189,6 +197,7 @@ class TestCacheFallback:
         assert result["data"] is not None
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_service_down_static_response(self):
         """Test cache service completely down, use static response"""
         fallback_chain = UnifiedFallbackChain("cache_down_test")
@@ -223,10 +232,12 @@ class TestCacheFallback:
         return StaticResponseFallback(config, static_response)
 
 
+@pytest.mark.e2e
 class TestDegradedModeActivation:
     """Test degraded mode activation - BVJ: Graceful service degradation"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_degraded_mode_activation(self, degradation_manager):
         """Test system enters degraded mode under high load"""
         with patch.object(degradation_manager, '_get_resource_usage') as mock_resources:
@@ -237,6 +248,7 @@ class TestDegradedModeActivation:
             assert degradation_manager.global_degradation_level == DegradationLevel.MINIMAL
 
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_service_specific_degradation(self, degradation_manager):
         """Test individual service degradation without affecting others"""
         from netra_backend.app.core.degradation_types import (
@@ -253,6 +265,7 @@ class TestDegradedModeActivation:
         mock_strategy.degrade_to_level.assert_called_once()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_automatic_recovery_from_degraded(self, degradation_manager):
         """Test automatic recovery when conditions improve"""
         
@@ -267,10 +280,12 @@ class TestDegradedModeActivation:
         mock_strategy.can_restore_service.assert_called_once()
 
 
+@pytest.mark.e2e
 class TestFallbackValidation:
     """Validation tests for fallback patterns - BVJ: System reliability verification"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_fallback_priority_ordering(self):
         """Test fallback handlers execute in correct priority order"""
         chain = UnifiedFallbackChain("priority_test")
@@ -285,6 +300,7 @@ class TestFallbackValidation:
         assert chain.handlers[1].config.priority == FallbackPriority.EMERGENCY
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_recovery_detection(self, fallback_coordinator):
         """Test detection and handling of service recovery"""
         agent_name = "recovery_test_agent"
@@ -296,6 +312,7 @@ class TestFallbackValidation:
         status = fallback_coordinator.get_system_status()
         assert agent_name in status.get("agents", {})
 
+    @pytest.mark.e2e
     def test_fallback_metrics_collection(self):
         """Test fallback metrics are properly collected"""
         chain, handler = self._setup_metrics_test()

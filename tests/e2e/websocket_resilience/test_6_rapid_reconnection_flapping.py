@@ -201,6 +201,7 @@ class RapidReconnectionClient:
             logger.error(f"Stable connection failed: {e}")
             return False
             
+    @pytest.mark.e2e
     async def test_send_test_message(self) -> bool:
         """Send a test message to verify connection functionality."""
         if not self.is_connected or not self.websocket:
@@ -224,6 +225,7 @@ class RapidReconnectionClient:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_rapid_reconnection_flapping():
     """
     Test rapid reconnection flapping behavior.
@@ -304,6 +306,7 @@ async def test_rapid_reconnection_flapping():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_flapping_resource_leak_prevention():
     """
     Test that rapid flapping doesn't cause resource leaks.

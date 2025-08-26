@@ -1,5 +1,6 @@
 """Extended WebSocket Authentication Cold Start Agent Integration Tests (L3)
 
+
 Comprehensive L3 tests with increased depth and breadth for WebSocket authentication during cold start.
 These tests focus on challenging edge cases, security vulnerabilities, and real-world failure scenarios.
 
@@ -19,7 +20,7 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 import sys
 from pathlib import Path
 
-# Test framework import - using pytest fixtures instead
+from test_framework.performance_helpers import fast_test, timeout_override
 
 import asyncio
 import base64
@@ -58,6 +59,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 1: COLD START WITH VALID AUTH (DEPTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_cold_start_valid_auth_memory_pressure(self, auth_service_config, mock_postgres, mock_redis):
@@ -106,6 +108,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             del memory_hog  # Clean up memory
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_cold_start_valid_auth_clock_skew(self, auth_service_config, mock_postgres, mock_redis):
@@ -138,6 +141,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] in ["auth_success", "pong"]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_cold_start_valid_auth_jwt_algorithm_confusion(self, auth_service_config):
@@ -165,6 +169,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert exc_info.value.status_code == 401
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_cold_start_valid_auth_connection_pooling(self, auth_service_config, mock_postgres, mock_redis):
@@ -209,6 +214,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 await ws.close()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_cold_start_valid_auth_dns_resolution_delay(self, auth_service_config, mock_postgres, mock_redis):
@@ -252,6 +258,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert elapsed < 15.0
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_cold_start_valid_auth_binary_protocol(self, auth_service_config, mock_postgres, mock_redis):
@@ -288,6 +295,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 2: EXPIRED TOKEN REJECTION (DEPTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_expired_token_replay_attack(self, auth_service_config):
@@ -321,6 +329,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert exc_info.value.status_code == 401
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_expired_token_timing_attack(self, auth_service_config):
@@ -372,6 +381,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert abs(avg_valid - avg_invalid) / max(avg_valid, avg_invalid) < 0.2
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_expired_token_boundary_conditions(self, auth_service_config):
@@ -408,6 +418,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert exc_info.value.status_code == 401
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_expired_token_malformed_exp_claim(self, auth_service_config):
@@ -448,6 +459,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert exc_info.value.status_code in [400, 401]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_expired_token_cache_poisoning(self, auth_service_config, mock_redis):
@@ -495,6 +507,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert exc_info.value.status_code == 401
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_expired_token_error_message_leakage(self, auth_service_config):
@@ -529,6 +542,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 3: TOKEN REFRESH (DEPTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_token_refresh_race_condition(self, auth_service_config, mock_postgres, mock_redis):
@@ -573,6 +587,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert refresh_count == 1
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_token_refresh_rotation_tracking(self, auth_service_config, mock_postgres, mock_redis):
@@ -623,6 +638,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert exc_info.value.status_code == 401
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_token_refresh_invalid_refresh_token(self, auth_service_config, mock_postgres, mock_redis):
@@ -664,6 +680,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert "refresh" in data["message"].lower()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_token_refresh_cross_tier_upgrade(self, auth_service_config, mock_postgres, mock_redis):
@@ -707,6 +724,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert new_token_payload["tier"] == "enterprise"
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_token_refresh_during_maintenance_mode(self, auth_service_config, mock_postgres, mock_redis):
@@ -741,6 +759,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert data["type"] in ["maintenance_mode", "token_refresh_queued"]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_token_refresh_with_ip_change(self, auth_service_config, mock_postgres, mock_redis):
@@ -783,6 +802,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 4: CONCURRENT AUTH (DEPTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_concurrent_auth_thundering_herd(self, auth_service_config, mock_postgres, mock_redis):
@@ -827,6 +847,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert elapsed < 30.0, f"Took {elapsed}s for 1000 connections"
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_concurrent_auth_deadlock_prevention(self, auth_service_config, mock_postgres, mock_redis):
@@ -888,6 +909,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             pytest.fail("Deadlock detected - operations timed out")
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_concurrent_auth_resource_starvation(self, auth_service_config, mock_postgres, mock_redis):
@@ -954,6 +976,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert max(low_priority_times) < 10.0  # None should wait too long
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_concurrent_auth_connection_hijacking(self, auth_service_config, mock_postgres, mock_redis):
@@ -1018,6 +1041,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             await victim_ws.close()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_concurrent_auth_load_balancing(self, auth_service_config, mock_postgres, mock_redis):
@@ -1071,6 +1095,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert 0.23 < distribution_ratio < 0.43
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_concurrent_auth_circuit_breaker(self, auth_service_config, mock_postgres, mock_redis):
@@ -1134,6 +1159,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 5: DATABASE UNAVAILABILITY (DEPTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_database_unavailable_cache_consistency(self, auth_service_config, mock_postgres, mock_redis):
@@ -1186,6 +1212,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert update_response["type"] in ["error", "queued"]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_database_unavailable_split_brain(self, auth_service_config, mock_postgres, mock_redis):
@@ -1246,6 +1273,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert sum(results) <= 1
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_database_unavailable_graceful_degradation(self, auth_service_config, mock_postgres, mock_redis):
@@ -1292,6 +1320,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert results["get_system_status"] in ["success", "status"]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_database_unavailable_recovery_sync(self, auth_service_config, mock_postgres, mock_redis):
@@ -1347,6 +1376,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["processed_count"] == len(queued_operations)
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_database_unavailable_cache_expiry(self, auth_service_config, mock_postgres, mock_redis):
@@ -1390,6 +1420,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     assert "unavailable" in data.get("message", "").lower()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_database_unavailable_failover_ordering(self, auth_service_config, mock_postgres, mock_redis):
@@ -1446,6 +1477,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 6: ROLE-BASED ACCESS CONTROL (DEPTH & BREADTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rbac_privilege_escalation_attempts(self, auth_service_config, mock_postgres, mock_redis):
@@ -1500,6 +1532,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert "unauthorized" in data["message"].lower() or "forbidden" in data["message"].lower()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rbac_role_inheritance_delegation(self, auth_service_config, mock_postgres, mock_redis):
@@ -1563,6 +1596,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert "delegation expired" in data["message"].lower()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rbac_dynamic_role_changes(self, auth_service_config, mock_postgres, mock_redis):
@@ -1622,6 +1656,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 assert data["type"] == "access_granted"
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rbac_cross_tenant_access_prevention(self, auth_service_config, mock_postgres, mock_redis):
@@ -1685,6 +1720,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert "tenant" in data["message"].lower()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rbac_role_specific_rate_limits(self, auth_service_config, mock_postgres, mock_redis):
@@ -1748,6 +1784,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert premium_request_count > free_request_count * 2
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rbac_audit_logging_privileged_ops(self, auth_service_config, mock_postgres, mock_redis):
@@ -1803,6 +1840,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 7: SESSION PERSISTENCE (DEPTH & BREADTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_session_fixation_attacks(self, auth_service_config, mock_postgres, mock_redis):
@@ -1857,6 +1895,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["user_id"] == "victim"
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_session_distributed_consistency(self, auth_service_config, mock_postgres, mock_redis):
@@ -1912,6 +1951,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     assert f"from_{other_node}" in data["session_data"]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_session_timeout_renewal(self, auth_service_config, mock_postgres, mock_redis):
@@ -1958,6 +1998,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] in ["session_expired", "reauth_required"]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_session_cross_device_management(self, auth_service_config, mock_postgres, mock_redis):
@@ -2027,6 +2068,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 await ws.close()
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_session_migration_during_failover(self, auth_service_config, mock_postgres, mock_redis):
@@ -2082,6 +2124,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["session_data"]["counter"] == 42
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_session_storage_limits(self, auth_service_config, mock_postgres, mock_redis):
@@ -2126,6 +2169,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     # ==================== TEST 8: RATE LIMITING (DEPTH & BREADTH) ====================
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rate_limit_distributed_accuracy(self, auth_service_config, mock_postgres, mock_redis):
@@ -2178,6 +2222,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert total_requests >= rate_limit - 5
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rate_limit_bypass_attempts(self, auth_service_config, mock_postgres, mock_redis):
@@ -2230,6 +2275,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert total_successful < 50  # Much less than 80 (8 attempts × 10 requests)
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rate_limit_sliding_vs_fixed_window(self, auth_service_config, mock_postgres, mock_redis):
@@ -2285,6 +2331,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] != "rate_limited"
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rate_limit_tier_based(self, auth_service_config, mock_postgres, mock_redis):
@@ -2337,6 +2384,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert abs(results[tier] - expected) < expected * 0.1  # Within 10%
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rate_limit_geographic(self, auth_service_config, mock_postgres, mock_redis):
@@ -2391,6 +2439,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         assert results["CN"] > results["RU"]
     
     @pytest.mark.integration
+    @fast_test
     @pytest.mark.l3
     @pytest.mark.asyncio
     async def test_rate_limit_recovery_backoff(self, auth_service_config, mock_postgres, mock_redis):

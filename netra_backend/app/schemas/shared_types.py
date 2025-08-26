@@ -93,14 +93,88 @@ class ErrorContext(BaseModel):
 
     @classmethod
     def generate_trace_id(cls) -> str:
-        """Generate a unique trace ID for request tracking."""
+        """Generate a unique trace ID for request tracking and set it in context."""
         import uuid
-        return f"trace_{uuid.uuid4().hex[:16]}"
+        trace_id = f"trace_{uuid.uuid4().hex[:16]}"
+        cls.set_trace_id(trace_id)
+        return trace_id
+    
+    @classmethod
+    def set_trace_id(cls, trace_id: str) -> None:
+        """Set trace ID in class-level context storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        cls._context_storage['trace_id'] = trace_id
+    
+    @classmethod
+    def set_request_id(cls, request_id: str) -> None:
+        """Set request ID in class-level context storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        cls._context_storage['request_id'] = request_id
+    
+    @classmethod
+    def set_user_id(cls, user_id: str) -> None:
+        """Set user ID in class-level context storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        cls._context_storage['user_id'] = user_id
+    
+    @classmethod
+    def set_context(cls, key: str, value: Union[str, int, float, bool]) -> None:
+        """Set arbitrary context value in class-level storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        cls._context_storage[key] = value
+    
+    @classmethod
+    def get_trace_id(cls) -> Optional[str]:
+        """Get trace ID from class-level context storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        return cls._context_storage.get('trace_id')
+    
+    @classmethod
+    def get_request_id(cls) -> Optional[str]:
+        """Get request ID from class-level context storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        return cls._context_storage.get('request_id')
+    
+    @classmethod
+    def get_user_id(cls) -> Optional[str]:
+        """Get user ID from class-level context storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        return cls._context_storage.get('user_id')
+    
+    @classmethod
+    def get_context(cls, key: str, default: Union[str, int, float, bool, None] = None) -> Union[str, int, float, bool, None]:
+        """Get context value by key with optional default."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        return cls._context_storage.get(key, default)
     
     @classmethod
     def get_all_context(cls) -> Dict[str, Union[str, int, float, bool]]:
-        """Get default context for error handling compatibility."""
-        return {}
+        """Get all context from class-level storage."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        return cls._context_storage.copy()
+    
+    @classmethod
+    def clear_context(cls) -> None:
+        """Clear error context - for test compatibility."""
+        if not hasattr(cls, '_context_storage'):
+            cls._context_storage = {}
+        cls._context_storage.clear()
+    
+    @classmethod
+    def get_enriched_error_context(cls) -> Dict[str, Union[str, int, float, bool]]:
+        """Get enriched error context for test compatibility."""
+        context = cls.get_all_context()
+        context['timestamp'] = datetime.now(UTC).isoformat()
+        return context
 
 
 class BaseAgentInterface(ABC):
@@ -380,3 +454,54 @@ class AnomalyDetectionResponse(BaseModel):
         if v < 0:
             raise ValueError('Anomaly count must be non-negative')
         return v
+
+
+class ErrorContextManager:
+    """Context manager for error context to ensure proper cleanup."""
+    
+    def __init__(self, **context_data):
+        """Initialize with context data to set."""
+        self.context_data = context_data
+        self.original_context = {}
+    
+    def __enter__(self):
+        """Save current context and set new values."""
+        # Save current context
+        self.original_context = ErrorContext.get_all_context().copy()
+        
+        # Set new context values
+        for key, value in self.context_data.items():
+            if key == 'trace_id':
+                ErrorContext.set_trace_id(value)
+            elif key == 'request_id':
+                ErrorContext.set_request_id(value)
+            elif key == 'user_id':
+                ErrorContext.set_user_id(value)
+            else:
+                ErrorContext.set_context(key, value)
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Restore original context."""
+        ErrorContext.clear_context()
+        # Restore original values
+        for key, value in self.original_context.items():
+            if key == 'trace_id':
+                ErrorContext.set_trace_id(value)
+            elif key == 'request_id':
+                ErrorContext.set_request_id(value)  
+            elif key == 'user_id':
+                ErrorContext.set_user_id(value)
+            else:
+                ErrorContext.set_context(key, value)
+
+
+def get_enriched_error_context(additional_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Get enriched error context with additional data."""
+    context = ErrorContext.get_all_context()
+    context['timestamp'] = datetime.now(UTC).isoformat()
+    
+    if additional_data:
+        context.update(additional_data)
+    
+    return context

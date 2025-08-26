@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <title>GCP Staging Deployment Critical Issues - Fixes and Prevention</title>
+    <category>deployment</category>
+    <category>staging</category>
+    <category>infrastructure</category>
+    <date>2025-08-26</date>
+    
+    <context>
+        During GCP staging deployment audit, three critical issues were identified that could cause service failures in production:
+        1. OAuth Configuration Missing - Google OAuth credentials not configured properly  
+        2. Redis Connection Issues - Variable scoping error with async/sync method confusion
+        3. Migration Configuration Missing - Alembic configuration file not found in deployment
+        
+        These issues were systematically identified, reproduced via failing tests, and fixed with comprehensive solutions.
+    </context>
+
+    <learning type="oauth_configuration">
+        <issue>OAuth Configuration Missing in Staging</issue>
+        <root_cause>
+            - OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) not properly configured in staging environment
+            - Test framework automatically provides test credentials, masking the real issue
+            - System didn't gracefully handle missing OAuth credentials in staging/production
+        </root_cause>
+        <solution>
+            - Enhanced AuthSecretLoader to gracefully handle missing OAuth credentials
+            - Updated tests to properly simulate missing credentials by clearing test framework values
+            - Added proper logging and warning messages when OAuth is not configured
+            - System now detects and reports OAuth configuration status correctly
+        </solution>
+        <prevention>
+            - Always test OAuth configuration in staging environment without test framework overrides
+            - Verify GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are properly set in Google Secret Manager
+            - Use environment-specific OAuth credentials (GOOGLE_OAUTH_CLIENT_ID_STAGING, etc.)
+            - Implement fail-fast validation in staging/production environments for critical OAuth configuration
+        </prevention>
+        <code_changes>
+            - Updated auth_service/tests/test_oauth_staging_missing_credentials.py with proper test isolation
+            - Enhanced auth_service/auth_core/secret_loader.py with graceful handling
+            - Added environment variable clearing and restoration in tests
+        </code_changes>
+    </learning>
+
+    <learning type="redis_connection">
+        <issue>Redis Connection Variable Scoping and Async Method Confusion</issue>
+        <root_cause>
+            - Tests were calling async Redis methods (initialize()) without awaiting them
+            - Redundant imports of get_env() function inside methods could cause scoping issues
+            - Test methods weren't marked with @pytest.mark.asyncio for async operations
+            - Error messages indicated "cannot access local variable 'get_env'" but real issue was sync/async mismatch
+        </root_cause>
+        <solution>
+            - Fixed redundant import of get_env() in Redis manager (removed duplicate import at line 140)
+            - Updated all Redis tests to properly use @pytest.mark.asyncio and await async methods
+            - Enhanced Redis tests to use test_mode=True for controlled testing without real Redis connections
+            - Added proper async cleanup in test teardown methods
+        </solution>
+        <prevention>
+            - Always mark async tests with @pytest.mark.asyncio decorator
+            - Always await async methods in tests - never call them synchronously
+            - Avoid redundant imports within functions - use module-level imports
+            - Use test_mode=True for Redis manager in tests to avoid external dependencies
+            - Implement proper async resource cleanup in test fixtures
+        </prevention>
+        <code_changes>
+            - Fixed netra_backend/app/redis_manager.py to remove redundant get_env import
+            - Updated netra_backend/tests/test_redis_connection_staging_issues.py with proper async handling
+            - Added test_mode usage for controlled Redis testing
+            - Enhanced error handling and graceful degradation in Redis operations
+        </code_changes>
+    </learning>
+
+    <learning type="migration_configuration">
+        <issue>Alembic Configuration Missing in Staging Deployment</issue>
+        <root_cause>
+            - alembic.ini file expected at /app/config/alembic.ini in Cloud Run deployment
+            - Path resolution logic only checked single development path structure
+            - No fallback mechanisms for missing alembic.ini in deployment scenarios
+            - Container deployments might have different file system layouts than development
+        </root_cause>
+        <solution>
+            - Enhanced _get_alembic_ini_path() with multiple fallback locations for different deployment scenarios
+            - Added create_alembic_config_with_fallback() function for programmatic Alembic configuration
+            - Implemented comprehensive error messages with troubleshooting guidance
+            - Created robust path resolution that works in development, staging, and production environments
+        </solution>
+        <prevention>
+            - Ensure alembic.ini is included in container build and deployment processes
+            - Use multiple fallback paths for critical configuration files in deployment environments
+            - Implement programmatic fallback configuration for critical infrastructure files
+            - Test path resolution in different working directory scenarios during development
+            - Verify file system layout matches expectations in staging before production deployment
+        </prevention>
+        <code_changes>
+            - Enhanced netra_backend/app/db/migration_utils.py with robust path resolution
+            - Added fallback paths for Cloud Run, Docker, and various deployment scenarios
+            - Created create_alembic_config_with_fallback() for graceful degradation
+            - Updated tests to validate path resolution and fallback mechanisms
+        </code_changes>
+    </learning>
+
+    <best_practices>
+        <practice name="Staging Environment Testing">
+            - Always test in staging environment with production-like configurations
+            - Clear test framework overrides when testing configuration loading
+            - Validate environment-specific variables are properly set
+            - Test graceful degradation when dependencies are unavailable
+        </practice>
+        
+        <practice name="Async Method Testing">
+            - Use @pytest.mark.asyncio for all async test methods
+            - Always await async method calls in tests
+            - Use test_mode or mock configurations to avoid external dependencies
+            - Implement proper async cleanup in test fixtures
+        </practice>
+        
+        <practice name="Deployment Configuration Resilience">
+            - Implement multiple fallback paths for critical configuration files
+            - Provide programmatic fallback configurations when files are missing
+            - Include comprehensive error messages with troubleshooting guidance
+            - Test configuration loading in different working directory scenarios
+        </practice>
+        
+        <practice name="Import and Scoping Hygiene">
+            - Avoid redundant imports within functions
+            - Use module-level imports consistently
+            - Check for variable scoping issues with linting tools
+            - Keep import statements clean and minimal
+        </practice>
+    </best_practices>
+
+    <testing_approach>
+        <principle>Fail-Fast Test Design</principle>
+        <description>
+            Design tests that fail when the actual deployment issues occur, rather than tests that pass because of test framework accommodation. This ensures real problems are caught early.
+        </description>
+        <implementation>
+            - Clear test framework overrides to simulate real deployment conditions
+            - Use environment variable manipulation to test missing configuration scenarios
+            - Test async methods with proper async test decorators and await statements
+            - Validate fallback mechanisms work when primary configurations are unavailable
+        </implementation>
+    </testing_approach>
+
+    <validation>
+        <test_files>
+            - auth_service/tests/test_oauth_staging_missing_credentials.py (3 tests passing)
+            - netra_backend/tests/test_redis_connection_staging_issues.py (3 tests passing)
+            - netra_backend/tests/test_migration_staging_configuration_issues.py (3 tests passing)
+        </test_files>
+        <fixes_confirmed>
+            - OAuth configuration gracefully handles missing credentials in staging
+            - Redis connection properly uses async methods with correct scoping
+            - Migration configuration has robust path resolution and fallback mechanisms
+            - All tests now pass and validate the actual fixes rather than masking issues
+        </fixes_confirmed>
+    </validation>
+</learnings>

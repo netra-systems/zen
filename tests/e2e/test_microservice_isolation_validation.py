@@ -182,6 +182,7 @@ class MicroserviceIsolationValidator:
         }
 
 
+@pytest.mark.e2e
 class TestMicroserviceIsolationValidation:
     """Test suite for microservice isolation validation"""
     
@@ -193,6 +194,7 @@ class TestMicroserviceIsolationValidation:
     def validation_results(self, validator):
         return validator.run_full_validation()
     
+    @pytest.mark.e2e
     def test_import_isolation_enforced(self, validation_results):
         """Test that services have no forbidden cross-service imports"""
         results = validation_results["import_isolation"]
@@ -200,6 +202,7 @@ class TestMicroserviceIsolationValidation:
             violations = "\n".join([f"FAIL {v['service']}: {v['violation']} in {v['file']}" for v in results["violations"]])
             pytest.fail(f"\nIMPORT ISOLATION VIOLATIONS:\n{violations}\n\nCRITICAL: Services must be 100% import-isolated per SPEC/independent_services.xml")
     
+    @pytest.mark.e2e
     def test_service_independence_maintained(self, validation_results):
         """Test that services maintain structural independence"""
         results = validation_results["service_independence"]
@@ -207,6 +210,7 @@ class TestMicroserviceIsolationValidation:
             violations = "\n".join([f"  - {v}" for v in results["violations"]])
             pytest.fail(f"\nSERVICE INDEPENDENCE VIOLATIONS:\n{violations}\n\nServices must maintain independent directory structures.")
     
+    @pytest.mark.e2e
     def test_code_boundaries_clean(self, validation_results):
         """Test that code boundaries are properly enforced"""
         results = validation_results["code_boundaries"]
@@ -214,6 +218,7 @@ class TestMicroserviceIsolationValidation:
             violations = "\n".join([f"  - {v}" for v in results["violations"]])
             pytest.fail(f"\nCODE BOUNDARY VIOLATIONS:\n{violations}\n\nServices must not share module namespaces.")
     
+    @pytest.mark.e2e
     def test_configuration_isolation_complete(self, validation_results):
         """Test that each service has isolated configuration"""
         results = validation_results["configuration_isolation"]
@@ -221,6 +226,7 @@ class TestMicroserviceIsolationValidation:
             violations = "\n".join([f"  - {v}" for v in results["violations"]])
             pytest.fail(f"\nCONFIGURATION ISOLATION VIOLATIONS:\n{violations}\n\nEach service must have independent configuration files.")
     
+    @pytest.mark.e2e
     def test_api_only_communication(self, validation_results):
         """Test that inter-service communication uses only APIs"""
         results = validation_results["communication_protocols"]
@@ -228,12 +234,14 @@ class TestMicroserviceIsolationValidation:
             violations = "\n".join([f"FAIL {v['service']}: {v['violation']} in {v['file']}" for v in results["violations"]])
             pytest.fail(f"\nCOMMUNICATION PROTOCOL VIOLATIONS:\n{violations}\n\nServices must communicate only via APIs, not direct code calls.")
     
+    @pytest.mark.e2e
     def test_backend_services_only_scope(self, validator):
         """Test that validation correctly scopes to backend services only"""
         assert "frontend" not in validator.backend_services
         assert "frontend" in validator.excluded_services
         assert set(validator.backend_services.keys()) == {"main_backend", "auth_service"}
     
+    @pytest.mark.e2e
     def test_comprehensive_isolation_report(self, validation_results):
         """Generate comprehensive isolation validation report"""
         categories = [("Import Isolation", "import_isolation"), ("Service Independence", "service_independence"),

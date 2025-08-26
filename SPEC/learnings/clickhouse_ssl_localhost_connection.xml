@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>ClickHouse SSL Localhost Connection Fix</name>
+        <type>Learnings.DatabaseConnectivity</type>
+        <version>1.0</version>
+        <description>Documents the resolution of ClickHouse SSL errors when connecting to localhost</description>
+        <created>2025-08-26</created>
+    </metadata>
+
+    <problem>
+        <title>ClickHouse SSL Errors with Localhost Connections</title>
+        <description>
+            ClickHouse tests were failing with SSL errors when trying to connect to local development
+            ClickHouse instances running on HTTP (port 8123) instead of HTTPS (port 8443).
+            
+            Error: "SSLError(SSLError(1, '[SSL: WRONG_VERSION_NUMBER] wrong version number"
+            
+            This occurred because the connection logic was hardcoded to use `secure=True`,
+            attempting HTTPS connections to localhost ClickHouse servers running HTTP-only.
+        </description>
+        
+        <root_causes>
+            <cause>Hardcoded `secure=True` in test fixtures</cause>
+            <cause>Hardcoded `secure=True` in ClickHouse service class</cause>
+            <cause>Test fixtures always using `clickhouse_https` config instead of environment-appropriate config</cause>
+            <cause>No environment-aware SSL detection for localhost vs remote connections</cause>
+        </root_causes>
+    </problem>
+
+    <solution>
+        <title>Environment-Aware SSL Connection Logic</title>
+        <description>
+            Implemented intelligent SSL detection that distinguishes between localhost and remote
+            ClickHouse connections, using HTTP for localhost and HTTPS only for remote connections.
+        </description>
+        
+        <changes>
+            <change location="netra_backend/tests/clickhouse/test_clickhouse_permissions.py">
+                <description>Fixed test fixtures to use environment-appropriate configuration</description>
+                <before>
+                    <code>
+def _get_clickhouse_config():
+    """Get ClickHouse configuration based on environment"""
+    return get_config().clickhouse_https
+
+def _create_clickhouse_client(config):
+    """Create ClickHouse client with given configuration"""
+    return ClickHouseDatabase(
+        host=config.host, port=config.port, user=config.user,
+        password=config.password, database=config.database, secure=True
+    )
+                    </code>
+                </before>
+                <after>
+                    <code>
+def _get_clickhouse_config():
+    """Get ClickHouse configuration based on environment"""
+    config = get_config()
+    # Use HTTP config for local development, HTTPS for production/remote
+    if config.clickhouse_mode == "local" or config.environment == "development":
+        # Use HTTP port (8123) for local development
+        return config.clickhouse_http
+    else:
+        # Use HTTPS port (8443) for production/staging
+        return config.clickhouse_https
+
+def _create_clickhouse_client(config):
+    """Create ClickHouse client with given configuration"""
+    # Never use HTTPS for localhost connections to avoid SSL errors
+    is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]
+    # Use secure connection only for remote hosts on HTTPS port (8443)
+    use_secure = not is_localhost and config.port == 8443
+    return ClickHouseDatabase(
+        host=config.host, port=config.port, user=config.user,
+        password=config.password, database=config.database, secure=use_secure
+    )
+                    </code>
+                </after>
+            </change>
+            
+            <change location="netra_backend/app/db/clickhouse.py">
+                <description>Fixed ClickHouse service to use intelligent SSL detection</description>
+                <before>
+                    <code>
+    def _add_database_security_params(self, params: dict, config) -> dict:
+        """Add database and security parameters."""
+        params['database'] = config.database
+        params['secure'] = True
+        return params
+                    </code>
+                </before>
+                <after>
+                    <code>
+    def _add_database_security_params(self, params: dict, config) -> dict:
+        """Add database and security parameters."""
+        # Never use HTTPS for localhost connections to avoid SSL errors
+        is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]
+        use_secure = not is_localhost and config.port == 8443
+        params['database'] = config.database
+        params['secure'] = use_secure
+        return params
+                    </code>
+                </after>
+            </change>
+        </changes>
+    </solution>
+
+    <validation>
+        <test_results>
+            <result>ClickHouse connection test passes with HTTP connection to localhost:8123</result>
+            <result>Connection logs show "secure=False" for localhost connections</result>
+            <result>No SSL errors when connecting to local ClickHouse development instances</result>
+            <result>Maintains HTTPS support for remote/production ClickHouse connections</result>
+        </test_results>
+        
+        <connection_behavior>
+            <localhost_connection>
+                <host>localhost, 127.0.0.1, ::1</host>
+                <port>8123 (HTTP)</port>
+                <secure>false</secure>
+                <use_case>Local development and testing</use_case>
+            </localhost_connection>
+            
+            <remote_connection>
+                <host>Remote hosts (non-localhost)</host>
+                <port>8443 (HTTPS)</port>
+                <secure>true</secure>
+                <use_case>Production and staging environments</use_case>
+            </remote_connection>
+        </connection_behavior>
+    </validation>
+
+    <prevention>
+        <guidelines>
+            <guideline>NEVER hardcode `secure=True` for ClickHouse connections</guideline>
+            <guideline>Always use environment-aware SSL detection logic</guideline>
+            <guideline>Test fixtures should use the same connection logic as production code</guideline>
+            <guideline>Consider localhost vs remote host when determining SSL requirements</guideline>
+            <guideline>Use HTTP (port 8123) for localhost, HTTPS (port 8443) for remote connections</guideline>
+        </guidelines>
+        
+        <code_pattern>
+            <description>Standard SSL detection pattern for ClickHouse connections</description>
+            <code>
+# Standard pattern for ClickHouse SSL detection
+is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]
+use_secure = not is_localhost and config.port == 8443
+            </code>
+        </code_pattern>
+    </prevention>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>Development Velocity and Testing Reliability</business_goal>
+        <metrics>
+            <metric>100% ClickHouse test reliability for localhost connections</metric>
+            <metric>Zero SSL configuration errors in development</metric>
+            <metric>Maintained security for production connections</metric>
+            <metric>Reduced debugging time for connection issues</metric>
+        </metrics>
+    </business_value>
+</specification>

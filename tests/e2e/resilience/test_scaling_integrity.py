@@ -38,9 +38,11 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
     # return create_scaling_setup(agents, real_llm_manager, real_websocket_manager)
     return {"agents": agents, "llm_manager": real_llm_manager, "websocket_manager": real_websocket_manager}
 
+@pytest.mark.e2e
 class TestScalingWorkflowIntegrity:
     """Test integrity of complete scaling analysis workflows."""
     
+    @pytest.mark.e2e
     async def test_end_to_end_data_consistency(self, scaling_analysis_setup):
         """Test data consistency throughout scaling analysis workflow."""
         setup = scaling_analysis_setup
@@ -55,6 +57,7 @@ class TestScalingWorkflowIntegrity:
         assert "triage" in setup["agents"]
         assert "data" in setup["agents"]
     
+    @pytest.mark.e2e
     async def test_scaling_recommendations_coherence(self, scaling_analysis_setup):
         """Test coherence of scaling recommendations across agents."""
         setup = scaling_analysis_setup

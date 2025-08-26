@@ -12,6 +12,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
+import pytest
 import os
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
@@ -28,6 +29,7 @@ except ImportError:
     ServiceConfigHelper = None
 
 
+@pytest.mark.e2e
 class TestEnvironmentType(Enum):
     """Test environment types."""
     LOCAL = "local"
@@ -55,6 +57,7 @@ class DatabaseConfig:
 
 
 @dataclass
+@pytest.mark.e2e
 class TestEnvironmentConfig:
     """Configuration for test environments."""
     

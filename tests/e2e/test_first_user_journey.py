@@ -24,6 +24,7 @@ def create_test_token(user_id: str) -> str:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestFirstUserJourney:
     """Critical user journey tests protecting 100% of new revenue conversion"""
 
@@ -97,6 +98,7 @@ class TestFirstUserJourney:
         features = user_plan["features"]
         return features["max_threads"] == 5 and features["max_corpus_size"] == 1000
 
+    @pytest.mark.e2e
     async def test_signup_to_first_message(self, app, mock_agent_service):
         """Test complete onboarding: Signup→Verify→Login→Message. BVJ: 100% revenue protection"""
         user_data = self._create_test_user_data()
@@ -115,6 +117,7 @@ class TestFirstUserJourney:
             result = await mock_agent_service.handle_websocket_message(test_message)
             assert result["user_id"] == user_id
 
+    @pytest.mark.e2e
     async def test_email_verification_flow(self, app):
         """Test email confirmation flow. BVJ: Prevents 30% user drop-off"""
         user_data = self._create_test_user_data()
@@ -136,6 +139,7 @@ class TestFirstUserJourney:
             verified = await email_service.verify_token(verification_token)
             assert email_sent and verified
 
+    @pytest.mark.e2e
     async def test_profile_creation_sync(self, app):
         """Test profile sync across Auth/Backend DBs. BVJ: $2K/month support savings"""
         user_data = self._create_test_user_data()
@@ -153,6 +157,7 @@ class TestFirstUserJourney:
             backend_profile = mock_backend_repo.create(UserCreate(**user_data))
             assert auth_profile["id"] == backend_profile.id == user_id
 
+    @pytest.mark.e2e
     async def test_free_tier_limits(self, app):
         """Test free tier limits. BVJ: 25% free-to-paid conversion ($15K MRR)"""
         user_id = str(uuid.uuid4())
@@ -168,6 +173,7 @@ class TestFirstUserJourney:
             with pytest.raises(Exception):
                 raise Exception("Thread limit exceeded for free tier")
 
+    @pytest.mark.e2e
     async def test_conversion_dropoff_points(self, app):
         """Test critical conversion points. BVJ: 40% dropoff prevention ($20K MRR)"""
         user_data = self._create_test_user_data()
@@ -181,6 +187,7 @@ class TestFirstUserJourney:
         
         assert all([signup_completed, verification_valid, login_within_window, True])
 
+    @pytest.mark.e2e
     async def test_websocket_authentication_flow(self, app, mock_websocket_manager):
         """Test WebSocket auth. BVJ: Real-time features ($5K MRR value)"""
         user_id = str(uuid.uuid4())
@@ -190,14 +197,21 @@ class TestFirstUserJourney:
         mock_websocket.headers = {"authorization": f"Bearer {auth_token}"}
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.auth_dependencies.verify_token') as mock_verify:
-            mock_verify.return_value = {"user_id": user_id, "verified": True}
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token_jwt') as mock_validate:
+            # Mock auth client validation response matching the actual WebSocket auth flow
+            mock_validate.return_value = {
+                "valid": True,
+                "user_id": user_id,
+                "email": f"{user_id}@example.com"
+            }
             mock_websocket_manager.connect.return_value = True
             
-            auth_result = mock_verify(auth_token)
+            # Test the validation response structure matches WebSocket auth expectations
+            validation_result = await mock_validate(auth_token)
             connection_success = mock_websocket_manager.connect(mock_websocket, user_id)
-            assert auth_result["verified"] and connection_success
+            assert validation_result["valid"] and validation_result["user_id"] == user_id and connection_success
 
+    @pytest.mark.e2e
     async def test_first_ai_interaction_quality(self, app, mock_agent_service):
         """Test first AI interaction quality. BVJ: 60% retention ($30K MRR protection)"""
         user_id = str(uuid.uuid4())

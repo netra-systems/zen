@@ -4,6 +4,7 @@ Validates complete OAuth token flow across all services.
 """
 
 import asyncio
+import pytest
 import json
 import os
 import time
@@ -49,6 +50,7 @@ class OAuthFlowTester:
         self.jwt_token: Optional[str] = None
         self.user_id: Optional[str] = None
         
+    @pytest.mark.e2e
     async def test_oauth_configuration(self) -> Dict:
         """Test OAuth configuration endpoint"""
         async with httpx.AsyncClient() as client:
@@ -66,6 +68,7 @@ class OAuthFlowTester:
             
             return config
     
+    @pytest.mark.e2e
     async def test_oauth_initiation(self) -> str:
         """Test OAuth login initiation"""
         async with httpx.AsyncClient(follow_redirects=False) as client:
@@ -95,6 +98,7 @@ class OAuthFlowTester:
             
             return redirect_uri
     
+    @pytest.mark.e2e
     async def test_oauth_callback_simulation(self) -> Dict:
         """Simulate OAuth callback with mock token"""
         # Generate a mock OAuth code for testing
@@ -168,6 +172,7 @@ class OAuthFlowTester:
         
         return token
     
+    @pytest.mark.e2e
     async def test_token_validation(self) -> Dict:
         """Test token validation endpoint"""
         if not self.jwt_token:
@@ -198,6 +203,7 @@ class OAuthFlowTester:
                 print(f"[FAIL] Unexpected validation response: {response.status_code}")
                 return {"status": "error", "code": response.status_code}
     
+    @pytest.mark.e2e
     async def test_api_authentication(self) -> bool:
         """Test API authentication with OAuth token"""
         if not self.jwt_token:
@@ -231,6 +237,7 @@ class OAuthFlowTester:
                 print(f"  - With token: {with_auth_status}")
                 return False
     
+    @pytest.mark.e2e
     async def test_websocket_authentication(self) -> bool:
         """Test WebSocket authentication with OAuth token"""
         if not self.jwt_token:
@@ -278,6 +285,7 @@ class OAuthFlowTester:
             print(f"[WARN] WebSocket test error: {e}")
             return False
     
+    @pytest.mark.e2e
     async def test_service_integration(self) -> Dict:
         """Test integration between all services"""
         results = {

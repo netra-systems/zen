@@ -55,6 +55,7 @@ def mock_justified(reason: str):
     return decorator
 
 
+@pytest.mark.e2e
 class TestResponsePersistenceRecovery:
     """Integration test for response persistence and recovery mechanisms"""
 
@@ -84,6 +85,7 @@ class TestResponsePersistenceRecovery:
         return QualityGateService()
 
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_thread(self, postgres_session):
         """Create test thread for message persistence"""
         thread = Thread(
@@ -95,6 +97,7 @@ class TestResponsePersistenceRecovery:
         return thread
 
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_assistant(self, postgres_session):
         """Create test assistant for message persistence"""
         assistant = Assistant(
@@ -108,6 +111,7 @@ class TestResponsePersistenceRecovery:
         return assistant
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_persistence_transaction_integrity(self, postgres_session, test_thread, test_assistant):
         """Test message persistence maintains transaction integrity"""
         test_responses = [
@@ -164,6 +168,7 @@ class TestResponsePersistenceRecovery:
         logger.info(f"Transaction integrity validated for {len(persisted_messages)} messages")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_persistence_rollback_scenario(self, postgres_session, test_thread, test_assistant):
         """Test response persistence handles rollback scenarios correctly"""
         valid_response = {
@@ -233,6 +238,7 @@ class TestResponsePersistenceRecovery:
         logger.info("Rollback scenario and recovery validation completed")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_crash_recovery_and_data_consistency(self, postgres_session, test_thread, test_assistant):
         """Test crash recovery maintains data consistency"""
         # Simulate partial state before crash
@@ -300,6 +306,7 @@ class TestResponsePersistenceRecovery:
         logger.info("Crash recovery and data consistency validation completed")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_persistence_consistency(self, postgres_session, test_thread, test_assistant):
         """Test concurrent response persistence maintains consistency"""
         concurrent_responses = [
@@ -362,6 +369,7 @@ class TestResponsePersistenceRecovery:
         logger.info(f"Concurrent persistence: {len(persisted_ids)} messages in {total_time:.2f}s")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_quality_persistence_integration(self, postgres_session, test_thread, test_assistant, quality_service):
         """Test integration of response quality validation with persistence"""
         quality_test_responses = [
@@ -439,6 +447,7 @@ class TestResponsePersistenceRecovery:
         logger.info(f"Quality-persistence integration validated for {len(quality_test_responses)} responses")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_database_persistence_consistency(self, postgres_session, clickhouse_client):
         """Test consistency across PostgreSQL and ClickHouse persistence"""
         multi_db_test_data = {
@@ -502,6 +511,7 @@ class TestResponsePersistenceRecovery:
         logger.info("Multi-database persistence consistency validated")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_persistence_performance_under_load(self, postgres_session, test_thread, test_assistant):
         """Test persistence performance under high load conditions"""
         load_test_responses = [
@@ -563,6 +573,7 @@ class TestResponsePersistenceRecovery:
         logger.info(f"Load test: {total_persisted} responses in {total_time:.2f}s ({total_persisted/total_time:.1f} req/s)")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_data_recovery_after_partial_failure(self, postgres_session, test_thread, test_assistant):
         """Test data recovery mechanisms after partial system failures"""
         # Create baseline data

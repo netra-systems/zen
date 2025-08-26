@@ -29,6 +29,7 @@ from tests.e2e.free_tier_limit_tester import FreeTierLimitTester
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_free_tier_limit_enforcement_upgrade_flow():
     """
     CRITICAL E2E Test #7: Free Tier Limit Enforcement → Upgrade Prompt
@@ -97,6 +98,7 @@ async def test_free_tier_limit_enforcement_upgrade_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_limit_enforcement_different_usage_patterns():
     """Test limit enforcement with different usage patterns."""
     manager = AuthCompleteFlowManager()
@@ -125,6 +127,7 @@ async def test_limit_enforcement_different_usage_patterns():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_limit_enforcement_edge_cases():
     """Test limit enforcement edge cases and boundary conditions."""
     manager = AuthCompleteFlowManager()

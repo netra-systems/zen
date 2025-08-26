@@ -162,6 +162,7 @@ def create_test_user_data(index: int = 0) -> Dict:
     }
 
 
+@pytest.mark.e2e
 class TestDatabaseUserConsistency:
     """Test Suite 6: Database User Consistency Tests."""
     
@@ -171,6 +172,7 @@ class TestDatabaseUserConsistency:
         return DatabaseUserConsistencyValidator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_creation_sync(self, validator):
         """Test 1: User created in Auth appears in Backend DB."""
         user_data = create_test_user_data(1)
@@ -186,6 +188,7 @@ class TestDatabaseUserConsistency:
         assert backend_user['email'] == user_data['email'], "Email mismatch"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_profile_update_propagation(self, validator):
         """Test 2: Profile changes sync across databases."""
         user_data = create_test_user_data(2)
@@ -202,6 +205,7 @@ class TestDatabaseUserConsistency:
         assert backend_user['full_name'] == 'Updated User Name', "Update not propagated"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_deletion_cascade(self, validator):
         """Test 3: Deletion in Auth cascades to Backend."""
         user_data = create_test_user_data(3)
@@ -216,6 +220,7 @@ class TestDatabaseUserConsistency:
         assert is_deleted, "User deletion cascade failed"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_data_integrity_validation(self, validator):
         """Test 4: All user fields sync correctly."""
         user_data = create_test_user_data(4)
@@ -231,6 +236,7 @@ class TestDatabaseUserConsistency:
         assert 'synced_at' in backend_user, "Sync timestamp missing"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_sync_performance(self, validator):
         """Test 5: Database sync < 1 second."""
         user_data = create_test_user_data(5)
@@ -239,6 +245,7 @@ class TestDatabaseUserConsistency:
         assert sync_duration < 1.0, f"Sync took {sync_duration}s, expected <1s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_user_operations(self, validator):
         """Test 6: Multiple users don't interfere."""
         user_tasks = []
@@ -261,6 +268,7 @@ class TestDatabaseUserConsistency:
         return user_id
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_transaction_consistency(self, validator):
         """Test 7: Operations are atomic across DBs."""
         user_data = create_test_user_data(7)

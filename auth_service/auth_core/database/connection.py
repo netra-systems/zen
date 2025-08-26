@@ -37,28 +37,46 @@ class AuthDatabaseConnection:
         self.is_test_mode = env.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
         self.environment = env.get("ENVIRONMENT", "development").lower()
     
-    async def initialize(self):
-        """Initialize async database connection for all environments - idempotent operation"""
+    async def initialize(self, timeout: float = 30.0):
+        """Initialize async database connection for all environments - idempotent operation with timeout"""
         if self._initialized:
             logger.info("Database already initialized, skipping re-initialization")
             return
         
-        # Use AuthDatabaseManager as SSOT for engine creation
+        # Use AuthDatabaseManager as SSOT for engine creation with timeout handling
         try:
-            # Get database URL from config instead of relying on DATABASE_URL env var
+            # Get database URL from config with timeout
             from auth_service.auth_core.config import AuthConfig
-            database_url = AuthConfig.get_database_url()
-            self.engine = AuthDatabaseManager.create_async_engine(database_url=database_url)
+            import asyncio
             
-            # Test connection early to catch authentication issues
+            database_url = await asyncio.wait_for(
+                self._get_database_url_async(AuthConfig),
+                timeout=5.0
+            )
+            
+            # Create engine with timeout-optimized settings
+            self.engine = await asyncio.wait_for(
+                self._create_async_engine_with_timeout(database_url),
+                timeout=15.0
+            )
+            
+            # Test connection early to catch authentication issues with timeout
             try:
-                await self._validate_initial_connection()
+                await asyncio.wait_for(
+                    self._validate_initial_connection(),
+                    timeout=15.0
+                )
+            except asyncio.TimeoutError:
+                raise RuntimeError(
+                    f"Database connection validation timeout exceeded (15s). "
+                    f"This may indicate network connectivity issues or database overload."
+                )
             except Exception as e:
                 # Enhanced error message for authentication failures
                 error_msg = str(e).lower()
                 if "authentication" in error_msg or "password" in error_msg:
-                    database_url = get_env().get("DATABASE_URL", "")
-                    user_match = self._extract_user_from_url(database_url)
+                    database_url_for_error = get_env().get("DATABASE_URL", "")
+                    user_match = self._extract_user_from_url(database_url_for_error)
                     raise RuntimeError(
                         f"Database authentication failed for user '{user_match}'. "
                         f"Check POSTGRES_USER and POSTGRES_PASSWORD environment variables. "
@@ -86,7 +104,9 @@ class AuthDatabaseConnection:
                 # Check if this is a mock object by testing for specific mock attributes
                 from unittest.mock import MagicMock
                 if not isinstance(self.engine, MagicMock):
-                    await self.create_tables()
+                    await asyncio.wait_for(self.create_tables(), timeout=10.0)
+            except asyncio.TimeoutError:
+                logger.warning("Table creation timeout - skipping (may be in test environment)")
             except Exception as e:
                 # If create_tables fails in tests, it's likely due to mocking
                 logger.warning(f"Skipping table creation due to error (likely in test): {e}")
@@ -94,14 +114,13 @@ class AuthDatabaseConnection:
             self._initialized = True
             logger.info(f"Auth database initialized successfully for {self.environment}")
             
+        except asyncio.TimeoutError:
+            logger.error(f"Auth database initialization timeout exceeded ({timeout}s)")
+            await self._cleanup_partial_initialization()
+            raise RuntimeError(f"Auth database initialization timeout exceeded ({timeout}s)")
         except Exception as e:
             # Clean up partial initialization
-            if hasattr(self, 'engine') and self.engine:
-                try:
-                    await self.engine.dispose()
-                except Exception as cleanup_error:
-                    logger.warning(f"Failed to clean up engine during initialization error: {cleanup_error}")
-            
+            await self._cleanup_partial_initialization()
             logger.error(f"Failed to initialize auth database: {e}")
             raise RuntimeError(f"Auth database initialization failed: {e}") from e
     
@@ -134,6 +153,50 @@ class AuthDatabaseConnection:
             return parsed.username or "unknown"
         except Exception:
             return "unknown"
+    
+    async def _get_database_url_async(self, AuthConfig) -> str:
+        """Get database URL asynchronously."""
+        return AuthConfig.get_database_url()
+    
+    async def _create_async_engine_with_timeout(self, database_url: str):
+        """Create async engine with timeout-optimized settings."""
+        # Enhanced connection arguments with timeouts - conditional based on database type
+        connect_args = {}
+        
+        # Only add PostgreSQL-specific connection args for PostgreSQL databases
+        if not database_url.startswith('sqlite'):
+            connect_args = {
+                "command_timeout": 15,  # Command timeout for PostgreSQL/asyncpg
+                "server_settings": {
+                    "application_name": f"netra_auth_{self.environment}",
+                }
+            }
+        else:
+            # SQLite/aiosqlite specific connection args (if any needed in future)
+            connect_args = {}
+        
+        # Create engine with optimized timeout settings using AuthDatabaseManager
+        return AuthDatabaseManager.create_async_engine(
+            database_url=database_url,
+            connect_args=connect_args,
+            pool_size=5,
+            max_overflow=10, 
+            pool_timeout=30,  # Pool checkout timeout
+            pool_recycle=3600,  # Recycle connections after 1 hour
+            pool_pre_ping=True  # Test connections before use
+        )
+    
+    async def _cleanup_partial_initialization(self):
+        """Clean up partially initialized resources."""
+        import asyncio
+        if hasattr(self, 'engine') and self.engine:
+            try:
+                await asyncio.wait_for(self.engine.dispose(), timeout=5.0)
+            except Exception as cleanup_error:
+                logger.warning(f"Failed to clean up engine during initialization error: {cleanup_error}")
+        
+        self._initialized = False
+        self.engine = None
     
     async def _validate_database_url(self) -> bool:
         """Validate the current database URL configuration.
@@ -202,24 +265,41 @@ class AuthDatabaseConnection:
             finally:
                 await session.close()
     
-    async def test_connection(self) -> bool:
-        """Test database connectivity"""
+    async def test_connection(self, timeout: float = 10.0) -> bool:
+        """Test database connectivity with timeout handling"""
+        import asyncio
         try:
+            # Initialize if needed with timeout
             if not self._initialized:
-                await self.initialize()
+                await asyncio.wait_for(self.initialize(timeout=20.0), timeout=25.0)
             
+            # Test connection with timeout
             async with self.engine.begin() as conn:
-                result = await conn.execute(text("SELECT 1"))
+                result = await asyncio.wait_for(
+                    conn.execute(text("SELECT 1")),
+                    timeout=timeout
+                )
                 value = result.scalar_one()
                 logger.info(f"Auth database connection test successful: {value}")
                 return True
+        except asyncio.TimeoutError:
+            logger.warning(f"Auth database connection test timeout exceeded ({timeout}s)")
+            return False
         except Exception as e:
             logger.error(f"Auth database connection test failed: {e}")
             return False
     
-    async def is_ready(self) -> bool:
-        """Check if database is ready to accept connections"""
-        return await self.test_connection()
+    async def is_ready(self, timeout: float = 10.0) -> bool:
+        """Check if database is ready to accept connections with timeout handling"""
+        import asyncio
+        try:
+            return await asyncio.wait_for(self.test_connection(timeout=timeout), timeout=timeout + 5.0)
+        except asyncio.TimeoutError:
+            logger.warning(f"Database readiness check timeout exceeded ({timeout}s)")
+            return False
+        except Exception as e:
+            logger.error(f"Database readiness check failed: {e}")
+            return False
     
     async def close(self, timeout: float = 10.0):
         """Close all database connections with timeout handling.

@@ -34,6 +34,7 @@ from test_framework.auth_helpers import (
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketAuthConnection:
     """Critical WebSocket Authentication Connection Tests."""
     
@@ -47,6 +48,7 @@ class TestWebSocketAuthConnection:
         """Initialize token expiry tester."""
         return TokenExpiryTester(auth_tester)
     
+    @pytest.mark.e2e
     async def test_websocket_auth_integration(self, auth_tester):
         """
         BVJ: Segment: ALL | Goal: Core Chat | Impact: $300K MRR
@@ -94,6 +96,7 @@ class TestWebSocketAuthConnection:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_invalid_token_rejection(self, auth_tester, expiry_tester):
         """Test proper rejection of invalid tokens with performance requirements."""
         malformed_tokens = expiry_tester.create_malformed_tokens()
@@ -116,6 +119,7 @@ class TestWebSocketAuthConnection:
             except Exception as e:
                 skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_cross_service_token_consistency(self, auth_tester):
         """Test token validation consistency across Auth and Backend services."""
         try:
@@ -143,6 +147,7 @@ class TestWebSocketAuthConnection:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_websocket_connection_basic_messaging(self, auth_tester):
         """Test basic messaging functionality with authenticated WebSocket connection."""
         try:
@@ -182,6 +187,7 @@ class TestWebSocketAuthConnection:
         except Exception as e:
             skip_if_services_unavailable(str(e))
     
+    @pytest.mark.e2e
     async def test_websocket_connection_different_user_tiers(self, auth_tester):
         """Test WebSocket authentication with different user tier tokens."""
         try:

@@ -32,10 +32,24 @@ export function useAuth(): AuthContextType {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // Initialize token from localStorage immediately on mount
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [authConfig, setAuthConfig] = useState<AuthConfigResponse | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => {
+    // Check for token in localStorage during initial state creation
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('jwt_token');
+      if (storedToken) {
+        logger.debug('Found token in localStorage during AuthProvider initialization', {
+          component: 'AuthContext',
+          action: 'init_token_from_storage'
+        });
+        return storedToken;
+      }
+    }
+    return null;
+  });
   const authStore = useAuthStore();
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isRefreshingRef = useRef(false);
@@ -127,10 +141,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthConfig(data);
 
       // Check for existing token first (from OAuth callback or storage)
-      const storedToken = unifiedAuthService.getToken();
+      // But prefer the token already in state if it exists (from initialization)
+      const currentToken = token;
+      const storedToken = currentToken || unifiedAuthService.getToken();
       
-      if (storedToken) {
-        // Use existing token
+      if (storedToken && storedToken !== currentToken) {
+        // Update token if different from state
         setToken(storedToken);
         try {
           const decodedUser = jwtDecode(storedToken) as User;
@@ -234,18 +250,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [syncAuthStore, scheduleTokenRefreshCheck]);
+  }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh]);
+
+  const hasMountedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple initialization calls
+    if (hasMountedRef.current) {
+      return;
+    }
+    hasMountedRef.current = true;
+
+    // Only fetch auth config once on mount
     fetchAuthConfig();
     
-    // Cleanup timeout on unmount
+    // Listen for storage events to detect token changes from OAuth callback
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'jwt_token' && e.newValue) {
+        logger.info('Detected token change via storage event', {
+          component: 'AuthContext',
+          action: 'storage_token_detected'
+        });
+        
+        // Update token immediately when detected via storage event
+        setToken(e.newValue);
+        try {
+          const decodedUser = jwtDecode(e.newValue) as User;
+          setUser(decodedUser);
+          syncAuthStore(decodedUser, e.newValue);
+          scheduleTokenRefreshCheck(e.newValue);
+        } catch (error) {
+          logger.error('Failed to decode token from storage event', error as Error);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup on unmount
     return () => {
+      window.removeEventListener('storage', handleStorageChange);
       if (refreshTimeoutRef.current) {
         clearTimeout(refreshTimeoutRef.current);
       }
+      hasMountedRef.current = false;
     };
-  }, [fetchAuthConfig]);
+  }, []); // Remove dependencies to prevent re-runs
 
   const login = async () => {
     try {

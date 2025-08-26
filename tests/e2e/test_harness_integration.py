@@ -23,10 +23,12 @@ from tests.e2e.harness_complete import (
 )
 
 
+@pytest.mark.e2e
 class TestUnifiedHarness:
     """Test the unified test harness functionality."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_harness_service_startup_sequence(self):
         """Test complete service startup sequence."""
         # Setup test environment first
@@ -61,6 +63,7 @@ class TestUnifiedHarness:
             await harness.stop_all_services()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_harness_context_manager(self):
         """Test harness context manager functionality."""
         # Setup test environment
@@ -83,6 +86,7 @@ class TestUnifiedHarness:
         # Note: We can't easily test cleanup state without accessing internals
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_dependency_order(self):
         """Test that services start in correct dependency order."""
         setup_test_environment()
@@ -111,6 +115,7 @@ class TestUnifiedHarness:
             await harness.stop_all_services()
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_database_configuration(self):
         """Test that database configuration is correct for testing."""
         setup_test_environment()
@@ -137,10 +142,12 @@ class TestUnifiedHarness:
 
 
 @pytest.mark.real_e2e
+@pytest.mark.e2e
 class TestRealServiceIntegration:
     """Test with real service processes (marked for real_e2e tests)."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_real_service_health_checks(self):
         """Test health checks with real service processes."""
         setup_test_environment()

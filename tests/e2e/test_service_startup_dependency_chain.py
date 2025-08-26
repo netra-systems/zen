@@ -352,6 +352,7 @@ class ServiceStartupDependencyChainValidator:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestServiceStartupDependencyChain:
     """Comprehensive service startup dependency chain test suite."""
     
@@ -362,6 +363,7 @@ class TestServiceStartupDependencyChain:
         yield validator
         await validator.cleanup()
     
+    @pytest.mark.e2e
     async def test_dependency_startup_order(self, dependency_validator):
         """Test 1: Services start in correct dependency order."""
         result = await dependency_validator.validate_dependency_startup_order()
@@ -375,6 +377,7 @@ class TestServiceStartupDependencyChain:
             
         logger.info("✓ Dependency startup order validated")
     
+    @pytest.mark.e2e
     async def test_health_check_dependency_wait(self, dependency_validator):
         """Test 2: Health checks wait for dependencies before reporting ready."""
         result = await dependency_validator.validate_health_check_dependency_wait()
@@ -383,6 +386,7 @@ class TestServiceStartupDependencyChain:
         
         logger.info("✓ Health check dependency waiting validated")
     
+    @pytest.mark.e2e
     async def test_graceful_degradation(self, dependency_validator):
         """Test 3: Graceful degradation on partial service failures."""
         result = await dependency_validator.validate_graceful_degradation()
@@ -392,6 +396,7 @@ class TestServiceStartupDependencyChain:
         
         logger.info("✓ Graceful degradation validated")
     
+    @pytest.mark.e2e
     async def test_dependency_outage_recovery(self, dependency_validator):
         """Test 4: Recovery from dependency outages."""
         result = await dependency_validator.validate_dependency_outage_recovery()
@@ -401,6 +406,7 @@ class TestServiceStartupDependencyChain:
         
         logger.info(f"✓ Dependency outage recovery validated (avg: {result['average_recovery_time']:.0f}ms)")
     
+    @pytest.mark.e2e
     async def test_startup_performance(self, dependency_validator):
         """Test 5: Full startup performance <30s."""
         result = await dependency_validator.validate_startup_performance()
@@ -409,6 +415,7 @@ class TestServiceStartupDependencyChain:
         
         logger.info(f"✓ Startup performance validated: {result['total_startup_time_ms']:.0f}ms ({result['performance_rating']})")
     
+    @pytest.mark.e2e
     async def test_concurrent_startup_safety(self, dependency_validator):
         """Test 6: Concurrent startup scenarios prevent race conditions."""
         result = await dependency_validator.validate_concurrent_startup_safety()

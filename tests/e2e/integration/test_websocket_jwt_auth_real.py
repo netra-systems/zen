@@ -211,6 +211,7 @@ class TokenSecurityTester:
         parts = valid_token.split('.')
         return f"{parts[0]}.{parts[1]}.tampered_signature_test"
     
+    @pytest.mark.e2e
     async def test_invalid_token_rejection(self, invalid_token: str, token_type: str) -> Dict[str, Any]:
         """Test that invalid tokens are properly rejected."""
         start_time = time.time()
@@ -247,6 +248,7 @@ class TokenSecurityTester:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_jwt_auth_flow(real_services):
     """
     BVJ: Segment: ALL | Goal: Core Chat Security | Impact: $80K+ MRR
@@ -305,6 +307,7 @@ async def test_complete_jwt_auth_flow(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_invalid_token_rejection(real_services):
     """Test that various invalid tokens are properly rejected."""
     auth_tester = WebSocketJWTAuthTester(real_services)
@@ -325,6 +328,7 @@ async def test_invalid_token_rejection(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_expiry_and_reconnection(real_services):
     """Test token expiry handling and reconnection with fresh token."""
     auth_tester = WebSocketJWTAuthTester(real_services)
@@ -392,6 +396,7 @@ async def test_token_expiry_and_reconnection(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_authenticated_connections(real_services):
     """Test multiple concurrent WebSocket connections with different valid tokens."""
     auth_tester = WebSocketJWTAuthTester(real_services)
@@ -451,6 +456,7 @@ async def test_concurrent_authenticated_connections(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cross_service_token_consistency(real_services):
     """Test that tokens are consistently validated across Auth, Backend, and WebSocket services."""
     auth_tester = WebSocketJWTAuthTester(real_services)

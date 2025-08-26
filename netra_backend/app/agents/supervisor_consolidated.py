@@ -128,7 +128,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.reliability_manager = SupervisorInitializationHelpers.create_reliability_manager()
         # BaseExecutionEngine: Core reliability and monitoring infrastructure
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
-        self.error_handler = ExecutionErrorHandler
+        self.error_handler = ExecutionErrorHandler()
     
     def _init_supervisor_state(self) -> None:
         """Initialize supervisor state and hooks."""
@@ -280,7 +280,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     async def _handle_execution_exception(self, exception: Exception, context: ExecutionContext,
                                         state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Handle execution exception with fallback."""
-        await self.error_handler.handle_execution_error(str(exception), context)
+        await self.error_handler.handle_execution_error(exception, context)
         logger.error(f"Modern execution failed, falling back to legacy: {exception}")
         await self._execute_legacy_workflow(state, run_id, stream_updates)
     

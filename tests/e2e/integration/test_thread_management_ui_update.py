@@ -451,6 +451,7 @@ class ConcurrentThreadManager:
             return {"operation_successful": False, "error": str(e)}
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestThreadManagementUIUpdate:
     """Thread Management UI Update Integration Test Suite."""
     

@@ -33,6 +33,7 @@ from tests.e2e.harness_complete import TestHarnessContext
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.real_services
+@pytest.mark.e2e
 async def test_agent_context_loading_from_user_history():
 
     """
@@ -58,6 +59,7 @@ async def test_agent_context_loading_from_user_history():
 @pytest.mark.integration
 
 @pytest.mark.real_services
+@pytest.mark.e2e
 async def test_multi_agent_orchestration_initialization():
 
     """
@@ -208,6 +210,7 @@ async def _cleanup_multi_agent_test(manager: MultiAgentTestManager) -> None:
 @pytest.mark.asyncio
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_context_loading_with_empty_history():
 
     """
@@ -286,6 +289,7 @@ async def _validate_empty_context_response(response: Dict[str, Any]) -> None:
 @pytest.mark.asyncio
 
 @pytest.mark.stress
+@pytest.mark.e2e
 async def test_concurrent_multi_agent_initialization():
 
     """

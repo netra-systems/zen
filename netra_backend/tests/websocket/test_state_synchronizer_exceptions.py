@@ -113,17 +113,15 @@ class TestStateSynchronizerExceptionHandling:
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
-        handler = synchronizer._callback_handler
-        
         # Test critical exceptions
-        assert handler._is_critical_failure(ConnectionError("test"))
-        assert handler._is_critical_failure(TimeoutError("test"))
-        assert handler._is_critical_failure(CriticalCallbackFailure("test"))
+        assert synchronizer._is_critical_failure(ConnectionError("test"))
+        assert synchronizer._is_critical_failure(TimeoutError("test"))
+        assert synchronizer._is_critical_failure(CriticalCallbackFailure("test"))
         
         # Test non-critical exceptions
-        assert not handler._is_critical_failure(ValueError("test"))
-        assert not handler._is_critical_failure(RuntimeError("test"))
-        assert not handler._is_critical_failure(KeyError("test"))
+        assert not synchronizer._is_critical_failure(ValueError("test"))
+        assert not synchronizer._is_critical_failure(RuntimeError("test"))
+        assert not synchronizer._is_critical_failure(KeyError("test"))
     
     @pytest.mark.asyncio
     async def test_successful_callback_execution(self):
@@ -164,62 +162,101 @@ class TestStateSynchronizerExceptionHandling:
         # Create a callback that's neither async nor sync callable
         invalid_callback = "not_a_function"
         
-        handler = synchronizer._callback_handler
+        # Register the invalid callback
+        synchronizer.register_sync_callback("test_conn", invalid_callback)
         
-        # Should handle task creation error gracefully
-        result = await handler._process_single_callback(
-            invalid_callback, "test_conn", "state_desync"
-        )
-        assert result is None  # Failed task creation returns None
+        # Should handle invalid callback gracefully (logs warning, doesn't raise)
+        try:
+            await synchronizer._notify_sync_callbacks("test_conn", "state_desync")
+        except Exception as e:
+            pytest.fail(f"Invalid callback should be handled gracefully, but raised: {e}")
 
-class TestCallbackHandlerDirectly:
-    """Test callback handler functionality directly."""
+class TestStateSynchronizerExceptionClassification:
+    """Test exception classification functionality directly."""
     
     @pytest.mark.asyncio
-    async def test_explicit_exception_inspection(self):
-        """Test explicit exception inspection per specification."""
-        from netra_backend.app.websocket_core.callback_handler import CallbackHandler
+    async def test_explicit_exception_classification(self):
+        """Test explicit exception classification per specification."""
+        # Mock: Generic component isolation for controlled unit testing
+        connection_manager = MagicMock()
+        synchronizer = ConnectionStateSynchronizer(connection_manager)
         
-        handler = CallbackHandler()
+        # Create callbacks that raise different types of exceptions
+        async def critical_callback_1(conn_id, event_type):
+            raise ConnectionError("critical_error")
         
-        # Simulate gather results with mixed success/failure
-        results = [
-            "success_result_1",
-            ConnectionError("critical_error"),
-            "success_result_2",
-            ValueError("non_critical_error"),
-            TimeoutError("another_critical_error")
-        ]
+        async def critical_callback_2(conn_id, event_type):
+            raise TimeoutError("another_critical_error")
+        
+        async def non_critical_callback(conn_id, event_type):
+            raise ValueError("non_critical_error")
+        
+        async def successful_callback(conn_id, event_type):
+            return "success_result"
+        
+        # Register all callbacks
+        synchronizer.register_sync_callback("test_conn", critical_callback_1)
+        synchronizer.register_sync_callback("test_conn", critical_callback_2)
+        synchronizer.register_sync_callback("test_conn", non_critical_callback)
+        synchronizer.register_sync_callback("test_conn", successful_callback)
         
         # Should raise CriticalCallbackFailure due to critical exceptions
         with pytest.raises(CriticalCallbackFailure) as exc_info:
-            await handler._inspect_callback_results(results, "test_conn")
+            await synchronizer._notify_sync_callbacks("test_conn", "state_desync")
         
-        assert "2 failures" in str(exc_info.value)  # Two critical failures
+        # Should contain information about critical failures
+        assert "Critical callback failures" in str(exc_info.value)
+        assert "test_conn" in str(exc_info.value)
     
     @pytest.mark.asyncio
-    async def test_no_exceptions_in_results(self):
-        """Test behavior when no exceptions are in results."""
-        from netra_backend.app.websocket_core.callback_handler import CallbackHandler
+    async def test_no_exceptions_in_callbacks(self):
+        """Test behavior when no exceptions occur in callbacks."""
+        # Mock: Generic component isolation for controlled unit testing
+        connection_manager = MagicMock()
+        synchronizer = ConnectionStateSynchronizer(connection_manager)
         
-        handler = CallbackHandler()
+        results = []
         
-        results = ["success_1", "success_2", "success_3"]
+        async def successful_callback_1(conn_id, event_type):
+            results.append("success_1")
+            return "success_1"
+            
+        async def successful_callback_2(conn_id, event_type):
+            results.append("success_2")
+            return "success_2"
+            
+        async def successful_callback_3(conn_id, event_type):
+            results.append("success_3")
+            return "success_3"
+        
+        # Register successful callbacks
+        synchronizer.register_sync_callback("test_conn", successful_callback_1)
+        synchronizer.register_sync_callback("test_conn", successful_callback_2)
+        synchronizer.register_sync_callback("test_conn", successful_callback_3)
         
         # Should complete without raising
-        await handler._inspect_callback_results(results, "test_conn")
+        await synchronizer._notify_sync_callbacks("test_conn", "state_desync")
+        assert results == ["success_1", "success_2", "success_3"]
     
     @pytest.mark.asyncio
     async def test_only_non_critical_exceptions(self):
         """Test behavior with only non-critical exceptions."""
-        from netra_backend.app.websocket_core.callback_handler import CallbackHandler
+        # Mock: Generic component isolation for controlled unit testing
+        connection_manager = MagicMock()
+        synchronizer = ConnectionStateSynchronizer(connection_manager)
         
-        handler = CallbackHandler()
+        async def non_critical_callback_1(conn_id, event_type):
+            raise ValueError("error_1")
+            
+        async def non_critical_callback_2(conn_id, event_type):
+            raise RuntimeError("error_2")
         
-        results = [ValueError("error_1"), RuntimeError("error_2")]
+        # Register non-critical callbacks
+        synchronizer.register_sync_callback("test_conn", non_critical_callback_1)
+        synchronizer.register_sync_callback("test_conn", non_critical_callback_2)
         
         # Should NOT raise CriticalCallbackFailure
         try:
-            await handler._inspect_callback_results(results, "test_conn")
+            await synchronizer._notify_sync_callbacks("test_conn", "state_desync")
         except CriticalCallbackFailure:
             pytest.fail("Non-critical exceptions should not raise CriticalCallbackFailure")

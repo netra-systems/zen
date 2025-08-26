@@ -190,6 +190,7 @@ class NetworkSwitchingTestClient:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_basic_network_interface_switching():
     """
     Test basic network interface switching functionality.
@@ -259,6 +260,7 @@ async def test_basic_network_interface_switching():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_network_transitions():
     """
     Test multiple network interface transitions.
@@ -329,6 +331,7 @@ async def test_multiple_network_transitions():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_rapid_network_switching():
     """
     Test rapid network switching scenarios.

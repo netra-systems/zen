@@ -109,11 +109,11 @@ class TestGCPMonitoringRoutes:
     async def test_get_gcp_errors_authenticated_success(self, test_client, mock_authenticated_user, sample_error_response):
         """Test successful GCP errors retrieval with authentication."""
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 mock_gcp_service = self._setup_mock_gcp_service(sample_error_response)
                 mock_service.return_value = mock_gcp_service
                 
@@ -133,11 +133,11 @@ class TestGCPMonitoringRoutes:
         }
         
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 mock_gcp_service = self._setup_mock_gcp_service(sample_error_response)
                 mock_service.return_value = mock_gcp_service
                 
@@ -149,7 +149,7 @@ class TestGCPMonitoringRoutes:
     async def test_get_gcp_errors_unauthenticated_returns_401(self, test_client):
         """Test GCP errors endpoint without authentication."""
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.side_effect = HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired token"
@@ -163,11 +163,11 @@ class TestGCPMonitoringRoutes:
     async def test_get_gcp_errors_service_failure_returns_500(self, test_client, mock_authenticated_user):
         """Test GCP errors endpoint with service failure."""
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 mock_service.side_effect = NetraException(
                     "GCP service unavailable",
                     ErrorCode.EXTERNAL_SERVICE_ERROR
@@ -184,11 +184,11 @@ class TestGCPMonitoringRoutes:
         error_id = "error-detail-123"
         
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_gcp_service = AsyncMock()
                 mock_gcp_service.get_error_details.return_value = sample_error_detail
@@ -204,11 +204,11 @@ class TestGCPMonitoringRoutes:
         error_id = "non-existent-error"
         
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_gcp_service = AsyncMock()
                 mock_gcp_service.get_error_details.side_effect = NetraException(
@@ -228,11 +228,11 @@ class TestGCPMonitoringRoutes:
         resolution_data = {"resolution_note": "Fixed the bug in authentication service"}
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.gcp_monitoring.require_permission') as mock_perm:
+        with patch('netra_backend.app.routes.gcp_monitoring.require_permission') as mock_perm:
             mock_perm.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_gcp_service = AsyncMock()
                 mock_gcp_service.update_error_status.return_value = True
@@ -252,7 +252,7 @@ class TestGCPMonitoringRoutes:
         resolution_data = {"resolution_note": "Test resolution"}
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.gcp_monitoring.require_permission') as mock_perm:
+        with patch('netra_backend.app.routes.gcp_monitoring.require_permission') as mock_perm:
             mock_perm.side_effect = HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Permission 'error_resolution' required"
@@ -272,11 +272,11 @@ class TestGCPMonitoringRoutes:
         resolution_data = {"resolution_note": "Test resolution"}
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.gcp_monitoring.require_permission') as mock_perm:
+        with patch('netra_backend.app.routes.gcp_monitoring.require_permission') as mock_perm:
             mock_perm.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_gcp_service = AsyncMock()
                 mock_gcp_service.update_error_status.side_effect = NetraException(
@@ -296,13 +296,13 @@ class TestGCPMonitoringRoutes:
     async def test_gcp_service_configuration_loading(self, test_client, mock_authenticated_user):
         """Test GCP service configuration and dependency injection."""
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.return_value = mock_authenticated_user
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
+            with patch('netra_backend.app.routes.gcp_monitoring._get_gcp_error_service') as mock_service:
                 # Mock: Component isolation for testing without external dependencies
-                with patch('app.config.settings') as mock_settings:
+                with patch('netra_backend.app.config.settings') as mock_settings:
                     mock_settings.google_cloud.project_id = "test-project-456"
                     
                     # Mock: Generic component isolation for controlled unit testing
@@ -327,7 +327,7 @@ class TestGCPMonitoringRoutes:
         }
         
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.routes.gcp_monitoring.get_current_user') as mock_auth:
+        with patch('netra_backend.app.routes.gcp_monitoring.get_current_user') as mock_auth:
             mock_auth.return_value = mock_authenticated_user
             
             # FastAPI should handle validation before reaching the endpoint

@@ -112,6 +112,7 @@ class DatabaseConnectionTester:
         self.connection_times: List[float] = []
         self.pool_stats: Dict[str, Any] = {}
     
+    @pytest.mark.e2e
     async def test_connection_acquisition_speed(self) -> Tuple[float, bool]:
         """Test connection acquisition speed"""
         start_time = time.perf_counter()
@@ -180,6 +181,7 @@ class StorageMonitor:
         return growth_bytes / 1024 / 1024  # Return MB growth
 
 
+@pytest.mark.e2e
 class TestResourceUsage:
     """Resource usage efficiency tests"""
     
@@ -200,6 +202,7 @@ class TestResourceUsage:
         return StorageMonitor()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_memory_usage_limits(self, resource_monitor: ResourceMonitor):
         """Test memory usage stays within limits during operation"""
         try:
@@ -217,6 +220,7 @@ class TestResourceUsage:
             await resource_monitor.stop_monitoring()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cpu_usage_efficiency(self, resource_monitor: ResourceMonitor):
         """Test CPU usage remains under 70% during normal load"""
         await resource_monitor.start_monitoring()
@@ -231,6 +235,7 @@ class TestResourceUsage:
         assert len(resource_monitor.metrics) >= 2
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_connection_pooling(self, db_tester: DatabaseConnectionTester):
         """Test database connection pool efficiency"""
         # Test multiple connection acquisition cycles
@@ -246,6 +251,7 @@ class TestResourceUsage:
         assert avg_time < 0.5, f"Average connection time too slow: {avg_time}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_storage_growth_rate(self, storage_monitor: StorageMonitor):
         """Test storage growth remains predictable"""
         storage_monitor.start_monitoring()
@@ -262,6 +268,7 @@ class TestResourceUsage:
         assert growth_mb >= 0.0, "Storage growth should not be negative"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_memory_leak_detection(self, resource_monitor: ResourceMonitor):
         """Test for memory leaks during repeated operations"""
         await resource_monitor.start_monitoring()
@@ -285,6 +292,7 @@ class TestResourceUsage:
         assert growth_rate < 0.2, f"Memory growth rate too high: {growth_rate*100}%"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_resource_cleanup_efficiency(self, resource_monitor: ResourceMonitor):
         """Test resource cleanup after operations"""
         initial_metrics = resource_monitor._collect_current_metrics()

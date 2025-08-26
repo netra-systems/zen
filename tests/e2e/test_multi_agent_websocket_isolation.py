@@ -253,9 +253,11 @@ class MultiAgentWebSocketIsolationManager:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestMultiAgentWebSocketIsolation:
     """Test 5: Multi-Agent WebSocket Isolation - Critical P1 HIGH priority."""
     
+    @pytest.mark.e2e
     async def test_two_users_concurrent_agents_complete_isolation(self):
         """Scenario 1: Two users execute agents simultaneously → each receives only their events."""
         manager = MultiAgentWebSocketIsolationManager()
@@ -273,6 +275,7 @@ class TestMultiAgentWebSocketIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_single_user_three_concurrent_agents_proper_tagging(self):
         """Scenario 2: Single user runs 3 agents concurrently → all events properly tagged."""
         manager = MultiAgentWebSocketIsolationManager()
@@ -295,6 +298,7 @@ class TestMultiAgentWebSocketIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_user_thread_switching_context_maintained(self):
         """Scenario 3: User switches threads during agent execution → context maintained."""
         manager = MultiAgentWebSocketIsolationManager()
@@ -318,6 +322,7 @@ class TestMultiAgentWebSocketIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_ten_concurrent_users_complete_isolation(self):
         """Scenario 4: 10 concurrent users with agents → complete isolation."""
         manager = MultiAgentWebSocketIsolationManager()
@@ -336,6 +341,7 @@ class TestMultiAgentWebSocketIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_agent_failure_isolation_no_impact(self):
         """Scenario 5: Agent failure in User A doesn't affect User B's agents."""
         manager = MultiAgentWebSocketIsolationManager()

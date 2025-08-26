@@ -151,9 +151,11 @@ async def websocket_auth_tester():
     await asyncio.gather(*cleanup_tasks, return_exceptions=True)
 
 
+@pytest.mark.e2e
 class TestWebSocketAuthHandshake:
     """Test JWT validation during WebSocket connection handshake."""
     
+    @pytest.mark.e2e
     async def test_websocket_auth_handshake(self, websocket_auth_tester):
         """Test JWT validation in WebSocket connection."""
         user_id = "test_user_handshake"
@@ -178,6 +180,7 @@ class TestWebSocketAuthHandshake:
             
         return {"authenticated": True, "user_id": user_id}
     
+    @pytest.mark.e2e
     async def test_invalid_token_handshake_rejection(self, websocket_auth_tester):
         """Test handshake rejection with invalid token."""
         user_id = "test_invalid_token"
@@ -205,9 +208,11 @@ class TestWebSocketAuthHandshake:
                 return {"authenticated": False, "error": str(e)}
 
 
+@pytest.mark.e2e
 class TestReconnectionWithAuth:
     """Test disconnect → reconnect → resume with auth state."""
     
+    @pytest.mark.e2e
     async def test_reconnection_with_auth(self, websocket_auth_tester):
         """Test disconnect → reconnect → resume with auth."""
         user_id = "test_reconnection_user"
@@ -247,6 +252,7 @@ class TestReconnectionWithAuth:
             
         return new_websocket
     
+    @pytest.mark.e2e
     async def test_token_refresh_with_active_websocket(self, websocket_auth_tester):
         """Test token refresh works with active WebSocket."""
         user_id = "test_token_refresh"
@@ -283,9 +289,11 @@ class TestReconnectionWithAuth:
         }
 
 
+@pytest.mark.e2e
 class TestMultiClientBroadcast:
     """Test message broadcast to multiple authenticated clients."""
     
+    @pytest.mark.e2e
     async def test_multi_client_broadcast(self, websocket_auth_tester):
         """Test message broadcast to multiple authenticated clients."""
         clients = await self._create_authenticated_clients(websocket_auth_tester, 5)
@@ -321,9 +329,11 @@ class TestMultiClientBroadcast:
         return result
 
 
+@pytest.mark.e2e
 class TestWebSocketRateLimiting:
     """Test rate limit enforcement on WebSocket connections."""
     
+    @pytest.mark.e2e
     async def test_websocket_rate_limiting(self, websocket_auth_tester):
         """Test rate limit enforcement on WebSocket."""
         user_id = "test_rate_limit"

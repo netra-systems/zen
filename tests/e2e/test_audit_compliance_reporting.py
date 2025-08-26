@@ -22,6 +22,7 @@ from netra_backend.app.security.audit_compliance import (
 )
 
 
+@pytest.mark.e2e
 class TestComplianceReporting:
     """Test GDPR/SOC2 compliance report generation capabilities.
     
@@ -30,6 +31,7 @@ class TestComplianceReporting:
     """
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_gdpr_compliance_report_generation(self):
         """Test generation of GDPR compliance reports."""
         report = await self._generate_gdpr_compliance_report()
@@ -74,6 +76,7 @@ class TestComplianceReporting:
         return {"compliant": True, "retention_period_days": 365, "auto_deletion": True}
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_soc2_compliance_report_generation(self):
         """Test generation of SOC2 compliance reports."""
         auditors = self._create_security_auditors()

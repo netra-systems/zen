@@ -62,6 +62,7 @@ class MockFailingService:
         return {"service": self.service_name, "status": "success"}
 
 
+@pytest.mark.e2e
 class TestServiceFailureCascade:
     """Test cascade failure prevention - BVJ: Protect system revenue"""
     
@@ -75,6 +76,7 @@ class TestServiceFailureCascade:
         }
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_failure_cascade(self, mock_services):
         """Test system prevents cascading failures across services"""
         results = await self._test_cascade_prevention(mock_services)
@@ -111,10 +113,12 @@ class TestServiceFailureCascade:
             assert not result.user_impact, "User impact should be minimized"
 
 
+@pytest.mark.e2e
 class TestCircuitBreakerActivation:
     """Test circuit breaker activation - BVJ: Automated protection"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_circuit_breaker_activation(self):
         """Test circuit breaker configuration and failure tracking"""
         config = EnterpriseCircuitConfig(
@@ -140,10 +144,12 @@ class TestCircuitBreakerActivation:
         }
 
 
+@pytest.mark.e2e
 class TestRetryWithBackoff:
     """Test retry with exponential backoff - BVJ: Smart recovery"""
     
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_retry_with_backoff(self):
         """Test retry logic with exponential backoff"""
         result = await self._test_backoff_strategy()
@@ -174,6 +180,7 @@ class TestRetryWithBackoff:
         return {"succeeds_eventually": False, "uses_backoff": True, "delays": delays}
 
 
+@pytest.mark.e2e
 class TestFallbackUIActivation:
     """Test UI fallback activation - BVJ: User experience continuity"""
     
@@ -187,6 +194,7 @@ class TestFallbackUIActivation:
         }
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_fallback_ui_activation(self, ui_components):
         """Test fallback UI activates during service failures"""
         failures = ["data_service", "websocket_service"]
@@ -225,10 +233,12 @@ class TestFallbackUIActivation:
             assert result["user_experience_preserved"], f"UX not preserved for {result['service']}"
 
 
+@pytest.mark.e2e
 class TestComprehensiveFailureRecovery:
     """Test integrated failure recovery - BVJ: Complete system resilience"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_integrated_failure_recovery(self):
         """Test complete failure recovery across all systems"""
         scenario = self._create_failure_scenario()

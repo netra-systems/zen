@@ -26,6 +26,7 @@ from tests.e2e.token_lifecycle_helpers import (
     TokenValidationHelper, PerformanceBenchmark
 )
 
+@pytest.mark.e2e
 class TestTokenLifecycleE2E:
     """E2E test for JWT token refresh during active sessions."""
     
@@ -40,17 +41,20 @@ class TestTokenLifecycleE2E:
         return WebSocketSessionManager("ws://localhost:8000")
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_user_id(self):
         """Provide test user ID."""
         import uuid
         return f"test-user-{uuid.uuid4().hex[:8]}"
     
     @pytest.fixture
+    @pytest.mark.e2e
     def test_thread_id(self):
         """Provide test thread ID."""
         return f"thread-{uuid.uuid4().hex[:8]}"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_refresh_during_active_session(self, token_manager, websocket_manager, test_user_id, test_thread_id):
         """
         Test #5: Token Refresh During Active Session
@@ -133,6 +137,7 @@ class TestTokenLifecycleE2E:
         assert propagation_success, "Token propagation across services failed"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_refresh_with_invalid_refresh_token(self, token_manager, test_user_id):
         """Test token refresh fails gracefully with invalid refresh token."""
         expired_refresh_token = await self._create_expired_refresh_token(
@@ -153,6 +158,7 @@ class TestTokenLifecycleE2E:
         return await token_manager.jwt_helper.create_jwt_token(expired_payload)
 
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_websocket_handles_token_expiration_gracefully(self, token_manager, websocket_manager, test_user_id, test_thread_id):
         """Test WebSocket handles token expiration gracefully."""
         short_token = await token_manager.create_short_ttl_token(test_user_id, ttl_seconds=3)
@@ -181,6 +187,7 @@ class TestTokenLifecycleE2E:
         assert not expired_message_sent or not connection_alive, "WebSocket should handle expired tokens gracefully"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_token_refresh_race_conditions(self, token_manager, test_user_id):
         """Test concurrent token refresh requests don't cause race conditions."""
         refresh_token = await token_manager.create_valid_refresh_token(test_user_id)
@@ -191,6 +198,7 @@ class TestTokenLifecycleE2E:
         assert len(successful_refreshes) >= 1, "At least one concurrent refresh should succeed"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_refresh_performance_benchmark(self, token_manager, test_user_id):
         """Benchmark token refresh performance."""
         refresh_token = await token_manager.create_valid_refresh_token(test_user_id)

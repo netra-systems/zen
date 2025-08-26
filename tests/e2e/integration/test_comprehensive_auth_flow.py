@@ -54,6 +54,7 @@ class ComprehensiveAuthFlowTester:
         """Cleanup test environment"""
         pass
     
+    @pytest.mark.e2e
     async def test_user_registration(self) -> Dict[str, Any]:
         """Test user registration with validation"""
         print(f"[TEST] Starting user registration for {self.test_user_email}")
@@ -80,6 +81,7 @@ class ComprehensiveAuthFlowTester:
             print(f"[SUCCESS] User registered: {self.test_user_email}")
             return result
     
+    @pytest.mark.e2e
     async def test_user_login(self) -> Dict[str, Any]:
         """Test user login and token generation"""
         print(f"[TEST] Starting user login for {self.test_user_email}")
@@ -126,6 +128,7 @@ class ComprehensiveAuthFlowTester:
             print(f"[SUCCESS] User logged in: {user_data['id']}")
             return result
     
+    @pytest.mark.e2e
     async def test_token_validation(self) -> Dict[str, Any]:
         """Test access token validation"""
         print("[TEST] Starting token validation")
@@ -153,6 +156,7 @@ class ComprehensiveAuthFlowTester:
             print(f"[SUCCESS] Token validated for user: {result['user_id']}")
             return result
     
+    @pytest.mark.e2e
     async def test_user_info_retrieval(self) -> Dict[str, Any]:
         """Test current user information retrieval"""
         print("[TEST] Starting user info retrieval")
@@ -179,6 +183,7 @@ class ComprehensiveAuthFlowTester:
             print(f"[SUCCESS] User info retrieved: {result['id']}")
             return result
     
+    @pytest.mark.e2e
     async def test_token_refresh(self) -> Dict[str, Any]:
         """Test token refresh functionality"""
         print("[TEST] Starting token refresh")
@@ -213,6 +218,7 @@ class ComprehensiveAuthFlowTester:
             print("[SUCCESS] Tokens refreshed successfully")
             return result
     
+    @pytest.mark.e2e
     async def test_session_info(self) -> Dict[str, Any]:
         """Test session information retrieval"""
         print("[TEST] Starting session info retrieval")
@@ -242,6 +248,7 @@ class ComprehensiveAuthFlowTester:
             print(f"[SUCCESS] Session info retrieved - active: {result['active']}")
             return result
     
+    @pytest.mark.e2e
     async def test_websocket_auth_handshake(self) -> Dict[str, Any]:
         """Test WebSocket authentication handshake"""
         print("[TEST] Starting WebSocket auth handshake")
@@ -270,6 +277,7 @@ class ComprehensiveAuthFlowTester:
             print(f"[SUCCESS] WebSocket auth handshake completed for: {result['user']['id']}")
             return result
     
+    @pytest.mark.e2e
     async def test_user_logout(self) -> Dict[str, Any]:
         """Test user logout and token invalidation"""
         print("[TEST] Starting user logout")
@@ -294,6 +302,7 @@ class ComprehensiveAuthFlowTester:
             print("[SUCCESS] User logged out successfully")
             return result
     
+    @pytest.mark.e2e
     async def test_token_invalidation_after_logout(self) -> Dict[str, Any]:
         """Test that tokens are invalidated after logout"""
         print("[TEST] Starting token invalidation verification")
@@ -328,6 +337,7 @@ class ComprehensiveAuthFlowTester:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_comprehensive_auth_flow():
     """
     Comprehensive auth flow integration test.
@@ -405,6 +415,7 @@ async def test_comprehensive_auth_flow():
 
 @pytest.mark.asyncio
 @pytest.mark.integration  
+@pytest.mark.e2e
 async def test_auth_service_health_check():
     """Test auth service health check endpoint"""
     config = get_config()
@@ -424,6 +435,7 @@ async def test_auth_service_health_check():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_auth_config_endpoint():
     """Test auth service configuration endpoint"""
     config = get_config()

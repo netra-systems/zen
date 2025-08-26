@@ -39,9 +39,11 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketMessageStructure:
     """Test #9: WebSocket Message Structure Consistency - P1 CRITICAL"""
     
+    @pytest.mark.e2e
     async def test_all_messages_use_type_payload_structure(self):
         """Test that ALL WebSocket messages use {type, payload} structure."""
         user_id = TEST_USERS["enterprise"].id
@@ -89,6 +91,7 @@ class TestWebSocketMessageStructure:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_no_event_data_structure_used(self):
         """Test that NO messages use deprecated {event, data} structure."""
         user_id = TEST_USERS["early"].id
@@ -131,6 +134,7 @@ class TestWebSocketMessageStructure:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_message_parsing_never_fails(self):
         """Test that message parsing doesn't fail on any message type."""
         user_id = TEST_USERS["mid"].id
@@ -196,6 +200,7 @@ class TestWebSocketMessageStructure:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_frontend_can_parse_all_message_types(self):
         """Test that frontend can parse all message types without errors."""
         user_id = TEST_USERS["enterprise"].id
@@ -256,6 +261,7 @@ class TestWebSocketMessageStructure:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_all_server_messages_follow_standard(self):
         """Test that all server-to-client messages follow {type, payload} standard."""
         user_id = TEST_USERS["free"].id
@@ -310,6 +316,7 @@ class TestWebSocketMessageStructure:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
 
+    @pytest.mark.e2e
     async def test_client_server_message_structure_compatibility(self):
         """Test full client-server message structure compatibility."""
         user_id = TEST_USERS["mid"].id

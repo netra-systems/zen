@@ -27,15 +27,18 @@ from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
+@pytest.mark.e2e
 class TestRealClientFactory:
     """Test suite for RealClientFactory"""
     
+    @pytest.mark.e2e
     def test_factory_initialization(self):
         """Test factory initializes with default config"""
         factory = create_real_client_factory()
         assert isinstance(factory, RealClientFactory)
         assert isinstance(factory.config, ClientConfig)
     
+    @pytest.mark.e2e
     def test_factory_with_custom_config(self):
         """Test factory initializes with custom config"""
         config = create_test_config(timeout=10.0, max_retries=5)
@@ -43,6 +46,7 @@ class TestRealClientFactory:
         assert factory.config.timeout == 10.0
         assert factory.config.max_retries == 5
     
+    @pytest.mark.e2e
     def test_http_client_creation(self):
         """Test HTTP client creation"""
         factory = create_real_client_factory()
@@ -50,6 +54,7 @@ class TestRealClientFactory:
         assert isinstance(client, RealHTTPClient)
         assert client.base_url == "http://localhost:8000"
     
+    @pytest.mark.e2e
     def test_websocket_client_creation(self):
         """Test WebSocket client creation"""
         factory = create_real_client_factory()
@@ -57,6 +62,7 @@ class TestRealClientFactory:
         assert isinstance(client, RealWebSocketClient)
         assert client.ws_url == "ws://localhost:8000/ws"
     
+    @pytest.mark.e2e
     def test_client_reuse(self):
         """Test client reuse for same URLs"""
         factory = create_real_client_factory()
@@ -64,6 +70,7 @@ class TestRealClientFactory:
         client2 = factory.create_http_client("http://localhost:8000")
         assert client1 is client2
     
+    @pytest.mark.e2e
     def test_auth_client_creation(self):
         """Test auth HTTP client with specific config"""
         factory = create_real_client_factory()
@@ -72,6 +79,7 @@ class TestRealClientFactory:
         assert client.config.timeout == 15.0
         assert client.config.max_retries == 2
     
+    @pytest.mark.e2e
     def test_backend_client_creation(self):
         """Test backend HTTP client with specific config"""
         factory = create_real_client_factory()
@@ -80,6 +88,7 @@ class TestRealClientFactory:
         assert client.config.timeout == 60.0
         assert client.config.pool_size == 20
     
+    @pytest.mark.e2e
     def test_initial_metrics(self):
         """Test initial connection metrics"""
         factory = create_real_client_factory()
@@ -89,9 +98,11 @@ class TestRealClientFactory:
         assert metrics == expected
 
 
+@pytest.mark.e2e
 class TestRealHTTPClient:
     """Test suite for RealHTTPClient"""
     
+    @pytest.mark.e2e
     def test_client_initialization(self):
         """Test HTTP client initialization"""
         config = create_test_config()
@@ -99,6 +110,7 @@ class TestRealHTTPClient:
         assert client.base_url == "http://localhost:8000"
         assert client.config is config
     
+    @pytest.mark.e2e
     def test_auth_headers_without_token(self):
         """Test auth headers without token"""
         client = RealHTTPClient("http://localhost:8000")
@@ -106,6 +118,7 @@ class TestRealHTTPClient:
         expected = {"Content-Type": "application/json"}
         assert headers == expected
     
+    @pytest.mark.e2e
     def test_auth_headers_with_token(self):
         """Test auth headers with token"""
         client = RealHTTPClient("http://localhost:8000")
@@ -116,15 +129,18 @@ class TestRealHTTPClient:
         }
         assert headers == expected
     
+    @pytest.mark.e2e
     def test_base_url_normalization(self):
         """Test base URL trailing slash removal"""
         client = RealHTTPClient("http://localhost:8000/")
         assert client.base_url == "http://localhost:8000"
 
 
+@pytest.mark.e2e
 class TestRealWebSocketClient:
     """Test suite for RealWebSocketClient"""
     
+    @pytest.mark.e2e
     def test_client_initialization(self):
         """Test WebSocket client initialization"""
         config = create_test_config()
@@ -132,6 +148,7 @@ class TestRealWebSocketClient:
         assert client.ws_url == "ws://localhost:8000/ws"
         assert client.config is config
     
+    @pytest.mark.e2e
     def test_message_preparation(self):
         """Test message preparation for sending"""
         client = RealWebSocketClient("ws://localhost:8000/ws")
@@ -147,9 +164,11 @@ class TestRealWebSocketClient:
         assert prepared == "test message"
 
 
+@pytest.mark.e2e
 class TestClientConfig:
     """Test suite for ClientConfig"""
     
+    @pytest.mark.e2e
     def test_default_config(self):
         """Test default configuration values"""
         config = ClientConfig()
@@ -159,6 +178,7 @@ class TestClientConfig:
         assert config.pool_size == 10
         assert config.verify_ssl is False
     
+    @pytest.mark.e2e
     def test_retry_delay_calculation(self):
         """Test retry delay with backoff"""
         config = ClientConfig(retry_delay=1.0)
@@ -166,6 +186,7 @@ class TestClientConfig:
         assert config.get_retry_delay(1) == 2.0
         assert config.get_retry_delay(2) == 3.0
     
+    @pytest.mark.e2e
     def test_ssl_context_creation(self):
         """Test SSL context creation"""
         config = ClientConfig(verify_ssl=False)
@@ -178,9 +199,11 @@ class TestClientConfig:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAsyncOperations:
     """Test suite for async operations"""
     
+    @pytest.mark.e2e
     async def test_factory_cleanup(self):
         """Test factory cleanup operations"""
         factory = create_real_client_factory()

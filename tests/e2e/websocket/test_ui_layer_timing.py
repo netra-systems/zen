@@ -211,10 +211,12 @@ async def timing_validator():
     await validator.cleanup_clients()
 
 
+@pytest.mark.e2e
 class TestFastLayerTiming:
     """Test fast layer timing requirements (<100ms)"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_started_fast_response(self, timing_validator):
         """Test agent_started event arrives within 100ms (fast layer)"""
         client = timing_validator.create_authenticated_client("fast_agent_started")
@@ -244,6 +246,7 @@ class TestFastLayerTiming:
         assert validation["layer"] == "fast_layer"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_tool_executing_fast_response(self, timing_validator):
         """Test tool_executing event arrives within 100ms (fast layer)"""
         client = timing_validator.create_authenticated_client("fast_tool_executing")
@@ -290,6 +293,7 @@ class TestFastLayerTiming:
                     f"tool_executing took {validation['latency_ms']:.1f}ms, should be <100ms"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_fast_layer_event_ordering(self, timing_validator):
         """Test fast layer events arrive in correct order"""
         client = timing_validator.create_authenticated_client("fast_ordering")
@@ -319,10 +323,12 @@ class TestFastLayerTiming:
             timing_validator.record_timing_measurement(validation)
 
 
+@pytest.mark.e2e
 class TestMediumLayerTiming:
     """Test medium layer timing requirements (<1s)"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_thinking_medium_response(self, timing_validator):
         """Test agent_thinking event arrives within 1s (medium layer)"""
         client = timing_validator.create_authenticated_client("medium_thinking")
@@ -362,6 +368,7 @@ class TestMediumLayerTiming:
             print("MISSING: agent_thinking events not implemented (medium layer)")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_partial_result_medium_response(self, timing_validator):
         """Test partial_result event arrives within 1s (medium layer)"""
         client = timing_validator.create_authenticated_client("medium_partial")
@@ -390,6 +397,7 @@ class TestMediumLayerTiming:
             print("MISSING: partial_result events not implemented (medium layer)")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_medium_layer_progressive_updates(self, timing_validator):
         """Test medium layer provides progressive updates"""
         client = timing_validator.create_authenticated_client("medium_progressive")
@@ -420,10 +428,12 @@ class TestMediumLayerTiming:
             timing_validator.record_timing_measurement(validation)
 
 
+@pytest.mark.e2e
 class TestSlowLayerTiming:
     """Test slow layer timing requirements (>1s for final results)"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_completed_slow_layer(self, timing_validator):
         """Test agent_completed event arrives after appropriate delay (slow layer)"""
         client = timing_validator.create_authenticated_client("slow_completed")
@@ -452,6 +462,7 @@ class TestSlowLayerTiming:
             print("INFO: agent_completed not received in test timeframe")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_final_report_slow_layer(self, timing_validator):
         """Test final_report event arrives after appropriate delay (slow layer)"""
         client = timing_validator.create_authenticated_client("slow_final_report")
@@ -480,10 +491,12 @@ class TestSlowLayerTiming:
             print("MISSING: final_report events not implemented (slow layer)")
 
 
+@pytest.mark.e2e
 class TestEventAccumulationAndOrdering:
     """Test event accumulation and ordering across layers"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_layer_event_accumulation_sequence(self, timing_validator):
         """Test events accumulate correctly across fast->medium->slow layers"""
         client = timing_validator.create_authenticated_client("accumulation_test")
@@ -523,6 +536,7 @@ class TestEventAccumulationAndOrdering:
                 "Fast layer events should arrive before slow layer events"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_ui_layer_performance_analysis(self, timing_validator):
         """Test comprehensive UI layer performance analysis"""
         client = timing_validator.create_authenticated_client("performance_analysis")

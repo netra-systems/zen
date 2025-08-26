@@ -60,7 +60,20 @@ export default function AuthCallbackClient() {
         }
         
         logger.info('OAuth authentication successful, redirecting to chat');
-        router.push('/chat');
+        
+        // Dispatch a storage event to notify other components immediately
+        // This helps AuthContext detect the token faster
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'jwt_token',
+          newValue: token,
+          url: window.location.href,
+          storageArea: localStorage
+        }));
+        
+        // Small delay to ensure storage event is processed
+        setTimeout(() => {
+          router.push('/chat');
+        }, 50);
       } else {
         logger.error('No token received in OAuth callback');
         setCriticalError('Authentication Failed - No authentication token received. This may indicate an OAuth configuration problem.');

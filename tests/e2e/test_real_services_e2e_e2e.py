@@ -93,6 +93,7 @@ class RealServiceE2ETestSuite:
         
         logger.info("E2E test environment setup complete")
     
+    @pytest.mark.e2e
     async def test_teardown_test_environment(self):
         """Cleanup test environment and close connections."""
         logger.info("Tearing down E2E test environment")
@@ -152,6 +153,7 @@ class RealServiceE2ETestSuite:
             )
 
     # Test 1: Complete Cold Start (Zero State to Response)
+    @pytest.mark.e2e
     async def test_complete_cold_start_flow(self) -> E2ETestMetrics:
         """
         CRITICAL Test: Complete cold start from zero state to AI response.
@@ -212,6 +214,7 @@ class RealServiceE2ETestSuite:
         return metrics
 
     # Test 2: Cross-Service Profile Synchronization
+    @pytest.mark.e2e
     async def test_cross_service_profile_synchronization(self) -> E2ETestMetrics:
         """
         Test: Verify user data consistency across Auth Service, Backend, and PostgreSQL.
@@ -273,6 +276,7 @@ class RealServiceE2ETestSuite:
         return metrics
 
     # Test 3: Real LLM API Integration
+    @pytest.mark.e2e
     async def test_real_llm_api_integration(self) -> E2ETestMetrics:
         """
         Test: Validate real-world LLM interactions including errors and edge cases.
@@ -344,6 +348,7 @@ class RealServiceE2ETestSuite:
         return metrics
 
     # Test 4: Redis Cache Population and Invalidation  
+    @pytest.mark.e2e
     async def test_redis_cache_validation(self) -> E2ETestMetrics:
         """
         Test: Ensure cache coherency in production environment.
@@ -424,6 +429,7 @@ class RealServiceE2ETestSuite:
         return metrics
 
     # Test 5: Database Consistency (Postgres to ClickHouse)
+    @pytest.mark.e2e
     async def test_database_consistency_validation(self) -> E2ETestMetrics:
         """
         Test: Validate analytics data pipeline from PostgreSQL to ClickHouse.
@@ -869,9 +875,11 @@ class RealServiceE2ETestSuite:
         
         return report
 
+@pytest.mark.e2e
 class TestRealServicesE2E:
     """Pytest integration for real services E2E testing."""
     
+    @pytest.mark.e2e
     async def test_complete_cold_start_flow(self):
         """Test complete cold start flow with performance validation."""
         suite = RealServiceE2ETestSuite()
@@ -891,6 +899,7 @@ class TestRealServicesE2E:
         finally:
             await suite.teardown_test_environment()
 
+    @pytest.mark.e2e
     async def test_cross_service_synchronization(self):
         """Test cross-service profile synchronization."""
         suite = RealServiceE2ETestSuite()
@@ -907,6 +916,7 @@ class TestRealServicesE2E:
         finally:
             await suite.teardown_test_environment()
 
+    @pytest.mark.e2e
     async def test_real_llm_integration(self):
         """Test real LLM API integration."""
         suite = RealServiceE2ETestSuite()
@@ -923,6 +933,7 @@ class TestRealServicesE2E:
         finally:
             await suite.teardown_test_environment()
 
+    @pytest.mark.e2e
     async def test_redis_cache_validation(self):
         """Test Redis cache operations."""
         suite = RealServiceE2ETestSuite()
@@ -939,6 +950,7 @@ class TestRealServicesE2E:
         finally:
             await suite.teardown_test_environment()
 
+    @pytest.mark.e2e
     async def test_database_consistency(self):
         """Test database consistency between PostgreSQL and ClickHouse."""
         suite = RealServiceE2ETestSuite()

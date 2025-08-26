@@ -59,7 +59,7 @@ class TestAuthSessionIntegration:
     async def _test_token_refresh_cycle(self, tokens, user):
         """Test automatic token refresh before expiration"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.clients.auth_client.refresh_token') as mock_refresh:
+        with patch('netra_backend.app.clients.auth_client.refresh_token') as mock_refresh:
             mock_refresh.return_value = {"access_token": f"new_{tokens['access']}"}
             expired_token = tokens.copy()
             expired_token['expires'] = datetime.utcnow() - timedelta(minutes=5)

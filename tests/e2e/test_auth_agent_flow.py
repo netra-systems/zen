@@ -57,6 +57,7 @@ class AuthAgentFlowHarness:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAuthAgentFlow:
     """Test suite for auth-agent flow validation"""
     
@@ -64,6 +65,7 @@ class TestAuthAgentFlow:
         """Setup test harness for each test."""
         self.harness = AuthAgentFlowHarness()
     
+    @pytest.mark.e2e
     async def test_auth_to_agent_token_flow(self):
         """
         BVJ: $50K MRR protection - Complete auth-to-agent flow validation
@@ -184,6 +186,7 @@ class TestAuthAgentFlow:
         assert self.harness.test_user["email"] in response.get("message", "")
         assert response.get("user_specific_data", {}).get("user_id") is not None
     
+    @pytest.mark.e2e
     async def test_invalid_token_rejection(self):
         """BVJ: $30K MRR protection - Invalid tokens must be rejected"""
         invalid_token = "invalid.jwt.token"
@@ -204,6 +207,7 @@ class TestAuthAgentFlow:
         """Attempt to setup agent with invalid context - should fail."""
         raise Exception("Invalid token - no user context available")
     
+    @pytest.mark.e2e
     async def test_token_expiration_handling(self):
         """
         BVJ: $25K MRR protection - Expired tokens handled gracefully
@@ -224,6 +228,7 @@ class TestAuthAgentFlow:
             "expired": True
         }
     
+    @pytest.mark.e2e
     async def test_role_based_agent_context(self):
         """
         BVJ: $40K MRR protection - Role-based access controls work
@@ -256,6 +261,7 @@ class TestAuthAgentFlow:
             "role_based": True
         }
     
+    @pytest.mark.e2e
     async def test_concurrent_user_sessions(self):
         """
         BVJ: $35K MRR protection - Multiple user sessions work correctly
@@ -273,6 +279,7 @@ class TestAuthAgentFlow:
         assert "user1@test.com" in user1_response["message"]
         assert "user2@test.com" in user2_response["message"]
     
+    @pytest.mark.e2e
     async def test_auth_service_unavailable_fallback(self):
         """
         BVJ: $20K MRR protection - Graceful handling when auth service unavailable

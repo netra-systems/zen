@@ -154,6 +154,7 @@ class DevHealthTestFixture:
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_health_test_fixture():
     """Fixture providing health test environment."""
     fixture = DevHealthTestFixture()
@@ -162,6 +163,7 @@ async def test_health_test_fixture():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_all_services_have_health_endpoints(test_health_test_fixture):
     """Test all services expose working health endpoints."""
     success = await test_health_test_fixture.start_dev_environment()
@@ -177,6 +179,7 @@ async def test_all_services_have_health_endpoints(test_health_test_fixture):
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_health_checks_during_startup(test_health_test_fixture):
     """Test health endpoints become available during startup sequence."""
     # Start launcher but monitor health during startup
@@ -194,6 +197,7 @@ async def test_health_checks_during_startup(test_health_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_health_check_response_times(test_health_test_fixture):
     """Test health endpoints respond within acceptable time limits."""
     success = await test_health_test_fixture.start_dev_environment()
@@ -208,6 +212,7 @@ async def test_health_check_response_times(test_health_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_health_check_content_validation(test_health_test_fixture):
     """Test health endpoint responses contain expected data."""
     success = await test_health_test_fixture.start_dev_environment()
@@ -222,6 +227,7 @@ async def test_health_check_content_validation(test_health_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_health_monitoring_reliability(test_health_test_fixture):
     """Test health checks remain reliable over time."""
     success = await test_health_test_fixture.start_dev_environment()

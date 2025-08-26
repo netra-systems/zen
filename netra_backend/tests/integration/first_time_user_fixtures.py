@@ -485,9 +485,12 @@ class FirstTimeUserFixtures:
     @staticmethod
     async def create_comprehensive_test_env():
         """Create comprehensive test environment for first-time user tests."""
-        from netra_backend.app.db.database_manager import get_session_for_testing
+        from netra_backend.app.db.database_manager import DatabaseManager
         
-        session = await get_session_for_testing()
+        # Get the session factory for tests - we'll use a direct approach
+        session_factory = DatabaseManager.get_application_session()
+        session = session_factory()
+        
         redis_mock = MagicMock()
         
         return {

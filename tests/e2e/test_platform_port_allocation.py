@@ -17,11 +17,13 @@ from dev_launcher.service_coordination import (
 )
 
 
+@pytest.mark.e2e
 class TestWindowsPlatformPortAllocation:
     """Test Windows-specific port allocation behavior."""
     
     @pytest.mark.skipif(platform.system() != "Windows", reason="Windows-specific test")
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_windows_dynamic_port_range(self):
         """Test Windows uses correct dynamic port range."""
         allocator = PlatformAwarePortAllocator()
@@ -38,6 +40,7 @@ class TestWindowsPlatformPortAllocation:
         assert 49152 <= port <= 65535
     
     @pytest.mark.skipif(platform.system() != "Windows", reason="Windows-specific test")
+    @pytest.mark.e2e
     def test_windows_socket_options(self):
         """Test Windows-specific socket options."""
         allocator = PlatformAwarePortAllocator()
@@ -60,11 +63,13 @@ class TestWindowsPlatformPortAllocation:
             )
 
 
+@pytest.mark.e2e
 class TestLinuxPlatformPortAllocation:
     """Test Linux-specific port allocation behavior."""
     
     @pytest.mark.skipif(platform.system() != "Linux", reason="Linux-specific test")
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_linux_ephemeral_port_range(self):
         """Test Linux uses correct ephemeral port range."""
         allocator = PlatformAwarePortAllocator()
@@ -81,6 +86,7 @@ class TestLinuxPlatformPortAllocation:
         assert port > 1024  # At minimum, above privileged ports
     
     @pytest.mark.skipif(platform.system() != "Linux", reason="Linux-specific test")
+    @pytest.mark.e2e
     def test_linux_socket_options(self):
         """Test Linux-specific socket options."""
         allocator = PlatformAwarePortAllocator()
@@ -103,11 +109,13 @@ class TestLinuxPlatformPortAllocation:
             )
 
 
+@pytest.mark.e2e
 class TestMacOSPlatformPortAllocation:
     """Test macOS-specific port allocation behavior."""
     
     @pytest.mark.skipif(platform.system() != "Darwin", reason="macOS-specific test")
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_macos_dynamic_port_range(self):
         """Test macOS uses correct dynamic port range."""
         allocator = PlatformAwarePortAllocator()
@@ -124,6 +132,7 @@ class TestMacOSPlatformPortAllocation:
         assert 49152 <= port <= 65535
     
     @pytest.mark.skipif(platform.system() != "Darwin", reason="macOS-specific test")
+    @pytest.mark.e2e
     def test_macos_socket_options(self):
         """Test macOS-specific socket options."""
         allocator = PlatformAwarePortAllocator()
@@ -146,6 +155,7 @@ class TestMacOSPlatformPortAllocation:
             )
 
 
+@pytest.mark.e2e
 class TestCrossPlatformPortAllocation:
     """Test cross-platform port allocation compatibility."""
     
@@ -155,6 +165,7 @@ class TestCrossPlatformPortAllocation:
         return PlatformAwarePortAllocator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_specific_ports_cross_platform(self, allocator):
         """Test service-specific ports work across platforms."""
         # These should work on any platform
@@ -168,6 +179,7 @@ class TestCrossPlatformPortAllocation:
             allocated_ports.add(port)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_fallback_to_ephemeral(self, allocator):
         """Test fallback to ephemeral ports when dynamic allocation fails."""
         # Mock to always fail dynamic allocation
@@ -186,6 +198,7 @@ class TestCrossPlatformPortAllocation:
         assert "fallback_service" in allocator.service_port_map
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_allocation_cross_platform(self, allocator):
         """Test concurrent allocation works on all platforms."""
         num_services = 20
@@ -208,6 +221,7 @@ class TestCrossPlatformPortAllocation:
         for port in ports:
             assert 1024 < port <= 65535
     
+    @pytest.mark.e2e
     def test_platform_detection(self, allocator):
         """Test correct platform detection."""
         current_platform = platform.system()
@@ -216,6 +230,7 @@ class TestCrossPlatformPortAllocation:
                allocator.platform_name is not None
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_port_exhaustion_handling(self, allocator):
         """Test handling when no ports are available."""
         # Mock to simulate all ports being unavailable
@@ -241,6 +256,7 @@ class TestCrossPlatformPortAllocation:
         assert port > 1024  # Should still get a valid port
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_static_strategy_failure(self, allocator):
         """Test static strategy fails when port unavailable."""
         # Allocate a port
@@ -256,6 +272,7 @@ class TestCrossPlatformPortAllocation:
             )
 
 
+@pytest.mark.e2e
 class TestPortAllocationEdgeCases:
     """Test edge cases in port allocation."""
     
@@ -265,6 +282,7 @@ class TestPortAllocationEdgeCases:
         return PlatformAwarePortAllocator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_allocate_same_service_twice(self, allocator):
         """Test allocating port for same service returns same port."""
         port1 = await allocator.allocate_port("duplicate_service", preferred_port=7654)
@@ -274,12 +292,14 @@ class TestPortAllocationEdgeCases:
         assert port1 == 7654  # Should be the first allocated port
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_release_nonexistent_service(self, allocator):
         """Test releasing port for non-existent service."""
         # Should not raise error
         await allocator.release_port("nonexistent_service")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_allocate_privileged_port(self, allocator):
         """Test allocation of privileged ports (< 1024)."""
         # Should not be able to bind to privileged ports without root
@@ -290,6 +310,7 @@ class TestPortAllocationEdgeCases:
         # But service should be in map
         assert "privileged_service" in allocator.service_port_map
     
+    @pytest.mark.e2e
     def test_allocation_summary_empty(self, allocator):
         """Test allocation summary when no ports allocated."""
         summary = allocator.get_allocation_summary()
@@ -299,6 +320,7 @@ class TestPortAllocationEdgeCases:
         assert summary["platform"] == platform.system()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_allocation_summary_with_ports(self, allocator):
         """Test allocation summary with allocated ports."""
         await allocator.allocate_port("service1", preferred_port=5000)
@@ -314,10 +336,12 @@ class TestPortAllocationEdgeCases:
         assert "service3" in summary["service_ports"]
 
 
+@pytest.mark.e2e
 class TestPortAllocationIntegration:
     """Integration tests for port allocation with real sockets."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_real_port_binding(self):
         """Test actual port binding and release."""
         allocator = PlatformAwarePortAllocator()
@@ -346,6 +370,7 @@ class TestPortAllocationIntegration:
             pytest.fail(f"Could not bind to allocated port {port}: {e}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_detect_occupied_port(self):
         """Test detection of occupied ports."""
         allocator = PlatformAwarePortAllocator()
@@ -371,6 +396,7 @@ class TestPortAllocationIntegration:
             sock.close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rapid_allocation_deallocation(self):
         """Test rapid allocation and deallocation cycles."""
         allocator = PlatformAwarePortAllocator()

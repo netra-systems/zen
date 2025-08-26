@@ -86,6 +86,7 @@ async def dev_launcher_fixture():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_dev_launcher_starts_successfully(dev_launcher_fixture):
     """Test dev launcher starts all services without errors."""
     success = await dev_launcher_fixture.start_launcher()
@@ -99,6 +100,7 @@ async def test_dev_launcher_starts_successfully(dev_launcher_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_port_allocation_works(dev_launcher_fixture):
     """Test dynamic port allocation prevents conflicts."""
     # Start first launcher
@@ -117,6 +119,7 @@ async def test_port_allocation_works(dev_launcher_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_configuration_loading(dev_launcher_fixture):
     """Test .env files and configuration are loaded correctly."""
     success = await dev_launcher_fixture.start_launcher()
@@ -129,6 +132,7 @@ async def test_configuration_loading(dev_launcher_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_startup_sequence_ordering(dev_launcher_fixture):
     """Test services start in correct order with dependencies."""
     logs = []
@@ -147,6 +151,7 @@ async def test_startup_sequence_ordering(dev_launcher_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_graceful_shutdown(dev_launcher_fixture):
     """Test graceful shutdown stops all services cleanly."""
     success = await dev_launcher_fixture.start_launcher()
@@ -166,6 +171,7 @@ async def test_graceful_shutdown(dev_launcher_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_error_recovery(dev_launcher_fixture):
     """Test launcher recovers from service failures."""
     # Simulate service failure during startup
@@ -238,6 +244,7 @@ def _verify_partial_startup(launcher: DevLauncher) -> bool:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_env_file_validation(dev_launcher_fixture):
     """Test .env file loading and validation."""
     # Create test .env content
@@ -264,6 +271,7 @@ def _verify_env_loaded(launcher: DevLauncher, expected: Dict[str, str]) -> bool:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_process_cleanup_on_failure(dev_launcher_fixture):
     """Test processes are cleaned up if startup fails."""
     # Force startup failure

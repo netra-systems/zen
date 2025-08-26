@@ -27,6 +27,7 @@ from tests.e2e.permission_enforcement_helpers import PermissionEnforcementTester
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_enforcement_complete_flow():
     """
     Test #7: Permission Enforcement Across Services
@@ -90,6 +91,7 @@ async def test_permission_enforcement_complete_flow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cross_service_permission_boundaries():
     """
     Cross-Service Permission Boundary Validation
@@ -128,6 +130,7 @@ async def test_cross_service_permission_boundaries():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_violation_audit_trail():
     """
     Permission Violation Audit Trail Validation
@@ -177,6 +180,7 @@ async def test_permission_violation_audit_trail():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_enforcement_performance():
     """
     Performance validation for permission enforcement operations.
@@ -214,6 +218,7 @@ async def test_permission_enforcement_performance():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_escalation_prevention():
     """
     Permission escalation prevention validation.

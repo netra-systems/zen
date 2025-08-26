@@ -35,11 +35,13 @@ from tests.e2e.websocket_guarantees_helpers import (
     data=["enterprise_test_users", "message_sequences"]
 )
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestMessageOrderingPreservation:
     @pytest.fixture
     def ordering_core(self):
         return MessageOrderingCore()
     
+    @pytest.mark.e2e
     async def test_sequential_message_ordering_preserved(self, ordering_core):
         user_id = TEST_USERS["enterprise"].id
         message_count = 50
@@ -63,6 +65,7 @@ class TestMessageOrderingPreservation:
                 pytest.skip("WebSocket server not available for ordering test")
             raise
 
+    @pytest.mark.e2e
     async def test_concurrent_message_ordering_integrity(self, ordering_core):
         user_id = TEST_USERS["enterprise"].id
         batch_size = 25
@@ -88,11 +91,13 @@ class TestMessageOrderingPreservation:
             raise
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAtLeastOnceDeliveryGuarantee:
     @pytest.fixture
     def delivery_core(self):
         return AtLeastOnceDeliveryCore()
     
+    @pytest.mark.e2e
     async def test_guaranteed_message_delivery_with_retries(self, delivery_core):
         user_id = TEST_USERS["enterprise"].id
         message_count = 30
@@ -116,6 +121,7 @@ class TestAtLeastOnceDeliveryGuarantee:
                 pytest.skip("WebSocket server not available for delivery test")
             raise
     
+    @pytest.mark.e2e
     async def test_retry_mechanism_under_simulated_failures(self, delivery_core):
         user_id = TEST_USERS["enterprise"].id
         message_count = 20
@@ -134,11 +140,13 @@ class TestAtLeastOnceDeliveryGuarantee:
             raise
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestDuplicateMessageDetection:
     @pytest.fixture
     def duplicate_core(self):
         return DuplicateDetectionCore()
     
+    @pytest.mark.e2e
     async def test_duplicate_message_detection_accuracy(self, duplicate_core):
         user_id = TEST_USERS["enterprise"].id
         message_count = 30
@@ -163,6 +171,7 @@ class TestDuplicateMessageDetection:
                 pytest.skip("WebSocket server not available for duplicate test")
             raise
     
+    @pytest.mark.e2e
     async def test_duplicate_prevention_under_retry_scenarios(self, duplicate_core):
         user_id = TEST_USERS["enterprise"].id
         message_count = 15
@@ -187,11 +196,13 @@ class TestDuplicateMessageDetection:
             raise
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestReconnectionWithMessageRecovery:
     @pytest.fixture
     def recovery_core(self):
         return ReconnectionRecoveryCore()
     
+    @pytest.mark.e2e
     async def test_message_recovery_after_disconnection(self, recovery_core):
         user_id = TEST_USERS["enterprise"].id
         queued_count = 25
@@ -218,6 +229,7 @@ class TestReconnectionWithMessageRecovery:
                 pytest.skip("WebSocket server not available for recovery test")
             raise
     
+    @pytest.mark.e2e
     async def test_seamless_reconnection_without_message_loss(self, recovery_core):
         user_id = TEST_USERS["enterprise"].id
         pre_disconnect_count = 10
@@ -243,11 +255,13 @@ class TestReconnectionWithMessageRecovery:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestConcurrentMessageHandling:
     @pytest.fixture
     def concurrent_core(self):
         return ConcurrentMessageCore()
     
+    @pytest.mark.e2e
     async def test_high_concurrency_message_processing(self, concurrent_core):
         user_id = TEST_USERS["enterprise"].id
         concurrent_count = 100
@@ -275,6 +289,7 @@ class TestConcurrentMessageHandling:
                 pytest.skip("WebSocket server not available for concurrency test")
             raise
     
+    @pytest.mark.e2e
     async def test_concurrent_users_message_isolation(self, concurrent_core):
         user1_id = TEST_USERS["enterprise"].id
         user2_id = TEST_USERS["growth"].id

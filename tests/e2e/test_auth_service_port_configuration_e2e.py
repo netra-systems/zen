@@ -15,9 +15,9 @@ from typing import Dict, List, Any
 # Test configurations that represent the current inconsistent state
 PORT_CONFIGURATIONS = [
     {
-        "name": "E2E_STANDARD_CONFIG",
-        "expected_auth_port": 8001,
-        "description": "Standard E2E test configuration expects auth on 8001",
+        "name": "CORRECTED_E2E_CONFIG",
+        "expected_auth_port": 8081,
+        "description": "Corrected E2E test configuration - now expects auth on 8081 (matches dev launcher)",
         "test_files_using": [
             "config.py", "harness_complete.py", "integration/config.py",
             "oauth_test_providers.py", "README.md", "fixtures/*.py"
@@ -26,16 +26,16 @@ PORT_CONFIGURATIONS = [
     {
         "name": "DEV_LAUNCHER_CONFIG", 
         "expected_auth_port": 8081,
-        "description": "Dev launcher and real service tests expect auth on 8081",
+        "description": "Dev launcher and real service tests expect auth on 8081 (CORRECT)",
         "test_files_using": [
             "dev_launcher_real_system.py", "real_services_manager.py",
             "jwt_token_helpers.py", "performance/*.py"
         ]
     },
     {
-        "name": "AUTH_SERVICE_DEFAULT",
-        "expected_auth_port": 8080,
-        "description": "Auth service main.py defaults to 8080",
+        "name": "AUTH_SERVICE_RUNTIME",
+        "expected_auth_port": 8081,
+        "description": "Auth service main.py runtime - defaults to 8081 when PORT not set",
         "test_files_using": [
             "auth_service/main.py"
         ]
@@ -154,6 +154,7 @@ class AuthServicePortConfigurationValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_auth_service_port_consistency_validation():
     """
     FAILING TEST: Expose auth service port configuration inconsistencies
@@ -207,6 +208,7 @@ async def test_auth_service_port_consistency_validation():
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_specific_port_8001_expectation():
     """
     Test that specifically checks if auth service is running on port 8001
@@ -243,6 +245,7 @@ async def test_specific_port_8001_expectation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_specific_port_8081_expectation():
     """
     Test that specifically checks if auth service is running on port 8081

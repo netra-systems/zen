@@ -497,6 +497,7 @@ class WebSocketAuthPersistence:
         }
     
 
+    @pytest.mark.e2e
     async def test_connection_persistence_during_token_refresh(self) -> Dict[str, Any]:
 
         """Test WebSocket connection persistence during token refresh."""
@@ -654,6 +655,7 @@ class WebSocketAuthPersistence:
 
 @pytest.mark.asyncio
 
+@pytest.mark.e2e
 class TestAuthenticationTokenFlow:
 
     """Authentication Token Flow Integration Test Suite."""
@@ -661,6 +663,7 @@ class TestAuthenticationTokenFlow:
 
     @pytest.fixture
 
+    @pytest.mark.e2e
     async def test_user_id(self):
 
         """Provide test user ID for authentication testing."""
@@ -670,6 +673,7 @@ class TestAuthenticationTokenFlow:
 
     @pytest.fixture
 
+    @pytest.mark.e2e
     async def test_pipeline_validator(self, test_user_id):
 
         """Initialize message pipeline auth validator."""
@@ -679,6 +683,7 @@ class TestAuthenticationTokenFlow:
 
     @pytest.fixture
 
+    @pytest.mark.e2e
     async def test_websocket_auth(self, test_user_id):
 
         """Initialize WebSocket auth persistence tester."""
@@ -686,6 +691,7 @@ class TestAuthenticationTokenFlow:
         return WebSocketAuthPersistence(test_user_id)
     
 
+    @pytest.mark.e2e
     async def test_jwt_creation_and_validation(self, pipeline_validator):
 
         """Test Case 1: JWT tokens created and validated correctly."""
@@ -720,6 +726,7 @@ class TestAuthenticationTokenFlow:
         assert all(step_result for step_result in pipeline_steps.values())
     
 
+    @pytest.mark.e2e
     async def test_token_expiry_and_renewal(self, pipeline_validator):
 
         """Test Case 2: Token expiry handled and renewal works correctly."""
@@ -772,6 +779,7 @@ class TestAuthenticationTokenFlow:
         assert new_validation["validation_successful"]
     
 
+    @pytest.mark.e2e
     async def test_message_pipeline_token_validation(self, pipeline_validator):
 
         """Test Case 3: Token validation throughout message pipeline."""
@@ -810,6 +818,7 @@ class TestAuthenticationTokenFlow:
         assert avg_time < 0.1  # Average validation time under 100ms
     
 
+    @pytest.mark.e2e
     async def test_long_conversation_token_handling(self, pipeline_validator):
 
         """Test Case 4: Long conversations handle token lifecycle correctly."""
@@ -841,6 +850,7 @@ class TestAuthenticationTokenFlow:
             assert conversation_result["token_refreshes"] >= 0
     
 
+    @pytest.mark.e2e
     async def test_websocket_authentication_flow(self, websocket_auth):
 
         """Test Case 5: WebSocket authentication flow works end-to-end."""
@@ -875,6 +885,7 @@ class TestAuthenticationTokenFlow:
         assert websocket_event["timestamp"] > auth_event["timestamp"]
     
 
+    @pytest.mark.e2e
     async def test_token_refresh_during_active_connection(self, websocket_auth):
 
         """Test Case 6: Token refresh during active WebSocket connection."""
@@ -914,6 +925,7 @@ class TestAuthenticationTokenFlow:
         assert refresh_event["connection_maintained"]
     
 
+    @pytest.mark.e2e
     async def test_connection_recovery_with_auth(self, websocket_auth):
 
         """Test Case 7: Connection recovery maintains authentication state."""
@@ -950,6 +962,7 @@ class TestAuthenticationTokenFlow:
         assert reconnect_event["timestamp"] > drop_event["timestamp"]
     
 
+    @pytest.mark.e2e
     async def test_invalid_token_handling(self, pipeline_validator):
 
         """Test Case 8: Invalid tokens handled gracefully throughout pipeline."""
@@ -990,6 +1003,7 @@ class TestAuthenticationTokenFlow:
         assert len(failed_events) >= len([t for t in invalid_tokens if t is not None])
     
 
+    @pytest.mark.e2e
     async def test_concurrent_token_validations(self, pipeline_validator):
 
         """Test Case 9: Concurrent token validations handled correctly."""

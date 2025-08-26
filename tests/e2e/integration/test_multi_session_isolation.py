@@ -206,6 +206,7 @@ class SessionIsolationTester:
             isolation_results["verification_time"] = time.time() - start_time
             return isolation_results
     
+    @pytest.mark.e2e
     async def test_concurrent_operations_isolation(self, sessions: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test that concurrent operations remain isolated between sessions."""
         start_time = time.time()
@@ -270,6 +271,7 @@ class SessionIsolationTester:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multi_session_isolation():
     """
     BVJ: Segment: Enterprise | Goal: Data Security | Impact: $200K+ MRR Protection
@@ -281,6 +283,7 @@ async def test_multi_session_isolation():
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multi_session_isolation_with_real_services(real_services):
     """
     BVJ: Segment: Enterprise | Goal: Data Security | Impact: $200K+ MRR Protection
@@ -362,6 +365,7 @@ async def test_multi_session_isolation_with_real_services(real_services):
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_websocket_session_boundaries(real_services):
     """Test WebSocket-specific session boundary enforcement."""
     isolation_tester = SessionIsolationTester(real_services)
@@ -405,6 +409,7 @@ async def test_websocket_session_boundaries(real_services):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_state_independence(real_services):
     """Test that session state changes don't affect other sessions."""
     isolation_tester = SessionIsolationTester(real_services)

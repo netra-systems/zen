@@ -243,6 +243,7 @@ class HeartbeatTestClient:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_normal_heartbeat_functionality():
     """
     Test normal ping/pong heartbeat functionality.
@@ -310,6 +311,7 @@ async def test_normal_heartbeat_functionality():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_zombie_connection_detection():
     """
     Test zombie connection detection and termination.
@@ -400,6 +402,7 @@ async def test_zombie_connection_detection():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_heartbeat_recovery():
     """
     Test connection recovery after temporary unresponsiveness.
@@ -467,6 +470,7 @@ async def test_heartbeat_recovery():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multi_connection_heartbeat_stress():
     """
     Test heartbeat mechanism under multiple concurrent connections.

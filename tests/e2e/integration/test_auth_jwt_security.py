@@ -56,6 +56,7 @@ class JWTSecurityTestManager(JWTGenerationTestManager):
         self.security_test_results: List[Dict] = []
     
 
+    @pytest.mark.e2e
     async def test_revoke_token_and_test_propagation(self, token_set: TokenSet) -> Dict[str, Any]:
 
         """
@@ -152,6 +153,7 @@ class JWTSecurityTestManager(JWTGenerationTestManager):
         return await self._validate_token_direct(token)
     
 
+    @pytest.mark.e2e
     async def test_expired_token_handling(self) -> Dict[str, Any]:
 
         """
@@ -219,6 +221,7 @@ class JWTSecurityTestManager(JWTGenerationTestManager):
         }
     
 
+    @pytest.mark.e2e
     async def test_tampered_token_detection(self) -> Dict[str, Any]:
 
         """
@@ -343,6 +346,7 @@ class JWTSecurityTestManager(JWTGenerationTestManager):
         return f"{encoded_header}.{encoded_payload}."
     
 
+    @pytest.mark.e2e
     async def test_security_boundary_enforcement(self) -> Dict[str, Any]:
 
         """
@@ -457,6 +461,7 @@ class JWTSecurityTestManager(JWTGenerationTestManager):
 
 @pytest.mark.asyncio
 
+@pytest.mark.e2e
 class TestJWTSecurity:
 
     """JWT Token Security and Attack Prevention Tests."""
@@ -471,6 +476,7 @@ class TestJWTSecurity:
         return JWTSecurityTestManager()
     
 
+    @pytest.mark.e2e
     async def test_token_revocation_and_propagation(self, jwt_manager):
 
         """
@@ -546,6 +552,7 @@ class TestJWTSecurity:
         logger.info("✓ Token revocation and propagation tested")
     
 
+    @pytest.mark.e2e
     async def test_expired_token_handling(self, jwt_manager):
 
         """
@@ -589,6 +596,7 @@ class TestJWTSecurity:
         logger.info("✓ Expired token handling validated")
     
 
+    @pytest.mark.e2e
     async def test_tampered_token_detection(self, jwt_manager):
 
         """
@@ -631,6 +639,7 @@ class TestJWTSecurity:
         logger.info("✓ Tampered token detection validated")
     
 
+    @pytest.mark.e2e
     async def test_none_algorithm_attack_prevention(self, jwt_manager):
 
         """
@@ -670,6 +679,7 @@ class TestJWTSecurity:
         logger.info("✓ None algorithm attack prevention validated")
     
 
+    @pytest.mark.e2e
     async def test_security_boundary_enforcement(self, jwt_manager):
 
         """
@@ -719,6 +729,7 @@ class TestJWTSecurity:
         logger.info("✓ Security boundary enforcement validated")
     
 
+    @pytest.mark.e2e
     async def test_comprehensive_security_matrix(self, jwt_manager):
 
         """

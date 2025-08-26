@@ -238,6 +238,7 @@ class ThreadMessagingExecutor:
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_messaging_executor(test_users):
     """Thread messaging executor fixture."""
     user = test_users["mid"]
@@ -261,9 +262,11 @@ async def prepared_thread_for_messaging(messaging_executor):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestThreadUIMessaging:
     """Thread UI Messaging Test Suite."""
     
+    @pytest.mark.e2e
     async def test_message_addition_ui_update(self, prepared_thread_for_messaging):
         """Test Case 1: Message addition updates UI and thread counters."""
         executor = prepared_thread_for_messaging["executor"]
@@ -296,6 +299,7 @@ class TestThreadUIMessaging:
         message_events = executor.ui_manager.get_message_events()
         assert len(message_events) == len(messages)
     
+    @pytest.mark.e2e
     async def test_message_addition_different_roles(self, prepared_thread_for_messaging):
         """Test Case 2: Messages with different roles handled correctly."""
         executor = prepared_thread_for_messaging["executor"]
@@ -329,6 +333,7 @@ class TestThreadUIMessaging:
         message_count = executor.get_thread_message_count(thread_id)
         assert message_count == len(message_configs)
     
+    @pytest.mark.e2e
     async def test_message_pagination_state_management(self, prepared_thread_for_messaging):
         """Test Case 3: Message pagination state managed correctly."""
         executor = prepared_thread_for_messaging["executor"]
@@ -359,6 +364,7 @@ class TestThreadUIMessaging:
         ui_updates = executor.ui_manager.get_ui_updates()
         assert len(ui_updates) == message_count
     
+    @pytest.mark.e2e
     async def test_concurrent_message_addition(self, prepared_thread_for_messaging):
         """Test Case 4: Concurrent message addition handled correctly."""
         executor = prepared_thread_for_messaging["executor"]
@@ -398,6 +404,7 @@ class TestThreadUIMessaging:
         message_ids = [msg["id"] for msg in ui_state["message_history"]]
         assert len(set(message_ids)) == message_count, "All message IDs must be unique"
     
+    @pytest.mark.e2e
     async def test_message_addition_across_multiple_threads(self, messaging_executor):
         """Test Case 5: Message addition across multiple threads maintains isolation."""
         # Create multiple threads
@@ -434,6 +441,7 @@ class TestThreadUIMessaging:
             # Note: message history is reset when switching threads in this implementation
             assert ui_state["active_thread"]["thread_id"] == thread_id
     
+    @pytest.mark.e2e
     async def test_message_ui_event_ordering(self, prepared_thread_for_messaging):
         """Test Case 6: Message UI events maintain correct ordering."""
         executor = prepared_thread_for_messaging["executor"]
@@ -466,6 +474,7 @@ class TestThreadUIMessaging:
         for i, expected_content in enumerate(messages):
             assert ui_state["message_history"][i]["content"] == expected_content
     
+    @pytest.mark.e2e
     async def test_message_addition_error_handling(self, messaging_executor):
         """Test Case 7: Message addition error handling."""
         # Attempt to add message to non-existent thread
@@ -493,6 +502,7 @@ class TestThreadUIMessaging:
         )
         assert valid_message["operation_successful"]
     
+    @pytest.mark.e2e
     async def test_message_addition_ui_performance(self, prepared_thread_for_messaging):
         """Test Case 8: Message addition UI performance under load."""
         executor = prepared_thread_for_messaging["executor"]

@@ -23,6 +23,7 @@ from netra_backend.app.db.migration_utils import (
 )
 from netra_backend.app.migration_models import FailedMigration, MigrationState
 from netra_backend.app.startup.migration_state_manager import MigrationStateManager
+from netra_backend.app.db.alembic_state_recovery import ensure_migration_state_healthy
 
 
 class MigrationTracker:
@@ -54,7 +55,12 @@ class MigrationTracker:
         return create_alembic_config(sync_url)
 
     async def check_migrations(self) -> MigrationState:
-        """Check for pending migrations."""
+        """Check for pending migrations with state recovery."""
+        # CRITICAL: Ensure migration state is healthy before checking
+        healthy, recovery_info = await ensure_migration_state_healthy(self.database_url)
+        if not healthy:
+            self.logger.error(f"Migration state recovery failed: {recovery_info}")
+            
         state = await self._load_state()
         return await self._perform_migration_check(state)
 

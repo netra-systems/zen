@@ -29,9 +29,11 @@ from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTe
     features=["concurrent_user_support", "performance_metrics", "scaling"],
     data=["concurrent_test_users", "performance_baselines"]
 )
+@pytest.mark.e2e
 class TestConcurrentLoadCore:
     """Core concurrent user load tests"""
     
+    @pytest.mark.e2e
     async def test_50_concurrent_users(self):
         """Test system with 50 concurrent demo users"""
         tester = ConcurrentUserLoadTest()
@@ -41,6 +43,7 @@ class TestConcurrentLoadCore:
         assert results['avg_response_time'] < 2.0, f"Average response time too high: {results['avg_response_time']}s"
         assert results['p95_response_time'] < 5.0, f"P95 response time too high: {results['p95_response_time']}s"
     
+    @pytest.mark.e2e
     async def test_response_time_under_load(self):
         """Verify response time stays under 2s with concurrent users"""
         tester = ConcurrentUserLoadTest()
@@ -52,6 +55,7 @@ class TestConcurrentLoadCore:
             assert results['avg_response_time'] < 2.0, \
                 f"Response time degraded with {num_users} users: {results['avg_response_time']}s"
     
+    @pytest.mark.e2e
     async def test_gradual_load_increase(self):
         """Test system behavior with gradually increasing load"""
         tester = ConcurrentUserLoadTest()
@@ -107,6 +111,7 @@ class TestConcurrentLoadCore:
         assert curr_metric['success_rate'] > 80, \
             f"Success rate too low with {curr_metric['users']} users: {curr_metric['success_rate']}%"
     
+    @pytest.mark.e2e
     async def test_burst_traffic_handling(self):
         """Test handling of sudden traffic bursts"""
         tester = ConcurrentUserLoadTest()

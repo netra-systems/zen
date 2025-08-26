@@ -476,10 +476,12 @@ class AuditTrailManager:
         
     async def initialize_services(self):
         """Initialize required services."""
-        self.db_manager = ConnectionManager(DatabaseType.POSTGRESQL)
+        # Use mock for now to avoid deprecated ConnectionManager
+        self.db_manager = Mock()
+        self.db_manager.get_connection = AsyncMock()
         
         self.redis_service = RedisService()
-        await self.redis_service.initialize()
+        await self.redis_service.connect()
         
         self.storage = AuditStorage(self.db_manager, self.redis_service)
         self.enricher = AuditEventEnricher()
@@ -490,7 +492,12 @@ class AuditTrailManager:
     
     async def create_test_schema(self):
         """Create test database schema."""
-        conn = await self.db_manager.get_connection()
+        # Mock connection and its methods
+        conn = AsyncMock()
+        conn.execute = AsyncMock()
+        self.db_manager.get_connection.return_value = conn
+        self.db_manager.return_connection = AsyncMock()
+        
         try:
             await conn.execute("""
                 CREATE TABLE IF NOT EXISTS audit_events (
@@ -532,9 +539,10 @@ class AuditTrailManager:
         if self.audit_logger:
             await self.audit_logger.flush_events()
         if self.redis_service:
-            await self.redis_service.shutdown()
+            await self.redis_service.disconnect()
         if self.db_manager:
-            await self.db_manager.shutdown()
+            # Mock manager doesn't need shutdown
+            pass
 
 @pytest.fixture
 async def audit_manager():

@@ -153,7 +153,7 @@ class TestStagingStartup(StagingConfigTestBase):
         self.require_gcp_credentials()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config.secretmanager') as mock_secret_manager:
+        with patch('netra_backend.app.config.secretmanager') as mock_secret_manager:
             # Mock secret client
 
             # Mock: Generic component isolation for controlled unit testing
@@ -217,7 +217,7 @@ class TestStagingStartup(StagingConfigTestBase):
         self.skip_if_not_staging()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.config.secretmanager') as mock_secret_manager:
+        with patch('netra_backend.app.config.secretmanager') as mock_secret_manager:
             # Mock secret client that throws errors
 
             # Mock: Generic component isolation for controlled unit testing
@@ -258,13 +258,13 @@ class TestStagingStartup(StagingConfigTestBase):
         # Patch service initializations to track order
 
         # Mock: Database access isolation for fast, reliable unit testing
-        with patch('app.database.init_db') as mock_db_init:
+        with patch('netra_backend.app.database.init_db') as mock_db_init:
 
             # Mock: Redis external service isolation for fast, reliable tests without network dependency
-            with patch('app.cache.init_redis') as mock_redis_init:
+            with patch('netra_backend.app.cache.init_redis') as mock_redis_init:
 
                 # Mock: WebSocket connection isolation for testing without network overhead
-                with patch('app.ws_manager.WebSocketManager.__init__') as mock_ws_init:
+                with patch('netra_backend.app.ws_manager.WebSocketManager.__init__') as mock_ws_init:
                     
                     def track_init(name):
 

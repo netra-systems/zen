@@ -128,6 +128,7 @@ async def simulate_corruption_recovery(self) -> Dict[str, Any]:
         return recovery_result
 
 
+@pytest.mark.e2e
 async def test_agent_with_corruption_simulation(self) -> Dict[str, Any]:
 
         """Test agent startup with corrupted state using simulation."""
@@ -400,6 +401,7 @@ def _calculate_memory_metrics(self) -> Dict[str, float]:
 @pytest.mark.asyncio
 @pytest.mark.integration  
 @pytest.mark.real_services
+@pytest.mark.e2e
 async def test_agent_startup_with_corrupted_state():
 
     """
@@ -450,6 +452,7 @@ async def test_agent_startup_with_corrupted_state():
 @pytest.mark.stress
 
 @pytest.mark.real_services
+@pytest.mark.e2e
 async def test_agent_startup_performance_under_load():
 
     """
@@ -486,6 +489,7 @@ async def test_agent_startup_performance_under_load():
 @pytest.mark.asyncio
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_corrupted_state_detection_and_logging():
 
     """Additional test for corruption detection and logging mechanisms."""
@@ -520,6 +524,7 @@ async def test_corrupted_state_detection_and_logging():
 @pytest.mark.asyncio
 
 @pytest.mark.stress
+@pytest.mark.e2e
 async def test_resource_monitoring_during_load():
 
     """Additional test for resource monitoring accuracy during load."""

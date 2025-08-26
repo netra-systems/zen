@@ -262,10 +262,12 @@ async def events_tracker():
     await tracker.cleanup_clients()
 
 
+@pytest.mark.e2e
 class TestAgentLifecycleEvents:
     """Test agent lifecycle events implementation"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_started_event_complete_payload(self, events_tracker):
         """Test agent_started event has complete payload with all required fields"""
         client = events_tracker.create_authenticated_client("agent_started_test")
@@ -299,6 +301,7 @@ class TestAgentLifecycleEvents:
         assert "timestamp" in payload, "Missing timestamp"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_completed_event_implementation(self, events_tracker):
         """Test agent_completed event is properly implemented"""
         client = events_tracker.create_authenticated_client("agent_completed_test")
@@ -324,10 +327,12 @@ class TestAgentLifecycleEvents:
             assert validation["valid"] is True, f"Invalid agent_completed: {validation}"
 
 
+@pytest.mark.e2e
 class TestProgressEvents:
     """Test progress events implementation (currently missing)"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_thinking_events_implementation(self, events_tracker):
         """Test agent_thinking events show intermediate reasoning"""
         client = events_tracker.create_authenticated_client("thinking_test")
@@ -357,6 +362,7 @@ class TestProgressEvents:
             print("MISSING: agent_thinking events not implemented")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_partial_result_events_implementation(self, events_tracker):
         """Test partial_result events for streaming content"""
         client = events_tracker.create_authenticated_client("partial_result_test")
@@ -383,10 +389,12 @@ class TestProgressEvents:
             print("MISSING: partial_result events not implemented")
 
 
+@pytest.mark.e2e
 class TestToolEvents:
     """Test tool events implementation and alignment"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_tool_executing_vs_tool_call_alignment(self, events_tracker):
         """Test tool_executing vs tool_call event alignment"""
         client = events_tracker.create_authenticated_client("tool_events_test")
@@ -432,10 +440,12 @@ class TestToolEvents:
             print("MISSING: tool_executing events not implemented (misalignment)")
 
 
+@pytest.mark.e2e
 class TestFinalResultEvents:
     """Test final result events implementation"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_final_report_events_implementation(self, events_tracker):
         """Test final_report events with comprehensive results"""
         client = events_tracker.create_authenticated_client("final_report_test")
@@ -462,10 +472,12 @@ class TestFinalResultEvents:
             print("MISSING: final_report events not implemented")
 
 
+@pytest.mark.e2e
 class TestMissingEventsAnalysis:
     """Test comprehensive missing events analysis"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_comprehensive_event_coverage_analysis(self, events_tracker):
         """Test comprehensive analysis of all missing events"""
         client = events_tracker.create_authenticated_client("comprehensive_test")
@@ -514,6 +526,7 @@ class TestMissingEventsAnalysis:
             f"Event coverage {analysis['coverage_percentage']:.1f}% below threshold {coverage_threshold}%"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_missing_events_priority_assessment(self, events_tracker):
         """Test assessment of missing events by priority"""
         client = events_tracker.create_authenticated_client("priority_test")

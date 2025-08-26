@@ -90,10 +90,12 @@ async def db_test():
     await test.teardown()
 
 
+@pytest.mark.e2e
 class TestPostgreSQLOperations:
     """Test PostgreSQL operations across Auth and Backend services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_postgresql_user_operations(self, db_test):
         """Test user creation and sync between Auth and Backend PostgreSQL."""
         # Generate test user data
@@ -148,10 +150,12 @@ class TestPostgreSQLOperations:
             assert user_record['is_active'], "User not active in Backend DB"
 
 
+@pytest.mark.e2e
 class TestClickHouseOperations:
     """Test ClickHouse analytics operations."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_clickhouse_analytics_writes(self, db_test):
         """Test ClickHouse analytics event writes and queries."""
         user_id = str(uuid.uuid4())
@@ -185,6 +189,7 @@ class TestClickHouseOperations:
         logger.info(f"ClickHouse analytics test passed in {query_time:.3f}s")
         
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_clickhouse_data_aggregation(self, db_test):
         """Test ClickHouse data aggregation capabilities."""
         if not db_test.db_connections.clickhouse_client:
@@ -211,10 +216,12 @@ class TestClickHouseOperations:
         logger.info("ClickHouse data aggregation test passed")
 
 
+@pytest.mark.e2e
 class TestCrossDatabaseConsistency:
     """Test consistency across different database systems."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_database_consistency(self, db_test):
         """Test data consistency between PostgreSQL, ClickHouse, and Redis."""
         user_id = str(uuid.uuid4())
@@ -274,10 +281,12 @@ class TestCrossDatabaseConsistency:
         assert len(user_activities) >= 1, "No activities found in ClickHouse"
 
 
+@pytest.mark.e2e
 class TestTransactionAtomicity:
     """Test transaction atomicity across database operations."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_transaction_atomicity(self, db_test):
         """Test atomic transactions with rollback scenarios."""
         user_id = str(uuid.uuid4())
@@ -365,10 +374,12 @@ class TestTransactionAtomicity:
                 pass
 
 
+@pytest.mark.e2e
 class TestConnectionPoolManagement:
     """Test database connection pool management and limits."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_pool_management(self, db_test):
         """Test connection pool limits and reuse patterns."""
         if not db_test.db_connections.postgres_pool:
@@ -409,6 +420,7 @@ class TestConnectionPoolManagement:
             return False
             
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_pool_exhaustion(self, db_test):
         """Test connection pool behavior under exhaustion."""
         if not db_test.db_connections.postgres_pool:
@@ -446,10 +458,12 @@ class TestConnectionPoolManagement:
                 await pool.release(conn)
 
 
+@pytest.mark.e2e
 class TestConcurrentWrites:
     """Test concurrent write operations across databases."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_writes(self, db_test):
         """Test concurrent write operations for data integrity."""
         base_user_id = str(uuid.uuid4())
@@ -513,6 +527,7 @@ class TestConcurrentWrites:
 
 # Integration test that combines all components
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_database_operations_integration():
     """Complete integration test of all database operations."""
     logger.info("Starting complete database operations integration test")

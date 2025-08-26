@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>API Dual-Channel Architecture</title>
+    <category>Architecture</category>
+    <version>1.0.0</version>
+    <date>2025-01-26</date>
+    <status>Active</status>
+    <business_value>
+      <segment>Platform/Internal</segment>
+      <goal>Flexibility, Compatibility, Performance</goal>
+      <impact>Enables both traditional REST and real-time WebSocket communication patterns</impact>
+    </business_value>
+  </metadata>
+
+  <overview>
+    <summary>
+      Netra uses a dual-channel API architecture that provides both REST endpoints and WebSocket connections
+      for agent communication. This design maximizes compatibility while enabling real-time features.
+    </summary>
+    
+    <key_insight>
+      Both channels connect to the SAME backend services (SupervisorAgent, ThreadService, MessageHandlerService),
+      ensuring consistent functionality regardless of the communication method chosen.
+    </key_insight>
+  </overview>
+
+  <architecture>
+    <channel name="REST_API">
+      <description>Traditional HTTP request/response pattern</description>
+      <base_path>/api/agent</base_path>
+      <implementation_file>netra_backend/app/routes/agent_route.py</implementation_file>
+      
+      <endpoints>
+        <endpoint method="POST" path="/run_agent">
+          <purpose>Start agent execution</purpose>
+          <handler>run_agent</handler>
+          <backend_service>SupervisorAgent.run()</backend_service>
+        </endpoint>
+        
+        <endpoint method="GET" path="/{run_id}/status">
+          <purpose>Get agent status</purpose>
+          <handler>get_agent_status</handler>
+          <backend_service>SupervisorAgent.get_agent_state()</backend_service>
+        </endpoint>
+        
+        <endpoint method="GET" path="/{run_id}/state">
+          <purpose>Get full agent state</purpose>
+          <handler>get_agent_state</handler>
+          <backend_service>state_persistence_service.load_agent_state()</backend_service>
+        </endpoint>
+        
+        <endpoint method="GET" path="/thread/{thread_id}/runs">
+          <purpose>List thread runs</purpose>
+          <handler>get_thread_runs</handler>
+          <backend_service>state_persistence_service.list_thread_runs()</backend_service>
+        </endpoint>
+        
+        <endpoint method="POST" path="/message">
+          <purpose>Process agent message</purpose>
+          <handler>process_agent_message</handler>
+          <backend_service>AgentService.process_message()</backend_service>
+        </endpoint>
+        
+        <endpoint method="POST" path="/stream">
+          <purpose>Stream responses via SSE</purpose>
+          <handler>stream_response</handler>
+          <backend_service>AgentService with StreamingResponse</backend_service>
+        </endpoint>
+      </endpoints>
+      
+      <use_cases>
+        <use_case>Mobile applications with REST clients</use_case>
+        <use_case>Simple integrations and webhooks</use_case>
+        <use_case>Stateless operations</use_case>
+        <use_case>Polling-based status checks</use_case>
+        <use_case>Traditional web applications</use_case>
+      </use_cases>
+    </channel>
+
+    <channel name="WebSocket">
+      <description>Bidirectional real-time communication</description>
+      <base_path>/ws</base_path>
+      <implementation_file>netra_backend/app/routes/websocket.py</implementation_file>
+      <handler_file>netra_backend/app/websocket_core/agent_handler.py</handler_file>
+      
+      <message_types>
+        <message type="START_AGENT">
+          <purpose>Start agent execution</purpose>
+          <handler>AgentMessageHandler._handle_start_agent</handler>
+          <backend_service>MessageHandlerService.handle_start_agent()</backend_service>
+        </message>
+        
+        <message type="USER_MESSAGE">
+          <purpose>Send user message to agent</purpose>
+          <handler>AgentMessageHandler._handle_user_message</handler>
+          <backend_service>MessageHandlerService.handle_user_message()</backend_service>
+        </message>
+        
+        <message type="SYSTEM_MESSAGE">
+          <purpose>System notifications and status updates</purpose>
+          <direction>Server to Client</direction>
+        </message>
+        
+        <message type="HEARTBEAT">
+          <purpose>Connection health monitoring</purpose>
+          <interval>45 seconds</interval>
+        </message>
+      </message_types>
+      
+      <features>
+        <feature>JWT authentication via header or subprotocol</feature>
+        <feature>Automatic message routing</feature>
+        <feature>Heartbeat monitoring</feature>
+        <feature>Rate limiting (30 messages/minute)</feature>
+        <feature>Connection limits (3 per user)</feature>
+        <feature>MCP/JSON-RPC compatibility</feature>
+      </features>
+      
+      <use_cases>
+        <use_case>Real-time agent updates</use_case>
+        <use_case>Interactive chat interfaces</use_case>
+        <use_case>Live streaming of agent thoughts</use_case>
+        <use_case>Complex multi-turn conversations</use_case>
+        <use_case>Push notifications</use_case>
+      </use_cases>
+    </channel>
+  </architecture>
+
+  <implementation_details>
+    <shared_services>
+      <service name="SupervisorAgent">
+        <location>netra_backend/app/agents/supervisor_consolidated.py</location>
+        <description>Main agent orchestration engine</description>
+        <used_by>Both REST and WebSocket</used_by>
+      </service>
+      
+      <service name="ThreadService">
+        <location>netra_backend/app/services/thread_service.py</location>
+        <description>Thread and conversation management</description>
+        <used_by>Both REST and WebSocket</used_by>
+      </service>
+      
+      <service name="MessageHandlerService">
+        <location>netra_backend/app/services/message_handlers.py</location>
+        <description>Unified message processing logic</description>
+        <used_by>Both REST and WebSocket</used_by>
+      </service>
+      
+      <service name="AgentService">
+        <location>netra_backend/app/services/agent_service.py</location>
+        <description>Agent execution and state management</description>
+        <used_by>Both REST and WebSocket</used_by>
+      </service>
+      
+      <service name="StatePersistenceService">
+        <location>netra_backend/app/services/state_persistence.py</location>
+        <description>Agent state persistence</description>
+        <used_by>Both REST and WebSocket</used_by>
+      </service>
+    </shared_services>
+
+    <how_it_works>
+      <step number="1">
+        <title>Request Routing</title>
+        <rest>FastAPI routes in agent_route.py receive HTTP requests</rest>
+        <websocket>WebSocket endpoint receives messages via MessageRouter</websocket>
+      </step>
+      
+      <step number="2">
+        <title>Authentication</title>
+        <rest>JWT validation via auth_middleware</rest>
+        <websocket>JWT validation via WebSocketAuthenticator</websocket>
+      </step>
+      
+      <step number="3">
+        <title>Service Invocation</title>
+        <description>
+          Both channels invoke the SAME backend services with identical parameters.
+          This ensures functional parity between REST and WebSocket.
+        </description>
+        <example>
+          REST: supervisor.run(query, request_id, stream_updates=True)
+          WebSocket: supervisor.run(query, request_id, stream_updates=True)
+        </example>
+      </step>
+      
+      <step number="4">
+        <title>Response Delivery</title>
+        <rest>
+          - Immediate: JSON response
+          - Streaming: Server-Sent Events (SSE)
+        </rest>
+        <websocket>
+          - Real-time message delivery
+          - Automatic status updates
+          - Bidirectional communication
+        </websocket>
+      </step>
+    </how_it_works>
+
+    <dependency_injection>
+      <description>
+        Both channels use FastAPI's dependency injection system to access services
+      </description>
+      
+      <rest_example><![CDATA[
+@router.post("/run_agent")
+async def run_agent(
+    request_model: RequestModel,
+    supervisor: Supervisor = Depends(get_agent_supervisor)
+) -> Dict[str, Any]:
+    return await execute_supervisor_run(supervisor, request_model)
+      ]]></rest_example>
+      
+      <websocket_example><![CDATA[
+# In WebSocket handler
+supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+message_handler_service = MessageHandlerService(supervisor, thread_service)
+agent_handler = AgentMessageHandler(message_handler_service)
+      ]]></websocket_example>
+    </dependency_injection>
+  </implementation_details>
+
+  <decision_matrix>
+    <criteria>
+      <criterion name="Real-time updates" rest="Polling required" websocket="Push-based" />
+      <criterion name="Bidirectional communication" rest="No" websocket="Yes" />
+      <criterion name="Stateless operation" rest="Yes" websocket="No" />
+      <criterion name="Mobile compatibility" rest="Excellent" websocket="Good" />
+      <criterion name="Firewall traversal" rest="Excellent" websocket="May require config" />
+      <criterion name="Connection overhead" rest="Per request" websocket="Once per session" />
+      <criterion name="Streaming efficiency" rest="SSE (unidirectional)" websocket="Bidirectional" />
+      <criterion name="Error recovery" rest="Simple retry" websocket="Reconnection logic" />
+      <criterion name="Load balancing" rest="Simple" websocket="Sticky sessions" />
+    </criteria>
+  </decision_matrix>
+
+  <migration_notes>
+    <note priority="high">
+      Both channels are production-ready and should be maintained.
+      They are NOT competing implementations but complementary approaches.
+    </note>
+    
+    <note priority="medium">
+      Clients can choose the appropriate channel based on their requirements.
+      Some clients may use both (REST for CRUD, WebSocket for real-time).
+    </note>
+    
+    <note priority="low">
+      Future enhancements should maintain parity between channels
+      by updating the shared backend services.
+    </note>
+  </migration_notes>
+
+  <testing_strategy>
+    <test_category name="Unit Tests">
+      <description>Test individual route handlers and message handlers</description>
+      <files>
+        - netra_backend/tests/routes/test_agent_routes.py
+        - netra_backend/tests/websocket/test_agent_handler.py
+      </files>
+    </test_category>
+    
+    <test_category name="Integration Tests">
+      <description>Test end-to-end flow through both channels</description>
+      <files>
+        - tests/integration/test_agent_llm_integration.py
+        - tests/integration/test_websocket_integration.py
+      </files>
+    </test_category>
+    
+    <test_category name="E2E Tests">
+      <description>Test complete workflows using both channels</description>
+      <files>
+        - tests/e2e/test_api_version_compatibility.py
+      </files>
+    </test_category>
+  </testing_strategy>
+
+  <learnings>
+    <learning date="2025-01-26">
+      The dual-channel architecture is intentional and production-ready.
+      Both REST and WebSocket endpoints are actively used and maintained.
+    </learning>
+    
+    <learning date="2025-01-26">
+      Service layer abstraction enables channel-agnostic functionality.
+      The same SupervisorAgent, ThreadService, and MessageHandlerService
+      power both REST and WebSocket communications.
+    </learning>
+    
+    <learning date="2025-01-26">
+      REST endpoints are NOT legacy - they serve different use cases:
+      - REST: Better for stateless, polling-based, simple integrations
+      - WebSocket: Better for real-time, interactive, streaming scenarios
+    </learning>
+  </learnings>
+</specification>

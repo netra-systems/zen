@@ -31,6 +31,7 @@ import websockets
 from tests.e2e.database_sync_fixtures import create_test_user_data
 from tests.e2e.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
+    TestClient,
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
@@ -42,17 +43,21 @@ class WebSocketE2ETester:
     def __init__(self):
         self.harness = TestHarness()
         self.jwt_helper = JWTTestHelper()
+        self.test_client = None
         self.connections: Dict[str, websockets.WebSocketClientProtocol] = {}
         self.received_messages: Dict[str, List] = {}
     
     async def setup(self):
         """Initialize test environment."""
         await self.harness.setup()
+        self.test_client = TestClient(self.harness)
         return self
     
     async def cleanup(self):
         """Clean up test environment."""
         await self._close_all_connections()
+        if self.test_client:
+            await self.test_client.close()
         await self.harness.teardown()
     
     async def _close_all_connections(self):
@@ -97,6 +102,28 @@ class WebSocketE2ETester:
                 return self.received_messages[conn_id].pop(0)
             await asyncio.sleep(0.1)
         return None
+    
+    async def create_user(self, user_data: Dict) -> str:
+        """Create user via auth service API and return user ID."""
+        if not self.test_client:
+            raise RuntimeError("Test client not initialized. Call setup() first.")
+        
+        # Create user via auth service API
+        response = await self.test_client.auth_request(
+            "POST", 
+            "/users", 
+            json={
+                "email": user_data["email"],
+                "password": user_data.get("password", "testpass123"),
+                "name": user_data.get("name", "Test User")
+            }
+        )
+        
+        if response.status_code != 201:
+            raise RuntimeError(f"Failed to create user: {response.status_code} - {response.text}")
+        
+        user_response = response.json()
+        return user_response["id"]
 
 
 @pytest_asyncio.fixture
@@ -117,7 +144,7 @@ class TestWebSocketComprehensiveE2E:
         """Test complete WebSocket connection lifecycle."""
         # Create user and get token
         user_data = create_test_user_data("ws_lifecycle")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         
         # Connect
@@ -142,7 +169,7 @@ class TestWebSocketComprehensiveE2E:
         """Test messages route correctly to agent orchestration."""
         # Setup connection
         user_data = create_test_user_data("ws_routing")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
         
@@ -172,7 +199,7 @@ class TestWebSocketComprehensiveE2E:
         # Create multiple users and connections
         for i in range(num_users):
             user_data = create_test_user_data(f"concurrent_{i}")
-            user_id = await ws_tester.harness.auth_service.create_user(user_data)
+            user_id = await ws_tester.create_user(user_data)
             token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
             conn_id = await ws_tester.create_authenticated_connection(user_id, token)
             connections.append((conn_id, user_id))
@@ -196,7 +223,7 @@ class TestWebSocketComprehensiveE2E:
         """Test reconnection maintains session continuity."""
         # Create initial connection
         user_data = create_test_user_data("reconnect")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         
         # First connection with session data
@@ -224,7 +251,7 @@ class TestWebSocketComprehensiveE2E:
         """Test error messages propagate correctly through WebSocket."""
         # Setup connection
         user_data = create_test_user_data("error_test")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
         
@@ -243,7 +270,7 @@ class TestWebSocketComprehensiveE2E:
         """Test real-time event broadcasting to multiple clients."""
         # Create multiple connections for same user
         user_data = create_test_user_data("broadcast")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         
         conn_ids = []
@@ -270,7 +297,7 @@ class TestWebSocketComprehensiveE2E:
         """Test WebSocket connection health monitoring."""
         # Setup connection
         user_data = create_test_user_data("health_monitor")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
         
@@ -289,7 +316,7 @@ class TestWebSocketComprehensiveE2E:
         """Test messages maintain order during transmission."""
         # Setup connection
         user_data = create_test_user_data("message_order")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
         
@@ -312,7 +339,7 @@ class TestWebSocketComprehensiveE2E:
         """Test rate limiting on WebSocket connections."""
         # Setup connection
         user_data = create_test_user_data("rate_limit")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         token = ws_tester.jwt_helper.create_access_token(user_id, user_data['email'])
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
         
@@ -333,7 +360,7 @@ class TestWebSocketComprehensiveE2E:
         """Test WebSocket handles auth token expiry correctly."""
         # Create connection with short-lived token
         user_data = create_test_user_data("auth_expiry")
-        user_id = await ws_tester.harness.auth_service.create_user(user_data)
+        user_id = await ws_tester.create_user(user_data)
         
         # Create token that expires in 1 second
         short_token = ws_tester.jwt_helper.create_access_token(

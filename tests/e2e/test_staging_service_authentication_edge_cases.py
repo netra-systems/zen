@@ -295,6 +295,7 @@ class StagingAuthEdgeCaseReplicator:
 # Test 1: Token Expiry During Active Session
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_expiry_during_active_session_failure():
     """
     EXPECTED TO FAIL - CRITICAL SESSION MANAGEMENT ISSUE
@@ -327,6 +328,7 @@ async def test_token_expiry_during_active_session_failure():
 # Test 2: Concurrent Authentication Race Conditions
 @pytest.mark.env("staging") 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_authentication_race_conditions_failure():
     """
     EXPECTED TO FAIL - CRITICAL CONCURRENCY ISSUE
@@ -359,6 +361,7 @@ async def test_concurrent_authentication_race_conditions_failure():
 # Test 3: Network Timeout During Authentication Handshake  
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_network_timeout_auth_handshake_failure():
     """
     EXPECTED TO FAIL - CRITICAL TIMEOUT ISSUE
@@ -389,6 +392,7 @@ async def test_network_timeout_auth_handshake_failure():
 # Test 4: Invalid Token Format Handling
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_invalid_token_format_handling_failure():
     """
     EXPECTED TO FAIL - MEDIUM INPUT VALIDATION ISSUE
@@ -422,6 +426,7 @@ async def test_invalid_token_format_handling_failure():
 # Test 5: Service Discovery Authentication Failure
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_discovery_authentication_failure():
     """
     EXPECTED TO FAIL - CRITICAL SERVICE DISCOVERY ISSUE
@@ -453,6 +458,7 @@ async def test_service_discovery_authentication_failure():
 # Test 6: Cross-Origin Authentication in Staging
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cross_origin_authentication_staging_failure():
     """
     EXPECTED TO FAIL - CRITICAL CORS/ORIGIN ISSUE
@@ -528,6 +534,7 @@ async def test_cross_origin_authentication_staging_failure():
 # Test 7: Authentication State Corruption Detection
 @pytest.mark.env("staging")
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_authentication_state_corruption_detection():
     """
     EXPECTED TO FAIL - CRITICAL STATE MANAGEMENT ISSUE

@@ -195,7 +195,7 @@ class TestServiceHealthIntegration:
         - Health status reflects circuit breaker state
         """
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.circuit_breaker.CircuitBreaker') as mock_cb_class:
+        with patch('netra_backend.app.core.circuit_breaker.CircuitBreaker') as mock_cb_class:
             # Mock: Generic component isolation for controlled unit testing
             circuit_breaker = Mock()
             mock_cb_class.return_value = circuit_breaker

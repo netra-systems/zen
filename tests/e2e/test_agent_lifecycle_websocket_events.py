@@ -295,6 +295,7 @@ class AgentLifecycleEventTestCore:
             logger.debug(f"Services health check failed: {e}")
         self.test_session_data.clear()
     
+    @pytest.mark.e2e
     async def test_teardown_test_environment(self) -> None:
         """Cleanup test environment."""
         await self.conversation_core.teardown_test_environment()
@@ -385,6 +386,7 @@ class AgentLifecycleEventTestCore:
 
 
 @pytest_asyncio.fixture
+@pytest.mark.e2e
 async def test_agent_lifecycle_test_core():
     """Create agent lifecycle test core fixture."""
     core = AgentLifecycleEventTestCore()
@@ -396,9 +398,11 @@ async def test_agent_lifecycle_test_core():
         await core.teardown_test_environment()
 
 
+@pytest.mark.e2e
 class TestAgentLifecycleWebSocketEvents:
     """Test all agent lifecycle WebSocket events with comprehensive validation."""
     
+    @pytest.mark.e2e
     async def test_complete_agent_lifecycle_event_flow(self, agent_lifecycle_test_core):
         """Test complete agent lifecycle with all expected events."""
         core = agent_lifecycle_test_core
@@ -445,6 +449,7 @@ class TestAgentLifecycleWebSocketEvents:
         assert len(events_received) >= 4, "Too few events received for complete agent execution"
         assert len(events_received) <= 20, "Too many events received - possible event spam"
     
+    @pytest.mark.e2e
     async def test_agent_started_event_payload_validation(self, agent_lifecycle_test_core):
         """Test agent_started event has correct payload structure."""
         core = agent_lifecycle_test_core
@@ -477,6 +482,7 @@ class TestAgentLifecycleWebSocketEvents:
         assert isinstance(payload["agent_name"], str), "agent_name must be string"
         assert isinstance(payload["timestamp"], (int, float)), "timestamp must be numeric"
     
+    @pytest.mark.e2e
     async def test_ui_layer_timing_validation(self, agent_lifecycle_test_core):
         """Test events arrive within correct UI layer timing windows."""
         core = agent_lifecycle_test_core
@@ -518,6 +524,7 @@ class TestAgentLifecycleWebSocketEvents:
             assert first_fast.received_at < first_slow.received_at, \
                 "Fast layer events should arrive before slow layer events"
     
+    @pytest.mark.e2e
     async def test_event_payload_field_consistency(self, agent_lifecycle_test_core):
         """Test event payload fields are consistent and properly formatted."""
         core = agent_lifecycle_test_core
@@ -564,6 +571,7 @@ class TestAgentLifecycleWebSocketEvents:
         # Run ID should be consistent for this execution
         assert len(run_ids) <= 2, f"Too many different run IDs for single execution: {run_ids}"
     
+    @pytest.mark.e2e
     async def test_missing_events_detection(self, agent_lifecycle_test_core):
         """Test that missing critical events are properly detected."""
         core = agent_lifecycle_test_core
@@ -597,6 +605,7 @@ class TestAgentLifecycleWebSocketEvents:
         if missing_critical:
             logger.warning(f"Missing critical events (known issue): {missing_critical}")
     
+    @pytest.mark.e2e
     async def test_frontend_event_processing_simulation(self, agent_lifecycle_test_core):
         """Test that frontend can successfully process all event types."""
         core = agent_lifecycle_test_core

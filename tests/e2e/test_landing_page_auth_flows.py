@@ -12,6 +12,7 @@ import jwt
 import os
 
 
+@pytest.mark.e2e
 class TestLandingPageAuthFlows:
     """Test suite for landing page authentication flows."""
     
@@ -90,6 +91,7 @@ class TestLandingPageAuthFlows:
         }
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_google_oauth_flow(self, auth_service, mock_oauth_response):
         """Test complete Google OAuth flow from landing page."""
         # 1. User clicks "Sign in with Google" on landing page
@@ -121,6 +123,7 @@ class TestLandingPageAuthFlows:
         assert "refresh_token" in user_data
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_jwt_validation_flow(self, auth_service, jwt_secret):
         """Test JWT creation and validation for landing page auth."""
         # Create test user data
@@ -144,6 +147,7 @@ class TestLandingPageAuthFlows:
         assert "iat" in decoded
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_to_dashboard_flow(self, auth_service, user_service):
         """Test complete flow from landing page to dashboard access."""
         # 1. User arrives at landing page (unauthenticated)
@@ -174,6 +178,7 @@ class TestLandingPageAuthFlows:
         assert is_authorized is True
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_multi_provider_flow(self, auth_service):
         """Test authentication with multiple OAuth providers."""
         providers = ["google", "github", "microsoft"]
@@ -199,6 +204,7 @@ class TestLandingPageAuthFlows:
             assert "scope=" in oauth_url
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_refresh_token_flow(self, auth_service, jwt_secret):
         """Test refresh token flow for expired sessions."""
         # Create initial token with short expiry
@@ -234,6 +240,7 @@ class TestLandingPageAuthFlows:
         assert decoded["user_id"] == user_data["user_id"]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_logout_flow(self, auth_service, user_service):
         """Test logout flow from authenticated state."""
         # Create authenticated session
@@ -255,6 +262,7 @@ class TestLandingPageAuthFlows:
         assert is_active is False
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_remember_me_flow(self, auth_service):
         """Test 'Remember Me' functionality for persistent sessions."""
         user_data = {
@@ -285,6 +293,7 @@ class TestLandingPageAuthFlows:
         assert expiry_diff >= 29  # At least 29 days difference
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_first_time_user_flow(self, auth_service, user_service):
         """Test first-time user registration and onboarding flow."""
         # New user OAuth data
@@ -314,6 +323,7 @@ class TestLandingPageAuthFlows:
         assert user["redirect_to"] == "/onboarding"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_landing_page_returning_user_flow(self, auth_service, user_service):
         """Test returning user authentication flow."""
         # Existing user data

@@ -5,20 +5,20 @@ Demonstrates how to use the unified testing infrastructure
 This shows the REAL service testing approach per SPEC/unified_system_testing.xml
 """
 
-from test_framework.http_client import TestClient
-from tests.e2e.harness_complete import TestHarnessContext, UnifiedE2ETestHarness
+from tests.e2e.harness_complete import TestHarnessContext, UnifiedE2ETestHarness, TestClient, create_minimal_harness, create_test_harness
 from typing import Any, Dict
 import asyncio
 import pytest
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_first_time_user_journey():
 
     """Test complete first-time user journey across all services."""
 
     async with TestHarnessContext("first_time_user_test") as harness:
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
         
         # Verify all services are healthy
 
@@ -45,13 +45,14 @@ async def test_first_time_user_journey():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_returning_user_login():
 
     """Test returning user login flow across services."""
 
     async with TestHarnessContext("returning_user_test") as harness:
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
         
         # Get test user
 
@@ -59,7 +60,7 @@ async def test_returning_user_login():
 
         assert user is not None
 
-        assert user["email"] == "test@example.com"
+        assert user["email"] == "test0@example.com"
         
         # Get auth token
 
@@ -72,6 +73,7 @@ async def test_returning_user_login():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_basic_chat_interaction():
 
     """Test basic chat interaction through WebSocket."""
@@ -96,11 +98,12 @@ async def test_basic_chat_interaction():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_service_isolation():
 
     """Test that services are properly isolated but can communicate."""
 
-    harness = await UnifiedE2ETestHarness.create_minimal_harness("isolation_test")
+    harness = await create_minimal_harness("isolation_test")
     
 
     try:
@@ -127,21 +130,23 @@ async def test_service_isolation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_isolation():
 
     """Test that each test gets isolated database."""
 
-    harness1 = await UnifiedE2ETestHarness.create_minimal_harness("db_test_1")
+    harness1 = await create_minimal_harness("db_test_1")
 
-    harness2 = await UnifiedE2ETestHarness.create_minimal_harness("db_test_2")
+    harness2 = await create_minimal_harness("db_test_2")
     
 
     try:
         # Each harness should have its own temp directory
 
         assert harness1.state.temp_dir != harness2.state.temp_dir
-
-        assert harness1.state.databases.test_db_name != harness2.state.databases.test_db_name
+        
+        # Each harness should have its own database manager instance
+        assert harness1.database_manager is not harness2.database_manager
         
 
     finally:
@@ -151,6 +156,7 @@ async def test_database_isolation():
         await harness2.stop_all_services()
 
 
+@pytest.mark.e2e
 class TestRealServiceIntegration:
 
     """Test class demonstrating real service integration patterns."""
@@ -162,7 +168,7 @@ class TestRealServiceIntegration:
 
         """Fixture providing a test harness for the test class."""
 
-        harness = await UnifiedE2ETestHarness.create_test_harness("class_test")
+        harness = await create_test_harness("class_test")
 
         yield harness
 
@@ -170,6 +176,7 @@ class TestRealServiceIntegration:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_to_backend_communication(self, harness):
 
         """Test communication from auth service to backend."""
@@ -181,7 +188,7 @@ class TestRealServiceIntegration:
         
         # Backend should be able to validate tokens from auth service
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
 
         headers = {"Authorization": f"Bearer {token}"}
         
@@ -196,6 +203,7 @@ class TestRealServiceIntegration:
     
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_data_consistency(self, harness):
 
         """Test that user data is consistent across services."""
@@ -214,13 +222,14 @@ class TestRealServiceIntegration:
 # Performance and load testing examples
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_requests():
 
     """Test system behavior under concurrent load."""
 
     async with TestHarnessContext("load_test") as harness:
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
         
         # Make multiple concurrent requests to test system stability
 

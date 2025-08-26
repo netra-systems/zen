@@ -102,6 +102,7 @@ class WebSocketResilienceTester:
         
         return disconnection_test
     
+    @pytest.mark.e2e
     async def test_message_queuing_during_disconnection(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test message queuing behavior during disconnection"""
         queuing_test = {
@@ -153,6 +154,7 @@ class WebSocketResilienceTester:
         
         return queuing_test
     
+    @pytest.mark.e2e
     async def test_token_refresh_during_connection(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test token refresh while maintaining active connection"""
         token_refresh_test = {
@@ -189,6 +191,7 @@ class WebSocketResilienceTester:
         
         return token_refresh_test
     
+    @pytest.mark.e2e
     async def test_malformed_payload_handling(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test handling of malformed payloads"""
         malformed_test = {
@@ -248,6 +251,7 @@ class WebSocketResilienceTester:
         
         return malformed_test
     
+    @pytest.mark.e2e
     async def test_rapid_reconnection_handling(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test handling of rapid reconnection attempts"""
         rapid_reconnect_test = {
@@ -332,10 +336,12 @@ async def resilience_tester():
     await tester.cleanup_clients()
 
 
+@pytest.mark.e2e
 class TestAutomaticReconnection:
     """Test automatic reconnection mechanisms"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_automatic_reconnection_on_network_failure(self, resilience_tester):
         """Test automatic reconnection when network fails"""
         client = resilience_tester.create_resilient_client("reconnection_test")
@@ -369,6 +375,7 @@ class TestAutomaticReconnection:
             print("Automatic reconnection not yet implemented")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_reconnection_with_retry_logic(self, resilience_tester):
         """Test reconnection with retry logic and backoff"""
         client = resilience_tester.create_resilient_client("retry_logic_test")
@@ -410,6 +417,7 @@ class TestAutomaticReconnection:
         assert client.metrics.retry_count >= 0, "Retry count should be tracked"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_state_transitions_during_recovery(self, resilience_tester):
         """Test proper connection state transitions during recovery"""
         client = resilience_tester.create_resilient_client("state_transition_test")
@@ -449,10 +457,12 @@ class TestAutomaticReconnection:
         })
 
 
+@pytest.mark.e2e
 class TestMessageQueuingAndRecovery:
     """Test message queuing during disconnection and recovery"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_queuing_during_disconnection(self, resilience_tester):
         """Test message queuing when connection is lost"""
         client = resilience_tester.create_resilient_client("queuing_test")
@@ -472,6 +482,7 @@ class TestMessageQueuingAndRecovery:
             print("Message queuing not yet implemented")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_ordering_preservation(self, resilience_tester):
         """Test message ordering is preserved during reconnection"""
         client = resilience_tester.create_resilient_client("ordering_test")
@@ -513,6 +524,7 @@ class TestMessageQueuingAndRecovery:
         assert sequences == list(range(10)), "Message sequences should be in order"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_deduplication_after_reconnect(self, resilience_tester):
         """Test message deduplication after reconnection"""
         client = resilience_tester.create_resilient_client("deduplication_test")
@@ -542,10 +554,12 @@ class TestMessageQueuingAndRecovery:
         print("Message deduplication handling depends on server-side implementation")
 
 
+@pytest.mark.e2e
 class TestTokenRefreshDuringConnection:
     """Test token refresh during active connections"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_refresh_maintains_connection(self, resilience_tester):
         """Test token refresh maintains active connection"""
         client = resilience_tester.create_resilient_client("token_refresh_test")
@@ -565,6 +579,7 @@ class TestTokenRefreshDuringConnection:
         assert token_refresh_result["connection_maintained"], "Connection should be maintained"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_token_handling_during_connection(self, resilience_tester):
         """Test handling of expired tokens during active connection"""
         client = resilience_tester.create_resilient_client("expired_token_test")
@@ -600,10 +615,12 @@ class TestTokenRefreshDuringConnection:
             "Connection should remain functional with expired token"
 
 
+@pytest.mark.e2e
 class TestMalformedPayloadHandling:
     """Test handling of malformed payloads and error recovery"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_malformed_payload_resilience(self, resilience_tester):
         """Test resilience against malformed payloads"""
         client = resilience_tester.create_resilient_client("malformed_test")
@@ -626,6 +643,7 @@ class TestMalformedPayloadHandling:
             "Should have tested malformed payloads"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_json_parsing_error_handling(self, resilience_tester):
         """Test JSON parsing error handling"""
         client = resilience_tester.create_resilient_client("json_error_test")
@@ -679,10 +697,12 @@ class TestMalformedPayloadHandling:
         })
 
 
+@pytest.mark.e2e
 class TestRapidReconnectionHandling:
     """Test rapid reconnection and connection flapping scenarios"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rapid_reconnection_stability(self, resilience_tester):
         """Test stability under rapid reconnection attempts"""
         client = resilience_tester.create_resilient_client("rapid_reconnect_test")
@@ -709,6 +729,7 @@ class TestRapidReconnectionHandling:
                 f"Average reconnection time should be reasonable: {rapid_reconnect_result['average_reconnect_time']:.2f}s"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_flapping_prevention(self, resilience_tester):
         """Test prevention of connection flapping"""
         client = resilience_tester.create_resilient_client("flapping_test")
@@ -761,10 +782,12 @@ class TestRapidReconnectionHandling:
             f"Average connection time should remain reasonable during flapping: {average_connect_time:.2f}s"
 
 
+@pytest.mark.e2e
 class TestComprehensiveResilienceValidation:
     """Test comprehensive resilience validation"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_end_to_end_resilience_scenario(self, resilience_tester):
         """Test comprehensive end-to-end resilience scenario"""
         client = resilience_tester.create_resilient_client("e2e_resilience_test")
@@ -821,6 +844,7 @@ class TestComprehensiveResilienceValidation:
             f"End-to-end resilience score below threshold: {resilience_score:.1f}%"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_resilience_metrics_analysis(self, resilience_tester):
         """Test analysis of all resilience metrics"""
         # Run a quick resilience test to generate metrics

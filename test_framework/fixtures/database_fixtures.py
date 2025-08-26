@@ -44,7 +44,11 @@ async def test_db_session():
         mock_session.add = MagicMock()
         mock_session.execute = AsyncMock()
         mock_session.get = AsyncMock()
-        yield mock_session
+        try:
+            yield mock_session
+        finally:
+            # Ensure mock session cleanup
+            await mock_session.close()
         return
     
     # Use in-memory SQLite for tests
@@ -52,9 +56,12 @@ async def test_db_session():
         "sqlite+aiosqlite:///:memory:",
         poolclass=StaticPool,
         echo=False,
+        connect_args={"check_same_thread": False},
+        pool_pre_ping=True,
+        pool_recycle=300
     )
     
-    # Create session
+    # Create session with proper lifecycle management
     async_session_maker = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
@@ -65,19 +72,32 @@ async def test_db_session():
         yield session
     except Exception:
         if session:
-            await session.rollback()
+            try:
+                await session.rollback()
+            except Exception:
+                pass
         raise
     finally:
+        # Comprehensive cleanup with error handling
         if session:
             try:
                 await session.rollback()
+            except Exception:
+                pass
+            try:
                 await session.close()
             except Exception:
                 pass
+        
+        # Proper engine cleanup
         try:
             await engine.dispose()
         except Exception:
             pass
+        
+        # Force garbage collection for SQLite connections
+        import gc
+        gc.collect()
 
 
 @pytest.fixture
@@ -92,13 +112,27 @@ async def netra_backend_db_session():
             try:
                 yield session
             finally:
+                # Enhanced cleanup with rollback and close
+                if hasattr(session, 'rollback'):
+                    try:
+                        await session.rollback()
+                    except Exception:
+                        pass
                 if hasattr(session, 'close'):
-                    await session.close()
+                    try:
+                        await session.close()
+                    except Exception:
+                        pass
     except ImportError:
         # Fall back to mock session if netra_backend is not available
         mock_session = AsyncMock()
+        mock_session.rollback = AsyncMock()
         mock_session.close = AsyncMock()
-        yield mock_session
+        try:
+            yield mock_session
+        finally:
+            await mock_session.rollback()
+            await mock_session.close()
 
 
 @pytest.fixture  
@@ -117,10 +151,15 @@ async def auth_service_db_session():
             try:
                 yield session
             finally:
-                # Additional cleanup if needed
+                # Enhanced cleanup with proper error handling
                 if hasattr(session, 'rollback'):
                     try:
                         await session.rollback()
+                    except Exception:
+                        pass
+                if hasattr(session, 'close'):
+                    try:
+                        await session.close()
                     except Exception:
                         pass
     except ImportError:
@@ -128,7 +167,11 @@ async def auth_service_db_session():
         mock_session = AsyncMock()
         mock_session.close = AsyncMock()
         mock_session.rollback = AsyncMock()
-        yield mock_session
+        try:
+            yield mock_session
+        finally:
+            await mock_session.rollback()
+            await mock_session.close()
 
 @pytest.fixture
 def mock_postgres_connection():

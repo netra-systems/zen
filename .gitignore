@@ -42,6 +42,7 @@ out/
 .env.test.local
 .env.production.local
 .env.staging.local
+.env.staging
 
 # GCP Service Account Keys - NEVER COMMIT
 *-sa-key.json

@@ -38,33 +38,37 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
 
+# Global fixtures for all test classes
+@pytest.fixture
+def mock_credentials():
+    """Mock HTTP Bearer credentials"""
+    return HTTPAuthorizationCredentials(
+        scheme="Bearer",
+        credentials="valid_token_123"
+    )
+
+@pytest.fixture
+def mock_db_session():
+    """Mock async database session"""
+    # Mock: Database session isolation for transaction testing without real database dependency
+    session = AsyncMock(spec=AsyncSession)
+    # Configure async context manager behavior
+    session.__aenter__ = AsyncMock(return_value=session)
+    session.__aexit__ = AsyncMock(return_value=None)
+    return session
+
+@pytest.fixture
+def mock_user():
+    """Mock user object"""
+    # Mock: Component isolation for controlled unit testing
+    user = Mock(spec=User)
+    user.id = "user_123"
+    user.email = "test@example.com"
+    user.is_active = True
+    return user
+
 class TestAuthenticationCore:
     """Core authentication functionality tests"""
-
-    @pytest.fixture
-    def mock_credentials(self):
-        """Mock HTTP Bearer credentials"""
-        return HTTPAuthorizationCredentials(
-            scheme="Bearer",
-            credentials="valid_token_123"
-        )
-
-    @pytest.fixture
-    def mock_db_session(self):
-        """Mock async database session"""
-        # Mock: Database session isolation for transaction testing without real database dependency
-        session = AsyncMock(spec=AsyncSession)
-        return session
-
-    @pytest.fixture
-    def mock_user(self):
-        """Mock user object"""
-        # Mock: Component isolation for controlled unit testing
-        user = Mock(spec=User)
-        user.id = "user_123"
-        user.email = "test@example.com"
-        user.is_active = True
-        return user
 
     @pytest.mark.asyncio
     async def test_get_current_user_success(
@@ -76,11 +80,11 @@ class TestAuthenticationCore:
         """Test successful user authentication and retrieval"""
         # Arrange - Mock auth client validation
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth:
-            mock_auth.validate_token.return_value = {
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
+            mock_auth.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "user_123"
-            }
+            })
             
             # Mock database query result
             # Mock: Generic component isolation for controlled unit testing
@@ -93,7 +97,7 @@ class TestAuthenticationCore:
             
             # Assert
             assert result == mock_user
-            mock_auth.validate_token.assert_called_once_with("valid_token_123")
+            mock_auth.validate_token_jwt.assert_called_once_with("valid_token_123")
 
     @pytest.mark.asyncio
     async def test_get_current_user_invalid_token(
@@ -104,8 +108,8 @@ class TestAuthenticationCore:
         """Test authentication failure with invalid token"""
         # Arrange
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth:
-            mock_auth.validate_token.return_value = {"valid": False}
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
+            mock_auth.validate_token_jwt = AsyncMock(return_value={"valid": False})
             
             # Act & Assert
             with pytest.raises(HTTPException) as exc_info:
@@ -123,8 +127,8 @@ class TestAuthenticationCore:
         """Test authentication failure when token lacks user_id"""
         # Arrange
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth:
-            mock_auth.validate_token.return_value = {"valid": True}
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
+            mock_auth.validate_token_jwt = AsyncMock(return_value={"valid": True})
             
             # Act & Assert
             with pytest.raises(HTTPException) as exc_info:
@@ -142,11 +146,18 @@ class TestAuthenticationCore:
         """Test authentication failure when user not in database"""
         # Arrange
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth:
-            mock_auth.validate_token.return_value = {
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth, \
+             patch('netra_backend.app.config.get_config') as mock_get_config:
+            
+            mock_auth.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "nonexistent_user"
-            }
+            })
+            
+            # Mock config to return non-development environment
+            mock_config = Mock()
+            mock_config.environment = "production"
+            mock_get_config.return_value = mock_config
             
             # Mock database query returning None
             # Mock: Generic component isolation for controlled unit testing
@@ -170,8 +181,8 @@ class TestAuthenticationCore:
         """Test handling of auth service communication errors"""
         # Arrange
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth:
-            mock_auth.validate_token.side_effect = Exception("Auth service down")
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
+            mock_auth.validate_token_jwt = AsyncMock(side_effect=Exception("Auth service down"))
             
             # Act & Assert
             with pytest.raises(Exception):
@@ -212,7 +223,7 @@ class TestOptionalAuthentication:
         mock_user.id = "user_123"
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.auth_integration.auth.get_current_user') as mock_get_user:
+        with patch('netra_backend.app.auth_integration.auth.get_current_user') as mock_get_user:
             mock_get_user.return_value = mock_user
             
             # Act
@@ -234,7 +245,7 @@ class TestOptionalAuthentication:
         )
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.auth_integration.auth.get_current_user') as mock_get_user:
+        with patch('netra_backend.app.auth_integration.auth.get_current_user') as mock_get_user:
             mock_get_user.side_effect = HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
@@ -266,8 +277,8 @@ class TestAuthenticationBoundaries:
             )
             
             # Mock: Authentication service isolation for testing without real auth flows
-            with patch('app.auth_integration.auth.auth_client') as mock_auth:
-                mock_auth.validate_token.return_value = {"valid": False}
+            with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
+                mock_auth.validate_token_jwt = AsyncMock(return_value={"valid": False})
                 
                 with pytest.raises(HTTPException):
                     await get_current_user(credentials, mock_db_session)
@@ -281,14 +292,17 @@ class TestAuthenticationBoundaries:
         """Test proper database session context management"""
         # Arrange
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth:
-            mock_auth.validate_token.return_value = {
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
+            mock_auth.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "user_123"
-            }
+            })
             
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
+            # Configure async context manager behavior
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
             # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.scalar_one_or_none.return_value = mock_user
@@ -320,11 +334,11 @@ class TestAuthenticationPerformance:
         )
         
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth:
-            mock_auth.validate_token.return_value = {
+        with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_auth:
+            mock_auth.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "user_123"
-            }
+            })
             
             # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()

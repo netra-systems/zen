@@ -35,6 +35,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_refresh_prompt_and_flow(jwt_generator, audit_logger, token_refresh_service, expired_token):
     """
     Test Case 1: Token refresh prompt and flow validation.
@@ -114,6 +115,7 @@ async def test_token_refresh_prompt_and_flow(jwt_generator, audit_logger, token_
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_refresh_token_validation_and_security(jwt_generator, audit_logger, token_refresh_service):
     """
     Test Case 2: Refresh token validation and security controls.
@@ -197,6 +199,7 @@ async def test_refresh_token_validation_and_security(jwt_generator, audit_logger
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_refresh_token_lifecycle_and_cleanup(jwt_generator, audit_logger, token_refresh_service):
     """
     Test Case 3: Refresh token lifecycle and cleanup procedures.

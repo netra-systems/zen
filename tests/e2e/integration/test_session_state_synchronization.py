@@ -76,9 +76,11 @@ async def jwt_helper():
         pass
 
 
+@pytest.mark.e2e
 class TestSessionStateSynchronization:
     """Test session state synchronization across services."""
     
+    @pytest.mark.e2e
     async def test_cross_service_session_sync(self, session_manager, cross_service_validator):
         """Test session synchronization across all services."""
         manager = session_manager
@@ -106,6 +108,7 @@ class TestSessionStateSynchronization:
         
         logger.info(f"Cross-service sync validated for session {session.session_id}")
     
+    @pytest.mark.e2e
     async def test_session_persistence_across_restart(self, session_manager):
         """Test session persists across service restart."""
         manager = session_manager
@@ -134,6 +137,7 @@ class TestSessionStateSynchronization:
         
         logger.info(f"Session persistence validated across restart for {session.session_id}")
     
+    @pytest.mark.e2e
     async def test_concurrent_session_updates(self, session_manager):
         """Test concurrent session updates from multiple sources."""
         manager = session_manager
@@ -169,6 +173,7 @@ class TestSessionStateSynchronization:
         
         logger.info(f"Concurrent updates validated for session {session.session_id}")
     
+    @pytest.mark.e2e
     async def test_multi_tab_session_isolation(self, multi_tab_manager):
         """Test multi-tab session isolation and synchronization."""
         manager = multi_tab_manager
@@ -205,6 +210,7 @@ class TestSessionStateSynchronization:
         
         logger.info(f"Multi-tab isolation and sync validated for user {user_data.id}")
     
+    @pytest.mark.e2e
     async def test_session_timeout_handling(self, session_manager):
         """Test session timeout behavior."""
         manager = session_manager
@@ -228,6 +234,7 @@ class TestSessionStateSynchronization:
         
         logger.info(f"Session timeout handling validated for {session.session_id}")
     
+    @pytest.mark.e2e
     async def test_session_migration_between_servers(self, session_manager, cross_service_validator):
         """Test session migration during server changes."""
         session_mgr = session_manager
@@ -258,6 +265,7 @@ class TestSessionStateSynchronization:
         
         logger.info(f"Session migration validated for {session.session_id}")
     
+    @pytest.mark.e2e
     async def test_different_user_session_isolation(self, session_manager, cross_service_validator):
         """Test sessions between different users are properly isolated."""
         manager = session_manager
@@ -285,6 +293,7 @@ class TestSessionStateSynchronization:
         logger.info(f"User session isolation validated between {user_1.id} and {user_2.id}")
     
     @pytest.mark.performance
+    @pytest.mark.e2e
     async def test_session_sync_performance(self, session_manager, cross_service_validator):
         """Test session synchronization performance."""
         manager = session_manager
@@ -322,6 +331,7 @@ class TestSessionStateSynchronization:
                    f"Sync: {sync_time:.3f}s, "
                    f"Update: {update_time:.3f}s")
     
+    @pytest.mark.e2e
     async def test_session_state_scenarios(self, session_manager):
         """Test various session state scenarios."""
         manager = session_manager

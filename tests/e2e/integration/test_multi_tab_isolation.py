@@ -102,6 +102,7 @@ class MultiTabWebSocketIsolationManager:
             
         return connected_tabs
     
+    @pytest.mark.e2e
     async def test_message_isolation(self, tab_ids: List[str]) -> bool:
         """Test that messages are isolated between tabs."""
         if len(tab_ids) < 2:
@@ -131,6 +132,7 @@ class MultiTabWebSocketIsolationManager:
         
         return True
     
+    @pytest.mark.e2e
     async def test_shared_session_state(self, tab_ids: List[str]) -> bool:
         """Test that session state is shared across tabs."""
         if len(tab_ids) < 2:
@@ -171,6 +173,7 @@ class MultiTabWebSocketIsolationManager:
         
         return True
     
+    @pytest.mark.e2e
     async def test_concurrent_operations(self, tab_ids: List[str]) -> bool:
         """Test concurrent operations across multiple tabs."""
         if len(tab_ids) < 3:
@@ -189,6 +192,7 @@ class MultiTabWebSocketIsolationManager:
         successful_operations = sum(1 for result in results if result is True)
         return successful_operations >= len(tab_ids) * 0.8  # 80% success rate
     
+    @pytest.mark.e2e
     async def test_tab_specific_data_isolation(self, tab_ids: List[str]) -> bool:
         """Test that tab-specific data remains isolated."""
         # Set unique data for each tab
@@ -271,9 +275,11 @@ class MultiTabWebSocketIsolationManager:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestMultiTabIsolation:
     """Critical E2E Test: Multi-Tab WebSocket Isolation."""
     
+    @pytest.mark.e2e
     async def test_multi_tab_isolation(self):
         """
         BVJ: Segment: Enterprise | Goal: UX | Impact: Enterprise user experience
@@ -308,6 +314,7 @@ class TestMultiTabIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_two_tabs_separate_websocket_connections(self):
         """Test that each tab has its own WebSocket connection."""
         manager = MultiTabWebSocketIsolationManager()
@@ -329,6 +336,7 @@ class TestMultiTabIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_message_routing_correctness(self):
         """Test that messages are routed correctly to each tab."""
         manager = MultiTabWebSocketIsolationManager()
@@ -360,6 +368,7 @@ class TestMultiTabIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_no_data_cross_contamination(self):
         """Test that there's no data cross-contamination between tabs."""
         manager = MultiTabWebSocketIsolationManager()
@@ -408,6 +417,7 @@ class TestMultiTabIsolation:
         finally:
             await manager.cleanup()
     
+    @pytest.mark.e2e
     async def test_shared_session_across_tabs(self):
         """Test that session data is properly shared across tabs."""
         manager = MultiTabWebSocketIsolationManager()

@@ -95,6 +95,7 @@ class WebSocketStreamingTester:
         
         return streaming_result
 
+    @pytest.mark.e2e
     async def test_websocket_connection_stability(self, ws_manager: WebSocketManager,
                                                 user_id: str) -> Dict[str, Any]:
         """Test WebSocket connection stability during streaming."""
@@ -170,6 +171,7 @@ class WebSocketStreamingTester:
         
         return backpressure_result
 
+    @pytest.mark.e2e
     async def test_reconnection_handling(self, ws_manager: WebSocketManager,
                                        user_id: str) -> Dict[str, Any]:
         """Test WebSocket reconnection scenarios."""
@@ -238,6 +240,7 @@ class WebSocketStreamingTester:
         await asyncio.sleep(0.05)
         return {"attempt": attempt, "successful": attempt < 2, "user_id": user_id}
 
+@pytest.mark.e2e
 class TestWebSocketMessageStreaming:
     """Integration tests for WebSocket message streaming."""
     
@@ -247,6 +250,7 @@ class TestWebSocketMessageStreaming:
         return WebSocketStreamingTester()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_basic_response_streaming(self, streaming_tester):
         """Test basic agent response streaming through WebSocket."""
         ws_manager = await streaming_tester.create_test_websocket_manager()
@@ -265,6 +269,7 @@ class TestWebSocketMessageStreaming:
         assert len(streaming_tester.streaming_events) > 0
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_stability_during_streaming(self, streaming_tester):
         """Test WebSocket connection stability during active streaming."""
         ws_manager = await streaming_tester.create_test_websocket_manager()
@@ -286,6 +291,7 @@ class TestWebSocketMessageStreaming:
         assert len(streaming_tester.connection_events) > 0
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backpressure_handling(self, streaming_tester):
         """Test backpressure handling during high-volume streaming."""
         ws_manager = await streaming_tester.create_test_websocket_manager()
@@ -302,6 +308,7 @@ class TestWebSocketMessageStreaming:
         assert backpressure_result["backpressure_triggered"] or not backpressure_result["queue_overflow"]
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_streaming_sessions(self, streaming_tester):
         """Test concurrent streaming sessions for multiple users."""
         ws_manager = await streaming_tester.create_test_websocket_manager()
@@ -330,6 +337,7 @@ class TestWebSocketMessageStreaming:
         assert total_time < 15.0, f"Concurrent streaming too slow: {total_time:.2f}s"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_reconnection_scenarios(self, streaming_tester):
         """Test WebSocket reconnection handling."""
         ws_manager = await streaming_tester.create_test_websocket_manager()
@@ -345,6 +353,7 @@ class TestWebSocketMessageStreaming:
         assert reconnection_result["successful_reconnections"] > 0
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_chunk_ordering_and_integrity(self, streaming_tester):
         """Test chunk ordering and data integrity during streaming."""
         ws_manager = await streaming_tester.create_test_websocket_manager()
@@ -365,10 +374,12 @@ class TestWebSocketMessageStreaming:
             assert chunks[i]["chunk_index"] == chunks[i-1]["chunk_index"] + 1
 
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestCriticalStreamingScenarios:
     """Critical streaming scenarios protecting user experience."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_streaming_performance(self):
         """Test enterprise-level streaming performance requirements."""
         tester = WebSocketStreamingTester()

@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 
+@pytest.mark.e2e
 class TestWebsocketUiTimingIntegrationCore:
     """Test class for websocket_ui_timing_integration_core"""
     
@@ -16,10 +17,12 @@ class TestWebsocketUiTimingIntegrationCore:
         """Setup for each test method"""
         pass
     
+    @pytest.mark.e2e
     def test_placeholder(self):
         """Placeholder test to ensure file is syntactically valid"""
         assert True
     
+    @pytest.mark.e2e
     def test_basic_functionality(self):
         """Basic functionality test placeholder"""
         # TODO: Implement actual tests

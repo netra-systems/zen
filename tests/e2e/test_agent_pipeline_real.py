@@ -66,6 +66,7 @@ pytestmark = pytest.mark.skipif(
     data=["test_users", "agent_test_data"]
 )
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestAgentPipelineReal:
     """CRITICAL Test: Real Agent Message Processing Pipeline."""
     
@@ -83,6 +84,7 @@ class TestAgentPipelineReal:
         return await pipeline_infrastructure.create_supervisor_agent()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_message_routing_through_supervisor(self, pipeline_infrastructure, supervisor_agent):
         """Test message flows through supervisor to correct agents."""
         test_session = await pipeline_infrastructure.create_test_session(PlanTier.ENTERPRISE)
@@ -93,6 +95,7 @@ class TestAgentPipelineReal:
             await test_session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_agent_processing_pipeline(self, pipeline_infrastructure, supervisor_agent):
         """Test real agent processing with controlled LLM responses."""
         test_session = await pipeline_infrastructure.create_test_session(PlanTier.PRO)
@@ -103,6 +106,7 @@ class TestAgentPipelineReal:
             await test_session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_response_streaming_to_user(self, pipeline_infrastructure, supervisor_agent):
         """Test response streaming back to user with performance requirements."""
         test_session = await pipeline_infrastructure.create_test_session(PlanTier.ENTERPRISE)
@@ -113,6 +117,7 @@ class TestAgentPipelineReal:
             await test_session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_agent_coordination(self, pipeline_infrastructure, supervisor_agent):
         """Test multi-agent coordination and parallel execution."""
         test_session = await pipeline_infrastructure.create_test_session(PlanTier.ENTERPRISE)
@@ -123,6 +128,7 @@ class TestAgentPipelineReal:
             await test_session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_pipeline_error_recovery(self, pipeline_infrastructure, supervisor_agent):
         """Test pipeline error handling and recovery mechanisms."""
         test_session = await pipeline_infrastructure.create_test_session(PlanTier.PRO)

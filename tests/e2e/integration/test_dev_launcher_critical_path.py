@@ -56,6 +56,7 @@ AUTH_URL = f"http://localhost:{AUTH_PORT}"
 WS_URL = f"ws://localhost:{BACKEND_PORT}/ws"
 
 
+@pytest.mark.e2e
 class TestDevLauncherCriticalPath:
     """
     Comprehensive test suite for dev launcher critical path.
@@ -121,6 +122,7 @@ class TestDevLauncherCriticalPath:
     
     @pytest.mark.critical
     @pytest.mark.timeout(60)
+    @pytest.mark.e2e
     async def test_cold_start_complete_system(self):
         """
         Test complete system startup from clean state.
@@ -206,6 +208,7 @@ class TestDevLauncherCriticalPath:
             return False
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_service_health_endpoints(self):
         """Test that all service health endpoints respond correctly."""
         # Start services first
@@ -238,6 +241,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_cors_configuration(self):
         """Test CORS configuration for cross-origin requests."""
         await self._start_dev_launcher()
@@ -265,6 +269,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_websocket_connection(self):
         """Test WebSocket connection establishment and basic messaging."""
         await self._start_dev_launcher()
@@ -299,6 +304,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_authentication_flow(self):
         """Test complete authentication flow from login to authenticated API call."""
         await self._start_dev_launcher()
@@ -340,6 +346,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_database_connections(self):
         """Test that all required databases are accessible."""
         await self._start_dev_launcher()
@@ -372,6 +379,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_end_to_end_user_journey(self):
         """
         Test complete user journey from login to chat interaction.
@@ -427,6 +435,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.performance
+    @pytest.mark.e2e
     async def test_startup_performance(self):
         """Test that startup meets performance requirements."""
         # Measure cold start time
@@ -464,6 +473,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.resilience
+    @pytest.mark.e2e
     async def test_service_failure_recovery(self):
         """Test that system recovers from individual service failures."""
         await self._start_dev_launcher()
@@ -500,6 +510,7 @@ class TestDevLauncherCriticalPath:
             await self._stop_dev_launcher()
     
     @pytest.mark.resilience
+    @pytest.mark.e2e
     async def test_port_conflict_handling(self):
         """Test handling of port conflicts during startup."""
         # Start a dummy service on backend port
@@ -533,6 +544,7 @@ class TestDevLauncherCriticalPath:
             await dummy_server.wait_closed()
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_service_independence(self):
         """Test that services are truly independent as per requirements."""
         # Start only backend service

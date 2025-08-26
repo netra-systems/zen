@@ -110,6 +110,30 @@ def configure_dev_environment():
     os.environ["REDIS_URL"] = "redis://localhost:6379"
     os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
 
+def configure_test_environment():
+    """Configure environment variables for testing mode."""
+    # Set environment to testing  
+    os.environ["ENVIRONMENT"] = "testing"
+    os.environ["TESTING"] = "true"
+    
+    # Skip heavy startup checks during testing
+    os.environ["SKIP_STARTUP_CHECKS"] = "true"
+    os.environ["TEST_COLLECTION_MODE"] = "false"
+    
+    # Configure test service URLs
+    os.environ["BASE_URL"] = "http://localhost:8001"
+    os.environ["API_BASE_URL"] = "http://localhost:8001" 
+    os.environ["BACKEND_URL"] = "http://localhost:8001"
+    
+    # Frontend URLs (if needed)
+    os.environ["FRONTEND_URL"] = "http://localhost:3000"
+    
+    # Database and service URLs for test environment
+    # Use test-specific database to avoid conflicts with dev data
+    os.environ["DATABASE_URL"] = "postgresql://postgres:password@localhost:5432/netra_test"
+    os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use DB 1 for tests
+    os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
+
 def configure_real_llm(model: str = "gemini-2.5-flash", 
                        timeout: int = 60, 
                        parallel: str = "auto", 

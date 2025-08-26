@@ -48,6 +48,7 @@ class OnboardingTestManager:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_user_onboarding_to_first_value_delivery():
     """
     E2E Test #1: Complete User Onboarding → First Value Delivery
@@ -85,6 +86,7 @@ def _log_onboarding_success_metrics(results: dict) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_onboarding_flow_performance_validation():
     """
     Performance validation for user onboarding flow under various conditions.
@@ -136,6 +138,7 @@ def _log_performance_test_metrics(performance_results: list) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_onboarding_flow_error_handling():
     """
     Test onboarding flow error handling and recovery scenarios.
@@ -162,6 +165,7 @@ def _log_error_handling_success() -> None:
 
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_concurrent_user_onboarding():
     """
     Test multiple users going through onboarding simultaneously.

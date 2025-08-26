@@ -22,6 +22,7 @@ from tests.e2e.config import (
 )
 
 
+@pytest.mark.e2e
 def test_environment_variables_set():
     """Test that environment variables are properly set"""
     assert os.environ.get("TESTING") == "1"
@@ -31,6 +32,7 @@ def test_environment_variables_set():
     assert os.environ.get("ENCRYPTION_KEY") is not None
 
 
+@pytest.mark.e2e
 def test_test_users_created():
     """Test that test users are created for all tiers"""
     for tier in CustomerTier:
@@ -41,6 +43,7 @@ def test_test_users_created():
         assert user.is_active is True
 
 
+@pytest.mark.e2e
 def test_test_endpoints_configured():
     """Test that test endpoints are properly configured"""
     assert TEST_ENDPOINTS.ws_url.startswith("ws://")
@@ -48,6 +51,7 @@ def test_test_endpoints_configured():
     assert TEST_ENDPOINTS.auth_base.startswith("http://")
 
 
+@pytest.mark.e2e
 def test_secrets_configured():
     """Test that secrets are properly configured"""
     assert len(TEST_SECRETS.jwt_secret) >= 32
@@ -55,6 +59,7 @@ def test_secrets_configured():
     assert len(TEST_SECRETS.encryption_key) >= 16
 
 
+@pytest.mark.e2e
 def test_factory_functions():
     """Test that data factory functions work correctly"""
     # Test message data creation
@@ -76,6 +81,7 @@ def test_factory_functions():
     assert plan_data["auto_renew"] is True
 
 
+@pytest.mark.e2e
 def test_database_manager():
     """Test that database manager provides correct configuration"""
     db_url = TestDatabaseManager.get_memory_db_url()
@@ -91,6 +97,7 @@ def test_database_manager():
     assert session_config["autocommit"] is False
 
 
+@pytest.mark.e2e
 def test_helper_functions():
     """Test that helper functions work correctly"""
     # Test get_test_user function
@@ -105,6 +112,7 @@ def test_helper_functions():
     assert enterprise_user.plan_tier == "enterprise"
 
 
+@pytest.mark.e2e
 def test_token_manager():
     """Test that token manager works correctly"""
     token_manager = TestTokenManager(TEST_SECRETS)
@@ -116,6 +124,7 @@ def test_token_manager():
     assert len(token) > 10  # Should be a reasonable token length
 
 
+@pytest.mark.e2e
 def test_configuration_isolation():
     """Test that configuration is properly isolated for testing"""
     # Ensure we're in test mode

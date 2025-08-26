@@ -753,12 +753,38 @@ def _alter_userbase_plan_started_at() -> None:
 
 
 def _drop_userbase_indexes() -> None:
-    """Drop obsolete userbase indexes."""
-    op.drop_index(op.f('idx_userbase_created_at'), table_name='userbase')
-    op.drop_index(op.f('idx_userbase_email'), table_name='userbase')
-    op.drop_index(op.f('idx_userbase_plan_tier_is_active'), table_name='userbase')
-    op.drop_index(op.f('idx_userbase_role_is_developer'), table_name='userbase')
-    op.drop_index(op.f('ix_userbase_role'), table_name='userbase')
+    """Drop obsolete userbase indexes.
+    
+    Prerequisites: Assumes indexes may or may not exist due to different database states.
+    Uses IF EXISTS to ensure idempotent operation that can be run multiple times safely.
+    
+    CAUTION: This operation is idempotent and will not fail if indexes don't exist.
+    """
+    try:
+        op.drop_index(op.f('idx_userbase_created_at'), table_name='userbase', if_exists=True)
+    except Exception:
+        # Index may not exist - continue with other operations
+        pass
+    
+    try:
+        op.drop_index(op.f('idx_userbase_email'), table_name='userbase', if_exists=True)
+    except Exception:
+        pass
+    
+    try:
+        op.drop_index(op.f('idx_userbase_plan_tier_is_active'), table_name='userbase', if_exists=True)
+    except Exception:
+        pass
+    
+    try:
+        op.drop_index(op.f('idx_userbase_role_is_developer'), table_name='userbase', if_exists=True)
+    except Exception:
+        pass
+    
+    try:
+        op.drop_index(op.f('ix_userbase_role'), table_name='userbase', if_exists=True)
+    except Exception:
+        pass
 
 
 def upgrade() -> None:
@@ -788,12 +814,38 @@ def _restore_userbase_table() -> None:
 
 
 def _restore_userbase_indexes() -> None:
-    """Restore userbase indexes."""
-    op.create_index(op.f('ix_userbase_role'), 'userbase', ['role'], unique=False)
-    op.create_index(op.f('idx_userbase_role_is_developer'), 'userbase', ['role', 'is_developer'], unique=False)
-    op.create_index(op.f('idx_userbase_plan_tier_is_active'), 'userbase', ['plan_tier', 'is_active'], unique=False)
-    op.create_index(op.f('idx_userbase_email'), 'userbase', ['email'], unique=False)
-    op.create_index(op.f('idx_userbase_created_at'), 'userbase', ['created_at'], unique=False)
+    """Restore userbase indexes.
+    
+    Prerequisites: Assumes indexes may or may not exist due to rollback scenarios.
+    Uses IF NOT EXISTS to ensure idempotent operation for index restoration.
+    
+    CAUTION: This operation is idempotent and will not fail if indexes already exist.
+    """
+    try:
+        op.create_index(op.f('ix_userbase_role'), 'userbase', ['role'], unique=False, if_not_exists=True)
+    except Exception:
+        # Index may already exist - continue with other operations
+        pass
+    
+    try:
+        op.create_index(op.f('idx_userbase_role_is_developer'), 'userbase', ['role', 'is_developer'], unique=False, if_not_exists=True)
+    except Exception:
+        pass
+    
+    try:
+        op.create_index(op.f('idx_userbase_plan_tier_is_active'), 'userbase', ['plan_tier', 'is_active'], unique=False, if_not_exists=True)
+    except Exception:
+        pass
+    
+    try:
+        op.create_index(op.f('idx_userbase_email'), 'userbase', ['email'], unique=False, if_not_exists=True)
+    except Exception:
+        pass
+    
+    try:
+        op.create_index(op.f('idx_userbase_created_at'), 'userbase', ['created_at'], unique=False, if_not_exists=True)
+    except Exception:
+        pass
 
 
 def _restore_userbase_columns() -> None:

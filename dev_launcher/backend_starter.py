@@ -90,11 +90,19 @@ class BackendStarter:
     
     def _allocate_dynamic_backend_port(self) -> int:
         """Allocate dynamic backend port."""
-        # Try to get a port in a preferred range first
+        # CRITICAL FIX: Always try port 8000 first for frontend consistency
+        from dev_launcher.utils import is_port_available
+        
+        # Force port 8000 if available
+        if is_port_available(8000):
+            logger.info(f"Using preferred backend port: 8000")
+            return 8000
+        
+        # Only use dynamic allocation if 8000 is truly unavailable
         from dev_launcher.utils import find_available_port
-        preferred_port = 8000
-        port = find_available_port(preferred_port, (8000, 8010))
-        logger.info(f"Allocated backend port: {port}")
+        port = find_available_port(8001, (8001, 8010))
+        logger.warning(f"Port 8000 unavailable, allocated backend port: {port}")
+        logger.warning(f"Frontend may fail to connect - port mismatch detected!")
         return port
     
     def _find_server_script(self) -> Optional[Path]:
@@ -201,20 +209,86 @@ class BackendStarter:
     
     def _verify_backend_startup(self, process: subprocess.Popen, port: int, 
                                log_streamer: LogStreamer) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
-        """Verify backend startup."""
+        """Verify backend startup with improved readiness logic."""
+        # Initial quick check to make sure process didn't crash immediately
         time.sleep(2)
         if process.poll() is not None:
             self._handle_backend_startup_failure(process)
             return None, None
         
-        # Verify backend is actually responding on the expected port
-        if not self._verify_backend_health(port):
-            logger.error(f"Backend process started but not responding on port {port}")
-            self._print("❌", "ERROR", f"Backend not responding on port {port}")
+        # Wait for backend to fully initialize before health check
+        self._print("⏳", "WAIT", f"Waiting for backend initialization on port {port}...")
+        ready, details = self._wait_for_backend_ready(process, port)
+        
+        if not ready:
+            logger.error(f"Backend readiness check failed on port {port}: {details}")
+            self._print("❌", "ERROR", f"Backend not ready: {details}")
             return None, None
             
         self._finalize_backend_startup(port, process)
         return process, log_streamer
+    
+    def _wait_for_backend_ready(self, process: subprocess.Popen, port: int) -> Tuple[bool, str]:
+        """
+        Wait for backend to be ready with comprehensive monitoring.
+        
+        Combines process monitoring with health checks to prevent false positives
+        and false negatives in service readiness detection.
+        
+        Returns:
+            Tuple of (ready, details) where details explains any failure
+        """
+        max_wait_time = 45  # Increased timeout for backend initialization
+        check_interval = 1  # Check every second
+        start_time = time.time()
+        
+        # Phase 1: Wait for process to stabilize (first 5 seconds)
+        stabilization_time = 5
+        while time.time() - start_time < stabilization_time:
+            if process.poll() is not None:
+                return False, f"Process crashed during stabilization (exit code: {process.poll()})"
+            time.sleep(0.5)
+        
+        # Phase 2: Wait for port to be available (network listening)
+        port_ready = False
+        port_wait_time = 15
+        while time.time() - start_time < port_wait_time and not port_ready:
+            if process.poll() is not None:
+                return False, f"Process crashed during port binding (exit code: {process.poll()})"
+            
+            port_ready = self._check_port_listening(port)
+            if not port_ready:
+                time.sleep(check_interval)
+        
+        if not port_ready:
+            return False, f"Port {port} not listening after {port_wait_time}s"
+        
+        # Phase 3: Wait for health endpoint to respond
+        from dev_launcher.utils import wait_for_service_with_details
+        backend_url = f"http://localhost:{port}/health/"
+        health_timeout = max_wait_time - (time.time() - start_time)
+        
+        if health_timeout <= 0:
+            return False, "Timeout during health check phase"
+        
+        success, details = wait_for_service_with_details(backend_url, timeout=int(health_timeout))
+        if success:
+            elapsed = time.time() - start_time
+            return True, f"Ready in {elapsed:.1f}s"
+        else:
+            return False, f"Health check failed: {details}"
+    
+    def _check_port_listening(self, port: int) -> bool:
+        """Check if the port is listening for connections."""
+        try:
+            import socket
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)
+                result = sock.connect_ex(('localhost', port))
+                return result == 0
+        except Exception as e:
+            logger.debug(f"Port check failed for {port}: {e}")
+            return False
     
     def _verify_backend_health(self, port: int) -> bool:
         """Verify backend is responding on the expected port."""
@@ -231,9 +305,151 @@ class BackendStarter:
         self._print("❌", "ERROR", f"Backend startup failed: {str(e)[:100]}")
     
     def _handle_backend_startup_failure(self, process: subprocess.Popen):
-        """Handle backend startup failure."""
-        self._print("❌", "ERROR", "Backend failed to start")
+        """Handle backend startup failure with enhanced error capture and recovery."""
+        exit_code = process.poll()
+        self._print("❌", "ERROR", f"Backend failed to start (exit code: {exit_code})")
+        
+        # Capture detailed error information
+        detailed_errors = self._capture_backend_runtime_errors(process, exit_code)
+        if detailed_errors:
+            self._print("📋", "DETAILS", "Backend runtime errors:")
+            for error in detailed_errors[:5]:  # Show max 5 most relevant errors
+                print(f"  → {error}")
+        
+        # Suggest recovery actions based on exit code
+        self._suggest_recovery_actions(exit_code)
+        
         self._print_backend_troubleshooting()
+    
+    def _capture_backend_runtime_errors(self, process: subprocess.Popen, exit_code: Optional[int]) -> list:
+        """Capture detailed backend runtime errors from process output and logs."""
+        errors = []
+        
+        try:
+            # Try to read from stderr if available
+            if hasattr(process, 'stderr') and process.stderr:
+                stderr_output = process.stderr.read()
+                if stderr_output:
+                    errors.extend(self._parse_backend_errors(stderr_output.decode('utf-8', errors='ignore')))
+        except Exception as e:
+            logger.debug(f"Failed to read process stderr: {e}")
+        
+        # Try to capture errors from backend log files
+        try:
+            backend_log_path = self.config.log_dir / "backend.log"
+            if backend_log_path.exists():
+                with open(backend_log_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    # Read last 100 lines for recent errors
+                    lines = f.readlines()
+                    recent_logs = ''.join(lines[-100:]) if lines else ""
+                    errors.extend(self._parse_backend_errors(recent_logs))
+        except Exception as e:
+            logger.debug(f"Failed to read backend log file: {e}")
+        
+        # Check for common backend issues based on exit code
+        if exit_code:
+            errors.extend(self._diagnose_exit_code_issues(exit_code))
+        
+        return list(set(errors))  # Remove duplicates
+    
+    def _parse_backend_errors(self, output: str) -> list:
+        """Parse backend errors from output text."""
+        errors = []
+        lines = output.split('\n')
+        
+        # Common error patterns in backend startup
+        error_patterns = [
+            r'ModuleNotFoundError: .+',
+            r'ImportError: .+',
+            r'FileNotFoundError: .+',
+            r'ConnectionError: .+',
+            r'DatabaseError: .+',
+            r'PermissionError: .+',
+            r'AttributeError: .+',
+            r'ValueError: .+',
+            r'RuntimeError: .+',
+            r'OSError: .+',
+            r'uvicorn.error: .+',
+            r'sqlalchemy.exc.: .+',
+            r'asyncpg.exceptions.: .+',
+            r'redis.exceptions.: .+',
+            r'clickhouse_driver.errors.: .+',
+            r'FastAPI.*Error: .+',
+            r'Traceback \(most recent call last\):',
+            r'Exception: .+',
+            r'Error: .+',
+            r'CRITICAL: .+',
+            r'FATAL: .+',
+        ]
+        
+        import re
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if line:
+                for pattern in error_patterns:
+                    if re.search(pattern, line, re.IGNORECASE):
+                        # For traceback lines, include some context
+                        if 'Traceback' in line and i + 2 < len(lines):
+                            context_lines = lines[i:i+3]
+                            error_summary = ' | '.join(l.strip() for l in context_lines if l.strip())
+                            errors.append(error_summary[:300])
+                        else:
+                            errors.append(line[:200])  # Truncate very long errors
+                        break
+        
+        return errors[:15]  # Return max 15 errors
+    
+    def _diagnose_exit_code_issues(self, exit_code: int) -> list:
+        """Diagnose issues based on process exit code."""
+        issues = []
+        
+        if exit_code == 1:
+            issues.append("General error - check Python syntax and imports")
+        elif exit_code == 2:
+            issues.append("Misuse of shell command - check command line arguments")
+        elif exit_code == 126:
+            issues.append("Permission denied - check file permissions")
+        elif exit_code == 127:
+            issues.append("Command not found - check Python installation and PATH")
+        elif exit_code == 130:
+            issues.append("Process terminated by Ctrl+C")
+        elif exit_code == 139:
+            issues.append("Segmentation fault - possible memory corruption")
+        elif exit_code and exit_code > 128:
+            signal_num = exit_code - 128
+            issues.append(f"Process terminated by signal {signal_num}")
+        elif exit_code and exit_code != 0:
+            issues.append(f"Process exited with code {exit_code}")
+            
+        return issues
+    
+    def _suggest_recovery_actions(self, exit_code: Optional[int]):
+        """Suggest recovery actions based on exit code and error patterns."""
+        if not exit_code:
+            return
+        
+        self._print("💡", "RECOVERY", "Suggested recovery actions:")
+        
+        if exit_code == 1:
+            print("  → Check Python syntax in backend files")
+            print("  → Verify all required modules are installed: pip install -r requirements.txt")
+            print("  → Check environment variables are properly set")
+            print("  → Review database connection settings")
+        elif exit_code == 126:
+            print("  → Fix file permissions: chmod +x scripts/run_server.py")
+            print("  → Check if running as appropriate user")
+        elif exit_code == 127:
+            print("  → Verify Python is installed and in PATH")
+            print("  → Check if uvicorn is installed: pip install uvicorn")
+        elif exit_code == 130:
+            print("  → Process was interrupted - this is usually intentional")
+        elif exit_code in [139, 134]:
+            print("  → Memory issue detected - restart system if problem persists")
+            print("  → Check for corrupted Python installation")
+        else:
+            print(f"  → Exit code {exit_code} indicates an application-specific error")
+            print("  → Check backend logs for detailed error information")
+            print("  → Verify all dependencies are properly installed")
     
     def _print_backend_troubleshooting(self):
         """Print backend troubleshooting tips."""

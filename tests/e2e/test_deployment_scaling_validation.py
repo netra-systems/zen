@@ -16,7 +16,7 @@ import json
 from unittest.mock import patch, AsyncMock, MagicMock
 from typing import Dict, Any, List
 
-from netra_backend.app.core.configuration.environment import EnvironmentConfig
+from netra_backend.app.core.environment_constants import EnvironmentConfig
 from netra_backend.app.core.health.unified_health_checker import UnifiedHealthChecker
 from netra_backend.app.services.unified_health_service import UnifiedHealthService
 
@@ -27,10 +27,12 @@ pytestmark = [
 ]
 
 
+@pytest.mark.e2e
 class TestDeploymentScalingValidation:
     """Test deployment and scaling resilience patterns."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_configuration_hot_reload_validation(self):
         """
         Test that system can handle configuration changes without restart.
@@ -99,6 +101,7 @@ class TestDeploymentScalingValidation:
                 os.environ.pop(test_config_key, None)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_health_during_scaling_events(self):
         """
         Test that health checks remain accurate during scaling operations.
@@ -149,6 +152,7 @@ class TestDeploymentScalingValidation:
                     pytest.fail("Health status should reflect scaling stress (degraded/warning)")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rolling_deployment_compatibility(self):
         """
         Test that system handles rolling deployments gracefully.
@@ -214,6 +218,7 @@ class TestDeploymentScalingValidation:
             pytest.fail(f"Too many deployment phases failed: {error_phases}")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_migration_lock_handling(self):
         """
         Test that system handles database migration locks properly.
@@ -269,6 +274,7 @@ class TestDeploymentScalingValidation:
                         pytest.fail(f"Database operations should work when not locked: {e}")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_secret_rotation_resilience(self):
         """
         Test that system handles secret rotation during runtime.

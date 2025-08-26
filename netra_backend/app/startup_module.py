@@ -41,6 +41,12 @@ from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.utils.multiprocessing_cleanup import setup_multiprocessing
 
 
+def _get_project_root() -> Path:
+    """Get the project root path."""
+    # startup_module.py is in netra_backend/app/, so project root is two levels up
+    return Path(__file__).parent.parent.parent
+
+
 async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
     """Ensure all required database tables exist, creating them if necessary."""
     try:
@@ -365,10 +371,37 @@ def _perform_migration(logger: logging.Logger, sync_url: str) -> None:
 
 
 def _execute_if_needed(logger: logging.Logger, current: Optional[str], head: Optional[str]) -> None:
-    """Execute migration if needed."""
+    """Execute migration if needed with idempotent handling."""
     log_migration_status(logger, current, head)
     if needs_migration(current, head):
-        execute_migration(logger)
+        try:
+            execute_migration(logger)
+        except Exception as e:
+            # CRITICAL FIX: Handle DuplicateTable errors gracefully for idempotent migrations
+            error_msg = str(e)
+            if any(keyword in error_msg.lower() for keyword in ['already exists', 'duplicatetable', 'relation']):
+                logger.warning(f"Tables already exist during migration: {e}")
+                logger.info("Attempting to stamp database to current head revision...")
+                
+                # Try to stamp the database to the current head
+                try:
+                    import alembic.config
+                    
+                    config = get_config()
+                    sync_url = get_sync_database_url(config.database_url)
+                    alembic_ini_path = Path(__file__).parent.parent.parent.parent / "config" / "alembic.ini"
+                    
+                    alembic.config.main(argv=["-c", str(alembic_ini_path), "--raiseerr", "stamp", "head"])
+                    logger.info("Successfully stamped database to current head revision")
+                except Exception as stamp_error:
+                    logger.error(f"Failed to stamp database: {stamp_error}")
+                    if should_continue_on_error(settings.environment):
+                        logger.warning("Continuing despite migration/stamp failure")
+                    else:
+                        raise stamp_error
+            else:
+                # Re-raise non-table-existence errors
+                raise e
 
 
 def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
@@ -379,8 +412,23 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
     logger.warning("Continuing without migrations")
 
 
+async def _async_initialize_postgres(logger: logging.Logger):
+    """Async wrapper for postgres initialization to enable timeout protection."""
+    try:
+        # Run postgres initialization in a thread to avoid blocking
+        loop = asyncio.get_event_loop()
+        async_session_factory = await loop.run_in_executor(
+            None,
+            initialize_postgres
+        )
+        return async_session_factory
+    except Exception as e:
+        logger.error(f"Error in async postgres initialization: {e}")
+        return None
+
+
 async def setup_database_connections(app: FastAPI) -> None:
-    """Setup PostgreSQL connection factory (critical service)."""
+    """Setup PostgreSQL connection factory (critical service) with timeout protection."""
     logger = central_logger.get_logger(__name__)
     logger.info("Setting up database connections...")
     config = get_config()
@@ -397,9 +445,13 @@ async def setup_database_connections(app: FastAPI) -> None:
         app.state.database_mock_mode = True
         return
     
+    # CRITICAL FIX: Wrap database initialization in timeout to prevent server startup hanging
     try:
-        logger.debug("Calling initialize_postgres()...")
-        async_session_factory = initialize_postgres()
+        logger.debug("Calling initialize_postgres() with 15s timeout...")
+        async_session_factory = await asyncio.wait_for(
+            asyncio.create_task(_async_initialize_postgres(logger)),
+            timeout=15.0
+        )
         logger.debug(f"initialize_postgres() returned: {async_session_factory}")
         
         if async_session_factory is None:
@@ -408,12 +460,17 @@ async def setup_database_connections(app: FastAPI) -> None:
                 logger.error(f"{error_msg} - using mock database for graceful degradation")
                 app.state.db_session_factory = None  # Signal to use mock/fallback
                 app.state.database_available = False
+                app.state.database_mock_mode = True
                 return
             else:
                 raise RuntimeError(error_msg)
         
-        # Ensure database tables exist before proceeding
-        await _ensure_database_tables_exist(logger, graceful_startup)
+        # Ensure database tables exist with timeout protection
+        logger.debug("Ensuring database tables exist with 10s timeout...")
+        await asyncio.wait_for(
+            _ensure_database_tables_exist(logger, graceful_startup),
+            timeout=10.0
+        )
             
         app.state.db_session_factory = async_session_factory
         app.state.database_available = True
@@ -424,6 +481,18 @@ async def setup_database_connections(app: FastAPI) -> None:
             logger.debug("Verified: app.state.db_session_factory is accessible and not None")
         else:
             logger.error("ERROR: app.state.db_session_factory is None after setting!")
+            
+    except asyncio.TimeoutError:
+        # CRITICAL FIX: Handle database timeout gracefully to prevent server startup hanging
+        timeout_msg = "Database initialization timed out - continuing in graceful mode"
+        logger.error(timeout_msg)
+        if graceful_startup:
+            logger.warning("Database timeout - using mock mode for graceful degradation")
+            app.state.db_session_factory = None
+            app.state.database_available = False
+            app.state.database_mock_mode = True
+        else:
+            raise RuntimeError("Database initialization timed out and graceful mode disabled") from None
             
     except Exception as e:
         if graceful_startup:
@@ -460,16 +529,41 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     clickhouse_mode = config.clickhouse_mode.lower()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
+    # CRITICAL FIX: Skip ClickHouse in staging environment entirely
+    if config.environment == "staging":
+        logger.info("Skipping ClickHouse initialization entirely in staging environment (infrastructure not available)")
+        return
+    
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         try:
-            await _setup_clickhouse_tables(logger, clickhouse_mode)
-        except Exception as e:
+            # Add timeout protection for ClickHouse initialization
+            await asyncio.wait_for(
+                _setup_clickhouse_tables(logger, clickhouse_mode),
+                timeout=30.0  # 30 second timeout for ClickHouse
+            )
+        except asyncio.TimeoutError:
+            timeout_msg = "ClickHouse initialization timed out after 30 seconds"
+            logger.error(timeout_msg)
             if graceful_startup:
-                logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
-                # Set clickhouse to mock mode for graceful degradation
+                logger.warning(f"{timeout_msg} - continuing without ClickHouse (optional service)")
                 config.clickhouse_mode = "mock"
             else:
-                raise
+                raise RuntimeError(timeout_msg)
+        except Exception as e:
+            # Enhanced error handling for common ClickHouse connection issues
+            error_msg = str(e).lower()
+            is_connection_error = any(keyword in error_msg for keyword in [
+                'connection', 'refused', 'timeout', 'unreachable', 'network', 'dns'
+            ])
+            
+            if is_connection_error and graceful_startup:
+                logger.warning(f"ClickHouse connection failed but continuing (optional service): {e}")
+                config.clickhouse_mode = "mock"
+            elif graceful_startup:
+                logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
+                config.clickhouse_mode = "mock"
+            else:
+                raise RuntimeError(f"ClickHouse initialization failed: {e}") from e
     else:
         _log_clickhouse_skip(logger, clickhouse_mode)
 
@@ -573,7 +667,7 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
 
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
-    """Run application startup checks (graceful failure handling)."""
+    """Run application startup checks with timeout protection (graceful failure handling)."""
     config = get_config()
     disable_checks = config.disable_startup_checks.lower() == "true"
     fast_startup = config.fast_startup_mode.lower() == "true"
@@ -586,8 +680,12 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     logger.info("Starting comprehensive startup health checks...")
     from netra_backend.app.startup_checks import run_startup_checks
     try:
-        logger.debug("Calling run_startup_checks...")
-        results = await run_startup_checks(app)
+        logger.debug("Calling run_startup_checks() with 20s timeout...")
+        # CRITICAL FIX: Add timeout to prevent startup health checks from hanging server startup
+        results = await asyncio.wait_for(
+            run_startup_checks(app),
+            timeout=20.0
+        )
         passed = results.get('passed', 0)
         total = results.get('total_checks', 0)
         logger.info(f"Startup checks completed: {passed}/{total} passed")
@@ -598,6 +696,16 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
             logger.warning(f"Some startup checks failed ({failed}), but continuing in graceful mode")
         elif passed < total:
             raise RuntimeError(f"Critical startup checks failed: {failed} of {total}")
+            
+    except asyncio.TimeoutError:
+        # CRITICAL FIX: Handle startup check timeout gracefully
+        timeout_msg = "Startup health checks timed out after 20s"
+        logger.error(timeout_msg)
+        if graceful_startup:
+            logger.warning("Startup checks timeout - continuing in graceful mode")
+        else:
+            logger.error("Startup checks timeout and graceful mode disabled")
+            await _handle_startup_failure(logger, RuntimeError(timeout_msg))
             
     except Exception as e:
         if graceful_startup:

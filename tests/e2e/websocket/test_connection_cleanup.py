@@ -203,10 +203,12 @@ async def cleanup_tester():
     await tester.teardown_real_services()
 
 
+@pytest.mark.e2e
 class TestNormalConnectionCleanup:
     """Test normal connection cleanup scenarios"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_graceful_disconnect_cleanup(self, cleanup_tester):
         """Test normal graceful disconnect cleans up all resources"""
         client = cleanup_tester.create_tracked_client("graceful_user")
@@ -231,6 +233,7 @@ class TestNormalConnectionCleanup:
         cleanup_tester.record_cleanup_metrics(client, "graceful_disconnect", True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multiple_connection_cleanup(self, cleanup_tester):
         """Test cleanup of multiple simultaneous connections"""
         num_clients = 3
@@ -261,6 +264,7 @@ class TestNormalConnectionCleanup:
             cleanup_tester.record_cleanup_metrics(client, f"multi_cleanup_{i}", True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_connection_timeout_cleanup(self, cleanup_tester):
         """Test cleanup when connection times out"""
         # Create client with short timeout
@@ -284,10 +288,12 @@ class TestNormalConnectionCleanup:
         cleanup_tester.record_cleanup_metrics(client, "timeout_cleanup", True)
 
 
+@pytest.mark.e2e
 class TestAbnormalConnectionCleanup:
     """Test abnormal connection cleanup scenarios - 3+ error cases required"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_network_drop_cleanup(self, cleanup_tester):
         """CLEANUP CASE 1: Network drop during active connection"""
         client = cleanup_tester.create_tracked_client("network_drop_user")
@@ -315,6 +321,7 @@ class TestAbnormalConnectionCleanup:
         cleanup_tester.record_cleanup_metrics(client, "network_drop_cleanup", True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_server_shutdown_cleanup(self, cleanup_tester):
         """CLEANUP CASE 2: Server shutdown during active connection"""
         client = cleanup_tester.create_tracked_client("server_shutdown_user")
@@ -347,6 +354,7 @@ class TestAbnormalConnectionCleanup:
         cleanup_tester.record_cleanup_metrics(client, "server_shutdown_cleanup", True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_malformed_message_cleanup(self, cleanup_tester):
         """CLEANUP CASE 3: Connection cleanup after malformed message"""
         client = cleanup_tester.create_tracked_client("malformed_msg_user")
@@ -388,6 +396,7 @@ class TestAbnormalConnectionCleanup:
         cleanup_tester.record_cleanup_metrics(client, "malformed_msg_cleanup", True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_token_expiry_cleanup(self, cleanup_tester):
         """CLEANUP CASE 4: Connection cleanup when auth token expires"""
         # Create client with short-lived token
@@ -417,10 +426,12 @@ class TestAbnormalConnectionCleanup:
         cleanup_tester.record_cleanup_metrics(client, "token_expiry_cleanup", True)
 
 
+@pytest.mark.e2e
 class TestResourceLeakDetection:
     """Test for resource leaks and ghost connections"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_memory_leak_detection(self, cleanup_tester):
         """Test for memory leaks during connection lifecycle"""
         initial_memory = None
@@ -471,6 +482,7 @@ class TestResourceLeakDetection:
                 })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_ghost_connection_detection(self, cleanup_tester):
         """Test for ghost connections that aren't properly cleaned up"""
         # Track connections before test
@@ -525,6 +537,7 @@ class TestResourceLeakDetection:
         })
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_process_resource_cleanup(self, cleanup_tester):
         """Test that process resources (file descriptors, etc.) are cleaned up"""
         # Get initial process info

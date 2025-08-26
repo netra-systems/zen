@@ -25,6 +25,7 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest_asyncio.fixture
+@pytest.mark.e2e
 async def test_websocket_test_manager():
     """Create WebSocket test manager fixture"""
     manager = WebSocketTestManager()
@@ -36,9 +37,11 @@ async def test_websocket_test_manager():
         await manager.teardown_test_environment()
 
 
+@pytest.mark.e2e
 class TestWebSocketEventCompleteness:
     """Test WebSocket event flow completeness"""
     
+    @pytest.mark.e2e
     async def test_all_required_events_received(self, websocket_test_manager):
         """Test that ALL required WebSocket events are received"""
         manager = websocket_test_manager
@@ -92,6 +95,7 @@ class TestWebSocketEventCompleteness:
         
         await client.close()
     
+    @pytest.mark.e2e
     async def test_event_payload_correctness(self, websocket_test_manager):
         """Test that event payloads match websocket_communication.xml spec"""
         manager = websocket_test_manager
@@ -131,6 +135,7 @@ class TestWebSocketEventCompleteness:
         
         await client.close()
     
+    @pytest.mark.e2e
     async def test_streaming_partial_results(self, websocket_test_manager):
         """Test partial_result events with streaming content"""
         manager = websocket_test_manager
@@ -159,6 +164,7 @@ class TestWebSocketEventCompleteness:
         
         await client.close()
     
+    @pytest.mark.e2e
     async def test_tool_execution_events(self, websocket_test_manager):
         """Test tool_executing events when tools run"""
         manager = websocket_test_manager
@@ -188,6 +194,7 @@ class TestWebSocketEventCompleteness:
         await client.close()
     
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_websocket_events(self, websocket_test_manager):
         """
         BVJ: Segment: ALL | Goal: UX Quality | Impact: User satisfaction

@@ -210,7 +210,7 @@ class TriageExecutor:
     ) -> None:
         """Handle execution error with monitoring and modern error handling."""
         self.monitor.record_error(context, error)
-        error_result = await self.error_handler.handle_execution_error(context, error)
+        error_result = await self.error_handler.handle_execution_error(error, context)
         await self._process_error_result(context, error_result)
     
     async def _handle_reliability_error(self, context: ExecutionContext, 

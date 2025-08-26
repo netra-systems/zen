@@ -21,10 +21,12 @@ from tests.e2e.agent_orchestration_fixtures import (
 )
 
 
+@pytest.mark.e2e
 class TestSupervisorRouting:
     """Test supervisor agent routing decisions - BVJ: Correct agent selection"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_data_request_to_data_agent(self, mock_supervisor_agent, routing_test_data):
         """Test data analysis request routes to DataSubAgent"""
         request = routing_test_data["data_request"]
@@ -37,6 +39,7 @@ class TestSupervisorRouting:
         mock_supervisor_agent.route_request.assert_called_once_with(request)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_optimization_request(self, mock_supervisor_agent, routing_test_data):
         """Test optimization request routes to OptimizationsSubAgent"""
         request = routing_test_data["optimization_request"]
@@ -48,6 +51,7 @@ class TestSupervisorRouting:
         mock_supervisor_agent.route_request.assert_called_once_with(request)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_complex_request_to_pipeline(self, mock_supervisor_agent, routing_test_data):
         """Test complex request creates multi-agent pipeline"""
         request = routing_test_data["complex_request"]
@@ -62,6 +66,7 @@ class TestSupervisorRouting:
         assert "actions" in result
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_unknown_request_fallback(self, mock_supervisor_agent, routing_test_data):
         """Test unknown request type uses fallback routing"""
         request = routing_test_data["unknown_request"]
@@ -73,6 +78,7 @@ class TestSupervisorRouting:
         mock_supervisor_agent.route_request.assert_called_once_with(request)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_based_on_user_tier(self, mock_supervisor_agent):
         """Test routing considers user tier for agent selection"""
         enterprise_request = {
@@ -87,6 +93,7 @@ class TestSupervisorRouting:
         assert result == "enterprise_data"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_with_priority_handling(self, mock_supervisor_agent):
         """Test high-priority requests get priority routing"""
         priority_request = {
@@ -101,6 +108,7 @@ class TestSupervisorRouting:
         assert result == "priority_optimizations"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_handles_malformed_request(self, mock_supervisor_agent):
         """Test routing handles malformed or incomplete requests"""
         malformed_request = {"incomplete": "data"}
@@ -111,6 +119,7 @@ class TestSupervisorRouting:
         assert result == "fallback"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_route_considers_agent_availability(self, mock_supervisor_agent):
         """Test routing considers agent availability status"""
         request_with_preferred = {
@@ -126,10 +135,12 @@ class TestSupervisorRouting:
         assert result == "general"
 
 
+@pytest.mark.e2e
 class TestRoutingValidation:
     """Test routing validation and error handling - BVJ: System reliability"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_validate_routing_decision(self, mock_supervisor_agent):
         """Test routing decisions are validated before execution"""
         valid_request = {"type": "optimization", "validation": True}
@@ -141,6 +152,7 @@ class TestRoutingValidation:
         assert result == "optimizations"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_routing_timeout_handling(self, mock_supervisor_agent):
         """Test routing handles timeout scenarios gracefully"""
         timeout_request = {"type": "slow_analysis", "timeout": 5}
@@ -151,6 +163,7 @@ class TestRoutingValidation:
         assert result == "timeout_handler"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_routing_preserves_request_context(self, mock_supervisor_agent):
         """Test routing preserves important request context"""
         contextual_request = {
@@ -169,10 +182,12 @@ class TestRoutingValidation:
         assert "metadata" in call_args
 
 
+@pytest.mark.e2e
 class TestRoutingPerformance:
     """Test routing performance characteristics - BVJ: Response time SLAs"""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_routing_response_time(self, mock_supervisor_agent):
         """Test routing decisions complete within performance thresholds"""
         performance_request = {"type": "quick_analysis", "sla": "fast"}
@@ -185,6 +200,7 @@ class TestRoutingPerformance:
         mock_supervisor_agent.route_request.assert_called_once()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_routing_requests(self, mock_supervisor_agent):
         """Test supervisor handles concurrent routing requests"""
         import asyncio
@@ -207,6 +223,7 @@ class TestRoutingPerformance:
         assert results == side_effects
 
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_routing_load_balancing(self, mock_supervisor_agent):
         """Test routing includes load balancing considerations"""
         load_balanced_request = {

@@ -26,10 +26,12 @@ pytestmark = [
 logger = get_logger(__name__)
 
 
+@pytest.mark.e2e
 class TestCacheResilienceValidation:
     """Test cache failure scenarios and recovery patterns."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_redis_connection_failure_graceful_degradation(self):
         """
         Test that application continues functioning when Redis is unavailable.
@@ -86,6 +88,7 @@ class TestCacheResilienceValidation:
                 pytest.fail("Cache should not propagate Redis connection errors on store")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_memory_pressure_eviction_policies(self):
         """
         Test that cache handles memory pressure with proper eviction.
@@ -142,6 +145,7 @@ class TestCacheResilienceValidation:
                 logger.info("Cache eviction test skipped - cache not available")
 
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_cache_corruption_recovery(self):
         """
         Test that cache can recover from corrupted data.
@@ -211,6 +215,7 @@ class TestCacheResilienceValidation:
                 pytest.fail(f"Cache should remain functional after corruption scenario {scenario_name}: {e}")
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_cache_access_thread_safety(self):
         """
         Test that cache operations are thread-safe under concurrent access.

@@ -169,6 +169,7 @@ class WebSocketJWTReconnectionTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWebSocketJWTReconnectionState:
     """Test Suite: WebSocket JWT Reconnection State Management."""
     
@@ -182,6 +183,7 @@ class TestWebSocketJWTReconnectionState:
         """Provide enterprise test user ID."""
         return TEST_USERS["enterprise"].id
     
+    @pytest.mark.e2e
     async def test_jwt_token_reconnection_same_token(self, jwt_reconnection_tester, enterprise_user_id):
         """Test Case 1: Reconnection with same JWT token maintains session."""
         session_state = await jwt_reconnection_tester.setup_authenticated_session(enterprise_user_id)
@@ -197,6 +199,7 @@ class TestWebSocketJWTReconnectionState:
         assert metrics.reconnection_time < jwt_reconnection_tester.performance_threshold
         assert metrics.total_cycle_time < jwt_reconnection_tester.performance_threshold
     
+    @pytest.mark.e2e
     async def test_message_queue_preservation_during_reconnection(self, jwt_reconnection_tester, enterprise_user_id):
         """Test Case 2: Message queue preserved and delivered after reconnection."""
         session_state = await jwt_reconnection_tester.setup_authenticated_session(enterprise_user_id)
@@ -211,6 +214,7 @@ class TestWebSocketJWTReconnectionState:
         assert metrics.messages_preserved == queued_messages
         assert metrics.message_delivery_time < 1.0
     
+    @pytest.mark.e2e
     async def test_auth_context_persistence_across_reconnection(self, jwt_reconnection_tester, enterprise_user_id):
         """Test Case 3: Authentication context maintained across reconnection."""
         session_state = await jwt_reconnection_tester.setup_authenticated_session(enterprise_user_id)
@@ -224,6 +228,7 @@ class TestWebSocketJWTReconnectionState:
         assert session_state.user_id == original_user_id
         assert metrics.auth_validation_time < 0.5
     
+    @pytest.mark.e2e
     async def test_session_state_restoration_completeness(self, jwt_reconnection_tester, enterprise_user_id):
         """Test Case 4: Complete session state restored after reconnection."""
         session_state = await jwt_reconnection_tester.setup_authenticated_session(enterprise_user_id)
@@ -240,6 +245,7 @@ class TestWebSocketJWTReconnectionState:
         assert all(key in session_state.agent_context for key in ["workspace", "execution_state", "user_preferences"])
         assert metrics.state_restoration_time < 1.0
     
+    @pytest.mark.e2e
     async def test_performance_requirements_compliance(self, jwt_reconnection_tester, enterprise_user_id):
         """Test Case 5: Performance requirements met consistently."""
         performance_results = []
@@ -255,6 +261,7 @@ class TestWebSocketJWTReconnectionState:
         assert max_time < 2.0, f"Max reconnection time {max_time:.2f}s exceeds 2s requirement"
         assert avg_time < 1.5, f"Average reconnection time {avg_time:.2f}s exceeds 1.5s target"
     
+    @pytest.mark.e2e
     async def test_concurrent_reconnection_isolation(self, jwt_reconnection_tester):
         """Test Case 6: Concurrent user reconnections don't interfere."""
         user_sessions = []

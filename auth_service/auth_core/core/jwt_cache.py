@@ -51,8 +51,16 @@ class JWTValidationCache:
             if cache_key in self._validation_cache:
                 cached_entry = self._validation_cache[cache_key]
                 if cached_entry['expires'] > time.time():
+                    # Also check if the cached JWT token itself has expired
+                    cached_data = cached_entry['data']
+                    if cached_data and isinstance(cached_data, dict):
+                        jwt_exp = cached_data.get('exp')
+                        if jwt_exp and jwt_exp <= time.time():
+                            # JWT token has expired, remove from cache
+                            del self._validation_cache[cache_key]
+                            return None
                     self._validation_stats['cache_hits'] += 1
-                    return cached_entry['data']
+                    return cached_data
                 else:
                     # Expired, remove from memory cache
                     del self._validation_cache[cache_key]
@@ -63,6 +71,15 @@ class JWTValidationCache:
                     redis_data = self.redis_manager.get_client().get(f"jwt_cache:{cache_key}")
                     if redis_data:
                         cached_data = json.loads(redis_data)
+                        
+                        # Check if the cached JWT token itself has expired
+                        if cached_data and isinstance(cached_data, dict):
+                            jwt_exp = cached_data.get('exp')
+                            if jwt_exp and jwt_exp <= time.time():
+                                # JWT token has expired, remove from Redis cache
+                                self.redis_manager.get_client().delete(f"jwt_cache:{cache_key}")
+                                return None
+                        
                         self._validation_stats['redis_hits'] += 1
                         
                         # Also update in-memory cache for next time

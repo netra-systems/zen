@@ -122,7 +122,7 @@ class AuthSecretLoader:
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
         env_manager = get_env()
-        # Environment-specific
+        # Environment-specific with higher priority than generic
         if env == "staging":
             # First check staging-specific env var
             client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_STAGING")
@@ -139,9 +139,10 @@ class AuthSecretLoader:
         client_id = env_manager.get("GOOGLE_CLIENT_ID", "")
         if client_id:
             logger.info("Using GOOGLE_CLIENT_ID from environment")
+            return client_id
         else:
             logger.warning("No Google Client ID found in environment")
-        return client_id
+            return ""
     
     @staticmethod
     def get_google_client_secret() -> str:
@@ -149,7 +150,7 @@ class AuthSecretLoader:
         env_manager = get_env()
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
-        # Environment-specific
+        # Environment-specific with higher priority than generic
         if env == "staging":
             # First check staging-specific env var
             secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
@@ -166,9 +167,10 @@ class AuthSecretLoader:
         secret = env_manager.get("GOOGLE_CLIENT_SECRET", "")
         if secret:
             logger.info("Using GOOGLE_CLIENT_SECRET from environment")
+            return secret
         else:
             logger.warning("No Google Client Secret found in environment")
-        return secret
+            return ""
     
     @staticmethod
     def get_database_url() -> str:

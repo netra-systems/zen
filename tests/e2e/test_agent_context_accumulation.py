@@ -105,6 +105,7 @@ class AgentContextAccumulationTester:
         context_building_result["conversation_time"] = time.time() - conversation_start
         return context_building_result
 
+    @pytest.mark.e2e
     async def test_context_window_management(self, supervisor: SupervisorAgent,
                                            max_context_size: int = 4000) -> Dict[str, Any]:
         """Test context window management and truncation."""
@@ -157,6 +158,7 @@ class AgentContextAccumulationTester:
         window_management_result["management_time"] = time.time() - window_test_start
         return window_management_result
 
+    @pytest.mark.e2e
     async def test_context_retrieval_accuracy(self, supervisor: SupervisorAgent,
                                             historical_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test context retrieval accuracy and relevance."""
@@ -200,6 +202,7 @@ class AgentContextAccumulationTester:
         retrieval_result["average_retrieval_time"] = total_retrieval_time / len(retrieval_test_queries)
         return retrieval_result
 
+    @pytest.mark.e2e
     async def test_memory_persistence_across_sessions(self, supervisor: SupervisorAgent) -> Dict[str, Any]:
         """Test memory persistence across different conversation sessions."""
         persistence_start = time.time()
@@ -245,6 +248,7 @@ class AgentContextAccumulationTester:
         
         return persistence_result
 
+@pytest.mark.e2e
 class TestAgentContextAccumulation:
     """Integration tests for agent context accumulation."""
     
@@ -254,6 +258,7 @@ class TestAgentContextAccumulation:
         return AgentContextAccumulationTester(use_mock_llm=True)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_basic_context_building(self, context_tester):
         """Test basic context building across multiple messages."""
         thread_id = "test_thread_context_001"
@@ -276,6 +281,7 @@ class TestAgentContextAccumulation:
         assert len(context_tester.context_history) >= len(conversation_messages)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_context_window_management(self, context_tester):
         """Test context window management with large conversations."""
         thread_id = "test_thread_window_001"
@@ -289,6 +295,7 @@ class TestAgentContextAccumulation:
         assert len(context_tester.context_windows) > 0
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_context_retrieval_accuracy(self, context_tester):
         """Test context retrieval accuracy and relevance."""
         thread_id = "test_thread_retrieval_001"
@@ -312,6 +319,7 @@ class TestAgentContextAccumulation:
         assert retrieval_result["successful_retrievals"] > 0, "No successful context retrievals"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_memory_persistence_across_sessions(self, context_tester):
         """Test memory persistence across conversation sessions."""
         thread_id = "test_thread_persistence_001"
@@ -326,6 +334,7 @@ class TestAgentContextAccumulation:
         assert isinstance(persistence_result["context_carried_over"], bool)
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_context_management(self, context_tester):
         """Test concurrent context management for multiple threads."""
         thread_ids = [f"test_thread_concurrent_{i:03d}" for i in range(3)]
@@ -357,6 +366,7 @@ class TestAgentContextAccumulation:
         assert total_time < 15.0, f"Concurrent context management too slow: {total_time:.2f}s"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_context_quality_and_relevance(self, context_tester):
         """Test context quality and relevance preservation."""
         thread_id = "test_thread_quality_001"
@@ -414,10 +424,12 @@ class TestAgentContextAccumulation:
         return {"relevant_context_found": True, "accuracy_score": relevance_score}
 
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestCriticalContextScenarios:
     """Critical context scenarios protecting conversation quality."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_context_management(self):
         """Test enterprise-level context management requirements."""
         tester = AgentContextAccumulationTester(use_mock_llm=True)

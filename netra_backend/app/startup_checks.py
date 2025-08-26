@@ -13,11 +13,15 @@ from netra_backend.app.startup_checks import (
     run_startup_checks,
 )
 
+# Backward compatibility alias
+startup_checks = run_startup_checks
+
 # Maintain backward compatibility - all legacy code removed
 # All classes and functions now imported from startup_checks module
 
 __all__ = [
     "StartupCheckResult",
     "StartupChecker", 
-    "run_startup_checks"
+    "run_startup_checks",
+    "startup_checks"
 ]

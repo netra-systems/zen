@@ -288,6 +288,7 @@ async def observability_harness():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_distributed_tracing(observability_harness):
     """Test distributed tracing works end-to-end"""
     validator = DistributedTracingValidator(observability_harness)
@@ -311,6 +312,7 @@ async def _create_operation_spans(validator: DistributedTracingValidator) -> Lis
 
 
 @pytest.mark.asyncio  
+@pytest.mark.e2e
 async def test_log_aggregation(observability_harness):
     """Test log aggregation and correlation"""
     validator = LogAggregationValidator(observability_harness)
@@ -325,6 +327,7 @@ async def test_log_aggregation(observability_harness):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_error_tracking(observability_harness):
     """Test error tracking and aggregation"""  
     validator = ErrorTrackingValidator(observability_harness)
@@ -339,6 +342,7 @@ async def test_error_tracking(observability_harness):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_alerting_triggers(observability_harness):
     """Test alerting system triggers and delivery"""
     validator = AlertingValidator(observability_harness)

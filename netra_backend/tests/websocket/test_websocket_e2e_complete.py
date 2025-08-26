@@ -46,11 +46,11 @@ class WebSocketE2EClient:
         self.websocket: Optional[websockets.WebSocketServerProtocol] = None
         self.messages: List[Dict] = []
         self.connected = False
-        self.jwt_helper = JWTTestHelper(environment="test")
+        self.jwt_helper = JWTTestHelper(secret_key="test_secret_key")
         
     async def connect_with_auth(self, user_id: str = "test_user") -> str:
         """Connect with JWT authentication."""
-        token = self.jwt_helper.create_test_user_token(user_id, f"{user_id}@test.com")
+        token = self.jwt_helper.create_test_token(user_id=user_id, email=f"{user_id}@test.com")
         url = f"ws://localhost:8001/ws?token={token}"
         self.websocket = await websockets.connect(url)
         self.connected = True

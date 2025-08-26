@@ -26,6 +26,7 @@ import redis
 import redis.asyncio
 import websockets
 
+@pytest.mark.e2e
 async def test_websocket_connection_scaling(concurrent_test_environment, 
     isolated_test_users
 ):

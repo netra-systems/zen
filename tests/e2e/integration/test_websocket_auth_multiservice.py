@@ -197,6 +197,7 @@ class MultiServiceWebSocketAuthTester:
             
         return True  # Accept any response as valid user context
     
+    @pytest.mark.e2e
     async def test_websocket_reconnection_with_token(
         self, token: str, expected_user_email: str
     ) -> Dict[str, Any]:
@@ -271,6 +272,7 @@ class MultiServiceWebSocketAuthTester:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_complete_multiservice_websocket_auth_flow(real_services):
     """
     BVJ: Segment: ALL | Goal: Real-time features | Impact: $8K+ MRR churn risk
@@ -347,6 +349,7 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
     print(f"✓ Complete multi-service WebSocket auth flow successful in {total_flow_time:.3f}s")
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_reconnect_maintains_session_continuity(real_services):
     """Test that WebSocket reconnection with valid token maintains session continuity."""
     tester = MultiServiceWebSocketAuthTester(real_services)
@@ -369,6 +372,7 @@ async def test_websocket_reconnect_maintains_session_continuity(real_services):
     print(f"✓ Second message context: {reconnect_result['second_message_context']}")
 
 @pytest.mark.asyncio 
+@pytest.mark.e2e
 async def test_multiple_users_concurrent_websocket_auth(real_services):
     """Test multiple users with different Auth service tokens connecting concurrently."""
     tester = MultiServiceWebSocketAuthTester(real_services)
@@ -442,6 +446,7 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
                 print(f"Warning: Error disconnecting WebSocket: {e}")
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_cross_service_token_consistency_validation(real_services):
     """Test that tokens are consistently validated across Auth, Backend, and WebSocket services."""
     tester = MultiServiceWebSocketAuthTester(real_services)

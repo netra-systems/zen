@@ -36,11 +36,11 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         user_request = "Analyze my AI workload and provide optimization recommendations"
         
         # Mock state persistence methods as AsyncMock
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
-            # Mock: Async component isolation for testing without real async operations
+            # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
-                # Mock: Async component isolation for testing without real async operations
+                # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # Execute the full agent lifecycle (don't mock the run method)
                     result_state = await supervisor.run(user_request, supervisor.thread_id, supervisor.user_id, run_id)
@@ -97,17 +97,17 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         async def capture_message_to_thread(thread_id, msg):
             messages_sent.append((thread_id, msg))
             
-        # Mock: WebSocket connection isolation for testing without network overhead
+        # Mock justification: Captures WebSocket messages for verification without establishing actual network connections or requiring WebSocket clients
         websocket_manager.send_message = AsyncMock(side_effect=capture_message)
-        # Mock: WebSocket connection isolation for testing without network overhead
+        # Mock justification: Intercepts thread-specific WebSocket messages for testing message flow without active WebSocket connections
         websocket_manager.send_to_thread = AsyncMock(side_effect=capture_message_to_thread)
         
         # Mock state persistence
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
-            # Mock: Async component isolation for testing without real async operations
+            # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
-                # Mock: Async component isolation for testing without real async operations
+                # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # Test with streaming enabled
                     await supervisor.run("Test request", supervisor.thread_id, supervisor.user_id, run_id)
@@ -125,9 +125,11 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         
         # Test without streaming
         messages_sent.clear()
+        # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+            # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
-                # Mock: Async component isolation for testing without real async operations
+                # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     await supervisor.run("Test request", supervisor.thread_id, supervisor.user_id, run_id + "_no_stream")
         
@@ -170,19 +172,20 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
                     # Return the state to indicate successful execution
                     return state
                 return track_execute
+            # Mock justification: Replaces sub-agent execution logic to track orchestration order without executing actual LLM-based agent operations that would be slow and unpredictable
             agent.execute = make_track_execute(agent_name)
             
-            # Mock check_entry_conditions to always return True
+            # Mock justification: Bypasses entry condition checks to ensure all agents execute in test scenarios, avoiding complex conditional logic testing
             async def mock_entry_conditions(state, rid):
                 return True
             agent.check_entry_conditions = mock_entry_conditions
         
         # Execute orchestration with proper state persistence mocking
-        # Mock: Generic component isolation for controlled unit testing
+        # Mock justification: Isolates database persistence operations to prevent actual state writes during testing and avoid database dependencies
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
-            # Mock: Async component isolation for testing without real async operations
+            # Mock justification: Prevents database read operations and simulates clean state (no existing agent state) to ensure predictable test conditions
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
-                # Mock: Async component isolation for testing without real async operations
+                # Mock justification: Bypasses thread context retrieval from database to simulate new thread scenario and avoid database dependencies
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     state = await supervisor.run("Optimize my GPU utilization", supervisor.thread_id, supervisor.user_id, run_id)
         

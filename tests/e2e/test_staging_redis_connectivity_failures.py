@@ -92,6 +92,7 @@ class RedisConfigurationValidation:
     business_impact: str = "unknown"
 
 
+@pytest.mark.e2e
 class TestStagingRedisConnectivityFailures:
     """Test suite for Redis connectivity failures and inappropriate fallback behavior in staging."""
 
@@ -108,6 +109,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_redis_connectivity_failure_with_inappropriate_fallback_masking(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS CONNECTIVITY WITH FALLBACK ISSUE
@@ -204,6 +206,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_redis_client_connection_failure_with_session_degradation(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS CLIENT APPLICATION ISSUE
@@ -298,6 +301,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_redis_fallback_mode_enabled_masking_infrastructure_issues(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS FALLBACK CONFIGURATION ISSUE
@@ -360,6 +364,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_redis_configuration_localhost_fallback_inappropriate_staging_behavior(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS CONFIGURATION FALLBACK ISSUE
@@ -419,6 +424,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_redis_service_provisioning_gap_staging_infrastructure(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS SERVICE PROVISIONING ISSUE
@@ -496,6 +502,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_redis_application_client_connection_pool_exhaustion(self):
         """
         EXPECTED TO FAIL - CRITICAL REDIS CLIENT POOL ISSUE
@@ -571,6 +578,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_redis_session_persistence_configuration_validation(self):
         """
         EXPECTED TO FAIL - CRITICAL SESSION PERSISTENCE ISSUE
@@ -645,6 +653,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     async def test_redis_cache_degradation_performance_impact_validation(self):
         """
         EXPECTED TO FAIL - CRITICAL CACHE PERFORMANCE DEGRADATION ISSUE
@@ -764,6 +773,7 @@ class TestStagingRedisConnectivityFailures:
 
     @pytest.mark.env("staging")
     @pytest.mark.critical
+    @pytest.mark.e2e
     def test_redis_authentication_credentials_validation_staging_requirements(self):
         """
         EXPECTED TO FAIL - MEDIUM REDIS AUTHENTICATION ISSUE
@@ -939,6 +949,7 @@ class TestStagingRedisConnectivityFailures:
 
 @pytest.mark.env("staging")
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_redis_staging_connectivity_quick_validation():
     """
     STANDALONE CRITICAL TEST - Redis Connectivity
@@ -975,6 +986,7 @@ async def test_redis_staging_connectivity_quick_validation():
 
 @pytest.mark.env("staging")
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_redis_session_store_validation_quick():
     """
     STANDALONE CRITICAL TEST - Redis Session Store

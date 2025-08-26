@@ -39,10 +39,12 @@ from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWorkspaceDataIsolation:
     """Critical Test #3: Complete Workspace Data Isolation Security."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize workspace isolation test core."""
         core = WorkspaceIsolationTestCore()
@@ -56,6 +58,7 @@ class TestWorkspaceDataIsolation:
         return WorkspaceSecurityTestUtils()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complete_workspace_data_isolation(self, test_core, security_utils):
         """
         Test complete data isolation between workspaces.
@@ -84,6 +87,7 @@ class TestWorkspaceDataIsolation:
         print(f"[PROTECTED] $50K+ Enterprise MRR from data breaches")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_rbac_enforcement_across_workspaces(self, test_core):
         """
         Test Role-Based Access Control enforcement across all workspace operations.
@@ -109,6 +113,7 @@ class TestWorkspaceDataIsolation:
         print(f"[ENTERPRISE] Admin capabilities properly isolated")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_workspace_query_prevention(self, test_core, security_utils):
         """
         Test that cross-workspace queries are completely prevented.
@@ -142,6 +147,7 @@ class TestWorkspaceDataIsolation:
         print(f"[PROTECTED] Cross-workspace data breach prevention validated")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_audit_trail_compliance(self, test_core):
         """
         Test comprehensive audit trail for Enterprise compliance requirements.
@@ -166,6 +172,7 @@ class TestWorkspaceDataIsolation:
         print(f"[ENTERPRISE] Security logging requirements met")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_workspace_deletion_complete_cleanup(self, test_core):
         """
         Test workspace deletion removes ALL associated data completely.
@@ -190,6 +197,7 @@ class TestWorkspaceDataIsolation:
         print(f"[COMPLIANCE] Data retention compliance validated")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_performance_under_isolation_load(self, test_core, security_utils):
         """
         Test workspace isolation performance under concurrent load.
@@ -274,10 +282,12 @@ class TestWorkspaceDataIsolation:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestWorkspaceIsolationCompliance:
     """Enterprise compliance validation for workspace isolation."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_soc2_compliance_requirements(self):
         """Test workspace isolation meets SOC2 compliance requirements."""
         test_core = WorkspaceIsolationTestCore()

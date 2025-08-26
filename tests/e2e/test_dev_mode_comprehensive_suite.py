@@ -418,6 +418,7 @@ class DevModeTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_dev_mode_comprehensive():
     """Run comprehensive dev mode test suite"""
     tester = DevModeTester()

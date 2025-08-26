@@ -18,10 +18,12 @@ import websockets
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
+@pytest.mark.e2e
 class TestTokenValidationFlow:
     """Test complete token validation through all services."""
     
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_harness(self):
         """Setup unified test harness."""
         harness = UnifiedE2ETestHarness()
@@ -55,10 +57,12 @@ class TestTokenValidationFlow:
             return {"status": response.status_code, "data": response.json()}
 
 
+@pytest.mark.e2e
 class TestValidTokenAccepted(TestTokenValidationFlow):
     """Test valid tokens are accepted across services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_valid_token_auth_service(self, test_harness, valid_token_payload):
         """Test auth service accepts valid token."""
         token = await self._generate_test_token(valid_token_payload)
@@ -67,6 +71,7 @@ class TestValidTokenAccepted(TestTokenValidationFlow):
         assert result["data"]["valid"] is True
     
     @pytest.mark.asyncio  
+    @pytest.mark.e2e
     async def test_valid_token_backend_validation(self, test_harness, valid_token_payload):
         """Test backend validates token correctly."""
         token = await self._generate_test_token(valid_token_payload)
@@ -77,6 +82,7 @@ class TestValidTokenAccepted(TestTokenValidationFlow):
             assert response.status_code in [200, 401]  # Service may require setup
 
 
+@pytest.mark.e2e
 class TestExpiredTokenRejected(TestTokenValidationFlow):
     """Test expired tokens are properly rejected."""
     
@@ -88,6 +94,7 @@ class TestExpiredTokenRejected(TestTokenValidationFlow):
         return payload
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_token_auth_rejection(self, test_harness, expired_token_payload):
         """Test auth service rejects expired token."""
         token = await self._generate_test_token(expired_token_payload)
@@ -95,6 +102,7 @@ class TestExpiredTokenRejected(TestTokenValidationFlow):
         assert result["status"] == 401
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_expired_token_websocket_rejection(self, test_harness, expired_token_payload):
         """Test WebSocket connection rejects expired token."""
         token = await self._generate_test_token(expired_token_payload)
@@ -104,6 +112,7 @@ class TestExpiredTokenRejected(TestTokenValidationFlow):
                 await ws.ping()
 
 
+@pytest.mark.e2e
 class TestInvalidSignatureRejected(TestTokenValidationFlow):
     """Test tokens with invalid signatures are rejected."""
     
@@ -114,6 +123,7 @@ class TestInvalidSignatureRejected(TestTokenValidationFlow):
         return f"{parts[0]}.{parts[1]}.invalid_signature_xyz"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_invalid_signature_auth_rejection(self, test_harness, valid_token_payload):
         """Test auth service rejects tampered signature."""
         token = await self._create_tampered_token(valid_token_payload)
@@ -121,6 +131,7 @@ class TestInvalidSignatureRejected(TestTokenValidationFlow):
         assert result["status"] == 401
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_invalid_signature_backend_rejection(self, test_harness, valid_token_payload):
         """Test backend rejects tampered signature."""
         token = await self._create_tampered_token(valid_token_payload)
@@ -131,6 +142,7 @@ class TestInvalidSignatureRejected(TestTokenValidationFlow):
             assert response.status_code == 401
 
 
+@pytest.mark.e2e
 class TestTokenRefreshFlow(TestTokenValidationFlow):
     """Test token refresh mechanism."""
     
@@ -144,6 +156,7 @@ class TestTokenRefreshFlow(TestTokenValidationFlow):
         return payload
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_refresh_token_generates_new_access(self, test_harness, refresh_token_payload):
         """Test refresh token generates new access token."""
         refresh_token = await self._generate_test_token(refresh_token_payload)
@@ -158,6 +171,7 @@ class TestTokenRefreshFlow(TestTokenValidationFlow):
                 assert "refresh_token" in result
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_access_token_cannot_refresh(self, test_harness, valid_token_payload):
         """Test access token cannot be used for refresh."""
         access_token = await self._generate_test_token(valid_token_payload)
@@ -168,10 +182,12 @@ class TestTokenRefreshFlow(TestTokenValidationFlow):
             assert response.status_code == 401
 
 
+@pytest.mark.e2e
 class TestTokenRevocation(TestTokenValidationFlow):
     """Test token revocation mechanism."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_blacklist_concept(self, test_harness, valid_token_payload):
         """Test token structure supports revocation."""
         token = await self._generate_test_token(valid_token_payload)
@@ -182,6 +198,7 @@ class TestTokenRevocation(TestTokenValidationFlow):
         assert "sub" in payload  # User ID for user-based revocation
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_revoked_token_rejection(self, test_harness, valid_token_payload):
         """Test revoked token is rejected."""
         token = await self._generate_test_token(valid_token_payload)
@@ -194,10 +211,12 @@ class TestTokenRevocation(TestTokenValidationFlow):
             assert result["status"] in [200, 401]
 
 
+@pytest.mark.e2e
 class TestWebSocketAuthentication(TestTokenValidationFlow):
     """Test WebSocket-specific token authentication."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_token_authentication(self, test_harness, valid_token_payload):
         """Test WebSocket authenticates with valid token."""
         token = await self._generate_test_token(valid_token_payload)
@@ -215,6 +234,7 @@ class TestWebSocketAuthentication(TestTokenValidationFlow):
             pass
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_no_token_rejection(self, test_harness):
         """Test WebSocket rejects connection without token."""
         with pytest.raises((websockets.exceptions.ConnectionClosedError, ConnectionRefusedError)):
@@ -222,10 +242,12 @@ class TestWebSocketAuthentication(TestTokenValidationFlow):
                 await ws.ping()
 
 
+@pytest.mark.e2e
 class TestAgentContextExtraction(TestTokenValidationFlow):
     """Test agent context extraction from tokens."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_context_extracted_from_token(self, test_harness, valid_token_payload):
         """Test agent receives correct user context."""
         token = await self._generate_test_token(valid_token_payload)
@@ -251,6 +273,7 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
                     assert mock_process.called
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_permissions_extracted_for_agent_authorization(self, test_harness, valid_token_payload):
         """Test agent receives permission context."""
         # Add admin permission to token
@@ -276,10 +299,12 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
                     assert mock_execute.called
 
 
+@pytest.mark.e2e
 class TestTokenValidationSecurity(TestTokenValidationFlow):
     """Test security aspects of token validation."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_none_algorithm_attack_prevention(self, test_harness):
         """Test prevention of 'none' algorithm attack."""
         # Create malicious token with 'none' algorithm
@@ -300,6 +325,7 @@ class TestTokenValidationSecurity(TestTokenValidationFlow):
         assert result["status"] == 401
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_token_replay_protection(self, test_harness, valid_token_payload):
         """Test token replay attack protection."""
         token = await self._generate_test_token(valid_token_payload)
@@ -313,10 +339,12 @@ class TestTokenValidationSecurity(TestTokenValidationFlow):
         assert result1["status"] == result2["status"]
 
 
+@pytest.mark.e2e
 class TestCrossServiceTokenFlow(TestTokenValidationFlow):
     """Test token validation across all services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_to_backend_token_flow(self, test_harness, valid_token_payload):
         """Test token generated by auth service works in backend."""
         token = await self._generate_test_token(valid_token_payload)
@@ -334,6 +362,7 @@ class TestCrossServiceTokenFlow(TestTokenValidationFlow):
                 assert backend_response.status_code in [200, 404]  # 404 if user not found
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_to_websocket_token_flow(self, test_harness, valid_token_payload):
         """Test token validated by backend works in WebSocket."""
         token = await self._generate_test_token(valid_token_payload)

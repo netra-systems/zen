@@ -119,6 +119,8 @@ def setup_circuit_breaker(supervisor: SupervisorAgent, threshold: int = 3):
     supervisor.circuit_breaker_enabled = True
     supervisor.circuit_breaker_threshold = threshold
     supervisor.circuit_breaker_failures = {}
+    supervisor.circuit_breaker_open_time = {}
+    supervisor.circuit_breaker_cooldown = 0.1  # 100ms cooldown for testing
 
 def create_pipeline_config(agents: List[str], strategies: List[ExecutionStrategy]) -> List[tuple]:
     """Create pipeline configuration."""
@@ -301,7 +303,10 @@ def _create_triage_execute_func(triage_result):
     async def mock_execute(state, run_id, stream_updates=True):
         state.triage_result = triage_result
         return state
-    return mock_execute
+    
+    # Create AsyncMock with the same behavior but trackable calls
+    mock = AsyncMock(side_effect=mock_execute)
+    return mock
 
 def _create_optimizations_result(return_data: Dict[str, Any]):
     """Create optimizations result from return data."""
@@ -323,7 +328,10 @@ def _create_optimization_execute_func(optimizations_result):
     async def mock_execute(state, run_id, stream_updates=True):
         state.optimizations_result = optimizations_result
         return state
-    return mock_execute
+    
+    # Create AsyncMock with the same behavior but trackable calls
+    mock = AsyncMock(side_effect=mock_execute)
+    return mock
 
 def _create_data_result(return_data: Dict[str, Any]):
     """Create data result from return data."""
@@ -358,7 +366,10 @@ def _create_data_execute_func(data_result):
     async def mock_execute(state, run_id, stream_updates=True):
         state.data_result = data_result
         return state
-    return mock_execute
+    
+    # Create AsyncMock with the same behavior but trackable calls
+    mock = AsyncMock(side_effect=mock_execute)
+    return mock
 
 def _create_retry_side_effects(failures: List[str], agent_name: str, success_data: Dict[str, Any]):
     """Create side effects for retry behavior."""

@@ -77,7 +77,7 @@ class TestSystemStartupIntegration:
     def _mock_external_services(self):
         """Mock external services for startup testing."""
         return patch.multiple(
-            'app.startup_checks.service_checks.ServiceChecker',
+            'netra_backend.app.startup_checks.service_checks.ServiceChecker',
             # Mock: Redis caching isolation to prevent test interference and external dependencies
             check_redis=AsyncMock(return_value=StartupCheckResult(
                 name="check_redis", success=True, message="Redis connected"
@@ -173,7 +173,7 @@ class TestSystemStartupIntegration:
     def _mock_non_database_services(self):
         """Mock non-database services for database testing."""
         return patch.multiple(
-            'app.startup_checks.service_checks.ServiceChecker',
+            'netra_backend.app.startup_checks.service_checks.ServiceChecker',
             # Mock: Redis caching isolation to prevent test interference and external dependencies
             check_redis=AsyncMock(return_value=StartupCheckResult(
                 name="check_redis", success=True, message="Redis connected"
@@ -320,7 +320,7 @@ class TestSystemStartupIntegration:
             
             # Mock one service to fail
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.startup_checks.service_checks.ServiceChecker.check_redis', 
+            with patch('netra_backend.app.startup_checks.service_checks.ServiceChecker.check_redis', 
                       # Mock: Async component isolation for testing without real async operations
                       AsyncMock(return_value=StartupCheckResult(
                           name="check_redis", success=False, message="Redis unavailable", critical=True

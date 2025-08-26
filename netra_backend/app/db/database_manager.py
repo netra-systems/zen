@@ -218,7 +218,26 @@ class DatabaseManager:
         base_url = DatabaseManager.get_base_database_url()
         # For async driver, ensure postgresql+asyncpg:// prefix
         if base_url.startswith("sqlite"):
-            return base_url.replace("sqlite://", "sqlite+aiosqlite://")
+            # Handle various sqlite URL formats correctly
+            if ":memory:" in base_url:
+                # Always use the correct format for in-memory databases
+                return "sqlite+aiosqlite:///:memory:"
+            elif base_url.startswith("sqlite:///"):
+                # Standard format: sqlite:///path -> sqlite+aiosqlite:///path
+                return base_url.replace("sqlite://", "sqlite+aiosqlite://")
+            elif base_url.startswith("sqlite://"):
+                # Two-slash format, ensure three slashes for file paths
+                path_part = base_url[9:]  # Remove "sqlite://"
+                if path_part.startswith('/'):
+                    # Already has leading slash, use as-is
+                    return f"sqlite+aiosqlite://{path_part}"
+                else:
+                    # Add leading slash for absolute path
+                    return f"sqlite+aiosqlite:///{path_part}"
+            else:
+                # Very malformed sqlite URL, fix completely
+                path_part = base_url.replace("sqlite:", "")
+                return f"sqlite+aiosqlite:///{path_part}"
         
         # Use DatabaseURLBuilder for driver-specific formatting
         env_vars = get_env().get_all()
@@ -322,9 +341,17 @@ class DatabaseManager:
         """
         migration_url = DatabaseManager.get_migration_url_sync_format()
         
-        # Get SQL echo setting from unified config
+        # Get SQL echo setting from environment variable or unified config
+        from netra_backend.app.core.isolated_environment import get_env
+        env = get_env()
+        sql_echo_env = env.get("SQL_ECHO", "false").lower() == "true"
+        
+        # Also check config for TRACE mode
         config = get_unified_config()
-        sql_echo = config.log_level == "DEBUG"  # Enable SQL echo in DEBUG mode
+        sql_echo_config = config.log_level == "TRACE" and getattr(config, 'enable_sql_logging', False)
+        
+        # Enable SQL echo if either environment variable is set or config enables it
+        sql_echo = sql_echo_env or sql_echo_config
         
         return create_engine(
             migration_url,
@@ -383,7 +410,8 @@ class DatabaseManager:
         
         # Get SQL echo setting from unified config
         config = get_unified_config()
-        sql_echo = config.log_level == "DEBUG"  # Enable SQL echo in DEBUG mode
+        # Only enable SQL echo in TRACE mode to avoid spam
+        sql_echo = config.log_level == "TRACE" and getattr(config, 'enable_sql_logging', False)
         
         engine_args = {
             "echo": sql_echo,
@@ -397,9 +425,9 @@ class DatabaseManager:
         if pool_class != NullPool:
             engine_args.update({
                 # Optimized pool sizes for cold start resilience
-                "pool_size": 25,  # Increased base pool size for concurrent startup
-                "max_overflow": 35,  # Higher overflow to handle startup bursts (total max: 60)
-                "pool_timeout": 120,  # Longer timeout for cold start scenarios
+                "pool_size": 10,  # Reduced from 25 for faster startup  # Increased base pool size for concurrent startup
+                "max_overflow": 15,  # Reduced from 35 (total max: 25)  # Higher overflow to handle startup bursts (total max: 60)
+                "pool_timeout": 60,  # Reduced from 120 for faster failure detection  # Longer timeout for cold start scenarios
             })
         
         if connect_args:
@@ -521,13 +549,19 @@ class DatabaseManager:
             Dictionary with pool statistics
         """
         if hasattr(engine.pool, 'size'):
-            return {
+            pool_stats = {
                 "pool_size": engine.pool.size(),
                 "checked_in": engine.pool.checkedin(),
                 "checked_out": engine.pool.checkedout(),
                 "overflow": engine.pool.overflow(),
-                "invalid": engine.pool.invalid(),
             }
+            
+            # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() or invalidated() methods
+            # These methods only exist on synchronous pools, not async pools
+            # For async pools, we can only check basic stats
+            pool_stats["pool_type"] = type(engine.pool).__name__
+            
+            return pool_stats
         return {"status": "Pool status unavailable"}
     
     @staticmethod

@@ -49,6 +49,7 @@ class DatabaseConnectionTester:
         self.redis_url = os.getenv("TEST_REDIS_URL") or \
             "redis://localhost:6379/1"
     
+    @pytest.mark.e2e
     async def test_postgres_connection(self) -> Tuple[bool, Optional[str]]:
         """Test PostgreSQL database connection."""
         try:
@@ -62,6 +63,7 @@ class DatabaseConnectionTester:
         except Exception as e:
             return False, str(e)
     
+    @pytest.mark.e2e
     async def test_clickhouse_connection(self) -> Tuple[bool, Optional[str]]:
         """Test ClickHouse database connection."""
         try:
@@ -76,6 +78,7 @@ class DatabaseConnectionTester:
         except Exception as e:
             return False, str(e)
     
+    @pytest.mark.e2e
     def test_redis_connection(self) -> Tuple[bool, Optional[str]]:
         """Test Redis connection."""
         try:
@@ -86,6 +89,7 @@ class DatabaseConnectionTester:
         except Exception as e:
             return False, str(e)
     
+    @pytest.mark.e2e
     async def test_connection_pooling(self) -> Tuple[bool, Optional[str]]:
         """Test database connection pooling works correctly."""
         try:
@@ -166,6 +170,7 @@ class DevDatabaseTestFixture:
 
 
 @pytest.fixture
+@pytest.mark.e2e
 async def test_db_test_fixture():
     """Fixture providing database test environment."""
     fixture = DevDatabaseTestFixture()
@@ -174,6 +179,7 @@ async def test_db_test_fixture():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_postgres_connectivity(test_db_test_fixture):
     """Test PostgreSQL database connectivity during startup."""
     success, error = await test_db_test_fixture.db_tester.test_postgres_connection()
@@ -183,6 +189,7 @@ async def test_postgres_connectivity(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_clickhouse_connectivity(test_db_test_fixture):
     """Test ClickHouse database connectivity during startup."""
     success, error = await test_db_test_fixture.db_tester.test_clickhouse_connection()
@@ -192,6 +199,7 @@ async def test_clickhouse_connectivity(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_redis_connectivity(test_db_test_fixture):
     """Test Redis connectivity during startup."""
     success, error = test_db_test_fixture.db_tester.test_redis_connection()
@@ -201,6 +209,7 @@ async def test_redis_connectivity(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_all_databases_available_in_dev_mode(test_db_test_fixture):
     """Test all databases are available when dev environment starts."""
     startup_success = await test_db_test_fixture.start_dev_environment()
@@ -218,6 +227,7 @@ async def _verify_all_database_connections(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_startup_checks(test_db_test_fixture):
     """Test database startup checks execute successfully."""
     startup_success = await test_db_test_fixture.start_dev_environment()
@@ -233,6 +243,7 @@ async def test_database_startup_checks(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_connection_pooling_works(test_db_test_fixture):
     """Test database connection pooling works correctly."""
     success, error = await test_db_test_fixture.db_tester.test_connection_pooling()
@@ -240,6 +251,7 @@ async def test_connection_pooling_works(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_recovery_after_disconnection(test_db_test_fixture):
     """Test database connections recover after temporary disconnection."""
     startup_success = await test_db_test_fixture.start_dev_environment()
@@ -258,6 +270,7 @@ async def test_database_recovery_after_disconnection(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_schema_validation(test_db_test_fixture):
     """Test database schema validation during startup."""
     startup_success = await test_db_test_fixture.start_dev_environment()
@@ -274,6 +287,7 @@ async def test_database_schema_validation(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_database_access(test_db_test_fixture):
     """Test concurrent database access works correctly."""
     startup_success = await test_db_test_fixture.start_dev_environment()
@@ -295,6 +309,7 @@ async def test_concurrent_database_access(test_db_test_fixture):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_database_environment_isolation(test_db_test_fixture):
     """Test database connections use test environment settings."""
     # Verify test environment variables are set

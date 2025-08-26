@@ -59,6 +59,7 @@ class PermissionPropagationTester:
         self.permission_timings.append({"operation": "permission_revoke", "time": propagation_time, "user_id": user["user_id"]})
         return {"success": True, "propagation_time": propagation_time, "permissions_revoked": permissions, "revocation_results": revocation_results}
     
+    @pytest.mark.e2e
     async def test_websocket_command_access(self, user_email: str) -> Dict[str, Any]:
         """Test WebSocket command filtering based on permissions."""
         user = self.test_users[user_email]
@@ -72,6 +73,7 @@ class PermissionPropagationTester:
         await self.websocket_client.disconnect()
         return {"websocket_connected": ws_connected, "command_results": command_results, "admin_commands_tested": len(admin_commands)}
     
+    @pytest.mark.e2e
     async def test_concurrent_permission_changes(self) -> Dict[str, Any]:
         """Test multiple concurrent permission changes don't conflict."""
         users = [await self.setup_test_user(f"concurrent_user_{i}@test.com", ["read_access"]) for i in range(3)]
@@ -82,6 +84,7 @@ class PermissionPropagationTester:
         successful_changes = sum(1 for r in results if isinstance(r, dict) and r.get("success"))
         return {"concurrent_changes": len(users), "successful_changes": successful_changes, "total_time": total_time, "no_conflicts": successful_changes == len(users)}
     
+    @pytest.mark.e2e
     async def test_permission_rollback(self, user_email: str) -> Dict[str, Any]:
         """Test permission rollback on failed changes."""
         user = self.test_users[user_email]
@@ -116,6 +119,7 @@ class PermissionPropagationTester:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_basic_permission_grant():
     """Test Case 1: Grant permissions and verify across services."""
     tester = PermissionPropagationTester()
@@ -134,6 +138,7 @@ async def test_basic_permission_grant():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_admin_elevation():
     """Test Case 2: Elevate user to admin and verify elevated access."""
     tester = PermissionPropagationTester()
@@ -154,6 +159,7 @@ async def test_admin_elevation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_revocation():
     """Test Case 3: Revoke permissions and verify loss of access."""
     tester = PermissionPropagationTester()
@@ -171,6 +177,7 @@ async def test_permission_revocation():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_websocket_command_access():
     """Test Case 4: Verify permission-based command filtering."""
     tester = PermissionPropagationTester()
@@ -193,6 +200,7 @@ async def test_websocket_command_access():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_propagation_speed():
     """Test Case 5: Changes propagate < 500ms."""
     tester = PermissionPropagationTester()
@@ -213,6 +221,7 @@ async def test_permission_propagation_speed():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_permission_changes():
     """Test Case 6: Multiple permission changes don't conflict."""
     tester = PermissionPropagationTester()
@@ -225,6 +234,7 @@ async def test_concurrent_permission_changes():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_permission_rollback():
     """Test Case 7: Failed permission changes rollback properly."""
     tester = PermissionPropagationTester()

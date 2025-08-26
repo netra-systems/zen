@@ -225,6 +225,7 @@ class RealDevLauncherTester:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.e2e
 class TestDevLauncherRealStartup:
     """
     CRITICAL: Real dev launcher startup validation - NO MOCKS
@@ -262,6 +263,7 @@ class TestDevLauncherRealStartup:
             dynamic_ports=False  # Use fixed ports for testing
         )
     
+    @pytest.mark.e2e
     async def test_real_dev_launcher_startup_sequence(self, launcher_tester, launcher_config):
         """
         Test real dev launcher starts all 3 services with actual HTTP validation.
@@ -504,6 +506,7 @@ class TestDevLauncherRealStartup:
         
         return health_results
     
+    @pytest.mark.e2e
     async def test_service_startup_order_validation(self, launcher_tester, launcher_config):
         """
         Test that services start in correct dependency order.
@@ -560,6 +563,7 @@ class TestDevLauncherRealStartup:
         
         print("✅ Service startup order validation passed")
     
+    @pytest.mark.e2e
     async def test_health_endpoint_response_validation(self, launcher_tester, launcher_config):
         """
         Test health endpoints return proper responses.

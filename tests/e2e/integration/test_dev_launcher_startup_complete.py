@@ -76,6 +76,7 @@ class RealDevLauncherTester:
         self.launcher_running = False
         self.services_status: Dict[str, ServiceStatus] = {}
         
+    @pytest.mark.e2e
     async def test_real_startup(self) -> Dict[str, Any]:
         """Test real dev launcher startup and validate all services."""
         self.start_time = time.time()
@@ -436,6 +437,7 @@ class RealDevLauncherTester:
 
 @pytest.mark.critical
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestDevLauncherStartupComplete:
     """Critical dev launcher startup validation test suite."""
     
@@ -444,6 +446,7 @@ class TestDevLauncherStartupComplete:
         """Create dev launcher tester."""
         return RealDevLauncherTester()
     
+    @pytest.mark.e2e
     async def test_real_dev_launcher_startup_all_services(self, launcher_tester):
         """Test complete dev launcher startup with all services."""
         logger.info("Starting CRITICAL dev launcher startup test")

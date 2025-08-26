@@ -18,11 +18,13 @@ from pathlib import Path
 
 
 
+@pytest.mark.e2e
 class TestStagingDeploymentErrors:
     """Test suite for critical staging deployment errors."""
     
     # Test 1: PostgreSQL Authentication Error
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_postgres_authentication_staging(self):
         """
         Test that reproduces the PostgreSQL authentication failure in staging.
@@ -55,6 +57,7 @@ class TestStagingDeploymentErrors:
 
     # Test 2: ClickHouse Connection Error
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_backend_clickhouse_localhost_in_staging(self):
         """
         Test that reproduces ClickHouse trying to connect to localhost in staging.
@@ -78,6 +81,7 @@ class TestStagingDeploymentErrors:
 
     # Test 3: Auth Service SSL Parameter Error
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_service_sslmode_parameter_error(self):
         """
         Test that reproduces auth service asyncpg SSL parameter incompatibility.
@@ -115,6 +119,7 @@ class TestStagingDeploymentErrors:
             assert converted.startswith("postgresql+asyncpg://"), f"Should use asyncpg: {converted}"
 
     # Test 4: Frontend Node Version Compatibility
+    @pytest.mark.e2e
     def test_frontend_node_version_requirement(self):
         """
         Test that validates Node version requirements for frontend.
@@ -141,6 +146,7 @@ class TestStagingDeploymentErrors:
 
     # Test 5: Database URL Consistency Across Services
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_url_consistency_staging(self):
         """
         Test that both backend and auth services handle DATABASE_URL consistently.
@@ -174,6 +180,7 @@ class TestStagingDeploymentErrors:
 
     # Test 6: Deployment Configuration Validation
     @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    @pytest.mark.e2e
     def test_staging_deployment_configuration(self):
         """
         Test that validates all required staging configuration is present.
@@ -217,6 +224,7 @@ class TestStagingDeploymentErrors:
 
     # Test 7: Health Check Database Initialization
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_health_check_database_initialization(self):
         """
         Test that health check endpoints properly handle database initialization.
@@ -244,6 +252,7 @@ class TestStagingDeploymentErrors:
 
     # Test 8: Similar SSL Parameter Issues
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_similar_ssl_parameter_issues(self):
         """
         Test for similar SSL parameter issues across different URL formats.
@@ -279,6 +288,7 @@ class TestStagingDeploymentErrors:
                     assert "ssl=" not in async_url, f"Cloud SQL should have no SSL: {async_url}"
 
     # Test 9: Missing Configuration Detection
+    @pytest.mark.e2e
     def test_missing_configuration_detection(self):
         """
         Test detection of missing critical configurations in staging.
@@ -312,6 +322,7 @@ class TestStagingDeploymentErrors:
 
     # Test 10: Deployment Readiness Check
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_deployment_readiness_comprehensive(self):
         """
         Comprehensive test to validate deployment readiness.

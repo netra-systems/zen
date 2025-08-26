@@ -31,9 +31,11 @@ from tests.e2e.staging_test_helpers import (
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingEnvironmentCore:
     """Core staging environment configuration and validation tests."""
     
+    @pytest.mark.e2e
     async def test_staging_environment_detection(self):
         """Test that staging environment is correctly detected and configured."""
         suite = await get_staging_suite()
@@ -44,6 +46,7 @@ class TestStagingEnvironmentCore:
         assert not config.is_test_environment()
         assert not config.is_production_environment()
     
+    @pytest.mark.e2e
     async def test_critical_environment_variables(self):
         """Test all critical environment variables are properly set."""
         required_vars = [
@@ -55,6 +58,7 @@ class TestStagingEnvironmentCore:
         missing_vars = [var for var in required_vars if not os.getenv(var)]
         assert len(missing_vars) == 0, f"Missing critical variables: {missing_vars}"
     
+    @pytest.mark.e2e
     async def test_database_configuration_integrity(self):
         """Test database configuration meets staging requirements."""
         suite = await get_staging_suite()
@@ -69,9 +73,11 @@ class TestStagingEnvironmentCore:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingSecurityValidation:
     """Test staging security configuration and secret validation."""
     
+    @pytest.mark.e2e
     async def test_jwt_security_configuration(self):
         """Test JWT configuration meets security requirements."""
         jwt_secret = os.getenv(JWTConstants.JWT_SECRET_KEY)
@@ -85,6 +91,7 @@ class TestStagingSecurityValidation:
         assert len(fernet_key) > 20  # Base64 encoded Fernet keys are longer
         assert fernet_key != "test-fernet-key-fallback"
     
+    @pytest.mark.e2e
     async def test_oauth_configuration_security(self):
         """Test OAuth configuration is properly secured for staging."""
         client_id = os.getenv(CredentialConstants.GOOGLE_CLIENT_ID)
@@ -98,9 +105,11 @@ class TestStagingSecurityValidation:
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.e2e
 class TestStagingConfigurationManager:
     """Test unified configuration manager initialization for staging."""
     
+    @pytest.mark.e2e
     async def test_configuration_manager_initialization(self):
         """Test configuration manager initializes correctly for staging."""
         suite = await get_staging_suite()
@@ -111,12 +120,14 @@ class TestStagingConfigurationManager:
         assert config.database_url is not None
         assert config.environment in ['staging', 'testing']
     
+    @pytest.mark.e2e
     async def test_configuration_integrity_validation(self):
         """Test configuration integrity passes all validation checks."""
         is_valid, issues = validate_config_integrity()
         assert is_valid, f"Configuration integrity issues: {issues}"
         assert len(issues) == 0
     
+    @pytest.mark.e2e
     async def test_configuration_completeness(self):
         """Test configuration provides all required components."""
         suite = await get_staging_suite()
@@ -132,9 +143,11 @@ class TestStagingConfigurationManager:
 @pytest.mark.asyncio
 @pytest.mark.staging  
 @pytest.mark.comprehensive
+@pytest.mark.e2e
 class TestStagingStartupFlow:
     """Test core staging startup flow and system initialization."""
     
+    @pytest.mark.e2e
     async def test_core_system_startup(self):
         """Test core system startup completes successfully within time limits."""
         start_time = time.time()
@@ -151,6 +164,7 @@ class TestStagingStartupFlow:
         duration = time.time() - start_time
         assert duration < 30, f"Startup took too long: {duration:.2f}s"
     
+    @pytest.mark.e2e
     async def test_service_dependency_chain(self):
         """Test services start in correct dependency order."""
         suite = await get_staging_suite()
@@ -166,6 +180,7 @@ class TestStagingStartupFlow:
         assert backend_health.healthy, "Backend service not ready"
         assert backend_health.details.get("status") == "healthy"
     
+    @pytest.mark.e2e
     async def test_startup_summary_generation(self):
         """Test comprehensive startup validation and summary generation."""
         start_time = time.time()

@@ -39,7 +39,7 @@ class ToolPermissionRateLimiter:
             )
             if current_usage >= limit:
                 return self._build_limit_exceeded_response(period, limit, current_usage, rate_limits)
-        return self._build_allowed_response(rate_limits, context)
+        return await self._build_allowed_response(rate_limits, context)
 
     def _get_applicable_rate_limits(self, permissions: List[str], permission_definitions: Dict) -> Dict:
         """Get applicable rate limits for permissions"""

@@ -284,6 +284,7 @@ class ImportIntegrityValidator:
         }
 
 
+@pytest.mark.e2e
 class TestImportIntegrity:
     """Import integrity test suite"""
     
@@ -297,6 +298,7 @@ class TestImportIntegrity:
         """Run validation and return results"""
         return validator.run_comprehensive_validation()
 
+    @pytest.mark.e2e
     def test_no_missing_required_packages(self, validation_results):
         """Test that all required packages are available"""
         missing_packages = validation_results["missing_packages_list"]
@@ -308,6 +310,7 @@ class TestImportIntegrity:
                 failure_msg += f"  - {package}: {details['error']}\n"
             pytest.fail(failure_msg)
 
+    @pytest.mark.e2e
     def test_all_modules_importable(self, validation_results):
         """Test that all Python modules can be imported without errors"""
         failed_imports = validation_results["failed_imports"]
@@ -339,6 +342,7 @@ class TestImportIntegrity:
             
             pytest.fail(failure_report)
 
+    @pytest.mark.e2e
     def test_no_circular_dependencies(self, validation_results):
         """Test that no circular import dependencies are detected"""
         circular_deps = validation_results["circular_deps"]
@@ -348,6 +352,7 @@ class TestImportIntegrity:
             failure_msg += "These modules have potential circular import issues that must be resolved."
             pytest.fail(failure_msg)
 
+    @pytest.mark.e2e
     def test_performance_requirements(self, validation_results):
         """Test that import validation completes within performance requirements"""
         elapsed_time = validation_results["elapsed_time_seconds"]
@@ -359,6 +364,7 @@ class TestImportIntegrity:
                 f"This indicates potential performance issues in import resolution."
             )
 
+    @pytest.mark.e2e
     def test_minimum_success_rate(self, validation_results):
         """Test that import success rate meets minimum threshold"""
         success_rate = validation_results["success_rate"]
@@ -370,6 +376,7 @@ class TestImportIntegrity:
                 f"Too many modules have import failures."
             )
 
+    @pytest.mark.e2e
     def test_critical_directories_coverage(self, validation_results, validator):
         """Test that all critical directories are covered"""
         # Ensure we tested files from all expected directories
@@ -392,6 +399,7 @@ class TestImportIntegrity:
             if missing_dir_warnings:
                 pytest.fail(f"Missing critical directories: {missing_dir_warnings}")
 
+    @pytest.mark.e2e
     def test_validation_report_generation(self, validation_results):
         """Test that comprehensive validation report is generated"""
         # Verify all expected keys are present in results
@@ -415,6 +423,7 @@ class TestImportIntegrity:
                 f"!= total files ({total_files})"
             )
 
+    @pytest.mark.e2e
     def test_import_integrity_summary(self, validation_results):
         """Generate and validate comprehensive test summary"""
         print("\n" + "=" * 80)

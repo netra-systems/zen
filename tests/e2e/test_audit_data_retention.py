@@ -15,6 +15,7 @@ from typing import Any, Dict, List
 import pytest
 
 
+@pytest.mark.e2e
 class TestAuditRetentionPolicy:
     """Test audit data retention policy and lifecycle management.
     
@@ -23,6 +24,7 @@ class TestAuditRetentionPolicy:
     """
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_audit_data_retention_enforcement(self):
         """Test audit data is properly retained according to policy."""
         retention_policy = self._get_retention_policy_config()
@@ -57,6 +59,7 @@ class TestAuditRetentionPolicy:
         }
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_compliance_data_lifecycle_management(self):
         """Test complete data lifecycle management for compliance."""
         lifecycle_stages = await self._execute_full_lifecycle_test()

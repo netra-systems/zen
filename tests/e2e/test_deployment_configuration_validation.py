@@ -23,9 +23,11 @@ from unittest.mock import patch, Mock, MagicMock
 
 
 
+@pytest.mark.e2e
 class TestDeploymentConfigurationFailures:
     """Test suite reproducing deployment configuration failures."""
     
+    @pytest.mark.e2e
     def test_gcp_deployment_script_missing_critical_secrets(self):
         """
         FAILING TEST: Shows GCP deployment script missing critical secrets mapping.
@@ -98,6 +100,7 @@ class TestDeploymentConfigurationFailures:
         assert not missing_secrets, \
             f"Critical secrets missing from deployment script: {missing_secrets}"
     
+    @pytest.mark.e2e
     def test_cloud_run_service_configuration_incomplete(self):
         """
         FAILING TEST: Shows Cloud Run service configuration missing required settings.
@@ -145,6 +148,7 @@ class TestDeploymentConfigurationFailures:
         assert not missing_configs, \
             f"Required Cloud Run configurations missing: {missing_configs}"
     
+    @pytest.mark.e2e
     def test_secret_manager_secret_creation_incomplete(self):
         """
         FAILING TEST: Shows Secret Manager secrets not properly created for staging.
@@ -190,6 +194,7 @@ class TestDeploymentConfigurationFailures:
         assert not missing_secret_refs, \
             f"Secret Manager secrets not referenced in deployment: {missing_secret_refs}"
     
+    @pytest.mark.e2e
     def test_environment_variable_precedence_issues(self):
         """
         FAILING TEST: Shows environment variable precedence causing wrong values.
@@ -234,9 +239,11 @@ class TestDeploymentConfigurationFailures:
                 f"Environment variable precedence issues: {precedence_issues}"
 
 
+@pytest.mark.e2e
 class TestServiceSpecificConfigurationFailures:
     """Test suite for service-specific configuration failures."""
     
+    @pytest.mark.e2e
     def test_backend_clickhouse_configuration_missing(self):
         """
         FAILING TEST: Shows backend ClickHouse configuration missing in staging.
@@ -273,6 +280,7 @@ class TestServiceSpecificConfigurationFailures:
             assert not staging_clickhouse_issues, \
                 f"Backend ClickHouse configuration issues in staging: {staging_clickhouse_issues}"
     
+    @pytest.mark.e2e
     def test_auth_service_redis_configuration_missing(self):
         """
         FAILING TEST: Shows auth service Redis configuration missing in staging.
@@ -296,6 +304,7 @@ class TestServiceSpecificConfigurationFailures:
             assert "localhost" not in redis_url, \
                 f"Auth service using localhost Redis in staging: {redis_url}"
     
+    @pytest.mark.e2e
     def test_frontend_api_url_configuration_mismatch(self):
         """
         FAILING TEST: Shows frontend API URL configuration mismatch in staging.
@@ -328,9 +337,11 @@ class TestServiceSpecificConfigurationFailures:
                 f"Frontend URL configuration mismatches: {url_mismatches}"
 
 
+@pytest.mark.e2e
 class TestDeploymentValidationFailures:
     """Test suite for deployment validation failures."""
     
+    @pytest.mark.e2e
     def test_no_pre_deployment_configuration_validation(self):
         """
         FAILING TEST: Shows lack of pre-deployment configuration validation.
@@ -360,6 +371,7 @@ class TestDeploymentValidationFailures:
         assert has_validation, \
             "Deployment script missing pre-deployment configuration validation"
     
+    @pytest.mark.e2e
     def test_no_post_deployment_health_verification(self):
         """
         FAILING TEST: Shows lack of post-deployment health verification.
@@ -390,6 +402,7 @@ class TestDeploymentValidationFailures:
         assert has_health_verification, \
             "Deployment script missing post-deployment health verification"
     
+    @pytest.mark.e2e
     def test_deployment_rollback_strategy_missing(self):
         """
         FAILING TEST: Shows deployment rollback strategy missing.
@@ -420,9 +433,11 @@ class TestDeploymentValidationFailures:
             "Deployment script missing rollback strategy for failed deployments"
 
 
+@pytest.mark.e2e
 class TestConfigurationIntegrationFailures:
     """Test suite for cross-service configuration integration failures."""
     
+    @pytest.mark.e2e
     def test_service_to_service_url_mismatch(self):
         """
         FAILING TEST: Shows service-to-service URL configuration mismatches.
@@ -468,6 +483,7 @@ class TestConfigurationIntegrationFailures:
             if "localhost" in frontend_url:
                 pytest.fail(f"Auth service using localhost frontend URL in staging: {frontend_url}")
     
+    @pytest.mark.e2e
     def test_database_url_sharing_inconsistency(self):
         """
         FAILING TEST: Shows DATABASE_URL sharing inconsistency between services.

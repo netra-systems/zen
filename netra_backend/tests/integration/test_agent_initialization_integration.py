@@ -147,7 +147,7 @@ class TestAgentInitializationIntegration:
     
     @mock_justified("LLM service unavailable during agent initialization testing")
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.triage_sub_agent.agent.TriageSubAgent.execute')
+    @patch('netra_backend.app.agents.triage_sub_agent.agent.TriageSubAgent.execute')
     @pytest.mark.asyncio
     async def test_supervisor_agent_initialization(self, mock_execute, agent_registry):
         """Test supervisor agent initialization and coordination setup."""
@@ -219,7 +219,7 @@ class TestAgentInitializationIntegration:
     
     @mock_justified("External agent recovery service not available in test environment")
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.core.agent_recovery_supervisor.SupervisorRecoveryStrategy')
+    @patch('netra_backend.app.core.agent_recovery_supervisor.SupervisorRecoveryStrategy')
     @pytest.mark.asyncio
     async def test_agent_failure_and_recovery(self, mock_recovery_strategy, agent_registry):
         """Test agent failure detection and recovery mechanisms."""

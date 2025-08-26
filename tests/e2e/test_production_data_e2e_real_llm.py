@@ -179,10 +179,12 @@ class ProductionDataGenerator:
 
 @pytest.mark.real_llm
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestProductionDataE2ERealLLM:
     """Test production-scale data processing with real LLM."""
     
     @pytest_asyncio.fixture
+    @pytest.mark.e2e
     async def test_core(self):
         """Initialize test core with real LLM support."""
         core = AgentConversationTestCore()
@@ -202,6 +204,7 @@ class TestProductionDataE2ERealLLM:
     
     @pytest.mark.asyncio
     @pytest.mark.parametrize("scenario", ProductionDataGenerator.get_production_scenarios())
+    @pytest.mark.e2e
     async def test_production_scenario_execution(self, test_core, use_real_llm, production_monitor, scenario):
         """Test production scenario execution with real data volumes.""" 
         if not use_real_llm:
@@ -219,6 +222,7 @@ class TestProductionDataE2ERealLLM:
         self._validate_production_performance(scenario_result, scenario, execution_time)
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_enterprise_workload_processing(self, test_core, use_real_llm, production_monitor):
         """Test enterprise workload processing capabilities."""
         if not use_real_llm:
@@ -249,6 +253,7 @@ class TestProductionDataE2ERealLLM:
             await session_data["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_production_data_quality_validation(self, test_core, use_real_llm):
         """Test data quality with production-scale datasets."""
         # Generate large dataset
@@ -280,6 +285,7 @@ class TestProductionDataE2ERealLLM:
             await session_data["client"].close()
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_concurrent_production_load(self, test_core, use_real_llm, production_monitor):
         """Test concurrent production load handling."""
         if not use_real_llm:
@@ -321,6 +327,7 @@ class TestProductionDataE2ERealLLM:
                 await session["client"].close()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_production_edge_cases(self, test_core, use_real_llm):
         """Test production edge cases and error scenarios."""
         edge_case_requests = self._generate_edge_case_requests()

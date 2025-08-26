@@ -37,6 +37,7 @@ from tests.e2e.concurrent_user_simulators import (
 @pytest.mark.asyncio
 
 @pytest.mark.integration
+@pytest.mark.e2e
 async def test_multi_user_concurrent_chat_sessions():
 
     """
@@ -148,6 +149,7 @@ async def test_multi_user_concurrent_chat_sessions():
 @pytest.mark.asyncio
 
 @pytest.mark.performance
+@pytest.mark.e2e
 async def test_concurrent_user_performance_targets():
 
     """
@@ -216,6 +218,7 @@ async def test_concurrent_user_performance_targets():
 @pytest.mark.asyncio
 
 @pytest.mark.critical
+@pytest.mark.e2e
 async def test_concurrent_user_data_isolation():
 
     """

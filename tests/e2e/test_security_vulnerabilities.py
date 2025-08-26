@@ -17,6 +17,7 @@ from typing import Dict, List, Any
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_sql_injection_prevention():
     """
     Test that APIs properly prevent SQL injection attacks.
@@ -112,6 +113,7 @@ async def test_sql_injection_prevention():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_xss_prevention():
     """
     Test that APIs properly prevent Cross-Site Scripting (XSS) attacks.
@@ -193,6 +195,7 @@ async def test_xss_prevention():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_authentication_bypass_attempts():
     """
     Test that authentication cannot be bypassed through common attack vectors.
@@ -276,6 +279,7 @@ async def test_authentication_bypass_attempts():
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_rate_limiting_enforcement():
     """
     Test that rate limiting is properly enforced to prevent abuse.

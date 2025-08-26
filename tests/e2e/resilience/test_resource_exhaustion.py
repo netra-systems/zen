@@ -26,9 +26,11 @@ from netra_backend.tests.e2e.concurrent_load_helpers import (
 
 
 # Add project root to path
+@pytest.mark.e2e
 class TestResourceExhaustion:
     """Test resource pool exhaustion handling"""
     
+    @pytest.mark.e2e
     async def test_resource_pool_exhaustion_handling(self):
         """Test that system handles resource pool exhaustion gracefully"""
         tester = ConcurrentUserLoadTest()
@@ -38,6 +40,7 @@ class TestResourceExhaustion:
         assert results['queue_mechanism_works'], "Queue mechanism failed under load"
         assert results['graceful_degradation'], "System did not degrade gracefully"
     
+    @pytest.mark.e2e
     async def test_resource_pool_exhaustion(self, tester) -> dict:
         """Test handling of resource pool exhaustion"""
         connections = []

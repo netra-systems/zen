@@ -98,10 +98,12 @@ def mock_unified_manager():
     return mock_manager
 
 
+@pytest.mark.e2e
 class TestStreamingChunkDelivery:
     """Test streaming chunk delivery performance and reliability."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_chunks_arrive_sequentially(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test streaming chunks arrive in sequential order."""
         await self._setup_sequential_test(mock_unified_manager, streaming_websocket)
@@ -130,6 +132,7 @@ class TestStreamingChunkDelivery:
         assert sequences == [1, 2, 3, 4]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_handles_long_responses(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test streaming efficiently handles large responses."""
         user_id = "test_long_response_user"
@@ -150,10 +153,12 @@ class TestStreamingChunkDelivery:
     
 
 
+@pytest.mark.e2e
 class TestStreamingInterruption:
     """Test streaming interruption and recovery handling."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_interruption_handling(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test streaming gracefully handles interruptions."""
         user_id = "test_interruption_user"
@@ -182,10 +187,12 @@ class TestStreamingInterruption:
     
 
 
+@pytest.mark.e2e
 class TestStreamingFormatting:
     """Test streaming preserves content formatting."""
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_streaming_with_markdown_formatting(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test streaming preserves markdown formatting."""
         user_id = "test_markdown_user"
@@ -211,10 +218,12 @@ class TestStreamingFormatting:
         assert "```json" in message_content
 
 
+@pytest.mark.e2e
 class TestStreamingPerformance:
     """Test streaming performance characteristics."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_first_chunk_timing(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test first chunk arrives within 500ms."""
         await mock_unified_manager.connect_user("test_timing_user", streaming_websocket)
@@ -228,6 +237,7 @@ class TestStreamingPerformance:
         assert first_chunk_delay_ms < 500, f"First chunk took {first_chunk_delay_ms}ms"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_steady_chunk_delivery(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test chunks arrive with steady timing."""
         await mock_unified_manager.connect_user("test_steady_user", streaming_websocket)
@@ -243,6 +253,7 @@ class TestStreamingPerformance:
         assert max_chunk_time < 100, f"Slowest chunk took {max_chunk_time}ms"
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_streaming(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test concurrent streaming to multiple users."""
         users = [f"concurrent_user_{i}" for i in range(3)]
@@ -257,10 +268,12 @@ class TestStreamingPerformance:
         streaming_harness.assert_fast_execution(start_time, max_seconds=1.0)
 
 
+@pytest.mark.e2e
 class TestStreamingReliability:
     """Test streaming reliability and error recovery."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_connection_recovery(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test streaming recovers from connection issues."""
         await mock_unified_manager.connect_user("test_recovery_user", streaming_websocket)
@@ -282,6 +295,7 @@ class TestStreamingReliability:
         assert True  # Recovery succeeded
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_streaming_message_validation(self, streaming_websocket, streaming_harness, mock_unified_manager):
         """Test streaming validates message formats."""
         await mock_unified_manager.connect_user("test_validation_user", streaming_websocket)

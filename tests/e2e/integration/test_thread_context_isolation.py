@@ -28,6 +28,7 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_agent_context_maintained_per_thread(ws_thread_fixtures, thread_context_manager):
     """Test agent context is maintained per thread without cross-contamination."""
     user = TEST_USERS["enterprise"]
@@ -89,6 +90,7 @@ async def test_agent_context_maintained_per_thread(ws_thread_fixtures, thread_co
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_thread_state_isolation(ws_thread_fixtures, thread_context_manager):
     """Test state isolation across multiple threads for same user."""
     user = TEST_USERS["enterprise"]
@@ -153,6 +155,7 @@ async def test_multiple_thread_state_isolation(ws_thread_fixtures, thread_contex
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_thread_isolation_maintained_across_users(ws_thread_fixtures, thread_context_manager):
     """Test thread isolation is maintained across different users."""
     user_a = TEST_USERS["free"]
@@ -223,6 +226,7 @@ async def test_thread_isolation_maintained_across_users(ws_thread_fixtures, thre
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_context_isolation_under_concurrent_operations(ws_thread_fixtures, thread_context_manager):
     """Test context isolation maintains integrity under concurrent operations."""
     user = TEST_USERS["enterprise"]
@@ -296,6 +300,7 @@ async def test_context_isolation_under_concurrent_operations(ws_thread_fixtures,
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_context_isolation_during_rapid_switches(ws_thread_fixtures, thread_context_manager):
     """Test context isolation during rapid thread switching."""
     user = TEST_USERS["enterprise"]

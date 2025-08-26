@@ -359,10 +359,12 @@ class MockRedisWithRaceConditions:
         """Health check simulation"""
         return True
 
+@pytest.mark.e2e
 class TestConcurrentTokenRefreshRaceConditions:
     """Test Case 1: Concurrent Token Refresh Race Conditions"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_token_refresh_race(self, isolated_auth_environment:
                                                concurrent_executor, race_detector):
         """
@@ -424,10 +426,12 @@ class TestConcurrentTokenRefreshRaceConditions:
                 "token": refresh_token[:10] + "..."
             })
 
+@pytest.mark.e2e
 class TestMultiDeviceLoginCollision:
     """Test Case 2: Multi-Device Login Collision"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_device_login_collision(self, isolated_auth_environment:
                                               concurrent_executor, race_detector):
         """
@@ -514,10 +518,12 @@ class TestMultiDeviceLoginCollision:
         
         race_detector.take_memory_snapshot("after_multidevice_test")
 
+@pytest.mark.e2e
 class TestConcurrentSessionInvalidation:
     """Test Case 3: Session Invalidation Race Conditions"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_session_invalidation(self, isolated_auth_environment:
                                                  concurrent_executor, race_detector):
         """
@@ -621,10 +627,12 @@ class TestConcurrentSessionInvalidation:
         
         race_detector.take_memory_snapshot("after_invalidation_test")
 
+@pytest.mark.e2e
 class TestJWTTokenCollisionDetection:
     """Test Case 4: JWT Token Collision Detection"""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_token_collision_detection(self, isolated_auth_environment:
                                                 race_detector):
         """
@@ -745,11 +753,13 @@ class TestJWTTokenCollisionDetection:
         
         race_detector.take_memory_snapshot("after_token_collision_test")
 
+@pytest.mark.e2e
 class TestRaceConditionLoadStress:
     """Comprehensive load stress test for race condition detection"""
     
     @pytest.mark.asyncio
     @pytest.mark.slow  # Mark as slow test for optional execution
+    @pytest.mark.e2e
     async def test_comprehensive_race_condition_stress(self, isolated_auth_environment:
                                                      race_detector):
         """

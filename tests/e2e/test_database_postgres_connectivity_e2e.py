@@ -34,10 +34,12 @@ logger = logging.getLogger(__name__)
 
 @env("staging")
 @env_requires(services=["auth_service", "backend", "postgres"], features=["database_connectivity"])
+@pytest.mark.e2e
 class TestDatabasePostgresConnectivityE2E:
     """E2E test suite for database 'postgres' connectivity failures across services."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_auth_service_fails_to_start_with_postgres_database_error(self):
         """FAILING E2E TEST: Auth service startup failure cascades to entire platform.
         
@@ -75,6 +77,7 @@ class TestDatabasePostgresConnectivityE2E:
                 logger.error(f"Auth service correctly failed to start due to postgres database error: {exc_info.value}")
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_user_authentication_fails_without_database_connectivity(self):
         """FAILING E2E TEST: User authentication fails when database is unreachable.
         
@@ -112,6 +115,7 @@ class TestDatabasePostgresConnectivityE2E:
                 logger.error(f"User authentication correctly failed due to database connectivity: {exc_info.value}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_session_management_fails_across_services(self):
         """FAILING E2E TEST: Session management fails across backend and auth service.
         
@@ -159,6 +163,7 @@ class TestDatabasePostgresConnectivityE2E:
                 logger.error("Session management correctly failed across services due to database issue")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_authentication_fails_with_database_error(self):
         """FAILING E2E TEST: WebSocket authentication fails when database is unavailable.
         
@@ -196,6 +201,7 @@ class TestDatabasePostgresConnectivityE2E:
                 logger.error(f"WebSocket authentication correctly failed: {exc_info.value}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_health_checks_detect_database_connectivity_issues(self):
         """FAILING E2E TEST: Service health checks should detect postgres database connectivity issues.
         
@@ -247,6 +253,7 @@ class TestDatabasePostgresConnectivityE2E:
                 logger.info("Cross-service health check correctly propagated database connectivity failure")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_migration_fails_with_postgres_database_error(self):
         """FAILING E2E TEST: Database migrations fail when target database doesn't exist.
         
@@ -282,6 +289,7 @@ class TestDatabasePostgresConnectivityE2E:
                 assert 'postgres" does not exist' in str(exc_info.value)
                 logger.error(f"Database migration correctly failed: {exc_info.value}")
     
+    @pytest.mark.e2e
     def test_service_startup_dependency_chain_breaks_with_database_error(self):
         """FAILING E2E TEST: Service startup dependency chain breaks when database is unavailable.
         
@@ -321,6 +329,7 @@ class TestDatabasePostgresConnectivityE2E:
                 logger.error("Service startup dependency chain correctly failed due to database connectivity")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_connection_pool_exhaustion_across_services(self):
         """FAILING E2E TEST: Database connection pool exhaustion when retrying postgres connections.
         
@@ -369,9 +378,11 @@ class TestDatabasePostgresConnectivityE2E:
 
 @env("staging") 
 @env_requires(services=["postgres"], features=["database_naming"])
+@pytest.mark.e2e
 class TestDatabaseNamingConventionE2E:
     """E2E tests for database naming convention issues across the platform."""
     
+    @pytest.mark.e2e
     def test_environment_specific_database_naming_consistency(self):
         """FAILING E2E TEST: Database naming consistency across environments and services.
         
@@ -418,6 +429,7 @@ class TestDatabaseNamingConventionE2E:
                         logger.warning(f"Environment '{environment}' database resolution unclear: {database_url}")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_service_database_name_synchronization(self):
         """FAILING E2E TEST: All services should use the same application database name.
         

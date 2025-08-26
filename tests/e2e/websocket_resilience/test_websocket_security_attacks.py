@@ -36,6 +36,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_session_hijacking_prevention_with_expired_tokens(jwt_generator, audit_logger):
     """
     Test Case 1: Session hijacking prevention with old tokens.
@@ -154,6 +155,7 @@ async def test_session_hijacking_prevention_with_expired_tokens(jwt_generator, a
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_multiple_rapid_expired_token_attempts_brute_force_protection(jwt_generator, audit_logger):
     """
     Test Case 2: Multiple expired token attempts (brute force protection).
@@ -237,6 +239,7 @@ async def test_multiple_rapid_expired_token_attempts_brute_force_protection(jwt_
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_malformed_expired_token_handling(jwt_generator, audit_logger):
     """
     Test Case 3: Malformed expired token handling.
@@ -333,6 +336,7 @@ async def test_malformed_expired_token_handling(jwt_generator, audit_logger):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_token_tampering_with_expired_timestamps(jwt_generator, audit_logger):
     """
     Test Case 4: Token tampering with expired timestamps.

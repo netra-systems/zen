@@ -101,6 +101,16 @@ class UnifiedTestConfig:
         self.endpoints = self._create_test_endpoints()
         self.users = self._create_test_users()
     
+    @property
+    def auth_service_url(self) -> str:
+        """Get auth service URL for backward compatibility"""
+        return self.endpoints.auth_base
+    
+    @property
+    def backend_service_url(self) -> str:
+        """Get backend service URL for backward compatibility"""
+        return self.endpoints.api_base
+    
     def _setup_environment(self) -> None:
         """Setup test environment variables"""
         test_env = self._get_base_test_env()
@@ -370,3 +380,8 @@ def get_auth_service_url() -> str:
 def get_backend_service_url() -> str:
     """Get the backend service URL."""
     return os.environ.get("BACKEND_SERVICE_URL", "http://localhost:8000")
+
+
+def get_test_config() -> UnifiedTestConfig:
+    """Get the unified test configuration instance."""
+    return TEST_CONFIG

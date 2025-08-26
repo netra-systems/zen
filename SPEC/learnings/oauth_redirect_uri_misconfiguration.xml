@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>OAuth Redirect URI Misconfiguration - Critical Authentication Failure</title>
+        <date>2025-08-26</date>
+        <severity>CRITICAL</severity>
+        <impact>100% OAuth authentication failure in staging</impact>
+        <resolution_status>FIXED</resolution_status>
+        <affected_services>auth_service, frontend</affected_services>
+        <keywords>OAuth, Google OAuth, redirect_uri, callback, authentication, staging failure</keywords>
+    </metadata>
+    
+    <problem>
+        <description>
+            After successful Google OAuth authentication, users received "No token received" error in staging.
+            The auth service was telling Google to redirect OAuth callbacks to the FRONTEND URL instead of 
+            the AUTH SERVICE URL, causing complete authentication failure.
+        </description>
+        
+        <symptoms>
+            <symptom>Frontend shows "[ERROR] No token received" after Google OAuth success</symptom>
+            <symptom>Auth service logs show no callback hits after OAuth redirect</symptom>
+            <symptom>Google OAuth redirects directly to frontend with code parameter only</symptom>
+            <symptom>Frontend expects tokens but receives only OAuth code</symptom>
+            <symptom>100% authentication failure rate for OAuth flows</symptom>
+        </symptoms>
+        
+        <root_cause>
+            Auth service incorrectly used frontend URL for OAuth redirect_uri configuration.
+            File: auth_service/auth_core/routes/auth_routes.py
+            Lines: 242, 676, 906
+            
+            INCORRECT: redirect_uri = _determine_urls()[1] + "/auth/callback"  # Uses frontend URL
+            CORRECT:   redirect_uri = _determine_urls()[0] + "/auth/callback"  # Uses auth service URL
+            
+            The _determine_urls() function returns (auth_service_url, frontend_url), so:
+            - Index [0] = auth service URL (correct for OAuth callback)
+            - Index [1] = frontend URL (incorrect - frontend can't exchange OAuth codes)
+        </root_cause>
+    </problem>
+    
+    <broken_flow>
+        <step number="1">User clicks "Sign in with Google" → Frontend calls auth service</step>
+        <step number="2">Auth service redirects to Google with redirect_uri=https://app.staging.netrasystems.ai/auth/callback (WRONG)</step>
+        <step number="3">User authenticates with Google successfully</step>
+        <step number="4">Google redirects to FRONTEND callback with OAuth code</step>
+        <step number="5">Frontend expects tokens but only has code, cannot exchange it</step>
+        <step number="6">Frontend shows "No token received" error</step>
+        <step number="7">Auth service never receives callback, never exchanges code for tokens</step>
+    </broken_flow>
+    
+    <correct_flow>
+        <step number="1">User clicks "Sign in with Google" → Frontend calls auth service</step>
+        <step number="2">Auth service redirects to Google with redirect_uri=https://auth.staging.netrasystems.ai/auth/callback (CORRECT)</step>
+        <step number="3">User authenticates with Google successfully</step>
+        <step number="4">Google redirects to AUTH SERVICE callback with OAuth code</step>
+        <step number="5">Auth service exchanges code for tokens via Google API</step>
+        <step number="6">Auth service redirects to frontend with tokens: https://app.staging.netrasystems.ai/auth/callback?token=...</step>
+        <step number="7">Frontend receives tokens and authentication succeeds</step>
+    </correct_flow>
+    
+    <solution>
+        <fix>
+            Changed three lines in auth_service/auth_core/routes/auth_routes.py:
+            - Line 242: redirect_uri = _determine_urls()[0] + "/auth/callback"
+            - Line 676: redirect_uri = _determine_urls()[0] + "/auth/callback"
+            - Line 906: redirect_uri = request.redirect_uri or (_determine_urls()[0] + "/auth/callback")
+            
+            This ensures OAuth callbacks are directed to the auth service for token exchange.
+        </fix>
+        
+        <google_oauth_console>
+            Required redirect URIs in Google OAuth Console:
+            
+            STAGING:
+            ✓ ADD: https://auth.staging.netrasystems.ai/auth/callback
+            ✗ REMOVE: https://app.staging.netrasystems.ai/auth/callback
+            
+            PRODUCTION:
+            ✓ ADD: https://auth.netrasystems.ai/auth/callback
+            ✗ REMOVE: https://netrasystems.ai/auth/callback
+            
+            DEVELOPMENT:
+            ✓ ADD: http://localhost:8081/auth/callback (auth service port)
+            ✗ REMOVE: http://localhost:3000/auth/callback (frontend port)
+        </google_oauth_console>
+    </solution>
+    
+    <prevention>
+        <measure>
+            Created comprehensive test: tests/e2e/test_oauth_redirect_uri_configuration.py
+            Tests verify redirect_uri always uses auth service URL, not frontend URL.
+        </measure>
+        
+        <measure>
+            Added validation script: scripts/validate_oauth_configuration.py
+            Pre-deployment check ensures OAuth configuration is correct.
+        </measure>
+        
+        <measure>
+            Document OAuth flow architecture clearly showing auth service handles callbacks.
+        </measure>
+        
+        <measure>
+            Code review checklist: Verify OAuth redirect URIs point to auth service.
+        </measure>
+        
+        <measure>
+            Monitor "No token received" errors as indicator of OAuth misconfiguration.
+        </measure>
+    </prevention>
+    
+    <testing>
+        <test name="test_oauth_redirect_uri_must_point_to_auth_service">
+            Verifies redirect_uri uses auth service URL in all environments
+        </test>
+        
+        <test name="test_oauth_login_generates_correct_redirect_uri">
+            Tests /auth/login endpoint generates correct OAuth redirect
+        </test>
+        
+        <test name="test_google_oauth_console_configuration_matches">
+            Documents required Google OAuth Console configuration
+        </test>
+    </testing>
+    
+    <lessons_learned>
+        <lesson>
+            Array index mistakes can cause complete authentication failures.
+            Always verify which index corresponds to which service URL.
+        </lesson>
+        
+        <lesson>
+            OAuth redirect_uri MUST point to the service that can exchange codes for tokens.
+            Frontend cannot perform OAuth token exchange - only auth service can.
+        </lesson>
+        
+        <lesson>
+            Staging logs may not show errors when callbacks go to wrong service.
+            Check if expected endpoints are being hit, not just error logs.
+        </lesson>
+        
+        <lesson>
+            Google OAuth Console configuration must match code exactly.
+            Mismatched redirect URIs cause silent failures.
+        </lesson>
+        
+        <lesson>
+            End-to-end OAuth testing in staging is critical before production.
+            Mock tests may not catch redirect URI configuration errors.
+        </lesson>
+    </lessons_learned>
+    
+    <why_not_discovered_earlier>
+        <reason category="testing_gap">
+            <title>Local Development Testing Masked the Issue</title>
+            <description>
+                In local development, both auth service and frontend run on localhost with CORS allowing
+                cross-origin requests. The misconfigured redirect might have worked locally due to:
+                - Less strict CORS policies in development
+                - Frontend and auth service on same domain (localhost)
+                - Development shortcuts that bypass proper OAuth flow
+            </description>
+        </reason>
+        
+        <reason category="deployment_testing">
+            <title>Staging Deployment Tests Were Not End-to-End</title>
+            <description>
+                Deployment scripts tested service health endpoints but not actual OAuth flows.
+                The auth service appeared healthy (returned 200 on /auth/health) but the 
+                OAuth redirect configuration was never validated in staging environment.
+            </description>
+        </reason>
+        
+        <reason category="test_coverage">
+            <title>Unit Tests Mocked OAuth Flow</title>
+            <description>
+                Existing OAuth tests mocked the Google OAuth responses and redirect behavior.
+                No integration test actually verified the redirect_uri parameter sent to Google.
+                Tests checked if tokens were generated but not HOW the OAuth flow reached that point.
+            </description>
+        </reason>
+        
+        <reason category="code_review">
+            <title>Subtle Array Index Error</title>
+            <description>
+                The bug was a simple index error: [1] instead of [0].
+                Without clear documentation that _determine_urls() returns (auth_url, frontend_url),
+                reviewers might assume [1] was correct, especially since "callback" sounds like
+                it should go to the frontend.
+            </description>
+        </reason>
+        
+        <reason category="environment_differences">
+            <title>Environment-Specific URL Configuration</title>
+            <description>
+                The issue only manifested in staging where services have different domains:
+                - Auth: auth.staging.netrasystems.ai
+                - Frontend: app.staging.netrasystems.ai
+                In local dev, both might use localhost with different ports, masking the issue.
+            </description>
+        </reason>
+        
+        <reason category="google_console">
+            <title>Google OAuth Console Had Both URLs Authorized</title>
+            <description>
+                If both frontend and auth service URLs were authorized in Google OAuth Console
+                during initial setup, the redirect would succeed but to the wrong service.
+                Google doesn't validate if the receiving service can handle OAuth codes.
+            </description>
+        </reason>
+        
+        <reason category="error_messaging">
+            <title>Generic "No Token Received" Error</title>
+            <description>
+                The frontend error message didn't indicate WHY no token was received.
+                It could have been network issues, auth service down, or misconfiguration.
+                Without specific error details, the root cause wasn't immediately obvious.
+            </description>
+        </reason>
+        
+        <reason category="logging">
+            <title>Auth Service Logs Showed No Errors</title>
+            <description>
+                The auth service logs showed successful login initiation (302 redirect to Google).
+                No errors were logged because the callback never reached the auth service.
+                The absence of callback logs wasn't immediately recognized as the problem.
+            </description>
+        </reason>
+        
+        <reason category="assumptions">
+            <title>Assumption That OAuth "Just Works"</title>
+            <description>
+                OAuth is a well-established pattern, leading to assumptions that basic flow
+                would work correctly. Focus was on token validation, JWT handling, and session
+                management rather than the fundamental redirect flow.
+            </description>
+        </reason>
+    </why_not_discovered_earlier>
+    
+    <prevention_for_future>
+        <action priority="1">
+            Add staging-specific OAuth flow test that verifies actual redirect URLs
+        </action>
+        <action priority="2">
+            Implement pre-deployment validation that checks OAuth configuration matches environment
+        </action>
+        <action priority="3">
+            Add explicit logging when OAuth callbacks are received vs expected
+        </action>
+        <action priority="4">
+            Document service URL tuple returns clearly: (auth_url, frontend_url)
+        </action>
+        <action priority="5">
+            Create environment-specific integration tests that run against deployed services
+        </action>
+        <action priority="6">
+            Add monitoring for OAuth callback success rate as a key metric
+        </action>
+        <action priority="7">
+            Implement more descriptive error messages that indicate WHERE in the flow failure occurred
+        </action>
+    </prevention_for_future>
+    
+    <impact_analysis>
+        <impact type="user">100% OAuth registration/login failure - no users could authenticate</impact>
+        <impact type="business">Complete blocking of user onboarding and sign-in</impact>
+        <impact type="technical">Simple index error ([1] vs [0]) caused system-wide auth failure</impact>
+        <impact type="reputation">New users unable to access platform after OAuth success</impact>
+    </impact_analysis>
+    
+    <validation_commands>
+        <command>
+            python -m pytest tests/e2e/test_oauth_redirect_uri_configuration.py -xvs
+        </command>
+        <command>
+            python scripts/validate_oauth_configuration.py --env staging
+        </command>
+        <command>
+            curl -s https://auth.staging.netrasystems.ai/auth/login -L | grep redirect_uri
+        </command>
+    </validation_commands>
+</learning>

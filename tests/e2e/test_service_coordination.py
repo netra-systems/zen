@@ -21,6 +21,7 @@ from dev_launcher.service_coordination import (
 )
 
 
+@pytest.mark.e2e
 class TestPlatformAwarePortAllocator:
     """Test platform-aware port allocation."""
     
@@ -30,6 +31,7 @@ class TestPlatformAwarePortAllocator:
         return PlatformAwarePortAllocator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_allocate_preferred_port(self, allocator):
         """Test allocating a preferred port when available."""
         port = await allocator.allocate_port("test_service", preferred_port=9999)
@@ -39,6 +41,7 @@ class TestPlatformAwarePortAllocator:
         assert 9999 in allocator.allocated_ports
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_allocate_service_specific_port(self, allocator):
         """Test allocating from service-specific preferred ports."""
         # Backend should get one of its preferred ports
@@ -47,6 +50,7 @@ class TestPlatformAwarePortAllocator:
         assert "backend" in allocator.service_port_map
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_allocate_dynamic_port(self, allocator):
         """Test dynamic port allocation."""
         port = await allocator.allocate_port(
@@ -57,6 +61,7 @@ class TestPlatformAwarePortAllocator:
         assert "custom_service" in allocator.service_port_map
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_allocate_ephemeral_port(self, allocator):
         """Test ephemeral port allocation."""
         port = await allocator.allocate_port(
@@ -67,6 +72,7 @@ class TestPlatformAwarePortAllocator:
         assert "ephemeral_service" in allocator.service_port_map
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_port_conflict_resolution(self, allocator):
         """Test handling of port conflicts."""
         # Allocate a port
@@ -79,6 +85,7 @@ class TestPlatformAwarePortAllocator:
         assert port2 > 1024
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_release_port(self, allocator):
         """Test releasing allocated ports."""
         port = await allocator.allocate_port("test_service", preferred_port=7777)
@@ -94,6 +101,7 @@ class TestPlatformAwarePortAllocator:
         assert port2 == 7777
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_platform_specific_ranges(self, allocator):
         """Test platform-specific port ranges."""
         current_platform = platform.system()
@@ -110,6 +118,7 @@ class TestPlatformAwarePortAllocator:
         assert allocator.PLATFORM_PORT_RANGES.get(current_platform, (49152, 65535)) == expected_range
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_concurrent_allocation(self, allocator):
         """Test concurrent port allocation."""
         tasks = []
@@ -127,6 +136,7 @@ class TestPlatformAwarePortAllocator:
         for i in range(10):
             assert f"service_{i}" in allocator.service_port_map
     
+    @pytest.mark.e2e
     def test_get_allocation_summary(self, allocator):
         """Test getting allocation summary."""
         summary = allocator.get_allocation_summary()
@@ -138,6 +148,7 @@ class TestPlatformAwarePortAllocator:
         assert "port_range" in summary
 
 
+@pytest.mark.e2e
 class TestServiceInitializationGates:
     """Test service initialization with dependency gates."""
     
@@ -147,6 +158,7 @@ class TestServiceInitializationGates:
         return ServiceCoordinator()
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_register_service(self, coordinator):
         """Test registering a service."""
         gate = await coordinator.register_service(
@@ -160,6 +172,7 @@ class TestServiceInitializationGates:
         assert len(gate.dependencies) == 0
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_register_service_with_dependencies(self, coordinator):
         """Test registering a service with dependencies."""
         deps = [
@@ -179,6 +192,7 @@ class TestServiceInitializationGates:
         assert gate.dependencies[1].required == False
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initialize_service_no_deps(self, coordinator):
         """Test initializing a service without dependencies."""
         await coordinator.register_service("standalone_service")
@@ -195,6 +209,7 @@ class TestServiceInitializationGates:
         assert gate.init_end_time is not None
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initialize_service_with_deps(self, coordinator):
         """Test initializing a service with dependencies."""
         # Register database service
@@ -217,6 +232,7 @@ class TestServiceInitializationGates:
         assert coordinator._initialization_order == ["database", "api"]
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initialize_service_missing_required_dep(self, coordinator):
         """Test initialization fails when required dependency is missing."""
         deps = [ServiceDependency("missing_service", required=True)]
@@ -232,6 +248,7 @@ class TestServiceInitializationGates:
         assert "Dependencies failed" in gate.error_message
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initialize_service_optional_dep_missing(self, coordinator):
         """Test initialization succeeds when optional dependency is missing."""
         deps = [ServiceDependency("optional_service", required=False)]
@@ -246,6 +263,7 @@ class TestServiceInitializationGates:
         assert gate.state == ServiceState.READY
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initialize_already_initialized(self, coordinator):
         """Test initializing an already initialized service."""
         await coordinator.register_service("test_service")
@@ -260,6 +278,7 @@ class TestServiceInitializationGates:
         assert port2 == port1
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_stop_service(self, coordinator):
         """Test stopping a service."""
         await coordinator.register_service("test_service")
@@ -273,6 +292,7 @@ class TestServiceInitializationGates:
         assert "test_service" not in coordinator.port_allocator.service_port_map
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_stop_all_services(self, coordinator):
         """Test stopping all services in reverse order."""
         # Initialize services
@@ -292,6 +312,7 @@ class TestServiceInitializationGates:
         for service_name in ["service1", "service2", "service3"]:
             assert coordinator.services[service_name].state == ServiceState.STOPPED
     
+    @pytest.mark.e2e
     def test_get_initialization_summary(self, coordinator):
         """Test getting initialization summary."""
         summary = coordinator.get_initialization_summary()
@@ -305,10 +326,12 @@ class TestServiceInitializationGates:
         assert "port_allocation" in summary
 
 
+@pytest.mark.e2e
 class TestIntegratedServiceCoordination:
     """Test integrated service coordination scenarios."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_initialize_services_with_gates(self):
         """Test initializing multiple services with gates."""
         services = [
@@ -355,6 +378,7 @@ class TestIntegratedServiceCoordination:
         assert backend_index < frontend_index
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_parallel_vs_sequential_initialization(self):
         """Test parallel vs sequential initialization."""
         services = [
@@ -380,6 +404,7 @@ class TestIntegratedServiceCoordination:
         assert summary_sequential["ready"] == 3
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_complex_dependency_graph(self):
         """Test complex service dependency graph."""
         # Reset coordinator for fresh test
@@ -413,6 +438,7 @@ class TestIntegratedServiceCoordination:
         assert order.index("api") < order.index("frontend")
         assert order.index("api") < order.index("admin")
     
+    @pytest.mark.e2e
     def test_get_service_coordinator_singleton(self):
         """Test that get_service_coordinator returns singleton."""
         coord1 = get_service_coordinator()
@@ -420,6 +446,7 @@ class TestIntegratedServiceCoordination:
         assert coord1 is coord2
 
 
+@pytest.mark.e2e
 class TestPortAvailabilityChecking:
     """Test port availability checking logic."""
     
@@ -428,6 +455,7 @@ class TestPortAvailabilityChecking:
         """Create a port allocator instance."""
         return PlatformAwarePortAllocator()
     
+    @pytest.mark.e2e
     def test_is_port_available_free_port(self, allocator):
         """Test checking a free port."""
         # Find a likely free port
@@ -438,12 +466,14 @@ class TestPortAvailabilityChecking:
         # Should be available
         assert allocator._is_port_available(free_port) == True
     
+    @pytest.mark.e2e
     def test_is_port_available_allocated_port(self, allocator):
         """Test checking an allocated port."""
         allocator.allocated_ports.add(12345)
         assert allocator._is_port_available(12345) == False
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_port_allocation_with_retry(self, allocator):
         """Test port allocation with retry logic."""
         # Mock to simulate port conflicts
@@ -464,6 +494,7 @@ class TestPortAvailabilityChecking:
         assert port > 1024
         assert call_count > 3  # Should have retried
     
+    @pytest.mark.e2e
     def test_get_ephemeral_port(self, allocator):
         """Test getting an ephemeral port from OS."""
         port = allocator._get_ephemeral_port()

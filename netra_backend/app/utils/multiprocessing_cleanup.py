@@ -39,7 +39,12 @@ class MultiprocessingResourceManager:
     
     def _signal_handler(self, signum: int, frame: Optional[FrameType]) -> None:
         """Handle signals and cleanup resources."""
-        logger.info(f"Received signal {signum}, cleaning up multiprocessing resources...")
+        try:
+            if hasattr(sys.stdout, 'closed') and not sys.stdout.closed:
+                logger.info(f"Received signal {signum}, cleaning up multiprocessing resources...")
+        except (OSError, ValueError):
+            # Silently ignore logging errors during shutdown
+            pass
         self.cleanup_all()
         sys.exit(0)
     
@@ -66,7 +71,13 @@ class MultiprocessingResourceManager:
         _cleanup_queues(self)
         _cleanup_locks(self)
         _clear_all_lists(self)
-        logger.info("Multiprocessing resources cleaned up")
+        # Only log if stdout/stderr are still available to prevent I/O errors during test cleanup
+        try:
+            if hasattr(sys.stdout, 'closed') and not sys.stdout.closed:
+                logger.info("Multiprocessing resources cleaned up")
+        except (OSError, ValueError):
+            # Silently ignore logging errors during shutdown
+            pass
 
 
 # Global instance

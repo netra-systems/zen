@@ -12,10 +12,12 @@ from pathlib import Path
 # Add project root to path
 
 
+@pytest.mark.e2e
 class TestColdStartFixesValidation:
     """Validate that the cold start fixes are working correctly."""
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_secret_compatibility(self):
         """Test that JWT secret accepts both JWT_SECRET and JWT_SECRET_KEY."""
         # Set different JWT secrets to test backward compatibility
@@ -46,6 +48,7 @@ class TestColdStartFixesValidation:
         assert jwt_secret3 == "test_secret_456", "Should work with JWT_SECRET alone"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_jwt_issuer_claim_present(self):
         """Test that JWT tokens include the required 'iss' claim."""
         os.environ["JWT_SECRET_KEY"] = "test_secret"
@@ -67,6 +70,7 @@ class TestColdStartFixesValidation:
         assert payload["iss"] == "netra-auth-service", "Issuer should be netra-auth-service"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_clickhouse_port_configuration(self):
         """Test that ClickHouse uses correct port for HTTP connections."""
         # Set environment for local development
@@ -80,6 +84,7 @@ class TestColdStartFixesValidation:
         assert config.port == 8123, "Should use HTTP port 8123 for local development"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_redis_local_fallback(self):
         """Test that Redis falls back to local when remote fails."""
         # Set remote Redis that will fail
@@ -97,6 +102,7 @@ class TestColdStartFixesValidation:
         assert current_mode in ["local", "auto", "shared"]
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_background_task_timeout(self):
         """Test that background tasks have proper timeout."""
         from netra_backend.app.services.background_task_manager import BackgroundTaskManager
@@ -113,6 +119,7 @@ class TestColdStartFixesValidation:
         assert hasattr(manager, 'get_active_tasks'), "Should have task tracking"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_database_table_auto_creation(self):
         """Test that database tables are created automatically on startup."""
         from netra_backend.app.startup_module import _ensure_database_tables_exist
@@ -129,6 +136,7 @@ class TestColdStartFixesValidation:
             assert "connection" in str(e).lower() or "database" in str(e).lower()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_oauth_state_atomic_operations(self):
         """Test that OAuth state operations are atomic to prevent race conditions."""
         from auth_service.auth_core.security.oauth_security import OAuthStateCleanupManager
@@ -140,6 +148,7 @@ class TestColdStartFixesValidation:
         assert hasattr(cleanup_mgr, 'cleanup_expired_nonces'), "Should have nonce cleanup"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_service_port_dynamic_allocation(self):
         """Test that services can use dynamic port allocation."""
         from dev_launcher.service_discovery_system import ServiceDiscoverySystem
@@ -155,6 +164,7 @@ class TestColdStartFixesValidation:
         assert port2 != port, "Should allocate different port when conflict exists"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_environment_variable_compatibility(self):
         """Test that environment variables support both old and new names."""
         # Test ClickHouse password configuration
@@ -167,6 +177,7 @@ class TestColdStartFixesValidation:
         assert password == "password1", "Should use CLICKHOUSE_PASSWORD"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_cors_configuration(self):
         """Test that WebSocket CORS is properly configured."""
         from netra_backend.app.middleware.websocket_cors import WebSocketCORSMiddleware

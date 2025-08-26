@@ -54,8 +54,8 @@ class ServiceDiscoveryClient {
     
     if (environment === 'development') {
       // In development, try the backend discovery endpoint
-      // Use fallback port if discovery isn't available
-      return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      // Force port 8000 for consistency
+      return 'http://localhost:8000';
     }
     
     // In staging/production, use environment-specific URLs
@@ -107,8 +107,8 @@ class ServiceDiscoveryClient {
     
     if (environment === 'development') {
       return {
-        apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-        wsUrl: process.env.NEXT_PUBLIC_WEBSOCKET_URL || process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws',
+        apiUrl: 'http://localhost:8000', // Force port 8000 for backend API
+        wsUrl: 'ws://localhost:8000/ws', // Force port 8000 for WebSocket
         authUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081',
       };
     } else if (environment === 'production') {

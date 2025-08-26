@@ -129,10 +129,12 @@ def log_manager():
     return LogManager()
 
 
+@pytest.mark.e2e
 class TestFrontendPortConflictResolution:
     """Test suite for frontend port conflict resolution."""
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_port_3000_conflict_detection_and_fallback(self, mock_config, mock_services_config, 
                                                            mock_service_discovery, log_manager):
         """Test 1: Detect when port 3000 is occupied and properly fallback to alternative port."""
@@ -168,6 +170,7 @@ class TestFrontendPortConflictResolution:
             mock_server.stop()
     
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_frontend_startup_with_occupied_default_port(self, mock_config, mock_services_config,
                                                              mock_service_discovery, log_manager):
         """Test 2: Full frontend startup flow when default port is occupied."""
@@ -219,6 +222,7 @@ class TestFrontendPortConflictResolution:
             # Clean up
             mock_server.stop()
     
+    @pytest.mark.e2e
     def test_port_manager_allocation_with_conflict(self):
         """Test 3: PortManager properly handles port conflicts and allocates alternatives."""
         port_manager = PortManager()
@@ -257,6 +261,7 @@ class TestFrontendPortConflictResolution:
             port_manager.release_port("frontend")
             mock_server.stop()
     
+    @pytest.mark.e2e
     def test_find_available_port_fallback_mechanism(self):
         """Test 4: find_available_port function handles port conflicts correctly."""
         # Step 1: Occupy multiple ports to test fallback mechanism
@@ -288,6 +293,7 @@ class TestFrontendPortConflictResolution:
             for server in servers:
                 server.stop()
     
+    @pytest.mark.e2e
     def test_concurrent_port_allocation_race_condition_prevention(self):
         """Test 5: Prevent race conditions when multiple services try to allocate ports simultaneously."""
         port_manager = PortManager()
@@ -346,6 +352,7 @@ class TestFrontendPortConflictResolution:
         for service_name, _ in allocated_ports:
             port_manager.release_port(service_name)
     
+    @pytest.mark.e2e
     def test_windows_specific_port_race_condition_fix(self):
         """Test 6: Verify Windows-specific port race condition is properly handled."""
         if sys.platform != "win32":
@@ -389,6 +396,7 @@ class TestFrontendPortConflictResolution:
         print(f"SUCCESS: Windows race condition test passed - {len(results)} iterations successful")
     
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_frontend_startup_error_handling_and_recovery(self, mock_config, mock_services_config,
                                                               mock_service_discovery, log_manager):
         """Test 7: Proper error handling when frontend startup fails despite port allocation."""
@@ -424,6 +432,7 @@ class TestFrontendPortConflictResolution:
                 
                 print(" SUCCESS: Frontend startup failure handled gracefully")
     
+    @pytest.mark.e2e
     def test_port_availability_check_interface_consistency(self):
         """Test 8: Ensure port availability checks use consistent interface (0.0.0.0 vs localhost)."""
         test_port = 3007
@@ -453,9 +462,11 @@ class TestFrontendPortConflictResolution:
                 mock_server.stop()
 
 
+@pytest.mark.e2e
 class TestFrontendPortConflictRemediation:
     """Test suite for frontend port conflict remediation and fixes."""
     
+    @pytest.mark.e2e
     def test_enhanced_port_allocation_with_process_detection(self):
         """Test 9: Enhanced port allocation that can identify which process is using a port."""
         port_manager = PortManager()
@@ -490,6 +501,7 @@ class TestFrontendPortConflictRemediation:
             port_manager.release_port("frontend_enhanced")
             mock_server.stop()
     
+    @pytest.mark.e2e
     def test_port_cleanup_verification(self):
         """Test 10: Verify proper port cleanup after service termination."""
         port_manager = PortManager()
@@ -529,10 +541,12 @@ class TestFrontendPortConflictRemediation:
 
 
 @pytest.mark.integration
+@pytest.mark.e2e
 class TestFrontendPortConflictIntegration:
     """Integration tests for frontend port conflict resolution."""
     
     @pytest.mark.skipif(not (PROJECT_ROOT / "frontend").exists(), reason="Frontend directory not found")
+    @pytest.mark.e2e
     def test_real_frontend_port_conflict_scenario(self):
         """Integration Test 1: Real-world frontend port conflict scenario."""
         # Step 1: Find a currently available port for testing

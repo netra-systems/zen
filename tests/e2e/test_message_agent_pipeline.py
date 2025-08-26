@@ -86,9 +86,11 @@ async def mock_websocket():
     return websocket
 
 
+@pytest.mark.e2e
 class TestMessagePipelineCore:
     """Core message pipeline functionality tests."""
     
+    @pytest.mark.e2e
     async def test_complete_message_pipeline_flow(self, pipeline_tester, mock_websocket):
         """Test complete pipeline: WebSocket → Auth → Agent → Response
         
@@ -174,9 +176,11 @@ class TestMessagePipelineCore:
             return {"streamed": False, "error": str(e)}
 
 
+@pytest.mark.e2e
 class TestMessagePipelineTypes:
     """Test different message types through pipeline."""
     
+    @pytest.mark.e2e
     async def test_typed_message_pipelines(self, pipeline_tester, mock_websocket):
         """Test query, analysis, and command message pipelines."""
         test_cases = [
@@ -218,9 +222,11 @@ class TestMessagePipelineTypes:
             }
 
 
+@pytest.mark.e2e
 class TestPipelinePerformance:
     """Test pipeline performance and concurrency."""
     
+    @pytest.mark.e2e
     async def test_concurrent_message_processing(self, pipeline_tester):
         """Test concurrent message processing with ordering.
         
@@ -275,9 +281,11 @@ class TestPipelinePerformance:
             }
 
 
+@pytest.mark.e2e
 class TestPipelineErrorHandling:
     """Test error handling throughout the pipeline."""
     
+    @pytest.mark.e2e
     async def test_pipeline_error_handling(self, pipeline_tester):
         """Test WebSocket, agent, and degradation error handling."""
         # Test WebSocket error and recovery

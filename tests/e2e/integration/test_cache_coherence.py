@@ -34,6 +34,7 @@ MIN_CACHE_HIT_RATIO = 80.0
 MAX_CONSISTENCY_VIOLATIONS = 0
 
 
+@pytest.mark.e2e
 class TestCacheCoherence:
     """E2E tests for distributed cache coherence across services."""
     
@@ -48,6 +49,7 @@ class TestCacheCoherence:
         await self.validator.cleanup_coherence_environment()
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_user_data_cache_invalidation_flow(self):
         """Test user data update → cache invalidation → consistency."""
         # BVJ: Enterprise revenue protection from stale user data
@@ -77,6 +79,7 @@ class TestCacheCoherence:
         return True
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cross_service_cache_consistency(self):
         """Test cache consistency across Auth→Backend→Frontend services."""
         user_id = "cache_consistency_user_002"
@@ -123,6 +126,7 @@ class TestCacheCoherence:
         return "enterprise" in auth_data and "enterprise" in backend_data
 
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_bulk_operations_cache_coherence(self):
         """Test cache coherence during bulk operations."""
         # BVJ: Prevents data inconsistency during batch processing
@@ -158,6 +162,7 @@ class TestCacheCoherence:
         return {"successful_writes": sum(write_results), "total_operations": len(user_ids)}
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_ttl_expiration_refresh_logic(self):
         """Test TTL expiration and cache refresh logic."""
         cache_key = "ttl_test_key"
@@ -186,6 +191,7 @@ class TestCacheCoherence:
         assert expired_data is None, "Data should expire after TTL"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_websocket_cache_update_notifications(self):
         """Test WebSocket notifications for cache updates."""
         # BVJ: Real-time cache invalidation notifications prevent stale UI
@@ -200,6 +206,7 @@ class TestCacheCoherence:
         assert metrics["notification_deliveries"] >= 1
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_stampede_prevention(self):
         """Test cache stampede prevention during concurrent requests."""
         cache_key = "stampede_prevention_test"
@@ -219,6 +226,7 @@ class TestCacheCoherence:
         assert final_cache_value is not None, "Cache should contain computed value"
 
     @pytest.mark.asyncio 
+    @pytest.mark.e2e
     async def test_cache_invalidation_performance(self):
         """Test cache invalidation performance requirements."""
         # BVJ: Sub-100ms invalidation prevents user experience degradation
@@ -237,6 +245,7 @@ class TestCacheCoherence:
         assert invalidation_time_ms <= MAX_INVALIDATION_TIME_MS, f"Invalidation too slow: {invalidation_time_ms}ms"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_multi_service_cache_invalidation_cascade(self):
         """Test cascading cache invalidation across multiple services."""
         user_id = "cascade_test_user"
@@ -272,6 +281,7 @@ class TestCacheCoherence:
             assert cached_data is None, f"Cache key {cache_key} not properly invalidated"
 
     @pytest.mark.asyncio
+    @pytest.mark.e2e
     async def test_cache_coherence_metrics_collection(self):
         """Test comprehensive cache coherence metrics collection."""
         # Execute various cache operations to generate metrics

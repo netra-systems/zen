@@ -228,6 +228,26 @@ class JWTTestHelper:
             return json.loads(decoded)
         except Exception as e:
             return {"error": f"Failed to decode token: {str(e)}"}
+    
+    def create_expired_token_sync(self) -> str:
+        """Create a synchronous expired token for malformed token testing."""
+        # Create a basic expired JWT for testing purposes
+        import base64
+        import json
+        import time
+        
+        header = {"alg": "HS256", "typ": "JWT"}
+        payload = {
+            "sub": "test_user",
+            "exp": int(time.time()) - 3600,  # Expired 1 hour ago
+            "iat": int(time.time()) - 7200   # Issued 2 hours ago
+        }
+        
+        header_b64 = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip('=')
+        payload_b64 = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip('=')
+        
+        # Return unsigned token (will be invalid anyway due to expiry)
+        return f"{header_b64}.{payload_b64}.invalid_signature"
 
 
 class WebSocketAuthTester:
@@ -586,6 +606,20 @@ class TokenExpiryTester:
             results["error"] = str(e)
         
         return results
+    
+    def create_malformed_tokens(self) -> List[Tuple[str, str]]:
+        """Create various malformed tokens for testing rejection."""
+        return [
+            ("empty_token", ""),
+            ("invalid_format", "not.a.jwt"),
+            ("malformed_header", "invalid_header.eyJzdWIiOiIxMjMifQ.signature"),
+            ("malformed_payload", "eyJhbGciOiJIUzI1NiJ9.invalid_payload.signature"),
+            ("missing_signature", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ"),
+            ("invalid_signature", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.invalid_signature"),
+            ("expired_token", self.jwt_helper.create_expired_token_sync()),
+            ("null_token", None),
+            ("very_long_token", "x" * 5000),
+        ]
 
 
 class MessagePreservationTester:

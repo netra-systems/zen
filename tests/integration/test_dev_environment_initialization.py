@@ -754,8 +754,8 @@ class TestDevEnvironmentRealServices:
             # Mock: Component isolation for testing without external dependencies
             with patch('signal.signal'):
                 config = LauncherConfig(
-                    backend_port=8004,
-                    frontend_port=3004,  
+                    backend_port=8000,
+                    frontend_port=3000,  
                     project_root=project_root,
                     verbose=False,
                     no_browser=True

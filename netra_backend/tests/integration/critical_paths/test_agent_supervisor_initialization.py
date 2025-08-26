@@ -30,7 +30,7 @@ class TestAgentSupervisorInitialization(L3IntegrationTest):
         headers = {"Authorization": f"Bearer {token}"}
         
         try:
-            async with websockets.connect(websocket_url, additional_headers=headers, timeout=10.0) as websocket:
+            async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                 print("✅ WebSocket connection established successfully")
                 
                 # Wait a moment for any initial messages
@@ -102,7 +102,7 @@ class TestAgentSupervisorInitialization(L3IntegrationTest):
         error_details = None
         
         try:
-            async with websockets.connect(websocket_url, additional_headers=headers, timeout=10.0) as websocket:
+            async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                 print("🔬 Testing for agent_supervisor error reproduction...")
                 
                 # Send messages that might trigger agent supervisor usage

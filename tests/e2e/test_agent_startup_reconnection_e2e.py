@@ -29,11 +29,13 @@ from tests.e2e.real_client_factory import create_real_client_factory
 
 @pytest.mark.asyncio
 
+@pytest.mark.e2e
 class TestWebSocketReconnectionPreservesAgentState:
 
     """Test 5: WebSocket reconnection preserves agent state - BVJ: Session continuity"""
     
 
+    @pytest.mark.e2e
     async def test_websocket_reconnection_preserves_agent_state(self):
 
         """Test agent state preservation across WebSocket reconnections."""
@@ -82,11 +84,13 @@ class TestWebSocketReconnectionPreservesAgentState:
 
 @pytest.mark.asyncio 
 
+@pytest.mark.e2e
 class TestConcurrentUserAgentStartupIsolation:
 
     """Test 6: Concurrent user agent startup isolation - BVJ: Multi-tenant security"""
     
 
+    @pytest.mark.e2e
     async def test_concurrent_user_agent_startup_isolation(self):
 
         """Test 10 concurrent users with complete isolation."""

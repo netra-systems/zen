@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <component>frontend_authentication</component>
+    <type>configuration_fix</type>
+    <created>2025-08-26</created>
+    <priority>critical</priority>
+    <category>authentication_stability</category>
+  </metadata>
+
+  <title>Frontend Authentication Configuration Loop Prevention</title>
+
+  <problem>
+    <description>Frontend authentication context was experiencing infinite re-initialization loops due to useEffect dependency issues</description>
+    <symptoms>
+      <symptom>Multiple authentication configuration fetches on single page load</symptom>
+      <symptom>Authentication context constantly re-mounting</symptom>
+      <symptom>Excessive API calls to auth service</symptom>
+      <symptom>Poor user experience with auth state flicker</symptom>
+    </symptoms>
+  </problem>
+
+  <root_cause>
+    <analysis>
+      The useEffect in AuthProvider had dependencies [syncAuthStore, scheduleTokenRefreshCheck] which would trigger re-runs whenever these functions changed, creating infinite loops. The authentication configuration would be fetched repeatedly instead of once on mount.
+    </analysis>
+    <technical_details>
+      - useEffect dependencies caused function recreation on every render
+      - syncAuthStore and scheduleTokenRefreshCheck functions were being recreated
+      - No protection against multiple initialization calls
+      - Missing hasMounted guard pattern
+    </technical_details>
+  </root_cause>
+
+  <solution>
+    <approach>Implement single initialization pattern with hasMounted guard</approach>
+    <implementation>
+      <step>Added hasMountedRef to prevent multiple initialization calls</step>
+      <step>Removed dependencies from useEffect to prevent re-runs</step>
+      <step>Used empty dependency array [] for mount-only execution</step>
+      <step>Added proper cleanup that resets hasMounted flag</step>
+    </implementation>
+    <code_changes>
+      <file>frontend/auth/context.tsx</file>
+      <change>Added hasMountedRef useRef(false) guard</change>
+      <change>Changed useEffect dependencies from [syncAuthStore, scheduleTokenRefreshCheck] to []</change>
+      <change>Added early return if hasMountedRef.current is true</change>
+      <change>Reset hasMountedRef.current = false in cleanup function</change>
+    </code_changes>
+  </solution>
+
+  <validation>
+    <test_method>Frontend build validation and static file existence check</test_method>
+    <success_criteria>
+      <criterion>Authentication context initializes exactly once per mount</criterion>
+      <criterion>No infinite loops in authentication configuration fetching</criterion>
+      <criterion>Clean authentication state management</criterion>
+      <criterion>Stable OAuth flow timing</criterion>
+    </success_criteria>
+  </validation>
+
+  <learning_outcomes>
+    <insight>useEffect dependency arrays must be carefully managed in authentication contexts</insight>
+    <insight>Single initialization patterns are critical for authentication stability</insight>
+    <insight>Mount guards prevent race conditions in complex authentication flows</insight>
+    <principle>Authentication initialization should be idempotent and run exactly once per component lifecycle</principle>
+  </learning_outcomes>
+
+  <prevention>
+    <guideline>Always use mount guards for authentication initialization</guideline>
+    <guideline>Carefully review useEffect dependency arrays in auth contexts</guideline>
+    <guideline>Test authentication flows for initialization loops</guideline>
+    <guideline>Use empty dependency arrays for mount-only authentication setup</guideline>
+  </prevention>
+</learning>

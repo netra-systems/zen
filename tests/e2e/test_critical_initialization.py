@@ -197,9 +197,11 @@ class SystemInitializationTestBase:
         return ws
 
 
+@pytest.mark.e2e
 class TestCriticalPath(SystemInitializationTestBase):
     """Category 1: Critical Path Tests - Must work for basic functionality"""
     
+    @pytest.mark.e2e
     def test_01_complete_cold_start_from_empty_state(self):
         """Test 1: Full system startup with no existing data or configuration."""
         # Clear everything
@@ -234,6 +236,7 @@ class TestCriticalPath(SystemInitializationTestBase):
             r = redis.Redis(host='localhost', port=6379, decode_responses=True)
             assert r.ping(), "Redis not accessible"
             
+    @pytest.mark.e2e
     def test_02_service_startup_order_dependency_chain(self):
         """Test 2: Verify correct service startup sequencing and dependencies."""
         # Start services in wrong order intentionally
@@ -270,6 +273,7 @@ class TestCriticalPath(SystemInitializationTestBase):
             backend_proc.terminate()
             auth_proc.terminate()
             
+    @pytest.mark.e2e
     def test_03_database_schema_initialization_and_migration(self):
         """Test 3: Fresh database with automatic schema creation."""
         # Drop all database objects
@@ -303,6 +307,7 @@ class TestCriticalPath(SystemInitializationTestBase):
                 index_count = result.scalar()
                 assert index_count > 0, "Database indexes not created"
                 
+    @pytest.mark.e2e
     def test_04_authentication_flow_end_to_end_setup(self):
         """Test 4: JWT and OAuth provider setup with cross-service validation."""
         with self.start_dev_launcher() as proc:
@@ -329,6 +334,7 @@ class TestCriticalPath(SystemInitializationTestBase):
             providers = oauth_response.json()
             assert len(providers) > 0, "No OAuth providers available"
             
+    @pytest.mark.e2e
     def test_05_websocket_connection_establishment(self):
         """Test 5: WebSocket endpoint registration and authentication."""
         with self.start_dev_launcher() as proc:
@@ -369,6 +375,7 @@ class TestCriticalPath(SystemInitializationTestBase):
                 ws.close()
                 assert "authenticated" in response.lower() or "success" in response.lower()
                 
+    @pytest.mark.e2e
     def test_06_real_time_message_processing_pipeline(self):
         """Test 6: End-to-end message flow from WebSocket to LLM to response."""
         with self.start_dev_launcher() as proc:
@@ -414,6 +421,7 @@ class TestCriticalPath(SystemInitializationTestBase):
                 ws.close()
                 assert len(responses_received) > 0, "No response received from message pipeline"
                 
+    @pytest.mark.e2e
     def test_07_frontend_static_asset_loading_and_api_connection(self):
         """Test 7: Next.js compilation and API endpoint discovery."""
         with self.start_dev_launcher(["--frontend-port", "3000"]) as proc:
@@ -439,6 +447,7 @@ class TestCriticalPath(SystemInitializationTestBase):
             )
             assert response.status_code in [200, 204], "CORS not configured correctly"
             
+    @pytest.mark.e2e
     def test_08_health_check_cascade_validation(self):
         """Test 8: All service health endpoints with dependency validation."""
         with self.start_dev_launcher() as proc:
@@ -462,9 +471,11 @@ class TestCriticalPath(SystemInitializationTestBase):
                         assert dep_status in ["healthy", "ok", "connected"], f"{name} dependency {dep_name} not healthy"
 
 
+@pytest.mark.e2e
 class TestServiceDependencies(SystemInitializationTestBase):
     """Category 2: Service Dependencies - Cross-service communication"""
     
+    @pytest.mark.e2e
     def test_09_redis_connection_failure_recovery(self):
         """Test 9: Redis unavailable at startup with graceful degradation."""
         # Stop Redis if running
@@ -485,6 +496,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             response = httpx.get(f"{self.backend_url}/api/cache/test")
             assert response.status_code in [200, 501], "Cache fallback not working"
             
+    @pytest.mark.e2e
     def test_10_clickhouse_port_configuration_matrix(self):
         """Test 10: Test all ClickHouse port configurations."""
         clickhouse_ports = {
@@ -505,6 +517,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
                     # Port might not be configured
                     pass
                     
+    @pytest.mark.e2e
     def test_11_auth_backend_jwt_secret_synchronization(self):
         """Test 11: JWT secret synchronization between services."""
         with self.start_dev_launcher() as proc:
@@ -536,6 +549,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             )
             assert invalid_response.status_code == 401, "Invalid token not rejected"
             
+    @pytest.mark.e2e
     def test_12_service_discovery_dynamic_ports(self):
         """Test 12: Dynamic port allocation and service discovery."""
         # Occupy default ports
@@ -566,6 +580,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             for s in occupied_sockets:
                 s.close()
                 
+    @pytest.mark.e2e
     def test_13_database_connection_pool_high_load(self):
         """Test 13: Connection pool behavior under concurrent startup."""
         with self.start_dev_launcher() as proc:
@@ -587,6 +602,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
             success_count = sum(1 for r in results if isinstance(r, int) and r < 500)
             assert success_count > 40, f"Too many failures under load: {success_count}/50 succeeded"
             
+    @pytest.mark.e2e
     def test_14_cross_service_token_propagation(self):
         """Test 14: Tokens work across all services."""
         with self.start_dev_launcher() as proc:
@@ -614,6 +630,7 @@ class TestServiceDependencies(SystemInitializationTestBase):
                 )
                 assert response.status_code in [200, 404], f"Token not valid in {service_name}"
                 
+    @pytest.mark.e2e
     def test_15_websocket_connection_load_balancing(self):
         """Test 15: Multiple WebSocket connections handled properly."""
         with self.start_dev_launcher() as proc:
@@ -645,9 +662,11 @@ class TestServiceDependencies(SystemInitializationTestBase):
                         pass
 
 
+@pytest.mark.e2e
 class TestUserJourney(SystemInitializationTestBase):
     """Category 3: User Journey - First-time user experience"""
     
+    @pytest.mark.e2e
     def test_16_first_time_user_registration_flow(self):
         """Test 16: Complete new user signup through OAuth."""
         with self.start_dev_launcher() as proc:
@@ -677,6 +696,7 @@ class TestUserJourney(SystemInitializationTestBase):
             )
             assert login_response.status_code == 200, "Login failed for new user"
             
+    @pytest.mark.e2e
     def test_17_initial_chat_session_creation(self):
         """Test 17: First-time user creates a chat thread."""
         with self.start_dev_launcher() as proc:
@@ -709,6 +729,7 @@ class TestUserJourney(SystemInitializationTestBase):
             
             assert message_response.status_code in [200, 201], "Message creation failed"
             
+    @pytest.mark.e2e
     def test_18_frontend_authentication_state(self):
         """Test 18: Frontend loads and manages auth state."""
         with self.start_dev_launcher(["--frontend-port", "3001"]) as proc:
@@ -724,6 +745,7 @@ class TestUserJourney(SystemInitializationTestBase):
             api_response = httpx.get("http://localhost:3001/auth/session")
             assert api_response.status_code in [200, 401, 404], "Auth API routes not configured"
             
+    @pytest.mark.e2e
     def test_19_real_time_chat_message_exchange(self):
         """Test 19: User sends message and receives AI response."""
         with self.start_dev_launcher() as proc:
@@ -765,6 +787,7 @@ class TestUserJourney(SystemInitializationTestBase):
             # Should receive at least one response
             assert len(responses) > 0, "No AI response received"
             
+    @pytest.mark.e2e
     def test_20_session_persistence_browser_restart(self):
         """Test 20: Session survives browser restart."""
         with self.start_dev_launcher() as proc:
@@ -797,6 +820,7 @@ class TestUserJourney(SystemInitializationTestBase):
                 )
                 assert me_response.status_code in [200, 404], "New token not valid"
                 
+    @pytest.mark.e2e
     def test_21_multi_tab_session_synchronization(self):
         """Test 21: Multiple tabs with synchronized state."""
         with self.start_dev_launcher() as proc:
@@ -840,9 +864,11 @@ class TestUserJourney(SystemInitializationTestBase):
             ws2.close()
 
 
+@pytest.mark.e2e
 class TestRecoveryResilience(SystemInitializationTestBase):
     """Category 4: Recovery and Resilience - Error handling"""
     
+    @pytest.mark.e2e
     def test_22_database_recovery_after_partition(self):
         """Test 22: Database reconnection after network partition."""
         with self.start_dev_launcher() as proc:
@@ -856,6 +882,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             if "dependencies" in health_data:
                 assert "database" in health_data["dependencies"], "Database health not monitored"
                 
+    @pytest.mark.e2e
     def test_23_service_restart_without_data_loss(self):
         """Test 23: Backend restart with connection recovery."""
         with self.start_dev_launcher() as launcher_proc:
@@ -888,6 +915,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             
             assert get_thread_response.status_code in [200, 404], "Thread retrieval failed"
             
+    @pytest.mark.e2e
     def test_24_redis_failover_inmemory_fallback(self):
         """Test 24: Redis failure with in-memory cache fallback."""
         # Start without Redis
@@ -905,6 +933,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             
             assert auth_response.status_code == 200, "Registration failed without Redis"
             
+    @pytest.mark.e2e
     def test_25_auth_service_recovery_token_refresh(self):
         """Test 25: Auth service restart with session survival."""
         with self.start_dev_launcher() as proc:
@@ -925,6 +954,7 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             
             assert me_response.status_code in [200, 401, 404], "Token validation failed"
             
+    @pytest.mark.e2e
     def test_26_frontend_hot_reload_development(self):
         """Test 26: Frontend hot reload preserves state."""
         with self.start_dev_launcher(["--dev", "--frontend-port", "3002"]) as proc:
@@ -939,9 +969,11 @@ class TestRecoveryResilience(SystemInitializationTestBase):
             # For now, verify dev server is running
             
 
+@pytest.mark.e2e
 class TestConfigurationEnvironment(SystemInitializationTestBase):
     """Category 5: Configuration and Environment - Setup validation"""
     
+    @pytest.mark.e2e
     def test_27_environment_variable_loading_priority(self):
         """Test 27: Environment variable precedence and validation."""
         # Create test environment files
@@ -965,6 +997,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
             env_local.unlink(missing_ok=True)
             os.environ.pop("TEST_VAR", None)
             
+    @pytest.mark.e2e
     def test_28_secrets_management_gcp_integration(self):
         """Test 28: Secrets loading with fallback mechanisms."""
         with self.start_dev_launcher(["--no-secrets"]) as proc:
@@ -984,6 +1017,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
             
             assert auth_response.status_code == 200, "Auth failed without GCP secrets"
             
+    @pytest.mark.e2e
     def test_29_cors_configuration_dynamic_ports(self):
         """Test 29: CORS allows connections with dynamic ports."""
         # Start with dynamic ports
@@ -1013,6 +1047,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
             assert "access-control-allow-origin" in response.headers or \
                    "Access-Control-Allow-Origin" in response.headers, "CORS headers missing"
                    
+    @pytest.mark.e2e
     def test_30_container_health_check_integration(self):
         """Test 30: Container health checks work correctly."""
         with self.start_dev_launcher() as proc:

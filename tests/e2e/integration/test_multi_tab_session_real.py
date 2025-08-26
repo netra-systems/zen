@@ -213,6 +213,7 @@ class MessageBroadcastValidator:
         self.sent_messages: List[Dict[str, Any]] = []
         self.received_messages: Dict[str, List[Dict[str, Any]]] = {}
         
+    @pytest.mark.e2e
     async def test_send_test_message(self, sender_tab: str, content: str) -> Dict[str, Any]:
         """Send test message from specific tab."""
         message = {
@@ -253,6 +254,7 @@ class MessageBroadcastValidator:
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 class TestMultiTabSessionReal:
     """E2E Test: Multi-Tab WebSocket Session Management with Real Scenarios."""
     
@@ -271,6 +273,7 @@ class TestMultiTabSessionReal:
         """Initialize message broadcast validator."""
         return MessageBroadcastValidator(session_manager)
     
+    @pytest.mark.e2e
     async def test_multi_tab_session_complete_flow(self, session_manager, state_validator, broadcast_validator):
         """Test complete multi-tab session management flow."""
         start_time = time.time()
@@ -396,6 +399,7 @@ class TestMultiTabSessionReal:
             test_tab = remaining_tabs[0]
             assert manager.is_tab_connected(test_tab), "Remaining tab connection broken"
     
+    @pytest.mark.e2e
     async def test_realistic_user_scenario(self, session_manager, broadcast_validator):
         """Test realistic multi-tab user scenario."""
         session_manager.user_token = session_manager.create_user_token()
@@ -441,6 +445,7 @@ class TestMultiTabSessionReal:
         finally:
             await session_manager.close_all_tabs()
     
+    @pytest.mark.e2e
     async def test_tab_crash_recovery(self, session_manager, state_validator):
         """Test system resilience when tabs crash or close unexpectedly."""
         session_manager.user_token = session_manager.create_user_token()

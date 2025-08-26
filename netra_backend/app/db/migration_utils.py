@@ -13,9 +13,37 @@ from netra_backend.app.core.unified_logging import get_logger
 
 
 def _get_alembic_ini_path() -> str:
-    """Get absolute path to alembic.ini file."""
-    project_root = Path(__file__).parent.parent.parent.parent
-    return str(project_root / "config" / "alembic.ini")
+    """Get absolute path to alembic.ini file with fallback paths for different deployment scenarios."""
+    # Try multiple possible locations for alembic.ini
+    possible_paths = [
+        # Standard development/local structure
+        Path(__file__).parent.parent.parent.parent / "config" / "alembic.ini",
+        
+        # Cloud Run deployment structure (common patterns)
+        Path("/app/config/alembic.ini"),
+        Path("/app/alembic.ini"), 
+        Path("/usr/src/app/config/alembic.ini"),
+        Path("/usr/src/app/alembic.ini"),
+        
+        # Current working directory fallbacks
+        Path.cwd() / "config" / "alembic.ini",
+        Path.cwd() / "alembic.ini",
+        
+        # Relative to migration utils file
+        Path(__file__).parent / "alembic.ini",
+        Path(__file__).parent.parent / "alembic.ini",
+        Path(__file__).parent.parent.parent / "alembic.ini",
+    ]
+    
+    # Return the first path that exists
+    for path in possible_paths:
+        if path.exists():
+            return str(path.absolute())
+    
+    # If no existing path found, return the default (development) path
+    # This maintains backward compatibility and provides a clear error message
+    default_path = Path(__file__).parent.parent.parent.parent / "config" / "alembic.ini"
+    return str(default_path.absolute())
 
 
 def get_sync_database_url(database_url: str) -> str:
@@ -36,9 +64,20 @@ def get_sync_database_url(database_url: str) -> str:
 
 
 def get_current_revision(database_url: str) -> Optional[str]:
-    """Get current database revision."""
+    """Get current database revision with table existence check."""
+    from sqlalchemy import text
     engine = create_engine(database_url)
     with engine.connect() as connection:
+        # Check if alembic_version table exists
+        result = connection.execute(text(
+            "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'alembic_version')"
+        ))
+        table_exists = result.scalar()
+        
+        if not table_exists:
+            # No alembic_version table means no migrations have been applied
+            return None
+            
         context = MigrationContext.configure(connection)
         return context.get_current_revision()
 
@@ -50,26 +89,106 @@ def get_head_revision(alembic_cfg: alembic.config.Config) -> str:
 
 
 def create_alembic_config(database_url: str) -> alembic.config.Config:
-    """Create Alembic configuration."""
+    """Create Alembic configuration with enhanced error handling and fallback mechanisms."""
     alembic_ini_path = _get_alembic_ini_path()
+    
     if not Path(alembic_ini_path).exists():
-        raise FileNotFoundError(f"Alembic configuration file not found: {alembic_ini_path}")
-    cfg = alembic.config.Config(alembic_ini_path)
-    cfg.set_main_option("sqlalchemy.url", database_url)
-    return cfg
+        # Enhanced error message with troubleshooting information
+        error_msg = f"""
+Alembic configuration file not found at: {alembic_ini_path}
+
+This typically happens in one of these scenarios:
+1. Container deployment where alembic.ini wasn't copied to expected location
+2. Working directory changed from project root
+3. File system permissions preventing access
+
+Troubleshooting:
+- Verify alembic.ini exists in container at deployment time
+- Check if current working directory is correct: {Path.cwd()}
+- Verify file permissions allow reading alembic.ini
+
+For staging/production deployments, ensure alembic.ini is included in the container build.
+"""
+        raise FileNotFoundError(error_msg.strip())
+    
+    try:
+        cfg = alembic.config.Config(alembic_ini_path)
+        cfg.set_main_option("sqlalchemy.url", database_url)
+        return cfg
+    except Exception as e:
+        raise RuntimeError(f"Failed to create Alembic configuration from {alembic_ini_path}: {e}")
+        
+def create_alembic_config_with_fallback(database_url: str) -> alembic.config.Config:
+    """Create Alembic configuration with graceful fallback for missing alembic.ini.
+    
+    This function attempts to create a basic Alembic configuration programmatically
+    if the alembic.ini file is not found, allowing the system to continue operating
+    in environments where the configuration file is missing.
+    """
+    try:
+        return create_alembic_config(database_url)
+    except FileNotFoundError:
+        # Create a basic configuration programmatically as fallback
+        logger = get_logger(__name__)
+        logger.warning("alembic.ini not found, creating basic configuration programmatically")
+        
+        # Create a minimal Alembic configuration
+        cfg = alembic.config.Config()
+        cfg.set_main_option("sqlalchemy.url", database_url)
+        
+        # Set basic migration directory (consistent with alembic.ini)
+        project_root = Path(__file__).parent.parent.parent.parent
+        alembic_dir = project_root / "netra_backend" / "app" / "alembic"
+        cfg.set_main_option("script_location", str(alembic_dir))
+        
+        # Set other essential options
+        cfg.set_main_option("version_locations", str(alembic_dir / "versions"))
+        cfg.set_main_option("file_template", "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s")
+        
+        logger.info(f"Created fallback Alembic configuration with migrations at: {alembic_dir}")
+        return cfg
 
 
 def needs_migration(current: Optional[str], head: str) -> bool:
     """Check if migration is needed."""
+    # If current is None, we need migration/stamp
+    if current is None:
+        return True
     return current != head
 
 
 def execute_migration(logger) -> None:
-    """Execute database migration to head."""
+    """Execute database migration to head with idempotent handling."""
     logger.info("Executing database migration...")
     alembic_ini_path = _get_alembic_ini_path()
-    alembic.config.main(argv=["-c", alembic_ini_path, "--raiseerr", "upgrade", "head"])
-    logger.info("Migration completed successfully")
+    
+    try:
+        # Use stamp if tables exist but no alembic_version table
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
+        sync_url = get_sync_database_url(config.database_url)
+        
+        # Check if we need to stamp instead of migrate
+        if _should_stamp_instead_of_migrate(sync_url, logger):
+            logger.info("Tables exist but no migration tracking - stamping to latest revision")
+            alembic.config.main(argv=["-c", alembic_ini_path, "--raiseerr", "stamp", "head"])
+        else:
+            alembic.config.main(argv=["-c", alembic_ini_path, "--raiseerr", "upgrade", "head"])
+        
+        logger.info("Migration completed successfully")
+    except Exception as e:
+        logger.error(f"Migration failed: {e}")
+        # Try to stamp if upgrade failed due to existing tables
+        if "already exists" in str(e) or "DuplicateTable" in str(e):
+            logger.warning("Migration failed due to existing tables - attempting to stamp")
+            try:
+                alembic.config.main(argv=["-c", alembic_ini_path, "--raiseerr", "stamp", "head"])
+                logger.info("Successfully stamped database to current head")
+            except Exception as stamp_error:
+                logger.error(f"Stamp also failed: {stamp_error}")
+                raise stamp_error
+        else:
+            raise e
 
 
 def log_migration_status(logger, current: Optional[str], head: str) -> None:
@@ -83,6 +202,39 @@ def log_migration_status(logger, current: Optional[str], head: str) -> None:
 def should_continue_on_error(environment: str) -> bool:
     """Determine if app should continue after migration error."""
     return environment != "production"
+
+
+def _should_stamp_instead_of_migrate(database_url: str, logger) -> bool:
+    """Check if we should stamp instead of migrate (tables exist but no alembic tracking)."""
+    try:
+        from sqlalchemy import create_engine, text
+        engine = create_engine(database_url)
+        
+        with engine.connect() as connection:
+            # Check if core tables exist
+            result = connection.execute(text(
+                "SELECT table_name FROM information_schema.tables "
+                "WHERE table_schema = 'public' AND table_name IN ('users', 'threads', 'assistants')"
+            ))
+            existing_core_tables = [row[0] for row in result.fetchall()]
+            
+            # Check if alembic_version exists
+            result = connection.execute(text(
+                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'alembic_version')"
+            ))
+            alembic_version_exists = result.scalar()
+            
+            # If core tables exist but no alembic_version, we should stamp
+            should_stamp = len(existing_core_tables) > 0 and not alembic_version_exists
+            
+            if should_stamp:
+                logger.info(f"Found {len(existing_core_tables)} core tables but no alembic_version table - will stamp")
+            
+            return should_stamp
+            
+    except Exception as e:
+        logger.warning(f"Could not determine stamp vs migrate: {e}")
+        return False
 
 
 def _is_database_url_empty(database_url: Optional[str]) -> bool:

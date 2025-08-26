@@ -163,27 +163,49 @@ def env(*environments: Union[str, TestEnvironment], **kwargs):
         for test_env in test_envs:
             func = pytest.mark.env(test_env.value)(func)
         
-        @functools.wraps(func)
-        def wrapper(*args, **wrapper_kwargs):
-            current_env = TestEnvironment.get_current()
-            
-            # Check if test should run in current environment
-            if current_env not in test_envs:
-                pytest.skip(f"Test not compatible with {current_env.value} environment. "
-                          f"Compatible: {', '.join([e.value for e in test_envs])}")
-            
-            # Apply environment-specific constraints
-            if current_env == TestEnvironment.PROD:
-                if not os.environ.get("ALLOW_PROD_TESTS"):
-                    pytest.skip("Production tests require ALLOW_PROD_TESTS=true")
+        # Preserve async nature of function
+        if getattr(func, '__code__', None) and func.__code__.co_flags & 0x80:  # CO_COROUTINE
+            @functools.wraps(func)
+            async def async_wrapper(*args, **wrapper_kwargs):
+                current_env = TestEnvironment.get_current()
                 
-                # Apply rate limiting if specified
-                if rate_limit := kwargs.get("rate_limit"):
-                    _apply_rate_limit(rate_limit)
-            
-            return func(*args, **wrapper_kwargs)
-        
-        return wrapper
+                # Check if test should run in current environment
+                if current_env not in test_envs:
+                    pytest.skip(f"Test not compatible with {current_env.value} environment. "
+                              f"Compatible: {', '.join([e.value for e in test_envs])}")
+                
+                # Apply environment-specific constraints
+                if current_env == TestEnvironment.PROD:
+                    if not os.environ.get("ALLOW_PROD_TESTS"):
+                        pytest.skip("Production tests require ALLOW_PROD_TESTS=true")
+                    
+                    # Apply rate limiting if specified
+                    if rate_limit := kwargs.get("rate_limit"):
+                        _apply_rate_limit(rate_limit)
+                
+                return await func(*args, **wrapper_kwargs)
+            return async_wrapper
+        else:
+            @functools.wraps(func)
+            def wrapper(*args, **wrapper_kwargs):
+                current_env = TestEnvironment.get_current()
+                
+                # Check if test should run in current environment
+                if current_env not in test_envs:
+                    pytest.skip(f"Test not compatible with {current_env.value} environment. "
+                              f"Compatible: {', '.join([e.value for e in test_envs])}")
+                
+                # Apply environment-specific constraints
+                if current_env == TestEnvironment.PROD:
+                    if not os.environ.get("ALLOW_PROD_TESTS"):
+                        pytest.skip("Production tests require ALLOW_PROD_TESTS=true")
+                    
+                    # Apply rate limiting if specified
+                    if rate_limit := kwargs.get("rate_limit"):
+                        _apply_rate_limit(rate_limit)
+                
+                return func(*args, **wrapper_kwargs)
+            return wrapper
     
     return decorator
 

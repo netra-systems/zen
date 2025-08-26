@@ -9,6 +9,7 @@ import asyncio
 from unittest.mock import AsyncMock, patch
 
 
+
 class TestDevSmokeTest:
     """Smoke tests for development environment."""
 
@@ -48,6 +49,7 @@ class TestDevSmokeTest:
     async def test_database_session_creation(self):
         """Test that database sessions can be created."""
         from netra_backend.app.db.postgres import initialize_postgres, get_async_db
+        from sqlalchemy import text
         
         # Try to initialize database
         try:
@@ -61,15 +63,19 @@ class TestDevSmokeTest:
         try:
             async with get_async_db() as session:
                 assert session is not None
-                # Try a simple query
-                result = await session.execute("SELECT 1")
+                # Try a simple query with proper SQLAlchemy 2.0+ syntax
+                result = await session.execute(text("SELECT 1"))
                 assert result.scalar() == 1
         except Exception as e:
             pytest.fail(f"Database session creation failed: {e}")
 
     def test_environment_variables_set(self):
         """Test that required environment variables are set."""
-        from netra_backend.app.core.isolated_environment import get_env
+        # Use the SAME get_env from the test framework to avoid multiple instances
+        try:
+            from dev_launcher.isolated_environment import get_env
+        except ImportError:
+            from netra_backend.app.core.isolated_environment import get_env
         
         env = get_env()
         
@@ -77,8 +83,13 @@ class TestDevSmokeTest:
         database_url = env.get('DATABASE_URL')
         environment = env.get('ENVIRONMENT') or env.get('NETRA_ENVIRONMENT')
         
-        assert database_url is not None, "DATABASE_URL must be set"
-        assert environment is not None, "ENVIRONMENT must be set"
+        # For smoke tests, we just need to verify that environment variables exist
+        # The actual values will vary between test/dev/staging/prod environments
+        assert database_url is not None, f"DATABASE_URL must be set, got: {database_url}"
+        assert environment is not None, f"ENVIRONMENT must be set, got: {environment}"
+        
+        # Additional validation to ensure DATABASE_URL is a valid format
+        assert 'postgresql://' in database_url or 'sqlite' in database_url, f"DATABASE_URL should be a valid database URL, got: {database_url}"
 
     def test_unified_config_accessible(self):
         """Test that unified config is accessible."""
@@ -181,7 +192,11 @@ class TestDevSmokeTest:
             pass
         
         # Test that environment supports dev launcher functionality
-        from netra_backend.app.core.isolated_environment import get_env
+        # Use the SAME get_env from the test framework to avoid multiple instances
+        try:
+            from dev_launcher.isolated_environment import get_env
+        except ImportError:
+            from netra_backend.app.core.isolated_environment import get_env
         env = get_env()
         
         # Should be able to get environment variables

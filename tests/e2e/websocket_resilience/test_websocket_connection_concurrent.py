@@ -34,6 +34,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_concurrent_expired_token_connections(jwt_generator, audit_logger):
     """
     Test Case 1: Concurrent expired token connection attempts.
@@ -135,6 +136,7 @@ async def test_concurrent_expired_token_connections(jwt_generator, audit_logger)
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_mixed_token_concurrent_connections(jwt_generator, audit_logger):
     """
     Test Case 2: Mixed valid and expired token concurrent connections.
@@ -251,6 +253,7 @@ async def test_mixed_token_concurrent_connections(jwt_generator, audit_logger):
 
 
 @pytest.mark.asyncio
+@pytest.mark.e2e
 async def test_sustained_concurrent_load_stability(jwt_generator, audit_logger):
     """
     Test Case 3: Sustained concurrent load stability.

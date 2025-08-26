@@ -19,6 +19,7 @@ from pydantic import ValidationError
 from tests.clients.factory import TestClientFactory
 
 
+@pytest.mark.e2e
 class TestWebSocketEventStructure:
     """Test suite for WebSocket event structure validation."""
     
@@ -41,6 +42,7 @@ class TestWebSocketEventStructure:
         """Get authenticated WebSocket client."""
         return await client_factory.create_authenticated_websocket_client()
     
+    @pytest.mark.e2e
     async def test_message_structure_compliance(self, websocket_client):
         """Test all WebSocket messages use {type, payload} structure."""
         # Trigger agent execution to generate WebSocket events
@@ -86,6 +88,7 @@ class TestWebSocketEventStructure:
             for field in forbidden_fields:
                 assert field not in message, f"Message {i} contains forbidden field '{field}': {message}"
     
+    @pytest.mark.e2e
     async def test_agent_started_event_structure(self, websocket_client):
         """Test agent_started event has required payload fields."""
         # Trigger agent execution
@@ -133,6 +136,7 @@ class TestWebSocketEventStructure:
         assert isinstance(payload["timestamp"], (int, float)), "timestamp must be number"
         assert payload["timestamp"] > 0, "timestamp must be positive"
     
+    @pytest.mark.e2e
     async def test_tool_executing_event_structure(self, websocket_client):
         """Test tool_executing event structure when tools are invoked."""
         # Trigger message that will use tools
@@ -176,6 +180,7 @@ class TestWebSocketEventStructure:
             assert "timestamp" in payload, "tool_executing missing timestamp"
             assert isinstance(payload["timestamp"], (int, float)), "timestamp must be number"
     
+    @pytest.mark.e2e
     async def test_forbidden_legacy_structures(self, websocket_client):
         """Test that no messages use forbidden legacy {event, data} structure."""
         # Trigger various events
@@ -212,6 +217,7 @@ class TestWebSocketEventStructure:
                 assert not ("event" in message and "data" in message), \
                     f"Message {i} uses forbidden legacy {{event, data}} structure: {message}"
     
+    @pytest.mark.e2e
     async def test_event_type_enum_compliance(self, websocket_client):
         """Test event types match expected enumerated values."""
         # Expected event types per SPEC/websocket_communication.xml
@@ -254,6 +260,7 @@ class TestWebSocketEventStructure:
         # We should observe at least agent_started
         assert "agent_started" in observed_events, "Expected agent_started event not observed"
     
+    @pytest.mark.e2e
     async def test_payload_schema_validation(self, websocket_client):
         """Test payload schemas are valid for each event type."""
         # Event schemas per SPEC/websocket_communication.xml
