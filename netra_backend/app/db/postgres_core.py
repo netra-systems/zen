@@ -345,14 +345,27 @@ class AsyncDatabase:
         await self._ensure_initialized()
         
         if hasattr(self._engine.pool, 'size'):
-            return {
+            pool_stats = {
                 "pool_size": self._engine.pool.size(),
                 "checked_in": self._engine.pool.checkedin(),
                 "checked_out": self._engine.pool.checkedout(),
                 "overflow": self._engine.pool.overflow(),
-                "invalid": self._engine.pool.invalid(),
                 "engine_disposed": self._engine.pool._invalidate_time is not None,
             }
+            
+            # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() method
+            # Use invalidated() instead, with fallback for compatibility
+            try:
+                if hasattr(self._engine.pool, 'invalidated'):
+                    pool_stats["invalidated"] = self._engine.pool.invalidated()
+                elif hasattr(self._engine.pool, 'invalid'):
+                    pool_stats["invalid"] = self._engine.pool.invalid()
+                else:
+                    pool_stats["invalidated_connections"] = "unknown"
+            except AttributeError:
+                pool_stats["invalidated_connections"] = "unavailable"
+            
+            return pool_stats
         return {"status": "Pool status unavailable"}
     
     async def close(self):

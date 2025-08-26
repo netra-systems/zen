@@ -27,6 +27,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+# Mark all tests in this file as env_test compatible
+pytestmark = [pytest.mark.env_test]
+
 
 class TestWebSocketBasicConnection:
     """Test basic WebSocket connectivity using mocked connections."""

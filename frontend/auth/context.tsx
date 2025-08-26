@@ -252,17 +252,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh]);
 
+  const hasMountedRef = useRef(false);
+
   useEffect(() => {
-    // Only fetch auth config once on mount, not when dependencies change
+    // Prevent multiple initialization calls
+    if (hasMountedRef.current) {
+      return;
+    }
+    hasMountedRef.current = true;
+
+    // Only fetch auth config once on mount
     fetchAuthConfig();
     
-    // Cleanup timeout on unmount
+    // Listen for storage events to detect token changes from OAuth callback
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'jwt_token' && e.newValue) {
+        logger.info('Detected token change via storage event', {
+          component: 'AuthContext',
+          action: 'storage_token_detected'
+        });
+        
+        // Update token immediately when detected via storage event
+        setToken(e.newValue);
+        try {
+          const decodedUser = jwtDecode(e.newValue) as User;
+          setUser(decodedUser);
+          syncAuthStore(decodedUser, e.newValue);
+          scheduleTokenRefreshCheck(e.newValue);
+        } catch (error) {
+          logger.error('Failed to decode token from storage event', error as Error);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup on unmount
     return () => {
+      window.removeEventListener('storage', handleStorageChange);
       if (refreshTimeoutRef.current) {
         clearTimeout(refreshTimeoutRef.current);
       }
+      hasMountedRef.current = false;
     };
-  }, []); // Empty dependency array to prevent re-fetching on dependency changes
+  }, []); // Remove dependencies to prevent re-runs
 
   const login = async () => {
     try {

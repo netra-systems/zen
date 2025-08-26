@@ -22,6 +22,9 @@ from typing import Dict, Any
 
 import pytest
 
+# Mark all tests in this file as env_test compatible
+pytestmark = [pytest.mark.env_test]
+
 
 class TestWebSocketBasicSecurity:
     """Test basic WebSocket security functionality."""

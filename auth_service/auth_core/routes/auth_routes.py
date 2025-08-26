@@ -65,11 +65,82 @@ def _determine_urls() -> tuple[str, str]:
     """Determine auth service and frontend URLs based on environment"""
     return AuthConfig.get_auth_service_url(), AuthConfig.get_frontend_url()
 
+def _is_placeholder_oauth_credential(credential: str, credential_type: str) -> bool:
+    """Check if OAuth credential appears to be a placeholder value."""
+    if not credential:
+        return True
+        
+    # Known placeholder patterns
+    placeholder_indicators = [
+        "REPLACE_", "PLACEHOLDER", "TODO", "CHANGEME", "YOUR_", 
+        "placeholder", "replace_me", "insert_here"
+    ]
+    
+    # Check for obvious placeholders
+    credential_lower = credential.lower()
+    for indicator in placeholder_indicators:
+        if indicator.lower() in credential_lower:
+            return True
+    
+    # Type-specific validation
+    if credential_type == "client_id":
+        # Google Client IDs should end with .apps.googleusercontent.com and be reasonable length
+        if not credential.endswith(".apps.googleusercontent.com"):
+            return True
+        # Google Client IDs are typically 70+ characters, but allow shorter ones that are valid format
+        # Only flag as placeholder if unreasonably short (less than 40 chars total)
+        if len(credential) < 40:
+            return True
+    elif credential_type == "client_secret":
+        # Google Client Secrets are typically 24+ characters and alphanumeric with some symbols
+        if len(credential) < 20:
+            return True
+        # Very short secrets or obvious test patterns
+        if credential in ["test", "secret", "dev", "development", "dummy"]:
+            return True
+    
+    return False
+
 async def _sync_user_to_main_db(auth_user):
     """Return user ID - no sync needed as auth service uses same database"""
     # Auth service uses the same database as main app
     # No separate sync needed - just return the user ID
     return auth_user.id if auth_user else None
+
+@router.get("/oauth/providers")
+async def get_oauth_providers(request: Request):
+    """List available OAuth providers"""
+    try:
+        env = _detect_environment()
+        google_client_id = AuthConfig.get_google_client_id()
+        
+        providers = []
+        if google_client_id and len(google_client_id) > 20:
+            providers.append({
+                "name": "google",
+                "display_name": "Google",
+                "available": True
+            })
+        else:
+            providers.append({
+                "name": "google", 
+                "display_name": "Google",
+                "available": False,
+                "reason": "Client ID not configured"
+            })
+        
+        return {
+            "providers": providers,
+            "environment": env
+        }
+    except Exception as e:
+        logger.error(f"OAuth providers endpoint failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/oauth/config", response_model=AuthConfigResponse)
+async def get_oauth_config(request: Request):
+    """OAuth-specific configuration endpoint"""
+    return await get_auth_config(request)
 
 @router.get("/config", response_model=AuthConfigResponse)
 async def get_auth_config(request: Request):
@@ -83,16 +154,16 @@ async def get_auth_config(request: Request):
         google_client_id = AuthConfig.get_google_client_id()
         google_client_secret = AuthConfig.get_google_client_secret()
         
-        # LOUD warning for missing OAuth configuration
+        # Validate OAuth configuration for frontend with improved placeholder detection
         oauth_warnings = []
         if not google_client_id:
             oauth_warnings.append("GOOGLE_CLIENT_ID is not configured")
-        elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
-            oauth_warnings.append(f"GOOGLE_CLIENT_ID appears to be a placeholder")
+        elif _is_placeholder_oauth_credential(google_client_id, "client_id"):
+            oauth_warnings.append(f"GOOGLE_CLIENT_ID appears to be a placeholder: {google_client_id[:20]}...")
             
         if not google_client_secret:
             oauth_warnings.append("GOOGLE_CLIENT_SECRET is not configured")
-        elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
+        elif _is_placeholder_oauth_credential(google_client_secret, "client_secret"):
             oauth_warnings.append("GOOGLE_CLIENT_SECRET appears to be a placeholder")
         
         if oauth_warnings and env in ["staging", "production"]:
@@ -159,7 +230,16 @@ Frontend will not be able to configure OAuth.
             }
         )
 
+@router.get("/google")
+async def google_oauth_initiate(
+    return_url: Optional[str] = None,
+    request: Request = None
+):
+    """Initiate Google OAuth login flow - dedicated endpoint"""
+    return await initiate_oauth_login(provider="google", return_url=return_url, request=request)
+
 @router.get("/login")
+@router.head("/login")
 async def initiate_oauth_login(
     provider: str = "google",
     return_url: Optional[str] = None,
@@ -436,6 +516,7 @@ async def verify_token_endpoint(authorization: Optional[str] = Header(None)):
         )
 
 @router.get("/verify")
+@router.head("/verify")
 async def verify_auth(authorization: Optional[str] = Header(None)):
     """Quick endpoint to verify if token is valid (legacy compatibility)"""
     if not authorization:
@@ -454,6 +535,7 @@ async def verify_auth(authorization: Optional[str] = Header(None)):
     }
 
 @router.get("/me")
+@router.head("/me")
 async def get_current_user(authorization: Optional[str] = Header(None)):
     """Get current user information from token"""
     if not authorization:

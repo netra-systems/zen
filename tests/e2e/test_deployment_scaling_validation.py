@@ -16,7 +16,7 @@ import json
 from unittest.mock import patch, AsyncMock, MagicMock
 from typing import Dict, Any, List
 
-from netra_backend.app.core.configuration.environment import EnvironmentConfig
+from netra_backend.app.core.environment_constants import EnvironmentConfig
 from netra_backend.app.core.health.unified_health_checker import UnifiedHealthChecker
 from netra_backend.app.services.unified_health_service import UnifiedHealthService
 

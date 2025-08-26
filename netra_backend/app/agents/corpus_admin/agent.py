@@ -139,7 +139,7 @@ class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
         self, e: Exception, context: ExecutionContext, state: DeepAgentState, run_id: str, stream_updates: bool
     ) -> None:
         """Handle execution exception with error handler and fallback."""
-        await self.error_handler.handle_execution_error(str(e), context)
+        await self.error_handler.handle_execution_error(e, context)
         logger.error(f"Modern execution failed, falling back to legacy: {e}")
         await self._execute_legacy_workflow(state, run_id, stream_updates)
     

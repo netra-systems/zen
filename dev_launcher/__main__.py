@@ -95,7 +95,7 @@ DEFAULT CONFIGURATION (Optimized for Development):
   
   This provides:
     - Docker containers for databases (no local installation needed)
-    - Dynamic port allocation (no conflicts)
+    - Static ports (8000/3000) for consistent frontend-backend communication
     - No hot reload by default (maximum performance)
     - Local-only secret loading (no GCP by default)
     - Real-time log streaming with emoji indicators
@@ -103,8 +103,8 @@ DEFAULT CONFIGURATION (Optimized for Development):
     - Better error detection and reporting
 
 EXAMPLES:
-  python -m dev_launcher                           # Default: dynamic ports, no backend reload
-  python -m dev_launcher --static                  # Use fixed ports (8000/3000)
+  python -m dev_launcher                           # Default: static ports (8000/3000), no backend reload
+  python -m dev_launcher --dynamic                 # Use dynamic port allocation
   python -m dev_launcher --backend-reload          # Enable backend hot reload
   python -m dev_launcher --load-secrets            # Enable GCP secret loading
   python -m dev_launcher --no-turbopack            # Use webpack instead of turbopack
@@ -121,7 +121,7 @@ QUICK SHORTCUTS:
     port_group.add_argument(
         "--backend-port",
         type=int,
-        help="Backend server port (default: 8000 or dynamic)"
+        help="Backend server port (default: 8000)"
     )
     port_group.add_argument(
         "--frontend-port",
@@ -130,15 +130,15 @@ QUICK SHORTCUTS:
         help="Frontend server port (default: 3000)"
     )
     port_group.add_argument(
-        "-d", "--dynamic",
+        "--dynamic",
         action="store_true",
-        default=True,
-        help="Use dynamic port allocation to avoid conflicts (default: enabled)"
+        help="Use dynamic port allocation to avoid conflicts"
     )
     port_group.add_argument(
-        "--static",
+        "-s", "--static",
         action="store_true",
-        help="Use static ports instead of dynamic allocation"
+        default=True,
+        help="Use static ports (8000/3000) for consistent API communication (default: enabled)"
     )
     
     # Reload configuration

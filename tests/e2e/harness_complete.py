@@ -208,6 +208,8 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
     async def _setup_databases(self) -> None:
         """Setup all test databases using database manager."""
         await self.database_manager.setup_databases()
+        # Set the databases reference in state so health checks can find it
+        self.state.databases = self.database_manager
     
     async def _start_auth_service(self) -> None:
         """Start auth service using service manager."""
@@ -303,6 +305,15 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
             except Exception as e:
                 logger.error(f"Cleanup task failed: {e}")
         
+        # Cleanup temp directory if it was created
+        if self.state.temp_dir and os.path.exists(self.state.temp_dir):
+            try:
+                import shutil
+                shutil.rmtree(self.state.temp_dir)
+                self.logger.info(f"Cleaned up temp directory: {self.state.temp_dir}")
+            except Exception as e:
+                logger.error(f"Failed to cleanup temp directory {self.state.temp_dir}: {e}")
+        
         self.state.ready = False
         self.logger.info("Test harness shutdown complete")
     
@@ -329,7 +340,13 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
     
     async def _setup_test_environment(self) -> None:
         """Setup test environment variables and configuration."""
+        import tempfile
         from tests.e2e.config import setup_test_environment
+        
+        # Create unique temporary directory for this test instance
+        self.state.temp_dir = tempfile.mkdtemp(prefix=f"netra_test_{self.test_name}_")
+        self.logger.info(f"Created temp directory: {self.state.temp_dir}")
+        
         setup_test_environment()
         self.logger.info("Test environment configured")
     

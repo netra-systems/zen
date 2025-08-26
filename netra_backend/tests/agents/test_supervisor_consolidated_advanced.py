@@ -75,16 +75,17 @@ class TestSupervisorAgentEdgeCases:
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
-        # Mock components with delays to test locking
-        async def slow_initialize(prompt, thread_id, user_id, run_id):
+        # Mock workflow executor with delays to test locking
+        async def slow_execute_workflow(flow_id, user_prompt, thread_id, user_id, run_id):
             await asyncio.sleep(0.1)
-            return DeepAgentState(user_request=prompt)
+            return DeepAgentState(user_request=user_prompt)
         
-        supervisor.state_manager.initialize_state = slow_initialize
-        # Mock: Component isolation for controlled unit testing
-        supervisor.pipeline_builder.get_execution_pipeline = Mock(return_value=[])
-        # Mock: Generic component isolation for controlled unit testing
-        supervisor._execute_with_context = AsyncMock()
+        supervisor.workflow_executor.execute_workflow_steps = slow_execute_workflow
+        
+        # Mock flow logger
+        supervisor.flow_logger.generate_flow_id = Mock(side_effect=["flow_1", "flow_2"])
+        supervisor.flow_logger.start_flow = Mock()
+        supervisor.flow_logger.complete_flow = Mock()
         
         # Start two concurrent executions
         task1 = asyncio.create_task(
@@ -101,5 +102,6 @@ class TestSupervisorAgentEdgeCases:
         assert result1.user_request == "query 1"
         assert result2.user_request == "query 2"
         
-        # Verify execute_with_context was called twice (serialized)
-        assert supervisor._execute_with_context.call_count == 2
+        # Verify flow logger was called twice (for both executions)
+        assert supervisor.flow_logger.start_flow.call_count == 2
+        assert supervisor.flow_logger.complete_flow.call_count == 2

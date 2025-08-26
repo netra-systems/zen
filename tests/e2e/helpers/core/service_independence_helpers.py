@@ -27,8 +27,8 @@ from pathlib import Path
 # Add project root to path for imports
 
 # Import everything from the new modular structure
-from tests.e2e.helpers.service_independence import *
-from tests.e2e.helpers.service_independence.pytest_interface import (
+from tests.e2e.helpers.core.service_independence import *
+from tests.e2e.helpers.core.service_independence.pytest_interface import (
     test_service_independence, test_zero_,
     test_service_independence,
     test_zero_import_violations,

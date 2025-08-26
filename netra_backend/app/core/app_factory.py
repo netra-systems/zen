@@ -70,6 +70,12 @@ def _add_path_traversal_middleware(app: FastAPI) -> None:
     app.middleware("http")(path_traversal_protection_middleware)
 
 
+def _add_security_response_middleware_final(app: FastAPI) -> None:
+    """Add security response middleware LAST to run FIRST (prevents information disclosure)."""
+    from netra_backend.app.middleware.security_response_middleware import SecurityResponseMiddleware
+    app.add_middleware(SecurityResponseMiddleware)
+
+
 def _add_security_headers_middleware(app: FastAPI) -> None:
     """Add security headers middleware."""
     from netra_backend.app.config import get_config
@@ -96,6 +102,8 @@ def setup_middleware(app: FastAPI) -> None:
     """Setup all middleware for the application."""
     setup_security_middleware(app)
     setup_request_middleware(app)
+    # Add security response middleware LAST so it runs FIRST (LIFO order)
+    _add_security_response_middleware_final(app)
 
 
 def initialize_oauth(app: FastAPI) -> None:

@@ -7,19 +7,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
 
 /**
- * Check backend service health with timeout
+ * Check backend service health with environment-aware timeout
  */
 async function checkBackendHealth(): Promise<{ status: string; details?: any }> {
   try {
     const config = getUnifiedApiConfig();
+    
+    // Environment-aware timeout configuration
+    const timeout = config.environment === 'staging' ? 2000 : 
+                   config.environment === 'development' ? 3000 : 5000;
+    
     const response = await fetch(`${config.urls.api}/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Netra-Frontend-HealthCheck/1.0.0',
       },
-      // 5 second timeout for health checks
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(timeout),
     });
 
     if (response.ok) {
@@ -29,27 +33,36 @@ async function checkBackendHealth(): Promise<{ status: string; details?: any }> 
       return { status: 'unhealthy', details: { status: response.status, statusText: response.statusText } };
     }
   } catch (error) {
+    // In staging, treat timeouts as degraded rather than unhealthy
+    const config = getUnifiedApiConfig();
+    const isDegraded = config.environment === 'staging' && 
+                      (error instanceof Error && error.name === 'TimeoutError');
+    
     return { 
-      status: 'unhealthy', 
+      status: isDegraded ? 'degraded' : 'unhealthy', 
       details: { error: error instanceof Error ? error.message : 'Unknown error' }
     };
   }
 }
 
 /**
- * Check auth service health with timeout
+ * Check auth service health with environment-aware timeout
  */
 async function checkAuthHealth(): Promise<{ status: string; details?: any }> {
   try {
     const config = getUnifiedApiConfig();
+    
+    // Environment-aware timeout configuration
+    const timeout = config.environment === 'staging' ? 1500 : 
+                   config.environment === 'development' ? 2000 : 3000;
+    
     const response = await fetch(`${config.urls.auth}/health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Netra-Frontend-HealthCheck/1.0.0',
       },
-      // 5 second timeout for health checks
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(timeout),
     });
 
     if (response.ok) {
@@ -59,8 +72,13 @@ async function checkAuthHealth(): Promise<{ status: string; details?: any }> {
       return { status: 'unhealthy', details: { status: response.status, statusText: response.statusText } };
     }
   } catch (error) {
+    // In staging, treat auth service issues as degraded if backend is healthy
+    const config = getUnifiedApiConfig();
+    const isDegraded = config.environment === 'staging' && 
+                      (error instanceof Error && error.name === 'TimeoutError');
+    
     return { 
-      status: 'unhealthy', 
+      status: isDegraded ? 'degraded' : 'unhealthy', 
       details: { error: error instanceof Error ? error.message : 'Unknown error' }
     };
   }
@@ -85,9 +103,20 @@ export async function GET(request: NextRequest) {
       auth: authHealth.status === 'fulfilled' ? authHealth.value : { status: 'error', details: authHealth.reason },
     };
 
-    // Determine overall health status
-    const allDependenciesHealthy = Object.values(dependencies).every(dep => dep.status === 'healthy');
-    const overallStatus = allDependenciesHealthy ? 'healthy' : 'degraded';
+    // Determine overall health status with graceful degradation
+    const healthyCount = Object.values(dependencies).filter(dep => dep.status === 'healthy').length;
+    const degradedCount = Object.values(dependencies).filter(dep => dep.status === 'degraded').length;
+    const errorCount = Object.values(dependencies).filter(dep => dep.status === 'unhealthy' || dep.status === 'error').length;
+    
+    let overallStatus: string;
+    if (healthyCount === Object.keys(dependencies).length) {
+      overallStatus = 'healthy';
+    } else if (healthyCount > 0 || degradedCount > 0) {
+      // At least one service is working
+      overallStatus = 'degraded';
+    } else {
+      overallStatus = 'unhealthy';
+    }
     
     // Standard health check format expected by monitoring systems
     const healthData = {
@@ -117,7 +146,8 @@ export async function GET(request: NextRequest) {
     };
 
     // Return appropriate status code based on health
-    const statusCode = overallStatus === 'healthy' ? 200 : 503;
+    const statusCode = overallStatus === 'healthy' ? 200 : 
+                      overallStatus === 'degraded' ? 200 : 503; // 200 for degraded allows traffic
     
     return NextResponse.json(healthData, { 
       status: statusCode,

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <component>frontend_health_endpoints</component>
+    <type>reliability_improvement</type>
+    <created>2025-08-26</created>
+    <priority>high</priority>
+    <category>health_check_optimization</category>
+  </metadata>
+
+  <title>React useEffect Dependency Management Best Practices</title>
+
+  <problem>
+    <description>React useEffect hooks with incorrectly managed dependencies were causing infinite re-render loops and performance issues</description>
+    <symptoms>
+      <symptom>Infinite re-render loops in authentication contexts</symptom>
+      <symptom>Excessive API calls due to useEffect re-runs</symptom>
+      <symptom>Poor application performance and user experience</symptom>
+      <symptom>Authentication state constantly resetting</symptom>
+    </symptoms>
+  </problem>
+
+  <root_cause>
+    <analysis>
+      useEffect dependency arrays contained functions that were recreated on every render, causing the effect to run infinitely. The lack of proper dependency management led to unstable component behavior.
+    </analysis>
+    <technical_details>
+      - Functions in dependency arrays recreated on every render cycle
+      - Missing useCallback memoization for dependent functions
+      - No mount guards to prevent multiple initializations
+      - Cleanup functions not properly resetting component state
+    </technical_details>
+  </root_cause>
+
+  <solution>
+    <approach>Implement proper useEffect dependency management with mount guards and memoization</approach>
+    <implementation>
+      <step>Use empty dependency arrays [] for mount-only effects</step>
+      <step>Implement mount guards with useRef to prevent multiple runs</step>
+      <step>Memoize functions with useCallback when needed as dependencies</step>
+      <step>Add proper cleanup functions that reset component state</step>
+    </implementation>
+    <best_practices>
+      <practice>Use [] dependency array for initialization effects</practice>
+      <practice>Add mount guards (useRef) for single-run initialization</practice>
+      <practice>Memoize functions with useCallback if they must be dependencies</practice>
+      <practice>Reset mount guards in cleanup functions</practice>
+      <practice>Carefully audit all functions used in dependency arrays</practice>
+    </best_practices>
+  </solution>
+
+  <validation>
+    <test_method>Component mount/unmount testing and render cycle monitoring</test_method>
+    <success_criteria>
+      <criterion>useEffect hooks run only when intended</criterion>
+      <criterion>No infinite re-render loops</criterion>
+      <criterion>Stable authentication and component state</criterion>
+      <criterion>Proper cleanup on component unmount</criterion>
+    </success_criteria>
+  </validation>
+
+  <learning_outcomes>
+    <insight>useEffect dependency management is critical for application stability</insight>
+    <insight>Mount guards prevent race conditions in complex initialization</insight>
+    <insight>Function recreation in render cycles causes dependency changes</insight>
+    <principle>useEffect dependencies should be stable references or explicitly memoized</principle>
+  </learning_outcomes>
+
+  <prevention>
+    <guideline>Always use mount guards for initialization effects</guideline>
+    <guideline>Audit all functions in useEffect dependency arrays</guideline>
+    <guideline>Use empty dependency arrays for mount-only effects</guideline>
+    <guideline>Memoize functions with useCallback when used as dependencies</guideline>
+    <guideline>Test component mount/unmount cycles thoroughly</guideline>
+  </prevention>
+</learning>

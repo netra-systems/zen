@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>API Retry Strategy and Loop Prevention</title>
+    <category>frontend</category>
+    <subcategory>api</subcategory>
+    <severity>high</severity>
+    <date>2025-08-26</date>
+    <affected_components>
+      <component>AuthServiceClient</component>
+      <component>API Configuration Fetching</component>
+      <component>Network Request Handling</component>
+    </affected_components>
+  </metadata>
+
+  <problem>
+    <description>
+      Uncontrolled API retry logic can create request storms that overwhelm backend
+      services and degrade application performance. This is particularly problematic
+      for configuration endpoints that are called during application initialization.
+    </description>
+    
+    <scenarios>
+      <scenario>
+        Backend service temporarily unavailable causing rapid retry attempts
+      </scenario>
+      <scenario>
+        Network issues triggering immediate retries without backoff
+      </scenario>
+      <scenario>
+        Configuration fetch failures causing cascading retry loops
+      </scenario>
+      <scenario>
+        Multiple components simultaneously retrying the same failed endpoint
+      </scenario>
+    </scenarios>
+
+    <impact>
+      <effect>Backend service overload from retry storms</effect>
+      <effect>Frontend performance degradation</effect>
+      <effect>Increased cloud infrastructure costs from excessive API calls</effect>
+      <effect>Poor user experience with slow page loads</effect>
+      <effect>Potential rate limiting or DDoS protection triggers</effect>
+    </impact>
+  </problem>
+
+  <solution>
+    <strategies>
+      <strategy name="Exponential Backoff">
+        <description>
+          Increase delay between retry attempts exponentially to reduce load
+        </description>
+        <implementation><![CDATA[
+const delay = Math.pow(2, attemptNumber) * 1000; // 1s, 2s, 4s, 8s...
+await new Promise(resolve => setTimeout(resolve, delay));
+        ]]></implementation>
+      </strategy>
+      
+      <strategy name="Retry Cooldown">
+        <description>
+          Enforce minimum time between retry attempts for the same resource
+        </description>
+        <implementation><![CDATA[
+const COOLDOWN_MS = 10000; // 10 seconds
+if (lastAttempt && Date.now() - lastAttempt < COOLDOWN_MS) {
+  return cachedResponse || fallbackResponse;
+}
+        ]]></implementation>
+      </strategy>
+      
+      <strategy name="Response Caching">
+        <description>
+          Cache successful responses to avoid unnecessary repeated requests
+        </description>
+        <implementation><![CDATA[
+if (response.ok) {
+  this.cache.set(endpoint, {
+    data: responseData,
+    timestamp: Date.now(),
+    ttl: 60000 // 1 minute
+  });
+}
+        ]]></implementation>
+      </strategy>
+      
+      <strategy name="Circuit Breaker">
+        <description>
+          Stop making requests after repeated failures until timeout expires
+        </description>
+        <implementation><![CDATA[
+if (failureCount >= threshold) {
+  circuitState = 'open';
+  setTimeout(() => {
+    circuitState = 'half-open';
+  }, resetTimeout);
+  return fallbackResponse;
+}
+        ]]></implementation>
+      </strategy>
+    </strategies>
+
+    <implementation_guidelines>
+      <guideline>
+        Always implement at least one retry prevention mechanism for critical endpoints
+      </guideline>
+      <guideline>
+        Use different retry strategies for different types of endpoints
+        (configuration vs data vs authentication)
+      </guideline>
+      <guideline>
+        Provide fallback responses for non-critical configuration data
+      </guideline>
+      <guideline>
+        Log retry attempts with appropriate severity levels for monitoring
+      </guideline>
+    </implementation_guidelines>
+  </solution>
+
+  <prevention>
+    <design_principle>
+      Design API clients with retry protection from the start, not as an afterthought
+    </design_principle>
+    <design_principle>
+      Centralize retry logic in a base API client class or utility function
+    </design_principle>
+    <design_principle>
+      Make retry behavior configurable through environment variables
+    </design_principle>
+    <design_principle>
+      Implement request deduplication to prevent multiple components from
+      making the same request simultaneously
+    </design_principle>
+  </prevention>
+
+  <monitoring>
+    <metrics>
+      <metric>API call retry rate per endpoint</metric>
+      <metric>Average time between retry attempts</metric>
+      <metric>Circuit breaker state transitions</metric>
+      <metric>Cache hit/miss ratio for configuration endpoints</metric>
+    </metrics>
+    
+    <alerts>
+      <alert>Retry rate exceeds threshold (e.g., >3 retries per minute)</alert>
+      <alert>Circuit breaker opens frequently (service reliability issue)</alert>
+      <alert>Configuration cache miss rate too high</alert>
+    </alerts>
+  </monitoring>
+
+  <testing>
+    <test_scenario>
+      Simulate backend unavailability and verify retry backoff behavior
+    </test_scenario>
+    <test_scenario>
+      Test circuit breaker opens after threshold failures
+    </test_scenario>
+    <test_scenario>
+      Verify cache returns stale data when backend unavailable
+    </test_scenario>
+    <test_scenario>
+      Ensure cooldown prevents rapid successive requests
+    </test_scenario>
+    <test_scenario>
+      Test request deduplication with concurrent component mounts
+    </test_scenario>
+  </testing>
+
+  <related_patterns>
+    <pattern>Circuit Breaker Pattern</pattern>
+    <pattern>Retry Pattern with Exponential Backoff</pattern>
+    <pattern>Cache-Aside Pattern</pattern>
+    <pattern>Bulkhead Isolation Pattern</pattern>
+    <pattern>Request Coalescing/Deduplication</pattern>
+  </related_patterns>
+</learning>

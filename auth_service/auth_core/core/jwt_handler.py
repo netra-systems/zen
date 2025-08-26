@@ -683,6 +683,12 @@ class JWTHandler:
         """CONSOLIDATED: JWT security validation - moved from oauth_security.py to eliminate SSOT violation"""
         try:
             import jwt
+            import json
+            import base64
+            
+            # First validate JWT structure (prevents "Not enough segments" errors)
+            if not self._validate_jwt_structure(token):
+                return False
             
             # Decode header without verification to check algorithm
             header = jwt.get_unverified_header(token)
@@ -702,5 +708,52 @@ class JWTHandler:
             return True
             
         except Exception as e:
-            logger.error(f"JWT security validation error: {e}")
+            logger.warning(f"JWT security validation error: {e}")
+            return False
+    
+    def _validate_jwt_structure(self, token: str) -> bool:
+        """Validate JWT token structure to prevent malformed token errors"""
+        try:
+            if not token or not isinstance(token, str):
+                logger.warning("Token is None or not a string")
+                return False
+                
+            # Check for basic JWT structure (3 parts separated by dots)
+            parts = token.split('.')
+            if len(parts) != 3:
+                logger.warning(f"Invalid JWT structure: expected 3 parts, got {len(parts)}")
+                return False
+            
+            # Check that each part is valid base64
+            for i, part in enumerate(parts):
+                if not part:  # Empty part
+                    logger.warning(f"JWT part {i} is empty")
+                    return False
+                    
+                try:
+                    # Add padding if needed for base64 decoding
+                    padded = part + '=' * (4 - len(part) % 4)
+                    base64.urlsafe_b64decode(padded)
+                except Exception:
+                    logger.warning(f"JWT part {i} is not valid base64")
+                    return False
+            
+            # Try to decode header and payload as JSON
+            try:
+                header_padded = parts[0] + '=' * (4 - len(parts[0]) % 4)
+                header_data = base64.urlsafe_b64decode(header_padded)
+                json.loads(header_data.decode('utf-8'))
+                
+                payload_padded = parts[1] + '=' * (4 - len(parts[1]) % 4)
+                payload_data = base64.urlsafe_b64decode(payload_padded)
+                json.loads(payload_data.decode('utf-8'))
+                
+            except Exception:
+                logger.warning("JWT header or payload contains invalid JSON")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"JWT structure validation error: {e}")
             return False

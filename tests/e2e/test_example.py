@@ -5,8 +5,7 @@ Demonstrates how to use the unified testing infrastructure
 This shows the REAL service testing approach per SPEC/unified_system_testing.xml
 """
 
-from test_framework.http_client import TestClient
-from tests.e2e.harness_complete import TestHarnessContext, UnifiedE2ETestHarness
+from tests.e2e.harness_complete import TestHarnessContext, UnifiedE2ETestHarness, TestClient, create_minimal_harness, create_test_harness
 from typing import Any, Dict
 import asyncio
 import pytest
@@ -18,7 +17,7 @@ async def test_first_time_user_journey():
 
     async with TestHarnessContext("first_time_user_test") as harness:
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
         
         # Verify all services are healthy
 
@@ -51,7 +50,7 @@ async def test_returning_user_login():
 
     async with TestHarnessContext("returning_user_test") as harness:
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
         
         # Get test user
 
@@ -59,7 +58,7 @@ async def test_returning_user_login():
 
         assert user is not None
 
-        assert user["email"] == "test@example.com"
+        assert user["email"] == "test0@example.com"
         
         # Get auth token
 
@@ -100,7 +99,7 @@ async def test_service_isolation():
 
     """Test that services are properly isolated but can communicate."""
 
-    harness = await UnifiedE2ETestHarness.create_minimal_harness("isolation_test")
+    harness = await create_minimal_harness("isolation_test")
     
 
     try:
@@ -131,17 +130,18 @@ async def test_database_isolation():
 
     """Test that each test gets isolated database."""
 
-    harness1 = await UnifiedE2ETestHarness.create_minimal_harness("db_test_1")
+    harness1 = await create_minimal_harness("db_test_1")
 
-    harness2 = await UnifiedE2ETestHarness.create_minimal_harness("db_test_2")
+    harness2 = await create_minimal_harness("db_test_2")
     
 
     try:
         # Each harness should have its own temp directory
 
         assert harness1.state.temp_dir != harness2.state.temp_dir
-
-        assert harness1.state.databases.test_db_name != harness2.state.databases.test_db_name
+        
+        # Each harness should have its own database manager instance
+        assert harness1.database_manager is not harness2.database_manager
         
 
     finally:
@@ -162,7 +162,7 @@ class TestRealServiceIntegration:
 
         """Fixture providing a test harness for the test class."""
 
-        harness = await UnifiedE2ETestHarness.create_test_harness("class_test")
+        harness = await create_test_harness("class_test")
 
         yield harness
 
@@ -181,7 +181,7 @@ class TestRealServiceIntegration:
         
         # Backend should be able to validate tokens from auth service
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
 
         headers = {"Authorization": f"Bearer {token}"}
         
@@ -220,7 +220,7 @@ async def test_concurrent_requests():
 
     async with TestHarnessContext("load_test") as harness:
 
-        client = TestClient(harness.backend_url)
+        client = TestClient(harness)
         
         # Make multiple concurrent requests to test system stability
 

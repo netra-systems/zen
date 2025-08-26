@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>StagingInfrastructureConfigurationFailures</name>
+        <type>SystemLearnings</type>
+        <version>1.0</version>
+        <description>Critical learnings about Redis and ClickHouse configuration failures in staging environment observed August 2025.</description>
+    </metadata>
+
+    <learning category="Infrastructure Configuration">
+        <title>Redis Initialization get_env Variable Reference Before Assignment</title>
+        <context>
+            During staging deployment, Redis initialization fails with "Variable 'get_env' referenced before assignment" error.
+            This occurs when the IsolatedEnvironment module fails to load properly during service initialization.
+        </context>
+        <root-cause>
+            1. Race condition in IsolatedEnvironment singleton initialization during concurrent service startup
+            2. Import dependency failures where get_env() function is not properly imported
+            3. Missing error handling when environment access fails during Redis URL retrieval
+        </root-cause>
+        <impact>
+            - Complete Redis connection failure preventing service startup
+            - Session management disabled causing authentication issues
+            - Cache invalidation failures affecting performance
+        </impact>
+        <solution>
+            1. Add proper error handling around all get_env() calls
+            2. Implement fallback Redis configuration when environment access fails
+            3. Add initialization order validation to prevent race conditions
+            4. Create comprehensive failing tests to catch these scenarios
+        </solution>
+        <prevention>
+            - Always validate environment variable access before Redis initialization
+            - Use dependency injection for environment access to improve testability
+            - Add startup health checks that validate all required environment variables
+        </prevention>
+    </learning>
+
+    <learning category="Infrastructure Configuration">
+        <title>ClickHouse Connection Timeout to Staging Infrastructure</title>
+        <context>
+            ClickHouse connections timeout to clickhouse.staging.netrasystems.ai:8443 causing analytics service failures.
+            Multiple timeout scenarios observed: connection timeout, SSL handshake failure, DNS resolution failure.
+        </context>
+        <root-cause>
+            1. ClickHouse infrastructure not properly provisioned in staging environment
+            2. SSL certificate configuration mismatch between client expectations and server setup
+            3. Network connectivity issues between staging services and ClickHouse instance
+            4. Missing DNS resolution for clickhouse.staging.netrasystems.ai hostname
+        </root-cause>
+        <impact>
+            - Analytics data collection completely disabled
+            - Health check endpoints return 503 blocking deployment validation
+            - Business intelligence features non-functional
+            - Performance monitoring and metrics collection broken
+        </impact>
+        <solution>
+            1. Validate ClickHouse infrastructure exists before deployment
+            2. Add connection retry mechanisms with exponential backoff
+            3. Implement graceful degradation when ClickHouse unavailable
+            4. Add comprehensive timeout and error handling for all connection scenarios
+        </solution>
+        <prevention>
+            - Pre-deployment infrastructure validation checks
+            - Automated testing of external service connectivity
+            - Staging environment must mirror production infrastructure requirements
+        </prevention>
+    </learning>
+
+    <learning category="Infrastructure Configuration">
+        <title>Environment Variable Control Character Corruption</title>
+        <context>
+            Redis and ClickHouse URLs retrieved from environment contain control characters (newlines, null bytes, carriage returns)
+            causing connection parsing failures and authentication errors.
+        </context>
+        <root-cause>
+            1. Configuration management tools introducing control characters during secret deployment
+            2. Insufficient sanitization of environment variables during retrieval
+            3. Copy-paste errors introducing invisible characters in configuration files
+        </root-cause>
+        <impact>
+            - Connection URL parsing failures preventing service initialization
+            - Authentication failures due to corrupted credentials
+            - Silent connection failures that are difficult to debug
+        </impact>
+        <solution>
+            1. Implement comprehensive environment variable sanitization removing ASCII control characters (0-31, 127)
+            2. Add validation for all database and service URLs before use
+            3. Log sanitization actions for debugging while preserving security
+            4. Special handling for database URLs to preserve password integrity
+        </solution>
+        <prevention>
+            - Automated validation of all environment variables during deployment
+            - Control character detection in CI/CD pipeline
+            - Regular audit of configuration sources for corruption
+        </prevention>
+    </learning>
+
+    <learning category="Infrastructure Configuration">
+        <title>Staging Service Dependency Validation</title>
+        <context>
+            Services start successfully but fail silently when external dependencies (Redis, ClickHouse) are unavailable.
+            Health checks pass even when core functionality is broken.
+        </context>
+        <root-cause>
+            1. Health checks only validate service startup, not external dependency availability
+            2. Fallback mechanisms mask infrastructure provisioning issues
+            3. Staging environment allows degraded operation that would fail in production
+        </root-cause>
+        <impact>
+            - False positive health checks allowing broken deployments
+            - Production failures not caught in staging validation
+            - Silent feature degradation affecting user experience
+        </impact>
+        <solution>
+            1. Health checks must validate ALL external dependencies
+            2. Disable fallback mechanisms in staging to match production behavior
+            3. Implement fail-fast approach when critical services unavailable
+            4. Add comprehensive dependency validation before service ready state
+        </solution>
+        <prevention>
+            - Staging environment must enforce production-like strict validation
+            - External services required in staging, not optional
+            - Comprehensive integration tests validating full service functionality
+        </prevention>
+    </learning>
+
+    <critical-patterns>
+        <pattern name="Environment Access Error Handling">
+            <description>Always wrap get_env() calls in try-catch blocks with appropriate fallback behavior</description>
+            <example>
+                try:
+                    redis_url = get_env().get("REDIS_URL")
+                    if not redis_url:
+                        raise ValueError("REDIS_URL not configured")
+                except (NameError, AttributeError, ValueError) as e:
+                    logger.error(f"Redis configuration failed: {e}")
+                    # Implement appropriate fallback or fail-fast behavior
+            </example>
+        </pattern>
+        
+        <pattern name="Infrastructure Validation">
+            <description>Validate external service availability before marking service as ready</description>
+            <example>
+                async def validate_external_services():
+                    # Test Redis connection
+                    if not await redis_client.ping():
+                        raise HealthCheckFailure("Redis unavailable")
+                    
+                    # Test ClickHouse connection  
+                    if not await clickhouse_client.test_connection():
+                        raise HealthCheckFailure("ClickHouse unavailable")
+            </example>
+        </pattern>
+        
+        <pattern name="URL Sanitization">
+            <description>Sanitize all environment variables containing URLs to remove control characters</description>
+            <example>
+                def sanitize_url(url: str) -> str:
+                    # Remove ASCII control characters (0-31, 127)
+                    sanitized = ''.join(char for char in url if ord(char) >= 32 and ord(char) != 127)
+                    # Validate URL is still parseable after sanitization
+                    parsed = urllib.parse.urlparse(sanitized)
+                    if not parsed.hostname:
+                        raise ValueError(f"URL sanitization resulted in invalid URL: {sanitized}")
+                    return sanitized
+            </example>
+        </pattern>
+    </critical-patterns>
+
+    <test-validation>
+        <requirement>Create comprehensive failing tests that replicate each configuration failure scenario</requirement>
+        <requirement>Tests must initially fail demonstrating the bugs exist</requirement>
+        <requirement>Tests should cover both main cases and edge cases for each failure type</requirement>
+        <requirement>Tests must validate error handling, retry mechanisms, and graceful degradation</requirement>
+        <locations>
+            <file>netra_backend/tests/integration/staging/test_redis_initialization_failures.py</file>
+            <file>netra_backend/tests/integration/staging/test_clickhouse_connection_failures.py</file>
+            <file>netra_backend/tests/integration/staging/test_redis_environment_edge_cases.py</file>
+            <file>netra_backend/tests/integration/staging/test_clickhouse_infrastructure_edge_cases.py</file>
+        </locations>
+    </test-validation>
+
+    <deployment-validation>
+        <check name="Environment Variable Validation">
+            <description>Validate all required environment variables exist and contain valid values</description>
+            <script>python scripts/validate_environment_configuration.py</script>
+        </check>
+        
+        <check name="External Service Connectivity">
+            <description>Test connectivity to all external services before deployment</description>
+            <script>python scripts/test_external_service_connectivity.py</script>
+        </check>
+        
+        <check name="Configuration Sanitization">
+            <description>Verify all configuration values are properly sanitized</description>
+            <script>python scripts/validate_configuration_sanitization.py</script>
+        </check>
+    </deployment-validation>
+</specification>

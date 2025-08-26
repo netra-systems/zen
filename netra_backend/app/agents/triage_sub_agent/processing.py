@@ -94,7 +94,7 @@ class TriageProcessor:
         """Handle processing error with modern error handling."""
         self.monitor.record_error(context, error)
         self.error_helper.log_processing_error(error, context.run_id)
-        error_result = await self.error_handler.handle_execution_error(context, error)
+        error_result = await self.error_handler.handle_execution_error(error, context)
         return self.error_helper.create_error_fallback_result(context.state, start_time)
     
     async def _fallback_llm_processing(self, enhanced_prompt, run_id, struct_error):

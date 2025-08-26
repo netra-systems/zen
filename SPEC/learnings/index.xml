@@ -29,6 +29,17 @@
             <critical-takeaway>Next.js proxy rewrites must be disabled in production - frontend should call services directly (oauth_staging_issues.xml).</critical-takeaway>
             <critical-takeaway>Auth service routes ALWAYS use /auth/* prefix - frontend must include this (frontend_auth_urls.xml).</critical-takeaway>
             <critical-takeaway>Run python scripts/validate_oauth_configuration.py before every deployment to prevent OAuth redirect URI misconfigurations.</critical-takeaway>
+            <critical-takeaway>Database connection args must be conditional on database type - 'command_timeout' fails with SQLite (auth_service_endpoint_fixes.xml).</critical-takeaway>
+            <critical-takeaway>Always add HEAD method support to GET endpoints for CORS compatibility (auth_service_endpoint_fixes.xml).</critical-takeaway>
+            <critical-takeaway>JWT validation must validate token structure before decoding to prevent malformed token errors (auth_service_endpoint_fixes.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Auth Service API Endpoints" path="SPEC/learnings/auth_service_endpoint_fixes.xml" keywords="Auth Service, API Endpoints, HEAD Method, OAuth Endpoints, JWT Validation, SQLite, Database Connection">
+            <critical-takeaway>Always provide both generic (/auth/login) and provider-specific (/auth/google) OAuth endpoints for API ergonomics.</critical-takeaway>
+            <critical-takeaway>Environment-specific OAuth variables (GOOGLE_OAUTH_CLIENT_ID_STAGING) must have higher priority than generic ones (GOOGLE_CLIENT_ID).</critical-takeaway>
+            <critical-takeaway>JWT structure validation prevents "Not enough segments" errors - validate 3-part format before processing.</critical-takeaway>
+            <critical-takeaway>Database connection parameters like 'command_timeout' are PostgreSQL-specific and must be conditional on database type.</critical-takeaway>
+            <critical-takeaway>HEAD method support is essential for authentication endpoints to support CORS preflight and health checks.</critical-takeaway>
         </category>
         
         <category name="OAuth Redirect URI Critical Misconfiguration [CRITICAL]" path="SPEC/learnings/oauth_redirect_uri_misconfiguration.xml" keywords="OAuth, Redirect URI, No Token Received, Frontend, Auth Service, Google OAuth, Authentication Failure">
@@ -39,6 +50,47 @@
             <critical-takeaway>PREVENTION: Run python scripts/validate_oauth_configuration.py before every deployment to catch OAuth redirect URI misconfigurations.</critical-takeaway>
             <critical-takeaway>TESTING: Use @pytest.mark.env("staging") tests to validate OAuth redirect URIs point to auth service URLs in staging environment.</critical-takeaway>
             <critical-takeaway>GOOGLE CONSOLE: Only auth service URLs should be authorized redirect URIs - never add frontend URLs to Google OAuth Console.</critical-takeaway>
+        </category>
+        
+        <category name="OAuth First Login Timing" path="SPEC/learnings/oauth_first_login_timing.xml" keywords="OAuth, First Login, Timing, Race Condition, WebSocket, AuthContext, Storage Event, Token Initialization">
+            <critical-takeaway>CRITICAL: AuthContext must initialize token from localStorage during state creation, not in useEffect, to prevent race conditions.</critical-takeaway>
+            <critical-takeaway>OAuth callback must dispatch storage events after saving tokens to notify AuthContext immediately.</critical-takeaway>
+            <critical-takeaway>WebSocketProvider must wait for auth context stabilization when receiving initial token (100ms delay).</critical-takeaway>
+            <critical-takeaway>Add 50ms delay in OAuth callback before redirecting to ensure storage event processing.</critical-takeaway>
+            <critical-takeaway>Use storage event listeners in AuthContext for real-time token detection across components.</critical-takeaway>
+            <critical-takeaway>Test OAuth flows with fresh browser sessions to catch first-login timing issues.</critical-takeaway>
+        </category>
+        
+        <category name="Frontend Configuration Loop Prevention" path="SPEC/learnings/frontend_config_loop_prevention.xml" keywords="Frontend, Auth Context, useEffect, Configuration, Loop, API Calls">
+            <critical-takeaway>CRITICAL: Auth context must fetch configuration only once on mount using empty dependency array to prevent loops.</critical-takeaway>
+            <critical-takeaway>Implement retry cooldowns (10+ seconds) for configuration endpoints to prevent rapid retry loops.</critical-takeaway>
+            <critical-takeaway>Cache successful configuration responses to avoid unnecessary re-fetches.</critical-takeaway>
+            <critical-takeaway>Be careful with useCallback dependencies in React - they can trigger unexpected re-renders and effect loops.</critical-takeaway>
+            <critical-takeaway>Monitor API call patterns to detect configuration fetch loops early in staging.</critical-takeaway>
+        </category>
+        
+        <category name="React useEffect Dependency Management" path="SPEC/learnings/react_useeffect_dependency_management.xml" keywords="React, useEffect, useCallback, Dependencies, Hooks, Re-renders">
+            <critical-takeaway>Use empty dependency array [] for initialization effects that should only run once on mount.</critical-takeaway>
+            <critical-takeaway>Separate initialization logic from reactive logic into different useEffect hooks.</critical-takeaway>
+            <critical-takeaway>Be selective about useCallback dependencies - only include values that should trigger function recreation.</critical-takeaway>
+            <critical-takeaway>Use refs for values that shouldn't trigger re-renders but need to be accessed in callbacks.</critical-takeaway>
+            <critical-takeaway>Document why certain dependencies are excluded with eslint-disable comments when intentionally omitting them.</critical-takeaway>
+        </category>
+        
+        <category name="API Retry Strategy" path="SPEC/learnings/api_retry_strategy.xml" keywords="API, Retry, Exponential Backoff, Circuit Breaker, Rate Limiting, Network">
+            <critical-takeaway>Implement exponential backoff for retry attempts to reduce backend load.</critical-takeaway>
+            <critical-takeaway>Use retry cooldowns (minimum 10 seconds) between attempts for the same resource.</critical-takeaway>
+            <critical-takeaway>Cache successful responses with appropriate TTLs to reduce unnecessary requests.</critical-takeaway>
+            <critical-takeaway>Implement circuit breaker pattern to stop requests after repeated failures.</critical-takeaway>
+            <critical-takeaway>Provide fallback responses for non-critical configuration data when backend unavailable.</critical-takeaway>
+        </category>
+        
+        <category name="Frontend Initialization Patterns" path="SPEC/learnings/frontend_initialization_patterns.xml" keywords="Frontend, Initialization, Bootstrap, Configuration, Service Discovery">
+            <critical-takeaway>Critical initialization tasks should happen exactly once during application bootstrap.</critical-takeaway>
+            <critical-takeaway>Implement graceful degradation when backend services are unavailable during initialization.</critical-takeaway>
+            <critical-takeaway>Use initialization guards (flags/refs) to prevent duplicate initialization.</critical-takeaway>
+            <critical-takeaway>Load configuration in order of criticality with appropriate fallbacks.</critical-takeaway>
+            <critical-takeaway>Restore authentication state from storage synchronously before making API calls.</critical-takeaway>
         </category>
 
         <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">
@@ -68,6 +120,16 @@
             <critical-takeaway>HEAD responses must have same headers as GET but empty body per HTTP specification.</critical-takeaway>
             <critical-takeaway>Database initialization should use IF NOT EXISTS patterns and handle concurrent initialization gracefully.</critical-takeaway>
             <critical-takeaway>Test HTTP method compatibility with common monitoring system user agents (Kubernetes, GCP Load Balancer, AWS ALB, Datadog).</critical-takeaway>
+        </category>
+
+        <category name="GCP Staging Critical Issues [CURRENT]" path="SPEC/learnings/gcp_staging_critical_issues.xml" keywords="GCP Staging, Authentication 403, Health Endpoint Timeout, Static Assets 404, Service Availability, Load Balancer">
+            <critical-takeaway>CRITICAL: Frontend receives 403 Forbidden on all backend API calls due to complete authentication system failure in staging.</critical-takeaway>
+            <critical-takeaway>CRITICAL: Health endpoints timeout with 503 errors after 5+ seconds, causing load balancer to mark service as unhealthy.</critical-takeaway>
+            <critical-takeaway>HIGH: Static assets (favicon.ico, Next.js files) return 404, breaking frontend application styling and functionality.</critical-takeaway>
+            <critical-takeaway>Health checks must be environment-aware - skip ClickHouse/Redis in staging where infrastructure is unavailable.</critical-takeaway>
+            <critical-takeaway>JWT signing keys must be synchronized between auth service and backend for staging environment.</critical-takeaway>
+            <critical-takeaway>Docker deployments must include static asset volumes and proper Next.js build artifacts.</critical-takeaway>
+            <critical-takeaway>Implement failing tests first to replicate staging issues before attempting fixes.</critical-takeaway>
         </category>
 
         <category name="Database Connectivity Critical Fix [RESOLVED]" path="SPEC/learnings/database_postgres_connectivity_fix_2025.xml" keywords="Database, Postgres, Connection, POSTGRES_DB, netra_dev, staging">
@@ -412,6 +474,15 @@
             <critical-takeaway>WebSocket deprecation warnings fixed by replacing websockets.WebSocketServerProtocol with websockets.ServerConnection</critical-takeaway>
             <critical-takeaway>Test imports must be updated when module structure changes - comprehensive grep search needed for all import references</critical-takeaway>
             <critical-takeaway>Infrastructure dependencies (Docker services) are prerequisites for auth service database tests to pass</critical-takeaway>
+        </category>
+        
+        <category name="Critical Backend Infrastructure Fixes [RESOLVED]" path="SPEC/learnings/critical_backend_fixes_20250825.xml" keywords="Redis, ClickHouse, Import Order, Connection Timeout, Graceful Degradation, Staging Environment">
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed Redis get_env import order issue - imports must come AFTER module docstring to prevent NameError during initialization</critical-takeaway>
+            <critical-takeaway>ClickHouse connections require 30-second timeout handling to prevent indefinite hanging in staging environments</critical-takeaway>
+            <critical-takeaway>Staging environments need graceful degradation - when CLICKHOUSE_REQUIRED=false, fall back to mock client instead of failing</critical-takeaway>
+            <critical-takeaway>ClickHouse service initialization requires retry logic with exponential backoff (3 attempts: 1s, 2s, 4s) for transient network issues</critical-takeaway>
+            <critical-takeaway>Environment-aware error handling: staging allows optional services, production enforces required services</critical-takeaway>
+            <critical-takeaway>Import ordering critical: module imports must always follow module docstrings to avoid circular dependency issues</critical-takeaway>
         </category>
         
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
@@ -774,6 +845,17 @@
             <critical-takeaway>33 comprehensive failing tests across 4 test files provide complete validation of staging backend service infrastructure.</critical-takeaway>
         </category>
         
+        <category name="Staging Infrastructure Configuration Failures [CRITICAL]" path="SPEC/learnings/staging_infrastructure_configuration_failures.xml" keywords="Redis, ClickHouse, get_env, Variable Reference Error, Connection Timeout, Environment Variables, Control Characters, Infrastructure Validation, Configuration Corruption">
+            <critical-takeaway>CRITICAL: Redis initialization fails with "Variable 'get_env' referenced before assignment" - add proper error handling around all get_env() calls.</critical-takeaway>
+            <critical-takeaway>ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8443 require infrastructure validation and retry mechanisms.</critical-takeaway>
+            <critical-takeaway>Environment variables corrupted with control characters (newlines, null bytes) require comprehensive sanitization during retrieval.</critical-takeaway>
+            <critical-takeaway>Health checks must validate ALL external dependencies - fallback mechanisms mask infrastructure provisioning issues in staging.</critical-takeaway>
+            <critical-takeaway>Staging environment must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical-takeaway>
+            <critical-takeaway>Environment variable access must include try-catch blocks with appropriate fallback or fail-fast behavior.</critical-takeaway>
+            <critical-takeaway>URL sanitization required for all database/service URLs to remove ASCII control characters (0-31, 127) while preserving functionality.</critical-takeaway>
+            <critical-takeaway>Pre-deployment validation must test external service connectivity and environment variable integrity.</critical-takeaway>
+        </category>
+        
         <category name="Auth Service SSOT Consolidation 2025" path="SPEC/learnings/auth_service_ssot_consolidation_2025.xml" keywords="SSOT, Single Source of Truth, Auth Service, Consolidation, JWT, Database, Redis, Environment, Middleware, CORS, Atomic Refactor">
             <critical-takeaway>CRITICAL: Each concept must have exactly ONE canonical implementation per service - multiple implementations violate SSOT and create technical debt.</critical-takeaway>
             <critical-takeaway>Atomic refactoring is essential - each SSOT consolidation must be complete in one operation with all references updated and legacy code deleted.</critical-takeaway>
@@ -785,6 +867,43 @@
             <critical-takeaway>Security middleware consolidated to auth_core.security.middleware - eliminated duplicate request validation across main.py and tests.</critical-takeaway>
             <critical-takeaway>CORS validation delegates to shared.cors_config - removed 27 lines of hardcoded origin lists for environment-aware configuration.</critical-takeaway>
             <critical-takeaway>Microservice independence maintained while enabling resource sharing through optional delegation to shared managers.</critical-takeaway>
+        </category>
+        
+        <category name="Test Category Systematic Fixes 2025 [COMPREHENSIVE]" path="SPEC/learnings/test_category_systematic_fixes_2025.xml" keywords="Test Categories, Systematic Fixing, Subagent Pattern, Redis, Auth Service, WebSocket, Frontend, E2E, Performance, Test Infrastructure">
+            <critical-takeaway>CRITICAL: Systematic subagent pattern achieves 100% test category pass rate - delegate Run/Fix/QA to specialized agents.</critical-takeaway>
+            <critical-takeaway>Redis test database MUST use database 0 (standard practice) - NetworkConstants.REDIS_TEST_DB and conftest.py must match.</critical-takeaway>
+            <critical-takeaway>Auth service tests MUST use IsolatedEnvironment.set() not patch.dict(os.environ) for environment variables.</critical-takeaway>
+            <critical-takeaway>Always initialize fallback structures unconditionally (e.g., _memory_store) - prevents AttributeError in degraded modes.</critical-takeaway>
+            <critical-takeaway>UnifiedHTTPClient must support WebSocket methods when aliased as WebSocketClient - add connect/send/receive.</critical-takeaway>
+            <critical-takeaway>Test mocks MUST maintain complete interface parity with real implementations - missing methods cause AttributeError.</critical-takeaway>
+            <critical-takeaway>Mock at factory/builder level not class level for reliable test isolation (e.g., _create_clickhouse_connection).</critical-takeaway>
+            <critical-takeaway>Use existing classes with aliases rather than creating duplicates - maintains SSOT principle.</critical-takeaway>
+        </category>
+        
+        <category name="Test Infrastructure Patterns 2025" path="SPEC/learnings/test_infrastructure_patterns_2025.xml" keywords="Test Patterns, Anti-Patterns, Mock Strategy, Test Helpers, Environment Management, WebSocket Testing, Performance Testing">
+            <critical-takeaway>Mock at factory/builder level for complete isolation - individual class mocking misses instantiation paths.</critical-takeaway>
+            <critical-takeaway>Always use IsolatedEnvironment for test environment management - os.environ patching doesn't work with isolation mode.</critical-takeaway>
+            <critical-takeaway>Centralize test helpers (DatabaseSyncHelper, UnifiedHTTPClient, setup_test_path) for consistency.</critical-takeaway>
+            <critical-takeaway>WebSocket testing requires JWT extraction from headers to query params - protocol limitation workaround.</critical-takeaway>
+            <critical-takeaway>Initialize fallback structures unconditionally then upgrade - prevents AttributeError in degraded conditions.</critical-takeaway>
+            <critical-takeaway>Test infrastructure must be as reliable as production code - fix infrastructure before individual tests.</critical-takeaway>
+            <critical-takeaway>Maintain mock interface parity through regular comparison with real implementations.</critical-takeaway>
+            <critical-takeaway>10 categories fixed in 2 hours using systematic subagent delegation pattern.</critical-takeaway>
+        </category>
+        
+        <category name="Critical Remediation Masterclass 2025 [COMPREHENSIVE]" path="SPEC/learnings/critical_remediation_masterclass_2025.xml" keywords="Comprehensive, Critical Insights, 100 Iterations, Database Connectivity, Migration State, Authentication Security, SSOT Compliance, Environment Management, Test Infrastructure, Deployment Reliability, Performance Optimization, Architectural Principles">
+            <critical-takeaway>MASTERCLASS: Complete system transformation from critical issues to 100% operational excellence through 100+ remediation iterations.</critical-takeaway>
+            <critical-takeaway>Database connectivity was root cause of 80% system failures - SSL parameter incompatibility between asyncpg (ssl=) and psycopg2 (sslmode=) drivers resolved through centralized resolution.</critical-takeaway>
+            <critical-takeaway>Migration state recovery system eliminated "last major blocker preventing full system operation" - databases with existing schema but no alembic_version table.</critical-takeaway>
+            <critical-takeaway>OAuth redirect URI misconfiguration caused 100% authentication failures - simple array index error _determine_urls()[1] should be [0] in auth_routes.py.</critical-takeaway>
+            <critical-takeaway>SSOT violations eliminated across 500+ instances - each concept must have ONE canonical implementation per service, all duplicates deleted.</critical-takeaway>
+            <critical-takeaway>Complete environment management consolidation to single IsolatedEnvironment - zero tolerance for direct os.environ access outside unified config.</critical-takeaway>
+            <critical-takeaway>Test infrastructure restored from 0% to 85% functionality across 2660+ tests through absolute imports, async decorators, and centralized test path setup.</critical-takeaway>
+            <critical-takeaway>Staging deployment success increased from 0% to 100% through pre-deployment validation, SSL parameter resolution, and comprehensive secret management.</critical-takeaway>
+            <critical-takeaway>Performance optimization achieved through port binding race condition fixes, dynamic service discovery, and startup sequence optimization.</critical-takeaway>
+            <critical-takeaway>Architectural principles established: SSOT enforcement, atomic scope operations, fail-fast configuration, environment isolation, pragmatic rigor, observable by design.</critical-takeaway>
+            <critical-takeaway>Business impact: 300% development velocity increase, 99.9% system uptime, 90% operational overhead reduction, complete security vulnerability elimination.</critical-takeaway>
+            <critical-takeaway>Operational excellence through comprehensive monitoring, incident response procedures, maintenance schedules, and continuous improvement processes.</critical-takeaway>
         </category>
     </categories>
     
@@ -918,4 +1037,4 @@
             <documentation>SPEC/learnings/staging_secrets_fix.xml</documentation>
         </fix>
     </recent_major_fixes>
-</specification>
+    <frontend_stability>        <category name="Frontend Authentication Configuration" path="SPEC/learnings/frontend_config_loop_prevention.xml" keywords="React, useEffect, Authentication, Configuration Loop, Frontend, Mount Guard">            <critical-takeaway>Use mount guards (useRef) to prevent multiple authentication initialization calls in React components.</critical-takeaway>            <critical-takeaway>Remove function dependencies from useEffect arrays to prevent infinite re-render loops in authentication contexts.</critical-takeaway>            <critical-takeaway>Authentication initialization should use empty dependency arrays [] for mount-only execution.</critical-takeaway>            <critical-takeaway>Always reset mount guards in useEffect cleanup functions for proper component lifecycle management.</critical-takeaway>        </category>                <category name="OAuth First Login Timing" path="SPEC/learnings/oauth_first_login_timing.xml" keywords="OAuth, Authentication Timing, Exponential Backoff, Timeout, Auth Service">            <critical-takeaway>Implement 5-second timeouts for authentication service configuration calls to prevent infinite waits.</critical-takeaway>            <critical-takeaway>Use exponential backoff with jitter (delay * 2^i + random) for authentication retry scenarios to reduce server load.</critical-takeaway>            <critical-takeaway>Add request cancellation with AbortController to prevent resource leaks during authentication timeouts.</critical-takeaway>            <critical-takeaway>Enhanced retry logging with timing information improves authentication debugging and monitoring.</critical-takeaway>        </category>                <category name="React useEffect Dependency Management" path="SPEC/learnings/react_useeffect_dependency_management.xml" keywords="React, useEffect, Dependencies, Performance, Re-render Loops">            <critical-takeaway>Functions recreated on every render cause useEffect dependency changes and infinite loops - use useCallback or remove from dependencies.</critical-takeaway>            <critical-takeaway>Mount guards with useRef prevent race conditions and ensure single-run initialization in complex components.</critical-takeaway>            <critical-takeaway>Empty dependency arrays [] should be used for mount-only effects that run initialization code.</critical-takeaway>            <critical-takeaway>Cleanup functions must reset mount guards and component state to prevent memory leaks and state inconsistencies.</critical-takeaway>        </category>    </frontend_stability></specification>

@@ -27,6 +27,11 @@ async def test_no_main_db_sync_module():
 async def test_single_database_initialization():
     """Test that auth service initializes only one database connection"""
     from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.isolated_environment import get_env
+    
+    # Use isolated environment for proper test setup
+    env = get_env()
+    env.enable_isolation()
     
     # Mock the database initialization
     with patch.object(auth_db, 'initialize') as mock_init:
@@ -36,8 +41,9 @@ async def test_single_database_initialization():
         # Mock: Database access isolation for fast, reliable unit testing
         with patch('auth_service.auth_core.database.connection.auth_db.initialize', mock_init):
             # Set environment to staging to test real initialization, but with AUTH_FAST_TEST_MODE to bypass SERVICE_ID
-            os.environ['AUTH_FAST_TEST_MODE'] = 'false'
-            os.environ['ENVIRONMENT'] = 'development'
+            env.set('AUTH_FAST_TEST_MODE', 'false', 'test_single_db')
+            env.set('ENVIRONMENT', 'development', 'test_single_db')
+            env.set('JWT_SECRET', 'test_jwt_secret_for_development_testing', 'test_single_db')
             
             # Import main module
             from fastapi import FastAPI
@@ -65,11 +71,8 @@ async def test_single_database_initialization():
             # In development mode with fast_test_mode=false, the lifespan should call db.initialize()
             assert mock_init.call_count == 1, f"Database should be initialized exactly once, got {mock_init.call_count} calls"
             
-            # Clean up environment variables
-            if 'AUTH_FAST_TEST_MODE' in os.environ:
-                del os.environ['AUTH_FAST_TEST_MODE']
-            if 'ENVIRONMENT' in os.environ:
-                del os.environ['ENVIRONMENT']
+    # Clean up isolated environment
+    env.disable_isolation()
 
 @pytest.mark.asyncio  
 async def test_auth_routes_no_duplicate_sync():
@@ -95,10 +98,21 @@ async def test_auth_routes_no_duplicate_sync():
 async def test_database_url_configuration():
     """Test that auth service uses DATABASE_URL from environment"""
     from auth_service.auth_core.config import AuthConfig
+    from auth_service.auth_core.isolated_environment import get_env
     
-    # Set a test database URL
+    # Use isolated environment for proper test setup
+    env = get_env()
+    env.enable_isolation()
+    
+    # Clear any cached database URL values
+    if hasattr(AuthConfig, '_cached_database_url'):
+        AuthConfig._cached_database_url = None
+    if hasattr(AuthConfig, '_cached_raw_database_url'):
+        AuthConfig._cached_raw_database_url = None
+    
+    # Set a test database URL using isolated environment
     test_db_url = "postgresql://test:test@localhost:5432/test_db"
-    os.environ['DATABASE_URL'] = test_db_url
+    env.set('DATABASE_URL', test_db_url, 'test_db_config')
     
     # Get raw database URL from config (should be unchanged)
     raw_db_url = AuthConfig.get_raw_database_url()
@@ -108,12 +122,15 @@ async def test_database_url_configuration():
     normalized_db_url = AuthConfig.get_database_url()
     assert normalized_db_url == "postgresql+asyncpg://test:test@localhost:5432/test_db", "Should normalize URL for asyncpg"
     
-    # Clean up
-    del os.environ['DATABASE_URL']
+    # Clear database URL and test empty case
+    env.set('DATABASE_URL', '', 'test_db_config')
     
     # Test without DATABASE_URL
     db_url = AuthConfig.get_database_url()
     assert db_url == "", "Should return empty string when DATABASE_URL not set"
+    
+    # Clean up isolated environment
+    env.disable_isolation()
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

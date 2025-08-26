@@ -1,0 +1,21 @@
+# robots.txt for Netra AI Optimization Platform
+
+# Allow all crawlers to access the site
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://app.netrasystems.ai/sitemap.xml
+
+# Prevent indexing of API routes and internal pages
+Disallow: /api/
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /health
+
+# Allow indexing of main pages
+Allow: /
+Allow: /demo
+Allow: /pricing
+Allow: /docs

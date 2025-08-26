@@ -90,11 +90,19 @@ class BackendStarter:
     
     def _allocate_dynamic_backend_port(self) -> int:
         """Allocate dynamic backend port."""
-        # Try to get a port in a preferred range first
+        # CRITICAL FIX: Always try port 8000 first for frontend consistency
+        from dev_launcher.utils import is_port_available
+        
+        # Force port 8000 if available
+        if is_port_available(8000):
+            logger.info(f"Using preferred backend port: 8000")
+            return 8000
+        
+        # Only use dynamic allocation if 8000 is truly unavailable
         from dev_launcher.utils import find_available_port
-        preferred_port = 8000
-        port = find_available_port(preferred_port, (8000, 8010))
-        logger.info(f"Allocated backend port: {port}")
+        port = find_available_port(8001, (8001, 8010))
+        logger.warning(f"Port 8000 unavailable, allocated backend port: {port}")
+        logger.warning(f"Frontend may fail to connect - port mismatch detected!")
         return port
     
     def _find_server_script(self) -> Optional[Path]:

@@ -36,7 +36,7 @@ class TestUnifiedConfigManager:
     def test_environment_detection(self):
         """Test environment detection logic."""
         manager = UnifiedConfigManager()
-        with patch.dict('os.environ', {'ENVIRONMENT': 'staging'}):
+        with patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': ''}):
             env = manager._detect_environment()
             assert env == 'staging'
         

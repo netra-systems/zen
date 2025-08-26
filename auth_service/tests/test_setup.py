@@ -13,9 +13,13 @@ auth_service_dir = Path(__file__).parent.parent
 
 def test_environment_setup():
     """Test environment variables are set correctly"""
-    assert os.getenv("ENVIRONMENT") == "test"
-    assert os.getenv("JWT_SECRET") is not None
-    assert len(os.getenv("JWT_SECRET", "")) > 10
+    # Use isolated environment for consistency with auth service
+    from auth_service.auth_core.isolated_environment import get_env
+    env = get_env()
+    
+    assert env.get("ENVIRONMENT") == "test"
+    assert env.get("JWT_SECRET") is not None
+    assert len(env.get("JWT_SECRET", "")) > 10
     
 def test_imports_work():
     """Test that auth_core modules can be imported"""

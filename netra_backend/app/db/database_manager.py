@@ -521,13 +521,25 @@ class DatabaseManager:
             Dictionary with pool statistics
         """
         if hasattr(engine.pool, 'size'):
-            return {
+            pool_stats = {
                 "pool_size": engine.pool.size(),
                 "checked_in": engine.pool.checkedin(),
                 "checked_out": engine.pool.checkedout(),
                 "overflow": engine.pool.overflow(),
-                "invalid": engine.pool.invalid(),
             }
+            
+            # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() method
+            try:
+                if hasattr(engine.pool, 'invalidated'):
+                    pool_stats["invalidated"] = engine.pool.invalidated()
+                elif hasattr(engine.pool, 'invalid'):
+                    pool_stats["invalid"] = engine.pool.invalid()
+                else:
+                    pool_stats["invalidated_connections"] = "unknown"
+            except AttributeError:
+                pool_stats["invalidated_connections"] = "unavailable"
+            
+            return pool_stats
         return {"status": "Pool status unavailable"}
     
     @staticmethod

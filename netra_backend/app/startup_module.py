@@ -365,10 +365,37 @@ def _perform_migration(logger: logging.Logger, sync_url: str) -> None:
 
 
 def _execute_if_needed(logger: logging.Logger, current: Optional[str], head: Optional[str]) -> None:
-    """Execute migration if needed."""
+    """Execute migration if needed with idempotent handling."""
     log_migration_status(logger, current, head)
     if needs_migration(current, head):
-        execute_migration(logger)
+        try:
+            execute_migration(logger)
+        except Exception as e:
+            # CRITICAL FIX: Handle DuplicateTable errors gracefully for idempotent migrations
+            error_msg = str(e)
+            if any(keyword in error_msg.lower() for keyword in ['already exists', 'duplicatetable', 'relation']):
+                logger.warning(f"Tables already exist during migration: {e}")
+                logger.info("Attempting to stamp database to current head revision...")
+                
+                # Try to stamp the database to the current head
+                try:
+                    import alembic.config
+                    
+                    config = get_config()
+                    sync_url = get_sync_database_url(config.database_url)
+                    alembic_ini_path = Path(__file__).parent.parent.parent.parent / "config" / "alembic.ini"
+                    
+                    alembic.config.main(argv=["-c", str(alembic_ini_path), "--raiseerr", "stamp", "head"])
+                    logger.info("Successfully stamped database to current head revision")
+                except Exception as stamp_error:
+                    logger.error(f"Failed to stamp database: {stamp_error}")
+                    if should_continue_on_error(settings.environment):
+                        logger.warning("Continuing despite migration/stamp failure")
+                    else:
+                        raise stamp_error
+            else:
+                # Re-raise non-table-existence errors
+                raise e
 
 
 def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
@@ -495,16 +522,41 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     clickhouse_mode = config.clickhouse_mode.lower()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
+    # CRITICAL FIX: Skip ClickHouse in staging environment entirely
+    if config.environment == "staging":
+        logger.info("Skipping ClickHouse initialization entirely in staging environment (infrastructure not available)")
+        return
+    
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         try:
-            await _setup_clickhouse_tables(logger, clickhouse_mode)
-        except Exception as e:
+            # Add timeout protection for ClickHouse initialization
+            await asyncio.wait_for(
+                _setup_clickhouse_tables(logger, clickhouse_mode),
+                timeout=30.0  # 30 second timeout for ClickHouse
+            )
+        except asyncio.TimeoutError:
+            timeout_msg = "ClickHouse initialization timed out after 30 seconds"
+            logger.error(timeout_msg)
             if graceful_startup:
-                logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
-                # Set clickhouse to mock mode for graceful degradation
+                logger.warning(f"{timeout_msg} - continuing without ClickHouse (optional service)")
                 config.clickhouse_mode = "mock"
             else:
-                raise
+                raise RuntimeError(timeout_msg)
+        except Exception as e:
+            # Enhanced error handling for common ClickHouse connection issues
+            error_msg = str(e).lower()
+            is_connection_error = any(keyword in error_msg for keyword in [
+                'connection', 'refused', 'timeout', 'unreachable', 'network', 'dns'
+            ])
+            
+            if is_connection_error and graceful_startup:
+                logger.warning(f"ClickHouse connection failed but continuing (optional service): {e}")
+                config.clickhouse_mode = "mock"
+            elif graceful_startup:
+                logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
+                config.clickhouse_mode = "mock"
+            else:
+                raise RuntimeError(f"ClickHouse initialization failed: {e}") from e
     else:
         _log_clickhouse_skip(logger, clickhouse_mode)
 

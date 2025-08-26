@@ -183,10 +183,16 @@ def _create_base_client(config, use_secure: bool):
     return ClickHouseDatabase(**params)
 
 async def _test_and_yield_client(client):
-    """Test connection and yield client."""
-    await client.test_connection()
-    logger.info("[ClickHouse] REAL connection established")
-    yield client
+    """Test connection and yield client with timeout handling."""
+    import asyncio
+    try:
+        # Add timeout for connection test to prevent hanging in staging
+        await asyncio.wait_for(client.test_connection(), timeout=30.0)
+        logger.info("[ClickHouse] REAL connection established")
+        yield client
+    except asyncio.TimeoutError as e:
+        logger.error("[ClickHouse] Connection test timeout after 30 seconds")
+        raise asyncio.TimeoutError("ClickHouse connection timeout") from e
 
 def _log_connection_attempt(config, use_secure: bool):
     """Log ClickHouse connection attempt."""
@@ -198,8 +204,21 @@ def _create_intercepted_client(config, use_secure: bool):
     return ClickHouseQueryInterceptor(base_client)
 
 def _handle_connection_error(e: Exception):
-    """Handle ClickHouse connection error."""
-    logger.error(f"[ClickHouse] REAL connection failed: {str(e)}")
+    """Handle ClickHouse connection error with environment-aware handling."""
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    environment = get_env().get("ENVIRONMENT", "development").lower()
+    
+    logger.error(f"[ClickHouse] REAL connection failed in {environment}: {str(e)}")
+    
+    # In staging, check if ClickHouse should be optional
+    if environment == "staging":
+        clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+        if not clickhouse_required:
+            logger.warning("[ClickHouse] Connection failed in staging but not required - graceful degradation")
+            # Don't raise in staging if not required
+            return
+    
     raise
 
 async def _cleanup_client_connection(client):
@@ -233,6 +252,15 @@ async def _create_real_client():
             yield c
     except Exception as e:
         _handle_connection_error(e)
+        # If error handling didn't raise (graceful degradation), yield mock client
+        from netra_backend.app.core.isolated_environment import get_env
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        if environment == "staging":
+            clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+            if not clickhouse_required:
+                logger.info("[ClickHouse] Using mock client as fallback in staging")
+                async for c in _create_mock_client():
+                    yield c
 
 
 class ClickHouseService:
@@ -281,12 +309,32 @@ class ClickHouseService:
         return ClickHouseDatabase(**params)
     
     async def _initialize_real_client(self):
-        """Initialize real ClickHouse client."""
+        """Initialize real ClickHouse client with retry logic."""
+        import asyncio
+        
         logger.info("[ClickHouse Service] Initializing with REAL client")
         config = get_clickhouse_config()
-        base_client = self._build_clickhouse_database(config)
-        self._client = ClickHouseQueryInterceptor(base_client)
-        await self._client.test_connection()
+        
+        # Retry connection with exponential backoff
+        max_retries = 3
+        base_delay = 1.0
+        
+        for attempt in range(max_retries):
+            try:
+                base_client = self._build_clickhouse_database(config)
+                self._client = ClickHouseQueryInterceptor(base_client)
+                # Test connection with timeout
+                await asyncio.wait_for(self._client.test_connection(), timeout=30.0)
+                logger.info(f"[ClickHouse Service] Connection established on attempt {attempt + 1}")
+                return
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    logger.warning(f"[ClickHouse Service] Connection attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
+                    await asyncio.sleep(delay)
+                else:
+                    logger.error(f"[ClickHouse Service] All {max_retries} connection attempts failed: {e}")
+                    raise
 
     async def initialize(self):
         """Initialize ClickHouse connection."""

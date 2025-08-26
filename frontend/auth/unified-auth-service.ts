@@ -30,13 +30,17 @@ export class UnifiedAuthService {
   }
 
   /**
-   * Get auth configuration from auth service
+   * Get auth configuration from auth service with exponential backoff
    */
   async getAuthConfig(retries = 3, delay = 1000): Promise<AuthConfigResponse> {
     for (let i = 0; i < retries; i++) {
       try {
-        // Get config from auth service
+        // Get config from auth service with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
         const authConfig = await authServiceClient.getAuthConfig();
+        clearTimeout(timeoutId);
         
         // Transform to expected format using unified config
         return {
@@ -55,11 +59,14 @@ export class UnifiedAuthService {
         };
       } catch (error) {
         if (i < retries - 1) {
-          logger.warn(`Auth config fetch error, retrying... (${i + 1}/${retries})`, {
+          // Exponential backoff with jitter
+          const backoffDelay = delay * Math.pow(2, i) + Math.random() * 1000;
+          logger.warn(`Auth config fetch error, retrying... (${i + 1}/${retries}) in ${Math.round(backoffDelay)}ms`, {
             component: 'UnifiedAuthService',
-            environment: this.environment
+            environment: this.environment,
+            error: error instanceof Error ? error.message : 'Unknown error'
           });
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
           continue;
         }
         throw error;

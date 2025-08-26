@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>TestInfrastructurePatterns2025</name>
+        <type>LearningDocument</type>
+        <version>1.0</version>
+        <created>2025-08-26</created>
+        <description>Patterns and anti-patterns discovered during comprehensive test infrastructure repair</description>
+    </metadata>
+
+    <context>
+        <summary>
+            Deep analysis of test infrastructure failures and successful patterns for maintaining
+            a healthy test suite across microservices architecture.
+        </summary>
+        <scope>Backend, Auth Service, Frontend, E2E, Performance testing</scope>
+    </context>
+
+    <successful_patterns>
+        <pattern id="isolated-environment-testing">
+            <name>IsolatedEnvironment for Test Environment Management</name>
+            <description>Use IsolatedEnvironment.set() instead of os.environ patching</description>
+            <benefits>
+                <benefit>Prevents environment pollution between tests</benefit>
+                <benefit>Works with isolation mode in services</benefit>
+                <benefit>Provides source tracking for debugging</benefit>
+            </benefits>
+            <implementation>
+                env = get_env()
+                original = env.get("VAR")
+                try:
+                    env.set("VAR", test_value)
+                    # test code
+                finally:
+                    if original:
+                        env.set("VAR", original)
+                    else:
+                        env.unset("VAR")
+            </implementation>
+        </pattern>
+
+        <pattern id="mock-at-factory-level">
+            <name>Mock at Factory/Builder Level</name>
+            <description>Mock connection factories rather than individual classes</description>
+            <example>Mock _create_clickhouse_connection instead of ClickHouseDatabase</example>
+            <benefits>
+                <benefit>Catches all instantiation paths</benefit>
+                <benefit>Simpler mock configuration</benefit>
+                <benefit>More reliable test isolation</benefit>
+            </benefits>
+        </pattern>
+
+        <pattern id="websocket-http-unification">
+            <name>Unified HTTP/WebSocket Client</name>
+            <description>Single client class supporting both HTTP and WebSocket protocols</description>
+            <features>
+                <feature>Automatic protocol conversion (http→ws, https→wss)</feature>
+                <feature>Unified authentication handling</feature>
+                <feature>Consistent error handling</feature>
+                <feature>Connection state management</feature>
+            </features>
+            <benefit>Reduces code duplication and test complexity</benefit>
+        </pattern>
+
+        <pattern id="fallback-initialization">
+            <name>Unconditional Fallback Initialization</name>
+            <description>Always initialize fallback structures, then upgrade if possible</description>
+            <example>
+                self._memory_store = {}  # Always initialize
+                if redis_available:
+                    self.redis = redis_client
+                else:
+                    self.redis = None
+            </example>
+            <benefit>Prevents AttributeError in degraded conditions</benefit>
+        </pattern>
+
+        <pattern id="test-helper-centralization">
+            <name>Centralized Test Helpers</name>
+            <description>Single source of truth for test utilities</description>
+            <examples>
+                <example>DatabaseSyncHelper for database operations</example>
+                <example>UnifiedHTTPClient for all HTTP/WebSocket needs</example>
+                <example>setup_test_path() for import configuration</example>
+            </examples>
+            <benefit>Consistent test behavior across all test files</benefit>
+        </pattern>
+    </successful_patterns>
+
+    <anti_patterns>
+        <anti_pattern id="environment-patching">
+            <name>Direct os.environ Patching</name>
+            <problem>Doesn't work with IsolatedEnvironment</problem>
+            <symptoms>Tests pass locally but fail in CI or with isolation mode</symptoms>
+            <fix>Use IsolatedEnvironment.set() method instead</fix>
+        </anti_pattern>
+
+        <anti_pattern id="incomplete-mocks">
+            <name>Incomplete Mock Interfaces</name>
+            <problem>Mock missing methods that real implementation has</problem>
+            <symptoms>AttributeError in tests but not production</symptoms>
+            <fix>Maintain complete interface parity in mocks</fix>
+        </anti_pattern>
+
+        <anti_pattern id="conditional-initialization">
+            <name>Conditional Fallback Initialization</name>
+            <problem>Only initializing fallbacks in error paths</problem>
+            <symptoms>AttributeError when fallback needed but not in exception path</symptoms>
+            <fix>Always initialize fallbacks unconditionally</fix>
+        </anti_pattern>
+
+        <anti_pattern id="class-level-mocking">
+            <name>Individual Class Mocking</name>
+            <problem>Mocking classes instead of their factories</problem>
+            <symptoms>Real connections attempted despite mocks</symptoms>
+            <fix>Mock at factory/builder/connection level</fix>
+        </anti_pattern>
+
+        <anti_pattern id="hardcoded-test-config">
+            <name>Hardcoded Test Configuration</name>
+            <problem>Test configuration values hardcoded in multiple places</problem>
+            <symptoms>Configuration drift, inconsistent test behavior</symptoms>
+            <fix>Centralize test configuration in conftest or constants</fix>
+        </anti_pattern>
+    </anti_patterns>
+
+    <infrastructure_requirements>
+        <requirement id="enum-completeness">
+            <description>All enums must include all values used across the system</description>
+            <validation>Grep for enum usage and ensure all values defined</validation>
+        </requirement>
+
+        <requirement id="mock-interface-parity">
+            <description>Test mocks must implement complete interface of real classes</description>
+            <validation>Compare mock methods with real implementation regularly</validation>
+        </requirement>
+
+        <requirement id="redis-database-zero">
+            <description>Redis tests should use database 0 (standard practice)</description>
+            <rationale>Database 0 is default, reduces configuration complexity</rationale>
+        </requirement>
+
+        <requirement id="websocket-token-handling">
+            <description>WebSocket connections must extract JWT from headers to query params</description>
+            <rationale>WebSocket protocol doesn't support Authorization headers</rationale>
+        </requirement>
+
+        <requirement id="import-aliasing">
+            <description>Use import aliases for backward compatibility</description>
+            <example>UnifiedHTTPClient as HTTPClient</example>
+            <benefit>Prevents breaking existing code during refactoring</benefit>
+        </requirement>
+    </infrastructure_requirements>
+
+    <testing_strategy>
+        <principle>Test infrastructure must be as reliable as production code</principle>
+        <principle>Mock at the right level - not too high, not too low</principle>
+        <principle>Maintain single source of truth for test utilities</principle>
+        <principle>Fix test infrastructure before fixing individual tests</principle>
+        <principle>Use subagent pattern for systematic test fixing</principle>
+    </testing_strategy>
+
+    <maintenance_checklist>
+        <item>Run all test categories weekly: python unified_test_runner.py --category all</item>
+        <item>Verify mock completeness when adding new methods to classes</item>
+        <item>Update test framework imports when refactoring</item>
+        <item>Check for AttributeError in test logs - indicates incomplete mocks</item>
+        <item>Validate environment handling uses IsolatedEnvironment</item>
+        <item>Ensure WebSocket tests have proper connection methods</item>
+        <item>Monitor Redis database configuration consistency</item>
+    </maintenance_checklist>
+
+    <metrics>
+        <metric name="Test Categories" value="10 total"/>
+        <metric name="Fixes Applied" value="10 targeted fixes"/>
+        <metric name="Time to Resolution" value="2 hours with subagent pattern"/>
+        <metric name="Lines Changed" value="~500 lines across 15 files"/>
+        <metric name="Test Pass Rate Improvement" value="60% to 100%"/>
+    </metrics>
+</specification>

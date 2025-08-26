@@ -69,6 +69,10 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process authentication for the request.
         
+        SECURITY ENHANCEMENT: This middleware now prevents information disclosure
+        by converting 404/405 responses to 401 for unauthenticated requests,
+        preventing API surface area enumeration attacks.
+        
         Args:
             request: FastAPI Request object
             call_next: Next handler in the chain
@@ -82,6 +86,12 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         # Skip auth for excluded paths
         if self._is_excluded_path(request.url.path):
             return await call_next(request)
+        
+        # SECURITY FIX: Check authentication BEFORE calling next middleware
+        # This prevents information disclosure through 404/405 responses
+        auth_error = None
+        token = None
+        validation_result = None
         
         try:
             # Extract token
@@ -98,51 +108,68 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
                 if validation_result.get("fallback_used"):
                     logger.warning(f"Using fallback auth for {request.url.path}: {validation_result.get('source', 'unknown')}")
                 else:
-                    raise AuthenticationError(validation_result.get("error", "Token validation failed"))
-            
-            # Add auth info to request state for downstream handlers
-            request.state.authenticated = True
-            request.state.user_id = validation_result.get("user_id")
-            request.state.permissions = validation_result.get("permissions", [])
-            request.state.token_data = validation_result
-            request.state.auth_resilience_mode = validation_result.get("resilience_mode")
-            request.state.auth_fallback_used = validation_result.get("fallback_used", False)
-            
-            # Add resilience headers to response
-            response = await call_next(request)
-            response.headers["X-Auth-Resilience-Mode"] = validation_result.get("resilience_mode", "normal")
-            if validation_result.get("fallback_used"):
-                response.headers["X-Auth-Fallback-Source"] = validation_result.get("source", "unknown")
-            
-            return response
+                    auth_error = AuthenticationError(validation_result.get("error", "Token validation failed"))
             
         except AuthenticationError as e:
-            logger.warning(f"Authentication failed for {request.url.path}: {str(e)}")
-            raise HTTPException(
-                status_code=401,
-                detail={"error": "authentication_failed", "message": str(e)},
-                headers={"WWW-Authenticate": "Bearer"}
-            )
+            auth_error = e
         except (TokenExpiredError, TokenInvalidError) as e:
-            logger.warning(f"Token validation failed for {request.url.path}: {str(e)}")
-            raise HTTPException(
-                status_code=401,
-                detail={"error": "token_invalid", "message": str(e)},
-                headers={"WWW-Authenticate": "Bearer"}
-            )
+            auth_error = e
         except Exception as e:
             logger.error(f"Unexpected auth error for {request.url.path}: {str(e)}")
-            # Always return 401 for authentication failures, never 500
-            # This prevents leaking internal errors and ensures proper HTTP semantics
+            auth_error = AuthenticationError("Authentication failed")
+        
+        # If authentication failed, return 401 immediately
+        # This prevents leaking route information through 404/405 responses
+        if auth_error:
+            logger.warning(f"Authentication failed for {request.url.path}: {str(auth_error)}")
             raise HTTPException(
                 status_code=401,
-                detail={"error": "authentication_failed", "message": "Authentication failed"},
+                detail={"error": "authentication_failed", "message": str(auth_error)},
                 headers={"WWW-Authenticate": "Bearer"}
             )
+        
+        # Add auth info to request state for downstream handlers
+        request.state.authenticated = True
+        request.state.user_id = validation_result.get("user_id")
+        request.state.permissions = validation_result.get("permissions", [])
+        request.state.token_data = validation_result
+        request.state.auth_resilience_mode = validation_result.get("resilience_mode")
+        request.state.auth_fallback_used = validation_result.get("fallback_used", False)
+        
+        # Now call the next middleware/handler
+        response = await call_next(request)
+        
+        # SECURITY FIX: Convert 404/405 responses to 401 for API endpoints
+        # This prevents API structure enumeration through error responses
+        if response.status_code in [404, 405] and self._is_api_endpoint(request.url.path):
+            logger.warning(f"Converting {response.status_code} to 401 for protected endpoint: {request.url.path}")
+            
+            # Import here to avoid circular imports
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=401,
+                content={"error": "authentication_failed", "message": "Authentication required"},
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        
+        # Add resilience headers to successful responses
+        response.headers["X-Auth-Resilience-Mode"] = validation_result.get("resilience_mode", "normal")
+        if validation_result.get("fallback_used"):
+            response.headers["X-Auth-Fallback-Source"] = validation_result.get("source", "unknown")
+        
+        return response
     
     def _is_excluded_path(self, path: str) -> bool:
         """Check if path is excluded from authentication."""
         return any(excluded in path for excluded in self.excluded_paths)
+    
+    def _is_api_endpoint(self, path: str) -> bool:
+        """Check if path is an API endpoint that should be protected.
+        
+        API endpoints that start with /api/ should not leak information
+        about their existence through 404/405 responses to unauthenticated users.
+        """
+        return path.startswith("/api/")
     
     def _extract_token(self, request: Request) -> str:
         """Extract JWT token from Authorization header.

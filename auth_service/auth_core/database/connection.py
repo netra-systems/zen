@@ -160,13 +160,20 @@ class AuthDatabaseConnection:
     
     async def _create_async_engine_with_timeout(self, database_url: str):
         """Create async engine with timeout-optimized settings."""
-        # Enhanced connection arguments with timeouts
-        connect_args = {
-            "command_timeout": 15,  # Command timeout
-            "server_settings": {
-                "application_name": f"netra_auth_{self.environment}",
+        # Enhanced connection arguments with timeouts - conditional based on database type
+        connect_args = {}
+        
+        # Only add PostgreSQL-specific connection args for PostgreSQL databases
+        if not database_url.startswith('sqlite'):
+            connect_args = {
+                "command_timeout": 15,  # Command timeout for PostgreSQL/asyncpg
+                "server_settings": {
+                    "application_name": f"netra_auth_{self.environment}",
+                }
             }
-        }
+        else:
+            # SQLite/aiosqlite specific connection args (if any needed in future)
+            connect_args = {}
         
         # Create engine with optimized timeout settings using AuthDatabaseManager
         return AuthDatabaseManager.create_async_engine(

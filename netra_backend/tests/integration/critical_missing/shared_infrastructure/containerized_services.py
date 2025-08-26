@@ -84,7 +84,19 @@ class MockPool:
 
 class MockConnection:
     """Mock database connection for testing"""
+    def __init__(self):
+        self._transaction_count = 0
+        self._active_updates = set()
+    
     async def execute(self, query, *args):
+        # Track concurrent updates for deadlock simulation
+        if "UPDATE userbase" in query and len(args) > 0:
+            user_id = args[-1] if args else None
+            if user_id in self._active_updates:
+                # Simulate deadlock on concurrent updates to same user
+                from netra_backend.tests.integration.critical_missing.tier1_critical.test_database_transaction_rollback import DatabaseDeadlockError
+                raise DatabaseDeadlockError(f"Deadlock detected updating user {user_id}")
+            self._active_updates.add(user_id)
         return None
     
     async def fetchrow(self, query, *args):
@@ -95,7 +107,13 @@ class MockConnection:
     
     @asynccontextmanager
     async def transaction(self):
-        yield self
+        self._transaction_count += 1
+        try:
+            yield self
+        finally:
+            # Clear active updates when transaction completes
+            self._active_updates.clear()
+            self._transaction_count -= 1
 
 class ClickHouseContainer:
     """L3 Real ClickHouse container for metrics testing."""

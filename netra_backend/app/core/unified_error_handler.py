@@ -924,8 +924,35 @@ async def validation_exception_handler(request: Request, exc: ValidationError) -
 
 
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    """HTTP exception handler for FastAPI."""
+    """HTTP exception handler for FastAPI.
+    
+    SECURITY ENHANCEMENT: Converts 404/405 responses to 401 for API endpoints
+    to prevent information disclosure through API surface enumeration.
+    """
+    # SECURITY FIX: Convert 404/405 to 401 for API endpoints when user is not authenticated
+    if exc.status_code in [404, 405] and _is_api_endpoint(request.url.path):
+        # Check if request has valid authentication
+        if not _has_valid_auth(request):
+            logger.warning(f"Converting HTTP {exc.status_code} to 401 for protected endpoint: {request.url.path}")
+            return JSONResponse(
+                status_code=401,
+                content={"error": "authentication_failed", "message": "Authentication required"},
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+    
     return await api_error_handler.handle_exception(exc, request)
+
+
+def _is_api_endpoint(path: str) -> bool:
+    """Check if path is an API endpoint that should be protected."""
+    return path.startswith("/api/")
+
+
+def _has_valid_auth(request: Request) -> bool:
+    """Check if request has valid authentication."""
+    # Check if request state indicates successful authentication
+    # This will be set by the auth middleware if authentication was successful
+    return getattr(request.state, 'authenticated', False)
 
 
 async def netra_exception_handler(request: Request, exc: NetraException) -> JSONResponse:
