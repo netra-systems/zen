@@ -174,29 +174,11 @@ class LogFormatter:
     
     def get_console_format(self) -> str:
         """Get human-readable format string for console output."""
-        # Use preprocessor to add color to messages
-        return self._get_preprocessed_format()
-    
-    def _get_preprocessed_format(self) -> str:
-        """Get format string with message preprocessing."""
         return (
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
             "<level>{level: <8}</level> | "
             "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-            "{extra[colored_message]}"
-        )
-    
-    def _get_base_console_format(self) -> str:
-        """Get the base console format string with proper color mapping."""
-        return self._get_color_formatted_template()
-    
-    def _get_color_formatted_template(self) -> str:
-        """Get format template with proper level-based color mapping."""
-        return (
-            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-            "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-            "{extra[colored_message]}"
+            "<level>{message}</level>"
         )
     
     def _has_context(self) -> bool:
@@ -210,29 +192,6 @@ class LogFormatter:
         return "{time} | {level} | {name}:{function}:{line} | {message}"
 
 
-def _color_message_preprocessor(record):
-    """Preprocess log record to add proper colors based on level."""
-    level = record["level"].name
-    message = record["message"]
-    
-    # Map log levels to appropriate colors (not error red for info)
-    color_map = {
-        "TRACE": "<dim>{}</dim>",
-        "DEBUG": "<dim>{}</dim>", 
-        "INFO": "<white>{}</white>",  # Info should be white, not red
-        "SUCCESS": "<green>{}</green>",
-        "WARNING": "<yellow>{}</yellow>",
-        "ERROR": "<red>{}</red>",
-        "CRITICAL": "<red><bold>{}</bold></red>"
-    }
-    
-    color_template = color_map.get(level, "<white>{}</white>")
-    colored_message = color_template.format(message)
-    
-    # Add colored message to extra data
-    if "extra" not in record:
-        record["extra"] = {}
-    record["extra"]["colored_message"] = colored_message
 
 
 class LogHandlerConfig:
@@ -269,12 +228,11 @@ class LogHandlerConfig:
             format=self.formatter.get_console_format(),
             level=self.level,
             filter=should_log_func,
+            colorize=True,  # Enable color processing
             enqueue=True,
             backtrace=True,
             diagnose=False
         )
-        # Add preprocessor for message coloring
-        logger.configure(patcher=_color_message_preprocessor)
     
     def add_file_handler(self, file_path: str, should_log_func):
         """Add file handler with rotation."""

@@ -1,0 +1,611 @@
+{
+  "summary": {
+    "total_iterations": 100,
+    "passed": 85,
+    "failed": 15,
+    "fixes_applied": 14,
+    "pass_rate": 85
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 2,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 3,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 4,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 5,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 6,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 7,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 8,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 9,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 10,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 11,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 12,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 13,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 14,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 15,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 16,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 17,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 18,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 19,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 20,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 21,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 22,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 23,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 24,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 25,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 26,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 27,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 28,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 29,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 30,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 31,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 32,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 33,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 34,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 35,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 36,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 37,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 38,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 39,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 40,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 41,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 42,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 43,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 44,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 45,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 46,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 47,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 48,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 49,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 50,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 51,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 52,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 53,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 54,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 55,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 56,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 57,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 58,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 59,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 60,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 61,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 62,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 63,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 64,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 65,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 66,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 67,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 68,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 69,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 70,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 71,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 72,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 73,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 74,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 75,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 76,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 77,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 78,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 79,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 80,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 81,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 82,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 83,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 84,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 85,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 86,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 87,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 88,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 89,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 90,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 91,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 92,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 93,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 94,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 95,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 96,
+      "passed": false,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 97,
+      "passed": true,
+      "issue_fixed": true,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 98,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 99,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    },
+    {
+      "iteration": 100,
+      "passed": true,
+      "issue_fixed": false,
+      "timestamp": 1756056863.402359
+    }
+  ]
+}

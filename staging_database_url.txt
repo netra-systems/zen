@@ -1,1 +1,0 @@
-postgresql://postgres:qNdlZRHu%28Mlc%23%296K8LHm-lYi%5B7sc%7D25K@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres

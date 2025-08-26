@@ -16,8 +16,7 @@ import pytest
 from netra_backend.app.core.unified_logging import UnifiedLogger, central_logger, get_logger
 from netra_backend.app.core.logging_formatters import (
     LogHandlerConfig,
-    SensitiveDataFilter,
-    _color_message_preprocessor
+    SensitiveDataFilter
 )
 
 
@@ -254,39 +253,6 @@ class TestLoggingColorOutput:
             # Should be valid JSON-like structure
             assert '"message"' in output or test_message in output, f"Message not found in JSON: {output}"
     
-    def test_color_preprocessor_should_not_add_literal_tags_when_colorize_false(self):
-        """Test that the color preprocessor should not add literal tags to colored_message."""
-        from netra_backend.app.core.logging_formatters import _color_message_preprocessor
-        
-        # Create a mock record like loguru would
-        record = {
-            "level": MagicMock(name="INFO"),
-            "message": "Test message for color processing",
-            "extra": {}
-        }
-        
-        # Apply the preprocessor (this currently adds literal tags, which is wrong)
-        _color_message_preprocessor(record)
-        
-        # ASSERTION: The preprocessor should NOT add literal color tags
-        # This test will FAIL because current implementation adds literal tags
-        assert "colored_message" in record["extra"], "colored_message should be added"
-        colored_message = record["extra"]["colored_message"]
-        
-        # The bug: current implementation adds literal tags instead of processing them
-        # When fixed, this should pass by either:
-        # 1. Adding ANSI escape codes instead of literal tags, OR  
-        # 2. Not adding literal tags when colorization should be off, OR
-        # 3. Processing the tags properly based on sink capabilities
-        
-        # These assertions will FAIL with current implementation, demonstrating the bug
-        assert "<white>" not in colored_message, f"Found literal <white> tag (BUG): {repr(colored_message)}"
-        assert "</white>" not in colored_message, f"Found literal </white> tag (BUG): {repr(colored_message)}"
-        assert "<red>" not in colored_message, f"Found literal <red> tag (BUG): {repr(colored_message)}"  
-        assert "<dim>" not in colored_message, f"Found literal <dim> tag (BUG): {repr(colored_message)}"
-        
-        # Should still contain the original message
-        assert "Test message for color processing" in colored_message, f"Message not found: {colored_message}"
     
     def test_multiple_log_levels_no_literal_tags(self, clean_logger, capture_stderr):
         """Test multiple log levels to ensure none produce literal color tags."""
@@ -435,84 +401,3 @@ class TestLoggingColorOutput:
             assert "secret123" not in output, f"Sensitive password not redacted: {output}"
 
 
-class TestColorPreprocessorBehavior:
-    """Test the specific behavior of the color message preprocessor."""
-    
-    def test_preprocessor_color_mapping_info_level(self):
-        """Test preprocessor maps INFO level to white color tag."""
-        record = {
-            "level": MagicMock(name="INFO"),
-            "message": "Info test",
-            "extra": {}
-        }
-        
-        _color_message_preprocessor(record)
-        
-        colored_message = record["extra"]["colored_message"] 
-        assert "<white>Info test</white>" == colored_message
-    
-    def test_preprocessor_color_mapping_error_level(self):
-        """Test preprocessor maps ERROR level to red color tag.""" 
-        record = {
-            "level": MagicMock(name="ERROR"),
-            "message": "Error test",
-            "extra": {}
-        }
-        
-        _color_message_preprocessor(record)
-        
-        colored_message = record["extra"]["colored_message"]
-        assert "<red>Error test</red>" == colored_message
-    
-    def test_preprocessor_color_mapping_warning_level(self):
-        """Test preprocessor maps WARNING level to yellow color tag."""
-        record = {
-            "level": MagicMock(name="WARNING"), 
-            "message": "Warning test",
-            "extra": {}
-        }
-        
-        _color_message_preprocessor(record)
-        
-        colored_message = record["extra"]["colored_message"]
-        assert "<yellow>Warning test</yellow>" == colored_message
-    
-    def test_preprocessor_color_mapping_debug_level(self):
-        """Test preprocessor maps DEBUG level to dim color tag."""
-        record = {
-            "level": MagicMock(name="DEBUG"),
-            "message": "Debug test", 
-            "extra": {}
-        }
-        
-        _color_message_preprocessor(record)
-        
-        colored_message = record["extra"]["colored_message"]
-        assert "<dim>Debug test</dim>" == colored_message
-    
-    def test_preprocessor_color_mapping_critical_level(self):
-        """Test preprocessor maps CRITICAL level to red bold color tag."""
-        record = {
-            "level": MagicMock(name="CRITICAL"),
-            "message": "Critical test",
-            "extra": {}
-        }
-        
-        _color_message_preprocessor(record)
-        
-        colored_message = record["extra"]["colored_message"]
-        assert "<red><bold>Critical test</bold></red>" == colored_message
-    
-    def test_preprocessor_preserves_existing_extra_data(self):
-        """Test preprocessor preserves existing extra data in record."""
-        record = {
-            "level": MagicMock(name="INFO"),
-            "message": "Test",
-            "extra": {"existing_key": "existing_value"}
-        }
-        
-        _color_message_preprocessor(record)
-        
-        assert "existing_key" in record["extra"]
-        assert record["extra"]["existing_key"] == "existing_value"
-        assert "colored_message" in record["extra"]
