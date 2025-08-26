@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Docker Compose Profiles and ClickHouse Configuration</name>
+        <type>Infrastructure Learning</type>
+        <version>1.0</version>
+        <created>2025-01-26</created>
+        <description>Learnings about Docker Compose profiles and ClickHouse service configuration</description>
+    </metadata>
+
+    <learning id="clickhouse-profile-configuration">
+        <title>ClickHouse Docker Compose Profile Configuration</title>
+        <context>
+            <description>ClickHouse was initially configured with a Docker Compose profile called "analytics" which made it optional and not started by default</description>
+            <file>docker-compose.dev.yml</file>
+            <lines>65-66</lines>
+        </context>
+        
+        <issue>
+            <description>ClickHouse service was not starting by default with docker compose up</description>
+            <impact>Developers needed to explicitly enable the analytics profile using --profile flag</impact>
+        </issue>
+        
+        <resolution>
+            <action>Removed the profiles configuration from ClickHouse service to make it load by default</action>
+            <rationale>ClickHouse is a core component for analytics and should be available in the default development environment</rationale>
+        </resolution>
+        
+        <learnings>
+            <learning>Docker Compose profiles allow optional service loading but can cause confusion if core services are profiled</learning>
+            <learning>Services with profiles are NOT started unless explicitly enabled with --profile flag</learning>
+            <learning>Core infrastructure services should load by default without profiles</learning>
+            <learning>Optional or resource-intensive services are good candidates for profile configuration</learning>
+        </learnings>
+        
+        <best-practices>
+            <practice>Use profiles for truly optional services that not all developers need</practice>
+            <practice>Document profile requirements clearly in README or development setup guides</practice>
+            <practice>Consider resource usage when deciding whether to profile a service</practice>
+            <practice>Backend services should handle missing optional services gracefully</practice>
+        </best-practices>
+        
+        <commands>
+            <command purpose="Start services with specific profile">docker compose --profile analytics up</command>
+            <command purpose="Start multiple profiles">docker compose --profile analytics --profile monitoring up</command>
+            <command purpose="List available profiles">grep -n "profiles:" docker-compose.yml</command>
+        </commands>
+    </learning>
+
+    <learning id="docker-compose-service-dependencies">
+        <title>Service Dependencies and Optional Services</title>
+        <context>
+            <description>Backend service has ClickHouse environment variables configured regardless of whether ClickHouse is running</description>
+        </context>
+        
+        <learnings>
+            <learning>Environment variables for optional services should be configured even if service is not running</learning>
+            <learning>Application code should handle missing optional services gracefully with fallbacks</learning>
+            <learning>Health checks and depends_on do not work across profiles - services in profiles are treated as optional</learning>
+        </learnings>
+        
+        <best-practices>
+            <practice>Implement connection retry logic for optional services</practice>
+            <practice>Use feature flags to disable functionality when optional services are unavailable</practice>
+            <practice>Log clear warnings when optional services cannot be reached</practice>
+        </best-practices>
+    </learning>
+</specification>

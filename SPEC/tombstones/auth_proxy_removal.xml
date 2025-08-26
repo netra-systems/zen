@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tombstone>
+    <metadata>
+        <name>Auth Proxy Removal</name>
+        <type>tombstone</type>
+        <version>1.0</version>
+        <removal_date>2025-08-26</removal_date>
+        <removed_by>Principal Engineer</removed_by>
+        <description>Documentation of auth-proxy directory removal and migration to auth_service</description>
+    </metadata>
+    
+    <removed_component>
+        <name>auth-proxy</name>
+        <location>/auth-proxy/</location>
+        <files_removed>
+            <file>auth-proxy/main.py</file>
+            <file>auth-proxy/requirements.txt</file>
+        </files_removed>
+        <purpose>
+            Simple OAuth proxy service for handling OAuth redirects in staging environments,
+            particularly for dynamic PR deployments where Google OAuth doesn't support wildcard redirect URIs
+        </purpose>
+    </removed_component>
+    
+    <removal_reason>
+        <reason priority="critical">
+            <title>Superseded by auth_service</title>
+            <description>
+                The full auth_service at /auth_service/ provides all functionality of auth-proxy
+                plus comprehensive OAuth handling, database integration, Redis session management,
+                and JWT token management
+            </description>
+        </reason>
+        <reason priority="high">
+            <title>Not actively deployed or used</title>
+            <description>
+                No references in deployment scripts, docker-compose configurations, or GitHub Actions workflows.
+                The service was never integrated into the active deployment pipeline
+            </description>
+        </reason>
+        <reason priority="high">
+            <title>Violates SSOT principle</title>
+            <description>
+                Having two OAuth handling implementations violates the Single Source of Truth principle
+                defined in CLAUDE.md. Each concept must have ONE canonical implementation per service
+            </description>
+        </reason>
+        <reason priority="medium">
+            <title>Legacy code forbidden</title>
+            <description>
+                CLAUDE.md explicitly states "LEGACY IS FORBIDDEN" and requires maintaining one and only
+                one latest version of every concept
+            </description>
+        </reason>
+    </removal_reason>
+    
+    <migration_path>
+        <from>auth-proxy service</from>
+        <to>auth_service</to>
+        <details>
+            All OAuth proxy functionality has been incorporated into the auth_service which provides:
+            - Full OAuth flow handling for multiple providers
+            - PR environment support through state parameter encoding
+            - Secure token management with JWT
+            - Redis-based session management
+            - Database persistence for user accounts
+            - Comprehensive security features (CSRF protection, PKCE, etc.)
+        </details>
+        <auth_service_location>/auth_service/</auth_service_location>
+    </migration_path>
+    
+    <references_cleaned>
+        <reference>
+            <file>tests/e2e/test_oauth_proxy_staging.py</file>
+            <action>Renamed to test_auth_service_staging.py and updated to use auth_service endpoints</action>
+        </reference>
+        <reference>
+            <file>SPEC/auth_environment_isolation.xml</file>
+            <action>Updated to reference auth_service instead of auth-proxy</action>
+        </reference>
+        <reference>
+            <file>SPEC/auth_subdomain_architecture.xml</file>
+            <action>Updated principle name from oauth-proxy-service to auth-subdomain-service</action>
+        </reference>
+        <reference>
+            <file>SPEC/frontend_base_url_configuration.xml</file>
+            <action>Updated auth-proxy references to auth-service</action>
+        </reference>
+        <reference>
+            <file>SPEC/folder_structure_rules.md</file>
+            <action>Removed auth-proxy from directory structure</action>
+        </reference>
+        <reference>
+            <file>SPEC/learnings/deployment.xml</file>
+            <action>Updated oauth-proxy configuration references to auth-service</action>
+        </reference>
+        <reference>
+            <file>SPEC/learnings/testing.xml</file>
+            <action>Updated test file reference</action>
+        </reference>
+        <reference>
+            <file>SPEC/learnings/cors_dynamic_ports.xml</file>
+            <action>Removed auth-proxy violation reference</action>
+        </reference>
+        <reference>
+            <file>SPEC/learnings/ssot_consolidation_20250825.xml</file>
+            <action>Removed auth-proxy from duplication references</action>
+        </reference>
+    </references_cleaned>
+    
+    <historical_context>
+        <timeline>
+            <event date="2025-08-12">
+                auth-proxy created as interim solution for PR environment OAuth handling
+            </event>
+            <event date="2025-08-16">
+                auth_subdomain_architecture.xml spec created defining full auth service approach
+            </event>
+            <event date="2025-08-21">
+                auth_service fully implemented with comprehensive OAuth support
+            </event>
+            <event date="2025-08-26">
+                auth-proxy removed as redundant legacy code
+            </event>
+        </timeline>
+    </historical_context>
+    
+    <notes>
+        The auth-proxy was a transitional solution that served its purpose during early development
+        but has been completely superseded by the more robust auth_service implementation. Its removal
+        simplifies the codebase and ensures a single, authoritative OAuth handling implementation.
+    </notes>
+</tombstone>

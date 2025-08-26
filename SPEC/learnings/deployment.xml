@@ -231,11 +231,11 @@
     </learning>
     
     <learning>
-      <id>staging-oauth-proxy-configuration</id>
+      <id>staging-auth-service-configuration</id>
       <category>deployment</category>
       <date>2025-08-22</date>
       <severity>critical</severity>
-      <title>USE_OAUTH_PROXY Must Be "true" for Token Validation</title>
+      <title>USE_AUTH_SERVICE Must Be "true" for Token Validation</title>
       <problem>
         <description>Backend cannot validate tokens through auth service</description>
         <symptoms>
@@ -243,13 +243,13 @@
           <symptom>Cross-service authentication not working</symptom>
           <symptom>Users cannot access protected endpoints</symptom>
         </symptoms>
-        <root_cause>USE_OAUTH_PROXY not set to "true" even when OAUTH_PROXY_URL is configured</root_cause>
+        <root_cause>USE_AUTH_SERVICE not set to "true" even when AUTH_SERVICE_URL is configured</root_cause>
       </problem>
       <solution>
-        <description>Set USE_OAUTH_PROXY="true" for backend to validate tokens through auth service</description>
+        <description>Set USE_AUTH_SERVICE="true" for backend to validate tokens through auth service</description>
         <implementation>
-          <requirement>USE_OAUTH_PROXY=true</requirement>
-          <requirement>OAUTH_PROXY_URL=https://auth.staging.netrasystems.ai</requirement>
+          <requirement>USE_AUTH_SERVICE=true</requirement>
+          <requirement>AUTH_SERVICE_URL=https://auth.staging.netrasystems.ai</requirement>
           <note>Both settings required for proper token validation</note>
         </implementation>
         <verification>
@@ -259,7 +259,7 @@
         </verification>
       </solution>
       <prevention>
-        <guideline>Always set USE_OAUTH_PROXY=true when using auth service proxy</guideline>
+        <guideline>Always set USE_AUTH_SERVICE=true when using auth service</guideline>
         <guideline>Validate token validation configuration in staging</guideline>
         <guideline>Test cross-service authentication before deployment</guideline>
       </prevention>
@@ -579,7 +579,7 @@ frontend/cypress
         <guideline>Test exclusions work for all services</guideline>
         <guideline>Remove any subdirectory .dockerignore files to avoid confusion</guideline>
       </prevention>
-      <key_insight>When Docker builds from root with "docker build -f deployment/docker/Dockerfile.frontend .", it uses root .dockerignore, NOT frontend/.dockerignore</key_insight>
+      <key_insight>When Docker builds from root with "docker build -f deployment/docker/frontend.gcp.Dockerfile .", it uses root .dockerignore, NOT frontend/.dockerignore</key_insight>
     </learning>
 
     <learning>

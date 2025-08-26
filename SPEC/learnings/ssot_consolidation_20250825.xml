@@ -93,8 +93,8 @@
                 - Centralized validation and type conversion
                 - Consistent default value patterns
             </after>
-            <files_updated count="9">
-                database_scripts/*, auth-proxy/main.py,
+            <files_updated count="8">
+                database_scripts/*,
                 scripts/cleanup_staging_environments.py,
                 scripts/unified_test_runner.py,
                 auth_service/tests/conftest.py,

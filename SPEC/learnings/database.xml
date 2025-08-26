@@ -29,6 +29,180 @@
         - Test failures in database-dependent components
       </symptoms>
     </problem_solved>
+  </critical_architecture_fix>
+
+  <critical_remediation_2025_08_26>
+    <problem_solved>
+      <title>PostgreSQL Readiness Check Configuration Mismatch</title>
+      <description>
+        PostgreSQL connection validation succeeded during startup, but /health/ready endpoint returned 503 
+        "Core database unavailable" due to configuration mismatches between startup validation and readiness checks.
+        Multiple root causes included environment detection, async generator lifecycle, timeout misalignment, and 
+        SSL parameter inconsistencies.
+      </description>
+      <symptoms>
+        - PostgreSQL connection validation successful during startup
+        - /health/ready endpoint returning 503 "Core database unavailable"
+        - Request timeouts ~3.2s per request indicating configuration mismatch
+        - 26 tables exist but readiness check fails to connect
+        - RuntimeError: aclose(): asynchronous generator is already running
+      </symptoms>
+    </problem_solved>
+    
+    <fixes_implemented>
+      <fix>
+        <title>Environment Detection Fix</title>
+        <description>
+          Fixed DatabaseManager.get_base_database_url() to prefer PostgreSQL over SQLite for actual test execution,
+          only using SQLite for explicit pytest collection mode (TEST_COLLECTION_MODE=1).
+        </description>
+        <files_modified>
+          <file>netra_backend/app/db/database_manager.py</file>
+        </files_modified>
+        <code_changes>
+          - Modified get_base_database_url() to distinguish between pytest collection and test execution
+          - Added fallback to _get_default_database_url() for test execution when no DATABASE_URL is set
+        </code_changes>
+      </fix>
+      
+      <fix>
+        <title>Async Generator Lifecycle Fix</title>
+        <description>
+          Fixed UnifiedDatabaseManager.postgres_session() async generator lifecycle issues by removing the 
+          @asynccontextmanager decorator and updating get_db() to use async for instead of async with.
+        </description>
+        <files_modified>
+          <file>netra_backend/app/database/__init__.py</file>
+        </files_modified>
+        <code_changes>
+          - Removed @asynccontextmanager from UnifiedDatabaseManager.postgres_session()
+          - Changed get_db() from "async with" to "async for" pattern
+          - Fixed RuntimeError: aclose(): asynchronous generator is already running
+        </code_changes>
+      </fix>
+      
+      <fix>
+        <title>Timeout Configuration Alignment</title>
+        <description>
+          Aligned timeout configurations across database components: PostgreSQL check timeout reduced from 3s to 2s,
+          overall readiness timeout reduced from 8s to 6s, and pool timeout reduced from 60s to 5s.
+        </description>
+        <files_modified>
+          <file>netra_backend/app/routes/health.py</file>
+          <file>netra_backend/app/db/database_manager.py</file>
+        </files_modified>
+        <code_changes>
+          - _check_postgres_connection timeout: 3.0s → 2.0s
+          - ready() endpoint timeout: 8.0s → 6.0s  
+          - pool_timeout: 60s → 5.0s
+        </code_changes>
+      </fix>
+      
+      <fix>
+        <title>SSL Parameter Consistency</title>
+        <description>
+          Added explicit SSL parameter resolution using CoreDatabaseManager.resolve_ssl_parameter_conflicts()
+          to ensure consistent SSL parameter handling between async and sync database connections.
+        </description>
+        <files_modified>
+          <file>netra_backend/app/db/database_manager.py</file>
+        </files_modified>
+        <code_changes>
+          - Added CoreDatabaseManager import
+          - Applied resolve_ssl_parameter_conflicts() to both async and sync URL generation
+          - Ensures asyncpg uses ssl= and psycopg2 uses sslmode= consistently
+        </code_changes>
+      </fix>
+    </fixes_implemented>
+    
+    <validation_results>
+      <result>
+        <test>Database URL Consistency</test>
+        <status>PASS</status>
+        <description>All database URL access methods return consistent PostgreSQL URLs</description>
+      </result>
+      <result>
+        <test>SSL Parameter Resolution</test>
+        <status>PASS</status>
+        <description>SSL parameters correctly resolved: sslmode→ssl for asyncpg, sslmode preserved for psycopg2</description>
+      </result>
+      <result>
+        <test>Async Generator Lifecycle</test>
+        <status>PASS</status>
+        <description>No more "asynchronous generator is already running" errors</description>
+      </result>
+      <result>
+        <test>Dependency Injection Consistency</test>
+        <status>PASS</status>
+        <description>get_db_dependency() uses same DatabaseManager.get_application_session() as direct access</description>
+      </result>
+      <result>
+        <test>Timeout Alignment</test>
+        <status>PASS</status>
+        <description>Timeout configurations aligned: 2s → 6s → 5s pool hierarchy prevents timeout race conditions</description>
+      </result>
+    </validation_results>
+    
+    <business_impact>
+      <segment>Platform/Internal</segment>
+      <business_goal>Operational Excellence - Health Check Reliability</business_goal>
+      <value_impact>Eliminates false negative health check failures preventing successful deployments</value_impact>
+      <strategic_impact>Ensures consistent database configuration between startup validation and runtime health checks</strategic_impact>
+    </business_impact>
+  </critical_remediation_2025_08_26>
+
+  <alembic_configuration_learning>
+    <problem_solved>
+      <title>Alembic.ini Hardcoded Database URL Breaking Cross-Environment Deployments</title>
+      <date>2025-08-26</date>
+      <description>
+        The alembic.ini file contained a hardcoded database URL (postgresql://netra:netra123@postgres:5432/netra_db)
+        that was specific to the Docker Compose development environment. This caused deployment failures in staging
+        and production where database URLs differ significantly (e.g., Cloud SQL Unix socket connections).
+      </description>
+      <symptoms>
+        - Alembic migrations work in Docker Compose but fail in staging/production
+        - Connection errors when running migrations in GCP environments
+        - Inability to use environment-specific database configurations
+      </symptoms>
+    </problem_solved>
+
+    <solution_implemented>
+      <description>
+        Removed the hardcoded sqlalchemy.url from alembic.ini and rely entirely on env.py's dynamic
+        URL resolution through DatabaseManager.get_migration_url_sync_format(). This ensures proper
+        environment-specific database URLs across all deployments.
+      </description>
+      <key_changes>
+        <change>Commented out hardcoded sqlalchemy.url in alembic.ini</change>
+        <change>Added documentation in alembic.ini explaining dynamic URL resolution</change>
+        <change>Verified env.py properly uses DatabaseManager for URL resolution</change>
+      </key_changes>
+      <implementation_details>
+        The env.py file already correctly implements dynamic URL resolution:
+        - Uses DatabaseManager.get_migration_url_sync_format() for migrations
+        - Handles environment detection (dev, staging, production)
+        - Properly formats URLs for sync drivers (psycopg2/pg8000)
+        - Manages Cloud SQL Unix socket connections for GCP deployments
+      </implementation_details>
+    </solution_implemented>
+
+    <best_practices>
+      <practice>Never hardcode database URLs in configuration files</practice>
+      <practice>Always use environment-aware configuration managers</practice>
+      <practice>Ensure alembic.ini remains environment-agnostic</practice>
+      <practice>Document in alembic.ini that URLs are dynamically resolved</practice>
+      <practice>Test migrations across all target environments</practice>
+    </best_practices>
+
+    <verification_steps>
+      <step>Run migrations in Docker Compose: alembic upgrade head</step>
+      <step>Deploy to staging and verify migrations run successfully</step>
+      <step>Check DATABASE_URL environment variable is properly set in each environment</step>
+      <step>Verify DatabaseManager correctly detects environment and returns appropriate URL</step>
+    </verification_steps>
+  </alembic_configuration_learning>
+    </problem_solved>
 
     <solution_implemented>
       <title>Unified DatabaseManager Architecture</title>

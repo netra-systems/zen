@@ -17,7 +17,7 @@
       <violation>netra_backend/app/middleware/cors_middleware.py - CORSMiddleware class</violation>
       <violation>netra_backend/app/core/middleware_setup.py - CustomCORSMiddleware class</violation>
       <violation>auth_service/main.py - DynamicCORSMiddleware class</violation>
-      <violation>auth-proxy/main.py - WildcardCORSMiddleware class</violation>
+      <violation>REMOVED: auth-proxy/main.py - Directory deleted, functionality moved to auth_service</violation>
       <violation>FastAPI's built-in CORSMiddleware used inconsistently</violation>
     </specific-violations>
     <secondary-issue>Dynamic ports in development caused CORS failures</secondary-issue>

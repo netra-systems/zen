@@ -345,7 +345,7 @@
                 <description>Fixed Docker build npm integrity checksum error</description>
                 <solution>
                     - Cleared npm cache and regenerated package-lock.json locally
-                    - Modified Dockerfile.frontend to use 'npm install --no-audit' instead of 'npm ci'
+                    - Modified frontend.gcp.Dockerfile to use 'npm install --no-audit' instead of 'npm ci'
                     - This resolved lodash.memoize@4.1.2 integrity checksum mismatch
                 </solution>
             </fix>
