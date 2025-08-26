@@ -18,11 +18,10 @@ from netra_backend.app.schemas.llm_response_types import LLMResponse
 
 class LLMTestModel(str, Enum):
     """Supported LLM models for testing."""
-    GPT_4 = "gpt-4"
-    GPT_35_TURBO = "gpt-3.5-turbo"
-    CLAUDE_3_OPUS = "claude-3-opus"
-    CLAUDE_3_SONNET = "claude-3-sonnet"
+    GEMINI_2_5_FLASH = "gemini-2.0-flash-exp"
+    GEMINI_2_5_PRO = "gemini-2.0-flash-thinking-exp"
     GEMINI_PRO = "gemini-pro"
+    CLAUDE_3_SONNET = "claude-3-sonnet"
 
 class LLMTestConfig(BaseModel):
     """Configuration for LLM test manager."""
@@ -97,12 +96,10 @@ class LLMTestManager:
                 
     def _create_real_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create real client for specific model."""
-        if model in [LLMTestModel.GPT_4, LLMTestModel.GPT_35_TURBO]:
-            return self._create_openai_client(model)
-        elif model in [LLMTestModel.CLAUDE_3_OPUS, LLMTestModel.CLAUDE_3_SONNET]:
-            return self._create_anthropic_client(model)
-        elif model == LLMTestModel.GEMINI_PRO:
+        if model in [LLMTestModel.GEMINI_2_5_FLASH, LLMTestModel.GEMINI_2_5_PRO, LLMTestModel.GEMINI_PRO]:
             return self._create_gemini_client(model)
+        elif model == LLMTestModel.CLAUDE_3_SONNET:
+            return self._create_anthropic_client(model)
         return None
         
     def _create_openai_client(self, model: LLMTestModel) -> Optional[Any]:
@@ -310,12 +307,12 @@ class LLMTestManager:
         """Get list of available models."""
         return list(self._clients.keys())
         
-    async def ask_llm(self, prompt: str, model: str = "gpt-4", temperature: float = 0.7) -> str:
+    async def ask_llm(self, prompt: str, model: str = "gemini-2.0-flash-exp", temperature: float = 0.7) -> str:
         """Ask LLM interface compatible with agent expectations."""
         try:
             model_enum = LLMTestModel(model)
         except ValueError:
-            model_enum = LLMTestModel.GPT_4
+            model_enum = LLMTestModel.GEMINI_2_5_FLASH
             
         request = LLMTestRequest(
             prompt=prompt,

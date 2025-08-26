@@ -28,9 +28,10 @@ def test_config():
     """Create test configuration."""
     return LLMTestConfig(
         enabled=False,  # Use mocks for tests
-        models=[LLMTestModel.GPT_4, LLMTestModel.CLAUDE_3_OPUS],
+        models=[LLMTestModel.GEMINI_2_5_FLASH, LLMTestModel.GEMINI_2_5_PRO],
         cache_enabled=True,
-        timeout_seconds=10
+        timeout_seconds=10,
+        fallback_to_mock=True  # Enable fallback to mocks for tests
     )
 
 @pytest.fixture
@@ -43,7 +44,7 @@ def sample_request():
     """Create sample LLM test request."""
     return LLMTestRequest(
         prompt="What is the capital of France?",
-        model=LLMTestModel.GPT_4,
+        model=LLMTestModel.GEMINI_2_5_FLASH,
         temperature=0.7,
         use_cache=True
     )
@@ -61,11 +62,11 @@ class TestLLMTestManager:
         """Test loading configuration from environment."""
         with patch.dict(os.environ, {
             "ENABLE_REAL_LLM_TESTING": "true",
-            "LLM_TEST_MODELS": "gpt-4,claude-3-opus"
+            "LLM_TEST_MODELS": "gemini-2.0-flash-exp,gemini-2.0-flash-thinking-exp"
         }):
             manager = LLMTestManager()
             assert manager.config.enabled
-            assert LLMTestModel.GPT_4 in manager.config.models
+            assert LLMTestModel.GEMINI_2_5_FLASH in manager.config.models
             
     @pytest.mark.asyncio
     async def test_mock_response_generation(self, llm_manager, sample_request):
@@ -102,7 +103,7 @@ class TestLLMTestManager:
         """Test fallback to mock when real clients unavailable."""
         request = LLMTestRequest(
             prompt="Test fallback",
-            model=LLMTestModel.GPT_4,
+            model=LLMTestModel.GEMINI_2_5_FLASH,
             use_cache=False
         )
         response = await llm_manager.generate_response(request)
@@ -111,7 +112,7 @@ class TestLLMTestManager:
         
     def test_real_client_initialization_without_keys(self):
         """Test real client initialization fails without API keys."""
-        config = LLMTestConfig(enabled=True, models=[LLMTestModel.GPT_4])
+        config = LLMTestConfig(enabled=True, models=[LLMTestModel.GEMINI_2_5_FLASH])
         manager = LLMTestManager(config)
         # Should fallback to mocks when no real API keys
         assert len(manager._clients) > 0  # Mock clients created
@@ -130,10 +131,10 @@ class TestLLMTestRequest:
         """Test request model validation."""
         request = LLMTestRequest(
             prompt="Test prompt",
-            model=LLMTestModel.GPT_4
+            model=LLMTestModel.GEMINI_2_5_FLASH
         )
         assert request.prompt == "Test prompt"
-        assert request.model == LLMTestModel.GPT_4
+        assert request.model == LLMTestModel.GEMINI_2_5_FLASH
         assert request.temperature == 0.7  # Default value
         
     def test_invalid_model_rejection(self):
@@ -151,11 +152,11 @@ class TestLLMTestResponse:
         """Test response model creation."""
         response = LLMTestResponse(
             content="Test response",
-            model_used=LLMTestModel.GPT_4,
+            model_used=LLMTestModel.GEMINI_2_5_FLASH,
             response_time_ms=150
         )
         assert response.content == "Test response"
-        assert response.model_used == LLMTestModel.GPT_4
+        assert response.model_used == LLMTestModel.GEMINI_2_5_FLASH
         assert response.response_time_ms == 150
         assert response.success  # Default value
         
@@ -163,7 +164,7 @@ class TestLLMTestResponse:
         """Test cache hit flag functionality."""
         response = LLMTestResponse(
             content="Cached response",
-            model_used=LLMTestModel.GPT_4,
+            model_used=LLMTestModel.GEMINI_2_5_FLASH,
             response_time_ms=50,
             cache_hit=True
         )
