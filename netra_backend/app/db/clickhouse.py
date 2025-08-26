@@ -160,9 +160,11 @@ def _get_connection_config():
     """Get ClickHouse connection configuration."""
     config = get_clickhouse_config()
     app_config = get_configuration()
-    # Never use HTTPS for localhost connections to avoid SSL errors
-    is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]
-    use_secure = app_config.clickhouse_mode != "local" and not is_localhost
+    # Never use HTTPS for localhost or Docker container connections to avoid SSL errors
+    is_local_or_docker = config.host in ["localhost", "127.0.0.1", "::1", "clickhouse", "netra-clickhouse"]
+    # Also check if we're in development environment
+    is_development = app_config.environment == "development"
+    use_secure = app_config.clickhouse_mode != "local" and not is_local_or_docker and not is_development
     return config, use_secure
 
 def _get_connection_details(config) -> dict:

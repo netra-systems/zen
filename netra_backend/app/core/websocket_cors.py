@@ -70,10 +70,10 @@ class WebSocketCORSHandler:
             if '*' in origin:
                 # Convert wildcard patterns to regex
                 pattern = origin.replace('*', '.*')
-                patterns.append(re.compile(f'^{pattern}$', re.IGNORECASE))
+                patterns.append(re.compile(f'^{pattern}/?$', re.IGNORECASE))
             else:
-                # Exact match pattern
-                patterns.append(re.compile(f'^{re.escape(origin)}$', re.IGNORECASE))
+                # Exact match pattern - allow optional trailing slash
+                patterns.append(re.compile(f'^{re.escape(origin)}/?$', re.IGNORECASE))
         
         return patterns
     
@@ -89,6 +89,14 @@ class WebSocketCORSHandler:
         """Check if origin matches suspicious patterns."""
         if not SECURITY_CONFIG["block_suspicious_patterns"]:
             return False
+        
+        # In development and staging, allow localhost IP addresses for testing
+        if self.environment in ["development", "staging"]:
+            # Check if it's a localhost IP
+            import re
+            localhost_ip_pattern = r'^https?://(127\.0\.0\.1|0\.0\.0\.0|\[::1\]|localhost)(:\d+)?(/.*)?$'
+            if re.match(localhost_ip_pattern, origin, re.IGNORECASE):
+                return False  # Not suspicious in dev/staging for local testing
         
         for pattern in self._suspicious_patterns:
             if pattern.match(origin):
