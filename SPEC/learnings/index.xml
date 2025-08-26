@@ -34,6 +34,19 @@
             <critical-takeaway>JWT validation must validate token structure before decoding to prevent malformed token errors (auth_service_endpoint_fixes.xml).</critical-takeaway>
         </category>
         
+        <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
+            <critical-takeaway>CRITICAL: Cross-service vulnerability testing MUST use real services with controlled failure scenarios, not mocks</critical-takeaway>
+            <critical-takeaway>Mock network timeouts and database failures at the transport layer (httpx.TimeoutException, httpx.RequestError), not the service layer</critical-takeaway>
+            <critical-takeaway>Never assume internal endpoints exist - implement discovery patterns first and test both endpoint existence AND expected behavior</critical-takeaway>
+            <critical-takeaway>Validate user existence in both auth AND backend services for consistency using different HTTP status codes (200 vs 404/401/403)</critical-takeaway>
+            <critical-takeaway>Test authentication success combined with backend access failure as primary vulnerability indicator</critical-takeaway>
+            <critical-takeaway>Test for health endpoints that might detect consistency issues (consistency_check, sync_status, orphaned_users)</critical-takeaway>
+            <critical-takeaway>Use uuid-based test user emails to prevent conflicts (desync_test_{uuid4().hex[:8]}@netra-test.com)</critical-takeaway>
+            <critical-takeaway>Critical security tests should complete within 45-60 seconds maximum with best-effort cleanup</critical-takeaway>
+            <critical-takeaway>Track ALL aspects of vulnerability testing using comprehensive result containers (DesynchronizationTestResult dataclass pattern)</critical-takeaway>
+            <critical-takeaway>P0 CRITICAL vulnerability: User creation succeeds in auth but fails in backend sync, allowing authentication without backend access</critical-takeaway>
+        </category>
+        
         <category name="Auth Service API Endpoints" path="SPEC/learnings/auth_service_endpoint_fixes.xml" keywords="Auth Service, API Endpoints, HEAD Method, OAuth Endpoints, JWT Validation, SQLite, Database Connection">
             <critical-takeaway>Always provide both generic (/auth/login) and provider-specific (/auth/google) OAuth endpoints for API ergonomics.</critical-takeaway>
             <critical-takeaway>Environment-specific OAuth variables (GOOGLE_OAUTH_CLIENT_ID_STAGING) must have higher priority than generic ones (GOOGLE_CLIENT_ID).</critical-takeaway>
