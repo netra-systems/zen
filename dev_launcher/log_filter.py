@@ -11,24 +11,14 @@ from typing import Any, Dict, Optional, Set
 
 from dev_launcher.isolated_environment import get_env
 
-try:
-    from .filter_patterns import (
-        COMMON_NOISE_PATTERNS,
-        CRITICAL_PATTERNS,
-        CRITICAL_STARTUP_FAILURES,
-        KEY_STARTUP_MESSAGES,
-        NOISE_PATTERNS,
-        STANDARD_CONDENSE_PATTERNS,
-    )
-except ImportError:
-    from filter_patterns import (
-        COMMON_NOISE_PATTERNS,
-        CRITICAL_PATTERNS,
-        CRITICAL_STARTUP_FAILURES,
-        KEY_STARTUP_MESSAGES,
-        NOISE_PATTERNS,
-        STANDARD_CONDENSE_PATTERNS,
-    )
+from dev_launcher.filter_patterns import (
+    COMMON_NOISE_PATTERNS,
+    CRITICAL_PATTERNS,
+    CRITICAL_STARTUP_FAILURES,
+    KEY_STARTUP_MESSAGES,
+    NOISE_PATTERNS,
+    STANDARD_CONDENSE_PATTERNS,
+)
 
 
 class StartupMode(Enum):
