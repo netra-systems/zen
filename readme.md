@@ -37,11 +37,11 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 
 ## 🚀 Developer Guidelines
 
-📚 **[INDEX OF INDEXES](INDEX_OF_INDEXES.md)** - Master navigation hub for all documentation and specifications
+📚 **[LLM Master Index](LLM_MASTER_INDEX.md)** - Master navigation hub for all documentation and specifications
 📖 **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy and AI factory patterns
-🧪 **[TESTING.md](TESTING.md)** - Comprehensive testing guide and unified test runner
-🔧 **[TOOLING INDEX](TOOLING_INDEX.md)** - AI Native centric tools
-📚 **[LLM INDEX.md](LLM_MASTER_INDEX.md)** - Complete file navigation index
+🧪 **[Test Runner Guide](SPEC/test_runner_guide.xml)** - Comprehensive testing guide and unified test runner
+🔧 **[Scripts](scripts/)** - Development and operation tools
+📚 **[LLM Master Index](LLM_MASTER_INDEX.md)** - Complete file navigation index
 🔍 **[SPEC/](SPEC/)** - Living source of truth (XML specifications)
 🏭 **[AI Native Meta Process](SPEC/ai_native_meta_process.md)** - AI factory methodology for 99.99% correctness
 
@@ -76,7 +76,7 @@ python scripts/scan_string_literals.py
 | [`conventions.xml`](SPEC/conventions.xml) | Code standards and patterns | Before implementation |
 | [`learnings/index.xml`](SPEC/learnings/index.xml) | System learnings and insights | Before starting work |
 | [`string_literals_index.xml`](SPEC/string_literals_index.xml) | Platform constants index | Before using literals |
-| [`staging_deployment_testing.xml`](SPEC/staging_deployment_testing.xml) | Staging validation | Before deployment |
+| [`staging_environment.xml`](SPEC/staging_environment.xml) | Staging configuration | Before deployment |
 
 ## 🏃 Quick Start
 
@@ -150,7 +150,7 @@ powershell -ExecutionPolicy Bypass -File quick-start.ps1  # Windows
 
 ### 🧪 Testing
 
-**📖 See [TESTING.md](TESTING.md) for comprehensive testing documentation**
+**📖 See [Test Runner Guide](SPEC/test_runner_guide.xml) for comprehensive testing documentation**
 
 #### Quick Start
 
@@ -368,14 +368,14 @@ netra-core-generation-1/
 
 ### Bad Test Detection System
 ```bash
-# View flaky test report
-python -m test_framework.bad_test_reporter
+# View failing tests report
+python -m test_framework.failing_tests_manager
 
-# View specific test history
-python -m test_framework.bad_test_reporter --test "test_name"
+# View test quality analysis
+python -m test_framework.test_quality_analyzer
 
-# Reset bad test tracking
-python -m test_framework.bad_test_reporter --reset
+# Reset test tracking
+python -m test_framework.failing_tests_manager --reset
 ```
 
 ### Testing Best Practices
@@ -395,13 +395,13 @@ python -m test_framework.bad_test_reporter --reset
 python unified_test_runner.py --level staging --env staging
 
 # Deploy to staging
-python organized_root/deployment_configs/deploy_staging.py
+python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
 # Verify deployment
 python scripts/test_staging_startup.py
 
-# Rollback if needed
-python organized_root/deployment_configs/rollback_staging.py --version previous
+# Rollback if needed (use GCP Console or kubectl)
+# kubectl rollout undo deployment/netra-backend -n production
 ```
 
 ### Production Deployment
@@ -428,7 +428,7 @@ Required for production:
 - `ANTHROPIC_API_KEY`: Anthropic API key
 
 **Deployment Guides:**
-- [SPEC/staging_deployment_testing.xml](SPEC/staging_deployment_testing.xml)
+- [SPEC/staging_environment.xml](SPEC/staging_environment.xml)
 - [SPEC/learnings/deployment_staging.xml](SPEC/learnings/deployment_staging.xml)
 
 

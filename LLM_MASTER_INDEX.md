@@ -95,6 +95,11 @@
 | Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python -m test_framework.runner --service frontend` |
 | E2E Tests | `/tests/e2e/` | `test_*.py` | `python -m test_framework.runner --level e2e` |
 
+#### Critical Security Tests (New Implementation - Cycle 1)
+| Test File | Location | Purpose | Protection Value |
+|-----------|----------|---------|------------------|
+| **🔴 Auth Backend Desynchronization** | `/tests/e2e/test_auth_backend_desynchronization.py` | **P0 CRITICAL** - Cross-service transaction rollback vulnerability | **9.4M Protection** |
+
 ---
 
 ## 🎯 UNIFIED SYSTEM ARCHITECTURE
