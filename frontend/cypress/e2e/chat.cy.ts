@@ -2,10 +2,36 @@ import { Message, WebSocketMessage } from '@/types/unified';
 
 describe('Chat UI', () => {
   beforeEach(() => {
+    // Setup authenticated state
+    cy.window().then((win) => {
+      win.localStorage.setItem('authToken', 'test-token');
+      win.localStorage.setItem('jwt_token', 'test-jwt-token');
+    });
+    
+    // Mock authentication endpoint
+    cy.intercept('GET', '/api/me', {
+      statusCode: 200,
+      body: {
+        id: 1,
+        email: 'test@netrasystems.ai',
+        full_name: 'Test User'
+      }
+    }).as('userRequest');
+    
+    // Mock threads endpoint
+    cy.intercept('GET', '/api/threads', {
+      statusCode: 200,
+      body: []
+    }).as('threadsRequest');
+    
     // Set up WebSocket mock before visiting the page
     cy.mockWebSocket();
     cy.mockLegacyWebSocket(); // For backward compatibility with tests using window.ws
+    
     cy.visit('/chat');
+    
+    // Wait for page to load (but don't require specific API calls)
+    cy.wait(1000);
   });
 
   it('should send and receive messages', () => {
@@ -29,10 +55,7 @@ describe('Chat UI', () => {
       payload: payload,
     };
     
-    // Use the new WebSocket mock command
-    cy.sendWebSocketMessage(message);
-    
-    // Also trigger for legacy window.ws if needed
+    // Simulate WebSocket message using legacy approach
     cy.window().then((win) => {
       if ((win as any).ws && (win as any).ws.onmessage) {
         (win as any).ws.onmessage({ data: JSON.stringify(message) });
@@ -59,9 +82,7 @@ describe('Chat UI', () => {
       payload: payload,
     };
     
-    cy.sendWebSocketMessage(message);
-    
-    // Also trigger for legacy window.ws if needed
+    // Simulate WebSocket message using legacy approach
     cy.window().then((win) => {
       if ((win as any).ws && (win as any).ws.onmessage) {
         (win as any).ws.onmessage({ data: JSON.stringify(message) });
@@ -86,9 +107,7 @@ describe('Chat UI', () => {
       },
     };
     
-    cy.sendWebSocketMessage(message);
-    
-    // Also trigger for legacy window.ws if needed
+    // Simulate WebSocket message using legacy approach
     cy.window().then((win) => {
       if ((win as any).ws && (win as any).ws.onmessage) {
         (win as any).ws.onmessage({ data: JSON.stringify(message) });
@@ -113,9 +132,7 @@ describe('Chat UI', () => {
       payload: payload,
     };
     
-    cy.sendWebSocketMessage(message);
-    
-    // Also trigger for legacy window.ws if needed
+    // Simulate WebSocket message using legacy approach
     cy.window().then((win) => {
       if ((win as any).ws && (win as any).ws.onmessage) {
         (win as any).ws.onmessage({ data: JSON.stringify(message) });
@@ -167,9 +184,15 @@ describe('Chat UI', () => {
     cy.get('button[aria-label="Send message"]').should('be.disabled');
     
     // Simulate processing complete
-    cy.sendWebSocketMessage({
-      type: 'processing_complete',
-      payload: {}
+    cy.window().then((win) => {
+      if ((win as any).ws && (win as any).ws.onmessage) {
+        (win as any).ws.onmessage({ 
+          data: JSON.stringify({
+            type: 'processing_complete',
+            payload: {}
+          })
+        });
+      }
     });
     
     // Wait for UI to update
