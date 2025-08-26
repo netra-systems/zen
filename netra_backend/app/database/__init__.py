@@ -37,9 +37,12 @@ class UnifiedDatabaseManager:
     """
     
     @staticmethod
-    @asynccontextmanager
     async def postgres_session() -> AsyncGenerator[AsyncSession, None]:
-        """Get PostgreSQL session via DatabaseManager - single source of truth."""
+        """Get PostgreSQL session via DatabaseManager - single source of truth.
+        
+        CRITICAL FIX: Removed @asynccontextmanager to fix async generator lifecycle issues.
+        This function is now a proper async generator that yields database sessions.
+        """
         # Use DatabaseManager's session factory directly
         async_session_factory = DatabaseManager.get_application_session()
         async with async_session_factory() as session:
@@ -81,8 +84,10 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     
     This is the SINGLE source of truth for PostgreSQL sessions in netra_backend.
     All database access delegates to DatabaseManager implementation.
+    
+    CRITICAL FIX: Use async for to properly handle async generator from postgres_session()
     """
-    async with _db_manager.postgres_session() as session:
+    async for session in _db_manager.postgres_session():
         yield session
 
 # SINGLE SOURCE OF TRUTH for ClickHouse connections

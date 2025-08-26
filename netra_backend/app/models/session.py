@@ -15,7 +15,7 @@ Business Value Justification (BVJ):
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from netra_backend.app.schemas.auth_types import SessionInfo
 
@@ -92,10 +92,10 @@ class Session(BaseModel):
         """Retrieve data from session."""
         return self.session_data.get(key, default)
 
-    class Config:
-        """Pydantic configuration."""
-        from_attributes = True
-        extra = "allow"
+    model_config = ConfigDict(
+        from_attributes=True,
+        extra="allow"
+    )
 
 
 # Backward compatibility alias

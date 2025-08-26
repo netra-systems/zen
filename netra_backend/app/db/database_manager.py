@@ -27,6 +27,7 @@ from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
 from shared.database_url_builder import DatabaseURLBuilder
+from shared.database.core_database_manager import CoreDatabaseManager
 from urllib.parse import urlparse
 import urllib.parse
 import re
@@ -104,9 +105,16 @@ class DatabaseManager:
             # Use env URL if set, otherwise use config URL
             raw_url = env_url or config.database_url or ""
             
-            # Check test collection mode from config
+            # CRITICAL FIX: For PostgreSQL readiness tests, prefer PostgreSQL over SQLite
+            # Only use SQLite for explicit test collection mode (pytest discovery phase)
             if config.environment == "testing" and not raw_url:
-                return "sqlite:///:memory:"
+                # Check if this is pytest collection mode specifically
+                test_collection_mode = get_env().get('TEST_COLLECTION_MODE')
+                if test_collection_mode == '1':
+                    return "sqlite:///:memory:"
+                else:
+                    # For actual test execution, use default PostgreSQL database
+                    return DatabaseManager._get_default_database_url()
         except Exception:
             # Fallback for bootstrap or when config not available
             raw_url = env_url
@@ -202,9 +210,8 @@ class DatabaseManager:
         # For non-Cloud SQL, format for sync driver with SSL parameter conversion
         sync_url = builder.format_url_for_driver(raw_url, 'base')
         
-        # Convert ssl= to sslmode= for sync drivers
-        if "ssl=" in sync_url and "sslmode=" not in sync_url:
-            sync_url = sync_url.replace("ssl=", "sslmode=")
+        # CRITICAL FIX: Ensure SSL parameters are consistently resolved for psycopg2 
+        sync_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(sync_url, "psycopg2")
         
         return sync_url
     
@@ -252,6 +259,9 @@ class DatabaseManager:
         
         # For non-Cloud SQL, format for async driver
         base_url = builder.format_url_for_driver(base_url, 'asyncpg')
+        
+        # CRITICAL FIX: Ensure SSL parameters are consistently resolved for asyncpg
+        base_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(base_url, "asyncpg")
         
         # Remove search_path options from URL - handled via server_settings in connect_args
         from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
@@ -425,9 +435,10 @@ class DatabaseManager:
         if pool_class != NullPool:
             engine_args.update({
                 # Optimized pool sizes for cold start resilience
-                "pool_size": 10,  # Reduced from 25 for faster startup  # Increased base pool size for concurrent startup
-                "max_overflow": 15,  # Reduced from 35 (total max: 25)  # Higher overflow to handle startup bursts (total max: 60)
-                "pool_timeout": 60,  # Reduced from 120 for faster failure detection  # Longer timeout for cold start scenarios
+                "pool_size": 10,  # Reduced from 25 for faster startup
+                "max_overflow": 15,  # Reduced from 35 (total max: 25)
+                # CRITICAL FIX: Align pool timeout with readiness check timeouts (5.0s - faster than readiness timeout)
+                "pool_timeout": 5.0,  # Reduced from 60s to prevent readiness timeout issues
             })
         
         if connect_args:

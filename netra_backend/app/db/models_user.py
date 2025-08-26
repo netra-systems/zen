@@ -17,40 +17,48 @@ See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 
 import uuid
 from datetime import datetime, timezone
+from typing import Optional
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from netra_backend.app.db.base import Base
 
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    email = Column(String, unique=True, index=True, nullable=False)
-    full_name = Column(String, index=True)
-    hashed_password = Column(String, nullable=True)
-    picture = Column(String, nullable=True)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-    is_active = Column(Boolean(), default=True)
-    is_superuser = Column(Boolean(), default=False)
+    
+    # Primary key
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    
+    # Core user fields
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    full_name: Mapped[Optional[str]] = mapped_column(String, index=True)
+    hashed_password: Mapped[Optional[str]] = mapped_column(String)
+    picture: Mapped[Optional[str]] = mapped_column(String)
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    
+    # Status fields
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_developer: Mapped[bool] = mapped_column(Boolean, default=False)  # Auto-detected developer status
+    
     # Admin permission fields
-    role = Column(String, default="standard_user")  # standard_user, power_user, developer, admin, super_admin
-    permissions = Column(JSON, default=dict)  # Additional granular permissions
-    is_developer = Column(Boolean(), default=False)  # Auto-detected developer status
+    role: Mapped[str] = mapped_column(String, default="standard_user")  # standard_user, power_user, developer, admin, super_admin
+    permissions: Mapped[dict] = mapped_column(JSON, default=dict)  # Additional granular permissions
     
-    # New plan and tool permission fields
-    plan_tier = Column(String, default="free")  # free, pro, enterprise, developer
-    plan_expires_at = Column(DateTime(timezone=True), nullable=True)  # Plan expiration
-    feature_flags = Column(JSON, default=dict)  # Enabled feature flags
-    tool_permissions = Column(JSON, default=dict)  # Per-tool permission overrides
-    
-    # Plan billing fields
-    plan_started_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    auto_renew = Column(Boolean(), default=False)  # Auto-renewal enabled
-    payment_status = Column(String, default="active")  # active, suspended, cancelled
-    trial_period = Column(Integer(), default=0)  # Trial period days (0 = not in trial)
+    # Plan and billing fields
+    plan_tier: Mapped[str] = mapped_column(String, default="free")  # free, pro, enterprise, developer
+    plan_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    plan_started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    feature_flags: Mapped[dict] = mapped_column(JSON, default=dict)  # Enabled feature flags
+    tool_permissions: Mapped[dict] = mapped_column(JSON, default=dict)  # Per-tool permission overrides
+    auto_renew: Mapped[bool] = mapped_column(Boolean, default=False)  # Auto-renewal enabled
+    payment_status: Mapped[str] = mapped_column(String, default="active")  # active, suspended, cancelled
+    trial_period: Mapped[int] = mapped_column(Integer, default=0)  # Trial period days (0 = not in trial)
     
     # Relationships
     secrets = relationship("Secret", back_populates="user", cascade="all, delete-orphan")
@@ -58,28 +66,31 @@ class User(Base):
 
 class Secret(Base):
     __tablename__ = "secrets"
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    key = Column(String, nullable=False)
-    encrypted_value = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-    user = relationship("User", back_populates="secrets")
+    
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"))
+    key: Mapped[str] = mapped_column(String)
+    encrypted_value: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    
+    user: Mapped["User"] = relationship("User", back_populates="secrets")
 
 
 class ToolUsageLog(Base):
     __tablename__ = "tool_usage_logs"
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    tool_name = Column(String, nullable=False, index=True)
-    category = Column(String, index=True)
-    execution_time_ms = Column(Integer, default=0)
-    tokens_used = Column(Integer, nullable=True)
-    cost_cents = Column(Integer, nullable=True)
-    status = Column(String, nullable=False, index=True)  # success, error, permission_denied, rate_limited
-    plan_tier = Column(String, nullable=False)  # User's plan at time of usage
-    permission_check_result = Column(JSON, nullable=True)  # Permission check details
-    arguments = Column(JSON, nullable=True)  # Tool arguments (for analytics)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
     
-    user = relationship("User")
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"))
+    tool_name: Mapped[str] = mapped_column(String, index=True)
+    category: Mapped[Optional[str]] = mapped_column(String, index=True)
+    execution_time_ms: Mapped[int] = mapped_column(Integer, default=0)
+    tokens_used: Mapped[Optional[int]] = mapped_column(Integer)
+    cost_cents: Mapped[Optional[int]] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String, index=True)  # success, error, permission_denied, rate_limited
+    plan_tier: Mapped[str] = mapped_column(String)  # User's plan at time of usage
+    permission_check_result: Mapped[Optional[dict]] = mapped_column(JSON)  # Permission check details
+    arguments: Mapped[Optional[dict]] = mapped_column(JSON)  # Tool arguments (for analytics)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), index=True)
+    
+    user: Mapped["User"] = relationship("User")
