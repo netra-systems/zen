@@ -102,27 +102,27 @@ class AIFixGenerator:
     def _generate_gemini_fix(self, test_file: str, error: str, context: Dict[str, str]) -> FixResult:
         """Generate fix using Gemini."""
         try:
-            import google.generativeai as genai
+            import google.genai as genai
         except ImportError:
-            return FixResult(False, "", "google-generativeai package not installed", 0, "gemini")
+            return FixResult(False, "", "google-genai package not installed", 0, "gemini")
             
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel('gemini-2.5-pro')
+        client = genai.Client(api_key=self.api_key)
         
         # Build prompt
         prompt = self._build_prompt(test_file, error, context)
         
         try:
-            response = model.generate_content(
-                prompt,
-                generation_config=genai.GenerationConfig(
-                    temperature=0.2,
-                    max_output_tokens=4000
-                )
+            response = client.models.generate_content(
+                model='gemini-2.0-flash-exp',
+                contents=[{'parts': [{'text': prompt}]}],
+                config={
+                    'temperature': 0.2,
+                    'max_output_tokens': 4000
+                }
             )
             
             # Parse response
-            content = response.text
+            content = response.candidates[0].content.parts[0].text
             patch, explanation, confidence = self._parse_fix_response(content)
             
             return FixResult(
@@ -143,13 +143,13 @@ class AIFixGenerator:
         except ImportError:
             return FixResult(False, "", "openai package not installed", 0, "gpt4")
             
-        openai.api_key = self.api_key
+        client = openai.OpenAI(api_key=self.api_key)
         
         # Build prompt
         prompt = self._build_prompt(test_file, error, context)
         
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4-turbo",
                 messages=[
                     {
