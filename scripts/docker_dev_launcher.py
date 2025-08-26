@@ -16,6 +16,12 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import json
 
+# Fix Unicode output on Windows
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 # Add parent directory to path
 parent_dir = Path(__file__).parent.parent.resolve()
 if parent_dir not in sys.path:
@@ -43,7 +49,7 @@ class DockerDevLauncher:
                 check=False
             )
             if result.returncode != 0:
-                print("❌ Docker is not installed or not in PATH")
+                print("[ERROR] Docker is not installed or not in PATH")
                 return False
                 
             # Check Docker Compose
@@ -62,19 +68,19 @@ class DockerDevLauncher:
                     check=False
                 )
                 if result.returncode != 0:
-                    print("❌ Docker Compose is not installed or not in PATH")
+                    print("[ERROR] Docker Compose is not installed or not in PATH")
                     return False
                     
-            print("✅ Docker and Docker Compose are available")
+            print("[OK] Docker and Docker Compose are available")
             return True
             
         except FileNotFoundError:
-            print("❌ Docker or Docker Compose not found")
+            print("[ERROR] Docker or Docker Compose not found")
             return False
             
     def prepare_environment(self):
         """Prepare environment variables for Docker Compose."""
-        print("🔧 Preparing environment configuration...")
+        print("[INFO] Preparing environment configuration...")
         
         # Load existing .env if it exists
         env_vars = {}
@@ -147,7 +153,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO netra;
 
 -- Initial setup complete
 SELECT 'Database initialized successfully' as status;
-""")
+""", encoding='utf-8')
             print("   → Created PostgreSQL initialization script")
             
         # ClickHouse init script (optional)
@@ -169,7 +175,7 @@ CREATE TABLE IF NOT EXISTS events (
 ORDER BY (timestamp, event_type, user_id);
 
 SELECT 'ClickHouse initialized successfully' as status;
-""")
+""", encoding='utf-8')
             print("   → Created ClickHouse initialization script")
             
         # Wait for DB script
@@ -199,14 +205,14 @@ def wait_for_db(max_retries=30, delay=2):
         try:
             conn = psycopg2.connect(db_url)
             conn.close()
-            print("✅ Database is ready!")
+            print("[OK] Database is ready!")
             return True
         except OperationalError as e:
             if i < max_retries - 1:
-                print(f"⏳ Waiting for database... ({i+1}/{max_retries})")
+                print(f"[WAIT] Waiting for database... ({i+1}/{max_retries})")
                 time.sleep(delay)
             else:
-                print(f"❌ Database connection failed after {max_retries} attempts")
+                print(f"[ERROR] Database connection failed after {max_retries} attempts")
                 print(f"   Error: {e}")
                 return False
     return False
@@ -214,12 +220,12 @@ def wait_for_db(max_retries=30, delay=2):
 if __name__ == "__main__":
     success = wait_for_db()
     sys.exit(0 if success else 1)
-""")
+""", encoding='utf-8')
             print("   → Created database wait script")
             
     def build_services(self, services: Optional[List[str]] = None):
         """Build Docker images for services."""
-        print("🔨 Building Docker images...")
+        print("[INFO] Building Docker images...")
         
         cmd = ["docker", "compose", "-f", self.compose_file, "build"]
         if services:
@@ -230,15 +236,15 @@ if __name__ == "__main__":
             
         result = subprocess.run(cmd, cwd=self.project_root)
         if result.returncode != 0:
-            print("❌ Failed to build Docker images")
+            print("[ERROR] Failed to build Docker images")
             return False
             
-        print("✅ Docker images built successfully")
+        print("[OK] Docker images built successfully")
         return True
         
     def start_services(self):
         """Start all services using Docker Compose."""
-        print("🚀 Starting services...")
+        print("[INFO] Starting services...")
         
         # Prepare the command
         cmd = ["docker", "compose", "-f", self.compose_file, "up"]
@@ -263,26 +269,26 @@ if __name__ == "__main__":
             try:
                 process.wait()
             except KeyboardInterrupt:
-                print("\n🛑 Stopping services...")
+                print("\n[INFO] Stopping services...")
                 self.stop_services()
                 
         else:
             # Run in background
             result = subprocess.run(cmd, cwd=self.project_root, capture_output=True, text=True)
             if result.returncode != 0:
-                print("❌ Failed to start services")
+                print("[ERROR] Failed to start services")
                 print(result.stderr)
                 return False
                 
             self.running = True
-            print("✅ All services started successfully")
+            print("[OK] All services started successfully")
             
             # Show service URLs
             self.show_service_info()
             
             # Follow logs if not in silent mode
             if not self.config.get('silent'):
-                print("\n📋 Following service logs (Ctrl+C to stop)...")
+                print("\n[INFO] Following service logs (Ctrl+C to stop)...")
                 self.follow_logs()
                 
         return True
@@ -296,12 +302,12 @@ if __name__ == "__main__":
         try:
             subprocess.run(cmd, cwd=self.project_root)
         except KeyboardInterrupt:
-            print("\n🛑 Stopped following logs")
+            print("\n[INFO] Stopped following logs")
             
     def show_service_info(self):
         """Display information about running services."""
         print("\n" + "="*60)
-        print("🎯 Service URLs:")
+        print("Service URLs:")
         print("="*60)
         
         backend_port = os.environ.get('BACKEND_PORT', '8000')
@@ -318,7 +324,7 @@ if __name__ == "__main__":
             print(f"   ClickHouse:  http://localhost:{os.environ.get('CLICKHOUSE_HTTP_PORT', '8123')}")
             
         print("\n" + "="*60)
-        print("📝 Useful commands:")
+        print("Useful commands:")
         print("   View logs:        docker compose -f docker-compose.dev.yml logs -f [service]")
         print("   Restart service:  docker compose -f docker-compose.dev.yml restart [service]")
         print("   Stop all:         docker compose -f docker-compose.dev.yml down")
@@ -330,7 +336,7 @@ if __name__ == "__main__":
         if not self.running:
             return
             
-        print("🛑 Stopping services...")
+        print("[INFO] Stopping services...")
         cmd = ["docker", "compose", "-f", self.compose_file, "down"]
         
         if self.config.get('remove_volumes'):
@@ -338,11 +344,11 @@ if __name__ == "__main__":
             
         subprocess.run(cmd, cwd=self.project_root)
         self.running = False
-        print("✅ All services stopped")
+        print("[OK] All services stopped")
         
     def cleanup(self):
         """Clean up Docker resources."""
-        print("🧹 Cleaning up Docker resources...")
+        print("[INFO] Cleaning up Docker resources...")
         
         # Stop services
         self.stop_services()
@@ -360,16 +366,16 @@ if __name__ == "__main__":
             print("   → Pruning unused resources...")
             subprocess.run(["docker", "system", "prune", "-f"])
             
-        print("✅ Cleanup completed")
+        print("[OK] Cleanup completed")
         
     def run(self):
         """Main execution flow."""
-        print("🐳 Netra Docker Development Environment")
+        print("[NETRA] Docker Development Environment")
         print("="*60)
         
         # Check Docker availability
         if not self.check_docker():
-            print("\n📚 Please install Docker Desktop from: https://www.docker.com/products/docker-desktop")
+            print("\n[INFO] Please install Docker Desktop from: https://www.docker.com/products/docker-desktop")
             return 1
             
         # Prepare environment
@@ -501,7 +507,7 @@ def main():
     
     # Set up signal handlers
     def signal_handler(signum, frame):
-        print("\n🛑 Received shutdown signal")
+        print("\n[INFO] Received shutdown signal")
         launcher.stop_services()
         sys.exit(0)
         
@@ -512,7 +518,7 @@ def main():
     exit_code = launcher.run()
     
     if exit_code != 0:
-        print("\n❌ Failed to start Docker development environment")
+        print("\n[ERROR] Failed to start Docker development environment")
         print("   Check the logs above for details")
         
     return exit_code

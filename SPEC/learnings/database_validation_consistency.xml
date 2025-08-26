@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <title>Database Validation Consistency</title>
+  <category>Database Management</category>
+  <severity>High</severity>
+  
+  <issue>
+    <description>
+      Database validation was producing contradictory output messages with multiple 
+      validation attempts and inconsistent reporting between different validation stages.
+    </description>
+    
+    <symptoms>
+      <symptom>Docker services showing as reusable and healthy</symptom>
+      <symptom>Initial resilient validation showing some successes and some failures</symptom>
+      <symptom>Database initialization running AFTER validation and failing</symptom>
+      <symptom>Final validation showing all connections as successful despite earlier failures</symptom>
+    </symptoms>
+    
+    <root_causes>
+      <cause>
+        Multiple validation paths:
+        1. _validate_databases_with_resilience() performs initial validation
+        2. On failure, it falls back to _validate_databases() 
+        3. _validate_databases() runs initialization THEN validation again
+        4. This creates duplicate and contradictory messages
+      </cause>
+      <cause>
+        Database initialization was happening AFTER the first validation attempt,
+        meaning connections could fail initially but succeed after initialization
+      </cause>
+      <cause>
+        Different message prefixes (DB-RESILIENT, RESILIENCE, DATABASE, CONNECT) 
+        made it unclear which stage was executing
+      </cause>
+    </root_causes>
+  </issue>
+  
+  <solution>
+    <principle>Single Responsibility - Each function should have ONE clear purpose</principle>
+    <principle>Initialize Once - Database initialization should happen BEFORE validation</principle>
+    <principle>Consistent Messaging - Use consistent prefixes across validation stages</principle>
+    
+    <implementation>
+      <step>Move database initialization to the START of _validate_databases_with_resilience()</step>
+      <step>Remove duplicate initialization from _validate_databases()</step>
+      <step>Use consistent message prefixes: DATABASE for overall status, CONNECT for individual connections</step>
+      <step>Continue startup even with some failed connections in development mode</step>
+      <step>Remove confusing fallback that re-runs the entire validation</step>
+    </implementation>
+    
+    <benefits>
+      <benefit>Clear, sequential flow: Initialize → Validate → Report</benefit>
+      <benefit>No duplicate validation attempts with conflicting results</benefit>
+      <benefit>Consistent messaging that accurately reflects system state</benefit>
+      <benefit>Faster startup with fewer redundant operations</benefit>
+    </benefits>
+  </solution>
+  
+  <patterns>
+    <pattern name="Initialize-Then-Validate">
+      Always initialize resources BEFORE attempting to validate them.
+      This prevents false negatives from uninitialized resources.
+    </pattern>
+    
+    <pattern name="Single-Validation-Pass">
+      Perform validation once with clear reporting. Avoid fallback 
+      validations that repeat the same checks with different logic.
+    </pattern>
+    
+    <pattern name="Consistent-Status-Reporting">
+      Use consistent message formats and prefixes throughout the validation
+      pipeline to make the flow clear to users.
+    </pattern>
+  </patterns>
+  
+  <testing>
+    <test>Verify output shows initialization before validation</test>
+    <test>Ensure no duplicate validation messages for the same service</test>
+    <test>Confirm failed connections don't trigger redundant validation</test>
+    <test>Check that the final status accurately reflects actual connectivity</test>
+  </testing>
+  
+  <related_specs>
+    <spec>database_connectivity_architecture.xml</spec>
+    <spec>network_resilience.xml</spec>
+    <spec>startup.xml</spec>
+  </related_specs>
+</spec>

@@ -455,6 +455,14 @@
             <critical-takeaway>All services MUST use DatabaseManager for database connections to ensure credential consistency from IsolatedEnvironment.</critical-takeaway>
         </category>
         
+        <category name="Database Validation Consistency" path="SPEC/learnings/database_validation_consistency.xml" keywords="Database Validation, Dev Launcher, Initialization, Connection Validation, Startup, Resilient Validation">
+            <critical-takeaway>Database initialization MUST happen BEFORE validation to prevent false connection failures.</critical-takeaway>
+            <critical-takeaway>Use single validation pass with consistent reporting - avoid fallback validations that re-run checks.</critical-takeaway>
+            <critical-takeaway>Consistent message prefixes across validation stages: DATABASE for overall, CONNECT for individual connections.</critical-takeaway>
+            <critical-takeaway>Continue startup with available services even if some database connections fail in development mode.</critical-takeaway>
+            <critical-takeaway>Avoid duplicate validation messages by having clear separation between initialization and validation phases.</critical-takeaway>
+        </category>
+        
         <category name="Database Config Migration" path="SPEC/learnings/database_config_migration.xml" keywords="DatabaseConfig, Migration, Unified Config, postgres_events, Configuration Migration">
             <critical-takeaway>ALL DatabaseConfig.* references MUST be replaced with get_unified_config().db_* - partial migrations cause deployment failures.</critical-takeaway>
             <critical-takeaway>Migration from DatabaseConfig to unified config must be atomic and comprehensive across ALL files.</critical-takeaway>
