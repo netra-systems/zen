@@ -119,7 +119,7 @@ class EnhancedSecurityService(SecurityService):
         if hasattr(to_encode['exp'], 'timestamp'):
             to_encode['exp'] = to_encode['exp'].timestamp()
         
-        from jose import jwt
+        import jwt
         return jwt.encode(to_encode, self.key_manager.jwt_secret_key, algorithm="HS256")
         
     def _init_enhanced_features(self) -> None:

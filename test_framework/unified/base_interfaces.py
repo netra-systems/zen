@@ -206,7 +206,7 @@ class BaseTestRunner(BaseTestInterface):
         """Get current status of the runner."""
         return {
             "initialized": self._initialized,
-            "config": self.config.dict() if hasattr(self.config, 'dict') else str(self.config)
+            "config": self.config.model_dump() if hasattr(self.config, 'model_dump') else (self.config.dict() if hasattr(self.config, 'dict') else str(self.config))
         }
     
     @abstractmethod

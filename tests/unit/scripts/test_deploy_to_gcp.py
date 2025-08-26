@@ -408,7 +408,7 @@ class TestGCPDeployerIntegration:
             name="backend",
             directory="netra_backend",
             port=8888,
-            dockerfile="deployment/docker/Dockerfile.backend",
+            dockerfile="deployment/docker/backend.gcp.Dockerfile",
             cloud_run_name="netra-backend-staging",
             environment_vars={"ENVIRONMENT": "staging"},
             memory="1Gi",

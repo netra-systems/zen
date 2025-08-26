@@ -140,7 +140,7 @@
     <environment>
       <name>Production</name>
       <pythonpath>/app:/app/netra_backend</pythonpath>
-      <configuration_file>Dockerfile.backend</configuration_file>
+      <configuration_file>backend.gcp.Dockerfile</configuration_file>
     </environment>
   </pythonpath_configuration>
 
