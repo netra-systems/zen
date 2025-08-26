@@ -1,98 +1,111 @@
-# Netra Backend Requirements
-# Core Web Framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-gunicorn==21.2.0
-starlette==0.27.0
+# Netra Backend Requirements - Modernized and Audited
+# Report Date: 2025-09-01
 
-# Data Validation & Serialization
-pydantic>=2.7.4
-pydantic[email]>=2.7.4
-email-validator>=2.0.0
-python-multipart==0.0.6
+# --- Core Web Framework ---
+# FastAPI is the core web framework. Upgraded to a version compatible with Pydantic v2 and modern Starlette.
+fastapi>=0.116.1
+# Starlette is the underlying ASGI framework for FastAPI. Version is managed by FastAPI's dependencies.
+starlette>=0.47.3
+# Uvicorn is the high-performance ASGI server. The [standard] extra includes uvloop and httptools for performance.
+uvicorn[standard]>=0.35.0
+# Gunicorn is the production-grade process manager for Uvicorn workers.
+gunicorn>=23.0.0
+# ItsDangerous is used for signing data (e.g., for secure tokens/cookies).
+itsdangerous>=2.2.0
 
-# Database
-sqlalchemy>=2.0.0
-sqlmodel>=0.0.14
-asyncpg>=0.29.0
-aiosqlite>=0.19.0
-alembic>=1.13.0
-cloud-sql-python-connector[asyncpg]>=1.7.0
-psycopg2-binary>=2.9.9
+# --- Data Validation ---
+# Pydantic is used for data validation and settings management. V2 is a major upgrade with a Rust core.
+pydantic>=2.11.7
+# Required for email validation within Pydantic models.
+email-validator>=2.3.0
+# Handles multipart/form-data parsing. Updated to patch critical DoS vulnerabilities.
+python-multipart>=0.0.20
 
-# Redis
-redis>=5.0.1
-aioredis>=2.0.1
+# --- Database (PostgreSQL with SQLAlchemy) ---
+# SQLAlchemy is the core ORM. Version 2.0+ uses a modern, explicit API.
+sqlalchemy>=2.0.43
+# SQLModel provides a seamless layer over SQLAlchemy and Pydantic.
+sqlmodel>=0.0.24
+# High-performance asyncio driver for PostgreSQL, compatible with SQLAlchemy 2.0 async support.
+asyncpg>=0.30.0
+# Alembic is the database migration tool for SQLAlchemy.
+alembic>=1.16.4
+# Google Cloud SQL Connector for secure, IAM-based connections. The [asyncpg] extra is for async support.
+cloud-sql-python-connector[asyncpg]>=1.18.4
+# Synchronous PostgreSQL driver, often used for scripts or legacy code.
+psycopg2-binary>=2.9.10
 
-# ClickHouse
-clickhouse-connect>=0.7.0
-clickhouse-driver>=0.2.6
-lz4>=4.3.2
+# --- In-Memory Cache ---
+# Redis client for Python.
+redis>=6.4.0
 
-# Authentication & Security
-PyJWT==2.8.0
-python-jose[cryptography]==3.3.0
-argon2-cffi>=23.1.0
-bcrypt>=4.1.2
-cryptography>=41.0.7
-pyotp>=2.9.0
+# --- Analytics Database ---
+# ClickHouse driver for Python.
+clickhouse-connect>=0.8.18
+# LZ4 is a dependency for ClickHouse for fast compression.
+lz4>=4.4.4
 
-# HTTP & WebSockets
-httpx>=0.25.1
-aiohttp>=3.9.1
-websockets>=12.0
-websocket-client>=1.7.0
+# --- Authentication & Security ---
+# PyJWT is the standard for handling JSON Web Tokens. Replaces the unmaintained python-jose.
+PyJWT[cryptography]>=2.10.1
+# Argon2 is a modern, secure password hashing algorithm.
+argon2-cffi>=25.1.0
+# Bcrypt is another widely-used password hashing algorithm.
+bcrypt>=4.3.0
+# Cryptography provides low-level cryptographic primitives. Essential to keep updated.
+cryptography>=45.0.6
 
-# Environment & Configuration
-python-dotenv==1.0.0
+# --- HTTP & WebSockets ---
+# Modern async HTTP client, used by FastAPI's TestClient and many SDKs.
+httpx>=0.28.1
+# Another powerful async HTTP client/server library.
+aiohttp>=3.12.15
+# Library for building WebSocket clients and servers.
+websockets>=15.0.1
 
-# Logging & Monitoring
-loguru==0.7.2
-prometheus-client>=0.19.0
-watchdog>=3.0.0
+# --- Environment & Configuration ---
+# Manages environment variables from.env files.
+python-dotenv>=1.1.1
 
-# AI/ML Libraries
-langchain-core>=0.1.0
-langchain-community>=0.0.10
-openai>=1.0.0
-anthropic>=0.18.1
-google-generativeai>=0.3.2
+# --- Logging & Monitoring ---
+# A modern, easy-to-use logging library.
+loguru>=0.7.3
+# Client library for instrumenting code for Prometheus monitoring.
+prometheus-client>=0.22.1
 
-# Testing (for dev environment)
-pytest>=7.4.3
-pytest-asyncio>=0.21.1
-faker>=20.1.0
-testcontainers>=3.7.1
+# --- AI/ML Libraries ---
+# LangChain has been modularized. Core contains base abstractions.
+langchain-core>=0.3.75
+# Community-contributed LangChain integrations.
+langchain-community>=0.3.28
+# OpenAI's official Python SDK. V1.x is a major rewrite from v0.x.
+openai>=1.101.0
+# Anthropic's official Python SDK.
+anthropic>=0.64.0
+# The new, unified Google GenAI SDK, replacing the deprecated google-generativeai.
+google-genai
 
-# Utilities
-tenacity>=8.2.3
-beartype>=0.16.4
-python-dateutil>=2.8.2
-pytz>=2023.3
-pyyaml>=6.0.1
-rich>=13.7.0
-pandas>=2.1.4
-numpy>=1.24.3
+# --- Utilities ---
+# General-purpose retrying library.
+tenacity>=9.1.2
+# High-performance runtime type-checker.
+beartype>=0.21.0
+# Powerful extensions for Python's standard datetime module.
+python-dateutil>=2.9.0.post0
+# YAML parser and emitter for Python.
+pyyaml>=6.0.2
+# Core libraries for data analysis and manipulation.
+pandas>=2.3.2
+numpy>=2.3.2
+rich>=14.1.0
+Faker>=37.6.0
 
-# MCP (Model Context Protocol)
-mcp>=0.1.0
+# --- Performance Monitoring ---
+# Cross-platform library for process and system monitoring.
+psutil>=7.0.0
 
-# Background Tasks
-celery>=5.3.4
-
-# Performance
-psutil>=5.9.6
-
-# Docker
-docker>=7.0.0
-
-# DNS
-dnspython>=2.4.2
-
-# Science/ML
-scikit-learn>=1.3.2
-
-# Code Quality
-black>=23.12.0
-ruff>=0.1.8
-mypy>=1.7.1
+# --- Testing ---
+# The standard testing framework for Python.
+pytest>=8.4.1
+# Pytest plugin for testing asyncio code.
+pytest-asyncio>=1.1.0

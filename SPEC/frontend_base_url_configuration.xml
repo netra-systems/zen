@@ -103,17 +103,17 @@
       <development>
         <base-url>http://localhost:3000</base-url>
         <api-proxy>/api → http://localhost:8000</api-proxy>
-        <auth-proxy>/auth → http://localhost:8081</auth-proxy>
+        <auth-service>/auth → http://localhost:8081</auth-service>
       </development>
       <staging>
         <base-url>https://app.staging.netrasystems.ai</base-url>
         <api-proxy>/api → https://api.staging.netrasystems.ai</api-proxy>
-        <auth-proxy>/auth → https://auth.staging.netrasystems.ai</auth-proxy>
+        <auth-service>/auth → https://auth.staging.netrasystems.ai</auth-service>
       </staging>
       <production>
         <base-url>https://app.netrasystems.ai</base-url>
         <api-proxy>/api → https://api.netrasystems.ai</api-proxy>
-        <auth-proxy>/auth → https://auth.netrasystems.ai</auth-proxy>
+        <auth-service>/auth → https://auth.netrasystems.ai</auth-service>
       </production>
     </environment-specific-configuration>
   </solution-architecture>

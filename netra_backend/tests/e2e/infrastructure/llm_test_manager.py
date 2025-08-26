@@ -161,14 +161,13 @@ class LLMTestManager:
                 )
             return None
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-            return genai.GenerativeModel(model.value)
+            import google.genai as genai
+            return genai.Client(api_key=api_key)
         except ImportError:
             if self.config.enabled and not self.config.fallback_to_mock:
                 raise NetraException(
-                    f"Real LLM testing enabled but google-generativeai package not installed. "
-                    f"Run: pip install google-generativeai"
+                    f"Real LLM testing enabled but google-genai package not installed. "
+                    f"Run: pip install google-genai"
                 )
             return None
             
@@ -247,7 +246,7 @@ class LLMTestManager:
             return await self._call_openai_client(client, request)
         elif hasattr(client, 'messages'):  # Anthropic
             return await self._call_anthropic_client(client, request)
-        elif hasattr(client, 'generate_content'):  # Gemini
+        elif hasattr(client, 'models'):  # Google GenAI
             return await self._call_gemini_client(client, request)
         else:
             raise NetraException(f"Unknown client type for {request.model}")
@@ -273,8 +272,15 @@ class LLMTestManager:
         
     async def _call_gemini_client(self, client: Any, request: LLMTestRequest) -> str:
         """Call Gemini client."""
-        response = await client.generate_content(request.prompt)
-        return response.text
+        response = await client.models.generate_content(
+            model=request.model.value,
+            contents=[{'parts': [{'text': request.prompt}]}],
+            config={
+                'temperature': request.temperature,
+                'max_output_tokens': request.max_tokens
+            }
+        )
+        return response.candidates[0].content.parts[0].text
         
     async def _generate_mock_response(self, request: LLMTestRequest, start_time: float) -> LLMTestResponse:
         """Generate mock response when real clients unavailable."""

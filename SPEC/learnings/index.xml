@@ -47,6 +47,13 @@
             <critical-takeaway>P0 CRITICAL vulnerability: User creation succeeds in auth but fails in backend sync, allowing authentication without backend access</critical-takeaway>
         </category>
         
+        <category name="Pydantic v2 Migration" path="SPEC/learnings/pydantic_v2_migration.xml" keywords="Pydantic, Migration, Config, model_config, ConfigDict, Core Web Framework, Security Upgrade">
+            <critical-takeaway>Config classes MUST be replaced with model_config = ConfigDict() pattern for Pydantic v2 compatibility</critical-takeaway>
+            <critical-takeaway>.dict() method calls should be updated to .model_dump() with fallback patterns for backward compatibility</critical-takeaway>
+            <critical-takeaway>Core Web Framework upgrades address critical CVE-2024-24762 and CVE-2024-53981 DoS vulnerabilities</critical-takeaway>
+            <critical-takeaway>Existing codebase was already largely Pydantic v2 compatible due to modern patterns (@field_validator, @model_validator)</critical-takeaway>
+        </category>
+        
         <category name="Auth Service API Endpoints" path="SPEC/learnings/auth_service_endpoint_fixes.xml" keywords="Auth Service, API Endpoints, HEAD Method, OAuth Endpoints, JWT Validation, SQLite, Database Connection">
             <critical-takeaway>Always provide both generic (/auth/login) and provider-specific (/auth/google) OAuth endpoints for API ergonomics.</critical-takeaway>
             <critical-takeaway>Environment-specific OAuth variables (GOOGLE_OAUTH_CLIENT_ID_STAGING) must have higher priority than generic ones (GOOGLE_CLIENT_ID).</critical-takeaway>
@@ -202,6 +209,14 @@
             <critical-takeaway>NEVER import environment management from dev_launcher - each service MUST have its own isolated_environment.</critical-takeaway>
             <critical-takeaway>Service-local implementations of shared patterns are acceptable and required for independence.</critical-takeaway>
             <critical-takeaway>Always provide production fallback patterns when development modules may not be available.</critical-takeaway>
+        </category>
+        
+        <category name="Docker Compose Profiles" path="SPEC/learnings/docker_compose_profiles.xml" keywords="Docker, Compose, Profiles, ClickHouse, Optional Services, Infrastructure">
+            <critical-takeaway>Core infrastructure services (PostgreSQL, Redis, ClickHouse) should load by default without profiles.</critical-takeaway>
+            <critical-takeaway>Services with profiles are NOT started unless explicitly enabled with --profile flag.</critical-takeaway>
+            <critical-takeaway>Use profiles only for truly optional services that not all developers need.</critical-takeaway>
+            <critical-takeaway>Backend services must handle missing optional services gracefully with fallbacks.</critical-takeaway>
+            <critical-takeaway>Environment variables for optional services should be configured even if service is not running.</critical-takeaway>
         </category>
         
         <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
@@ -412,6 +427,16 @@
             <critical-takeaway>Import order: stdlib -> third-party -> setup_test_path() -> project imports</critical-takeaway>
             <critical-takeaway>Manual PROJECT_ROOT manipulation is FORBIDDEN - violates SSOT principle</critical-takeaway>
         </category>
+        
+        <category name="Logging Color Configuration" path="SPEC/learnings/logging_color_configuration.xml" keywords="Loguru, Colors, ANSI, Markup, Console, Logging, Colorize">
+            <critical-takeaway>CRITICAL: Enable colorize=True in logger.add() for console handlers to process color markup tags into ANSI codes.</critical-takeaway>
+            <critical-takeaway>Use loguru's native &lt;level&gt;{message}&lt;/level&gt; format syntax for automatic level-based coloring.</critical-takeaway>
+            <critical-takeaway>NEVER manually add color tags to message content - let loguru handle color processing natively.</critical-takeaway>
+            <critical-takeaway>Custom preprocessors that add literal color tags cause display issues - use loguru's built-in markup.</critical-takeaway>
+            <critical-takeaway>File handlers must have colorize=False to prevent ANSI codes in log files.</critical-takeaway>
+            <critical-takeaway>JSON handlers use serialize=True parameter, not custom JSON formatters.</critical-takeaway>
+            <critical-takeaway>Test logging output with real console, not just StringIO, to verify color rendering.</critical-takeaway>
+        </category>
 
         <category name="Frontend" path="SPEC/learnings/frontend.xml" keywords="Zustand, React, TypeScript">
             <critical-takeaway context="Zustand">Use individual selectors to prevent infinite loops. See SPEC/conventions.xml#zustand-selectors.</critical-takeaway>
@@ -443,6 +468,14 @@
             <critical-takeaway>Health checkers MUST use DatabaseManager.create_application_engine() - direct async_engine imports cause authentication failures.</critical-takeaway>
             <critical-takeaway>Database connections in health checks should create and dispose engines per check to prevent pool exhaustion.</critical-takeaway>
             <critical-takeaway>All services MUST use DatabaseManager for database connections to ensure credential consistency from IsolatedEnvironment.</critical-takeaway>
+        </category>
+        
+        <category name="Database Validation Consistency" path="SPEC/learnings/database_validation_consistency.xml" keywords="Database Validation, Dev Launcher, Initialization, Connection Validation, Startup, Resilient Validation">
+            <critical-takeaway>Database initialization MUST happen BEFORE validation to prevent false connection failures.</critical-takeaway>
+            <critical-takeaway>Use single validation pass with consistent reporting - avoid fallback validations that re-run checks.</critical-takeaway>
+            <critical-takeaway>Consistent message prefixes across validation stages: DATABASE for overall, CONNECT for individual connections.</critical-takeaway>
+            <critical-takeaway>Continue startup with available services even if some database connections fail in development mode.</critical-takeaway>
+            <critical-takeaway>Avoid duplicate validation messages by having clear separation between initialization and validation phases.</critical-takeaway>
         </category>
         
         <category name="Database Config Migration" path="SPEC/learnings/database_config_migration.xml" keywords="DatabaseConfig, Migration, Unified Config, postgres_events, Configuration Migration">

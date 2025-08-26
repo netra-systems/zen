@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>WebSocket Authentication Timing Issues</title>
+  <date>2025-08-26</date>
+  
+  <issue>
+    <id>WEBSOCKET-AUTH-1008</id>
+    <description>WebSocket connection fails with error 1008 during DevLauncher startup when frontend attempts connection before JWT token is available</description>
+    <error_message>Authentication required: Use Authorization header or Sec-WebSocket-Protocol</error_message>
+    <severity>Critical</severity>
+    <affects>Development Environment, First-time User Experience</affects>
+  </issue>
+
+  <root_causes>
+    <cause>
+      <type>Timing Race Condition</type>
+      <description>WebSocketProvider attempts to connect immediately on mount, but AuthContext may not have loaded token from localStorage yet</description>
+      <location>frontend/providers/WebSocketProvider.tsx</location>
+    </cause>
+    <cause>
+      <type>Missing Token Check</type>
+      <description>Frontend does not verify token existence before attempting WebSocket connection</description>
+      <impact>Connection attempts with null/undefined token trigger authentication errors</impact>
+    </cause>
+    <cause>
+      <type>Strict Authentication in Development</type>
+      <description>Backend requires authentication even in development mode, hindering local development</description>
+      <location>netra_backend/app/websocket_core/auth.py</location>
+    </cause>
+  </root_causes>
+
+  <solutions>
+    <solution>
+      <type>Frontend Guard Condition</type>
+      <description>Add early return in WebSocketProvider useEffect when token is null</description>
+      <implementation>
+        <![CDATA[
+        useEffect(() => {
+          // Skip WebSocket connection if no token available
+          if (!token) {
+            logger.debug('WebSocket connection skipped - no token available');
+            return;
+          }
+          // ... rest of connection logic
+        }, [token, ...otherDeps]);
+        ]]>
+      </implementation>
+      <benefit>Prevents connection attempts without authentication</benefit>
+    </solution>
+    
+    <solution>
+      <type>Backend Development Mode Bypass</type>
+      <description>Allow unauthenticated connections in development environment with clear warnings</description>
+      <implementation>
+        <![CDATA[
+        if not token:
+            if self._is_development_auth_bypass_enabled():
+                logger.warning("WebSocket development mode: Bypassing authentication")
+                return self._create_development_auth_info()
+        ]]>
+      </implementation>
+      <benefit>Improves development experience while maintaining production security</benefit>
+    </solution>
+    
+    <solution>
+      <type>Origin None Handling</type>
+      <description>Allow None origin in development for desktop/mobile app testing</description>
+      <location>netra_backend/app/core/websocket_cors.py</location>
+      <benefit>Supports various client types during development</benefit>
+    </solution>
+  </solutions>
+
+  <prevention>
+    <measure>
+      <type>Token State Management</type>
+      <description>Implement proper token availability tracking before WebSocket connections</description>
+      <pattern>Always check token existence before attempting authenticated connections</pattern>
+    </measure>
+    <measure>
+      <type>Connection Retry Logic</type>
+      <description>Add automatic retry when token becomes available</description>
+      <pattern>Use React useEffect dependencies to trigger reconnection on token changes</pattern>
+    </measure>
+    <measure>
+      <type>Environment-Aware Authentication</type>
+      <description>Configure authentication requirements based on environment</description>
+      <pattern>Development allows bypass, staging/production requires strict auth</pattern>
+    </measure>
+  </prevention>
+
+  <testing>
+    <test_case>
+      <name>test_websocket_connection_without_token</name>
+      <description>Verify error 1008 when connecting without token</description>
+      <location>tests/e2e/test_websocket_auth_timing.py</location>
+    </test_case>
+    <test_case>
+      <name>test_websocket_connection_timing_race</name>
+      <description>Test race condition where token becomes available after connection attempt</description>
+      <location>tests/e2e/test_websocket_auth_timing.py</location>
+    </test_case>
+  </testing>
+
+  <best_practices>
+    <practice>
+      <title>Always Check Token Before Connection</title>
+      <description>Frontend should verify token existence before attempting authenticated WebSocket connections</description>
+      <rationale>Prevents authentication errors and improves user experience</rationale>
+    </practice>
+    <practice>
+      <title>Environment-Specific Security</title>
+      <description>Development environments should be more permissive while production maintains strict security</description>
+      <rationale>Balances developer productivity with production security requirements</rationale>
+    </practice>
+    <practice>
+      <title>Clear Error Messages</title>
+      <description>Authentication errors should clearly indicate the issue and required solution</description>
+      <rationale>Reduces debugging time and improves developer experience</rationale>
+    </practice>
+  </best_practices>
+
+  <monitoring>
+    <metric>
+      <name>WebSocket Auth Failures</name>
+      <description>Track frequency of 1008 errors</description>
+      <threshold>Should be zero in production after login</threshold>
+    </metric>
+    <metric>
+      <name>Connection Retry Count</name>
+      <description>Number of reconnection attempts after auth failure</description>
+      <threshold>Maximum 3 retries before giving up</threshold>
+    </metric>
+  </monitoring>
+
+  <related_files>
+    <file>frontend/providers/WebSocketProvider.tsx</file>
+    <file>frontend/services/webSocketService.ts</file>
+    <file>netra_backend/app/websocket_core/auth.py</file>
+    <file>netra_backend/app/core/websocket_cors.py</file>
+    <file>tests/e2e/test_websocket_auth_timing.py</file>
+  </related_files>
+
+  <keywords>
+    <keyword>WebSocket</keyword>
+    <keyword>Authentication</keyword>
+    <keyword>JWT</keyword>
+    <keyword>Error 1008</keyword>
+    <keyword>Timing</keyword>
+    <keyword>DevLauncher</keyword>
+    <keyword>CORS</keyword>
+    <keyword>Origin None</keyword>
+  </keywords>
+</learnings>

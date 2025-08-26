@@ -116,7 +116,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 ### Docker Build
 
 ```bash
-docker build -f deployment/docker/Dockerfile.auth -t auth-service .
+docker build -f deployment/docker/auth.gcp.Dockerfile -t auth-service .
 ```
 
 ### Deploy to GCP Cloud Run

@@ -100,6 +100,11 @@
 |-----------|----------|---------|------------------|
 | **🔴 Auth Backend Desynchronization** | `/tests/e2e/test_auth_backend_desynchronization.py` | **P0 CRITICAL** - Cross-service transaction rollback vulnerability | **9.4M Protection** |
 
+#### Critical Startup Tests (New Implementation - Cycle 2)
+| Test File | Location | Purpose | Protection Value |
+|-----------|----------|---------|------------------|
+| **🔴 Configuration Drift Detection** | `/netra_backend/tests/startup/test_configuration_drift_detection.py` | **P0 CRITICAL** - SSL parameter cascade failure detection | **9.4M Protection** |
+
 ---
 
 ## 🎯 UNIFIED SYSTEM ARCHITECTURE
@@ -175,6 +180,12 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 # Deploy to Production (With Checks)
 python scripts/deploy_to_gcp.py --project netra-production --run-checks
 ```
+
+### Docker Configuration
+**IMPORTANT: Two distinct Docker configuration sets exist**
+- **Development:** `/docker/*.development.Dockerfile` - Local dev with hot-reload
+- **Production/GCP:** `/deployment/docker/*.gcp.Dockerfile` - Optimized for Cloud Run
+- **Index:** [`docs/DOCKER_CONFIGURATION_INDEX.md`](docs/DOCKER_CONFIGURATION_INDEX.md) - Complete Docker configuration mapping
 
 ---
 

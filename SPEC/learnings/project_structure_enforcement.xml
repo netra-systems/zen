@@ -143,7 +143,7 @@ python scripts/fix_imports.py --fix    # Apply fixes</usage>
     </update>
     
     <update>
-      <file>Dockerfile.backend</file>
+      <file>backend.gcp.Dockerfile</file>
       <change>CMD ["uvicorn", "netra_backend.app.main:app", ...]</change>
       <reason>Updated entry point for new structure</reason>
     </update>

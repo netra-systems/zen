@@ -178,7 +178,8 @@ async def handle_oauth_callback(provider: str, token: dict):
 ```python
 # app/auth/jwt_handler.py
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import JWTError
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"

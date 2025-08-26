@@ -7,9 +7,12 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig
-from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitConfig
+from netra_backend.app.core.resilience.unified_circuit_breaker import (
+    UnifiedCircuitBreaker,
+    UnifiedCircuitConfig,
+    UnifiedCircuitBreakerState
+)
 from netra_backend.app.core.config import get_config
 
 
@@ -87,19 +90,23 @@ class AuthCircuitBreakerManager:
     def __init__(self):
         self.circuit_breaker = self._create_circuit_breaker()
     
-    def _create_circuit_breaker(self) -> CircuitBreaker:
+    def _create_circuit_breaker(self) -> UnifiedCircuitBreaker:
         """Create circuit breaker for auth service."""
         config = self._get_circuit_config()
-        return CircuitBreaker(config)
+        return UnifiedCircuitBreaker(config)
     
     def _get_circuit_config(self) -> UnifiedCircuitConfig:
-        """Get circuit breaker configuration."""
+        """Get circuit breaker configuration - more resilient settings."""
         return UnifiedCircuitConfig(
             name="auth_service",
-            failure_threshold=5,
-            recovery_timeout=60,
-            timeout_seconds=30,
-            sliding_window_size=10  # Required by UnifiedCircuitBreaker
+            failure_threshold=8,  # Increased from 5 - less aggressive opening
+            recovery_timeout=30,  # Reduced from 60 - faster recovery attempts
+            timeout_seconds=15,   # Reduced from 30 - faster timeout detection
+            success_threshold=2,  # Only need 2 successes to close
+            sliding_window_size=15,  # Larger window for better error rate calculation
+            error_rate_threshold=0.7,  # 70% error rate required to open
+            min_requests_threshold=5,  # Need at least 5 requests before opening
+            half_open_max_calls=5,  # Allow more test calls in half-open state
         )
     
     async def call_with_breaker(self, func, *args, **kwargs):

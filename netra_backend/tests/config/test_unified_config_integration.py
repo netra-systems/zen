@@ -193,7 +193,7 @@ class TestPostgresCoreIntegration:
     def test_sync_database_pool_config(self):
         """Test sync Database class uses unified config for pool settings."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+        with patch('netra_backend.app.db.postgres_core.get_unified_config') as mock_config:
             # Mock: Component isolation for controlled unit testing
             mock_config.return_value = Mock(
                 db_pool_size=25,
@@ -219,7 +219,7 @@ class TestPostgresCoreIntegration:
     async def test_async_database_pool_config(self):
         """Test async Database class uses unified config for pool settings."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+        with patch('netra_backend.app.db.postgres_core.get_unified_config') as mock_config:
             # Mock: Component isolation for controlled unit testing
             mock_config.return_value = Mock(
                 db_pool_size=30,

@@ -164,7 +164,7 @@
     </dev_launcher>
     
     <docker>
-      <status>Dockerfile.backend configured</status>
+      <status>backend.gcp.Dockerfile configured</status>
       <port>8888 (container) mapped dynamically</port>
     </docker>
     

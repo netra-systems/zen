@@ -125,8 +125,8 @@ deployment:
   build:
     cache_enabled: true
     parallel_builds: true
-    dockerfile_backend: "Dockerfile.backend"
-    dockerfile_frontend: "Dockerfile.frontend"
+    dockerfile_backend: "backend.gcp.Dockerfile"
+    dockerfile_frontend: "frontend.gcp.Dockerfile"
   
   # Health check configuration
   health_check:

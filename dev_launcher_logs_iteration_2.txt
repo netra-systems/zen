@@ -1,0 +1,72 @@
+DEV LAUNCHER - ITERATION 2 LOGS
+======================================
+Timestamp: 2025-08-26 14:13:21 - 14:17:08
+Status: PARTIAL SUCCESS - Backend and Auth Started, Frontend Failed
+Duration: ~4 minutes (2 attempts)
+
+ATTEMPT 1 (14:13:21 - 14:13:57): FAILED - PostgreSQL Down
+======================================
+INITIAL SETUP - SUCCESS:
+✅ Circuit breakers created successfully
+✅ Secrets populated for development
+✅ ServiceDiscoverySystem initialized
+✅ ClickHouse Docker container reused successfully
+✅ Environment check passed
+✅ Pre-checks completed (3.0s, 93.8% time saved)
+
+SERVICE ISSUES IN ATTEMPT 1:
+❌ Redis Docker container failed to start (port 6379 already allocated)
+❌ PostgreSQL Connection CRITICAL FAILURE (container was stopped)
+❌ Emergency exit - some resources may not be cleaned up properly
+
+ATTEMPT 2 (14:15:08 - 14:17:08): PARTIAL SUCCESS
+======================================
+INFRASTRUCTURE STATUS:
+✅ PostgreSQL: Started and healthy (manually started netra-postgres-dev)
+✅ ClickHouse: Running and healthy (netra-clickhouse-dev, Up 23+ hours)  
+❌ Redis: Docker start failed (port conflict) but Redis service available elsewhere
+
+DATABASE CONNECTIONS:
+✅ PostgreSQL: Connected successfully (after manual container start)
+✅ ClickHouse: Connected successfully
+✅ Redis: Connected successfully (using existing Redis instance)
+✅ Database schema up-to-date with 26 tables
+
+SERVICES STARTED SUCCESSFULLY:
+✅ Backend Service:
+   - Started on port 8000
+   - All startup components initialized (7.04s total)
+   - 26 database tables present
+   - 7 agents registered (triage, data, optimization, actions, reporting, synthetic_data, corpus_admin)
+   - Redis connected for sessions
+   - ClickHouse tables initialized
+   - System Ready: 10/10 successful, 0 degraded, 0 failed
+   - Health endpoint responding at /health/
+
+✅ Auth Service:
+   - Started on port 8081
+   - Circuit breakers created
+   - JWT validation cache initialized with Redis
+   - Redis connected for session management
+   - OAuth configuration loaded
+   - Signal handlers configured for graceful shutdown
+
+PERSISTENT ISSUES:
+❌ Backend Health Check: 
+   - /health/ready returning 503: "Core database unavailable"
+   - PostgreSQL readiness check failing (timeout ~3.2s per request)
+   - Backend started but database connection issues persist
+
+❌ Frontend Service:
+   - Failed to start (not detailed in logs)
+   - Frontend startup appears to have been skipped
+
+❌ WebSocket Validation:
+   - WebSocket endpoint validation attempts ongoing
+   - Connection attempts to main_ws and mcp_ws failing
+
+ROOT CAUSE ANALYSIS:
+The system can start backend and auth services, but there's a disconnect between:
+1. Database connection validation (shows success)
+2. Backend readiness checks (shows PostgreSQL unavailable)
+This suggests a configuration mismatch or connection pool issue rather than database unavailability.

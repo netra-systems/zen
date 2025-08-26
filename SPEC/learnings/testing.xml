@@ -978,9 +978,9 @@
                 pytest-asyncio is installed but decorator comes from pytest
             </solution>
             <files_affected>
-                <file>netra_backend/tests/unified/e2e/test_oauth_proxy_staging.py</file>
+                <file>tests/e2e/test_auth_service_staging.py</file>
             </files_affected>
-            <verification>OAuth proxy tests now run without import errors</verification>
+            <verification>Auth service tests now run without import errors</verification>
         </learning>
         
         <learning id="dev-launcher-real-system-integration">

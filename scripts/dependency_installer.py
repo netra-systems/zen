@@ -98,7 +98,7 @@ def install_essential_packages_fallback(pip_path: Path) -> InstallerResult:
     """Install essential packages individually if bulk install fails"""
     essential_packages = [
         "fastapi", "uvicorn", "sqlalchemy", "aiosqlite", "asyncpg",
-        "redis", "pydantic", "python-jose", "passlib", "bcrypt",
+        "redis", "pydantic", "PyJWT", "passlib", "bcrypt",
         "python-multipart", "httpx", "pytest", "pytest-asyncio"
     ]
     

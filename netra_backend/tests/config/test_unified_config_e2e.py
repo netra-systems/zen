@@ -101,7 +101,7 @@ class TestDatabaseE2E:
         from netra_backend.app.db.postgres_core import AsyncDatabase
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+        with patch('netra_backend.app.db.postgres_core.get_unified_config') as mock_config:
             # Mock: Component isolation for controlled unit testing
             mock_config.return_value = Mock(
                 db_pool_size=5,

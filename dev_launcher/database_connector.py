@@ -162,21 +162,21 @@ class DatabaseConnector:
         """Construct ClickHouse URL from environment variables."""
         env_manager = get_env()
         host = env_manager.get("CLICKHOUSE_HOST", HostConstants.LOCALHOST)
-        # Force port 8123 for HTTP connections in dev launcher
+        # Use HTTP port for dev launcher (health checks require HTTP)
         port = env_manager.get("CLICKHOUSE_HTTP_PORT", "8123")
         user = env_manager.get("CLICKHOUSE_USER", DatabaseConstants.CLICKHOUSE_DEFAULT_USER)
         password = env_manager.get("CLICKHOUSE_PASSWORD", "")
         database = env_manager.get("CLICKHOUSE_DB", DatabaseConstants.CLICKHOUSE_DEFAULT_DB)
         
-        # Ensure we use port 8123 for HTTP
-        http_port = 8123 if port == "8123" or not port else int(port)
-        return DatabaseConstants.build_clickhouse_url(
-            host=host,
-            port=http_port,
-            database=database,
-            user=user,
-            password=password if password else None
-        )
+        # Always use HTTP port 8123 for dev launcher (needed for health checks)
+        http_port = 8123
+        
+        # Build HTTP URL directly instead of using DatabaseConstants.build_clickhouse_url
+        # which uses clickhouse:// scheme. For dev launcher, we need HTTP for health checks.
+        if password:
+            return f"http://{user}:{password}@{host}:{http_port}/{database}"
+        else:
+            return f"http://{user}@{host}:{http_port}/{database}"
     
     def _build_redis_url(self) -> Optional[str]:
         """Build Redis URL from environment variables."""
@@ -538,12 +538,29 @@ class DatabaseConnector:
         base_url = self._build_clickhouse_http_url(parsed)
         auth = self._build_clickhouse_auth(parsed)
         
+        # Log the connection attempt details for debugging
+        logger.debug(f"ClickHouse health check - Original URL: {self._mask_url_credentials(connection.url)}")
+        logger.debug(f"ClickHouse health check - HTTP URL: {base_url}")
+        logger.debug(f"ClickHouse health check - Auth: {auth.login if auth else 'None'}")
+        
         return await self._execute_clickhouse_ping(base_url, auth)
     
     def _build_clickhouse_http_url(self, parsed_url) -> str:
         """Build HTTP URL for ClickHouse health check."""
-        scheme = "https" if parsed_url.port == 8443 else "http"
-        return f"{scheme}://{parsed_url.hostname}:{parsed_url.port}"
+        # If the URL is already HTTP, use it as-is
+        if parsed_url.scheme in ["http", "https"]:
+            return f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}"
+        
+        # If it's a clickhouse:// URL, convert to HTTP
+        # Use HTTPS for port 8443, HTTP for others (including 8123)
+        if parsed_url.port == 8443:
+            return f"https://{parsed_url.hostname}:{parsed_url.port}"
+        elif parsed_url.port == 9000:
+            # Native protocol port - convert to HTTP on 8123
+            return f"http://{parsed_url.hostname}:8123"
+        else:
+            # Default to HTTP for any other port
+            return f"http://{parsed_url.hostname}:{parsed_url.port}"
     
     def _build_clickhouse_auth(self, parsed_url):
         """Build authentication for ClickHouse connection."""
@@ -555,25 +572,33 @@ class DatabaseConnector:
     async def _execute_clickhouse_ping(self, base_url: str, auth) -> bool:
         """Execute ClickHouse ping request with proper error handling for code 194."""
         import aiohttp
+        ping_url = f"{base_url}/ping"
+        
         try:
+            logger.debug(f"ClickHouse ping attempt: {ping_url}")
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"{base_url}/ping",
+                    ping_url,
                     auth=auth,
                     timeout=aiohttp.ClientTimeout(total=self.retry_config.timeout)
                 ) as response:
+                    logger.debug(f"ClickHouse ping response: {response.status}")
                     if response.status == 200:
+                        logger.debug("ClickHouse ping successful")
                         return True
                     elif response.status == 401:
                         # Authentication failed - handle gracefully
                         logger.info("ClickHouse authentication failed - check credentials")
                         return False
                     else:
-                        logger.debug(f"ClickHouse ping failed with status {response.status}")
+                        response_text = await response.text() if response.content_length else ""
+                        logger.debug(f"ClickHouse ping failed with status {response.status}: {response_text}")
                         return False
         except aiohttp.ClientError as e:
+            logger.debug(f"ClickHouse ping client error: {str(e)}")
             return self._handle_clickhouse_connection_error(e)
         except Exception as e:
+            logger.debug(f"ClickHouse ping general error: {str(e)}")
             return self._handle_clickhouse_connection_error(e)
     
     def _handle_clickhouse_connection_error(self, error: Exception) -> bool:

@@ -70,7 +70,7 @@
         </solution>
         <files_modified>
             - auth_service/gunicorn_config.py (created)
-            - Dockerfile.auth (updated with tini)
+            - auth.gcp.Dockerfile (updated with tini)
             - auth_service/health_check.py (created)
         </files_modified>
         <verification>

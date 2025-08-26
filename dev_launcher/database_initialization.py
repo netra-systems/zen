@@ -14,6 +14,7 @@ import time
 from pathlib import Path
 from typing import Dict, Optional, List, Tuple
 from urllib.parse import urlparse
+import random
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -77,7 +78,7 @@ class DatabaseInitializer:
             return False
     
     async def _initialize_postgresql(self) -> bool:
-        """Initialize PostgreSQL database using DatabaseURLBuilder."""
+        """Initialize PostgreSQL database using DatabaseURLBuilder with retry logic."""
         env = get_env()
         
         # Use DatabaseURLBuilder for proper URL construction
@@ -90,51 +91,96 @@ class DatabaseInitializer:
             self._print("ℹ️", "POSTGRES", "No PostgreSQL configuration found, skipping initialization")
             return True
             
-        try:
-            # Parse database URL
-            parsed = urlparse(database_url)
-            if not parsed.hostname:
-                self._print("⚠️", "POSTGRES", "Invalid DATABASE_URL format")
-                return False
+        # Mask password in URL for logging
+        parsed_for_logging = urlparse(database_url)
+        safe_url = f"{parsed_for_logging.scheme}://{parsed_for_logging.username}:***@{parsed_for_logging.hostname}:{parsed_for_logging.port}{parsed_for_logging.path}"
+        self._print("ℹ️", "POSTGRES", f"Connecting to: {safe_url}")
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                # Parse database URL
+                parsed = urlparse(database_url)
+                if not parsed.hostname:
+                    self._print("⚠️", "POSTGRES", "Invalid DATABASE_URL format")
+                    return False
+                    
+                if attempt > 0:
+                    # Exponential backoff with jitter
+                    delay = (2 ** attempt) + random.uniform(0, 1)
+                    self._print("🔄", "POSTGRES", f"Retrying PostgreSQL initialization (attempt {attempt + 1}/{max_retries}) in {delay:.1f}s")
+                    await asyncio.sleep(delay)
+                    
+                # Test basic connection
+                connection_successful = await self._test_postgresql_connection(database_url)
+                if not connection_successful:
+                    if attempt == max_retries - 1:
+                        self._print("❌", "POSTGRES", "Cannot connect to PostgreSQL after all retries")
+                        return False
+                    else:
+                        self._print("⚠️", "POSTGRES", f"Connection attempt {attempt + 1} failed, will retry")
+                        continue
+                    
+                # Ensure database exists
+                db_exists = await self._ensure_database_exists(parsed)
+                if not db_exists:
+                    if attempt == max_retries - 1:
+                        self._print("⚠️", "POSTGRES", "Database existence check failed after all retries")
+                        return False
+                    else:
+                        self._print("⚠️", "POSTGRES", f"Database check attempt {attempt + 1} failed, will retry")
+                        continue
+                    
+                # Check for basic tables
+                tables_exist = await self._check_basic_tables(database_url)
+                if not tables_exist:
+                    self._print("🔧", "POSTGRES", "Basic tables missing, will be created by migrations")
+                    
+                self._print("✅", "POSTGRES", f"PostgreSQL initialization successful (attempt {attempt + 1})")
+                return True
                 
-            # Test basic connection
-            connection_successful = await self._test_postgresql_connection(database_url)
-            if not connection_successful:
-                self._print("❌", "POSTGRES", "Cannot connect to PostgreSQL")
-                return False
-                
-            # Ensure database exists
-            db_exists = await self._ensure_database_exists(parsed)
-            if not db_exists:
-                self._print("⚠️", "POSTGRES", "Database existence check failed")
-                return False
-                
-            # Check for basic tables
-            tables_exist = await self._check_basic_tables(database_url)
-            if not tables_exist:
-                self._print("🔧", "POSTGRES", "Basic tables missing, will be created by migrations")
-                
-            self._print("✅", "POSTGRES", "PostgreSQL initialization successful")
-            return True
-            
-        except Exception as e:
-            logger.error(f"PostgreSQL initialization failed: {e}")
-            self._print("❌", "POSTGRES", f"PostgreSQL initialization failed: {str(e)[:100]}")
-            return False
+            except Exception as e:
+                error_msg = str(e)
+                if attempt == max_retries - 1:
+                    logger.error(f"PostgreSQL initialization failed after {max_retries} attempts: {e}")
+                    self._print("❌", "POSTGRES", f"PostgreSQL initialization failed: {error_msg[:100]}")
+                    return False
+                else:
+                    logger.warning(f"PostgreSQL initialization attempt {attempt + 1} failed: {e}")
+                    self._print("⚠️", "POSTGRES", f"Attempt {attempt + 1} failed: {error_msg[:50]}, retrying...")
+                    continue
+        
+        return False
     
     async def _test_postgresql_connection(self, database_url: str) -> bool:
-        """Test PostgreSQL connection."""
+        """Test PostgreSQL connection with increased timeout."""
         try:
-            # Use sync connection for simpler error handling
-            conn = psycopg2.connect(database_url, connect_timeout=10)
+            # Use sync connection for simpler error handling with increased timeout
+            conn = psycopg2.connect(database_url, connect_timeout=30)
             conn.close()
             return True
+        except psycopg2.OperationalError as e:
+            error_msg = str(e)
+            if "timeout" in error_msg.lower():
+                logger.debug(f"PostgreSQL connection timeout after 30 seconds: {e}")
+            elif "refused" in error_msg.lower():
+                logger.debug(f"PostgreSQL connection refused: {e}")
+            elif "authentication" in error_msg.lower():
+                logger.debug(f"PostgreSQL authentication failed: {e}")
+            else:
+                logger.debug(f"PostgreSQL connection failed: {e}")
+            return False
         except Exception as e:
-            logger.debug(f"PostgreSQL connection test failed: {e}")
+            logger.debug(f"PostgreSQL connection test failed with unexpected error: {e}")
             return False
     
     async def _ensure_database_exists(self, parsed_url) -> bool:
-        """Ensure the target database exists."""
+        """Ensure the target database exists with improved error handling."""
+        database_name = parsed_url.path.lstrip('/')
+        if not database_name:
+            self._print("⚠️", "POSTGRES", "No database name found in URL")
+            return False
+            
         try:
             # Use DatabaseURLBuilder to construct postgres database URL
             env = get_env()
@@ -150,19 +196,38 @@ class DatabaseInitializer:
             builder = DatabaseURLBuilder(builder_env)
             postgres_url = builder.tcp.sync_url or builder.development.default_sync_url
             
-            conn = psycopg2.connect(postgres_url)
+            if not postgres_url:
+                self._print("⚠️", "POSTGRES", "Could not construct postgres database URL")
+                return True  # Continue anyway in development
+            
+            # Try to connect to postgres database with timeout
+            conn = psycopg2.connect(postgres_url, connect_timeout=30)
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
             cursor = conn.cursor()
             
             # Check if database exists
-            database_name = parsed_url.path.lstrip('/')
             cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database_name,))
             
             if not cursor.fetchone():
                 # Database doesn't exist, try to create it
                 self._print("🔧", "POSTGRES", f"Creating database '{database_name}'")
-                cursor.execute(f'CREATE DATABASE "{database_name}"')
-                self._print("✅", "POSTGRES", f"Database '{database_name}' created successfully")
+                try:
+                    cursor.execute(f'CREATE DATABASE "{database_name}"')
+                    self._print("✅", "POSTGRES", f"Database '{database_name}' created successfully")
+                except psycopg2.Error as create_error:
+                    error_msg = str(create_error)
+                    if "already exists" in error_msg.lower():
+                        self._print("✅", "POSTGRES", f"Database '{database_name}' already exists")
+                    elif "permission denied" in error_msg.lower():
+                        self._print("⚠️", "POSTGRES", f"Permission denied creating database '{database_name}', continuing anyway")
+                        cursor.close()
+                        conn.close()
+                        return True  # Continue in development mode
+                    else:
+                        self._print("⚠️", "POSTGRES", f"Failed to create database '{database_name}': {error_msg[:50]}")
+                        cursor.close()
+                        conn.close()
+                        return True  # Continue anyway in development
             else:
                 self._print("✅", "POSTGRES", f"Database '{database_name}' exists")
                 
@@ -170,10 +235,51 @@ class DatabaseInitializer:
             conn.close()
             return True
             
+        except psycopg2.OperationalError as e:
+            error_msg = str(e)
+            if "does not exist" in error_msg.lower() and "postgres" in error_msg.lower():
+                self._print("⚠️", "POSTGRES", "Cannot connect to 'postgres' database, trying alternative approach")
+                # Try connecting directly to the target database
+                return await self._fallback_database_check(parsed_url)
+            elif "authentication" in error_msg.lower():
+                self._print("⚠️", "POSTGRES", "Authentication failed for database existence check")
+                logger.error(f"Database authentication failed: {e}")
+                return True  # Continue anyway in development
+            elif "timeout" in error_msg.lower():
+                self._print("⚠️", "POSTGRES", "Timeout during database existence check")
+                logger.error(f"Database existence check timeout: {e}")
+                return True  # Continue anyway in development
+            else:
+                logger.error(f"Database existence check failed: {e}")
+                self._print("⚠️", "POSTGRES", f"Database check failed: {error_msg[:50]}, continuing anyway")
+                return True  # Continue anyway in development
         except Exception as e:
-            logger.error(f"Database existence check failed: {e}")
-            # Don't create database if we can't connect to postgres
-            return True  # Continue anyway
+            logger.error(f"Database existence check failed with unexpected error: {e}")
+            self._print("⚠️", "POSTGRES", f"Unexpected error during database check: {str(e)[:50]}, continuing anyway")
+            return True  # Continue anyway in development
+    
+    async def _fallback_database_check(self, parsed_url) -> bool:
+        """Fallback method to check database existence by connecting directly."""
+        database_name = parsed_url.path.lstrip('/')
+        try:
+            # Try connecting directly to the target database
+            # Reconstruct URL for direct connection
+            direct_url = f"{parsed_url.scheme}://{parsed_url.username}:{parsed_url.password}@{parsed_url.hostname}:{parsed_url.port or 5432}/{database_name}"
+            conn = psycopg2.connect(direct_url, connect_timeout=30)
+            conn.close()
+            self._print("✅", "POSTGRES", f"Database '{database_name}' is accessible")
+            return True
+        except psycopg2.OperationalError as e:
+            error_msg = str(e)
+            if "does not exist" in error_msg.lower():
+                self._print("⚠️", "POSTGRES", f"Database '{database_name}' does not exist and cannot be created")
+                return True  # Continue anyway in development - migrations will handle this
+            else:
+                self._print("⚠️", "POSTGRES", f"Fallback database check failed: {error_msg[:50]}")
+                return True  # Continue anyway in development
+        except Exception as e:
+            self._print("⚠️", "POSTGRES", f"Fallback check failed: {str(e)[:50]}")
+            return True  # Continue anyway in development
     
     async def _check_basic_tables(self, database_url: str) -> bool:
         """Check if basic tables exist."""
@@ -257,9 +363,9 @@ class DatabaseHealthChecker:
         return results
     
     async def _check_postgresql_readiness(self, database_url: str) -> bool:
-        """Check PostgreSQL readiness."""
+        """Check PostgreSQL readiness with increased timeout."""
         try:
-            conn = psycopg2.connect(database_url, connect_timeout=5)
+            conn = psycopg2.connect(database_url, connect_timeout=30)
             cursor = conn.cursor()
             cursor.execute("SELECT 1")
             cursor.fetchone()

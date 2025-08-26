@@ -111,7 +111,7 @@ class TestCircuitBreakerInitialization:
     def test_circuit_breaker_config_storage(self, circuit_breaker, circuit_config):
         """Circuit breaker stores configuration correctly."""
         assert circuit_breaker.config == circuit_config
-        assert circuit_breaker.adaptive_failure_threshold == circuit_config.failure_threshold
+        assert circuit_breaker.metrics.adaptive_failure_threshold == circuit_config.failure_threshold
 
     def test_circuit_breaker_metrics_initialization(self, circuit_breaker):
         """Circuit breaker initializes metrics to zero."""

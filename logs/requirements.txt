@@ -19,10 +19,10 @@ psycopg2-binary>=2.9.0  # CRITICAL: Required for sync operations and migration c
 asyncpg>=0.29.0
 cloud-sql-python-connector[asyncpg]>=1.7.0
 aiosqlite>=0.19.0  # For testing only
-python-jose[cryptography]>=3.3.0
-PyJWT>=2.8.0
+# python-jose REMOVED - Security vulnerability: unmaintained since 2015, replaced with PyJWT
+PyJWT>=2.10.1
 argon2-cffi>=23.1.0
-python-multipart>=0.0.5
+python-multipart>=0.0.20
 google-cloud-secret-manager>=2.16.0
 authlib>=1.0.0
 python-dateutil>=2.8.2

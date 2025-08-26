@@ -2,11 +2,11 @@
 
 import uuid
 from datetime import datetime, timezone
+from typing import Optional, List
 
 from sqlalchemy import (
     JSON,
     Boolean,
-    Column,
     DateTime,
     ForeignKey,
     Index,
@@ -14,8 +14,9 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    func,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from netra_backend.app.db.base import Base
 
@@ -25,39 +26,39 @@ class AgentStateSnapshot(Base):
     __tablename__ = "agent_state_snapshots"
     
     # Primary identifiers
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    run_id = Column(String, nullable=False, index=True)
-    thread_id = Column(String, nullable=False, index=True)
-    user_id = Column(String, nullable=False, index=True)  # Removed FK for test compatibility
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(String, index=True)
+    thread_id: Mapped[str] = mapped_column(String, index=True)
+    user_id: Mapped[str] = mapped_column(String, index=True)  # Removed FK for test compatibility
     
     # State versioning
-    version = Column(String, nullable=False, default="1.0")
-    schema_version = Column(String, nullable=False, default="1.0")
-    checkpoint_type = Column(String, nullable=False, default="manual")  # manual, auto, recovery
+    version: Mapped[str] = mapped_column(String, default="1.0")
+    schema_version: Mapped[str] = mapped_column(String, default="1.0")
+    checkpoint_type: Mapped[str] = mapped_column(String, default="manual")  # manual, auto, recovery
     
     # State data
-    state_data = Column(JSON, nullable=False)
-    serialization_format = Column(String, nullable=False, default="json")
-    compression_type = Column(String, nullable=True)  # None, gzip, zstd
+    state_data: Mapped[dict] = mapped_column(JSON)
+    serialization_format: Mapped[str] = mapped_column(String, default="json")
+    compression_type: Mapped[Optional[str]] = mapped_column(String)  # None, gzip, zstd
     
     # Metadata
-    step_count = Column(Integer, nullable=False, default=0)
-    agent_phase = Column(String, nullable=True)  # triage, data_analysis, etc.
-    execution_context = Column(JSON, nullable=True)
+    step_count: Mapped[int] = mapped_column(Integer, default=0)
+    agent_phase: Mapped[Optional[str]] = mapped_column(String)  # triage, data_analysis, etc.
+    execution_context: Mapped[Optional[dict]] = mapped_column(JSON)
     
     # Timestamps
-    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), index=True)
-    expires_at = Column(DateTime(timezone=True), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), index=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), index=True)
     
     # Recovery metadata
-    is_recovery_point = Column(Boolean, default=False)
-    recovery_reason = Column(String, nullable=True)
-    parent_snapshot_id = Column(String, ForeignKey("agent_state_snapshots.id"), nullable=True)
+    is_recovery_point: Mapped[bool] = mapped_column(Boolean, default=False)
+    recovery_reason: Mapped[Optional[str]] = mapped_column(String)
+    parent_snapshot_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("agent_state_snapshots.id"))
     
     # Relationships - commented out for test compatibility
-    # user = relationship("User")
-    parent_snapshot = relationship("AgentStateSnapshot", remote_side=[id], back_populates="child_snapshots")
-    child_snapshots = relationship("AgentStateSnapshot", back_populates="parent_snapshot")
+    # user: Mapped["User"] = relationship("User")
+    parent_snapshot: Mapped[Optional["AgentStateSnapshot"]] = relationship("AgentStateSnapshot", remote_side=[id], back_populates="child_snapshots")
+    child_snapshots: Mapped[List["AgentStateSnapshot"]] = relationship("AgentStateSnapshot", back_populates="parent_snapshot")
     
     # Indexes for performance
     __table_args__ = (
@@ -74,33 +75,33 @@ class AgentStateTransaction(Base):
     """Transaction log for agent state changes."""
     __tablename__ = "agent_state_transactions"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    snapshot_id = Column(String, ForeignKey("agent_state_snapshots.id"), nullable=False, index=True)
-    run_id = Column(String, nullable=False, index=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    snapshot_id: Mapped[str] = mapped_column(String, ForeignKey("agent_state_snapshots.id"), index=True)
+    run_id: Mapped[str] = mapped_column(String, index=True)
     
     # Transaction details
-    operation_type = Column(String, nullable=False)  # create, update, merge, restore
-    field_changes = Column(JSON, nullable=True)  # Changed fields
-    previous_values = Column(JSON, nullable=True)  # Previous values for rollback
+    operation_type: Mapped[str] = mapped_column(String)  # create, update, merge, restore
+    field_changes: Mapped[Optional[dict]] = mapped_column(JSON)  # Changed fields
+    previous_values: Mapped[Optional[dict]] = mapped_column(JSON)  # Previous values for rollback
     
     # Execution context
-    triggered_by = Column(String, nullable=False)  # agent_name or system
-    execution_phase = Column(String, nullable=True)
+    triggered_by: Mapped[str] = mapped_column(String)  # agent_name or system
+    execution_phase: Mapped[Optional[str]] = mapped_column(String)
     
     # Performance tracking
-    execution_time_ms = Column(Integer, nullable=True)
-    memory_usage_mb = Column(Integer, nullable=True)
+    execution_time_ms: Mapped[Optional[int]] = mapped_column(Integer)
+    memory_usage_mb: Mapped[Optional[int]] = mapped_column(Integer)
     
     # Status tracking
-    status = Column(String, nullable=False, default="pending")  # pending, committed, failed, rolled_back
-    error_message = Column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String, default="pending")  # pending, committed, failed, rolled_back
+    error_message: Mapped[Optional[str]] = mapped_column(Text)
     
     # Timestamps
-    started_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     
     # Relationships
-    snapshot = relationship("AgentStateSnapshot")
+    snapshot: Mapped["AgentStateSnapshot"] = relationship("AgentStateSnapshot")
     
     # Indexes
     __table_args__ = (
@@ -113,37 +114,37 @@ class AgentRecoveryLog(Base):
     """Log for agent recovery operations."""
     __tablename__ = "agent_recovery_logs"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    run_id = Column(String, nullable=False, index=True)
-    thread_id = Column(String, nullable=False, index=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(String, index=True)
+    thread_id: Mapped[str] = mapped_column(String, index=True)
     
     # Recovery details
-    recovery_type = Column(String, nullable=False)  # restart, resume, rollback
-    source_snapshot_id = Column(String, ForeignKey("agent_state_snapshots.id"), nullable=True)
-    target_snapshot_id = Column(String, ForeignKey("agent_state_snapshots.id"), nullable=True)
+    recovery_type: Mapped[str] = mapped_column(String)  # restart, resume, rollback
+    source_snapshot_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("agent_state_snapshots.id"))
+    target_snapshot_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("agent_state_snapshots.id"))
     
     # Recovery triggers
-    failure_reason = Column(String, nullable=True)
-    trigger_event = Column(String, nullable=False)  # crash, timeout, user_request
-    auto_recovery = Column(Boolean, default=False)
+    failure_reason: Mapped[Optional[str]] = mapped_column(String)
+    trigger_event: Mapped[str] = mapped_column(String)  # crash, timeout, user_request
+    auto_recovery: Mapped[bool] = mapped_column(Boolean, default=False)
     
     # Recovery results
-    recovery_status = Column(String, nullable=False, default="initiated")  # initiated, in_progress, completed, failed
-    recovered_data = Column(JSON, nullable=True)
-    lost_data = Column(JSON, nullable=True)
-    data_integrity_score = Column(Integer, nullable=True)  # 0-100
+    recovery_status: Mapped[str] = mapped_column(String, default="initiated")  # initiated, in_progress, completed, failed
+    recovered_data: Mapped[Optional[dict]] = mapped_column(JSON)
+    lost_data: Mapped[Optional[dict]] = mapped_column(JSON)
+    data_integrity_score: Mapped[Optional[int]] = mapped_column(Integer)  # 0-100
     
     # Performance metrics
-    recovery_time_ms = Column(Integer, nullable=True)
-    data_size_kb = Column(Integer, nullable=True)
+    recovery_time_ms: Mapped[Optional[int]] = mapped_column(Integer)
+    data_size_kb: Mapped[Optional[int]] = mapped_column(Integer)
     
     # Timestamps
-    initiated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
-    completed_at = Column(DateTime(timezone=True), nullable=True)
+    initiated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     
     # Relationships
-    source_snapshot = relationship("AgentStateSnapshot", foreign_keys=[source_snapshot_id])
-    target_snapshot = relationship("AgentStateSnapshot", foreign_keys=[target_snapshot_id])
+    source_snapshot: Mapped[Optional["AgentStateSnapshot"]] = relationship("AgentStateSnapshot", foreign_keys=[source_snapshot_id])
+    target_snapshot: Mapped[Optional["AgentStateSnapshot"]] = relationship("AgentStateSnapshot", foreign_keys=[target_snapshot_id])
     
     # Indexes
     __table_args__ = (

@@ -14,8 +14,8 @@ Smart quotes (Unicode characters U+201C and U+201D) were present in the PowerShe
 instead of regular ASCII double quotes (U+0022). These appeared on lines:
 - Line 92: $env:GCP_STAGING_SA_KEY_PATH
 - Line 96: .gcp/staging-sa-key.json path
-- Line 262: Dockerfile.frontend.staging
-- Line 264: Dockerfile.frontend.optimized  
+- Line 262: frontend.gcp.Dockerfile (formerly Dockerfile.frontend.staging)
+- Line 264: frontend.gcp.Dockerfile (formerly Dockerfile.frontend.optimized)  
 - Line 266: Dockerfile fallback comment
 
 SYMPTOMS:
@@ -44,7 +44,7 @@ However, the issue persisted even after this fix, suggesting either:
 WORKAROUND:
 -----------
 Deployed services directly using gcloud commands instead of the PowerShell script:
-1. Built Docker image: docker build -f Dockerfile.auth -t [image_tag] .
+1. Built Docker image: docker build -f auth.gcp.Dockerfile -t [image_tag] .
 2. Pushed to registry: docker push [image_tag]
 3. Deployed to Cloud Run: gcloud run deploy [service_name] --image [image_tag] ...
 

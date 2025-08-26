@@ -176,7 +176,7 @@ async def get_oauth_config(request: Request):
             providers.append("github")
         
         # Return OAuth-specific response
-        response_data = auth_config.dict() if hasattr(auth_config, 'dict') else auth_config
+        response_data = auth_config.model_dump() if hasattr(auth_config, 'model_dump') else (auth_config.dict() if hasattr(auth_config, 'dict') else auth_config)
         response_data["providers"] = providers
         response_data["google"] = {
             "client_id": google_client_id,

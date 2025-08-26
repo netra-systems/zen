@@ -7,7 +7,7 @@ resources, and isolation boundaries in the Netra platform.
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class SubscriptionTier(str, Enum):
@@ -52,8 +52,7 @@ class Permission(BaseModel):
     created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
     is_active: bool = True
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class TenantResource(BaseModel):
@@ -91,8 +90,7 @@ class TenantResource(BaseModel):
         """Check if usage has reached the limit."""
         return self.used >= self.limit
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class TenantSettings(BaseModel):
@@ -294,11 +292,12 @@ class Tenant(BaseModel):
             }
         return summary
     
-    class Config:
-        use_enum_values = True
-        json_encoders = {
+    model_config = ConfigDict(
+        use_enum_values=True,
+        json_encoders={
             datetime: lambda v: v.isoformat()
         }
+    )
 
 
 class TenantCreate(BaseModel):
@@ -312,8 +311,7 @@ class TenantCreate(BaseModel):
     billing_email: Optional[str] = None
     settings: Optional[TenantSettings] = None
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class TenantUpdate(BaseModel):
@@ -327,8 +325,7 @@ class TenantUpdate(BaseModel):
     status: Optional[str] = None
     settings: Optional[TenantSettings] = None
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class TenantResourceUsage(BaseModel):
@@ -341,8 +338,7 @@ class TenantResourceUsage(BaseModel):
     usage_percentage: float
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class TenantMetrics(BaseModel):
@@ -370,5 +366,4 @@ class TenantMetrics(BaseModel):
     
     generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)

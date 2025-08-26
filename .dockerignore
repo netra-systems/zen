@@ -99,10 +99,11 @@ README.md
 CLAUDE.md
 LICENSE
 
-# Scripts and development files
-scripts
+# Scripts and development files (keep some for container)
+# scripts - needed for wait_for_db.py and init scripts
+# dev_launcher - not needed in container
 dev_launcher
-test_framework
+# test_framework - needed for imports
 terraform-*
 .github
 act-cli
@@ -140,5 +141,5 @@ act.zip
 ACT_*
 nul
 
-# SPEC files (not needed in container)
-SPEC
+# SPEC files - needed for string literals and configuration
+# Keep SPEC directory as it contains runtime configuration

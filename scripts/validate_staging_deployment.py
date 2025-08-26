@@ -292,9 +292,9 @@ class StagingValidator:
         import os
         
         required_dockerfiles = [
-            "deployment/docker/Dockerfile.backend",
-            "deployment/docker/Dockerfile.auth", 
-            "deployment/docker/Dockerfile.frontend"
+            "deployment/docker/backend.gcp.Dockerfile",
+            "deployment/docker/auth.gcp.Dockerfile", 
+            "deployment/docker/frontend.gcp.Dockerfile"
         ]
         
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

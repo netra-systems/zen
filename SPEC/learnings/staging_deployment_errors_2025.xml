@@ -81,7 +81,7 @@
                 <secondary>Mismatch between package.json requirements and Dockerfile</secondary>
             </root_cause>
             <fix>
-                <verification>Dockerfile.frontend already uses node:20-alpine</verification>
+                <verification>frontend.gcp.Dockerfile already uses node:20-alpine</verification>
                 <status>Already fixed in codebase</status>
             </fix>
         </error>

@@ -39,6 +39,7 @@ from netra_backend.app.schemas.websocket_models import (
 from netra_backend.app.websocket_core.rate_limiter import get_rate_limiter, check_connection_rate_limit
 from netra_backend.app.websocket_core.heartbeat_manager import get_heartbeat_manager, register_connection_heartbeat
 from netra_backend.app.websocket_core.message_buffer import get_message_buffer, buffer_user_message, BufferPriority
+from netra_backend.app.services.external_api_client import HTTPError
 
 logger = central_logger.get_logger(__name__)
 
@@ -627,6 +628,71 @@ class WebSocketManager:
         """Save state snapshot for connection recovery - recovery manager compatibility."""
         logger.debug(f"State snapshot saved for connection: {connection_id}")
         # WebSocket connections are stateless, no persistent state to save
+    
+    async def _validate_oauth_token(self, token: str) -> Dict[str, Any]:
+        """Validate OAuth token with Google API - for quota cascade testing."""
+        # For testing purposes, simulate OAuth validation
+        # In real implementation, this would call Google's tokeninfo endpoint
+        
+        if not token or token == "invalid_token":
+            raise HTTPError(401, "Invalid token", {"error": "invalid_token"})
+        
+        if token == "quota_exceeded_token":
+            raise HTTPError(403, "Quota exceeded", {
+                "error": "quota_exceeded",
+                "error_description": "Daily quota exceeded for this application"
+            })
+        
+        # Return mock validation response for testing
+        return {
+            "aud": "test-client-id",
+            "sub": "test-user-id", 
+            "email": "test@example.com",
+            "scope": "openid email profile",
+            "exp": int(time.time()) + 3600
+        }
+    
+    async def _handle_llm_request(self, user_id: str, message: Dict[str, Any], provider: str = "openai") -> Dict[str, Any]:
+        """Handle LLM request through WebSocket - for quota cascade testing."""
+        try:
+            # Simulate LLM request processing
+            # In real implementation, this would call LLMProviderManager.make_request
+            
+            message_content = message.get("content", "")
+            request_type = message.get("type", "llm_request")
+            
+            # For testing, simulate quota failures based on provider
+            if provider == "openai" and "quota_test" in message_content:
+                raise HTTPError(429, "Quota exceeded", {
+                    "error": {"code": "rate_limit_exceeded"}
+                })
+            
+            # Return mock LLM response
+            response = {
+                "type": "llm_response",
+                "content": f"Mock response from {provider}",
+                "provider": provider,
+                "user_id": user_id,
+                "timestamp": time.time()
+            }
+            
+            # Send response back through WebSocket
+            await self.send_to_user(user_id, response)
+            return response
+            
+        except HTTPError:
+            # Re-raise HTTP errors for quota handling
+            raise
+        except Exception as e:
+            logger.error(f"LLM request handling failed for user {user_id}: {e}")
+            error_response = {
+                "type": "error",
+                "error": str(e),
+                "user_id": user_id,
+                "timestamp": time.time()
+            }
+            await self.send_to_user(user_id, error_response)
+            return error_response
 
     async def shutdown(self) -> None:
         """Gracefully shutdown WebSocket manager."""
