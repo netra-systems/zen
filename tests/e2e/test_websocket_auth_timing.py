@@ -106,9 +106,8 @@ class WebSocketAuthTimingTester:
             # Attempt WebSocket connection without Authorization header
             async with websockets.connect(
                 self.endpoints.ws_url,
-                timeout=self.connection_timeout,
                 # No authorization headers - this should trigger error 1008
-                extra_headers={}
+                additional_headers={}
             ) as websocket:
                 # If we reach here, connection succeeded when it should have failed
                 result.connection_successful = True
@@ -153,8 +152,7 @@ class WebSocketAuthTimingTester:
             
             async with websockets.connect(
                 self.endpoints.ws_url,
-                timeout=self.connection_timeout,
-                extra_headers=headers
+                additional_headers=headers
             ) as websocket:
                 result.connection_successful = True
                 result.error_message = "Connection succeeded with null token - vulnerability"
@@ -226,8 +224,7 @@ class WebSocketAuthTimingTester:
         """Helper: Attempt WebSocket connection without authentication."""
         try:
             async with websockets.connect(
-                self.endpoints.ws_url,
-                timeout=self.connection_timeout
+                self.endpoints.ws_url
             ) as websocket:
                 return {"failed_as_expected": False, "connected": True}
                 
@@ -250,8 +247,7 @@ class WebSocketAuthTimingTester:
             headers = {"Authorization": token}
             async with websockets.connect(
                 self.endpoints.ws_url,
-                timeout=self.connection_timeout,
-                extra_headers=headers
+                additional_headers=headers
             ) as websocket:
                 return {"successful": True}
                 
@@ -274,8 +270,7 @@ class WebSocketAuthTimingTester:
             
             async with websockets.connect(
                 self.endpoints.ws_url,
-                timeout=self.connection_timeout,
-                extra_headers=headers
+                additional_headers=headers
             ) as websocket:
                 result.connection_successful = True
                 result.error_message = "Connection succeeded with null Origin - check CORS config"
