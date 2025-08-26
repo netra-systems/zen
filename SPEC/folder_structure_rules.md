@@ -179,9 +179,7 @@ Each microservice owns its directory and ALL files within must be specific to th
 /alembic/                 # Database migrations (backend)
   /versions/              # Migration versions
   
-/auth-proxy/              # Auth proxy service
-  Dockerfile              # Container definition
-  requirements.txt        # Proxy dependencies
+# Note: auth-proxy directory removed - functionality moved to auth_service
 ```
 
 ## 8. Development Support

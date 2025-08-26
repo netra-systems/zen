@@ -1,1 +1,645 @@
-Deepresearch updates.
+Comprehensive Dependency Audit and Modernization Strategy for the Netra Backend Service
+Executive Summary
+Overview
+This report presents a comprehensive audit and modernization strategy for the Python dependencies of the Netra Backend Service. The analysis reveals that the current dependency stack, while functional, is significantly outdated and exposed to security vulnerabilities. Key components, including the core web framework and data persistence layers, are pinned to versions that precede major, architecture-altering releases. This modernization is not merely a version update; it is a critical initiative to enhance performance, bolster security, and align the service with contemporary best practices in Python backend development.
+
+The audit has identified several critical areas requiring immediate attention. The version of FastAPI in use predates the pivotal migration to Pydantic v2, a change that brings substantial performance improvements through its Rust-based core but requires significant code refactoring. Similarly, the application's database layer is built on patterns from SQLAlchemy 1.x, while the ecosystem has moved decisively to the more explicit and performant SQLAlchemy 2.0 API. The AI/ML SDKs for LangChain, OpenAI, Google, and Anthropic have all undergone major breaking changes, rendering the current versions obsolete and unsupported. Furthermore, the security layer contains a critical liability in the form of    
+
+python-jose, an unmaintained library based on a core last updated in 2015 , and    
+
+python-multipart, which has documented Denial of Service (DoS) vulnerabilities in its current version.   
+
+Strategic Recommendations
+A piecemeal approach to updating these packages is inadvisable due to the interconnected nature of the required changes. A coordinated, stack-wide upgrade is necessary. The following strategic actions are recommended:
+
+Execute a Unified Stack Upgrade: Address the updates to FastAPI, Pydantic, SQLAlchemy, and their related dependencies as a single, cohesive project. The interdependencies, particularly between FastAPI and Pydantic, make isolated updates impractical and risky.
+
+Allocate for Code Refactoring: The transition to Pydantic v2, SQLAlchemy 2.0, LangChain v0.2+, and the OpenAI v1.x SDK involves significant API changes. Development time must be explicitly scheduled for refactoring application code to conform to these new, more explicit patterns.
+
+Mitigate Immediate Security Risks: The unmaintained python-jose library must be replaced with the actively maintained PyJWT as a matter of priority to eliminate a significant security vulnerability. Concurrently, python-multipart must be updated to its latest version to patch documented DoS vulnerabilities.
+
+The modernization effort detailed in this report represents a strategic alignment with the evolution of the high-performance Python ecosystem. The broad trend across these foundational libraries is a move away from implicit, "magical" behaviors toward more explicit, strictly-typed, and performant APIs. This is evident in Pydantic's rewrite, SQLAlchemy's removal of autocommit, and the OpenAI SDK's shift to an instantiated client model. Embracing these changes will result in a more robust, maintainable, and secure Netra backend, positioning it for long-term stability and scalability.   
+
+Table: Dependency Modernization Summary
+The following table provides a high-level overview of the required updates, categorizing them by functional area and highlighting the significance of each change to facilitate planning and effort estimation.
+
+Package Group	Package Name	Current Version	Recommended Version	Release Date	Significance of Update
+Core Web Framework	fastapi	0.104.1	0.116.1	Latest	Major. Requires mandatory migration to Pydantic v2.
+starlette	0.27.0	0.47.3	Aug 24, 2025	Major. Core dependency of FastAPI; upgrade is required for compatibility.
+uvicorn[standard]	0.24.0	0.35.0	Jun 28, 2025	Performance and maintenance update.
+gunicorn	21.2.0	23.0.0	Aug 10, 2024	Maintenance and security update for process manager.
+Data Validation	pydantic	>=2.7.4 (Implies v1 via FastAPI)	2.11.7	Jun 14, 2025	Critical. Complete API overhaul (v1 to v2); major refactoring required.
+python-multipart	0.0.6	0.0.20	Dec 16, 2024	Critical Security. Patches high-severity DoS vulnerabilities.
+Database	sqlalchemy	>=2.0.0	2.0.43	Aug 11, 2025	Major. API overhaul (1.x patterns to 2.0); refactoring required.
+sqlmodel	>=0.0.14	0.0.24	Mar 7, 2025	Major. Ensures compatibility with SQLAlchemy 2.0 and Pydantic v2.
+alembic	>=1.13.0	1.16.4	Jul 10, 2025	Major. Required for compatibility with SQLAlchemy 2.0 models.
+asyncpg	>=0.29.0	0.30.0	Oct 20, 2024	Performance and maintenance update for async PostgreSQL driver.
+Authentication & Security	PyJWT	2.8.0	2.10.1	Nov 27, 2024	Maintenance and security update.
+python-jose[cryptography]	3.3.0	REMOVED	N/A	Critical Security. Replace with PyJWT; library is unmaintained.
+argon2-cffi	>=23.1.0	25.1.0	Jun 3, 2025	Maintenance and Python version compatibility update.
+bcrypt	>=4.1.2	4.3.0	Feb 28, 2025	Maintenance update.
+cryptography	>=41.0.7	45.0.6	Aug 5, 2025	High Priority. Foundational security library; update is essential.
+AI/ML SDKs	langchain-core	>=0.1.0	0.3.75	Aug 26, 2025	Major. Breaking changes in v0.2; requires import path updates.
+langchain-community	>=0.0.10	0.3.28	Aug 26, 2025	Major. Breaking changes in v0.2; requires import path updates.
+openai	>=1.0.0	1.101.0	Aug 21, 2025	Major. Ensure code uses v1.x instantiated client, not legacy v0.x API.
+anthropic	0.18.1	0.64.0	Aug 13, 2025	Major. Breaking changes introduced in v0.3.0; requires client refactoring.
+google-generativeai	>=0.3.2	REPLACED	N/A	Critical. Legacy library is deprecated; migrate to new google-genai SDK.
+
+Export to Sheets
+Final Recommended requirements.txt
+The following list represents the fully modernized and vetted dependencies for the Netra Backend Service. It should be adopted as the new standard for the project.
+
+Plaintext
+
+# Netra Backend Requirements - Modernized and Audited
+# Report Date: 2025-09-01
+
+# --- Core Web Framework ---
+# FastAPI is the core web framework. Upgraded to a version compatible with Pydantic v2 and modern Starlette.
+fastapi>=0.116.1
+# Starlette is the underlying ASGI framework for FastAPI. Version is managed by FastAPI's dependencies.
+starlette>=0.47.3
+# Uvicorn is the high-performance ASGI server. The [standard] extra includes uvloop and httptools for performance.
+uvicorn[standard]>=0.35.0
+# Gunicorn is the production-grade process manager for Uvicorn workers.
+gunicorn>=23.0.0
+# ItsDangerous is used for signing data (e.g., for secure tokens/cookies).
+itsdangerous>=2.2.0
+
+# --- Data Validation ---
+# Pydantic is used for data validation and settings management. V2 is a major upgrade with a Rust core.
+pydantic>=2.11.7
+# Required for email validation within Pydantic models.
+email-validator>=2.3.0
+# Handles multipart/form-data parsing. Updated to patch critical DoS vulnerabilities.
+python-multipart>=0.0.20
+
+# --- Database (PostgreSQL with SQLAlchemy) ---
+# SQLAlchemy is the core ORM. Version 2.0+ uses a modern, explicit API.
+sqlalchemy>=2.0.43
+# SQLModel provides a seamless layer over SQLAlchemy and Pydantic.
+sqlmodel>=0.0.24
+# High-performance asyncio driver for PostgreSQL, compatible with SQLAlchemy 2.0 async support.
+asyncpg>=0.30.0
+# Alembic is the database migration tool for SQLAlchemy.
+alembic>=1.16.4
+# Google Cloud SQL Connector for secure, IAM-based connections. The [asyncpg] extra is for async support.
+cloud-sql-python-connector[asyncpg]>=1.18.4
+# Synchronous PostgreSQL driver, often used for scripts or legacy code.
+psycopg2-binary>=2.9.10
+
+# --- In-Memory Cache ---
+# Redis client for Python.
+redis>=6.4.0
+
+# --- Analytics Database ---
+# ClickHouse driver for Python.
+clickhouse-connect>=0.8.18
+# LZ4 is a dependency for ClickHouse for fast compression.
+lz4>=4.4.4
+
+# --- Authentication & Security ---
+# PyJWT is the standard for handling JSON Web Tokens. Replaces the unmaintained python-jose.
+PyJWT[cryptography]>=2.10.1
+# Argon2 is a modern, secure password hashing algorithm.
+argon2-cffi>=25.1.0
+# Bcrypt is another widely-used password hashing algorithm.
+bcrypt>=4.3.0
+# Cryptography provides low-level cryptographic primitives. Essential to keep updated.
+cryptography>=45.0.6
+
+# --- HTTP & WebSockets ---
+# Modern async HTTP client, used by FastAPI's TestClient and many SDKs.
+httpx>=0.28.1
+# Another powerful async HTTP client/server library.
+aiohttp>=3.12.15
+# Library for building WebSocket clients and servers.
+websockets>=15.0.1
+
+# --- Environment & Configuration ---
+# Manages environment variables from.env files.
+python-dotenv>=1.1.1
+
+# --- Logging & Monitoring ---
+# A modern, easy-to-use logging library.
+loguru>=0.7.3
+# Client library for instrumenting code for Prometheus monitoring.
+prometheus-client>=0.22.1
+
+# --- AI/ML Libraries ---
+# LangChain has been modularized. Core contains base abstractions.
+langchain-core>=0.3.75
+# Community-contributed LangChain integrations.
+langchain-community>=0.3.28
+# OpenAI's official Python SDK. V1.x is a major rewrite from v0.x.
+openai>=1.101.0
+# Anthropic's official Python SDK.
+anthropic>=0.64.0
+# The new, unified Google GenAI SDK, replacing the deprecated google-generativeai.
+google-genai
+
+# --- Utilities ---
+# General-purpose retrying library.
+tenacity>=9.1.2
+# High-performance runtime type-checker.
+beartype>=0.21.0
+# Powerful extensions for Python's standard datetime module.
+python-dateutil>=2.9.0.post0
+# YAML parser and emitter for Python.
+pyyaml>=6.0.2
+# Core libraries for data analysis and manipulation.
+pandas>=2.3.2
+numpy>=2.3.2
+
+# --- Performance Monitoring ---
+# Cross-platform library for process and system monitoring.
+psutil>=7.0.0
+
+# --- Testing ---
+# The standard testing framework for Python.
+pytest>=8.4.1
+# Pytest plugin for testing asyncio code.
+pytest-asyncio>=1.1.0
+Part I: Core Web Framework and Infrastructure Modernization
+The foundation of the Netra backend is its web stack, comprising the FastAPI framework, its underlying ASGI toolkit Starlette, and the data validation library Pydantic. The application servers, Gunicorn and Uvicorn, provide the runtime environment. Modernizing this core infrastructure is the first and most critical step, as changes here have cascading effects throughout the entire application.
+
+Section 1.1: The FastAPI, Pydantic v2, and Starlette Nexus
+The relationship between FastAPI, Pydantic, and Starlette is exceptionally tight. FastAPI orchestrates the web layer, but it delegates the heavy lifting of data validation and serialization to Pydantic and the core ASGI communication to Starlette. An upgrade to one component necessitates compatible upgrades to the others, making a unified migration strategy essential.   
+
+The Pydantic v2 Imperative
+The most significant change in the Python web ecosystem in recent years has been the release of Pydantic v2. The user's current fastapi==0.104.1 is one of the first versions to support Pydantic v2, but code written for earlier versions of FastAPI would have been based on Pydantic v1. Upgrading to any modern version of FastAPI makes the migration to Pydantic v2 mandatory. This is not merely a syntactic update; it is a fundamental architectural shift that brings substantial benefits.   
+
+Pydantic v2 was rewritten from the ground up with a core validation engine in Rust, making it one of the fastest data validation libraries available for Python. This translates directly into lower latency and higher throughput for FastAPI applications, as every request and response that involves a Pydantic model benefits from this performance boost. However, this rewrite introduced several breaking API changes that require code modification.   
+
+Key Migration Steps from Pydantic v1 to v2:
+
+Model Configuration: The nested class Config used for model settings is deprecated. Configuration is now managed through a class dictionary named model_config. This change makes configuration more explicit and easier to inspect.   
+
+Pydantic v1 Example:
+
+Python
+
+from pydantic import BaseModel
+
+class User(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+Pydantic v2 Equivalent:
+
+Python
+
+from pydantic import BaseModel, ConfigDict
+
+class User(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+Note the renaming of orm_mode to from_attributes.
+
+Model Serialization: The .dict() method for serializing a model instance to a dictionary has been deprecated in favor of .model_dump(). The new method offers more fine-grained control over the output. Similarly,    
+
+.json() is replaced by .model_dump_json().
+
+Validators: The @validator and @root_validator decorators have been deprecated and replaced with the more explicit @field_validator and @model_validator decorators, respectively. This separation clarifies whether a validation function applies to a single field or the entire model.   
+
+The move to Pydantic v2 is more than a technical upgrade; it reflects a broader shift in the ecosystem towards more robust and explicit API contracts. Pydantic v1 was known for its often-permissive type coercion, which, while convenient, could sometimes mask underlying data integrity issues. Pydantic v2, particularly with its optional "strict mode," encourages developers to be more precise about their data contracts. This discipline reduces the likelihood of unexpected runtime errors and improves the overall reliability of the API, even if it requires a more deliberate development approach during the migration.   
+
+FastAPI and Starlette Upgrade Path
+FastAPI is built directly upon Starlette, a lightweight ASGI framework that provides the fundamental building blocks like routing, middleware, and request/response objects. Consequently, FastAPI's versioning is closely tied to Starlette's. The latest FastAPI releases specify a compatible version range for Starlette, ensuring stability.   
+
+It is recommended to upgrade fastapi from 0.104.1 to the latest stable release, 0.116.1. This upgrade will automatically pull in a compatible, modern version of    
+
+starlette (the latest of which is 0.47.3 ). This ensures the application benefits from the latest performance optimizations, security patches, and features from both libraries, such as Starlette's support for the ASGI    
+
+pathsend extension.   
+
+Other Core Dependencies
+The itsdangerous library is a dependency used for securely signing data. It is often employed by web frameworks for session cookies, password reset tokens, or any other scenario where data needs to be passed through an untrusted environment (like a user's browser) and then verified upon return. The current requirement of    
+
+>=2.0.0 should be updated to the latest stable version, 2.2.0 , to ensure continued maintenance and compatibility with the rest of the modernized stack.   
+
+Section 1.2: Application Server Configuration (Uvicorn & Gunicorn)
+For production deployments, FastAPI applications are typically run using a combination of a process manager and an ASGI server. Gunicorn serves as the mature, battle-tested process manager, responsible for spawning, monitoring, and managing worker processes. Uvicorn, in this configuration, acts as the worker class, providing the high-performance ASGI server implementation that runs the FastAPI application.   
+
+The recommended versions for these components are:
+
+uvicorn[standard]: Update from 0.24.0 to the latest stable version, 0.35.0. The    
+
+[standard] extra is critical for performance. It installs optional, Cython-based dependencies like uvloop (a faster replacement for Python's default asyncio event loop) and httptools (a faster HTTP protocol parser).   
+
+gunicorn: Update from 21.2.0 to the latest stable version, 23.0.0. As a foundational piece of production infrastructure, keeping Gunicorn updated ensures access to the latest security patches and operational improvements.   
+
+The standard command for running this setup in production remains unchanged by these version updates but is reinforced by the latest documentation: gunicorn myapp:app -w 4 -k uvicorn.workers.UvicornWorker. This command instructs Gunicorn to manage four worker processes, each running the Uvicorn worker class to serve the application. Updating the underlying packages ensures this robust deployment pattern benefits from the latest performance and security enhancements.   
+
+Part II: Data Persistence Layer Overhaul
+The data persistence layer, built upon SQLAlchemy, is another area requiring a significant and strategic migration. The move to SQLAlchemy 2.0 is as profound as the Pydantic v2 migration, introducing a new, unified API that enhances performance, improves type safety, and demands a more explicit style of programming. This overhaul will also necessitate updates to SQLModel, Alembic, and the underlying database drivers to ensure full compatibility.
+
+Section 2.1: Strategic Migration to SQLAlchemy 2.0
+SQLAlchemy 2.0 represents a major evolution of the library, unifying the Core and ORM components under a single, consistent API paradigm. The user's requirement of    
+
+sqlalchemy>=2.0.0 signals readiness for this transition, which is essential for building modern, high-performance data access layers.
+
+Key Migration Steps and Paradigm Shifts:
+Elimination of "Implicit Execution" and "Autocommit": A defining feature of legacy SQLAlchemy was its ability to "implicitly" execute statements and manage transactions. This "autocommit" behavior, where the Session would automatically begin and commit transactions, has been completely removed in favor of an explicit, "autobegin" pattern. Now, a transaction is automatically started when the    
+
+Session is first used, but it must always be explicitly committed with session.commit() or rolled back with session.rollback(). This change makes transaction boundaries clear and unambiguous, reducing a common source of bugs in complex applications.
+
+Unified Querying with select(): The legacy session.query() method has been fully superseded by the select() construct. This single function is now the universal way to build queries, whether for Core-level table expressions or ORM entities. This unification simplifies the API and encourages a more compositional approach to building queries.   
+
+SQLAlchemy 1.4 Query Example:
+
+Python
+
+# Legacy style
+results = session.query(User).filter(User.name == 'squidward').all()
+SQLAlchemy 2.0 select() Equivalent:
+
+Python
+
+from sqlalchemy import select
+
+# Modern style
+statement = select(User).where(User.name == 'squidward')
+results = session.scalars(statement).all()
+Fully Typed ORM with Mapped and mapped_column: The most significant improvement for developer experience in SQLAlchemy 2.0 is the introduction of a new declarative syntax that is fully compatible with PEP 484 type hinting and static analysis tools like Mypy. This eliminates the need for third-party stub packages. The migration involves replacing the traditional    
+
+Column declarations with the new Mapped and mapped_column constructs.   
+
+SQLAlchemy 1.4 Declarative Model:
+
+Python
+
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30), nullable=False)
+SQLAlchemy 2.0 Typed Declarative Model:
+
+Python
+
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+class Base(DeclarativeBase):
+    pass
+
+class User(Base):
+    __tablename__ = 'users'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(30))
+This new syntax allows static type checkers to understand the Python types of ORM-mapped attributes, providing autocompletion and error checking from the database model all the way through the application logic.
+
+The recommended version is the latest stable 2.0.x release, 2.0.43 , to ensure all bug fixes and performance improvements are included.   
+
+Section 2.2: Aligning SQLModel, Alembic, and Database Drivers
+With the core ORM updated, the surrounding data ecosystem must be brought into alignment.
+
+SQLModel Compatibility: SQLModel is ingeniously designed to be a Pydantic model and a SQLAlchemy model simultaneously, drastically reducing code duplication. Its compatibility with the new major versions of its underlying libraries is therefore non-negotiable. The user's current version,    
+
+>=0.0.14, already includes support for Pydantic v2 and SQLAlchemy 2.0 (support for which was added in version 0.0.12). However, to leverage the latest features and bug fixes, it is strongly recommended to update to the latest version,    
+
+0.0.24. This version includes valuable additions like official    
+
+UUID support, which is implemented using the new, efficient UUID type available in SQLAlchemy 2.0.   
+
+This combination of modern libraries enables a powerful architectural pattern. The "Great Unification" of the data layer is now possible: a single SQLModel class definition can serve as the database schema, the ORM object for queries, the validation model for API inputs, the serialization model for API outputs, and a fully type-hinted object for static analysis. This eliminates the historical need for separate, duplicative models for each layer, preventing synchronization bugs and providing end-to-end type safety from the database to the JSON response.
+
+Alembic for Migrations: Alembic is the canonical database migration tool for SQLAlchemy. It must be updated to correctly interpret the new SQLAlchemy 2.0 declarative syntax and generate accurate migration scripts. An outdated Alembic version could fail to detect changes in typed models or generate incorrect DDL. Therefore, an update from    
+
+>=1.13.0 to the latest stable version, 1.16.4, is required.   
+
+Database Drivers: The drivers are the final link in the chain, responsible for communicating with the database.
+
+asyncpg: As the primary high-performance asyncio driver for PostgreSQL, asyncpg is fully supported by SQLAlchemy 2.0's asyncio extension. An update from    
+
+>=0.29.0 to the latest version, 0.30.0, is recommended for the best performance and compatibility with modern PostgreSQL versions (up to 17).   
+
+psycopg2-binary: This synchronous driver may be used for offline scripts or administrative tasks. It should be updated from >=2.9.9 to 2.9.10. It is important to note that    
+
+psycopg2-binary is intended for development and ease of installation. For production environments, the standard psycopg2 package is recommended, as it compiles against system libraries and avoids potential issues that can arise with the pre-compiled binary version.   
+
+cloud-sql-python-connector: This library is essential for securely connecting to Google Cloud SQL instances, abstracting away the complexities of SSL certificates and IAM-based authentication. It integrates with SQLAlchemy by providing a custom connection creator function to    
+
+sqlalchemy.create_engine. Crucially, the connector supports    
+
+asyncpg for asynchronous applications. The library should be updated from >=1.7.0 to the latest version, 1.18.4 , to ensure compatibility with modern Python versions (3.9+) and the SQLAlchemy 2.0 engine patterns.   
+
+Part III: Fortifying the Authentication and Security Layer
+The security of the Netra backend is paramount and depends directly on the integrity and maintenance of its cryptographic and authentication libraries. This section addresses the modernization of these critical components, including the mandated replacement of a dangerously outdated library.
+
+Section 3.1: Modernizing Cryptographic and JWT Libraries
+PyJWT: This library is the de facto standard for encoding and decoding JSON Web Tokens (JWT) in Python. The application's current version,    
+
+2.8.0, is relatively recent. However, given the security-sensitive nature of JWTs, it is imperative to stay on the latest release to benefit from ongoing maintenance and potential security patches. The changelogs for PyJWT demonstrate a consistent history of improvements, including security-relevant fixes and enhanced validation options. The recommended action is to update to the latest stable version,    
+
+2.10.1.   
+
+cryptography: This is a foundational library that provides low-level cryptographic primitives used by many other security libraries, including PyJWT and argon2-cffi. The field of cryptography evolves continuously, with new algorithms being developed and weaknesses in older ones being discovered. The    
+
+cryptography library is actively maintained to reflect these changes. The current requirement of >=41.0.7 should be updated to the latest stable version, 45.0.6 , to ensure the application is protected by the most current and secure cryptographic implementations available.   
+
+Password Hashing (argon2-cffi & bcrypt): Secure password storage relies on strong, one-way hashing algorithms.
+
+argon2-cffi: Argon2 is the winner of the Password Hashing Competition and is considered a modern, robust choice. The library should be updated from    
+
+>=23.1.0 to the latest version, 25.1.0. This update ensures compatibility with the latest Python versions (3.13 and 3.14) and drops support for the end-of-life Python 3.7.   
+
+bcrypt: A long-standing and trusted password hashing function. The library should be updated from >=4.1.2 to the latest version, 4.3.0 , as a standard maintenance practice.   
+
+Section 3.2: Critical Advisory on python-jose
+The presence of python-jose[cryptography]==3.3.0 in the dependency list represents a severe and unacceptable security risk that must be addressed immediately.
+
+The Problem: While python-jose is a fork that has received some updates, it is fundamentally based on the jose library. An investigation of the original jose package on PyPI reveals that its last release was version 1.0.0 on November 13, 2015, and it is explicitly classified for Python 2 only.   
+
+The Risk: Relying on a cryptographic library whose core logic has not been maintained for nearly a decade is extraordinarily dangerous. It has not received updates to address new classes of vulnerabilities, nor has it been adapted to incorporate modern cryptographic best practices. This exposes the Netra backend to a wide range of potential attacks that have been discovered and mitigated in actively maintained libraries.
+
+The Solution: Mandated Migration to PyJWT:
+The only responsible course of action is the complete removal of python-jose from the project's dependencies. All functionality related to JWT, JWS (JSON Web Signature), and JWE (JSON Web Encryption) must be migrated to the PyJWT library. PyJWT is the industry standard, is actively maintained by the community, and provides a robust, secure implementation of the relevant RFCs.   
+
+Migration Example (JWS Encoding/Decoding):
+
+Python
+
+import jwt
+
+# Example of encoding a token with PyJWT
+encoded_token = jwt.encode(
+    payload={"user_id": 123},
+    key="your-256-bit-secret",
+    algorithm="HS256"
+)
+
+# Example of decoding a token with PyJWT
+decoded_payload = jwt.decode(
+    jwt=encoded_token,
+    key="your-256-bit-secret",
+    algorithms=
+)
+This situation with python-jose serves as a critical lesson in dependency management. It underscores the hidden dangers of using wrapper or forked packages that can obscure the maintenance status of their underlying core components. A superficial check of python-jose might not reveal the problem, but a deeper analysis of its provenance exposes the abandoned foundation. A thorough dependency audit must always investigate the entire supply chain for critical components, especially those in security-sensitive domains. The recommendation here is not just an update but a strategic replacement of a compromised dependency chain.
+
+Part IV: Navigating the Evolving AI/ML SDK Landscape
+The landscape of AI and machine learning SDKs is characterized by rapid innovation and, consequently, frequent and significant API changes. The libraries used by the Netra backend for interacting with large language models (LLMs) have all undergone major revisions that introduce breaking changes. Navigating these updates is essential to leverage the latest models, features, and performance improvements.
+
+Section 4.1: Adapting to the LangChain Modular Ecosystem (v0.2+)
+LangChain has evolved from a monolithic library into a modular ecosystem of packages. The v0.2 release in May 2024 solidified this structure, introducing breaking changes aimed at improving maintainability and clarity. The user's current versions (   
+
+langchain-core>=0.1.0, langchain-community>=0.0.10) are from the early stages of this transition.
+
+Migration Guidance: The primary task for migration is updating import paths. Components that were previously in the main langchain package have been moved to more specific packages like langchain-community, langchain-core, and partner packages such as langchain-openai.   
+
+To facilitate this, the LangChain team provides a command-line tool, langchain-cli, which includes a migrate command. This tool can automatically rewrite many of the outdated import statements in a codebase. The report must emphasize the use of this tool as the first step in the migration process.   
+
+Additionally, the API for streaming events, astream_events, was rewritten in v2 to be more efficient and consistent. Any code that relies on streaming responses from LangChain chains will need to be updated to handle the new event structure.   
+
+Recommended Versions: It is crucial to update all langchain-* packages in unison to ensure compatibility. The recommended versions are langchain-core>=0.3.75  and    
+
+langchain-community>=0.3.28. Adopting these versions ensures access to the latest abstractions, integrations, and bug fixes, and aligns the project with the current stable release policy of the LangChain ecosystem.   
+
+Section 4.2: OpenAI SDK v1.x Migration Guide
+The user's requirement of openai>=1.0.0 indicates they are using the modern version of the SDK. However, it is critical to verify that the application's code has been fully migrated away from the legacy v0.x patterns. The v1.x SDK, released in late 2023, was a complete rewrite and is not backward-compatible.   
+
+Key Migration Points:
+
+Client Instantiation: The most significant change is the shift from a global, module-level API to an explicit, instantiated client. This is a mandatory change for all v1.x code. This pattern improves testability, allows for per-client configuration (e.g., timeouts, retries), and provides better resource management.   
+
+Legacy v0.x Pattern:
+
+Python
+
+import openai
+openai.api_key = "YOUR_API_KEY"
+completion = openai.ChatCompletion.create(...)
+Modern v1.x Pattern:
+
+Python
+
+from openai import OpenAI
+client = OpenAI(api_key="YOUR_API_KEY")
+completion = client.chat.completions.create(...)
+Method Renaming and Structure: The API surface was reorganized. For instance, openai.Image.create() became client.images.generate().   
+
+Typed Response Objects: API responses are no longer simple dictionaries. They are now Pydantic models, which provide type hints, autocompletion, and attribute-style access (e.g., response.choices.message.content).   
+
+Recommended Version: Update to the latest version, 1.101.0. This is essential for accessing the newest models, such as the GPT-5 family, and new API features like the Responses and Conversations APIs, which are designed to supersede the older Chat Completions endpoint for many use cases.   
+
+Section 4.3: Google Generative AI SDK Transition
+The dependency on google-generativeai>=0.3.2 requires immediate and strategic action, as this library has been officially deprecated by Google.
+
+Library Deprecation: The google-generativeai package is now considered a legacy library. Google has announced that all support, including bug fixes, will end on November 30th, 2025. It will not receive access to new features or models.   
+
+Mandatory Migration to google-genai: The official replacement is the new, unified google-genai SDK. This new library provides a single, consistent interface for interacting with Gemini models, whether through the developer-focused Gemini API (using an API key) or the enterprise-grade Vertex AI platform (using Application Default Credentials). This unified approach simplifies development and deployment, allowing code prototyped with an API key to be moved to a production Vertex AI environment with minimal changes.   
+
+Key Changes:
+
+The new SDK is stateless and revolves around a genai.Client() object, replacing the stateful model objects of the legacy library.   
+
+Authentication is streamlined into the client's initialization.
+
+Some response objects and method names have been changed to be more consistent.
+
+Recommendation: The google-generativeai package must be removed and replaced with google-genai. The application code must be refactored to use the new genai.Client pattern. This migration is not optional; it is required to maintain support and access future Google AI capabilities.
+
+Section 4.4: Anthropic SDK Updates
+Similar to the other AI providers, Anthropic has significantly evolved its Python SDK. The user's current version, anthropic==0.18.1, predates a major rewrite.
+
+SDK Evolution: Version 0.3.0 of the Anthropic SDK was a complete overhaul, introducing separate synchronous (Anthropic) and asynchronous (AsyncAnthropic) clients, unified streaming interfaces, and structured Pydantic-based response objects.   
+
+Migration Guidance:
+
+The application code must be updated to use the new explicit client instantiation pattern.
+
+Streaming logic needs to be refactored, as the old .completion_stream() and .acompletion_stream() methods have been removed. The new approach is to use the standard .create() method with the stream=True parameter.
+
+Recommended Version: Update to the latest stable version, 0.64.0. This upgrade is necessary to interact with the latest Claude models, benefit from increased rate limits, and use new features such as enhanced tool use and the ability to reference images by URL.   
+
+Part V: Analysis of Supporting Libraries and Testing Frameworks
+This final part of the audit covers the wide range of supporting utilities and testing frameworks that are essential for the backend's operation. Ensuring these libraries are up-to-date is crucial for security, performance, and compatibility with the modernized core stack.
+
+Section 5.1: Addressing Vulnerabilities and Ensuring Compatibility
+A number of libraries in the current dependency list require updates for security, performance, or compatibility reasons.
+
+Critical Security Update for python-multipart: The current version, 0.0.6, has two documented high-severity Denial of Service (DoS) vulnerabilities. CVE-2024-24762 describes a Regular Expression DoS (ReDoS) vulnerability in the parsing of Content-Type headers, where a malicious header can cause excessive CPU consumption and stall the server. CVE-2024-53981 describes a similar DoS vulnerability related to the handling of multipart form boundaries. This is a high-priority vulnerability for any public-facing web service. The recommendation is to upgrade immediately to the latest version,    
+
+0.0.20 , which contains the necessary patches. The Starlette project itself has also updated its minimum requirement for this library in recent releases to address this.   
+
+General Utilities: The following updates are recommended for maintenance, performance, and compatibility:
+
+httpx: Used extensively by FastAPI's TestClient and as the HTTP client for modern SDKs like OpenAI and Anthropic. Update from    
+
+>=0.25.1 to 0.28.1.   
+
+aiohttp: Update from >=3.9.1 to 3.12.15.   
+
+websockets: Update from >=12.0 to 15.0.1.   
+
+python-dotenv: Update from 1.0.0 to 1.1.1.   
+
+loguru: Update from 0.7.2 to 0.7.3.   
+
+prometheus-client: This is the library for instrumenting application code to expose Prometheus metrics. Update from >=0.19.0 to 0.22.1. This should not be confused with    
+
+prometheus-api-client, which is for querying a Prometheus server.   
+
+tenacity: Update from >=8.2.3 to 9.1.2.   
+
+beartype: Update from >=0.16.4 to 0.21.0.   
+
+python-dateutil: Update from >=2.8.2 to 2.9.0.post0.   
+
+pyyaml: Update from >=6.0.1 to 6.0.2.   
+
+pandas: Update from >=2.1.4 to 2.3.2.   
+
+numpy: Update from >=1.24.3 to 2.3.2.   
+
+psutil: Update from >=5.9.6 to 7.0.0.   
+
+Data Validation and Connectivity Utilities:
+
+email-validator: Update from >=2.0.0 to 2.3.0.   
+
+clickhouse-connect: Update from >=0.7.0 to the latest version, 0.8.18. A point of caution is warranted here: the library's documentation states that its SQLAlchemy integration is minimal and has only been tested against SQLAlchemy versions 1.3.x and 1.4.x. This presents a potential compatibility risk with the mandated migration to SQLAlchemy 2.0. The integration must be thoroughly tested post-upgrade to ensure continued functionality.   
+
+lz4: This is a high-speed compression library, likely used as a dependency for clickhouse-connect. Update from >=4.3.2 to 4.4.4.   
+
+Section 5.2: Updating the Testing Suite
+An outdated testing suite can fail to catch regressions introduced by library upgrades and may not be compatible with modern Python features or async patterns.
+
+Frameworks: The testing frameworks must be updated to ensure they can correctly discover and run tests against the modernized application code.
+
+Recommended Versions:
+
+pytest: The standard for testing in the Python ecosystem. Update from >=7.4.3 to 8.4.1. This ensures full compatibility with the latest Python versions, updated libraries, and other pytest plugins.   
+
+pytest-asyncio: This plugin is essential for testing the asynchronous code paths in the FastAPI application. Update from >=0.21.1 to 1.1.0. The plugin offers two modes of operation:    
+
+strict and auto. In strict mode (the default), async tests must be explicitly marked with @pytest.mark.asyncio. In auto mode, the plugin automatically treats any async def test function as an asyncio test. For a project that is purely based on asyncio, configuring auto mode in pytest.ini is recommended for convenience.   
+
+Conclusion and Final Consolidated Requirements
+Summary of Strategic Value
+This comprehensive dependency audit and modernization plan outlines a necessary and strategic investment in the future of the Netra Backend Service. The recommended upgrades transcend simple version bumps; they represent a fundamental alignment with a more performant, secure, and maintainable paradigm of modern Python development. By migrating to Pydantic v2 and SQLAlchemy 2.0, the application will benefit from significant performance gains and a more robust, statically-typed data layer that reduces boilerplate and prevents entire classes of bugs. Addressing the critical security vulnerabilities in python-jose and python-multipart is non-negotiable for maintaining a secure production environment. Finally, updating the full suite of AI/ML SDKs ensures that the service can leverage the latest models and features from key providers, maintaining its competitive edge. While this effort requires a dedicated refactoring process, the resulting improvements in performance, security, developer experience, and long-term maintainability will provide a substantial return on investment, positioning the Netra backend for future growth and operational excellence.
+
+Final requirements.txt
+The following is the final, consolidated list of dependencies, representing the target state for the Netra Backend Service after the modernization effort is complete.
+
+Plaintext
+
+# Netra Backend Requirements - Modernized and Audited
+# Report Date: 2025-09-01
+
+# --- Core Web Framework ---
+# FastAPI is the core web framework. Upgraded to a version compatible with Pydantic v2 and modern Starlette.
+fastapi>=0.116.1
+# Starlette is the underlying ASGI framework for FastAPI. Version is managed by FastAPI's dependencies.
+starlette>=0.47.3
+# Uvicorn is the high-performance ASGI server. The [standard] extra includes uvloop and httptools for performance.
+uvicorn[standard]>=0.35.0
+# Gunicorn is the production-grade process manager for Uvicorn workers.
+gunicorn>=23.0.0
+# ItsDangerous is used for signing data (e.g., for secure tokens/cookies).
+itsdangerous>=2.2.0
+
+# --- Data Validation ---
+# Pydantic is used for data validation and settings management. V2 is a major upgrade with a Rust core.
+pydantic>=2.11.7
+# Required for email validation within Pydantic models.
+email-validator>=2.3.0
+# Handles multipart/form-data parsing. Updated to patch critical DoS vulnerabilities.
+python-multipart>=0.0.20
+
+# --- Database (PostgreSQL with SQLAlchemy) ---
+# SQLAlchemy is the core ORM. Version 2.0+ uses a modern, explicit API.
+sqlalchemy>=2.0.43
+# SQLModel provides a seamless layer over SQLAlchemy and Pydantic.
+sqlmodel>=0.0.24
+# High-performance asyncio driver for PostgreSQL, compatible with SQLAlchemy 2.0 async support.
+asyncpg>=0.30.0
+# Alembic is the database migration tool for SQLAlchemy.
+alembic>=1.16.4
+# Google Cloud SQL Connector for secure, IAM-based connections. The [asyncpg] extra is for async support.
+cloud-sql-python-connector[asyncpg]>=1.18.4
+# Synchronous PostgreSQL driver, often used for scripts or legacy code.
+psycopg2-binary>=2.9.10
+
+# --- In-Memory Cache ---
+# Redis client for Python.
+redis>=6.4.0
+
+# --- Analytics Database ---
+# ClickHouse driver for Python.
+clickhouse-connect>=0.8.18
+# LZ4 is a dependency for ClickHouse for fast compression.
+lz4>=4.4.4
+
+# --- Authentication & Security ---
+# PyJWT is the standard for handling JSON Web Tokens. Replaces the unmaintained python-jose.
+PyJWT[cryptography]>=2.10.1
+# Argon2 is a modern, secure password hashing algorithm.
+argon2-cffi>=25.1.0
+# Bcrypt is another widely-used password hashing algorithm.
+bcrypt>=4.3.0
+# Cryptography provides low-level cryptographic primitives. Essential to keep updated.
+cryptography>=45.0.6
+
+# --- HTTP & WebSockets ---
+# Modern async HTTP client, used by FastAPI's TestClient and many SDKs.
+httpx>=0.28.1
+# Another powerful async HTTP client/server library.
+aiohttp>=3.12.15
+# Library for building WebSocket clients and servers.
+websockets>=15.0.1
+
+# --- Environment & Configuration ---
+# Manages environment variables from.env files.
+python-dotenv>=1.1.1
+
+# --- Logging & Monitoring ---
+# A modern, easy-to-use logging library.
+loguru>=0.7.3
+# Client library for instrumenting code for Prometheus monitoring.
+prometheus-client>=0.22.1
+
+# --- AI/ML Libraries ---
+# LangChain has been modularized. Core contains base abstractions.
+langchain-core>=0.3.75
+# Community-contributed LangChain integrations.
+langchain-community>=0.3.28
+# OpenAI's official Python SDK. V1.x is a major rewrite from v0.x.
+openai>=1.101.0
+# Anthropic's official Python SDK.
+anthropic>=0.64.0
+# The new, unified Google GenAI SDK, replacing the deprecated google-generativeai.
+google-genai
+
+# --- Utilities ---
+# General-purpose retrying library.
+tenacity>=9.1.2
+# High-performance runtime type-checker.
+beartype>=0.21.0
+# Powerful extensions for Python's standard datetime module.
+python-dateutil>=2.9.0.post0
+# YAML parser and emitter for Python.
+pyyaml>=6.0.2
+# Core libraries for data analysis and manipulation.
+pandas>=2.3.2
+numpy>=2.3.2
+rich>=14.1.0
+Faker>=37.6.0
+
+# --- Performance Monitoring ---
+# Cross-platform library for process and system monitoring.
+psutil>=7.0.0
+
+# --- Testing ---
+# The standard testing framework for Python.
+pytest>=8.4.1
+# Pytest plugin for testing asyncio code.
+pytest-asyncio>=1.1.0

@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from typing import Any, Dict, Generic, List, Optional
 
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.core.exceptions import RecordNotFoundError, ServiceError
@@ -106,19 +107,21 @@ class CRUDService(DatabaseService, Generic[T, ID, CreateSchema, UpdateSchema, Re
         """Get multiple entities with pagination and filtering."""
         async with self.get_db_session() as session:
             query = self._build_query(session, filters)
-            entities = await self._execute_paginated_query(query, skip, limit)
+            entities = await self._execute_paginated_query(session, query, skip, limit)
             return [self._to_response_schema(entity) for entity in entities]
     
     def _build_query(self, session: AsyncSession, filters: Optional[Dict[str, Any]]):
         """Build database query with optional filters."""
-        query = session.query(self._model_class)
+        query = select(self._model_class)
         if filters:
             query = self._apply_filters(query, filters)
         return query
     
-    async def _execute_paginated_query(self, query, skip: int, limit: int):
+    async def _execute_paginated_query(self, session: AsyncSession, query, skip: int, limit: int):
         """Execute query with pagination."""
-        return await query.offset(skip).limit(limit).all()
+        paginated_query = query.offset(skip).limit(limit)
+        result = await session.execute(paginated_query)
+        return result.scalars().all()
     
     async def update(self, entity_id: ID, data: UpdateSchema, **context) -> ResponseSchema:
         """Update an existing entity."""
@@ -178,7 +181,7 @@ class CRUDService(DatabaseService, Generic[T, ID, CreateSchema, UpdateSchema, Re
         """Apply filters to query - override in subclasses for complex filtering."""
         for field, value in filters.items():
             if hasattr(self._model_class, field):
-                query = query.filter(getattr(self._model_class, field) == value)
+                query = query.where(getattr(self._model_class, field) == value)
         return query
 
 

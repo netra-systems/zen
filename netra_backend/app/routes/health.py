@@ -273,8 +273,9 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         
         # CRITICAL FIX: Sequential execution of critical checks to prevent race conditions
         # PostgreSQL is critical - check first and fail fast
+        # CRITICAL FIX: Align timeout with pool timeout settings (reduce from 3.0s to 2.0s for faster failure detection)
         try:
-            await asyncio.wait_for(_check_postgres_connection(db), timeout=3.0)
+            await asyncio.wait_for(_check_postgres_connection(db), timeout=2.0)
             postgres_status = "connected"
         except (asyncio.TimeoutError, Exception) as e:
             logger.error(f"PostgreSQL readiness check failed: {e}")
@@ -400,15 +401,15 @@ async def ready(request: Request) -> Dict[str, Any]:
             # Use async for to properly handle session lifecycle
             async for db in get_db_dependency():
                 try:
-                    # Wrap the entire readiness check with timeout to prevent probe timeout
-                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=8.0)
+                    # CRITICAL FIX: Reduce timeout to align with faster database check (6.0s total allows for retries)
+                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=6.0)
                     return result
                 except asyncio.TimeoutError:
-                    logger.error("Readiness check exceeded 8 second timeout")
+                    logger.error("Readiness check exceeded 6 second timeout")
                     return _create_error_response(503, {
                         "status": "unhealthy",
                         "message": "Readiness check timeout",
-                        "timeout_seconds": 8
+                        "timeout_seconds": 6
                     })
                 except Exception as check_error:
                     logger.error(f"Readiness check failed: {check_error}")

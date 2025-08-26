@@ -1,6 +1,7 @@
 # app/services/supply_catalog_service.py
 from typing import List, Optional
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db import models_postgres
@@ -14,50 +15,54 @@ class SupplyCatalogService:
     Manages CRUD operations for LLM supply options.
     """
 
-    def get_all_options(self, db_session: AsyncSession) -> List[models_postgres.SupplyOption]:
+    async def get_all_options(self, db_session: AsyncSession) -> List[models_postgres.SupplyOption]:
         """Returns all available supply options from the database."""
-        return db_session.query(models_postgres.SupplyOption).all()
+        result = await db_session.execute(select(models_postgres.SupplyOption))
+        return result.scalars().all()
 
-    def get_option_by_id(self, db_session: AsyncSession, option_id: int) -> Optional[models_postgres.SupplyOption]:
+    async def get_option_by_id(self, db_session: AsyncSession, option_id: int) -> Optional[models_postgres.SupplyOption]:
         """Retrieves a specific supply option by its unique ID."""
-        return db_session.get(models_postgres.SupplyOption, option_id)
+        return await db_session.get(models_postgres.SupplyOption, option_id)
         
-    def get_option_by_name(self, db_session: AsyncSession, name: str) -> Optional[models_postgres.SupplyOption]:
+    async def get_option_by_name(self, db_session: AsyncSession, name: str) -> Optional[models_postgres.SupplyOption]:
         """Retrieves a supply option by its model name."""
-        return db_session.query(models_postgres.SupplyOption).filter(models_postgres.SupplyOption.name == name).first()
+        result = await db_session.execute(
+            select(models_postgres.SupplyOption).where(models_postgres.SupplyOption.name == name)
+        )
+        return result.scalars().first()
 
-    def create_option(self, db_session: AsyncSession, option_data: SupplyOptionCreate) -> models_postgres.SupplyOption:
+    async def create_option(self, db_session: AsyncSession, option_data: SupplyOptionCreate) -> models_postgres.SupplyOption:
         """Adds a new supply option to the database."""
         db_option = models_postgres.SupplyOption(**option_data.model_dump())
         db_session.add(db_option)
-        db_session.commit()
-        db_session.refresh(db_option)
+        await db_session.commit()
+        await db_session.refresh(db_option)
         return db_option
     
-    def update_option(self, db_session: AsyncSession, option_id: int, option_data: SupplyOptionUpdate) -> Optional[models_postgres.SupplyOption]:
+    async def update_option(self, db_session: AsyncSession, option_id: int, option_data: SupplyOptionUpdate) -> Optional[models_postgres.SupplyOption]:
         """Updates an existing supply option."""
-        db_option = self.get_option_by_id(db_session, option_id)
+        db_option = await self.get_option_by_id(db_session, option_id)
         if db_option:
             update_data = option_data.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_option, key, value)
             db_session.add(db_option)
-            db_session.commit()
-            db_session.refresh(db_option)
+            await db_session.commit()
+            await db_session.refresh(db_option)
         return db_option
 
-    def delete_option(self, db_session: AsyncSession, option_id: int) -> bool:
+    async def delete_option(self, db_session: AsyncSession, option_id: int) -> bool:
         """Deletes a supply option from the database."""
-        db_option = self.get_option_by_id(db_session, option_id)
+        db_option = await self.get_option_by_id(db_session, option_id)
         if db_option:
-            db_session.delete(db_option)
-            db_session.commit()
+            await db_session.delete(db_option)
+            await db_session.commit()
             return True
         return False
         
-    def autofill_catalog(self, db_session: AsyncSession):
+    async def autofill_catalog(self, db_session: AsyncSession):
         """Populates the catalog with a default set of common models."""
-        if self.get_all_options(db_session):
+        if await self.get_all_options(db_session):
             logger.info("Catalog already contains data. Skipping autofill.")
             return
 
@@ -71,7 +76,7 @@ class SupplyCatalogService:
         
         logger.info("Autofilling supply catalog with default models.")
         for option_data in default_options:
-            self.create_option(db_session, option_data)
+            await self.create_option(db_session, option_data)
         logger.info("Default models added to the catalog.")
 
     async def validate_chain(self, chain_data: dict) -> dict:
