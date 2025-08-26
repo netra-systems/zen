@@ -181,6 +181,12 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 python scripts/deploy_to_gcp.py --project netra-production --run-checks
 ```
 
+### Docker Configuration
+**IMPORTANT: Two distinct Docker configuration sets exist**
+- **Development:** `/docker/*.development.Dockerfile` - Local dev with hot-reload
+- **Production/GCP:** `/deployment/docker/*.gcp.Dockerfile` - Optimized for Cloud Run
+- **Index:** [`docs/DOCKER_CONFIGURATION_INDEX.md`](docs/DOCKER_CONFIGURATION_INDEX.md) - Complete Docker configuration mapping
+
 ---
 
 ## 📚 Essential Documentation

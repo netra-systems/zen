@@ -8,18 +8,18 @@ describe('Basic UI Test', () => {
   });
 
   it('should have chat input and send button', () => {
-    // Check for input field
-    cy.get('input[placeholder*="message"]', { timeout: 10000 }).should('exist');
+    // Check for textarea field (not input) with correct placeholder
+    cy.get('textarea[aria-label="Message input"]', { timeout: 10000 }).should('exist');
     
-    // Check for send button
-    cy.get('button[aria-label="Send"]').should('exist');
+    // Check for send button with correct aria-label
+    cy.get('button[aria-label="Send message"]').should('exist');
   });
 
   it('should allow typing in the input field', () => {
     const testText = 'Test message';
     
-    // Type in the input field
-    cy.get('input[placeholder*="message"]', { timeout: 10000 })
+    // Type in the textarea field
+    cy.get('textarea[aria-label="Message input"]', { timeout: 10000 })
       .type(testText, { force: true })
       .should('have.value', testText);
   });
@@ -28,13 +28,13 @@ describe('Basic UI Test', () => {
     const testText = 'Message to send';
     
     // Type and send
-    cy.get('input[placeholder*="message"]', { timeout: 10000 })
+    cy.get('textarea[aria-label="Message input"]', { timeout: 10000 })
       .type(testText, { force: true });
     
-    cy.get('button[aria-label="Send"]').click({ force: true });
+    cy.get('button[aria-label="Send message"]').click({ force: true });
     
-    // Input should be cleared after send
-    cy.get('input[placeholder*="message"]').should('have.value', '');
+    // Textarea should be cleared after send
+    cy.get('textarea[aria-label="Message input"]').should('have.value', '');
   });
 
   it('should show some content area for messages', () => {

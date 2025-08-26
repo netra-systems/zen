@@ -9,8 +9,8 @@ describe('Simple WebSocket Tests', () => {
 
   it('should load chat interface', () => {
     // Wait for chat elements to be visible
-    cy.get('input[placeholder*="message"]', { timeout: 10000 }).should('be.visible');
-    cy.get('button[aria-label="Send"]').should('be.visible');
+    cy.get('textarea[aria-label="Message input"]', { timeout: 10000 }).should('be.visible');
+    cy.get('button[aria-label="Send message"]').should('be.visible');
   });
 
   it('should send and display user messages', () => {
@@ -18,30 +18,30 @@ describe('Simple WebSocket Tests', () => {
     const messages = ['First message', 'Second message', 'Third message'];
     
     messages.forEach(msg => {
-      cy.get('input[placeholder*="message"]').type(msg);
-      cy.get('button[aria-label="Send"]').click();
+      cy.get('textarea[aria-label="Message input"]').type(msg);
+      cy.get('button[aria-label="Send message"]').click();
       cy.contains(msg).should('be.visible');
     });
   });
 
   it('should clear input after sending message', () => {
     // Type message
-    cy.get('input[placeholder*="message"]').type('Test message');
+    cy.get('textarea[aria-label="Message input"]').type('Test message');
     
     // Send message
-    cy.get('button[aria-label="Send"]').click();
+    cy.get('button[aria-label="Send message"]').click();
     
     // Input should be cleared
-    cy.get('input[placeholder*="message"]').should('have.value', '');
+    cy.get('textarea[aria-label="Message input"]').should('have.value', '');
   });
 
   it('should disable input while processing', () => {
     // Send a message
-    cy.get('input[placeholder*="message"]').type('Process this');
-    cy.get('button[aria-label="Send"]').click();
+    cy.get('textarea[aria-label="Message input"]').type('Process this');
+    cy.get('button[aria-label="Send message"]').click();
     
     // Check if input gets disabled (may depend on implementation)
-    cy.get('input[placeholder*="message"]').then($input => {
+    cy.get('textarea[aria-label="Message input"]').then($input => {
       // Input might be disabled or have a different placeholder
       const isDisabled = $input.prop('disabled');
       const placeholder = $input.attr('placeholder');

@@ -69,7 +69,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: docker/backend.Dockerfile
+      dockerfile: ./docker/backend.development.Dockerfile
     container_name: netra-backend
     environment:
       # Database
@@ -142,7 +142,7 @@ services:
   auth:
     build:
       context: .
-      dockerfile: docker/auth.Dockerfile
+      dockerfile: ./docker/auth.development.Dockerfile
     container_name: netra-auth
     environment:
       # Database
@@ -188,7 +188,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: docker/frontend.Dockerfile
+      dockerfile: ./docker/frontend.development.Dockerfile
       args:
         BUILD_MODE: development
     container_name: netra-frontend

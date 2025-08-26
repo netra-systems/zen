@@ -1,0 +1,285 @@
+===============================================================
+DEV LAUNCHER LOGS - ITERATION 1
+Date: 2025-08-26
+Start Time: 13:56:17 UTC
+===============================================================
+
+SUMMARY:
+- Services successfully started: Backend (8000), Auth (8081), Database (PostgreSQL, Redis, ClickHouse)
+- Issues encountered: Circuit breaker issues with auth service communication, WebSocket authentication failures
+- Frontend startup: Attempted but failed with Turbopack configuration
+- Overall system: Partially functional with core backend services running
+
+===============================================================
+FULL OUTPUT:
+===============================================================
+
+STDERR OUTPUT:
+Created unified circuit breaker: database_retry_circuit
+Created unified circuit breaker: llm_retry_circuit
+Created unified circuit breaker: api_retry_circuit
+Created unified circuit breaker: auth_service_retry_circuit
+Created unified circuit breaker: netra_backend_retry_circuit
+Created unified circuit breaker: dev_launcher_retry_circuit
+Populated secrets for development
+ServiceDiscoverySystem initialized with discovery file: .dev_services_discovery.json
+No existing discovery file found
+Using smart default service configuration with availability detection
+Service adjustment: ✅ Started Redis Docker container
+Service adjustment: ✅ Started ClickHouse Docker container
+Service adjustment: REDIS service using local mode: Local Redis not installed, but Docker available - will start Redis container
+Service adjustment: CLICKHOUSE service using local mode: Local ClickHouse not installed, but Docker available - will start ClickHouse container
+HealthMonitor initialized (check_interval: 30s)
+Windows process verification enabled
+ProcessManager initialized for win32
+Enhanced Windows process tree management enabled
+Race condition manager initialized
+Windows console event handlers registered
+Signal handler initialized for win32
+Discovered 3 database connections
+Discovered 2 WebSocket endpoints
+Environment isolation enabled
+ReadinessManager initialized
+DependencyManager initialized
+Added service database with 0 dependencies
+Added service redis with 0 dependencies
+Added service auth with 2 dependencies
+Added service backend with 3 dependencies
+Added service frontend with 1 dependencies
+Added service websocket with 2 dependencies
+Computed startup order: database → redis → auth → backend → frontend → websocket
+[... additional dependency manager initialization ...]
+ServiceCoordinator initialized with config: required={'database', 'backend'}, optional={'auth', 'redis', 'frontend'}
+[... service registration and readiness checker setup ...]
+Comprehensive signal handlers registered for graceful shutdown
+
+USING DIRECT UVICORN LAUNCH
+Backend hot reload: DISABLED
+RuntimeWarning: line buffering (buffering=1) isn't supported in binary mode, the default buffer size will be used
+
+STDOUT OUTPUT:
+🔍 DISCOVER | POSTGRESQL: postgresql+asyncpg://postgres:***@localhost:5433/netra_dev
+🔍 DISCOVER | CLICKHOUSE: http://default:***@localhost:8123/netra_dev
+🔍 DISCOVER | REDIS: redis://localhost:6379/0
+[DISCOVER] WEBSOCKET | Discovered endpoint: main_ws -> ws://localhost:8000/ws (required)
+[DISCOVER] WEBSOCKET | Discovered endpoint: mcp_ws -> ws://localhost:8000/api/mcp/ws (optional)
+
+🚀 Starting Netra AI Development Environment...
+   → Windows environment detected
+   → Enhanced process tree management enabled
+   → Port cleanup verification enabled
+
+============================================================
+🚀 Netra AI Development Environment
+============================================================
+Services Configuration:
+   Redis: local
+   ClickHouse: local
+   PostgreSQL: docker
+   LLM: shared
+============================================================
+
+📝 Configuration:
+🔧 Service Modes:
+  💻 Redis       : Local  (localhost:6379)
+  💻 ClickHouse  : Local  (localhost:9000)
+  🧪 PostgreSQL  : Docker
+  ☁️ LLM         : On    
+
+  • Dynamic ports: NO
+  • Backend hot reload: NO
+  • Frontend hot reload: YES (Next.js native)
+  • Real-time logging: YES
+  • Turbopack: YES
+  • Secret loading: NO
+  • Verbose output: NO
+
+🔄 Running pre-checks in parallel...
+🔒 Local secrets loaded (GCP disabled)
+🔍 Checking environment...
+✅ Environment check passed
+ℹ️ Set BACKEND_PORT=8000
+ℹ️ Set FRONTEND_PORT=3000
+ℹ️ Set AUTH_PORT=8081
+ℹ️ Set WEBSOCKET_PORT=8000
+ℹ️ Set LOG_LEVEL=INFO
+ℹ️ Set CORS_ORIGINS=*
+🔑 Using existing cross-service auth token (86 chars)
+🔍 Found running Docker services: postgres, clickhouse, redis
+✅ Postgres: netra-postgres-dev (Up 23 hours (healthy))
+✅ Clickhouse: netra-clickhouse-dev (Up 23 hours (healthy))
+✅ Redis: netra-redis-dev (Up 23 hours (healthy))
+
+🔄 Analyzing service availability...
+ REDIS: local → local (Local Redis not installed, but Docker available - will start Redis container (Docker mode))
+ CLICKHOUSE: local → local (Local ClickHouse not installed, but Docker available - will start ClickHouse container (Docker mode))
+🔧 Applied service availability recommendations
+🔄 Updated 29 environment variables
+✅ Successfully configured 3 service(s)
+✅ Environment and services ready
+⚡ Parallel execution saved 90.6% time (49.0s → 4.6s)
+✅ Completed 3/3 pre-checks in 4.6s
+✅ Found 3 reusable Docker service(s)
+🔄 Will reuse postgres: netra-postgres-dev (Up 23 hours (healthy))
+🔄 Will reuse clickhouse: netra-clickhouse-dev (Up 23 hours (healthy))
+🔄 Will reuse redis: netra-redis-dev (Up 23 hours (healthy))
+✅ Pre-checks completed (cache, environment, secrets)
+
+🔄 Validating database connections with network resilience...
+✅ Postgres connection validated
+✅ Redis connection validated
+⚠️ Clickhouse connection failed: Database connection failed after 5 attempts
+✅ Connected to 2 database service(s)
+⚠️ 1 database service(s) failed - using fallback validation
+
+🔧 Initializing databases for cold start...
+ℹ️ Connecting to: postgresql://netra_dev:***@127.0.0.1:5433/netra_dev
+⚠️ Connection attempt 1 failed, will retry
+🔄 Retrying PostgreSQL initialization (attempt 2/3) in 2.6s
+⚠️ Connection attempt 2 failed, will retry
+🔄 Retrying PostgreSQL initialization (attempt 3/3) in 4.4s
+❌ Cannot connect to PostgreSQL after all retries
+⚠️ PostgreSQL initialization had issues, continuing...
+✅ Database initialization completed
+
+🔍 Validating connections for: Redis, ClickHouse, PostgreSQL
+🔄 DATABASE | Validating 3 database connections...
+🔄 CONNECT | main_postgres: Attempt 1/5
+🔄 CONNECT | main_clickhouse: Attempt 1/5
+🔄 CONNECT | main_redis: Attempt 1/5
+✅ CONNECT | main_redis: Connected successfully
+✅ CONNECT | main_clickhouse: Connected successfully
+✅ CONNECT | main_postgres: Connected successfully
+✅ DATABASE | All database connections validated successfully
+✅ Database connections validated and ready: redis
+
+🔄 Checking and running migrations...
+✅ Database schema is up-to-date
+
+🔄 Starting backend and auth services...
+🚀 Starting backend server (Redis:local, ClickHouse:local, PostgreSQL:docker, LLM:cloud)...
+⏳ Waiting for backend initialization on port 8000...
+
+[BACKEND] STARTUP SEQUENCE:
+✅ Circuit breakers created (database, llm, api, auth_service, netra_backend, dev_launcher)
+✅ Environment configuration loaded
+✅ Background task manager initialized 
+✅ CORS middleware configured for development environment
+✅ WebSocket CORS configured with 34 allowed origins
+✅ Authentication middleware configured
+✅ Session middleware configured
+✅ Unified tool registry initialized
+✅ Synthetic data service initialized
+✅ Quality gate and monitoring services initialized
+✅ Server process started [56500]
+✅ Application startup initiated
+
+STARTUP COMPONENTS INITIALIZATION:
+✅ Database initialization (4.21s) - All 26 database tables present
+✅ Auth service initialization (0.00s)
+✅ Redis initialization (0.06s) - Connected successfully
+✅ WebSocket initialization (0.00s)
+✅ Agent supervisor initialization (0.05s) - 7 agents registered (triage, data, optimization, actions, reporting, synthetic_data, corpus_admin)
+✅ Background tasks initialization (0.00s) - 4/5 startup fixes applied
+✅ ClickHouse initialization (2.43s) - Tables initialized
+✅ Monitoring initialization (0.00s)
+✅ Metrics initialization (0.00s)
+✅ Tracing initialization (0.00s)
+
+✅ System Ready (Took 6.94s) - 10/10 successful, 0 degraded, 0 failed
+✅ Uvicorn running on http://0.0.0.0:8000
+
+✅ Backend started on port 8000
+✅ Backend service started successfully
+
+🔐 Starting auth service (using local Redis (localhost:6379))...
+[AUTH] STARTUP SEQUENCE:
+✅ Circuit breakers created
+✅ Environment configuration loaded
+✅ JWT validation cache initialized - Redis enabled
+✅ JWT secret configured (shared with backend)
+✅ Redis connected for session management
+⚠️ Using generated HMAC secret - set OAUTH_HMAC_SECRET for production
+✅ Signal handlers configured for graceful shutdown
+
+✅ Auth service started on port 8081
+✅ Auth service started successfully
+
+🔄 Waiting for backend readiness...
+✅ Backend API URL: http://localhost:8000
+✅ Backend WebSocket URL: ws://localhost:8000/ws
+✅ Service ready at http://localhost:8000/health/ after 1 attempts
+
+ONGOING ACTIVITY:
+- Health checks running on both services (backend /health/ready returning 200)
+- Auth service handling config requests and dev logins successfully
+- ClickHouse connections establishing and working
+- API requests being processed (some with 307 redirects, some with 401 auth failures)
+
+ISSUES ENCOUNTERED:
+❌ Circuit breaker for auth_service went OPEN due to connection failures
+❌ WebSocket authentication failing due to auth service circuit breaker
+❌ Some ClickHouse query failures (error code 0)
+❌ Token validation failing due to circuit breaker state
+❌ Frontend startup failed with Turbopack configuration issues
+
+FINAL STEPS ATTEMPTED:
+❌ Backend readiness check failed
+❌ Auth verification failed  
+❌ Frontend start failed
+
+===============================================================
+KEY OBSERVATIONS:
+===============================================================
+
+1. **SUCCESSFUL COMPONENTS:**
+   - Docker services (PostgreSQL, Redis, ClickHouse) all running and healthy
+   - Backend service fully initialized and responding on port 8000
+   - Auth service running on port 8081
+   - Database schema up-to-date with all 26 tables
+   - Agent supervisor with 7 registered agents
+   - Health endpoints responding (status 200)
+
+2. **CRITICAL ISSUES:**
+   - Auth service circuit breaker in OPEN state causing authentication failures
+   - WebSocket connections failing due to JWT validation issues
+   - Communication breakdown between backend and auth services
+   - Frontend failed to start due to Turbopack configuration issues
+
+3. **INFRASTRUCTURE STATUS:**
+   - All Docker containers healthy and running for 23+ hours
+   - Database connections working (PostgreSQL, Redis, ClickHouse)
+   - Environment variables properly configured
+   - Ports correctly assigned (Backend: 8000, Auth: 8081, Frontend: 3000)
+
+4. **SYSTEM HEALTH:**
+   - Core backend functionality appears operational
+   - Database operations working
+   - API endpoints accessible (though some require authentication)
+   - Monitoring and logging systems active
+   - Circuit breakers and resilience patterns in place
+
+===============================================================
+RECOMMENDATIONS:
+===============================================================
+
+1. **IMMEDIATE FIXES NEEDED:**
+   - Investigate auth service communication failures
+   - Reset circuit breaker state for auth_service
+   - Fix Turbopack configuration for frontend
+   - Resolve WebSocket authentication pipeline
+
+2. **MONITORING:**
+   - System is partially functional for backend API testing
+   - Database operations can be performed
+   - Health endpoints are responding correctly
+
+3. **NEXT STEPS:**
+   - Debug inter-service communication issues
+   - Test individual service endpoints
+   - Verify authentication token generation and validation
+   - Restart services to clear circuit breaker states
+
+===============================================================
+END OF LOG FILE
+===============================================================

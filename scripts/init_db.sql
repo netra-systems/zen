@@ -1,6 +1,15 @@
 -- Initialize Netra Database
 CREATE SCHEMA IF NOT EXISTS public;
 
+-- Create the netra user if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'netra') THEN
+        CREATE ROLE netra WITH LOGIN PASSWORD 'netra123';
+    END IF;
+END
+$$;
+
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
