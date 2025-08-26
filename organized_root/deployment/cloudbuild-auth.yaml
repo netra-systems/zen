@@ -6,6 +6,6 @@ steps:
   - -t
   - gcr.io/netra-staging/netra-auth-service:latest
   - -f
-  - deployment/docker/Dockerfile.auth
+  - deployment/docker/auth.gcp.Dockerfile
   - .
   name: gcr.io/cloud-builders/docker

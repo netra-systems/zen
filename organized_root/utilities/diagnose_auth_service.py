@@ -285,7 +285,7 @@ class AuthServiceDiagnostic:
         fix_map = {
             "Module import issue": [
                 "1. Rebuild with correct PYTHONPATH: ./deploy-auth-service-fix.ps1",
-                "2. Verify Dockerfile.auth copies auth_core directory"
+                "2. Verify auth.gcp.Dockerfile copies auth_core directory"
             ],
             "Redis connection issue": [
                 "This is expected in staging - Redis is disabled by design",

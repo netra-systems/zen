@@ -1,5 +1,5 @@
 """
-OAuth Proxy PR Environment Test - P1 STAGING BROKEN
+Auth Service PR Environment Test - P1 STAGING BROKEN
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
 1. **Segment**: Enterprise & Development - PR environment OAuth validation  
@@ -14,12 +14,12 @@ OAuth Proxy PR Environment Test - P1 STAGING BROKEN
 **TEST SCOPE:**
 - OAuth flow with PR environment URL encoding
 - State parameter encoding with PR number and CSRF protection
-- Proxy redirects to correct PR environment with subdomain routing
+- Auth service redirects to correct PR environment with subdomain routing
 - Token transfer via secure cookie with proper domain settings
 - Complete flow in <10 seconds for staging deployment validation
 
 **SUCCESS CRITERIA:**
-- OAuth proxy correctly routes PR environment auth
+- Auth service correctly routes PR environment auth
 - State encoding/decoding works for PR number extraction
 - Token transfer via secure cookie succeeds
 - PR environment receives valid token for authentication
@@ -149,7 +149,7 @@ class OAuthProxyStagingTester:
         }
     
     @pytest.mark.e2e
-    async def test_oauth_proxy_initiation(self, encoded_state: str) -> Dict[str, Any]:
+    async def test_auth_service_initiation(self, encoded_state: str) -> Dict[str, Any]:
         """Test OAuth proxy initiation from PR environment"""
         logger.info("Testing OAuth proxy initiation...")
         
@@ -186,7 +186,7 @@ class OAuthProxyStagingTester:
         }
     
     @pytest.mark.e2e
-    async def test_oauth_proxy_callback_processing(self, encoded_state: str) -> Dict[str, Any]:
+    async def test_auth_service_callback_processing(self, encoded_state: str) -> Dict[str, Any]:
         """Test OAuth proxy callback processing and token exchange"""
         logger.info("Testing OAuth proxy callback processing...")
         
@@ -309,7 +309,7 @@ class OAuthProxyStagingTester:
         }
     
     @pytest.mark.e2e
-    async def test_complete_oauth_proxy_flow(self) -> Dict[str, Any]:
+    async def test_complete_auth_service_flow(self) -> Dict[str, Any]:
         """Test complete OAuth proxy flow for PR environment"""
         logger.info("Testing complete OAuth proxy flow...")
         
@@ -320,11 +320,11 @@ class OAuthProxyStagingTester:
         flow_results["state_encoding"] = state_result
         
         # Step 2: OAuth initiation
-        initiation_result = await self.test_oauth_proxy_initiation(state_result["encoded_state"])
+        initiation_result = await self.test_auth_service_initiation(state_result["encoded_state"])
         flow_results["oauth_initiation"] = initiation_result
         
         # Step 3: Callback processing
-        callback_result = await self.test_oauth_proxy_callback_processing(state_result["encoded_state"])
+        callback_result = await self.test_auth_service_callback_processing(state_result["encoded_state"])
         flow_results["callback_processing"] = callback_result
         
         # Step 4: Token transfer
@@ -363,7 +363,7 @@ class OAuthProxyStagingTester:
 # Test execution
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_oauth_proxy_pr_environment_complete_flow():
+async def test_auth_service_pr_environment_complete_flow():
     """
     CRITICAL Test #8: OAuth Proxy PR Environment Validation
     
@@ -381,7 +381,7 @@ async def test_oauth_proxy_pr_environment_complete_flow():
         await tester.setup_pr_environment_simulation()
         
         # Execute complete OAuth proxy flow test
-        results = await tester.test_complete_oauth_proxy_flow()
+        results = await tester.test_complete_auth_service_flow()
         
         # Validate critical results
         assert results["state_encoding"]["validation_time"] < 1.0, "State encoding too slow"
@@ -403,7 +403,7 @@ async def test_oauth_proxy_pr_environment_complete_flow():
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_oauth_proxy_error_scenarios():
+async def test_auth_service_error_scenarios():
     """Test OAuth proxy error handling scenarios"""
     tester = OAuthProxyStagingTester()
     
@@ -450,8 +450,8 @@ async def test_oauth_proxy_error_scenarios():
 
 if __name__ == "__main__":
     """Direct execution for development testing"""
-    async def run_oauth_proxy_staging_test():
-        await test_oauth_proxy_pr_environment_complete_flow()
-        await test_oauth_proxy_error_scenarios()
+    async def run_auth_service_staging_test():
+        await test_auth_service_pr_environment_complete_flow()
+        await test_auth_service_error_scenarios()
     
-    asyncio.run(run_oauth_proxy_staging_test())
+    asyncio.run(run_auth_service_staging_test())

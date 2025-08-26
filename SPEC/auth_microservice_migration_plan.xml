@@ -17,7 +17,7 @@
       <dependent_files_count>51</dependent_files_count>
       <existing_infrastructure>
                 - Terraform auth-service.tf already exists (Cloud Run config)
-                - deployment/docker/Dockerfile.auth already exists
+                - deployment/docker/auth.gcp.Dockerfile already exists
                 - auth_service_main.py already exists
                 - Auth routes at app/routes/auth/
             </existing_infrastructure>
@@ -160,7 +160,7 @@
       <step order="2">
         <action>Update Docker configurations</action>
         <files>
-          <file>deployment/docker/Dockerfile.auth</file>
+          <file>deployment/docker/auth.gcp.Dockerfile</file>
           <updates>
                         - Optimize for production
                         - Multi-stage build

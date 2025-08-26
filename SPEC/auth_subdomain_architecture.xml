@@ -34,9 +34,9 @@
             </environments>
         </principle>
         
-        <principle id="oauth-proxy-service">
-            <name>OAuth Proxy Service for Dynamic Environments</name>
-            <description>Proxy service handling OAuth for unlimited PR staging environments</description>
+        <principle id="auth-subdomain-service">
+            <name>Auth Service for Dynamic Environments</name>
+            <description>Auth service handling OAuth for unlimited PR staging environments</description>
             <flow>
                 <step>PR environment initiates OAuth via auth subdomain</step>
                 <step>State encodes PR number and return URL</step>

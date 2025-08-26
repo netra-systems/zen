@@ -69,7 +69,7 @@
     <environment name="staging">
       <domain>*.staging.netrasystems.ai</domain>
       <api_domain>*.staging.netrasystems.ai</api_domain>
-      <auth_proxy>auth.staging.netrasystems.ai</auth_proxy>
+      <auth_service>auth.staging.netrasystems.ai</auth_service>
       <oauth_client>
         <client_id_env>GOOGLE_OAUTH_CLIENT_ID_STAGING</client_id_env>
         <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_STAGING</client_secret_env>
@@ -107,7 +107,7 @@
       </features>
     </environment>
   </environment_configuration>
-  <oauth_proxy_implementation>
+  <auth_service_implementation>
     <description>
       OAuth proxy service for staging environment to handle dynamic PR URLs
     </description>
@@ -139,10 +139,10 @@
         <max_age>300</max_age>
       </cookie_settings>
     </token_transfer>
-  </oauth_proxy_implementation>
+  </auth_service_implementation>
   <implementation_files>
-    <file path="app/auth/oauth_proxy.py">
-      OAuth proxy service for staging environments
+    <file path="auth_service/auth_core/routes/auth_routes.py">
+      Auth service routes for OAuth handling in all environments
     </file>
     <file path="app/auth/environment_config.py">
       Environment-specific OAuth configuration

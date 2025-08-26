@@ -4,102 +4,100 @@ SQLAlchemy models for auth service database persistence
 """
 import uuid
 from datetime import datetime, timezone
+from typing import Optional
 
-from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import JSON, Boolean, DateTime, Integer, String, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    """Declarative base class for auth service models using SQLAlchemy 2.0 patterns."""
+    pass
 
 class AuthUser(Base):
     """Auth service user model for authentication data"""
     __tablename__ = "auth_users"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    email = Column(String, unique=True, index=True, nullable=False)
-    full_name = Column(String, nullable=True)
-    hashed_password = Column(String, nullable=True)  # Null for OAuth users
+    # Primary key
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    
+    # Core user fields
+    email: Mapped[str] = mapped_column(String, unique=True, index=True)
+    full_name: Mapped[Optional[str]] = mapped_column(String)
+    hashed_password: Mapped[Optional[str]] = mapped_column(String)  # Null for OAuth users
     
     # OAuth provider information
-    auth_provider = Column(String, nullable=False, default="local")
-    provider_user_id = Column(String, nullable=True)  # Provider's user ID
-    provider_data = Column(JSON, nullable=True)  # Additional provider data
+    auth_provider: Mapped[str] = mapped_column(String, default="local")
+    provider_user_id: Mapped[Optional[str]] = mapped_column(String)  # Provider's user ID
+    provider_data: Mapped[Optional[dict]] = mapped_column(JSON)  # Additional provider data
     
     # Account status
-    is_active = Column(Boolean, default=True)
-    is_verified = Column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     
     # Timestamps
-    created_at = Column(DateTime(timezone=True), 
-                       default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), 
-                       default=lambda: datetime.now(timezone.utc),
-                       onupdate=lambda: datetime.now(timezone.utc))
-    last_login_at = Column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     
     # Security tracking
-    failed_login_attempts = Column(Integer, default=0)
-    locked_until = Column(DateTime(timezone=True), nullable=True)
+    failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
 class AuthSession(Base):
     """Active session tracking"""
     __tablename__ = "auth_sessions"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, nullable=False, index=True)
-    refresh_token_hash = Column(String, nullable=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, index=True)
+    refresh_token_hash: Mapped[Optional[str]] = mapped_column(String)
     
     # Session metadata
-    ip_address = Column(String, nullable=True)
-    user_agent = Column(String, nullable=True)
-    device_id = Column(String, nullable=True)
+    ip_address: Mapped[Optional[str]] = mapped_column(String)
+    user_agent: Mapped[Optional[str]] = mapped_column(String)
+    device_id: Mapped[Optional[str]] = mapped_column(String)
     
     # Timestamps
-    created_at = Column(DateTime(timezone=True), 
-                       default=lambda: datetime.now(timezone.utc))
-    expires_at = Column(DateTime(timezone=True), nullable=False)
-    last_activity = Column(DateTime(timezone=True), 
-                          default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_activity: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
     
     # Status
-    is_active = Column(Boolean, default=True)
-    revoked_at = Column(DateTime(timezone=True), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
 class AuthAuditLog(Base):
     """Audit log for authentication events"""
     __tablename__ = "auth_audit_logs"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    event_type = Column(String, nullable=False, index=True)
-    user_id = Column(String, nullable=True, index=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    event_type: Mapped[str] = mapped_column(String, index=True)
+    user_id: Mapped[Optional[str]] = mapped_column(String, index=True)
     
     # Event details
-    success = Column(Boolean, nullable=False)
-    error_message = Column(String, nullable=True)
-    event_metadata = Column(JSON, nullable=True)
+    success: Mapped[bool] = mapped_column(Boolean)
+    error_message: Mapped[Optional[str]] = mapped_column(String)
+    event_metadata: Mapped[Optional[dict]] = mapped_column(JSON)
     
     # Request context
-    ip_address = Column(String, nullable=True)
-    user_agent = Column(String, nullable=True)
+    ip_address: Mapped[Optional[str]] = mapped_column(String)
+    user_agent: Mapped[Optional[str]] = mapped_column(String)
     
     # Timestamp
-    created_at = Column(DateTime(timezone=True), 
-                       default=lambda: datetime.now(timezone.utc), 
-                       index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), index=True)
 
 class PasswordResetToken(Base):
     """Password reset token tracking"""
     __tablename__ = "password_reset_tokens"
     
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, nullable=False, index=True)
-    token_hash = Column(String, nullable=False, unique=True)
-    email = Column(String, nullable=False, index=True)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[str] = mapped_column(String, index=True)
+    token_hash: Mapped[str] = mapped_column(String, unique=True)
+    email: Mapped[str] = mapped_column(String, index=True)
     
     # Token status
-    is_used = Column(Boolean, default=False)
-    expires_at = Column(DateTime(timezone=True), nullable=False)
+    is_used: Mapped[bool] = mapped_column(Boolean, default=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     
     # Timestamps
-    created_at = Column(DateTime(timezone=True), 
-                       default=lambda: datetime.now(timezone.utc))
-    used_at = Column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
