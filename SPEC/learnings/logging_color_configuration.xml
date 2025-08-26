@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<logging_color_configuration>
+  <metadata>
+    <created>2025-08-26</created>
+    <category>logging</category>
+    <tags>loguru, colors, ansi, markup, console</tags>
+    <impact>high</impact>
+    <resolved>true</resolved>
+  </metadata>
+  
+  <issue>
+    <description>
+      Log messages displayed literal color markup tags like &lt;white&gt;, &lt;red&gt;, &lt;green&gt; 
+      instead of rendering colored output in the console.
+    </description>
+    <symptoms>
+      <symptom>Literal tags appearing in console output: "&lt;white&gt;Test message&lt;/white&gt;"</symptom>
+      <symptom>Poor readability due to markup clutter</symptom>
+      <symptom>Degraded developer experience when scanning logs</symptom>
+    </symptoms>
+    <example>
+      2025-08-26 12:07:55.827 | INFO | logging:handle:1028 | &lt;white&gt;Comprehensive signal handlers registered&lt;/white&gt;
+    </example>
+  </issue>
+  
+  <root_cause>
+    <finding>
+      The _color_message_preprocessor function was adding literal color markup tags to messages,
+      but loguru wasn't configured to interpret these tags, causing them to appear literally.
+    </finding>
+    <technical_details>
+      <detail>Custom preprocessor added tags like "&lt;white&gt;{message}&lt;/white&gt;" to extra data</detail>
+      <detail>Format string referenced {extra[colored_message]} which contained literal tags</detail>
+      <detail>logger.add() was called without colorize=True parameter</detail>
+      <detail>Patcher approach conflicted with loguru's native color handling</detail>
+    </technical_details>
+  </root_cause>
+  
+  <solution>
+    <changes>
+      <change location="netra_backend/app/core/logging_formatters.py">
+        Removed problematic _color_message_preprocessor function entirely
+      </change>
+      <change location="netra_backend/app/core/logging_formatters.py:177-200">
+        Updated console format string to use loguru's native &lt;level&gt;{message}&lt;/level&gt; syntax
+      </change>
+      <change location="netra_backend/app/core/logging_formatters.py:267">
+        Added colorize=True parameter to logger.add() for console handler
+      </change>
+      <change location="netra_backend/app/core/logging_formatters.py:277">
+        Removed logger.configure(patcher=...) call that was adding literal tags
+      </change>
+    </changes>
+    
+    <key_insight>
+      Loguru has built-in support for color markup when colorize=True is enabled.
+      Using &lt;level&gt;{message}&lt;/level&gt; in the format string automatically applies
+      appropriate colors based on log level without needing custom preprocessing.
+    </key_insight>
+  </solution>
+  
+  <best_practices>
+    <practice>
+      Always use loguru's native color support instead of custom preprocessing:
+      - Set colorize=True in logger.add() for console output
+      - Use &lt;level&gt;{message}&lt;/level&gt; for automatic level-based coloring
+      - Never manually add color tags to message content
+    </practice>
+    
+    <practice>
+      Properly configure handlers for different output targets:
+      - Console: colorize=True for ANSI color codes
+      - Files: colorize=False to keep clean text
+      - JSON: Use serialize=True for structured output
+    </practice>
+    
+    <practice>
+      Test logging output to ensure proper rendering:
+      - Verify no literal markup tags appear in console
+      - Check for presence of ANSI escape codes when colors enabled
+      - Ensure file output remains clean without escape codes
+    </practice>
+  </best_practices>
+  
+  <prevention>
+    <recommendation>
+      Always test logging configuration changes with actual console output,
+      not just unit tests with StringIO capture.
+    </recommendation>
+    <recommendation>
+      When using loguru, refer to official documentation for color configuration
+      rather than implementing custom color preprocessing.
+    </recommendation>
+    <recommendation>
+      Include comprehensive tests for logging output format including:
+      - Console color rendering
+      - File output cleanliness
+      - JSON structure validity
+    </recommendation>
+  </prevention>
+  
+  <testing>
+    <test_file>netra_backend/tests/unit/core/test_logging_color_output.py</test_file>
+    <test_coverage>
+      <test>Verify no literal color tags in console output</test>
+      <test>Confirm ANSI escape codes present when colorize enabled</test>
+      <test>Ensure file output has no ANSI codes</test>
+      <test>Validate JSON output structure</test>
+      <test>Test all log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)</test>
+      <test>Verify sensitive data filtering works with colors</test>
+    </test_coverage>
+  </testing>
+  
+  <references>
+    <reference>https://loguru.readthedocs.io/en/stable/api/logger.html#color</reference>
+    <reference>https://loguru.readthedocs.io/en/stable/resources/recipes.html#changing-colors</reference>
+  </references>
+</logging_color_configuration>

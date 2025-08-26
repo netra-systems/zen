@@ -77,6 +77,12 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   }, []);
 
   useEffect(() => {
+    // Guard: Skip connection if no token is available
+    if (!token) {
+      debugLogger.debug('[WebSocketProvider] WebSocket connection skipped - no token available');
+      return;
+    }
+    
     // Add a small delay to ensure auth context is fully initialized after OAuth redirect
     // This prevents race conditions when navigating from /auth/callback to /chat
     const connectWithDelay = () => {

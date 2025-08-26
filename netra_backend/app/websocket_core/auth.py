@@ -159,7 +159,13 @@ class WebSocketAuthenticator:
         token, auth_method = self._extract_jwt_token(websocket)
         
         if not token:
+            # Check for development mode auth bypass
+            if self._is_development_auth_bypass_enabled():
+                logger.warning("WebSocket development mode: Bypassing authentication (NEVER use in production!)")
+                return self._create_development_auth_info()
+            
             self.auth_stats["security_violations"] += 1
+            logger.error("WebSocket authentication failed: No token provided and not in development bypass mode")
             raise HTTPException(
                 status_code=1008,
                 detail="Authentication required: Use Authorization header or Sec-WebSocket-Protocol"
@@ -178,6 +184,7 @@ class WebSocketAuthenticator:
                 if not validation_result or not validation_result.get("valid"):
                     self.auth_stats["failed_auths"] += 1
                     span.set_attribute("error", True)
+                    logger.error(f"JWT validation failed: {validation_result}")
                     raise HTTPException(
                         status_code=1008,
                         detail="Authentication failed: Invalid or expired token"
@@ -186,6 +193,7 @@ class WebSocketAuthenticator:
                 user_id = str(validation_result.get("user_id", ""))
                 if not user_id:
                     self.auth_stats["security_violations"] += 1
+                    logger.error(f"JWT validation failed: No user_id in result {validation_result}")
                     raise HTTPException(
                         status_code=1008,
                         detail="Authentication failed: Invalid user information"
@@ -230,6 +238,36 @@ class WebSocketAuthenticator:
                     return token, "subprotocol"
         
         return None, None
+    
+    def _is_development_auth_bypass_enabled(self) -> bool:
+        """Check if development mode auth bypass is enabled."""
+        try:
+            from netra_backend.app.core.configuration.base import get_unified_config
+            config = get_unified_config()
+            
+            # Only allow bypass in development environment
+            is_development = getattr(config, 'environment', 'production').lower() == 'development'
+            
+            if is_development:
+                logger.debug("Development environment detected - auth bypass potentially available")
+            
+            return is_development
+        except Exception as e:
+            logger.error(f"Error checking development auth bypass: {e}")
+            return False
+    
+    def _create_development_auth_info(self) -> AuthInfo:
+        """Create a development/guest auth info for bypass mode."""
+        logger.warning("Creating development auth info - this should NEVER happen in production!")
+        
+        return AuthInfo(
+            user_id="development-user",
+            email="development@localhost",
+            permissions=["read", "write"],
+            auth_method="development_bypass",
+            token_expires=None,  # No expiration for development
+            authenticated_at=datetime.now(timezone.utc)
+        )
     
     def _decode_jwt_subprotocol(self, protocol: str) -> Optional[str]:
         """Decode JWT from subprotocol format."""

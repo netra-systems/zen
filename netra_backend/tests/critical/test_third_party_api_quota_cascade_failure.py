@@ -80,7 +80,23 @@ class TestThirdPartyAPIQuotaCascadeFailure:
     @pytest.fixture
     def llm_provider_manager(self):
         """Create LLM provider manager for testing."""
-        manager = LLMProviderManager()
+        from netra_backend.app.schemas.Config import AppConfig
+        
+        # Create mock settings for testing
+        mock_settings = MagicMock(spec=AppConfig)
+        mock_settings.llm_mode = "enabled"
+        mock_settings.environment = "testing"
+        mock_settings.llm_heartbeat_interval_seconds = 30
+        mock_settings.llm_heartbeat_log_json = False
+        mock_settings.llm_data_truncate_length = 1000
+        mock_settings.llm_data_json_depth = 5
+        mock_settings.llm_data_log_format = "text"
+        mock_settings.llm_configs = {
+            "openai": MagicMock(provider="openai", model_name="gpt-4", api_key="test-key", generation_config={}),
+            "anthropic": MagicMock(provider="anthropic", model_name="claude-3", api_key="test-key", generation_config={})
+        }
+        
+        manager = LLMProviderManager(mock_settings)
         return manager
 
     @pytest.mark.env("staging")
@@ -318,9 +334,9 @@ class TestThirdPartyAPIQuotaCascadeFailure:
         mock_websocket_1.client_state = "connected"
         mock_websocket_2.client_state = "connected"
         
-        with patch.object(websocket_manager, '_active_connections', {
-            "user_1": mock_websocket_1,
-            "user_2": mock_websocket_2
+        with patch.object(websocket_manager, 'active_connections', {
+            "user_1": [mock_websocket_1],
+            "user_2": [mock_websocket_2]
         }):
             # Test WebSocket message handling during API cascade
             cascade_events = []

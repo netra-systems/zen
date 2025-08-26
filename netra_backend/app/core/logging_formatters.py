@@ -142,7 +142,7 @@ class LogFormatter:
         """Format log record as JSON with context."""
         entry = self._create_log_entry(record)
         self._add_exception_info(record, entry)
-        return entry.json() + "\n"
+        return entry.model_dump_json() + "\n"
     
     def _create_log_entry(self, record) -> LogEntry:
         """Create a LogEntry from a loguru record."""
@@ -185,10 +185,10 @@ class LogFormatter:
         """Check if context variables are available."""
         return request_id_context.get() or trace_id_context.get()
     
-    def get_file_format(self, enable_json: bool) -> str:
+    def get_file_format(self, enable_json: bool):
         """Get format string for file output."""
         if enable_json:
-            return self.json_formatter
+            return "{message}"  # Simple format, JSON serialization happens separately
         return "{time} | {level} | {name}:{function}:{line} | {message}"
 
 
@@ -213,7 +213,8 @@ class LogHandlerConfig:
         """Add JSON format console handler."""
         logger.add(
             sys.stderr,
-            format=self.formatter.json_formatter,
+            format="{message}",  # Simple format, JSON serialization happens in serialize
+            serialize=self.formatter.json_formatter,
             level=self.level,
             filter=should_log_func,
             enqueue=True,
@@ -239,15 +240,30 @@ class LogHandlerConfig:
         from pathlib import Path
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
         
-        logger.add(
-            file_path,
-            format=self.formatter.get_file_format(self.enable_json),
-            level=self.level,
-            filter=should_log_func,
-            rotation="100 MB",
-            retention="7 days",
-            compression="zip",
-            enqueue=True,
-            backtrace=True,
-            diagnose=False
-        )
+        if self.enable_json:
+            logger.add(
+                file_path,
+                format="{message}",  # Simple format, JSON serialization happens in serialize
+                serialize=self.formatter.json_formatter,
+                level=self.level,
+                filter=should_log_func,
+                rotation="100 MB",
+                retention="7 days",
+                compression="zip",
+                enqueue=True,
+                backtrace=True,
+                diagnose=False
+            )
+        else:
+            logger.add(
+                file_path,
+                format=self.formatter.get_file_format(self.enable_json),
+                level=self.level,
+                filter=should_log_func,
+                rotation="100 MB",
+                retention="7 days",
+                compression="zip",
+                enqueue=True,
+                backtrace=True,
+                diagnose=False
+            )

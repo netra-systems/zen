@@ -159,13 +159,15 @@ class WebSocketCORSHandler:
         Returns:
             True if origin is allowed, False otherwise
         """
-        # TESTING ENVIRONMENT: Allow connections without origin (e.g., TestClient)
+        # Handle None origin case (common for desktop/mobile apps)
         if not origin:
             if self.environment in ['development', 'testing']:
-                logger.debug("WebSocket origin allowed: None (test environment bypass)")
+                logger.info("WebSocket connection allowed: None origin in development/testing mode (common for desktop/mobile apps)")
                 return True
-            self._record_violation("", "WebSocket connection attempted without Origin header")
-            return False
+            else:
+                logger.warning(f"WebSocket connection denied: None origin not allowed in {self.environment} environment")
+                self._record_violation("", "WebSocket connection attempted without Origin header in non-development environment")
+                return False
         
         # First check security constraints
         is_secure, security_reason = self._validate_origin_security(origin)
@@ -261,12 +263,15 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
         # Some clients might use "Origin" with capital O
         origin = websocket.headers.get("Origin")
     
+    # Log origin details for debugging
+    logger.debug(f"WebSocket connection attempt - Origin: {origin}, Environment: {cors_handler.environment}")
+    
     # Check if origin is allowed
     if not cors_handler.is_origin_allowed(origin):
-        logger.error(f"WebSocket connection denied: invalid origin {origin}")
+        logger.error(f"WebSocket connection denied: Origin '{origin}' not allowed in {cors_handler.environment} environment")
         return False
     
-    logger.info(f"WebSocket connection allowed from origin: {origin}")
+    logger.info(f"WebSocket connection allowed from origin: {origin} in {cors_handler.environment} environment")
     return True
 
 
