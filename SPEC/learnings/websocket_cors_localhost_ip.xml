@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>WebSocket CORS: Localhost vs 127.0.0.1 Origin Handling</title>
+    <date>2025-08-26</date>
+    <category>WebSocket, CORS, Security</category>
+    
+    <problem>
+        <description>
+            WebSocket connections from origin 'http://127.0.0.1:3000' were being denied in development and staging
+            environments, while 'http://localhost:3000' worked correctly. This caused issues for developers 
+            accessing the application via 127.0.0.1 instead of localhost.
+        </description>
+        <error_message>
+            WebSocket connection denied: Origin 'http://127.0.0.1:3000' not allowed in development environment
+        </error_message>
+        <root_cause>
+            Two issues were identified:
+            1. The suspicious pattern matcher was flagging IP addresses (including 127.0.0.1) as suspicious
+               even in development/staging environments
+            2. The staging allowed origins list didn't include 127.0.0.1 entries, only localhost entries
+        </root_cause>
+    </problem>
+    
+    <solution>
+        <fix_1>
+            <location>netra_backend/app/core/websocket_cors.py::_is_suspicious_origin</location>
+            <description>
+                Modified the suspicious origin detection to explicitly allow localhost IP addresses
+                (127.0.0.1, 0.0.0.0, ::1) in development and staging environments, preventing them
+                from being flagged as suspicious.
+            </description>
+            <code><![CDATA[
+# In development and staging, allow localhost IP addresses for testing
+if self.environment in ["development", "staging"]:
+    # Check if it's a localhost IP
+    import re
+    localhost_ip_pattern = r'^https?://(127\.0\.0\.1|0\.0\.0\.0|\[::1\]|localhost)(:\d+)?(/.*)?$'
+    if re.match(localhost_ip_pattern, origin, re.IGNORECASE):
+        return False  # Not suspicious in dev/staging for local testing
+            ]]></code>
+        </fix_1>
+        
+        <fix_2>
+            <location>shared/cors_config.py::_get_staging_origins</location>
+            <description>
+                Added explicit 127.0.0.1 origins to the staging allowed origins list to match 
+                the localhost entries, ensuring both forms of localhost are supported.
+            </description>
+            <code><![CDATA[
+# Local development support for staging testing
+"http://localhost:3000",
+"http://localhost:3001", 
+"http://localhost:8000",
+"http://localhost:8080",
+"http://127.0.0.1:3000",
+"http://127.0.0.1:3001",
+"http://127.0.0.1:8000",
+"http://127.0.0.1:8080"
+            ]]></code>
+        </fix_2>
+    </solution>
+    
+    <key_insights>
+        <insight>
+            Localhost can be accessed via multiple hostnames (localhost, 127.0.0.1, 0.0.0.0, ::1),
+            and all forms should be supported in development/staging environments for developer convenience.
+        </insight>
+        <insight>
+            Security patterns that block direct IP addresses should have environment-specific exceptions
+            to allow localhost IPs in non-production environments.
+        </insight>
+        <insight>
+            When configuring CORS allowed origins, ensure both 'localhost' and '127.0.0.1' forms are
+            included to prevent developer frustration when using different URL formats.
+        </insight>
+    </key_insights>
+    
+    <testing>
+        <test_approach>
+            Created comprehensive tests to verify that both localhost and 127.0.0.1 origins work correctly
+            in development and staging, while still being properly blocked in production.
+        </test_approach>
+        <test_files>
+            - test_cors_fix.py: Tests development and production CORS behavior
+            - test_cors_staging.py: Tests staging-specific CORS configuration
+        </test_files>
+    </testing>
+    
+    <prevention>
+        <recommendation>
+            When implementing CORS or security patterns, always consider the different ways localhost
+            can be accessed and ensure they're all handled consistently based on environment.
+        </recommendation>
+        <recommendation>
+            Add automated tests that verify CORS behavior for all common localhost formats
+            (localhost, 127.0.0.1, 0.0.0.0, ::1) in each environment.
+        </recommendation>
+        <recommendation>
+            Document that developers can use either localhost or 127.0.0.1 for local development,
+            as both are fully supported.
+        </recommendation>
+    </prevention>
+    
+    <impact>
+        <severity>Medium</severity>
+        <affected_environments>Development, Staging</affected_environments>
+        <user_impact>
+            Developers using 127.0.0.1 instead of localhost were unable to establish WebSocket
+            connections, causing confusion and requiring workarounds.
+        </user_impact>
+        <business_impact>
+            Developer productivity impact - time spent debugging CORS issues instead of
+            building features.
+        </business_impact>
+    </impact>
+</learning>

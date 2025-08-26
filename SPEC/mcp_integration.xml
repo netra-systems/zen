@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <title>Model Context Protocol (MCP) Integration</title>
+    <version>1.0</version>
+    <date>2025-08-26</date>
+    <status>active</status>
+    
+    <purpose>
+        <overview>
+            MCP (Model Context Protocol) is a standard protocol developed by Anthropic for enabling
+            seamless communication between AI models and external tools/services. FastMCP is a Python
+            framework that implements this protocol, providing a high-performance, type-safe way to
+            expose tools and context to AI models.
+        </overview>
+        <business_value>
+            - Enables AI agents to interact with external systems through standardized tool interfaces
+            - Provides context sharing capabilities for improved agent understanding
+            - Facilitates multi-agent collaboration through shared protocols
+            - Ensures type safety and validation for tool inputs/outputs
+        </business_value>
+    </purpose>
+    
+    <dependency_requirement>
+        <package>fastmcp</package>
+        <version>2.11.3</version>
+        <location>requirements.txt</location>
+        <reason>
+            Required for MCP service implementation in netra_backend/app/services/mcp_service.py.
+            This service enables:
+            1. Tool registration and execution for AI agents
+            2. Context server capabilities for sharing system state
+            3. Standardized communication protocol with Claude and other AI models
+            4. Type-safe tool parameter validation
+        </reason>
+    </dependency_requirement>
+    
+    <implementation_details>
+        <core_components>
+            <component name="MCPService">
+                <path>netra_backend/app/services/mcp_service.py</path>
+                <description>
+                    Main service class that manages MCP server instances, tool registration,
+                    and execution context. Provides the foundation for exposing Netra's
+                    capabilities as tools to AI models.
+                </description>
+            </component>
+            
+            <component name="MCPHandlers">
+                <path>netra_backend/app/routes/mcp/handlers.py</path>
+                <description>
+                    HTTP route handlers for MCP endpoints, enabling external clients to
+                    discover and execute tools through the MCP protocol.
+                </description>
+            </component>
+            
+            <component name="MCPToolExecution">
+                <path>netra_backend/app/services/mcp_service.py</path>
+                <description>
+                    Handles the actual execution of tools, including parameter validation,
+                    error handling, and response formatting according to MCP standards.
+                </description>
+            </component>
+        </core_components>
+        
+        <tool_categories>
+            <category name="Data Operations">
+                <description>Tools for querying and manipulating data in PostgreSQL and ClickHouse</description>
+            </category>
+            <category name="Agent Management">
+                <description>Tools for creating, configuring, and managing AI agents</description>
+            </category>
+            <category name="System Administration">
+                <description>Tools for monitoring, debugging, and maintaining the Netra platform</description>
+            </category>
+            <category name="Integration">
+                <description>Tools for connecting with external services and APIs</description>
+            </category>
+        </tool_categories>
+    </implementation_details>
+    
+    <protocol_features>
+        <feature name="Tool Discovery">
+            <description>
+                Clients can discover available tools and their schemas through the
+                /mcp/tools endpoint, enabling dynamic tool selection by AI models.
+            </description>
+        </feature>
+        
+        <feature name="Type Safety">
+            <description>
+                All tool parameters and return values are strongly typed using Pydantic
+                models, ensuring data integrity and reducing runtime errors.
+            </description>
+        </feature>
+        
+        <feature name="Context Sharing">
+            <description>
+                MCP servers can share context about the current system state, user session,
+                and environment, allowing AI models to make more informed decisions.
+            </description>
+        </feature>
+        
+        <feature name="Error Handling">
+            <description>
+                Standardized error responses allow AI models to gracefully handle tool
+                execution failures and provide meaningful feedback to users.
+            </description>
+        </feature>
+    </protocol_features>
+    
+    <integration_points>
+        <integration name="Claude Desktop">
+            <description>
+                FastMCP servers can be directly integrated with Claude Desktop app,
+                allowing Claude to use Netra's tools natively.
+            </description>
+        </integration>
+        
+        <integration name="LangChain">
+            <description>
+                MCP tools can be exposed as LangChain tools, enabling integration
+                with the broader LangChain ecosystem.
+            </description>
+        </integration>
+        
+        <integration name="Custom Clients">
+            <description>
+                Any client that implements the MCP protocol can discover and use
+                Netra's tools through the standardized HTTP/WebSocket interface.
+            </description>
+        </integration>
+    </integration_points>
+    
+    <security_considerations>
+        <consideration name="Authentication">
+            <description>
+                MCP endpoints require proper authentication through Netra's auth service
+                to prevent unauthorized tool execution.
+            </description>
+        </consideration>
+        
+        <consideration name="Authorization">
+            <description>
+                Tool access is controlled through role-based permissions, ensuring users
+                can only execute tools they're authorized to use.
+            </description>
+        </consideration>
+        
+        <consideration name="Input Validation">
+            <description>
+                All tool inputs are validated against their schemas before execution,
+                preventing injection attacks and malformed requests.
+            </description>
+        </consideration>
+    </security_considerations>
+    
+    <future_enhancements>
+        <enhancement name="Tool Versioning">
+            <description>Support for multiple versions of tools with backward compatibility</description>
+        </enhancement>
+        
+        <enhancement name="Tool Composition">
+            <description>Ability to compose complex tools from simpler building blocks</description>
+        </enhancement>
+        
+        <enhancement name="Performance Metrics">
+            <description>Built-in metrics for tool execution time, success rates, and usage patterns</description>
+        </enhancement>
+    </future_enhancements>
+</specification>

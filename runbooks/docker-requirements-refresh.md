@@ -114,8 +114,15 @@ docker compose logs postgres
 - [ ] Can access auth service health at http://localhost:8001/health
 - [ ] Database migrations completed successfully (check logs)
 
+## Common Issues After Requirements Update
+
+### Missing Module: fastmcp
+**Issue:** Backend fails with `ModuleNotFoundError: No module named 'fastmcp'`
+**Solution:** Add `fastmcp` to `/netra_backend/requirements.txt` and rebuild
+
 ## Notes
 
 - Always commit your code before doing a full reset
 - Document any additional service-specific requirements in this runbook
 - Keep this runbook updated as the system evolves
+- After requirements.txt updates, ensure all new dependencies are included

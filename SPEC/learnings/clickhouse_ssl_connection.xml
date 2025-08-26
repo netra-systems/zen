@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>ClickHouse SSL Connection Configuration</title>
+        <category>Database.ClickHouse.Connection</category>
+        <date>2025-08-26</date>
+        <severity>critical</severity>
+        <environments>development, docker, staging</environments>
+    </metadata>
+
+    <problem>
+        <description>
+            ClickHouse connection fails with SSL error when connecting to Docker container:
+            "HTTPSConnectionPool(host='clickhouse', port=8123): Max retries exceeded with url: /? 
+            (Caused by SSLError(SSLError(1, '[SSL] record layer failure (_ssl.c:1016)'))"
+        </description>
+        <root_cause>
+            The connection logic was attempting to use HTTPS (secure=True) for Docker container 
+            hostnames like 'clickhouse' because they weren't recognized as local/development hosts.
+            Docker containers expose only HTTP on port 8123, not HTTPS.
+        </root_cause>
+        <affected_components>
+            <component>netra_backend/app/db/clickhouse.py</component>
+            <component>docker-compose.dev.yml</component>
+            <component>Health check endpoints</component>
+        </affected_components>
+    </problem>
+
+    <solution>
+        <approach>
+            Expand the local host detection to include Docker container hostnames and 
+            development environment checks to ensure HTTP is used for all local connections.
+        </approach>
+        <implementation>
+            <code>
+def _get_connection_config():
+    """Get ClickHouse connection configuration."""
+    config = get_clickhouse_config()
+    app_config = get_configuration()
+    # Never use HTTPS for localhost or Docker container connections to avoid SSL errors
+    is_local_or_docker = config.host in ["localhost", "127.0.0.1", "::1", "clickhouse", "netra-clickhouse"]
+    # Also check if we're in development environment
+    is_development = app_config.environment == "development"
+    use_secure = app_config.clickhouse_mode != "local" and not is_local_or_docker and not is_development
+    return config, use_secure
+            </code>
+        </implementation>
+        <location>netra_backend/app/db/clickhouse.py:159-168</location>
+    </solution>
+
+    <environment_specific_behavior>
+        <environment name="development">
+            <behavior>Always use HTTP (port 8123) without SSL</behavior>
+            <hosts>localhost, 127.0.0.1, ::1, clickhouse, netra-clickhouse</hosts>
+        </environment>
+        <environment name="docker">
+            <behavior>Always use HTTP (port 8123) without SSL for container communication</behavior>
+            <hosts>clickhouse, netra-clickhouse</hosts>
+        </environment>
+        <environment name="staging">
+            <behavior>ClickHouse is OPTIONAL in staging - often skipped entirely</behavior>
+            <note>Infrastructure not always available in staging</note>
+            <fallback>System gracefully degrades without ClickHouse</fallback>
+            <if_configured>Would use HTTPS (port 8443) with SSL for remote hosts</if_configured>
+        </environment>
+        <environment name="production">
+            <behavior>Always use HTTPS (port 8443) with SSL for security</behavior>
+            <exception>Should never have local/docker hosts in production</exception>
+        </environment>
+    </environment_specific_behavior>
+
+    <staging_specific_notes>
+        <note>
+            ClickHouse is marked as optional in staging environment (clickhouse_optional_in_staging=true).
+            The system is designed to gracefully degrade without ClickHouse in staging.
+            Health checks skip ClickHouse entirely in staging to prevent false failures.
+        </note>
+        <configuration>
+            When CLICKHOUSE_HOST is not set in staging, the system returns empty host and skips initialization.
+            This prevents the system from trying to connect to localhost or defaulting to insecure connections.
+        </configuration>
+    </staging_specific_notes>
+
+    <validation>
+        <test>Verify ClickHouse connection succeeds in docker-compose.dev.yml environment</test>
+        <test>Ensure health checks pass without SSL errors</test>
+        <test>Confirm staging still uses HTTPS for remote ClickHouse instances</test>
+        <test>Validate production maintains secure connections</test>
+    </validation>
+
+    <prevention>
+        <guideline>Always test with actual Docker containers during development</guideline>
+        <guideline>Include Docker hostnames in local host detection logic</guideline>
+        <guideline>Environment-specific SSL configuration must be explicit</guideline>
+        <guideline>Never assume HTTPS is available for local/Docker connections</guideline>
+    </prevention>
+
+    <related_issues>
+        <issue>TTL expression error in workload_events table creation (separate issue)</issue>
+        <issue>Port allocation conflicts when containers already running</issue>
+    </related_issues>
+
+    <business_impact>
+        <impact>Development velocity blocked without functioning ClickHouse</impact>
+        <impact>CI/CD pipelines fail due to connection errors</impact>
+        <impact>Local testing impossible without this fix</impact>
+    </business_impact>
+</learning>
