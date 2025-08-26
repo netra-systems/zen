@@ -101,6 +101,7 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       NETRA_API_KEY: ${NETRA_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
       
       # Frontend URL
       FRONTEND_URL: http://localhost:3000
@@ -211,7 +212,8 @@ services:
     volumes:
       - ./frontend/src:/app/src:ro
       - ./frontend/public:/app/public:ro
-      - ./frontend/next.config.js:/app/next.config.js:ro
+      - ./frontend/next.config.ts:/app/next.config.ts:ro
+      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts:ro
       - ./frontend/tsconfig.json:/app/tsconfig.json:ro
       - ./frontend/tailwind.config.ts:/app/tailwind.config.ts:ro
       - ./frontend/postcss.config.mjs:/app/postcss.config.mjs:ro

@@ -83,7 +83,7 @@ resource "google_compute_backend_service" "api_backend" {
   
   security_policy = google_compute_security_policy.cloud_armor.id
   
-  health_checks = [google_compute_health_check.http_health_check.id]
+  # Health checks not supported for serverless NEGs
   
   log_config {
     enable      = true
@@ -106,7 +106,7 @@ resource "google_compute_backend_service" "auth_backend" {
   
   security_policy = google_compute_security_policy.cloud_armor.id
   
-  health_checks = [google_compute_health_check.http_health_check.id]
+  # Health checks not supported for serverless NEGs
   
   log_config {
     enable      = true
@@ -129,7 +129,9 @@ resource "google_compute_backend_service" "frontend_backend" {
   
   security_policy = google_compute_security_policy.cloud_armor.id
   
-  health_checks = [google_compute_health_check.http_health_check.id]
+  # Health checks not supported for serverless NEGs
+  
+  enable_cdn = true
   
   cdn_policy {
     cache_mode                   = "CACHE_ALL_STATIC"
@@ -138,6 +140,12 @@ resource "google_compute_backend_service" "frontend_backend" {
     max_ttl                      = 86400
     negative_caching             = true
     serve_while_stale            = 86400
+    
+    cache_key_policy {
+      include_host          = true
+      include_protocol      = true
+      include_query_string  = false
+    }
     
     negative_caching_policy {
       code = 404
@@ -212,7 +220,9 @@ resource "google_compute_managed_ssl_certificate" "staging" {
   managed {
     domains = [
       "staging.netrasystems.ai",
-      "*.staging.netrasystems.ai"
+      "api.staging.netrasystems.ai",
+      "auth.staging.netrasystems.ai",
+      "www.staging.netrasystems.ai"
     ]
   }
   

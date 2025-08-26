@@ -202,7 +202,7 @@ resource "google_compute_security_policy" "cloud_armor" {
     
     match {
       expr {
-        expression = "origin.region_code in ['CN', 'RU', 'KP', 'IR']"
+        expression = "origin.region_code == 'CN' || origin.region_code == 'RU' || origin.region_code == 'KP' || origin.region_code == 'IR'"
       }
     }
     
@@ -227,7 +227,7 @@ resource "google_compute_security_policy" "cloud_armor" {
     
     match {
       expr {
-        expression = "request.headers['user-agent'].matches('(?i)(bot|crawler|spider|scraper|scanner)')"
+        expression = "request.headers['user-agent'].lower().contains('bot') || request.headers['user-agent'].lower().contains('crawler') || request.headers['user-agent'].lower().contains('spider') || request.headers['user-agent'].lower().contains('scraper') || request.headers['user-agent'].lower().contains('scanner')"
       }
     }
     
@@ -261,16 +261,10 @@ resource "google_compute_security_policy" "cloud_armor" {
     
     description = "API endpoint rate limiting - 1000 requests per minute"
   }
-  
-  # Log configuration
-  log_config {
-    enable      = true
-    sample_rate = 1.0
-  }
 }
 
 # Cloud Logging sink for security events
-resource "google_logging_log_sink" "security_events" {
+resource "google_logging_project_sink" "security_events" {
   name        = "${var.environment}-security-events"
   destination = "storage.googleapis.com/${google_storage_bucket.security_logs.name}"
   project     = var.project_id
@@ -315,7 +309,7 @@ resource "google_storage_bucket" "security_logs" {
 resource "google_storage_bucket_iam_member" "security_logs_writer" {
   bucket = google_storage_bucket.security_logs.name
   role   = "roles/storage.objectCreator"
-  member = google_logging_log_sink.security_events.writer_identity
+  member = google_logging_project_sink.security_events.writer_identity
 }
 
 # Monitoring alert for security events
