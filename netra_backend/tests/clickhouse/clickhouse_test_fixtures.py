@@ -133,14 +133,7 @@ async def cleanup_test_table(client, table_name):
     except Exception as e:
         logger.warning(f"Failed to cleanup table {table_name}: {e}")
 
-@pytest.fixture
-def real_clickhouse_client():
-    """Create a real ClickHouse client using production configuration"""
-    config = get_clickhouse_config()
-    client = create_clickhouse_client(config)
-    interceptor = ClickHouseQueryInterceptor(client)
-    yield interceptor
-    # Note: Disconnect handled by the test itself or auto-cleanup
+# real_clickhouse_client fixture is now provided by conftest.py
 
 @pytest.fixture
 def setup_workload_table(event_loop):

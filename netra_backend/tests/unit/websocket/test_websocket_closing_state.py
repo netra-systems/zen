@@ -42,6 +42,7 @@ class TestWebSocketClosingState:
         return ConnectionInfo(
             connection_id="test_conn_123",
             user_id="test_user",
+            websocket=mock_websocket,
             connected_at=now,
             last_activity=now
         )

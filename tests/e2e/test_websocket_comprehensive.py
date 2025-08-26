@@ -79,22 +79,34 @@ async def get_auth_token(user_email: str, password: str) -> Optional[str]:
     """Get authentication token for test user."""
     try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
-            # Try auth service endpoints
+            # Try the correct auth service endpoints based on the auth routes
             auth_endpoints = [
-                "http://localhost:8001/login",  # Auth service
-                "http://localhost:8000/auth/login",  # Backend auth endpoint
-                "http://localhost:8000/login"  # Direct backend login
+                "http://localhost:8001/auth/dev/login",  # Development login endpoint
+                "http://localhost:8001/auth/login",     # Standard login endpoint
             ]
             
             for endpoint in auth_endpoints:
                 try:
-                    response = await client.post(
-                        endpoint,
-                        json={"username": user_email, "password": password},
-                        timeout=5
-                    )
+                    # For dev login, use a simple POST request without credentials
+                    if "dev/login" in endpoint:
+                        response = await client.post(
+                            endpoint,
+                            json={},  # Dev login doesn't need credentials
+                            timeout=5
+                        )
+                    else:
+                        # For standard login, use proper LoginRequest format
+                        response = await client.post(
+                            endpoint,
+                            json={"email": user_email, "password": password},
+                            timeout=5
+                        )
                     
                     if response.status_code == 200:
+                        data = response.json()
+                        return data.get("access_token") or data.get("token")
+                    elif response.status_code == 201:
+                        # Handle 201 status code for successful creation
                         data = response.json()
                         return data.get("access_token") or data.get("token")
                         
@@ -138,37 +150,69 @@ class WebSocketTestClient:
                 "Origin": "http://localhost:3000"
             }
             
-            # Method 2: Subprotocol authentication (backup method)
-            if subprotocol:
-                import base64
-                encoded_token = base64.b64encode(f"Bearer {self.token}".encode()).decode()
-                extra_headers = [("Sec-WebSocket-Protocol", f"jwt.{encoded_token}")]
-            else:
-                extra_headers = None
-            
             # EXPECTED FAILURE: Connection might not establish due to auth issues
-            self.websocket = await websockets.connect(
-                ws_url,
-                extra_headers=extra_headers or [(k, v) for k, v in headers.items()],
-                timeout=CONNECTION_TIMEOUT
-            )
+            try:
+                if subprotocol:
+                    import base64
+                    encoded_token = base64.b64encode(f"Bearer {self.token}".encode()).decode()
+                    # Use subprotocols parameter for WebSocket protocol negotiation
+                    self.websocket = await asyncio.wait_for(
+                        websockets.connect(
+                            ws_url,
+                            additional_headers=headers,
+                            subprotocols=[f"jwt.{encoded_token}"]
+                        ),
+                        timeout=CONNECTION_TIMEOUT
+                    )
+                else:
+                    # Use additional_headers parameter instead of extra_headers
+                    self.websocket = await asyncio.wait_for(
+                        websockets.connect(
+                            ws_url,
+                            additional_headers=headers
+                        ),
+                        timeout=CONNECTION_TIMEOUT
+                    )
+            except asyncio.TimeoutError:
+                self.connection_events.append(("connection_timeout", time.time()))
+                return False
             
             # Wait for welcome message - LIKELY TO TIMEOUT
             try:
-                welcome = await asyncio.wait_for(
-                    self.websocket.recv(),
-                    timeout=MESSAGE_TIMEOUT
-                )
-                welcome_data = json.loads(welcome)
+                # The server might send multiple messages, look for the connection established one
+                for attempt in range(3):  # Try to receive up to 3 messages
+                    welcome = await asyncio.wait_for(
+                        self.websocket.recv(),
+                        timeout=MESSAGE_TIMEOUT
+                    )
+                    welcome_data = json.loads(welcome)
+                    
+                    # Handle different message types from server
+                    msg_type = welcome_data.get("type")
+                    
+                    if msg_type == "connection_established":
+                        self.connection_id = welcome_data.get("payload", {}).get("connection_id") or welcome_data.get("data", {}).get("connection_id")
+                        self.is_authenticated = True
+                        self.connection_events.append(("connected", time.time()))
+                        return True
+                    elif msg_type == "system_message":
+                        # Check if it's a connection established system message
+                        data = welcome_data.get("data", {})
+                        if data.get("event") == "connection_established":
+                            self.connection_id = data.get("connection_id") or data.get("user_id")
+                            self.is_authenticated = True
+                            self.connection_events.append(("connected", time.time()))
+                            return True
+                    elif msg_type == "ping":
+                        # Server sent a ping, ignore and continue waiting
+                        continue
+                    elif msg_type == "error":
+                        self.connection_events.append(("auth_failed", time.time()))
+                        return False
                 
-                if welcome_data.get("type") == "connection_established":
-                    self.connection_id = welcome_data.get("payload", {}).get("connection_id")
-                    self.is_authenticated = True
-                    self.connection_events.append(("connected", time.time()))
-                    return True
-                else:
-                    self.connection_events.append(("auth_failed", time.time()))
-                    return False
+                # If we didn't get a connection_established message after 3 attempts
+                self.connection_events.append(("auth_failed", time.time()))
+                return False
                     
             except asyncio.TimeoutError:
                 self.connection_events.append(("welcome_timeout", time.time()))
@@ -271,7 +315,18 @@ async def test_user_with_token():
             "token": token
         }
     else:
-        pytest.fail("Failed to authenticate test user - auth service may be down")
+        # Provide more detailed error information for debugging
+        print("\n" + "="*60)
+        print("AUTHENTICATION FAILURE DETAILS:")
+        print("="*60)
+        print(f"- Attempted to authenticate user: {user_data['email']}")
+        print("- Tried endpoints:")
+        print("  * http://localhost:8001/auth/dev/login (POST)")
+        print("  * http://localhost:8001/auth/login (POST)")
+        print("- Auth service might not be running on localhost:8001")
+        print("- Check that services are started with: python scripts/dev_launcher.py")
+        print("="*60)
+        pytest.fail("Failed to authenticate test user - auth service may be down or not properly configured")
 
 
 @pytest.fixture  
@@ -524,9 +579,9 @@ class TestWebSocketMessageRouting:
             # ASSERTION LIKELY TO FAIL: No message response/echo
             assert response is not None, "Should receive response to chat message"
             
-            # Verify message structure
+            # Verify message structure (server uses "data" field, not "payload")
             assert "type" in response
-            assert "payload" in response
+            assert "data" in response or "payload" in response
             
         finally:
             await client.close()

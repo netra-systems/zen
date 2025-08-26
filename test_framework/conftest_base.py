@@ -438,6 +438,26 @@ def e2e_logger():
     return E2ELogger(logger)
 
 # =============================================================================
+# PYTEST HOOKS FOR SERVICE ENABLEMENT
+# =============================================================================
+
+def pytest_collection_modifyitems(config, items):
+    """Enable services for tests that require them."""
+    env = get_env()
+    
+    # Check if any tests need ClickHouse (marked with real_database)
+    needs_clickhouse = False
+    for item in items:
+        if item.get_closest_marker('real_database'):
+            needs_clickhouse = True
+            break
+    
+    # Enable ClickHouse if needed
+    if needs_clickhouse:
+        env.set("CLICKHOUSE_ENABLED", "true", "test_framework_real_database")
+        env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", "test_framework_real_database")
+
+# =============================================================================
 # ASYNC UTILITIES
 # =============================================================================
 

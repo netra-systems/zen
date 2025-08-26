@@ -193,7 +193,7 @@ class DatabaseTransactionCoordinatorL3:
         
         # Initialize with test URLs
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.configuration.get_configuration') as mock_config:
+        with patch('netra_backend.app.core.configuration.get_configuration') as mock_config:
             mock_config.return_value.DATABASE_URL = postgres_url
             mock_config.return_value.CLICKHOUSE_URL = clickhouse_url
 

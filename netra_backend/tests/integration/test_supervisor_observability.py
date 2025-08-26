@@ -96,7 +96,7 @@ class TestSupervisorObservabilityIntegration:
         return DeepAgentState(user_request="Test request")
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.supervisor.flow_logger.logger')
+    @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_end_to_end_flow_logging(self, mock_logger, mock_registry, mock_websocket_manager):
         """Test complete flow logging during supervisor execution."""
@@ -116,7 +116,7 @@ class TestSupervisorObservabilityIntegration:
         assert mock_logger.info.call_count >= 5  # start + 2*(agent_start+completion) + completion
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.supervisor.flow_logger.logger')
+    @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_inter_agent_communication_logging(self, mock_logger, mock_registry):
         """Test inter-agent communication is properly logged."""
@@ -134,7 +134,7 @@ class TestSupervisorObservabilityIntegration:
             assert "supervisor_inter_agent_comm" in call_data
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.supervisor.flow_logger.logger')
+    @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_pipeline_execution_logging_with_metrics(self, mock_logger):
         """Test pipeline execution logging with performance metrics."""
@@ -154,7 +154,7 @@ class TestSupervisorObservabilityIntegration:
         assert mock_logger.info.call_count == 3
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.supervisor.flow_logger.logger')
+    @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_todo_lifecycle_during_execution(self, mock_logger):
         """Test TODO lifecycle management during supervisor execution."""
@@ -181,7 +181,7 @@ class TestSupervisorObservabilityIntegration:
         assert mock_logger.info.call_count >= 7  # 3 creates + 4 state changes
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.supervisor.flow_logger.logger')
+    @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_observability_with_agent_failures(self, mock_logger, mock_registry):
         """Test observability logging handles agent failures gracefully."""
@@ -215,7 +215,7 @@ class TestSupervisorObservabilityIntegration:
         assert completion_log["failed_steps"] == 1
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.supervisor.flow_logger.logger')
+    @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_correlation_tracking_across_agents(self, mock_logger):
         """Test correlation ID tracking across multiple agent executions."""
@@ -237,7 +237,7 @@ class TestSupervisorObservabilityIntegration:
             assert correlation_id in call_data
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.agents.supervisor.flow_logger.logger')
+    @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_performance_metrics_collection(self, mock_logger):
         """Test collection and logging of performance metrics."""

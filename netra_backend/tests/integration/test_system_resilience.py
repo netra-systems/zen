@@ -34,8 +34,8 @@ class TestSystemResilience:
         # Simulate scenario where multiple components are failing simultaneously
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
+        with patch('netra_backend.app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             patch('netra_backend.app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Setup emergency scenario
             mock_health_instance = Mock()
@@ -84,7 +84,7 @@ class TestSystemResilience:
         agents = []
         for i in range(3):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+            with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_reliability = Mock()
                 # Mock: Generic component isolation for controlled unit testing

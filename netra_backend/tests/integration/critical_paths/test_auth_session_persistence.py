@@ -86,7 +86,7 @@ class TestAuthSessionPersistenceL3:
                 
                 # Simulate Redis restart
                 # Mock: Redis external service isolation for fast, reliable tests without network dependency
-                with patch('app.services.auth_service.redis_client') as mock_redis:
+                with patch('netra_backend.app.services.auth_service.redis_client') as mock_redis:
                     mock_redis.get.side_effect = [ConnectionError(), json.dumps({"user_id": "123"})]
                     
                     # First attempt should retry

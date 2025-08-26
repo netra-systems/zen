@@ -67,9 +67,13 @@ class TokenService:
         return None
     
     def _get_jwt_secret(self) -> str:
-        """Get JWT secret key from configuration."""
-        config = get_config()
-        return getattr(config, 'jwt_secret_key', 'development_secret_key_for_jwt_do_not_use_in_production')
+        """Get JWT secret key - DELEGATES TO SSOT.
+        
+        SSOT ENFORCEMENT: This method now delegates to the canonical
+        UnifiedSecretManager to eliminate duplicate JWT secret implementations.
+        """
+        from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
+        return get_jwt_secret()
     
     async def create_access_token(self, user_id: str, **kwargs) -> str:
         """

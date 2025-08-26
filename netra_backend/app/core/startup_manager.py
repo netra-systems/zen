@@ -81,6 +81,8 @@ class StartupManager:
         enable_circuit_breaker: bool = True,
         enable_metrics: bool = True
     ):
+        from netra_backend.app.core.startup_config import StartupConfig
+        
         self.components: Dict[str, StartupComponent] = {}
         self.circuit_breakers: Dict[str, CircuitBreakerState] = {}
         self.global_timeout = global_timeout
@@ -90,6 +92,9 @@ class StartupManager:
         self.is_initialized = False
         self._shutdown_event = asyncio.Event()
         self._startup_task: Optional[asyncio.Task] = None
+        
+        # Add circuit breaker configuration from StartupConfig
+        self.MAX_FAILURES = StartupConfig.MAX_FAILURES
         
     def register_component(
         self,
@@ -112,7 +117,7 @@ class StartupManager:
             max_retries=max_retries
         )
         self.components[name] = component
-        self.circuit_breakers[name] = CircuitBreakerState()
+        self.circuit_breakers[name] = CircuitBreakerState(failure_threshold=self.MAX_FAILURES)
         logger.info(f"Registered startup component: {name} (priority={priority.name})")
     
     def _check_circuit_breaker(self, name: str) -> bool:
@@ -242,10 +247,17 @@ class StartupManager:
             except asyncio.TimeoutError:
                 logger.error(f"Timeout initializing {name} after {component.timeout_seconds}s")
                 component.error = TimeoutError(f"Initialization timeout: {component.timeout_seconds}s")
+                self._trip_circuit_breaker(name)
                 
             except Exception as e:
                 logger.error(f"Error initializing {name}: {e}")
                 component.error = e
+                self._trip_circuit_breaker(name)
+            
+            # Check if circuit breaker is open after this failure
+            if not self._check_circuit_breaker(name):
+                logger.warning(f"Circuit breaker open for {name}, stopping retries")
+                break
             
             # Retry with exponential backoff
             if attempt < component.max_retries - 1:
@@ -259,7 +271,6 @@ class StartupManager:
         # All retries failed
         component.status = ComponentStatus.FAILED
         component.end_time = time.time()
-        self._trip_circuit_breaker(name)
         
         if self.enable_metrics:
             duration = component.end_time - component.start_time

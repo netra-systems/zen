@@ -42,7 +42,7 @@ class TestAgentReliabilityIntegration:
     def reliable_agent(self):
         """Create mock reliable agent."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing
@@ -166,15 +166,15 @@ class TestAgentReliabilityIntegration:
     async def test_agent_reliability_with_fallback_coordinator(self, reliable_agent):
         """Test agent reliability integration with fallback coordinator."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
+        with patch('netra_backend.app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             patch('netra_backend.app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             coordinator, mock_health_instance = self._setup_fallback_coordinator_mocks(mock_health_monitor, mock_emergency_manager)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
-                 patch('app.core.fallback_coordinator.CircuitBreaker'), \
-                 patch('app.core.fallback_coordinator.AgentFallbackStatus'):
+            with patch('netra_backend.app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
+                 patch('netra_backend.app.core.fallback_coordinator.CircuitBreaker'), \
+                 patch('netra_backend.app.core.fallback_coordinator.AgentFallbackStatus'):
                 
                 mock_handler = self._setup_coordination_handler_mocks(mock_handler_class)
                 coordinator.register_agent("TestAgent")
@@ -185,8 +185,8 @@ class TestAgentReliabilityIntegration:
     async def test_agent_failure_propagation_through_system(self, reliable_agent):
         """Test how agent failures propagate through the integrated system."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
+        with patch('netra_backend.app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             patch('netra_backend.app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Setup mocks for emergency scenario
             # Mock: Generic component isolation for controlled unit testing
@@ -217,9 +217,9 @@ class TestAgentReliabilityIntegration:
             test_error = RuntimeError("Critical system failure")
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
-                 patch('app.core.fallback_coordinator.CircuitBreaker'), \
-                 patch('app.core.fallback_coordinator.AgentFallbackStatus'):
+            with patch('netra_backend.app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
+                 patch('netra_backend.app.core.fallback_coordinator.CircuitBreaker'), \
+                 patch('netra_backend.app.core.fallback_coordinator.AgentFallbackStatus'):
                 
                 # Mock: Generic component isolation for controlled unit testing
                 mock_handler = AsyncMock()

@@ -324,7 +324,8 @@ class DatabaseManager:
         
         # Get SQL echo setting from unified config
         config = get_unified_config()
-        sql_echo = config.log_level == "DEBUG"  # Enable SQL echo in DEBUG mode
+        # Only enable SQL echo in TRACE mode to avoid spam
+        sql_echo = config.log_level == "TRACE" and getattr(config, 'enable_sql_logging', False)
         
         return create_engine(
             migration_url,
@@ -383,7 +384,8 @@ class DatabaseManager:
         
         # Get SQL echo setting from unified config
         config = get_unified_config()
-        sql_echo = config.log_level == "DEBUG"  # Enable SQL echo in DEBUG mode
+        # Only enable SQL echo in TRACE mode to avoid spam
+        sql_echo = config.log_level == "TRACE" and getattr(config, 'enable_sql_logging', False)
         
         engine_args = {
             "echo": sql_echo,
@@ -397,9 +399,9 @@ class DatabaseManager:
         if pool_class != NullPool:
             engine_args.update({
                 # Optimized pool sizes for cold start resilience
-                "pool_size": 25,  # Increased base pool size for concurrent startup
-                "max_overflow": 35,  # Higher overflow to handle startup bursts (total max: 60)
-                "pool_timeout": 120,  # Longer timeout for cold start scenarios
+                "pool_size": 10,  # Reduced from 25 for faster startup  # Increased base pool size for concurrent startup
+                "max_overflow": 15,  # Reduced from 35 (total max: 25)  # Higher overflow to handle startup bursts (total max: 60)
+                "pool_timeout": 60,  # Reduced from 120 for faster failure detection  # Longer timeout for cold start scenarios
             })
         
         if connect_args:
@@ -528,16 +530,10 @@ class DatabaseManager:
                 "overflow": engine.pool.overflow(),
             }
             
-            # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() method
-            try:
-                if hasattr(engine.pool, 'invalidated'):
-                    pool_stats["invalidated"] = engine.pool.invalidated()
-                elif hasattr(engine.pool, 'invalid'):
-                    pool_stats["invalid"] = engine.pool.invalid()
-                else:
-                    pool_stats["invalidated_connections"] = "unknown"
-            except AttributeError:
-                pool_stats["invalidated_connections"] = "unavailable"
+            # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() or invalidated() methods
+            # These methods only exist on synchronous pools, not async pools
+            # For async pools, we can only check basic stats
+            pool_stats["pool_type"] = type(engine.pool).__name__
             
             return pool_stats
         return {"status": "Pool status unavailable"}

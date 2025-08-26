@@ -410,16 +410,9 @@ class ConnectionPoolManager:
                     "overflow": self._engine.pool.overflow(),
                 }
                 
-                # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() method
-                try:
-                    if hasattr(self._engine.pool, 'invalidated'):
-                        pool_status["invalidated"] = self._engine.pool.invalidated()
-                    elif hasattr(self._engine.pool, 'invalid'):
-                        pool_status["invalid"] = self._engine.pool.invalid()
-                    else:
-                        pool_status["invalidated_connections"] = "unknown"
-                except AttributeError:
-                    pool_status["invalidated_connections"] = "unavailable"
+                # CRITICAL FIX: AsyncAdaptedQueuePool doesn't have invalid() or invalidated() methods
+                # These methods only exist on synchronous pools
+                pool_status["pool_type"] = type(self._engine.pool).__name__
             
             return {
                 "status": "healthy",

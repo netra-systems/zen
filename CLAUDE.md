@@ -180,6 +180,8 @@ ALL relevent changes must update [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md).
 *   **Learnings:** Document insights in specs (using positive wording) to ensure continuous improvement and stability.
 *   Refactors must delete all legacy code. Refactors must be complete system wide and "atomic" operations that leave a clean and better system.
 
+*   **Learnings vs Reports:** Learnings in SPEC/*.xml files are permanent knowledge stored in version control. Reports (*.md files) are ephemeral snapshots documenting specific work sessions and can be deleted after value extraction.
+
 ### 4.1. String Literals Index: Preventing Hallucination
 
 The **String Literals Index** is a critical system for maintaining consistency and preventing LLM hallucination of platform-specific values.

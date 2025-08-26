@@ -48,6 +48,11 @@ class ConnectionPoolRefreshStrategy(DatabaseRecoveryStrategy):
         """Refresh connections in pool."""
         try:
             logger.info(f"Refreshing connection pool: {getattr(pool, '_pool_id', 'unknown')}")
+            # Add validation for pool state before attempting recovery
+            if not await self._validate_pool_state(pool):
+                logger.warning("Pool is not in a valid state for recovery")
+                return False
+                
             await self._cleanup_idle_connections(pool)
             return await self._test_new_connections(pool, config)
         except Exception as e:
@@ -73,26 +78,56 @@ class ConnectionPoolRefreshStrategy(DatabaseRecoveryStrategy):
             await self._force_release_connections(pool, test_connections)
             return False
     
+    async def _validate_pool_state(self, pool: Any) -> bool:
+        """Validate pool state before attempting recovery."""
+        # Check if pool has required methods
+        if not hasattr(pool, 'acquire') or not hasattr(pool, 'release'):
+            logger.warning("Pool missing required methods for recovery")
+            return False
+            
+        # Check if pool is disposed or closed
+        if hasattr(pool, '_disposed') and pool._disposed:
+            logger.warning("Pool is disposed and cannot be recovered")
+            return False
+            
+        return True
+    
     async def _acquire_test_connections(self, pool: Any, config: DatabaseConfig, test_connections: List) -> bool:
         """Acquire test connections to verify pool health."""
         connection_count = min(3, config.pool_size)
-        for _ in range(connection_count):
-            conn = await pool.acquire()
-            test_connections.append(conn)
+        for i in range(connection_count):
+            try:
+                # Add timeout to prevent hanging
+                conn = await asyncio.wait_for(pool.acquire(), timeout=5.0)
+                test_connections.append(conn)
+            except asyncio.TimeoutError:
+                logger.warning(f"Timeout acquiring test connection {i+1}/{connection_count}")
+                return False
+            except Exception as e:
+                logger.error(f"Failed to acquire test connection {i+1}/{connection_count}: {e}")
+                return False
         logger.info("Connection pool refresh successful")
         return True
     
     async def _release_test_connections(self, pool: Any, test_connections: List) -> None:
         """Release all test connections back to pool."""
-        for conn in test_connections:
-            await pool.release(conn)
+        for i, conn in enumerate(test_connections):
+            try:
+                # Add timeout to prevent hanging during release
+                await asyncio.wait_for(pool.release(conn), timeout=3.0)
+            except asyncio.TimeoutError:
+                logger.warning(f"Timeout releasing test connection {i+1}")
+            except Exception as e:
+                logger.warning(f"Failed to release test connection {i+1}: {e}")
     
     async def _force_release_connections(self, pool: Any, test_connections: List) -> None:
         """Force release connections even on errors."""
-        for conn in test_connections:
+        for i, conn in enumerate(test_connections):
             try:
-                await pool.release(conn)
-            except Exception:
+                # Use shorter timeout for force release
+                await asyncio.wait_for(pool.release(conn), timeout=1.0)
+            except (asyncio.TimeoutError, Exception):
+                # Silently ignore errors in force release
                 pass
     
     def get_priority(self) -> int:

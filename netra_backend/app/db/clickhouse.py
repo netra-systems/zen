@@ -294,8 +294,11 @@ class ClickHouseService:
 
     def _add_database_security_params(self, params: dict, config) -> dict:
         """Add database and security parameters."""
+        # Never use HTTPS for localhost connections to avoid SSL errors
+        is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]
+        use_secure = not is_localhost and config.port == 8443
         params['database'] = config.database
-        params['secure'] = True
+        params['secure'] = use_secure
         return params
 
     def _prepare_database_params(self, config) -> dict:

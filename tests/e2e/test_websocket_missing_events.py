@@ -31,20 +31,19 @@ class TestWebSocketMissingEvents:
     
     @pytest.fixture
     async def backend_client(self):
-        """Get authenticated backend client."""
-        client = BackendTestClient()
-        await client.authenticate()
+        """Get backend client with proper configuration."""
+        config = UnifiedTestConfig()
+        client = BackendTestClient(config.backend_service_url)
         try:
             yield client
         finally:
             await client.close()
     
     @pytest.fixture
-    async def websocket_client(self, backend_client):
-        """Get authenticated WebSocket client."""
-        token = await backend_client.get_jwt_token()
-        ws_client = WebSocketTestClient()
-        await ws_client.connect(token)
+    async def websocket_client(self):
+        """Get WebSocket client with proper configuration."""
+        config = UnifiedTestConfig()
+        ws_client = WebSocketTestClient(config.endpoints.ws_url)
         try:
             yield ws_client
         finally:

@@ -566,7 +566,10 @@ class UnifiedTestRunner:
         
         # Add specific test pattern
         if args.pattern:
-            cmd_parts.extend(["-k", f'"{args.pattern}"'])
+            # Clean up pattern - remove asterisks that are invalid for pytest -k expressions
+            # pytest -k expects Python-like expressions, not glob patterns
+            clean_pattern = args.pattern.strip('*')
+            cmd_parts.extend(["-k", f'"{clean_pattern}"'])
         
         return " ".join(cmd_parts)
     

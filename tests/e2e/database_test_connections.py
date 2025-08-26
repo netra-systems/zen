@@ -96,7 +96,7 @@ class DatabaseConnectionManager:
                     database = "default"
             else:
                 host = os.getenv("CLICKHOUSE_HOST", "localhost")
-                port = int(os.getenv("CLICKHOUSE_PORT", "8443"))
+                port = int(os.getenv("CLICKHOUSE_PORT", "8123"))
                 database = "default"
             
             self.clickhouse_client = clickhouse_connect.get_client(

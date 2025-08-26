@@ -351,22 +351,19 @@ class TestDatabaseConnectivityValidation:
         else:
             print(f"Error: {result['error']}")
         
-        # Only assert if ClickHouse is configured (not in minimal test environments)
-        if config['host'] and config['host'] != '':
-            assert result['success'], (
-                f"ClickHouse HTTP connectivity FAILED:\n"
-                f"Host: {config['host']}:{config['http_port']}\n"
-                f"User: {config['user']}\n"
-                f"Database: {config['database']}\n"
-                f"Error: {result['error']}\n\n"
-                f"This indicates ClickHouse is not accessible via HTTP interface. Ensure:\n"
-                f"1. ClickHouse is running on port {config['http_port']}\n"
-                f"2. HTTP interface is enabled\n"
-                f"3. User '{config['user']}' has proper authentication\n"
-                f"4. Database '{config['database']}' exists"
-            )
-        else:
-            pytest.skip("ClickHouse not configured for this test environment")
+        # ClickHouse is now properly configured for local development
+        assert result['success'], (
+            f"ClickHouse HTTP connectivity FAILED:\n"
+            f"Host: {config['host']}:{config['http_port']}\n"
+            f"User: {config['user']}\n"
+            f"Database: {config['database']}\n"
+            f"Error: {result['error']}\n\n"
+            f"This indicates ClickHouse is not accessible via HTTP interface. Ensure:\n"
+            f"1. ClickHouse is running on port {config['http_port']}\n"
+            f"2. HTTP interface is enabled\n"
+            f"3. User '{config['user']}' has proper authentication\n"
+            f"4. Database '{config['database']}' exists"
+        )
     
     def test_clickhouse_native_port_9000_connectivity(self, validator):
         """
@@ -390,18 +387,15 @@ class TestDatabaseConnectivityValidation:
         else:
             print(f"Error: {result['error']}")
         
-        # Only assert if ClickHouse is configured
-        if config['host'] and config['host'] != '':
-            assert result['success'], (
-                f"ClickHouse native connectivity FAILED:\n"
-                f"Host: {config['host']}:{config['native_port']}\n"
-                f"User: {config['user']}\n"
-                f"Database: {config['database']}\n"
-                f"Error: {result['error']}\n\n"
-                f"This indicates ClickHouse native protocol is not working properly."
-            )
-        else:
-            pytest.skip("ClickHouse not configured for this test environment")
+        # ClickHouse is now properly configured for local development
+        assert result['success'], (
+            f"ClickHouse native connectivity FAILED:\n"
+            f"Host: {config['host']}:{config['native_port']}\n"
+            f"User: {config['user']}\n"
+            f"Database: {config['database']}\n"
+            f"Error: {result['error']}\n\n"
+            f"This indicates ClickHouse native protocol is not working properly."
+        )
     
     def test_database_url_builder_consistency(self, validator):
         """
@@ -619,8 +613,8 @@ class TestDatabaseConfigurationRegression:
         env = get_env()
         
         clickhouse_host = env.get('CLICKHOUSE_HOST')
-        if not clickhouse_host or clickhouse_host == '':
-            pytest.skip("ClickHouse not configured for this test environment")
+        # ClickHouse is now properly configured for local development
+        assert clickhouse_host, "ClickHouse host must be configured"
         
         clickhouse_password = env.get('CLICKHOUSE_PASSWORD')
         assert clickhouse_password, "ClickHouse password must be configured"

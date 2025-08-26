@@ -132,7 +132,7 @@ class BasicUserFlowE2ETester:
         # Use Auth service dev endpoint for user creation
         response = await self.test_client.auth_request(
             "POST", 
-            "/dev/login",
+            "/auth/dev/login",
             json={}  # Dev endpoint creates default user
         )
         
@@ -158,7 +158,7 @@ class BasicUserFlowE2ETester:
         # For dev environment, use dev login endpoint
         response = await self.test_client.auth_request(
             "POST",
-            "/dev/login", 
+            "/auth/dev/login", 
             json={}
         )
         
@@ -189,8 +189,8 @@ class BasicUserFlowE2ETester:
         try:
             self.websocket_connection = await websockets.connect(
                 WEBSOCKET_URL,
-                extra_headers=headers,
-                timeout=10
+                additional_headers=headers,
+                open_timeout=10
             )
             
             # Wait for connection acknowledgment

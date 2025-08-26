@@ -223,6 +223,70 @@ class BackendTestClient:
         except Exception:
             return False
     
+    async def get(self, url: str, params: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """Generic GET request method.
+        
+        Args:
+            url: URL path to request
+            params: Optional query parameters
+            headers: Optional additional headers
+            
+        Returns:
+            HTTP response
+        """
+        request_headers = {}
+        if headers:
+            request_headers.update(headers)
+        return await self.client.get(url, params=params, headers=request_headers)
+    
+    async def post(self, url: str, json: Optional[Dict[str, Any]] = None, data: Optional[Any] = None, headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """Generic POST request method.
+        
+        Args:
+            url: URL path to request
+            json: Optional JSON payload
+            data: Optional form data
+            headers: Optional additional headers
+            
+        Returns:
+            HTTP response
+        """
+        request_headers = {}
+        if headers:
+            request_headers.update(headers)
+        return await self.client.post(url, json=json, data=data, headers=request_headers)
+    
+    async def put(self, url: str, json: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """Generic PUT request method.
+        
+        Args:
+            url: URL path to request
+            json: Optional JSON payload
+            headers: Optional additional headers
+            
+        Returns:
+            HTTP response
+        """
+        request_headers = {}
+        if headers:
+            request_headers.update(headers)
+        return await self.client.put(url, json=json, headers=request_headers)
+    
+    async def delete(self, url: str, headers: Optional[Dict[str, str]] = None) -> httpx.Response:
+        """Generic DELETE request method.
+        
+        Args:
+            url: URL path to request
+            headers: Optional additional headers
+            
+        Returns:
+            HTTP response
+        """
+        request_headers = {}
+        if headers:
+            request_headers.update(headers)
+        return await self.client.delete(url, headers=request_headers)
+
     async def close(self) -> None:
         """Close the HTTP client."""
         await self.client.aclose()

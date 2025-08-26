@@ -194,7 +194,7 @@ class EnvironmentValidator:
         
         env_vars = self._load_env_file(".env")
         ch_host = env_vars.get("CLICKHOUSE_HOST") or os.environ.get("CLICKHOUSE_HOST")
-        ch_port = env_vars.get("CLICKHOUSE_PORT", "8443")
+        ch_port = env_vars.get("CLICKHOUSE_PORT", "8123")
         ch_user = env_vars.get("CLICKHOUSE_USER", "default")
         ch_password = env_vars.get("CLICKHOUSE_PASSWORD")
         

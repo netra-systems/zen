@@ -100,7 +100,7 @@ class DatabaseValidator:
         
         return {
             "host": host,
-            "port": int(os.getenv("CLICKHOUSE_PORT", "8443")),
+            "port": int(os.getenv("CLICKHOUSE_PORT", "8123")),
             "user": os.getenv("CLICKHOUSE_USER", "default"),
             "password": os.getenv("CLICKHOUSE_PASSWORD", ""),
             "database": os.getenv("CLICKHOUSE_DB", "default"),

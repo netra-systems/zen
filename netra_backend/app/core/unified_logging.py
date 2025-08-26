@@ -105,6 +105,15 @@ class UnifiedLogger:
     def _configure_handlers(self):
         """Configure logging handlers."""
         logger.remove()
+        
+        # Suppress SQLAlchemy verbose logging unless in TRACE mode
+        import logging
+        if self._config['log_level'] != 'TRACE':
+            logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+            logging.getLogger("sqlalchemy.pool").setLevel(logging.WARNING)
+            logging.getLogger("sqlalchemy.dialects").setLevel(logging.WARNING)
+            logging.getLogger("sqlalchemy.orm").setLevel(logging.WARNING)
+        
         handler_config = LogHandlerConfig(
             self._config['log_level'], 
             self._config['enable_json_logging']

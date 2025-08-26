@@ -243,8 +243,8 @@ async def test_circuit_breaker_functionality(startup_manager):
     # Circuit breaker should have tripped
     assert "flaky_service" in startup_manager.circuit_breakers
     breaker = startup_manager.circuit_breakers["flaky_service"]
-    assert breaker["failures"] >= 3
-    assert breaker["is_open"] is True
+    assert breaker.failure_count >= 3
+    assert breaker.is_open is True
 
 
 @pytest.mark.asyncio

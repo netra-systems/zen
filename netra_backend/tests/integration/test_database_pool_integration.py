@@ -239,7 +239,7 @@ class TestDatabasePoolIntegration:
         db_manager = ConnectionManager(failing_db_url, **pool_config)
         
         # Mock: Database access isolation for fast, reliable unit testing
-        with patch('app.core.database_connection_manager.create_async_engine') as mock_create_engine:
+        with patch('netra_backend.app.core.database_connection_manager.create_async_engine') as mock_create_engine:
             # Mock: Generic component isolation for controlled unit testing
             mock_engine = Mock()
             # Mock: Generic component isolation for controlled unit testing

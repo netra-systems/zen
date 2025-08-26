@@ -280,12 +280,53 @@ class UnifiedSecretManager:
         return credentials
     
     def get_jwt_secret(self) -> str:
-        """Get JWT secret key.
+        """CANONICAL JWT SECRET METHOD - SINGLE SOURCE OF TRUTH
+        
+        Get JWT secret key with proper fallback chain matching auth service pattern.
+        This is the ONLY method that should determine JWT secret loading logic.
+        All other JWT secret loading should delegate to this method.
+        
+        Fallback priority:
+        1. Environment-specific secrets (JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION)
+        2. Generic JWT_SECRET_KEY 
+        3. Legacy JWT_SECRET
+        4. Development fallback (development environment only)
         
         Returns:
             str: JWT secret key
+            
+        Raises:
+            ValueError: If no secret found in non-development environments
         """
-        return self.get_secret("JWT_SECRET_KEY", "")
+        # CONFIG BOOTSTRAP: Direct env access for JWT secret resolution
+        env = get_env().get("ENVIRONMENT", "development").lower()
+        
+        # 1. Check environment-specific secrets first
+        env_specific_key = f"JWT_SECRET_{env.upper()}"
+        secret = get_env().get(env_specific_key)
+        if secret and secret.strip():
+            self._logger.debug(f"Using environment-specific JWT secret: {env_specific_key}")
+            return secret.strip()
+        
+        # 2. Check generic JWT_SECRET_KEY
+        secret = get_env().get("JWT_SECRET_KEY")
+        if secret and secret.strip():
+            self._logger.debug("Using JWT_SECRET_KEY")
+            return secret.strip()
+        
+        # 3. Check legacy JWT_SECRET (for backward compatibility)
+        secret = get_env().get("JWT_SECRET")
+        if secret and secret.strip():
+            self._logger.warning("Using legacy JWT_SECRET - consider upgrading to JWT_SECRET_KEY")
+            return secret.strip()
+        
+        # 4. Development fallback
+        if env == "development":
+            self._logger.warning("No JWT secret configured - using development fallback")
+            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+        
+        # 5. No secret found in non-development environment
+        raise ValueError(f"JWT secret not configured for {env} environment. Set JWT_SECRET_KEY or JWT_SECRET_{env.upper()}")
     
     def clear_cache(self):
         """Clear the secret cache."""
@@ -395,3 +436,19 @@ def get_secret(key: str, default: Optional[str] = None) -> Optional[str]:
         Secret value or default
     """
     return _unified_secret_manager.get_secret(key, default)
+
+
+def get_jwt_secret() -> str:
+    """Get JWT secret key - CANONICAL SSOT METHOD
+    
+    This is the SINGLE canonical source for JWT secret loading.
+    All other components should use this function instead of
+    implementing their own JWT secret loading logic.
+    
+    Returns:
+        str: JWT secret key
+        
+    Raises:
+        ValueError: If no secret found in non-development environments
+    """
+    return _unified_secret_manager.get_jwt_secret()

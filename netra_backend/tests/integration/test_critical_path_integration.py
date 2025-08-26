@@ -48,9 +48,9 @@ class TestCriticalPathIntegration:
         """Setup all required patches for coordination test"""
         patches = {}
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_reliability_wrapper, \
-             patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_reliability_wrapper, \
+             patch('netra_backend.app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             patch('netra_backend.app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             patches.update(self._setup_reliability_mocks(mock_reliability_wrapper))
             patches.update(self._setup_coordinator_mocks(mock_health_monitor, mock_emergency_manager))
             return patches
@@ -98,9 +98,9 @@ class TestCriticalPathIntegration:
     def _setup_http_client_mocks(self):
         """Setup HTTP client with mocked responses"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
-             patch('app.services.external_api_client.circuit_registry') as mock_registry, \
-             patch('app.services.external_api_client.ClientSession') as mock_session_class:
+        with patch('netra_backend.app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
+             patch('netra_backend.app.services.external_api_client.circuit_registry') as mock_registry, \
+             patch('netra_backend.app.services.external_api_client.ClientSession') as mock_session_class:
             self._configure_http_mocks(mock_cb_class, mock_registry, mock_session_class)
             return ResilientHTTPClient(base_url="https://api.critical.com")
 
@@ -129,7 +129,7 @@ class TestCriticalPathIntegration:
             return await op()
         mock_patches["mock_reliability"].execute_safely.side_effect = async_execute_safely
         # Mock: Agent service isolation for testing without LLM agent execution
-        with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, patch('app.core.fallback_coordinator.CircuitBreaker'), patch('app.core.fallback_coordinator.AgentFallbackStatus'):
+        with patch('netra_backend.app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, patch('netra_backend.app.core.fallback_coordinator.CircuitBreaker'), patch('netra_backend.app.core.fallback_coordinator.AgentFallbackStatus'):
             self._setup_fallback_handler(mock_handler_class)
             return await agent.execute_with_reliability(critical_path_operation, "critical_path_operation", timeout=30.0)
 
@@ -167,9 +167,9 @@ class TestCriticalPathIntegration:
     def _setup_failure_recovery_test_patches(self):
         """Setup patches for failure recovery test"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_reliability_wrapper, \
-             patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
+        with patch('netra_backend.app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_reliability_wrapper, \
+             patch('netra_backend.app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             patch('netra_backend.app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
             # Mock: Generic component isolation for controlled unit testing
@@ -212,9 +212,9 @@ class TestCriticalPathIntegration:
     def _setup_failing_http_client(self):
         """Setup HTTP client that fails with 503 error"""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
-             patch('app.services.external_api_client.circuit_registry') as mock_registry, \
-             patch('app.services.external_api_client.ClientSession') as mock_session_class:
+        with patch('netra_backend.app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
+             patch('netra_backend.app.services.external_api_client.circuit_registry') as mock_registry, \
+             patch('netra_backend.app.services.external_api_client.ClientSession') as mock_session_class:
             api_error = HTTPError(503, "Service Unavailable", {"retry_after": 60})
             # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
@@ -234,7 +234,7 @@ class TestCriticalPathIntegration:
             return await op()
         mock_patches["mock_reliability"].execute_safely.side_effect = async_execute_safely_recovery
         # Mock: Agent service isolation for testing without LLM agent execution
-        with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, patch('app.core.fallback_coordinator.CircuitBreaker'), patch('app.core.fallback_coordinator.AgentFallbackStatus'):
+        with patch('netra_backend.app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, patch('netra_backend.app.core.fallback_coordinator.CircuitBreaker'), patch('netra_backend.app.core.fallback_coordinator.AgentFallbackStatus'):
             # Mock: Generic component isolation for controlled unit testing
             mock_handler = AsyncMock()
             mock_handler.execute_with_fallback.side_effect = HTTPError(503, "Service Unavailable", {"retry_after": 60})

@@ -44,13 +44,13 @@ class TestAdminAgentIntegration:
         supervisor.triage_agent = AsyncMock(spec=TriageSubAgent)
 
         # Mock: Generic component isolation for controlled unit testing
-        supervisor.triage_agent.process = AsyncMock()
+        supervisor.triage_agent.execute = AsyncMock()
 
         # Mock: Agent service isolation for testing without LLM agent execution
         supervisor.corpus_admin = AsyncMock(spec=CorpusAdminSubAgent)
 
         # Mock: Generic component isolation for controlled unit testing
-        supervisor.corpus_admin.process = AsyncMock()
+        supervisor.corpus_admin.execute = AsyncMock()
 
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         supervisor.tool_dispatcher = AsyncMock(spec=AdminToolDispatcher)
@@ -82,17 +82,22 @@ class TestAdminAgentIntegration:
 
         """Test triage to corpus admin routing"""
 
-        mock_supervisor.triage_agent.process.return_value = {
-
-            "intent": "corpus_generation",
-
-            "target_agent": "corpus_admin",
-
-            "parameters": {"domain": "fintech"}
-
-        }
-
-        result = await mock_supervisor.triage_agent.process("Generate corpus for fintech")
+        # Mock the execute method to simulate triage result in state
+        async def mock_execute(state, run_id, stream_updates):
+            # Simulate setting triage_result on the state
+            state.triage_result = {
+                "intent": "corpus_generation",
+                "target_agent": "corpus_admin",
+                "parameters": {"domain": "fintech"}
+            }
+        
+        mock_supervisor.triage_agent.execute.side_effect = mock_execute
+        
+        # Create a mock state to pass to execute
+        from netra_backend.app.agents.state import DeepAgentState
+        test_state = DeepAgentState(user_request="Generate corpus for fintech")
+        await mock_supervisor.triage_agent.execute(test_state, "test_run", False)
+        result = test_state.triage_result
 
         assert result["target_agent"] == "corpus_admin"
 
@@ -173,27 +178,36 @@ class TestAdminAgentIntegration:
 
         """Setup mocks for agent chain"""
 
-        supervisor.triage_agent.process.return_value = {
-
-            "target_agent": "corpus_admin"
-
-        }
-
-        supervisor.corpus_admin.process.return_value = {
-
-            "action": "create",
-
-            "corpus_id": "corpus_456"
-
-        }
+        # Mock the execute methods to simulate results in state
+        async def mock_triage_execute(state, run_id, stream_updates):
+            state.triage_result = {"target_agent": "corpus_admin"}
+        
+        async def mock_corpus_execute(state, run_id, stream_updates):
+            # Use agent_input to store corpus results since there's no corpus_result field
+            state.agent_input = state.agent_input or {}
+            state.agent_input["corpus_result"] = {
+                "action": "create",
+                "corpus_id": "corpus_456"
+            }
+        
+        supervisor.triage_agent.execute.side_effect = mock_triage_execute
+        supervisor.corpus_admin.execute.side_effect = mock_corpus_execute
     
     async def _execute_agent_chain(self, supervisor):
 
         """Execute complete agent chain"""
 
-        triage_result = await supervisor.triage_agent.process("Create corpus")
+        # Execute triage agent
+        from netra_backend.app.agents.state import DeepAgentState
+        triage_state = DeepAgentState(user_request="Create corpus")
+        await supervisor.triage_agent.execute(triage_state, "test_run", False)
+        triage_result = triage_state.triage_result
 
-        corpus_result = await supervisor.corpus_admin.process(triage_result)
+        # Execute corpus admin agent
+        corpus_state = DeepAgentState(user_request="Create corpus")
+        corpus_state.triage_result = triage_result
+        await supervisor.corpus_admin.execute(corpus_state, "test_run", False)
+        corpus_result = corpus_state.agent_input.get("corpus_result") if corpus_state.agent_input else {}
 
         return {"status": "completed", "corpus_id": corpus_result["corpus_id"]}
     
@@ -202,11 +216,12 @@ class TestAdminAgentIntegration:
 
         """Test error propagation through agents"""
 
-        mock_supervisor.corpus_admin.process.side_effect = Exception("Processing error")
+        mock_supervisor.corpus_admin.execute.side_effect = Exception("Processing error")
 
         with pytest.raises(Exception) as exc_info:
-
-            await mock_supervisor.corpus_admin.process({"request": "invalid"})
+            from netra_backend.app.agents.state import DeepAgentState
+            invalid_state = DeepAgentState(user_request="invalid")
+            await mock_supervisor.corpus_admin.execute(invalid_state, "test_run", False)
 
         assert "Processing error" in str(exc_info.value)
     
@@ -226,17 +241,35 @@ class TestAdminAgentIntegration:
         """Execute multiple concurrent operations"""
         import asyncio
 
-        supervisor.corpus_admin.process.return_value = {"success": True}
+        # Mock the execute method to simulate success
+        async def mock_execute_success(state, run_id, stream_updates):
+            # Use agent_input to store results since there's no corpus_result field
+            state.agent_input = state.agent_input or {}
+            state.agent_input["corpus_result"] = {"success": True}
+        
+        supervisor.corpus_admin.execute.side_effect = mock_execute_success
 
-        tasks = [
+        # Create tasks with proper execute method signature and collect states
+        tasks = []
+        states = []
+        for i in range(3):
+            from netra_backend.app.agents.state import DeepAgentState
+            state = DeepAgentState(user_request=f"task_{i}")
+            states.append(state)
+            tasks.append(supervisor.corpus_admin.execute(state, f"run_{i}", False))
 
-            supervisor.corpus_admin.process({"id": i})
-
-            for i in range(3)
-
-        ]
-
-        return await asyncio.gather(*tasks)
+        # Execute all tasks concurrently
+        await asyncio.gather(*tasks)
+        
+        # Extract results from the states
+        results = []
+        for state in states:
+            if state.agent_input and "corpus_result" in state.agent_input:
+                results.append(state.agent_input["corpus_result"])
+            else:
+                results.append({"success": False})
+        
+        return results
 
 class TestAgentStateManagement:
 

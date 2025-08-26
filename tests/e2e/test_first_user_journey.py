@@ -197,13 +197,19 @@ class TestFirstUserJourney:
         mock_websocket.headers = {"authorization": f"Bearer {auth_token}"}
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.auth_dependencies.verify_token') as mock_verify:
-            mock_verify.return_value = {"user_id": user_id, "verified": True}
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token_jwt') as mock_validate:
+            # Mock auth client validation response matching the actual WebSocket auth flow
+            mock_validate.return_value = {
+                "valid": True,
+                "user_id": user_id,
+                "email": f"{user_id}@example.com"
+            }
             mock_websocket_manager.connect.return_value = True
             
-            auth_result = mock_verify(auth_token)
+            # Test the validation response structure matches WebSocket auth expectations
+            validation_result = await mock_validate(auth_token)
             connection_success = mock_websocket_manager.connect(mock_websocket, user_id)
-            assert auth_result["verified"] and connection_success
+            assert validation_result["valid"] and validation_result["user_id"] == user_id and connection_success
 
     @pytest.mark.e2e
     async def test_first_ai_interaction_quality(self, app, mock_agent_service):

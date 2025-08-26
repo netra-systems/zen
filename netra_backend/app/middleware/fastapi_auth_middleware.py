@@ -267,7 +267,10 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         return all(perm in user_permissions for perm in required_permissions)
     
     def _get_jwt_secret_with_validation(self, jwt_secret: Optional[str], settings) -> str:
-        """Get JWT secret with proper validation and trimming.
+        """Get JWT secret with proper validation - DELEGATES TO SSOT.
+        
+        SSOT ENFORCEMENT: This method now delegates to the canonical
+        UnifiedSecretManager while preserving validation logic.
         
         Args:
             jwt_secret: Explicit JWT secret passed to middleware
@@ -279,20 +282,20 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         Raises:
             ValueError: If JWT secret is invalid or missing
         """
-        # Priority: explicit parameter > settings > error
-        secret = jwt_secret or getattr(settings, 'jwt_secret_key', None)
+        from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
         
-        if not secret:
-            raise ValueError(
-                "JWT secret not configured. Set JWT_SECRET_KEY environment variable "
-                "or pass jwt_secret parameter to middleware."
-            )
-        
-        # CRITICAL: Trim whitespace from secrets (common staging issue)
-        secret = secret.strip()
-        
-        if not secret:
-            raise ValueError("JWT secret cannot be empty after trimming whitespace")
+        # If explicit secret provided, validate and use it
+        if jwt_secret:
+            secret = jwt_secret.strip()
+            if not secret:
+                raise ValueError("Explicit JWT secret cannot be empty after trimming whitespace")
+        else:
+            # Use canonical SSOT method
+            try:
+                secret = get_jwt_secret()
+            except ValueError as e:
+                # Re-raise with middleware-specific context
+                raise ValueError(f"JWT secret not configured: {str(e)}")
         
         # Validate minimum length for security
         if len(secret) < 32:

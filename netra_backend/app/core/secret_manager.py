@@ -104,6 +104,12 @@ class SecretManager:
             "placeholder",  # Generic placeholder
             "staging-jwt-secret-key-should-be-replaced-in-deployment",  # JWT staging placeholder
             "staging-fernet-key-should-be-replaced-in-deployment",  # Fernet staging placeholder
+            "REPLACE",  # Replace placeholder
+            "should-be-replaced",  # Generic replacement pattern
+            "placeholder-value",  # Placeholder value pattern
+            "default-value",  # Default value pattern
+            "change-me",  # Change me pattern
+            "update-in-production",  # Production update pattern
             None  # None values
         ]
         
@@ -153,10 +159,98 @@ class SecretManager:
             # Enhanced logging
             self._log_enhanced_google_merge(google_secrets, secrets, env_secret_count, 
                                           placeholder_overrides, new_additions, supersessions)
+            
+            # Validate critical secrets after merge
+            self._validate_critical_secrets(secrets)
             return secrets
         
         self._logger.warning("No secrets loaded from Google Secret Manager")
+        # Still validate critical secrets even without Google secrets
+        self._validate_critical_secrets(secrets)
         return secrets
+    
+    def _validate_critical_secrets(self, secrets: Dict[str, Any]) -> None:
+        """Validate that critical secrets don't contain placeholder values."""
+        # Get current environment
+        environment = getattr(self._config, 'environment', 'development').lower()
+        
+        # Only validate strictly in staging/production
+        if environment in ['development', 'testing']:
+            self._logger.debug("Skipping critical secret validation in development/testing environment")
+            return
+        
+        # Define critical secrets that must not have placeholder values
+        CRITICAL_SECRETS = [
+            'POSTGRES_PASSWORD',
+            'REDIS_PASSWORD', 
+            'JWT_SECRET_KEY',
+            'CLICKHOUSE_PASSWORD',
+            'FERNET_KEY'
+        ]
+        
+        # Define expanded placeholder patterns (including partial matches)
+        PLACEHOLDER_PATTERNS = [
+            "",  # Empty strings
+            "will-be-set-by-secrets",
+            "placeholder",
+            "REPLACE",
+            "should-be-replaced",
+            "placeholder-value",
+            "default-value",
+            "change-me",
+            "update-in-production",
+            "staging-jwt-secret-key-should-be-replaced-in-deployment",
+            "staging-fernet-key-should-be-replaced-in-deployment",
+        ]
+        
+        validation_errors = []
+        warnings = []
+        
+        for secret_name in CRITICAL_SECRETS:
+            if secret_name not in secrets:
+                warnings.append(f"Critical secret {secret_name} is missing from configuration")
+                continue
+                
+            secret_value = secrets[secret_name]
+            
+            # Check for None values
+            if secret_value is None:
+                validation_errors.append(f"Critical secret {secret_name} is None")
+                continue
+                
+            # Convert to string for pattern matching
+            secret_str = str(secret_value).strip()
+            
+            # Check for exact placeholder matches
+            if secret_str in PLACEHOLDER_PATTERNS:
+                validation_errors.append(f"Critical secret {secret_name} contains placeholder value: '{secret_str}'")
+                continue
+                
+            # Check for partial placeholder patterns
+            secret_lower = secret_str.lower()
+            for pattern in ["replace", "placeholder", "should-be-replaced", "change-me", "update"]:
+                if pattern in secret_lower and len(secret_str) < 50:  # Short values likely to be placeholders
+                    warnings.append(f"Critical secret {secret_name} may contain placeholder pattern: '{pattern}' in '{secret_str[:20]}...'")
+                    break
+        
+        # Log warnings
+        for warning in warnings:
+            self._logger.warning(f"Secret validation warning: {warning}")
+        
+        # Handle validation errors based on environment
+        if validation_errors:
+            error_msg = f"Critical secret validation failed in {environment} environment: {'; '.join(validation_errors)}"
+            self._logger.error(error_msg)
+            
+            if environment in ['staging', 'production']:
+                # Raise exception in staging/production
+                raise SecretManagerError(f"Invalid placeholder values detected in critical secrets for {environment} environment. "
+                                       f"Google Secret Manager must override these placeholders. Errors: {'; '.join(validation_errors)}")
+            else:
+                # Just log warnings for other environments
+                self._logger.warning(f"Would fail in staging/production: {error_msg}")
+        else:
+            self._logger.info(f"Critical secret validation passed for {environment} environment")
     
     def _log_successful_google_merge(self, google_secrets: Dict[str, Any], secrets: Dict[str, Any], env_secret_count: int) -> None:
         """Log successful Google secrets merge with statistics."""

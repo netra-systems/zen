@@ -238,6 +238,7 @@ class TestOAuthFlows:
             "picture": "https://example.com/avatar.jpg"
         }
         
+        # Mock justification: External service isolation - prevents real HTTP calls to Google OAuth servers during testing
         with patch("httpx.AsyncClient.post") as mock_post, \
              patch("httpx.AsyncClient.get") as mock_get:
             
@@ -411,6 +412,7 @@ class TestRedisOperations:
     def test_redis_failover_graceful_degradation(self):
         """Test graceful degradation when Redis is unavailable."""
         # Simulate Redis connection failure
+        # Mock justification: Network isolation for testing Redis failover scenarios without requiring real Redis connection failures
         with patch('redis.Redis.ping', side_effect=redis.ConnectionError("Redis unavailable")):
             try:
                 # Auth service should still function with limited capabilities
@@ -432,6 +434,7 @@ class TestErrorHandling:
     
     def test_database_connection_error_handling(self):
         """Test handling of database connection errors."""
+        # Mock justification: Database transaction isolation for testing error handling scenarios without corrupting real database connections
         with patch('sqlalchemy.create_engine', side_effect=OperationalError("DB connection failed", None, None)):
             # Should handle database connection errors gracefully
             response = client.get("/health")
@@ -524,6 +527,7 @@ def cleanup_test_state():
 @pytest.fixture
 def mock_redis():
     """Mock Redis for tests that need it."""
+    # Mock justification: Redis isolation for testing without real Redis dependency - provides controlled Redis instance for tests
     with patch('redis.Redis') as mock_redis_class:
         mock_redis_instance = Mock()
         mock_redis_class.return_value = mock_redis_instance
@@ -532,6 +536,7 @@ def mock_redis():
 @pytest.fixture 
 def mock_database():
     """Mock database for tests that need it."""
+    # Mock justification: Database transaction isolation for unit testing without requiring real database connections
     with patch('sqlalchemy.create_engine') as mock_engine:
         yield mock_engine
 
