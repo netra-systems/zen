@@ -69,11 +69,10 @@ class LLMTestMockClient:
     def _get_model_base_delay(self) -> float:
         """Get base delay for model simulation."""
         delays = {
-            LLMTestModel.GPT_4: 0.1,
-            LLMTestModel.GPT_35_TURBO: 0.05,
-            LLMTestModel.CLAUDE_3_OPUS: 0.12,
-            LLMTestModel.CLAUDE_3_SONNET: 0.08,
-            LLMTestModel.GEMINI_PRO: 0.06
+            LLMTestModel.GEMINI_2_5_FLASH: 0.05,
+            LLMTestModel.GEMINI_2_5_PRO: 0.08,
+            LLMTestModel.GEMINI_PRO: 0.06,
+            LLMTestModel.CLAUDE_3_SONNET: 0.08
         }
         return delays.get(self.model, 0.08)
         
@@ -97,11 +96,10 @@ class LLMTestMockClient:
     def _add_model_specific_details(self, base_response: str) -> str:
         """Add model-specific details to response."""
         model_traits = {
-            LLMTestModel.GPT_4: "detailed analysis with technical depth",
-            LLMTestModel.GPT_35_TURBO: "efficient and concise recommendations",
-            LLMTestModel.CLAUDE_3_OPUS: "comprehensive evaluation with nuanced insights",
-            LLMTestModel.CLAUDE_3_SONNET: "balanced analysis with practical suggestions",
-            LLMTestModel.GEMINI_PRO: "data-driven insights with quantitative metrics"
+            LLMTestModel.GEMINI_2_5_FLASH: "fast and efficient analysis with practical insights",
+            LLMTestModel.GEMINI_2_5_PRO: "deep reasoning with multi-step problem solving",
+            LLMTestModel.GEMINI_PRO: "data-driven insights with quantitative metrics",
+            LLMTestModel.CLAUDE_3_SONNET: "balanced analysis with practical suggestions"
         }
         trait = model_traits.get(self.model, "general analysis")
         return f"{base_response} This {trait} approach ensures optimal results."

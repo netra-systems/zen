@@ -54,6 +54,16 @@
             <critical-takeaway>Existing codebase was already largely Pydantic v2 compatible due to modern patterns (@field_validator, @model_validator)</critical-takeaway>
         </category>
         
+        <category name="Package Upgrade Migration 2025" path="SPEC/learnings/migrations/package_upgrade_2025.xml" keywords="Package Upgrade, Dependency Modernization, Security, SQLAlchemy, Pydantic, python-jose, AI SDK, Migration">
+            <critical-takeaway>CRITICAL: python-jose MUST be removed - unmaintained since 2015, replaced with PyJWT >= 2.10.1</critical-takeaway>
+            <critical-takeaway>SQLAlchemy 2.0 migration requires: DeclarativeBase class, mapped_column(), select() queries, explicit commits</critical-takeaway>
+            <critical-takeaway>ClickHouse operates independently of SQLAlchemy - initial compatibility concern was unfounded</critical-takeaway>
+            <critical-takeaway>Most code already using modern patterns - only 19 files modified out of 500+ analyzed (3.8% change rate)</critical-takeaway>
+            <critical-takeaway>Implement fallback patterns (hasattr checks) during migration for zero-downtime upgrades</critical-takeaway>
+            <critical-takeaway>Google AI SDK deprecated google-generativeai, must migrate to google-genai with stateless client pattern</critical-takeaway>
+            <critical-takeaway>Security upgrades are critical priority - python-multipart DoS vulnerabilities fixed in 0.0.20</critical-takeaway>
+        </category>
+        
         <category name="Auth Service API Endpoints" path="SPEC/learnings/auth_service_endpoint_fixes.xml" keywords="Auth Service, API Endpoints, HEAD Method, OAuth Endpoints, JWT Validation, SQLite, Database Connection">
             <critical-takeaway>Always provide both generic (/auth/login) and provider-specific (/auth/google) OAuth endpoints for API ergonomics.</critical-takeaway>
             <critical-takeaway>Environment-specific OAuth variables (GOOGLE_OAUTH_CLIENT_ID_STAGING) must have higher priority than generic ones (GOOGLE_CLIENT_ID).</critical-takeaway>
@@ -457,6 +467,13 @@
         <category name="Database/AsyncIO" path="SPEC/learnings/database_asyncio.xml" keywords="AsyncSession, Database, Postgres, ClickHouse">
             <critical-takeaway>Functions marked as async must actually await something (postgres-session-async-function-paradox).</critical-takeaway>
             <critical-takeaway>ClickHouse driver: Use OperationalError instead of NetworkError (which doesn't exist) for network-related exceptions.</critical-takeaway>
+        </category>
+        
+        <category name="Database/ClickHouse SSL Connection" path="SPEC/learnings/clickhouse_ssl_connection.xml" keywords="ClickHouse, SSL, HTTPS, Docker, Connection, Port 8123, Port 8443">
+            <critical-takeaway>Docker container hostnames (clickhouse, netra-clickhouse) MUST be treated as local hosts to prevent SSL errors.</critical-takeaway>
+            <critical-takeaway>Development environment MUST always use HTTP (port 8123), never HTTPS, for ClickHouse connections.</critical-takeaway>
+            <critical-takeaway>ClickHouse is OPTIONAL in staging environment - system gracefully degrades without it.</critical-takeaway>
+            <critical-takeaway>SSL detection logic must check: localhost IPs, Docker hostnames, AND development environment flag.</critical-takeaway>
         </category>
         
         <category name="Database Architecture" path="SPEC/learnings/database.xml" keywords="Database, Connection, Driver, AsyncPG, Psycopg2, SSL, Cloud SQL, URL, Architecture, Health Check, Authentication, DatabaseManager, IsolatedEnvironment">

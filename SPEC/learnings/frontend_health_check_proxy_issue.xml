@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Frontend Health Check Proxy Configuration Issue</title>
+  <date>2025-08-26</date>
+  
+  <problem>
+    <description>Frontend attempting to proxy health check requests to wrong backend port (8004 instead of 8000)</description>
+    <symptoms>
+      - Error: "Failed to proxy http://localhost:8004/health/ready [AggregateError: ] { code: 'ECONNREFUSED' }"
+      - Repeated connection failures during development
+      - Frontend health checks failing unnecessarily
+    </symptoms>
+  </problem>
+  
+  <root_cause>
+    <description>Port mismatch in frontend API configuration during development</description>
+    <details>
+      - Frontend's unified-api-config detecting backend on port 8004 instead of 8000
+      - Next.js proxy rewrite rules attempting to forward /health/* requests to wrong port
+      - Service discovery or environment configuration issue during dev launcher startup
+    </details>
+  </root_cause>
+  
+  <architecture_clarification>
+    <principle>Frontend should serve its own health endpoints, not proxy to backend</principle>
+    <correct_implementation>
+      - Frontend has proper health endpoints at /api/health and /api/health/ready
+      - These endpoints check frontend-specific health (Node.js runtime, memory, configuration)
+      - Kubernetes/load balancer probes should hit frontend's own health endpoints
+      - Backend health should be checked separately at backend's endpoints
+    </correct_implementation>
+    <incorrect_assumption>
+      - Health checks should NOT be proxied from frontend to backend
+      - Each service should maintain its own health endpoints
+      - Proxying health checks creates unnecessary coupling and potential false negatives
+    </incorrect_assumption>
+  </architecture_clarification>
+  
+  <solution>
+    <immediate>
+      - Fix port detection in frontend's unified-api-config or service discovery
+      - Ensure NEXT_PUBLIC_API_URL or dynamic discovery returns correct backend port (8000)
+      - Remove unnecessary proxy rules for /health/* endpoints in Next.js config
+    </immediate>
+    <long_term>
+      - Implement clear separation of health endpoints per service
+      - Document that each service owns its health checks
+      - Configure monitoring/probes to hit appropriate service endpoints directly
+    </long_term>
+  </solution>
+  
+  <prevention>
+    <recommendations>
+      - Use consistent port configuration across all services
+      - Implement port validation during startup
+      - Add tests to verify correct service endpoint resolution
+      - Document port assignments clearly in configuration files
+    </recommendations>
+  </prevention>
+  
+  <related_files>
+    - frontend/next.config.ts (proxy rewrites configuration)
+    - frontend/lib/unified-api-config.ts (API URL detection)
+    - frontend/lib/service-discovery.ts (dynamic port discovery)
+    - frontend/app/api/health/route.ts (frontend health endpoint)
+    - frontend/app/api/health/ready/route.ts (frontend readiness endpoint)
+    - scripts/dev_launcher.py (development environment setup)
+  </related_files>
+</learning>

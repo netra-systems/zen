@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oauth_port_configuration>
+    <metadata>
+        <title>OAuth Port Configuration and Authorization Requirements</title>
+        <category>configuration</category>
+        <created>2025-01-26</created>
+        <related_files>
+            <file>netra_backend/app/core/network_constants.py</file>
+            <file>dev_launcher/config.py</file>
+            <file>auth_service/auth_core/config.py</file>
+            <file>.env.unified.template</file>
+            <file>scripts/setup_dev_oauth.py</file>
+        </related_files>
+    </metadata>
+
+    <summary>
+        Comprehensive documentation of port requirements for OAuth authorization in the Netra platform.
+        Explains why multiple ports need to be authorized in Google OAuth Console for proper functionality.
+    </summary>
+
+    <oauth_flow_architecture>
+        <description>
+            The OAuth authentication flow involves multiple services that may interact with Google's OAuth APIs.
+            Each service origin must be authorized to prevent CORS errors and security blocks.
+        </description>
+        
+        <flow_sequence>
+            <step number="1">
+                <action>User clicks "Login with Google"</action>
+                <service>Frontend</service>
+                <port>3000</port>
+                <description>Frontend initiates OAuth flow</description>
+            </step>
+            
+            <step number="2">
+                <action>OAuth flow initiation</action>
+                <service>Auth Service</service>
+                <port>8001/8081</port>
+                <description>Auth service generates state token and redirects to Google</description>
+            </step>
+            
+            <step number="3">
+                <action>User authenticates with Google</action>
+                <service>Google OAuth</service>
+                <port>N/A</port>
+                <description>User completes authentication on Google's servers</description>
+            </step>
+            
+            <step number="4">
+                <action>OAuth callback redirect</action>
+                <service>Frontend</service>
+                <port>3000</port>
+                <description>Google redirects to frontend callback URL with authorization code</description>
+            </step>
+            
+            <step number="5">
+                <action>Code exchange for tokens</action>
+                <service>Auth Service</service>
+                <port>8001/8081</port>
+                <description>Frontend sends code to auth service for token exchange</description>
+            </step>
+            
+            <step number="6">
+                <action>Token validation and API calls</action>
+                <service>Backend</service>
+                <port>8000</port>
+                <description>Backend may validate tokens or make authenticated API calls</description>
+            </step>
+        </flow_sequence>
+    </oauth_flow_architecture>
+
+    <port_requirements>
+        <port value="3000">
+            <service>Frontend (Next.js)</service>
+            <purpose>Primary user interface and OAuth callback handler</purpose>
+            <required>true</required>
+            <oauth_role>
+                <item>Initiates OAuth login flow</item>
+                <item>Receives OAuth callback with authorization code</item>
+                <item>Displays authentication UI to users</item>
+            </oauth_role>
+            <authorized_redirect_uri>http://localhost:3000/auth/callback</authorized_redirect_uri>
+        </port>
+        
+        <port value="8000">
+            <service>Main Backend API (FastAPI)</service>
+            <purpose>Primary application API server</purpose>
+            <required>true</required>
+            <oauth_role>
+                <item>Validates JWT tokens from auth service</item>
+                <item>May make OAuth-authenticated API calls to Google</item>
+                <item>Handles post-authentication business logic</item>
+                <item>WebSocket connections for authenticated users</item>
+            </oauth_role>
+            <configuration>
+                <constant>ServicePorts.BACKEND_DEFAULT</constant>
+                <env_var>BACKEND_PORT</env_var>
+            </configuration>
+        </port>
+        
+        <port value="8001">
+            <service>Auth Service (Current Configuration)</service>
+            <purpose>Dedicated authentication microservice</purpose>
+            <required>true</required>
+            <oauth_role>
+                <item>Handles OAuth flow with Google</item>
+                <item>Exchanges authorization codes for tokens</item>
+                <item>Manages user sessions and JWT generation</item>
+                <item>Validates OAuth tokens with Google</item>
+            </oauth_role>
+            <configuration>
+                <constant>ServicePorts.AUTH_SERVICE_TEST</constant>
+                <env_var>AUTH_SERVICE_URL</env_var>
+                <current_value>http://127.0.0.1:8001</current_value>
+            </configuration>
+        </port>
+        
+        <port value="8081">
+            <service>Auth Service (Default/Alternative)</service>
+            <purpose>Default auth service port per network constants</purpose>
+            <required>recommended</required>
+            <oauth_role>
+                <item>Alternative port for auth service</item>
+                <item>Used when port 8001 is unavailable</item>
+                <item>Default in network_constants.py</item>
+            </oauth_role>
+            <configuration>
+                <constant>ServicePorts.AUTH_SERVICE_DEFAULT</constant>
+                <note>Some configurations may use this instead of 8001</note>
+            </configuration>
+        </port>
+    </port_requirements>
+
+    <google_console_configuration>
+        <authorized_javascript_origins>
+            <origin>
+                <url>http://localhost:3000</url>
+                <purpose>Frontend application origin</purpose>
+                <required>true</required>
+            </origin>
+            <origin>
+                <url>http://localhost:8000</url>
+                <purpose>Backend API origin</purpose>
+                <required>true</required>
+            </origin>
+            <origin>
+                <url>http://localhost:8001</url>
+                <purpose>Auth service origin (current configuration)</purpose>
+                <required>true</required>
+            </origin>
+            <origin>
+                <url>http://localhost:8081</url>
+                <purpose>Auth service origin (default/alternative)</purpose>
+                <required>recommended</required>
+            </origin>
+            <origin>
+                <url>http://127.0.0.1:8001</url>
+                <purpose>Auth service with IP address (some configs use IP)</purpose>
+                <required>optional</required>
+            </origin>
+        </authorized_javascript_origins>
+        
+        <authorized_redirect_uris>
+            <uri>
+                <url>http://localhost:3000/auth/callback</url>
+                <purpose>Primary OAuth callback endpoint</purpose>
+                <required>true</required>
+            </uri>
+        </authorized_redirect_uris>
+    </google_console_configuration>
+
+    <rationale_for_multiple_ports>
+        <reason>
+            <title>Service Independence</title>
+            <description>
+                Each microservice (frontend, backend, auth) operates independently and may need to 
+                interact with Google OAuth APIs directly. Authorization prevents CORS blocks.
+            </description>
+        </reason>
+        
+        <reason>
+            <title>Port Conflict Resolution</title>
+            <description>
+                Development environments may have port conflicts. Having multiple authorized ports 
+                allows the system to fall back to alternative ports without breaking OAuth.
+            </description>
+        </reason>
+        
+        <reason>
+            <title>Configuration Flexibility</title>
+            <description>
+                Different developers or deployment scenarios might use different port configurations.
+                Pre-authorizing common ports prevents authentication failures.
+            </description>
+        </reason>
+        
+        <reason>
+            <title>Testing Scenarios</title>
+            <description>
+                Integration tests and E2E tests may spin up services on different ports.
+                Multiple authorized ports support comprehensive testing.
+            </description>
+        </reason>
+        
+        <reason>
+            <title>Development vs Production Parity</title>
+            <description>
+                Having flexible port authorization helps maintain consistency between 
+                development and staging/production OAuth configurations.
+            </description>
+        </reason>
+    </rationale_for_multiple_ports>
+
+    <common_issues_and_solutions>
+        <issue>
+            <symptom>CORS error when initiating OAuth flow</symptom>
+            <cause>Service origin not authorized in Google Console</cause>
+            <solution>Add the service's origin to Authorized JavaScript Origins</solution>
+        </issue>
+        
+        <issue>
+            <symptom>Redirect URI mismatch error</symptom>
+            <cause>Callback URL not exactly matching authorized redirect URI</cause>
+            <solution>Ensure http://localhost:3000/auth/callback is authorized exactly</solution>
+        </issue>
+        
+        <issue>
+            <symptom>Auth service cannot validate tokens</symptom>
+            <cause>Auth service port (8001 or 8081) not authorized</cause>
+            <solution>Add both auth service ports to authorized origins</solution>
+        </issue>
+        
+        <issue>
+            <symptom>Backend WebSocket authentication fails</symptom>
+            <cause>Backend port 8000 not authorized for OAuth</cause>
+            <solution>Add http://localhost:8000 to authorized origins</solution>
+        </issue>
+    </common_issues_and_solutions>
+
+    <security_considerations>
+        <consideration>
+            <title>Development-Only Origins</title>
+            <description>
+                These localhost origins should ONLY be used for development OAuth clients.
+                Production OAuth clients must use proper HTTPS domains.
+            </description>
+        </consideration>
+        
+        <consideration>
+            <title>Separate OAuth Clients</title>
+            <description>
+                Always use separate OAuth clients for development, staging, and production.
+                Never share OAuth credentials across environments.
+            </description>
+        </consideration>
+        
+        <consideration>
+            <title>Credential Storage</title>
+            <description>
+                OAuth credentials should be stored securely in environment variables or 
+                secret management systems, never committed to version control.
+            </description>
+        </consideration>
+    </security_considerations>
+
+    <setup_instructions>
+        <step>
+            <number>1</number>
+            <action>Create OAuth Client in Google Console</action>
+            <details>
+                Navigate to Google Cloud Console > APIs &amp; Services > Credentials.
+                Create a new OAuth 2.0 Client ID for Web application.
+            </details>
+        </step>
+        
+        <step>
+            <number>2</number>
+            <action>Configure Authorized JavaScript Origins</action>
+            <details>
+                Add all required origins:
+                - http://localhost:3000 (Frontend)
+                - http://localhost:8000 (Backend)
+                - http://localhost:8001 (Auth Service Current)
+                - http://localhost:8081 (Auth Service Default)
+            </details>
+        </step>
+        
+        <step>
+            <number>3</number>
+            <action>Configure Authorized Redirect URI</action>
+            <details>
+                Add the callback URL:
+                - http://localhost:3000/auth/callback
+            </details>
+        </step>
+        
+        <step>
+            <number>4</number>
+            <action>Set Environment Variables</action>
+            <details>
+                Run: python scripts/setup_dev_oauth.py
+                Or manually set in .env:
+                - GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT
+                - GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT
+            </details>
+        </step>
+        
+        <step>
+            <number>5</number>
+            <action>Verify Configuration</action>
+            <details>
+                Run: python scripts/verify_oauth_config.py
+                This will validate that OAuth is properly configured.
+            </details>
+        </step>
+    </setup_instructions>
+
+    <testing_oauth_flow>
+        <test>
+            <name>Manual OAuth Flow Test</name>
+            <steps>
+                <step>Start dev environment: python scripts/dev_launcher.py</step>
+                <step>Navigate to: http://localhost:3000/login</step>
+                <step>Click "Login with Google"</step>
+                <step>Complete Google authentication</step>
+                <step>Verify redirect to authenticated state</step>
+            </steps>
+        </test>
+        
+        <test>
+            <name>Automated OAuth Test</name>
+            <command>python unified_test_runner.py --category e2e --pattern "*oauth*"</command>
+        </test>
+    </testing_oauth_flow>
+
+    <references>
+        <reference>
+            <title>Google OAuth 2.0 Documentation</title>
+            <url>https://developers.google.com/identity/protocols/oauth2</url>
+        </reference>
+        
+        <reference>
+            <title>OAuth Client Environment Configuration</title>
+            <file>SPEC/learnings/oauth_client_environment_configuration.xml</file>
+        </reference>
+        
+        <reference>
+            <title>Network Constants</title>
+            <file>netra_backend/app/core/network_constants.py</file>
+        </reference>
+    </references>
+</oauth_port_configuration>

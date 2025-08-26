@@ -245,3 +245,10 @@ variable "labels" {
     team        = "platform"
   }
 }
+
+# Monitoring and Alerting Configuration
+variable "notification_channels" {
+  description = "List of notification channel IDs for alerts"
+  type        = list(string)
+  default     = []  # Add notification channel IDs once created in GCP
+}

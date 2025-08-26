@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>Docker Service Requirements for Testing</title>
+    <category>Testing Infrastructure</category>
+    <priority>CRITICAL</priority>
+    <last_updated>2025-08-26</last_updated>
+  </metadata>
+
+  <description>
+    Documents the requirement that Docker Compose services MUST be running
+    for both development and testing modes. This is an intentional architectural
+    decision to ensure consistency and prevent individual tests from managing
+    their own service lifecycle.
+  </description>
+
+  <requirements>
+    <requirement id="REQ-001" priority="CRITICAL">
+      <title>Docker Compose Services Required</title>
+      <description>
+        All tests that use real services (PostgreSQL, Redis, ClickHouse) REQUIRE
+        Docker Compose services to be running BEFORE test execution.
+      </description>
+      <rationale>
+        - Prevents individual tests from starting/stopping services (causing conflicts)
+        - Ensures consistent service state across all tests
+        - Allows test parallelization without service management conflicts
+        - Mirrors production architecture where services are always available
+      </rationale>
+    </requirement>
+
+    <requirement id="REQ-002" priority="HIGH">
+      <title>Service Startup Methods</title>
+      <description>
+        Services can be started using either method:
+        1. docker-compose up -d (standalone Docker)
+        2. python scripts/dev_launcher.py (integrated development environment)
+      </description>
+    </requirement>
+
+    <requirement id="REQ-003" priority="HIGH">
+      <title>Clear Error Messages</title>
+      <description>
+        When Docker services are not available, the system MUST provide clear
+        error messages indicating that Docker Compose services need to be started.
+      </description>
+      <current_behavior>
+        - Database connector shows "Connection refused" with retry attempts
+        - After max retries, shows clear failure message
+        - ClickHouse shows fallback mode communication
+      </current_behavior>
+    </requirement>
+  </requirements>
+
+  <service_ports>
+    <service name="PostgreSQL" port="5432" required="true"/>
+    <service name="Redis" port="6379" required="true"/>
+    <service name="ClickHouse" port="8123" required="false" fallback="mock"/>
+  </service_ports>
+
+  <test_categories_requiring_services>
+    <category name="integration" requires="postgres,redis"/>
+    <category name="database" requires="postgres"/>
+    <category name="clickhouse" requires="clickhouse"/>
+    <category name="api" requires="postgres,redis"/>
+    <category name="websocket" requires="postgres,redis"/>
+    <category name="agent" requires="postgres,redis"/>
+    <category name="e2e" requires="postgres,redis,clickhouse"/>
+  </test_categories_requiring_services>
+
+  <troubleshooting>
+    <issue>
+      <symptom>Tests fail with "Connection refused" errors</symptom>
+      <solution>
+        1. Ensure Docker Desktop is running (Windows/Mac)
+        2. Run: docker-compose up -d
+        3. Wait 10-15 seconds for services to initialize
+        4. Verify with: docker-compose ps
+      </solution>
+    </issue>
+    <issue>
+      <symptom>Port already in use errors</symptom>
+      <solution>
+        1. Check for conflicting services on ports 5432, 6379, 8123
+        2. Stop conflicting services or use docker-compose down first
+      </solution>
+    </issue>
+  </troubleshooting>
+
+  <implementation_notes>
+    <note>
+      This is an intentional design decision. DO NOT add code to tests
+      that attempts to start/stop Docker services. The services are a
+      shared resource managed at the environment level, not the test level.
+    </note>
+    <note>
+      Unit tests should mock database connections and not require Docker services.
+      Only integration/e2e tests should use real services.
+    </note>
+  </implementation_notes>
+</spec>

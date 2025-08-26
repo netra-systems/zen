@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>Staging CORS Configuration Audit Findings</title>
+    <date>2025-08-26</date>
+    <category>WebSocket, CORS, Security, Staging</category>
+    
+    <audit_summary>
+        <description>
+            Comprehensive audit of staging CORS configuration revealed several potential issues
+            that could affect WebSocket connectivity if incorrect origins are passed.
+        </description>
+    </audit_summary>
+    
+    <findings>
+        <finding priority="high">
+            <issue>Environment Detection for Auto-initialized Handlers</issue>
+            <description>
+                When WebSocket CORS handler is created via get_websocket_cors_handler(), 
+                it may default to 'development' instead of detecting 'staging' from environment variables.
+                This happens because the unified config might not be properly reading environment variables.
+            </description>
+            <impact>
+                Staging deployments might use development CORS settings if environment detection fails,
+                potentially allowing too permissive origins or blocking valid staging origins.
+            </impact>
+            <recommendation>
+                Ensure ENVIRONMENT or ENV variables are properly set in staging deployments.
+                Consider adding explicit environment parameter when creating handlers in staging.
+            </recommendation>
+        </finding>
+        
+        <finding priority="medium">
+            <issue>Trailing Slash Handling</issue>
+            <description>
+                Origins with trailing slashes (e.g., http://localhost:3000/) were being rejected
+                even though the base origin was allowed. Some browsers or clients may add trailing slashes.
+            </description>
+            <status>FIXED</status>
+            <fix>
+                Modified _compile_origin_patterns() to allow optional trailing slashes in origin matching.
+                Pattern now uses regex '/?$' to match with or without trailing slash.
+            </fix>
+        </finding>
+        
+        <finding priority="low">
+            <issue>IPv6 Localhost Not Supported</issue>
+            <description>
+                IPv6 localhost addresses ([::1]) are not included in allowed origins for staging.
+                While rare, some developers might use IPv6 localhost for testing.
+            </description>
+            <recommendation>
+                Consider adding IPv6 localhost origins if needed for specific development scenarios.
+            </recommendation>
+        </finding>
+        
+        <finding priority="info">
+            <issue>WebSocket Protocol Origins</issue>
+            <description>
+                Origins using ws:// or wss:// protocols are rejected, only http/https are allowed.
+                This is correct behavior as browser Origin headers use http/https even for WebSocket connections.
+            </description>
+            <status>Working as intended</status>
+        </finding>
+        
+        <finding priority="info">
+            <issue>Case Sensitivity</issue>
+            <description>
+                Origins are matched case-insensitively, so HTTP://LOCALHOST:3000 works the same as http://localhost:3000.
+                This is correct and user-friendly behavior.
+            </description>
+            <status>Working as intended</status>
+        </finding>
+    </findings>
+    
+    <security_validation>
+        <test>Private IP Blocking</test>
+        <result>PASSED - Private IPs (192.168.x.x, 10.x.x.x, 172.16.x.x) are correctly blocked in staging</result>
+        
+        <test>Tunnel Service Blocking</test>
+        <result>PASSED - Ngrok and localtunnel origins are correctly blocked</result>
+        
+        <test>Browser Extension Blocking</test>
+        <result>PASSED - Browser extension origins are correctly blocked</result>
+        
+        <test>File Protocol Blocking</test>
+        <result>PASSED - File:// protocol origins are correctly blocked</result>
+    </security_validation>
+    
+    <staging_specific_behavior>
+        <behavior>
+            <name>Localhost Access</name>
+            <description>
+                Both http://localhost and http://127.0.0.1 with common ports (3000, 3001, 8000, 8080)
+                are allowed in staging for local development testing against staging services.
+            </description>
+        </behavior>
+        
+        <behavior>
+            <name>HTTPS Requirement</name>
+            <description>
+                Staging domains (*.staging.netrasystems.ai) must use HTTPS.
+                HTTP versions of staging domains are correctly rejected.
+            </description>
+        </behavior>
+        
+        <behavior>
+            <name>Cloud Run URLs</name>
+            <description>
+                Google Cloud Run URLs for staging deployments are correctly allowed.
+            </description>
+        </behavior>
+    </staging_specific_behavior>
+    
+    <potential_issues_with_wrong_origins>
+        <scenario>
+            <description>Using wrong protocol</description>
+            <example>http://app.staging.netrasystems.ai instead of https://</example>
+            <result>Connection denied</result>
+        </scenario>
+        
+        <scenario>
+            <description>Using non-standard ports</description>
+            <example>http://localhost:9999</example>
+            <result>Connection denied unless port is explicitly allowed</result>
+        </scenario>
+        
+        <scenario>
+            <description>Missing subdomain</description>
+            <example>https://staging.netrasystems.ai instead of https://app.staging.netrasystems.ai</example>
+            <result>Connection denied</result>
+        </scenario>
+        
+        <scenario>
+            <description>Wrong environment detection</description>
+            <example>Handler initialized with wrong environment</example>
+            <result>May use wrong set of allowed origins</result>
+            <mitigation>Always verify environment variables are set correctly in staging</mitigation>
+        </scenario>
+    </potential_issues_with_wrong_origins>
+    
+    <recommendations>
+        <recommendation priority="high">
+            Always ensure ENVIRONMENT or ENV variable is set to 'staging' in staging deployments
+        </recommendation>
+        
+        <recommendation priority="medium">
+            Monitor WebSocket CORS violations in staging to identify configuration issues early
+        </recommendation>
+        
+        <recommendation priority="low">
+            Document the exact origins that should be used for each environment
+        </recommendation>
+        
+        <recommendation priority="low">
+            Consider adding health check endpoint that reports current CORS configuration
+        </recommendation>
+    </recommendations>
+    
+    <testing_commands>
+        <command>
+            <description>Test staging CORS configuration</description>
+            <code>python audit_staging_cors.py</code>
+        </command>
+        
+        <command>
+            <description>Verify environment detection</description>
+            <code>ENVIRONMENT=staging python -c "from shared.cors_config import _detect_environment; print(_detect_environment())"</code>
+        </command>
+    </testing_commands>
+</learning>

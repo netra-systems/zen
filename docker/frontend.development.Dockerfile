@@ -56,9 +56,9 @@ USER 1000
 ENV NODE_ENV=development \
     NEXT_TELEMETRY_DISABLED=1
 
-# Health check
+# Health check - check the Next.js health endpoint or app root  
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000/ || exit 1
+    CMD curl -f http://localhost:3000/api/health || curl -f http://localhost:3000/ || exit 1
 
 # Expose frontend port
 EXPOSE 3000
