@@ -782,8 +782,10 @@ CMD ["npm", "start"]
             # Enhanced JWT security for auth service
             "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
             "service-id-staging": f"netra-auth-staging-{int(time.time())}",
-            # CRITICAL: Missing secrets that were causing deployment failures
-            "redis-url-staging": "redis://default:REPLACE_WITH_REDIS_PASSWORD@10.128.0.3:6379/0",
+            # CRITICAL: Redis endpoint must match staging-shared-redis primary endpoint in GCP
+            # Primary endpoint: 10.107.0.3 (verified in Google Cloud Console)
+            # See SPEC/redis_staging_configuration.xml for full configuration details
+            "redis-url-staging": "redis://default:REPLACE_WITH_REDIS_PASSWORD@10.107.0.3:6379/0",
             "clickhouse-host-staging": "clickhouse.staging.netrasystems.ai",
             "clickhouse-port-staging": "8123",
             "clickhouse-user-staging": "default",

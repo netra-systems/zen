@@ -6,6 +6,8 @@ Critical: Thread context required for all agent interactions
 """
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -211,9 +213,9 @@ class TestFirstMessageThreadInit:
 
             "system_state": {
 
-                "models_available": ["gpt-4", "claude-3"],
+                "models_available": [LLMModel.GEMINI_2_5_FLASH.value, "claude-3"],
 
-                "rate_limits": {"gpt-4": 100, "claude-3": 50}
+                "rate_limits": {LLMModel.GEMINI_2_5_FLASH.value: 100, "claude-3": 50}
 
             }
 

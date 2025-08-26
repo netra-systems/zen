@@ -82,7 +82,7 @@ export function createAssistantMessage(content: string = 'I can help you with th
     role: 'assistant',
     content,
     metadata: {
-      model_used: 'gpt-4',
+      model_used: 'gemini-2.5-flash',
       token_count: content.length / 4,
       execution_time_ms: 1200
     }

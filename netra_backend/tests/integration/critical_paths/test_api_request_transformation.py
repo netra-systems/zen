@@ -12,6 +12,8 @@ Coverage: Request/response transformation, data mapping, schema evolution, legac
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -352,7 +354,7 @@ class ApiTransformationManager:
                 "timeout_ms": 30000,
                 "system_prompts": ["internal prompt"],
                 "debug_info": {"version": "1.0", "build": "123"},
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "capabilities": ["text", "analysis", "code"]
             }
             

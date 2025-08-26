@@ -13,6 +13,8 @@ L4 Realism: Tests against staging infrastructure with real monitoring stack
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -599,7 +601,7 @@ async def test_business_metrics_collection_l4_staging(metrics_pipeline_l4):
         ("revenue_per_user_monthly", 125.50, {"tier": "enterprise", "region": "us-east"}),
         ("api_requests_success_rate", 98.5, {"service": "auth", "timeframe": "1h"}),
         ("user_engagement_score", 8.7, {"feature": "chat", "cohort": "new_users"}),
-        ("llm_token_usage_rate", 15000, {"model": "gpt-4", "usage_type": "completion"}),
+        ("llm_token_usage_rate", 15000, {"model": LLMModel.GEMINI_2_5_FLASH.value, "usage_type": "completion"}),
         ("conversion_rate_percent", 12.3, {"source": "organic", "tier": "free_to_paid"})
     ]
     

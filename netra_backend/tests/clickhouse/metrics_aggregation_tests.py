@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 import random
 import uuid
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.db.clickhouse_query_fixer import (
     fix_clickhouse_array_syntax,
@@ -22,7 +24,7 @@ class TestLLMMetricsAggregation:
 
         """Get list of LLM models for testing"""
 
-        return ["gpt-4", "gpt-3.5-turbo", "claude-3", "gemini-pro"]
+        return [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-3", "gemini-pro"]
 
     def _get_workload_types(self) -> List[str]:
 

@@ -49,7 +49,7 @@ class TestDeploymentConfigurationFailures:
                 "DATABASE_URL",
                 "JWT_SECRET_KEY", 
                 "SECRET_KEY",
-                "OPENAI_API_KEY",
+                "GOOGLE_API_KEY",
                 "FERNET_KEY",
                 "GEMINI_API_KEY",
                 "GOOGLE_CLIENT_ID",

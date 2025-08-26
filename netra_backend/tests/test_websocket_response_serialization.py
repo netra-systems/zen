@@ -6,6 +6,8 @@ for real-time frontend communication.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -156,7 +158,7 @@ class TestStreamingResponseSerialization:
     def test_stream_chunk_with_rich_metadata(self) -> None:
         """Test StreamChunk with rich metadata."""
         rich_metadata = {
-            "model": "gpt-4",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "tokens": {"input": 50, "output": 25, "total": 75},
             "timing": {"start": "2025-01-01T10:00:00Z", "duration": 1.2},
             "quality": {"confidence": 0.95, "relevance": 0.88}

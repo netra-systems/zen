@@ -5,6 +5,8 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -107,7 +109,7 @@ class TestModelEffectivenessAnalysis:
     @pytest.mark.asyncio
     async def test_gpt4o_claude3_sonnet_effectiveness(self, model_selection_setup):
 
-        """Test: 'I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?'"""
+        """Test: 'I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?'"""
 
         setup = model_selection_setup
 
@@ -138,7 +140,7 @@ def _create_model_effectiveness_state() -> DeepAgentState:
 
     return DeepAgentState(
 
-        user_request="I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
+        user_request="I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
 
         metadata=AgentMetadata(custom_fields={'test_type': 'model_effectiveness', 'candidate_models': 'gpt-4o,claude-3-sonnet'})
 
@@ -152,7 +154,7 @@ def _create_comparative_analysis_state() -> DeepAgentState:
 
         user_request="Compare performance characteristics of GPT-4, Claude-3, and Gemini models for our workload.",
 
-        metadata={'test_type': 'comparative_analysis', 'models': ['gpt-4', 'claude-3', 'gemini']}
+        metadata={'test_type': 'comparative_analysis', 'models': [LLMModel.GEMINI_2_5_FLASH.value, 'claude-3', 'gemini']}
 
     )
 
@@ -240,7 +242,7 @@ def _validate_model_identification(result: Dict, state: DeepAgentState):
 
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
-    assert 'gpt-4o' in state.user_request or 'claude-3-sonnet' in state.user_request
+    assert 'gpt-4o' in state.user_request or LLMModel.GEMINI_2_5_FLASH.value in state.user_request
 
     assert 'effective' in state.user_request
 

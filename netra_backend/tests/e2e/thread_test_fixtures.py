@@ -8,6 +8,8 @@ import time
 import uuid
 from typing import Any, AsyncGenerator, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -62,7 +64,7 @@ class ThreadTestDataFactory:
             "thread_id": thread_id,
             "assistant_id": assistant_id,
             "status": kwargs.get("status", "in_progress"),
-            "model": kwargs.get("model", "gpt-4"),
+            "model": kwargs.get("model", LLMModel.GEMINI_2_5_FLASH.value),
             "instructions": kwargs.get("instructions"),
             "tools": [],
             "file_ids": [],

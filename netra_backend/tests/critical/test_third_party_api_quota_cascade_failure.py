@@ -22,6 +22,8 @@ import time
 from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.services.external_api_client import (
     ResilientHTTPClient,
@@ -92,7 +94,7 @@ class TestThirdPartyAPIQuotaCascadeFailure:
         mock_settings.llm_data_json_depth = 5
         mock_settings.llm_data_log_format = "text"
         mock_settings.llm_configs = {
-            "openai": MagicMock(provider="openai", model_name="gpt-4", api_key="test-key", generation_config={}),
+            "openai": MagicMock(provider="openai", model_name=LLMModel.GEMINI_2_5_FLASH.value, api_key="test-key", generation_config={}),
             "anthropic": MagicMock(provider="anthropic", model_name="claude-3", api_key="test-key", generation_config={})
         }
         
@@ -374,7 +376,7 @@ class TestThirdPartyAPIQuotaCascadeFailure:
         return await client.post(
             "/v1/chat/completions",
             "openai_api",
-            json_data={"model": "gpt-4", "messages": [{"role": "user", "content": "test"}]}
+            json_data={"model": LLMModel.GEMINI_2_5_FLASH.value, "messages": [{"role": "user", "content": "test"}]}
         )
     
     async def _simulate_anthropic_request(self, client: MagicMock) -> Dict[str, Any]:

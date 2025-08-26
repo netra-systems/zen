@@ -21,6 +21,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any, Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -79,7 +81,7 @@ class ConcurrentLLMExecutor:
         try:
             if self.use_real_llm:
                 response = await asyncio.wait_for(
-                    self.llm_manager.ask_llm_full(prompt, "gpt-3.5-turbo"),
+                    self.llm_manager.ask_llm_full(prompt, LLMModel.GEMINI_2_5_FLASH.value),
                     timeout=5.0
                 )
                 content = getattr(response, 'content', str(response))

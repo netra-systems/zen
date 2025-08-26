@@ -5,6 +5,8 @@ Business Value: Ensures $20K MRR from multi-agent optimization workflows.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -220,7 +222,7 @@ class TestAgentCollaborationIntegration:
         """Setup synthetic data generation pipeline"""
         return {
             "generators": {
-                "text": {"model": "gpt-3.5-turbo", "active": True},
+                "text": {"model": LLMModel.GEMINI_2_5_FLASH.value, "active": True},
                 "structured": {"engine": "faker", "active": True},
                 "timeseries": {"engine": "numpy", "active": True}
             },

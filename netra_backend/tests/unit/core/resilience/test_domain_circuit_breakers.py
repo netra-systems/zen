@@ -20,6 +20,8 @@ import pytest
 import time
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, Any, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.core.resilience.domain_circuit_breakers import (
     DatabaseCircuitBreaker,
@@ -273,7 +275,7 @@ class TestLLMCircuitBreaker:
     @pytest.fixture
     def llm_breaker(self):
         """Create LLM circuit breaker for testing."""
-        return LLMCircuitBreaker("gpt4", model="gpt-4")
+        return LLMCircuitBreaker("gpt4", model=LLMModel.GEMINI_2_5_FLASH.value)
         
     @pytest.fixture
     def response_validator(self):
@@ -347,7 +349,7 @@ class TestLLMCircuitBreaker:
         status = llm_breaker.get_status()
         
         assert status['domain'] == 'llm'
-        assert status['model'] == "gpt-4"
+        assert status['model'] == LLMModel.GEMINI_2_5_FLASH.value
         assert 'token_usage' in status
         assert 'config' in status
 

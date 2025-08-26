@@ -6,6 +6,8 @@ Handles all run-related database operations.
 import time
 import uuid
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from sqlalchemy import and_, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,7 +43,7 @@ class RunRepository(BaseRepository[Run]):
                         db: AsyncSession,
                         thread_id: str,
                         assistant_id: str,
-                        model: str = "gpt-4",
+                        model: str = LLMModel.GEMINI_2_5_FLASH.value,
                         instructions: Optional[str] = None,
                         metadata: Optional[Dict[str, Any]] = None) -> Optional[Run]:
         """Create a new run"""

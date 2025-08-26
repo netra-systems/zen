@@ -5,6 +5,8 @@ degradation strategies with standard configurations.
 """
 
 from typing import Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.core.degradation_manager import GracefulDegradationManager
 from netra_backend.app.core.degradation_strategies import (
@@ -50,7 +52,7 @@ def create_default_template_responses() -> Dict[str, str]:
 def create_default_fallback_models() -> List[str]:
     """Create default list of fallback models."""
     return [
-        'gpt-3.5-turbo',
+        LLMModel.GEMINI_2_5_FLASH.value,
         'claude-instant',
         'text-davinci-002'
     ]

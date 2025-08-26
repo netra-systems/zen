@@ -9,6 +9,8 @@ import os
 import time
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from pydantic import BaseModel, Field
 
@@ -21,7 +23,7 @@ class LLMTestModel(str, Enum):
     GEMINI_2_5_FLASH = "gemini-2.0-flash-exp"
     GEMINI_2_5_PRO = "gemini-2.0-flash-thinking-exp"
     GEMINI_PRO = "gemini-pro"
-    CLAUDE_3_SONNET = "claude-3-sonnet"
+    CLAUDE_3_SONNET = LLMModel.GEMINI_2_5_FLASH.value
 
 class LLMTestConfig(BaseModel):
     """Configuration for LLM test manager."""
@@ -105,7 +107,7 @@ class LLMTestManager:
     def _create_openai_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create OpenAI client."""
         # For test clients, read API key directly for test setup
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key or api_key.startswith("test-"):
             if self.config.enabled and not self.config.fallback_to_mock:
                 raise NetraException(

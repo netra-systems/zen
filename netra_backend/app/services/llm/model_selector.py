@@ -7,6 +7,8 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +58,8 @@ class ModelSelector:
     def _initialize_models(self) -> None:
         """Initialize available model specifications."""
         self.available_models = {
-            "gpt-4": ModelSpec(
-                name="gpt-4",
+            LLMModel.GEMINI_2_5_FLASH.value: ModelSpec(
+                name=LLMModel.GEMINI_2_5_FLASH.value,
                 provider="openai",
                 context_window=8192,
                 capabilities=[
@@ -70,8 +72,8 @@ class ModelSelector:
                 performance_score=0.95,
                 cost_score=8.5
             ),
-            "gpt-3.5-turbo": ModelSpec(
-                name="gpt-3.5-turbo",
+            LLMModel.GEMINI_2_5_FLASH.value: ModelSpec(
+                name=LLMModel.GEMINI_2_5_FLASH.value,
                 provider="openai",
                 context_window=4096,
                 capabilities=[
@@ -82,8 +84,8 @@ class ModelSelector:
                 performance_score=0.85,
                 cost_score=2.0
             ),
-            "claude-3-sonnet": ModelSpec(
-                name="claude-3-sonnet",
+            LLMModel.GEMINI_2_5_FLASH.value: ModelSpec(
+                name=LLMModel.GEMINI_2_5_FLASH.value,
                 provider="anthropic",
                 context_window=200000,
                 capabilities=[

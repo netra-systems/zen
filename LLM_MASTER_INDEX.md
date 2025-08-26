@@ -208,6 +208,11 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 - [`SPEC/cors_configuration.xml`](SPEC/cors_configuration.xml) - **UNIFIED CORS architecture (consolidated 5→1)**
 - [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) - Import rules
 
+### Infrastructure & Deployment Specs
+- [`SPEC/gcp_deployment.xml`](SPEC/gcp_deployment.xml) - GCP staging deployment guidelines
+- [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) - Deployment architecture patterns
+- [`SPEC/redis_staging_configuration.xml`](SPEC/redis_staging_configuration.xml) - **Redis endpoint configuration (10.107.0.3)**
+
 ---
 
 ## 🎯 Action Items

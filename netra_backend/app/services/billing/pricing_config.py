@@ -13,6 +13,8 @@ Business Value Justification (BVJ):
 from decimal import Decimal
 from enum import Enum
 from typing import Dict, Any
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.schemas.UserPlan import PlanTier
 
@@ -83,19 +85,19 @@ class PricingConfig:
         """Initialize LLM model pricing per 1K tokens."""
         self.model_pricing = {
             # OpenAI Models
-            "gpt-4": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "provider": ModelProvider.OPENAI,
                 "input": Decimal("0.03"),
                 "output": Decimal("0.06"),
                 "tier": "premium"
             },
-            "gpt-4-turbo": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "provider": ModelProvider.OPENAI,
                 "input": Decimal("0.01"),
                 "output": Decimal("0.03"),
                 "tier": "balanced"
             },
-            "gpt-3.5-turbo": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "provider": ModelProvider.OPENAI,
                 "input": Decimal("0.0015"),
                 "output": Decimal("0.002"),
@@ -109,7 +111,7 @@ class PricingConfig:
             },
             
             # Anthropic Models
-            "claude-3-opus": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "provider": ModelProvider.ANTHROPIC,
                 "input": Decimal("0.015"),
                 "output": Decimal("0.075"),
@@ -121,7 +123,7 @@ class PricingConfig:
                 "output": Decimal("0.015"),
                 "tier": "balanced"
             },
-            "claude-3-sonnet": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "provider": ModelProvider.ANTHROPIC,
                 "input": Decimal("0.003"),
                 "output": Decimal("0.015"),

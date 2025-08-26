@@ -145,8 +145,8 @@ describe('Comprehensive Integration Tests - Core', () => {
     it('should cache and retrieve LLM responses', async () => {
       setupComprehensiveLLMCacheResponseMocks(llmCacheService);
       
-      const response1 = await llmCacheService.query('test prompt', 'gpt-4');
-      const response2 = await llmCacheService.query('test prompt', 'gpt-4');
+      const response1 = await llmCacheService.query('test prompt', 'gemini-2.5-flash');
+      const response2 = await llmCacheService.query('test prompt', 'gemini-2.5-flash');
       
       expect(response1.cached).toBe(false);
       expect(response2.cached).toBe(true);

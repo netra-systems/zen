@@ -7,6 +7,8 @@ with staging API keys.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 # Test framework import - using pytest fixtures instead
@@ -74,7 +76,7 @@ class TestLLMIntegration(StagingConfigTestBase):
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "gpt-3.5-turbo",
+                    "model": LLMModel.GEMINI_2_5_FLASH.value,
                     "messages": [
                         {"role": "user", "content": "Reply with 'OK'"}
                     ],

@@ -26,6 +26,8 @@ import asyncio
 import pytest
 import statistics
 import time
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 @dataclass
 
@@ -187,7 +189,7 @@ class PerformanceTestExecutor:
 
         if self.use_real_llm:
 
-            response = await self.llm_manager.ask_llm_full(prompt, "gpt-3.5-turbo")
+            response = await self.llm_manager.ask_llm_full(prompt, LLMModel.GEMINI_2_5_FLASH.value)
 
             tokens_used = getattr(response, 'tokens_used', 100)  # Fallback
 

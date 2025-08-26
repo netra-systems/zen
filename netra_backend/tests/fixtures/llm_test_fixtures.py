@@ -17,6 +17,8 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from pydantic import BaseModel
 
@@ -120,7 +122,7 @@ def _setup_comprehensive_features(manager: Mock) -> None:
     # Mock: Async component isolation for testing without real async operations
     manager.health_check = AsyncMock(return_value=True)
     # Mock: Async component isolation for testing without real async operations
-    manager.get_available_models = AsyncMock(return_value=["gpt-4", "claude-3"])
+    manager.get_available_models = AsyncMock(return_value=[LLMModel.GEMINI_2_5_FLASH.value, "claude-3"])
     # Mock: Component isolation for controlled unit testing
     manager.estimate_tokens = Mock(return_value=150)
     # Mock: Component isolation for controlled unit testing

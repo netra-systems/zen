@@ -22,6 +22,8 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
 from netra_backend.app.services.cost_calculator import CostCalculatorService
@@ -111,7 +113,7 @@ class UsageTrackingService:
         self.monthly_aggregates = {}
     
     def record_usage(self, user_id: str, operation_type: str, 
-                    tokens: int, model: str = "gpt-4") -> Dict[str, Any]:
+                    tokens: int, model: str = LLMModel.GEMINI_2_5_FLASH.value) -> Dict[str, Any]:
         """Record usage for billing calculation."""
         from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
         

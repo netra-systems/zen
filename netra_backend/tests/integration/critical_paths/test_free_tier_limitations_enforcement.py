@@ -25,6 +25,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import aiohttp
 import pytest
@@ -282,7 +284,7 @@ class FreeTierLimitsTester:
                     "workspace_id": self.workspace_id,
                     "name": f"Test Agent {i+1}",
                     "type": "assistant",
-                    "model": "gpt-3.5-turbo"
+                    "model": LLMModel.GEMINI_2_5_FLASH.value
                 }
                 
                 async with self.session.post(
@@ -409,7 +411,7 @@ class FreeTierLimitsTester:
                 custom_model_data = {
                     "name": "custom-model-test",
                     "type": "fine-tuned",
-                    "base_model": "gpt-3.5-turbo"
+                    "base_model": LLMModel.GEMINI_2_5_FLASH.value
                 }
                 
                 async with self.session.post(

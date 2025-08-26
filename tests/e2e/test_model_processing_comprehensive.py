@@ -33,6 +33,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, AsyncIterator, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 from fastapi.testclient import TestClient
@@ -475,7 +477,7 @@ class TestTokenTrackingAndCostCalculation:
     async def test_cost_calculation_for_different_models(self, failing_llm_manager):
         """Test cost calculation across different model types"""
         prompt = "Calculate costs for this prompt"
-        models = ["gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"]
+        models = [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value]
         
         # Should fail if cost calculation is broken
         with pytest.raises((Exception, AttributeError, KeyError)):

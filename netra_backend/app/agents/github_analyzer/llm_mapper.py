@@ -7,6 +7,8 @@ Tracks models, parameters, and usage patterns.
 import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.logging_config import central_logger as logger
 
@@ -77,7 +79,7 @@ class LLMCallMapper:
     def _get_openai_model_mappings(self) -> Dict[str, str]:
         """Get OpenAI model mappings."""
         return {
-            "gpt-4": "openai",
+            LLMModel.GEMINI_2_5_FLASH.value: "openai",
             "gpt-3.5": "openai",
             "text-davinci": "openai"
         }

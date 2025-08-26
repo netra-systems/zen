@@ -155,7 +155,7 @@ class TestConfigurationMigrationValidation:
         # Test key environment variables are defined
         required_vars = [
             'DATABASE_URL', 'REDIS_URL', 'ENVIRONMENT', 'SECRET_KEY',
-            'JWT_SECRET_KEY', 'OPENAI_API_KEY', 'CLICKHOUSE_HOST'
+            'JWT_SECRET_KEY', 'GOOGLE_API_KEY', 'CLICKHOUSE_HOST'
         ]
         
         for var in required_vars:

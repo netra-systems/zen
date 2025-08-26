@@ -10,6 +10,8 @@ BVJ (Business Value Justification):
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -129,7 +131,7 @@ async def test_provider_settings_update(
     
     # Update provider settings
     settings_update = {
-        "default_model": "gpt-4",
+        "default_model": LLMModel.GEMINI_2_5_FLASH.value,
         "temperature": 0.7,
         "max_tokens": 2000
     }

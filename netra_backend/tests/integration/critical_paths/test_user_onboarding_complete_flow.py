@@ -24,6 +24,8 @@ import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import aiohttp
 import pytest
@@ -282,7 +284,7 @@ class UserOnboardingTester:
                 "workspace_id": self.workspace_id,
                 "name": "My First Agent",
                 "type": "assistant",
-                "model": "gpt-3.5-turbo",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "description": "A helpful AI assistant for testing",
                 "capabilities": ["chat", "code_generation"],
                 "settings": {

@@ -5,6 +5,8 @@ Provides common constants and utilities for data generation
 
 import random
 from typing import List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 class DataGeneratorBase:
     """Base class with common configuration for data generators"""
@@ -13,7 +15,7 @@ class DataGeneratorBase:
         if seed:
             random.seed(seed)
         
-        self.models = ["gpt-4", "gpt-3.5-turbo", "claude-3-opus", "claude-3-sonnet", 
+        self.models = [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, 
                        "gemini-pro", "gemini-ultra", "llama-70b", "mixtral-8x7b"]
         self.workload_types = ["chat", "completion", "embedding", "analysis", 
                               "rag_pipeline", "code_generation", "summarization"]

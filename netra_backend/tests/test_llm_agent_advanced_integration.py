@@ -2,6 +2,8 @@
 
 import pytest
 from typing import Dict, Any
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 class TestAdvancedLLMIntegration:
@@ -131,7 +133,7 @@ async def test_real_llm_interaction():
     # Mock real LLM interaction
     request = {
         "prompt": "Optimize my AI infrastructure costs",
-        "model": "gpt-4",
+        "model": LLMModel.GEMINI_2_5_FLASH.value,
         "temperature": 0.7
     }
     

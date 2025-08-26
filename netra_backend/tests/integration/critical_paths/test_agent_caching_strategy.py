@@ -12,6 +12,8 @@ Coverage: Real caching strategies, TTL management, cache warming, intelligent in
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -671,7 +673,7 @@ async def test_basic_cache_operations(cache_manager):
         agent_id="test_agent_001",
         input_text="What is machine learning?",
         response="Machine learning is a subset of AI that enables systems to learn from data.",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         temperature=0.7,
         ttl_seconds=3600
     )
@@ -682,7 +684,7 @@ async def test_basic_cache_operations(cache_manager):
     cached_response = await manager.cache_manager.get_cached_response(
         agent_id="test_agent_001",
         input_text="What is machine learning?",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         temperature=0.7
     )
     
@@ -701,14 +703,14 @@ async def test_cache_key_generation(cache_manager):
         namespace="test",
         cache_type=CacheType.RESPONSE_CACHE,
         input="hello",
-        model="gpt-4"
+        model=LLMModel.GEMINI_2_5_FLASH.value
     )
     
     key2 = CacheKey.create(
         namespace="test",
         cache_type=CacheType.RESPONSE_CACHE,
         input="hello",
-        model="gpt-4"
+        model=LLMModel.GEMINI_2_5_FLASH.value
     )
     
     assert key1.hash_key == key2.hash_key
@@ -742,7 +744,7 @@ async def test_cache_hit_miss_ratio(cache_manager):
             agent_id="hit_test_agent",
             input_text=input_text,
             response=response,
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
     
     # Test cache hits
@@ -750,7 +752,7 @@ async def test_cache_hit_miss_ratio(cache_manager):
         cached = await manager.cache_manager.get_cached_response(
             agent_id="hit_test_agent",
             input_text=input_text,
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         assert cached == expected_response
     
@@ -758,7 +760,7 @@ async def test_cache_hit_miss_ratio(cache_manager):
     miss1 = await manager.cache_manager.get_cached_response(
         agent_id="hit_test_agent",
         input_text="What is NLP?",  # Not cached
-        model="gpt-4"
+        model=LLMModel.GEMINI_2_5_FLASH.value
     )
     assert miss1 is None
     
@@ -836,7 +838,7 @@ async def test_cache_ttl_expiration(cache_manager):
         agent_id="ttl_test_agent",
         input_text="TTL test question",
         response="TTL test response",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         ttl_seconds=1  # 1 second TTL
     )
     
@@ -844,7 +846,7 @@ async def test_cache_ttl_expiration(cache_manager):
     cached = await manager.cache_manager.get_cached_response(
         agent_id="ttl_test_agent",
         input_text="TTL test question",
-        model="gpt-4"
+        model=LLMModel.GEMINI_2_5_FLASH.value
     )
     assert cached is not None
     
@@ -855,7 +857,7 @@ async def test_cache_ttl_expiration(cache_manager):
     expired = await manager.cache_manager.get_cached_response(
         agent_id="ttl_test_agent",
         input_text="TTL test question",
-        model="gpt-4"
+        model=LLMModel.GEMINI_2_5_FLASH.value
     )
     assert expired is None
 
@@ -874,7 +876,7 @@ async def test_cache_invalidation_by_tags(cache_manager):
             agent_id=agent_id,
             input_text=f"Question {i}",
             response=f"Response {i}",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
     
     # Verify all are cached
@@ -882,7 +884,7 @@ async def test_cache_invalidation_by_tags(cache_manager):
         cached = await manager.cache_manager.get_cached_response(
             agent_id=agent_id,
             input_text=f"Question {i}",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         assert cached is not None
     
@@ -895,7 +897,7 @@ async def test_cache_invalidation_by_tags(cache_manager):
         cached = await manager.cache_manager.get_cached_response(
             agent_id=agent_id,
             input_text=f"Question {i}",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         assert cached is None
 
@@ -918,7 +920,7 @@ async def test_cache_warming(cache_manager):
     warmed_count = await manager.cache_manager.warm_cache(
         agent_id="warming_test_agent",
         common_inputs=common_inputs,
-        model="gpt-4"
+        model=LLMModel.GEMINI_2_5_FLASH.value
     )
     
     assert warmed_count == len(common_inputs)
@@ -928,7 +930,7 @@ async def test_cache_warming(cache_manager):
         cached = await manager.cache_manager.get_cached_response(
             agent_id="warming_test_agent",
             input_text=input_text,
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         assert cached is not None
         assert "Pre-warmed response" in cached
@@ -953,7 +955,7 @@ async def test_lru_eviction_policy(cache_manager):
             agent_id="eviction_test_agent",
             input_text=f"Large question {i}",
             response=large_response,
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
     
     # Trigger cleanup/eviction
@@ -978,7 +980,7 @@ async def test_cache_access_tracking(cache_manager):
         agent_id="access_test_agent",
         input_text="Access tracking test",
         response="This response will be accessed multiple times",
-        model="gpt-4"
+        model=LLMModel.GEMINI_2_5_FLASH.value
     )
     
     # Access the cached response multiple times
@@ -986,7 +988,7 @@ async def test_cache_access_tracking(cache_manager):
         cached = await manager.cache_manager.get_cached_response(
             agent_id="access_test_agent",
             input_text="Access tracking test",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         assert cached is not None
     
@@ -995,7 +997,7 @@ async def test_cache_access_tracking(cache_manager):
         namespace="agent:access_test_agent",
         cache_type=CacheType.RESPONSE_CACHE,
         input_hash=hashlib.md5("Access tracking test".encode()).hexdigest(),
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         temperature=0.7,
         max_tokens=2000
     )
@@ -1018,7 +1020,7 @@ async def test_concurrent_cache_operations(cache_manager):
             agent_id=f"concurrent_agent_{i % 3}",
             input_text=f"Concurrent question {i}",
             response=f"Concurrent response {i}",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         write_tasks.append(task)
     
@@ -1031,7 +1033,7 @@ async def test_concurrent_cache_operations(cache_manager):
         task = manager.cache_manager.get_cached_response(
             agent_id=f"concurrent_agent_{i % 3}",
             input_text=f"Concurrent question {i}",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         read_tasks.append(task)
     
@@ -1055,7 +1057,7 @@ async def test_cache_performance_benchmarks(cache_manager):
             agent_id=f"perf_agent_{i % 5}",
             input_text=f"Performance test question {i}",
             response=f"Performance test response {i} with some content",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         write_tasks.append(task)
     
@@ -1072,7 +1074,7 @@ async def test_cache_performance_benchmarks(cache_manager):
         task = manager.cache_manager.get_cached_response(
             agent_id=f"perf_agent_{i % 5}",
             input_text=f"Performance test question {i}",
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         read_tasks.append(task)
     

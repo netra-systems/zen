@@ -2,6 +2,8 @@
 
 import json
 from typing import Any, Dict, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -70,7 +72,7 @@ class MessageHandlerBase:
     ) -> Run:
         """Create run for thread"""
         return await thread_service.create_run(
-            thread.id, assistant_id="netra-assistant", model="gpt-4",
+            thread.id, assistant_id="netra-assistant", model=LLMModel.GEMINI_2_5_FLASH.value,
             instructions="You are Netra AI Workload Optimization Assistant",
             db=db_session
         )

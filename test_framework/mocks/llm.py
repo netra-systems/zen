@@ -12,6 +12,8 @@ from unittest.mock import Mock, AsyncMock
 import uuid
 from dataclasses import dataclass
 from enum import Enum
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 class MockLLMProvider(str, Enum):
@@ -23,10 +25,10 @@ class MockLLMProvider(str, Enum):
 
 class MockLLMModel(str, Enum):
     """Mock LLM models."""
-    GPT_3_5 = "gpt-3.5-turbo"
-    GPT_4 = "gpt-4"
+    GPT_3_5 = LLMModel.GEMINI_2_5_FLASH.value
+    GPT_4 = LLMModel.GEMINI_2_5_FLASH.value
     CLAUDE_3_HAIKU = "claude-3-haiku"
-    CLAUDE_3_SONNET = "claude-3-sonnet"
+    CLAUDE_3_SONNET = LLMModel.GEMINI_2_5_FLASH.value
     MOCK_FAST = "mock-fast"
     MOCK_SLOW = "mock-slow"
 

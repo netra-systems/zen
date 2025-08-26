@@ -5,6 +5,8 @@ for different LLM types and configurations.
 """
 
 from typing import Dict
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, circuit_registry
 from netra_backend.app.llm.client_config import LLMClientConfig
@@ -47,7 +49,7 @@ class LLMCircuitBreakerManager:
     def _is_slow_llm(self, config_name: str) -> bool:
         """Check if LLM configuration is for slow models."""
         name_lower = config_name.lower()
-        return "gpt-4" in name_lower or "claude" in name_lower
+        return LLMModel.GEMINI_2_5_FLASH.value in name_lower or "claude" in name_lower
     
     async def get_structured_circuit(self, config_name: str) -> CircuitBreaker:
         """Get circuit breaker for structured LLM requests."""

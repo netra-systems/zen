@@ -7,6 +7,8 @@ Maximum 300 lines, functions ≤8 lines.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import time
 from datetime import datetime, timedelta, timezone
@@ -114,17 +116,17 @@ class ROICalculatorService:
         """Get optimization scenarios for customer tier"""
         if tier == "free":
             return {"basic_optimization": {
-                "current_provider": LLMProvider.OPENAI, "current_model": "gpt-3.5-turbo",
+                "current_provider": LLMProvider.OPENAI, "current_model": LLMModel.GEMINI_2_5_FLASH.value,
                 "optimized_provider": LLMProvider.GOOGLE, "optimized_model": "gemini-2.5-flash"
             }}
         elif tier == "growth":
             return {"premium_optimization": {
-                "current_provider": LLMProvider.OPENAI, "current_model": "gpt-4",
+                "current_provider": LLMProvider.OPENAI, "current_model": LLMModel.GEMINI_2_5_FLASH.value,
                 "optimized_provider": LLMProvider.ANTHROPIC, "optimized_model": "claude-3.5-sonnet"
             }}
         else:  # enterprise
             return {"enterprise_optimization": {
-                "current_provider": LLMProvider.OPENAI, "current_model": "gpt-4",
+                "current_provider": LLMProvider.OPENAI, "current_model": LLMModel.GEMINI_2_5_FLASH.value,
                 "optimized_provider": LLMProvider.GOOGLE, "optimized_model": "gemini-2.5-pro"
             }}
 
@@ -143,7 +145,7 @@ class TestInvestorCriticalROICalculator:
         roi_metrics = roi_service.calculate_instant_roi(
             usage_tokens=1000000,  # 1M tokens (typical enterprise usage)
             current_provider=LLMProvider.OPENAI,
-            current_model="gpt-4",
+            current_model=LLMModel.GEMINI_2_5_FLASH.value,
             optimized_provider=LLMProvider.GOOGLE,
             optimized_model="gemini-2.5-flash"
         )
@@ -165,7 +167,7 @@ class TestInvestorCriticalROICalculator:
         roi_metrics = roi_service.calculate_instant_roi(
             usage_tokens=5000000,  # 5M tokens
             current_provider=LLMProvider.OPENAI,
-            current_model="gpt-4-turbo",
+            current_model=LLMModel.GEMINI_2_5_FLASH.value,
             optimized_provider=LLMProvider.ANTHROPIC,
             optimized_model="claude-3.5-sonnet"
         )
@@ -180,9 +182,9 @@ class TestInvestorCriticalROICalculator:
         """Test multiple model cost comparison scenarios for investors.
         BVJ: Demonstrates platform's ability to optimize across all major providers."""
         scenarios = [
-            (LLMProvider.OPENAI, "gpt-4", LLMProvider.GOOGLE, "gemini-2.5-flash"),
-            (LLMProvider.ANTHROPIC, "claude-3-opus", LLMProvider.ANTHROPIC, "claude-3-haiku"),
-            (LLMProvider.OPENAI, "gpt-4-turbo", LLMProvider.GOOGLE, "gemini-2.5-pro")
+            (LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value, LLMProvider.GOOGLE, "gemini-2.5-flash"),
+            (LLMProvider.ANTHROPIC, LLMModel.GEMINI_2_5_FLASH.value, LLMProvider.ANTHROPIC, "claude-3-haiku"),
+            (LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value, LLMProvider.GOOGLE, "gemini-2.5-pro")
         ]
         
         for current_provider, current_model, opt_provider, opt_model in scenarios:
@@ -199,7 +201,7 @@ class TestInvestorCriticalROICalculator:
             monthly_tokens=1000000,          # 1M tokens/month starting point
             growth_rate=Decimal("1.15"),     # 15% monthly growth
             current_provider=LLMProvider.OPENAI,
-            current_model="gpt-4",
+            current_model=LLMModel.GEMINI_2_5_FLASH.value,
             optimized_provider=LLMProvider.GOOGLE,
             optimized_model="gemini-2.5-flash"
         )
@@ -229,7 +231,7 @@ class TestInvestorCriticalROICalculator:
         roi_metrics = roi_service.calculate_instant_roi(
             usage_tokens=0,
             current_provider=LLMProvider.OPENAI,
-            current_model="gpt-4",
+            current_model=LLMModel.GEMINI_2_5_FLASH.value,
             optimized_provider=LLMProvider.GOOGLE,
             optimized_model="gemini-2.5-flash"
         )
@@ -247,7 +249,7 @@ class TestInvestorCriticalROICalculator:
         roi_metrics = roi_service.calculate_instant_roi(
             usage_tokens=massive_usage,
             current_provider=LLMProvider.OPENAI,
-            current_model="gpt-4",
+            current_model=LLMModel.GEMINI_2_5_FLASH.value,
             optimized_provider=LLMProvider.GOOGLE,
             optimized_model="gemini-2.5-flash"
         )
@@ -265,7 +267,7 @@ class TestInvestorCriticalROICalculator:
             current_provider=LLMProvider.GOOGLE,
             current_model="gemini-2.5-flash",  # Already cheapest
             optimized_provider=LLMProvider.OPENAI,
-            optimized_model="gpt-4"  # Much more expensive
+            optimized_model=LLMModel.GEMINI_2_5_FLASH.value  # Much more expensive
         )
         
         # Should handle gracefully without breaking system

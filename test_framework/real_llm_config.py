@@ -25,6 +25,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Configure logging for LLM testing
 logger = logging.getLogger(__name__)
@@ -87,7 +89,7 @@ class RealLLMConfig:
     def _get_default_models(self) -> Dict[str, ModelConfig]:
         """Get default model configurations optimized for testing."""
         return {
-            "gpt-4": ModelConfig(
+            LLMModel.GEMINI_2_5_FLASH.value: ModelConfig(
                 name="gpt-4-turbo-preview",
                 provider=LLMProvider.OPENAI,
                 max_tokens=2000,  # Reduced for testing
@@ -96,7 +98,7 @@ class RealLLMConfig:
                 cost_per_1k_tokens=0.03
             ),
             "gpt-3.5": ModelConfig(
-                name="gpt-3.5-turbo",
+                name=LLMModel.GEMINI_2_5_FLASH.value,
                 provider=LLMProvider.OPENAI,
                 max_tokens=1500,  # Reduced for testing
                 temperature=0.0,  # Deterministic for testing
@@ -170,7 +172,7 @@ class RealLLMConfigManager:
         api_keys = {}
         
         # OpenAI API key
-        openai_key = os.getenv('TEST_OPENAI_API_KEY') or os.getenv('OPENAI_API_KEY')
+        openai_key = os.getenv('TEST_OPENAI_API_KEY') or os.getenv('GOOGLE_API_KEY')
         if openai_key:
             api_keys['openai'] = openai_key
         
@@ -197,7 +199,7 @@ class RealLLMConfigManager:
     def _validate_api_keys(self):
         """Validate required API keys are present, preferring TEST_* variants."""
         required_providers = {
-            "openai": ["TEST_OPENAI_API_KEY", "OPENAI_API_KEY"],
+            "openai": ["TEST_OPENAI_API_KEY", "GOOGLE_API_KEY"],
             "anthropic": ["TEST_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"],
             "google": ["TEST_GOOGLE_API_KEY", "GOOGLE_API_KEY"]
         }
@@ -241,7 +243,7 @@ class RealLLMConfigManager:
         """Get configuration for a specific model."""
         if model_key not in self.config.models:
             logger.warning(f"Model {model_key} not found, using gpt-4 default")
-            model_key = "gpt-4"
+            model_key = LLMModel.GEMINI_2_5_FLASH.value
         
         return self.config.models[model_key]
     
@@ -365,7 +367,7 @@ class RealLLMTestManager:
         self.config_manager = RealLLMConfigManager()
         self.execution_stats = {"total_calls": 0, "successful_calls": 0, "failed_calls": 0}
         
-    async def execute_llm_call(self, prompt: str, model_key: str = "gpt-4", 
+    async def execute_llm_call(self, prompt: str, model_key: str = LLMModel.GEMINI_2_5_FLASH.value, 
                              temperature: Optional[float] = None) -> Dict[str, Any]:
         """Execute LLM call with proper error handling and caching."""
         if not self.config_manager.is_enabled():
@@ -654,7 +656,7 @@ class CircuitBreaker:
 
 
 # Utility functions for test files
-async def execute_test_with_real_llm(prompt: str, model: str = "gpt-4", **kwargs) -> Dict[str, Any]:
+async def execute_test_with_real_llm(prompt: str, model: str = LLMModel.GEMINI_2_5_FLASH.value, **kwargs) -> Dict[str, Any]:
     """Execute test with real LLM if enabled, otherwise use mock."""
     manager = get_real_llm_manager()
     return await manager.execute_llm_call(prompt, model, **kwargs)

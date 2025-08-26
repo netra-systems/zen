@@ -15,6 +15,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -155,19 +157,19 @@ def usage_data_samples():
             "monthly_requests": 1000,
             "monthly_cost": 150,
             "average_response_time": 800,
-            "primary_models": ["gpt-3.5-turbo"]
+            "primary_models": [LLMModel.GEMINI_2_5_FLASH.value]
         },
         "medium_usage": {
             "monthly_requests": 15000,
             "monthly_cost": 2400,
             "average_response_time": 1200,
-            "primary_models": ["gpt-4", "claude-3-sonnet"]
+            "primary_models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value]
         },
         "high_usage": {
             "monthly_requests": 100000,
             "monthly_cost": 15000,
             "average_response_time": 1500,
-            "primary_models": ["gpt-4", "claude-3-opus", "gemini-pro"]
+            "primary_models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "gemini-pro"]
         }
     }
 

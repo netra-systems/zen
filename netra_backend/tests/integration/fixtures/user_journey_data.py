@@ -13,6 +13,8 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 class UserTestData:
     """Test data generators for different user segments."""
@@ -141,7 +143,7 @@ class OptimizationTestScenarios:
             "current_monthly_cost": 5000,
             "target_reduction_percentage": 20,
             "quality_threshold": 0.95,
-            "models_in_use": ["gpt-4", "claude-3-sonnet"],
+            "models_in_use": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value],
             "daily_requests": 10000,
             "average_tokens_per_request": 500
         },
@@ -165,8 +167,8 @@ class OptimizationTestScenarios:
     MODEL_MIGRATION = {
         "type": "model_migration",
         "context": {
-            "from_model": "gpt-4",
-            "to_model": "claude-3-sonnet",
+            "from_model": LLMModel.GEMINI_2_5_FLASH.value,
+            "to_model": LLMModel.GEMINI_2_5_FLASH.value,
             "migration_timeline": "30_days",
             "risk_tolerance": "low",
             "test_percentage": 5
@@ -225,12 +227,12 @@ class ProviderIntegrationData:
     OPENAI_CONNECTION = {
         "api_key": "sk-test-1234567890abcdef",
         "organization_id": "org-test123",
-        "expected_models": ["gpt-4", "gpt-3.5-turbo", "text-embedding-ada-002"]
+        "expected_models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "text-embedding-ada-002"]
     }
     
     ANTHROPIC_CONNECTION = {
         "api_key": "sk-ant-test-key-123",
-        "expected_models": ["claude-3-sonnet", "claude-3-haiku"]
+        "expected_models": [LLMModel.GEMINI_2_5_FLASH.value, "claude-3-haiku"]
     }
     
     OAUTH_PROVIDERS = {

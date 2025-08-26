@@ -5,6 +5,8 @@ Modular design with ≤300 lines, ≤8 lines per function
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -108,10 +110,10 @@ class TestSupplyResearcherManagement:
             "parsed": {
                 "research_type": ResearchType.PRICING,
                 "provider": "openai",
-                "model_name": "gpt-4",
+                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
                 "timeframe": "current"
             },
-            "expected_keywords": ["pricing", "cost", "tokens", "gpt-4"]
+            "expected_keywords": ["pricing", "cost", "tokens", LLMModel.GEMINI_2_5_FLASH.value]
         }
 
     def _get_capabilities_query_case(self):
@@ -156,7 +158,7 @@ class TestSupplyResearcherManagement:
         mock_supply_service.calculate_price_changes.return_value = {
             "all_changes": [{
                 "provider": "openai",
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "percent_change": 15,  # 15% change - should trigger
                 "field": "pricing_input"
             }]
@@ -167,7 +169,7 @@ class TestSupplyResearcherManagement:
         mock_supply_service.detect_anomalies.return_value = [{
             "type": "significant_price_change",
             "provider": "openai",
-            "model": "gpt-4",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "percent_change": 15
         }]
 

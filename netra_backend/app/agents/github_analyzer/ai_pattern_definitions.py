@@ -5,6 +5,8 @@ Handles OpenAI, Anthropic, LangChain, agents, embeddings, and tools.
 """
 
 from typing import Any, Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.logging_config import central_logger as logger
 
@@ -64,7 +66,7 @@ class AIPatternDefinitions:
     def _get_openai_models(self) -> List[str]:
         """Get OpenAI model patterns."""
         return [
-            r"gpt-4",
+            rLLMModel.GEMINI_2_5_FLASH.value,
             r"gpt-3\.5-turbo",
             r"text-davinci-\d+",
             r"text-embedding-ada-\d+"
@@ -73,7 +75,7 @@ class AIPatternDefinitions:
     def _get_openai_configs(self) -> List[str]:
         """Get OpenAI configuration patterns."""
         return [
-            r"OPENAI_API_KEY",
+            r"GOOGLE_API_KEY",
             r"temperature\s*[:=]",
             r"max_tokens\s*[:=]",
             r"top_p\s*[:=]"

@@ -1,6 +1,8 @@
 import time
 import uuid
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -139,7 +141,7 @@ class ThreadService(IThreadService):
         await self._send_agent_started_event(uow, run_id, thread_id, agent_name)
         return run
     
-    async def create_run(self, thread_id: str, assistant_id: str, model: str = "gpt-4", instructions: Optional[str] = None, db: Optional[AsyncSession] = None) -> Run:
+    async def create_run(self, thread_id: str, assistant_id: str, model: str = LLMModel.GEMINI_2_5_FLASH.value, instructions: Optional[str] = None, db: Optional[AsyncSession] = None) -> Run:
         """Create a new run for a thread using repository pattern"""
         run_id, run_data = self._prepare_run_data(thread_id, assistant_id, model, instructions)
         try:

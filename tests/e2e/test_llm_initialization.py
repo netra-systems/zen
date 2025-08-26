@@ -10,6 +10,8 @@ Business Value: Direct revenue protection through LLM reliability validation
 import os
 import asyncio
 from typing import Dict, Any, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -68,7 +70,7 @@ class TestLLMInitialization:
     async def _test_openai_provider(self, mock_manager, available_keys, results, tested_providers):
         """Test OpenAI provider if available"""
         if available_keys["openai"]:
-            results["openai"] = await self.helpers.test_provider_with_mock(mock_manager, "openai", "gpt-3.5-turbo")
+            results["openai"] = await self.helpers.test_provider_with_mock(mock_manager, "openai", LLMModel.GEMINI_2_5_FLASH.value)
             tested_providers.append("openai")
         return tested_providers
     

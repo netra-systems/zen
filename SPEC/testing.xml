@@ -650,4 +650,71 @@
     <practice>INCLUDE @dataclass decorator for ALL dataclass definitions to prevent initialization errors.</practice>
     <practice>PROVIDE graceful fallback from containers to mocks when Docker or external services unavailable.</practice>
   </best_practices>
+  
+  <llm_model_standardization>
+    <title>LLM Test Model Standardization Requirements</title>
+    <description>
+      All LLM-related tests must use standardized models to ensure consistency,
+      reduce maintenance burden, and align with production deployments.
+    </description>
+    
+    <approved_models>
+      <model name="GEMINI_2_5_FLASH" value="gemini-2.0-flash-exp" purpose="default">
+        Default model for all standard test scenarios. Fast execution with good quality.
+      </model>
+      <model name="GEMINI_2_5_PRO" value="gemini-2.0-flash-thinking-exp" purpose="advanced">
+        For tests requiring advanced reasoning or multi-step problem solving.
+      </model>
+      <model name="GEMINI_PRO" value="gemini-pro" purpose="compatibility">
+        Legacy Gemini model for backward compatibility testing.
+      </model>
+      <model name="CLAUDE_3_SONNET" value="claude-3-sonnet" purpose="cross-provider">
+        Retained for cross-provider compatibility testing only.
+      </model>
+    </approved_models>
+    
+    <deprecated_models>
+      <model name="GPT_4" reason="Replaced by GEMINI_2_5_FLASH for consistency"/>
+      <model name="GPT_35_TURBO" reason="Replaced by GEMINI_2_5_FLASH for consistency"/>
+      <model name="CLAUDE_3_OPUS" reason="Replaced by GEMINI_2_5_PRO for advanced scenarios"/>
+    </deprecated_models>
+    
+    <requirements>
+      <requirement priority="CRITICAL">
+        Test fixtures MUST use GEMINI_2_5_FLASH as the default model unless specifically testing cross-provider functionality.
+      </requirement>
+      <requirement priority="HIGH">
+        The LLMTestModel enum in llm_test_manager.py MUST NOT contain deprecated models (GPT_4, GPT_35_TURBO, CLAUDE_3_OPUS).
+      </requirement>
+      <requirement priority="HIGH">
+        Mock clients MUST provide appropriate delays and response patterns for Gemini models.
+      </requirement>
+      <requirement priority="MEDIUM">
+        Test data files (JSON, YAML) MUST NOT hardcode deprecated model strings like "gpt-4" or "claude-3-opus".
+      </requirement>
+      <requirement priority="MEDIUM">
+        Environment configurations for tests MUST NOT require OPENAI_API_KEY unless explicitly testing OpenAI integration.
+      </requirement>
+    </requirements>
+    
+    <validation>
+      <script>scripts/validate_llm_test_models.py</script>
+      <description>
+        Run this script to validate compliance with LLM model standardization.
+        The script checks for deprecated model usage and ensures proper configuration.
+      </description>
+      <frequency>Before each commit and as part of CI/CD pipeline</frequency>
+    </validation>
+    
+    <migration_guide>
+      <step>Replace all instances of LLMTestModel.GPT_4 with LLMTestModel.GEMINI_2_5_FLASH</step>
+      <step>Replace all instances of LLMTestModel.CLAUDE_3_OPUS with LLMTestModel.GEMINI_2_5_PRO</step>
+      <step>Update hardcoded strings from "gpt-4" to "gemini-2.0-flash-exp"</step>
+      <step>Update test fixtures to use models=[LLMTestModel.GEMINI_2_5_FLASH, LLMTestModel.GEMINI_2_5_PRO]</step>
+      <step>Remove OPENAI_API_KEY from test environment requirements</step>
+      <step>Run validation script to ensure compliance</step>
+    </migration_guide>
+  </llm_model_standardization>
+  
+  </best_practices>
 </specification>

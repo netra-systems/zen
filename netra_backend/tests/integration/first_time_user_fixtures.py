@@ -16,6 +16,8 @@ from netra_backend.app.schemas.UserPlan import UserPlan
 from netra_backend.app.schemas.registry import Message, Thread, User
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 from netra_backend.app.services.cost_calculator import (
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
     CostCalculatorService as BillingService,
 )
 from netra_backend.app.services.tool_registry import ToolRegistry
@@ -585,7 +587,7 @@ def get_mock_optimization_request() -> Dict[str, Any]:
 
             "quality_threshold": 0.95,
 
-            "models_in_use": ["gpt-4", "claude-3-sonnet"],
+            "models_in_use": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value],
 
             "daily_requests": 10000,
 
@@ -665,7 +667,7 @@ def get_mock_user_preferences() -> Dict[str, Any]:
 
             "technical_level": "expert",
 
-            "preferred_models": ["gpt-4", "claude-3-sonnet"]
+            "preferred_models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value]
 
         }
 

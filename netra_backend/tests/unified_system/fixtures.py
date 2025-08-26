@@ -8,6 +8,8 @@ Provides standardized fixtures for services, users, databases, and WebSocket cli
 import asyncio
 from dataclasses import dataclass
 from typing import Any, AsyncGenerator, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 import websockets
@@ -279,7 +281,7 @@ async def _setup_mock_services(registry: ServiceRegistry) -> None:
     registry.register_oauth_provider("github", github_oauth)
     
     # LLM services
-    gpt_service = MockLLMService("gpt-4")
+    gpt_service = MockLLMService(LLMModel.GEMINI_2_5_FLASH.value)
     registry.register_llm_service("openai", gpt_service)
     
     gemini_service = MockLLMService("gemini-pro")

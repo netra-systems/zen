@@ -664,7 +664,7 @@ class ConfigurationValidator:
             
             # External services
             ValidationRule(
-                name="OPENAI_API_KEY",
+                name="GOOGLE_API_KEY",
                 config_type=ConfigType.SECRET,
                 required=False,
                 description="OpenAI API key for LLM services",

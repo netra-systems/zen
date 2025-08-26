@@ -15,6 +15,8 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.jwt_token_helpers import JWTTestHelper
@@ -297,6 +299,6 @@ def create_user_preferences_data() -> Dict[str, Any]:
         'theme': 'dark',
         'notifications': True,
         'language': 'en',
-        'ai_settings': {'model_preference': 'gpt-4', 'temperature': 0.7},
+        'ai_settings': {'model_preference': LLMModel.GEMINI_2_5_FLASH.value, 'temperature': 0.7},
         'updated_at': datetime.now(timezone.utc).isoformat()
     }

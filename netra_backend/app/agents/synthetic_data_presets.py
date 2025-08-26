@@ -18,6 +18,8 @@ Each preset defines realistic parameters for synthetic data generation.
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from pydantic import BaseModel, Field
 
@@ -54,7 +56,7 @@ def _get_ecommerce_params() -> Dict[str, any]:
     """Get e-commerce specific parameters"""
     return {
         "peak_hours": [10, 14, 19, 20],
-        "models": ["gpt-4", "claude-2", "embedding-ada-002"],
+        "models": [LLMModel.GEMINI_2_5_FLASH.value, "claude-2", "embedding-ada-002"],
         "use_cases": ["product_recommendations", "search", "chat_support"],
         "avg_tokens_per_request": 500,
         "peak_multiplier": 3.5
@@ -74,7 +76,7 @@ def get_financial_preset() -> WorkloadProfile:
 def _get_financial_params() -> Dict[str, any]:
     """Get financial services specific parameters"""
     return {
-        "models": ["gpt-4-turbo", "claude-3-opus"],
+        "models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value],
         "use_cases": ["risk_analysis", "fraud_detection", "compliance"],
         "avg_tokens_per_request": 1500,
         "compliance_requirements": True,
@@ -95,7 +97,7 @@ def get_healthcare_preset() -> WorkloadProfile:
 def _get_healthcare_params() -> Dict[str, any]:
     """Get healthcare specific parameters"""
     return {
-        "models": ["med-palm-2", "gpt-4", "bio-gpt"],
+        "models": ["med-palm-2", LLMModel.GEMINI_2_5_FLASH.value, "bio-gpt"],
         "use_cases": ["diagnosis_assist", "medical_qa", "report_generation"],
         "avg_tokens_per_request": 2000,
         "hipaa_compliant": True,
@@ -116,7 +118,7 @@ def get_gaming_preset() -> WorkloadProfile:
 def _get_gaming_params() -> Dict[str, any]:
     """Get gaming specific parameters"""
     return {
-        "models": ["gpt-3.5-turbo", "llama-2-7b"],
+        "models": [LLMModel.GEMINI_2_5_FLASH.value, "llama-2-7b"],
         "use_cases": ["npc_dialogue", "story_generation", "player_assistance"],
         "avg_tokens_per_request": 200,
         "peak_hours": [19, 20, 21, 22, 23],
@@ -137,7 +139,7 @@ def get_research_preset() -> WorkloadProfile:
 def _get_research_params() -> Dict[str, any]:
     """Get research specific parameters"""
     return {
-        "models": ["gpt-4", "claude-3-opus", "palm-2"],
+        "models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "palm-2"],
         "use_cases": ["paper_analysis", "hypothesis_generation", "data_synthesis"],
         "avg_tokens_per_request": 5000,
         "batch_processing": True,

@@ -37,7 +37,7 @@ def staging_environment():
         "ENVIRONMENT": "staging",
         "DATABASE_URL": "postgresql://test:test@/staging?host=/cloudsql/test",
         "REDIS_URL": "redis://staging-redis:6379",
-        "CLICKHOUSE_HOST": "staging-clickhouse.netrasystems.ai",
+        "CLICKHOUSE_HOST": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
         "CLICKHOUSE_PASSWORD": "test-password",
         "JWT_SECRET_KEY": "test-jwt-secret-key-32-characters-minimum",
         "FERNET_KEY": "test-fernet-key-44-characters-exactly1234567=",

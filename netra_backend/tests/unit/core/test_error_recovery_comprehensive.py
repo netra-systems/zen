@@ -9,6 +9,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.core.error_recovery import (
     ErrorRecoveryManager, RecoveryExecutor, RecoveryContext, RecoveryResult,
@@ -725,7 +727,7 @@ class TestErrorRecoveryIntegration:
                     error=ConnectionError("API timeout"),
                     severity=ErrorSeverity.MEDIUM,
                     retry_count=1,
-                    metadata={"model": "gpt-4", "prompt_tokens": 500}
+                    metadata={"model": LLMModel.GEMINI_2_5_FLASH.value, "prompt_tokens": 500}
                 )
                 
                 result = await executor.attempt_recovery(context)

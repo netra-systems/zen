@@ -5,6 +5,8 @@ Provides all fixtures and mock configurations for business value critical tests
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -39,7 +41,7 @@ class BusinessValueFixtures:
 
     def _generate_usage_metrics(self):
         """Generate usage metrics for workload data"""
-        models = ["gpt-4", "gpt-3.5-turbo", "claude-3-opus"]
+        models = [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value]
         return [self._create_usage_metric(i, models) for i in range(100)]
 
     def _create_usage_metric(self, i, models):
@@ -263,7 +265,7 @@ class BusinessValueFixtures:
     def _get_key_findings(self):
         """Get key findings for data response"""
         return {
-            "high_cost_models": ["gpt-4"],
+            "high_cost_models": [LLMModel.GEMINI_2_5_FLASH.value],
             "peak_usage_hours": [14, 15, 16],
             "average_cost_per_request": 0.15
         }
@@ -377,9 +379,9 @@ class BusinessValueFixtures:
             "status": "success",
             "result": {
                 "top_cost_drivers": [
-                    {"model": "gpt-4", "percentage": 65},
-                    {"model": "claude-3-opus", "percentage": 25},
-                    {"model": "gpt-3.5-turbo", "percentage": 10}
+                    {"model": LLMModel.GEMINI_2_5_FLASH.value, "percentage": 65},
+                    {"model": LLMModel.GEMINI_2_5_FLASH.value, "percentage": 25},
+                    {"model": LLMModel.GEMINI_2_5_FLASH.value, "percentage": 10}
                 ]
             }
         }

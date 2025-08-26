@@ -7,6 +7,8 @@ import random
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.tests.clickhouse.data_models import LLMEvent
 from netra_backend.tests.clickhouse.generator_base import DataGeneratorBase
@@ -41,7 +43,7 @@ class LLMEventGenerator(DataGeneratorBase):
     def _calculate_realistic_latency(self, model: str, input_tokens: int, 
                                    output_tokens: int) -> float:
         """Calculate realistic latency based on model and tokens"""
-        base_latency = {"gpt-4": 2000, "gpt-3.5-turbo": 800, "claude-3-opus": 1500,
+        base_latency = {LLMModel.GEMINI_2_5_FLASH.value: 2000, LLMModel.GEMINI_2_5_FLASH.value: 800, LLMModel.GEMINI_2_5_FLASH.value: 1500,
                        "gemini-pro": 1000}.get(model.split("-")[0], 1200)
         token_latency = (input_tokens + output_tokens) * 0.5
         variance = random.uniform(-200, 500)
@@ -50,8 +52,8 @@ class LLMEventGenerator(DataGeneratorBase):
     def _calculate_cost_cents(self, model: str, input_tokens: int, 
                             output_tokens: int) -> float:
         """Calculate realistic cost in cents"""
-        input_cost_per_1k = {"gpt-4": 0.03, "gpt-3.5-turbo": 0.001, 
-                            "claude-3-opus": 0.015}.get(model.split("-")[0], 0.01)
+        input_cost_per_1k = {LLMModel.GEMINI_2_5_FLASH.value: 0.03, LLMModel.GEMINI_2_5_FLASH.value: 0.001, 
+                            LLMModel.GEMINI_2_5_FLASH.value: 0.015}.get(model.split("-")[0], 0.01)
         output_cost_per_1k = input_cost_per_1k * 2
         return (input_tokens * input_cost_per_1k + output_tokens * output_cost_per_1k) / 10
     

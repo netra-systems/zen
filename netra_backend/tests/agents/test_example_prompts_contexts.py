@@ -5,6 +5,8 @@ Generates synthetic contexts for different test scenarios
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -124,8 +126,8 @@ class ContextGenerator:
         """Generate context for model evaluation scenarios"""
         return {
             "current_models": {
-                "primary": random.choice(["gpt-4", "gpt-3.5-turbo", "claude-2"]),
-                "fallback": random.choice(["gpt-3.5-turbo", "claude-instant", "llama-2"]),
+                "primary": random.choice([LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-2"]),
+                "fallback": random.choice([LLMModel.GEMINI_2_5_FLASH.value, "claude-instant", "llama-2"]),
             },
             "performance_metrics": {
                 "accuracy_score": random.uniform(0.7, 0.95),
@@ -184,7 +186,7 @@ class ContextGenerator:
         return {
             "current_tools": {
                 "agent_count": random.randint(5, 20),
-                "average_model": random.choice(["gpt-4", "gpt-3.5-turbo", "claude-2"]),
+                "average_model": random.choice([LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-2"]),
                 "monthly_cost": random.uniform(5000, 20000),
             },
             "migration_candidates": {

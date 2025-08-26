@@ -15,6 +15,8 @@ Coverage: LLM usage tracking, cost calculation accuracy, billing pipeline integr
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -340,7 +342,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
             "free": ["gemini-1.5-flash"],
             "early": ["gemini-1.5-flash", "gpt-4o-mini"],
             "mid": ["gemini-1.5-flash", "gpt-4o-mini", "gpt-4o", "claude-3-haiku"],
-            "enterprise": ["gemini-1.5-flash", "gpt-4o-mini", "gpt-4o", "claude-3-haiku", "claude-3-sonnet", "gpt-4"]
+            "enterprise": ["gemini-1.5-flash", "gpt-4o-mini", "gpt-4o", "claude-3-haiku", LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value]
         }
         return tier_models.get(tier, ["gemini-1.5-flash"])
     

@@ -6,6 +6,8 @@ This module generates realistic LLM responses with production-like characteristi
 import random
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import numpy as np
 
@@ -23,7 +25,7 @@ class LLMResponseGenerator:
     
     def generate_realistic_llm_response(
         self,
-        model: str = "gpt-4",
+        model: str = LLMModel.GEMINI_2_5_FLASH.value,
         prompt_tokens: Optional[int] = None,
         include_errors: bool = True
     ) -> Dict[str, Any]:

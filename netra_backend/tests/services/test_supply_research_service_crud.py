@@ -5,6 +5,8 @@ Tests supply item creation, updates, and update log operations
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -35,7 +37,7 @@ def sample_supply_item() -> AISupplyItem:
     item = MagicMock(spec=AISupplyItem)
     item.id = "supply-item-1"
     item.provider = "openai"
-    item.model_name = "gpt-4"
+    item.model_name = LLMModel.GEMINI_2_5_FLASH.value
     item.pricing_input = Decimal("0.03")
     item.pricing_output = Decimal("0.06")
     item.confidence_score = 0.9
@@ -81,7 +83,7 @@ class TestSupplyItemCreate:
                     mock_item_class.return_value = mock_item
                     
                     result = service.create_or_update_supply_item(
-                        "openai", "gpt-4", data, "session-1", "test-user"
+                        "openai", LLMModel.GEMINI_2_5_FLASH.value, data, "session-1", "test-user"
                     )
             
             assert result == mock_item
@@ -108,7 +110,7 @@ class TestSupplyItemCreate:
                     mock_item = MagicMock()
                     mock_item_class.return_value = mock_item
                     
-                    result = service.create_or_update_supply_item("openai", "gpt-4", data)
+                    result = service.create_or_update_supply_item("openai", LLMModel.GEMINI_2_5_FLASH.value, data)
             
             assert result == mock_item
 
@@ -126,7 +128,7 @@ class TestSupplyItemUpdate:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = sample_supply_item
             
-            result = service.create_or_update_supply_item("openai", "gpt-4", data)
+            result = service.create_or_update_supply_item("openai", LLMModel.GEMINI_2_5_FLASH.value, data)
             
             assert result == sample_supply_item
     
@@ -154,7 +156,7 @@ class TestSupplyItemUpdate:
             
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyUpdateLog'):
-                result = service.create_or_update_supply_item("openai", "gpt-4", data)
+                result = service.create_or_update_supply_item("openai", LLMModel.GEMINI_2_5_FLASH.value, data)
         
         assert sample_supply_item.pricing_input == Decimal("0.04")
         assert sample_supply_item.pricing_output == Decimal("0.08")
@@ -168,7 +170,7 @@ class TestSupplyItemUpdate:
             
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyUpdateLog'):
-                result = service.create_or_update_supply_item("openai", "gpt-4", data, "session-1")
+                result = service.create_or_update_supply_item("openai", LLMModel.GEMINI_2_5_FLASH.value, data, "session-1")
         
         assert result == item
         assert item.pricing_input == expected_pricing

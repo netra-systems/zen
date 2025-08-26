@@ -13,6 +13,8 @@ BVJ (Business Value Justification):
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import asyncio
 import time
@@ -210,7 +212,7 @@ async def test_mid_tier_bulk_optimization_operations(
             },
             {
                 "type": "model_comparison",
-                "context": {"models": ["gpt-4", "claude-3-sonnet", "gemini-pro"]}
+                "context": {"models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "gemini-pro"]}
             }
         ],
         "batch_settings": {

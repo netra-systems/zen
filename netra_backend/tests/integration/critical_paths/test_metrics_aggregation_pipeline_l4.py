@@ -14,6 +14,8 @@ Coverage: Real ClickHouse time-series, Prometheus aggregation, retention policie
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -199,7 +201,7 @@ class MetricsAggregationPipelineL4TestSuite:
                 "base_value": 50000,
                 "variance": 15000,
                 "trend": "increasing",
-                "labels": {"model": "gpt-4", "user_tier": "enterprise"}
+                "labels": {"model": LLMModel.GEMINI_2_5_FLASH.value, "user_tier": "enterprise"}
             },
             {
                 "name": "billing_amount_cents",

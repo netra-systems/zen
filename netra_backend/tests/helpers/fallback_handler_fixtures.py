@@ -4,6 +4,8 @@ Provides reusable test data, metadata objects, and mock configurations
 """
 
 from typing import Any, Dict, List, Tuple
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -70,7 +72,7 @@ def llm_failure_metadata():
         agent_name="generation_agent",
         user_input="Explain quantum computing basics",
         partial_data={
-            "model": "gpt-4",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "operation": "text_generation",
             "tokens": 450
         }

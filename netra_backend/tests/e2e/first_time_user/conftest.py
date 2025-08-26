@@ -2,6 +2,8 @@
 
 import pytest
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 @pytest.fixture
@@ -158,7 +160,7 @@ async def ai_provider_simulator():
     simulator.test_connection = AsyncMock(return_value={
         "connected": True,
         "latency_ms": 45,
-        "model_access": ["gpt-4", "gpt-3.5-turbo"]
+        "model_access": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value]
     })
     # Mock: OpenAI service isolation to avoid API rate limits and costs
     simulator.connect_openai = AsyncMock(return_value={
@@ -217,7 +219,7 @@ async def real_llm_manager():
     manager.generate_response = AsyncMock()
     manager.generate_response.return_value = {
         "content": "This is a sample AI response for testing",
-        "model": "gpt-3.5-turbo",
+        "model": LLMModel.GEMINI_2_5_FLASH.value,
         "tokens_used": 45,
         "cost": 0.0012
     }

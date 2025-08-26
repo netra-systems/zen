@@ -48,8 +48,10 @@ class ApiClientWrapper {
 
   private async performConnectionCheck(): Promise<boolean> {
     try {
-      // Use unified configuration endpoint - no rewrites in staging/production
-      const healthUrl = unifiedApiConfig.endpoints.ready;
+      // Use direct URL for health check to bypass Next.js proxy issues
+      const healthUrl = this.environment === 'development' 
+        ? `${this.baseURL}/health/ready`
+        : unifiedApiConfig.endpoints.ready;
       logger.debug(`Checking backend connection at: ${healthUrl}`);
       
       const response = await fetch(healthUrl, {

@@ -10,6 +10,8 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.services.cost_calculator import BudgetManager, create_budget_manager
 
@@ -60,7 +62,7 @@ class LLMManager:
     def __init__(self, daily_budget: Optional[Decimal] = None):
         self.active_requests: Dict[str, LLMRequest] = {}
         self.model_metrics: Dict[str, ModelMetrics] = {}
-        self.default_model = "gpt-3.5-turbo"
+        self.default_model = LLMModel.GEMINI_2_5_FLASH.value
         self.initialized = False
         self.budget_manager: BudgetManager = create_budget_manager(daily_budget)
         self.cost_limit_enforced = True  # Flag to enable/disable cost enforcement
@@ -79,7 +81,7 @@ class LLMManager:
     
     def _initialize_metrics(self) -> None:
         """Initialize metrics for available models."""
-        models = ["gpt-4", "gpt-3.5-turbo", "claude-3-sonnet", "claude-3-haiku"]
+        models = [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-3-haiku"]
         for model in models:
             self.model_metrics[model] = ModelMetrics(
                 total_requests=0,
@@ -150,7 +152,7 @@ class LLMManager:
             
             # Estimate token usage for cost checking
             # More aggressive estimation for expensive models
-            token_multiplier = 3 if "gpt-4" in request.model else 2
+            token_multiplier = 3 if LLMModel.GEMINI_2_5_FLASH.value in request.model else 2
             estimated_tokens = len(request.prompt.split()) * token_multiplier
             
             # CRITICAL: Enforce cost limits before processing

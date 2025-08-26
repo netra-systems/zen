@@ -12,6 +12,8 @@ Coverage: Real provider switching, health monitoring, graceful degradation
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -424,7 +426,7 @@ class FailoverTestManager:
                 provider_type="openai",
                 endpoint="https://api.openai.com/v1",
                 api_key="test_key_1",
-                models=["gpt-4", "gpt-3.5-turbo"],
+                models=[LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value],
                 priority=1,
                 cost_per_1k_tokens=0.03,
                 circuit_breaker_config={
@@ -452,7 +454,7 @@ class FailoverTestManager:
                 provider_type="test",
                 endpoint="https://test.api.com/v1",
                 api_key="test_key_3",
-                models=["gpt-4"],
+                models=[LLMModel.GEMINI_2_5_FLASH.value],
                 priority=3,
                 cost_per_1k_tokens=0.02,
                 circuit_breaker_config={
@@ -466,7 +468,7 @@ class FailoverTestManager:
                 provider_type="test",
                 endpoint="https://slow.api.com/v1",
                 api_key="test_key_4",
-                models=["gpt-4"],
+                models=[LLMModel.GEMINI_2_5_FLASH.value],
                 priority=4,
                 cost_per_1k_tokens=0.01
             )
@@ -478,7 +480,7 @@ class FailoverTestManager:
         # Start health monitoring
         await self.health_checker.start_health_monitoring(providers)
     
-    def create_test_request(self, request_id: str = None, model: str = "gpt-4") -> LLMRequest:
+    def create_test_request(self, request_id: str = None, model: str = LLMModel.GEMINI_2_5_FLASH.value) -> LLMRequest:
         """Create a test LLM request."""
         return LLMRequest(
             request_id=request_id or f"req_{int(time.time() * 1000)}",
@@ -582,7 +584,7 @@ async def test_provider_priority_ordering(failover_manager):
     manager = failover_manager
     
     # Get available providers for gpt-4
-    available = await manager.provider_manager.get_available_providers("gpt-4")
+    available = await manager.provider_manager.get_available_providers(LLMModel.GEMINI_2_5_FLASH.value)
     
     # Should be ordered by priority (lower number = higher priority)
     priorities = [manager.provider_manager.configs[name].priority for name in available]
@@ -621,7 +623,7 @@ async def test_cost_optimized_strategy(failover_manager):
     manager.provider_manager.failover_strategy = FailoverStrategy.COST_OPTIMIZED
     
     # Get available providers sorted by cost
-    available = await manager.provider_manager.get_available_providers("gpt-4")
+    available = await manager.provider_manager.get_available_providers(LLMModel.GEMINI_2_5_FLASH.value)
     
     # Should be ordered by cost (lowest first)
     costs = [manager.provider_manager.configs[name].cost_per_1k_tokens for name in available]

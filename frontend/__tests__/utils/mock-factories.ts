@@ -178,7 +178,7 @@ export function createStreamingMessage(content: string = 'Streaming...', chunkIn
     metadata: {
       is_streaming: true,
       chunk_index: chunkIndex,
-      model_used: 'gpt-4',
+      model_used: 'gemini-2.5-flash',
       token_count: content.length
     }
   });

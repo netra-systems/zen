@@ -4,6 +4,8 @@ Tests for model effectiveness analysis workflows
 """
 
 from typing import Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -15,7 +17,7 @@ class TestModelEffectivenessAnalysis:
     
     @pytest.mark.real_llm
     async def test_gpt4o_claude3_sonnet_effectiveness(self, model_selection_setup):
-        """Test: 'I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?'"""
+        """Test: 'I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?'"""
         setup = model_selection_setup
         state = _create_model_effectiveness_state()
         results = await _execute_model_selection_workflow(setup, state)
@@ -32,7 +34,7 @@ class TestModelEffectivenessAnalysis:
 def _create_model_effectiveness_state() -> DeepAgentState:
     """Create state for model effectiveness analysis."""
     return DeepAgentState(
-        user_request="I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
+        user_request="I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
         metadata=AgentMetadata(custom_fields={'test_type': 'model_effectiveness', 'candidate_models': 'gpt-4o,claude-3-sonnet'})
     )
 
@@ -40,7 +42,7 @@ def _create_comparative_analysis_state() -> DeepAgentState:
     """Create state for comparative model analysis."""
     return DeepAgentState(
         user_request="Compare performance characteristics of GPT-4, Claude-3, and Gemini models for our workload.",
-        metadata={'test_type': 'comparative_analysis', 'models': ['gpt-4', 'claude-3', 'gemini']}
+        metadata={'test_type': 'comparative_analysis', 'models': [LLMModel.GEMINI_2_5_FLASH.value, 'claude-3', 'gemini']}
     )
 
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
@@ -87,7 +89,7 @@ def _validate_model_effectiveness_results(results: List[Dict], state: DeepAgentS
 def _validate_model_identification(result: Dict, state: DeepAgentState):
     """Validate identification of target models."""
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
-    assert 'gpt-4o' in state.user_request or 'claude-3-sonnet' in state.user_request
+    assert 'gpt-4o' in state.user_request or LLMModel.GEMINI_2_5_FLASH.value in state.user_request
     assert 'effective' in state.user_request
 
 def _validate_current_setup_analysis(result: Dict, state: DeepAgentState):

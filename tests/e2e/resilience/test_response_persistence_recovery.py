@@ -20,6 +20,8 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -103,7 +105,7 @@ class TestResponsePersistenceRecovery:
         assistant = Assistant(
             id=f"asst_{uuid.uuid4().hex[:8]}",
             created_at=int(datetime.now(UTC).timestamp()),
-            model="gpt-4",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             name="Test Assistant"
         )
         postgres_session.add(assistant)

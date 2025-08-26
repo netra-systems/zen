@@ -8,6 +8,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.schemas.Agent import AgentStatus, SubAgentLifecycle, TodoStatus
 from netra_backend.app.schemas.FinOps import CostComparison, FinOps
@@ -56,7 +58,7 @@ class SmallTestDatasets:
     def _create_agent_request(self, index: int) -> Dict[str, Any]:
         """Create single agent optimization request"""
         providers = ["openai", "anthropic", "google", "cohere"]
-        models = ["gpt-4", "claude-3-opus", "gemini-pro", "command-r"]
+        models = [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "gemini-pro", "command-r"]
         statuses = [AgentStatus.RUNNING, AgentStatus.COMPLETED, AgentStatus.FAILED]
         
         return {
@@ -83,7 +85,7 @@ class SmallTestDatasets:
 
     def _create_performance_metric(self, index: int) -> Dict[str, Any]:
         """Create model performance metric record"""
-        models = ["gpt-4", "claude-3", "gemini-pro"]
+        models = [LLMModel.GEMINI_2_5_FLASH.value, "claude-3", "gemini-pro"]
         metrics = ["throughput", "latency", "accuracy", "cost_efficiency"]
         
         return {

@@ -148,8 +148,8 @@ describe('Supply Catalog Integration', () => {
         const loadCatalog = async () => {
           const mockCatalog = {
             models: [
-              { id: 'gpt-4', name: 'GPT-4', provider: 'openai' },
-              { id: 'claude-3', name: 'Claude 3', provider: 'anthropic' }
+              { id: 'gemini-2.5-flash', name: 'GPT-4', provider: 'openai' },
+              { id: 'gemini-2.5-flash', name: 'Claude 3', provider: 'anthropic' }
             ]
           };
           useSupplyStore.getState().setCatalog(mockCatalog);
@@ -187,8 +187,8 @@ describe('Supply Catalog Integration', () => {
       
       return (
         <div>
-          <button onClick={() => handleSwitch('gpt-4')}>Use GPT-4</button>
-          <button onClick={() => handleSwitch('claude-3')}>Use Claude</button>
+          <button onClick={() => handleSwitch('gemini-2.5-flash')}>Use GPT-4</button>
+          <button onClick={() => handleSwitch('gemini-2.5-flash')}>Use Claude</button>
           <div data-testid="active-model">
             {useSupplyStore.getState().activeModel || 'none'}
           </div>
@@ -211,7 +211,7 @@ describe('Supply Catalog Integration', () => {
     );
     
     await waitFor(() => {
-      expect(useSupplyStore.getState().activeModel).toBe('gpt-4');
+      expect(useSupplyStore.getState().activeModel).toBe('gemini-2.5-flash');
     });
   });
 });

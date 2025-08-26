@@ -1,5 +1,7 @@
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import time
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
@@ -47,7 +49,7 @@ def sample_run():
         thread_id="thread_user123",
         assistant_id="asst_test123",
         status="in_progress",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         instructions="Test instructions",
         tools=[],
         file_ids=[],

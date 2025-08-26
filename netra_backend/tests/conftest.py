@@ -155,8 +155,8 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
                 env.set("GEMINI_API_KEY", "test-gemini-api-key", source="netra_backend_conftest")
             if not env.get("GOOGLE_API_KEY"):
                 env.set("GOOGLE_API_KEY", "test-gemini-api-key", source="netra_backend_conftest")  # Same as GEMINI
-            if not env.get("OPENAI_API_KEY"):
-                env.set("OPENAI_API_KEY", "test-openai-api-key", source="netra_backend_conftest")
+            if not env.get("GOOGLE_API_KEY"):
+                env.set("GOOGLE_API_KEY", "test-openai-api-key", source="netra_backend_conftest")
             if not env.get("ANTHROPIC_API_KEY"):
                 env.set("ANTHROPIC_API_KEY", "test-anthropic-api-key", source="netra_backend_conftest")
 

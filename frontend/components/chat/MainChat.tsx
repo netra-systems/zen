@@ -24,10 +24,15 @@ const executeTestRun = async (
   try {
     // Only import test module in development
     if (process.env.NODE_ENV === 'development') {
-      const { runEventQueueTests } = await import('@/lib/event-queue.test');
-      const results = await runEventQueueTests();
-      setTestResults(results);
-      logger.debug('Event Queue Test Results:', results);
+      try {
+        const testModule = await import('@/lib/event-queue.test');
+        const results = await testModule.runEventQueueTests();
+        setTestResults(results);
+        logger.debug('Event Queue Test Results:', results);
+      } catch (importError) {
+        logger.error('Failed to load test module:', importError);
+        setTestResults({ error: 'Test module not available' });
+      }
     } else {
       setTestResults({ error: 'Tests only available in development mode' });
     }

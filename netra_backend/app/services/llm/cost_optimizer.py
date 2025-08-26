@@ -7,6 +7,8 @@ import logging
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,22 +47,22 @@ class LLMCostOptimizer:
         """Initialize cost data for different models."""
         # Sample model cost data - in real implementation would come from config
         self.model_costs = {
-            "gpt-4": ModelCost(
-                model_name="gpt-4",
+            LLMModel.GEMINI_2_5_FLASH.value: ModelCost(
+                model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 input_cost_per_token=Decimal("0.00003"),
                 output_cost_per_token=Decimal("0.00006"),
                 context_window=8192,
                 performance_score=0.95
             ),
-            "gpt-3.5-turbo": ModelCost(
-                model_name="gpt-3.5-turbo", 
+            LLMModel.GEMINI_2_5_FLASH.value: ModelCost(
+                model_name=LLMModel.GEMINI_2_5_FLASH.value, 
                 input_cost_per_token=Decimal("0.000001"),
                 output_cost_per_token=Decimal("0.000002"),
                 context_window=4096,
                 performance_score=0.85
             ),
-            "claude-3-sonnet": ModelCost(
-                model_name="claude-3-sonnet",
+            LLMModel.GEMINI_2_5_FLASH.value: ModelCost(
+                model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 input_cost_per_token=Decimal("0.000015"),
                 output_cost_per_token=Decimal("0.000075"),
                 context_window=200000,
@@ -82,7 +84,7 @@ class LLMCostOptimizer:
             CostAnalysis with recommendations
         """
         try:
-            current_model = usage_data.get("current_model", "gpt-4")
+            current_model = usage_data.get("current_model", LLMModel.GEMINI_2_5_FLASH.value)
             input_tokens = usage_data.get("input_tokens", 0)
             output_tokens = usage_data.get("output_tokens", 0)
             
@@ -155,7 +157,7 @@ class LLMCostOptimizer:
                     best_cost_efficiency = cost_efficiency
                     best_model = model_name
         
-        return best_model or "gpt-3.5-turbo"  # Fallback
+        return best_model or LLMModel.GEMINI_2_5_FLASH.value  # Fallback
     
     def _generate_recommendations(
         self, 

@@ -93,7 +93,7 @@ describe('Complex Form Validation Integration', () => {
     });
     
     // Fill required field
-    fireEvent.change(getByTestId('model-input'), { target: { value: 'gpt-4' } });
+    fireEvent.change(getByTestId('model-input'), { target: { value: 'gemini-2.5-flash' } });
     fireEvent.click(getByText('Next'));
     
     await waitFor(() => {

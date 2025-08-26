@@ -2,6 +2,8 @@
 
 import json
 from typing import Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 class CatalogTools:
@@ -55,14 +57,14 @@ class CatalogTools:
         """Get Anthropic provider configuration"""
         return {
             "name": "Anthropic",
-            "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"]
+            "models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-3-haiku"]
         }
     
     def _get_openai_provider(self) -> dict:
         """Get OpenAI provider configuration"""
         return {
             "name": "OpenAI",
-            "models": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"]
+            "models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value]
         }
     
     def _get_google_provider(self) -> dict:

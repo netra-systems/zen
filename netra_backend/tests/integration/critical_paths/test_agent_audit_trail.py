@@ -12,6 +12,8 @@ Coverage: Real audit logging, compliance tracking, forensic analysis
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -594,7 +596,7 @@ async def test_audit_event_enrichment(audit_manager):
         level=AuditLevel.INFO,
         agent_id="test_agent_002",
         message="Model request initiated",
-        details={"model": "gpt-4", "tokens": 150},
+        details={"model": LLMModel.GEMINI_2_5_FLASH.value, "tokens": 150},
         source_ip="10.0.0.1",
         context=context
     )

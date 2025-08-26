@@ -1,3 +1,5 @@
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 DEFAULT_CONFIG = '''
 generation_settings:
   # The distribution of trace types to generate.
@@ -23,7 +25,7 @@ realism:
   # Pricing is in USD per 1M tokens (prompt, completion).
   models:
     - { provider: "openai", name: "gpt-4o", pricing: [5.00, 15.00] }
-    - { provider: "anthropic", name: "claude-3-opus", pricing: [15.00, 75.00] }
+    - { provider: "anthropic", name: LLMModel.GEMINI_2_5_FLASH.value, pricing: [15.00, 75.00] }
     - { provider: "google", name: "gemini-2.0-flash", pricing: [0.35, 0.70] }
     - { provider: "vllm", name: "llama-3.1-70b-instruct", pricing: [0.50, 0.50] }
 '''

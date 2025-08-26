@@ -2,6 +2,8 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from unittest.mock import MagicMock, patch
 
@@ -35,7 +37,7 @@ class TestSupplyCatalogService:
         # Mock: Generic component isolation for controlled unit testing
         mock_option1 = MagicMock()
         mock_option1.id = 1
-        mock_option1.name = "gpt-4"
+        mock_option1.name = LLMModel.GEMINI_2_5_FLASH.value
         mock_option1.provider = "OpenAI"
         
         # Mock: Generic component isolation for controlled unit testing
@@ -50,7 +52,7 @@ class TestSupplyCatalogService:
         result = supply_catalog_service.get_all_options(mock_db_session)
         
         assert len(result) == 2
-        assert result[0].name == "gpt-4"
+        assert result[0].name == LLMModel.GEMINI_2_5_FLASH.value
         assert result[1].provider == "Anthropic"
         mock_db_session.query.assert_called_once()
 
@@ -59,28 +61,28 @@ class TestSupplyCatalogService:
         # Mock: Generic component isolation for controlled unit testing
         mock_option = MagicMock()
         mock_option.id = 1
-        mock_option.name = "gpt-4"
+        mock_option.name = LLMModel.GEMINI_2_5_FLASH.value
         mock_option.provider = "OpenAI"
         mock_db_session.get.return_value = mock_option
         
         result = supply_catalog_service.get_option_by_id(mock_db_session, 1)
         
         assert result != None
-        assert result.name == "gpt-4"
+        assert result.name == LLMModel.GEMINI_2_5_FLASH.value
         mock_db_session.get.assert_called_once_with(models_postgres.SupplyOption, 1)
 
     def test_get_option_by_name(self, supply_catalog_service, mock_db_session):
         """Test retrieving supply option by name."""
         # Mock: Generic component isolation for controlled unit testing
         mock_option = MagicMock()
-        mock_option.name = "gpt-4"
+        mock_option.name = LLMModel.GEMINI_2_5_FLASH.value
         mock_option.provider = "OpenAI"
         mock_db_session.query.return_value.filter.return_value.first.return_value = mock_option
         
-        result = supply_catalog_service.get_option_by_name(mock_db_session, "gpt-4")
+        result = supply_catalog_service.get_option_by_name(mock_db_session, LLMModel.GEMINI_2_5_FLASH.value)
         
         assert result != None
-        assert result.name == "gpt-4"
+        assert result.name == LLMModel.GEMINI_2_5_FLASH.value
         mock_db_session.query.assert_called_once()
 
     def test_create_option(self, supply_catalog_service, mock_db_session):
@@ -113,7 +115,7 @@ class TestSupplyCatalogService:
     def test_update_option(self, supply_catalog_service, mock_db_session):
         """Test updating an existing supply option."""
         # Mock: Service component isolation for predictable testing behavior
-        mock_option = MagicMock(id=1, name="gpt-4")
+        mock_option = MagicMock(id=1, name=LLMModel.GEMINI_2_5_FLASH.value)
         # Mock: Service component isolation for predictable testing behavior
         supply_catalog_service.get_option_by_id = MagicMock(return_value=mock_option)
         
@@ -129,7 +131,7 @@ class TestSupplyCatalogService:
     def test_delete_option(self, supply_catalog_service, mock_db_session):
         """Test deleting a supply option."""
         # Mock: Service component isolation for predictable testing behavior
-        mock_option = MagicMock(id=1, name="gpt-4")
+        mock_option = MagicMock(id=1, name=LLMModel.GEMINI_2_5_FLASH.value)
         # Mock: Service component isolation for predictable testing behavior
         supply_catalog_service.get_option_by_id = MagicMock(return_value=mock_option)
         

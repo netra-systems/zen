@@ -453,7 +453,7 @@ describe('First Message Experience - Complete User Journey', () => {
 \`\`\`python
 # Example optimization
 def optimize_model_selection(task_complexity):
-    return "gpt-3.5-turbo" if task_complexity < 0.5 else "gpt-4"
+    return "gemini-2.5-flash" if task_complexity < 0.5 else "gemini-2.5-flash"
 \`\`\`
       `;
       

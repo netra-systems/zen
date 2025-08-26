@@ -1,4 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
@@ -287,7 +289,7 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> Run:
         """Create run for conversation"""
         return await self.thread_service.create_run(
-            thread.id, assistant_id="netra-assistant", model="gpt-4",
+            thread.id, assistant_id="netra-assistant", model=LLMModel.GEMINI_2_5_FLASH.value,
             instructions="You are Netra AI Workload Optimization Assistant", db=db_session
         )
     

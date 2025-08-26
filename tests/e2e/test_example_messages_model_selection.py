@@ -9,6 +9,8 @@ Business Value: Validates model selection guidance for users
 from datetime import datetime, timezone
 from typing import Any, Dict
 from uuid import uuid4
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -18,7 +20,7 @@ from netra_backend.app.handlers.example_message_handler import ExampleMessageHan
 MODEL_SELECTION_PROMPTS = [
     {
         "id": "model_effectiveness",
-        "content": "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
+        "content": "I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
         "category": "model-selection",
         "complexity": "intermediate"
     },

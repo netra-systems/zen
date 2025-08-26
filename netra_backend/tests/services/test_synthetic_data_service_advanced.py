@@ -5,6 +5,8 @@ Testing advanced and specialized features
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import asyncio
 import uuid
@@ -191,7 +193,7 @@ class TestAdvancedFeatures:
         """Test generation for multi-model AI workloads"""
         model_config = {
             "models": [
-                {"name": "gpt-4", "weight": 0.5, "latency_ms": [500, 2000]},
+                {"name": LLMModel.GEMINI_2_5_FLASH.value, "weight": 0.5, "latency_ms": [500, 2000]},
                 {"name": "claude-3", "weight": 0.3, "latency_ms": [400, 1500]},
                 {"name": "llama-2", "weight": 0.2, "latency_ms": [100, 500]}
             ],

@@ -91,7 +91,7 @@ class TestEnvironmentManager:
         # LLM test keys
         "GEMINI_API_KEY": "test-gemini-api-key",
         "GOOGLE_API_KEY": "test-gemini-api-key",
-        "OPENAI_API_KEY": "test-openai-api-key",
+        "GOOGLE_API_KEY": "test-openai-api-key",
         "ANTHROPIC_API_KEY": "test-anthropic-api-key",
     }
     

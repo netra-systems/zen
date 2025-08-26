@@ -148,8 +148,9 @@ class WebSocketCORSHandler:
             self._blocked_origins.add(origin)
             logger.warning(f"Origin {origin} temporarily blocked after {self._violation_counts[origin]} violations")
         
-        # Log security violation
-        logger.warning(f"WebSocket CORS security violation: {reason} for origin {origin}")
+        # Enhanced logging for debugging CORS issues
+        logger.warning(f"WebSocket CORS security violation: {reason} for origin '{origin}' in environment '{self.environment}'")
+        logger.info(f"CORS violation details - Origin: '{origin}', Environment: '{self.environment}', Allowed origins count: {len(self.allowed_origins)}")
     
     def _is_origin_explicitly_allowed(self, origin: str) -> bool:
         """Check if origin is explicitly allowed by patterns."""
@@ -181,16 +182,18 @@ class WebSocketCORSHandler:
         is_secure, security_reason = self._validate_origin_security(origin)
         if not is_secure:
             self._record_violation(origin, f"Security validation failed: {security_reason}")
+            logger.error(f"CORS ERROR: Security validation failed for '{origin}': {security_reason}")
             return False
         
         # Then check against allowed patterns
-        if self._is_origin_explicitly_allowed(origin):
+        explicitly_allowed = self._is_origin_explicitly_allowed(origin)
+        if explicitly_allowed:
             logger.debug(f"WebSocket origin allowed: {origin}")
             return True
         
         # Record violation for denied origin
         self._record_violation(origin, "Origin not in allowed list")
-        logger.warning(f"WebSocket origin denied: {origin}")
+        logger.error(f"WebSocket origin denied: '{origin}' not in allowed list for environment '{self.environment}'")
         return False
     
     def get_cors_headers(self, origin: str) -> dict:

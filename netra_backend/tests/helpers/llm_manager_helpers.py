@@ -9,6 +9,8 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 from pydantic import BaseModel
@@ -55,7 +57,7 @@ def _has_real_llm_marker() -> bool:
 
 def _has_api_keys() -> bool:
     """Check if any LLM API keys are available"""
-    api_keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+    api_keys = ["GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
     return any(get_env().get(key) for key in api_keys)
 
 def _create_llm_configs() -> Dict[str, LLMConfig]:
@@ -63,9 +65,9 @@ def _create_llm_configs() -> Dict[str, LLMConfig]:
     configs = {}
     
     # OpenAI configuration
-    openai_key = get_env().get('OPENAI_API_KEY', 'test_openai_key')
+    openai_key = get_env().get('GOOGLE_API_KEY', 'test_openai_key')
     configs['openai_gpt4'] = LLMConfig(
-        provider='openai', model_name='gpt-4', api_key=openai_key
+        provider='openai', model_name=LLMModel.GEMINI_2_5_FLASH.value, api_key=openai_key
     )
     
     # Google configuration
@@ -77,7 +79,7 @@ def _create_llm_configs() -> Dict[str, LLMConfig]:
     # Anthropic configuration
     anthropic_key = get_env().get('ANTHROPIC_API_KEY', 'test_anthropic_key')
     configs['anthropic_claude'] = LLMConfig(
-        provider='anthropic', model_name='claude-3-sonnet', api_key=anthropic_key
+        provider='anthropic', model_name=LLMModel.GEMINI_2_5_FLASH.value, api_key=anthropic_key
     )
     
     return configs
@@ -86,9 +88,9 @@ def create_mock_providers() -> Dict[str, Any]:
     """Create mock provider clients"""
     from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient
     return {
-        'openai_gpt4': MockLLMClient(LLMProvider.OPENAI, 'gpt-4'),
+        'openai_gpt4': MockLLMClient(LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value),
         'google_gemini': MockLLMClient(LLMProvider.GOOGLE, 'gemini-pro'),
-        'anthropic_claude': MockLLMClient(LLMProvider.ANTHROPIC, 'claude-3-sonnet')
+        'anthropic_claude': MockLLMClient(LLMProvider.ANTHROPIC, LLMModel.GEMINI_2_5_FLASH.value)
     }
 
 def register_providers_with_manager(manager, providers: Dict[str, Any]):

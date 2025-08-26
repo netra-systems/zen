@@ -12,6 +12,8 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -393,7 +395,7 @@ class ExampleMessageHandler:
                     'cost_impact': '+15% vs current',
                     'quality_improvement': '+25%'
                 },
-                'claude-3-sonnet': {
+                LLMModel.GEMINI_2_5_FLASH.value: {
                     'performance_score': 89,
                     'cost_efficiency': 95,
                     'latency': '580ms average',

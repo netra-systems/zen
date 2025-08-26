@@ -90,7 +90,7 @@ class TestEnvironmentValidator:
         
         # Check for test-specific API keys first, then fallback to production keys
         provider_keys = {
-            'openai': ['TEST_OPENAI_API_KEY', 'OPENAI_API_KEY'],
+            'openai': ['TEST_OPENAI_API_KEY', 'GOOGLE_API_KEY'],
             'anthropic': ['TEST_ANTHROPIC_API_KEY', 'ANTHROPIC_API_KEY'],
             'google': ['TEST_GOOGLE_API_KEY', 'GOOGLE_API_KEY']
         }

@@ -9,6 +9,8 @@ BVJ:
 """
 
 import asyncio
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Set testing environment
 import os
@@ -43,7 +45,7 @@ class MockLLMProvider:
         self.failure_modes = {}
         self.rate_limit_count = 0
         
-    async def generate_response(self, prompt: str, model: str = "gpt-4", **kwargs) -> Dict[str, Any]:
+    async def generate_response(self, prompt: str, model: str = LLMModel.GEMINI_2_5_FLASH.value, **kwargs) -> Dict[str, Any]:
         """Generate LLM response with realistic behavior."""
         self.request_count += 1
         start_time = time.time()

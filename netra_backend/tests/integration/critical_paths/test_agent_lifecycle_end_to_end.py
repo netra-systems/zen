@@ -22,6 +22,8 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import aiohttp
 import pytest
@@ -122,7 +124,7 @@ class AgentLifecycleTester:
                 "configuration": {
                     "max_context_size": 8192,
                     "temperature": 0.7,
-                    "model": "gpt-4",
+                    "model": LLMModel.GEMINI_2_5_FLASH.value,
                     "tools": ["search", "code_analysis", "task_delegation"]
                 },
                 "metadata": {

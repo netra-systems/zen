@@ -2,6 +2,8 @@
 
 import os
 from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 def _setup_basic_llm_mocks(mock_manager):
     """Setup basic LLM mock methods."""
@@ -16,7 +18,7 @@ def _setup_basic_llm_mocks(mock_manager):
     # Mock: Async component isolation for testing without real async operations
     mock_manager.generate_response = AsyncMock(return_value={
         "content": "This is a sample AI response for testing",
-        "model": "gpt-3.5-turbo",
+        "model": LLMModel.GEMINI_2_5_FLASH.value,
         "tokens_used": 45,
         "cost": 0.0012
     })

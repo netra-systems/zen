@@ -3,6 +3,8 @@
 import json
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.logging_config import CentralLogger
 
@@ -300,7 +302,7 @@ class NetraMCPResources:
         """Create first sample optimization record"""
         return {
             "id": "opt-001", "date": "2025-08-10",
-            "type": "prompt_optimization", "model": "claude-3-opus",
+            "type": "prompt_optimization", "model": LLMModel.GEMINI_2_5_FLASH.value,
             "cost_reduction": "45%", "performance_gain": "20%"
         }
     
@@ -308,8 +310,8 @@ class NetraMCPResources:
         """Create second sample optimization record"""
         return {
             "id": "opt-002", "date": "2025-08-11",
-            "type": "model_selection", "original": "gpt-4",
-            "recommended": "claude-3-sonnet", "cost_reduction": "60%",
+            "type": "model_selection", "original": LLMModel.GEMINI_2_5_FLASH.value,
+            "recommended": LLMModel.GEMINI_2_5_FLASH.value, "cost_reduction": "60%",
             "quality_maintained": True
         }
     
@@ -335,7 +337,7 @@ class NetraMCPResources:
     def _get_claude_config(self) -> Dict[str, Dict[str, Any]]:
         """Get Claude-3-Opus configuration"""
         return {
-            "claude-3-opus": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "context_window": 200000, "max_output": 4096,
                 "price_per_1k_input": 0.015, "price_per_1k_output": 0.075,
                 "rate_limit": 100
@@ -345,7 +347,7 @@ class NetraMCPResources:
     def _get_gpt4_config(self) -> Dict[str, Dict[str, Any]]:
         """Get GPT-4 configuration"""
         return {
-            "gpt-4": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "context_window": 128000, "max_output": 4096,
                 "price_per_1k_input": 0.03, "price_per_1k_output": 0.06,
                 "rate_limit": 500

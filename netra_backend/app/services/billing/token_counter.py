@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 class TokenType(Enum):
@@ -35,14 +37,14 @@ class TokenCounter:
         # Token pricing per 1K tokens (in USD)
         self.model_pricing = {
             # OpenAI GPT models
-            "gpt-4": {"input": Decimal("0.03"), "output": Decimal("0.06")},
-            "gpt-4-turbo": {"input": Decimal("0.01"), "output": Decimal("0.03")},
-            "gpt-3.5-turbo": {"input": Decimal("0.0015"), "output": Decimal("0.002")},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.03"), "output": Decimal("0.06")},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.01"), "output": Decimal("0.03")},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.0015"), "output": Decimal("0.002")},
             "gpt-3.5-turbo-instruct": {"input": Decimal("0.0015"), "output": Decimal("0.002")},
             
             # Anthropic Claude models
-            "claude-3-opus": {"input": Decimal("0.015"), "output": Decimal("0.075")},
-            "claude-3-sonnet": {"input": Decimal("0.003"), "output": Decimal("0.015")},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.015"), "output": Decimal("0.075")},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.003"), "output": Decimal("0.015")},
             "claude-3-haiku": {"input": Decimal("0.00025"), "output": Decimal("0.00125")},
             "claude-instant": {"input": Decimal("0.0008"), "output": Decimal("0.0024")},
             
@@ -78,7 +80,7 @@ class TokenCounter:
             "average_tokens_per_request": 0.0
         }
     
-    def count_tokens(self, text: str, model: str = "gpt-3.5-turbo", 
+    def count_tokens(self, text: str, model: str = LLMModel.GEMINI_2_5_FLASH.value, 
                     token_type: TokenType = TokenType.INPUT,
                     estimator: str = "advanced") -> int:
         """Count tokens in text for a specific model."""
@@ -111,7 +113,7 @@ class TokenCounter:
         return token_count
     
     def count_conversation_tokens(self, messages: List[Dict[str, str]], 
-                                model: str = "gpt-3.5-turbo") -> TokenCount:
+                                model: str = LLMModel.GEMINI_2_5_FLASH.value) -> TokenCount:
         """Count tokens for a conversation (list of messages)."""
         if not self.enabled:
             return TokenCount(0, 0, 0, model, datetime.now(timezone.utc))
@@ -149,7 +151,7 @@ class TokenCounter:
         )
     
     def calculate_cost(self, input_tokens: int, output_tokens: int, 
-                      model: str = "gpt-3.5-turbo") -> Decimal:
+                      model: str = LLMModel.GEMINI_2_5_FLASH.value) -> Decimal:
         """Calculate cost for token usage."""
         # Get pricing for model
         pricing = self.model_pricing.get(model, self.model_pricing["default"])
@@ -161,7 +163,7 @@ class TokenCounter:
         total_cost = input_cost + output_cost
         return total_cost.quantize(Decimal("0.000001"))  # 6 decimal places
     
-    def estimate_cost_for_text(self, text: str, model: str = "gpt-3.5-turbo",
+    def estimate_cost_for_text(self, text: str, model: str = LLMModel.GEMINI_2_5_FLASH.value,
                               include_response: bool = True, 
                               response_ratio: float = 0.3) -> Decimal:
         """Estimate cost for processing text, optionally including response."""

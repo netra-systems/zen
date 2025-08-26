@@ -134,7 +134,7 @@ def test_utility_function():
     assert format_currency(0) == "$0.00"
 
 # Example 8: Test requiring environment variables
-@requires_env("GEMINI_API_KEY", "OPENAI_API_KEY")
+@requires_env("GEMINI_API_KEY", "GOOGLE_API_KEY")
 @feature_flag("agent_orchestration")
 def test_multi_llm_orchestration():
     """Test that requires API keys and agent orchestration feature."""

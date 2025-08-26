@@ -5,6 +5,8 @@ This module defines models, enums, and configuration data for realistic test dat
 
 from enum import Enum
 from typing import Any, Dict, List, Tuple
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 class RealisticDataPatterns(Enum):
@@ -28,7 +30,7 @@ class RealisticTestDataConfigManager:
     def _init_llm_models(self) -> Dict[str, Dict[str, Any]]:
         """Initialize realistic LLM model characteristics"""
         return {
-            "gpt-4": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "latency_range_ms": (500, 30000),
                 "latency_distribution": "lognormal",
                 "token_limits": {"input": 8192, "output": 4096},
@@ -38,7 +40,7 @@ class RealisticTestDataConfigManager:
                 "rate_limit": 10000,  # per minute
                 "timeout_rate": 0.001
             },
-            "gpt-4-turbo": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "latency_range_ms": (300, 15000),
                 "latency_distribution": "lognormal",
                 "token_limits": {"input": 128000, "output": 4096},
@@ -48,7 +50,7 @@ class RealisticTestDataConfigManager:
                 "rate_limit": 50000,
                 "timeout_rate": 0.0005
             },
-            "claude-3-opus": {
+            LLMModel.GEMINI_2_5_FLASH.value: {
                 "latency_range_ms": (400, 25000),
                 "latency_distribution": "gamma",
                 "token_limits": {"input": 200000, "output": 4096},
@@ -139,7 +141,7 @@ class RealisticTestDataConfigManager:
     
     def get_llm_model_config(self, model: str) -> Dict[str, Any]:
         """Get configuration for specific LLM model"""
-        return self.llm_models.get(model, self.llm_models["gpt-4"])
+        return self.llm_models.get(model, self.llm_models[LLMModel.GEMINI_2_5_FLASH.value])
     
     def get_log_pattern_config(self, pattern: str) -> Dict[str, Any]:
         """Get configuration for specific log pattern"""

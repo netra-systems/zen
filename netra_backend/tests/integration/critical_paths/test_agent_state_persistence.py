@@ -12,6 +12,8 @@ Coverage: Real state serialization, Redis/DB persistence, migration, versioning
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -305,7 +307,7 @@ class AgentStatePersistenceManager:
             execution_context={
                 "task_id": "task_123",
                 "user_input": "Test input",
-                "model_used": "gpt-4",
+                "model_used": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens_used": 1500
             },
             variables={
