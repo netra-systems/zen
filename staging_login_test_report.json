@@ -1,0 +1,92 @@
+{
+  "timestamp": "2025-08-26T16:34:19.684577+00:00",
+  "environment": "staging",
+  "tests": {
+    "health": {
+      "method": "health_check",
+      "timestamp": "2025-08-26T16:34:19.684577+00:00",
+      "services": {
+        "Frontend": {
+          "url": "https://app.staging.netrasystems.ai/health",
+          "status": "healthy",
+          "code": 200
+        },
+        "Backend API": {
+          "url": "https://api.staging.netrasystems.ai/health",
+          "status": "healthy",
+          "code": 200
+        },
+        "Auth Service": {
+          "url": "https://auth.staging.netrasystems.ai/health",
+          "status": "healthy",
+          "code": 200
+        },
+        "WebSocket": {
+          "url": "https://api.staging.netrasystems.ai/ws/health",
+          "status": "healthy",
+          "code": 200
+        }
+      },
+      "overall_health": "healthy"
+    },
+    "oauth_redirect": {
+      "method": "oauth_redirect",
+      "providers": {
+        "google": {
+          "status": "configured",
+          "redirect_url": "https://accounts.google.com/o/oauth2/v2/auth?client_id=84056009371-k0p7b9imaeh1p7a0vioiosjvsfn6pfrl...."
+        },
+        "github": {
+          "status": "not_configured",
+          "code": 404
+        }
+      }
+    },
+    "direct_api": {
+      "method": "direct_api",
+      "authenticated": false,
+      "endpoints": {
+        "/health": {
+          "status": "available",
+          "data": {
+            "status": "healthy",
+            "service": "netra-ai-platform",
+            "version": "1.0.0",
+            "timestamp": "2025-08-26T16:34:22.130515+00:00"
+          }
+        },
+        "/api/version": {
+          "status": "unavailable",
+          "code": 401
+        },
+        "/api/status": {
+          "status": "unavailable",
+          "code": 401
+        }
+      }
+    },
+    "mock_login": {
+      "method": "mock_login",
+      "user": {
+        "id": "mock-user-001",
+        "email": "test.agent@staging.netrasystems.ai",
+        "name": "Test Agent",
+        "picture": "https://ui-avatars.com/api/?name=Test+Agent"
+      },
+      "endpoints": {
+        "/api/user/me": {
+          "status": "unauthorized",
+          "code": 401
+        },
+        "/api/threads": {
+          "status": "failed",
+          "code": 403
+        },
+        "/api/settings": {
+          "status": "unauthorized",
+          "code": 401
+        }
+      }
+    }
+  }
+}

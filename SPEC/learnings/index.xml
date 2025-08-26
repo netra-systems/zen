@@ -42,6 +42,14 @@
             <critical-takeaway>HEAD method support is essential for authentication endpoints to support CORS preflight and health checks.</critical-takeaway>
         </category>
         
+        <category name="API Dual-Channel Architecture" path="SPEC/api_dual_channel_architecture.xml" keywords="REST API, WebSocket, Agent Routes, Dual Channel, API Architecture, Streaming, Real-time">
+            <critical-takeaway>REST API endpoints (/api/agent/*) and WebSocket (/ws) are BOTH production features, NOT legacy vs new.</critical-takeaway>
+            <critical-takeaway>Both channels use the SAME backend services (SupervisorAgent, ThreadService, MessageHandlerService) ensuring functional parity.</critical-takeaway>
+            <critical-takeaway>REST is optimal for stateless operations, mobile clients, simple integrations; WebSocket for real-time updates, interactive sessions.</critical-takeaway>
+            <critical-takeaway>Service layer abstraction enables channel-agnostic business logic - changes benefit both channels automatically.</critical-takeaway>
+            <critical-takeaway>Maintain feature parity between channels by updating shared backend services, not duplicating logic.</critical-takeaway>
+        </category>
+        
         <category name="OAuth Redirect URI Critical Misconfiguration [CRITICAL]" path="SPEC/learnings/oauth_redirect_uri_misconfiguration.xml" keywords="OAuth, Redirect URI, No Token Received, Frontend, Auth Service, Google OAuth, Authentication Failure">
             <critical-takeaway>CRITICAL: Lines 242, 676, 906 in auth_routes.py use _determine_urls()[1] (frontend URL) instead of _determine_urls()[0] (auth service URL) for OAuth redirect_uri.</critical-takeaway>
             <critical-takeaway>IMPACT: Google OAuth redirects to frontend instead of auth service, causing "No token received" error and 100% OAuth authentication failure.</critical-takeaway>

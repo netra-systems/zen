@@ -178,7 +178,7 @@ class TestE2ERealBackend:
         
         # Use REAL backend components
         async for session in get_database_session():
-            user = User(email="test@example.com", full_name="Test")
+            user = User(id="test-user-123", email="test@example.com", full_name="Test")
             session.add(user)
             await session.commit()
             
@@ -353,8 +353,9 @@ class TestAntiPatternsWhatNotToDo:
 def create_test_user(**kwargs) -> User:
     """Helper to create test user with real User class."""
     defaults = {
+        "id": "test-user-default",
         "email": "test@example.com",
-        "name": "Test User"
+        "full_name": "Test User"
     }
     defaults.update(kwargs)
     return User(**defaults)

@@ -380,3 +380,8 @@ def get_auth_service_url() -> str:
 def get_backend_service_url() -> str:
     """Get the backend service URL."""
     return os.environ.get("BACKEND_SERVICE_URL", "http://localhost:8000")
+
+
+def get_test_config() -> UnifiedTestConfig:
+    """Get the unified test configuration instance."""
+    return TEST_CONFIG

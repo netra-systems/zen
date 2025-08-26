@@ -3,10 +3,15 @@ Backend-specific test configuration.
 Uses consolidated test framework infrastructure with backend-specific customizations.
 """
 
-from netra_backend.app.core.isolated_environment import get_env
-
-# Import all common fixtures from the consolidated base
+# Import all common fixtures from the consolidated base FIRST
 from test_framework.conftest_base import *
+
+# Use the SAME get_env from the test framework to avoid multiple instances
+try:
+    from dev_launcher.isolated_environment import get_env
+except ImportError:
+    # Fallback if dev_launcher is not available
+    from netra_backend.app.core.isolated_environment import get_env
 
 # Import backend-specific utilities
 from test_framework.fixtures.database_fixtures import *

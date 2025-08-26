@@ -452,3 +452,30 @@ def get_jwt_secret() -> str:
         ValueError: If no secret found in non-development environments
     """
     return _unified_secret_manager.get_jwt_secret()
+
+
+def get_config_value(key: str, default: Optional[str] = None) -> Optional[str]:
+    """Get a configuration value from environment or secrets.
+    
+    This function provides a unified interface to get configuration values,
+    checking both environment variables and secret stores.
+    
+    Args:
+        key: Configuration key to retrieve
+        default: Default value if not found
+        
+    Returns:
+        Configuration value or default
+    """
+    # First try to get as secret (for sensitive values)
+    secret_value = get_secret(key, None)
+    if secret_value is not None:
+        return secret_value
+    
+    # Fall back to environment variable via isolated environment
+    env_value = get_env().get(key, default)
+    return env_value
+
+
+# Backward compatibility alias
+UnifiedSecrets = UnifiedSecretManager

@@ -57,7 +57,7 @@ class TestServerStartupTimeouts:
             
             # Should set graceful degradation mode
             assert not getattr(app.state, 'database_available', True)
-            assert getattr(app.state, 'database_mock_mode', False)
+            assert getattr(app.state, 'database_mock_mode', False) == True
             
             print(f"✅ Database timeout protection working - completed in {elapsed:.1f}s")
     
@@ -153,7 +153,7 @@ class TestServerStartupTimeouts:
                         
                         # Should set fallback state
                         assert not getattr(app.state, 'database_available', True)
-                        assert getattr(app.state, 'database_mock_mode', False)
+                        assert getattr(app.state, 'database_mock_mode', False) == True
                         
                         print("✅ Graceful degradation working on database timeout")
     

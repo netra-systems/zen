@@ -225,3 +225,31 @@ class DatabaseFailoverStrategy(DatabaseRecoveryStrategy):
     def get_priority(self) -> int:
         """Failover has lowest priority."""
         return 4
+
+
+class DatabaseRecoveryCore:
+    """Core database recovery manager for test compatibility."""
+    
+    def __init__(self, backup_configs=None):
+        """Initialize the database recovery core."""
+        self.strategies = [
+            ConnectionPoolRefreshStrategy(),
+            ConnectionPoolRecreateStrategy(),
+            DatabaseFailoverStrategy(backup_configs or []),
+        ]
+    
+    async def recover(self, error_context: dict = None) -> bool:
+        """Execute recovery strategies in priority order."""
+        logger.info("Starting database recovery process")
+        
+        for strategy in sorted(self.strategies, key=lambda s: s.get_priority()):
+            try:
+                if await strategy.recover():
+                    logger.info(f"Recovery successful using {strategy.__class__.__name__}")
+                    return True
+            except Exception as e:
+                logger.error(f"Recovery strategy {strategy.__class__.__name__} failed: {e}")
+                continue
+        
+        logger.error("All recovery strategies failed")
+        return False

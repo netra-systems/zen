@@ -410,3 +410,7 @@ class MessageBatch(BaseModel):
     created_at: float = Field(default_factory=time.time)
     total_size_bytes: int = 0
     compression_enabled: bool = False
+
+
+# Backward compatibility aliases
+ConnectionState = WebSocketConnectionState

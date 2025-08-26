@@ -727,6 +727,16 @@ class StartupManager:
         
         logger.info("Agent supervisor initialization completed successfully")
 
+    async def get_jwt_secret(self) -> str:
+        """Get JWT secret key for testing/configuration validation."""
+        from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
+        return get_jwt_secret()
+
+    async def get_redis_config(self) -> Dict[str, Any]:
+        """Get Redis configuration for testing/validation."""
+        from netra_backend.app.core.configuration.unified_secrets import _unified_secret_manager
+        return _unified_secret_manager.get_redis_credentials()
+
 
 # Global instance
 startup_manager = StartupManager()

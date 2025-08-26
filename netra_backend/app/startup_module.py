@@ -41,6 +41,12 @@ from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.utils.multiprocessing_cleanup import setup_multiprocessing
 
 
+def _get_project_root() -> Path:
+    """Get the project root path."""
+    # startup_module.py is in netra_backend/app/, so project root is two levels up
+    return Path(__file__).parent.parent.parent
+
+
 async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
     """Ensure all required database tables exist, creating them if necessary."""
     try:
@@ -454,6 +460,7 @@ async def setup_database_connections(app: FastAPI) -> None:
                 logger.error(f"{error_msg} - using mock database for graceful degradation")
                 app.state.db_session_factory = None  # Signal to use mock/fallback
                 app.state.database_available = False
+                app.state.database_mock_mode = True
                 return
             else:
                 raise RuntimeError(error_msg)

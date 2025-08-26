@@ -607,8 +607,12 @@ def create_async_database(db_url: str = None) -> AsyncDatabase:
     return AsyncDatabase(db_url)
 
 
+# Compatibility alias for test imports
+PostgresCore = Database
+
+
 # Compatibility exports for existing code
 __all__ = [
-    "Database", "AsyncDatabase", "initialize_postgres", "create_async_database",
+    "Database", "AsyncDatabase", "PostgresCore", "initialize_postgres", "create_async_database",
     "get_converted_async_db_url", "async_engine", "async_session_factory"
 ]

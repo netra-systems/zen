@@ -452,6 +452,89 @@ class TokenService:
         except Exception as e:
             logger.warning(f"Failed to check token revocation: {e}")
             return False
+    
+    def initialize(self):
+        """Initialize the token service.
+        
+        This method exists for compatibility with tests that call initialize().
+        The service is ready to use after construction.
+        """
+        pass  # No additional initialization needed
+    
+    def create_token(self, user_data: dict) -> str:
+        """Create a token with user data.
+        
+        Synchronous wrapper for create_access_token for test compatibility.
+        
+        Args:
+            user_data: Dictionary containing user information
+            
+        Returns:
+            JWT token string
+        """
+        secret = self._get_jwt_secret()
+        
+        # Create payload from user_data
+        now = datetime.now(timezone.utc)
+        expires_in = self._access_token_ttl
+        if 'exp' in user_data and isinstance(user_data['exp'], datetime):
+            # If exp is provided as datetime, calculate expires_in
+            exp_time = user_data['exp']
+            if exp_time.tzinfo is None:
+                exp_time = exp_time.replace(tzinfo=timezone.utc)
+            expires_in = int((exp_time - now).total_seconds())
+        
+        payload = {
+            'sub': user_data.get('user_id', 'test_user'),
+            'iat': int(now.timestamp()),
+            'exp': int((now + timedelta(seconds=expires_in)).timestamp()),
+            'type': 'access',
+            'jti': str(uuid.uuid4()),
+        }
+        
+        # Add additional claims from user_data
+        for key, value in user_data.items():
+            if key not in ['exp'] and not key.startswith('_'):
+                payload[key] = value
+        
+        # Create and return token
+        return jwt.encode(payload, secret, algorithm='HS256')
+    
+    def create_service_token(self, service_data: dict) -> str:
+        """Create a service token with service data.
+        
+        Args:
+            service_data: Dictionary containing service information
+            
+        Returns:
+            JWT service token string
+        """
+        secret = self._get_jwt_secret()
+        
+        # Create payload from service_data
+        now = datetime.now(timezone.utc)
+        expires_in = self._access_token_ttl
+        if 'exp' in service_data and isinstance(service_data['exp'], datetime):
+            exp_time = service_data['exp']
+            if exp_time.tzinfo is None:
+                exp_time = exp_time.replace(tzinfo=timezone.utc)
+            expires_in = int((exp_time - now).total_seconds())
+        
+        payload = {
+            'sub': service_data.get('service_id', 'test_service'),
+            'iat': int(now.timestamp()),
+            'exp': int((now + timedelta(seconds=expires_in)).timestamp()),
+            'type': 'service_token',
+            'jti': str(uuid.uuid4()),
+        }
+        
+        # Add additional claims from service_data
+        for key, value in service_data.items():
+            if key not in ['exp'] and not key.startswith('_'):
+                payload[key] = value
+        
+        # Create and return token
+        return jwt.encode(payload, secret, algorithm='HS256')
 
 
 # Singleton instance

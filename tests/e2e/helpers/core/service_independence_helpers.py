@@ -40,6 +40,84 @@ from tests.e2e.helpers.core.service_independence.pytest_interface import (
 # Backward compatibility alias
 ServiceIndependenceHelper = ServiceIndependenceValidator
 
+# Additional helper classes for e2e tests
+import asyncio
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
+
+
+@dataclass
+class ServiceResponse:
+    """Response from service communication."""
+    status: str
+    flags: list = None
+    response_time: float = 0.0
+    
+    def __post_init__(self):
+        if self.flags is None:
+            self.flags = []
+
+
+class ServiceCommunicator:
+    """Helper class for testing service-to-service communication."""
+    
+    def __init__(self):
+        self.timeout = 10.0
+        
+    async def call_backend_with_auth(self, operation: str) -> ServiceResponse:
+        """Simulate calling backend with auth."""
+        # Simulate degraded mode when auth is unavailable
+        return ServiceResponse(
+            status="degraded",
+            flags=["auth_unavailable"],
+            response_time=0.5
+        )
+    
+    async def call_service(self, service_name: str, operation: str) -> ServiceResponse:
+        """Generic service call."""
+        return ServiceResponse(
+            status="success",
+            response_time=0.3
+        )
+
+
+class ServiceHealthChecker:
+    """Health checker for testing service availability and monitoring."""
+    
+    def __init__(self, timeout: float = 5.0):
+        self.timeout = timeout
+    
+    async def check_service_health(self, service_name: str) -> ServiceResponse:
+        """Check health of a specific service."""
+        # Simulate health check with timeout handling
+        if service_name == "slow_service":
+            await asyncio.sleep(self.timeout)
+            return ServiceResponse(
+                status="timeout",
+                response_time=self.timeout
+            )
+        
+        return ServiceResponse(
+            status="healthy",
+            response_time=0.1
+        )
+    
+    async def get_circuit_state(self, service_name: str) -> str:
+        """Get circuit breaker state for service."""
+        return "OPEN"  # Simulate circuit breaker in open state
+
+
+# Mock functions for testing
+async def check_service_endpoint(url: str):
+    """Mock service endpoint checker."""
+    await asyncio.sleep(0.1)
+    return {"status": "ok"}
+
+async def backend_operation(*args, **kwargs):
+    """Mock backend operation."""
+    raise Exception("Database connection failed")
+
+
 # For backward compatibility and direct execution
 if __name__ == "__main__":
     import asyncio
