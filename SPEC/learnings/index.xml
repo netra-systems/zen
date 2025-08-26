@@ -248,6 +248,22 @@
             <critical-takeaway>Prevention: End-to-end OAuth tests in staging, pre-deployment validation of redirect URIs, explicit logging of callback receipt.</critical-takeaway>
             <critical-takeaway>Google OAuth Console must authorize auth service URLs only, never frontend URLs for callbacks.</critical-takeaway>
         </category>
+        
+        <category name="ClickHouse Development Configuration" path="SPEC/learnings/clickhouse_dev_configuration.xml" keywords="ClickHouse, Port Configuration, Development Environment, Container, Testing, 8123, 8443">
+            <critical-takeaway>Local development ClickHouse runs on HTTP port 8123, not HTTPS port 8443 - many scripts had wrong defaults.</critical-takeaway>
+            <critical-takeaway>Container netra-clickhouse-dev uses standard ClickHouse config: HTTP on 8123, native on 9000, http://localhost:8123 for connections.</critical-takeaway>
+            <critical-takeaway>Test environment should enable ClickHouse (CLICKHOUSE_ENABLED=true, DEV_MODE_DISABLE_CLICKHOUSE=false) when container is available.</critical-takeaway>
+            <critical-takeaway>Default port fallbacks in scripts should use 8123 for development, 8443 for staging/production ClickHouse Cloud instances.</critical-takeaway>
+            <critical-takeaway>Skip logic in tests can be removed when services are properly configured and available locally.</critical-takeaway>
+        </category>
+        
+        <category name="ClickHouse SSL Localhost Connection Fix" path="SPEC/learnings/clickhouse_ssl_localhost_connection.xml" keywords="ClickHouse, SSL, HTTPS, Localhost, Connection, secure=True, SSL Error, Wrong Version Number, Environment Detection, Port 8123, Port 8443">
+            <critical-takeaway>NEVER hardcode secure=True for ClickHouse connections - use environment-aware SSL detection instead.</critical-takeaway>
+            <critical-takeaway>Localhost ClickHouse connections (127.0.0.1, localhost, ::1) must use HTTP (secure=False) to avoid SSL errors.</critical-takeaway>
+            <critical-takeaway>Remote ClickHouse connections should use HTTPS (secure=True) only on port 8443 for security.</critical-takeaway>
+            <critical-takeaway>Test fixtures must use same connection logic as production code - no hardcoded SSL settings.</critical-takeaway>
+            <critical-takeaway>Standard pattern: is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]; use_secure = not is_localhost and config.port == 8443</critical-takeaway>
+        </category>
 
         <category name="GCP Staging Deployment Critical Issues [RESOLVED]" path="SPEC/learnings/gcp_staging_deployment_fixes.xml" keywords="OAuth Configuration, Redis Connection, Alembic Migration, Async Testing, Variable Scoping, get_env, staging deployment, fallback configuration">
             <critical-takeaway>RESOLVED 2025-08-26: OAuth configuration missing due to test framework masking real staging issues - implement proper test isolation to simulate missing credentials.</critical-takeaway>
@@ -432,6 +448,18 @@
         <category name="Database/Migration" path="SPEC/learnings/alembic_asyncpg_greenlet.xml" keywords="Alembic, Migration, AsyncPG, Greenlet, SQLAlchemy">
             <critical-takeaway>Alembic requires synchronous database URL - remove asyncpg driver for migrations.</critical-takeaway>
             <critical-takeaway>Separate sync migration URLs from async application URLs to avoid greenlet errors.</critical-takeaway>
+        </category>
+
+        <category name="Database Migration Recovery Testing [CRITICAL]" path="SPEC/learnings/database_migration_recovery_testing.xml" keywords="Database Migration, Idempotency, Recovery Patterns, TDC, Test-Driven Correction, Database Integrity, Migration Safety, Partial State Recovery">
+            <critical-takeaway>MANDATORY: All migration operations must be idempotent with proper if_exists checks</critical-takeaway>
+            <critical-takeaway>CRITICAL: Implement Test-Driven Correction (TDC) for all database migration issues</critical-takeaway>
+            <critical-takeaway>ESSENTIAL: Database migrations require partial state detection and recovery mechanisms</critical-takeaway>
+            <critical-takeaway>REQUIRED: Use advisory locks to prevent concurrent migration execution</critical-takeaway>
+            <critical-takeaway>IMPORTANT: Validate cross-database consistency before creating foreign key constraints</critical-takeaway>
+            <critical-takeaway>NECESSARY: Rollback operations must be idempotent with proper existence checks</critical-takeaway>
+            <critical-takeaway>VALUABLE: Index creation requires dependency validation of tables and columns</critical-takeaway>
+            <critical-takeaway>BENEFICIAL: Document migration state assumptions and recovery procedures comprehensively</critical-takeaway>
+            <critical-takeaway>STRATEGIC: Build automated database recovery patterns for production resilience</critical-takeaway>
         </category>
 
         <category name="Dev Launcher" path="SPEC/learnings/dev_launcher.xml" keywords="Development, Startup, Local, Health Checks, Configuration, LLM, Environment">
@@ -927,6 +955,24 @@
             <critical-takeaway>Architectural principles established: SSOT enforcement, atomic scope operations, fail-fast configuration, environment isolation, pragmatic rigor, observable by design.</critical-takeaway>
             <critical-takeaway>Business impact: 300% development velocity increase, 99.9% system uptime, 90% operational overhead reduction, complete security vulnerability elimination.</critical-takeaway>
             <critical-takeaway>Operational excellence through comprehensive monitoring, incident response procedures, maintenance schedules, and continuous improvement processes.</critical-takeaway>
+        </category>
+        
+        <category name="Dev Launcher Migration and Connection Validation Fixes" path="SPEC/learnings/dev_launcher_migration_fixes.xml" keywords="migration, database, dev-launcher, clickhouse, idempotency, connection-validation, fallback-behavior">
+            <critical-takeaway>Non-idempotent migration operations (DROP INDEX without IF EXISTS) cause startup failures - always use conditional DDL operations.</critical-takeaway>
+            <critical-takeaway>ClickHouse connection validation must distinguish between service health and configuration issues for proper fallback behavior.</critical-takeaway>
+            <critical-takeaway>Uncontrolled migration fallback creates schema inconsistencies - classify errors as recoverable/non-recoverable and control fallback explicitly.</critical-takeaway>
+            <critical-takeaway>Five Whys analysis reveals most errors are not what they first appear - drill down to root causes (config, regression, context-specific).</critical-takeaway>
+            <critical-takeaway>Test-Driven Correction (TDC) ensures fixes address root causes - create failing tests first, then fix SUT to make them pass.</critical-takeaway>
+            <critical-takeaway>Migration retry logic with exponential backoff handles transient failures without corrupting schema state.</critical-takeaway>
+        </category>
+        
+        <category name="Dev Launcher Iteration 2 - Runtime Stability and Security Fixes" path="SPEC/learnings/dev_launcher_iteration2_runtime_fixes.xml" keywords="dev-launcher, runtime-stability, security, error-reporting, service-readiness, shell-injection">
+            <critical-takeaway>SECURITY: Never use shell: true in spawn() calls - creates critical command injection vulnerability.</critical-takeaway>
+            <critical-takeaway>Frontend build failures need comprehensive error capture from stderr, logs, and build outputs for effective debugging.</critical-takeaway>
+            <critical-takeaway>Backend runtime crashes require exit code diagnosis with specific recovery actions per exit code (1, 126, 127, 130, 139).</critical-takeaway>
+            <critical-takeaway>Service readiness checks need 3-phase validation: process stabilization, port binding, health endpoint verification.</critical-takeaway>
+            <critical-takeaway>Error reporting must provide actionable troubleshooting guidance, not just error messages.</critical-takeaway>
+            <critical-takeaway>Increased timeout to 45 seconds for backend initialization prevents false negative readiness checks.</critical-takeaway>
         </category>
     </categories>
     
