@@ -100,6 +100,11 @@
 |-----------|----------|---------|------------------|
 | **🔴 Auth Backend Desynchronization** | `/tests/e2e/test_auth_backend_desynchronization.py` | **P0 CRITICAL** - Cross-service transaction rollback vulnerability | **9.4M Protection** |
 
+#### Critical Startup Tests (New Implementation - Cycle 2)
+| Test File | Location | Purpose | Protection Value |
+|-----------|----------|---------|------------------|
+| **🔴 Configuration Drift Detection** | `/netra_backend/tests/startup/test_configuration_drift_detection.py` | **P0 CRITICAL** - SSL parameter cascade failure detection | **9.4M Protection** |
+
 ---
 
 ## 🎯 UNIFIED SYSTEM ARCHITECTURE
