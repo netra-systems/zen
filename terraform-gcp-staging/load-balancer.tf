@@ -264,34 +264,20 @@ resource "google_compute_url_map" "https_lb" {
 }
 
 # SSL Certificate (Google-managed)
-resource "google_compute_managed_ssl_certificate" "staging" {
-  name    = "${var.environment}-ssl-cert"
+# Using existing certificate that includes all required domains
+data "google_compute_ssl_certificate" "staging" {
+  name    = "${var.environment}-managed-cert-complete"
   project = var.project_id
-  
-  managed {
-    domains = [
-      "staging.netrasystems.ai",
-      "api.staging.netrasystems.ai",
-      "auth.staging.netrasystems.ai",
-      "www.staging.netrasystems.ai"
-    ]
-  }
-  
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # HTTPS Proxy
 resource "google_compute_target_https_proxy" "https_lb" {
   name             = "${var.environment}-https-lb-proxy"
   url_map          = google_compute_url_map.https_lb.id
-  ssl_certificates = [google_compute_managed_ssl_certificate.staging.id]
+  ssl_certificates = [data.google_compute_ssl_certificate.staging.id]
   project          = var.project_id
   
-  depends_on = [
-    google_compute_managed_ssl_certificate.staging
-  ]
+  # No depends_on needed for data source
 }
 
 # Global Forwarding Rule
