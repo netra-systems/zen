@@ -342,10 +342,9 @@ class NetworkEnvironmentHelper:
     
     @classmethod
     def is_test_environment(cls) -> bool:
-        """Check if running in test environment."""
-        from dev_launcher.isolated_environment import get_env
-        env = get_env()
-        return env.get("TESTING", "false").lower() == "true" or env.get("ENVIRONMENT", "").lower() == "testing"
+        """SSOT: Check test environment via centralized utils."""
+        from netra_backend.app.core.project_utils import is_test_environment
+        return is_test_environment()
     
     @classmethod
     def get_environment(cls) -> str:

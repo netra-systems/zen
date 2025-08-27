@@ -111,14 +111,30 @@ class UnifiedLogger:
     
     def _configure_handlers(self):
         """Configure logging handlers."""
+        # Check if we're in test environment and skip handler configuration
+        is_testing = get_env().get('TESTING') == '1' or get_env().get('ENVIRONMENT') == 'testing'
+        
         # Safely remove existing handlers to prevent I/O errors during test cleanup
         try:
             # Remove all existing handlers (stop is deprecated in favor of remove)
             logger.remove()
-        except (ValueError, OSError) as e:
+        except (ValueError, OSError, AttributeError) as e:
             # Ignore errors during handler removal (e.g., closed file handlers)
             # This commonly occurs during test teardown when files are already closed
             pass
+        
+        # Skip file handler configuration entirely during testing
+        if is_testing:
+            # Only add a minimal handler for tests to prevent I/O issues
+            try:
+                logger.add(
+                    sink=lambda message: None,  # No-op sink for tests
+                    level="ERROR",
+                    filter=should_log_record
+                )
+            except (ValueError, OSError):
+                pass
+            return
         
         # Suppress SQLAlchemy verbose logging unless in TRACE mode
         import logging

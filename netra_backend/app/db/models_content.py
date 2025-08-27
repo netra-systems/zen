@@ -17,11 +17,10 @@ from netra_backend.app.db.base import Base
 
 # Use JSON instead of ARRAY for SQLite compatibility during testing
 # For tests, always use JSON for array-like columns since SQLite doesn't support ARRAY
-def _is_test_environment():
-    """Check if we're in a test environment."""
-    return (os.environ.get('PYTEST_CURRENT_TEST') is not None or 
-            os.environ.get('TESTING') == '1' or
-            'pytest' in os.environ.get('_', ''))
+# SSOT compliance: Import from project_utils
+from netra_backend.app.core.project_utils import is_test_environment as _is_test_environment
+
+# Original function replaced:
 
 # Always use JSON for array columns in tests
 if _is_test_environment():

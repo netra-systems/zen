@@ -6,6 +6,7 @@ Handles proper cleanup of multiprocessing resources to prevent semaphore leaks.
 import atexit
 import multiprocessing
 import multiprocessing.synchronize
+import os
 import signal
 import sys
 from types import FrameType
@@ -71,13 +72,24 @@ class MultiprocessingResourceManager:
         self._cleanup_queues()
         self._cleanup_locks()
         self._clear_all_lists()
-        # Only log if stdout/stderr are still available to prevent I/O errors during test cleanup
+        # Prevent any logging during test teardown to avoid I/O errors
         try:
-            if (hasattr(sys.stdout, 'closed') and not sys.stdout.closed and 
-                hasattr(sys.stderr, 'closed') and not sys.stderr.closed):
+            # Check if we're in a test environment
+            is_testing = (
+                hasattr(sys, 'modules') and 'pytest' in sys.modules or
+                os.environ.get('TESTING') == '1' or
+                os.environ.get('ENVIRONMENT') == 'testing'
+            )
+            
+            # Only log if not in tests and streams are available
+            if not is_testing and (
+                hasattr(sys.stdout, 'closed') and not sys.stdout.closed and 
+                hasattr(sys.stderr, 'closed') and not sys.stderr.closed and
+                sys.stdout is not None and sys.stderr is not None
+            ):
                 logger.info("Multiprocessing resources cleaned up")
-        except (OSError, ValueError, AttributeError):
-            # Silently ignore logging errors during shutdown, including when streams are None
+        except (OSError, ValueError, AttributeError, ImportError):
+            # Silently ignore all logging errors during shutdown
             pass
 
 

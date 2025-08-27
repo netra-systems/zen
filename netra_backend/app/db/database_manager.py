@@ -673,13 +673,9 @@ class DatabaseManager:
     
     @staticmethod
     def is_test_environment() -> bool:
-        """Detect test environment - uses unified config."""
-        config = get_unified_config()
-        current_env = config.environment
-        is_test_mode = config.environment == "testing"
-        # NO pytest bypass - use environment configuration only
-        
-        return current_env in ["testing", "test"] or is_test_mode
+        """SSOT: Detect test environment via centralized utils."""
+        from netra_backend.app.core.project_utils import is_test_environment
+        return is_test_environment()
     
     @staticmethod
     def create_auth_application_engine():

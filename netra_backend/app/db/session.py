@@ -83,3 +83,35 @@ async def get_db_session() -> AsyncIterator[AsyncSession]:
     from netra_backend.app.database import get_db
     async for session in get_db():
         yield session
+
+async def get_session_from_factory(db_session_or_factory) -> AsyncSession:
+    """Get database session from either a session or session factory.
+    
+    This utility handles the common pattern where code needs to work with both:
+    - An AsyncSession instance (already created session)
+    - An async_sessionmaker factory (needs to create a session)
+    
+    Args:
+        db_session_or_factory: Either an AsyncSession or async_sessionmaker instance
+        
+    Returns:
+        AsyncSession: The database session to use
+        
+    Usage:
+        session = await get_session_from_factory(self.db_session)
+        # Use session for database operations
+    """
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+    
+    # If it's already an AsyncSession, return it directly
+    if isinstance(db_session_or_factory, AsyncSession):
+        return db_session_or_factory
+    
+    # If it's an async_sessionmaker, create a new session
+    if isinstance(db_session_or_factory, async_sessionmaker):
+        # Create a new session that will be managed by the caller
+        return db_session_or_factory()
+    
+    # Fallback: assume it's a session
+    logger.debug(f"Unknown session type {type(db_session_or_factory)}, assuming it's a session")
+    return db_session_or_factory

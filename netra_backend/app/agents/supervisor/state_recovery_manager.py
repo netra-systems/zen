@@ -3,6 +3,7 @@
 from typing import Dict, Optional, Tuple
 
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.db.session import get_session_from_factory
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.agent_state import RecoveryType, StateRecoveryRequest
 from netra_backend.app.services.state_persistence import state_persistence_service
@@ -37,8 +38,9 @@ class AgentStateRecoveryManager:
     
     async def _execute_recovery_request(self, recovery_request: StateRecoveryRequest):
         """Execute recovery request."""
+        session = await get_session_from_factory(self.db_session)
         return await self.state_persistence.recover_agent_state(
-            recovery_request, self.db_session)
+            recovery_request, session)
     
     async def _process_crash_recovery_result(self, success: bool, recovery_id: str,
                                            run_id: str) -> Tuple[bool, Optional[DeepAgentState]]:
@@ -50,8 +52,9 @@ class AgentStateRecoveryManager:
     async def _handle_successful_recovery(self, recovery_id: str, 
                                         run_id: str) -> Tuple[bool, Optional[DeepAgentState]]:
         """Handle successful crash recovery."""
+        session = await get_session_from_factory(self.db_session)
         recovered_state = await self.state_persistence.load_agent_state(
-            run_id, self.db_session)
+            run_id, session)
         logger.info(f"Crash recovery {recovery_id} completed for run {run_id}")
         return True, recovered_state
     
@@ -82,8 +85,9 @@ class AgentStateRecoveryManager:
                                       checkpoint_id: str) -> Tuple[bool, Optional[DeepAgentState]]:
         """Process rollback recovery result."""
         if success:
+            session = await get_session_from_factory(self.db_session)
             recovered_state = await self.state_persistence.load_agent_state(
-                run_id, self.db_session)
+                run_id, session)
             return True, recovered_state
         return False, None
     
@@ -103,7 +107,7 @@ class AgentStateRecoveryManager:
     
     async def _load_previous_state(self, run_id: str) -> Optional[DeepAgentState]:
         """Load the most recent state."""
-        session = self.db_session
+        session = await get_session_from_factory(self.db_session)
         return await self.state_persistence.load_agent_state(run_id, session)
     
     def _validate_recovered_state(self, recovered_state: Optional[DeepAgentState], 

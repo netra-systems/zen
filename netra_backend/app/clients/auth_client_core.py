@@ -522,10 +522,12 @@ class AuthServiceClient:
         }
     
     def _is_test_environment(self) -> bool:
-        """Check if we're in a test environment."""
-        from netra_backend.app.core.environment_constants import get_current_environment
-        current_env = get_current_environment()
-        return current_env in ["test", "testing", "development"]
+        """Check if we're in a test environment.
+        
+        SSOT compliance: Uses common utility for consistent detection.
+        """
+        from netra_backend.app.core.project_utils import is_test_environment
+        return is_test_environment()
     
     def _is_valid_test_token(self, jwt_token: str) -> bool:
         """Basic validation for test JWT tokens."""

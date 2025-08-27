@@ -714,6 +714,27 @@ class AgentErrorHandler:
         agent_error = self._convert_to_agent_error(error, context)
         self._store_error(agent_error)
         return agent_error
+    
+    async def handle_execution_error(
+        self,
+        error: Exception,
+        context: Optional[ErrorContext] = None,
+        fallback_operation: Optional[Callable] = None,
+        **kwargs
+    ) -> Union[AgentError, Any]:
+        """Handle execution error - alias for handle_error for backward compatibility."""
+        return await self.handle_error(error, context, fallback_operation, **kwargs)
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get health status of the error handler."""
+        return {
+            'status': 'healthy',
+            'total_errors': self._handler._error_metrics.get('total_errors', 0),
+            'recovery_attempts': self._handler._error_metrics.get('recovery_attempts', 0),
+            'recovery_successes': self._handler._error_metrics.get('recovery_successes', 0),
+            'error_categories': self._handler._error_metrics.get('errors_by_category', {}),
+            'error_severities': self._handler._error_metrics.get('errors_by_severity', {})
+        }
 
 
 class WebSocketErrorHandler:
