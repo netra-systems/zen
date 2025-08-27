@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Asyncio Nested Event Loop Deadlock</title>
+        <category>Critical Bug Fix</category>
+        <severity>CRITICAL</severity>
+        <date>2025-08-27</date>
+        <impact>Complete backend startup failure</impact>
+        <tags>asyncio, event-loop, deadlock, startup, critical</tags>
+    </metadata>
+    
+    <problem>
+        <description>
+            Backend service experienced a complete startup hang caused by nested asyncio.run() 
+            calls within an already running async context. This created an event loop deadlock 
+            that prevented the backend from completing initialization.
+        </description>
+        
+        <symptoms>
+            - Backend hangs indefinitely during startup
+            - Process appears to freeze after "Running comprehensive startup fixes verification..."
+            - No error messages displayed
+            - Health endpoint unreachable
+            - Service completely non-functional
+        </symptoms>
+        
+        <root_cause>
+            The apply_all_startup_fixes() function in startup_fixes_integration.py was using
+            asyncio.run() to execute an async function, but this was being called from within
+            an already running async context during the startup sequence. asyncio.run() attempts
+            to create a new event loop, which fails when an event loop is already running,
+            causing a deadlock.
+        </root_cause>
+        
+        <code_example>
+            <incorrect>
+# This causes a deadlock when called from async context
+def apply_all_startup_fixes() -> Dict[str, Any]:
+    """Apply all startup fixes and return results."""
+    return asyncio.run(startup_fixes.run_comprehensive_verification())
+            </incorrect>
+            
+            <correct>
+# Proper async function that works within existing event loop
+async def apply_all_startup_fixes() -> Dict[str, Any]:
+    """Apply all startup fixes and return results."""
+    return await startup_fixes.run_comprehensive_verification()
+            </correct>
+        </code_example>
+    </problem>
+    
+    <solution>
+        <approach>
+            Convert synchronous functions that use asyncio.run() to async functions
+            when they will be called from within an async context. Use await instead
+            of asyncio.run() for calling async functions from within async code.
+        </approach>
+        
+        <implementation>
+            Changed apply_all_startup_fixes() from a synchronous function using
+            asyncio.run() to an async function using await. This allows it to
+            execute within the existing event loop rather than trying to create
+            a new one.
+        </implementation>
+        
+        <verification>
+            - Backend starts successfully in under 1 second
+            - All startup components initialize properly
+            - Health endpoint responds with "healthy" status
+            - No hanging or deadlock behavior
+        </verification>
+    </solution>
+    
+    <prevention>
+        <guidelines>
+            1. NEVER use asyncio.run() inside async functions or coroutines
+            2. NEVER use asyncio.run() in code that will be called from async context
+            3. Use asyncio.run() ONLY at the top level of synchronous programs
+            4. Within async contexts, always use await for calling async functions
+            5. Be aware of the execution context when designing utility functions
+        </guidelines>
+        
+        <patterns>
+            <pattern name="Top-Level Entry Point">
+                <description>Use asyncio.run() only at the main entry point</description>
+                <code>
+# Good - top level entry point
+if __name__ == "__main__":
+    asyncio.run(main())
+                </code>
+            </pattern>
+            
+            <pattern name="Async All The Way">
+                <description>Keep async context throughout the call chain</description>
+                <code>
+# Good - async throughout
+async def utility_function():
+    return await some_async_operation()
+
+async def main():
+    result = await utility_function()
+                </code>
+            </pattern>
+            
+            <pattern name="Sync-Async Bridge">
+                <description>When sync code must call async, use proper patterns</description>
+                <code>
+# For sync code that needs async results
+def sync_wrapper():
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        # Already in async context - can't use asyncio.run()
+        raise RuntimeError("Cannot call from async context")
+    return asyncio.run(async_function())
+                </code>
+            </pattern>
+        </patterns>
+    </prevention>
+    
+    <detection>
+        <search_patterns>
+            - Look for: asyncio.run( within any async def function
+            - Look for: asyncio.run( in utility functions called during startup
+            - Look for: nested event loop creation patterns
+            - Look for: functions mixing sync and async without proper handling
+        </search_patterns>
+        
+        <warning_signs>
+            - Functions that are sometimes sync, sometimes async
+            - Utility functions using asyncio.run() without checking context
+            - Startup sequences that hang without error messages
+            - Code that works in isolation but fails when integrated
+        </warning_signs>
+    </detection>
+    
+    <related_issues>
+        - Event loop already running errors
+        - RuntimeError: This event loop is already running
+        - Startup hangs and timeouts
+        - Async context mixing with synchronous code
+    </related_issues>
+    
+    <references>
+        <file>netra_backend/app/services/startup_fixes_integration.py:248</file>
+        <file>netra_backend/app/core/startup_manager.py:666</file>
+        <documentation>https://docs.python.org/3/library/asyncio-eventloop.html</documentation>
+    </references>
+</learning>
