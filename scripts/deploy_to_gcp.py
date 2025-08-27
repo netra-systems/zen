@@ -24,7 +24,7 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 # Import centralized GCP authentication
-from gcp_auth_config import GCPAuthConfig
+from scripts.gcp_auth_config import GCPAuthConfig
 
 # Fix Unicode encoding issues on Windows
 if sys.platform == "win32":

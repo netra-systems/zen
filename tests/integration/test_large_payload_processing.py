@@ -5,7 +5,7 @@ import pytest
 
 # NOTE: Assuming the following constants. These may need to be updated.
 BACKEND_URL = "http://localhost:8000"
-AUTH_SERVICE_URL = "http://localhost:8001"
+AUTH_SERVICE_URL = "http://localhost:8081"
 TEST_USER_EMAIL = "test@example.com"
 
 

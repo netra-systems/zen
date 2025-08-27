@@ -38,6 +38,7 @@ import httpx
 import jwt as jwt_lib
 import pytest
 import websockets
+from websockets import ServerConnection
 
 from netra_backend.app.logging_config import central_logger
 
@@ -83,7 +84,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
         self.oauth_client_id = None
         self.oauth_client_secret = None
         self.test_tokens: Dict[str, JWTTokenData] = {}
-        self.websocket_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.websocket_connections: Dict[str, websockets.ServerConnection] = {}
         self.security_test_results: List[Dict[str, Any]] = []
         
     async def setup_test_specific_environment(self) -> None:

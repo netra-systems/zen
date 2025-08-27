@@ -17,6 +17,9 @@ import pytest
 
 from netra_backend.app.config import get_config
 
+# Get settings instance
+settings = get_config()
+
 class TestAPICRUDOperationsL3:
     """Test API CRUD operation scenarios"""
     

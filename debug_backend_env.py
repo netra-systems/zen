@@ -31,11 +31,12 @@ def main():
         
         # The issue might be in the middleware setup - let's check the actual config 
         # being used by directly importing it
-        from shared.cors_config import _detect_environment, get_cors_origins, get_fastapi_cors_config
+        from shared.cors_config_builder import CORSConfigurationBuilder, get_cors_origins, get_fastapi_cors_config
         from netra_backend.app.core.configuration import get_configuration
         
         print("Direct config check:")
-        print(f"Detected environment: {_detect_environment()}")
+        cors_builder = CORSConfigurationBuilder()
+        print(f"Detected environment: {cors_builder.environment}")
         
         config = get_configuration()
         print(f"Backend config environment: {config.environment}")

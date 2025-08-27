@@ -183,23 +183,13 @@ class TestSecurityMiddleware:
     def test_setup_security_middleware_calls_all_components(self, mock_app):
         """setup_security_middleware sets up all security components."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.core.app_factory._add_ip_blocking_middleware') as mock_ip:
+        with patch('netra_backend.app.core.app_factory._add_path_traversal_middleware') as mock_path:
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.core.app_factory._add_path_traversal_middleware') as mock_path:
-                # Mock: Component isolation for testing without external dependencies
-                with patch('netra_backend.app.core.app_factory._add_security_headers_middleware') as mock_headers:
-                    setup_security_middleware(mock_app)
-                    mock_ip.assert_called_once_with(mock_app)
-                    mock_path.assert_called_once_with(mock_app)
-                    mock_headers.assert_called_once_with(mock_app)
+            with patch('netra_backend.app.core.app_factory._add_security_headers_middleware') as mock_headers:
+                setup_security_middleware(mock_app)
+                mock_path.assert_called_once_with(mock_app)
+                mock_headers.assert_called_once_with(mock_app)
 
-    def test_ip_blocking_middleware_added(self, mock_app):
-        """IP blocking middleware is added."""
-        # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.middleware.ip_blocking.ip_blocking_middleware') as mock_middleware:
-            from netra_backend.app.core.app_factory import _add_ip_blocking_middleware
-            _add_ip_blocking_middleware(mock_app)
-            mock_app.middleware.assert_called_with("http")
 
     def test_path_traversal_middleware_added(self, mock_app):
         """Path traversal protection middleware is added."""

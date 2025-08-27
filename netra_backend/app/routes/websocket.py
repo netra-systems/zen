@@ -613,6 +613,39 @@ async def websocket_test_endpoint(websocket: WebSocket):
                         "original": message_data,
                         "timestamp": datetime.now(timezone.utc).isoformat()
                     })
+                elif msg_type == "session_start":
+                    # Handle session start request - return a mock session ID for testing
+                    client_id = message_data.get("client_id", "unknown")
+                    session_id = f"test_session_{client_id}_{int(time.time())}"
+                    await websocket.send_json({
+                        "type": "session_started",
+                        "session_id": session_id,
+                        "client_id": client_id,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "message": "Test session started successfully"
+                    })
+                elif msg_type == "queue_message":
+                    # Handle message queueing - acknowledge for testing
+                    client_id = message_data.get("client_id", "unknown")
+                    await websocket.send_json({
+                        "type": "message_queued",
+                        "client_id": client_id,
+                        "queued_count": 1,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "message": "Message queued successfully"
+                    })
+                elif msg_type == "reconnect":
+                    # Handle reconnection request - simulate session restoration
+                    client_id = message_data.get("client_id", "unknown")
+                    session_id = message_data.get("session_id", "unknown")
+                    await websocket.send_json({
+                        "type": "session_restored",
+                        "session_id": session_id,
+                        "client_id": client_id,
+                        "queued_messages": 1,  # Simulate at least one queued message
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "message": "Session restored successfully"
+                    })
                 else:
                     # Send generic acknowledgment
                     await websocket.send_json({

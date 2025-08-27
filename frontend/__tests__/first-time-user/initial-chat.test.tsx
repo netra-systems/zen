@@ -48,6 +48,17 @@ jest.mock('@/hooks/useWebSocket', () => ({
 // Mock the WebSocket provider completely
 jest.mock('@/providers/WebSocketProvider', () => require('@/__mocks__/providers/WebSocketProvider'));
 
+// Mock WebSocket provider context
+jest.mock('@/providers/WebSocketProvider', () => ({
+  useWebSocketContext: jest.fn().mockReturnValue({
+    status: 'OPEN',
+    isConnected: true,
+    send: jest.fn(),
+    disconnect: jest.fn()
+  }),
+  WebSocketProvider: ({ children }) => React.createElement('div', {}, children)
+}));
+
 jest.mock('@/hooks/useLoadingState', () => ({
   useLoadingState: mockUseLoadingState
 }));
@@ -83,6 +94,22 @@ jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
 // Mock child components
 jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => React.createElement('div', { 'data-testid': 'chat-header' }, 'Chat Header')
+}));
+
+// Mock ChatHeader dependencies
+jest.mock('@/components/chat/ConnectionStatusIndicator', () => ({
+  ConnectionStatusIndicator: () => React.createElement('div', { 'data-testid': 'connection-status' }, 'Connected')
+}));
+
+jest.mock('@/components/chat/MCPServerStatus', () => ({
+  MCPServerStatus: () => React.createElement('div', { 'data-testid': 'mcp-status' }, 'MCP Status')
+}));
+
+jest.mock('@/hooks/useMCPTools', () => ({
+  useMCPTools: jest.fn().mockReturnValue({
+    servers: [],
+    executions: []
+  })
 }));
 
 jest.mock('@/components/chat/MessageList', () => ({

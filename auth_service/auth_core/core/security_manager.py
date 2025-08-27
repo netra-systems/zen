@@ -43,13 +43,34 @@ class SecurityManager:
     
     def detect_token_replay(self, jti: str) -> bool:
         """Detect if a token has been used before (replay attack)."""
-        return self._token_usage.get(jti, 0) > 1
+        # A token is considered replayed if it has been consumed/used at least once
+        return self._token_usage.get(jti, 0) >= 1
     
     def validate_token_not_replayed(self, token: str):
         """Validate that a token hasn't been replayed."""
-        # This would normally decode the token to get the JTI
-        # For testing purposes, we'll raise an exception if replay is detected
-        raise ValueError("Token replay detected")
+        import jwt
+        
+        # Decode the token to extract JTI (using basic secret for testing)
+        try:
+            # Use same secret and algorithm as TokenValidator for consistency
+            decoded = jwt.decode(token, "test-secret-key", algorithms=["HS256"], verify_exp=True)
+            jti = decoded.get("jti")
+            
+            if not jti:
+                # If no JTI, we can't track replay - consider this valid for now
+                return
+                
+            # For validate_token_not_replayed, we check if token has been used at all
+            # This is stricter than detect_token_replay for security validation
+            if self._token_usage.get(jti, 0) >= 1:
+                raise ValueError("Token replay detected")
+                
+        except jwt.ExpiredSignatureError:
+            # Let expired token errors bubble up
+            raise
+        except jwt.InvalidTokenError:
+            # Invalid tokens should be rejected
+            raise ValueError("Invalid token for replay validation")
     
     def revoke_token(self, jti: str, reason: str):
         """Revoke a token by adding it to the revocation list."""
@@ -61,9 +82,28 @@ class SecurityManager:
     
     def validate_token_not_revoked(self, token: str):
         """Validate that a token hasn't been revoked."""
-        # This would normally decode the token to get the JTI
-        # For testing purposes, we'll raise an exception if revoked
-        raise ValueError("Token has been revoked")
+        import jwt
+        
+        # Decode the token to extract JTI (using basic secret for testing)
+        try:
+            # Use same secret and algorithm as TokenValidator for consistency
+            decoded = jwt.decode(token, "test-secret-key", algorithms=["HS256"], verify_exp=True)
+            jti = decoded.get("jti")
+            
+            if not jti:
+                # If no JTI, we can't track revocation - consider this valid for now
+                return
+                
+            # Check if this token has been revoked
+            if self.is_token_revoked(jti):
+                raise ValueError("Token has been revoked")
+                
+        except jwt.ExpiredSignatureError:
+            # Let expired token errors bubble up
+            raise
+        except jwt.InvalidTokenError:
+            # Invalid tokens should be rejected
+            raise ValueError("Invalid token for revocation validation")
     
     def get_token_usage_count(self, jti: str) -> int:
         """Get the usage count for a token."""

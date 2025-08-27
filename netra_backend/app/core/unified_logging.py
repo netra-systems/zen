@@ -84,9 +84,11 @@ class UnifiedLogger:
     
     def _get_fallback_config(self) -> Dict[str, Any]:
         """Get fallback configuration for bootstrap phase."""
+        # Disable file logging completely during testing
+        is_testing = get_env().get('TESTING') == '1' or get_env().get('ENVIRONMENT') == 'testing'
         return {
             'log_level': get_env().get('LOG_LEVEL', 'INFO').upper(),
-            'enable_file_logging': False,
+            'enable_file_logging': False,  # Never enable file logging in fallback
             'enable_json_logging': False,
             'log_file_path': 'logs/netra.log'
         }
@@ -99,12 +101,40 @@ class UnifiedLogger:
         # Load config (uses caching internally)
         self._config = self._load_config()
         self._configure_handlers()
-        setup_stdlib_interception()
+        
+        # Skip standard library interception during testing to prevent I/O errors
+        is_testing = get_env().get('TESTING') == '1' or get_env().get('ENVIRONMENT') == 'testing'
+        if not is_testing:
+            setup_stdlib_interception()
+        
         self._initialized = True
     
     def _configure_handlers(self):
         """Configure logging handlers."""
-        logger.remove()
+        # Check if we're in test environment and skip handler configuration
+        is_testing = get_env().get('TESTING') == '1' or get_env().get('ENVIRONMENT') == 'testing'
+        
+        # Safely remove existing handlers to prevent I/O errors during test cleanup
+        try:
+            # Remove all existing handlers (stop is deprecated in favor of remove)
+            logger.remove()
+        except (ValueError, OSError, AttributeError) as e:
+            # Ignore errors during handler removal (e.g., closed file handlers)
+            # This commonly occurs during test teardown when files are already closed
+            pass
+        
+        # Skip file handler configuration entirely during testing
+        if is_testing:
+            # Only add a minimal handler for tests to prevent I/O issues
+            try:
+                logger.add(
+                    sink=lambda message: None,  # No-op sink for tests
+                    level="ERROR",
+                    filter=should_log_record
+                )
+            except (ValueError, OSError):
+                pass
+            return
         
         # Suppress SQLAlchemy verbose logging unless in TRACE mode
         import logging

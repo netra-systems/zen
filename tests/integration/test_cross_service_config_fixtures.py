@@ -16,7 +16,7 @@ from fastapi.testclient import TestClient
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.service_discovery import ServiceDiscovery
 from fastapi.middleware.cors import CORSMiddleware
-from shared.cors_config import get_fastapi_cors_config
+from shared.cors_config_builder import get_fastapi_cors_config
 
 
 def test_fastapi_app():

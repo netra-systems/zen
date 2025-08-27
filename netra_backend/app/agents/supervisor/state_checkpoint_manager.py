@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Dict, Optional, Tuple
 
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.db.session import get_session_from_factory
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.agent_state import (
     AgentPhase,
@@ -43,7 +44,7 @@ class StateCheckpointManager:
     
     async def _save_checkpoint_request(self, request: StatePersistenceRequest):
         """Save checkpoint request to database."""
-        session = self.db_session
+        session = await get_session_from_factory(self.db_session)
         state = self._convert_request_to_state(request)
         success = await self._persist_state_data(request, state, session)
         return success, request.run_id
@@ -157,10 +158,14 @@ class StateCheckpointManager:
     async def _execute_checkpoint_save(self, request: StatePersistenceRequest,
                                       run_id: str) -> bool:
         """Execute checkpoint save operation."""
-        success, checkpoint_id = await self._save_checkpoint_request(request)
-        if success:
-            self._finalize_checkpoint_save(checkpoint_id, run_id)
-        return success
+        try:
+            success, checkpoint_id = await self._save_checkpoint_request(request)
+            if success:
+                self._finalize_checkpoint_save(checkpoint_id, run_id)
+            return success
+        except Exception as e:
+            logger.error(f"Failed to save checkpoint for run {run_id}: {e}")
+            return False
     
     def _finalize_checkpoint_save(self, checkpoint_id: str, run_id: str) -> None:
         """Finalize checkpoint save operation."""

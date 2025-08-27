@@ -664,13 +664,13 @@ class OAuthSecurityManager:
             return False
             
         # Use shared CORS configuration (SSOT) instead of hardcoded origins
-        from shared.cors_config import get_cors_origins, is_origin_allowed
+        from shared.cors_config_builder import CORSConfigurationBuilder
         from auth_service.auth_core.config import AuthConfig
         
         env = AuthConfig.get_environment()
-        allowed_origins = get_cors_origins(env)
+        cors = CORSConfigurationBuilder({"ENVIRONMENT": env} if env else None)
         
-        return is_origin_allowed(origin, allowed_origins, env)
+        return cors.origins.is_allowed(origin)
 
 
 # REMOVED: JWTSecurityValidator class - consolidated into jwt_handler.py to eliminate SSOT violation
@@ -849,13 +849,13 @@ def validate_cors_origin(origin: str) -> bool:
         return False
     
     # Use shared CORS configuration (SSOT) instead of hardcoded origins
-    from shared.cors_config import get_cors_origins, is_origin_allowed
+    from shared.cors_config_builder import CORSConfigurationBuilder
     from auth_service.auth_core.config import AuthConfig
     
     env = AuthConfig.get_environment()
-    allowed_origins = get_cors_origins(env)
+    cors = CORSConfigurationBuilder({"ENVIRONMENT": env} if env else None)
     
-    is_allowed = is_origin_allowed(origin, allowed_origins, env)
+    is_allowed = cors.origins.is_allowed(origin)
     
     if is_allowed:
         logger.debug(f"CORS origin allowed: {origin}")

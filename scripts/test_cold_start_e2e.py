@@ -30,7 +30,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import aiohttp
 import websockets
-from websockets.client import WebSocketClientProtocol
+from websockets import ClientConnection as WebSocketClientProtocol
 
 # Configure logging
 logging.basicConfig(

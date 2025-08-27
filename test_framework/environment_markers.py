@@ -234,17 +234,29 @@ def env_requires(services: Optional[List[str]] = None,
         capability = EnvironmentCapability(services, features, data)
         func._env_capability = capability
         
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            current_env = TestEnvironment.get_current()
-            is_satisfied, reason = capability.is_satisfied(current_env)
-            
-            if not is_satisfied:
-                pytest.skip(f"Environment requirements not met: {reason}")
-            
-            return func(*args, **kwargs)
-        
-        return wrapper
+        # Preserve async nature of function
+        if getattr(func, '__code__', None) and func.__code__.co_flags & 0x80:  # CO_COROUTINE
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                current_env = TestEnvironment.get_current()
+                is_satisfied, reason = capability.is_satisfied(current_env)
+                
+                if not is_satisfied:
+                    pytest.skip(f"Environment requirements not met: {reason}")
+                
+                return await func(*args, **kwargs)
+            return async_wrapper
+        else:
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                current_env = TestEnvironment.get_current()
+                is_satisfied, reason = capability.is_satisfied(current_env)
+                
+                if not is_satisfied:
+                    pytest.skip(f"Environment requirements not met: {reason}")
+                
+                return func(*args, **kwargs)
+            return wrapper
     
     return decorator
 
@@ -278,17 +290,29 @@ def env_safe(operations: Optional[List[str]] = None,
         )
         func._env_safety = safety
         
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            current_env = TestEnvironment.get_current()
-            is_safe, reason = safety.is_safe_for_environment(current_env)
-            
-            if not is_safe:
-                pytest.skip(f"Test not safe for {current_env.value}: {reason}")
-            
-            return func(*args, **kwargs)
-        
-        return wrapper
+        # Preserve async nature of function
+        if getattr(func, '__code__', None) and func.__code__.co_flags & 0x80:  # CO_COROUTINE
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                current_env = TestEnvironment.get_current()
+                is_safe, reason = safety.is_safe_for_environment(current_env)
+                
+                if not is_safe:
+                    pytest.skip(f"Test not safe for {current_env.value}: {reason}")
+                
+                return await func(*args, **kwargs)
+            return async_wrapper
+        else:
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                current_env = TestEnvironment.get_current()
+                is_safe, reason = safety.is_safe_for_environment(current_env)
+                
+                if not is_safe:
+                    pytest.skip(f"Test not safe for {current_env.value}: {reason}")
+                
+                return func(*args, **kwargs)
+            return wrapper
     
     return decorator
 
@@ -383,11 +407,57 @@ def get_environment_config(environment: TestEnvironment) -> Dict[str, Any]:
 
 def _is_service_available(service: str, environment: TestEnvironment) -> bool:
     """Check if a service is available in the environment."""
-    # This would check actual service availability
-    # For now, return True for non-prod environments
+    # Production environment uses explicit service list
     if environment == TestEnvironment.PROD:
         return service in os.environ.get("PROD_AVAILABLE_SERVICES", "").split(",")
+    
+    # For other environments, actually check service availability
+    if service == "postgres":
+        return _check_postgres_available()
+    elif service == "redis":
+        return _check_redis_available()
+    elif service == "auth_service":
+        return _check_http_service_available("http://localhost:8001/health")
+    elif service == "backend_service":
+        return _check_http_service_available("http://localhost:8000/health")
+    
+    # Unknown service, assume available for test environments
     return True
+
+
+def _check_postgres_available() -> bool:
+    """Check if PostgreSQL is available."""
+    import socket
+    try:
+        # Check common PostgreSQL ports
+        for port in [5432, 5433]:
+            sock = socket.create_connection(("localhost", port), timeout=2)
+            sock.close()
+            return True
+    except (ConnectionRefusedError, socket.timeout, OSError):
+        pass
+    return False
+
+
+def _check_redis_available() -> bool:
+    """Check if Redis is available."""
+    import socket
+    try:
+        sock = socket.create_connection(("localhost", 6379), timeout=2)
+        sock.close()
+        return True
+    except (ConnectionRefusedError, socket.timeout, OSError):
+        return False
+
+
+def _check_http_service_available(url: str) -> bool:
+    """Check if HTTP service is available."""
+    try:
+        import urllib.request
+        urllib.request.urlopen(url, timeout=2)
+        return True
+    except Exception:
+        return False
 
 
 def _is_feature_enabled(feature: str, environment: TestEnvironment) -> bool:

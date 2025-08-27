@@ -28,7 +28,7 @@ from netra_backend.app.schemas.Agent import SubAgentLifecycle
 
 
 @pytest.mark.e2e
-class TestSubAgent(BaseSubAgent):
+class MockSubAgent(BaseSubAgent):
     """Concrete test implementation of BaseSubAgent for testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
@@ -76,9 +76,9 @@ class AgentOrchestrationTester:
         self.active_agents[name] = supervisor
         return supervisor
     
-    async def create_sub_agent(self, agent_type: str, name: str) -> TestSubAgent:
+    async def create_sub_agent(self, agent_type: str, name: str) -> MockSubAgent:
         """Create sub-agent for coordination testing."""
-        sub_agent = TestSubAgent(
+        sub_agent = MockSubAgent(
             llm_manager=self.llm_manager, name=name, description=f"Test {agent_type} sub-agent"
         )
         sub_agent.user_id = "test_user_orchestration_001"
@@ -87,7 +87,7 @@ class AgentOrchestrationTester:
     
     @pytest.mark.e2e
     async def test_agent_coordination(self, supervisor: SupervisorAgent,
-                                    sub_agents: List[TestSubAgent], task: str) -> Dict[str, Any]:
+                                    sub_agents: List[MockSubAgent], task: str) -> Dict[str, Any]:
         """Test multi-agent coordination workflow."""
         start_time = time.time()
         result = await self._execute_coordination_workflow(supervisor, sub_agents, task)
@@ -139,7 +139,7 @@ class AgentOrchestrationTester:
         return error_test_result
     
     async def _execute_coordination_workflow(self, supervisor: SupervisorAgent, 
-                                           sub_agents: List[TestSubAgent], task: str) -> Dict[str, Any]:
+                                           sub_agents: List[MockSubAgent], task: str) -> Dict[str, Any]:
         """Execute coordination workflow between supervisor and sub-agents."""
         test_state = DeepAgentState(
             messages=[{"role": "user", "content": task}],

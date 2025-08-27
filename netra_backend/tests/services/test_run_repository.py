@@ -12,7 +12,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 import pytest
 
-from netra_backend.tests.database_repository_helpers import (
+from netra_backend.tests.helpers.database_repository_helpers import (
     assert_run_created_correctly,
     create_test_run,
     create_test_thread,

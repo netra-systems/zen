@@ -31,7 +31,8 @@ import websockets
 from fastapi.testclient import TestClient
 from starlette.testclient import TestClient as StarletteTestClient
 
-from shared.cors_config import (
+from shared.cors_config_builder import (
+    CORSConfigurationBuilder,
     get_cors_origins, get_cors_config, is_origin_allowed,
     get_websocket_cors_origins, get_cors_health_info, validate_cors_config
 )
@@ -130,13 +131,32 @@ def cors_helper():
 @pytest.fixture
 def test_app():
     """Create test FastAPI app with CORS middleware."""
-    return create_test_app()
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    from shared.cors_config_builder import get_cors_config
+    
+    app = FastAPI()
+    
+    # Add CORS middleware with current configuration
+    cors_config = get_cors_config()
+    app.add_middleware(
+        CORSMiddleware,
+        **cors_config
+    )
+    
+    # Add a simple test endpoint
+    @app.get("/test")
+    def test_endpoint():
+        return {"message": "test"}
+    
+    return app
 
 
 @pytest.fixture 
 def test_client(test_app):
     """Create test client."""
-    return create_test_client(test_app)
+    from fastapi.testclient import TestClient
+    return TestClient(test_app)
 
 
 class TestCORSConfiguration:

@@ -92,8 +92,8 @@ class UnifiedTestRunner:
         self.fail_fast_strategy = None
         self.execution_plan = None
         
-        # Initialize Cypress runner
-        self.cypress_runner = CypressTestRunner(self.project_root)
+        # Initialize Cypress runner lazily to avoid Docker issues during init
+        self.cypress_runner = None
         
         # Test configurations - Use project root as working directory to fix import issues
         self.test_configs = {
@@ -475,9 +475,11 @@ class UnifiedTestRunner:
         
         # Execute tests with timeout
         start_time = time.time()
-        # Set timeout based on service type
+        # Set timeout based on service type and category
         if service == "frontend":
             timeout_seconds = 120  # 2 minutes for frontend tests (mostly unit tests)
+        elif category_name == "unit":
+            timeout_seconds = 180  # 3 minutes for unit tests specifically
         else:
             timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
@@ -521,9 +523,66 @@ class UnifiedTestRunner:
             "errors": result.stderr if result else ""
         }
     
+    def _can_run_cypress_tests(self) -> Tuple[bool, str]:
+        """Check if Cypress tests can run given current environment."""
+        from dev_launcher.docker_services import check_docker_availability
+        import socket
+        
+        # Check Docker availability
+        docker_available = check_docker_availability()
+        
+        # Quick service availability checks (non-blocking)
+        def quick_service_check(host: str, port: int, timeout: float = 1.0) -> bool:
+            """Quick, non-blocking check if a service is available."""
+            try:
+                with socket.create_connection((host, port), timeout=timeout):
+                    return True
+            except (socket.timeout, socket.error, ConnectionRefusedError, OSError):
+                return False
+        
+        local_postgres = quick_service_check("localhost", 5432)
+        local_redis = quick_service_check("localhost", 6379)
+        local_backend = quick_service_check("localhost", 8000)
+        
+        if not docker_available and not (local_postgres and local_redis):
+            return False, (
+                "Cannot run Cypress tests: Docker Desktop not running and "
+                "required local services not available. "
+                "Either start Docker Desktop or run local PostgreSQL (port 5432) "
+                "and Redis (port 6379) services."
+            )
+        
+        if not local_backend:
+            return False, (
+                "Cannot run Cypress tests: Backend service not running on port 8000. "
+                "Start the backend service first."
+            )
+        
+        return True, "Services available for Cypress tests"
+    
+    def _get_cypress_runner(self):
+        """Get Cypress runner, initializing it lazily."""
+        if self.cypress_runner is None:
+            self.cypress_runner = CypressTestRunner(self.project_root)
+        return self.cypress_runner
+    
     def _run_cypress_tests(self, category_name: str, args: argparse.Namespace) -> Dict:
         """Run Cypress E2E tests using the CypressTestRunner."""
         print(f"Running Cypress tests for category: {category_name}")
+        
+        # Early check for service availability
+        can_run, message = self._can_run_cypress_tests()
+        if not can_run:
+            print(f"SKIPPING Cypress tests: {message}")
+            return {
+                "success": False,
+                "duration": 0,
+                "output": "",
+                "errors": message,
+                "category": "cypress",
+                "skipped": True,
+                "skip_reason": "service_unavailable"
+            }
         
         try:
             # Create Cypress execution options
@@ -545,16 +604,28 @@ class UnifiedTestRunner:
                 options.spec_pattern = "cypress/e2e/critical-basic-flow.cy.ts,cypress/e2e/basic-ui-test.cy.ts"
             else:
                 # Category-specific patterns
-                spec_patterns = self.cypress_runner.config_manager.get_spec_patterns(category_name)
+                cypress_runner = self._get_cypress_runner()
+                spec_patterns = cypress_runner.config_manager.get_spec_patterns(category_name)
                 if spec_patterns:
                     options.spec_pattern = ",".join(spec_patterns)
             
-            # Run Cypress tests (handle async call)
+            # Run Cypress tests (handle async call with event loop detection)
+            cypress_runner = self._get_cypress_runner()
             import asyncio
-            success, results = asyncio.run(self.cypress_runner.run_tests(options))
+            try:
+                # Try to get existing event loop
+                loop = asyncio.get_running_loop()
+                # If we have a loop, we need to run in a separate thread
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(lambda: asyncio.run(cypress_runner.run_tests(options)))
+                    success, results = future.result(timeout=options.timeout)
+            except RuntimeError:
+                # No event loop running, safe to create new one
+                success, results = asyncio.run(cypress_runner.run_tests(options))
             
             # Convert to unified format
-            return {
+            result_dict = {
                 "success": success,
                 "duration": results.get("execution_time_seconds", 0),
                 "output": results.get("raw_output", {}).get("stdout", ""),
@@ -566,9 +637,26 @@ class UnifiedTestRunner:
                 "skipped": results.get("skipped", 0)
             }
             
+            # Add Docker-specific error handling if present
+            if not success and "docker_info" in results:
+                docker_info = results["docker_info"]
+                if not docker_info.get("docker_available", True):
+                    print("ERROR: Cypress tests failed due to missing services")
+                    print(f"HINT: {results.get('suggestion', 'Please ensure required services are running')}")
+                    result_dict["docker_error"] = True
+            
+            return result_dict
+            
         except Exception as e:
             error_msg = f"Cypress test execution failed: {str(e)}"
             print(f"ERROR: {error_msg}")
+            
+            # Check if this is a Docker-related error
+            if "Docker" in str(e) or "docker" in str(e).lower():
+                print("HINT: This appears to be a Docker-related issue.")
+                print("      Either start Docker Desktop or ensure required services are running locally.")
+                print("      Required services: PostgreSQL (port 5432), Redis (port 6379)")
+            
             return {
                 "success": False,
                 "duration": 0,
@@ -630,6 +718,10 @@ class UnifiedTestRunner:
         # Add fast fail
         if args.fast_fail:
             cmd_parts.append("-x")
+        
+        # Add timeout for unit tests to prevent hanging
+        if category_name == "unit":
+            cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])
         
         # Add specific test pattern
         if args.pattern:

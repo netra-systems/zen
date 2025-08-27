@@ -32,7 +32,7 @@ import pytest
 
 from tests.clients.factory import TestClientFactory
 from tests.e2e.cache_coherence_helpers import CacheCoherenceValidator
-from tests.e2e.websocket.state_helpers import StateDiffTracker, StateValidator
+from tests.e2e.websocket_tests.state_helpers import StateDiffTracker, StateValidator
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(

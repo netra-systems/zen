@@ -477,7 +477,7 @@ class ValidationOrchestrator:
         return self.config.get("service_urls", {
             "frontend": "http://localhost:3000",
             "backend": "http://localhost:8000", 
-            "auth": "http://localhost:8001"
+            "auth": "http://localhost:8081"
         })
     
     def _get_test_users(self) -> List[str]:

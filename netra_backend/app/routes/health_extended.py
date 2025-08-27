@@ -84,10 +84,13 @@ async def pool_metrics() -> Dict[str, Any]:
 async def cors_test() -> Dict[str, Any]:
     """CORS configuration test endpoint for debugging and validation."""
     from netra_backend.app.core.configuration import get_configuration
-    from shared.cors_config import get_cors_health_info
+    from shared.cors_config_builder import CORSConfigurationBuilder
     
     config = get_configuration()
-    cors_info = get_cors_health_info(config.environment)
+    
+    # Use CORSConfigurationBuilder for health info
+    cors = CORSConfigurationBuilder()
+    cors_info = cors.health.get_config_info()
     
     return {
         "service": "netra-backend",

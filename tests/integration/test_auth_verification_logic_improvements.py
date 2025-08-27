@@ -73,7 +73,7 @@ class ImprovedAuthVerifier:
     """Improved auth verification with multiple strategies and fallbacks."""
     
     def __init__(self, auth_service_url: Optional[str] = None):
-        self.auth_service_url = auth_service_url or get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')
+        self.auth_service_url = auth_service_url or get_env().get('AUTH_SERVICE_URL', 'http://localhost:8081')
         self.verification_history = []
         self.current_state = AuthServiceState(
             service_url=self.auth_service_url,

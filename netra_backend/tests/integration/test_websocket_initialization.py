@@ -43,12 +43,8 @@ class TestWebSocketInitialization:
     async def test_startup_module_websocket_initialization_current_state(self):
         """
         Test current state of WebSocket initialization in startup_module.
-        This should fail due to the missing large_message_handler import.
+        This should now work correctly with the consolidated WebSocket architecture.
         """
-        # Mock the app
-        # Mock: Generic component isolation for controlled unit testing
-        mock_app = MagicMock()
-        
         # Mock logger
         # Mock: Generic component isolation for controlled unit testing
         mock_logger = MagicMock()
@@ -61,14 +57,11 @@ class TestWebSocketInitialization:
             mock_config.graceful_startup_mode = 'true'
             mock_get_config.return_value = mock_config
             
-            # This should log a warning but not raise an exception due to graceful mode
-            await initialize_websocket_components(mock_app, mock_logger)
+            # This should now work correctly without warnings
+            await initialize_websocket_components(mock_logger)
             
-            # Verify warning was logged about the missing module
-            mock_logger.warning.assert_called()
-            warning_message = mock_logger.warning.call_args[0][0]
-            assert "large_message_handler" in warning_message
-            assert "No module named" in warning_message
+            # Verify info was logged about successful initialization
+            mock_logger.info.assert_called_with("WebSocket components initialized")
     
     @pytest.mark.asyncio
     async def test_legacy_websocket_imports_removed(self):
@@ -91,8 +84,17 @@ class TestWebSocketInitialization:
                 import importlib
                 importlib.import_module(module_path)
             
-            assert f"No module named '{module_path}'" in str(exc_info.value) or \
-                   f"No module named '{module_path.split('.')[-1]}'" in str(exc_info.value)
+            error_str = str(exc_info.value)
+            # Check if the error contains a reference to the expected module path
+            # Account for partial path matches when parent modules don't exist
+            module_found = any([
+                f"No module named '{module_path}'" in error_str,
+                f"No module named '{module_path.split('.')[-1]}'" in error_str,
+                # Check for parent path when intermediate modules don't exist
+                any(f"No module named '{'.'.join(module_path.split('.')[:-i])}'" in error_str 
+                    for i in range(1, len(module_path.split('.'))))
+            ])
+            assert module_found, f"Expected module path '{module_path}' not found in error: {error_str}"
     
     @pytest.mark.asyncio
     async def test_consolidated_websocket_imports_work(self):
@@ -132,10 +134,10 @@ class TestWebSocketInitialization:
         
         # Verify it's not None and has expected methods
         assert manager is not None
-        assert hasattr(manager, 'connect')
+        assert hasattr(manager, 'connect_user')
         assert hasattr(manager, 'disconnect')
         assert hasattr(manager, 'send_message')
-        assert hasattr(manager, 'broadcast')
+        assert hasattr(manager, 'broadcast_to_all')
         
         # No large_message_handler should be referenced
         assert not hasattr(manager, 'large_message_handler')
@@ -175,19 +177,19 @@ class TestWebSocketMessageSizeHandling:
         Test that message chunking (from large_message_handler) is not needed.
         The consolidated architecture handles this differently.
         """
-        from netra_backend.app.websocket_core import WebSocketMessage, create_standard_message
+        from netra_backend.app.websocket_core import WebSocketMessage, create_standard_message, MessageType
         
         # Create a standard message
         message = create_standard_message(
-            type="user_message",
-            content="This is a test message that would have been chunked",
+            msg_type="user_message",
+            payload={"content": "This is a test message that would have been chunked"},
             user_id="test_user",
             thread_id="test_thread"
         )
         
         # Verify the message is created without chunking
-        assert message.type == "user_message"
-        assert message.content == "This is a test message that would have been chunked"
+        assert message.type == MessageType.USER_MESSAGE
+        assert message.payload["content"] == "This is a test message that would have been chunked"
         assert hasattr(message, 'chunk_index') == False  # No chunking fields
         assert hasattr(message, 'total_chunks') == False
 

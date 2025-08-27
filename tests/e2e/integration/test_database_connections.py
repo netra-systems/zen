@@ -25,6 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from dev_launcher import DevLauncher, LauncherConfig
 from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.core.database_types import DatabaseType
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
@@ -145,7 +146,7 @@ class DevDatabaseTestFixture:
         """Start dev environment for database testing."""
         config = LauncherConfig(
             dynamic_ports=True, no_browser=True,
-            no_secrets=True, non_interactive=True
+            load_secrets=False, non_interactive=True
         )
         
         self.launcher = DevLauncher(config)

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <title>CORS Architecture Specification</title>
+        <version>2.0.0</version>
+        <created>2025-08-27</created>
+        <updated>2025-08-27</updated>
+        <status>active</status>
+        <priority>high</priority>
+        <category>security</category>
+        <tags>cors, security, cross-origin, microservices</tags>
+        <bvj>
+            <segment>ALL</segment>
+            <business-goal>Enable secure cross-origin communication</business-goal>
+            <value-impact>Prevents CORS errors that block user interactions</value-impact>
+            <strategic-impact>Foundation for microservice architecture</strategic-impact>
+        </bvj>
+    </metadata>
+
+    <overview>
+        <description>
+            Comprehensive CORS configuration system using the CORSConfigurationBuilder pattern.
+            Provides unified, environment-aware CORS management across all services.
+        </description>
+        <key-principles>
+            <principle>Single Source of Truth (SSOT) - One canonical implementation</principle>
+            <principle>Environment-aware configuration</principle>
+            <principle>Security-first approach with monitoring</principle>
+            <principle>Service-to-service communication support</principle>
+            <principle>WebSocket and static asset support</principle>
+        </key-principles>
+    </overview>
+
+    <architecture>
+        <primary-component>
+            <name>CORSConfigurationBuilder</name>
+            <location>shared/cors_config_builder.py</location>
+            <pattern>Builder Pattern with Sub-Builders</pattern>
+            <description>
+                Main CORS configuration builder following DatabaseURLBuilder pattern.
+                Provides organized access to all CORS configurations through sub-builders.
+            </description>
+            <sub-builders>
+                <builder name="OriginsBuilder">
+                    <responsibility>Manages allowed origins with environment-specific patterns</responsibility>
+                    <methods>
+                        <method>allowed - Get list of allowed origins</method>
+                        <method>is_allowed(origin) - Check if origin is allowed</method>
+                        <method>validate_origin_format(origin) - Validate origin format</method>
+                    </methods>
+                </builder>
+                <builder name="HeadersBuilder">
+                    <responsibility>Manages CORS headers configuration</responsibility>
+                    <methods>
+                        <method>allowed_headers - Headers that clients can send</method>
+                        <method>exposed_headers - Headers exposed to client JavaScript</method>
+                        <method>allowed_methods - HTTP methods allowed for CORS</method>
+                        <method>max_age - Preflight cache duration</method>
+                    </methods>
+                </builder>
+                <builder name="SecurityBuilder">
+                    <responsibility>Handles security validation and logging</responsibility>
+                    <methods>
+                        <method>validate_content_type(content_type) - Validate for security</method>
+                        <method>log_security_event(...) - Log CORS security events</method>
+                        <method>get_security_events(limit) - Get recent security events</method>
+                    </methods>
+                </builder>
+                <builder name="ServiceDetector">
+                    <responsibility>Detects service-to-service communication</responsibility>
+                    <methods>
+                        <method>is_internal_request(headers) - Detect internal requests</method>
+                        <method>should_bypass_cors(headers) - Determine CORS bypass</method>
+                    </methods>
+                </builder>
+                <builder name="FastAPIBuilder">
+                    <responsibility>FastAPI middleware configuration</responsibility>
+                    <methods>
+                        <method>get_middleware_config() - Get complete CORS config</method>
+                        <method>get_middleware_kwargs() - Get kwargs for CORSMiddleware</method>
+                    </methods>
+                </builder>
+                <builder name="WebSocketBuilder">
+                    <responsibility>WebSocket-specific CORS configuration</responsibility>
+                    <methods>
+                        <method>allowed_origins - WebSocket CORS origins</method>
+                        <method>is_origin_allowed(origin) - Check WebSocket origin</method>
+                    </methods>
+                </builder>
+                <builder name="StaticAssetsBuilder">
+                    <responsibility>Static assets CORS configuration</responsibility>
+                    <methods>
+                        <method>get_static_headers() - Headers for static files</method>
+                        <method>get_cdn_config() - CDN CORS configuration</method>
+                    </methods>
+                </builder>
+                <builder name="HealthBuilder">
+                    <responsibility>Health and debug information</responsibility>
+                    <methods>
+                        <method>get_config_info() - CORS health information</method>
+                        <method>validate_config(config) - Validate configuration</method>
+                        <method>get_debug_info() - Detailed debug information</method>
+                    </methods>
+                </builder>
+            </sub-builders>
+        </primary-component>
+    </architecture>
+
+    <service-integration>
+        <service name="netra_backend">
+            <files>
+                <file>netra_backend/app/core/middleware_setup.py</file>
+                <file>netra_backend/app/middleware/cors_fix_middleware.py</file>
+                <file>netra_backend/app/core/websocket_cors.py</file>
+            </files>
+            <usage>
+                cors = CORSConfigurationBuilder()
+                app.add_middleware(CORSMiddleware, **cors.fastapi.get_middleware_config())
+            </usage>
+        </service>
+        <service name="auth_service">
+            <files>
+                <file>auth_service/main.py</file>
+                <file>auth_service/auth_core/security/oauth_security.py</file>
+            </files>
+            <usage>
+                cors_builder = CORSConfigurationBuilder()
+                app.add_middleware(CORSMiddleware, **cors_builder.fastapi.get_middleware_config())
+            </usage>
+        </service>
+    </service-integration>
+
+    <environment-configuration>
+        <environment name="development">
+            <origins>
+                <origin-pattern>http://localhost:*</origin-pattern>
+                <origin-pattern>http://127.0.0.1:*</origin-pattern>
+                <origin-pattern>https://localhost:*</origin-pattern>
+                <origin-pattern>Docker service names</origin-pattern>
+            </origins>
+            <security>Relaxed for development</security>
+        </environment>
+        <environment name="staging">
+            <origins>
+                <origin-pattern>https://*.staging.netrasystems.ai</origin-pattern>
+                <origin-pattern>Cloud Run URLs</origin-pattern>
+                <origin-pattern>Development origins for testing</origin-pattern>
+            </origins>
+            <security>Enhanced monitoring</security>
+        </environment>
+        <environment name="production">
+            <origins>
+                <origin-pattern>https://*.netrasystems.ai</origin-pattern>
+                <origin-pattern>Specific production domains only</origin-pattern>
+            </origins>
+            <security>Strict validation and monitoring</security>
+        </environment>
+    </environment-configuration>
+
+    <security-features>
+        <feature name="Content-Type Validation">
+            <description>Validates Content-Type headers to prevent XSS attacks</description>
+            <implementation>cors.security.validate_content_type(content_type)</implementation>
+        </feature>
+        <feature name="Security Event Logging">
+            <description>Logs CORS security events for monitoring and alerting</description>
+            <implementation>cors.security.log_security_event(...)</implementation>
+        </feature>
+        <feature name="Service-to-Service Detection">
+            <description>Identifies internal service requests for CORS bypass</description>
+            <implementation>cors.service_detector.is_internal_request(headers)</implementation>
+        </feature>
+        <feature name="Origin Validation">
+            <description>Strict origin validation with environment-aware rules</description>
+            <implementation>cors.origins.is_allowed(origin)</implementation>
+        </feature>
+        <feature name="Vary Header">
+            <description>Adds Vary: Origin to prevent CDN cache poisoning</description>
+        </feature>
+        <feature name="Preflight Caching">
+            <description>Configurable max-age for preflight response caching</description>
+        </feature>
+    </security-features>
+
+    <backward-compatibility>
+        <description>
+            The cors_config_builder module provides backward compatibility functions
+            for legacy code that was using the old cors_config module.
+        </description>
+        <functions>
+            <function>get_cors_origins(environment)</function>
+            <function>get_cors_config(environment)</function>
+            <function>is_origin_allowed(origin, allowed_origins, environment)</function>
+            <function>validate_content_type(content_type)</function>
+            <function>is_service_to_service_request(request_headers)</function>
+            <function>get_cors_health_info(environment)</function>
+            <function>get_websocket_cors_origins(environment)</function>
+            <function>get_static_file_cors_headers()</function>
+            <function>get_cdn_cors_config(environment)</function>
+            <function>log_cors_security_event(...)</function>
+        </functions>
+    </backward-compatibility>
+
+    <migration-status>
+        <status>COMPLETED</status>
+        <date>2025-08-27</date>
+        <services-migrated>
+            <service>netra_backend - COMPLETED</service>
+            <service>auth_service - COMPLETED</service>
+        </services-migrated>
+        <legacy-files>
+            <file status="deprecated">shared/cors_config.py.deprecated</file>
+        </legacy-files>
+        <notes>
+            All services have been successfully migrated to use CORSConfigurationBuilder.
+            The legacy cors_config.py has been renamed to cors_config.py.deprecated and
+            can be safely removed after confirming system stability.
+        </notes>
+    </migration-status>
+
+    <testing>
+        <test-coverage>
+            <unit-tests>tests/unit/test_cors_config_builder.py - 41 tests</unit-tests>
+            <security-tests>netra_backend/tests/security/test_cors_security_enhancements.py - 13 tests</security-tests>
+            <integration-tests>tests/integration/test_cors_*.py</integration-tests>
+        </test-coverage>
+    </testing>
+
+    <learnings>
+        <learning date="2025-08-27">
+            Successfully migrated all backend services to use CORSConfigurationBuilder,
+            eliminating duplicate CORS implementations and achieving SSOT principle.
+        </learning>
+        <learning date="2025-08-27">
+            Builder pattern with sub-builders provides clean separation of concerns
+            and makes CORS configuration more maintainable and testable.
+        </learning>
+        <learning date="2025-08-27">
+            Backward compatibility functions in cors_config_builder.py ensure
+            smooth migration without breaking existing code.
+        </learning>
+    </learnings>
+</specification>

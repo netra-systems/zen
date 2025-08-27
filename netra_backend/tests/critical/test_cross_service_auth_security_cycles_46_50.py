@@ -15,7 +15,7 @@ import pytest
 import asyncio
 import time
 from unittest.mock import patch, MagicMock, AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import jwt
 import secrets
 
@@ -37,8 +37,10 @@ class TestCrossServiceAuthSecurity:
     @pytest.fixture
     def auth_middleware(self, environment):
         """Create isolated auth middleware for testing."""
-        middleware = FastAPIAuthMiddleware()
-        middleware.initialize()
+        # Mock FastAPI app for middleware initialization
+        from unittest.mock import Mock
+        mock_app = Mock()
+        middleware = FastAPIAuthMiddleware(app=mock_app)
         return middleware
 
     @pytest.fixture
@@ -63,7 +65,7 @@ class TestCrossServiceAuthSecurity:
             "service_name": "authentication",
             "permissions": ["user_lookup", "token_validation"],
             "token_type": "service_token",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         legitimate_token = token_service.create_service_token(legitimate_service_data)
         
@@ -85,7 +87,7 @@ class TestCrossServiceAuthSecurity:
         user_token_data = {
             "user_id": "malicious_user",
             "role": "user",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         spoofed_token = token_service.create_token(user_token_data)  # User token, not service token
         
@@ -133,7 +135,7 @@ class TestCrossServiceAuthSecurity:
             "service_name": "frontend",
             "permissions": ["user_data", "session_management"],
             "token_type": "service_token",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         service_token = token_service.create_service_token(service_data)
         
@@ -200,7 +202,7 @@ class TestCrossServiceAuthSecurity:
             "service_name": "analytics",
             "permissions": ["read_metrics", "read_events"],  # Read-only permissions
             "token_type": "service_token",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         limited_token = token_service.create_service_token(limited_service_data)
         
@@ -209,7 +211,7 @@ class TestCrossServiceAuthSecurity:
             "service_name": "admin",
             "permissions": ["read_metrics", "write_config", "manage_users", "admin_access"],
             "token_type": "service_token",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         admin_token = token_service.create_service_token(admin_service_data)
         
@@ -289,7 +291,7 @@ class TestCrossServiceAuthSecurity:
             "permissions": ["test_permission"],
             "token_type": "service_token",
             "token_version": 1,
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         initial_token = token_service.create_service_token(initial_token_data)
         
@@ -313,7 +315,7 @@ class TestCrossServiceAuthSecurity:
             "permissions": ["test_permission"],
             "token_type": "service_token",
             "token_version": 2,  # New version
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         rotated_token = token_service.create_service_token(rotated_token_data)
         
@@ -380,7 +382,7 @@ class TestCrossServiceAuthSecurity:
             "service_name": "service_a",
             "permissions": ["call_service_b"],
             "token_type": "service_token",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         service_a_token = token_service.create_service_token(service_a_data)
         
@@ -389,7 +391,7 @@ class TestCrossServiceAuthSecurity:
             "service_name": "service_b",
             "permissions": ["call_service_c"],
             "token_type": "service_token",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         service_b_token = token_service.create_service_token(service_b_data)
         

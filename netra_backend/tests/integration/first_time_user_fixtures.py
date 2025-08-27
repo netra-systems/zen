@@ -572,8 +572,7 @@ class FirstTimeUserFixtures:
         user = User(
             id=str(uuid.uuid4()),
             email="demo@company.com",
-            plan_tier="free",
-            demo_eligible=True
+            plan_tier="free"
         )
         setup["session"].add(user)
         await setup["session"].commit()
@@ -587,8 +586,7 @@ class FirstTimeUserFixtures:
         user = User(
             id=str(uuid.uuid4()),
             email="converting@company.com",
-            plan_tier="free",
-            conversion_ready=True
+            plan_tier="free"
         )
         setup["session"].add(user)
         await setup["session"].commit()

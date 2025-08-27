@@ -16,6 +16,9 @@ import pytest
 
 from netra_backend.app.config import get_config
 
+# Get settings instance
+settings = get_config()
+
 class TestAPIResponseHandlingL3:
     """Test API response handling scenarios"""
     

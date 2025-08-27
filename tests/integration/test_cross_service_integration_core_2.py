@@ -18,7 +18,6 @@ from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceStat
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.middleware_setup import (
-    CustomCORSMiddleware,
     setup_cors_middleware,
 )
 
@@ -124,20 +123,21 @@ class TestSyntaxFix:
         assert status.cross_service_status['cors_enabled'] is True
         assert status.cross_service_status['service_discovery_active'] is True
 
+    @pytest.fixture
     def launcher_config(self):
         """Create test launcher config."""
         
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create required directory structure for LauncherConfig validation
             project_root = Path(temp_dir)
-            (project_root / "app").mkdir()
+            (project_root / "netra_backend" / "app").mkdir(parents=True)
             (project_root / "dev_launcher").mkdir()
             (project_root / "frontend").mkdir()
             (project_root / "auth_service").mkdir()
             
             # Create minimal required files
-            (project_root / "app" / "__init__.py").touch()
-            (project_root / "app" / "main.py").touch()
+            (project_root / "netra_backend" / "app" / "__init__.py").touch()
+            (project_root / "netra_backend" / "app" / "main.py").touch()
             
             config = LauncherConfig(project_root=project_root)
             config.load_secrets = False
@@ -157,7 +157,7 @@ class TestSyntaxFix:
             launcher = DevLauncher(launcher_config)
             
             # Force cache miss to trigger environment setup
-            launcher.cache_manager.invalidate_environment_cache()
+            launcher.cache_manager.clear_cache()
             
             # Trigger environment check which sets defaults
             launcher.check_environment()
@@ -181,7 +181,7 @@ class TestSyntaxFix:
             launcher = DevLauncher(launcher_config)
             
             # Force cache miss to trigger environment setup
-            launcher.cache_manager.invalidate_environment_cache()
+            launcher.cache_manager.clear_cache()
             
             # Trigger environment check which sets up tokens
             launcher.check_environment()

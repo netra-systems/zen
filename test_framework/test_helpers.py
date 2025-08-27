@@ -22,8 +22,9 @@ from sqlalchemy import create_engine, text
 
 
 def get_project_root() -> Path:
-    """Get the project root directory."""
-    return Path(__file__).parent.parent
+    """SSOT: Import from centralized project_utils."""
+    from netra_backend.app.core.project_utils import get_project_root as _get_project_root
+    return _get_project_root()
 
 
 def is_windows() -> bool:

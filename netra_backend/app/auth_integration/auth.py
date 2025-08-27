@@ -155,7 +155,7 @@ def require_permission(permission: str):
 
 def _validate_user_permission(user: User, permission: str) -> None:
     """Validate that user has the required permission."""
-    if hasattr(user, 'permissions'):
+    if hasattr(user, 'permissions') and user.permissions is not None:
         if permission not in user.permissions:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

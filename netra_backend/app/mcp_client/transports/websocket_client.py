@@ -12,6 +12,7 @@ from typing import Any, Callable, Dict, Optional
 from urllib.parse import urlparse
 
 import websockets
+from websockets import ServerConnection
 from websockets.exceptions import ConnectionClosed, InvalidMessage
 
 from netra_backend.app.db.base import (
@@ -55,7 +56,7 @@ class WebSocketTransport(MCPTransport):
 
     def _init_state_variables(self) -> None:
         """Initialize state management variables."""
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[websockets.ServerConnection] = None
         self._pending_requests: Dict[str, asyncio.Future] = {}
         self._message_handlers: Dict[str, Callable] = {}
         self._receiver_task: Optional[asyncio.Task] = None

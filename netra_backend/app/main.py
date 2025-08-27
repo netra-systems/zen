@@ -13,6 +13,7 @@ See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 import logging
 from pathlib import Path
+from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 
 from netra_backend.app.core.isolated_environment import get_env
 
@@ -41,11 +42,6 @@ def _load_local_development_env_file(root_path: Path) -> None:
         from dotenv import load_dotenv
         load_dotenv(env_local_path, override=True)
 
-
-def _get_project_root() -> Path:
-    """Get the project root path."""
-    # main.py is in netra_backend/app/, so project root is two levels up
-    return Path(__file__).parent.parent.parent
 
 
 def _load_all_env_files(root_path: Path) -> None:

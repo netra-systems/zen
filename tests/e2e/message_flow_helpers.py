@@ -18,7 +18,7 @@ from tests.e2e.message_flow_validators import (
 )
 
 
-async def test_message_send(harness, message_data: Dict[str, Any]) -> Dict[str, Any]:
+async def validate_message_send(harness, message_data: Dict[str, Any]) -> Dict[str, Any]:
     """Test message sending phase"""
     try:
         # Simple mock test for message sending
@@ -28,7 +28,7 @@ async def test_message_send(harness, message_data: Dict[str, Any]) -> Dict[str, 
         return {"success": False, "error": str(e)}
 
 
-async def test_message_processing(
+async def validate_message_processing(
     harness, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Test message processing through routing"""
@@ -40,7 +40,7 @@ async def test_message_processing(
         return {"processed": False, "error": str(e)}
 
 
-async def test_response_streaming(
+async def validate_response_streaming(
     harness, validator: MessageFlowValidator
 ) -> Dict[str, Any]:
     """Test response streaming to client"""
@@ -84,7 +84,7 @@ async def send_concurrent_message(
         return False
 
 
-async def test_postgres_persistence(
+async def validate_postgres_persistence(
     message_data: Dict[str, Any], validator: MessagePersistenceValidator
 ) -> bool:
     """Test PostgreSQL message persistence"""
@@ -95,7 +95,7 @@ async def test_postgres_persistence(
         return False
 
 
-async def test_cache_persistence(
+async def validate_cache_persistence(
     message_data: Dict[str, Any], validator: MessagePersistenceValidator
 ) -> bool:
     """Test cache persistence"""
@@ -106,7 +106,7 @@ async def test_cache_persistence(
         return False
 
 
-async def test_mid_stream_interruption(
+async def validate_mid_stream_interruption(
     harness, message_data: Dict[str, Any], handler: StreamInterruptionHandler
 ) -> bool:
     """Test interruption during streaming"""
@@ -118,7 +118,7 @@ async def test_mid_stream_interruption(
         return False
 
 
-async def test_interruption_recovery(
+async def validate_interruption_recovery(
     harness, handler: StreamInterruptionHandler  
 ) -> bool:
     """Test recovery after stream interruption"""

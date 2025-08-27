@@ -734,7 +734,8 @@ class DatabaseURLBuilder:
         
         # Strip all known SQLAlchemy driver prefixes
         import re
-        clean_url = re.sub(r'postgresql\+[^:]+://', 'postgresql://', url)
+        # Handle both postgresql+driver and postgres+driver patterns
+        clean_url = re.sub(r'(postgresql|postgres)\+[^:]+://', 'postgresql://', url)
         
         # Also handle postgres:// -> postgresql:// normalization
         if clean_url.startswith("postgres://"):

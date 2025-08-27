@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.db.session import get_session_from_factory
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -159,7 +160,8 @@ class PipelineExecutor:
                                   context: Dict[str, str]) -> None:
         """Save final state to persistence."""
         request = self._build_persistence_request(state, context)
-        await self.state_persistence.save_agent_state(request, self.db_session)
+        session = await get_session_from_factory(self.db_session)
+        await self.state_persistence.save_agent_state(request, session)
     
     def _build_persistence_request(self, state: DeepAgentState, 
                                    context: Dict[str, str]) -> StatePersistenceRequest:

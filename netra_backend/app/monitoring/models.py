@@ -150,6 +150,27 @@ class MetricsCollector:
         self.metrics = []
 
 
+@dataclass
+class ResourcePrediction:
+    """Resource usage prediction data."""
+    resource_type: str
+    current_usage: float
+    predicted_usage: float
+    prediction_time: datetime
+    confidence_score: float
+    time_to_exhaustion_seconds: Optional[float] = None
+
+
+@dataclass
+class TrendAnalysis:
+    """Trend analysis for resource usage."""
+    trend_direction: str  # "increasing", "decreasing", "stable"
+    growth_rate: float
+    variance: float
+    correlation_coefficient: float
+    prediction_accuracy: float
+
+
 __all__ = [
     'Metric',
     'MetricType',
@@ -160,5 +181,7 @@ __all__ = [
     'Alert',
     'MonitoringDashboard',
     'HealthCheck',
-    'MetricsCollector'
+    'MetricsCollector',
+    'ResourcePrediction',
+    'TrendAnalysis'
 ]

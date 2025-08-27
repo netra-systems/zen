@@ -38,6 +38,29 @@ class BaseE2ETest:
         self.test_processes: List[subprocess.Popen] = []
         self.start_time = time.time()
     
+    async def initialize_test_environment(self):
+        """Initialize the test environment with minimal setup.
+        
+        For E2E tests that don't need real services, this provides basic setup.
+        Tests requiring real services should override this method.
+        """
+        self.logger.info("Initializing minimal E2E test environment")
+        
+        # Basic environment setup without database connections
+        # This allows tests to run in 'test' environment without external dependencies
+        test_env = {
+            "NETRA_TEST_MODE": "true",
+            "NETRA_STARTUP_MODE": "minimal", 
+            "NETRA_SKIP_SECRETS": "true",
+            "ENVIRONMENT": "test"
+        }
+        
+        # Update environment variables for this test
+        for key, value in test_env.items():
+            os.environ[key] = value
+            
+        self.logger.info("Minimal E2E test environment initialized")
+    
     def teardown_method(self):
         """Tear down method called after each test method."""
         asyncio.run(self.cleanup_resources())

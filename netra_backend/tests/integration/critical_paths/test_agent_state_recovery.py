@@ -271,7 +271,8 @@ class RecoverableAgent(BaseSubAgent):
     """Agent with state recovery capabilities."""
     
     def __init__(self, agent_id: str, recovery_manager: AgentStateRecoveryManager):
-        super().__init__(agent_id=agent_id)
+        super().__init__()
+        self.agent_id = agent_id
         self.recovery_manager = recovery_manager
         self.conversation_context: List[Dict[str, Any]] = []
         self.task_progress: Dict[str, Any] = {}
@@ -450,6 +451,27 @@ class RecoverableAgent(BaseSubAgent):
             "memory_entries": len(self.memory_state),
             "last_heartbeat": self.last_heartbeat
         }
+    
+    async def execute(self, input_data: Any) -> Any:
+        """Execute agent task - required by BaseSubAgent interface."""
+        # For test purposes, simulate basic task execution
+        if self.is_crashed:
+            raise RuntimeError("Agent is crashed")
+            
+        # Update heartbeat
+        self.last_heartbeat = time.time()
+        
+        # Process the input
+        if isinstance(input_data, dict):
+            if "action" in input_data:
+                action = input_data["action"]
+                if action == "analyze":
+                    return {"result": "analysis_complete", "status": "success"}
+                elif action == "process":
+                    return {"result": "processing_complete", "status": "success"}
+                    
+        # Default response
+        return {"result": "executed", "input": input_data, "status": "success"}
 
 @pytest.mark.L3
 @pytest.mark.integration

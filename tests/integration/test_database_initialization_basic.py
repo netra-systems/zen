@@ -244,12 +244,10 @@ class TestDatabaseInitializationBasic:
                 
                 # Test CREATE TEMPORARY TABLE permission (already tested in CRUD test)
                 try:
-                    with connection.begin() as transaction:
-                        connection.execute(text("""
-                            CREATE TEMPORARY TABLE permission_test (test_col INTEGER)
-                        """))
-                        connection.execute(text("DROP TABLE permission_test"))
-                        transaction.commit()
+                    connection.execute(text("""
+                        CREATE TEMPORARY TABLE permission_test (test_col INTEGER)
+                    """))
+                    connection.execute(text("DROP TABLE permission_test"))
                     
                     print("[PASS] CREATE TEMPORARY TABLE permission verified")
                     

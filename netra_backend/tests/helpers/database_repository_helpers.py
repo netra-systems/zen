@@ -8,21 +8,11 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
-# Thread test helpers
-async def create_test_thread(uow, user_id="test_user", title="Test Thread"):
-    """Create a test thread with minimal setup."""
-    return await uow.threads.create({
-        "user_id": user_id,
-        "title": title
-    })
-
-async def create_test_threads(uow, count=5, user_id="test_user"):
-    """Create multiple test threads."""
-    threads = []
-    for i in range(count):
-        thread = await create_test_thread(uow, user_id, f"Thread {i}")
-        threads.append(thread)
-    return threads
+# Thread test helpers - SSOT compliance: import from thread_helpers
+from netra_backend.tests.helpers.thread_helpers import (
+    create_test_thread,
+    create_test_threads,
+)
 
 def setup_thread_mock_behavior(mock_repo):
     """Setup mock behavior for thread repository."""

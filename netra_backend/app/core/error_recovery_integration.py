@@ -510,7 +510,7 @@ class EnhancedErrorRecoverySystem:
         """Get basic recovery metrics."""
         return {
             'recovery_stats': self.recovery_stats,
-            'circuit_breakers': self.circuit_breaker_registry.get_all_metrics(),
+            'circuit_breakers': self.circuit_breaker_registry.get_all_services_status(),
             'degradation_status': self.degradation_manager.get_degradation_status()
         }
     

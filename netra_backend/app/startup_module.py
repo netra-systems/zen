@@ -9,6 +9,7 @@ import os
 import sys
 import time
 from pathlib import Path
+from netra_backend.app.core.project_utils import get_project_root as _get_project_root
 from typing import Optional, Tuple
 
 from fastapi import FastAPI
@@ -41,11 +42,7 @@ from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.utils.multiprocessing_cleanup import setup_multiprocessing
 
 
-def _get_project_root() -> Path:
-    """Get the project root path."""
-    # startup_module.py is in netra_backend/app/, so project root is two levels up
-    return Path(__file__).parent.parent.parent
-
+# SSOT compliance: _get_project_root now imported from netra_backend.app.core.project_utils
 
 async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
     """Ensure all required database tables exist, creating them if necessary."""

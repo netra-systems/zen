@@ -82,7 +82,7 @@ class ImprovedReadinessVerifier:
         self.readiness_configs = {
             'auth_service': ReadinessConfiguration(
                 service_name='auth_service',
-                base_url=get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001'),
+                base_url=get_env().get('AUTH_SERVICE_URL', 'http://localhost:8081'),
                 readiness_endpoints=['/health', '/health/ready', '/status'],
                 dependencies=['postgres'],
                 required_checks=['endpoint_responsive', 'database_connected'],
@@ -752,7 +752,7 @@ class TestServiceReadinessVerificationImprovements:
         
         # Test services with resilient readiness checks
         test_services = [
-            {'name': 'auth_service', 'url': get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')},
+            {'name': 'auth_service', 'url': get_env().get('AUTH_SERVICE_URL', 'http://localhost:8081')},
             {'name': 'backend', 'url': get_env().get('BACKEND_URL', 'http://localhost:8000')}
         ]
         

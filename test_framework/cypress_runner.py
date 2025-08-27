@@ -165,12 +165,26 @@ class CypressTestRunner:
         # Ensure services are ready
         services_ready, service_status = await self.ensure_services_ready(options.timeout // 3)
         if not services_ready:
-            return False, {
+            # Get Docker status information for better error reporting
+            docker_info = self.service_manager.get_docker_status_info()
+            
+            error_details = {
                 "success": False,
                 "error": "Required services not available",
                 "service_status": service_status,
+                "docker_info": docker_info,
                 "timestamp": datetime.now().isoformat()
             }
+            
+            # Add helpful message for Docker unavailability
+            if not docker_info["docker_available"]:
+                error_details["suggestion"] = (
+                    "Docker Desktop is not running. Either start Docker Desktop to enable "
+                    "automatic service containers, or ensure the following services are "
+                    f"running locally: {', '.join(docker_info['docker_dependent_services'])}"
+                )
+            
+            return False, error_details
             
         # Generate dynamic configuration
         dynamic_config = self.generate_dynamic_config(service_status)

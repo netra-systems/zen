@@ -62,7 +62,7 @@ async def create_migration_users(sync_validator):
     return test_users
 
 
-async def test_execute_migration(sync_validator, test_users):
+async def execute_migration(sync_validator, test_users):
     """Execute test migration for all users."""
     for user_id in test_users:
         auth_user = await sync_validator.auth_service.get_user(user_id)
@@ -72,7 +72,7 @@ async def test_execute_migration(sync_validator, test_users):
     return True
 
 
-async def test_verify_migration_integrity(sync_validator, test_users):
+async def verify_migration_integrity(sync_validator, test_users):
     """Verify migration integrity for all users."""
     for user_id in test_users:
         is_synced = await sync_validator.verify_auth_backend_sync(user_id)
@@ -97,7 +97,7 @@ async def verify_auth_backend_consistency(sync_validator, user_id):
     assert is_synced, "Auth-Backend user sync failed"
 
 
-async def test_verify_backend_user_exists(sync_validator, user_id, test_user_data):
+async def verify_backend_user_exists(sync_validator, user_id, test_user_data):
     """Verify Backend user exists with correct data."""
     backend_user = await sync_validator.backend_service.get_user(user_id)
     assert backend_user is not None, "User not found in Backend"
@@ -131,7 +131,7 @@ async def verify_initial_cache(sync_validator, cache_key, user_json):
     assert is_consistent, "Initial cache not consistent"
 
 
-async def test_update_user_and_invalidate_cache(sync_validator, user_id, test_user_data, cache_key):
+async def update_user_and_invalidate_cache(sync_validator, user_id, test_user_data, cache_key):
     """Update user and invalidate cache."""
     updated_data = test_user_data.copy()
     updated_data['full_name'] = "Updated User Name"

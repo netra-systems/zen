@@ -77,7 +77,7 @@ class TestLauncherConfig(unittest.TestCase):
             backend_port=8080, frontend_port=3001,
             static=False, verbose=True,
             backend_reload=False, no_reload=False,
-            no_secrets=False, project_id="test-project",
+            load_secrets=True, project_id="test-project",
             no_browser=True, no_turbopack=False, dev=False,
             no_parallel=False  # Add missing attribute for parallel startup
         )

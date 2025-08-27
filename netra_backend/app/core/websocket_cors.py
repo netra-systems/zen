@@ -16,7 +16,7 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-# WebSocket CORS now uses unified configuration from shared/cors_config.py
+# WebSocket CORS now uses unified configuration from shared/cors_config_builder.py
 # No need for separate WebSocket origin management
 
 # Security configuration constants - more permissive in development
@@ -75,8 +75,9 @@ class WebSocketCORSHandler:
             environment: Current environment (development, staging, production)
         """
         if allowed_origins is None:
-            from shared.cors_config import get_websocket_cors_origins
-            allowed_origins = get_websocket_cors_origins(environment)
+            from shared.cors_config_builder import CORSConfigurationBuilder
+            cors = CORSConfigurationBuilder({"ENVIRONMENT": environment} if environment else None)
+            allowed_origins = cors.websocket.allowed_origins
         
         self.allowed_origins = allowed_origins
         self.environment = environment
@@ -239,8 +240,9 @@ class WebSocketCORSHandler:
         # In development mode, be very permissive - allow almost everything
         if self.environment == "development":
             # Check if it's any localhost origin or Docker service
-            from shared.cors_config import _is_localhost_origin
-            if _is_localhost_origin(origin):
+            from shared.cors_config_builder import CORSConfigurationBuilder
+            cors = CORSConfigurationBuilder()
+            if cors.origins._is_localhost_origin(origin):
                 logger.debug(f"WebSocket origin allowed (dev localhost/Docker): {origin}")
                 return True
             
@@ -415,8 +417,9 @@ def get_environment_origins() -> List[str]:
         env = getattr(config, 'environment', 'development').lower()
         logger.info(f"WebSocket CORS: Using config environment: '{env}'")
     except Exception as e:
-        from shared.cors_config import _detect_environment
-        env = _detect_environment()
+        from shared.cors_config_builder import CORSConfigurationBuilder
+        cors = CORSConfigurationBuilder()
+        env = cors.environment
         logger.warning(f"WebSocket CORS: Config unavailable, using fallback environment: '{env}' (Error: {e})")
     
     return get_environment_origins_for_environment(env)
@@ -431,9 +434,10 @@ def get_environment_origins_for_environment(environment: str) -> List[str]:
     Returns:
         List of allowed origins for the environment
     """
-    from shared.cors_config import get_websocket_cors_origins
+    from shared.cors_config_builder import CORSConfigurationBuilder
     
-    origins = get_websocket_cors_origins(environment)
+    cors = CORSConfigurationBuilder({"ENVIRONMENT": environment} if environment else None)
+    origins = cors.websocket.allowed_origins
     logger.info(f"WebSocket CORS configured for environment '{environment}' with {len(origins)} allowed origins")
     
     # Add explicit logging for critical staging/production detection
@@ -562,8 +566,9 @@ def get_websocket_cors_handler(environment: Optional[str] = None) -> WebSocketCO
             logger.info(f"WebSocket CORS: Detected environment from config: '{environment}'")
         except Exception as e:
             # Fallback to shared CORS config environment detection
-            from shared.cors_config import _detect_environment
-            environment = _detect_environment()
+            from shared.cors_config_builder import CORSConfigurationBuilder
+            fallback_cors = CORSConfigurationBuilder()
+            environment = fallback_cors.environment
             logger.warning(f"WebSocket CORS: Config unavailable, using fallback detection: '{environment}' (Error: {e})")
     else:
         logger.info(f"WebSocket CORS: Using explicit environment: '{environment}'")

@@ -32,16 +32,17 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import websockets
+from websockets import ServerConnection
 
-StagingTestSuite = AsyncMock
+StagingTestSuite = AsyncMock()
 
-get_staging_suite = AsyncMock
+get_staging_suite = AsyncMock()
 # from netra_backend.app.websocket_core.manager import WebSocketManager
 
-WebSocketManager = AsyncMock
+WebSocketManager = AsyncMock()
 # from app.services.redis.session_manager import RedisSessionManager
 
-RedisSessionManager = AsyncMock
+RedisSessionManager = AsyncMock()
 
 @dataclass
 
@@ -73,7 +74,7 @@ class WebSocketL4TestSuite:
 
         self.websocket_url: str = ""
 
-        self.active_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.active_connections: Dict[str, websockets.ServerConnection] = {}
 
         self.connection_metrics: Dict[str, Dict] = {}
 
@@ -345,7 +346,7 @@ class WebSocketL4TestSuite:
         
         return successful_messages / len(message_results) if message_results else 0.0
     
-    async def _send_and_verify_message(self, websocket: websockets.WebSocketServerProtocol,
+    async def _send_and_verify_message(self, websocket: websockets.ServerConnection,
 
                                      connection_id: str, message: Dict) -> Dict[str, Any]:
 
@@ -402,7 +403,7 @@ class WebSocketL4TestSuite:
     
     async def _simulate_disconnection_and_reconnect(self, connection_id: str,
 
-                                                  websocket: websockets.WebSocketServerProtocol) -> Dict[str, Any]:
+                                                  websocket: websockets.ServerConnection) -> Dict[str, Any]:
 
         """Simulate network disconnection and test reconnection."""
 

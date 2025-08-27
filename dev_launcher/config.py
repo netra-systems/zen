@@ -25,7 +25,7 @@ class LauncherConfig:
     # Port configuration - FIX: Use static ports for consistent frontend-backend communication
     backend_port: Optional[int] = ServicePorts.BACKEND_DEFAULT  # Default to 8000
     frontend_port: int = ServicePorts.FRONTEND_DEFAULT  # Default to 3000
-    dynamic_ports: bool = False  # Default to static allocation for consistency
+    dynamic_ports: bool = True  # Default to dynamic allocation for flexibility
     enable_port_conflict_resolution: bool = True  # Auto-resolve port conflicts only when needed
     
     # Reload configuration (uses native reload)

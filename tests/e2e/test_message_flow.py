@@ -32,13 +32,13 @@ from tests.e2e.harness_complete import TestHarnessContext
 from tests.e2e.message_flow_helpers import (
     create_concurrent_messages,
     send_concurrent_message,
-    test_cache_persistence,
-    test_interruption_recovery,
-    test_message_processing,
-    test_message_send,
-    test_mid_stream_interruption,
-    test_postgres_persistence,
-    test_response_streaming,
+    validate_cache_persistence,
+    validate_interruption_recovery,
+    validate_message_processing,
+    validate_message_send,
+    validate_mid_stream_interruption,
+    validate_postgres_persistence,
+    validate_response_streaming,
     validate_complete_flow,
 )
 from tests.e2e.message_flow_validators import (
@@ -85,13 +85,13 @@ async def test_complete_message_lifecycle(message_flow_config, flow_validator
             user.id, "Test message for complete lifecycle"
         )
         
-        sent_result = await test_message_send(harness, message_data)
+        sent_result = await validate_message_send(harness, message_data)
         assert sent_result["success"], "Message send failed"
         
-        process_result = await test_message_processing(harness, message_data)
+        process_result = await validate_message_processing(harness, message_data)
         assert process_result["processed"], "Message processing failed"
         
-        stream_result = await test_response_streaming(harness, flow_validator)
+        stream_result = await validate_response_streaming(harness, flow_validator)
         assert stream_result["streamed"], "Response streaming failed"
         
         flow_complete = await validate_complete_flow(flow_validator)
@@ -135,12 +135,12 @@ async def test_message_persistence(message_flow_config, persistence_validator
         message_data = TestDataFactory.create_message_data(
             user.id, "Test persistence message"
         )
-        postgres_saved = await test_postgres_persistence(
+        postgres_saved = await validate_postgres_persistence(
             message_data, persistence_validator
         )
         assert postgres_saved, "PostgreSQL persistence failed"
         
-        cache_saved = await test_cache_persistence(
+        cache_saved = await validate_cache_persistence(
             message_data, persistence_validator
         )
         assert cache_saved, "Cache persistence failed"
@@ -164,12 +164,12 @@ async def test_streaming_interruption(message_flow_config, interruption_handler
         message_data = TestDataFactory.create_message_data(
             user.id, "Test stream interruption"
         )
-        interruption_handled = await test_mid_stream_interruption(
+        interruption_handled = await validate_mid_stream_interruption(
             harness, message_data, interruption_handler
         )
         assert interruption_handled, "Mid-stream interruption not handled"
         
-        recovery_successful = await test_interruption_recovery(
+        recovery_successful = await validate_interruption_recovery(
             harness, interruption_handler
         )
         assert recovery_successful, "Recovery after interruption failed"

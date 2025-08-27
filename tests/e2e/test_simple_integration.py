@@ -33,7 +33,11 @@ class SimpleServiceManager:
         auth_main = project_root / "auth_service" / "main.py"
         env = os.environ.copy()
         env["PORT"] = "8001"
+        # Enable fast test mode to avoid database initialization issues
+        env["AUTH_FAST_TEST_MODE"] = "true"
+        env["ENVIRONMENT"] = "test"
         
+        print(f"Starting auth service with command: {sys.executable} {auth_main}")
         self.processes["auth"] = subprocess.Popen(
             [sys.executable, str(auth_main)],
             cwd=str(project_root),
@@ -43,8 +47,16 @@ class SimpleServiceManager:
             text=True
         )
         
-        # Wait for service to start
-        await self._wait_for_health("http://localhost:8001/health", timeout=15)
+        # Wait for service to start, with better error handling
+        try:
+            await self._wait_for_health("http://localhost:8001/health", timeout=15)
+        except RuntimeError:
+            # Capture process output for debugging
+            if self.processes["auth"].poll() is not None:
+                stdout, stderr = self.processes["auth"].communicate()
+                print(f"Auth service process exited. STDOUT: {stdout}")
+                print(f"Auth service process exited. STDERR: {stderr}")
+            raise
     
     async def start_backend_service(self):
         """Start backend service if not running."""
@@ -53,7 +65,10 @@ class SimpleServiceManager:
             return
         
         env = os.environ.copy()
+        env["ENVIRONMENT"] = "test"
+        env["AUTH_FAST_TEST_MODE"] = "true"
         
+        print(f"Starting backend service with uvicorn")
         self.processes["backend"] = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "netra_backend.app.main:app", 
              "--host", "0.0.0.0", "--port", "8000", "--log-level", "warning"],
@@ -64,8 +79,16 @@ class SimpleServiceManager:
             text=True
         )
         
-        # Wait for service to start
-        await self._wait_for_health("http://localhost:8000/health", timeout=30)
+        # Wait for service to start, with better error handling
+        try:
+            await self._wait_for_health("http://localhost:8000/health", timeout=30)
+        except RuntimeError:
+            # Capture process output for debugging
+            if self.processes["backend"].poll() is not None:
+                stdout, stderr = self.processes["backend"].communicate()
+                print(f"Backend service process exited. STDOUT: {stdout}")
+                print(f"Backend service process exited. STDERR: {stderr}")
+            raise
     
     async def _check_service_health(self, url: str) -> bool:
         """Check if a service is healthy."""

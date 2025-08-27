@@ -21,9 +21,9 @@ from typing import Any, Dict, List, Optional
 import docker
 import pytest
 import redis.asyncio as aioredis
-from background_jobs.job_manager import JobManager
-from background_jobs.queue import RedisQueue
-from background_jobs.worker import JobWorker
+from test_framework.mocks.background_jobs_mock.job_manager import JobManager
+from test_framework.mocks.background_jobs_mock.queue import RedisQueue
+from test_framework.mocks.background_jobs_mock.worker import JobWorker
 
 @pytest.mark.L3
 class TestBackgroundJobsRedisQueueL3:

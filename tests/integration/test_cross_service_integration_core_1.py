@@ -19,7 +19,7 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_discovery import ServiceDiscovery
 from netra_backend.app.core.middleware_setup import setup_cors_middleware
 from fastapi.middleware.cors import CORSMiddleware
-from shared.cors_config import get_fastapi_cors_config
+from shared.cors_config_builder import get_fastapi_cors_config
 
 
 class TestSyntaxFix:

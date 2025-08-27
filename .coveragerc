@@ -1,5 +1,5 @@
 [run]
-source = app
+source = netra_backend/app
 omit = 
     */tests/*
     */test_*.py
@@ -7,8 +7,12 @@ omit =
     */venv/*
     */migrations/*
     */alembic/*
-    app/config.py
-    app/main.py
+    netra_backend/app/config.py
+    netra_backend/app/main.py
+    dev_launcher/*
+    test_framework/*
+    scripts/*
+    organized_root/*
 
 [report]
 exclude_lines =

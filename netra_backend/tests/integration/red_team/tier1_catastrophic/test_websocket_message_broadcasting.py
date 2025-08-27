@@ -22,6 +22,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 import websockets
+from websockets import ServerConnection
 from websockets.exceptions import ConnectionClosed, InvalidURI
 
 import pytest
@@ -730,7 +731,7 @@ class TestWebSocketMessageBroadcasting:
         
         try:
             # Establish concurrent connections
-            async def connect_client(token: str, client_id: int) -> Optional[websockets.WebSocketServerProtocol]:
+            async def connect_client(token: str, client_id: int) -> Optional[websockets.ServerConnection]:
                 try:
                     connect_start = time.time()
                     ws = await websockets.connect(

@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 import websockets
+from websockets import ServerConnection
 
 from tests.e2e.service_manager import HealthMonitor, ServiceManager, TestDataSeeder
 from tests.e2e.test_harness import ServiceConfig
@@ -153,7 +154,7 @@ class AgentTestHarness:
             "Content-Type": "application/json"
         }
     
-    async def connect_websocket_with_auth(self, user_auth: Dict) -> websockets.WebSocketServerProtocol:
+    async def connect_websocket_with_auth(self, user_auth: Dict) -> websockets.ServerConnection:
         """Connect WebSocket with authentication."""
         ws_url = f"ws://localhost:{self.config['backend_port']}/ws"
         headers = user_auth["headers"]
@@ -163,7 +164,7 @@ class AgentTestHarness:
         self.state.cleanup_tasks.append(websocket.close)
         return websocket
     
-    async def send_agent_message(self, websocket: websockets.WebSocketServerProtocol, 
+    async def send_agent_message(self, websocket: websockets.ServerConnection, 
                                 message: str, thread_id: str = None) -> str:
         """Send message to agent via WebSocket."""
         message_id = str(uuid.uuid4())
@@ -180,7 +181,7 @@ class AgentTestHarness:
         await websocket.send(json.dumps(payload))
         return message_id
     
-    async def wait_for_agent_response(self, websocket: websockets.WebSocketServerProtocol,
+    async def wait_for_agent_response(self, websocket: websockets.ServerConnection,
                                     message_id: str, timeout: float = 30.0) -> Optional[AgentResponse]:
         """Wait for agent response with timeout."""
         start_time = time.time()

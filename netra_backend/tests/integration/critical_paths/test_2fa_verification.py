@@ -56,6 +56,119 @@ from netra_backend.app.schemas.auth_types import (
 
 logger = logging.getLogger(__name__)
 
+class MockRedisClient:
+    """In-memory mock Redis client for testing when TEST_DISABLE_REDIS=true."""
+    
+    def __init__(self):
+        self._data = {}
+        self._expiry = {}
+    
+    async def ping(self):
+        """Mock ping - always succeeds."""
+        return True
+    
+    async def flushdb(self):
+        """Mock flushdb - clears in-memory data."""
+        self._data.clear()
+        self._expiry.clear()
+        return True
+    
+    async def get(self, key: str):
+        """Mock get - returns value if not expired."""
+        import time
+        if key in self._expiry and time.time() > self._expiry[key]:
+            # Key has expired
+            if key in self._data:
+                del self._data[key]
+            del self._expiry[key]
+            return None
+        return self._data.get(key)
+    
+    async def set(self, key: str, value: str):
+        """Mock set - stores value."""
+        self._data[key] = value
+        return True
+    
+    async def setex(self, key: str, ttl: int, value: str):
+        """Mock setex - stores value with expiry."""
+        import time
+        self._data[key] = value
+        self._expiry[key] = time.time() + ttl
+        return True
+    
+    async def delete(self, key: str):
+        """Mock delete - removes key."""
+        existed = key in self._data
+        if key in self._data:
+            del self._data[key]
+        if key in self._expiry:
+            del self._expiry[key]
+        return 1 if existed else 0
+    
+    async def exists(self, key: str):
+        """Mock exists - checks if key exists and not expired."""
+        import time
+        if key in self._expiry and time.time() > self._expiry[key]:
+            # Key has expired
+            if key in self._data:
+                del self._data[key]
+            del self._expiry[key]
+            return 0
+        return 1 if key in self._data else 0
+    
+    async def incr(self, key: str):
+        """Mock incr - increment counter."""
+        current = int(self._data.get(key, 0))
+        self._data[key] = str(current + 1)
+        return current + 1
+    
+    async def expire(self, key: str, ttl: int):
+        """Mock expire - set expiry for existing key."""
+        import time
+        if key in self._data:
+            self._expiry[key] = time.time() + ttl
+            return True
+        return False
+    
+    async def smembers(self, key: str):
+        """Mock smembers - return set members."""
+        value = self._data.get(key, "")
+        if not value:
+            return set()
+        # Store sets as comma-separated strings for simplicity
+        return set(value.split(",")) if value else set()
+    
+    async def sadd(self, key: str, *values):
+        """Mock sadd - add to set."""
+        existing = await self.smembers(key)
+        for value in values:
+            existing.add(value)
+        self._data[key] = ",".join(existing)
+        return len(values)
+    
+    async def sismember(self, key: str, value: str):
+        """Mock sismember - check set membership."""
+        members = await self.smembers(key)
+        return value in members
+    
+    # Compatibility methods for potential connection pool references
+    @property
+    def connection_pool(self):
+        """Mock connection pool."""
+        class MockPool:
+            @property 
+            def _in_use_connections(self):
+                return []
+        return MockPool()
+    
+    async def aclose(self):
+        """Mock aclose - cleanup."""
+        pass
+    
+    async def close(self):
+        """Mock close - cleanup."""
+        pass
+
 class MockSMSProvider:
     """Mock SMS provider for testing - external service simulation."""
     
@@ -139,10 +252,7 @@ class TOTPGenerator:
             totp_key = f"user_totp:{user_id}"
             logger.info(f"Storing TOTP data to Redis with key: {totp_key}")
             try:
-                # Ensure we're using the current event loop's Redis client
-                if not self.redis_client or self.redis_client.connection_pool._in_use_connections:
-                    await self._reinitialize_redis_client()
-                    
+                # Store TOTP data using Redis client (real or mock)
                 await self.redis_client.setex(totp_key, 86400 * 30, json.dumps(totp_data))  # 30 days
                 logger.info(f"Successfully stored TOTP data to Redis")
             except Exception as e:
@@ -676,36 +786,44 @@ class TwoFactorAuthTestManager:
     async def initialize_services(self):
         """Initialize real services for testing."""
         try:
-            # Create Redis client within the event loop context
-            import redis.asyncio as aioredis
+            # Check if Redis is disabled for tests
             import os
+            redis_disabled = os.getenv("TEST_DISABLE_REDIS", "false").lower() == "true"
             
-            # Configuration for Redis connection
-            redis_host = os.getenv("REDIS_HOST", "localhost")
-            redis_port = int(os.getenv("REDIS_PORT", "6379"))
-            redis_username = os.getenv("REDIS_USERNAME", "")
-            redis_password = os.getenv("REDIS_PASSWORD", "")
+            if redis_disabled:
+                logger.info("Using mock Redis client for 2FA testing (TEST_DISABLE_REDIS=true)")
+                # Use in-memory mock Redis client for testing
+                self.redis_client = MockRedisClient()
+            else:
+                # Create real Redis client within the event loop context
+                import redis.asyncio as aioredis
+                
+                # Configuration for Redis connection
+                redis_host = os.getenv("REDIS_HOST", "localhost")
+                redis_port = int(os.getenv("REDIS_PORT", "6379"))
+                redis_username = os.getenv("REDIS_USERNAME", "")
+                redis_password = os.getenv("REDIS_PASSWORD", "")
+                
+                # Use database 15 for isolated testing to avoid conflicts
+                test_database = 15
+                
+                self.redis_client = aioredis.Redis(
+                    host=redis_host,
+                    port=redis_port,
+                    db=test_database,
+                    username=redis_username or None,
+                    password=redis_password or None,
+                    decode_responses=True,
+                    socket_connect_timeout=10,
+                    socket_timeout=5,
+                    health_check_interval=30
+                )
+                
+                # Test connection and clear test database
+                await self.redis_client.ping()
+                await self.redis_client.flushdb()  # Clear test database
             
-            # Use database 15 for isolated testing to avoid conflicts
-            test_database = 15
-            
-            self.redis_client = aioredis.Redis(
-                host=redis_host,
-                port=redis_port,
-                db=test_database,
-                username=redis_username or None,
-                password=redis_password or None,
-                decode_responses=True,
-                socket_connect_timeout=10,
-                socket_timeout=5,
-                health_check_interval=30
-            )
-            
-            # Test connection and clear test database
-            await self.redis_client.ping()
-            await self.redis_client.flushdb()  # Clear test database
-            
-            # Initialize real components with the Redis client
+            # Initialize real components with the Redis client (real or mock)
             self.totp_generator = TOTPGenerator(self.redis_client)
             self.sms_handler = SMSFallbackHandler(self.sms_provider, self.redis_client)
             self.tfa_manager = TwoFactorAuthManager(
@@ -713,7 +831,8 @@ class TwoFactorAuthTestManager:
                 self.jwt_handler, self.redis_client
             )
             
-            logger.info("2FA verification services initialized with real Redis client")
+            client_type = "mock" if redis_disabled else "real"
+            logger.info(f"2FA verification services initialized with {client_type} Redis client")
             
         except Exception as e:
             logger.error(f"Service initialization failed: {e}")
@@ -722,11 +841,62 @@ class TwoFactorAuthTestManager:
     async def _reinitialize_redis_client(self):
         """Reinitialize Redis client for the current event loop."""
         try:
-            if self.redis_client:
-                await self.redis_client.close()
-            
-            import redis.asyncio as aioredis
             import os
+            redis_disabled = os.getenv("TEST_DISABLE_REDIS", "false").lower() == "true"
+            
+            if redis_disabled:
+                # Use mock Redis client
+                if self.redis_client:
+                    await self.redis_client.close()
+                self.redis_client = MockRedisClient()
+                logger.info("Mock Redis client reinitialized successfully")
+            else:
+                # Use real Redis client
+                if self.redis_client:
+                    await self.redis_client.close()
+                
+                import redis.asyncio as aioredis
+                
+                # Configuration for Redis connection
+                redis_host = os.getenv("REDIS_HOST", "localhost")
+                redis_port = int(os.getenv("REDIS_PORT", "6379"))
+                redis_username = os.getenv("REDIS_USERNAME", "")
+                redis_password = os.getenv("REDIS_PASSWORD", "")
+                
+                # Use database 15 for isolated testing to avoid conflicts
+                test_database = 15
+                
+                self.redis_client = aioredis.Redis(
+                    host=redis_host,
+                    port=redis_port,
+                    db=test_database,
+                    username=redis_username or None,
+                    password=redis_password or None,
+                    decode_responses=True,
+                    socket_connect_timeout=10,
+                    socket_timeout=5,
+                    health_check_interval=30
+                )
+                
+                # Test connection
+                await self.redis_client.ping()
+                logger.info("Real Redis client reinitialized successfully")
+            
+        except Exception as e:
+            logger.error(f"Redis client reinitialization failed: {e}")
+            raise
+    
+    async def _create_current_loop_redis_client(self):
+        """Create a Redis client in the current event loop context."""
+        import os
+        redis_disabled = os.getenv("TEST_DISABLE_REDIS", "false").lower() == "true"
+        
+        if redis_disabled:
+            # Use mock Redis client
+            return MockRedisClient()
+        else:
+            # Use real Redis client
+            import redis.asyncio as aioredis
             
             # Configuration for Redis connection
             redis_host = os.getenv("REDIS_HOST", "localhost")
@@ -737,7 +907,7 @@ class TwoFactorAuthTestManager:
             # Use database 15 for isolated testing to avoid conflicts
             test_database = 15
             
-            self.redis_client = aioredis.Redis(
+            return aioredis.Redis(
                 host=redis_host,
                 port=redis_port,
                 db=test_database,
@@ -748,40 +918,6 @@ class TwoFactorAuthTestManager:
                 socket_timeout=5,
                 health_check_interval=30
             )
-            
-            # Test connection
-            await self.redis_client.ping()
-            logger.info("Redis client reinitialized successfully")
-            
-        except Exception as e:
-            logger.error(f"Redis client reinitialization failed: {e}")
-            raise
-    
-    async def _create_current_loop_redis_client(self):
-        """Create a Redis client in the current event loop context."""
-        import redis.asyncio as aioredis
-        import os
-        
-        # Configuration for Redis connection
-        redis_host = os.getenv("REDIS_HOST", "localhost")
-        redis_port = int(os.getenv("REDIS_PORT", "6379"))
-        redis_username = os.getenv("REDIS_USERNAME", "")
-        redis_password = os.getenv("REDIS_PASSWORD", "")
-        
-        # Use database 15 for isolated testing to avoid conflicts
-        test_database = 15
-        
-        return aioredis.Redis(
-            host=redis_host,
-            port=redis_port,
-            db=test_database,
-            username=redis_username or None,
-            password=redis_password or None,
-            decode_responses=True,
-            socket_connect_timeout=10,
-            socket_timeout=5,
-            health_check_interval=30
-        )
     
     def _setup_current_loop_redis_client(self, current_loop_redis_client):
         """Setup components to use the current loop Redis client."""

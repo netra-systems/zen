@@ -50,15 +50,8 @@ def register_error_handlers(app: FastAPI) -> None:
 
 def setup_security_middleware(app: FastAPI) -> None:
     """Setup security middleware components."""
-    _add_ip_blocking_middleware(app)
     _add_path_traversal_middleware(app)
     _add_security_headers_middleware(app)
-
-
-def _add_ip_blocking_middleware(app: FastAPI) -> None:
-    """Add IP blocking middleware."""
-    from netra_backend.app.middleware.ip_blocking import ip_blocking_middleware
-    app.middleware("http")(ip_blocking_middleware)
 
 
 def _add_path_traversal_middleware(app: FastAPI) -> None:

@@ -36,13 +36,29 @@ if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
     os.environ["ENVIRONMENT"] = "testing"
     os.environ["E2E_TESTING"] = "true"
 
-# E2E Configuration - Project specific
-E2E_CONFIG = {
-    "timeout": 30,
-    "base_url": "http://localhost:8000",
-    "websocket_url": "ws://localhost:8000/ws",
-    "test_user": "test@example.com"
-}
+# Dynamic port configuration for E2E tests
+try:
+    from tests.e2e.dynamic_port_manager import get_port_manager
+    port_mgr = get_port_manager()
+    urls = port_mgr.get_service_urls()
+    E2E_CONFIG = {
+        "timeout": 30,
+        "base_url": urls["backend"],
+        "websocket_url": urls["websocket"],
+        "auth_url": urls["auth"],
+        "test_user": "test@example.com"
+    }
+except ImportError:
+    # Fallback to defaults if port manager not available
+    backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
+    auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
+    E2E_CONFIG = {
+        "timeout": 30,
+        "base_url": f"http://localhost:{backend_port}",
+        "websocket_url": f"ws://localhost:{backend_port}/ws",
+        "auth_url": f"http://localhost:{auth_port}",
+        "test_user": "test@example.com"
+    }
 
 class E2EEnvironmentValidator:
     """Validator for E2E test environment."""
@@ -97,6 +113,13 @@ def real_llm_config():
         "timeout": 30.0,
         "max_retries": 3
     }
+
+# Database sync validator fixture
+@pytest.fixture
+def sync_validator():
+    """Create sync validator instance for database sync tests."""
+    from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
+    return DatabaseSyncValidator()
 
 # Concurrent test fixtures
 @pytest.fixture

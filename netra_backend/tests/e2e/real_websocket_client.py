@@ -8,6 +8,7 @@ import json
 import logging
 from typing import Any, Callable, Dict, Optional
 import websockets
+from websockets import ServerConnection
 from websockets.exceptions import ConnectionClosed, WebSocketException
 
 from netra_backend.tests.e2e.real_client_types import ClientConfig, ConnectionState
@@ -20,7 +21,7 @@ class RealWebSocketClient:
     def __init__(self, config: ClientConfig):
         self.config = config
         self.connection_state = ConnectionState.DISCONNECTED
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[websockets.ServerConnection] = None
         self.message_handler: Optional[Callable] = None
         self._closed = False
     

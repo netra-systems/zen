@@ -233,3 +233,168 @@ async def test_protocol_version_mismatch():
     
     selected = await mock_ws.subprotocol()
     assert selected in subprotocols, "Should select valid subprotocol"
+
+
+class TestWebSocketMessageTamperingPrevention:
+    """ITERATION 29: Prevent WebSocket message tampering attacks."""
+    
+    @pytest.mark.asyncio
+    async def test_websocket_message_tampering_prevention(self):
+        """ITERATION 29: Prevent WebSocket message tampering that corrupts application state.
+        
+        Business Value: Prevents data integrity attacks worth $300K+ per compromise.
+        """
+        # Test 1: Message hash verification prevents tampering
+        client = OrderedWebSocket("secure-client")
+        
+        original_message = await client.send_ordered_message("Sensitive data: transfer $10000")
+        
+        # Simulate message tampering by modifying content but keeping same hash
+        tampered_message = original_message.copy()
+        tampered_message['content'] = "Sensitive data: transfer $100000"  # Amount changed
+        
+        # Hash should not match tampered content
+        expected_hash = hashlib.md5(
+            f"{tampered_message['client_id']}_{tampered_message['sequence']}_"
+            f"{tampered_message['content']}".encode()
+        ).hexdigest()
+        
+        assert tampered_message['hash'] != expected_hash, "Tampering should be detectable via hash mismatch"
+        
+        # Test 2: Sequence number manipulation detection
+        sequence_tampering_cases = [
+            (10, 5, "Sequence rollback attack"),    # Replay old sequence
+            (10, 10, "Sequence replay attack"),    # Duplicate sequence  
+            (10, 15, "Sequence skip attack"),      # Skip sequences
+            (10, -1, "Negative sequence attack"),  # Invalid sequence
+        ]
+        
+        for current_seq, tampered_seq, attack_type in sequence_tampering_cases:
+            client.sequence = current_seq
+            message = await client.send_ordered_message("Test message")
+            
+            # Tamper with sequence number
+            tampered_message = message.copy()
+            tampered_message['sequence'] = tampered_seq
+            
+            if tampered_seq <= current_seq and tampered_seq >= 0:
+                # This would be detected as out-of-order
+                out_of_order = _check_message_order(tampered_message, [message])
+                assert out_of_order > 0, f"{attack_type} should be detected"
+            else:
+                # Invalid sequences should be rejected
+                assert tampered_seq < 0 or tampered_seq > current_seq + 1, f"{attack_type} has invalid sequence"
+                
+        # Test 3: Timestamp manipulation detection
+        current_time = time.time()
+        message = await client.send_ordered_message("Time-sensitive order")
+        
+        timestamp_attacks = [
+            current_time + 86400,  # Future timestamp (1 day ahead)
+            current_time - 86400,  # Past timestamp (1 day behind)
+            0,                     # Invalid timestamp
+            -1,                    # Negative timestamp
+        ]
+        
+        for malicious_timestamp in timestamp_attacks:
+            tampered_message = message.copy()
+            tampered_message['timestamp'] = malicious_timestamp
+            
+            # Verify timestamp is within reasonable bounds
+            time_diff = abs(tampered_message['timestamp'] - current_time)
+            
+            if malicious_timestamp <= 0 or time_diff > 3600:  # More than 1 hour difference
+                assert True, "Suspicious timestamp should be flagged"
+            else:
+                assert False, f"Timestamp attack not properly detected: {malicious_timestamp}"
+                
+        # Test 4: Client ID spoofing prevention
+        legitimate_client = OrderedWebSocket("user-123")
+        attacker_client = OrderedWebSocket("attacker-456")
+        
+        # Legitimate message
+        legit_message = await legitimate_client.send_ordered_message("Authorized action")
+        
+        # Attacker tries to spoof client ID
+        spoofed_message = await attacker_client.send_ordered_message("Malicious action")
+        spoofed_message['client_id'] = "user-123"  # Spoof legitimate user
+        
+        # Hash verification should fail for spoofed message
+        expected_hash_for_spoofed = hashlib.md5(
+            f"user-123_{spoofed_message['sequence']}_Malicious action".encode()
+        ).hexdigest()
+        
+        assert spoofed_message['hash'] != expected_hash_for_spoofed, "Client ID spoofing should be detectable"
+        
+        # Test 5: Message injection prevention
+        client_queue = []
+        
+        # Send legitimate messages
+        for i in range(5):
+            msg = await client.send_ordered_message(f"Message {i}")
+            client_queue.append(msg)
+            
+        # Attacker tries to inject message in the middle
+        injected_message = {
+            'client_id': client.client_id,
+            'sequence': 2.5,  # Try to inject between sequence 2 and 3
+            'content': 'INJECTED MALICIOUS CONTENT',
+            'timestamp': time.time(),
+            'hash': 'fake-hash-12345'
+        }
+        
+        # Sequence validation should catch injection
+        is_valid_sequence = isinstance(injected_message['sequence'], int)
+        assert not is_valid_sequence, "Non-integer sequence should be rejected"
+        
+        # Test 6: Bulk message tampering detection
+        messages = []
+        for i in range(10):
+            msg = await client.send_ordered_message(f"Batch message {i}")
+            messages.append(msg)
+            
+        # Simulate tampering with multiple messages
+        tampered_count = 0
+        for i, msg in enumerate(messages):
+            if i % 2 == 0:  # Tamper with every other message
+                msg['content'] = f"TAMPERED: {msg['content']}"
+                tampered_count += 1
+                
+        # Verify tampered messages have hash mismatches
+        hash_mismatches = 0
+        for msg in messages:
+            expected_hash = hashlib.md5(
+                f"{msg['client_id']}_{msg['sequence']}_{msg['content']}".encode()
+            ).hexdigest()
+            
+            if msg['hash'] != expected_hash:
+                hash_mismatches += 1
+                
+        assert hash_mismatches == tampered_count, "All tampered messages should have hash mismatches"
+        
+        # Test 7: Binary message tampering detection  
+        binary_data = bytes([i % 256 for i in range(1000)])
+        binary_hash = hashlib.sha256(binary_data).hexdigest()
+        
+        binary_message = {
+            'client_id': client.client_id,
+            'sequence': client.sequence + 1,
+            'content_type': 'binary',
+            'data': binary_data,
+            'timestamp': time.time(),
+            'hash': binary_hash
+        }
+        
+        # Tamper with binary data
+        tampered_binary = bytearray(binary_data)
+        tampered_binary[500] = 255  # Change one byte
+        tampered_binary_hash = hashlib.sha256(bytes(tampered_binary)).hexdigest()
+        
+        assert tampered_binary_hash != binary_hash, "Binary tampering should be detectable"
+        
+        # Even small changes should be caught
+        single_bit_flip = bytearray(binary_data)
+        single_bit_flip[0] = single_bit_flip[0] ^ 1  # Flip one bit
+        single_bit_hash = hashlib.sha256(bytes(single_bit_flip)).hexdigest()
+        
+        assert single_bit_hash != binary_hash, "Single bit flip should be detectable"

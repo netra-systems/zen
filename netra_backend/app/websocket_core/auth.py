@@ -255,9 +255,9 @@ class WebSocketAuthenticator:
             # Only allow bypass in development environment
             is_development = getattr(config, 'environment', 'production').lower() == 'development'
             
-            # CRITICAL FIX: Enable development auth bypass automatically in development environment
-            # This allows WebSocket connections to work in development without requiring tokens
-            bypass_enabled = is_development and (auth_bypass or websocket_bypass or True)  # Auto-enable for dev
+            # CRITICAL FIX: Enable development auth bypass only when explicitly configured
+            # This allows WebSocket connections to work in development when bypass is explicitly enabled
+            bypass_enabled = is_development and (auth_bypass or websocket_bypass)
             
             if bypass_enabled and is_development:
                 logger.warning("WebSocket development auth bypass is ENABLED for development environment - NEVER use in production!")

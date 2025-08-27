@@ -265,7 +265,7 @@ class TestMetricsCollectorSummary:
 
         new_metrics = [
 
-            PerformanceMetric("test", float(i), cutoff_time + timedelta(seconds=i))
+            PerformanceMetric("test", float(i), cutoff_time + timedelta(seconds=i+1))
 
             for i in range(50)
 
@@ -352,3 +352,55 @@ class TestMetricsCollectorSummary:
             for i in range(len(metrics)-1)
 
         )
+    
+    def test_cache_performance_degradation_detection(self, collector):
+        """Test detection of cache performance degradation patterns."""
+        
+        # Test cache hit ratio calculation with various scenarios
+        mock_perf_stats_high = {"cache_stats": {"total_hits": 850, "size": 1000}}
+        mock_perf_stats_medium = {"cache_stats": {"total_hits": 650, "size": 1000}}
+        mock_perf_stats_low = {"cache_stats": {"total_hits": 200, "size": 1000}}
+        mock_perf_stats_empty = {"cache_stats": {"total_hits": 0, "size": 0}}
+        
+        # Verify cache hit ratio calculations
+        high_ratio = collector._calculate_cache_hit_ratio(mock_perf_stats_high)
+        medium_ratio = collector._calculate_cache_hit_ratio(mock_perf_stats_medium)
+        low_ratio = collector._calculate_cache_hit_ratio(mock_perf_stats_low)
+        empty_ratio = collector._calculate_cache_hit_ratio(mock_perf_stats_empty)
+        
+        assert high_ratio == 0.85, f"Expected high ratio 0.85, got {high_ratio}"
+        assert medium_ratio == 0.65, f"Expected medium ratio 0.65, got {medium_ratio}"
+        assert low_ratio == 0.20, f"Expected low ratio 0.20, got {low_ratio}"
+        assert empty_ratio == 0.0, f"Expected empty ratio 0.0, got {empty_ratio}"
+        
+        # Test edge cases for cache performance monitoring
+        partial_stats = {"cache_stats": {"total_hits": 100}}  # Missing size
+        no_cache_stats = {}  # No cache_stats section
+        
+        partial_ratio = collector._calculate_cache_hit_ratio(partial_stats)
+        no_cache_ratio = collector._calculate_cache_hit_ratio(no_cache_stats)
+        
+        assert partial_ratio == 0.0, "Should handle missing size gracefully"
+        assert no_cache_ratio == 0.0, "Should handle missing cache_stats gracefully"
+        
+        # Simulate recording cache hit rate directly to verify metrics buffer
+        collector._record_metric("cache_hit_rate", high_ratio)
+        collector._record_metric("cache_hit_rate", medium_ratio)
+        collector._record_metric("cache_hit_rate", low_ratio)
+        
+        # Verify cache metrics were recorded and can detect performance degradation
+        cache_metrics = collector.get_recent_metrics("cache_hit_rate", 60)
+        assert len(cache_metrics) >= 3, "Should have recorded all cache hit rate metrics"
+        
+        cache_values = [m.value for m in cache_metrics]
+        assert 0.85 in cache_values, "Should contain high cache hit rate"
+        assert 0.65 in cache_values, "Should contain medium cache hit rate"
+        assert 0.20 in cache_values, "Should contain low cache hit rate"
+        
+        # Test performance degradation detection logic
+        min_cache_ratio = min(cache_values)
+        max_cache_ratio = max(cache_values)
+        degradation_threshold = 0.3  # 30% degradation threshold
+        
+        performance_degraded = (max_cache_ratio - min_cache_ratio) > degradation_threshold
+        assert performance_degraded, "Should detect significant cache performance degradation"

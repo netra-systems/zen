@@ -13,6 +13,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 import pytest
 import websockets
+from websockets import ServerConnection
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 

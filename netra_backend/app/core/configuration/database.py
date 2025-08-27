@@ -100,11 +100,43 @@ class DatabaseConfigManager:
         self._set_clickhouse_url(config)
     
     def _populate_redis_config(self, config: AppConfig) -> None:
-        """Populate Redis configuration."""
-        redis_url = self._get_redis_url()
+        """Populate Redis configuration using RedisConfigurationBuilder."""
+        from shared.redis_config_builder import RedisConfigurationBuilder
+        
+        # Build environment variables dict for Redis builder
+        env_vars = {
+            "ENVIRONMENT": self._environment,
+            "REDIS_URL": self._env.get("REDIS_URL"),
+            "REDIS_HOST": self._env.get("REDIS_HOST"),
+            "REDIS_PORT": self._env.get("REDIS_PORT"),
+            "REDIS_DB": self._env.get("REDIS_DB"),
+            "REDIS_PASSWORD": self._env.get("REDIS_PASSWORD"),
+            "REDIS_USERNAME": self._env.get("REDIS_USERNAME"),
+            "REDIS_SSL": self._env.get("REDIS_SSL"),
+            "REDIS_FALLBACK_ENABLED": self._env.get("REDIS_FALLBACK_ENABLED"),
+            "REDIS_REQUIRED": self._env.get("REDIS_REQUIRED"),
+        }
+        
+        # Create Redis configuration builder
+        redis_builder = RedisConfigurationBuilder(env_vars)
+        
+        # Validate Redis configuration
+        is_valid, error_msg = redis_builder.validate()
+        if not is_valid:
+            self._logger.error(f"Redis configuration error: {error_msg}")
+            raise ConfigurationError(error_msg)
+        
+        # Get Redis URL and configuration
+        redis_url = redis_builder.connection.get_redis_url()
         if redis_url:
             config.redis_url = redis_url
             self._update_redis_config_object(config, redis_url)
+            
+            # Log Redis configuration (masked) if not already logged
+            if redis_url not in self._logged_urls:
+                safe_log_msg = redis_builder.get_safe_log_message()
+                self._logger.info(safe_log_msg)
+                self._logged_urls.add(redis_url)
     
     def _get_postgres_url(self) -> Optional[str]:
         """Get PostgreSQL URL using comprehensive URL builder."""
@@ -341,16 +373,35 @@ class DatabaseConfigManager:
         return f"clickhouse://{ch_config.user}{password_part}@{ch_config.host}:{port}/{ch_config.database}"
     
     def _get_redis_url(self) -> Optional[str]:
-        """Get Redis URL from environment.
+        """Get Redis URL using RedisConfigurationBuilder.
         
-        Uses IsolatedEnvironment for Redis URL loading.
+        DEPRECATED: This method is kept for backward compatibility.
+        New code should use _populate_redis_config which uses RedisConfigurationBuilder.
         """
         # Return cached URL if available
         if self._redis_url_cache is not None:
             return self._redis_url_cache
             
-        # Use IsolatedEnvironment for Redis URL
-        url = self._env.get("REDIS_URL")
+        from shared.redis_config_builder import RedisConfigurationBuilder
+        
+        # Build environment variables dict for Redis builder
+        env_vars = {
+            "ENVIRONMENT": self._environment,
+            "REDIS_URL": self._env.get("REDIS_URL"),
+            "REDIS_HOST": self._env.get("REDIS_HOST"),
+            "REDIS_PORT": self._env.get("REDIS_PORT"),
+            "REDIS_DB": self._env.get("REDIS_DB"),
+            "REDIS_PASSWORD": self._env.get("REDIS_PASSWORD"),
+            "REDIS_USERNAME": self._env.get("REDIS_USERNAME"),
+            "REDIS_SSL": self._env.get("REDIS_SSL"),
+            "REDIS_FALLBACK_ENABLED": self._env.get("REDIS_FALLBACK_ENABLED"),
+            "REDIS_REQUIRED": self._env.get("REDIS_REQUIRED"),
+        }
+        
+        # Create Redis configuration builder
+        redis_builder = RedisConfigurationBuilder(env_vars)
+        url = redis_builder.connection.get_redis_url()
+        
         # Cache the URL
         self._redis_url_cache = url
         return url

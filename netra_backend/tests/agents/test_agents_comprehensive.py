@@ -34,6 +34,8 @@ class MockAgent:
     """Mock agent for testing agent patterns."""
     
     def __init__(self, agent_id: str, agent_type: str = "generic"):
+        if not agent_id or not agent_id.strip():
+            raise ValueError("Agent ID cannot be empty")
         self.agent_id = agent_id
         self.agent_type = agent_type
         self.status = "initialized"

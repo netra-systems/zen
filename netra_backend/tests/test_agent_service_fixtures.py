@@ -42,12 +42,7 @@ def error_prone_agent():
 def orchestrator():
     """Create a standard orchestrator for testing."""
     orchestrator = MockOrchestrator()
-    orchestrator.metrics = {
-        "agents_created": 0,
-        "tasks_executed": 0,
-        "errors_handled": 0,
-        "total_execution_time": 0.0
-    }
+    # Don't override metrics - use the complete initialization from MockOrchestrator
     return orchestrator
 
 
@@ -72,7 +67,16 @@ def verify_orchestration_metrics(orchestrator, expected_agents=None, expected_ta
 
 
 @pytest.fixture
-def agent_service():
+def agent_service(mock_supervisor):
+    """Create a real agent service for testing with mocked dependencies."""
+    from netra_backend.app.services.agent_service import AgentService
+    # Create real service with mocked supervisor for integration testing
+    service = AgentService(mock_supervisor)
+    return service
+
+
+@pytest.fixture
+def mock_agent_service():
     """Create a mock agent service for testing."""
     from netra_backend.app.services.agent_service import AgentService
     # Mock: Agent service isolation for testing without LLM agent execution
@@ -129,10 +133,12 @@ def create_mock_request_model():
     from netra_backend.app.schemas import RequestModel
     # Mock: Service component isolation for predictable testing behavior
     request = MagicMock(spec=RequestModel)
-    request.message = "test message" 
+    request.message = "test message"
+    request.user_request = "test message"  # Alias for message
     request.thread_id = "thread123"
     request.user_id = "user123"
     request.run_id = "run123"
+    request.id = "request123"
     return request
 
 

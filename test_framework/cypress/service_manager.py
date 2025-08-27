@@ -17,7 +17,7 @@ import psycopg2
 import redis
 
 # Import existing dev launcher infrastructure
-from dev_launcher.docker_services import DockerServiceManager
+from dev_launcher.docker_services import DockerServiceManager, check_docker_availability
 from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
 from dev_launcher.isolated_environment import get_env
 
@@ -62,8 +62,11 @@ class ServiceDependencyManager:
         self.project_root = project_root
         self.env = get_env()
         
+        # Check Docker availability once during initialization
+        self.docker_available = check_docker_availability()
+        
         # Initialize existing infrastructure
-        self.docker_manager = DockerServiceManager()
+        self.docker_manager = DockerServiceManager() if self.docker_available else None
         self.availability_checker = ServiceAvailabilityChecker()
         
         # Service configuration
@@ -147,9 +150,36 @@ class ServiceDependencyManager:
                 
         return service_statuses
         
+    def get_docker_status_info(self) -> Dict[str, Any]:
+        """
+        Get information about Docker availability and its impact on services.
+        
+        Returns:
+            Dictionary with Docker status and affected services
+        """
+        docker_dependent_services = [
+            name for name, config in self.required_services.items() 
+            if config.get("docker_fallback", False)
+        ]
+        
+        return {
+            "docker_available": self.docker_available,
+            "docker_dependent_services": docker_dependent_services,
+            "can_fallback_to_docker": self.docker_available,
+            "fallback_message": (
+                "Docker services available for fallback" if self.docker_available 
+                else "Docker not available - ensure local services are running"
+            )
+        }
+        
     async def _start_docker_services_if_needed(self):
         """Start Docker services for databases/cache if local services not available."""
         logger.info("Checking if Docker services need to be started...")
+        
+        # Skip Docker operations if Docker is not available
+        if not self.docker_available:
+            logger.warning("Docker is not available - skipping Docker service startup")
+            return
         
         # Check PostgreSQL
         postgres_available = await self._check_service_health("postgres", self.required_services["postgres"])

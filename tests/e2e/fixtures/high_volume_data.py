@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 E2E_TEST_CONFIG = {
     "websocket_url": "ws://localhost:8765",
     "backend_url": "http://localhost:8000", 
-    "auth_service_url": "http://localhost:8001",
+    "auth_service_url": "http://localhost:8081",
     "skip_real_services": True,
     "test_mode": "mock"
 }

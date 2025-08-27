@@ -128,11 +128,12 @@ class AuthSecretLoader:
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
         # Environment-specific with higher priority than generic
-        if env == "development":
+        if env in ["development", "test"]:
+            # Test environment uses same config as development
             # First check development-specific env var
             client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
             if client_id:
-                logger.info("Using GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT from environment")
+                logger.info(f"Using GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT from environment for {env}")
                 return client_id
         elif env == "staging":
             # First check staging-specific env var
@@ -163,11 +164,12 @@ class AuthSecretLoader:
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
         # Environment-specific with higher priority than generic
-        if env == "development":
+        if env in ["development", "test"]:
+            # Test environment uses same config as development
             # First check development-specific env var
             secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT")
             if secret:
-                logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT from environment")
+                logger.info(f"Using GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT from environment for {env}")
                 return secret
         elif env == "staging":
             # First check staging-specific env var

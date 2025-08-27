@@ -67,14 +67,25 @@ class UnifiedJWTValidator:
         secret: Optional[str] = None,
         algorithm: str = "HS256",
         issuer: str = "netra-auth-service",
-        access_token_expire_minutes: int = 30,
-        refresh_token_expire_days: int = 7
+        access_token_expire_minutes: Optional[int] = None,
+        refresh_token_expire_days: Optional[int] = None
     ):
         """Initialize validator - configuration only, no JWT operations."""
         self.algorithm = algorithm
         self.issuer = issuer
-        self.access_token_expire_minutes = access_token_expire_minutes
-        self.refresh_token_expire_days = refresh_token_expire_days
+        
+        # Use JWT Configuration Builder for consistent timing configuration
+        try:
+            from shared.jwt_config_builder import JWTConfigBuilder
+            builder = JWTConfigBuilder(service="netra_backend")
+            self.access_token_expire_minutes = access_token_expire_minutes or builder.timing.get_access_token_expire_minutes()
+            self.refresh_token_expire_days = refresh_token_expire_days or builder.timing.get_refresh_token_expire_days()
+            logger.info(f"Using JWT Configuration Builder: access_token_expire_minutes={self.access_token_expire_minutes}")
+        except Exception as e:
+            # Fallback to provided values or defaults
+            self.access_token_expire_minutes = access_token_expire_minutes or 15  # Use 15 minutes to match auth service default
+            self.refresh_token_expire_days = refresh_token_expire_days or 7
+            logger.warning(f"Failed to load JWT config from builder, using fallback: {e}")
         
         # Log warning if direct secret is provided
         if secret:

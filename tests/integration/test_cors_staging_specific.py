@@ -21,9 +21,9 @@ from typing import Dict, List
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
-from shared.cors_config import (
-    get_cors_origins, get_cors_config, is_origin_allowed, 
-    _detect_environment, _matches_staging_patterns
+from shared.cors_config_builder import (
+    CORSConfigurationBuilder,
+    get_cors_origins, get_cors_config, is_origin_allowed
 )
 from test_framework.fixtures import create_test_app
 
@@ -57,7 +57,8 @@ class TestCORSStagingSpecific:
             # Clear other environment variables that might interfere
             clear_env = {k: "" for k in ["ENVIRONMENT", "ENV", "NETRA_ENV", "AUTH_ENV", "NODE_ENV"]}
             with patch.dict(os.environ, {**clear_env, **env_var}, clear=False):
-                environment = _detect_environment()
+                cors_builder = CORSConfigurationBuilder()
+                environment = cors_builder.environment
                 assert environment == "staging", f"Failed to detect staging with {env_var}"
     
     def test_staging_origins_configuration(self):
@@ -117,7 +118,8 @@ class TestCORSStagingSpecific:
         ]
         
         for url in cloud_run_urls:
-            assert _matches_staging_patterns(url), f"Cloud Run URL {url} not matched by staging patterns"
+            cors_builder = CORSConfigurationBuilder({'ENVIRONMENT': 'staging'})
+            assert cors_builder.origins._matches_staging_patterns(url), f"Cloud Run URL {url} not matched by staging patterns"
     
     def test_staging_cors_config_structure(self):
         """Test staging CORS configuration structure."""
@@ -203,7 +205,7 @@ class TestCORSStagingSpecific:
         # This would require WebSocket test support
         # For now, test that WebSocket origins match HTTP origins
         with patch.dict(os.environ, {"ENVIRONMENT": "staging"}):
-            from shared.cors_config import get_websocket_cors_origins
+            from shared.cors_config_builder import get_websocket_cors_origins
             
             ws_origins = get_websocket_cors_origins()
             http_origins = get_cors_origins()

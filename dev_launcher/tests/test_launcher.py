@@ -77,7 +77,7 @@ class TestLauncherConfig(unittest.TestCase):
             verbose=True,
             backend_reload=False,  # Changed: use positive flag
             no_reload=False,
-            no_secrets=False,
+            load_secrets=True,
             project_id="test-project",
             no_browser=True,
             no_turbopack=False,

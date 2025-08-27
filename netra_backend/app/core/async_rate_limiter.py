@@ -21,9 +21,20 @@ class AsyncRateLimiter:
             self._cleanup_old_calls(now)
             
             if await self._should_wait(now):
-                await self._wait_and_retry()
-            
-            self._record_call(now)
+                # Release lock before recursive call to avoid deadlock
+                oldest_call = min(self._calls)
+                wait_time = self._calculate_wait_time(oldest_call)
+        
+        # If we need to wait, do so outside the lock
+        if 'wait_time' in locals() and wait_time > 0:
+            await asyncio.sleep(wait_time)
+            await self.acquire()  # Recursive call after waiting, without holding lock
+        else:
+            # Only record the call if we didn't need to wait
+            async with self._lock:
+                now = time.time()
+                self._cleanup_old_calls(now)
+                self._record_call(now)
     
     def _cleanup_old_calls(self, now: float):
         """Remove old calls outside the time window."""
@@ -36,14 +47,6 @@ class AsyncRateLimiter:
         """Check if we need to wait before making a call."""
         return len(self._calls) >= self._max_calls
     
-    async def _wait_and_retry(self):
-        """Wait for the required time and retry acquisition."""
-        oldest_call = min(self._calls)
-        wait_time = self._calculate_wait_time(oldest_call)
-        
-        if wait_time > 0:
-            await asyncio.sleep(wait_time)
-            await self.acquire()  # Recursive call after waiting
     
     def _calculate_wait_time(self, oldest_call: float) -> float:
         """Calculate how long to wait before next call."""

@@ -84,7 +84,7 @@ def setup_test_path():
 
 
 def get_project_root():
-    """Get the project root path without modifying sys.path.
+    """SSOT: Get the project root path from centralized utils.
     
     Simple utility for tests that only need the project root path
     without the sys.path setup side effect.
@@ -92,9 +92,8 @@ def get_project_root():
     Returns:
         Path: The project root path
     """
-    # Navigate from test_framework/ -> project_root/
-    current_file = Path(__file__).resolve()
-    return current_file.parent.parent  # Go up two levels from test_framework/__init__.py to project root
+    from netra_backend.app.core.project_utils import get_project_root as _get_project_root
+    return _get_project_root()
 
 
 __all__ = [

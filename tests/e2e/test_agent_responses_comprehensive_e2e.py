@@ -23,7 +23,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -74,7 +74,7 @@ class AgentResponseTester:
                 "tools_used": base_response["tools_used"],
                 "confidence": base_response["confidence"],
                 "processing_time": time.time() - start_time,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "context": context or {},
                 "success": True
             }
@@ -87,7 +87,7 @@ class AgentResponseTester:
                 "error": f"Unknown agent type: {agent_type}",
                 "success": False,
                 "processing_time": time.time() - start_time,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         
         # Store in conversation history
@@ -99,19 +99,20 @@ class AgentResponseTester:
                                          messages: List[str]) -> List[Dict[str, Any]]:
         """Test multi-turn conversation with an agent."""
         responses = []
-        context = {"conversation_id": str(uuid.uuid4())}
+        base_context = {"conversation_id": str(uuid.uuid4())}
         
         for i, message in enumerate(messages):
-            # Add conversation context
+            # Create a fresh context for each iteration to prevent mutation
+            context = base_context.copy()
             context["turn"] = i + 1
             context["previous_responses"] = len(responses)
             
+            # Add last response to context if available
+            if responses and responses[-1]["success"]:
+                context["last_response"] = responses[-1]["response"]
+            
             response = await self.send_agent_request(agent_type, message, context)
             responses.append(response)
-            
-            # Update context with response
-            if response["success"]:
-                context["last_response"] = response["response"]
             
             # Small delay between turns
             await asyncio.sleep(0.05)
@@ -125,7 +126,7 @@ class AgentResponseTester:
             "error": f"Simulated {error_type} in {agent_type} agent",
             "error_type": error_type,
             "success": False,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "fallback_available": True
         }
     
@@ -154,7 +155,7 @@ class AgentResponseTester:
             "result": result,
             "execution_time": time.time() - start_time,
             "success": "error" not in result,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     def get_conversation_stats(self) -> Dict[str, Any]:

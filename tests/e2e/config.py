@@ -24,6 +24,14 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
+# Import dynamic port manager for port allocation
+try:
+    from tests.e2e.dynamic_port_manager import get_port_manager, TestMode
+except ImportError:
+    # Fallback if import fails
+    get_port_manager = None
+    TestMode = None
+
 
 class CustomerTier(Enum):
     """Customer tier enumeration for testing"""
@@ -164,9 +172,20 @@ class UnifiedTestConfig:
     
     def _create_test_endpoints(self) -> TestEndpoints:
         """Create test endpoint configuration"""
-        ws_url = "ws://localhost:8000/ws"
-        api_base = "http://localhost:8000"
-        auth_base = "http://localhost:8081"
+        # Use dynamic port manager if available
+        if get_port_manager:
+            port_mgr = get_port_manager()
+            urls = port_mgr.get_service_urls()
+            ws_url = urls["websocket"]
+            api_base = urls["backend"]
+            auth_base = urls["auth"]
+        else:
+            # Fallback to environment or defaults
+            backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
+            auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
+            ws_url = f"ws://localhost:{backend_port}/ws"
+            api_base = f"http://localhost:{backend_port}"
+            auth_base = f"http://localhost:{auth_port}"
         # Set environment variables for service discovery
         os.environ["AUTH_SERVICE_URL"] = auth_base
         os.environ["BACKEND_SERVICE_URL"] = api_base
@@ -333,17 +352,40 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
     # Support both parameter names for backward compatibility
     target_env = environment or env_type
     if target_env == TestEnvironmentType.LOCAL:
-        return TestEnvironmentConfig(
-            environment_type=TestEnvironmentType.LOCAL,
-            base_url="http://localhost:8000",
-            ws_url="ws://localhost:8000/ws",
-            auth_url="http://localhost:8081",
-            services=TestServices(
-                auth="http://localhost:8081",
-                backend="http://localhost:8000",
-                frontend="http://localhost:3000"
+        # Use dynamic port manager for local testing
+        if get_port_manager:
+            port_mgr = get_port_manager()
+            urls = port_mgr.get_service_urls()
+            return TestEnvironmentConfig(
+                environment_type=TestEnvironmentType.LOCAL,
+                base_url=urls["backend"],
+                ws_url=urls["websocket"],
+                auth_url=urls["auth"],
+                services=TestServices(
+                    auth=urls["auth"],
+                    backend=urls["backend"],
+                    frontend=urls["frontend"]
+                ),
+                postgres_port=port_mgr.ports.postgres,
+                redis_port=port_mgr.ports.redis,
+                clickhouse_port=port_mgr.ports.clickhouse
             )
-        )
+        else:
+            # Fallback to defaults
+            backend_port = int(os.environ.get("TEST_BACKEND_PORT", "8000"))
+            auth_port = int(os.environ.get("TEST_AUTH_PORT", "8081"))
+            frontend_port = int(os.environ.get("TEST_FRONTEND_PORT", "3000"))
+            return TestEnvironmentConfig(
+                environment_type=TestEnvironmentType.LOCAL,
+                base_url=f"http://localhost:{backend_port}",
+                ws_url=f"ws://localhost:{backend_port}/ws",
+                auth_url=f"http://localhost:{auth_port}",
+                services=TestServices(
+                    auth=f"http://localhost:{auth_port}",
+                    backend=f"http://localhost:{backend_port}",
+                    frontend=f"http://localhost:{frontend_port}"
+                )
+            )
     elif target_env == TestEnvironmentType.DEV:
         return TestEnvironmentConfig(
             environment_type=TestEnvironmentType.DEV,
@@ -374,12 +416,32 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
 
 def get_auth_service_url() -> str:
     """Get the auth service URL."""
-    return os.environ.get("AUTH_SERVICE_URL", "http://localhost:8081")
+    # Check if already set in environment
+    if "AUTH_SERVICE_URL" in os.environ:
+        return os.environ["AUTH_SERVICE_URL"]
+    # Try to get from port manager
+    if get_port_manager:
+        port_mgr = get_port_manager()
+        urls = port_mgr.get_service_urls()
+        return urls["auth"]
+    # Fallback to default
+    auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
+    return f"http://localhost:{auth_port}"
 
 
 def get_backend_service_url() -> str:
     """Get the backend service URL."""
-    return os.environ.get("BACKEND_SERVICE_URL", "http://localhost:8000")
+    # Check if already set in environment
+    if "BACKEND_SERVICE_URL" in os.environ:
+        return os.environ["BACKEND_SERVICE_URL"]
+    # Try to get from port manager
+    if get_port_manager:
+        port_mgr = get_port_manager()
+        urls = port_mgr.get_service_urls()
+        return urls["backend"]
+    # Fallback to default
+    backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
+    return f"http://localhost:{backend_port}"
 
 
 def get_test_config() -> UnifiedTestConfig:

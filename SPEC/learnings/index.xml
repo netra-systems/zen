@@ -248,6 +248,14 @@
             <critical-takeaway>shared/cors_config.py is the SINGLE source of truth for all services' CORS configuration.</critical-takeaway>
         </category>
         
+        <category name="Agent Error Handler Unified Integration" path="SPEC/learnings/agent_error_handler_unified.xml" keywords="AgentErrorHandler, handle_execution_error, unified_error_handler, backward compatibility, error handling, agent execution, reliability failure, missing attribute">
+            <critical-takeaway>AgentErrorHandler convenience class MUST expose handle_execution_error method for backward compatibility.</critical-takeaway>
+            <critical-takeaway>handle_execution_error can be an alias to handle_error but MUST exist for agent execution.</critical-takeaway>
+            <critical-takeaway>Error handlers MUST provide get_health_status() method for monitoring integration.</critical-takeaway>
+            <critical-takeaway>Always verify error handler methods exist before runtime to catch missing methods early.</critical-takeaway>
+            <critical-takeaway>Unified error handlers must maintain ALL methods from original implementations for backward compatibility.</critical-takeaway>
+        </category>
+        
         <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
             <critical-takeaway>RESOLVED 2025-08-25: Fixed critical SSOT violations in auth_service - removed 365+ lines of duplicate code.</critical-takeaway>
             <critical-takeaway>AuthDatabaseManager is the canonical database connection implementation - all operations delegate to it.</critical-takeaway>
@@ -1137,6 +1145,25 @@
             <critical-takeaway>Service independence allows each service to have its own database manager, but within a service there must be only ONE.</critical-takeaway>
             <critical-takeaway>Use dependency injection to allow test-specific behavior without creating test-only managers.</critical-takeaway>
         </category>
+        
+        <category name="E2E Test Port Management" path="SPEC/learnings/e2e_port_management.xml" keywords="E2E, Testing, Ports, Docker, CI, Dynamic Allocation, Port Conflicts, Service Discovery">
+            <critical-takeaway>Never hardcode ports in E2E tests - always use configuration functions like get_backend_service_url().</critical-takeaway>
+            <critical-takeaway>Auto-detect execution environment (Local/Docker/CI) instead of requiring manual configuration.</critical-takeaway>
+            <critical-takeaway>Docker test services use different ports (8001/8082) than dev services (8000/8081) to prevent conflicts.</critical-takeaway>
+            <critical-takeaway>Dynamic port allocation in CI mode prevents parallel test execution conflicts.</critical-takeaway>
+            <critical-takeaway>Service discovery through port manager handles Docker networking (service names vs localhost).</critical-takeaway>
+            <critical-takeaway>Export port configuration to environment variables for subprocess inheritance.</critical-takeaway>
+            <critical-takeaway>Wait for service availability before running tests to prevent race conditions.</critical-takeaway>
+        </category>
+        
+        <category name="Security Architecture - IP Blocking Migration" path="SPEC/learnings/ip_blocking_migration.xml" keywords="IP blocking, load balancer, Cloud Armor, security middleware, rate limiting, migration">
+            <critical-takeaway>IP blocking is most effective at the load balancer level (Cloud Armor) rather than application middleware.</critical-takeaway>
+            <critical-takeaway>Static IP blocking (pre-configured lists) should be separated from behavioral blocking (pattern-based).</critical-takeaway>
+            <critical-takeaway>Security feature migration requires coordinated deployment with overlapping protection during transition.</critical-takeaway>
+            <critical-takeaway>Well-isolated middleware components can be cleanly removed with minimal regression risk.</critical-takeaway>
+            <critical-takeaway>Load balancer security provides better performance, advanced threat detection, and centralized management.</critical-takeaway>
+        </category>
+        
     </categories>
     
     <recent_major_fixes>

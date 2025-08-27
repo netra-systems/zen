@@ -46,12 +46,36 @@ class TriageResultProcessor:
     def _convert_dict_to_triage_result(self, result_dict: dict) -> TriageResult:
         """Convert dictionary to TriageResult with error handling."""
         try:
-            # Apply comprehensive JSON fixes first
-            fixed_dict = comprehensive_json_fix(result_dict)
+            # Check if this is a wrapped text/command/malformed response BEFORE fixing
+            if self._is_wrapped_response(result_dict):
+                logger.warning(f"Received wrapped response type: {result_dict.get('type', 'unknown')}")
+                return self._create_fallback_triage_result()
+            
+            # Apply comprehensive JSON fixes only for non-wrapped responses
+            # But skip string-to-JSON conversion for valid dict structures
+            fixed_dict = self._apply_selective_json_fixes(result_dict)
             return TriageResult(**fixed_dict)
         except Exception as e:
             logger.warning(f"Failed to convert dict to TriageResult: {e}")
             return self._create_fallback_triage_result()
+    
+    def _apply_selective_json_fixes(self, result_dict: dict) -> dict:
+        """Apply JSON fixes selectively without wrapping valid strings."""
+        # Apply specific fixes for tool parameters and list recommendations
+        from netra_backend.app.core.json_parsing_utils import (
+            fix_tool_parameters, fix_list_recommendations
+        )
+        fixed_dict = fix_tool_parameters(result_dict.copy())
+        fixed_dict = fix_list_recommendations(fixed_dict)
+        return fixed_dict
+    
+    def _is_wrapped_response(self, result_dict: dict) -> bool:
+        """Check if the response is wrapped by ensure_agent_response_is_json."""
+        if not isinstance(result_dict, dict):
+            return False
+        response_type = result_dict.get('type')
+        wrapped_types = {'text_response', 'command_result', 'malformed_json', 'unknown_response', 'list_response'}
+        return response_type in wrapped_types
     
     def _create_fallback_triage_result(self) -> TriageResult:
         """Create fallback TriageResult with default values."""

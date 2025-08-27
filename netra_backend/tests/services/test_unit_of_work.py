@@ -13,7 +13,7 @@ import asyncio
 import pytest
 
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
-from netra_backend.tests.database_repository_helpers import (
+from netra_backend.tests.helpers.database_repository_helpers import (
     assert_thread_created_correctly,
     create_test_message,
     create_test_thread,

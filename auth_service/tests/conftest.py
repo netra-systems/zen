@@ -33,8 +33,12 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     env.set("ENVIRONMENT", "test", "auth_conftest")  # Use test environment for proper test setup
     env.set("AUTH_FAST_TEST_MODE", "false", "auth_conftest")  # Disable fast test mode for integration tests
     env.set("JWT_SECRET", "test_jwt_secret_key_that_is_long_enough_for_testing_purposes", "auth_conftest")
-    env.set("GOOGLE_CLIENT_ID", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest")
-    env.set("GOOGLE_CLIENT_SECRET", "GOCSPX-1234567890123456789012345678901", "auth_conftest")
+    # Set test-specific OAuth credentials (environment-specific)
+    env.set("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest")
+    env.set("GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT", "GOCSPX-1234567890123456789012345678901", "auth_conftest")
+    # DEPRECATED: Remove old variables to ensure tests use new environment-specific variables
+    # env.set("GOOGLE_CLIENT_ID", "123456789-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "auth_conftest")
+    # env.set("GOOGLE_CLIENT_SECRET", "GOCSPX-1234567890123456789012345678901", "auth_conftest")
     env.set("DATABASE_URL", "sqlite+aiosqlite:///test_auth.db", "auth_conftest")
     env.set("AUTH_USE_FILE_DB", "true", "auth_conftest")  # Force file-based DB for tests
     env.set("REDIS_URL", "redis://localhost:6379/1", "auth_conftest")

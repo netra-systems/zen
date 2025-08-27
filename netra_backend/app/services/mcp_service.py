@@ -489,6 +489,7 @@ class MCPService(IMCPService):
             client_id=client_id,
             tool_name=tool_name,
             input_params=parameters,
+            execution_time_ms=0,  # Will be updated when execution completes
             status="executing"
         )
 
@@ -501,7 +502,7 @@ class MCPService(IMCPService):
     async def _handle_successful_execution(self, execution: MCPToolExecution, result: Dict[str, Any]) -> Dict[str, Any]:
         """Handle successful tool execution."""
         execution.status = "completed"
-        execution.result = result
+        execution.output_result = result
         # Note: db_session would need to be passed from caller for proper recording
         return result
 
