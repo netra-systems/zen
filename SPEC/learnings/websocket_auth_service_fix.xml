@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>WebSocket Authentication Service-to-Service Communication Fix</title>
+  <type>bug_fix</type>
+  <category>authentication</category>
+  <services>backend, auth_service, websocket</services>
+  <date>2025-08-27</date>
+  
+  <problem_statement>
+    WebSocket connections in staging environment were failing with HTTP 500 errors due to JWT authentication failures.
+    The auth service was returning 401/403 errors when the backend tried to validate tokens.
+  </problem_statement>
+  
+  <root_causes>
+    <cause priority="1">
+      Missing service-to-service authentication headers in auth client requests.
+      The backend was not including X-Service-ID and X-Service-Secret headers when calling the auth service.
+    </cause>
+    <cause priority="2">
+      AUTH_SERVICE_ENABLED environment variable was not explicitly set in staging.
+      This could cause the auth client to skip authentication entirely.
+    </cause>
+  </root_causes>
+  
+  <solution>
+    <step number="1">
+      Added service authentication to AuthServiceClient in auth_client_core.py:
+      - Load SERVICE_ID and SERVICE_SECRET from configuration
+      - Add _get_service_auth_headers() method to generate headers
+      - Add _get_request_headers() helper to combine service auth with tracing
+      - Update all auth service API calls to include service auth headers
+    </step>
+    
+    <step number="2">
+      Set AUTH_SERVICE_ENABLED=true environment variable in staging:
+      - Ensures auth service is actually used for validation
+      - Prevents fallback to local validation which would fail
+    </step>
+    
+    <implementation_details>
+      <!-- Service auth headers implementation -->
+      <code language="python">
+def _get_service_auth_headers(self) -> Dict[str, str]:
+    """Get service-to-service authentication headers."""
+    headers = {}
+    if self.service_id and self.service_secret:
+        headers["X-Service-ID"] = self.service_id
+        headers["X-Service-Secret"] = self.service_secret
+    return headers
+
+def _get_request_headers(self, include_auth: bool = True, bearer_token: str = None) -> Dict[str, str]:
+    """Get headers for auth service requests."""
+    headers = {}
+    if include_auth:
+        headers.update(self._get_service_auth_headers())
+    trace_headers = self.tracing_manager.inject_trace_headers()
+    headers.update(trace_headers)
+    if bearer_token:
+        headers[HeaderConstants.AUTHORIZATION] = f"{HeaderConstants.BEARER_PREFIX}{bearer_token}"
+    return headers
+      </code>
+    </implementation_details>
+  </solution>
+  
+  <testing>
+    <test type="manual">
+      Used curl to test WebSocket upgrade with test token:
+      - Before fix: HTTP 500 Internal Server Error
+      - After fix: HTTP 101 Switching Protocols, connection established
+      - Received ping messages and connection_established event
+    </test>
+  </testing>
+  
+  <prevention>
+    <recommendation>
+      Always include service authentication headers for service-to-service communication.
+      This is especially critical for auth service calls which validate security credentials.
+    </recommendation>
+    <recommendation>
+      Explicitly set AUTH_SERVICE_ENABLED in all non-development environments.
+      This prevents confusion about whether auth service should be used.
+    </recommendation>
+    <recommendation>
+      Add integration tests that verify service-to-service authentication is working.
+      These should catch missing headers before deployment.
+    </recommendation>
+  </prevention>
+  
+  <impact>
+    <positive>WebSocket connections now work properly in staging environment</positive>
+    <positive>Service-to-service authentication is properly implemented</positive>
+    <positive>Auth service can now validate and authorize backend requests</positive>
+  </impact>
+  
+  <related_files>
+    <file>netra_backend/app/clients/auth_client_core.py</file>
+    <file>netra_backend/app/websocket_core/auth.py</file>
+    <file>auth_service/main.py</file>
+  </related_files>
+  
+  <environment_config>
+    <staging>
+      <variable name="AUTH_SERVICE_ENABLED" value="true"/>
+      <variable name="AUTH_SERVICE_URL" value="https://auth.staging.netrasystems.ai"/>
+      <variable name="SERVICE_ID" value="netra-backend"/>
+      <variable name="SERVICE_SECRET" source="secret-manager:service-secret-staging"/>
+    </staging>
+  </environment_config>
+  
+  <monitoring>
+    Check for 401/403 responses from auth service which indicate service auth issues.
+    Monitor WebSocket connection success rates in staging/production.
+  </monitoring>
+</learning>

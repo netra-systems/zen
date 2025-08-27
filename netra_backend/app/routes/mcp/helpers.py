@@ -27,77 +27,111 @@ def check_admin_access(current_user: UserInDB) -> None:
         )
 
 
-def extract_tools_from_app(app) -> list:
+async def extract_tools_from_app(app) -> list:
     """Extract tools from FastMCP app"""
-    if not hasattr(app, '_tool_manager'):
+    if not hasattr(app, 'get_tools'):
         return []
-    return [_build_tool_info(name, func) 
-            for name, func in app._tool_manager.tools.items()]
+    tools = await app.get_tools()
+    return [_build_tool_info(name, tool) 
+            for name, tool in tools.items()]
 
 
-def _build_tool_info(tool_name: str, tool_func) -> Dict[str, Any]:
+def _build_tool_info(tool_name: str, tool_data) -> Dict[str, Any]:
     """Build tool information dictionary"""
+    # Handle both function and dict tool data
+    if hasattr(tool_data, '__doc__'):
+        description = tool_data.__doc__ or "No description available"
+    elif isinstance(tool_data, dict):
+        description = tool_data.get('description', "No description available")
+    else:
+        description = "No description available"
+    
     tool_info = {
         "name": tool_name,
-        "description": tool_func.__doc__ or "No description available"
+        "description": description
     }
-    _add_category_if_exists(tool_info, tool_func)
+    _add_category_if_exists(tool_info, tool_data)
     return tool_info
 
 
-def _add_category_if_exists(tool_info: Dict[str, Any], tool_func) -> None:
+def _add_category_if_exists(tool_info: Dict[str, Any], tool_data) -> None:
     """Add category to tool info if it exists"""
-    if hasattr(tool_func, '__category__'):
-        tool_info["category"] = tool_func.__category__
+    if hasattr(tool_data, '__category__'):
+        tool_info["category"] = tool_data.__category__
+    elif isinstance(tool_data, dict) and 'category' in tool_data:
+        tool_info["category"] = tool_data['category']
 
 
-def extract_resources_from_app(app) -> list:
+async def extract_resources_from_app(app) -> list:
     """Extract resources from FastMCP app"""
-    if not hasattr(app, '_resource_manager'):
+    if not hasattr(app, 'get_resources'):
         return []
-    return [_build_resource_info(uri, func) 
-            for uri, func in app._resource_manager.resources.items()]
+    resources = await app.get_resources()
+    return [_build_resource_info(uri, resource) 
+            for uri, resource in resources.items()]
 
 
-def _build_resource_info(resource_uri: str, resource_func) -> Dict[str, Any]:
+def _build_resource_info(resource_uri: str, resource_data) -> Dict[str, Any]:
     """Build resource information dictionary"""
+    # Handle both function and dict resource data
+    if hasattr(resource_data, '__doc__'):
+        description = resource_data.__doc__ or "No description available"
+    elif isinstance(resource_data, dict):
+        description = resource_data.get('description', "No description available")
+    else:
+        description = "No description available"
+    
     return {
         "uri": resource_uri,
-        "description": resource_func.__doc__ or "No description available"
+        "description": description
     }
 
 
-def extract_prompts_from_app(app) -> list:
+async def extract_prompts_from_app(app) -> list:
     """Extract prompts from FastMCP app"""
-    if not hasattr(app, '_prompt_manager'):
+    if not hasattr(app, 'get_prompts'):
         return []
-    return [_build_prompt_info(name, func) 
-            for name, func in app._prompt_manager.prompts.items()]
+    prompts = await app.get_prompts()
+    return [_build_prompt_info(name, prompt) 
+            for name, prompt in prompts.items()]
 
 
-def _build_prompt_info(prompt_name: str, prompt_func) -> Dict[str, Any]:
+def _build_prompt_info(prompt_name: str, prompt_data) -> Dict[str, Any]:
     """Build prompt information dictionary"""
+    # Handle both function and dict prompt data  
+    if hasattr(prompt_data, '__doc__'):
+        description = prompt_data.__doc__ or "No description available"
+    elif isinstance(prompt_data, dict):
+        description = prompt_data.get('description', "No description available")
+    else:
+        description = "No description available"
+    
     prompt_info = {
         "name": prompt_name,
-        "description": prompt_func.__doc__ or "No description available"
+        "description": description
     }
-    _add_category_if_exists(prompt_info, prompt_func)
+    _add_category_if_exists(prompt_info, prompt_data)
     return prompt_info
 
 
-def get_tool_function(server, tool_name: str):
+async def get_tool_function(server, tool_name: str):
     """Get tool function from server"""
     app = server.get_app()
-    if not _has_tool_manager_with_tool(app, tool_name):
+    if not hasattr(app, 'get_tool'):
         _raise_tool_not_found(tool_name)
     
-    return app._tool_manager.tools[tool_name]
+    tool = await app.get_tool(tool_name)
+    if tool is None:
+        _raise_tool_not_found(tool_name)
+    
+    return tool
 
 
-def _has_tool_manager_with_tool(app, tool_name: str) -> bool:
+async def _has_tool_manager_with_tool(app, tool_name: str) -> bool:
     """Check if app has tool manager with specified tool"""
-    return (hasattr(app, '_tool_manager') and 
-            tool_name in app._tool_manager.tools)
+    if not hasattr(app, 'get_tool'):
+        return False
+    return await app.get_tool(tool_name) is not None
 
 
 def _raise_tool_not_found(tool_name: str) -> None:
@@ -108,19 +142,24 @@ def _raise_tool_not_found(tool_name: str) -> None:
     )
 
 
-def get_resource_function(server, uri: str):
+async def get_resource_function(server, uri: str):
     """Get resource function from server"""
     app = server.get_app()
-    if not _has_resource_manager_with_uri(app, uri):
+    if not hasattr(app, 'get_resource'):
         _raise_resource_not_found(uri)
     
-    return app._resource_manager.resources[uri]
+    resource = await app.get_resource(uri)
+    if resource is None:
+        _raise_resource_not_found(uri)
+    
+    return resource
 
 
-def _has_resource_manager_with_uri(app, uri: str) -> bool:
+async def _has_resource_manager_with_uri(app, uri: str) -> bool:
     """Check if app has resource manager with specified URI"""
-    return (hasattr(app, '_resource_manager') and 
-            uri in app._resource_manager.resources)
+    if not hasattr(app, 'get_resource'):
+        return False
+    return await app.get_resource(uri) is not None
 
 
 def _raise_resource_not_found(uri: str) -> None:
@@ -131,19 +170,24 @@ def _raise_resource_not_found(uri: str) -> None:
     )
 
 
-def get_prompt_function(server, prompt_name: str):
+async def get_prompt_function(server, prompt_name: str):
     """Get prompt function from server"""
     app = server.get_app()
-    if not _has_prompt_manager_with_prompt(app, prompt_name):
+    if not hasattr(app, 'get_prompt'):
         _raise_prompt_not_found(prompt_name)
     
-    return app._prompt_manager.prompts[prompt_name]
+    prompt = await app.get_prompt(prompt_name)
+    if prompt is None:
+        _raise_prompt_not_found(prompt_name)
+    
+    return prompt
 
 
-def _has_prompt_manager_with_prompt(app, prompt_name: str) -> bool:
+async def _has_prompt_manager_with_prompt(app, prompt_name: str) -> bool:
     """Check if app has prompt manager with specified prompt"""
-    return (hasattr(app, '_prompt_manager') and 
-            prompt_name in app._prompt_manager.prompts)
+    if not hasattr(app, 'get_prompt'):
+        return False
+    return await app.get_prompt(prompt_name) is not None
 
 
 def _raise_prompt_not_found(prompt_name: str) -> None:

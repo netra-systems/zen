@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Critical: Service-to-Service Authentication Headers Required</title>
+  <type>architecture_pattern</type>
+  <category>security</category>
+  <services>all</services>
+  <date>2025-08-27</date>
+  <severity>critical</severity>
+  
+  <key_insight>
+    All service-to-service communication MUST include authentication headers.
+    Missing these headers causes silent failures that are difficult to debug.
+  </key_insight>
+  
+  <pattern>
+    <name>Service Authentication Headers Pattern</name>
+    <description>
+      Every microservice that calls another service must include:
+      - X-Service-ID: Identifies the calling service
+      - X-Service-Secret: Authenticates the calling service
+    </description>
+    
+    <implementation>
+      <step>Load service credentials from configuration at client initialization</step>
+      <step>Create helper method to generate service auth headers</step>
+      <step>Include headers in ALL requests to other services</step>
+      <step>Combine with other headers (tracing, user auth) as needed</step>
+    </implementation>
+    
+    <code_pattern language="python">
+# In service client initialization
+self.service_id = config.service_id or "default-service-name"
+self.service_secret = config.service_secret
+
+# Helper method for headers
+def _get_service_auth_headers(self) -> Dict[str, str]:
+    headers = {}
+    if self.service_id and self.service_secret:
+        headers["X-Service-ID"] = self.service_id
+        headers["X-Service-Secret"] = self.service_secret
+    return headers
+
+# Use in all API calls
+headers = self._get_service_auth_headers()
+response = await client.post(endpoint, json=data, headers=headers)
+    </code_pattern>
+  </pattern>
+  
+  <common_mistakes>
+    <mistake>
+      <description>Forgetting to include service auth headers in API calls</description>
+      <symptom>401/403 errors from target service</symptom>
+      <fix>Add _get_service_auth_headers() to all client methods</fix>
+    </mistake>
+    
+    <mistake>
+      <description>Only adding headers to some endpoints</description>
+      <symptom>Inconsistent authentication failures</symptom>
+      <fix>Create centralized _get_request_headers() method used everywhere</fix>
+    </mistake>
+    
+    <mistake>
+      <description>Not setting SERVICE_ID and SERVICE_SECRET in environment</description>
+      <symptom>Service calls work locally but fail in staging/production</symptom>
+      <fix>Ensure these are set in all deployment environments</fix>
+    </mistake>
+  </common_mistakes>
+  
+  <debugging_tips>
+    <tip>Check if service is actually calling the other service (look for HTTP requests in logs)</tip>
+    <tip>Verify SERVICE_ID and SERVICE_SECRET are loaded correctly at startup</tip>
+    <tip>Look for 401/403 responses which indicate auth issues vs 500 which indicates other problems</tip>
+    <tip>Enable debug logging to see exact headers being sent</tip>
+  </debugging_tips>
+  
+  <required_environment_variables>
+    <variable name="SERVICE_ID" description="Unique identifier for this service"/>
+    <variable name="SERVICE_SECRET" description="Secret key for service authentication"/>
+    <variable name="AUTH_SERVICE_ENABLED" description="Must be 'true' in staging/production"/>
+    <variable name="AUTH_SERVICE_URL" description="URL of the auth service"/>
+  </required_environment_variables>
+  
+  <testing_checklist>
+    <item>Test service calls work with correct headers</item>
+    <item>Test service calls fail without headers (security check)</item>
+    <item>Test service calls fail with wrong SERVICE_SECRET</item>
+    <item>Verify headers are included in all endpoints</item>
+    <item>Check headers work with both GET and POST requests</item>
+  </testing_checklist>
+  
+  <architectural_principle>
+    Zero-trust security model: Every service must authenticate itself to every other service.
+    No service should accept requests without proper authentication, even from internal services.
+  </architectural_principle>
+  
+  <related_specs>
+    <spec>SPEC/independent_services.xml</spec>
+    <spec>SPEC/security.xml</spec>
+    <spec>SPEC/cross_system_context_reference.md</spec>
+  </related_specs>
+</learning>

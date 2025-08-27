@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>CORS and Routing Issues in Docker Localhost Environment</title>
+  <date>2025-08-27</date>
+  <severity>CRITICAL</severity>
+  <environments>Docker, Development, Localhost</environments>
+  
+  <problem_statement>
+    Frontend at http://127.0.0.1:3000 unable to communicate with backend at http://localhost:8000 due to multiple CORS and routing issues in Docker environment.
+  </problem_statement>
+  
+  <root_causes>
+    <cause id="1" severity="CRITICAL">
+      <name>OPTIONS Preflight Request Blocking</name>
+      <description>
+        FastAPIAuthMiddleware was not excluding OPTIONS requests from authentication, 
+        causing all CORS preflight requests to hang or require authentication.
+      </description>
+      <impact>Complete blocking of all cross-origin requests</impact>
+      <detection_method>OPTIONS requests timing out with no response</detection_method>
+    </cause>
+    
+    <cause id="2" severity="HIGH">
+      <name>Trailing Slash Redirect CORS Loss</name>
+      <description>
+        FastAPI's automatic 307 redirects from /api/endpoint to /api/endpoint/ 
+        were not preserving CORS headers, causing browser to reject responses.
+      </description>
+      <impact>API calls failing with "No Access-Control-Allow-Origin header" error</impact>
+      <detection_method>307 redirect responses missing CORS headers</detection_method>
+    </cause>
+    
+    <cause id="3" severity="HIGH">
+      <name>Import Name Mismatch</name>
+      <description>
+        auth_client_core.py importing 'get_config' instead of 'get_configuration' 
+        from netra_backend.app.core.configuration module.
+      </description>
+      <impact>Backend failing to start with ImportError</impact>
+      <detection_method>ImportError in Docker logs during startup</detection_method>
+    </cause>
+    
+    <cause id="4" severity="MEDIUM">
+      <name>Cross-Origin Host Mismatch</name>
+      <description>
+        Frontend using 127.0.0.1:3000 while API calls going to localhost:8000,
+        creating a cross-origin scenario even on same machine.
+      </description>
+      <impact>Browser treating requests as cross-origin requiring full CORS flow</impact>
+      <detection_method>Origin header showing different host than request URL</detection_method>
+    </cause>
+  </root_causes>
+  
+  <solutions_implemented>
+    <solution for_cause="1">
+      <file>netra_backend/app/middleware/fastapi_auth_middleware.py</file>
+      <line_number>86-88</line_number>
+      <code><![CDATA[
+# Skip auth for OPTIONS requests (CORS preflight)
+if request.method == "OPTIONS":
+    return await call_next(request)
+      ]]></code>
+      <explanation>
+        Added explicit bypass for OPTIONS method before any authentication logic,
+        allowing CORS preflight requests to proceed without authentication.
+      </explanation>
+    </solution>
+    
+    <solution for_cause="2">
+      <file>netra_backend/app/routes/threads_route.py</file>
+      <line_number>54-55</line_number>
+      <code><![CDATA[
+@router.get("", response_model=List[ThreadResponse])
+@router.get("/", response_model=List[ThreadResponse], include_in_schema=False)
+async def list_threads(...):
+      ]]></code>
+      <explanation>
+        Define both routes with and without trailing slash to prevent redirects.
+        The slash version is hidden from schema to avoid duplication in docs.
+      </explanation>
+    </solution>
+    
+    <solution for_cause="3">
+      <file>netra_backend/app/clients/auth_client_core.py</file>
+      <line_number>60-61</line_number>
+      <code><![CDATA[
+from netra_backend.app.core.configuration import get_configuration
+config = get_configuration()
+      ]]></code>
+      <explanation>
+        Corrected import to use the actual exported function name 'get_configuration'.
+      </explanation>
+    </solution>
+    
+    <solution for_cause="4">
+      <file>shared/cors_config.py</file>
+      <line_number>189-196</line_number>
+      <code><![CDATA[
+# 127.0.0.1 variants
+"http://127.0.0.1:3000",
+"http://127.0.0.1:3001", 
+"http://127.0.0.1:3002",
+"http://127.0.0.1:8000",
+"http://127.0.0.1:8080",
+      ]]></code>
+      <explanation>
+        Ensured both localhost and 127.0.0.1 origins are in allowed origins list
+        for all common development ports.
+      </explanation>
+    </solution>
+  </solutions_implemented>
+  
+  <additional_fixes_needed>
+    <fix priority="MEDIUM">
+      <description>Apply trailing slash fix to other routes</description>
+      <affected_files>
+        <file>corpus.py</file>
+        <file>demo.py</file>
+        <file>llm_cache.py</file>
+        <file>unified_tools/router.py</file>
+        <file>mcp/main.py</file>
+      </affected_files>
+      <recommendation>
+        Use the same dual-route pattern for all routes defined with only "/"
+      </recommendation>
+    </fix>
+    
+    <fix priority="LOW">
+      <description>Standardize route definitions</description>
+      <recommendation>
+        Create a project-wide standard: always define routes without trailing slashes
+        as the primary route, with optional slash variant for compatibility.
+      </recommendation>
+    </fix>
+  </additional_fixes_needed>
+  
+  <middleware_stack_analysis>
+    <layer order="1" runs="LAST">
+      <name>CORSMiddleware</name>
+      <purpose>Handle standard CORS headers and preflight</purpose>
+      <status>Working after auth middleware fix</status>
+    </layer>
+    
+    <layer order="2">
+      <name>cors_redirect_middleware</name>
+      <purpose>Add CORS headers to redirect responses</purpose>
+      <status>Working but not needed with dual routes</status>
+    </layer>
+    
+    <layer order="3">
+      <name>FastAPIAuthMiddleware</name>
+      <purpose>JWT authentication</purpose>
+      <status>Fixed - now skips OPTIONS requests</status>
+    </layer>
+    
+    <layer order="4">
+      <name>Security middleware</name>
+      <purpose>Security headers and protections</purpose>
+      <status>Working</status>
+    </layer>
+    
+    <layer order="5" runs="FIRST">
+      <name>CORSFixMiddleware</name>
+      <purpose>Fallback to add missing CORS headers</purpose>
+      <status>Working as safety net</status>
+    </layer>
+  </middleware_stack_analysis>
+  
+  <testing_verification>
+    <test id="1" type="preflight">
+      <command>curl -X OPTIONS "http://localhost:8000/api/threads" -H "Origin: http://127.0.0.1:3000" -H "Access-Control-Request-Method: GET" -i</command>
+      <expected_response>
+        <status>200 OK</status>
+        <headers>
+          <header>Access-Control-Allow-Origin: http://127.0.0.1:3000</header>
+          <header>Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</header>
+          <header>Access-Control-Allow-Credentials: true</header>
+        </headers>
+      </expected_response>
+      <actual_response>SUCCESS - All headers present</actual_response>
+    </test>
+    
+    <test id="2" type="actual_request">
+      <command>curl -X GET "http://localhost:8000/api/threads?limit=20" -H "Origin: http://127.0.0.1:3000" -i</command>
+      <expected_response>
+        <status>403 Forbidden (auth required)</status>
+        <headers>
+          <header>Access-Control-Allow-Origin: http://127.0.0.1:3000</header>
+          <header>Access-Control-Allow-Credentials: true</header>
+        </headers>
+      </expected_response>
+      <actual_response>SUCCESS - CORS headers present with auth error</actual_response>
+    </test>
+  </testing_verification>
+  
+  <prevention_checklist>
+    <item priority="CRITICAL">
+      Always exclude OPTIONS method from authentication middleware
+    </item>
+    <item priority="HIGH">
+      Define routes without trailing slashes as primary pattern
+    </item>
+    <item priority="HIGH">
+      Test with both localhost and 127.0.0.1 origins in development
+    </item>
+    <item priority="MEDIUM">
+      Verify all imported function names match actual exports
+    </item>
+    <item priority="MEDIUM">
+      Include comprehensive CORS testing in CI/CD pipeline
+    </item>
+    <item priority="LOW">
+      Document CORS configuration for different environments
+    </item>
+  </prevention_checklist>
+  
+  <monitoring_recommendations>
+    <metric name="options_request_success_rate">
+      Track percentage of successful OPTIONS preflight requests
+    </metric>
+    <metric name="cors_header_presence">
+      Monitor responses to ensure CORS headers are always present
+    </metric>
+    <metric name="redirect_count">
+      Track 307 redirects that might indicate route definition issues
+    </metric>
+    <alert name="cors_failure_spike">
+      Alert if CORS errors exceed threshold in production logs
+    </alert>
+  </monitoring_recommendations>
+  
+  <related_specifications>
+    <spec>SPEC/cors_redirect_fix.xml</spec>
+    <spec>SPEC/cors_comprehensive_fixes.xml</spec>
+    <spec>shared/cors_config.py</spec>
+    <spec>SPEC/unified_environment_management.xml</spec>
+  </related_specifications>
+  
+  <business_value>
+    <impact type="IMMEDIATE">
+      Unblocked frontend-backend communication in development environment
+    </impact>
+    <impact type="VELOCITY">
+      Reduced debugging time for CORS issues from hours to minutes
+    </impact>
+    <impact type="QUALITY">
+      Improved developer experience with working local Docker environment
+    </impact>
+    <impact type="RISK_REDUCTION">
+      Prevented similar issues from reaching staging/production
+    </impact>
+  </business_value>
+</learnings>

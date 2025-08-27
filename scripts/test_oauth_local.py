@@ -57,8 +57,8 @@ class OAuthLocalTester:
         console.print("\n[bold cyan]1. Checking Environment Configuration[/bold cyan]")
         
         env_vars = {
-            'GOOGLE_CLIENT_ID': os.getenv('GOOGLE_CLIENT_ID'),
-            'GOOGLE_CLIENT_SECRET': os.getenv('GOOGLE_CLIENT_SECRET'),
+            'OAUTH_GOOGLE_CLIENT_ID_ENV': os.getenv('OAUTH_GOOGLE_CLIENT_ID_ENV'),
+            'OAUTH_GOOGLE_CLIENT_SECRET_ENV': os.getenv('OAUTH_GOOGLE_CLIENT_SECRET_ENV'),
             'JWT_SECRET_KEY': os.getenv('JWT_SECRET_KEY'),
             'AUTH_SERVICE_URL': os.getenv('AUTH_SERVICE_URL'),
             'FRONTEND_URL': os.getenv('FRONTEND_URL')

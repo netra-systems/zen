@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>UnifiedToolRegistry Missing Method Fix</title>
+    <date>2025-08-27</date>
+    <category>bug-fix</category>
+    <severity>medium</severity>
+    
+    <problem>
+        <description>
+            During application shutdown, an error was logged: 
+            "Error listing tools: 'ToolManager' object has no attribute 'tools'"
+            
+            Investigation revealed that the UnifiedToolRegistry class was missing
+            the get_tool_categories() method that was being called by the unified
+            tools router.
+        </description>
+        <symptoms>
+            - Error during shutdown sequence
+            - Missing get_tool_categories method in UnifiedToolRegistry
+            - Misleading error message about ToolManager (which doesn't exist)
+        </symptoms>
+    </problem>
+    
+    <solution>
+        <description>
+            Added the missing get_tool_categories() method to UnifiedToolRegistry
+            class with proper category grouping and counting functionality.
+        </description>
+        <implementation>
+            <file>netra_backend/app/services/unified_tool_registry/registry.py</file>
+            <changes>
+                - Added get_tool_categories() method that groups tools by category
+                - Returns list of category dictionaries with name, count, and description
+                - Handles tools without category attribute by defaulting to 'default'
+            </changes>
+        </implementation>
+    </solution>
+    
+    <testing>
+        <unit_tests>
+            <file>netra_backend/tests/unit/test_unified_tool_registry.py</file>
+            <coverage>
+                - Tool registration and retrieval
+                - Category management and filtering
+                - Permission checking
+                - Tool execution with and without handlers
+                - Error handling scenarios
+                - Empty registry handling
+            </coverage>
+            <result>17 tests passed</result>
+        </unit_tests>
+        
+        <integration_tests>
+            <file>netra_backend/tests/integration/test_unified_tools_api.py</file>
+            <coverage>
+                - API endpoints for tool listing
+                - Category retrieval endpoint
+                - Tool execution via API
+                - Authentication and permissions
+                - Error handling
+            </coverage>
+        </integration_tests>
+        
+        <e2e_tests>
+            <file>tests/e2e/test_tool_management_flow.py</file>
+            <coverage>
+                - Complete tool workflow from authentication to execution
+                - Permission validation flow
+                - Error recovery
+                - Concurrent operations
+                - System resilience
+            </coverage>
+        </e2e_tests>
+    </testing>
+    
+    <validation>
+        <method>Comprehensive test runner</method>
+        <file>netra_backend/tests/test_tool_registry_comprehensive.py</file>
+        <results>
+            - All functionality tests passed
+            - Error scenarios handled correctly
+            - Category grouping works as expected
+            - Default category fallback works
+        </results>
+    </validation>
+    
+    <impact>
+        <affected_components>
+            - UnifiedToolRegistry service
+            - Tool management API routes
+            - Tool category endpoints
+        </affected_components>
+        <risk>low</risk>
+        <backward_compatible>true</backward_compatible>
+    </impact>
+    
+    <lessons_learned>
+        - Missing methods in registry classes can cause misleading error messages
+        - Always ensure API contracts match implementation
+        - Comprehensive test coverage helps identify gaps quickly
+        - Tools without category attributes should have sensible defaults
+    </lessons_learned>
+    
+    <future_improvements>
+        - Consider adding tool category metadata caching
+        - Implement proper tool category descriptions from configuration
+        - Add tool usage metrics per category
+    </future_improvements>
+</learning>

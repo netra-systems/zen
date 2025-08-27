@@ -71,8 +71,9 @@ class BaseCRUD(Generic[T], ABC):
     
     async def _execute_get_by_id_query(self, session: AsyncSession, entity_id: str) -> Optional[T]:
         """Execute get by ID query."""
+        # Ensure entity_id is treated as string to avoid asyncpg parameter type issues
         result = await session.execute(
-            select(self.model).where(self.model.id == entity_id)
+            select(self.model).where(self.model.id == str(entity_id))
         )
         scalar_result = result.scalar_one_or_none()
         
@@ -216,7 +217,7 @@ class BaseCRUD(Generic[T], ABC):
     async def exists(self, db: AsyncSession, entity_id: str) -> bool:
         """Check if entity exists"""
         try:
-            query = select(func.count()).select_from(self.model).where(self.model.id == entity_id)
+            query = select(func.count()).select_from(self.model).where(self.model.id == str(entity_id))
             result = await db.execute(query)
             return result.scalar() > 0
         except SQLAlchemyError as e:

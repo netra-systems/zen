@@ -40,6 +40,7 @@ from netra_backend.app.websocket_core.types import (
     convert_jsonrpc_to_websocket_message,
     normalize_message_type
 )
+from netra_backend.app.websocket_core.utils import is_websocket_connected
 
 logger = central_logger.get_logger(__name__)
 
@@ -105,7 +106,7 @@ class HeartbeatHandler(BaseMessageHandler):
                 return True
             
             # Check if websocket is connected or is a mock (for testing)
-            if (websocket.application_state == WebSocketState.CONNECTED or 
+            if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
                 await websocket.send_json(response.model_dump())
                 return True
@@ -171,7 +172,7 @@ class UserMessageHandler(BaseMessageHandler):
             )
             
             # Check if websocket is connected or is a mock (for testing)
-            if (websocket.application_state == WebSocketState.CONNECTED or 
+            if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
                 await websocket.send_json(ack.model_dump())
                 
@@ -249,7 +250,7 @@ class JsonRpcHandler(BaseMessageHandler):
             }
             
             # Check if websocket is connected or is a mock (for testing)
-            if (websocket.application_state == WebSocketState.CONNECTED or 
+            if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
                 await websocket.send_json(response)
         
@@ -321,7 +322,7 @@ class ErrorHandler(BaseMessageHandler):
             )
             
             # Check if websocket is connected or is a mock (for testing)
-            if (websocket.application_state == WebSocketState.CONNECTED or 
+            if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
                 await websocket.send_json(ack.model_dump())
             
@@ -598,7 +599,7 @@ async def send_error_to_websocket(websocket: WebSocket, error_code: str,
     """Send error message to WebSocket client."""
     try:
         # Check if websocket is connected or is a mock (for testing)
-        if not (websocket.application_state == WebSocketState.CONNECTED or 
+        if not (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
             return False
             
@@ -616,7 +617,7 @@ async def send_system_message(websocket: WebSocket, content: str,
     """Send system message to WebSocket client."""
     try:
         # Check if websocket is connected or is a mock (for testing)
-        if not (websocket.application_state == WebSocketState.CONNECTED or 
+        if not (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
             return False
         

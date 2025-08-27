@@ -17,6 +17,7 @@ from netra_backend.app.routes.utils.validators import (
     validate_user_active,
     validate_user_id_in_payload,
 )
+from netra_backend.app.websocket_core.utils import is_websocket_connected
 
 logger = central_logger.get_logger(__name__)
 
@@ -410,6 +411,10 @@ def _determine_disconnect_code(websocket: WebSocket) -> int:
                 return 1006  # Abnormal closure - connection lost
             elif websocket.client_state == WebSocketState.CONNECTING:
                 return 1014  # Failed to establish connection
+        
+        # Use centralized connection check to determine disconnect code
+        if not is_websocket_connected(websocket):
+            return 1006  # Abnormal closure - connection lost
         
         # Default to normal closure
         return 1000

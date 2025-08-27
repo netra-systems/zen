@@ -110,10 +110,11 @@ class CredentialConstants:
     """OAuth and API credential constants."""
     
     # Google OAuth environment variables
-    GOOGLE_CLIENT_ID: Final[str] = "GOOGLE_CLIENT_ID"
-    GOOGLE_CLIENT_SECRET: Final[str] = "GOOGLE_CLIENT_SECRET"
-    GOOGLE_OAUTH_CLIENT_ID: Final[str] = "GOOGLE_OAUTH_CLIENT_ID"
-    GOOGLE_OAUTH_CLIENT_SECRET: Final[str] = "GOOGLE_OAUTH_CLIENT_SECRET"
+    # TOMBSTONE: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET superseded by environment-specific variables
+    GOOGLE_CLIENT_ID: Final[str] = "OAUTH_GOOGLE_CLIENT_ID_ENV"  # Updated to new naming convention
+    GOOGLE_CLIENT_SECRET: Final[str] = "OAUTH_GOOGLE_CLIENT_SECRET_ENV"  # Updated to new naming convention
+    GOOGLE_OAUTH_CLIENT_ID: Final[str] = "OAUTH_GOOGLE_CLIENT_ID_ENV"  # Alias for consistency
+    GOOGLE_OAUTH_CLIENT_SECRET: Final[str] = "OAUTH_GOOGLE_CLIENT_SECRET_ENV"  # Alias for consistency
     
     # API keys
     API_KEY: Final[str] = "api_key"

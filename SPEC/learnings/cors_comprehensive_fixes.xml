@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>Comprehensive CORS and Routing Fixes in Docker Environment</title>
+  <date>2025-08-27</date>
+  
+  <issues_identified>
+    <issue id="1">
+      <type>CORS Preflight Blocking</type>
+      <description>OPTIONS requests were being blocked by auth middleware, causing preflight failures</description>
+      <symptoms>
+        - OPTIONS requests timing out
+        - Browser CORS error: "No 'Access-Control-Allow-Origin' header is present"
+        - Frontend at 127.0.0.1:3000 unable to reach localhost:8000
+      </symptoms>
+    </issue>
+    
+    <issue id="2">
+      <type>Trailing Slash Redirects</type>
+      <description>FastAPI automatic 307 redirects losing CORS headers</description>
+      <symptoms>
+        - /api/threads redirecting to /api/threads/
+        - CORS headers missing on redirect responses
+      </symptoms>
+    </issue>
+    
+    <issue id="3">
+      <type>Import Error</type>
+      <description>auth_client_core.py importing wrong function name</description>
+      <symptoms>
+        - ImportError: cannot import name 'get_config' from 'netra_backend.app.core.configuration'
+        - Backend failing to start
+      </symptoms>
+    </issue>
+    
+    <issue id="4">
+      <type>Database Session Management</type>
+      <description>Async session lifecycle issues in database/__init__.py</description>
+      <symptoms>
+        - asyncpg.exceptions: cannot perform operation: another operation is in progress
+        - SQLAlchemy InterfaceError during session cleanup
+      </symptoms>
+    </issue>
+  </issues_identified>
+  
+  <fixes_applied>
+    <fix id="1">
+      <file>netra_backend/app/middleware/fastapi_auth_middleware.py</file>
+      <change>Added OPTIONS request bypass in auth middleware</change>
+      <code>
+        # Skip auth for OPTIONS requests (CORS preflight)
+        if request.method == "OPTIONS":
+            return await call_next(request)
+      </code>
+    </fix>
+    
+    <fix id="2">
+      <file>netra_backend/app/routes/threads_route.py</file>
+      <change>Added dual route definitions to prevent redirects</change>
+      <code>
+        @router.get("", response_model=List[ThreadResponse])
+        @router.get("/", response_model=List[ThreadResponse], include_in_schema=False)
+        async def list_threads(...):
+      </code>
+    </fix>
+    
+    <fix id="3">
+      <file>netra_backend/app/clients/auth_client_core.py</file>
+      <change>Fixed import to use correct function name</change>
+      <code>
+        from netra_backend.app.core.configuration import get_configuration
+        config = get_configuration()
+      </code>
+    </fix>
+    
+    <fix id="4">
+      <file>netra_backend/app/middleware/cors_fix_middleware.py</file>
+      <change>Created fallback middleware to ensure CORS headers are always present</change>
+      <purpose>Adds missing Access-Control-Allow-Origin header when FastAPI's CORSMiddleware fails</purpose>
+    </fix>
+  </fixes_applied>
+  
+  <other_routes_needing_fixes>
+    <route>corpus.py - Has @router.post("/") and @router.get("/")</route>
+    <route>demo.py - Has @router.get("/")</route>
+    <route>llm_cache.py - Has @router.delete("/")</route>
+    <route>health.py - Has both @router.get("/") and @router.get("")</route>
+    <route>unified_tools/router.py - Has @router.get("/")</route>
+    <route>mcp/main.py - Has @router.post("/")</route>
+  </other_routes_needing_fixes>
+  
+  <middleware_stack_order>
+    <layer order="1">CORSMiddleware (FastAPI built-in)</layer>
+    <layer order="2">cors_redirect_middleware (handles redirects)</layer>
+    <layer order="3">FastAPIAuthMiddleware (authentication)</layer>
+    <layer order="4">Security middleware</layer>
+    <layer order="5">CORSFixMiddleware (fallback)</layer>
+  </middleware_stack_order>
+  
+  <testing_commands>
+    <test>
+      <description>Test OPTIONS preflight</description>
+      <command>curl -X OPTIONS "http://localhost:8000/api/threads" -H "Origin: http://127.0.0.1:3000" -H "Access-Control-Request-Method: GET" -i</command>
+      <expected>HTTP 200 with Access-Control-Allow-Origin header</expected>
+    </test>
+    
+    <test>
+      <description>Test GET with CORS</description>
+      <command>curl -X GET "http://localhost:8000/api/threads?limit=20" -H "Origin: http://127.0.0.1:3000" -i</command>
+      <expected>HTTP 403 (auth required) with proper CORS headers</expected>
+    </test>
+  </testing_commands>
+  
+  <prevention_guidelines>
+    <guideline>Always exclude OPTIONS requests from authentication middleware</guideline>
+    <guideline>Define routes without trailing slashes and add duplicate with slash if needed</guideline>
+    <guideline>Test CORS with both localhost and 127.0.0.1 origins</guideline>
+    <guideline>Verify import names match exported functions in configuration modules</guideline>
+    <guideline>Use proper async context managers for database sessions</guideline>
+    <guideline>Test preflight requests explicitly in Docker environments</guideline>
+  </prevention_guidelines>
+  
+  <business_impact>
+    <impact>Frontend can now communicate with backend in Docker environment</impact>
+    <impact>Users can access the application without CORS errors</impact>
+    <impact>Development velocity improved with working local environment</impact>
+    <impact>Reduced debugging time for CORS-related issues</impact>
+  </business_impact>
+</learnings>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Cloud Armor OAuth Callback False Positive Resolution</title>
+  <date>2025-08-27</date>
+  <category>security,infrastructure,oauth</category>
+  
+  <problem>
+    OAuth callback URLs were being blocked by Cloud Armor with 403 errors.
+    The OWASP SQL injection rule (owasp-crs-v030001-id942432-sqli) was
+    incorrectly flagging Google OAuth authorization codes as SQL injection attempts.
+  </problem>
+  
+  <root_cause>
+    Google OAuth authorization codes contain URL-encoded forward slashes in the format
+    "4%2F0..." where %2F represents an encoded forward slash (/). The OWASP CRS rule
+    id942432 interprets this pattern as a potential SQL injection attack, causing
+    false positives on legitimate OAuth callbacks.
+  </root_cause>
+  
+  <symptoms>
+    <symptom>403 Forbidden errors on /auth/callback endpoints</symptom>
+    <symptom>Cloud Armor logs showing: preconfiguredExprIds: ["owasp-crs-v030001-id942432-sqli"]</symptom>
+    <symptom>Pattern in blocked URLs: /auth/callback?state=...&amp;code=4%2F0...</symptom>
+    <symptom>User unable to complete OAuth login flow</symptom>
+  </symptoms>
+  
+  <solution>
+    Added an exception rule in Cloud Armor at priority 50 (higher priority than
+    the SQL injection rule at priority 100) to explicitly allow the /auth/callback
+    path, exempting it from SQL injection checks.
+    
+    Command used:
+    gcloud compute security-policies rules create 50 \
+      --security-policy=staging-security-policy \
+      --action=allow \
+      --description="Allow OAuth callback - exempts Google OAuth callbacks from SQL injection false positives" \
+      --expression="request.path == '/auth/callback'" \
+      --project=netra-staging
+  </solution>
+  
+  <debugging_process>
+    <step>Used gcloud logging to query Cloud Armor denied requests</step>
+    <step>Identified pattern of OAuth callbacks being blocked</step>
+    <step>Analyzed the specific OWASP rule triggering (id942432)</step>
+    <step>Recognized URL-encoded slashes in OAuth codes as the trigger</step>
+    <step>Created targeted exception rule for OAuth callback path</step>
+  </debugging_process>
+  
+  <tools_created>
+    <tool>
+      <name>scripts/analyze_cloud_armor_logs.py</name>
+      <purpose>
+        Python script for analyzing Cloud Armor security logs.
+        Provides easy access to blocked requests, OAuth issues,
+        and OWASP rule analysis.
+      </purpose>
+      <usage>
+        python scripts/analyze_cloud_armor_logs.py --oauth
+        python scripts/analyze_cloud_armor_logs.py --rule "id942432"
+        python scripts/analyze_cloud_armor_logs.py --summary
+      </usage>
+    </tool>
+    
+    <tool>
+      <name>SPEC/cloud_armor_security.xml</name>
+      <purpose>
+        Comprehensive documentation of Cloud Armor security configuration,
+        known issues, and monitoring approaches.
+      </purpose>
+    </tool>
+  </tools_created>
+  
+  <prevention>
+    <measure>
+      Always test OAuth flows after modifying security policies as they
+      frequently trigger WAF false positives due to URL-encoded parameters.
+    </measure>
+    <measure>
+      Create specific path-based exceptions for known legitimate endpoints
+      rather than disabling entire security rule categories.
+    </measure>
+    <measure>
+      Use preview mode for new security rules to identify false positives
+      before enforcement.
+    </measure>
+    <measure>
+      Regularly monitor Cloud Armor logs using the provided analysis script
+      to identify patterns in blocked legitimate traffic.
+    </measure>
+  </prevention>
+  
+  <related_issues>
+    <issue>
+      WebSocket connections (/ws endpoint) also being blocked by a different
+      SQL injection rule (id942421). May require similar exception if the
+      issue persists.
+    </issue>
+  </related_issues>
+  
+  <key_takeaways>
+    <takeaway>
+      Cloud Armor's OWASP rules can trigger false positives on legitimate
+      traffic containing URL-encoded characters, especially OAuth flows.
+    </takeaway>
+    <takeaway>
+      Path-based exception rules with higher priority are an effective way
+      to exempt specific endpoints from WAF rules while maintaining security
+      for the rest of the application.
+    </takeaway>
+    <takeaway>
+      Having proper log analysis tools is essential for quickly identifying
+      and resolving security policy issues.
+    </takeaway>
+  </key_takeaways>
+</learning>

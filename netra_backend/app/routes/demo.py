@@ -26,10 +26,15 @@ from netra_backend.app.schemas.demo_schemas import (
 )
 from netra_backend.app.services.demo_service import DemoService, get_demo_service
 
-router = APIRouter(prefix="/api/demo", tags=["demo"])
+router = APIRouter(
+    prefix="/api/demo",
+    tags=["demo"],
+    redirect_slashes=False  # Disable automatic trailing slash redirects
+)
 
 
-@router.get("/", response_model=Dict[str, Any])
+@router.get("", response_model=Dict[str, Any])
+@router.get("/", response_model=Dict[str, Any], include_in_schema=False)
 async def get_demo_overview(
     current_user: Optional[Dict] = Depends(get_current_user)
 ) -> Dict[str, Any]:

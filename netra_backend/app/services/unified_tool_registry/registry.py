@@ -150,6 +150,25 @@ class UnifiedToolRegistry:
         self._tools.clear()
         self._tool_handlers.clear()
         logger.info("Tool registry cleared")
+    
+    def get_tool_categories(self) -> List[Dict[str, Any]]:
+        """Get list of all tool categories with counts.
+        
+        Returns:
+            List of dictionaries containing category information
+        """
+        categories = {}
+        for tool in self._tools.values():
+            category = tool.category if hasattr(tool, 'category') else 'default'
+            if category not in categories:
+                categories[category] = {
+                    'name': category,
+                    'count': 0,
+                    'description': f'{category.capitalize()} tools'
+                }
+            categories[category]['count'] += 1
+        
+        return list(categories.values())
 
 
 # Global registry instance

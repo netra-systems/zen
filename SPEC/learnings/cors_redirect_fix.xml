@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>CORS and Redirect Handling in Docker Environment</title>
+  <context>
+    Frontend at localhost:3000 was getting CORS errors when accessing backend API at localhost:8000.
+    Error: "Access to fetch at 'http://localhost:8000/api/threads/?limit=20&offset=0' (redirected from 'http://localhost:8000/api/threads?limit=20&offset=0') from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+  </context>
+  
+  <root_causes>
+    <cause id="1">
+      <description>FastAPI automatic trailing slash redirects (307) were not preserving CORS headers</description>
+      <details>
+        When routes are defined with @router.get("/"), FastAPI redirects requests without trailing slashes to include them.
+        During the redirect, CORS headers were not being properly applied to the redirect response.
+      </details>
+    </cause>
+    <cause id="2">
+      <description>SQLAlchemy async session management conflict</description>
+      <details>
+        The database/__init__.py had improper async generator lifecycle management causing "cannot perform operation: another operation is in progress" errors.
+        The postgres_session method was mixing @asynccontextmanager decorator logic with manual async generator yielding.
+      </details>
+    </cause>
+  </root_causes>
+  
+  <solutions>
+    <solution id="1">
+      <description>Support both trailing slash and no-slash routes</description>
+      <implementation>
+        Modified threads_route.py to define routes both with and without trailing slashes:
+        - @router.get("") for no trailing slash
+        - @router.get("/", include_in_schema=False) for trailing slash support
+        This prevents redirects and ensures CORS headers are always applied.
+      </implementation>
+    </solution>
+    <solution id="2">
+      <description>CORS middleware stack properly configured</description>
+      <verification>
+        - CORSMiddleware from FastAPI handles standard CORS
+        - cors_redirect_middleware handles redirects (307) 
+        - CORSFixMiddleware adds missing headers as fallback
+        All three work together to ensure CORS headers are always present.
+      </verification>
+    </solution>
+  </solutions>
+  
+  <testing>
+    <test>curl http://localhost:8000/api/threads?limit=20 -H "Origin: http://localhost:3000"</test>
+    <result>Returns proper CORS headers with access-control-allow-origin: http://localhost:3000</result>
+  </testing>
+  
+  <prevention>
+    <guideline>Always define API routes without trailing slashes and add duplicate routes with trailing slashes when needed</guideline>
+    <guideline>Test CORS handling for both direct requests and redirects in Docker environment</guideline>
+    <guideline>Ensure database session management uses proper async context manager patterns</guideline>
+  </prevention>
+  
+  <related_files>
+    <file>netra_backend/app/routes/threads_route.py</file>
+    <file>netra_backend/app/core/middleware_setup.py</file>
+    <file>netra_backend/app/middleware/cors_fix_middleware.py</file>
+    <file>netra_backend/app/database/__init__.py</file>
+    <file>shared/cors_config.py</file>
+  </related_files>
+</learnings>

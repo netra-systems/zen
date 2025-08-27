@@ -28,7 +28,10 @@ from netra_backend.app.routes.mcp.websocket_handler import MCPWebSocketHandler
 from netra_backend.app.services.mcp_models import MCPClient
 from netra_backend.app.services.service_factory import get_mcp_service
 
-router = APIRouter(tags=["MCP"])
+router = APIRouter(
+    tags=["MCP"],
+    redirect_slashes=False  # Disable automatic trailing slash redirects
+)
 
 
 @router.get("/info")
@@ -250,7 +253,8 @@ async def websocket_endpoint(
     handler = MCPWebSocketHandler(mcp_service)
     await handler.handle_websocket(websocket, api_key)
 
-@router.post("/")
+@router.post("")
+@router.post("/", include_in_schema=False)
 async def handle_mcp_message(
     request: dict,
     mcp_service = Depends(get_mcp_service)

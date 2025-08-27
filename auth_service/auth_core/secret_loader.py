@@ -117,7 +117,13 @@ class AuthSecretLoader:
     
     @staticmethod
     def get_google_client_id() -> str:
-        """Get Google OAuth client ID with proper fallback chain."""
+        """Get Google OAuth client ID with proper fallback chain.
+        
+        TOMBSTONE: GOOGLE_CLIENT_ID variable superseded by environment-specific variables:
+        - GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT
+        - GOOGLE_OAUTH_CLIENT_ID_STAGING
+        - GOOGLE_OAUTH_CLIENT_ID_PRODUCTION
+        """
         env_manager = get_env()
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
@@ -140,18 +146,19 @@ class AuthSecretLoader:
                 logger.info("Using GOOGLE_OAUTH_CLIENT_ID_PRODUCTION from environment")
                 return client_id
         
-        # Generic fallback - this is what Cloud Run sets from secrets
-        client_id = env_manager.get("GOOGLE_CLIENT_ID", "")
-        if client_id:
-            logger.info("Using GOOGLE_CLIENT_ID from environment")
-            return client_id
-        else:
-            logger.warning("No Google Client ID found in environment")
-            return ""
+        # No fallback to generic GOOGLE_CLIENT_ID - use environment-specific variables only
+        logger.warning(f"No Google Client ID found for {env} environment")
+        return ""
     
     @staticmethod
     def get_google_client_secret() -> str:
-        """Get Google OAuth client secret with proper fallback chain."""
+        """Get Google OAuth client secret with proper fallback chain.
+        
+        TOMBSTONE: GOOGLE_CLIENT_SECRET variable superseded by environment-specific variables:
+        - GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT
+        - GOOGLE_OAUTH_CLIENT_SECRET_STAGING
+        - GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION
+        """
         env_manager = get_env()
         env = env_manager.get("ENVIRONMENT", "development").lower()
         
@@ -174,14 +181,9 @@ class AuthSecretLoader:
                 logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION from environment")
                 return secret
         
-        # Generic fallback - this is what Cloud Run sets from secrets
-        secret = env_manager.get("GOOGLE_CLIENT_SECRET", "")
-        if secret:
-            logger.info("Using GOOGLE_CLIENT_SECRET from environment")
-            return secret
-        else:
-            logger.warning("No Google Client Secret found in environment")
-            return ""
+        # No fallback to generic GOOGLE_CLIENT_SECRET - use environment-specific variables only
+        logger.warning(f"No Google Client Secret found for {env} environment")
+        return ""
     
     @staticmethod
     def get_database_url() -> str:

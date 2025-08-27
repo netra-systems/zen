@@ -102,12 +102,12 @@ async def check_postgres_health() -> HealthCheckResult:
 async def _execute_postgres_query() -> None:
     """Execute test query on PostgreSQL database using centralized connection manager."""
     from sqlalchemy import text
-    from netra_backend.app.core.unified.db_connection_manager import db_manager
+    from netra_backend.app.db.database_manager import DatabaseManager
     
     # CRITICAL: Use unified database manager to ensure proper SSL parameter conversion
     try:
         # Try to get connection from unified manager first
-        async with db_manager.get_async_session("default") as session:
+        async with DatabaseManager.get_async_session("default") as session:
             await session.execute(text("SELECT 1"))
     except (ValueError, Exception):
         # Fallback to direct engine access with validation
@@ -845,10 +845,10 @@ async def check_database_monitoring_health() -> HealthCheckResult:
     
     try:
         # Quick check of database connection pool status if available
-        from netra_backend.app.core.unified.db_connection_manager import db_manager
+        from netra_backend.app.db.database_manager import DatabaseManager
         
         # Check if connection manager is initialized
-        if hasattr(db_manager, '_engines') and db_manager._engines:
+        if hasattr(DatabaseManager, '_engines') and DatabaseManager._engines:
             # Database monitoring is working if we have active connections
             response_time = (time.time() - start_time) * 1000
             return _create_success_result("database_monitoring", response_time)

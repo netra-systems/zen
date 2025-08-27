@@ -55,13 +55,13 @@ class TestOAuthStagingCredentialsFailures:
         env_manager = get_env()
         
         # Temporarily clear OAuth credentials to simulate missing config
-        original_client_id = env_manager.get("GOOGLE_CLIENT_ID")
-        original_client_secret = env_manager.get("GOOGLE_CLIENT_SECRET")
+        original_client_id = env_manager.get("OAUTH_GOOGLE_CLIENT_ID_ENV")
+        original_client_secret = env_manager.get("OAUTH_GOOGLE_CLIENT_SECRET_ENV")
         
         try:
             # Clear OAuth credentials
-            env_manager.set("GOOGLE_CLIENT_ID", "", "test_oauth_missing")
-            env_manager.set("GOOGLE_CLIENT_SECRET", "", "test_oauth_missing")
+            env_manager.set("OAUTH_GOOGLE_CLIENT_ID_ENV", "", "test_oauth_missing")
+            env_manager.set("OAUTH_GOOGLE_CLIENT_SECRET_ENV", "", "test_oauth_missing")
             env_manager.set("ENVIRONMENT", "staging", "test_oauth_missing")
             
             # Test graceful handling of missing credentials
@@ -83,9 +83,9 @@ class TestOAuthStagingCredentialsFailures:
         finally:
             # Restore original values
             if original_client_id is not None:
-                env_manager.set("GOOGLE_CLIENT_ID", original_client_id, "test_oauth_restore")
+                env_manager.set("OAUTH_GOOGLE_CLIENT_ID_ENV", original_client_id, "test_oauth_restore")
             if original_client_secret is not None:
-                env_manager.set("GOOGLE_CLIENT_SECRET", original_client_secret, "test_oauth_restore")
+                env_manager.set("OAUTH_GOOGLE_CLIENT_SECRET_ENV", original_client_secret, "test_oauth_restore")
 
     def test_google_oauth_client_id_environment_detection_works(self):
         """Test that OAuth client ID environment detection works correctly in staging.
@@ -99,12 +99,12 @@ class TestOAuthStagingCredentialsFailures:
         
         # Temporarily set staging environment but clear OAuth credentials
         original_environment = env_manager.get("ENVIRONMENT")
-        original_client_id = env_manager.get("GOOGLE_CLIENT_ID")
+        original_client_id = env_manager.get("OAUTH_GOOGLE_CLIENT_ID_ENV")
         
         try:
             # Set staging environment but no OAuth credentials
             env_manager.set("ENVIRONMENT", "staging", "test_oauth_env_detect")
-            env_manager.set("GOOGLE_CLIENT_ID", "", "test_oauth_env_detect")
+            env_manager.set("OAUTH_GOOGLE_CLIENT_ID_ENV", "", "test_oauth_env_detect")
             env_manager.set("GCP_PROJECT_ID", "netra-staging", "test_oauth_env_detect")
             
             # Should detect staging environment correctly
@@ -119,7 +119,7 @@ class TestOAuthStagingCredentialsFailures:
                 f"Should return empty client ID when not configured, got: '{client_id}'"
             
             # Test with a valid-looking client ID
-            env_manager.set("GOOGLE_CLIENT_ID", "123456789.apps.googleusercontent.com", "test_oauth_env_detect")
+            env_manager.set("OAUTH_GOOGLE_CLIENT_ID_ENV", "123456789.apps.googleusercontent.com", "test_oauth_env_detect")
             client_id = AuthSecretLoader.get_google_client_id()
             assert client_id.endswith('.apps.googleusercontent.com'), \
                 f"Should return valid client ID format when configured, got: {client_id}"
@@ -129,7 +129,7 @@ class TestOAuthStagingCredentialsFailures:
             if original_environment is not None:
                 env_manager.set("ENVIRONMENT", original_environment, "test_oauth_restore")
             if original_client_id is not None:
-                env_manager.set("GOOGLE_CLIENT_ID", original_client_id, "test_oauth_restore")
+                env_manager.set("OAUTH_GOOGLE_CLIENT_ID_ENV", original_client_id, "test_oauth_restore")
 
     def test_oauth_service_handles_missing_credentials_gracefully(self):
         """Test OAuth service initialization with missing credentials.
@@ -143,15 +143,15 @@ class TestOAuthStagingCredentialsFailures:
         env_manager = get_env()
         
         # Clear OAuth credentials to simulate missing config
-        original_client_id = env_manager.get("GOOGLE_CLIENT_ID")
-        original_client_secret = env_manager.get("GOOGLE_CLIENT_SECRET")
+        original_client_id = env_manager.get("OAUTH_GOOGLE_CLIENT_ID_ENV")
+        original_client_secret = env_manager.get("OAUTH_GOOGLE_CLIENT_SECRET_ENV")
         original_environment = env_manager.get("ENVIRONMENT")
         
         try:
             # Set staging environment but no OAuth credentials
             env_manager.set("ENVIRONMENT", "staging", "test_oauth_service")
-            env_manager.set("GOOGLE_CLIENT_ID", "", "test_oauth_service")
-            env_manager.set("GOOGLE_CLIENT_SECRET", "", "test_oauth_service")
+            env_manager.set("OAUTH_GOOGLE_CLIENT_ID_ENV", "", "test_oauth_service")
+            env_manager.set("OAUTH_GOOGLE_CLIENT_SECRET_ENV", "", "test_oauth_service")
             env_manager.set("AUTH_FAST_TEST_MODE", "true", "test_oauth_service")  # Skip database init
             
             # Test that configuration detects missing OAuth credentials
@@ -174,9 +174,9 @@ class TestOAuthStagingCredentialsFailures:
             if original_environment is not None:
                 env_manager.set("ENVIRONMENT", original_environment, "test_oauth_restore")
             if original_client_id is not None:
-                env_manager.set("GOOGLE_CLIENT_ID", original_client_id, "test_oauth_restore")
+                env_manager.set("OAUTH_GOOGLE_CLIENT_ID_ENV", original_client_id, "test_oauth_restore")
             if original_client_secret is not None:
-                env_manager.set("GOOGLE_CLIENT_SECRET", original_client_secret, "test_oauth_restore")
+                env_manager.set("OAUTH_GOOGLE_CLIENT_SECRET_ENV", original_client_secret, "test_oauth_restore")
 
     def test_oauth_redirect_flow_configuration_fails(self):
         """Test OAuth redirect flow configuration in staging.

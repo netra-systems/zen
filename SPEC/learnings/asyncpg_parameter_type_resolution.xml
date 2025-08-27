@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>AsyncPG Parameter Type Resolution Issue with SQLAlchemy VARCHAR Casting</title>
+  <date>2025-08-27</date>
+  <severity>critical</severity>
+  <category>database</category>
+  
+  <problem>
+    <description>
+      AsyncPG driver fails with "could not determine data type of parameter $1" when SQLAlchemy 
+      generates queries with explicit type casting (::VARCHAR) for unbounded String columns.
+    </description>
+    <error_message>
+      sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) 
+      &lt;class 'asyncpg.exceptions.UndefinedParameterError'&gt;: could not determine data type of parameter $1
+      [SQL: SELECT threads.id AS threads_id... WHERE threads.id = $1::VARCHAR]
+    </error_message>
+    <affected_components>
+      <component>netra_backend/app/services/database/base_crud.py</component>
+      <component>netra_backend/app/db/models_agent.py</component>
+      <component>netra_backend/app/websocket_core/agent_handler.py</component>
+    </affected_components>
+  </problem>
+  
+  <root_cause>
+    <technical_analysis>
+      SQLAlchemy generates explicit VARCHAR type casts when String columns are defined without 
+      length constraints. AsyncPG (v0.30.0) cannot determine parameter types when these explicit 
+      casts are present, causing query execution to fail.
+    </technical_analysis>
+    <trigger_conditions>
+      <condition>String column defined without length (e.g., Column(String) instead of Column(String(255)))</condition>
+      <condition>Query parameter comparison using WHERE clause</condition>
+      <condition>AsyncPG driver used for PostgreSQL connection</condition>
+      <condition>Development mode with non-existent thread IDs</condition>
+    </trigger_conditions>
+  </root_cause>
+  
+  <solution>
+    <approach>Multi-Agent Team Approach</approach>
+    <agents_used>
+      <agent role="Database Architecture Agent">Analyzed root cause and proposed technical fixes</agent>
+      <agent role="Implementation Agent">Applied fixes to models and query methods</agent>
+    </agents_used>
+    
+    <changes_implemented>
+      <change file="netra_backend/app/db/models_agent.py">
+        <description>Updated all unbounded String columns to String(255)</description>
+        <before>id = Column(String, primary_key=True)</before>
+        <after>id = Column(String(255), primary_key=True)</after>
+      </change>
+      
+      <change file="netra_backend/app/services/database/base_crud.py">
+        <description>Added explicit string conversion in query methods</description>
+        <before>select(self.model).where(self.model.id == entity_id)</before>
+        <after>select(self.model).where(self.model.id == str(entity_id))</after>
+      </change>
+    </changes_implemented>
+  </solution>
+  
+  <testing>
+    <test_strategy>
+      Created three levels of tests to validate the fix:
+      1. Unit test: Verify repository handles missing threads gracefully
+      2. Integration test: Validate WebSocket thread validation flow
+      3. E2E test: Test complete development mode thread handling
+    </test_strategy>
+    
+    <test_results>
+      <test name="test_thread_repository_handles_missing_thread_gracefully" status="PASSED"/>
+      <test name="test_websocket_start_agent_with_nonexistent_thread" status="PENDING"/>
+      <test name="test_development_thread_lifecycle" status="PENDING"/>
+    </test_results>
+  </testing>
+  
+  <prevention>
+    <best_practice>Always define String columns with explicit length constraints in SQLAlchemy models</best_practice>
+    <best_practice>Use Text type for unbounded text fields instead of String without length</best_practice>
+    <best_practice>Test database queries with asyncpg driver specifically, not just generic SQLAlchemy</best_practice>
+    <best_practice>Implement proper thread creation flow for development mode</best_practice>
+  </prevention>
+  
+  <business_impact>
+    <impact>Development environment WebSocket connections fail immediately</impact>
+    <impact>Prevents developers from testing agent functionality locally</impact>
+    <impact>Blocks first-time user experience in development mode</impact>
+    <mitigation>Fix ensures stable development environment and reliable database operations</mitigation>
+  </business_impact>
+  
+  <related_issues>
+    <issue>Development mode authentication bypass creates "development-user" without corresponding thread</issue>
+    <issue>Frontend generates thread IDs that don't exist in database</issue>
+    <issue>Missing graceful handling of non-existent threads</issue>
+  </related_issues>
+  
+  <monitoring>
+    <metric>Track DB_QUERY_FAILED errors in production logs</metric>
+    <metric>Monitor asyncpg parameter type errors</metric>
+    <metric>Alert on WebSocket connection failures in development mode</metric>
+  </monitoring>
+  
+  <lessons_learned>
+    <lesson>
+      Multi-agent approach effectively divides complex problems:
+      - Architecture agent identifies root cause
+      - Implementation agent applies targeted fixes
+      - Testing validates solution at multiple levels
+    </lesson>
+    <lesson>
+      Database driver-specific issues require understanding of both ORM (SQLAlchemy) 
+      and driver (asyncpg) behaviors, not just high-level abstractions
+    </lesson>
+    <lesson>
+      Development mode requires special handling for authentication bypass scenarios 
+      to ensure smooth developer experience
+    </lesson>
+  </lessons_learned>
+</learning>

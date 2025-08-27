@@ -51,7 +51,8 @@ class ThreadResponse(BaseModel):
     metadata: Optional[dict] = None
     message_count: int = 0
 
-@router.get("/", response_model=List[ThreadResponse])
+@router.get("", response_model=List[ThreadResponse])
+@router.get("/", response_model=List[ThreadResponse], include_in_schema=False)
 async def list_threads(
     db: DbDep, current_user = Depends(get_current_active_user),
     limit: int = Query(20, le=100), offset: int = Query(0, ge=0)
@@ -60,7 +61,8 @@ async def list_threads(
     handler = lambda: handle_list_threads_request(db, current_user.id, offset, limit)
     return await handle_route_with_error_logging(handler, "listing threads")
 
-@router.post("/", response_model=ThreadResponse)
+@router.post("", response_model=ThreadResponse)
+@router.post("/", response_model=ThreadResponse, include_in_schema=False)
 async def create_thread(
     thread_data: ThreadCreate, db: DbDep,
     current_user = Depends(get_current_active_user)

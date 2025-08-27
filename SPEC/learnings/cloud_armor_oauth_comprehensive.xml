@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Cloud Armor OAuth False Positive - Complete Analysis and Resolution</title>
+  <date>2025-08-27</date>
+  <category>security,infrastructure,oauth,production-incident</category>
+  <severity>critical</severity>
+  
+  <executive_summary>
+    Cloud Armor's OWASP SQL injection rule was blocking legitimate OAuth callbacks from Google,
+    preventing users from logging into the staging environment. The issue was caused by URL-encoded
+    forward slashes in Google's authorization codes triggering false positives in the WAF rules.
+  </executive_summary>
+  
+  <incident_timeline>
+    <event time="2025-08-27T02:50:09Z">First observed OAuth callback blocked (user from 68.5.230.82)</event>
+    <event time="2025-08-27T04:00:01Z">Multiple OAuth callback attempts blocked, pattern confirmed</event>
+    <event time="2025-08-27T04:35:00Z">Issue investigated, root cause identified</event>
+    <event time="2025-08-27T04:40:00Z">Exception rule deployed to Cloud Armor</event>
+    <event time="2025-08-27T04:45:00Z">Documentation and monitoring tools created</event>
+  </incident_timeline>
+  
+  <technical_details>
+    <blocked_pattern>
+      URL: /auth/callback?state=...&amp;code=4%2F0AVMBsJi...
+      Triggered Rule: owasp-crs-v030001-id942432-sqli
+      Rule Set: sqli-stable (SQL Injection Protection)
+    </blocked_pattern>
+    
+    <root_cause_analysis>
+      Google OAuth authorization codes follow the pattern "4/0..." which when URL-encoded
+      becomes "4%2F0..." where %2F represents a forward slash. The OWASP CRS rule id942432
+      is designed to detect SQL injection attempts that include encoded slashes, which are
+      common in injection attacks like "1' OR '1'='1" becoming "1%27+OR+%271%27%3D%271".
+      
+      The rule correctly identifies the pattern but incorrectly classifies it as malicious
+      when it appears in OAuth authorization codes.
+    </root_cause_analysis>
+    
+    <false_positive_indicators>
+      <indicator>All blocked requests were to /auth/callback endpoint</indicator>
+      <indicator>All contained legitimate OAuth parameters (state, code, scope)</indicator>
+      <indicator>Code parameter consistently started with "4%2F0"</indicator>
+      <indicator>Requests came from legitimate user browsers (Chrome/Edge)</indicator>
+      <indicator>Referer headers showed legitimate frontend origins</indicator>
+    </false_positive_indicators>
+  </technical_details>
+  
+  <resolution_details>
+    <solution_approach>
+      Created a targeted exception rule that allows the OAuth callback path while maintaining
+      security for all other endpoints. The rule uses path-based matching to exempt only
+      the specific callback endpoint from SQL injection checks.
+    </solution_approach>
+    
+    <implementation>
+      Rule Priority: 50 (higher priority than SQL injection rule at 100)
+      Rule Action: allow
+      Rule Expression: request.path == '/auth/callback'
+      
+      Command executed:
+      gcloud compute security-policies rules create 50 \
+        --security-policy=staging-security-policy \
+        --action=allow \
+        --description="Allow OAuth callback - exempts Google OAuth callbacks from SQL injection false positives" \
+        --expression="request.path == '/auth/callback'" \
+        --project=netra-staging
+    </implementation>
+    
+    <alternatives_considered>
+      <alternative status="rejected">
+        Disable SQL injection protection entirely - Would leave application vulnerable
+      </alternative>
+      <alternative status="rejected">
+        Whitelist specific IP addresses - OAuth users come from various IPs
+      </alternative>
+      <alternative status="rejected">
+        Modify OAuth provider settings - Google's code format is standard and unchangeable
+      </alternative>
+      <alternative status="future">
+        Add parameter validation to exception rule - Could validate state/code parameters exist
+      </alternative>
+    </alternatives_considered>
+  </resolution_details>
+  
+  <monitoring_improvements>
+    <tool name="analyze_cloud_armor_logs.py">
+      Purpose: Quick analysis of Cloud Armor blocks and patterns
+      Location: scripts/analyze_cloud_armor_logs.py
+      
+      Key features:
+      - Filter by denied requests, OAuth blocks, URL patterns, or specific rules
+      - Summary mode shows rule frequency and blocked URL patterns
+      - Windows-compatible with proper gcloud shell handling
+      - Timezone-aware datetime handling
+    </tool>
+    
+    <monitoring_queries>
+      <query purpose="Find all OAuth blocks">
+        python scripts/analyze_cloud_armor_logs.py --oauth --limit 50
+      </query>
+      <query purpose="Check specific rule triggers">
+        python scripts/analyze_cloud_armor_logs.py --rule "id942432" --summary
+      </query>
+      <query purpose="Monitor callback endpoint">
+        python scripts/analyze_cloud_armor_logs.py --url "/auth/callback"
+      </query>
+      <query purpose="Get block summary">
+        python scripts/analyze_cloud_armor_logs.py --summary --limit 100 --hours 48
+      </query>
+    </monitoring_queries>
+  </monitoring_improvements>
+  
+  <broader_implications>
+    <implication>
+      WebSocket endpoints (/ws) also showing similar false positives with rule id942421.
+      May require similar exception if legitimate WebSocket traffic is blocked.
+    </implication>
+    <implication>
+      Other URL-encoded parameters in legitimate requests could trigger similar issues.
+      Need to monitor for patterns in blocked legitimate traffic.
+    </implication>
+    <implication>
+      Preview mode should be used for new security rules to identify false positives
+      before enforcement in production.
+    </implication>
+  </broader_implications>
+  
+  <best_practices_established>
+    <practice priority="high">
+      Always test OAuth flows explicitly after any Cloud Armor policy changes
+    </practice>
+    <practice priority="high">
+      Create path-specific exceptions rather than disabling entire rule categories
+    </practice>
+    <practice priority="medium">
+      Use preview mode for new security rules for at least 24 hours before enforcement
+    </practice>
+    <practice priority="medium">
+      Document all security policy exceptions with clear business justification
+    </practice>
+    <practice priority="low">
+      Consider implementing custom rules that better understand OAuth patterns
+    </practice>
+  </best_practices_established>
+  
+  <testing_recommendations>
+    <test>
+      Add E2E test that performs actual OAuth flow in staging environment
+    </test>
+    <test>
+      Include Cloud Armor log checks in deployment validation
+    </test>
+    <test>
+      Monitor 403 error rates as part of health checks
+    </test>
+    <test>
+      Create synthetic monitoring that attempts OAuth login periodically
+    </test>
+  </testing_recommendations>
+  
+  <prevention_checklist>
+    <item>Review Cloud Armor logs for false positives before production deployment</item>
+    <item>Test all authentication flows after security policy changes</item>
+    <item>Document expected URL patterns for legitimate endpoints</item>
+    <item>Use gradual rollout with preview mode for new security rules</item>
+    <item>Set up alerts for sudden increases in 403 errors</item>
+    <item>Maintain exception rule documentation in version control</item>
+  </prevention_checklist>
+  
+  <references>
+    <reference type="issue">OAuth callback returns 403 in staging environment</reference>
+    <reference type="gcp-doc">https://cloud.google.com/armor/docs/rule-tuning</reference>
+    <reference type="owasp">OWASP CRS Rule ID 942432 - SQL Injection Attack</reference>
+    <reference type="spec">SPEC/cloud_armor_security.xml</reference>
+    <reference type="script">scripts/analyze_cloud_armor_logs.py</reference>
+  </references>
+  
+  <key_learnings>
+    <learning priority="critical">
+      URL-encoded characters in OAuth parameters frequently trigger WAF false positives.
+      Always explicitly test OAuth flows when WAF rules are enabled.
+    </learning>
+    <learning priority="high">
+      Cloud Armor's preconfigured rule sets may include more rules than explicitly
+      documented. Check actual enforcement logs to see all rules being applied.
+    </learning>
+    <learning priority="high">
+      Security policy rule priority determines order of evaluation. Lower priority
+      numbers are evaluated first. Exceptions must have lower numbers than blocking rules.
+    </learning>
+    <learning priority="medium">
+      Having proper log analysis tooling is essential for rapid incident response.
+      The Python script created can identify patterns that would be hard to spot manually.
+    </learning>
+    <learning priority="medium">
+      Path-based exceptions are safer than parameter-based exceptions as they limit
+      the attack surface to specific endpoints.
+    </learning>
+  </key_learnings>
+</learning>

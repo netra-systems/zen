@@ -3,6 +3,7 @@
  * Provides health status for the Next.js frontend application
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { corsJsonResponse, handleOptions } from '@/lib/cors-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,16 +22,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(healthData, { status: 200 })
+    return corsJsonResponse(healthData, request, { status: 200 })
   } catch (error) {
     console.error('Health check error:', error)
     
-    return NextResponse.json({
+    return corsJsonResponse({
       status: 'unhealthy',
       service: 'frontend', 
       version: '1.0.0',
       timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 503 })
+    }, request, { status: 503 })
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return handleOptions(request);
 }

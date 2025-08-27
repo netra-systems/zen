@@ -104,8 +104,8 @@ def test_auth_service_startup_with_all_configs():
     os.environ['ENVIRONMENT'] = 'staging'
     os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost/test'
     os.environ['JWT_SECRET_KEY'] = 'test-jwt-secret-key'
-    os.environ['GOOGLE_CLIENT_ID'] = 'test-client-id'
-    os.environ['GOOGLE_CLIENT_SECRET'] = 'test-client-secret'
+    os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV'] = 'test-client-id'
+    os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV'] = 'test-client-secret'
     os.environ['SERVICE_SECRET'] = 'test-service-secret'
     os.environ['SERVICE_ID'] = 'auth-service'
     os.environ['PORT'] = '8080'
@@ -118,5 +118,5 @@ def test_auth_service_startup_with_all_configs():
     
     # Test that the service can access all required configs
     assert os.getenv('DATABASE_URL') is not None
-    assert os.getenv('GOOGLE_CLIENT_ID') is not None
-    assert os.getenv('GOOGLE_CLIENT_SECRET') is not None
+    assert os.getenv('OAUTH_GOOGLE_CLIENT_ID_ENV') is not None
+    assert os.getenv('OAUTH_GOOGLE_CLIENT_SECRET_ENV') is not None

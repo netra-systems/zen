@@ -3,8 +3,8 @@ Tests that replicate missing OAuth environment variables found in staging logs.
 
 CRITICAL OAUTH ENVIRONMENT ISSUES TO REPLICATE:
 1. Missing OAUTH_HMAC_SECRET environment variable causing OAuth flow failures
-2. Missing or invalid GOOGLE_CLIENT_ID causing OAuth initialization failures
-3. Missing GOOGLE_CLIENT_SECRET causing OAuth token exchange failures  
+2. Missing or invalid OAUTH_GOOGLE_CLIENT_ID_ENV causing OAuth initialization failures
+3. Missing OAUTH_GOOGLE_CLIENT_SECRET_ENV causing OAuth token exchange failures  
 4. Invalid OAuth redirect URI configuration causing authentication errors
 
 Business Value Justification (BVJ):
@@ -41,8 +41,6 @@ class TestCriticalOAuthEnvironmentFailures:
         # Environment missing OAUTH_HMAC_SECRET
         missing_hmac_env = {
             'ENVIRONMENT': 'staging',
-            'GOOGLE_CLIENT_ID': 'test-client-id.googleusercontent.com',
-            'GOOGLE_CLIENT_SECRET': 'test-client-secret',
             'JWT_SECRET_KEY': 'test-jwt-secret-key-32-chars-long',
             'SERVICE_SECRET': 'test-service-secret-32-chars-long',
             'SERVICE_ID': 'test-service-id',
@@ -79,84 +77,84 @@ class TestCriticalOAuthEnvironmentFailures:
                     raise
     
     def test_missing_google_client_id_environment_variable(self):
-        """FAILING TEST: Tests missing GOOGLE_CLIENT_ID causing OAuth initialization failures.
+        """FAILING TEST: Tests missing OAUTH_GOOGLE_CLIENT_ID_ENV causing OAuth initialization failures.
         
-        Without GOOGLE_CLIENT_ID, the OAuth flow cannot be initialized, preventing
+        Without OAUTH_GOOGLE_CLIENT_ID_ENV, the OAuth flow cannot be initialized, preventing
         all Google-based authentication.
         """
         missing_client_id_env = {
             'ENVIRONMENT': 'staging',
-            # GOOGLE_CLIENT_ID is deliberately missing
-            'GOOGLE_CLIENT_SECRET': 'test-client-secret',
+            # OAUTH_GOOGLE_CLIENT_ID_ENV is deliberately missing
+            'OAUTH_GOOGLE_CLIENT_SECRET_ENV': 'test-client-secret',
             'OAUTH_HMAC_SECRET': 'test-oauth-hmac-secret-32-chars',
             'JWT_SECRET_KEY': 'test-jwt-secret-key-32-chars-long',
             'AUTH_FAST_TEST_MODE': 'false'
         }
         
         with patch.dict(os.environ, missing_client_id_env, clear=True):
-            # Remove GOOGLE_CLIENT_ID if it exists
-            if 'GOOGLE_CLIENT_ID' in os.environ:
-                del os.environ['GOOGLE_CLIENT_ID']
+            # Remove OAUTH_GOOGLE_CLIENT_ID_ENV if it exists
+            if 'OAUTH_GOOGLE_CLIENT_ID_ENV' in os.environ:
+                del os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV']
             
             try:
                 client_id = AuthConfig.get_google_client_id()
                 
                 # In staging, empty client ID should be detected as an error
                 if AuthConfig.get_environment() == 'staging' and not client_id:
-                    pytest.fail("Missing GOOGLE_CLIENT_ID not detected in staging environment")
+                    pytest.fail("Missing OAUTH_GOOGLE_CLIENT_ID_ENV not detected in staging environment")
                 
                 # Should not return placeholder values
-                if client_id in ['', 'test-client-id', 'GOOGLE_CLIENT_ID']:
-                    pytest.fail(f"Invalid GOOGLE_CLIENT_ID placeholder returned: '{client_id}'")
+                if client_id in ['', 'test-client-id', 'OAUTH_GOOGLE_CLIENT_ID_ENV']:
+                    pytest.fail(f"Invalid OAUTH_GOOGLE_CLIENT_ID_ENV placeholder returned: '{client_id}'")
                 
                 logger.error(f"Google Client ID missing error not detected: '{client_id}'")
                 
             except ValueError as e:
                 # Expected behavior - should raise ValueError for missing required config
-                if "GOOGLE_CLIENT_ID" in str(e) or "client" in str(e).lower():
-                    logger.info(f"GOOGLE_CLIENT_ID correctly detected as missing: {e}")
+                if "OAUTH_GOOGLE_CLIENT_ID_ENV" in str(e) or "client" in str(e).lower():
+                    logger.info(f"OAUTH_GOOGLE_CLIENT_ID_ENV correctly detected as missing: {e}")
                 else:
-                    pytest.fail(f"Unexpected error for missing GOOGLE_CLIENT_ID: {e}")
+                    pytest.fail(f"Unexpected error for missing OAUTH_GOOGLE_CLIENT_ID_ENV: {e}")
     
     def test_missing_google_client_secret_environment_variable(self):
-        """FAILING TEST: Tests missing GOOGLE_CLIENT_SECRET causing OAuth token exchange failures.
+        """FAILING TEST: Tests missing OAUTH_GOOGLE_CLIENT_SECRET_ENV causing OAuth token exchange failures.
         
-        Without GOOGLE_CLIENT_SECRET, OAuth authorization codes cannot be exchanged
+        Without OAUTH_GOOGLE_CLIENT_SECRET_ENV, OAuth authorization codes cannot be exchanged
         for access tokens, breaking the authentication flow.
         """
         missing_client_secret_env = {
             'ENVIRONMENT': 'staging',
-            'GOOGLE_CLIENT_ID': 'test-client-id.googleusercontent.com',
-            # GOOGLE_CLIENT_SECRET is deliberately missing
+            'OAUTH_GOOGLE_CLIENT_ID_ENV': 'test-client-id.googleusercontent.com',
+            # OAUTH_GOOGLE_CLIENT_SECRET_ENV is deliberately missing
             'OAUTH_HMAC_SECRET': 'test-oauth-hmac-secret-32-chars',
             'JWT_SECRET_KEY': 'test-jwt-secret-key-32-chars-long',
             'AUTH_FAST_TEST_MODE': 'false'
         }
         
         with patch.dict(os.environ, missing_client_secret_env, clear=True):
-            # Remove GOOGLE_CLIENT_SECRET if it exists
-            if 'GOOGLE_CLIENT_SECRET' in os.environ:
-                del os.environ['GOOGLE_CLIENT_SECRET']
+            # Remove OAUTH_GOOGLE_CLIENT_SECRET_ENV if it exists
+            if 'OAUTH_GOOGLE_CLIENT_SECRET_ENV' in os.environ:
+                del os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV']
             
             try:
                 client_secret = AuthConfig.get_google_client_secret()
                 
                 # In staging, empty client secret should be detected as an error
                 if AuthConfig.get_environment() == 'staging' and not client_secret:
-                    pytest.fail("Missing GOOGLE_CLIENT_SECRET not detected in staging environment")
+                    pytest.fail("Missing OAUTH_GOOGLE_CLIENT_SECRET_ENV not detected in staging environment")
                 
                 # Should not return placeholder values
-                if client_secret in ['', 'test-secret', 'GOOGLE_CLIENT_SECRET']:
-                    pytest.fail(f"Invalid GOOGLE_CLIENT_SECRET placeholder returned: '{client_secret}'")
+                if client_secret in ['', 'test-secret', 'OAUTH_GOOGLE_CLIENT_SECRET_ENV']:
+                    pytest.fail(f"Invalid OAUTH_GOOGLE_CLIENT_SECRET_ENV placeholder returned: '{client_secret}'")
                 
                 logger.error(f"Google Client Secret missing error not detected: '{client_secret}'")
                 
             except ValueError as e:
                 # Expected behavior - should raise ValueError for missing required config
-                if "GOOGLE_CLIENT_SECRET" in str(e) or "secret" in str(e).lower():
-                    logger.info(f"GOOGLE_CLIENT_SECRET correctly detected as missing: {e}")
+                if "OAUTH_GOOGLE_CLIENT_SECRET_ENV" in str(e) or "secret" in str(e).lower():
+                    logger.info(f"OAUTH_GOOGLE_CLIENT_SECRET_ENV correctly detected as missing: {e}")
                 else:
-                    pytest.fail(f"Unexpected error for missing GOOGLE_CLIENT_SECRET: {e}")
+                    pytest.fail(f"Unexpected error for missing OAUTH_GOOGLE_CLIENT_SECRET_ENV: {e}")
     
     def test_oauth_environment_variables_validation_in_staging(self):
         """FAILING TEST: Tests comprehensive OAuth environment validation in staging.
@@ -174,7 +172,7 @@ class TestCriticalOAuthEnvironmentFailures:
                 'name': 'Only client ID',
                 'env': {
                     'ENVIRONMENT': 'staging',
-                    'GOOGLE_CLIENT_ID': 'test-client-id.googleusercontent.com',
+                    'OAUTH_GOOGLE_CLIENT_ID_ENV': 'test-client-id.googleusercontent.com',
                     'AUTH_FAST_TEST_MODE': 'false'
                 }
             },
@@ -182,8 +180,8 @@ class TestCriticalOAuthEnvironmentFailures:
                 'name': 'Missing HMAC secret',
                 'env': {
                     'ENVIRONMENT': 'staging',
-                    'GOOGLE_CLIENT_ID': 'test-client-id.googleusercontent.com',
-                    'GOOGLE_CLIENT_SECRET': 'test-client-secret',
+                    'OAUTH_GOOGLE_CLIENT_ID_ENV': 'test-client-id.googleusercontent.com',
+                    'OAUTH_GOOGLE_CLIENT_SECRET_ENV': 'test-client-secret',
                     'AUTH_FAST_TEST_MODE': 'false'
                     # OAUTH_HMAC_SECRET missing
                 }
@@ -192,8 +190,8 @@ class TestCriticalOAuthEnvironmentFailures:
                 'name': 'Empty values',
                 'env': {
                     'ENVIRONMENT': 'staging',
-                    'GOOGLE_CLIENT_ID': '',
-                    'GOOGLE_CLIENT_SECRET': '',
+                    'OAUTH_GOOGLE_CLIENT_ID_ENV': '',
+                    'OAUTH_GOOGLE_CLIENT_SECRET_ENV': '',
                     'OAUTH_HMAC_SECRET': '',
                     'AUTH_FAST_TEST_MODE': 'false'
                 }
@@ -210,16 +208,16 @@ class TestCriticalOAuthEnvironmentFailures:
                 try:
                     client_id = AuthConfig.get_google_client_id()
                     if not client_id:
-                        errors.append(f"Empty GOOGLE_CLIENT_ID: '{client_id}'")
+                        errors.append(f"Empty OAUTH_GOOGLE_CLIENT_ID_ENV: '{client_id}'")
                 except Exception as e:
-                    errors.append(f"GOOGLE_CLIENT_ID error: {e}")
+                    errors.append(f"OAUTH_GOOGLE_CLIENT_ID_ENV error: {e}")
                 
                 try:
                     client_secret = AuthConfig.get_google_client_secret()
                     if not client_secret:
-                        errors.append(f"Empty GOOGLE_CLIENT_SECRET: '{client_secret}'")
+                        errors.append(f"Empty OAUTH_GOOGLE_CLIENT_SECRET_ENV: '{client_secret}'")
                 except Exception as e:
-                    errors.append(f"GOOGLE_CLIENT_SECRET error: {e}")
+                    errors.append(f"OAUTH_GOOGLE_CLIENT_SECRET_ENV error: {e}")
                 
                 try:
                     oauth_hmac_secret = os.getenv('OAUTH_HMAC_SECRET')
@@ -263,8 +261,8 @@ class TestOAuthEnvironmentVariableFormatValidation:
         for invalid_client_id in invalid_client_ids:
             test_env = {
                 'ENVIRONMENT': 'staging',
-                'GOOGLE_CLIENT_ID': invalid_client_id,
-                'GOOGLE_CLIENT_SECRET': 'valid-client-secret',
+                'OAUTH_GOOGLE_CLIENT_ID_ENV': invalid_client_id,
+                'OAUTH_GOOGLE_CLIENT_SECRET_ENV': 'valid-client-secret',
                 'OAUTH_HMAC_SECRET': 'valid-oauth-hmac-secret-32-chars',
                 'AUTH_FAST_TEST_MODE': 'false'
             }
@@ -275,11 +273,11 @@ class TestOAuthEnvironmentVariableFormatValidation:
                     
                     # If we get back the invalid ID without validation, that's a problem
                     if client_id == invalid_client_id and invalid_client_id != '':
-                        pytest.fail(f"Invalid GOOGLE_CLIENT_ID format not detected: '{invalid_client_id}'")
+                        pytest.fail(f"Invalid OAUTH_GOOGLE_CLIENT_ID_ENV format not detected: '{invalid_client_id}'")
                     
                     # Empty client ID should be detected
                     if not client_id and AuthConfig.get_environment() == 'staging':
-                        pytest.fail(f"Empty GOOGLE_CLIENT_ID not detected: '{invalid_client_id}' -> '{client_id}'")
+                        pytest.fail(f"Empty OAUTH_GOOGLE_CLIENT_ID_ENV not detected: '{invalid_client_id}' -> '{client_id}'")
                     
                     logger.warning(f"Client ID format test: '{invalid_client_id}' -> '{client_id}'")
                     
@@ -308,8 +306,8 @@ class TestOAuthEnvironmentVariableFormatValidation:
         for weak_secret in weak_hmac_secrets:
             test_env = {
                 'ENVIRONMENT': 'staging',
-                'GOOGLE_CLIENT_ID': 'valid-client-id.googleusercontent.com',
-                'GOOGLE_CLIENT_SECRET': 'valid-client-secret',
+                'OAUTH_GOOGLE_CLIENT_ID_ENV': 'valid-client-id.googleusercontent.com',
+                'OAUTH_GOOGLE_CLIENT_SECRET_ENV': 'valid-client-secret',
                 'OAUTH_HMAC_SECRET': weak_secret,
                 'AUTH_FAST_TEST_MODE': 'false'
             }
@@ -389,7 +387,7 @@ class TestOAuthSecretLoaderIntegration:
         with patch.dict(os.environ, oauth_secrets_env, clear=True):
             # Test each secret loader method
             oauth_methods = [
-                ('get_google_client_id', 'GOOGLE_CLIENT_ID'),
+                ('get_google_client_id', 'OAUTH_GOOGLE_CLIENT_ID_ENV'),
                 ('get_google_client_secret', 'GOOGLE_CLIENT_SECRET'),
                 ('get_jwt_secret', 'JWT_SECRET_KEY'),
             ]

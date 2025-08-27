@@ -5,7 +5,9 @@ from fastapi import APIRouter, HTTPException
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.llm_cache_service import llm_cache_service
 
-router = APIRouter()
+router = APIRouter(
+    redirect_slashes=False  # Disable automatic trailing slash redirects
+)
 logger = central_logger.get_logger(__name__)
 
 # Helper functions for maintaining 25-line function limit
@@ -133,7 +135,8 @@ async def _clear_api_cache_safe() -> Dict[str, Any]:
         logger.error(f"Error clearing all cache entries: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.delete("/")
+@router.delete("")
+@router.delete("/", include_in_schema=False)
 async def clear_api_cache() -> Dict[str, Any]:
     """Clear all cache entries"""
     return await _clear_api_cache_safe()

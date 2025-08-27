@@ -12,7 +12,9 @@ from netra_backend.app.services.corpus_service import (
     corpus_service_instance as corpus_service,
 )
 
-router = APIRouter()
+router = APIRouter(
+    redirect_slashes=False  # Disable automatic trailing slash redirects
+)
 
 class DocumentCreate(BaseModel):
     title: str
@@ -44,7 +46,8 @@ def _schedule_corpus_generation(request: Request, corpus_id: str, db: AsyncSessi
     task = corpus_service.generate_corpus_task(corpus_id, db)
     request.app.state.background_task_manager.add_task(task)
 
-@router.post("/", response_model=schemas.Corpus)
+@router.post("", response_model=schemas.Corpus)
+@router.post("/", response_model=schemas.Corpus, include_in_schema=False)
 async def create_corpus(
     corpus: schemas.CorpusCreate, request: Request,
     db: AsyncSession = Depends(get_db_session),
@@ -59,7 +62,8 @@ async def create_corpus(
     _schedule_corpus_generation(request, db_corpus.id, db)
     return db_corpus
 
-@router.get("/", response_model=List[schemas.Corpus])
+@router.get("", response_model=List[schemas.Corpus])
+@router.get("/", response_model=List[schemas.Corpus], include_in_schema=False)
 async def read_corpora(
     skip: int = 0,
     limit: int = 100,

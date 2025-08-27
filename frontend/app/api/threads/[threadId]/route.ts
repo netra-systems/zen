@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
+import { corsJsonResponse, corsEmptyResponse, handleOptions } from '@/lib/cors-utils'
 
 interface RouteParams {
   params: {
@@ -25,30 +26,31 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         'Authorization': request.headers.get('authorization') || '',
         'User-Agent': request.headers.get('user-agent') || 'Netra-Frontend',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
       console.warn(`Backend thread ${params.threadId} GET failed: ${response.status} ${response.statusText}`);
-      return NextResponse.json({
+      return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
         threadId: params.threadId,
         source: 'frontend-proxy'
-      }, { status: response.status });
+      }, request, { status: response.status });
     }
 
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
     console.error(`Thread ${params.threadId} GET proxy error:`, error);
-    return NextResponse.json({
+    return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
       threadId: params.threadId,
       source: 'frontend-proxy'
-    }, { status: 503 });
+    }, request, { status: 503 });
   }
 }
 
@@ -67,30 +69,31 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         'User-Agent': request.headers.get('user-agent') || 'Netra-Frontend',
       },
       body: JSON.stringify(body),
+      credentials: 'include',
     });
 
     if (!response.ok) {
       console.warn(`Backend thread ${params.threadId} PUT failed: ${response.status} ${response.statusText}`);
-      return NextResponse.json({
+      return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
         threadId: params.threadId,
         source: 'frontend-proxy'
-      }, { status: response.status });
+      }, request, { status: response.status });
     }
 
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
     console.error(`Thread ${params.threadId} PUT proxy error:`, error);
-    return NextResponse.json({
+    return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
       threadId: params.threadId,
       source: 'frontend-proxy'
-    }, { status: 503 });
+    }, request, { status: 503 });
   }
 }
 
@@ -106,34 +109,39 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         'Authorization': request.headers.get('authorization') || '',
         'User-Agent': request.headers.get('user-agent') || 'Netra-Frontend',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
       console.warn(`Backend thread ${params.threadId} DELETE failed: ${response.status} ${response.statusText}`);
-      return NextResponse.json({
+      return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
         threadId: params.threadId,
         source: 'frontend-proxy'
-      }, { status: response.status });
+      }, request, { status: response.status });
     }
 
     // DELETE might not return JSON data
     if (response.status === 204) {
-      return new NextResponse(null, { status: 204 });
+      return corsEmptyResponse(request, { status: 204 });
     }
 
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
     console.error(`Thread ${params.threadId} DELETE proxy error:`, error);
-    return NextResponse.json({
+    return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
       threadId: params.threadId,
       source: 'frontend-proxy'
-    }, { status: 503 });
+    }, request, { status: 503 });
   }
+}
+
+export async function OPTIONS(request: NextRequest, { params }: RouteParams) {
+  return handleOptions(request);
 }

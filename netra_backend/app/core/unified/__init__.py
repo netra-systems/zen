@@ -16,10 +16,15 @@ Modules:
 - retry_decorator: Unified retry logic with circuit breaker patterns
 """
 
-from netra_backend.app.core.unified.db_connection_manager import (
-    UnifiedDatabaseManager,
-    db_manager,
-)
+# DEPRECATED: Use canonical DatabaseManager instead
+# from netra_backend.app.core.unified.db_connection_manager import (
+#     UnifiedDatabaseManager,
+#     db_manager,
+# )
+from netra_backend.app.db.database_manager import DatabaseManager as UnifiedDatabaseManager
+# Create compatibility instance using the deprecated UnifiedDatabaseManager for backward compatibility
+from netra_backend.app.db.database_manager import UnifiedDatabaseManager as _UnifiedDatabaseManagerCompat
+db_manager = _UnifiedDatabaseManagerCompat()
 from netra_backend.app.core.unified.jwt_validator import (
     UnifiedJWTValidator,
     jwt_validator,

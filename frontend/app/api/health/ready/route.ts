@@ -3,6 +3,7 @@
  * Indicates if the frontend is ready to serve traffic
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { corsJsonResponse, handleOptions } from '@/lib/cors-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,33 +11,33 @@ export async function GET(request: NextRequest) {
     const readinessChecks = await performReadinessChecks()
     
     if (readinessChecks.ready) {
-      return NextResponse.json({
+      return corsJsonResponse({
         status: 'ready',
         service: 'frontend',
         version: '1.0.0',
         timestamp: new Date().toISOString(),
         checks: readinessChecks.details
-      }, { status: 200 })
+      }, request, { status: 200 })
     } else {
-      return NextResponse.json({
+      return corsJsonResponse({
         status: 'not_ready',
         service: 'frontend',
         version: '1.0.0', 
         timestamp: new Date().toISOString(),
         checks: readinessChecks.details,
         errors: readinessChecks.errors
-      }, { status: 503 })
+      }, request, { status: 503 })
     }
   } catch (error) {
     console.error('Readiness check error:', error)
     
-    return NextResponse.json({
+    return corsJsonResponse({
       status: 'not_ready',
       service: 'frontend',
       version: '1.0.0',
       timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 503 })
+    }, request, { status: 503 })
   }
 }
 
@@ -116,4 +117,8 @@ async function performReadinessChecks(): Promise<{
     details: checks,
     errors: criticalErrors
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return handleOptions(request);
 }

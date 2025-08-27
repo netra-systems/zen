@@ -18,8 +18,9 @@ def setup_oauth_credentials():
     print("-" * 60)
     
     # OAuth credentials for development
-    GOOGLE_CLIENT_ID = "304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com"
-    GOOGLE_CLIENT_SECRET = "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"
+    # TOMBSTONE: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET superseded by environment-specific variables
+    GOOGLE_OAUTH_CLIENT_ID_DEV = "304612253870-bqie9nvlaokfc2noos1nu5st614vlqam.apps.googleusercontent.com"
+    GOOGLE_OAUTH_CLIENT_SECRET_DEV = "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"
     
     # Path to .env file
     env_file = project_root / ".env"
@@ -40,12 +41,11 @@ def setup_oauth_credentials():
     lines = existing_content.splitlines()
     
     # OAuth variables to set
+    # TOMBSTONE: Removed generic GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
+    # Only set environment-specific variables
     oauth_vars = {
-        "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT": GOOGLE_CLIENT_ID,
-        "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT": GOOGLE_CLIENT_SECRET,
-        # Also set generic fallbacks for compatibility
-        "GOOGLE_CLIENT_ID": GOOGLE_CLIENT_ID,
-        "GOOGLE_CLIENT_SECRET": GOOGLE_CLIENT_SECRET,
+        "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT": GOOGLE_OAUTH_CLIENT_ID_DEV,
+        "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT": GOOGLE_OAUTH_CLIENT_SECRET_DEV,
     }
     
     # Update or add OAuth variables
@@ -82,8 +82,8 @@ def setup_oauth_credentials():
     print("[SUCCESS] OAuth credentials configured for development!")
     print("=" * 60)
     print("\nConfiguration details:")
-    print(f"  Client ID: {GOOGLE_CLIENT_ID[:40]}...")
-    print(f"  Client Secret: {GOOGLE_CLIENT_SECRET[:10]}... (hidden)")
+    print(f"  Client ID: {GOOGLE_OAUTH_CLIENT_ID_DEV[:40]}...")
+    print(f"  Client Secret: {GOOGLE_OAUTH_CLIENT_SECRET_DEV[:10]}... (hidden)")
     print("\nGoogle OAuth Console Configuration:")
     print("  Authorized JavaScript origins:")
     print("    - http://localhost:3000")

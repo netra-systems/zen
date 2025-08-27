@@ -26,6 +26,7 @@ from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.core.websocket_cors import check_websocket_cors
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.types import AuthInfo, WebSocketConfig
+from netra_backend.app.websocket_core.utils import is_websocket_connected
 
 logger = central_logger.get_logger(__name__)
 tracing_manager = TracingManager()
@@ -365,7 +366,7 @@ class ConnectionSecurityManager:
         websocket = conn["websocket"]
         
         # Check WebSocket state
-        if websocket.application_state != WebSocketState.CONNECTED:
+        if not is_websocket_connected(websocket):
             return False
         
         # Check for excessive violations

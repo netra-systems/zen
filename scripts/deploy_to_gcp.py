@@ -209,9 +209,9 @@ class GCPDeployer:
             return False
         
         # Required environment variables for staging deployment
+        # TOMBSTONE: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET superseded by environment-specific variables
+        # These are now handled by OAuth configuration validation
         required_env_vars = [
-            "GOOGLE_CLIENT_ID",
-            "GOOGLE_CLIENT_SECRET", 
             "GEMINI_API_KEY"
         ]
         
@@ -780,8 +780,10 @@ CMD ["npm", "start"]
             "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
             "jwt-secret-staging": jwt_secret_value,  # Auth service uses JWT_SECRET - MUST BE SAME VALUE!
-            "google-client-id-staging": os.getenv("GOOGLE_CLIENT_ID", "REPLACE_WITH_REAL_GOOGLE_CLIENT_ID"),
-            "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"),
+            # TOMBSTONE: google-client-id-staging and google-client-secret-staging
+            # These should be configured using environment-specific OAuth variables
+            "google-oauth-client-id-staging": os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_ID"),
+            "google-oauth-client-secret-staging": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET"),
             "oauth-hmac-secret-staging": "oauth_hmac_secret_for_staging_at_least_32_chars_secure",
             # Enhanced JWT security for auth service
             "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",

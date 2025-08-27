@@ -78,3 +78,21 @@ def _build_pool_metrics() -> Dict[str, Any]:
 async def pool_metrics() -> Dict[str, Any]:
     """Get detailed connection pool metrics for monitoring."""
     return _build_pool_metrics()
+
+
+@router.get("/cors/test")
+async def cors_test() -> Dict[str, Any]:
+    """CORS configuration test endpoint for debugging and validation."""
+    from netra_backend.app.core.configuration import get_configuration
+    from shared.cors_config import get_cors_health_info
+    
+    config = get_configuration()
+    cors_info = get_cors_health_info(config.environment)
+    
+    return {
+        "service": "netra-backend",
+        "version": "1.0.0",
+        "cors_status": "configured",
+        "timestamp": datetime.now(UTC).isoformat(),
+        **cors_info
+    }

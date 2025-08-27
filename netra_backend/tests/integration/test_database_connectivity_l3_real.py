@@ -18,7 +18,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.core.unified.db_connection_manager import get_db_manager
+# Use canonical DatabaseManager instead of deprecated db_connection_manager
+# from netra_backend.app.core.unified.db_connection_manager import get_db_manager
 from netra_backend.app.db.postgres_core import AsyncDatabase
 
 
@@ -287,11 +288,11 @@ class TestDatabaseConnectivityL3:
         import os
         with pytest.mock.patch.dict(os.environ, {'DATABASE_URL': real_url}):
             
-            # Test connection manager initialization
-            db_manager = get_db_manager()
+            # Test connection manager initialization - use canonical DatabaseManager
+            # db_manager = get_db_manager()  # DEPRECATED
             
-            # Test async session creation
-            async with db_manager.get_async_session() as session:
+            # Test async session creation using DatabaseManager directly
+            async with DatabaseManager.get_async_session() as session:
                 result = await session.execute(text("SELECT current_database()"))
                 db_name = result.fetchone()[0]
                 assert db_name == postgres_container.database_name

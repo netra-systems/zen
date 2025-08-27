@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket Cloud Armor False Positive Block Resolution</title>
+    <date>2025-08-27</date>
+    <category>security,infrastructure,websocket</category>
+    <severity>critical</severity>
+    <impact>production</impact>
+  </metadata>
+  
+  <problem>
+    <description>
+      WebSocket connections to /ws endpoint were being blocked by Cloud Armor with 403 errors.
+      The OWASP SQL injection rule (owasp-crs-v030001-id942421-sqli) was incorrectly 
+      flagging WebSocket upgrade requests as SQL injection attempts, preventing all
+      WebSocket connections from establishing.
+    </description>
+    
+    <symptoms>
+      <symptom>WebSocket connection failed immediately with 403 Forbidden</symptom>
+      <symptom>Frontend console showing: WebSocket connection to 'wss://api.staging.netrasystems.ai/ws' failed</symptom>
+      <symptom>Frontend logs showing authentication error with code 1006 (ABNORMAL_CLOSURE)</symptom>
+      <symptom>Cloud Armor logs showing: preconfiguredExprIds: ["owasp-crs-v030001-id942421-sqli"]</symptom>
+      <symptom>Pattern: All WebSocket connections from browser being blocked</symptom>
+      <symptom>Repeated connection attempts every 6 seconds (exponential backoff)</symptom>
+    </symptoms>
+    
+    <root_cause>
+      The OWASP CRS rule id942421 was triggering false positives on WebSocket upgrade
+      requests to the /ws endpoint. This rule is designed to detect SQL injection attempts
+      but was incorrectly interpreting WebSocket protocol upgrade headers or query parameters
+      as potential SQL injection patterns.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <approach>
+      Added an exception rule in Cloud Armor at priority 51 (higher priority than
+      the SQL injection rule at priority 100) to explicitly allow the /ws path,
+      exempting it from SQL injection checks while maintaining security for other endpoints.
+    </approach>
+    
+    <implementation>
+      <command>
+        gcloud compute security-policies rules create 51 \
+          --security-policy=staging-security-policy \
+          --action=allow \
+          --description="Allow WebSocket connections - exempts /ws endpoint from SQL injection false positives" \
+          --expression="request.path == '/ws'" \
+          --project=netra-staging
+      </command>
+      
+      <justification>
+        Priority 51 ensures this rule is evaluated before the OWASP rules (priority 100),
+        allowing legitimate WebSocket connections while maintaining security for other paths.
+      </justification>
+    </implementation>
+    
+    <validation>
+      After applying the rule, WebSocket connections immediately started succeeding:
+      - 403 errors stopped appearing in Cloud Armor logs
+      - WebSocket upgrade requests returned proper responses instead of 403
+      - Frontend successfully established WebSocket connections
+    </validation>
+  </solution>
+  
+  <debugging_process>
+    <step>Analyzed frontend console errors showing WebSocket connection failures</step>
+    <step>Used analyze_cloud_armor_logs.py to identify blocked requests</step>
+    <step>Found pattern of /ws endpoint being blocked with rule id942421</step>
+    <step>Identified all blocked requests were legitimate WebSocket upgrades</step>
+    <step>Created targeted exception rule for /ws path only</step>
+    <step>Validated fix with curl WebSocket upgrade test</step>
+  </debugging_process>
+  
+  <prevention>
+    <measure>
+      Always test WebSocket connections after modifying security policies as they
+      use unique upgrade mechanisms that can trigger WAF false positives.
+    </measure>
+    <measure>
+      Add path-based exceptions for known WebSocket endpoints rather than
+      disabling entire security rule categories.
+    </measure>
+    <measure>
+      Monitor Cloud Armor logs for patterns of blocked legitimate traffic,
+      especially for WebSocket and SSE (Server-Sent Events) endpoints.
+    </measure>
+    <measure>
+      Include WebSocket endpoint testing in deployment validation to catch
+      security policy issues early.
+    </measure>
+    <measure>
+      Document all Cloud Armor exceptions with clear justification for
+      security audit purposes.
+    </measure>
+  </prevention>
+  
+  <related_issues>
+    <issue>
+      Similar false positive previously occurred with OAuth callbacks (/auth/callback)
+      being blocked by rule id942432. Both issues stem from OWASP CRS rules being
+      overly aggressive with URL-encoded or protocol-specific parameters.
+    </issue>
+    <issue>
+      WebSocket connections may still fail due to other issues like authentication,
+      CORS, or backend errors once past the Cloud Armor layer.
+    </issue>
+  </related_issues>
+  
+  <five_whys_analysis>
+    <why level="1">
+      Q: Why were WebSocket connections failing?
+      A: Because Cloud Armor was returning 403 Forbidden for all /ws requests.
+    </why>
+    <why level="2">
+      Q: Why was Cloud Armor blocking /ws requests?
+      A: Because OWASP rule id942421 was detecting false positive SQL injection.
+    </why>
+    <why level="3">
+      Q: Why was the rule triggering on WebSocket requests?
+      A: Because WebSocket upgrade headers or parameters matched SQL injection patterns.
+    </why>
+    <why level="4">
+      Q: Why wasn't this caught during initial deployment?
+      A: Because WebSocket endpoint testing wasn't included in deployment validation.
+    </why>
+    <why level="5">
+      Q: Why wasn't WebSocket testing included?
+      A: Because the focus was on OAuth and regular HTTP endpoints, not real-time features.
+    </why>
+  </five_whys_analysis>
+  
+  <key_takeaways>
+    <takeaway>
+      Cloud Armor OWASP rules can block legitimate WebSocket traffic due to
+      false positive pattern matching on protocol-specific headers.
+    </takeaway>
+    <takeaway>
+      Path-specific exception rules with appropriate priority are an effective
+      solution for WebSocket endpoints while maintaining security elsewhere.
+    </takeaway>
+    <takeaway>
+      WebSocket connectivity testing must be part of deployment validation
+      when using Web Application Firewalls like Cloud Armor.
+    </takeaway>
+    <takeaway>
+      The analyze_cloud_armor_logs.py script is essential for quickly
+      identifying and resolving security policy blocking issues.
+    </takeaway>
+  </key_takeaways>
+  
+  <references>
+    <reference>Cloud Armor Security Policies documentation</reference>
+    <reference>OWASP CRS rule id942421 - SQL Injection Attack</reference>
+    <reference>WebSocket Protocol RFC 6455</reference>
+    <reference>scripts/analyze_cloud_armor_logs.py - Log analysis tool</reference>
+    <reference>SPEC/learnings/cloud_armor_oauth_fix.xml - Similar OAuth false positive</reference>
+  </references>
+</learning>
