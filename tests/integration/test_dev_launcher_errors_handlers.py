@@ -36,9 +36,9 @@ from dev_launcher.process_manager import ProcessManager
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def __init__(self, error_detector: ErrorDetector):
-        super().__init__()
-        self.error_detector = error_detector
+    def setup_method(self):
+        """Setup method called before each test method"""
+        self.error_detector = ErrorDetector()
 
     def emit(self, record):
         """Handle log record."""

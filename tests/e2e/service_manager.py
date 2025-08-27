@@ -515,6 +515,13 @@ class RealServicesManager:
             return False
         process = self.service_processes[service_name]
         return process.poll() is None
+    
+    def get_service_urls(self) -> Dict[str, str]:
+        """Get service URLs for all running services."""
+        return {
+            'auth_service': f'http://localhost:{self.service_ports["auth_service"]}',
+            'backend_service': f'http://localhost:{self.service_ports["backend"]}' 
+        }
 
 # Factory function for backward compatibility with existing imports
 def create_real_services_manager(project_root: Optional[Path] = None) -> RealServicesManager:

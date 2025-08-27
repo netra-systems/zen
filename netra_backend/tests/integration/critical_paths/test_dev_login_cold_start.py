@@ -115,28 +115,30 @@ class TestDevLoginColdStart:
     @pytest.mark.integration
     @pytest.mark.L3
     @pytest.mark.asyncio
-    async def test_dev_login_disabled_in_test_environment(self, async_client):
-        """Test 1: Dev login should be disabled in test environment by default."""
+    async def test_dev_login_enabled_in_test_environment(self, async_client):
+        """Test 1: Dev login should be enabled in test environment for E2E testing."""
         # Get current OAuth config
         oauth_config = auth_client.get_oauth_config()
         
-        # Note: When TEST credentials are missing, system falls back to DEV config
-        # This is expected behavior for local testing without full credential setup
-        # In a properly configured test environment with TEST credentials,
-        # allow_dev_login would be False
+        # Dev login is now enabled in testing environment to support E2E tests
+        # This allows authentication flows to work during testing scenarios
+        assert oauth_config.allow_dev_login == True, "Dev login should be enabled in testing environment"
         
         # Attempt dev login
         dev_login_data = {"email": "test@example.com"}
         response = await async_client.post("/auth/dev_login", json=dev_login_data)
         
-        # When dev login is enabled (fallback scenario), it will fail with 503
-        # When dev login is disabled, it will return 403
-        assert response.status_code in [403, 503], f"Expected 403 or 503, got {response.status_code}"
+        # With dev login enabled and working, should return 200 (success) in test mode with mock responses
+        # In test mode, the auth proxy returns mock responses for dev login
+        assert response.status_code == 200, f"Expected success (200), got {response.status_code}"
         
-        # If it's 403, verify the error message
-        if response.status_code == 403:
-            error_data = response.json()
-            assert "not available" in error_data.get("detail", "").lower()
+        # Should not return 403 (forbidden)
+        assert response.status_code != 403, "Dev login should not be forbidden in testing environment"
+        
+        # Verify the response contains expected dev login token structure
+        response_data = response.json()
+        assert "access_token" in response_data, "Response should contain access token"
+        assert "user" in response_data, "Response should contain user info"
     
     @pytest.mark.integration
     @pytest.mark.L3
@@ -227,7 +229,7 @@ class TestDevLoginColdStart:
         
         # Verify dev login settings
         assert dev_config.allow_dev_login == True, "Dev should allow dev login"
-        assert test_config.allow_dev_login == False, "Test should not allow dev login"
+        assert test_config.allow_dev_login == True, "Test should allow dev login for E2E testing"
         assert staging_config.allow_dev_login == False, "Staging should not allow dev login"
         assert prod_config.allow_dev_login == False, "Prod should not allow dev login"
         
@@ -304,12 +306,14 @@ class TestDevLoginColdStart:
         
         responses = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # All should return same status (403 if dev login disabled, 503 if enabled but service unavailable)
+        # All should return same status (200 in test mode with mock responses)
         status_codes = [r.status_code for r in responses if not isinstance(r, Exception)]
         # Check that all requests got the same status code (consistency)
         assert len(set(status_codes)) == 1, f"Inconsistent status codes: {status_codes}"
-        # Accept either 403 (forbidden) or 503 (service unavailable)
-        assert status_codes[0] in [403, 503], f"Unexpected status code: {status_codes[0]}"
+        # Should return 200 since dev login is enabled and working in testing mode
+        assert status_codes[0] == 200, f"Expected success (200), got {status_codes[0]}"
+        # Should not return 403 since dev login is enabled in testing
+        assert status_codes[0] != 403, "Dev login should not be forbidden in testing environment"
     
     @pytest.mark.integration
     @pytest.mark.L3

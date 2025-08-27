@@ -95,6 +95,9 @@ class UnifiedTestRunner:
         # Initialize Cypress runner lazily to avoid Docker issues during init
         self.cypress_runner = None
         
+        # Test execution timeout fix for iterations 41-60
+        self.max_collection_size = int(os.getenv("MAX_TEST_COLLECTION_SIZE", "1000"))
+        
         # Test configurations - Use project root as working directory to fix import issues
         self.test_configs = {
             "backend": {

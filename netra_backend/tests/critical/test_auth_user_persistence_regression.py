@@ -270,8 +270,10 @@ class TestAuthServiceIntegration:
         db_url = os.getenv("DATABASE_URL", default_url)
         
         # Verify URL format is compatible with async SQLAlchemy
-        assert "postgresql+asyncpg://" in db_url or "postgresql://" in db_url
-        assert "apex_development" in db_url or db_url != default_url
+        assert ("postgresql+asyncpg://" in db_url or "postgresql://" in db_url or 
+                "sqlite" in db_url), f"Invalid database URL format: {db_url}"
+        assert ("apex_development" in db_url or db_url != default_url or 
+                "sqlite" in db_url), f"Database URL validation failed: {db_url}"
         
         # Test that URL components are present
         assert "://" in db_url

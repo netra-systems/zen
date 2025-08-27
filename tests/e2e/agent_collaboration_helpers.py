@@ -67,7 +67,7 @@ class AgentCollaborationTestCore:
         """Setup collaboration test environment."""
         self.active_sessions.clear(); self.performance_metrics.clear()
     
-    async def test_teardown_test_environment(self) -> None:
+    async def teardown_test_environment(self) -> None:
         """Cleanup collaboration test environment."""
         self.active_sessions.clear(); self.performance_metrics.clear()
     
@@ -173,8 +173,16 @@ class CollaborationFlowValidator:
     
     async def validate_agent_handoff(self, session: MultiAgentSession) -> Dict[str, Any]:
         """Validate agent handoff across collaboration."""
-        if len(session.collaboration_turns) < 1:
-            return {"handoff_validation": "insufficient_turns"}
+        collaboration_turns_count = len(session.collaboration_turns)
+        
+        if collaboration_turns_count < 1:
+            return {
+                "handoff_validation": "insufficient_turns",
+                "handoff_chain_valid": False,
+                "context_preserved_across_agents": False,
+                "agents_collaborated": False,
+                "orchestration_score": 0.0
+            }
         
         handoff_success = self._validate_handoff_chain(session.collaboration_turns)
         context_continuity = self._validate_context_preservation(session.collaboration_turns)
@@ -182,7 +190,7 @@ class CollaborationFlowValidator:
         return {
             "handoff_chain_valid": handoff_success,
             "context_preserved_across_agents": context_continuity,
-            "agents_collaborated": len(session.collaboration_turns) > 0,
+            "agents_collaborated": True,
             "orchestration_score": self._calculate_orchestration_score(session.collaboration_turns)
         }
     
