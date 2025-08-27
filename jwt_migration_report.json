@@ -1,0 +1,35 @@
+{
+  "migrations_performed": [],
+  "conflicts_detected": [],
+  "warnings": [
+    "Missing canonical variables: ['JWT_SECRET_KEY', 'JWT_ALGORITHM', 'JWT_ACCESS_TOKEN_EXPIRE_MINUTES', 'JWT_REFRESH_TOKEN_EXPIRE_DAYS', 'JWT_SERVICE_TOKEN_EXPIRE_MINUTES', 'JWT_ISSUER', 'JWT_AUDIENCE']"
+  ],
+  "summary": {
+    "total_variables_scanned": 0,
+    "migrations_needed": 0,
+    "conflicts_detected": 0,
+    "warnings_issued": 1,
+    "canonical_variables": [
+      "JWT_SECRET_KEY",
+      "JWT_ALGORITHM",
+      "JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
+      "JWT_REFRESH_TOKEN_EXPIRE_DAYS",
+      "JWT_SERVICE_TOKEN_EXPIRE_MINUTES",
+      "JWT_ISSUER",
+      "JWT_AUDIENCE"
+    ],
+    "legacy_mappings": {
+      "JWT_SECRET": "JWT_SECRET_KEY",
+      "JWT_SECRET_STAGING": "JWT_SECRET_KEY",
+      "JWT_SECRET_PRODUCTION": "JWT_SECRET_KEY",
+      "JWT_ACCESS_EXPIRY_MINUTES": "JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
+      "ACCESS_TOKEN_EXPIRE_MINUTES": "JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
+      "JWT_EXPIRY_MINUTES": "JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
+      "JWT_REFRESH_EXPIRY_DAYS": "JWT_REFRESH_TOKEN_EXPIRE_DAYS",
+      "REFRESH_TOKEN_EXPIRE_DAYS": "JWT_REFRESH_TOKEN_EXPIRE_DAYS",
+      "JWT_SERVICE_EXPIRY_MINUTES": "JWT_SERVICE_TOKEN_EXPIRE_MINUTES",
+      "SERVICE_TOKEN_EXPIRE_MINUTES": "JWT_SERVICE_TOKEN_EXPIRE_MINUTES"
+    }
+  },
+  "all_variables": {}
+}
