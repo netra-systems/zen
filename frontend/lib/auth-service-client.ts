@@ -65,7 +65,7 @@ export class AuthServiceClient {
       
       const response = await fetch(this.endpoints.authConfig, {
         signal: AbortSignal.timeout(5000), // Increased timeout for staging
-        credentials: 'include',
+        // No credentials needed for public config endpoint
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ export class AuthServiceClient {
     
     const response = await fetch(this.endpoints.authLogout, {
       method: 'POST',
-      credentials: 'include',
+      credentials: 'include', // Needed for session cookie
     });
     
     if (!response.ok) {
@@ -199,7 +199,7 @@ export class AuthServiceClient {
   async getSession(): Promise<AuthSession | null> {
     try {
       const response = await fetch(this.endpoints.authSession, {
-        credentials: 'include',
+        credentials: 'include', // Needed for session cookie
       });
       
       if (!response.ok) {
@@ -228,7 +228,7 @@ export class AuthServiceClient {
   async getCurrentUser(): Promise<any | null> {
     try {
       const response = await fetch(this.endpoints.authMe, {
-        credentials: 'include',
+        credentials: 'include', // Needed for session cookie
       });
       
       if (!response.ok) {
@@ -283,7 +283,7 @@ export class AuthServiceClient {
     
     const response = await fetch(this.endpoints.authRefresh, {
       method: 'POST',
-      credentials: 'include',
+      credentials: 'include', // Needed for refresh token cookie
     });
     
     if (!response.ok) {

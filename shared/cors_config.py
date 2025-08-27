@@ -171,23 +171,50 @@ def _get_staging_origins() -> List[str]:
 
 def _get_development_origins() -> List[str]:
     """Get development CORS origins with support for dynamic ports."""
-    origins = []
-    
-    # Common hosts
-    hosts = ["http://localhost", "http://127.0.0.1"]
-    
-    # Common frontend ports (React, Vue, Vite, Angular, etc.)
-    frontend_ports = [3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174]
-    
-    # Common backend/service ports
-    backend_ports = [8000, 8001, 8002, 8003, 8080, 8081, 8082, 8083]
-    
-    # Generate all combinations
-    for host in hosts:
-        for port in frontend_ports + backend_ports:
-            origins.append(f"{host}:{port}")
-    
-    return origins
+    # In development, return comprehensive list of localhost variations
+    # We can't use wildcard "*" when credentials are included per CORS spec
+    # This list covers all common development scenarios
+    return [
+        # Standard localhost ports
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:8000",
+        "http://localhost:8080",
+        "http://localhost:8081",
+        "http://localhost:5173",  # Vite
+        "http://localhost:4200",  # Angular
+        
+        # 127.0.0.1 variants
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001", 
+        "http://127.0.0.1:3002",
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:4200",
+        
+        # HTTPS variants for local cert testing
+        "https://localhost:3000",
+        "https://localhost:3001",
+        "https://localhost:8000",
+        "https://localhost:8080",
+        "https://127.0.0.1:3000",
+        "https://127.0.0.1:3001",
+        "https://127.0.0.1:8000",
+        "https://127.0.0.1:8080",
+        
+        # 0.0.0.0 for Docker/container scenarios
+        "http://0.0.0.0:3000",
+        "http://0.0.0.0:8000",
+        "http://0.0.0.0:8080",
+        
+        # IPv6 localhost
+        "http://[::1]:3000",
+        "http://[::1]:8000",
+        "http://[::1]:8080"
+    ]
 
 
 def is_origin_allowed(origin: str, allowed_origins: List[str], environment: Optional[str] = None) -> bool:
