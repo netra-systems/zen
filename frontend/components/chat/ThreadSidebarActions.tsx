@@ -2,6 +2,7 @@ import { useThreadStore } from '@/store/threadStore';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { useThreadCreation } from '@/hooks/useThreadCreation';
+import { useAuth } from '@/hooks/useAuth';
 import { defaultRecoveryManager } from '@/lib/thread-error-recovery';
 import { createThreadErrorFromError } from './ThreadSidebarErrorHandling';
 import { logger } from '@/utils/debug-logger';
@@ -46,9 +47,10 @@ export const useThreadSidebarActions = (): ThreadSidebarActionsResult => {
   const { clearMessages } = useUnifiedChatStore();
   const { state: switchingState, switchToThread } = useThreadSwitching();
   const { state: creationState, createAndNavigate } = useThreadCreation();
+  const { isAuthenticated } = useAuth();
 
   const loadThreads = async () => {
-    await executeThreadLoad(setLoading, setThreads, setError);
+    await executeThreadLoad(setLoading, setThreads, setError, isAuthenticated);
   };
 
   const handleCreateThread = async () => {

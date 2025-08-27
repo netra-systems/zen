@@ -167,6 +167,20 @@ export function createExpiredToken(): MockToken {
 }
 
 /**
+ * Create mock expired token with user ID
+ */
+export function createMockExpiredToken(userId: string): string {
+  return `expired_token_${userId}_${Date.now()}`;
+}
+
+/**
+ * Create mock expiring token with user ID and duration
+ */
+export function createMockExpiringToken(userId: string, expiresInSeconds: number): string {
+  return `expiring_token_${userId}_${expiresInSeconds}_${Date.now()}`;
+}
+
+/**
  * Create token without refresh capability
  */
 export function createTokenWithoutRefresh(): MockToken {

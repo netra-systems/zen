@@ -6,10 +6,28 @@
 jest.mock('lucide-react', () => {
   const React = require('react');
   return {
+    // Existing icons
     Command: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Command', ...props }),
     ArrowUp: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'ArrowUp', ...props }),
     ArrowDown: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'ArrowDown', ...props }),
-    Loader2: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Loader2', 'data-testid': 'loader2-icon', ...props })
+    Loader2: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Loader2', 'data-testid': 'loader2-icon', ...props }),
+    
+    // ChatHeader and component icons
+    Bot: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Bot', ...props }),
+    Zap: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Zap', ...props }),
+    Activity: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Activity', ...props }),
+    Shield: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Shield', ...props }),
+    Database: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Database', ...props }),
+    Cpu: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Cpu', ...props }),
+    Brain: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Brain', ...props }),
+    
+    // MCPServerStatus icons
+    Server: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Server', ...props }),
+    Wifi: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Wifi', ...props }),
+    WifiOff: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'WifiOff', ...props }),
+    AlertTriangle: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'AlertTriangle', ...props }),
+    CheckCircle2: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'CheckCircle2', ...props }),
+    Clock: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Clock', ...props })
   };
 });
 
@@ -96,9 +114,10 @@ jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => React.createElement('div', { 'data-testid': 'chat-header' }, 'Chat Header')
 }));
 
-// Mock ChatHeader dependencies
+// Mock ChatHeader dependencies  
 jest.mock('@/components/chat/ConnectionStatusIndicator', () => ({
-  ConnectionStatusIndicator: () => React.createElement('div', { 'data-testid': 'connection-status' }, 'Connected')
+  __esModule: true,
+  default: () => React.createElement('div', { 'data-testid': 'connection-status' }, 'Connected')
 }));
 
 jest.mock('@/components/chat/MCPServerStatus', () => ({
