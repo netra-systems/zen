@@ -42,8 +42,37 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         """Log middleware initialization."""
         logger.info(f"Security headers middleware initialized for {self.environment} environment")
     
+    def _is_websocket_upgrade(self, request: Request) -> bool:
+        """Check if request is a WebSocket upgrade request.
+        
+        WebSocket upgrades are identified by:
+        - Upgrade: websocket header
+        - Connection header containing 'upgrade'
+        
+        Args:
+            request: The incoming request
+            
+        Returns:
+            True if this is a WebSocket upgrade request
+        """
+        upgrade_header = request.headers.get("upgrade", "").lower()
+        connection_header = request.headers.get("connection", "").lower()
+        
+        is_websocket_upgrade = (
+            upgrade_header == "websocket" and 
+            "upgrade" in connection_header
+        )
+        
+        return is_websocket_upgrade
+    
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Add security headers to all responses."""
+        # CRITICAL: Skip security headers for WebSocket upgrades
+        # Security headers can interfere with the WebSocket upgrade process
+        if self._is_websocket_upgrade(request):
+            logger.debug(f"Skipping security headers for WebSocket upgrade: {request.url.path}")
+            return await call_next(request)
+        
         start_time = time.time()
         nonce = self.nonce_generator.generate_nonce()
         request.state.csp_nonce = nonce

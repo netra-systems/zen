@@ -84,29 +84,44 @@ def _add_security_headers_middleware(app: FastAPI) -> None:
     app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
 
 
-def setup_request_middleware(app: FastAPI) -> None:
-    """Setup CORS, auth, error, and request logging middleware."""
+def setup_request_middleware(app: FastAPI) -> FastAPI:
+    """Setup CORS, auth, error, and request logging middleware.
+    
+    Returns:
+        The app with WebSocket CORS middleware applied (may be wrapped)
+    """
     # Setup WebSocket-aware CORS middleware that excludes WebSocket upgrades
     setup_cors_middleware(app)
     
     # Apply WebSocket CORS middleware for WebSocket upgrade support
-    # This handles WebSocket connections specifically and works with the above CORS middleware
+    # CRITICAL FIX: WebSocket CORS returns a wrapped ASGI app that must be used
+    # The configure_websocket_cors function wraps the app with WebSocket CORS handling
     wrapped_app = configure_websocket_cors(app)
-    # Note: configure_websocket_cors returns the wrapped app, but FastAPI middleware
-    # registration doesn't need reassignment since it modifies the app in place
+    
+    # Continue with HTTP middleware on the original app
     app.middleware("http")(create_cors_redirect_middleware())
-    setup_auth_middleware(app)  # Add auth middleware after CORS
+    setup_auth_middleware(app)  # Add auth middleware after CORS (with WebSocket exclusions)
     app.middleware("http")(create_error_context_middleware())
     app.middleware("http")(create_request_logging_middleware())
     setup_session_middleware(app)
+    
+    # Return the WebSocket-wrapped app for proper ASGI handling
+    return wrapped_app
 
 
-def setup_middleware(app: FastAPI) -> None:
-    """Setup all middleware for the application."""
+def setup_middleware(app: FastAPI) -> FastAPI:
+    """Setup all middleware for the application.
+    
+    Returns:
+        The app with all middleware applied (may be wrapped for WebSocket CORS)
+    """
     setup_security_middleware(app)
-    setup_request_middleware(app)
+    wrapped_app = setup_request_middleware(app)
     # Add security response middleware LAST so it runs FIRST (LIFO order)
     _add_security_response_middleware_final(app)
+    
+    # Return the wrapped app that includes WebSocket CORS handling
+    return wrapped_app
 
 
 def initialize_oauth(app: FastAPI) -> None:
@@ -146,16 +161,25 @@ def setup_root_endpoint(app: FastAPI) -> None:
 def create_app() -> FastAPI:
     """Create and fully configure the FastAPI application."""
     app = create_fastapi_app()
-    _configure_app_handlers(app)
+    wrapped_app = _configure_app_handlers(app)
     _configure_app_routes(app)
-    return app
+    
+    # CRITICAL: Return the wrapped app that includes WebSocket CORS handling
+    # The wrapped_app is an ASGI app that includes WebSocket CORS middleware
+    # while still maintaining the original FastAPI app for route configuration
+    return wrapped_app
 
 
-def _configure_app_handlers(app: FastAPI) -> None:
-    """Configure error handlers and middleware."""
+def _configure_app_handlers(app: FastAPI) -> FastAPI:
+    """Configure error handlers and middleware.
+    
+    Returns:
+        The app with all handlers and middleware (may be wrapped for WebSocket CORS)
+    """
     register_error_handlers(app)
-    setup_middleware(app)
+    wrapped_app = setup_middleware(app)
     initialize_oauth(app)
+    return wrapped_app
 
 
 def _configure_app_routes(app: FastAPI) -> None:

@@ -119,12 +119,17 @@ def setup_auth_middleware(app: FastAPI) -> None:
     """Setup authentication middleware."""
     from netra_backend.app.middleware.fastapi_auth_middleware import FastAPIAuthMiddleware
     
-    # Add authentication middleware to the app
+    # Add authentication middleware to the app - CRITICAL: exclude WebSocket paths
+    # WebSocket connections handle authentication differently and must not be processed
+    # by HTTP authentication middleware as it will block the upgrade process
     app.add_middleware(
         FastAPIAuthMiddleware,
-        excluded_paths=["/health", "/metrics", "/", "/docs", "/openapi.json", "/redoc"]
+        excluded_paths=[
+            "/health", "/metrics", "/", "/docs", "/openapi.json", "/redoc",
+            "/ws", "/websocket", "/ws/test", "/ws/config", "/ws/health", "/ws/stats"
+        ]
     )
-    logger.info("Authentication middleware configured")
+    logger.info("Authentication middleware configured with WebSocket exclusions")
 
 
 def setup_session_middleware(app: FastAPI) -> None:

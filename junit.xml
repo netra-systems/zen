@@ -1,1 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="0" time="0.364" timestamp="2025-08-26T14:45:29.237792-07:00" hostname="Anthony" /></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="6" time="0.839" timestamp="2025-08-26T19:14:01.550572-07:00" hostname="Anthony"><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_google_oauth_initiation" time="0.337" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_redirect_uri_configuration" time="0.002" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_state_csrf_protection" time="0.013" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_callback_handling" time="0.022"><failure message="assert 401 in [200, 302, 400]&#10; +  where 401 = &lt;Response [401 Unauthorized]&gt;.status_code">auth_service\tests\test_auth_comprehensive.py:257: in test_oauth_callback_handling
+    assert response.status_code in [200, 302, 400]  # Added 400 for invalid state
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 401 in [200, 302, 400]
+E    +  where 401 = &lt;Response [401 Unauthorized]&gt;.status_code</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_error_scenarios" time="0.013"><failure message="assert 422 in [400, 401, 403]&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">auth_service\tests\test_auth_comprehensive.py:270: in test_oauth_error_scenarios
+    assert response.status_code in [400, 401, 403]  # Authentication/authorization error
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 422 in [400, 401, 403]
+E    +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_staging_configuration" time="0.005" /></testsuite></testsuites>
