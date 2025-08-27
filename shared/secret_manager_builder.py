@@ -295,8 +295,16 @@ class SecretManagerBuilder:
                 client = self._get_secret_client()
                 # Test connectivity by listing secrets
                 request = {"parent": f"projects/{self._project_id}"}
-                list(client.list_secrets(request=request, page_size=1))
+                # Use the correct API signature - no page_size parameter in request
+                try:
+                    # Try newer API signature first
+                    list(client.list_secrets(request=request))
+                except TypeError:
+                    # Fall back to older API signature if needed
+                    list(client.list_secrets(parent=f"projects/{self._project_id}"))
                 return True, ""
+            except ImportError:
+                return False, "GCP Secret Manager library not installed"
             except Exception as e:
                 return False, f"GCP connectivity failed: {str(e)}"
         
@@ -356,13 +364,42 @@ class SecretManagerBuilder:
         
         def load_environment_secrets(self) -> Dict[str, str]:
             """Load base secrets from environment variables."""
-            mappings = self.get_environment_mappings()
             secrets = {}
             
-            for secret_name, env_var_name in mappings.items():
-                value = self.parent.env.get(env_var_name)
-                if value:
-                    secrets[env_var_name] = value
+            # For development, load all relevant environment variables directly
+            if self.parent._environment == "development":
+                # List of common secret environment variables
+                common_secrets = [
+                    'JWT_SECRET_KEY', 'JWT_SECRET',
+                    'POSTGRES_PASSWORD', 'POSTGRES_HOST', 'POSTGRES_PORT', 'POSTGRES_DB', 'POSTGRES_USER',
+                    'REDIS_PASSWORD', 'REDIS_HOST', 'REDIS_PORT',
+                    'CLICKHOUSE_PASSWORD', 'CLICKHOUSE_HOST', 'CLICKHOUSE_PORT', 'CLICKHOUSE_USER', 'CLICKHOUSE_DB',
+                    'FERNET_KEY',
+                    'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET',
+                    'ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'GEMINI_API_KEY',
+                    'LANGFUSE_PUBLIC_KEY', 'LANGFUSE_SECRET_KEY',
+                    'DATABASE_URL', 'REDIS_URL'  # Common composite URLs
+                ]
+                
+                # Load any of these that exist in environment
+                for env_var_name in common_secrets:
+                    value = self.parent.env.get(env_var_name)
+                    if value:
+                        secrets[env_var_name] = value
+                        
+                # Also load any environment variables that match common patterns
+                for key, value in self.parent.env.items():
+                    if any(pattern in key for pattern in ['SECRET', 'PASSWORD', 'KEY', 'TOKEN', 'API']):
+                        if key not in secrets and value:
+                            secrets[key] = value
+            else:
+                # For staging/production, use mappings from secret_mappings module
+                mappings = self.get_environment_mappings()
+                
+                for secret_name, env_var_name in mappings.items():
+                    value = self.parent.env.get(env_var_name)
+                    if value:
+                        secrets[env_var_name] = value
             
             return secrets
         
