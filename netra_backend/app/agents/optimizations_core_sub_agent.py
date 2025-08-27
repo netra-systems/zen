@@ -116,8 +116,13 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
         log_agent_communication("Supervisor", "OptimizationsCoreSubAgent", run_id, "execute_request")
         
         context = self.create_execution_context(state, run_id, stream_updates)
+        
+        # Create async wrapper function
+        async def execute_wrapper():
+            return await self._execute_with_modern_patterns(context)
+        
         result = await self.reliability_manager.execute_with_reliability(
-            context, lambda: self._execute_with_modern_patterns(context)
+            context, execute_wrapper
         )
         
         if result.success:

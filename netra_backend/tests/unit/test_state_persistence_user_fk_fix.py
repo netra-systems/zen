@@ -88,6 +88,7 @@ async def test_state_persistence_creates_missing_dev_user(mock_db_session, persi
         user_create_obj = create_call_args[1]['obj_in']
         assert user_create_obj.id == "dev-temp-test123"
         assert user_create_obj.email == "dev-temp-test123@dev.local"
+        assert user_create_obj.password == "DevPassword123!"
         assert user_create_obj.is_developer is True
 
 

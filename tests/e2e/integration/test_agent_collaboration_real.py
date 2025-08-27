@@ -57,7 +57,7 @@ class TestRealAgentCollaboration:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_complex_cost_optimization_multi_agent_flow(self, test_core, flow_simulator:
+    async def test_complex_cost_optimization_multi_agent_flow(self, test_core, flow_simulator,
                                                             flow_validator):
         """Test complex cost optimization requiring multiple agents with real LLM calls."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)
@@ -211,17 +211,14 @@ class TestRealAgentCollaboration:
                                              request: Dict[str, Any]) -> Dict[str, Any]:
         """Execute collaboration request with mocked multi-agent responses."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
-            mock_llm.return_value = {
-                "content": "Multi-agent collaboration analysis completed with agent handoff",
-                "tokens_used": 300, "execution_time": 1.2
-            }
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
+            mock_llm.return_value = "Multi-agent collaboration analysis completed with agent handoff"
             response = await AgentCollaborationTestUtils.send_collaboration_request(
                 session_data["client"], request
             )
             return {
                 "status": "success", 
-                "content": mock_llm.return_value["content"],
+                "content": mock_llm.return_value,
                 "agents_involved": ["triage", "data", "optimization"], 
                 "orchestration_time": 1.2,
                 "response_time": response.get("response_time", 0)
@@ -282,8 +279,8 @@ class TestAgentCollaborationPerformance:
                     "turn_id": f"concurrent_collab_{i}", "require_multi_agent": True
                 }
                 # Mock: LLM service isolation for fast testing without API calls or rate limits
-                with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
-                    mock_llm.return_value = {"content": "Concurrent collaboration", "tokens_used": 200}
+                with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
+                    mock_llm.return_value = "Concurrent collaboration"
                     tasks.append(AgentCollaborationTestUtils.send_collaboration_request(
                         session_data["client"], request
                     ))

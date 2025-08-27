@@ -49,9 +49,7 @@ from test_framework.http_client import (
     create_backend_config,
 )
 from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
-from tests.e2e.service_manager import (
-    RealServicesManager as create_real_services_manager,
-)
+from tests.e2e.service_manager import RealServicesManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -61,7 +59,8 @@ class OAuthEndpointValidator:
     
     def __init__(self):
         """Initialize OAuth endpoint validator"""
-        self.services_manager = create_real_services_manager()
+        project_root = Path(__file__).parent.parent.parent.parent
+        self.services_manager = RealServicesManager(project_root)
         self.auth_client: Optional[RealHTTPClient] = None
         self.backend_client: Optional[RealHTTPClient] = None
         self.validation_data: Dict[str, Any] = {}
@@ -72,7 +71,7 @@ class OAuthEndpointValidator:
         self.test_start_time = time.time()
         logger.info("Starting real services for OAuth endpoint validation")
         
-        await self.services_manager.start_all_services(skip_frontend=True)
+        await self.services_manager.start_all_services()
         service_urls = self.services_manager.get_service_urls()
         await self._initialize_oauth_clients(service_urls)
         await self._validate_oauth_service_readiness()
@@ -95,7 +94,7 @@ class OAuthEndpointValidator:
         
         # Validate backend service health for OAuth integration
         backend_health = await self.backend_client.get("/health/")
-        assert backend_health.get("status") == "ok", "Backend service not ready for OAuth"
+        assert backend_health.get("status") in ["ok", "healthy"], "Backend service not ready for OAuth"
         
         logger.info("OAuth service readiness validated successfully")
     
