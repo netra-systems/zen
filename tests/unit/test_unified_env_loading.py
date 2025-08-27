@@ -25,8 +25,8 @@ class TestUnifiedEnvLoading:
         
         # Clear critical environment variables
         env_vars_to_clear = [
-            'ENVIRONMENT', 'GEMINI_API_KEY', 'GOOGLE_CLIENT_ID',
-            'GOOGLE_CLIENT_SECRET', 'JWT_SECRET_KEY', 'FERNET_KEY',
+            'ENVIRONMENT', 'GEMINI_API_KEY', 'OAUTH_GOOGLE_CLIENT_ID_ENV',
+            'OAUTH_GOOGLE_CLIENT_SECRET_ENV', 'JWT_SECRET_KEY', 'FERNET_KEY',
             'SERVICE_SECRET', 'CLICKHOUSE_PASSWORD',
             'ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'DATABASE_URL',
             'REDIS_URL', 'CLICKHOUSE_HOST', 'CLICKHOUSE_PORT',
@@ -47,8 +47,8 @@ class TestUnifiedEnvLoading:
         # Set development environment
         os.environ['ENVIRONMENT'] = 'development'
         os.environ['GEMINI_API_KEY'] = 'test_gemini_key'
-        os.environ['GOOGLE_CLIENT_ID'] = 'test_client_id'
-        os.environ['GOOGLE_CLIENT_SECRET'] = 'test_client_secret'
+        os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV'] = 'test_client_id'
+        os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV'] = 'test_client_secret'
         os.environ['JWT_SECRET_KEY'] = 'test_jwt_key'
         os.environ['FERNET_KEY'] = 'test_fernet_key'
         os.environ['SERVICE_SECRET'] = 'test_service_secret'
@@ -119,8 +119,8 @@ class TestUnifiedEnvLoading:
         # Set all required secrets in environment
         os.environ['ENVIRONMENT'] = 'development'
         os.environ['GEMINI_API_KEY'] = 'test_gemini'
-        os.environ['GOOGLE_CLIENT_ID'] = 'test_client_id'
-        os.environ['GOOGLE_CLIENT_SECRET'] = 'test_client_secret'
+        os.environ['OAUTH_GOOGLE_CLIENT_ID_ENV'] = 'test_client_id'
+        os.environ['OAUTH_GOOGLE_CLIENT_SECRET_ENV'] = 'test_client_secret'
         os.environ['JWT_SECRET_KEY'] = 'test_jwt'
         os.environ['FERNET_KEY'] = 'test_fernet'
         os.environ['SERVICE_SECRET'] = 'test_service'

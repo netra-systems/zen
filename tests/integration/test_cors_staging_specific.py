@@ -54,7 +54,9 @@ class TestCORSStagingSpecific:
         ]
         
         for env_var in staging_env_vars:
-            with patch.dict(os.environ, env_var):
+            # Clear other environment variables that might interfere
+            clear_env = {k: "" for k in ["ENVIRONMENT", "ENV", "NETRA_ENV", "AUTH_ENV", "NODE_ENV"]}
+            with patch.dict(os.environ, {**clear_env, **env_var}, clear=False):
                 environment = _detect_environment()
                 assert environment == "staging", f"Failed to detect staging with {env_var}"
     

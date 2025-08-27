@@ -243,9 +243,10 @@ startup_fixes = StartupFixesIntegration()
 
 
 # Convenience functions
-def apply_all_startup_fixes() -> Dict[str, Any]:
+async def apply_all_startup_fixes() -> Dict[str, Any]:
     """Apply all startup fixes and return results."""
-    return asyncio.run(startup_fixes.run_comprehensive_verification())
+    # Fixed: Remove nested asyncio.run() to prevent event loop deadlock
+    return await startup_fixes.run_comprehensive_verification()
 
 
 def get_startup_fix_summary() -> str:
