@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification name="docker_service_management" version="1.0.0">
+    <metadata>
+        <author>Principal Engineer</author>
+        <created>2025-08-27</created>
+        <description>Docker service management patterns and selective control for Netra platform</description>
+        <category>infrastructure</category>
+        <tags>docker, services, deployment, development</tags>
+    </metadata>
+
+    <overview>
+        <purpose>
+            Define standardized patterns for Docker service management with selective control capabilities.
+            This specification covers development environment service orchestration, allowing fine-grained
+            control over individual services or service groups.
+        </purpose>
+        <scope>
+            - Docker Compose profile management
+            - Selective service control patterns
+            - Service dependency resolution
+            - Quick restart/refresh operations
+        </scope>
+    </overview>
+
+    <service_profiles>
+        <profile name="netra" primary="true">
+            <description>Main Netra backend application with required dependencies</description>
+            <services>
+                <service>postgres</service>
+                <service>redis</service>
+                <service>backend</service>
+            </services>
+            <use_case>Backend development, API testing, agent development</use_case>
+        </profile>
+        
+        <profile name="backend">
+            <description>All backend services including auth</description>
+            <services>
+                <service>postgres</service>
+                <service>redis</service>
+                <service>backend</service>
+                <service>auth</service>
+            </services>
+            <use_case>Full backend development with authentication</use_case>
+        </profile>
+        
+        <profile name="frontend">
+            <description>Frontend application only</description>
+            <services>
+                <service>frontend</service>
+            </services>
+            <use_case>UI development, requires backend running separately</use_case>
+        </profile>
+        
+        <profile name="full">
+            <description>Complete development environment</description>
+            <services>
+                <service>postgres</service>
+                <service>redis</service>
+                <service>backend</service>
+                <service>auth</service>
+                <service>frontend</service>
+            </services>
+            <use_case>End-to-end development and testing</use_case>
+        </profile>
+    </service_profiles>
+
+    <common_operations>
+        <operation name="refresh_netra">
+            <description>Refresh/restart Netra backend service</description>
+            <aliases>
+                <alias>refresh netra docker</alias>
+                <alias>restart netra</alias>
+                <alias>reload netra backend</alias>
+            </aliases>
+            <command>python scripts/docker_services.py restart netra</command>
+            <effect>Restarts Netra backend container while preserving database state</effect>
+        </operation>
+        
+        <operation name="start_netra_only">
+            <description>Start only Netra backend with dependencies</description>
+            <aliases>
+                <alias>start netra</alias>
+                <alias>run netra backend</alias>
+            </aliases>
+            <command>python scripts/docker_services.py start netra</command>
+            <effect>Starts PostgreSQL, Redis, and Netra backend</effect>
+        </operation>
+        
+        <operation name="view_netra_logs">
+            <description>View Netra backend logs</description>
+            <aliases>
+                <alias>netra logs</alias>
+                <alias>backend logs</alias>
+            </aliases>
+            <command>python scripts/docker_services.py logs netra</command>
+            <effect>Streams live logs from Netra backend container</effect>
+        </operation>
+        
+        <operation name="stop_all">
+            <description>Stop all Docker services</description>
+            <command>python scripts/docker_services.py stop</command>
+            <effect>Gracefully stops all running containers</effect>
+        </operation>
+        
+        <operation name="clean_restart">
+            <description>Clean restart with fresh volumes</description>
+            <commands>
+                <command>python scripts/docker_services.py stop --volumes</command>
+                <command>python scripts/docker_services.py start full --build</command>
+            </commands>
+            <effect>Removes all data and starts fresh</effect>
+        </operation>
+    </common_operations>
+
+    <service_dependencies>
+        <dependency>
+            <service>backend</service>
+            <requires>
+                <service>postgres</service>
+                <service>redis</service>
+            </requires>
+        </dependency>
+        
+        <dependency>
+            <service>auth</service>
+            <requires>
+                <service>postgres</service>
+                <service>redis</service>
+            </requires>
+        </dependency>
+        
+        <dependency>
+            <service>frontend</service>
+            <optional>
+                <service>backend</service>
+                <service>auth</service>
+            </optional>
+        </dependency>
+    </service_dependencies>
+
+    <files>
+        <file path="/docker-compose.dev.yml">
+            <purpose>Development Docker Compose with profile support</purpose>
+            <modifications>Added profiles for selective service management</modifications>
+        </file>
+        
+        <file path="/scripts/docker_services.py">
+            <purpose>CLI tool for Docker service management</purpose>
+            <features>
+                <feature>Profile-based service control</feature>
+                <feature>Log viewing and following</feature>
+                <feature>Service restart capabilities</feature>
+                <feature>Container exec support</feature>
+            </features>
+        </file>
+        
+        <file path="/scripts/docker_dev_launcher.py">
+            <purpose>Full development environment launcher</purpose>
+            <features>
+                <feature>Environment preparation</feature>
+                <feature>Database initialization</feature>
+                <feature>Service health checks</feature>
+            </features>
+        </file>
+        
+        <file path="/docs/docker-services-guide.md">
+            <purpose>User documentation for Docker service management</purpose>
+            <content>Complete guide with examples and troubleshooting</content>
+        </file>
+    </files>
+
+    <troubleshooting>
+        <issue>
+            <problem>Service won't start</problem>
+            <solution>Check port availability and Docker daemon status</solution>
+            <command>docker compose -f docker-compose.dev.yml ps</command>
+        </issue>
+        
+        <issue>
+            <problem>Database connection errors after restart</problem>
+            <solution>Wait for database to be ready or check initialization</solution>
+            <command>python scripts/docker_services.py logs db</command>
+        </issue>
+        
+        <issue>
+            <problem>Changes not reflected after code update</problem>
+            <solution>Restart the specific service to reload code</solution>
+            <command>python scripts/docker_services.py restart netra</command>
+        </issue>
+    </troubleshooting>
+
+    <best_practices>
+        <practice>
+            <title>Use profiles for resource efficiency</title>
+            <description>Start only the services you need for your current task</description>
+        </practice>
+        
+        <practice>
+            <title>Monitor logs during development</title>
+            <description>Keep logs open in a separate terminal for immediate feedback</description>
+        </practice>
+        
+        <practice>
+            <title>Clean volumes periodically</title>
+            <description>Remove volumes when switching between major branches</description>
+        </practice>
+        
+        <practice>
+            <title>Use service-specific restarts</title>
+            <description>Restart individual services instead of the entire stack</description>
+        </practice>
+    </best_practices>
+
+    <cross_references>
+        <reference>
+            <spec>deployment_architecture.xml</spec>
+            <relation>Production deployment patterns</relation>
+        </reference>
+        
+        <reference>
+            <spec>gcp_deployment.xml</spec>
+            <relation>Cloud deployment configuration</relation>
+        </reference>
+        
+        <reference>
+            <document>LLM_MASTER_INDEX.md</document>
+            <section>Docker Configuration &amp; Service Management</section>
+        </reference>
+        
+        <reference>
+            <document>docs/docker-services-guide.md</document>
+            <relation>User-facing documentation</relation>
+        </reference>
+    </cross_references>
+</specification>

@@ -183,11 +183,35 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 python scripts/deploy_to_gcp.py --project netra-production --run-checks
 ```
 
-### Docker Configuration
+### Docker Configuration & Service Management
 **IMPORTANT: Two distinct Docker configuration sets exist**
 - **Development:** `/docker/*.development.Dockerfile` - Local dev with hot-reload
 - **Production/GCP:** `/deployment/docker/*.gcp.Dockerfile` - Optimized for Cloud Run
 - **Index:** [`docs/DOCKER_CONFIGURATION_INDEX.md`](docs/DOCKER_CONFIGURATION_INDEX.md) - Complete Docker configuration mapping
+
+#### 🐳 Docker Service Management (Selective Service Control)
+- **Service Guide:** [`docs/docker-services-guide.md`](docs/docker-services-guide.md) - Complete guide for selective service management
+- **Service Manager:** `/scripts/docker_services.py` - CLI tool for selective service control
+- **Docker Launcher:** `/scripts/docker_dev_launcher.py` - Full development environment launcher
+- **Docker Compose:** `/docker-compose.dev.yml` - Development compose with profile support
+
+#### Quick Docker Commands
+```bash
+# Refresh/Restart Netra backend only
+python scripts/docker_services.py restart netra
+
+# Start just Netra backend (with dependencies)
+python scripts/docker_services.py start netra
+
+# Start everything
+python scripts/docker_services.py start full
+
+# View Netra logs
+python scripts/docker_services.py logs netra
+
+# Stop all services
+python scripts/docker_services.py stop
+```
 
 ---
 

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>CORS Wildcard with Credentials Issue</title>
+    <date>2025-08-27</date>
+    <category>security</category>
+    <subcategory>cors</subcategory>
+    
+    <problem>
+        <description>
+            Frontend requests to auth service were blocked by CORS policy with error:
+            "The value of the 'Access-Control-Allow-Origin' header in the response must not be 
+            the wildcard '*' when the request's credentials mode is 'include'"
+        </description>
+        <root_cause>
+            CORS specification prohibits using wildcard origin (*) when credentials are included
+            in requests for security reasons. The development environment was using wildcard for
+            flexibility, but frontend was sending credentials: 'include' for all requests.
+        </root_cause>
+    </problem>
+    
+    <solution>
+        <approach>Two-part fix to maintain development flexibility</approach>
+        <changes>
+            <change>
+                <file>frontend/lib/auth-service-client.ts</file>
+                <description>
+                    Removed credentials: 'include' from public config endpoint request
+                    at line 68. The /auth/config endpoint doesn't require authentication.
+                </description>
+            </change>
+            <change>
+                <file>shared/cors_config.py</file>
+                <description>
+                    Replaced wildcard (*) with comprehensive list of localhost variations
+                    in _get_development_origins() function. Covers all common dev scenarios
+                    including localhost, 127.0.0.1, IPv6, and various port combinations.
+                </description>
+            </change>
+        </changes>
+    </solution>
+    
+    <best_practices>
+        <practice>
+            Only include credentials in requests that actually need them (session management,
+            authenticated endpoints). Public endpoints should not include credentials.
+        </practice>
+        <practice>
+            When credentials are needed, CORS must specify exact origins, not wildcards.
+            In development, maintain a comprehensive list of localhost variations.
+        </practice>
+        <practice>
+            Keep CORS configuration centralized in shared/cors_config.py for consistency
+            across all services.
+        </practice>
+    </best_practices>
+    
+    <testing>
+        <test>Verified auth config endpoint works with http://127.0.0.1:3000 origin</test>
+        <test>Confirmed CORS headers correctly return specific origin instead of wildcard</test>
+        <test>Maintained backward compatibility with existing localhost:3000 requests</test>
+    </testing>
+    
+    <references>
+        <reference>https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#credentialed_requests_and_wildcards</reference>
+        <reference>CORS spec section 6.1: Origin request header</reference>
+    </references>
+</learning>
