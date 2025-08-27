@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
+import { corsJsonResponse, handleOptions } from '@/lib/cors-utils'
 
 /**
  * Enhanced authentication headers for service-to-service communication
@@ -56,6 +57,8 @@ async function fetchWithRetry(url: string, options: RequestInit, maxRetries: num
         ...options,
         // Add timeout to prevent hanging requests
         signal: AbortSignal.timeout(30000), // 30 second timeout
+        // Add credentials for CORS
+        credentials: 'include',
       });
 
       // If we get a 403, try to refresh auth token on retry
@@ -100,30 +103,30 @@ export async function GET(request: NextRequest) {
       // Provide more detailed error information
       const errorBody = await response.json().catch(() => ({}));
       
-      return NextResponse.json({
+      return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
         details: errorBody,
         source: 'frontend-proxy',
         timestamp: new Date().toISOString(),
-      }, { status: response.status });
+      }, request, { status: response.status });
     }
 
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
     console.error('Threads proxy error:', error);
     
     // Enhanced error response with more context
-    return NextResponse.json({
+    return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
       source: 'frontend-proxy',
       timestamp: new Date().toISOString(),
       type: error instanceof Error ? error.constructor.name : 'UnknownError',
-    }, { status: 503 });
+    }, request, { status: 503 });
   }
 }
 
@@ -148,29 +151,33 @@ export async function POST(request: NextRequest) {
       // Provide more detailed error information
       const errorBody = await response.json().catch(() => ({}));
       
-      return NextResponse.json({
+      return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
         details: errorBody,
         source: 'frontend-proxy',
         timestamp: new Date().toISOString(),
-      }, { status: response.status });
+      }, request, { status: response.status });
     }
 
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
     console.error('Threads POST proxy error:', error);
     
     // Enhanced error response with more context
-    return NextResponse.json({
+    return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
       source: 'frontend-proxy',
       timestamp: new Date().toISOString(),
       type: error instanceof Error ? error.constructor.name : 'UnknownError',
-    }, { status: 503 });
+    }, request, { status: 503 });
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return handleOptions(request);
 }

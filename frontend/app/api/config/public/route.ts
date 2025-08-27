@@ -4,6 +4,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getUnifiedApiConfig } from '@/lib/unified-api-config'
+import { corsJsonResponse, handleOptions, addCorsHeaders } from '@/lib/cors-utils'
 
 // Simple in-memory cache for configuration data
 const CONFIG_CACHE = {
@@ -85,6 +86,7 @@ async function fetchFreshConfig(config: any): Promise<any> {
         },
         // Short timeout for config requests
         signal: AbortSignal.timeout(10000), // 10 second timeout
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -171,25 +173,27 @@ export async function GET(request: NextRequest) {
     // Check cache first
     const cachedConfig = getCachedConfig();
     if (cachedConfig) {
-      return NextResponse.json(cachedConfig, { 
+      const response = NextResponse.json(cachedConfig, { 
         status: 200,
         headers: {
           'Cache-Control': 'public, max-age=30, s-maxage=60',
           'Vary': 'Accept-Encoding',
         }
       });
+      return addCorsHeaders(response, request);
     }
     
     // Check circuit breaker
     if (!shouldAllowRequest()) {
       console.warn('Circuit breaker is open, returning fallback config');
       const fallbackConfig = getFallbackConfig(config, 'Circuit breaker open - using fallback');
-      return NextResponse.json(fallbackConfig, { 
+      const response = NextResponse.json(fallbackConfig, { 
         status: 200,
         headers: {
           'Cache-Control': 'public, max-age=10, s-maxage=30', // Shorter cache for fallback
         }
       });
+      return addCorsHeaders(response, request);
     }
     
     try {
@@ -200,13 +204,14 @@ export async function GET(request: NextRequest) {
       CONFIG_CACHE.data = freshConfig;
       CONFIG_CACHE.timestamp = Date.now();
       
-      return NextResponse.json(freshConfig, { 
+      const response = NextResponse.json(freshConfig, { 
         status: 200,
         headers: {
           'Cache-Control': 'public, max-age=30, s-maxage=60',
           'Vary': 'Accept-Encoding',
         }
       });
+      return addCorsHeaders(response, request);
       
     } catch (error) {
       console.warn('Failed to fetch fresh config, returning fallback:', error instanceof Error ? error.message : error);
@@ -217,12 +222,13 @@ export async function GET(request: NextRequest) {
         error instanceof Error ? error.message : 'Unknown error'
       );
       
-      return NextResponse.json(fallbackConfig, { 
+      const response = NextResponse.json(fallbackConfig, { 
         status: 200,
         headers: {
           'Cache-Control': 'public, max-age=10, s-maxage=30', // Shorter cache for fallback
         }
       });
+      return addCorsHeaders(response, request);
     }
     
   } catch (error) {
@@ -236,23 +242,28 @@ export async function GET(request: NextRequest) {
         `Critical error: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
       
-      return NextResponse.json(emergencyConfig, { 
+      const response = NextResponse.json(emergencyConfig, { 
         status: 200,
         headers: {
           'Cache-Control': 'no-cache',
         }
       });
+      return addCorsHeaders(response, request);
       
     } catch (emergencyError) {
       // Even fallback failed - return minimal config
-      return NextResponse.json({
+      return corsJsonResponse({
         environment: 'staging',
         features: { chat: false, auth: false, mcp: false },
         error: 'Critical system error',
         timestamp: Date.now(),
         cache_status: 'emergency_fallback',
         source: 'emergency',
-      }, { status: 500 });
+      }, request, { status: 500 });
     }
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return handleOptions(request);
 }
