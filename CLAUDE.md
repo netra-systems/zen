@@ -44,6 +44,7 @@ Netra Apex succeeds by creating and capturing value relative to a customer's AI/
 ### 2.1. Architectural Tenets
 *   **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
 *   **Single Source of Truth (SSOT)**: CRUCIAL: Each concept must have ONE canonical implementation per service. Multiple implementations of the same concept within a service violate SSOT and create maintenance burden. Each concept in each service must only exist ONCE and ONLY ONCE. (Cross-service patterns may be acceptable for independence - see SPEC/acceptable_duplicates.xml)
+**"Search First, Create Second"**  Read learnings_analysis_72hours_20250827.md. Always check existing implementations.
 *   **ATOMIC SCOPE** Every edit must represent a COMPLETE update to the system as defined by Complete Work. ALways be aware of scope. Only task subagents with scope you are 99.99% sure they an handle successfully. Split and dive work.
 *   **Complete Work** All relevant parts of the system are updated, integrated, tested, validated, working, production grade, high quality, follow ALL rules in claude.md, legacy code is deleted, prior versions are deleted as relevant, documented in xmls, docs, and other relevant places, audited, reviewed, QA tested and validated.
 *   **REFACTORS = ATOMIC SCOPE** All refactors must be complete atomic updates as per 2.1 Atomic Scope.

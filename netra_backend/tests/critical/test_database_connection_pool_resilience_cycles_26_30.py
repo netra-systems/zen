@@ -17,7 +17,7 @@ import time
 from unittest.mock import patch, MagicMock
 from sqlalchemy.exc import SQLAlchemyError
 
-from netra_backend.app.db.connection_pool_manager import ConnectionPoolManager
+# Using canonical DatabaseManager instead of removed ConnectionPoolManager
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.unified_logging import get_logger
 
@@ -35,7 +35,7 @@ class TestDatabaseConnectionPoolResilience:
     @pytest.fixture
     async def pool_manager(self, environment):
         """Create isolated connection pool manager for testing."""
-        manager = ConnectionPoolManager()
+        manager = DatabaseManager.get_connection_manager()
         # Add the missing methods for testing
         async def mock_check_pool_health():
             return {"healthy": True}

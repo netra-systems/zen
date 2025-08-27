@@ -1236,15 +1236,14 @@ class DatabaseManager:
             Tuple of (engine, session_factory, migration_manager)
         """
         from netra_backend.app.db.migration_manager import migration_lock_manager
-        from netra_backend.app.db.connection_pool_manager import get_connection_pool_manager
         
         logger.info("Initializing database with migration lock management")
         
-        # Get connection pool manager
-        pool_manager = await get_connection_pool_manager()
+        # Use the canonical DatabaseManager instance
+        db_manager = DatabaseManager.get_connection_manager()
         
         # Perform health check first
-        health_status = await pool_manager.health_check()
+        health_status = await db_manager.health_check()
         if health_status["status"] != "healthy":
             logger.warning(f"Database health check warning: {health_status}")
         
@@ -1253,23 +1252,23 @@ class DatabaseManager:
             if locked:
                 logger.info("Acquired migration lock - performing initialization")
                 
-                # Test connection with the pool manager
+                # Test connection with the database manager
                 try:
-                    async with await pool_manager.get_session() as session:
+                    async with db_manager.get_session() as session:
                         await session.execute(text("SELECT 1"))
                         await session.commit()
                     
                     logger.info("Database initialization completed successfully")
-                    return pool_manager._engine, pool_manager._session_factory, migration_lock_manager
+                    return db_manager._engine, db_manager._session_factory, migration_lock_manager
                     
                 except Exception as e:
                     logger.error(f"Database initialization failed: {e}")
                     raise
             else:
                 logger.info("Could not acquire migration lock - using existing initialization")
-                # Still return the pool manager components
-                await pool_manager._ensure_initialized()
-                return pool_manager._engine, pool_manager._session_factory, migration_lock_manager
+                # Still return the database manager components
+                await db_manager._ensure_initialized()
+                return db_manager._engine, db_manager._session_factory, migration_lock_manager
 
 
 # CONSOLIDATED CLIENT MANAGER FUNCTIONALITY

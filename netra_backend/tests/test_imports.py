@@ -60,7 +60,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
     def test_database_modules(self):
         """Test all database modules can be imported"""
         db_modules = [
-            'netra_backend.app.db.database_connectivity_master',
+            'netra_backend.app.db.database_manager',
             'netra_backend.app.db.postgres_core',
             'netra_backend.app.db.clickhouse_init',
             'netra_backend.app.db.clickhouse_reliable_manager',
@@ -205,7 +205,7 @@ class TestFastFailImports:
             ('netra_backend.app.main', 'Main application entry point'),
             ('netra_backend.app.config', 'Configuration loading'),
             ('netra_backend.app.startup_module', 'Application startup'),
-            ('netra_backend.app.db.database_connectivity_master', 'Database connectivity'),
+            ('netra_backend.app.db.database_manager', 'Database connectivity'),
         ]
         
         for module_path, description in critical_modules:
