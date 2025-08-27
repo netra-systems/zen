@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>GCP Load Balancer Requirements Implementation</title>
+  <category>deployment</category>
+  <category>load-balancer</category>
+  <category>websocket</category>
+  <last_updated>2025-08-27</last_updated>
+
+  <summary>
+    Implementation of 6 critical requirements for GCP load balancer deployment to support WebSocket connections, HTTPS security, and proper protocol handling.
+  </summary>
+
+  <requirements>
+    <requirement id="1" name="Load Balancer Backend Protocol">
+      <description>Load balancer backend services must use HTTPS protocol</description>
+      <status>IMPLEMENTED</status>
+      <implementation>
+        - All backend services configured with protocol = "HTTPS"
+        - api_backend, auth_backend, and frontend_backend use HTTPS
+      </implementation>
+      <files_modified>
+        - terraform-gcp-staging/load-balancer.tf
+      </files_modified>
+    </requirement>
+
+    <requirement id="2" name="WebSocket Support">
+      <description>3600 second timeout and session affinity for WebSocket connections</description>
+      <status>IMPLEMENTED</status>
+      <implementation>
+        - timeout_sec = var.backend_timeout_sec (default: 3600)
+        - session_affinity = "GENERATED_COOKIE" 
+        - affinity_cookie_ttl_sec = var.session_affinity_ttl_sec (default: 3600)
+        - Applied to all backend services
+      </implementation>
+      <files_modified>
+        - terraform-gcp-staging/load-balancer.tf
+        - terraform-gcp-staging/variables.tf
+      </files_modified>
+    </requirement>
+
+    <requirement id="3" name="Protocol Headers">
+      <description>Preserve X-Forwarded-Proto header for proper protocol detection</description>
+      <status>IMPLEMENTED</status>
+      <implementation>
+        - custom_request_headers = ["X-Forwarded-Proto: https"] on all backend services
+        - request_headers_to_add in default_route_action with X-Forwarded-Proto: https
+        - WebSocket path rules include X-WebSocket-Upgrade header
+      </implementation>
+      <files_modified>
+        - terraform-gcp-staging/load-balancer.tf
+      </files_modified>
+    </requirement>
+
+    <requirement id="4" name="Health Checks">
+      <description>Use HTTPS protocol for health checks with port 443</description>
+      <status>IMPLEMENTED</status>
+      <implementation>
+        - Changed from http_health_check to https_health_check
+        - Port changed from 8080 to 443
+        - Renamed resource from http_health_check to https_health_check
+      </implementation>
+      <files_modified>
+        - terraform-gcp-staging/load-balancer.tf
+      </files_modified>
+    </requirement>
+
+    <requirement id="5" name="CORS Configuration">
+      <description>HTTPS-only origins in staging/production environments</description>
+      <status>IMPLEMENTED</status>
+      <implementation>
+        - CORS allow_origins restricted to HTTPS URLs only
+        - WebSocket-specific path matchers added for /ws, /ws/*, /websocket, /websocket/*
+        - Enhanced CORS to include PATCH method
+        - WebSocket upgrade support via X-WebSocket-Upgrade header
+      </implementation>
+      <files_modified>
+        - terraform-gcp-staging/load-balancer.tf
+      </files_modified>
+    </requirement>
+
+    <requirement id="6" name="Cloud Run Ingress">
+      <description>Set ingress to "all" with FORCE_HTTPS=true environment variable</description>
+      <status>IMPLEMENTED</status>
+      <implementation>
+        - Cloud Run services deployed with --ingress "all"
+        - FORCE_HTTPS=true environment variable added to all services
+        - Generation 2 execution environment enabled (--execution-environment gen2)
+      </implementation>
+      <files_modified>
+        - scripts/deploy_to_gcp.py
+      </files_modified>
+    </requirement>
+  </requirements>
+
+  <files_modified>
+    <file path="terraform-gcp-staging/load-balancer.tf">
+      <changes>
+        - Updated all backend services timeout_sec to var.backend_timeout_sec (3600s)
+        - Added session_affinity = "GENERATED_COOKIE" to all backend services  
+        - Added affinity_cookie_ttl_sec = var.session_affinity_ttl_sec to all backend services
+        - Changed http_health_check to https_health_check with port 443
+        - Added custom_request_headers with X-Forwarded-Proto: https to all backend services
+        - Added WebSocket-specific path matchers with timeout and headers
+        - Enhanced CORS configuration with HTTPS-only origins
+        - Added X-Forwarded-Proto header to default route action
+      </changes>
+    </file>
+
+    <file path="terraform-gcp-staging/variables.tf">
+      <changes>
+        - Added backend_timeout_sec variable (default: 3600)
+        - Added session_affinity_ttl_sec variable (default: 3600) 
+        - Added force_https_enabled variable (default: true)
+      </changes>
+    </file>
+
+    <file path="scripts/deploy_to_gcp.py">
+      <changes>
+        - Added FORCE_HTTPS=true environment variable to all service configurations
+        - Added --execution-environment gen2 flag for Cloud Run deployment
+        - Updated ingress configuration comment for clarity
+      </changes>
+    </file>
+  </files_modified>
+
+  <deployment_validation>
+    <test_points>
+      <test>WebSocket connections maintain session affinity across requests</test>
+      <test>Long-running connections supported up to 3600 seconds</test>
+      <test>HTTPS protocol enforced for all backend communications</test>
+      <test>X-Forwarded-Proto header properly preserved</test>
+      <test>Health checks use HTTPS on port 443</test>
+      <test>CORS allows only HTTPS origins</test>
+    </test_points>
+    
+    <monitoring>
+      - Load balancer logs show HTTPS backend protocol usage
+      - Session affinity cookies generated for WebSocket connections
+      - Health check status via HTTPS endpoints
+      - Protocol headers properly forwarded to backend services
+    </monitoring>
+  </deployment_validation>
+
+  <production_considerations>
+    <security>
+      - All communications use HTTPS encryption
+      - Session cookies have appropriate TTL for security
+      - CORS restricted to known HTTPS origins only
+    </security>
+    
+    <performance>
+      - WebSocket connections can persist for up to 1 hour
+      - Session affinity reduces connection overhead
+      - CDN caching configured for frontend static assets
+    </performance>
+    
+    <scalability>
+      - Backend services support auto-scaling with session affinity
+      - Load balancer distributes WebSocket connections appropriately
+      - Timeout values balanced for stability and resource usage
+    </scalability>
+  </production_considerations>
+
+  <next_steps>
+    1. Deploy updated Terraform configuration to staging environment
+    2. Test WebSocket functionality with 3600-second timeout
+    3. Verify HTTPS health checks are working properly
+    4. Validate session affinity for WebSocket connections
+    5. Monitor load balancer metrics for proper protocol handling
+    6. Update production environment with same configuration
+  </next_steps>
+</learnings>

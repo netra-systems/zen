@@ -117,13 +117,21 @@ class WebSocketCORSHandler:
         if not self.security_config["block_suspicious_patterns"]:
             return False
         
-        # In development and staging, allow localhost IP addresses for testing
-        if self.environment in ["development", "staging"]:
+        # In development, be very permissive - almost nothing is "suspicious"
+        if self.environment == "development":
+            # Check if it's a localhost, Docker service, or bridge network IP
+            import re
+            localhost_docker_pattern = r'^https?://(127\.0\.0\.1|0\.0\.0\.0|\[::1\]|localhost|frontend|backend|auth|netra-frontend|netra-backend|netra-auth|172\.\d+\.\d+\.\d+)(:\d+)?(/.*)?$'
+            if re.match(localhost_docker_pattern, origin, re.IGNORECASE):
+                return False  # Never suspicious in development for local/Docker testing
+        
+        # In staging, allow localhost IP addresses for testing  
+        if self.environment == "staging":
             # Check if it's a localhost IP
             import re
             localhost_ip_pattern = r'^https?://(127\.0\.0\.1|0\.0\.0\.0|\[::1\]|localhost)(:\d+)?(/.*)?$'
             if re.match(localhost_ip_pattern, origin, re.IGNORECASE):
-                return False  # Not suspicious in dev/staging for local testing
+                return False  # Not suspicious in staging for local testing
         
         for pattern in self._suspicious_patterns:
             if pattern.match(origin):
@@ -210,24 +218,22 @@ class WebSocketCORSHandler:
                 self._record_violation("", "WebSocket connection attempted without Origin header in non-development environment")
                 return False
         
-        # In development, be more permissive with localhost origins
+        # In development mode, be very permissive - allow almost everything
         if self.environment == "development":
-            # Check if it's any localhost origin
+            # Check if it's any localhost origin or Docker service
             from shared.cors_config import _is_localhost_origin
             if _is_localhost_origin(origin):
-                logger.debug(f"WebSocket origin allowed (dev localhost): {origin}")
+                logger.debug(f"WebSocket origin allowed (dev localhost/Docker): {origin}")
                 return True
+            
+            # In development, allow any origin that looks reasonable
+            # This helps with Docker networking and development scenarios
+            logger.info(f"WebSocket origin allowed (dev mode - permissive): {origin}")
+            return True
         
-        # First check security constraints
+        # First check security constraints for non-development environments
         is_secure, security_reason = self._validate_origin_security(origin)
         if not is_secure:
-            # In development, log but allow anyway for localhost
-            if self.environment == "development":
-                from shared.cors_config import _is_localhost_origin
-                if _is_localhost_origin(origin):
-                    logger.info(f"WebSocket origin allowed despite security warning (dev mode): {origin}")
-                    return True
-            
             self._record_violation(origin, f"Security validation failed: {security_reason}")
             logger.error(f"CORS ERROR: Security validation failed for '{origin}': {security_reason}")
             return False
@@ -236,11 +242,6 @@ class WebSocketCORSHandler:
         explicitly_allowed = self._is_origin_explicitly_allowed(origin)
         if explicitly_allowed:
             logger.debug(f"WebSocket origin allowed: {origin}")
-            return True
-        
-        # In development, be extra permissive
-        if self.environment == "development":
-            logger.info(f"WebSocket origin allowed (dev mode fallback): {origin}")
             return True
         
         # Record violation for denied origin

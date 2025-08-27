@@ -170,7 +170,7 @@ def _get_staging_origins() -> List[str]:
 
 
 def _get_development_origins() -> List[str]:
-    """Get development CORS origins with support for dynamic ports."""
+    """Get development CORS origins with support for dynamic ports and Docker networking."""
     # In development, return comprehensive list of localhost variations
     # We can't use wildcard "*" when credentials are included per CORS spec
     # This list covers all common development scenarios
@@ -209,6 +209,24 @@ def _get_development_origins() -> List[str]:
         "http://0.0.0.0:3000",
         "http://0.0.0.0:8000",
         "http://0.0.0.0:8080",
+        
+        # Docker service names and internal networking
+        "http://frontend:3000",  # Docker service name for frontend
+        "http://backend:8000",   # Docker service name for backend
+        "http://auth:8081",      # Docker service name for auth
+        "http://netra-frontend:3000",   # Docker container name
+        "http://netra-backend:8000",    # Docker container name  
+        "http://netra-auth:8081",       # Docker container name
+        
+        # Docker bridge network IP ranges (common Docker defaults)
+        "http://172.17.0.1:3000",
+        "http://172.17.0.1:8000",
+        "http://172.18.0.1:3000", 
+        "http://172.18.0.1:8000",
+        "http://172.19.0.1:3000",
+        "http://172.19.0.1:8000",
+        "http://172.20.0.1:3000",
+        "http://172.20.0.1:8000",
         
         # IPv6 localhost
         "http://[::1]:3000",
@@ -256,21 +274,37 @@ def is_origin_allowed(origin: str, allowed_origins: List[str], environment: Opti
 
 def _is_localhost_origin(origin: str) -> bool:
     """
-    Check if origin is from localhost/127.0.0.1 with any port.
+    Check if origin is from localhost/127.0.0.1 with any port, or Docker service names.
     
     Args:
         origin: Origin to check
         
     Returns:
-        True if origin is localhost-based
+        True if origin is localhost-based or Docker service
     """
     try:
         parsed = urlparse(origin)
-        localhost_hosts = ["localhost", "127.0.0.1", "0.0.0.0", "::1"]
-        return parsed.hostname in localhost_hosts
+        # Include Docker service names and container names
+        localhost_hosts = [
+            "localhost", "127.0.0.1", "0.0.0.0", "::1",
+            # Docker service names from docker-compose.dev.yml
+            "frontend", "backend", "auth",
+            # Docker container names
+            "netra-frontend", "netra-backend", "netra-auth"
+        ]
+        
+        # Check if hostname is in our allowed list
+        if parsed.hostname in localhost_hosts:
+            return True
+        
+        # Check for Docker bridge network IPs (172.x.x.x range)
+        if parsed.hostname and parsed.hostname.startswith("172."):
+            return True
+            
+        return False
     except Exception:
         # Fallback regex pattern matching
-        localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?/?$'
+        localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]|frontend|backend|auth|netra-frontend|netra-backend|netra-auth|172\.\d+\.\d+\.\d+)(:\d+)?/?$'
         return bool(re.match(localhost_pattern, origin, re.IGNORECASE))
 
 

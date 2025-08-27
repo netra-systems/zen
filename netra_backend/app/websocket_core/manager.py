@@ -213,10 +213,15 @@ class WebSocketManager:
         # Remove from rooms
         self._leave_all_rooms_for_connection(connection_id)
         
-        # Close WebSocket if still connected
+        # CRITICAL FIX: Close WebSocket safely to prevent "Unexpected ASGI message" errors
         if websocket.application_state == WebSocketState.CONNECTED:
             try:
-                await websocket.close(code=code, reason=reason)
+                # Check if client is still connected before closing
+                if websocket.client_state == WebSocketState.CONNECTED:
+                    await websocket.close(code=code, reason=reason)
+                    logger.info(f"WebSocket closed for connection {connection_id}: {code} - {reason}")
+                else:
+                    logger.debug(f"WebSocket client already disconnected for {connection_id}")
             except Exception as e:
                 logger.warning(f"Error closing WebSocket {connection_id}: {e}")
         
@@ -305,7 +310,9 @@ class WebSocketManager:
             conn = self.connections[connection_id]
             websocket = conn["websocket"]
         
+        # CRITICAL FIX: Check WebSocket state more carefully to prevent premature cleanup
         if websocket.application_state != WebSocketState.CONNECTED:
+            logger.warning(f"WebSocket not connected for {connection_id}, state: {websocket.application_state}")
             await self._cleanup_connection(connection_id, 1000, "Connection lost")
             return False
         

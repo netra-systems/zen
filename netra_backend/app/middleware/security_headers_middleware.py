@@ -193,18 +193,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
         response.headers["X-Frame-Options"] = "SAMEORIGIN"  # Allow embedding in same origin for docs
     
-    def _add_cors_headers(self, response: Response) -> None:
-        """Add CORS headers to response."""
-        if self.environment == "development":
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
-            response.headers["Access-Control-Max-Age"] = "86400"
-        else:
-            response.headers["Access-Control-Allow-Origin"] = "https://netrasystems.ai"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
+    # CORS headers removed - handled by WebSocketAwareCORSMiddleware in middleware_setup.py
+    # This was legacy code that violated SSOT principles
     
     def _generate_security_fingerprint(self, request: Request) -> str:
         """Generate a security fingerprint for the request."""

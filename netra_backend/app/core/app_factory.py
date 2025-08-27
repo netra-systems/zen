@@ -23,7 +23,6 @@ from netra_backend.app.core.middleware_setup import (
     setup_cors_middleware,
     setup_session_middleware,
 )
-from netra_backend.app.core.websocket_cors import configure_websocket_cors
 from netra_backend.app.core.request_context import (
     create_error_context_middleware,
     create_request_logging_middleware,
@@ -76,6 +75,14 @@ def _add_security_response_middleware_final(app: FastAPI) -> None:
     app.add_middleware(SecurityResponseMiddleware)
 
 
+def _add_cors_fix_middleware(app: FastAPI) -> None:
+    """Add CORS fix middleware to handle missing Access-Control-Allow-Origin header."""
+    from netra_backend.app.config import get_config
+    from netra_backend.app.middleware.cors_fix_middleware import CORSFixMiddleware
+    settings = get_config()
+    app.add_middleware(CORSFixMiddleware, environment=settings.environment)
+
+
 def _add_security_headers_middleware(app: FastAPI) -> None:
     """Add security headers middleware."""
     from netra_backend.app.config import get_config
@@ -84,44 +91,33 @@ def _add_security_headers_middleware(app: FastAPI) -> None:
     app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
 
 
-def setup_request_middleware(app: FastAPI) -> FastAPI:
-    """Setup CORS, auth, error, and request logging middleware.
-    
-    Returns:
-        The app with WebSocket CORS middleware applied (may be wrapped)
-    """
+def setup_request_middleware(app: FastAPI) -> None:
+    """Setup CORS, auth, error, and request logging middleware."""
     # Setup WebSocket-aware CORS middleware that excludes WebSocket upgrades
     setup_cors_middleware(app)
     
-    # Apply WebSocket CORS middleware for WebSocket upgrade support
-    # CRITICAL FIX: WebSocket CORS returns a wrapped ASGI app that must be used
-    # The configure_websocket_cors function wraps the app with WebSocket CORS handling
-    wrapped_app = configure_websocket_cors(app)
+    # NOTE: WebSocket CORS is handled separately by WebSocketCORSMiddleware
+    # which is applied at the ASGI level when needed. For HTTP requests,
+    # the WebSocketAwareCORSMiddleware handles CORS.
     
-    # Continue with HTTP middleware on the original app
+    # Continue with HTTP middleware
     app.middleware("http")(create_cors_redirect_middleware())
     setup_auth_middleware(app)  # Add auth middleware after CORS (with WebSocket exclusions)
     app.middleware("http")(create_error_context_middleware())
     app.middleware("http")(create_request_logging_middleware())
     setup_session_middleware(app)
-    
-    # Return the WebSocket-wrapped app for proper ASGI handling
-    return wrapped_app
 
 
-def setup_middleware(app: FastAPI) -> FastAPI:
-    """Setup all middleware for the application.
-    
-    Returns:
-        The app with all middleware applied (may be wrapped for WebSocket CORS)
-    """
+def setup_middleware(app: FastAPI) -> None:
+    """Setup all middleware for the application."""
+    # CORS middleware must be added AFTER security middleware
+    # so it runs BEFORE security middleware in the request flow
+    setup_request_middleware(app)  # This includes CORS
     setup_security_middleware(app)
-    wrapped_app = setup_request_middleware(app)
     # Add security response middleware LAST so it runs FIRST (LIFO order)
     _add_security_response_middleware_final(app)
-    
-    # Return the wrapped app that includes WebSocket CORS handling
-    return wrapped_app
+    # Add CORS fix middleware to handle missing Access-Control-Allow-Origin header
+    _add_cors_fix_middleware(app)
 
 
 def initialize_oauth(app: FastAPI) -> None:
@@ -161,25 +157,19 @@ def setup_root_endpoint(app: FastAPI) -> None:
 def create_app() -> FastAPI:
     """Create and fully configure the FastAPI application."""
     app = create_fastapi_app()
-    wrapped_app = _configure_app_handlers(app)
+    _configure_app_handlers(app)
     _configure_app_routes(app)
     
-    # CRITICAL: Return the wrapped app that includes WebSocket CORS handling
-    # The wrapped_app is an ASGI app that includes WebSocket CORS middleware
-    # while still maintaining the original FastAPI app for route configuration
-    return wrapped_app
+    # Return the FastAPI app instance
+    # The middleware stack including CORS is already configured on the app
+    return app
 
 
-def _configure_app_handlers(app: FastAPI) -> FastAPI:
-    """Configure error handlers and middleware.
-    
-    Returns:
-        The app with all handlers and middleware (may be wrapped for WebSocket CORS)
-    """
+def _configure_app_handlers(app: FastAPI) -> None:
+    """Configure error handlers and middleware."""
     register_error_handlers(app)
-    wrapped_app = setup_middleware(app)
+    setup_middleware(app)
     initialize_oauth(app)
-    return wrapped_app
 
 
 def _configure_app_routes(app: FastAPI) -> None:

@@ -249,6 +249,19 @@
             <critical-takeaway>Remove all service discovery imports from dev_launcher in production services.</critical-takeaway>
         </category>
         
+        <category name="GCP Load Balancer Requirements" path="SPEC/learnings/gcp_load_balancer_implementation.xml" keywords="GCP, Load Balancer, WebSocket, HTTPS, Terraform, Health Check, CORS, Session Affinity, Timeout, Protocol Headers, Cloud Run, Ingress">
+            <critical-takeaway>CRITICAL: All 6 load balancer requirements are mandatory for production deployment.</critical-takeaway>
+            <critical-takeaway>Backend services MUST use protocol="HTTPS" in Terraform - HTTP causes SSL termination failures.</critical-takeaway>
+            <critical-takeaway>WebSockets require timeout_sec=3600 AND session_affinity="GENERATED_COOKIE" for stable connections.</critical-takeaway>
+            <critical-takeaway>X-Forwarded-Proto header preservation prevents redirect loops and maintains HTTPS context.</critical-takeaway>
+            <critical-takeaway>Health checks MUST use https_health_check on port 443 - HTTP checks fail against HTTPS backends.</critical-takeaway>
+            <critical-takeaway>Production CORS must restrict to HTTPS-only origins - HTTP origins enable MITM attacks.</critical-takeaway>
+            <critical-takeaway>Cloud Run requires ingress="all" with FORCE_HTTPS=true environment variable.</critical-takeaway>
+            <critical-takeaway>Use scripts/validate_gcp_deployment.py with 95% minimum compliance before deployment.</critical-takeaway>
+            <critical-takeaway>E2E tests must validate WebSocket persistence beyond 60 seconds to verify timeout configuration.</critical-takeaway>
+            <critical-takeaway>Multi-agent coordination effective for complex infrastructure: DevOps, QA, and Documentation agents.</critical-takeaway>
+        </category>
+        
         <category name="AI-Native Path Management" path="SPEC/learnings/ai_native_path_management.xml" keywords="AI-Native, Path Migration, Refactoring, Service Creation, Batch Operations, Import Management">
             <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
             <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>

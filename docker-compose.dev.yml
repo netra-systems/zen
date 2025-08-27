@@ -109,7 +109,11 @@ services:
       
       # Frontend URL
       FRONTEND_URL: http://localhost:3000
-      CORS_ORIGINS: '["http://localhost:3000", "http://frontend:3000"]'
+      # CORS_ORIGINS removed to use comprehensive list from shared/cors_config.py
+      
+      # Development Auth Bypass
+      ALLOW_DEV_AUTH_BYPASS: true
+      WEBSOCKET_AUTH_BYPASS: true
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
@@ -198,14 +202,16 @@ services:
     container_name: netra-frontend
     profiles: ["frontend", "full"]
     environment:
-      # API URLs
+      # API URLs (External - for browser connections from host)
       NEXT_PUBLIC_API_URL: http://localhost:8000
       NEXT_PUBLIC_AUTH_URL: http://localhost:8081
       NEXT_PUBLIC_WS_URL: ws://localhost:8000
+      NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8000/ws
       
-      # Internal API URLs (for SSR)
+      # Internal API URLs (for SSR and Docker networking)
       API_URL: http://backend:8000
       AUTH_URL: http://auth:8081
+      WS_URL: ws://backend:8000
       
       # Next.js Config
       NODE_ENV: development

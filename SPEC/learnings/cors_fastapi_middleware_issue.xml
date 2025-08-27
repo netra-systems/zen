@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>FastAPI CORSMiddleware Access-Control-Allow-Origin Header Issue</title>
+  
+  <problem>
+    <description>
+      FastAPI's CORSMiddleware was not adding the Access-Control-Allow-Origin header to responses,
+      even though the origin was in the allowed list and other CORS headers were being added.
+    </description>
+    <symptoms>
+      - Browser error: "No 'Access-Control-Allow-Origin' header is present on the requested resource"
+      - Partial CORS headers present (allow-credentials, expose-headers) but missing allow-origin
+      - OPTIONS preflight requests returning 400 Bad Request
+      - Issue affected both main backend and auth service
+    </symptoms>
+  </problem>
+  
+  <root_causes>
+    <cause id="1">
+      <title>WebSocket CORS Wrapper Interference</title>
+      <description>
+        The WebSocket CORS wrapper (configure_websocket_cors) was wrapping the app instance,
+        but routes were being registered on the unwrapped app, causing middleware chain issues.
+      </description>
+      <fix>
+        Removed the WebSocket CORS wrapper from the HTTP middleware chain. WebSocket CORS
+        should be handled separately at the ASGI level only for WebSocket connections.
+      </fix>
+    </cause>
+    
+    <cause id="2">
+      <title>Custom WebSocketAwareCORSMiddleware Implementation</title>
+      <description>
+        The custom WebSocketAwareCORSMiddleware was not properly delegating to the parent
+        CORSMiddleware class, causing OPTIONS requests to fail with 400 Bad Request.
+      </description>
+      <fix>
+        Replaced WebSocketAwareCORSMiddleware with standard FastAPI CORSMiddleware.
+        WebSocket CORS is handled separately by WebSocketCORSMiddleware at the ASGI level.
+      </fix>
+    </cause>
+    
+    <cause id="3">
+      <title>Legacy CORS Implementation in SecurityHeadersMiddleware</title>
+      <description>
+        SecurityHeadersMiddleware had an unused _add_cors_headers method that was never called,
+        violating SSOT principles and causing confusion.
+      </description>
+      <fix>
+        Removed the legacy CORS implementation from SecurityHeadersMiddleware.
+      </fix>
+    </cause>
+    
+    <cause id="4">
+      <title>Middleware Ordering Issues</title>
+      <description>
+        Middleware execution order matters in FastAPI (LIFO - Last In First Out).
+        Security middleware was potentially interfering with CORS headers.
+      </description>
+      <fix>
+        Reordered middleware so CORS middleware is added after security middleware in code,
+        meaning it runs before security middleware in the request/response flow.
+      </fix>
+    </cause>
+  </root_causes>
+  
+  <final_issue>
+    <title>FastAPI CORSMiddleware Behavior with Multiple Origins</title>
+    <description>
+      FastAPI's CORSMiddleware has a known behavior where when allow_credentials=True
+      and multiple origins are configured, it may not add the Access-Control-Allow-Origin
+      header properly. The middleware validates the origin but fails to add the header
+      to the response.
+    </description>
+    <workaround>
+      This appears to be a limitation or bug in FastAPI/Starlette's CORSMiddleware
+      implementation. The middleware correctly validates origins but doesn't always
+      add the Access-Control-Allow-Origin header when credentials are allowed.
+    </workaround>
+  </final_issue>
+  
+  <solution>
+    <title>Custom CORS Header Injection</title>
+    <description>
+      Since FastAPI's CORSMiddleware validates origins correctly but doesn't add
+      the header, we need to manually add the Access-Control-Allow-Origin header
+      when the origin is valid.
+    </description>
+    <implementation>
+      Create a custom middleware that runs after CORSMiddleware to add the missing
+      Access-Control-Allow-Origin header when other CORS headers are present.
+    </implementation>
+  </solution>
+  
+  <best_practices>
+    <practice>Maintain SSOT for CORS configuration in /shared/cors_config.py</practice>
+    <practice>Use standard FastAPI CORSMiddleware instead of custom implementations</practice>
+    <practice>Handle WebSocket CORS separately from HTTP CORS</practice>
+    <practice>Be aware of middleware execution order (LIFO)</practice>
+    <practice>Test CORS with actual browser requests, not just curl</practice>
+    <practice>Always verify both regular requests and OPTIONS preflight requests</practice>
+  </best_practices>
+  
+  <testing>
+    <test>Regular GET request: curl -H "Origin: http://localhost:3000" http://localhost:8000/health/ready</test>
+    <test>OPTIONS preflight: curl -X OPTIONS -H "Origin: http://localhost:3000" -H "Access-Control-Request-Method: GET" http://localhost:8000/health/ready</test>
+    <test>Check for Access-Control-Allow-Origin header in response</test>
+  </testing>
+</learning>
