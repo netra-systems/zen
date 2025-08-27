@@ -3,7 +3,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useMCPTools } from '@/hooks/useMCPTools';
 import { Bot, Zap, Activity, Shield, Database, Cpu, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
+import ConnectionStatusIndicator from './ConnectionStatusIndicator';
 import { MCPServerStatus } from './MCPServerStatus';
 
 export const ChatHeader: React.FC = () => {
