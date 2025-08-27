@@ -11,7 +11,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from netra_backend.app.auth_integration import get_current_user, require_admin
 from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.db.client import db_client_manager
+# Use canonical DatabaseManager instead of deprecated client manager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.llm.client import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.circuit_helpers import (
@@ -142,7 +143,7 @@ async def get_llm_health(current_user: Dict = Depends(get_current_user)) -> Dict
 
 async def _get_database_health_data() -> tuple[Dict, Dict[str, Any]]:
     """Get database health checks and circuits."""
-    db_health = await db_client_manager.health_check_all()
+    db_health = await DatabaseManager.health_check_all()
     all_status = await delegate_circuit_status()
     return db_health, filter_database_circuits(all_status)
 

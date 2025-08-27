@@ -24,7 +24,7 @@ async def handle_resources_listing(
 ) -> Dict[str, Any]:
     """List available MCP resources"""
     try:
-        return build_resources_response(mcp_service)
+        return await build_resources_response(mcp_service)
     except Exception as e:
         return handle_list_error(e, "resources")
 
@@ -43,16 +43,16 @@ async def handle_resource_read(
         return handle_resource_error(e)
 
 
-def build_resources_response(mcp_service: MCPService) -> Dict[str, Any]:
+async def build_resources_response(mcp_service: MCPService) -> Dict[str, Any]:
     """Build resources list response"""
     app = mcp_service.get_fastmcp_app()
-    resources = extract_resources_from_app(app)
+    resources = await extract_resources_from_app(app)
     return build_list_response(resources, "resources")
 
 
 async def read_mcp_resource(request: MCPResourceReadRequest, mcp_service: MCPService) -> Dict[str, Any]:
     """Read MCP resource by URI"""
     server = mcp_service.get_mcp_server()
-    resource_func = get_resource_function(server, request.uri)
+    resource_func = await get_resource_function(server, request.uri)
     result = await resource_func()
     return build_resource_result(request.uri, result)

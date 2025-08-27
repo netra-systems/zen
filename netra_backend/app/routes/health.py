@@ -22,7 +22,9 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
 from netra_backend.app.services.schema_validation_service import SchemaValidationService
 
-router = APIRouter()
+router = APIRouter(
+    redirect_slashes=False  # Disable automatic trailing slash redirects
+)
 logger = central_logger.get_logger(__name__)
 
 # Initialize unified health interface

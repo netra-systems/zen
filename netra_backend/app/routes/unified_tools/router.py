@@ -37,7 +37,9 @@ from netra_backend.app.schemas.unified_tools import (
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.app.services.unified_tool_registry import UnifiedToolRegistry
 
-router = APIRouter()
+router = APIRouter(
+    redirect_slashes=False  # Disable automatic trailing slash redirects
+)
 
 # Initialize services (in production, these would be dependency injected)
 redis_client = None
@@ -73,7 +75,8 @@ async def execute_list_tools_logic(current_user: User, category: Optional[str]) 
     return await process_list_tools_request(current_user, category)
 
 
-@router.get("/", summary="List available tools")
+@router.get("", summary="List available tools")
+@router.get("/", summary="List available tools", include_in_schema=False)
 async def list_tools(
     db: DbDep, category: Optional[str] = Query(None, description="Filter by category"),
     current_user: User = Depends(get_current_user)

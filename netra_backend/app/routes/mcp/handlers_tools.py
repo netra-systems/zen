@@ -33,7 +33,7 @@ async def handle_tools_listing(
 ) -> Dict[str, Any]:
     """List available MCP tools"""
     try:
-        return build_tools_response(mcp_service, category)
+        return await build_tools_response(mcp_service, category)
     except Exception as e:
         return handle_list_error(e, "tools")
 
@@ -54,10 +54,10 @@ async def handle_tool_call(
         await handle_tool_execution_error(request, db, mcp_service, current_user, e, start_time)
 
 
-def build_tools_response(mcp_service: MCPService, category: Optional[str]) -> Dict[str, Any]:
+async def build_tools_response(mcp_service: MCPService, category: Optional[str]) -> Dict[str, Any]:
     """Build tools list response"""
     app = mcp_service.get_fastmcp_app()
-    tools = extract_tools_from_app(app)
+    tools = await extract_tools_from_app(app)
     if category:
         tools = filter_by_category(tools, category)
     return build_list_response(tools, "tools")
@@ -66,7 +66,7 @@ def build_tools_response(mcp_service: MCPService, category: Optional[str]) -> Di
 async def execute_tool(request, mcp_service):
     """Execute MCP tool with provided arguments"""
     server = mcp_service.get_mcp_server()
-    tool_func = get_tool_function(server, request.tool_name)
+    tool_func = await get_tool_function(server, request.tool_name)
     return await tool_func(**request.arguments)
 
 

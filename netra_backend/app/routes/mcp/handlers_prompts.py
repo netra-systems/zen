@@ -26,7 +26,7 @@ async def handle_prompts_listing(
 ) -> Dict[str, Any]:
     """List available MCP prompts"""
     try:
-        return build_prompts_response(mcp_service, category)
+        return await build_prompts_response(mcp_service, category)
     except Exception as e:
         return handle_list_error(e, "prompts")
 
@@ -45,10 +45,10 @@ async def handle_prompt_get(
         return handle_prompt_error(e)
 
 
-def build_prompts_response(mcp_service: MCPService, category: Optional[str]) -> Dict[str, Any]:
+async def build_prompts_response(mcp_service: MCPService, category: Optional[str]) -> Dict[str, Any]:
     """Build prompts list response"""
     app = mcp_service.get_fastmcp_app()
-    prompts = extract_prompts_from_app(app)
+    prompts = await extract_prompts_from_app(app)
     if category:
         prompts = filter_by_category(prompts, category)
     return build_list_response(prompts, "prompts")
@@ -57,6 +57,6 @@ def build_prompts_response(mcp_service: MCPService, category: Optional[str]) -> 
 async def get_mcp_prompt(request: MCPPromptGetRequest, mcp_service: MCPService) -> Dict[str, Any]:
     """Get MCP prompt by name"""
     server = mcp_service.get_mcp_server()
-    prompt_func = get_prompt_function(server, request.prompt_name)
+    prompt_func = await get_prompt_function(server, request.prompt_name)
     result = await prompt_func(**request.arguments)
     return build_prompt_result(request.prompt_name, result)

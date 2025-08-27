@@ -99,19 +99,23 @@ class SecretManager:
     
     def _get_google_client_id_mapping(self) -> Dict[str, Any]:
         """Get Google Client ID mapping."""
+        # OAuth is optional for development environments
+        is_required = self._environment in ["production", "staging"]
         return {
             "target_models": ["google_cloud", "oauth_config"],
             "target_field": "client_id", 
-            "required": True,
+            "required": is_required,
             "rotation_enabled": False
         }
     
     def _get_google_client_secret_mapping(self) -> Dict[str, Any]:
         """Get Google Client Secret mapping."""
+        # OAuth is optional for development environments
+        is_required = self._environment in ["production", "staging"]
         return {
             "target_models": ["google_cloud", "oauth_config"],
             "target_field": "client_secret",
-            "required": True,
+            "required": is_required,
             "rotation_enabled": True
         }
     
