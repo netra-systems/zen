@@ -248,6 +248,14 @@
             <critical-takeaway>shared/cors_config.py is the SINGLE source of truth for all services' CORS configuration.</critical-takeaway>
         </category>
         
+        <category name="Agent Error Handler Unified Integration" path="SPEC/learnings/agent_error_handler_unified.xml" keywords="AgentErrorHandler, handle_execution_error, unified_error_handler, backward compatibility, error handling, agent execution, reliability failure, missing attribute">
+            <critical-takeaway>AgentErrorHandler convenience class MUST expose handle_execution_error method for backward compatibility.</critical-takeaway>
+            <critical-takeaway>handle_execution_error can be an alias to handle_error but MUST exist for agent execution.</critical-takeaway>
+            <critical-takeaway>Error handlers MUST provide get_health_status() method for monitoring integration.</critical-takeaway>
+            <critical-takeaway>Always verify error handler methods exist before runtime to catch missing methods early.</critical-takeaway>
+            <critical-takeaway>Unified error handlers must maintain ALL methods from original implementations for backward compatibility.</critical-takeaway>
+        </category>
+        
         <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
             <critical-takeaway>RESOLVED 2025-08-25: Fixed critical SSOT violations in auth_service - removed 365+ lines of duplicate code.</critical-takeaway>
             <critical-takeaway>AuthDatabaseManager is the canonical database connection implementation - all operations delegate to it.</critical-takeaway>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning status="questionable" date="2025-08-27" confidence="medium">
+    <title>Triage Result Wrapped Response Handling</title>
+    
+    <problem>
+        <description>
+            TriageResult validation errors occur when LLM returns plain text instead of JSON.
+            The ensure_agent_response_is_json function wraps non-JSON responses with metadata
+            fields (type, content, etc.) that don't match the TriageResult model schema.
+        </description>
+        <error_messages>
+            - "Input should be a valid string [type=string_type, input_value={'type': 'text_response',..."
+            - "Input should be 'critical', 'high', 'medium' or 'low' [type=enum, input_value={'type': 'text_response',..."
+        </error_messages>
+    </problem>
+    
+    <solution status="questionable">
+        <description>
+            Modified result_processor.py to detect wrapped responses before validation.
+            When detected, returns a fallback TriageResult instead of attempting to
+            validate the wrapped structure against the model.
+        </description>
+        <implementation>
+            Added _is_wrapped_response() method to check for wrapper types:
+            - text_response
+            - command_result  
+            - malformed_json
+            - unknown_response
+            - list_response
+            
+            Added _apply_selective_json_fixes() to avoid re-wrapping valid strings
+            during JSON fix processing.
+        </implementation>
+    </solution>
+    
+    <questionable_aspects>
+        <aspect>
+            <description>
+                The fix addresses symptoms rather than root cause. The real issue may be
+                why the LLM is returning plain text instead of structured JSON in the first place.
+            </description>
+        </aspect>
+        <aspect>
+            <description>
+                The comprehensive_json_fix function's recursive string wrapping behavior
+                might be intentional for other use cases. Our selective fix approach could
+                break other parts of the system that depend on this behavior.
+            </description>
+        </aspect>
+        <aspect>
+            <description>
+                Fallback to "unknown" category with 0.5 confidence might not be the best
+                default behavior. Could potentially retry with better prompting or use
+                a more sophisticated fallback strategy.
+            </description>
+        </aspect>
+        <aspect>
+            <description>
+                The wrapped response detection relies on specific type field values.
+                If ensure_agent_response_is_json changes its wrapping format, this
+                detection will fail silently.
+            </description>
+        </aspect>
+    </questionable_aspects>
+    
+    <alternative_approaches>
+        <approach>
+            Fix the LLM prompting to ensure structured responses more reliably
+        </approach>
+        <approach>
+            Modify ensure_agent_response_is_json to be context-aware and not wrap
+            responses when called from triage processing
+        </approach>
+        <approach>
+            Implement a more sophisticated response parser that can extract
+            meaningful data from plain text responses
+        </approach>
+    </alternative_approaches>
+    
+    <testing_concerns>
+        <concern>
+            Only tested with mock data, not with actual LLM responses in production
+        </concern>
+        <concern>
+            Backend was crashing during testing, couldn't verify end-to-end behavior
+        </concern>
+    </testing_concerns>
+    
+    <files_modified>
+        <file>netra_backend/app/agents/triage_sub_agent/result_processor.py</file>
+    </files_modified>
+    
+    <follow_up_required>
+        <item priority="high">
+            Investigate why LLM returns plain text instead of JSON
+        </item>
+        <item priority="medium">
+            Test with real LLM responses in staging environment
+        </item>
+        <item priority="medium">
+            Consider implementing retry logic with improved prompting
+        </item>
+        <item priority="low">
+            Review comprehensive_json_fix usage across the codebase
+        </item>
+    </follow_up_required>
+</learning>
