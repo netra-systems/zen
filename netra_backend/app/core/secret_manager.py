@@ -27,20 +27,25 @@ class SecretManager:
     
     def _initialize_project_id(self) -> str:
         """Initialize project ID based on environment."""
-        environment = getattr(self._config, 'environment', 'development').lower()
+        # Check environment variable directly for proper test support
+        environment = os.getenv('ENVIRONMENT', getattr(self._config, 'environment', 'development')).lower()
         if environment == "staging":
             return self._get_staging_project_id()
         return self._get_production_project_id()
     
     def _get_staging_project_id(self) -> str:
         """Get staging project ID with fallbacks."""
-        return getattr(self._config, 'gcp_project_id_numerical_staging', 
-                      getattr(self._config, 'secret_manager_project_id', "701982941522"))
+        # Check environment variable first, then config attributes, then default
+        return os.getenv('GCP_PROJECT_ID_NUMERICAL_STAGING', 
+                         getattr(self._config, 'gcp_project_id_numerical_staging', 
+                                getattr(self._config, 'secret_manager_project_id', "701982941522")))
     
     def _get_production_project_id(self) -> str:
         """Get production project ID with fallbacks."""
-        return getattr(self._config, 'gcp_project_id_numerical_staging', 
-                      getattr(self._config, 'secret_manager_project_id', "304612253870"))
+        # Check environment variable first, then config attributes, then default
+        return os.getenv('GCP_PROJECT_ID_NUMERICAL_PRODUCTION', 
+                         getattr(self._config, 'gcp_project_id_numerical_production', 
+                                getattr(self._config, 'secret_manager_project_id', "304612253870")))
     
     def _log_initialization_status(self) -> None:
         """Log Secret Manager initialization status."""

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 E2E_TEST_CONFIG = {
     "websocket_url": os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
     "backend_url": os.getenv("E2E_BACKEND_URL", "http://localhost:8000"),
-    "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+    "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
     "skip_real_services": os.getenv("SKIP_REAL_SERVICES", "true").lower() == "true",
     "test_mode": os.getenv("RAPID_MESSAGE_TEST_MODE", "mock")
 }

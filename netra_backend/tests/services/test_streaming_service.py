@@ -194,3 +194,118 @@ class TestStreamingService:
         service2 = get_streaming_service()
         
         assert service1 is service2
+    
+    @pytest.mark.asyncio
+    async def test_stream_buffer_performance_and_memory_management(self):
+        """Test stream buffer performance under load and memory efficiency."""
+        import asyncio
+        import gc
+        import time
+        from netra_backend.app.services.streaming_service import StreamingService, StreamChunk
+        
+        # Create service with smaller buffer for faster testing
+        service = StreamingService(buffer_size=10, chunk_delay_ms=1)
+        
+        # Test buffer fill performance
+        start_time = time.time()
+        test_chunks = []
+        
+        # Create stream chunks
+        for i in range(25):  # 2.5x buffer size to test multiple buffer flushes
+            chunk = StreamChunk(
+                type="performance_test",
+                data={"sequence": i, "payload": f"test_data_{i}" * 10},  # Some bulk
+                metadata={"timestamp": time.time()}
+            )
+            test_chunks.append(chunk)
+        
+        # Create async generator from list
+        async def async_chunks_generator():
+            for chunk in test_chunks:
+                yield chunk
+        
+        # Process chunks through buffer
+        buffered_chunks = []
+        async for buffer in service.buffer_stream(async_chunks_generator()):
+            buffered_chunks.extend(buffer)
+            
+        chunk_processing_time = time.time() - start_time
+        
+        # Verify buffer performance
+        assert len(buffered_chunks) == 25, f"Expected 25 chunks, got {len(buffered_chunks)}"
+        assert chunk_processing_time < 0.5, f"Buffer processing took {chunk_processing_time}s, should be < 0.5s"
+        
+        # Test buffer memory efficiency - no memory leaks
+        initial_objects = len(gc.get_objects())
+        
+        # Process large stream to test memory management
+        async def large_chunks_generator():
+            for i in range(100):
+                chunk = StreamChunk(
+                    type="memory_test",
+                    data={"large_payload": "x" * 1000, "id": i},
+                    metadata={"memory_test": True}
+                )
+                yield chunk
+        
+        # Process and immediately discard
+        processed_buffers = 0
+        async for buffer in service.buffer_stream(large_chunks_generator()):
+            processed_buffers += 1
+            # Explicitly delete buffer to free memory
+            del buffer
+        
+        # Force garbage collection
+        gc.collect()
+        
+        final_objects = len(gc.get_objects())
+        memory_growth = final_objects - initial_objects
+        
+        # Verify efficient processing
+        assert processed_buffers == 10, f"Expected 10 buffers (100/10), got {processed_buffers}"
+        assert memory_growth < 50, f"Memory growth {memory_growth} objects, should be minimal"
+        
+        # Test buffer size configuration impact
+        small_buffer_service = StreamingService(buffer_size=5)
+        large_buffer_service = StreamingService(buffer_size=20)
+        
+        async def test_data_generator():
+            for i in range(20):
+                yield StreamChunk("test", f"data_{i}")
+        
+        # Count buffers with different buffer sizes
+        small_buffer_count = 0
+        async for buffer in small_buffer_service.buffer_stream(test_data_generator()):
+            small_buffer_count += 1
+        
+        large_buffer_count = 0
+        async for buffer in large_buffer_service.buffer_stream(test_data_generator()):
+            large_buffer_count += 1
+        
+        # Smaller buffers should create more buffer flushes
+        assert small_buffer_count == 4, f"Expected 4 small buffers, got {small_buffer_count}"
+        assert large_buffer_count == 1, f"Expected 1 large buffer, got {large_buffer_count}"
+        
+        # Test buffer performance with concurrent streams
+        async def process_concurrent_stream(stream_id: int, chunk_count: int):
+            async def concurrent_stream_generator():
+                for i in range(chunk_count):
+                    yield StreamChunk(f"stream_{stream_id}", f"data_{i}")
+            
+            buffer_count = 0
+            async for buffer in service.buffer_stream(concurrent_stream_generator()):
+                buffer_count += 1
+            return buffer_count
+        
+        # Run multiple streams concurrently
+        concurrent_tasks = [
+            process_concurrent_stream(i, 15) for i in range(3)
+        ]
+        
+        concurrent_start = time.time()
+        results = await asyncio.gather(*concurrent_tasks)
+        concurrent_time = time.time() - concurrent_start
+        
+        # Verify concurrent processing
+        assert all(r == 2 for r in results), f"Expected 2 buffers per stream, got {results}"
+        assert concurrent_time < 1.0, f"Concurrent processing took {concurrent_time}s, should be < 1.0s"

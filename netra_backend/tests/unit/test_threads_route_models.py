@@ -76,3 +76,31 @@ class TestPydanticModels:
         assert response.updated_at == None
         assert response.metadata == None
         assert response.message_count == 0
+    
+    def test_thread_response_validation_edge_cases(self):
+        """Test ThreadResponse model validation with edge case values"""
+        # Test with empty metadata
+        response = ThreadResponse(
+            id="thread_edge", 
+            created_at=0, 
+            updated_at=0, 
+            metadata={}
+        )
+        assert response.metadata == {}
+        
+        # Test with maximum message count
+        response_high = ThreadResponse(
+            id="thread_high", 
+            created_at=1234567890, 
+            message_count=999999
+        )
+        assert response_high.message_count == 999999
+        
+        # Test with long title
+        long_title = "A" * 500
+        response_long = ThreadResponse(
+            id="thread_long", 
+            created_at=1234567890, 
+            title=long_title
+        )
+        assert response_long.title == long_title

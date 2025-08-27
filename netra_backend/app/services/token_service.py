@@ -535,6 +535,94 @@ class TokenService:
         
         # Create and return token
         return jwt.encode(payload, secret, algorithm='HS256')
+    
+    async def rotate_service_token(self, service_id: str, old_token_version: int, 
+                                   new_token_version: int, grace_period_seconds: int = 30):
+        """Rotate a service token with grace period.
+        
+        Args:
+            service_id: Service identifier
+            old_token_version: Version of token being replaced
+            new_token_version: Version of new token
+            grace_period_seconds: Grace period for old token validity
+        """
+        try:
+            redis_client = await self._get_redis_client()
+            if redis_client:
+                # Store rotation info in Redis
+                rotation_key = f"service_rotation:{service_id}"
+                rotation_data = {
+                    'old_version': old_token_version,
+                    'new_version': new_token_version,
+                    'rotation_time': int(time.time()),
+                    'grace_period_ends': int(time.time()) + grace_period_seconds
+                }
+                await redis_client.setex(rotation_key, grace_period_seconds + 60, json.dumps(rotation_data))
+                
+                logger.info(f"Service token rotation registered for {service_id}: {old_token_version} -> {new_token_version}")
+            
+            # Store in memory fallback
+            if not hasattr(self, '_service_rotations'):
+                self._service_rotations = {}
+            self._service_rotations[service_id] = {
+                'old_version': old_token_version,
+                'new_version': new_token_version,
+                'grace_period_ends': int(time.time()) + grace_period_seconds
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to register service token rotation: {e}")
+    
+    async def is_service_token_version_valid(self, service_id: str, token_version: int) -> bool:
+        """Check if a service token version is still valid.
+        
+        Args:
+            service_id: Service identifier
+            token_version: Token version to check
+            
+        Returns:
+            True if token version is valid
+        """
+        try:
+            redis_client = await self._get_redis_client()
+            if redis_client:
+                rotation_key = f"service_rotation:{service_id}"
+                rotation_data = await redis_client.get(rotation_key)
+                
+                if rotation_data:
+                    data = json.loads(rotation_data)
+                    current_time = int(time.time())
+                    
+                    # Check if it's the current version
+                    if token_version == data.get('new_version'):
+                        return True
+                    
+                    # Check if it's an old version within grace period
+                    if token_version == data.get('old_version'):
+                        return current_time < data.get('grace_period_ends', 0)
+                    
+                    # Any other version is invalid
+                    return False
+            
+            # Check memory fallback
+            if hasattr(self, '_service_rotations') and service_id in self._service_rotations:
+                data = self._service_rotations[service_id]
+                current_time = int(time.time())
+                
+                if token_version == data.get('new_version'):
+                    return True
+                
+                if token_version == data.get('old_version'):
+                    return current_time < data.get('grace_period_ends', 0)
+                
+                return False
+            
+            # No rotation data means all versions are valid (backward compatibility)
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to check service token version validity: {e}")
+            return True  # Fail open for availability
 
 
 # Singleton instance

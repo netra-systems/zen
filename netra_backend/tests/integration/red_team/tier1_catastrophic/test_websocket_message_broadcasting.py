@@ -730,7 +730,7 @@ class TestWebSocketMessageBroadcasting:
         
         try:
             # Establish concurrent connections
-            async def connect_client(token: str, client_id: int) -> Optional[websockets.WebSocketServerProtocol]:
+            async def connect_client(token: str, client_id: int) -> Optional[websockets.legacy.server.WebSocketServerProtocol]:
                 try:
                     connect_start = time.time()
                     ws = await websockets.connect(

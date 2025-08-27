@@ -12,7 +12,7 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch
 
-from netra_backend.app.db.connection_pool_manager import ConnectionPoolManager
+# Using canonical DatabaseManager instead of removed ConnectionPoolManager
 from netra_backend.app.db.postgres_core import Database
 
 

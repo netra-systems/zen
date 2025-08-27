@@ -55,7 +55,7 @@ class WebSocketTransport(MCPTransport):
 
     def _init_state_variables(self) -> None:
         """Initialize state management variables."""
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[websockets.legacy.server.WebSocketServerProtocol] = None
         self._pending_requests: Dict[str, asyncio.Future] = {}
         self._message_handlers: Dict[str, Callable] = {}
         self._receiver_task: Optional[asyncio.Task] = None

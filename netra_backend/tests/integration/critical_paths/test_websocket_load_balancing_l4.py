@@ -250,7 +250,7 @@ class WebSocketLoadBalancingL4TestSuite:
                 "connection_time": time.time() - start_time
             }
     
-    async def _identify_assigned_server(self, websocket: websockets.WebSocketServerProtocol) -> str:
+    async def _identify_assigned_server(self, websocket: websockets.legacy.server.WebSocketServerProtocol) -> str:
         """Identify which server is handling the connection."""
         try:
             # Send identification request

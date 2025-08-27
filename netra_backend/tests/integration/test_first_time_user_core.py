@@ -72,8 +72,9 @@ class TestFirstTimeUserCore:
         
         demo_result = await llm_system.demonstrate_optimization("sample_workload")
         
-        user.demo_completed = True
-        user.first_value_seen_at = datetime.now(timezone.utc)
+        # Note: demo_completed and first_value_seen_at would be tracked in actual demo system
+        # user.demo_completed = True  # Field doesn't exist on User model
+        # user.first_value_seen_at = datetime.now(timezone.utc)  # Field doesn't exist on User model
         await setup["session"].commit()
         
         return {"user": user, "demo_result": demo_result, "impressed": True}
@@ -111,8 +112,9 @@ class TestFirstTimeUserCore:
         validation = await payment_system.validate_payment_method("test_card_token")
         subscription = await payment_system.setup_subscription(user.id, "growth")
         
-        user.payment_ready = True
-        user.subscription_id = subscription["subscription_id"]
+        # Note: payment_ready and subscription_id would be tracked in actual billing system
+        # user.payment_ready = True  # Field doesn't exist on User model
+        # user.subscription_id = subscription["subscription_id"]  # Field doesn't exist on User model
         await setup["session"].commit()
         
         return {"user": user, "validation": validation, "subscription": subscription}
@@ -148,7 +150,7 @@ class TestFirstTimeUserCore:
 
     async def _create_optimization_ready_user(self, setup):
         """Create user ready for optimization"""
-        user = User(id=str(uuid.uuid4()), email="optimizer@company.com", plan_tier="free", optimization_ready=True)
+        user = User(id=str(uuid.uuid4()), email="optimizer@company.com", plan_tier="free")
         setup["session"].add(user)
         await setup["session"].commit()
         return user
@@ -159,8 +161,9 @@ class TestFirstTimeUserCore:
         
         optimization_result = await llm_system.calculate_cost_savings("user_workload")
         
-        user.first_optimization_completed = True
-        user.total_savings_identified = optimization_result["total_savings"]
+        # Note: optimization tracking would be stored in separate optimization tables
+        # user.first_optimization_completed = True  # Field doesn't exist on User model
+        # user.total_savings_identified = optimization_result["total_savings"]  # Field doesn't exist on User model
         await setup["session"].commit()
         
         return {"user": user, "optimization": optimization_result, "success": True}

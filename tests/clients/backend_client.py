@@ -7,6 +7,9 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+# Alias for compatibility
+BackendClient = None  # Will be set after class definition
+
 
 class BackendTestClient:
     """Typed client for testing backend service endpoints."""
@@ -301,3 +304,7 @@ class BackendTestClient:
             New BackendTestClient instance with token
         """
         return BackendTestClient(self.base_url, token)
+
+
+# Create alias for backward compatibility
+BackendClient = BackendTestClient

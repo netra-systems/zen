@@ -204,7 +204,15 @@ class LogHandlerConfig:
     
     def add_console_handler(self, should_log_func):
         """Add console handler with appropriate formatting."""
-        if self.enable_json:
+        # During testing, use safer console handling to prevent I/O errors
+        from netra_backend.app.core.isolated_environment import get_env
+        is_testing = get_env().get('TESTING') == '1' or get_env().get('ENVIRONMENT') == 'testing'
+        
+        if is_testing:
+            # During testing, completely skip console handlers to prevent I/O errors
+            # Tests should not rely on console output anyway
+            pass
+        elif self.enable_json:
             self._add_json_console_handler(should_log_func)
         else:
             self._add_readable_console_handler(should_log_func)
@@ -219,7 +227,8 @@ class LogHandlerConfig:
             filter=should_log_func,
             enqueue=True,
             backtrace=True,
-            diagnose=False
+            diagnose=False,
+            catch=True  # Catch exceptions to prevent I/O errors from breaking tests
         )
     
     def _add_readable_console_handler(self, should_log_func):
@@ -232,7 +241,8 @@ class LogHandlerConfig:
             colorize=True,  # Enable color processing
             enqueue=True,
             backtrace=True,
-            diagnose=False
+            diagnose=False,
+            catch=True  # Catch exceptions to prevent I/O errors from breaking tests
         )
     
     def add_file_handler(self, file_path: str, should_log_func):
@@ -252,7 +262,8 @@ class LogHandlerConfig:
                 compression="zip",
                 enqueue=True,
                 backtrace=True,
-                diagnose=False
+                diagnose=False,
+                catch=True  # Catch exceptions to prevent I/O errors from breaking tests
             )
         else:
             logger.add(
@@ -265,5 +276,6 @@ class LogHandlerConfig:
                 compression="zip",
                 enqueue=True,
                 backtrace=True,
-                diagnose=False
+                diagnose=False,
+                catch=True  # Catch exceptions to prevent I/O errors from breaking tests
             )

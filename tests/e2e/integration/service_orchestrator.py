@@ -145,8 +145,8 @@ class E2EServiceOrchestrator:
         # Default fallback URLs
         default_urls = {
             "backend": "http://localhost:8000",
-            "auth": "http://localhost:8001",
-            "auth_service": "http://localhost:8001",
+            "auth": "http://localhost:8081",
+            "auth_service": "http://localhost:8081",
             "frontend": "http://localhost:3000"
         }
         return default_urls.get(service_name, "http://localhost:8000")

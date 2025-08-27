@@ -111,6 +111,11 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
     env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test_framework_base")
     env.set("CLICKHOUSE_ENABLED", "false", "test_framework_base")
     env.set("TEST_DISABLE_REDIS", "true", "test_framework_base")
+    
+    # CRITICAL: Also set TEST_DISABLE_REDIS in real os.environ so auth_service can see it
+    # This ensures cross-service test configuration consistency
+    import os
+    os.environ["TEST_DISABLE_REDIS"] = "true"
 
 # =============================================================================
 # COMMON FIXTURES
@@ -381,7 +386,7 @@ def e2e_test_config():
     return {
         "websocket_url": os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
         "backend_url": os.getenv("E2E_BACKEND_URL", "http://localhost:8000"),
-        "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+        "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
         "skip_real_services": os.getenv("SKIP_REAL_SERVICES", "true").lower() == "true",
         "test_mode": os.getenv("HIGH_VOLUME_TEST_MODE", "mock"),
         "timeout": int(os.getenv("E2E_TEST_TIMEOUT", "300")),

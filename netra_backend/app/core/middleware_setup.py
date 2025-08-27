@@ -12,7 +12,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse, Response
 
 from netra_backend.app.core.configuration import get_configuration
-from shared.cors_config import get_fastapi_cors_config, log_cors_security_event
+from shared.cors_config_builder import CORSConfigurationBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -24,12 +24,15 @@ logger = logging.getLogger(__name__)
 
 
 def setup_cors_middleware(app: FastAPI) -> None:
-    """Configure CORS middleware using unified configuration."""
+    """Configure CORS middleware using CORSConfigurationBuilder."""
     config = get_configuration()
-    cors_config = get_fastapi_cors_config(config.environment)
+    
+    # Initialize CORS configuration builder
+    cors = CORSConfigurationBuilder()
+    cors_config = cors.fastapi.get_middleware_config()
     
     # Debug logging to understand CORS configuration
-    logger.info(f"CORS Configuration for {config.environment}:")
+    logger.info(f"CORS Configuration for {cors.environment}:")
     logger.info(f"  Origins count: {len(cors_config.get('allow_origins', []))}")
     logger.info(f"  Allow credentials: {cors_config.get('allow_credentials')}")
     logger.info(f"  First 3 origins: {cors_config.get('allow_origins', [])[:3]}")
@@ -40,7 +43,7 @@ def setup_cors_middleware(app: FastAPI) -> None:
         CORSMiddleware, 
         **cors_config
     )
-    logger.info(f"CORS middleware configured for environment: {config.environment}")
+    logger.info(f"CORS middleware configured for environment: {cors.environment}")
 
 
 # WebSocketAwareCORSMiddleware removed - using standard CORSMiddleware
@@ -73,11 +76,13 @@ def process_cors_if_needed(request: Request, response: Any) -> None:
             # Log CORS redirect handling for security monitoring
             config = get_configuration()
             request_id = request.headers.get("x-request-id", "unknown")
-            log_cors_security_event(
+            
+            # Use CORSConfigurationBuilder for security event logging
+            cors = CORSConfigurationBuilder()
+            cors.security.log_security_event(
                 event_type="cors_redirect_handling",
                 origin=origin,
                 path=request.url.path,
-                environment=config.environment,
                 request_id=request_id
             )
             add_cors_headers_to_response(response, origin)

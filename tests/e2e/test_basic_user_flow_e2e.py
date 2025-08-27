@@ -67,7 +67,7 @@ class BasicUserFlowE2ETester:
         self.test_user_email = f"test-user-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         self.test_user_id: Optional[str] = None
         self.jwt_token: Optional[str] = None
-        self.websocket_connection: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket_connection: Optional[websockets.legacy.server.WebSocketServerProtocol] = None
     
     async def execute_complete_user_flow(self) -> Dict[str, Any]:
         """Execute complete signup → login → chat flow with REAL services."""

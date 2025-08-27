@@ -38,7 +38,7 @@ class BackupService:
     
     async def restore_backup(self, *args, **kwargs):
         return {"status": "restored"}
-from netra_backend.app.core.db.database_manager import (
+from netra_backend.app.db.database_manager import (
     DatabaseManager as ConnectionManager,
 )
 

@@ -43,7 +43,7 @@ class WebSocketE2EClient:
     """E2E WebSocket test client with auth and message handling."""
     
     def __init__(self):
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[websockets.legacy.server.WebSocketServerProtocol] = None
         self.messages: List[Dict] = []
         self.connected = False
         self.jwt_helper = JWTTestHelper(secret_key="test_secret_key")

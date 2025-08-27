@@ -14,11 +14,10 @@ import pytest
 from typing import Dict, Any
 import httpx
 
-from test_framework.e2e_base import E2ETestBase
-from test_framework.fixtures import create_test_user_with_auth
+from test_framework.base_e2e_test import BaseE2ETest
 
 
-class TestToolManagementE2E(E2ETestBase):
+class TestToolManagementE2E(BaseE2ETest):
     """End-to-end tests for tool management workflow"""
     
     @pytest.fixture(autouse=True)

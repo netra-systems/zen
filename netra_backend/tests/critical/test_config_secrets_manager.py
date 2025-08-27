@@ -77,7 +77,7 @@ class TestSecretLoadingCore:
         """Test secrets successfully loaded from Google Cloud Secret Manager"""
         # Arrange - Mock Google Cloud Secret Manager
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+        with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
@@ -92,7 +92,8 @@ class TestSecretLoadingCore:
             mock_client_instance.access_secret_version.return_value = mock_response
             
             # Act - Load secrets
-            with patch.object(manager, '_get_secret_names', return_value=['test-secret']):
+            with patch('netra_backend.app.core.secret_manager_helpers.get_secret_names_list', return_value=['test-secret']), \
+                 patch.object(manager, '_should_load_from_secret_manager', return_value=True):
                 secrets = manager.load_secrets()
                 
         # Assert - Secrets loaded successfully
@@ -105,7 +106,7 @@ class TestSecretLoadingCore:
         # Arrange - Mock GCP failure and env vars
         with patch.dict(os.environ, {"JWT_SECRET_KEY": "env_fallback_secret"}):
             # Mock: Component isolation for testing without external dependencies
-            with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+            with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
                 mock_client.side_effect = Exception("GCP Connection Failed")
                 
                 manager = SecretManager()
@@ -122,7 +123,7 @@ class TestSecretLoadingCore:
         """Test empty secret response handled without failure"""
         # Arrange - Mock empty secret response
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+        with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
@@ -142,7 +143,7 @@ class TestSecretLoadingCore:
         """Test secret decoding errors handled without service failure"""
         # Arrange - Mock decoding failure
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+        with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
@@ -315,7 +316,7 @@ class TestSecretManagerResilience:
         """Test secret manager resilience against network timeouts"""
         # Arrange - Mock network timeout
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+        with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             mock_client.side_effect = TimeoutError("Network timeout")
             
             manager = SecretManager()
@@ -333,7 +334,7 @@ class TestSecretManagerResilience:
         """Test secret manager resilience against authentication failures"""
         # Arrange - Mock authentication failure
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+        with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             mock_client.side_effect = Exception("Authentication failed")
             
             manager = SecretManager()
@@ -348,7 +349,7 @@ class TestSecretManagerResilience:
         """Test partial secret loading doesn't halt entire operation"""
         # Arrange - Mock partial success scenario
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+        with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
@@ -390,7 +391,7 @@ class TestSecretManagerResilience:
             return mock_response
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+        with patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance

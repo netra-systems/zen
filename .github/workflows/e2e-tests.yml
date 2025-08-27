@@ -237,7 +237,7 @@ jobs:
           echo "TEST_DATABASE_URL=${POSTGRES_URL}" >> $GITHUB_ENV
           
           # Service URLs
-          echo "AUTH_SERVICE_URL=http://localhost:8001" >> $GITHUB_ENV
+          echo "AUTH_SERVICE_URL=http://localhost:8081" >> $GITHUB_ENV
           echo "BACKEND_SERVICE_URL=http://localhost:8000" >> $GITHUB_ENV
           echo "FRONTEND_URL=http://localhost:3000" >> $GITHUB_ENV
           

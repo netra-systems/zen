@@ -158,22 +158,14 @@ class BasicHealthCheckTester:
         }
 
 
-@env("test", "dev", "staging")
-@env_requires(
-    services=["network_connectivity"],
-    features=["http_client"],
-    data=[]
-)
-@env_safe(
-    operations=["read_only", "health_check"],
-    impact="none",
-    rollback=True
-)
 class TestBasicHealthChecksE2E:
     """Basic E2E health check tests that work without services."""
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
+    @env("test", "dev", "staging")
+    @env_requires(services=["network_connectivity"], features=["http_client"], data=[])
+    @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_health_check_infrastructure_works(self, health_check_config):
         """Test that health check infrastructure itself works."""
         tester = BasicHealthCheckTester(health_check_config)
@@ -193,6 +185,9 @@ class TestBasicHealthChecksE2E:
     
     @pytest.mark.asyncio 
     @pytest.mark.e2e
+    @env("test", "dev", "staging")
+    @env_requires(services=["network_connectivity"], features=["http_client"], data=[])
+    @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_service_connectivity_attempt(self, health_check_config):
         """Test service connectivity - passes regardless of service status."""
         tester = BasicHealthCheckTester(health_check_config)
@@ -226,6 +221,9 @@ class TestBasicHealthChecksE2E:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
+    @env("test", "dev", "staging")
+    @env_requires(services=["network_connectivity"], features=["http_client"], data=[])
+    @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_auth_service_health_if_running(self, health_check_config):
         """Test auth service health if it's running."""
         tester = BasicHealthCheckTester(health_check_config)
@@ -257,7 +255,10 @@ class TestBasicHealthChecksE2E:
             # This is OK - service might not be running
     
     @pytest.mark.asyncio
-    @pytest.mark.e2e 
+    @pytest.mark.e2e
+    @env("test", "dev", "staging")
+    @env_requires(services=["network_connectivity"], features=["http_client"], data=[])
+    @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_backend_service_health_if_running(self, health_check_config):
         """Test backend service health if it's running."""
         tester = BasicHealthCheckTester(health_check_config)
@@ -289,6 +290,9 @@ class TestBasicHealthChecksE2E:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
+    @env("test", "dev", "staging")
+    @env_requires(services=["network_connectivity"], features=["http_client"], data=[])
+    @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_e2e_test_framework_basic_functionality(self, health_check_config):
         """Test basic E2E test framework functionality."""
         # Test async functionality

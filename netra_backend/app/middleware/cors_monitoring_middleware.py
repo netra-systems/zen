@@ -25,7 +25,7 @@ from starlette.responses import Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from prometheus_client import Counter, Histogram, Gauge
 
-from shared.cors_config import is_origin_allowed, get_cors_origins
+from shared.cors_config_builder import CORSConfigurationBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,11 @@ class CORSMonitoringMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.service_name = service_name
         self.environment = environment
-        self.allowed_origins = set(get_cors_origins(environment))
+        
+        # Initialize CORS configuration builder
+        env_vars = {"ENVIRONMENT": environment} if environment else None
+        self.cors = CORSConfigurationBuilder(env_vars)
+        self.allowed_origins = set(self.cors.origins.allowed)
         
         # In-memory tracking for active origins (last hour)
         self.recent_origins = defaultdict(list)
@@ -193,7 +197,7 @@ class CORSMonitoringMiddleware(BaseHTTPMiddleware):
         if not origin:
             return False
         
-        return is_origin_allowed(origin, list(self.allowed_origins), self.environment)
+        return self.cors.origins.is_allowed(origin)
     
     def _get_block_reason(self, origin: Optional[str]) -> str:
         """Get reason why origin was blocked."""

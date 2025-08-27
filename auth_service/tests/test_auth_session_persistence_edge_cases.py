@@ -19,6 +19,7 @@ from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 async def test_session_persistence_during_service_restart():
     """Test session survives auth service restart without user re-login."""
     session_manager = SessionManager()
+    await session_manager.initialize()
     
     # Create active session
     user = User(id="user123", email="test@example.com")
@@ -26,6 +27,7 @@ async def test_session_persistence_during_service_restart():
     
     # Simulate service restart by creating new manager instance
     restarted_manager = SessionManager()
+    await restarted_manager.initialize()
     
     # Verify session still valid
     is_valid = await restarted_manager.validate_session(session_token)
@@ -37,6 +39,7 @@ async def test_session_persistence_during_service_restart():
 async def test_session_consistency_during_database_failover():
     """Test session remains valid during database failover scenarios."""
     session_manager = SessionManager()
+    await session_manager.initialize()
     user = User(id="user456", email="failover@example.com")
     session_token = await session_manager.create_session(user)
     
@@ -54,6 +57,7 @@ async def test_session_consistency_during_database_failover():
 async def test_cross_service_session_sync_consistency():
     """Test session updates sync correctly between auth and backend services."""
     session_manager = SessionManager()
+    await session_manager.initialize()
     user = User(id="user789", email="sync@example.com")
     session_token = await session_manager.create_session(user)
     
@@ -79,6 +83,7 @@ async def test_cross_service_session_sync_consistency():
 async def test_session_cleanup_on_user_logout():
     """Test session properly cleaned up when user logs out."""
     session_manager = SessionManager()
+    await session_manager.initialize()
     user = User(id="user101", email="logout@example.com")
     session_token = await session_manager.create_session(user)
     

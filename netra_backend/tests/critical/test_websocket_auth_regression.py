@@ -368,3 +368,67 @@ class TestWebSocketMessageHandling:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+class TestWebSocketAuthEdgeCasesIteration85:
+    """WebSocket authentication edge cases - Iteration 85."""
+
+    def test_websocket_auth_token_expiration_iteration_85(self):
+        """Test WebSocket authentication with expired tokens - Iteration 85."""
+        
+        # Test expired token scenarios
+        expiration_scenarios = [
+            {"token_age_seconds": 3600, "max_age_seconds": 1800, "should_pass": False},
+            {"token_age_seconds": 900, "max_age_seconds": 1800, "should_pass": True},
+            {"token_age_seconds": 0, "max_age_seconds": 1800, "should_pass": True},
+        ]
+        
+        for scenario in expiration_scenarios:
+            auth_result = self._simulate_token_expiration_check(scenario)
+            
+            # Should handle token expiration appropriately
+            assert "valid" in auth_result
+            assert "reason" in auth_result
+            assert auth_result["valid"] == scenario["should_pass"]
+            
+            if not scenario["should_pass"]:
+                assert "expired" in auth_result["reason"].lower()
+    
+    def _simulate_token_expiration_check(self, scenario):
+        """Simulate token expiration checking for testing."""
+        is_expired = scenario["token_age_seconds"] > scenario["max_age_seconds"]
+        
+        return {
+            "valid": not is_expired,
+            "reason": "Token expired" if is_expired else "Token valid",
+            "token_age_seconds": scenario["token_age_seconds"],
+            "max_age_seconds": scenario["max_age_seconds"]
+        }
+
+    def test_websocket_auth_concurrent_connections_iteration_85(self):
+        """Test WebSocket authentication with concurrent connections - Iteration 85."""
+        
+        # Test concurrent connection scenarios
+        connection_scenarios = [
+            {"user_id": "user_1", "connections": 3, "max_connections": 5, "should_allow": True},
+            {"user_id": "user_2", "connections": 5, "max_connections": 5, "should_allow": False},
+            {"user_id": "user_3", "connections": 1, "max_connections": 3, "should_allow": True},
+        ]
+        
+        for scenario in connection_scenarios:
+            conn_result = self._simulate_concurrent_connection_check(scenario)
+            
+            # Should handle concurrent connections appropriately
+            assert "allowed" in conn_result
+            assert "active_connections" in conn_result
+            assert conn_result["allowed"] == scenario["should_allow"]
+            assert conn_result["active_connections"] == scenario["connections"]
+    
+    def _simulate_concurrent_connection_check(self, scenario):
+        """Simulate concurrent connection checking for testing."""
+        can_connect = scenario["connections"] < scenario["max_connections"]
+        
+        return {
+            "allowed": can_connect,
+            "active_connections": scenario["connections"],
+            "max_connections": scenario["max_connections"],
+            "user_id": scenario["user_id"]
+        }

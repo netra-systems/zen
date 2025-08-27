@@ -30,9 +30,13 @@ class TestCriticalAuthIntegration:
     """Test critical authentication integration scenarios"""
     
     @pytest.mark.asyncio
-    async def test_auth_flow_with_token_refresh(self, test_session: AsyncSession):
+    async def test_auth_flow_with_token_refresh(self, test_db_session: AsyncSession):
         """Test authentication flow with token refresh"""
         mock_auth = MockAuthService()
+        
+        # First register user
+        user_data = {"user_id": "test_user", "email": "test@example.com", "password": "password123"}
+        await mock_auth.register_user(user_data)
         
         # Initial authentication
         auth_result = await mock_auth.authenticate("test@example.com", "password123")
@@ -48,7 +52,7 @@ class TestCriticalAuthIntegration:
         assert refreshed_auth["session_token"] != original_token
     
     @pytest.mark.asyncio
-    async def test_multi_session_management(self, test_session: AsyncSession):
+    async def test_multi_session_management(self, test_db_session: AsyncSession):
         """Test multi-session management for single user"""
         mock_auth = MockAuthService()
         
@@ -64,7 +68,7 @@ class TestCriticalAuthIntegration:
         assert len(mock_auth.sessions) == 2
     
     @pytest.mark.asyncio
-    async def test_session_security_validation(self, test_session: AsyncSession):
+    async def test_session_security_validation(self, test_db_session: AsyncSession):
         """Test session security and validation"""
         mock_auth = MockAuthService()
         

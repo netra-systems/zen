@@ -313,8 +313,8 @@ class TestAuthenticationBoundaries:
             
             # Assert
             assert result == mock_user
-            # Verify session was used as context manager
-            mock_session.__aenter__.assert_called_once()
+            # Verify session execute was called for database query
+            mock_session.execute.assert_called_once()
 
 class TestAuthenticationPerformance:
     """Performance and scalability tests for authentication"""

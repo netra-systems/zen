@@ -26,7 +26,7 @@ class TestSchemaConsistency:
         
         # Check column type is Integer
         assert isinstance(trial_period_col.type, Integer)
-        assert trial_period_col.nullable is True
+        assert trial_period_col.nullable is False  # Not nullable since Mapped[int] without Optional
         assert trial_period_col.default.arg == 0
     
     def test_user_model_types_match_expectations(self):

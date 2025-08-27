@@ -234,6 +234,8 @@ class DatabaseConnector:
         
         Uses DatabaseURLBuilder for consistent URL normalization.
         """
+        if url is None:
+            return None
         if not url:
             return url
         # Use centralized format_for_asyncpg_driver method for consistent handling

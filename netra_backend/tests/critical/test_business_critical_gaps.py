@@ -173,7 +173,7 @@ class TestAuthTokenRefresh:
         
         # Act - Mock token refresh mechanism
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.auth_integration.auth.auth_client') as mock_auth_client:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client') as mock_auth_client:
             # Mock: Authentication service isolation for testing without real auth flows
             mock_auth_client.refresh_token = AsyncMock(
                 return_value={"token": "new_token", "exp": "future_date"}

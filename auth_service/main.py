@@ -42,7 +42,7 @@ else:
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
 from shared.logging import get_logger, configure_service_logging
-from shared.cors_config import get_fastapi_cors_config, log_cors_security_event
+from shared.cors_config_builder import CORSConfigurationBuilder
 
 # Configure unified logging for auth service
 configure_service_logging({
@@ -325,10 +325,11 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
-# Configure CORS using unified configuration
-# @marked: CORS configuration from unified shared config
+# Configure CORS using CORSConfigurationBuilder
+# @marked: CORS configuration from unified shared config builder
 env = AuthConfig.get_environment()
-cors_config = get_fastapi_cors_config(env)
+cors_builder = CORSConfigurationBuilder()
+cors_config = cors_builder.fastapi.get_middleware_config()
 
 # Add service-specific headers to the configuration
 cors_config["allow_headers"].extend([
@@ -370,7 +371,6 @@ from auth_service.auth_core.security.middleware import (
 @app.middleware("http")
 async def security_and_service_middleware(request: Request, call_next):
     """Enhanced security middleware with CORS security features"""
-    from shared.cors_config import validate_content_type, is_service_to_service_request
     
     # Request size validation (canonical implementation)
     size_error = await validate_request_size(request)
@@ -382,13 +382,12 @@ async def security_and_service_middleware(request: Request, call_next):
     origin = request.headers.get("origin")
     request_id = request.headers.get("x-request-id", "unknown")
     
-    if content_type and not validate_content_type(content_type):
+    if content_type and not cors_builder.security.validate_content_type(content_type):
         # SEC-002: Log suspicious Content-Type
-        log_cors_security_event(
+        cors_builder.security.log_security_event(
             event_type="suspicious_content_type",
             origin=origin or "unknown",
             path=request.url.path,
-            environment=AuthConfig.get_environment(),
             request_id=request_id,
             additional_info={"content_type": content_type, "service": "auth-service"}
         )
@@ -535,10 +534,7 @@ async def readiness() -> Dict[str, Any]:
 @app.head("/cors/test")
 async def cors_test() -> Dict[str, Any]:
     """CORS configuration test endpoint for debugging and validation"""
-    from shared.cors_config import get_cors_health_info
-    
-    env = AuthConfig.get_environment()
-    cors_info = get_cors_health_info(env)
+    cors_info = cors_builder.health.get_config_info()
     
     return {
         "service": "auth-service",

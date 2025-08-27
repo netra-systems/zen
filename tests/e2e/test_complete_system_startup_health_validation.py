@@ -169,7 +169,7 @@ class ComprehensiveSystemTester:
         self.database_types = {"postgresql", "redis", "clickhouse"}
         
         # Testing state
-        self.websocket_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.websocket_connections: Dict[str, websockets.legacy.server.WebSocketServerProtocol] = {}
         
     def _detect_project_root(self) -> Path:
         """Detect project root directory."""

@@ -35,6 +35,10 @@ class AuthRedisManager:
         # Check for explicit disable flags
         if get_env().get("DISABLE_REDIS", "false").lower() == "true":
             return False
+        
+        # Check for test disable flags (for consistent test behavior)
+        if get_env().get("TEST_DISABLE_REDIS", "false").lower() == "true":
+            return False
             
         return True
     

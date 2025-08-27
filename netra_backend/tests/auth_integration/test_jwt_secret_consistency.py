@@ -127,7 +127,7 @@ class TestJWTSecretConsistency:
             assert auth_secret == prod_secret
     
     def test_development_fallback_when_no_secrets(self):
-        """Test development fallback when no secrets are configured."""
+        """Test development environment requires explicit JWT secret configuration."""
         with patch.dict(os.environ, {
             "ENVIRONMENT": "development"
         }, clear=True):
@@ -136,8 +136,9 @@ class TestJWTSecretConsistency:
                 if key in os.environ:
                     del os.environ[key]
             
-            auth_secret = AuthSecretLoader.get_jwt_secret()
-            assert auth_secret == "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+            # Development environment now requires explicit JWT secret
+            with pytest.raises(ValueError, match="JWT secret not configured for development environment"):
+                AuthSecretLoader.get_jwt_secret()
     
     @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_production_require_secret(self):
@@ -207,9 +208,9 @@ class TestJWTSecretIntegration:
             "JWT_SECRET_KEY": test_secret,
             "ENVIRONMENT": "development"
         }, clear=False):
-            # Mock auth client validation to return consistent result
-            with patch.object(auth_client, 'validate_token', new_callable=AsyncMock) as mock_validate:
-                mock_validate.return_value = {
+            # Mock the internal validation method to bypass auth service connection
+            with patch.object(auth_client, '_execute_token_validation', new_callable=AsyncMock) as mock_execute:
+                mock_execute.return_value = {
                     "valid": True,
                     "user_id": "test-user-123",
                     "email": "test@example.com"

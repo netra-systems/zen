@@ -37,8 +37,10 @@ class TestCrossServiceAuthSecurity:
     @pytest.fixture
     def auth_middleware(self, environment):
         """Create isolated auth middleware for testing."""
-        middleware = FastAPIAuthMiddleware()
-        middleware.initialize()
+        # Mock FastAPI app for middleware initialization
+        from unittest.mock import Mock
+        mock_app = Mock()
+        middleware = FastAPIAuthMiddleware(app=mock_app)
         return middleware
 
     @pytest.fixture

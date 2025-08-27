@@ -79,6 +79,13 @@ class SessionManager:
         """Get a database session via DatabaseManager."""
         async for session in get_db():
             yield session
+    
+    def get_stats(self):
+        """Get session manager statistics."""
+        return {
+            'active_sessions': self.active_sessions,
+            'total_sessions_created': self.total_sessions_created
+        }
 
 session_manager = SessionManager()
 

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <metadata>
+        <title>E2E Test Port Management Learnings</title>
+        <category>Testing Infrastructure</category>
+        <date>2025-08-27</date>
+        <impact>High - Prevents test failures and enables parallel testing</impact>
+    </metadata>
+
+    <problem_statement>
+        E2E tests were failing due to hardcoded ports conflicting between local development,
+        Docker test containers, and CI environments. Tests assumed fixed ports (8000, 8081)
+        which caused failures when services were running on different ports or when multiple
+        test suites ran in parallel.
+    </problem_statement>
+
+    <root_causes>
+        <cause>
+            <description>Hardcoded port values throughout E2E test suite</description>
+            <example>ws_url = "ws://localhost:8000/ws" in multiple test files</example>
+        </cause>
+        <cause>
+            <description>No detection of execution environment (local vs Docker vs CI)</description>
+            <impact>Tests couldn't adapt to different port configurations</impact>
+        </cause>
+        <cause>
+            <description>Docker Compose test services use different ports than dev services</description>
+            <detail>Test backend on 8001 vs dev backend on 8000</detail>
+        </cause>
+    </root_causes>
+
+    <solution>
+        <component name="Dynamic Port Manager">
+            <description>Created centralized port management system that detects execution environment</description>
+            <location>tests/e2e/dynamic_port_manager.py</location>
+            <features>
+                <feature>Auto-detects LOCAL, DOCKER, or CI mode</feature>
+                <feature>Provides consistent service URLs across environments</feature>
+                <feature>Supports dynamic port allocation for CI</feature>
+                <feature>Exports configuration to environment variables</feature>
+            </features>
+        </component>
+        
+        <component name="Test Configuration Integration">
+            <description>Updated E2E config to use dynamic port manager</description>
+            <location>tests/e2e/config.py</location>
+            <changes>
+                <change>get_auth_service_url() now checks port manager first</change>
+                <change>get_backend_service_url() adapts to environment</change>
+                <change>Graceful fallback if port manager unavailable</change>
+            </changes>
+        </component>
+
+        <component name="Helper Scripts">
+            <description>Scripts to manage test execution with proper ports</description>
+            <scripts>
+                <script>
+                    <name>scripts/setup_e2e_test_ports.py</name>
+                    <purpose>Configure and verify port settings</purpose>
+                </script>
+                <script>
+                    <name>scripts/run_e2e_tests_with_docker.py</name>
+                    <purpose>Manage Docker services lifecycle for E2E tests</purpose>
+                </script>
+            </scripts>
+        </component>
+    </solution>
+
+    <port_mappings>
+        <environment name="LOCAL">
+            <service name="backend" port="8000"/>
+            <service name="auth" port="8081"/>
+            <service name="frontend" port="3000"/>
+            <service name="postgres" port="5432"/>
+            <service name="redis" port="6379"/>
+            <service name="clickhouse" port="8123"/>
+        </environment>
+        
+        <environment name="DOCKER">
+            <service name="backend" port="8001"/>
+            <service name="auth" port="8082"/>
+            <service name="frontend" port="3001"/>
+            <service name="postgres" port="5433"/>
+            <service name="redis" port="6380"/>
+            <service name="clickhouse" port="8124"/>
+            <note>Uses Docker service names for networking (e.g., backend-test)</note>
+        </environment>
+        
+        <environment name="CI">
+            <service name="all" port="dynamic"/>
+            <note>All ports dynamically allocated to prevent conflicts</note>
+        </environment>
+    </port_mappings>
+
+    <best_practices>
+        <practice>
+            <title>Never hardcode ports in E2E tests</title>
+            <guideline>Always use configuration functions like get_backend_service_url()</guideline>
+        </practice>
+        <practice>
+            <title>Environment detection over configuration</title>
+            <guideline>Automatically detect Docker/CI environments instead of requiring manual config</guideline>
+        </practice>
+        <practice>
+            <title>Service discovery through port manager</title>
+            <guideline>Use port_manager.get_service_urls() for all service connections</guideline>
+        </practice>
+        <practice>
+            <title>Export configuration for child processes</title>
+            <guideline>Call port_manager.export_to_env() to ensure subprocesses get correct ports</guideline>
+        </practice>
+    </best_practices>
+
+    <testing_patterns>
+        <pattern name="Port Manager Singleton">
+            <description>Use get_port_manager() to ensure single instance</description>
+            <code><![CDATA[
+from tests.e2e.dynamic_port_manager import get_port_manager
+port_mgr = get_port_manager()  # Returns same instance
+urls = port_mgr.get_service_urls()
+            ]]></code>
+        </pattern>
+        
+        <pattern name="Environment Variable Override">
+            <description>Allow manual port override via environment variables</description>
+            <variables>
+                <var>TEST_BACKEND_PORT</var>
+                <var>TEST_AUTH_PORT</var>
+                <var>TEST_FRONTEND_PORT</var>
+                <var>TEST_POSTGRES_PORT</var>
+                <var>TEST_REDIS_PORT</var>
+                <var>TEST_CLICKHOUSE_PORT</var>
+            </variables>
+        </pattern>
+        
+        <pattern name="Wait for Service Availability">
+            <description>Ensure services are ready before running tests</description>
+            <code><![CDATA[
+port_mgr.wait_for_service("backend", timeout=30)
+port_mgr.wait_for_service("auth", timeout=30)
+            ]]></code>
+        </pattern>
+    </testing_patterns>
+
+    <common_issues>
+        <issue>
+            <problem>Port conflicts when running local dev and tests simultaneously</problem>
+            <solution>Use TEST_* environment variables to override test ports</solution>
+        </issue>
+        <issue>
+            <problem>Docker service names not resolving</problem>
+            <solution>Ensure Docker Compose services are running with correct names</solution>
+        </issue>
+        <issue>
+            <problem>CI tests failing due to port binding</problem>
+            <solution>Set CI=true to enable dynamic port allocation</solution>
+        </issue>
+    </common_issues>
+
+    <future_improvements>
+        <improvement>
+            <description>Add port conflict detection and automatic reassignment</description>
+            <benefit>More robust handling of occupied ports</benefit>
+        </improvement>
+        <improvement>
+            <description>Integrate with test framework service manager</description>
+            <benefit>Unified service lifecycle management</benefit>
+        </improvement>
+        <improvement>
+            <description>Add health check endpoints verification</description>
+            <benefit>Better service readiness detection</benefit>
+        </improvement>
+    </future_improvements>
+
+    <impact_summary>
+        <positive>
+            <item>Eliminated port conflict test failures</item>
+            <item>Enabled parallel E2E test execution in CI</item>
+            <item>Simplified Docker-based testing</item>
+            <item>Improved test reliability across environments</item>
+        </positive>
+        <metrics>
+            <metric name="Test failures due to ports" before="Common" after="None"/>
+            <metric name="Parallel test support" before="No" after="Yes"/>
+            <metric name="Environment adaptability" before="Manual" after="Automatic"/>
+        </metrics>
+    </impact_summary>
+</learnings>

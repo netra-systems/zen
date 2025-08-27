@@ -14,7 +14,7 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from shared.cors_config import get_cors_origins, is_origin_allowed
+from shared.cors_config_builder import get_cors_origins, is_origin_allowed
 
 
 def test_development_cors():
@@ -142,11 +142,11 @@ def check_ssot_compliance():
     """Check that all services use the shared CORS config."""
     print("\n=== Checking SSOT Compliance ===")
     
-    # Check that services import from shared.cors_config
+    # Check that services import from shared.cors_config_builder
     services_to_check = [
-        ("netra_backend/app/core/middleware_setup.py", "from shared.cors_config import get_fastapi_cors_config"),
-        ("auth_service/main.py", "from shared.cors_config import get_fastapi_cors_config"),
-        ("netra_backend/app/core/websocket_cors.py", "from shared.cors_config import get_websocket_cors_origins"),
+        ("netra_backend/app/core/middleware_setup.py", "from shared.cors_config_builder import get_fastapi_cors_config"),
+        ("auth_service/main.py", "from shared.cors_config_builder import get_fastapi_cors_config"),
+        ("netra_backend/app/core/websocket_cors.py", "from shared.cors_config_builder import get_websocket_cors_origins"),
     ]
     
     all_compliant = True

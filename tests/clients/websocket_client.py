@@ -6,7 +6,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 import websockets
-from websockets.client import WebSocketClientProtocol
+from websockets.legacy.client import WebSocketClientProtocol
 
 logger = logging.getLogger(__name__)
 

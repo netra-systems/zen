@@ -35,15 +35,17 @@
 | `secrets.py` | `/netra_backend/app/core/configuration/secrets.py` | Secret management | GCP Secret Manager integration |
 | **🔴 CORS CONFIG** | `/shared/cors_config.py` | **UNIFIED CORS for ALL services** | **CRITICAL: Single source for CORS - consolidated from 5 implementations** |
 
-### Database Files (Similar Names, Different DBs)
+### Database Files (SSOT Compliant - 2025-08-27)
 | File | Location | Purpose | Key Functions |
 |------|----------|---------|---------------|
+| **🔴 CANONICAL MANAGER** | `/netra_backend/app/db/database_manager.py` | **Single database manager (SSOT)** | DatabaseManager.get_connection_manager() |
 | `clickhouse.py` | `/netra_backend/app/db/clickhouse.py` | ClickHouse connection | get_clickhouse_client() |
 | `postgres.py` | `/netra_backend/app/db/postgres.py` | PostgreSQL connection | get_postgres_db() |
 | `clickhouse_operations.py` | `/netra_backend/app/agents/` | ClickHouse data operations | Agent-specific queries |
 | `models_auth.py` | `/netra_backend/app/db/models_auth.py` | Auth database models | User, Team, Session |
 | `models_corpus.py` | `/netra_backend/app/db/models_corpus.py` | Corpus database models | CorpusData, CorpusEntry |
 | `models_metrics.py` | `/netra_backend/app/db/models_metrics.py` | Metrics database models | MetricsData |
+| **🔴 REMOVED (SSOT)** | Multiple locations | **Deleted duplicate managers** | See [`SPEC/learnings/database_manager_ssot_consolidation.xml`](SPEC/learnings/database_manager_ssot_consolidation.xml) |
 
 ### Authentication & Security (MANDATORY Shared Auth Integration)
 | File | Location | Purpose | Key Components |

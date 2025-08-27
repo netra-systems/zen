@@ -57,7 +57,7 @@ class TestHeartbeatLogger:
     async def test_heartbeat_logging_flow(self):
         """Test complete heartbeat logging flow."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.llm.observability.logger') as mock_logger:
+        with patch('netra_backend.app.llm.heartbeat_logger.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
             
@@ -167,7 +167,7 @@ class TestSupervisorHeartbeatScenarios:
     async def test_supervisor_agent_coordination_heartbeat(self):
         """Test heartbeat during supervisor agent coordination."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.llm.observability.logger') as mock_logger:
+        with patch('netra_backend.app.llm.heartbeat_logger.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
             
@@ -183,7 +183,7 @@ class TestSupervisorHeartbeatScenarios:
     async def test_heartbeat_during_pipeline_execution(self):
         """Test heartbeat continues during long pipeline operations."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.llm.observability.logger') as mock_logger:
+        with patch('netra_backend.app.llm.heartbeat_logger.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
             
@@ -199,7 +199,7 @@ class TestSupervisorHeartbeatScenarios:
     async def test_concurrent_supervisor_agents_heartbeat(self):
         """Test heartbeat for multiple concurrent supervisor agents."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.llm.observability.logger') as mock_logger:
+        with patch('netra_backend.app.llm.heartbeat_logger.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             
             # Start multiple supervisor agents
@@ -242,7 +242,7 @@ class TestSupervisorHeartbeatScenarios:
     async def test_supervisor_state_checkpoint_heartbeat(self):
         """Test heartbeat during supervisor state checkpointing."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.llm.observability.logger') as mock_logger:
+        with patch('netra_backend.app.llm.heartbeat_logger.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
             
@@ -273,7 +273,7 @@ class TestSupervisorHeartbeatScenarios:
     async def test_supervisor_long_operation_heartbeat_persistence(self):
         """Test heartbeat persists through long supervisor operations."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.llm.observability.logger') as mock_logger:
+        with patch('netra_backend.app.llm.heartbeat_logger.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.05)
             correlation_id = generate_llm_correlation_id()
             
@@ -317,3 +317,27 @@ class TestSupervisorHeartbeatScenarios:
         # Clean up
         logger.stop_heartbeat(correlation_id_1)
         logger.stop_heartbeat(correlation_id_2)
+    def test_llm_heartbeat_edge_case_scenarios(self):
+        """Test LLM heartbeat logging with edge cases."""
+        from netra_backend.app.llm.heartbeat_logger import HeartbeatLogger
+        
+        # Test with extremely short intervals
+        logger_fast = HeartbeatLogger(interval_seconds=0.001)
+        correlation_id_1 = logger_fast.generate_correlation_id()
+        logger_fast.start_heartbeat(correlation_id_1, 'test_agent')
+        
+        # Test with very long intervals
+        logger_slow = HeartbeatLogger(interval_seconds=3600)
+        correlation_id_2 = logger_slow.generate_correlation_id()
+        logger_slow.start_heartbeat(correlation_id_2, 'test_agent_slow')
+        
+        # Test edge case: duplicate correlation ID
+        try:
+            logger_fast.start_heartbeat(correlation_id_1, 'duplicate_agent')
+            # Should handle gracefully or replace existing
+        except Exception:
+            pass  # Edge case handling
+        
+        # Cleanup
+        logger_fast.stop_heartbeat(correlation_id_1)
+        logger_slow.stop_heartbeat(correlation_id_2)

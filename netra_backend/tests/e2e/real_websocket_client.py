@@ -20,7 +20,7 @@ class RealWebSocketClient:
     def __init__(self, config: ClientConfig):
         self.config = config
         self.connection_state = ConnectionState.DISCONNECTED
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[websockets.legacy.server.WebSocketServerProtocol] = None
         self.message_handler: Optional[Callable] = None
         self._closed = False
     

@@ -102,8 +102,18 @@ class DevLauncherRealSystem:
         config.startup_mode = "minimal"  # Fast startup
         config.no_secrets = True  # Don't load secrets for tests
         config.parallel_startup = True  # Parallel startup for speed
-        config.project_root = project_root
+        config.project_root = self._detect_project_root()
         return config
+        
+    def _detect_project_root(self) -> Path:
+        """Detect project root directory."""
+        current = Path(__file__).parent
+        while current.parent != current:
+            # Check for project root markers - netra_backend and auth_service directories
+            if (current / "netra_backend").exists() and (current / "auth_service").exists():
+                return current
+            current = current.parent
+        raise RuntimeError("Could not detect project root directory")
         
     async def _check_existing_services(self) -> bool:
         """Check if services are already running and healthy."""

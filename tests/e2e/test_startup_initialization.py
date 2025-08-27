@@ -214,12 +214,12 @@ async def dev_launcher():
     config = LauncherConfig(
         backend_port=0,  # Dynamic port allocation
         frontend_port=0,
-        dynamic=True,
+        dynamic_ports=True,
         no_browser=True,
         non_interactive=True,
         verbose=False,
-        no_secrets=True,
-        mode="minimal"
+        load_secrets=False,
+        startup_mode="minimal"
     )
     launcher = DevLauncher(config)
     yield launcher
@@ -271,6 +271,11 @@ def limit_resource(resource_type: str, limit: int):
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
+@pytest.mark.dev
+@pytest.mark.skipif(
+    not os.environ.get("USE_REAL_SERVICES", "").lower() == "true", 
+    reason="Test requires real PostgreSQL service - set USE_REAL_SERVICES=true"
+)
 async def test_missing_postgresql_tables_on_first_boot(test_env):
     """Test 1: Application should handle missing database tables gracefully"""
     # Drop all tables to simulate fresh installation
@@ -360,6 +365,10 @@ async def test_connection_pool_exhaustion_during_startup(test_env):
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
+@pytest.mark.skipif(
+    not os.environ.get("USE_REAL_SERVICES", "").lower() == "true", 
+    reason="Test requires real database services - set USE_REAL_SERVICES=true"
+)
 async def test_schema_version_mismatch_between_services(test_env):
     """Test 3: Detect and handle schema version mismatches"""
     # Set different schema versions for different services
@@ -620,7 +629,7 @@ async def test_port_conflict_resolution_failure(test_env):
         # Dev launcher should allocate different port
         launcher = DevLauncher(LauncherConfig(
             backend_port=8000,
-            dynamic=True,
+            dynamic_ports=True,
             non_interactive=True
         ))
         

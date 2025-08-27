@@ -34,20 +34,40 @@ def feature_flag(feature_name: str, *, reason: Optional[str] = None):
             # Test for feature in development
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            manager = get_feature_flag_manager()
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                manager = get_feature_flag_manager()
+                
+                if manager.should_skip(feature_name):
+                    skip_reason = reason or manager.get_skip_reason(feature_name)
+                    pytest.skip(skip_reason)
+                
+                return await func(*args, **kwargs)
             
-            if manager.should_skip(feature_name):
-                skip_reason = reason or manager.get_skip_reason(feature_name)
-                pytest.skip(skip_reason)
+            # Mark the test with feature metadata
+            async_wrapper._feature_flag = feature_name
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                manager = get_feature_flag_manager()
+                
+                if manager.should_skip(feature_name):
+                    skip_reason = reason or manager.get_skip_reason(feature_name)
+                    pytest.skip(skip_reason)
+                
+                return func(*args, **kwargs)
             
-            return func(*args, **kwargs)
-        
-        # Mark the test with feature metadata
-        wrapper._feature_flag = feature_name
-        return wrapper
+            # Mark the test with feature metadata
+            sync_wrapper._feature_flag = feature_name
+            return sync_wrapper
     
     return decorator
 
@@ -66,20 +86,40 @@ def requires_feature(*features: str):
             # Test requiring multiple features
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            manager = get_feature_flag_manager()
-            disabled_features = [f for f in features if not manager.is_enabled(f)]
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                manager = get_feature_flag_manager()
+                disabled_features = [f for f in features if not manager.is_enabled(f)]
+                
+                if disabled_features:
+                    skip_reason = f"Required features not enabled: {', '.join(disabled_features)}"
+                    pytest.skip(skip_reason)
+                
+                return await func(*args, **kwargs)
             
-            if disabled_features:
-                skip_reason = f"Required features not enabled: {', '.join(disabled_features)}"
-                pytest.skip(skip_reason)
+            async_wrapper._required_features = features
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                manager = get_feature_flag_manager()
+                disabled_features = [f for f in features if not manager.is_enabled(f)]
+                
+                if disabled_features:
+                    skip_reason = f"Required features not enabled: {', '.join(disabled_features)}"
+                    pytest.skip(skip_reason)
+                
+                return func(*args, **kwargs)
             
-            return func(*args, **kwargs)
-        
-        wrapper._required_features = features
-        return wrapper
+            sync_wrapper._required_features = features
+            return sync_wrapper
     
     return decorator
 
@@ -99,19 +139,38 @@ def experimental_test(reason: Optional[str] = None):
             # Experimental test
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # Check global experimental flag
-            if not os.environ.get("ENABLE_EXPERIMENTAL_TESTS", "").lower() == "true":
-                skip_reason = reason or "Experimental tests disabled"
-                pytest.skip(skip_reason)
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                # Check global experimental flag
+                if not os.environ.get("ENABLE_EXPERIMENTAL_TESTS", "").lower() == "true":
+                    skip_reason = reason or "Experimental tests disabled"
+                    pytest.skip(skip_reason)
+                
+                return await func(*args, **kwargs)
             
-            return func(*args, **kwargs)
-        
-        wrapper._experimental = True
-        wrapper._experimental_reason = reason
-        return wrapper
+            async_wrapper._experimental = True
+            async_wrapper._experimental_reason = reason
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                # Check global experimental flag
+                if not os.environ.get("ENABLE_EXPERIMENTAL_TESTS", "").lower() == "true":
+                    skip_reason = reason or "Experimental tests disabled"
+                    pytest.skip(skip_reason)
+                
+                return func(*args, **kwargs)
+            
+            sync_wrapper._experimental = True
+            sync_wrapper._experimental_reason = reason
+            return sync_wrapper
     
     return decorator
 
@@ -164,27 +223,54 @@ def performance_test(threshold_ms: float = 1000):
             # Test that checks performance
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # Skip in fast mode unless explicitly enabled
-            if os.environ.get("FAST_MODE") == "true" and \
-               not os.environ.get("ENABLE_PERFORMANCE_TESTS") == "true":
-                pytest.skip("Performance tests disabled in fast mode")
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                # Skip in fast mode unless explicitly enabled
+                if os.environ.get("FAST_MODE") == "true" and \
+                   not os.environ.get("ENABLE_PERFORMANCE_TESTS") == "true":
+                    pytest.skip("Performance tests disabled in fast mode")
+                
+                import time
+                start = time.time()
+                result = await func(*args, **kwargs)
+                duration_ms = (time.time() - start) * 1000
+                
+                if duration_ms > threshold_ms:
+                    pytest.fail(f"Performance threshold exceeded: {duration_ms:.2f}ms > {threshold_ms}ms")
+                
+                return result
             
-            import time
-            start = time.time()
-            result = func(*args, **kwargs)
-            duration_ms = (time.time() - start) * 1000
+            async_wrapper._performance_test = True
+            async_wrapper._threshold_ms = threshold_ms
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                # Skip in fast mode unless explicitly enabled
+                if os.environ.get("FAST_MODE") == "true" and \
+                   not os.environ.get("ENABLE_PERFORMANCE_TESTS") == "true":
+                    pytest.skip("Performance tests disabled in fast mode")
+                
+                import time
+                start = time.time()
+                result = func(*args, **kwargs)
+                duration_ms = (time.time() - start) * 1000
+                
+                if duration_ms > threshold_ms:
+                    pytest.fail(f"Performance threshold exceeded: {duration_ms:.2f}ms > {threshold_ms}ms")
+                
+                return result
             
-            if duration_ms > threshold_ms:
-                pytest.fail(f"Performance threshold exceeded: {duration_ms:.2f}ms > {threshold_ms}ms")
-            
-            return result
-        
-        wrapper._performance_test = True
-        wrapper._threshold_ms = threshold_ms
-        return wrapper
+            sync_wrapper._performance_test = True
+            sync_wrapper._threshold_ms = threshold_ms
+            return sync_wrapper
     
     return decorator
 
@@ -198,15 +284,30 @@ def integration_only():
             # Integration test
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if os.environ.get("TEST_LEVEL") not in ["integration", "comprehensive", "all"]:
-                pytest.skip("Integration tests only")
-            return func(*args, **kwargs)
-        
-        wrapper._integration_only = True
-        return wrapper
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                if os.environ.get("TEST_LEVEL") not in ["integration", "comprehensive", "all"]:
+                    pytest.skip("Integration tests only")
+                return await func(*args, **kwargs)
+            
+            async_wrapper._integration_only = True
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                if os.environ.get("TEST_LEVEL") not in ["integration", "comprehensive", "all"]:
+                    pytest.skip("Integration tests only")
+                return func(*args, **kwargs)
+            
+            sync_wrapper._integration_only = True
+            return sync_wrapper
     
     return decorator
 
@@ -220,15 +321,30 @@ def unit_only():
             # Unit test
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if os.environ.get("TEST_LEVEL") not in ["unit", "comprehensive", "all"]:
-                pytest.skip("Unit tests only")
-            return func(*args, **kwargs)
-        
-        wrapper._unit_only = True
-        return wrapper
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                if os.environ.get("TEST_LEVEL") not in ["unit", "comprehensive", "all"]:
+                    pytest.skip("Unit tests only")
+                return await func(*args, **kwargs)
+            
+            async_wrapper._unit_only = True
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                if os.environ.get("TEST_LEVEL") not in ["unit", "comprehensive", "all"]:
+                    pytest.skip("Unit tests only")
+                return func(*args, **kwargs)
+            
+            sync_wrapper._unit_only = True
+            return sync_wrapper
     
     return decorator
 
@@ -245,18 +361,36 @@ def requires_env(*env_vars: str):
             # Test requiring external services
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            missing_vars = [var for var in env_vars if not os.environ.get(var)]
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                missing_vars = [var for var in env_vars if not os.environ.get(var)]
+                
+                if missing_vars:
+                    pytest.skip(f"Required environment variables not set: {', '.join(missing_vars)}")
+                
+                return await func(*args, **kwargs)
             
-            if missing_vars:
-                pytest.skip(f"Required environment variables not set: {', '.join(missing_vars)}")
+            async_wrapper._required_env_vars = env_vars
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                missing_vars = [var for var in env_vars if not os.environ.get(var)]
+                
+                if missing_vars:
+                    pytest.skip(f"Required environment variables not set: {', '.join(missing_vars)}")
+                
+                return func(*args, **kwargs)
             
-            return func(*args, **kwargs)
-        
-        wrapper._required_env_vars = env_vars
-        return wrapper
+            sync_wrapper._required_env_vars = env_vars
+            return sync_wrapper
     
     return decorator
 
@@ -276,28 +410,56 @@ def flaky_test(max_retries: int = 3, reason: Optional[str] = None):
             # Test that may fail due to network issues
             pass
     """
+    import asyncio
+    import inspect
+    
     def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            last_exception = None
+        if inspect.iscoroutinefunction(func):
+            # For async functions, create an async wrapper
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                last_exception = None
+                
+                for attempt in range(max_retries):
+                    try:
+                        return await func(*args, **kwargs)
+                    except Exception as e:
+                        last_exception = e
+                        if attempt < max_retries - 1:
+                            import time
+                            await asyncio.sleep(0.5 * (attempt + 1))  # Exponential backoff with asyncio
+                
+                # All retries failed
+                if last_exception:
+                    raise last_exception
             
-            for attempt in range(max_retries):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    last_exception = e
-                    if attempt < max_retries - 1:
-                        import time
-                        time.sleep(0.5 * (attempt + 1))  # Exponential backoff
+            async_wrapper._flaky = True
+            async_wrapper._max_retries = max_retries
+            async_wrapper._flaky_reason = reason
+            return async_wrapper
+        else:
+            # For sync functions, create a sync wrapper
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                last_exception = None
+                
+                for attempt in range(max_retries):
+                    try:
+                        return func(*args, **kwargs)
+                    except Exception as e:
+                        last_exception = e
+                        if attempt < max_retries - 1:
+                            import time
+                            time.sleep(0.5 * (attempt + 1))  # Exponential backoff
+                
+                # All retries failed
+                if last_exception:
+                    raise last_exception
             
-            # All retries failed
-            if last_exception:
-                raise last_exception
-        
-        wrapper._flaky = True
-        wrapper._max_retries = max_retries
-        wrapper._flaky_reason = reason
-        return wrapper
+            sync_wrapper._flaky = True
+            sync_wrapper._max_retries = max_retries
+            sync_wrapper._flaky_reason = reason
+            return sync_wrapper
     
     return decorator
 

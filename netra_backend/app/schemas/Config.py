@@ -506,7 +506,7 @@ class DevelopmentConfig(AppConfig):
         client_secret="",  # Populated by SecretReference: google-client-secret
         authorized_redirect_uris=[
             "http://localhost:8000/auth/callback",
-            "http://localhost:8001/auth/callback",
+            "http://localhost:8081/auth/callback",
             "http://localhost:8002/auth/callback",
             "http://localhost:8003/auth/callback",
             "http://localhost:8080/auth/callback",
@@ -620,7 +620,7 @@ class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
-    auth_service_url: str = "http://localhost:8001"
+    auth_service_url: str = "http://localhost:8081"
     fast_startup_mode: str = "true"  # Enable fast startup for tests
     service_secret: str = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
     jwt_secret_key: str = "test_jwt_secret_key_for_testing_32_chars_minimum_required_length"  # Test-safe JWT secret

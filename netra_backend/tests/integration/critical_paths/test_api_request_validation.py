@@ -16,6 +16,9 @@ import pytest
 
 from netra_backend.app.config import get_config
 
+# Get settings instance
+settings = get_config()
+
 class TestAPIRequestValidationL3:
     """Test API request validation scenarios"""
     

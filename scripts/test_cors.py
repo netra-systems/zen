@@ -38,7 +38,8 @@ except ImportError:
 # Add project root to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from shared.cors_config import (
+from shared.cors_config_builder import (
+    CORSConfigurationBuilder,
     get_cors_origins, get_cors_config, is_origin_allowed,
     get_websocket_cors_origins, get_cors_health_info, validate_cors_config
 )

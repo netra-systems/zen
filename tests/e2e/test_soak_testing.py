@@ -510,7 +510,7 @@ class WebSocketStressTest:
 
         self.max_connections = max_connections
 
-        self.active_connections: List[websockets.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.legacy.server.WebSocketServerProtocol] = []
 
         self.message_count = 0
 

@@ -30,6 +30,8 @@ class MockAgent:
         self.should_fail = False
         self.failure_message = "Test failure"
         self.execution_time = 0.1
+        self.thread_id = None
+        self.db_session = None
         
     async def process_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Mock process request method."""
@@ -65,6 +67,7 @@ class MockOrchestrator:
         self.retry_delay = 0.1
         self.execution_timeout = 0.5
         self.max_concurrent_agents = 10
+        self.max_pool_size = 5
         self.metrics = {
             "agents_created": 0,
             "tasks_executed": 0, 
@@ -107,7 +110,17 @@ class MockOrchestrator:
         if user_id in self.agents:
             agent = self.agents[user_id]
             agent.state = AgentState.IDLE
-            self.agent_pool.append(agent)
+            
+            # Reset agent state for reuse
+            agent.user_id = None
+            agent.thread_id = None
+            agent.db_session = None
+            
+            # Only add to pool if under size limit
+            if len(self.agent_pool) < self.max_pool_size:
+                self.agent_pool.append(agent)
+            # If pool is full, agent is discarded (garbage collected)
+            
             del self.agents[user_id]
     
     async def get_or_create_agent(self, user_id: str) -> MockAgent:

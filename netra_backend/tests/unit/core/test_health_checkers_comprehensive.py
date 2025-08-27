@@ -48,6 +48,38 @@ class TestHealthCheckerInitialization:
         assert SERVICE_PRIORITIES["system_resources"] == ServicePriority.IMPORTANT
 
 
+class TestWeightedHealthScoreCalculation:
+    """Test weighted health score calculation edge cases."""
+    
+    def test_calculate_weighted_health_score_empty_results(self):
+        """Test weighted health score calculation with empty results."""
+        from netra_backend.app.core.health_checkers import _calculate_weighted_health_score
+        
+        # Empty results should return 0.0
+        result = _calculate_weighted_health_score({})
+        assert result == 0.0
+    
+    def test_calculate_weighted_health_score_mixed_priorities(self):
+        """Test weighted health score with mixed service priorities and health states."""
+        from netra_backend.app.core.health_checkers import _calculate_weighted_health_score
+        
+        # Create mock health check results with different priorities and scores
+        results = {
+            "postgres": Mock(status="healthy", health_score=1.0, details={"health_score": 1.0}),
+            "redis": Mock(status="degraded", health_score=0.5, details={"health_score": 0.5}), 
+            "clickhouse": Mock(status="unhealthy", health_score=0.0, details={"health_score": 0.0})
+        }
+        
+        # Calculate weighted score
+        # postgres (critical, weight=3.0): 1.0 * 3.0 = 3.0
+        # redis (important, weight=2.0): 0.5 * 2.0 = 1.0  
+        # clickhouse (optional, weight=1.0): 0.0 * 1.0 = 0.0
+        # total_weight = 6.0, weighted_score = 4.0, result = 4.0/6.0 = 0.667
+        
+        result = _calculate_weighted_health_score(results)
+        assert abs(result - 0.6667) < 0.001  # Allow for floating point precision
+
+
 class TestPostgreSQLHealthCheck:
     """Test PostgreSQL database health checking."""
     
@@ -98,18 +130,18 @@ class TestPostgreSQLHealthCheck:
         assert result.error_message == "Database unavailable"
         
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
-    async def test_execute_postgres_query_with_unified_manager(self, mock_db_manager):
+    @patch('netra_backend.app.db.database_manager.DatabaseManager.get_async_session')
+    async def test_execute_postgres_query_with_unified_manager(self, mock_get_async_session):
         """Test PostgreSQL query execution with unified DB manager."""
         from netra_backend.app.core.health_checkers import _execute_postgres_query
         
         # Mock successful session
         mock_session = AsyncMock()
-        mock_db_manager.get_async_session.return_value.__aenter__.return_value = mock_session
+        mock_get_async_session.return_value.__aenter__.return_value = mock_session
         
         await _execute_postgres_query()
         
-        mock_db_manager.get_async_session.assert_called_once_with("default")
+        mock_get_async_session.assert_called_once_with("default")
         mock_session.execute.assert_called_once()
         
     @pytest.mark.skip("Complex fallback initialization test - skipped for now")
@@ -121,13 +153,13 @@ class TestPostgreSQLHealthCheck:
         pass
         
     @pytest.mark.asyncio
-    @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
-    async def test_execute_postgres_query_sslmode_detection(self, mock_db_manager):
+    @patch('netra_backend.app.db.database_manager.DatabaseManager.get_async_session')
+    async def test_execute_postgres_query_sslmode_detection(self, mock_get_async_session):
         """Test PostgreSQL query execution detects sslmode parameters."""
         from netra_backend.app.core.health_checkers import _execute_postgres_query
         
-        # Mock unified manager failure
-        mock_db_manager.get_async_session.side_effect = ValueError("Manager failed")
+        # Mock DatabaseManager failure to force fallback path
+        mock_get_async_session.side_effect = ValueError("Manager failed")
         
         # Mock engine with sslmode in URL
         mock_engine = Mock()
@@ -890,3 +922,69 @@ class TestHealthCheckResultCreation:
         assert result.response_time_ms == 0.0
         assert result.details["status"] == "disabled"
         assert result.details["reason"] == "Disabled in development"
+
+
+class TestServicePriorityEdgeCases:
+    """Test edge cases and complex scenarios in service priority handling."""
+    
+    def test_service_priority_unknown_service_default(self):
+        """Test that unknown services get appropriate default priority."""
+        from netra_backend.app.core.health_checkers import _get_service_priority_for_environment
+        
+        with patch('netra_backend.app.core.health_checkers.unified_config_manager') as mock_config_manager:
+            mock_config = Mock()
+            mock_config.environment = 'production'
+            mock_config_manager.get_config.return_value = mock_config
+            
+            # Unknown service should get IMPORTANT priority by default
+            priority = _get_service_priority_for_environment("unknown_service")
+            assert priority == ServicePriority.IMPORTANT
+    
+    def test_service_priority_staging_redis_optional_flag(self):
+        """Test redis optional flag in staging environment."""
+        from netra_backend.app.core.health_checkers import _get_service_priority_for_environment
+        
+        with patch('netra_backend.app.core.health_checkers.unified_config_manager') as mock_config_manager:
+            mock_config = Mock()
+            mock_config.environment = 'staging'
+            mock_config.redis_optional_in_staging = True
+            mock_config_manager.get_config.return_value = mock_config
+            
+            # Redis should be OPTIONAL when flag is set in staging
+            priority = _get_service_priority_for_environment("redis")
+            assert priority == ServicePriority.OPTIONAL
+    
+    def test_service_priority_production_critical_services(self):
+        """Test critical services maintain priority in production."""
+        from netra_backend.app.core.health_checkers import _get_service_priority_for_environment
+        
+        with patch('netra_backend.app.core.health_checkers.unified_config_manager') as mock_config_manager:
+            mock_config = Mock()
+            mock_config.environment = 'production'
+            mock_config_manager.get_config.return_value = mock_config
+            
+            # Postgres should always be CRITICAL
+            priority = _get_service_priority_for_environment("postgres")
+            assert priority == ServicePriority.CRITICAL
+            
+            # System resources should be IMPORTANT
+            priority = _get_service_priority_for_environment("system_resources")
+            assert priority == ServicePriority.IMPORTANT
+    @pytest.mark.asyncio
+    async def test_health_checker_concurrent_checks(self):
+        """Test concurrent health check executions."""
+        checker = HealthChecker()
+        
+        # Mock multiple concurrent checks
+        check_tasks = []
+        for i in range(3):
+            task = asyncio.create_task(checker.check_component('postgres'))
+            check_tasks.append(task)
+        
+        # Should handle concurrent checks without issues
+        results = await asyncio.gather(*check_tasks, return_exceptions=True)
+        assert len(results) == 3
+        
+        # All results should be valid (no exceptions)
+        for result in results:
+            assert not isinstance(result, Exception)

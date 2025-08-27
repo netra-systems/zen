@@ -806,7 +806,7 @@ async def _execute_auth_service_check() -> None:
         from netra_backend.app.core.isolated_environment import get_env
         
         # Get auth service URL from environment
-        auth_base_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8001')
+        auth_base_url = get_env().get('AUTH_SERVICE_URL', 'http://localhost:8081')
         health_url = f"{auth_base_url}/health"
         
         # Quick connectivity check with minimal timeout

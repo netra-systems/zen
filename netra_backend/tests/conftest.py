@@ -41,6 +41,12 @@ import sys
 import os
 import atexit
 
+# Apply stderr patch to prevent I/O errors during test teardown
+try:
+    from . import test_logging_patch  # Import to apply the patch
+except ImportError:
+    pass
+
 # Enhanced collection mode detection and cleanup registration
 if "pytest" in sys.modules and not get_env().get("PYTEST_CURRENT_TEST"):
     # Only set collection mode if pytest is imported but we're not currently executing a test
@@ -59,6 +65,16 @@ def _cleanup_async_resources():
             loop = asyncio.get_event_loop()
             if loop and not loop.is_closed():
                 loop.close()
+        except Exception:
+            pass
+        
+        # Safely cleanup loguru handlers to prevent I/O errors during test shutdown
+        try:
+            from loguru import logger
+            import time
+            # Remove all handlers to prevent closed file I/O errors
+            time.sleep(0.05)  # Small delay to allow any queued messages to be processed
+            logger.remove()
         except Exception:
             pass
 
@@ -95,7 +111,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
         # Use PostgreSQL URL format even for tests to satisfy validator
         if not env.get("TEST_COLLECTION_MODE"):
             database_url = DatabaseConstants.build_postgres_url(
-                user="test", password="test", 
+                user="postgres", password="postgres", 
                 port=ServicePorts.POSTGRES_DEFAULT,
                 database="netra_test"
             )
@@ -108,7 +124,7 @@ if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
             env.set("REDIS_PORT", str(ServicePorts.REDIS_DEFAULT), source="netra_backend_conftest")
         else:
             # Use simple defaults during collection mode
-            env.set("DATABASE_URL", "postgresql://test:test@localhost:5432/netra_test", source="netra_backend_conftest")
+            env.set("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test", source="netra_backend_conftest")
             env.set("REDIS_URL", "redis://localhost:6379/0", source="netra_backend_conftest")
             env.set("REDIS_HOST", "localhost", source="netra_backend_conftest")
             env.set("REDIS_PORT", "6379", source="netra_backend_conftest")
@@ -322,6 +338,26 @@ else:
     @pytest.fixture
     def test_config():
         """Placeholder config fixture for collection mode."""
+        pass
+
+# Auto-cleanup fixture to prevent I/O errors during test teardown
+@pytest.fixture(autouse=True)
+def cleanup_loguru_handlers():
+    """Automatically cleanup loguru handlers after each test to prevent I/O errors."""
+    yield  # Run the test
+    # Cleanup after test completes
+    try:
+        from loguru import logger
+        import warnings
+        import time
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            # Small delay to allow queued messages to be processed
+            time.sleep(0.01) 
+            # Remove all handlers
+            logger.remove()
+    except (ImportError, ValueError, OSError):
+        # Ignore any errors during cleanup - this is common during test teardown
         pass
 
 # Common test utilities

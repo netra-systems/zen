@@ -418,7 +418,7 @@ class MetricsCollector:
         """Filter metrics by timestamp."""
         return [
             metric for metric in metrics
-            if metric.timestamp > cutoff_time
+            if metric.timestamp >= cutoff_time
         ]
     
     def get_metric_summary(self, metric_name: str, duration_seconds: int = 300) -> Dict[str, float]:
@@ -432,7 +432,9 @@ class MetricsCollector:
             return {}
         
         values = [m.value for m in metrics]
-        return self._calculate_summary_stats(values)
+        basic_stats = self._get_basic_stats(values)
+        extended_stats = self._get_extended_stats_with_metrics(metrics)
+        return {**basic_stats, **extended_stats}
     
     def _calculate_summary_stats(self, values: List[float]) -> Dict[str, float]:
         """Calculate summary statistics for metric values."""
@@ -453,4 +455,13 @@ class MetricsCollector:
         return {
             "avg": sum(values) / len(values),
             "current": values[-1] if values else 0.0
+        }
+
+    def _get_extended_stats_with_metrics(self, metrics: List[PerformanceMetric]) -> Dict[str, float]:
+        """Get extended statistical measures using full metrics list."""
+        values = [m.value for m in metrics]
+        most_recent_metric = max(metrics, key=lambda m: m.timestamp)
+        return {
+            "avg": sum(values) / len(values),
+            "current": most_recent_metric.value if metrics else 0.0
         }

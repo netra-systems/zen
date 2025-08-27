@@ -174,7 +174,7 @@ class WebSocketTestConfig:
 class WebSocketConnection:
     """Tracks individual WebSocket connection state."""
     connection_id: str
-    websocket: Optional[websockets.WebSocketServerProtocol]
+    websocket: Optional[websockets.legacy.server.WebSocketServerProtocol]
     connected_at: float
     last_ping: Optional[float] = None
     messages_sent: int = 0

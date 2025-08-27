@@ -20,6 +20,7 @@ class TestSecretManagerInitialization:
     """Test SecretManager initialization and configuration."""
     
     @patch('netra_backend.app.core.secret_manager.config_manager')
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging'}, clear=False)
     def test_initialization_with_staging_environment(self, mock_config_manager):
         """Test initialization detects staging environment correctly."""
         mock_config = Mock()
@@ -33,11 +34,12 @@ class TestSecretManagerInitialization:
         assert manager._config == mock_config
         
     @patch('netra_backend.app.core.secret_manager.config_manager')
+    @patch.dict('os.environ', {'ENVIRONMENT': 'production'}, clear=False)
     def test_initialization_with_production_environment(self, mock_config_manager):
         """Test initialization detects production environment correctly."""
         mock_config = Mock()
         mock_config.environment = 'production'
-        mock_config.gcp_project_id_numerical_staging = '304612253870'
+        mock_config.gcp_project_id_numerical_production = '304612253870'
         mock_config_manager.get_config.return_value = mock_config
         
         manager = SecretManager()
@@ -49,7 +51,7 @@ class TestSecretManagerInitialization:
         """Test initialization uses production defaults for development."""
         mock_config = Mock()
         mock_config.environment = 'development'
-        mock_config.gcp_project_id_numerical_staging = '304612253870'
+        mock_config.gcp_project_id_numerical_production = '304612253870'
         mock_config.secret_manager_project_id = '999999999999'
         mock_config_manager.get_config.return_value = mock_config
         
@@ -196,6 +198,7 @@ class TestSecretFetching:
     
     @patch('netra_backend.app.core.secret_manager.config_manager')
     @patch('netra_backend.app.core.secret_manager.secretmanager.SecretManagerServiceClient')
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging'}, clear=False)
     def test_fetch_secret_success(self, mock_client_class, mock_config_manager):
         """Test successful secret fetching."""
         mock_config = Mock()

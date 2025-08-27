@@ -109,7 +109,7 @@ class TestFirstTimeUserRealCritical:
         # Mock token generation since deprecated function returns empty string
         # TODO: Replace with proper auth service call
         def mock_create_access_token(data, expires_delta):
-            exp = datetime.utcnow() + expires_delta
+            exp = datetime.now(timezone.utc) + expires_delta
             payload = {**data, "exp": exp.timestamp()}
             return jwt.encode(payload, jwt_secret_key, algorithm="HS256")
         
@@ -219,17 +219,16 @@ class TestFirstTimeUserRealCritical:
         
         # Test first 10 requests are allowed (real rate limiting)
         for request_num in range(10):
-            is_limited = rate_limiter.is_rate_limited(conn_info)
-            assert not is_limited, f"Request {request_num + 1} should be allowed"
+            is_allowed, rate_info = rate_limiter.is_allowed(conn_info.user_id)
+            assert is_allowed, f"Request {request_num + 1} should be allowed"
         
         # Test 11th request is blocked (real enforcement)
-        is_limited = rate_limiter.is_rate_limited(conn_info)
-        assert is_limited, "Request 11 should be blocked for free tier"
+        is_allowed, rate_info = rate_limiter.is_allowed(conn_info.user_id)
+        assert not is_allowed, "Request 11 should be blocked for free tier"
         
         # Test real rate limit info
-        rate_info = rate_limiter.get_rate_limit_info(conn_info)
-        assert rate_info["max_requests"] == 10
-        assert rate_info["is_limited"] is True
+        assert rate_info["requests_count"] == 10
+        assert rate_info["remaining_requests"] == 0
 
     @pytest.mark.asyncio
     async def test_5_real_websocket_connection_handshake_flow(self):
@@ -435,7 +434,7 @@ class TestFirstTimeUserRealCritical:
         # Mock verification token generation since deprecated function returns empty string
         # TODO: Replace with proper auth service call
         def mock_create_verification_token(data, expires_delta):
-            exp = datetime.utcnow() + expires_delta
+            exp = datetime.now(timezone.utc) + expires_delta
             payload = {**data, "exp": exp.timestamp()}
             return jwt.encode(payload, jwt_secret_key, algorithm="HS256")
         
@@ -508,6 +507,55 @@ class TestFirstTimeUserRealCritical:
         second_hash = mock_get_password_hash(plain_password)
         assert second_hash != hashed_password  # Should be different due to salt
         assert mock_verify_password(plain_password, second_hash) is True
+
+
+class TestFirstTimeUserSecurityEnhancements:
+    """Test security enhancements and modern datetime handling for first-time users."""
+    
+    def test_timezone_aware_datetime_handling(self):
+        """Test that datetime operations use timezone-aware datetime objects."""
+        from datetime import datetime, timedelta, UTC
+        
+        # Use modern UTC datetime instead of deprecated utcnow()
+        current_time = datetime.now(UTC)
+        expires_delta = timedelta(hours=1)
+        exp_time = current_time + expires_delta
+        
+        # Verify timezone awareness
+        assert current_time.tzinfo is not None
+        assert exp_time.tzinfo is not None
+        
+        # Verify time calculations work correctly
+        assert exp_time > current_time
+        time_diff = exp_time - current_time
+        assert time_diff == expires_delta
+    
+    def test_user_input_validation_edge_cases(self):
+        """Test user input validation for edge cases."""
+        # Test email validation edge cases
+        valid_emails = [
+            "user@domain.com",
+            "user.name@domain.co.uk", 
+            "user+tag@domain.org"
+        ]
+        
+        invalid_emails = [
+            "",  # Empty
+            "notanemail",  # No @
+            "@domain.com",  # No local part
+            "user@",  # No domain
+        ]
+        
+        # Basic email format validation (simplified)
+        import re
+        email_pattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$'
+        
+        for email in valid_emails:
+            assert re.match(email_pattern, email) is not None
+            
+        for email in invalid_emails:
+            assert re.match(email_pattern, email) is None
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

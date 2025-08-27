@@ -13,6 +13,7 @@ Cycles Covered: 16, 17, 18, 19, 20
 
 import pytest
 import asyncio
+import os
 from unittest.mock import patch, MagicMock
 import time
 
@@ -32,6 +33,10 @@ class TestClickHouseReliability:
     @pytest.fixture
     async def clickhouse_manager(self):
         """Create isolated ClickHouse manager for testing."""
+        # Skip if ClickHouse is disabled in testing environment
+        if os.getenv("CLICKHOUSE_ENABLED", "false").lower() == "false":
+            pytest.skip("ClickHouse disabled for testing environment")
+        
         manager = ClickHouseManager()
         await manager.initialize()
         yield manager
