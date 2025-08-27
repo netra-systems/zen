@@ -286,6 +286,16 @@
             <critical-takeaway context="Schema">Ensure strict alignment of message fields (e.g., 'content' vs 'text') between FE/BE.</critical-takeaway>
         </category>
         
+        <category name="WebSocket State Management Critical Fix [RESOLVED]" path="SPEC/learnings/websocket_state_management.xml" keywords="WebSocket, State Management, Subprotocol, Client State, Application State, Immediate Disconnect, ABNORMAL_CLOSURE">
+            <critical-takeaway>RESOLVED 2025-08-27: WebSocket immediate disconnect with ABNORMAL_CLOSURE (1006) FIXED - dual issue with state checking and subprotocol negotiation.</critical-takeaway>
+            <critical-takeaway>CRITICAL: WebSocket.accept() MUST include subprotocol parameter if client sends any subprotocols - RFC 6455 requirement.</critical-takeaway>
+            <critical-takeaway>is_websocket_connected() MUST check client_state first (Starlette), then application_state, then default to True.</critical-takeaway>
+            <critical-takeaway>Frontend sends jwt-auth and jwt.token subprotocols - backend MUST respond with selected protocol or client closes immediately.</critical-takeaway>
+            <critical-takeaway>All WebSocket state checks MUST use centralized is_websocket_connected() function for SSOT - 16 locations updated.</critical-takeaway>
+            <critical-takeaway>Test with real WebSocket connections not just mocks - state management differs between frameworks.</critical-takeaway>
+            <critical-takeaway>Symptoms: "Loading chat..." forever, connection accepted then immediately closed, 0 messages processed.</critical-takeaway>
+        </category>
+        
         <category name="WebSocket Docker Fixes [RESOLVED]" path="SPEC/learnings/websocket_docker_fixes.xml" keywords="WebSocket, Docker, Development, Authentication Bypass, CORS, Container Networking, Bridge Network, Development Environment">
             <critical-takeaway>RESOLVED 2025-08-27: WebSocket Docker connectivity FIXED - development authentication bypass and CORS configuration implemented.</critical-takeaway>
             <critical-takeaway>CRITICAL: Set ALLOW_DEV_AUTH_BYPASS=true and WEBSOCKET_AUTH_BYPASS=true for Docker development environment.</critical-takeaway>

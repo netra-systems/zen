@@ -61,7 +61,22 @@ def get_current_iso_timestamp() -> str:
 
 def is_websocket_connected(websocket: WebSocket) -> bool:
     """Check if WebSocket is connected."""
-    return hasattr(websocket, 'application_state') and websocket.application_state == WebSocketState.CONNECTED
+    # Check multiple conditions to determine if WebSocket is connected
+    # 1. Check if WebSocket has client_state (Starlette WebSocket attribute)
+    if hasattr(websocket, 'client_state'):
+        is_connected = websocket.client_state == WebSocketState.CONNECTED
+        logger.debug(f"WebSocket state check: client_state={websocket.client_state}, connected={is_connected}")
+        return is_connected
+    
+    # 2. Fallback to application_state if available
+    if hasattr(websocket, 'application_state'):
+        is_connected = websocket.application_state == WebSocketState.CONNECTED
+        logger.debug(f"WebSocket state check: application_state={websocket.application_state}, connected={is_connected}")
+        return is_connected
+    
+    # 3. Default to True if we can't determine state (let the receive() call handle disconnection)
+    logger.debug("WebSocket state check: No state attributes found, defaulting to connected=True")
+    return True
 
 
 async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], str],

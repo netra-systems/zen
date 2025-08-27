@@ -41,7 +41,6 @@ from netra_backend.app.websocket_core import (
     secure_websocket_context,
     WebSocketHeartbeat,
     get_connection_monitor,
-    is_websocket_connected,
     safe_websocket_send,
     safe_websocket_close,
     create_server_message,
@@ -49,6 +48,7 @@ from netra_backend.app.websocket_core import (
     MessageType,
     WebSocketConfig
 )
+from netra_backend.app.websocket_core.utils import is_websocket_connected
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(tags=["WebSocket"])
@@ -114,8 +114,23 @@ async def websocket_endpoint(websocket: WebSocket):
         async with secure_websocket_context(websocket) as (auth_info, security_manager):
             user_id = auth_info.user_id
             
-            # Accept WebSocket connection
-            await websocket.accept()
+            # Accept WebSocket connection with appropriate subprotocol
+            # Check if client sent subprotocols
+            subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
+            selected_protocol = None
+            
+            # Select jwt-auth if available (client supports authentication)
+            if "jwt-auth" in [p.strip() for p in subprotocols]:
+                selected_protocol = "jwt-auth"
+            
+            # Accept with selected subprotocol
+            if selected_protocol:
+                await websocket.accept(subprotocol=selected_protocol)
+                logger.info(f"WebSocket accepted with subprotocol: {selected_protocol}")
+            else:
+                await websocket.accept()
+                logger.info("WebSocket accepted without subprotocol")
+            
             connection_start_time = time.time()
             logger.info(f"WebSocket connection accepted for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
             
@@ -155,6 +170,8 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # Main message handling loop
             logger.info(f"Starting message handling loop for connection: {connection_id}")
+            # Debug: Check WebSocket state before entering loop
+            logger.info(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
             await _handle_websocket_messages(
                 websocket, user_id, connection_id, ws_manager, 
                 message_router, connection_monitor, security_manager, heartbeat
@@ -163,7 +180,7 @@ async def websocket_endpoint(websocket: WebSocket):
             
     except HTTPException as e:
         logger.error(f"WebSocket authentication failed: {e.detail}")
-        if websocket.application_state != WebSocketState.DISCONNECTED:
+        if is_websocket_connected(websocket):
             await safe_websocket_close(websocket, code=e.status_code, reason=e.detail[:50])
     
     except WebSocketDisconnect as e:
@@ -228,8 +245,15 @@ async def _handle_websocket_messages(
     message_count = 0
     logger.info(f"Entering message handling loop for connection: {connection_id} (user: {user_id})")
     
+    # Debug WebSocket state at loop entry
+    logger.info(f"WebSocket state at loop entry - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
+    
     try:
+        first_check = True
         while is_websocket_connected(websocket):
+            if first_check:
+                logger.info(f"First loop iteration for {connection_id}, WebSocket is_connected returned True")
+                first_check = False
             try:
                 # Track loop iteration with detailed state
                 loop_duration = time.time() - loop_start_time
@@ -620,7 +644,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
     
     except Exception as e:
         logger.error(f"Test WebSocket error: {e}", exc_info=True)
-        if websocket.application_state != WebSocketState.DISCONNECTED:
+        if is_websocket_connected(websocket):
             try:
                 await websocket.close(code=1011, reason="Internal error")
             except:

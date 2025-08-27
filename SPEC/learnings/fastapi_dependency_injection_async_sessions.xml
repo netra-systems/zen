@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>FastAPI Dependency Injection with Async Sessions</title>
+        <date>2025-08-27</date>
+        <category>auth</category>
+        <tags>
+            <tag>fastapi</tag>
+            <tag>async</tag>
+            <tag>sqlalchemy</tag>
+            <tag>dependency-injection</tag>
+        </tags>
+    </metadata>
+    
+    <problem>
+        <description>
+            TypeError: 'async_generator' object does not support the asynchronous context manager protocol
+            when trying to use `async with db as session:` in a FastAPI dependency function.
+        </description>
+        <error_location>
+            netra_backend/app/auth_integration/auth.py:78 in get_current_user
+        </error_location>
+        <stack_trace>
+            <![CDATA[
+File "/app/netra_backend/app/auth_integration/auth.py", line 78, in get_current_user
+    async with db as session:
+TypeError: 'async_generator' object does not support the asynchronous context manager protocol
+            ]]>
+        </stack_trace>
+    </problem>
+    
+    <root_cause>
+        <description>
+            When using FastAPI's Depends() with an async generator function that yields an AsyncSession,
+            the dependency injection system already handles the async context manager protocol internally.
+            The injected parameter is the yielded AsyncSession object, not the generator itself.
+        </description>
+        <incorrect_understanding>
+            Attempting to use the injected session as a context manager with `async with db as session:`
+        </incorrect_understanding>
+        <correct_understanding>
+            The injected `db` parameter IS already the AsyncSession - use it directly
+        </correct_understanding>
+    </root_cause>
+    
+    <solution>
+        <description>
+            Remove the async context manager usage and use the injected session directly
+        </description>
+        <incorrect_code>
+            <![CDATA[
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db_session)
+) -> User:
+    # INCORRECT - db is already the session, not a generator
+    async with db as session:
+        result = await session.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+            ]]>
+        </incorrect_code>
+        <correct_code>
+            <![CDATA[
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db_session)
+) -> User:
+    # CORRECT - db is already the AsyncSession
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+            ]]>
+        </correct_code>
+    </solution>
+    
+    <key_insights>
+        <insight>
+            FastAPI's dependency injection with async generators handles the context manager protocol
+            internally. The function receives the yielded value, not the generator.
+        </insight>
+        <insight>
+            When a dependency is defined as `async def get_db() -> AsyncGenerator[AsyncSession, None]: yield session`,
+            any function using `Depends(get_db)` receives the `session` directly, not the generator.
+        </insight>
+        <insight>
+            This pattern ensures proper cleanup - FastAPI calls the generator's cleanup code after the request completes.
+        </insight>
+    </key_insights>
+    
+    <best_practices>
+        <practice>
+            Always use the injected database session directly in FastAPI dependencies
+        </practice>
+        <practice>
+            Type hint the dependency parameter as AsyncSession for clarity: `db: AsyncSession = Depends(get_db)`
+        </practice>
+        <practice>
+            Let FastAPI handle the async context manager lifecycle for database sessions
+        </practice>
+        <practice>
+            Use the modern pattern: `from netra_backend.app.dependencies import DbDep` for type-safe dependency injection
+        </practice>
+    </best_practices>
+    
+    <related_files>
+        <file>netra_backend/app/auth_integration/auth.py</file>
+        <file>netra_backend/app/dependencies.py</file>
+        <file>netra_backend/app/db/database_manager.py</file>
+    </related_files>
+    
+    <testing>
+        <description>
+            Verify that auth functions work correctly with the fixed session handling
+        </description>
+        <test_commands>
+            <command>python -m pytest netra_backend/tests/auth_integration/ -xvs -k "test_get_current_user"</command>
+            <command>python unified_test_runner.py --category integration --fast-fail</command>
+        </test_commands>
+    </testing>
+</learning>

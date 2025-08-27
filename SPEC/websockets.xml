@@ -3,10 +3,11 @@
   <metadata>
     <name>Netra WebSockets</name>
     <type>NETRA_WEBSOCKETS</type>
-    <version>1.1</version>
-    <last_edited>2025-08-27T00:00:00.000000</last_edited>
+    <version>1.2</version>
+    <last_edited>2025-08-27T04:20:00.000000</last_edited>
     <changes>
       <change version="1.1" date="2025-08-27">Added Docker development configuration requirements and troubleshooting</change>
+      <change version="1.2" date="2025-08-27">Fixed WebSocket state management and subprotocol negotiation issues</change>
     </changes>
   </metadata>
   <primary-spec>
@@ -196,4 +197,20 @@
       <description>NETRA_WEBSOCKETS End to end testing</description>
     </requirement>
   </technical-requirements>
+  <related-learnings>
+    <learning path="SPEC/learnings/websocket_state_management.xml">
+      <description>Critical fix for WebSocket immediate disconnect issue with state management and subprotocol negotiation</description>
+      <key-points>
+        <point>WebSocket.accept() must include subprotocol parameter if client sends any</point>
+        <point>is_websocket_connected() must check client_state before application_state</point>
+        <point>All state checks must use centralized function for SSOT</point>
+      </key-points>
+    </learning>
+    <learning path="SPEC/learnings/websocket_docker_fixes.xml">
+      <description>Docker-specific WebSocket configuration and authentication bypass</description>
+    </learning>
+    <learning path="SPEC/learnings/websocket_consolidation.xml">
+      <description>WebSocket module consolidation and SSOT patterns</description>
+    </learning>
+  </related-learnings>
 </specification>

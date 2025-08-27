@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket State Management Critical Fix</title>
+    <date>2025-08-27</date>
+    <category>websocket</category>
+    <severity>critical</severity>
+    <impact>production</impact>
+  </metadata>
+  
+  <problem>
+    <description>
+      WebSocket connections were immediately disconnecting after acceptance with 
+      ABNORMAL_CLOSURE (1006) error code. The connection would be accepted, 
+      authenticated, but immediately close when entering the message handling loop.
+    </description>
+    
+    <symptoms>
+      <symptom>Frontend showing "Loading chat..." indefinitely</symptom>
+      <symptom>WebSocket connects then immediately disconnects (0.0s duration)</symptom>
+      <symptom>Backend logs show ABNORMAL_CLOSURE: 1006 with no errors</symptom>
+      <symptom>Messages processed: 0 for all connections</symptom>
+    </symptoms>
+    
+    <root_cause>
+      The is_websocket_connected() function was only checking websocket.application_state,
+      but Starlette/FastAPI WebSockets use websocket.client_state as the primary state
+      attribute. The application_state attribute may not be set, causing the function to
+      always return False and immediately exit the message loop.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <approach>
+      The fix required TWO separate issues to be addressed:
+      
+      1. WebSocket State Checking:
+      Updated is_websocket_connected() to check multiple state attributes in order:
+      - First check client_state (Starlette's primary attribute)
+      - Fallback to application_state if client_state doesn't exist
+      - Default to True if neither attribute exists (let receive() handle disconnection)
+      
+      2. WebSocket Subprotocol Negotiation:
+      The frontend sends subprotocols (jwt-auth, jwt.token) but the backend wasn't
+      responding with a selected subprotocol. This caused the client to immediately
+      close the connection as it didn't receive the expected protocol acknowledgment.
+      Fixed by accepting the WebSocket with the appropriate subprotocol.
+    </approach>
+    
+    <implementation>
+      <file>netra_backend/app/websocket_core/utils.py</file>
+      <change>
+        Modified is_websocket_connected() function to properly check both
+        client_state and application_state with appropriate fallback logic.
+      </change>
+      
+      <file>netra_backend/app/routes/websocket.py</file>
+      <change>
+        Modified websocket_endpoint() to accept WebSocket with proper subprotocol
+        negotiation. Checks for client-requested subprotocols and responds with
+        "jwt-auth" if requested by the client.
+      </change>
+    </implementation>
+    
+    <ssot_compliance>
+      Updated all direct WebSocket state checks across the codebase to use the
+      centralized is_websocket_connected() function, ensuring Single Source of Truth:
+      - netra_backend/app/websocket_core/manager.py (6 checks)
+      - netra_backend/app/websocket_core/handlers.py (7 checks)  
+      - netra_backend/app/websocket_core/auth.py (1 check)
+      - netra_backend/app/routes/websocket.py (2 checks)
+      - netra_backend/app/routes/utils/websocket_helpers.py (1 check)
+    </ssot_compliance>
+  </solution>
+  
+  <testing>
+    <test_file>netra_backend/tests/critical/test_websocket_state_regression.py</test_file>
+    <test_coverage>
+      - Tests both client_state and application_state scenarios
+      - Tests mixed state conditions
+      - Tests fallback behavior when no state attributes exist
+      - Regression tests for Starlette and FastAPI WebSocket behaviors
+      - Integration tests for connection lifecycle
+    </test_coverage>
+  </testing>
+  
+  <prevention>
+    <guideline>
+      Always use is_websocket_connected() from netra_backend.app.websocket_core.utils
+      instead of directly checking WebSocket state attributes.
+    </guideline>
+    
+    <guideline>
+      When working with WebSockets, be aware that different frameworks may use
+      different attribute names for connection state (client_state vs application_state).
+    </guideline>
+    
+    <guideline>
+      Test WebSocket functionality with actual WebSocket connections, not just
+      unit tests, as state management behavior can differ between mocks and real objects.
+    </guideline>
+  </prevention>
+  
+  <five_whys_analysis>
+    <why level="1">
+      Q: Why were WebSocket connections immediately disconnecting?
+      A: Initially thought to be is_websocket_connected() returning False, but actually
+      the client was immediately closing the connection after receiving the acceptance.
+    </why>
+    <why level="2">
+      Q: Why was the client closing the connection immediately?
+      A: Because the server wasn't responding with a selected subprotocol when the
+      client sent subprotocols in the connection request.
+    </why>
+    <why level="3">
+      Q: Why wasn't the server responding with a subprotocol?
+      A: Because the WebSocket.accept() call didn't include the subprotocol parameter
+      even though the client requested specific protocols (jwt-auth, jwt.token).
+    </why>
+    <why level="4">
+      Q: Why was the subprotocol negotiation missing?
+      A: Because the WebSocket RFC requires servers to respond with a selected
+      subprotocol if the client sends any, but this was not implemented.
+    </why>
+    <why level="5">
+      Q: Why was this requirement overlooked?
+      A: Because WebSocket subprotocol negotiation is often optional, but some clients
+      (including our frontend) strictly require it when they send subprotocols.
+    </why>
+  </five_whys_analysis>
+  
+  <references>
+    <reference>Starlette WebSocket documentation</reference>
+    <reference>FastAPI WebSocket implementation</reference>
+    <reference>WebSocket RFC 6455 connection states</reference>
+  </references>
+</learning>

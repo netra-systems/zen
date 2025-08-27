@@ -39,6 +39,7 @@ from netra_backend.app.schemas.websocket_models import (
 from netra_backend.app.websocket_core.rate_limiter import get_rate_limiter, check_connection_rate_limit
 from netra_backend.app.websocket_core.heartbeat_manager import get_heartbeat_manager, register_connection_heartbeat
 from netra_backend.app.websocket_core.message_buffer import get_message_buffer, buffer_user_message, BufferPriority
+from netra_backend.app.websocket_core.utils import is_websocket_connected
 from netra_backend.app.services.external_api_client import HTTPError
 
 logger = central_logger.get_logger(__name__)
@@ -159,9 +160,8 @@ class WebSocketManager:
     async def _close_websocket_safely(self, websocket: WebSocket, code: int = 1000, reason: str = "Normal closure") -> None:
         """Close WebSocket safely by checking states."""
         try:
-            # Only close if both client and application states are connected
-            if (hasattr(websocket, 'client_state') and websocket.client_state == WebSocketState.CONNECTED and
-                hasattr(websocket, 'application_state') and websocket.application_state == WebSocketState.CONNECTED):
+            # Only close if websocket is connected
+            if is_websocket_connected(websocket):
                 await websocket.close(code=code, reason=reason)
         except Exception as e:
             logger.warning(f"Error closing WebSocket safely: {e}")
@@ -214,16 +214,14 @@ class WebSocketManager:
         self._leave_all_rooms_for_connection(connection_id)
         
         # CRITICAL FIX: Close WebSocket safely to prevent "Unexpected ASGI message" errors
-        if websocket.application_state == WebSocketState.CONNECTED:
+        if is_websocket_connected(websocket):
             try:
-                # Check if client is still connected before closing
-                if websocket.client_state == WebSocketState.CONNECTED:
-                    await websocket.close(code=code, reason=reason)
-                    logger.info(f"WebSocket closed for connection {connection_id}: {code} - {reason}")
-                else:
-                    logger.debug(f"WebSocket client already disconnected for {connection_id}")
+                await websocket.close(code=code, reason=reason)
+                logger.info(f"WebSocket closed for connection {connection_id}: {code} - {reason}")
             except Exception as e:
                 logger.warning(f"Error closing WebSocket {connection_id}: {e}")
+        else:
+            logger.debug(f"WebSocket already disconnected for {connection_id}")
         
         # Remove connection
         del self.connections[connection_id]
@@ -279,11 +277,7 @@ class WebSocketManager:
         
         # Check WebSocket states if websocket is available
         if hasattr(connection_info, 'websocket') and connection_info.websocket:
-            # Check client state
-            if hasattr(connection_info.websocket, 'client_state') and connection_info.websocket.client_state != WebSocketState.CONNECTED:
-                return False
-            # Check application state  
-            if hasattr(connection_info.websocket, 'application_state') and connection_info.websocket.application_state != WebSocketState.CONNECTED:
+            if not is_websocket_connected(connection_info.websocket):
                 return False
             
         return True
@@ -311,8 +305,8 @@ class WebSocketManager:
             websocket = conn["websocket"]
         
         # CRITICAL FIX: Check WebSocket state more carefully to prevent premature cleanup
-        if websocket.application_state != WebSocketState.CONNECTED:
-            logger.warning(f"WebSocket not connected for {connection_id}, state: {websocket.application_state}")
+        if not is_websocket_connected(websocket):
+            logger.warning(f"WebSocket not connected for {connection_id}")
             await self._cleanup_connection(connection_id, 1000, "Connection lost")
             return False
         
@@ -539,7 +533,7 @@ class WebSocketManager:
                 if (current_time - last_activity).total_seconds() > 300:
                     stale_connections.append(conn_id)
                 # Check WebSocket state
-                elif websocket.application_state != WebSocketState.CONNECTED:
+                elif not is_websocket_connected(websocket):
                     stale_connections.append(conn_id)
             
             # Clean up stale connections

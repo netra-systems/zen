@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <name>Cloud Armor Security Configuration</name>
+  <description>
+    Comprehensive specification for Cloud Armor security policies, WAF rules, and exception handling
+    for the Netra Staging environment.
+  </description>
+  
+  <overview>
+    Cloud Armor provides DDoS protection and Web Application Firewall (WAF) capabilities for our
+    load balancers. This specification documents our security policy configuration, known issues,
+    and solutions.
+  </overview>
+  
+  <security_policy>
+    <name>staging-security-policy</name>
+    <type>CLOUD_ARMOR</type>
+    
+    <adaptive_protection>
+      <layer7_ddos_defense enabled="true" visibility="STANDARD"/>
+    </adaptive_protection>
+    
+    <rules>
+      <!-- OAuth Exception Rule - MUST BE HIGHEST PRIORITY -->
+      <rule priority="50" action="allow">
+        <description>
+          Allow OAuth callback - exempts Google OAuth callbacks from SQL injection false positives.
+          Google OAuth authorization codes contain URL-encoded forward slashes (4%2F0...) that
+          trigger OWASP SQL injection rule id942432-sqli false positives.
+        </description>
+        <match>
+          <expression>request.path == '/auth/callback'</expression>
+        </match>
+        <rationale>
+          OAuth providers (especially Google) return authorization codes with URL-encoded
+          characters that legitimate contain patterns like %2F which SQL injection rules
+          interpret as potential attacks. This is a known false positive that must be
+          exempted.
+        </rationale>
+      </rule>
+      
+      <!-- SQL Injection Protection -->
+      <rule priority="100" action="deny(403)">
+        <description>Block SQL injection attempts</description>
+        <match>
+          <preconfigured_expr>sqli-stable</preconfigured_expr>
+          <included_rules>
+            <rule>owasp-crs-v030001-id942251-sqli</rule>
+            <rule>owasp-crs-v030001-id942420-sqli</rule>
+            <rule>owasp-crs-v030001-id942421-sqli</rule>  <!-- Triggers on WebSocket paths -->
+            <rule>owasp-crs-v030001-id942431-sqli</rule>
+            <rule>owasp-crs-v030001-id942432-sqli</rule>  <!-- Triggers on OAuth callbacks -->
+            <rule>owasp-crs-v030001-id942460-sqli</rule>
+          </included_rules>
+        </match>
+        <known_false_positives>
+          <pattern>OAuth callback URLs with code parameter containing 4%2F0...</pattern>
+          <pattern>WebSocket connection URLs with certain query parameters</pattern>
+        </known_false_positives>
+      </rule>
+      
+      <!-- XSS Protection -->
+      <rule priority="101" action="deny(403)">
+        <description>Block XSS attempts</description>
+        <match>
+          <preconfigured_expr>xss-stable</preconfigured_expr>
+        </match>
+      </rule>
+      
+      <!-- Rate Limiting -->
+      <rule priority="1000" action="rate_based_ban">
+        <description>Rate limiting - 100 requests per minute per IP</description>
+        <rate_limit>
+          <threshold count="100" interval_sec="60"/>
+          <ban_duration_sec>600</ban_duration_sec>
+          <exceed_action>deny(429)</exceed_action>
+        </rate_limit>
+      </rule>
+      
+      <!-- API Endpoint Rate Limiting -->
+      <rule priority="700" action="rate_based_ban">
+        <description>API endpoint rate limiting - 1000 requests per minute</description>
+        <match>
+          <expression>request.path.matches('/api/.*')</expression>
+        </match>
+        <rate_limit>
+          <threshold count="1000" interval_sec="60"/>
+          <ban_duration_sec>300</ban_duration_sec>
+          <exceed_action>deny(429)</exceed_action>
+        </rate_limit>
+      </rule>
+    </rules>
+  </security_policy>
+  
+  <known_issues>
+    <issue id="oauth-callback-403" status="resolved">
+      <description>
+        OAuth callback URLs blocked by OWASP SQL injection rule id942432-sqli
+      </description>
+      <symptoms>
+        - 403 errors on /auth/callback endpoints
+        - Log shows: preconfiguredExprIds: ["owasp-crs-v030001-id942432-sqli"]
+        - Affects Google OAuth callbacks with code parameter like "4%2F0AVMBsJi..."
+      </symptoms>
+      <root_cause>
+        The URL-encoded forward slash (%2F) in Google's OAuth authorization codes
+        triggers the SQL injection detection rule as a false positive.
+      </root_cause>
+      <solution>
+        Added exception rule at priority 50 to allow /auth/callback path before
+        SQL injection rules are evaluated (priority 100).
+      </solution>
+      <implementation_date>2025-08-27</implementation_date>
+    </issue>
+    
+    <issue id="websocket-403" status="monitoring">
+      <description>
+        WebSocket connections blocked by OWASP SQL injection rule id942421-sqli
+      </description>
+      <symptoms>
+        - 403 errors on /ws endpoints
+        - Log shows: preconfiguredExprIds: ["owasp-crs-v030001-id942421-sqli"]
+      </symptoms>
+      <root_cause>
+        Certain WebSocket connection parameters trigger SQL injection detection.
+        Further investigation needed to identify specific patterns.
+      </root_cause>
+      <potential_solution>
+        May need to add similar exception rule for /ws path if legitimate
+        traffic continues to be blocked.
+      </potential_solution>
+    </issue>
+  </known_issues>
+  
+  <monitoring>
+    <log_analysis>
+      <tool>scripts/analyze_cloud_armor_logs.py</tool>
+      <common_commands>
+        <command purpose="View all blocked requests">
+          python scripts/analyze_cloud_armor_logs.py --denied
+        </command>
+        <command purpose="View OAuth-specific blocks">
+          python scripts/analyze_cloud_armor_logs.py --oauth
+        </command>
+        <command purpose="Analyze specific URL patterns">
+          python scripts/analyze_cloud_armor_logs.py --url "/auth/callback"
+        </command>
+        <command purpose="Check specific OWASP rule triggers">
+          python scripts/analyze_cloud_armor_logs.py --rule "id942432"
+        </command>
+        <command purpose="Get summary of blocked requests">
+          python scripts/analyze_cloud_armor_logs.py --summary --limit 100
+        </command>
+      </common_commands>
+    </log_analysis>
+    
+    <gcloud_commands>
+      <command purpose="View security policy">
+        gcloud compute security-policies describe staging-security-policy --project=netra-staging
+      </command>
+      <command purpose="List security policy rules">
+        gcloud compute security-policies rules list --security-policy=staging-security-policy --project=netra-staging
+      </command>
+      <command purpose="Query denied requests in logs">
+        gcloud logging read "resource.type=\"http_load_balancer\" AND jsonPayload.statusDetails=\"denied_by_security_policy\"" --limit=20 --project=netra-staging
+      </command>
+    </gcloud_commands>
+  </monitoring>
+  
+  <best_practices>
+    <practice>
+      Always test OAuth flows after modifying security policies as they often
+      trigger false positives due to URL-encoded parameters.
+    </practice>
+    <practice>
+      Create specific exception rules for known false positives rather than
+      disabling entire rule categories.
+    </practice>
+    <practice>
+      Monitor logs regularly using the provided Python script to identify
+      patterns in blocked legitimate traffic.
+    </practice>
+    <practice>
+      Document all security policy changes with clear descriptions explaining
+      why exceptions were added.
+    </practice>
+    <practice>
+      Use preview mode (preview=true) for new blocking rules before enforcing
+      them to identify potential false positives.
+    </practice>
+  </best_practices>
+  
+  <references>
+    <reference type="documentation">
+      https://cloud.google.com/armor/docs/security-policy-overview
+    </reference>
+    <reference type="owasp-crs">
+      https://cloud.google.com/armor/docs/rule-tuning#owasp-modsecurity-crs
+    </reference>
+    <reference type="preconfigured-rules">
+      https://cloud.google.com/armor/docs/waf-rules
+    </reference>
+  </references>
+</spec>

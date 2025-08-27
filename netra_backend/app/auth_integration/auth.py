@@ -74,27 +74,26 @@ async def get_current_user(
 
     from sqlalchemy import select
     
-    # Use async session properly with context manager
-    async with db as session:
-        result = await session.execute(select(User).where(User.id == user_id))
-        user = result.scalar_one_or_none()
-        
-        if not user:
-            # In development mode, create and persist a dev user
-            from netra_backend.app.config import get_config
-            config = get_config()
-            if config.environment == "development":
-                from netra_backend.app.services.user_service import user_service
-                
-                # Use centralized dev user creation
-                email = validation_result.get("email", "dev@example.com")
-                user = await user_service.get_or_create_dev_user(session, email=email, user_id=user_id)
-                logger.warning(f"Using dev user: {user.email}")
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="User not found",
-                )
+    # db is already an AsyncSession from the dependency injection
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        # In development mode, create and persist a dev user
+        from netra_backend.app.config import get_config
+        config = get_config()
+        if config.environment == "development":
+            from netra_backend.app.services.user_service import user_service
+            
+            # Use centralized dev user creation
+            email = validation_result.get("email", "dev@example.com")
+            user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
+            logger.warning(f"Using dev user: {user.email}")
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
     
     return user
 
