@@ -265,6 +265,41 @@ class WebSocketManager:
         """Alias for send_to_user for backward compatibility."""
         return await self.send_to_user(user_id, message, retry)
     
+    async def send_to_thread(self, thread_id: str, 
+                            message: Union[WebSocketMessage, Dict[str, Any]]) -> bool:
+        """Send message to all users in a thread."""
+        # Find all connections for the given thread (copy keys to avoid iteration issues)
+        connections_sent = 0
+        conn_ids = list(self.connections.keys())
+        
+        for conn_id in conn_ids:
+            # Check if connection still exists and is associated with the thread
+            if conn_id in self.connections:
+                conn_info = self.connections[conn_id]
+                if conn_info.get("thread_id") == thread_id:
+                    # Try to send without cleanup in iteration
+                    try:
+                        websocket = conn_info["websocket"]
+                        if hasattr(message, 'model_dump'):
+                            message_dict = message.model_dump()
+                        elif hasattr(message, 'dict'):
+                            message_dict = message.dict()
+                        else:
+                            message_dict = message
+                        
+                        await websocket.send_json(message_dict)
+                        connections_sent += 1
+                        conn_info["message_count"] = conn_info.get("message_count", 0) + 1
+                    except Exception as e:
+                        logger.debug(f"Failed to send to connection {conn_id}: {e}")
+        
+        if connections_sent > 0:
+            logger.debug(f"Sent message to {connections_sent} connections in thread {thread_id}")
+            return True
+        
+        logger.warning(f"No active connections found for thread {thread_id}")
+        return False
+    
     def _is_connection_ready(self, connection_info: 'ConnectionInfo') -> bool:
         """Check if connection is ready to receive messages."""
         # Check if connection is in closing state

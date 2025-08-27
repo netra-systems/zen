@@ -158,7 +158,7 @@ class DeepAgentState(BaseModel):
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert state to dictionary."""
-        return self.model_dump(exclude_none=True)
+        return self.model_dump(exclude_none=True, mode='json')
     
     def copy_with_updates(self, **updates: Any) -> 'DeepAgentState':
         """Create a new instance with updated fields (immutable pattern)."""

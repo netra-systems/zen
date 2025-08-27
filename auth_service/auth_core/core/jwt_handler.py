@@ -349,7 +349,8 @@ class JWTHandler:
             "sub": sub,
             "iat": int(now.timestamp()),
             "exp": int(exp.timestamp()),
-            "token_type": token_type,
+            "token_type": token_type,  # Keep existing field for backward compatibility
+            "type": token_type,        # Add new field for tests that expect it
             "iss": "netra-auth-service",  # Issuer claim
             "aud": self._get_audience_for_token_type(token_type),  # Enhanced audience
             "jti": str(uuid.uuid4()),     # JWT ID for replay protection

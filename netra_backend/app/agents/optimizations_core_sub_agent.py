@@ -18,9 +18,9 @@ from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,
     ExecutionResult,
-    ExecutionStatus,
     WebSocketManagerProtocol,
 )
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import (
     CircuitBreakerConfig,
@@ -117,7 +117,7 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
         
         context = self.create_execution_context(state, run_id, stream_updates)
         result = await self.reliability_manager.execute_with_reliability(
-            context, self._execute_with_modern_patterns
+            context, lambda: self._execute_with_modern_patterns(context)
         )
         
         if result.success:
@@ -126,16 +126,34 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
         # Log agent communication completion
         log_agent_communication("OptimizationsCoreSubAgent", "Supervisor", run_id, "execute_response")
     
-    async def _execute_with_modern_patterns(self, context: ExecutionContext) -> Dict[str, Any]:
+    async def _execute_with_modern_patterns(self, context: ExecutionContext) -> ExecutionResult:
         """Execute using modern execution patterns."""
         if not await self.validate_preconditions(context):
-            return await self._create_fallback_result(context)
+            result = await self._create_fallback_result(context)
+            return ExecutionResult(
+                success=True,
+                status=ExecutionStatus.COMPLETED,
+                result=result,
+                fallback_used=True
+            )
         
         try:
-            return await self.execute_core_logic(context)
+            result = await self.execute_core_logic(context)
+            return ExecutionResult(
+                success=True,
+                status=ExecutionStatus.COMPLETED,
+                result=result
+            )
         except Exception as e:
             logger.error(f"Core logic failed: {e}")
-            return await self._create_fallback_result(context)
+            result = await self._create_fallback_result(context)
+            return ExecutionResult(
+                success=True,
+                status=ExecutionStatus.COMPLETED,
+                result=result,
+                error=str(e),
+                fallback_used=True
+            )
     
     async def _create_fallback_result(self, context: ExecutionContext) -> Dict[str, Any]:
         """Create fallback optimization result."""

@@ -47,10 +47,40 @@ def _is_descriptive_text_format(stripped: str) -> bool:
             not stripped.endswith(('}', ']', '"')) and
             len(stripped.split(',')) > 1)
 
+def _is_json_fragment(stripped: str) -> bool:
+    """Check if string appears to be a JSON fragment (incomplete JSON)."""
+    # Check for key-value pairs that look like JSON fragments
+    if '"' in stripped and ':' in stripped:
+        # Check if it starts with a quoted key but isn't wrapped in braces/brackets
+        if (stripped.startswith('"') and 
+            not stripped.startswith(('{', '[')) and 
+            not stripped.endswith(('}', ']'))):
+            return True
+        # Check for multiple key-value pairs without proper JSON structure
+        if ', "' in stripped and not stripped.startswith(('{', '[')):
+            return True
+    return False
+
 def _handle_non_json_format(value: str, fallback: Any, format_type: str) -> Any:
     """Handle non-JSON format strings."""
     logger.debug(f"String appears to be {format_type}, not JSON: {value[:100]}...")
     return fallback if fallback is not None else value
+
+def _handle_json_fragment(value: str, fallback: Any) -> Any:
+    """Handle JSON fragment strings by attempting to wrap them in a valid JSON structure."""
+    stripped = value.strip()
+    
+    # Try to wrap the fragment in curly braces to make it valid JSON
+    wrapped = f"{{{stripped}}}"
+    
+    try:
+        parsed = json.loads(wrapped)
+        logger.debug(f"Successfully parsed JSON fragment by wrapping: {value[:100]}...")
+        return parsed
+    except (json.JSONDecodeError, TypeError):
+        # If wrapping doesn't work, log at debug level (not warning) since this is expected
+        logger.debug(f"JSON fragment cannot be parsed even with wrapping: {value[:100]}...")
+        return fallback if fallback is not None else value
 
 def _attempt_json_parsing(value: str, fallback: Any) -> Any:
     """Attempt to parse string as JSON."""
@@ -256,7 +286,8 @@ def _is_non_json_format(stripped: str) -> bool:
     """Check if string appears to be non-JSON format."""
     return (_is_command_line_format(stripped) or 
             _is_key_value_pair_format(stripped) or 
-            _is_descriptive_text_format(stripped))
+            _is_descriptive_text_format(stripped) or
+            _is_json_fragment(stripped))
 
 
 def _handle_detected_non_json_format(value: str, fallback: Any, stripped: str) -> Any:
@@ -265,6 +296,8 @@ def _handle_detected_non_json_format(value: str, fallback: Any, stripped: str) -
         return _handle_non_json_format(value, fallback, "command-line arguments")
     if _is_key_value_pair_format(stripped):
         return _handle_non_json_format(value, fallback, "key-value pair")
+    if _is_json_fragment(stripped):
+        return _handle_json_fragment(value, fallback)
     return _handle_non_json_format(value, fallback, "descriptive text")
 
 

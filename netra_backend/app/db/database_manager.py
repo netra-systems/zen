@@ -989,7 +989,13 @@ class DatabaseManager:
         async with async_session_factory() as session:
             try:
                 yield session
-                await session.commit()
+                # Only commit if session is active and not in an error state
+                if session.is_active and not session.in_transaction():
+                    await session.commit()
+            except asyncio.CancelledError:
+                # Handle task cancellation - don't attempt any session operations
+                # The async context manager will handle cleanup
+                raise
             except GeneratorExit:
                 # Handle generator cleanup gracefully
                 # Session context manager will handle cleanup
