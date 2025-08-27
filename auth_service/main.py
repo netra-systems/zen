@@ -42,7 +42,7 @@ else:
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
 from shared.logging import get_logger, configure_service_logging
-from shared.cors_config import get_fastapi_cors_config
+from shared.cors_config import get_fastapi_cors_config, log_cors_security_event
 
 # Configure unified logging for auth service
 configure_service_logging({
@@ -337,7 +337,8 @@ cors_config["allow_headers"].extend([
 ])
 cors_config["expose_headers"].extend([
     "X-Service-Name", 
-    "X-Service-Version"
+    "X-Service-Version",
+    "Vary"  # CORS-005: Expose Vary header for security
 ])
 
 logger.info(f"CORS configured for {env} environment with {len(cors_config['allow_origins'])} origins")
@@ -368,11 +369,29 @@ from auth_service.auth_core.security.middleware import (
 
 @app.middleware("http")
 async def security_and_service_middleware(request: Request, call_next):
-    """Canonical security middleware using SSOT implementation"""
+    """Enhanced security middleware with CORS security features"""
+    from shared.cors_config import validate_content_type, is_service_to_service_request
+    
     # Request size validation (canonical implementation)
     size_error = await validate_request_size(request)
     if size_error:
         return size_error
+    
+    # CORS-012: Validate Content-Type for security
+    content_type = request.headers.get("content-type")
+    origin = request.headers.get("origin")
+    request_id = request.headers.get("x-request-id", "unknown")
+    
+    if content_type and not validate_content_type(content_type):
+        # SEC-002: Log suspicious Content-Type
+        log_cors_security_event(
+            event_type="suspicious_content_type",
+            origin=origin or "unknown",
+            path=request.url.path,
+            environment=AuthConfig.get_environment(),
+            request_id=request_id,
+            additional_info={"content_type": content_type, "service": "auth-service"}
+        )
     
     # Process request
     response = await call_next(request)
@@ -380,6 +399,10 @@ async def security_and_service_middleware(request: Request, call_next):
     # Add service and security headers (canonical implementation)
     add_service_headers(response, "auth-service", "1.0.0")
     add_security_headers(response)
+    
+    # CORS-005: Add Vary: Origin header if origin is present
+    if origin:
+        response.headers["Vary"] = "Origin"
     
     return response
 
@@ -506,6 +529,24 @@ async def health_ready() -> Dict[str, Any]:
 async def readiness() -> Dict[str, Any]:
     """Alternative readiness endpoint with same validation logic"""
     return await health_ready()
+
+# CORS health check endpoint
+@app.get("/cors/test")
+@app.head("/cors/test")
+async def cors_test() -> Dict[str, Any]:
+    """CORS configuration test endpoint for debugging and validation"""
+    from shared.cors_config import get_cors_health_info
+    
+    env = AuthConfig.get_environment()
+    cors_info = get_cors_health_info(env)
+    
+    return {
+        "service": "auth-service",
+        "version": "1.0.0",
+        "cors_status": "configured",
+        "timestamp": datetime.now(UTC).isoformat(),
+        **cors_info
+    }
 
 if __name__ == "__main__":
     import uvicorn

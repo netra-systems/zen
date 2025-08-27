@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Auth Service Client Implementation Patterns</title>
+  <type>implementation_pattern</type>
+  <category>authentication</category>
+  <services>backend, auth_service</services>
+  <date>2025-08-27</date>
+  
+  <pattern_overview>
+    The auth service client requires special handling to ensure both service-to-service
+    authentication and user authentication work correctly together.
+  </pattern_overview>
+  
+  <critical_requirements>
+    <requirement priority="1">
+      ALL auth service calls must include service authentication headers
+    </requirement>
+    <requirement priority="2">
+      User bearer tokens and service auth headers must coexist
+    </requirement>
+    <requirement priority="3">
+      Service credentials must be loaded at client initialization
+    </requirement>
+  </critical_requirements>
+  
+  <implementation_template>
+    <class_initialization>
+      <code language="python">
+class AuthServiceClient:
+    def __init__(self):
+        # ... other initialization ...
+        
+        # CRITICAL: Load service credentials
+        from netra_backend.app.core.configuration import get_configuration
+        config = get_configuration()
+        self.service_id = config.service_id or "netra-backend"
+        self.service_secret = config.service_secret
+      </code>
+    </class_initialization>
+    
+    <header_management>
+      <code language="python">
+def _get_request_headers(self, include_auth: bool = True, bearer_token: str = None) -> Dict[str, str]:
+    """Get headers for auth service requests.
+    
+    Args:
+        include_auth: Whether to include service auth headers
+        bearer_token: Optional bearer token for user auth
+        
+    Returns:
+        Dict of headers combining service auth, tracing, and user auth
+    """
+    headers = {}
+    
+    # Service authentication (always needed)
+    if include_auth:
+        headers.update(self._get_service_auth_headers())
+    
+    # Distributed tracing
+    trace_headers = self.tracing_manager.inject_trace_headers()
+    headers.update(trace_headers)
+    
+    # User authentication (when provided)
+    if bearer_token:
+        from netra_backend.app.core.auth_constants import HeaderConstants
+        headers[HeaderConstants.AUTHORIZATION] = f"{HeaderConstants.BEARER_PREFIX}{bearer_token}"
+    
+    return headers
+      </code>
+    </header_management>
+    
+    <api_call_pattern>
+      <code language="python">
+# For endpoints that don't require user auth
+async def some_service_operation(self, data: Dict) -> Optional[Dict]:
+    client = await self._get_client()
+    headers = self._get_request_headers()  # Service auth only
+    response = await client.post("/endpoint", json=data, headers=headers)
+    return response.json() if response.status_code == 200 else None
+
+# For endpoints that require user auth
+async def user_specific_operation(self, token: str, data: Dict) -> Optional[Dict]:
+    client = await self._get_client()
+    headers = self._get_request_headers(bearer_token=token)  # Both service and user auth
+    response = await client.post("/user-endpoint", json=data, headers=headers)
+    return response.json() if response.status_code == 200 else None
+      </code>
+    </api_call_pattern>
+  </implementation_template>
+  
+  <error_handling>
+    <status_code value="401">
+      <meaning>Authentication failed - check SERVICE_SECRET or JWT token</meaning>
+      <action>Log warning about auth failure, check credentials</action>
+    </status_code>
+    <status_code value="403">
+      <meaning>Service not authorized for this operation</meaning>
+      <action>Check SERVICE_ID is correct and service has permissions</action>
+    </status_code>
+    <status_code value="200">
+      <meaning>Success - parse and return response</meaning>
+      <action>Process response normally</action>
+    </status_code>
+  </error_handling>
+  
+  <websocket_specific>
+    <note>
+      WebSocket authentication is particularly sensitive because the auth validation
+      happens during the connection upgrade, making debugging harder.
+    </note>
+    
+    <validation_flow>
+      1. WebSocket receives token (header or protocol)
+      2. Backend extracts token
+      3. Backend calls auth service WITH service auth headers
+      4. Auth service validates both service auth and user JWT
+      5. Returns validation result
+      6. WebSocket accepts or rejects connection
+    </validation_flow>
+  </websocket_specific>
+  
+  <deployment_checklist>
+    <environment name="development">
+      <setting>AUTH_SERVICE_ENABLED can be false for local testing</setting>
+      <setting>SERVICE_SECRET can be a test value</setting>
+    </environment>
+    
+    <environment name="staging">
+      <setting>AUTH_SERVICE_ENABLED=true (REQUIRED)</setting>
+      <setting>SERVICE_SECRET from Secret Manager (REQUIRED)</setting>
+      <setting>SERVICE_ID=netra-backend (or appropriate service name)</setting>
+      <setting>AUTH_SERVICE_URL=https://auth.staging.netrasystems.ai</setting>
+    </environment>
+    
+    <environment name="production">
+      <setting>Same as staging but with production URLs and secrets</setting>
+    </environment>
+  </deployment_checklist>
+  
+  <common_failures>
+    <failure>
+      <symptom>WebSocket returns 500 Internal Server Error</symptom>
+      <cause>Auth service rejecting validation due to missing headers</cause>
+      <fix>Ensure _get_request_headers() is used in validation calls</fix>
+    </failure>
+    
+    <failure>
+      <symptom>Auth operations work locally but fail in staging</symptom>
+      <cause>AUTH_SERVICE_ENABLED not set or SERVICE_SECRET missing</cause>
+      <fix>Set environment variables in Cloud Run configuration</fix>
+    </failure>
+    
+    <failure>
+      <symptom>Intermittent auth failures</symptom>
+      <cause>Some endpoints using headers, others not</cause>
+      <fix>Audit all auth client methods to ensure headers are included</fix>
+    </failure>
+  </common_failures>
+  
+  <best_practices>
+    <practice>Always use centralized header generation methods</practice>
+    <practice>Log service auth headers in debug mode (not secrets)</practice>
+    <practice>Test with invalid credentials to ensure proper rejection</practice>
+    <practice>Monitor 401/403 rates to detect auth issues early</practice>
+    <practice>Document which endpoints need user auth vs just service auth</practice>
+  </best_practices>
+</learning>
