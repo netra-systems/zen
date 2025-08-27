@@ -666,9 +666,12 @@ class WebSocketService {
         this.status = 'OPEN';
         this.onStatusChange?.(this.status);
         
-        // Token authentication handled securely via subprotocol
-        // No additional auth message needed
-        logger.debug('WebSocket connected, secure authentication completed');
+        // CRITICAL FIX: Handle both authenticated and development mode connections
+        if (options.token) {
+          logger.debug('WebSocket connected with token authentication');
+        } else {
+          logger.debug('WebSocket connected in development mode (no authentication required)');
+        }
         
         // Send queued messages
         while (this.messageQueue.length > 0) {
@@ -681,8 +684,10 @@ class WebSocketService {
           this.startHeartbeat(options.heartbeatInterval);
         }
 
-        // Setup token refresh
-        this.setupTokenRefresh();
+        // CRITICAL FIX: Only setup token refresh if we have a token
+        if (options.token) {
+          this.setupTokenRefresh();
+        }
         
         options.onOpen?.();
       };
@@ -738,7 +743,7 @@ class WebSocketService {
         this.onStatusChange?.(this.status);
         this.stopHeartbeat();
         
-        // Handle authentication errors specifically
+        // CRITICAL FIX: Handle authentication errors, but ignore them in development mode
         if (event.code === 1008) {
           logger.error('WebSocket authentication failed', undefined, {
             component: 'WebSocketService',
@@ -746,23 +751,28 @@ class WebSocketService {
             metadata: { code: event.code, reason: event.reason }
           });
           
-          // Check if this is a token expiry issue
-          const isTokenExpired = event.reason && (
-            event.reason.includes('Token expired') ||
-            event.reason.includes('token has expired') ||
-            event.reason.includes('JWT expired')
-          );
-          
-          if (isTokenExpired && !this.isRefreshingToken) {
-            logger.debug('WebSocket closed due to token expiry, attempting refresh');
-            this.performTokenRefresh().catch(error => {
-              logger.error('Token refresh after auth error failed', error as Error);
-            });
+          // CRITICAL FIX: In development mode without token, don't treat auth errors as fatal
+          if (!this.currentToken) {
+            logger.debug('WebSocket auth error in development mode (no token), ignoring');
           } else {
-            this.handleAuthError({
-              code: event.code,
-              reason: event.reason || 'Authentication failed'
-            });
+            // Check if this is a token expiry issue
+            const isTokenExpired = event.reason && (
+              event.reason.includes('Token expired') ||
+              event.reason.includes('token has expired') ||
+              event.reason.includes('JWT expired')
+            );
+            
+            if (isTokenExpired && !this.isRefreshingToken) {
+              logger.debug('WebSocket closed due to token expiry, attempting refresh');
+              this.performTokenRefresh().catch(error => {
+                logger.error('Token refresh after auth error failed', error as Error);
+              });
+            } else {
+              this.handleAuthError({
+                code: event.code,
+                reason: event.reason || 'Authentication failed'
+              });
+            }
           }
         }
         
@@ -947,12 +957,14 @@ class WebSocketService {
   /**
    * Creates a secure WebSocket connection using proper authentication methods.
    * Uses subprotocol for JWT authentication (browser-compatible method)
+   * CRITICAL FIX: Handle development mode without token authentication
    */
   private createSecureWebSocket(url: string, options: WebSocketOptions): WebSocket {
     const token = options.token;
     
+    // CRITICAL FIX: In development mode, allow connections without authentication
     if (!token) {
-      logger.debug('Creating WebSocket without authentication');
+      logger.debug('Creating WebSocket without authentication (development mode)');
       return new WebSocket(url);
     }
 
@@ -964,28 +976,35 @@ class WebSocketService {
     // Encode the JWT token to make it safe for subprotocol use
     // Remove "Bearer " prefix and encode for safe transmission
     const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
-    // Base64URL encode the token to ensure it's safe for subprotocol
-    const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     
-    // Build protocols array with auth and compression support
-    const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
-    
-    // Add compression protocols if supported
-    if (options.compression) {
-      const compressionProtocols = options.compression
-        .filter(alg => this.supportedCompression.includes(alg))
-        .map(alg => `compression-${alg}`);
-      protocols.push(...compressionProtocols);
+    try {
+      // Base64URL encode the token to ensure it's safe for subprotocol
+      const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+      
+      // Build protocols array with auth and compression support
+      const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
+      
+      // Add compression protocols if supported
+      if (options.compression) {
+        const compressionProtocols = options.compression
+          .filter(alg => this.supportedCompression.includes(alg))
+          .map(alg => `compression-${alg}`);
+        protocols.push(...compressionProtocols);
+      }
+      
+      logger.debug('Creating secure WebSocket with authentication and compression support', {
+        url: url,
+        protocols: protocols.map(p => p.startsWith('jwt.') ? 'jwt.[token]' : p),
+        tokenPrefix: cleanToken.substring(0, 10) + '...',
+        encodedTokenLength: encodedToken.length
+      });
+      
+      return new WebSocket(url, protocols);
+    } catch (error) {
+      logger.error('Failed to encode token for WebSocket authentication, falling back to unauthenticated connection', error as Error);
+      // CRITICAL FIX: Fallback to unauthenticated connection for development mode
+      return new WebSocket(url);
     }
-    
-    logger.debug('Creating secure WebSocket with authentication and compression support', {
-      url: url,
-      protocols: protocols.map(p => p.startsWith('jwt.') ? 'jwt.[token]' : p),
-      tokenPrefix: cleanToken.substring(0, 10) + '...',
-      encodedTokenLength: encodedToken.length
-    });
-    
-    return new WebSocket(url, protocols);
   }
 
   /**

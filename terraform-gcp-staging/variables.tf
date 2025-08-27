@@ -234,6 +234,25 @@ variable "redis_version" {
   default     = "REDIS_7_2"
 }
 
+# Load Balancer Configuration
+variable "backend_timeout_sec" {
+  description = "Backend service timeout in seconds for WebSocket support"
+  type        = number
+  default     = 3600  # 1 hour for WebSocket connections
+}
+
+variable "session_affinity_ttl_sec" {
+  description = "Session affinity cookie TTL in seconds"
+  type        = number
+  default     = 3600  # 1 hour
+}
+
+variable "force_https_enabled" {
+  description = "Force HTTPS for all services"
+  type        = bool
+  default     = true
+}
+
 # Labels for resource organization
 variable "labels" {
   description = "Labels to apply to all resources"

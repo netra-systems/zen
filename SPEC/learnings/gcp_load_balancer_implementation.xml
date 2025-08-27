@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <metadata>
+    <title>GCP Load Balancer Implementation Learnings</title>
+    <date>2025-08-27</date>
+    <category>deployment,infrastructure,gcp,load-balancer,websocket</category>
+    <priority>critical</priority>
+    <tags>terraform,https,websocket,cors,health-checks,production</tags>
+  </metadata>
+
+  <summary>
+    Critical learnings from implementing 6 mandatory GCP load balancer requirements for production deployment.
+    These requirements ensure WebSocket support, HTTPS security, and proper protocol handling.
+  </summary>
+
+  <critical_requirements>
+    <requirement id="1" status="mandatory">
+      <name>Backend Protocol HTTPS</name>
+      <learning>All backend services MUST use protocol="HTTPS" in Terraform configuration</learning>
+      <implementation>
+        resource "google_compute_backend_service" {
+          protocol = "HTTPS"  # NOT "HTTP"
+        }
+      </implementation>
+      <impact>Without HTTPS backend protocol, SSL termination fails and security is compromised</impact>
+    </requirement>
+
+    <requirement id="2" status="mandatory">
+      <name>WebSocket Support Configuration</name>
+      <learning>WebSockets require both extended timeout AND session affinity for stable connections</learning>
+      <implementation>
+        resource "google_compute_backend_service" {
+          timeout_sec = 3600  # Extended from default 30s
+          session_affinity = "GENERATED_COOKIE"
+          affinity_cookie_ttl_sec = 3600
+        }
+      </implementation>
+      <impact>Without 3600s timeout, WebSocket connections drop after 30 seconds causing data loss</impact>
+    </requirement>
+
+    <requirement id="3" status="mandatory">
+      <name>Protocol Header Preservation</name>
+      <learning>X-Forwarded-Proto header MUST be preserved to maintain HTTPS context through load balancer</learning>
+      <implementation>
+        custom_request_headers = ["X-Forwarded-Proto: https"]
+      </implementation>
+      <impact>Missing headers cause redirect loops and break HTTPS enforcement</impact>
+    </requirement>
+
+    <requirement id="4" status="mandatory">
+      <name>HTTPS Health Checks</name>
+      <learning>Health checks MUST use HTTPS protocol on port 443, not HTTP on 8080</learning>
+      <implementation>
+        resource "google_compute_health_check" {
+          https_health_check {  # Changed from http_health_check
+            port = 443
+            request_path = "/health"
+          }
+        }
+      </implementation>
+      <impact>HTTP health checks fail against HTTPS-only backends, causing false unhealthy status</impact>
+    </requirement>
+
+    <requirement id="5" status="mandatory">
+      <name>CORS HTTPS-Only Origins</name>
+      <learning>Production CORS must restrict origins to HTTPS URLs only</learning>
+      <implementation>
+        allow_origins = [
+          "https://staging.netrasystems.ai",
+          "https://api.staging.netrasystems.ai"
+        ]
+        # NO http:// origins in production
+      </implementation>
+      <impact>HTTP origins in production enable man-in-the-middle attacks</impact>
+    </requirement>
+
+    <requirement id="6" status="mandatory">
+      <name>Cloud Run Ingress Configuration</name>
+      <learning>Cloud Run services require ingress="all" with FORCE_HTTPS=true environment variable</learning>
+      <implementation>
+        gcloud run deploy --ingress "all" \
+          --set-env-vars "FORCE_HTTPS=true"
+      </implementation>
+      <impact>Restricted ingress blocks load balancer traffic; missing FORCE_HTTPS allows insecure connections</impact>
+    </requirement>
+  </critical_requirements>
+
+  <implementation_insights>
+    <insight category="terraform">
+      <learning>Use variables for timeout and session affinity values to enable environment-specific configuration</learning>
+      <example>
+        variable "backend_timeout_sec" {
+          default = 3600
+          description = "Backend timeout for WebSocket support"
+        }
+      </example>
+    </insight>
+
+    <insight category="validation">
+      <learning>Static configuration validation catches issues before deployment, preventing production outages</learning>
+      <tool>scripts/validate_gcp_deployment.py</tool>
+      <usage>python scripts/validate_gcp_deployment.py --min-compliance 95.0</usage>
+    </insight>
+
+    <insight category="testing">
+      <learning>E2E tests must validate WebSocket persistence beyond initial connection</learning>
+      <implementation>
+        - Test initial WebSocket connection
+        - Send messages after 60+ seconds to verify timeout
+        - Reconnect and verify session affinity
+      </implementation>
+    </insight>
+
+    <insight category="debugging">
+      <learning>Load balancer logs are critical for diagnosing WebSocket issues</learning>
+      <location>GCP Console > Network Services > Load Balancing > Logs</location>
+      <common_issues>
+        - "upstream_connection_termination" = timeout too short
+        - "no_healthy_upstream" = health check protocol mismatch
+        - "cors_request_blocked" = origin not in allowlist
+      </common_issues>
+    </insight>
+  </implementation_insights>
+
+  <common_pitfalls>
+    <pitfall id="1">
+      <issue>Assuming default 30-second timeout is sufficient</issue>
+      <symptom>WebSocket connections dropping unexpectedly</symptom>
+      <solution>Always set timeout_sec=3600 for WebSocket services</solution>
+    </pitfall>
+
+    <pitfall id="2">
+      <issue>Using HTTP health checks for HTTPS backends</issue>
+      <symptom>Services marked unhealthy despite working correctly</symptom>
+      <solution>Use https_health_check with port 443</solution>
+    </pitfall>
+
+    <pitfall id="3">
+      <issue>Missing session affinity for WebSocket connections</issue>
+      <symptom>WebSocket reconnects hitting different backend instances</symptom>
+      <solution>Configure session_affinity="GENERATED_COOKIE"</solution>
+    </pitfall>
+
+    <pitfall id="4">
+      <issue>Forgetting FORCE_HTTPS environment variable</issue>
+      <symptom>Services accepting HTTP connections in production</symptom>
+      <solution>Always set FORCE_HTTPS=true in Cloud Run deployment</solution>
+    </pitfall>
+  </common_pitfalls>
+
+  <production_checklist>
+    <item>Verify all backend services use HTTPS protocol</item>
+    <item>Confirm 3600s timeout for WebSocket-enabled services</item>
+    <item>Test session affinity with multiple WebSocket connections</item>
+    <item>Validate HTTPS health checks are responding</item>
+    <item>Audit CORS origins for HTTPS-only in production</item>
+    <item>Ensure FORCE_HTTPS=true in all Cloud Run services</item>
+    <item>Run validation script with 95% minimum compliance</item>
+    <item>Execute E2E tests including WebSocket persistence</item>
+    <item>Monitor load balancer logs for first 24 hours</item>
+  </production_checklist>
+
+  <multi_agent_coordination>
+    <learning>Complex infrastructure changes benefit from specialized agent collaboration</learning>
+    <agents_used>
+      - DevOps Agent: Infrastructure analysis and Terraform updates
+      - QA Agent: Validation system and E2E test creation
+      - Documentation Agent: Specification updates and audit reports
+    </agents_used>
+    <coordination_pattern>
+      1. Principal Engineer creates comprehensive task list
+      2. DevOps Agent analyzes current state and implements changes
+      3. QA Agent creates validation and testing infrastructure
+      4. Documentation Agent updates specifications
+      5. Principal Engineer validates compliance and generates report
+    </coordination_pattern>
+  </multi_agent_coordination>
+
+  <validation_strategy>
+    <static_validation>
+      <tool>scripts/validate_gcp_deployment.py</tool>
+      <purpose>Parse Terraform files and validate configuration</purpose>
+      <frequency>Pre-deployment on every change</frequency>
+    </static_validation>
+    
+    <dynamic_validation>
+      <tool>tests/e2e/test_gcp_deployment_requirements.py</tool>
+      <purpose>Test live infrastructure behavior</purpose>
+      <frequency>Post-deployment and continuous monitoring</frequency>
+    </dynamic_validation>
+    
+    <compliance_thresholds>
+      <staging>90% minimum compliance</staging>
+      <production>95% minimum compliance</production>
+    </compliance_thresholds>
+  </validation_strategy>
+
+  <references>
+    <reference type="specification">SPEC/gcp_deployment.xml</reference>
+    <reference type="validation">SPEC/gcp_deployment_validation.xml</reference>
+    <reference type="terraform">terraform-gcp-staging/load-balancer.tf</reference>
+    <reference type="script">scripts/deploy_to_gcp.py</reference>
+    <reference type="test">tests/e2e/test_gcp_deployment_requirements.py</reference>
+    <reference type="report">docs/audit_reports/gcp_load_balancer_implementation_report.md</reference>
+  </references>
+
+  <keywords>
+    gcp,load-balancer,websocket,https,terraform,health-check,cors,session-affinity,
+    timeout,protocol-headers,cloud-run,ingress,force-https,validation,e2e-testing
+  </keywords>
+</learnings>

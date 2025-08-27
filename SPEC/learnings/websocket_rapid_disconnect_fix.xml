@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>WebSocket Rapid Disconnect and Reconnect Issue</title>
+    <date>2025-08-26</date>
+    <category>WebSocket</category>
+    <severity>High</severity>
+    
+    <problem>
+        <description>
+            WebSocket connections were rapidly connecting and disconnecting with code 1006 (abnormal closure)
+            immediately after successful authentication in development mode.
+        </description>
+        <symptoms>
+            - Connection accepted and authenticated successfully (user: dev-temp-*)
+            - Immediate disconnect with code 1006 within milliseconds
+            - Rapid reconnect attempts creating a loop
+            - Frontend logs show connection closed before message handling starts
+        </symptoms>
+        <affected_components>
+            - frontend/providers/WebSocketProvider.tsx
+            - frontend/services/webSocketService.ts
+            - netra_backend/app/routes/websocket.py
+            - netra_backend/app/websocket_core/auth.py
+        </affected_components>
+    </problem>
+    
+    <root_cause>
+        <primary>
+            Development mode authentication bypass is enabled in backend but frontend WebSocketProvider
+            was checking for token and potentially skipping connection or misconfiguring it.
+        </primary>
+        <secondary>
+            Insufficient error logging in WebSocket message handling loop made it difficult to diagnose
+            the exact disconnect reason.
+        </secondary>
+    </root_cause>
+    
+    <solution>
+        <backend_improvements>
+            - Enhanced debug logging in message handling loop to track WebSocket state
+            - Added detailed disconnect reason logging with codes and messages
+            - Improved heartbeat timeout handling to continue loop instead of breaking
+        </backend_improvements>
+        
+        <frontend_improvements>
+            - WebSocketProvider should allow connections in development mode without tokens
+            - WebSocketService already has fallback for development mode (lines 966-968)
+            - Need to ensure AuthContext provides consistent dev tokens or null handling
+        </frontend_improvements>
+        
+        <configuration>
+            - Backend auto-enables development auth bypass when environment='development'
+            - This creates dev-temp-* users automatically for unauthenticated connections
+            - Frontend should be aware of this and handle it appropriately
+        </configuration>
+    </solution>
+    
+    <testing>
+        <test_script>test_websocket_connection.py</test_script>
+        <validation_steps>
+            1. Run backend with development configuration
+            2. Test WebSocket connections with various auth configurations
+            3. Monitor connection lifecycle and disconnect reasons
+            4. Verify heartbeat/ping-pong mechanism works correctly
+        </validation_steps>
+        <success_criteria>
+            - WebSocket connections remain stable for extended periods
+            - No rapid disconnect-reconnect cycles
+            - Clear error messages in logs when disconnections occur
+            - Development mode works without authentication tokens
+        </success_criteria>
+    </testing>
+    
+    <best_practices>
+        <error_logging>
+            Always log WebSocket disconnect codes and reasons explicitly.
+            Include connection ID, user ID, and timestamp in all WebSocket logs.
+            Use debug-level logging for normal operations, info for connections/disconnections,
+            and error for unexpected failures.
+        </error_logging>
+        
+        <development_mode>
+            Development auth bypass should be clearly documented and logged.
+            Frontend and backend must agree on development mode behavior.
+            Never allow auth bypass in production environments.
+        </development_mode>
+        
+        <connection_lifecycle>
+            Log all major lifecycle events: connect, authenticate, ready, disconnect.
+            Include timing information to detect rapid cycling.
+            Track connection duration for monitoring stability.
+        </connection_lifecycle>
+    </best_practices>
+    
+    <preventive_measures>
+        - Add integration tests for WebSocket connections in development mode
+        - Monitor WebSocket connection stability metrics
+        - Implement exponential backoff for reconnection attempts
+        - Add connection health checks and automatic recovery
+        - Include WebSocket diagnostics in health endpoints
+    </preventive_measures>
+    
+    <related_files>
+        - SPEC/websockets.xml
+        - SPEC/websocket_communication.xml
+        - SPEC/learnings/cors_middleware_fix_solution.xml
+        - test_websocket_connection.py
+    </related_files>
+</learning>

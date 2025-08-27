@@ -322,7 +322,7 @@ resource "google_monitoring_alert_policy" "security_violations" {
     display_name = "High rate of security denials"
     
     condition_threshold {
-      filter          = "resource.type=\"http_load_balancer\" AND metric.type=\"loadbalancing.googleapis.com/https/request_count\" AND metric.labels.response_code_class=\"400\""
+      filter          = "resource.type=\"https_lb_rule\" AND metric.type=\"loadbalancing.googleapis.com/https/request_count\" AND metric.label.response_code_class=\"4xx\""
       duration        = "60s"
       comparison      = "COMPARISON_GT"
       threshold_value = 100

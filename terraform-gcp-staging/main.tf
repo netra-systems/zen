@@ -15,6 +15,8 @@ resource "google_storage_bucket" "terraform_state" {
     enabled = true
   }
   
+  uniform_bucket_level_access = true
+  
   lifecycle_rule {
     condition {
       age = 30

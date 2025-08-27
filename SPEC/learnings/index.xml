@@ -249,6 +249,19 @@
             <critical-takeaway>Remove all service discovery imports from dev_launcher in production services.</critical-takeaway>
         </category>
         
+        <category name="GCP Load Balancer Requirements" path="SPEC/learnings/gcp_load_balancer_implementation.xml" keywords="GCP, Load Balancer, WebSocket, HTTPS, Terraform, Health Check, CORS, Session Affinity, Timeout, Protocol Headers, Cloud Run, Ingress">
+            <critical-takeaway>CRITICAL: All 6 load balancer requirements are mandatory for production deployment.</critical-takeaway>
+            <critical-takeaway>Backend services MUST use protocol="HTTPS" in Terraform - HTTP causes SSL termination failures.</critical-takeaway>
+            <critical-takeaway>WebSockets require timeout_sec=3600 AND session_affinity="GENERATED_COOKIE" for stable connections.</critical-takeaway>
+            <critical-takeaway>X-Forwarded-Proto header preservation prevents redirect loops and maintains HTTPS context.</critical-takeaway>
+            <critical-takeaway>Health checks MUST use https_health_check on port 443 - HTTP checks fail against HTTPS backends.</critical-takeaway>
+            <critical-takeaway>Production CORS must restrict to HTTPS-only origins - HTTP origins enable MITM attacks.</critical-takeaway>
+            <critical-takeaway>Cloud Run requires ingress="all" with FORCE_HTTPS=true environment variable.</critical-takeaway>
+            <critical-takeaway>Use scripts/validate_gcp_deployment.py with 95% minimum compliance before deployment.</critical-takeaway>
+            <critical-takeaway>E2E tests must validate WebSocket persistence beyond 60 seconds to verify timeout configuration.</critical-takeaway>
+            <critical-takeaway>Multi-agent coordination effective for complex infrastructure: DevOps, QA, and Documentation agents.</critical-takeaway>
+        </category>
+        
         <category name="AI-Native Path Management" path="SPEC/learnings/ai_native_path_management.xml" keywords="AI-Native, Path Migration, Refactoring, Service Creation, Batch Operations, Import Management">
             <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
             <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>
@@ -271,6 +284,20 @@
             <critical-takeaway context="Error Handling">All failures MUST raise exceptions. Silent failures (e.g., auth hanging) are forbidden.</critical-takeaway>
             <critical-takeaway context="Async">Always await async operations. Verify objects are not coroutines before access.</critical-takeaway>
             <critical-takeaway context="Schema">Ensure strict alignment of message fields (e.g., 'content' vs 'text') between FE/BE.</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket Docker Fixes [RESOLVED]" path="SPEC/learnings/websocket_docker_fixes.xml" keywords="WebSocket, Docker, Development, Authentication Bypass, CORS, Container Networking, Bridge Network, Development Environment">
+            <critical-takeaway>RESOLVED 2025-08-27: WebSocket Docker connectivity FIXED - development authentication bypass and CORS configuration implemented.</critical-takeaway>
+            <critical-takeaway>CRITICAL: Set ALLOW_DEV_AUTH_BYPASS=true and WEBSOCKET_AUTH_BYPASS=true for Docker development environment.</critical-takeaway>
+            <critical-takeaway>Authentication bypass MUST be environment-aware - only enabled when ENVIRONMENT=development with multiple safeguards.</critical-takeaway>
+            <critical-takeaway>CORS configuration enhanced with Docker service names (frontend:3000, backend:8000, auth:8081) and container names (netra-frontend, netra-backend, netra-auth).</critical-takeaway>
+            <critical-takeaway>Docker bridge network IP ranges (172.17.0.1, 172.18.0.1, etc.) added to development CORS origins for container networking.</critical-takeaway>
+            <critical-takeaway>Frontend MUST use ws://localhost:8000/ws for WebSocket URL in Docker environment - host browser to Docker backend.</critical-takeaway>
+            <critical-takeaway>Development environment made permissive for CORS validation - production/staging maintain strict validation.</critical-takeaway>
+            <critical-takeaway>Multiple origin header handling implemented for Docker proxy chains and networking complexity.</critical-takeaway>
+            <critical-takeaway>Use scripts/test_docker_websocket_fix.py for comprehensive Docker WebSocket configuration validation.</critical-takeaway>
+            <critical-takeaway>E2E testing with tests/e2e/test_websocket_dev_docker_connection.py validates connection, retry, and CORS scenarios.</critical-takeaway>
+            <critical-takeaway>Troubleshooting guide at docs/websocket_docker_troubleshooting.md provides diagnosis and solutions for common Docker WebSocket issues.</critical-takeaway>
         </category>
 
         <category name="Configuration/Secrets" path="SPEC/learnings/configuration_secrets.xml" keywords="Env Vars, .env">

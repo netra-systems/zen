@@ -88,6 +88,7 @@ class GCPDeployer:
                     "PYTHONUNBUFFERED": "1",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
+                    "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                 }
             ),
             ServiceConfig(
@@ -116,6 +117,7 @@ class GCPDeployer:
                     "LOG_ASYNC_CHECKOUT": "false",
                     "AUTH_FAST_TEST_MODE": "false",
                     "USE_MEMORY_DB": "false",
+                    "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                 }
             ),
             ServiceConfig(
@@ -131,6 +133,7 @@ class GCPDeployer:
                 environment_vars={
                     "NODE_ENV": "production",
                     "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",
+                    "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
                 }
             )
         ]
@@ -578,7 +581,8 @@ CMD ["npm", "start"]
             "--timeout", str(service.timeout),
             "--allow-unauthenticated",  # Remove for production
             "--no-cpu-throttling",
-            "--ingress", "all"  # Allow traffic from anywhere
+            "--ingress", "all",  # REQUIREMENT 6: Allow traffic from anywhere
+            "--execution-environment", "gen2"  # Use 2nd generation execution environment
         ]
         
         # Add environment variables

@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gcp_deployment_validation>
+    <metadata>
+        <version>1.0.0</version>
+        <created>2025-08-27</created>
+        <purpose>Comprehensive validation system for GCP load balancer deployment requirements</purpose>
+        <scope>Infrastructure validation, deployment testing, CI/CD integration</scope>
+    </metadata>
+
+    <overview>
+        <description>
+            This specification defines a comprehensive validation system for GCP load balancer deployments,
+            ensuring all critical requirements are met before and after deployment. The system includes
+            static configuration validation, live infrastructure testing, and CI/CD pipeline integration.
+        </description>
+        
+        <business_value>
+            <segment>Platform/Internal</segment>
+            <goal>Risk Reduction</goal>
+            <impact>Prevents production outages by validating infrastructure configuration</impact>
+            <strategic_impact>Ensures reliable deployment pipeline and reduces operational overhead</strategic_impact>
+        </business_value>
+    </overview>
+
+    <requirements>
+        <requirement id="1" priority="critical">
+            <name>Load Balancer Backend Protocol HTTPS</name>
+            <description>All backend services must use HTTPS protocol for secure communication</description>
+            <validation_criteria>
+                <criterion>All google_compute_backend_service resources specify protocol = "HTTPS"</criterion>
+                <criterion>All load_balancing_scheme set to "EXTERNAL_MANAGED"</criterion>
+                <criterion>SSL certificates properly configured</criterion>
+            </validation_criteria>
+            <score_weight>20</score_weight>
+        </requirement>
+
+        <requirement id="2" priority="critical">
+            <name>WebSocket Support</name>
+            <description>Load balancer must support WebSocket connections with proper timeouts and session affinity</description>
+            <validation_criteria>
+                <criterion>backend_timeout_sec >= 3600 seconds for WebSocket connections</criterion>
+                <criterion>session_affinity = "GENERATED_COOKIE" for sticky sessions</criterion>
+                <criterion>affinity_cookie_ttl_sec configured appropriately</criterion>
+                <criterion>WebSocket-specific path rules configured (/ws, /websocket)</criterion>
+            </validation_criteria>
+            <score_weight>20</score_weight>
+        </requirement>
+
+        <requirement id="3" priority="critical">
+            <name>Protocol Headers Preservation</name>
+            <description>X-Forwarded-Proto headers must be preserved and set to HTTPS</description>
+            <validation_criteria>
+                <criterion>custom_request_headers include X-Forwarded-Proto: https</criterion>
+                <criterion>All backend services have proper header configuration</criterion>
+                <criterion>URL map includes header forwarding rules</criterion>
+            </validation_criteria>
+            <score_weight>15</score_weight>
+        </requirement>
+
+        <requirement id="4" priority="critical">
+            <name>HTTPS Health Checks</name>
+            <description>Health checks must use HTTPS protocol on port 443</description>
+            <validation_criteria>
+                <criterion>https_health_check block configured (not http_health_check)</criterion>
+                <criterion>port = 443 specified</criterion>
+                <criterion>request_path configured for health endpoints</criterion>
+                <criterion>Health check logging enabled</criterion>
+            </validation_criteria>
+            <score_weight>15</score_weight>
+        </requirement>
+
+        <requirement id="5" priority="critical">
+            <name>CORS Configuration</name>
+            <description>CORS must be configured with HTTPS-only origins</description>
+            <validation_criteria>
+                <criterion>allow_origins contains only HTTPS URLs</criterion>
+                <criterion>No HTTP origins (except localhost for development)</criterion>
+                <criterion>allow_credentials properly configured</criterion>
+                <criterion>Required HTTP methods included</criterion>
+            </validation_criteria>
+            <score_weight>15</score_weight>
+        </requirement>
+
+        <requirement id="6" priority="critical">
+            <name>Cloud Run Ingress Configuration</name>
+            <description>Cloud Run services must allow external traffic with HTTPS enforcement</description>
+            <validation_criteria>
+                <criterion>--ingress all configured for external access</criterion>
+                <criterion>FORCE_HTTPS=true environment variable set</criterion>
+                <criterion>Generation 2 execution environment</criterion>
+                <criterion>Proper SSL certificate configuration</criterion>
+            </validation_criteria>
+            <score_weight>15</score_weight>
+        </requirement>
+    </requirements>
+
+    <validation_tools>
+        <static_validator>
+            <file_path>scripts/validate_gcp_deployment.py</file_path>
+            <description>
+                Comprehensive Python script that parses Terraform configuration files and 
+                deployment scripts to validate all requirements against static configuration.
+            </description>
+            
+            <features>
+                <feature>Terraform configuration parsing</feature>
+                <feature>Deployment script analysis</feature>
+                <feature>Compliance scoring (0-100%)</feature>
+                <feature>JSON report generation</feature>
+                <feature>CI/CD pipeline integration</feature>
+            </features>
+            
+            <usage_examples>
+                <example>
+                    <command>python scripts/validate_gcp_deployment.py</command>
+                    <description>Basic validation with default settings</description>
+                </example>
+                <example>
+                    <command>python scripts/validate_gcp_deployment.py --terraform-dir terraform-gcp-staging --output-json report.json</command>
+                    <description>Validate specific directory and save JSON report</description>
+                </example>
+                <example>
+                    <command>python scripts/validate_gcp_deployment.py --min-compliance 95.0</command>
+                    <description>Require 95% compliance for success</description>
+                </example>
+            </usage_examples>
+            
+            <output_format>
+                <console_output>
+                    <section>Requirement-by-requirement validation results</section>
+                    <section>Detailed findings for each check</section>
+                    <section>Overall compliance score and assessment</section>
+                    <section>Pass/fail determination</section>
+                </console_output>
+                
+                <json_output>
+                    <field name="overall_passed">Boolean result</field>
+                    <field name="total_score">Numeric score achieved</field>
+                    <field name="max_score">Maximum possible score</field>
+                    <field name="compliance_percentage">Percentage compliance</field>
+                    <field name="results">Array of detailed ValidationResult objects</field>
+                    <field name="timestamp">ISO timestamp</field>
+                    <field name="summary">Text assessment</field>
+                </json_output>
+            </output_format>
+        </static_validator>
+
+        <integration_tests>
+            <file_path>tests/e2e/test_gcp_deployment_requirements.py</file_path>
+            <description>
+                Comprehensive end-to-end tests that validate the actual deployed infrastructure
+                against all requirements using live connections and real traffic.
+            </description>
+            
+            <test_classes>
+                <test_class name="TestBackendProtocolHTTPS">
+                    <purpose>Validate HTTPS enforcement across all services</purpose>
+                    <tests>
+                        <test>test_all_endpoints_use_https</test>
+                        <test>test_http_to_https_redirect</test>
+                    </tests>
+                </test_class>
+                
+                <test_class name="TestWebSocketSupport">
+                    <purpose>Validate WebSocket functionality and persistence</purpose>
+                    <tests>
+                        <test>test_websocket_connection_establishment</test>
+                        <test>test_websocket_long_duration_connection</test>
+                        <test>test_websocket_session_affinity</test>
+                        <test>test_websocket_upgrade_headers</test>
+                    </tests>
+                </test_class>
+                
+                <test_class name="TestProtocolHeaders">
+                    <purpose>Validate protocol header handling and security</purpose>
+                    <tests>
+                        <test>test_x_forwarded_proto_header_preservation</test>
+                        <test>test_secure_cookie_handling</test>
+                    </tests>
+                </test_class>
+                
+                <test_class name="TestHTTPSHealthChecks">
+                    <purpose>Validate health check endpoints and performance</purpose>
+                    <tests>
+                        <test>test_health_endpoints_over_https</test>
+                        <test>test_health_check_response_times</test>
+                    </tests>
+                </test_class>
+                
+                <test_class name="TestCORSConfiguration">
+                    <purpose>Validate CORS policy implementation</purpose>
+                    <tests>
+                        <test>test_cors_preflight_requests</test>
+                        <test>test_cors_actual_requests</test>
+                    </tests>
+                </test_class>
+                
+                <test_class name="TestCloudRunIngress">
+                    <purpose>Validate external accessibility and HTTPS enforcement</purpose>
+                    <tests>
+                        <test>test_https_enforcement</test>
+                        <test>test_service_accessibility</test>
+                        <test>test_websocket_external_access</test>
+                    </tests>
+                </test_class>
+                
+                <test_class name="TestOverallDeploymentRequirements">
+                    <purpose>Integration test for complete workflow validation</purpose>
+                    <tests>
+                        <test>test_end_to_end_https_workflow</test>
+                    </tests>
+                </test_class>
+            </test_classes>
+            
+            <test_environments>
+                <environment name="staging">
+                    <urls>
+                        <frontend>https://app.staging.netrasystems.ai</frontend>
+                        <backend>https://api.staging.netrasystems.ai</backend>
+                        <auth>https://auth.staging.netrasystems.ai</auth>
+                        <websocket>wss://api.staging.netrasystems.ai/ws</websocket>
+                    </urls>
+                    <marker>@environment_test("staging", "production")</marker>
+                </environment>
+                
+                <environment name="production">
+                    <description>Production URLs (to be configured when available)</description>
+                    <marker>@environment_test("staging", "production")</marker>
+                </environment>
+            </test_environments>
+        </integration_tests>
+    </validation_tools>
+
+    <test_coverage_matrix>
+        <requirement id="1" name="Backend Protocol HTTPS">
+            <static_validation>✅ Terraform parsing for protocol configuration</static_validation>
+            <integration_testing>✅ Live HTTPS connection testing</integration_testing>
+            <coverage_level>Comprehensive</coverage_level>
+        </requirement>
+        
+        <requirement id="2" name="WebSocket Support">
+            <static_validation>✅ Timeout and session affinity configuration</static_validation>
+            <integration_testing>✅ WebSocket connection persistence testing</integration_testing>
+            <coverage_level>Comprehensive</coverage_level>
+        </requirement>
+        
+        <requirement id="3" name="Protocol Headers">
+            <static_validation>✅ Header configuration parsing</static_validation>
+            <integration_testing>✅ Security header verification</integration_testing>
+            <coverage_level>Good</coverage_level>
+        </requirement>
+        
+        <requirement id="4" name="HTTPS Health Checks">
+            <static_validation>✅ Health check configuration validation</static_validation>
+            <integration_testing>✅ Live health endpoint testing</integration_testing>
+            <coverage_level>Comprehensive</coverage_level>
+        </requirement>
+        
+        <requirement id="5" name="CORS Configuration">
+            <static_validation>✅ CORS policy configuration parsing</static_validation>
+            <integration_testing>✅ CORS preflight and actual request testing</integration_testing>
+            <coverage_level>Comprehensive</coverage_level>
+        </requirement>
+        
+        <requirement id="6" name="Cloud Run Ingress">
+            <static_validation>✅ Deployment script configuration validation</static_validation>
+            <integration_testing>✅ External accessibility testing</integration_testing>
+            <coverage_level>Comprehensive</coverage_level>
+        </requirement>
+    </test_coverage_matrix>
+
+    <validation_procedures>
+        <pre_deployment>
+            <step>Run static configuration validation</step>
+            <step>Verify Terraform syntax and structure</step>
+            <step>Check deployment script configuration</step>
+            <step>Ensure all requirements meet compliance threshold</step>
+            
+            <commands>
+                <command>python scripts/validate_gcp_deployment.py --min-compliance 90.0</command>
+                <command>python scripts/validate_gcp_deployment.py --output-json pre_deploy_report.json</command>
+            </commands>
+            
+            <success_criteria>
+                <criterion>All critical requirements pass validation</criterion>
+                <criterion>Compliance score >= 90%</criterion>
+                <criterion>No configuration syntax errors</criterion>
+            </success_criteria>
+        </pre_deployment>
+
+        <post_deployment>
+            <step>Run integration tests against deployed infrastructure</step>
+            <step>Validate live service endpoints</step>
+            <step>Test WebSocket functionality</step>
+            <step>Verify end-to-end workflows</step>
+            
+            <commands>
+                <command>pytest tests/e2e/test_gcp_deployment_requirements.py --env=staging -v</command>
+                <command>pytest tests/e2e/test_gcp_deployment_requirements.py::TestWebSocketSupport -v</command>
+                <command>pytest tests/e2e/test_gcp_deployment_requirements.py::TestOverallDeploymentRequirements -v</command>
+            </commands>
+            
+            <success_criteria>
+                <criterion>All HTTPS endpoints accessible</criterion>
+                <criterion>WebSocket connections stable</criterion>
+                <criterion>CORS policies working correctly</criterion>
+                <criterion>Health checks responding properly</criterion>
+            </success_criteria>
+        </post_deployment>
+
+        <continuous_monitoring>
+            <step>Schedule periodic validation runs</step>
+            <step>Monitor compliance metrics over time</step>
+            <step>Alert on configuration drift</step>
+            <step>Validate after infrastructure changes</step>
+            
+            <frequency>
+                <static_validation>Daily</static_validation>
+                <integration_tests>Every 4 hours</integration_tests>
+                <full_validation>Weekly</full_validation>
+            </frequency>
+        </continuous_monitoring>
+    </validation_procedures>
+
+    <ci_cd_integration>
+        <github_actions>
+            <workflow_file>.github/workflows/gcp-deployment-validation.yml</workflow_file>
+            
+            <triggers>
+                <trigger>Push to terraform-gcp-staging directory</trigger>
+                <trigger>Changes to scripts/deploy_to_gcp.py</trigger>
+                <trigger>Manual workflow dispatch</trigger>
+                <trigger>Scheduled runs (daily)</trigger>
+            </triggers>
+            
+            <jobs>
+                <job name="static-validation">
+                    <description>Run static configuration validation</description>
+                    <steps>
+                        <step>Checkout code</step>
+                        <step>Set up Python environment</step>
+                        <step>Run validation script</step>
+                        <step>Upload validation report as artifact</step>
+                    </steps>
+                    <failure_action>Block deployment</failure_action>
+                </job>
+                
+                <job name="integration-tests">
+                    <description>Run integration tests against staging</description>
+                    <dependencies>static-validation</dependencies>
+                    <environment>staging</environment>
+                    <steps>
+                        <step>Checkout code</step>
+                        <step>Set up Python environment</step>
+                        <step>Install test dependencies</step>
+                        <step>Run e2e tests</step>
+                        <step>Upload test results</step>
+                    </steps>
+                    <failure_action>Create incident</failure_action>
+                </job>
+            </jobs>
+        </github_actions>
+
+        <deployment_pipeline>
+            <stage name="pre_validation">
+                <command>python scripts/validate_gcp_deployment.py --min-compliance 95.0</command>
+                <required>true</required>
+                <blocking>true</blocking>
+            </stage>
+            
+            <stage name="deployment">
+                <command>python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks</command>
+                <dependencies>pre_validation</dependencies>
+            </stage>
+            
+            <stage name="post_validation">
+                <command>pytest tests/e2e/test_gcp_deployment_requirements.py --env=staging</command>
+                <dependencies>deployment</dependencies>
+                <wait_time>30s</wait_time>
+            </stage>
+        </deployment_pipeline>
+    </ci_cd_integration>
+
+    <troubleshooting_guide>
+        <common_issues>
+            <issue>
+                <symptom>Backend Protocol validation fails</symptom>
+                <likely_causes>
+                    <cause>Protocol not set to "HTTPS" in backend service</cause>
+                    <cause>Missing EXTERNAL_MANAGED load balancing scheme</cause>
+                </likely_causes>
+                <resolution>
+                    <step>Check load-balancer.tf for protocol = "HTTPS"</step>
+                    <step>Verify load_balancing_scheme = "EXTERNAL_MANAGED"</step>
+                    <step>Update configuration and re-validate</step>
+                </resolution>
+            </issue>
+            
+            <issue>
+                <symptom>WebSocket timeout validation fails</symptom>
+                <likely_causes>
+                    <cause>backend_timeout_sec not set to 3600</cause>
+                    <cause>Session affinity not configured</cause>
+                    <cause>WebSocket paths not properly configured</cause>
+                </likely_causes>
+                <resolution>
+                    <step>Set backend_timeout_sec = 3600 in variables.tf</step>
+                    <step>Configure session_affinity = "GENERATED_COOKIE"</step>
+                    <step>Add WebSocket path rules in URL map</step>
+                </resolution>
+            </issue>
+            
+            <issue>
+                <symptom>HTTPS health checks fail in live tests</symptom>
+                <likely_causes>
+                    <cause>Health check endpoints not properly configured</cause>
+                    <cause>SSL certificate issues</cause>
+                    <cause>Service not ready</cause>
+                </likely_causes>
+                <resolution>
+                    <step>Verify health endpoints return valid responses</step>
+                    <step>Check SSL certificate status in GCP console</step>
+                    <step>Wait for services to fully start up</step>
+                    <step>Check firewall rules allow health check traffic</step>
+                </resolution>
+            </issue>
+            
+            <issue>
+                <symptom>WebSocket connection tests fail</symptom>
+                <likely_causes>
+                    <cause>WebSocket service not properly deployed</cause>
+                    <cause>Load balancer not routing WebSocket traffic</cause>
+                    <cause>SSL certificate issues with WSS</cause>
+                </likely_causes>
+                <resolution>
+                    <step>Verify WebSocket service is deployed and healthy</step>
+                    <step>Check load balancer path matching for /ws routes</step>
+                    <step>Test WebSocket endpoint directly</step>
+                    <step>Verify SSL configuration for WSS protocol</step>
+                </resolution>
+            </issue>
+            
+            <issue>
+                <symptom>CORS validation fails</symptom>
+                <likely_causes>
+                    <cause>CORS origins include HTTP URLs</cause>
+                    <cause>Wildcard (*) used for credentials</cause>
+                    <cause>Required methods not included</cause>
+                </likely_causes>
+                <resolution>
+                    <step>Update allow_origins to HTTPS-only URLs</step>
+                    <step>Remove wildcard origins for credentialed requests</step>
+                    <step>Include required HTTP methods in allow_methods</step>
+                </resolution>
+            </issue>
+        </common_issues>
+
+        <debugging_steps>
+            <step>Check validation script output for specific error messages</step>
+            <step>Review Terraform configuration files for syntax errors</step>
+            <step>Verify GCP resources are properly deployed using console</step>
+            <step>Test individual services manually to isolate issues</step>
+            <step>Check GCP logs for deployment and runtime errors</step>
+            <step>Validate DNS resolution for staging domains</step>
+            <step>Verify SSL certificates are active and valid</step>
+        </debugging_steps>
+    </troubleshooting_guide>
+
+    <performance_considerations>
+        <validation_performance>
+            <static_validation>
+                <runtime>~5-10 seconds</runtime>
+                <resource_usage>Minimal CPU, <100MB RAM</resource_usage>
+                <parallelization>N/A (configuration parsing)</parallelization>
+            </static_validation>
+            
+            <integration_tests>
+                <runtime>~60-120 seconds</runtime>
+                <resource_usage>Low CPU, network I/O intensive</resource_usage>
+                <parallelization>Test classes run in parallel</parallelization>
+                <optimization>Connection pooling, timeout management</optimization>
+            </integration_tests>
+        </validation_performance>
+        
+        <scalability>
+            <concurrent_validations>Support multiple parallel runs</concurrent_validations>
+            <multi_environment>Can validate different environments simultaneously</multi_environment>
+            <resource_isolation>Each validation run is independent</resource_isolation>
+        </scalability>
+    </performance_considerations>
+
+    <security_considerations>
+        <credential_management>
+            <principle>No credentials stored in validation code</principle>
+            <testing>Uses service account authentication for GCP access</testing>
+            <environment_variables>Safely handles environment-based configuration</environment_variables>
+        </credential_management>
+        
+        <network_security>
+            <ssl_verification>All HTTPS connections verify SSL certificates</ssl_verification>
+            <tls_version>Uses modern TLS versions only</tls_version>
+            <certificate_validation>Validates certificate chain and hostname</certificate_validation>
+        </network_security>
+        
+        <data_protection>
+            <no_sensitive_logging>Validation logs exclude sensitive information</no_sensitive_logging>
+            <report_sanitization>JSON reports sanitize potentially sensitive values</report_sanitization>
+        </data_protection>
+    </security_considerations>
+
+    <maintenance_procedures>
+        <regular_maintenance>
+            <update_frequency>Monthly review of validation criteria</update_frequency>
+            <dependency_updates>Keep testing libraries up to date</dependency_updates>
+            <test_environment_sync>Ensure test URLs match actual deployments</test_environment_sync>
+        </regular_maintenance>
+        
+        <validation_updates>
+            <new_requirements>Add validation for new security requirements</new_requirements>
+            <deprecated_features>Remove validation for deprecated GCP features</deprecated_features>
+            <performance_improvements>Optimize test execution time</performance_improvements>
+        </validation_updates>
+    </maintenance_procedures>
+
+    <reporting_and_metrics>
+        <compliance_metrics>
+            <overall_score>Percentage compliance across all requirements</overall_score>
+            <requirement_trends>Historical compliance for each requirement</requirement_trends>
+            <validation_frequency>How often validations are run</validation_frequency>
+            <failure_rates>Percentage of validations that fail</failure_rates>
+        </compliance_metrics>
+        
+        <alerting>
+            <critical_failures>Alert on any critical requirement failure</critical_failures>
+            <compliance_degradation>Alert when compliance drops below threshold</compliance_degradation>
+            <validation_errors>Alert on validation script errors</validation_errors>
+        </alerting>
+        
+        <dashboard_integration>
+            <grafana_panels>Compliance metrics in operational dashboard</grafana_panels>
+            <slack_notifications>Real-time alerts to engineering team</slack_notifications>
+            <email_reports>Weekly compliance summary reports</email_reports>
+        </dashboard_integration>
+    </reporting_and_metrics>
+
+    <future_enhancements>
+        <planned_features>
+            <feature>Support for additional GCP regions</feature>
+            <feature>Production environment validation</feature>
+            <feature>Performance regression testing</feature>
+            <feature>Automated remediation suggestions</feature>
+            <feature>Integration with infrastructure monitoring</feature>
+        </planned_features>
+        
+        <extensibility>
+            <plugin_system>Support for custom validation plugins</plugin_system>
+            <requirement_templates>Templated requirements for different environments</requirement_templates>
+            <validation_profiles>Different validation profiles for different deployment types</validation_profiles>
+        </extensibility>
+    </future_enhancements>
+</gcp_deployment_validation>

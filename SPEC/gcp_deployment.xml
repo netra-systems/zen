@@ -27,6 +27,18 @@
         - String literals validated
       </checks>
     </principle>
+    <principle id="load-balancer-requirements">
+      <rule>MUST validate all 6 critical load balancer requirements</rule>
+      <requirements>
+        1. Load Balancer Backend Protocol: HTTPS only
+        2. WebSocket Support: 3600s timeout with session affinity
+        3. Protocol Headers: X-Forwarded-Proto preservation required
+        4. Health Checks: HTTPS protocol on port 443
+        5. CORS Configuration: HTTPS-only origins in staging/production
+        6. Cloud Run Ingress: "all" with FORCE_HTTPS=true
+      </requirements>
+      <validation_command>python scripts/validate_gcp_deployment.py --min-compliance 95.0</validation_command>
+    </principle>
   </critical_principles>
 
   <existing_infrastructure>
@@ -229,6 +241,67 @@
       </secret>
     </secrets_management>
   </configuration>
+
+  <load_balancer_configuration>
+    <critical_settings>
+      <setting id="backend-protocol">
+        <requirement>HTTPS protocol for all backend services</requirement>
+        <terraform_config>protocol = "HTTPS"</terraform_config>
+        <files>terraform-gcp-staging/load-balancer.tf</files>
+      </setting>
+      <setting id="websocket-support">
+        <requirement>3600 second timeout with session affinity</requirement>
+        <terraform_config>
+          timeout_sec = 3600
+          session_affinity = "GENERATED_COOKIE"
+          affinity_cookie_ttl_sec = 3600
+        </terraform_config>
+        <files>terraform-gcp-staging/load-balancer.tf</files>
+      </setting>
+      <setting id="protocol-headers">
+        <requirement>Preserve X-Forwarded-Proto header</requirement>
+        <terraform_config>
+          custom_request_headers = ["X-Forwarded-Proto: https"]
+        </terraform_config>
+        <files>terraform-gcp-staging/load-balancer.tf</files>
+      </setting>
+      <setting id="health-checks">
+        <requirement>HTTPS health checks on port 443</requirement>
+        <terraform_config>
+          https_health_check {
+            port = 443
+            request_path = "/health"
+          }
+        </terraform_config>
+        <files>terraform-gcp-staging/load-balancer.tf</files>
+      </setting>
+      <setting id="cors-config">
+        <requirement>HTTPS-only origins in staging/production</requirement>
+        <terraform_config>
+          allow_origins = ["https://staging.netrasystems.ai", "https://api.staging.netrasystems.ai"]
+        </terraform_config>
+        <files>terraform-gcp-staging/load-balancer.tf</files>
+      </setting>
+      <setting id="cloud-run-ingress">
+        <requirement>Public ingress with FORCE_HTTPS=true</requirement>
+        <deployment_config>
+          --ingress "all"
+          --set-env-vars "FORCE_HTTPS=true"
+        </deployment_config>
+        <files>scripts/deploy_to_gcp.py</files>
+      </setting>
+    </critical_settings>
+    
+    <validation>
+      <script>scripts/validate_gcp_deployment.py</script>
+      <command>python scripts/validate_gcp_deployment.py --min-compliance 95.0</command>
+      <ci_integration>
+        - Pre-deployment: Static configuration validation
+        - Post-deployment: Live infrastructure testing
+        - Continuous: Monitoring and alerting
+      </ci_integration>
+    </validation>
+  </load_balancer_configuration>
 
   <enhancements_needed>
     <enhancement priority="high">

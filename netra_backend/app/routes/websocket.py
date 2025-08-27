@@ -116,7 +116,8 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # Accept WebSocket connection
             await websocket.accept()
-            logger.info(f"WebSocket connection accepted for user: {user_id}")
+            connection_start_time = time.time()
+            logger.info(f"WebSocket connection accepted for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
             
             # Register connection with manager
             connection_id = await ws_manager.connect_user(user_id, websocket)
@@ -153,10 +154,12 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.info(f"WebSocket ready: {connection_id}")
             
             # Main message handling loop
+            logger.info(f"Starting message handling loop for connection: {connection_id}")
             await _handle_websocket_messages(
                 websocket, user_id, connection_id, ws_manager, 
                 message_router, connection_monitor, security_manager, heartbeat
             )
+            logger.info(f"Message handling loop ended for connection: {connection_id}")
             
     except HTTPException as e:
         logger.error(f"WebSocket authentication failed: {e.detail}")
@@ -221,14 +224,25 @@ async def _handle_websocket_messages(
     backoff_delay = 0.1
     max_backoff = 5.0
     
+    loop_start_time = time.time()
+    message_count = 0
+    logger.info(f"Entering message handling loop for connection: {connection_id} (user: {user_id})")
+    
     try:
         while is_websocket_connected(websocket):
             try:
+                # Track loop iteration with detailed state
+                loop_duration = time.time() - loop_start_time
+                logger.debug(f"Message loop iteration #{message_count + 1} for {connection_id}, state: {websocket.application_state}, duration: {loop_duration:.1f}s")
+                
                 # Receive message with timeout
                 raw_message = await asyncio.wait_for(
                     websocket.receive_text(),
                     timeout=WEBSOCKET_CONFIG.heartbeat_interval_seconds
                 )
+                
+                message_count += 1
+                logger.debug(f"Received message #{message_count} from {connection_id}: {raw_message[:100]}...")
                 
                 # Validate message size
                 if len(raw_message.encode('utf-8')) > WEBSOCKET_CONFIG.max_message_size_bytes:
@@ -251,6 +265,7 @@ async def _handle_websocket_messages(
                 # Handle pong messages for heartbeat
                 if message_data.get("type") == "pong":
                     heartbeat.on_pong_received()
+                    logger.debug(f"Received pong from {connection_id}")
                 
                 # Route message to appropriate handler
                 success = await message_router.route_message(user_id, websocket, message_data)
@@ -259,8 +274,10 @@ async def _handle_websocket_messages(
                     error_count = 0  # Reset error count on success
                     backoff_delay = 0.1  # Reset backoff
                     connection_monitor.update_activity(connection_id, "message_sent")
+                    logger.debug(f"Successfully processed message for {connection_id}")
                 else:
                     error_count += 1
+                    logger.warning(f"Message routing failed for {connection_id}, error_count: {error_count}")
                     await asyncio.sleep(min(backoff_delay, max_backoff))
                     backoff_delay = min(backoff_delay * 2, max_backoff)
                 
@@ -275,17 +292,26 @@ async def _handle_websocket_messages(
                     break
                     
             except asyncio.TimeoutError:
-                # Timeout is expected for heartbeat - continue loop
+                # CRITICAL FIX: Timeout is expected for heartbeat - continue loop but add debug logging
+                logger.debug(f"Heartbeat timeout for connection: {connection_id}, continuing loop")
                 continue
                 
-            except WebSocketDisconnect:
-                # Client disconnected - break loop
+            except WebSocketDisconnect as e:
+                # Client disconnected - log with detailed information
+                disconnect_info = {
+                    "connection_id": connection_id,
+                    "user_id": user_id,
+                    "disconnect_code": e.code,
+                    "disconnect_reason": e.reason or "No reason provided",
+                    "connection_duration": time.time() - connection_monitor.get_connection_start_time(connection_id) if hasattr(connection_monitor, 'get_connection_start_time') else "Unknown"
+                }
+                logger.info(f"WebSocket disconnect: {disconnect_info}")
                 break
                 
             except Exception as e:
                 error_count += 1
                 connection_monitor.update_activity(connection_id, "error")
-                logger.error(f"Message handling error for {connection_id}: {e}")
+                logger.error(f"Message handling error for {connection_id}: {e}", exc_info=True)
                 
                 if error_count >= max_errors:
                     logger.error(f"Too many errors, closing connection {connection_id}")
@@ -296,7 +322,15 @@ async def _handle_websocket_messages(
                 backoff_delay = min(backoff_delay * 2, max_backoff)
                 
     except Exception as e:
-        logger.error(f"Critical error in message handling loop: {e}", exc_info=True)
+        logger.error(f"Critical error in message handling loop for {connection_id}: {e}", exc_info=True)
+    
+    # Log final statistics
+    loop_total_duration = time.time() - loop_start_time
+    logger.info(
+        f"Exiting message handling loop for connection: {connection_id} | "
+        f"Duration: {loop_total_duration:.1f}s | Messages processed: {message_count} | "
+        f"Errors: {error_count} | User: {user_id}"
+    )
 
 
 async def _send_format_error(websocket: WebSocket, error_message: str) -> None:

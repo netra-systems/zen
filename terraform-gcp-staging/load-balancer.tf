@@ -50,17 +50,17 @@ resource "google_compute_region_network_endpoint_group" "frontend_neg" {
   depends_on = [google_project_service.required_apis]
 }
 
-# Health check for backend services
-resource "google_compute_health_check" "http_health_check" {
-  name                = "${var.environment}-http-health-check"
+# Health check for backend services - REQUIREMENT 4: Use HTTPS protocol
+resource "google_compute_health_check" "https_health_check" {
+  name                = "${var.environment}-https-health-check"
   check_interval_sec  = 10
   timeout_sec         = 5
   healthy_threshold   = 2
   unhealthy_threshold = 3
   project             = var.project_id
   
-  http_health_check {
-    port         = 8080
+  https_health_check {
+    port         = 443
     request_path = "/health"
   }
   
@@ -74,7 +74,7 @@ resource "google_compute_backend_service" "api_backend" {
   name                  = "${var.environment}-api-backend"
   protocol              = "HTTPS"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  timeout_sec           = 30
+  timeout_sec           = 30  # Cloud Run NEG limitation: max 30 seconds for serverless NEGs
   project               = var.project_id
   
   backend {
@@ -83,7 +83,17 @@ resource "google_compute_backend_service" "api_backend" {
   
   security_policy = google_compute_security_policy.cloud_armor.id
   
+  # REQUIREMENT 2: Session affinity for WebSocket connections
+  session_affinity = "GENERATED_COOKIE"
+  
+  affinity_cookie_ttl_sec = var.session_affinity_ttl_sec
+  
   # Health checks not supported for serverless NEGs
+  
+  # REQUIREMENT 4: Preserve X-Forwarded-Proto header
+  custom_request_headers = [
+    "X-Forwarded-Proto: https"
+  ]
   
   log_config {
     enable      = true
@@ -97,7 +107,7 @@ resource "google_compute_backend_service" "auth_backend" {
   name                  = "${var.environment}-auth-backend"
   protocol              = "HTTPS"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  timeout_sec           = 30
+  timeout_sec           = 30  # Cloud Run NEG limitation: max 30 seconds for serverless NEGs
   project               = var.project_id
   
   backend {
@@ -106,7 +116,17 @@ resource "google_compute_backend_service" "auth_backend" {
   
   security_policy = google_compute_security_policy.cloud_armor.id
   
+  # REQUIREMENT 2: Session affinity for WebSocket connections
+  session_affinity = "GENERATED_COOKIE"
+  
+  affinity_cookie_ttl_sec = var.session_affinity_ttl_sec
+  
   # Health checks not supported for serverless NEGs
+  
+  # REQUIREMENT 4: Preserve X-Forwarded-Proto header
+  custom_request_headers = [
+    "X-Forwarded-Proto: https"
+  ]
   
   log_config {
     enable      = true
@@ -120,7 +140,7 @@ resource "google_compute_backend_service" "frontend_backend" {
   name                  = "${var.environment}-frontend-backend"
   protocol              = "HTTPS"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  timeout_sec           = 30
+  timeout_sec           = 30  # Cloud Run NEG limitation: max 30 seconds for serverless NEGs
   project               = var.project_id
   
   backend {
@@ -129,7 +149,17 @@ resource "google_compute_backend_service" "frontend_backend" {
   
   security_policy = google_compute_security_policy.cloud_armor.id
   
+  # REQUIREMENT 2: Session affinity for WebSocket connections
+  session_affinity = "GENERATED_COOKIE"
+  
+  affinity_cookie_ttl_sec = var.session_affinity_ttl_sec
+  
   # Health checks not supported for serverless NEGs
+  
+  # REQUIREMENT 4: Preserve X-Forwarded-Proto header
+  custom_request_headers = [
+    "X-Forwarded-Proto: https"
+  ]
   
   enable_cdn = true
   
@@ -187,6 +217,18 @@ resource "google_compute_url_map" "https_lb" {
   path_matcher {
     name            = "api-paths"
     default_service = google_compute_backend_service.api_backend.id
+    
+    # REQUIREMENT 5: WebSocket-specific path matchers
+    path_rule {
+      paths   = ["/ws", "/ws/*", "/websocket", "/websocket/*"]
+      service = google_compute_backend_service.api_backend.id
+      
+      route_action {
+        timeout {
+          seconds = var.backend_timeout_sec
+        }
+      }
+    }
   }
   
   path_matcher {
@@ -199,15 +241,24 @@ resource "google_compute_url_map" "https_lb" {
     default_service = google_compute_backend_service.frontend_backend.id
   }
   
-  # Add header-based routing for WebSocket connections
+  # REQUIREMENT 5: CORS with HTTPS-only origins for staging/production
   default_route_action {
     cors_policy {
       allow_origins     = ["https://app.staging.netrasystems.ai", "https://staging.netrasystems.ai"]
-      allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      allow_methods     = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
       allow_headers     = ["*"]
       expose_headers    = ["*"]
       max_age           = 3600
       allow_credentials = true
+    }
+  }
+  
+  # Add headers to support WebSocket upgrade
+  header_action {
+    request_headers_to_add {
+      header_name  = "X-Forwarded-Proto"
+      header_value = "https"
+      replace      = false
     }
   }
 }

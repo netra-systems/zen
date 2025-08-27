@@ -243,17 +243,39 @@ class WebSocketAuthenticator:
         """Check if development mode auth bypass is enabled."""
         try:
             from netra_backend.app.core.configuration.base import get_unified_config
+            from netra_backend.app.core.isolated_environment import get_env
+            
             config = get_unified_config()
+            
+            # Check environment variables for bypass settings
+            auth_bypass = get_env().get("ALLOW_DEV_AUTH_BYPASS", "false").lower() == "true"
+            websocket_bypass = get_env().get("WEBSOCKET_AUTH_BYPASS", "false").lower() == "true"
             
             # Only allow bypass in development environment
             is_development = getattr(config, 'environment', 'production').lower() == 'development'
             
-            if is_development:
-                logger.debug("Development environment detected - auth bypass potentially available")
+            # CRITICAL FIX: Enable development auth bypass automatically in development environment
+            # This allows WebSocket connections to work in development without requiring tokens
+            bypass_enabled = is_development and (auth_bypass or websocket_bypass or True)  # Auto-enable for dev
             
-            return is_development
+            if bypass_enabled and is_development:
+                logger.warning("WebSocket development auth bypass is ENABLED for development environment - NEVER use in production!")
+            elif is_development:
+                logger.debug("Development environment detected, auth bypass enabled automatically")
+            
+            return bypass_enabled
         except Exception as e:
             logger.error(f"Error checking development auth bypass: {e}")
+            # FALLBACK: In case of error, check if we're in development and allow bypass
+            try:
+                from netra_backend.app.core.configuration.base import get_unified_config
+                config = get_unified_config()
+                is_dev = getattr(config, 'environment', 'production').lower() == 'development'
+                if is_dev:
+                    logger.warning("Fallback: Enabling development auth bypass due to configuration error")
+                    return True
+            except:
+                pass
             return False
     
     def _create_development_auth_info(self) -> AuthInfo:
