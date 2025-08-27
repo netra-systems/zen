@@ -984,14 +984,24 @@ class DatabaseManager:
     @staticmethod
     @asynccontextmanager
     async def get_async_session(name: str = "default"):
-        """Get async database session with automatic cleanup."""
+        """Get async database session with automatic cleanup.
+        
+        CRITICAL FIX: Improved session lifecycle to prevent state errors.
+        Handles cleanup gracefully without causing IllegalStateChangeError.
+        """
         async_session_factory = DatabaseManager.get_application_session()
         async with async_session_factory() as session:
             try:
                 yield session
                 await session.commit()
+            except GeneratorExit:
+                # Handle generator cleanup gracefully
+                # Session context manager will handle cleanup
+                pass
             except Exception:
-                await session.rollback()
+                # Only rollback if session is still active
+                if session.is_active:
+                    await session.rollback()
                 raise
     
     @staticmethod
