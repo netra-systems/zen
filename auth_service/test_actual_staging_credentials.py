@@ -41,8 +41,9 @@ def setup_actual_staging_credentials():
     env_manager.set("SERVICE_ID", "auth-service-staging")
     env_manager.set("SERVICE_SECRET", "test-staging-service-secret-12345678901234567890")
     env_manager.set("JWT_SECRET_KEY", "test-staging-jwt-secret-key-12345678901234567890")
-    env_manager.set("GOOGLE_CLIENT_ID", "test-staging-client-id")
-    env_manager.set("GOOGLE_CLIENT_SECRET", "test-staging-client-secret")
+    # TOMBSTONE: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET superseded by environment-specific variables
+    env_manager.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "test-staging-client-id")
+    env_manager.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "test-staging-client-secret")
     
     logger.info("Set up ACTUAL staging credentials from Secret Manager")
 

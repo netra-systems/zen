@@ -139,13 +139,14 @@ export class AuthServiceClient {
       
       // For staging/production, still try to provide a working config
       if (this.environment === 'staging' || this.environment === 'production') {
-        const fallbackClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+        // TOMBSTONE: NEXT_PUBLIC_GOOGLE_CLIENT_ID superseded by OAuth config from auth service
+        const fallbackClientId = '';
         
         // CRITICAL: Warn about fallback configuration
         if (!fallbackClientId) {
           logger.error('🚨🚨🚨 CRITICAL: No fallback Google Client ID available 🚨🚨🚨');
           logger.error(`Environment: ${this.environment}`);
-          logger.error(`Both auth service and NEXT_PUBLIC_GOOGLE_CLIENT_ID are unavailable`);
+          logger.error(`Auth service OAuth configuration is unavailable`);
         }
         
         return {
@@ -159,7 +160,8 @@ export class AuthServiceClient {
       // Return offline configuration for development/test
       return {
         development_mode: this.environment === 'development' || this.environment === 'test',
-        google_client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+        // TOMBSTONE: NEXT_PUBLIC_GOOGLE_CLIENT_ID superseded by OAuth config from auth service
+        google_client_id: '',
         oauth_enabled: false,
         offline_mode: true
       };

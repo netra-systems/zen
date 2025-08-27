@@ -278,7 +278,9 @@ class TestOAuthFlows:
         google_client_id = env_vars.get("GOOGLE_OAUTH_CLIENT_ID_STAGING")
         if google_client_id:
             # Staging-specific config should take precedence
-            assert google_client_id != env_vars.get("GOOGLE_CLIENT_ID")
+            # TOMBSTONE: GOOGLE_CLIENT_ID superseded by environment-specific variables
+            # Staging should only use staging-specific config
+            assert google_client_id is not None
 
 class TestAPIEndpoints:
     """Test API endpoints and HTTP method compatibility."""

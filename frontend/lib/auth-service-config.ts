@@ -49,7 +49,8 @@ export function getAuthServiceConfig(): AuthServiceConfig {
       me: config.endpoints.authMe,
     },
     oauth: {
-      googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      // TOMBSTONE: NEXT_PUBLIC_GOOGLE_CLIENT_ID superseded by OAuth config from auth service
+      googleClientId: undefined,
       redirectUri: getOAuthRedirectUri(),
       javascriptOrigins: [config.urls.frontend],
     },

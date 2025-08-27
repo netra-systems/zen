@@ -45,7 +45,8 @@ export class UnifiedAuthService {
         // Transform to expected format using unified config
         return {
           development_mode: authConfig.development_mode ?? (this.environment === 'development'),
-          google_client_id: authConfig.google_client_id || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+          // TOMBSTONE: NEXT_PUBLIC_GOOGLE_CLIENT_ID superseded by OAuth config from auth service
+          google_client_id: authConfig.google_client_id || '',
           endpoints: {
             login: unifiedApiConfig.endpoints.authLogin,
             logout: unifiedApiConfig.endpoints.authLogout,
