@@ -23,8 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool, QueuePool
 
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
-from netra_backend.app.core.database_connection_manager import (
-    database_recovery_registry,
+from netra_backend.app.db.database_manager import (
+    DatabaseManager,
 )
 from netra_backend.app.core.database_health_monitoring import PoolHealthChecker
 from netra_backend.app.core.database_types import DatabaseType, PoolHealth

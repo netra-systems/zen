@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
+from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager
 
 from netra_backend.app.services.message_queue import MessageQueueService
 from netra_backend.app.services.redis_service import RedisService

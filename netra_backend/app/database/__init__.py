@@ -40,8 +40,8 @@ class UnifiedDatabaseManager:
     async def postgres_session() -> AsyncGenerator[AsyncSession, None]:
         """Get PostgreSQL session via DatabaseManager - single source of truth.
         
-        CRITICAL FIX: Removed @asynccontextmanager to fix async generator lifecycle issues.
-        This function is now a proper async generator that yields database sessions.
+        CRITICAL FIX: Improved session lifecycle management to prevent state errors.
+        Handles GeneratorExit gracefully without attempting operations on closed session.
         """
         # Use DatabaseManager's session factory directly
         async_session_factory = DatabaseManager.get_application_session()
@@ -49,6 +49,10 @@ class UnifiedDatabaseManager:
             try:
                 yield session
                 await session.commit()
+            except GeneratorExit:
+                # Handle generator cleanup gracefully without operations
+                # Session is already closing, no need for rollback
+                pass
             except Exception:
                 await session.rollback()
                 raise

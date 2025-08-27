@@ -47,7 +47,8 @@ from netra_backend.tests.integration.critical_paths.l4_staging_critical_base imp
 # from app.services.resource_management.resource_monitor import ResourceMonitor
 TenantIsolator = AsyncMock
 ResourceMonitor = AsyncMock
-# from app.services.database.connection_pool_manager import ConnectionPoolManager
+# Using canonical DatabaseManager instead of removed ConnectionPoolManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from unittest.mock import AsyncMock, MagicMock
 
 ConnectionPoolManager = AsyncMock
@@ -111,7 +112,7 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
         super().__init__("enterprise_resource_isolation_l4")
         self.tenant_isolator: Optional[TenantIsolator] = None
         self.resource_monitor: Optional[ResourceMonitor] = None
-        self.connection_pool_manager: Optional[ConnectionPoolManager] = None
+        self.db_manager: Optional[DatabaseManager] = None
         self.redis_namespace_manager: Optional[RedisNamespaceManager] = None
         self.performance_tracker: Optional[PerformanceTracker] = None
         self.enterprise_rate_limiter: Optional[EnterpriseRateLimiter] = None
@@ -155,8 +156,8 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
             )
             
             # Initialize connection pool manager with enterprise isolation
-            self.connection_pool_manager = ConnectionPoolManager()
-            await self.connection_pool_manager.initialize(
+            self.db_manager = DatabaseManager.get_connection_manager()
+            await self.db_manager.initialize(
                 isolation_mode="per_tenant",
                 max_connections_per_tenant=50,
                 connection_timeout_seconds=5,
@@ -310,7 +311,7 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
                 
                 if provisioning_result["success"]:
                     # Setup dedicated database connection pool
-                    pool_result = await self.connection_pool_manager.create_tenant_pool(
+                    pool_result = await self.db_manager.create_tenant_pool(
                         tenant_id=tenant_id,
                         max_connections=enterprise_resource.database_connections,
                         dedicated_pool=True
@@ -537,19 +538,19 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
             max_connections = self.enterprise_tenants[tenant_a].database_connections
             
             for i in range(max_connections - 1):  # Leave one connection available
-                conn = await self.connection_pool_manager.get_connection(tenant_a)
+                conn = await self.db_manager.get_connection(tenant_a)
                 if conn:
                     connections_a.append(conn)
             
             # Try to get connection for tenant B (should succeed despite tenant A exhaustion)
-            conn_b = await self.connection_pool_manager.get_connection(tenant_b)
+            conn_b = await self.db_manager.get_connection(tenant_b)
             
             # Clean up connections
             for conn in connections_a:
-                await self.connection_pool_manager.return_connection(tenant_a, conn)
+                await self.db_manager.return_connection(tenant_a, conn)
             
             if conn_b:
-                await self.connection_pool_manager.return_connection(tenant_b, conn_b)
+                await self.db_manager.return_connection(tenant_b, conn_b)
             
             # Verify isolation: tenant B should get connection despite tenant A exhaustion
             db_isolated = conn_b is not None
@@ -811,7 +812,7 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
             
             # Try to get more connections than allowed
             for i in range(max_allowed + 10):  # Try to get 10 extra connections
-                conn = await self.connection_pool_manager.get_connection(tenant_id)
+                conn = await self.db_manager.get_connection(tenant_id)
                 if conn:
                     connections.append(conn)
                 else:
@@ -819,7 +820,7 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
             
             # Clean up connections
             for conn in connections:
-                await self.connection_pool_manager.return_connection(tenant_id, conn)
+                await self.db_manager.return_connection(tenant_id, conn)
             
             # Verify limit enforcement
             limit_enforced = len(connections) <= max_allowed
@@ -1351,8 +1352,8 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
                         await self.tenant_isolator.cleanup_tenant_resources(tenant_id)
                     
                     # Clean up connection pools
-                    if self.connection_pool_manager:
-                        await self.connection_pool_manager.cleanup_tenant_pool(tenant_id)
+                    if self.db_manager:
+                        await self.db_manager.cleanup_tenant_pool(tenant_id)
                     
                     # Clean up Redis namespaces
                     if self.redis_namespace_manager:
@@ -1367,7 +1368,7 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
             
             # Shutdown services
             services = [
-                self.tenant_isolator, self.resource_monitor, self.connection_pool_manager,
+                self.tenant_isolator, self.resource_monitor, self.db_manager,
                 self.redis_namespace_manager, self.performance_tracker,
                 self.enterprise_rate_limiter, self.access_controller
             ]

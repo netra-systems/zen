@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from sqlalchemy.exc import OperationalError, DisconnectionError
 from sqlalchemy.pool import QueuePool
 
-from netra_backend.app.services.database.connection_manager import ConnectionManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.config import get_settings
 
@@ -38,7 +38,7 @@ class TestDatabaseConnectionManager:
         """Create a connection manager for testing."""
         with patch('netra_backend.app.services.database.connection_manager.get_settings') as mock_get_settings:
             mock_get_settings.return_value = mock_settings
-            manager = ConnectionManager()
+            manager = DatabaseManager.get_connection_manager()
             return manager
 
     @pytest.mark.asyncio

@@ -4,7 +4,7 @@ import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock
 
-from netra_backend.app.services.database.connection_manager import ConnectionManager, DatabaseConfig, DatabaseType
+from netra_backend.app.db.database_manager import DatabaseManager, DatabaseConfig, DatabaseType
 from shared.database_url_builder import DatabaseURLBuilder
 # Removed isolated_environment import - not needed for these tests
 
@@ -21,7 +21,7 @@ class TestConnectionPoolManagement:
     async def test_connection_pool_ssl_enforcement(self):
         """Test that connection pool enforces SSL in non-test environments."""
         # This test should fail initially - expecting SSL enforcement
-        manager = ConnectionManager()
+        manager = DatabaseManager.get_connection_manager()
         
         # Add SSL-required configuration
         config = DatabaseConfig(
@@ -41,7 +41,7 @@ class TestConnectionPoolManagement:
     @pytest.mark.asyncio
     async def test_connection_pool_exhaustion_recovery(self):
         """Test connection pool recovery from exhaustion."""
-        manager = ConnectionManager()
+        manager = DatabaseManager.get_connection_manager()
         
         # Add connection with small pool size
         config = DatabaseConfig(

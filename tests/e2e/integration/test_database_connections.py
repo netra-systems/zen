@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 # Add project root to path
 
 from dev_launcher import DevLauncher, LauncherConfig
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.database_types import DatabaseType
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager

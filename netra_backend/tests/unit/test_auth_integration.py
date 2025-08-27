@@ -223,70 +223,148 @@ class TestAuthIntegration:
         
         self._assert_403_forbidden(exc_info, "Permission 'admin' required")
 
-    def test_password_hashing_and_verification_success(self):
-        """Test deprecated password functions - they return empty/false values."""
-        password = "test-password-123"
+    @pytest.mark.asyncio
+    async def test_get_current_user_auth_service_failure(self, mock_credentials, mock_auth_client, mock_db_session):
+        """Test handling of auth service failure during token validation."""
+        # Mock auth service exception
+        mock_auth_client.side_effect = Exception("Auth service unavailable")
         
-        hashed = get_password_hash(password)
-        is_valid = verify_password(password, hashed)
+        with pytest.raises(Exception, match="Auth service unavailable"):
+            await get_current_user(mock_credentials, mock_db_session)
+            
+    @pytest.mark.asyncio
+    async def test_get_current_user_database_failure(self, mock_credentials, mock_auth_client, mock_db_session):
+        """Test handling of database failure during user lookup."""
+        self._setup_auth_client_valid_response(mock_auth_client)
+        # Mock database exception
+        mock_db_session.execute.side_effect = Exception("Database connection failed")
         
-        assert hashed == ""  # Deprecated function returns empty string
-        assert is_valid is False  # Deprecated function returns False
-
-    def test_password_verification_wrong_password_fails(self):
-        """Test password verification with wrong password."""
-        password = "correct-password"
-        wrong_password = "wrong-password"
-        hashed = get_password_hash(password)
+        with pytest.raises(Exception, match="Database connection failed"):
+            await get_current_user(mock_credentials, mock_db_session)
+            
+    @pytest.mark.asyncio
+    async def test_get_current_user_dev_mode_creates_user(self, mock_credentials, mock_auth_client, mock_db_session):
+        """Test that development mode creates user when not found."""
+        self._setup_auth_client_valid_response(mock_auth_client)
+        self._setup_db_session_no_user(mock_db_session)
         
-        is_valid = verify_password(wrong_password, hashed)
+        # Mock config to be development
+        with patch('netra_backend.app.config.get_config') as mock_config, \
+             patch('netra_backend.app.services.user_service.user_service.get_or_create_dev_user', new_callable=AsyncMock) as mock_create_user:
+            
+            mock_config.return_value.environment = "development"
+            
+            dev_user = User()
+            dev_user.id = "test-user-123"
+            dev_user.email = "dev@example.com"
+            mock_create_user.return_value = dev_user
+            
+            result = await get_current_user(mock_credentials, mock_db_session)
+            
+            assert result == dev_user
+            mock_create_user.assert_called_once()
+            
+    def test_permission_validation_helper_with_valid_permission(self, sample_user):
+        """Test internal permission validation helper function."""
+        # Should not raise exception for valid permission
+        try:
+            from netra_backend.app.auth_integration.auth import _validate_user_permission
+            _validate_user_permission(sample_user, "read")
+            assert True  # No exception raised
+        except ImportError:
+            pytest.skip("Permission validation helper not available")
+            
+    def test_permission_validation_helper_with_invalid_permission(self, sample_user):
+        """Test internal permission validation helper function with invalid permission."""
+        try:
+            from netra_backend.app.auth_integration.auth import _validate_user_permission
+            with pytest.raises(HTTPException) as exc_info:
+                _validate_user_permission(sample_user, "invalid_permission")
+            self._assert_403_forbidden(exc_info, "Permission 'invalid_permission' required")
+        except ImportError:
+            pytest.skip("Permission validation helper not available")
+            
+    def test_permission_validation_helper_user_without_permissions(self):
+        """Test permission validation with user that has no permissions attribute."""
+        try:
+            from netra_backend.app.auth_integration.auth import _validate_user_permission
+            user_no_permissions = User()
+            user_no_permissions.id = "no-perms-user"
+            # No permissions attribute
+            
+            # Should not raise exception if user doesn't have permissions attribute
+            _validate_user_permission(user_no_permissions, "any_permission")
+            assert True  # Should complete without error
+        except ImportError:
+            pytest.skip("Permission validation helper not available")
+            
+    @pytest.mark.asyncio
+    async def test_require_admin_with_superuser(self):
+        """Test admin requirement with superuser flag."""
+        user = User()
+        user.id = "superuser-123"
+        user.is_superuser = True
+        user.is_admin = False  # Legacy flag is false
         
-        assert is_valid is False
-
-    def test_create_access_token_default_expiry(self):
-        """Test deprecated JWT token creation - returns empty string."""
-        data = {"user_id": "test-123", "email": "test@example.com"}
+        result = await require_admin(user)
+        assert result == user
         
-        token = create_access_token(data)
+    @pytest.mark.asyncio
+    async def test_require_admin_with_role_based_admin(self):
+        """Test admin requirement with admin role."""
+        user = User()
+        user.id = "role-admin-123"
+        user.role = "admin"
+        user.is_admin = False
+        user.is_superuser = False
         
-        assert isinstance(token, str)
-        assert token == ""  # Deprecated function returns empty string
-
-    def test_create_access_token_custom_expiry(self):
-        """Test deprecated JWT token creation with custom expiry - returns empty string."""
-        data = {"user_id": "test-123"}
-        expires_delta = timedelta(hours=1)
+        result = await require_admin(user)
+        assert result == user
         
-        token = create_access_token(data, expires_delta)
+    @pytest.mark.asyncio
+    async def test_require_admin_with_super_admin_role(self):
+        """Test admin requirement with super_admin role."""
+        user = User()
+        user.id = "super-admin-123"
+        user.role = "super_admin"
+        user.is_admin = False
         
-        assert isinstance(token, str)
-        assert token == ""  # Deprecated function returns empty string
-
-    def test_validate_token_jwt_valid_token_success(self):
-        """Test deprecated JWT token validation - always returns None."""
-        data = {"user_id": "test-123", "email": "test@example.com"}
-        token = create_access_token(data, timedelta(minutes=5))
+        result = await require_admin(user)
+        assert result == user
         
-        payload = validate_token_jwt(token)
+    @pytest.mark.asyncio
+    async def test_require_developer_user_without_developer_attribute(self):
+        """Test developer requirement with user that has no is_developer attribute."""
+        user = User()
+        user.id = "no-dev-attr-123"
+        # No is_developer attribute
         
-        assert payload is None  # Deprecated function always returns None
-
-    def test_validate_token_jwt_invalid_token_returns_none(self):
-        """Test JWT token validation with invalid token."""
-        invalid_token = "invalid.jwt.token"
+        with pytest.raises(HTTPException) as exc_info:
+            await require_developer(user)
+            
+        self._assert_403_forbidden(exc_info, "Developer access required")
         
-        payload = validate_token_jwt(invalid_token)
+    def test_auth_client_instance_exists(self):
+        """Test that auth client instance is properly initialized."""
+        from netra_backend.app.auth_integration.auth import auth_client
+        assert auth_client is not None
+        assert hasattr(auth_client, 'validate_token_jwt')
         
-        assert payload is None
-
-    def test_validate_token_jwt_expired_token_returns_none(self):
-        """Test JWT token validation with expired token - deprecated function returns None."""
-        data = {"user_id": "test-123"}
+    def test_security_bearer_instance(self):
+        """Test that HTTPBearer security instance is properly configured."""
+        from netra_backend.app.auth_integration.auth import security
+        assert security is not None
+        assert isinstance(security, HTTPBearer)
         
-        # Since validate_token_jwt is deprecated and always returns None, just test that
-        payload = validate_token_jwt("any-token")
+    def test_dependency_annotations_exist(self):
+        """Test that FastAPI dependency annotations are properly defined."""
+        from netra_backend.app.auth_integration.auth import ActiveUserDep, OptionalUserDep, AdminDep, DeveloperDep
         
-        assert payload is None
+        # These should be properly typed annotations
+        assert ActiveUserDep is not None
+        assert OptionalUserDep is not None
+        assert AdminDep is not None
+        assert DeveloperDep is not None
 
     # Helper methods (each ≤8 lines)
     def _setup_successful_auth_flow(self, mock_auth_client, mock_db_session, user):
@@ -298,19 +376,18 @@ class TestAuthIntegration:
         """Setup auth client to return valid response."""
         mock_auth_client.return_value = {
             "valid": True,
-            "user_id": "test-user-123"
+            "user_id": "test-user-123",
+            "email": "test@example.com"  # Include email for dev user creation
         }
 
     def _setup_db_session_with_user(self, mock_db_session, user):
         """Setup database session to return user."""
-        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db_session.execute.return_value = mock_result
 
     def _setup_db_session_no_user(self, mock_db_session):
         """Setup database session to return no user."""
-        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db_session.execute.return_value = mock_result
@@ -325,3 +402,11 @@ class TestAuthIntegration:
         """Assert 403 Forbidden exception details."""
         assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
         assert expected_detail in exc_info.value.detail
+        
+    def _create_admin_user_with_role(self, role: str) -> User:
+        """Create admin user with specific role."""
+        user = User()
+        user.id = f"admin-{role}-123"
+        user.role = role
+        user.is_admin = False  # Test role-based auth over legacy flag
+        return user

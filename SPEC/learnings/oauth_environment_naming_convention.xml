@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>OAuth Environment Variable Naming Convention</title>
+    <category>Configuration</category>
+    <subcategory>OAuth</subcategory>
+    <tags>oauth, environment-variables, naming-convention, authentication</tags>
+    <created>2025-08-27</created>
+    <severity>critical</severity>
+    <business_impact>Platform/Internal - Authentication reliability across all environments</business_impact>
+  </metadata>
+
+  <problem>
+    <description>
+      Inconsistent OAuth environment variable naming caused confusion and failures across different environments.
+      The system had multiple naming patterns for OAuth credentials that led to configuration errors.
+    </description>
+    <root_cause>
+      Legacy naming conventions (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) were not environment-aware,
+      leading to credential conflicts between development, staging, and production environments.
+    </root_cause>
+    <symptoms>
+      - OAuth authentication failures in staging
+      - Missing credential errors despite credentials being set
+      - Environment-specific OAuth configurations not being loaded correctly
+      - Tests failing due to hardcoded environment variable names
+    </symptoms>
+  </problem>
+
+  <solution>
+    <description>
+      Implemented a consistent environment-aware OAuth naming convention with clear suffixes to indicate purpose.
+    </description>
+    
+    <naming_pattern>
+      <pattern name="Environment-Specific OAuth Variables">
+        <format>OAUTH_{PROVIDER}_{CREDENTIAL_TYPE}_ENV</format>
+        <examples>
+          <example>OAUTH_GOOGLE_CLIENT_ID_ENV</example>
+          <example>OAUTH_GOOGLE_CLIENT_SECRET_ENV</example>
+          <example>OAUTH_GITHUB_CLIENT_ID_ENV</example>
+          <example>OAUTH_GITHUB_CLIENT_SECRET_ENV</example>
+        </examples>
+        <rationale>
+          The "_ENV" suffix explicitly indicates these are environment-specific variables that may vary
+          between development, staging, and production. This prevents accidental credential leakage
+          and makes it clear these values should be loaded from environment configuration.
+        </rationale>
+      </pattern>
+
+      <pattern name="Environment-Agnostic OAuth Variables">
+        <format>OAUTH_{PROVIDER}_{CREDENTIAL_TYPE}_{ENVIRONMENT}</format>
+        <examples>
+          <example>OAUTH_GOOGLE_CLIENT_ID_DEV</example>
+          <example>OAUTH_GOOGLE_CLIENT_ID_STAGING</example>
+          <example>OAUTH_GOOGLE_CLIENT_ID_PROD</example>
+        </examples>
+        <rationale>
+          These variables explicitly include the environment name in the variable itself,
+          allowing multiple environment credentials to coexist in configuration files.
+          Used primarily in deployment scripts and secret management.
+        </rationale>
+      </pattern>
+
+      <pattern name="General OAuth Configuration">
+        <format>OAUTH_{CONFIG_NAME}</format>
+        <examples>
+          <example>OAUTH_HMAC_SECRET</example>
+          <example>OAUTH_STATE_TTL_SECONDS</example>
+          <example>OAUTH_REDIRECT_BASE_URL</example>
+        </examples>
+        <rationale>
+          Configuration values that are not provider-specific or credentials don't need
+          the _ENV suffix as they represent general OAuth settings.
+        </rationale>
+      </pattern>
+    </naming_pattern>
+
+    <implementation_details>
+      <detail>
+        Updated all test files to use OAUTH_*_ENV naming for environment-specific credentials
+      </detail>
+      <detail>
+        Modified auth_constants.py CredentialConstants to map old names to new convention
+      </detail>
+      <detail>
+        Added TOMBSTONE comments to indicate deprecated variable names
+      </detail>
+    </implementation_details>
+  </solution>
+
+  <suffix_explanation>
+    <suffix name="_ENV">
+      <purpose>
+        Indicates the variable contains an environment-specific value that should be loaded
+        from the current environment's configuration (dev, staging, or production).
+      </purpose>
+      <usage>
+        Used in application code and tests where the actual credential value needs to be
+        retrieved from the environment at runtime.
+      </usage>
+      <example_context>
+        Tests use OAUTH_GOOGLE_CLIENT_ID_ENV because they need to load the actual credential
+        for the current test environment, not a hardcoded value.
+      </example_context>
+    </suffix>
+
+    <suffix name="_{ENVIRONMENT}">
+      <purpose>
+        Explicitly includes the target environment in the variable name, allowing multiple
+        environment configurations to be stored together.
+      </purpose>
+      <usage>
+        Used in deployment configurations, secret management, and infrastructure code where
+        credentials for multiple environments need to be managed simultaneously.
+      </usage>
+      <example_context>
+        Deployment scripts might reference OAUTH_GOOGLE_CLIENT_ID_STAGING when deploying
+        to staging, ensuring the correct credentials are used for that specific environment.
+      </example_context>
+    </suffix>
+
+    <suffix name="No suffix">
+      <purpose>
+        General OAuth configuration values that are not credentials or are consistent
+        across environments.
+      </purpose>
+      <usage>
+        Used for OAuth settings like timeouts, URLs, or feature flags that don't change
+        between environments.
+      </usage>
+    </suffix>
+  </suffix_explanation>
+
+  <cross_references>
+    <reference>SPEC/unified_environment_management.xml - Environment variable management patterns</reference>
+    <reference>SPEC/cross_system_context_reference.md - OAuth flow across services</reference>
+    <reference>auth_service/auth_core/config.py - OAuth configuration loading implementation</reference>
+    <reference>SPEC/learnings/auth_service_client_patterns.xml - Related OAuth patterns</reference>
+    <reference>SPEC/learnings/oauth_state_validation_issue.xml - OAuth security considerations</reference>
+  </cross_references>
+
+  <migration_guide>
+    <step>Search for all occurrences of old variable names (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)</step>
+    <step>Replace with new naming convention (OAUTH_GOOGLE_CLIENT_ID_ENV, OAUTH_GOOGLE_CLIENT_SECRET_ENV)</step>
+    <step>Update CredentialConstants in auth_constants.py to map to new names</step>
+    <step>Add TOMBSTONE comments to indicate deprecated names</step>
+    <step>Update all tests to use new variable names</step>
+    <step>Verify deployment configurations use correct environment-specific variables</step>
+  </migration_guide>
+
+  <testing_considerations>
+    <consideration>
+      Tests should use *_ENV suffix variables as they need to load credentials for the current test environment
+    </consideration>
+    <consideration>
+      Test fixtures should mock or set OAUTH_*_ENV variables, not hardcoded environment-specific ones
+    </consideration>
+    <consideration>
+      Environment isolation in tests must handle the new naming convention
+    </consideration>
+  </testing_considerations>
+
+  <files_updated>
+    <file>archive/auth_tests_consolidated_iteration_81/test_critical_oauth_environment_failures.py</file>
+    <file>archive/auth_tests_consolidated_iteration_81/test_oauth_staging_missing_credentials.py</file>
+    <file>tests/unit/test_unified_env_loading.py</file>
+    <file>tests/staging_errors/test_auth_service_deployment.py</file>
+    <file>tests/e2e/test_oauth_google_login_500_error.py</file>
+    <file>scripts/test_oauth_local.py</file>
+    <file>netra_backend/app/core/auth_constants.py</file>
+  </files_updated>
+
+  <key_insights>
+    <insight>
+      The _ENV suffix clearly distinguishes runtime environment variables from deployment configuration variables
+    </insight>
+    <insight>
+      Consistent naming prevents credential leakage between environments
+    </insight>
+    <insight>
+      TOMBSTONE comments help track deprecated variable names during migration
+    </insight>
+    <insight>
+      CredentialConstants acts as a mapping layer to maintain backward compatibility during transition
+    </insight>
+  </key_insights>
+</learning>

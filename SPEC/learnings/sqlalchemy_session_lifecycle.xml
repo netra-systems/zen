@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>SQLAlchemy AsyncSession Lifecycle Management</title>
+  <created>2025-08-27</created>
+  
+  <problem>
+    <description>
+      SQLAlchemy raises IllegalStateChangeError when async sessions are cleaned up improperly:
+      "Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress"
+    </description>
+    <error_message>
+      sqlalchemy.exc.IllegalStateChangeError: Method 'close()' can't be called here; 
+      method '_connection_for_bind()' is already in progress and this would cause 
+      an unexpected state change to SessionTransactionState.CLOSED
+    </error_message>
+    <root_cause>
+      When Python's garbage collector cleans up async generators (GeneratorExit), 
+      attempting session operations like rollback() or close() can conflict with 
+      SQLAlchemy's internal state machine if a connection operation is in progress.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <approach>Handle GeneratorExit gracefully without session operations</approach>
+    <implementation>
+      <code>
+async def postgres_session() -> AsyncGenerator[AsyncSession, None]:
+    async_session_factory = DatabaseManager.get_application_session()
+    async with async_session_factory() as session:
+        try:
+            yield session
+            await session.commit()
+        except GeneratorExit:
+            # Handle generator cleanup gracefully without operations
+            # Session context manager will handle cleanup
+            pass
+        except Exception:
+            # Only rollback if session is still active
+            if session.is_active:
+                await session.rollback()
+            raise
+      </code>
+    </implementation>
+    <key_points>
+      <point>Catch GeneratorExit separately from other exceptions</point>
+      <point>Don't perform session operations during GeneratorExit</point>
+      <point>Check session.is_active before rollback in exception handler</point>
+      <point>Let the async context manager handle session cleanup</point>
+    </key_points>
+  </solution>
+  
+  <prevention>
+    <guideline>Always handle GeneratorExit in async generators that manage resources</guideline>
+    <guideline>Use session.is_active check before operations in cleanup code</guideline>
+    <guideline>Rely on context managers for resource cleanup when possible</guideline>
+    <guideline>Avoid manual session.close() calls in async generators</guideline>
+  </prevention>
+  
+  <testing>
+    <test_case>Verify sessions cleanup properly during normal operation</test_case>
+    <test_case>Test behavior when async generators are garbage collected</test_case>
+    <test_case>Ensure no IllegalStateChangeError during concurrent requests</test_case>
+    <test_case>Validate proper rollback on exceptions</test_case>
+  </testing>
+  
+  <references>
+    <file>netra_backend/app/database/__init__.py</file>
+    <file>netra_backend/app/db/database_manager.py</file>
+    <spec>SPEC/database_connectivity_architecture.xml</spec>
+  </references>
+</learning>

@@ -1,0 +1,133 @@
+name: Database Regression Tests
+
+on:
+  push:
+    branches: [main, develop, critical-remediation-*]
+    paths:
+      - 'netra_backend/app/database/**'
+      - 'netra_backend/app/db/**'
+      - 'netra_backend/tests/database/**'
+      - '.github/workflows/database-regression-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'netra_backend/app/database/**'
+      - 'netra_backend/app/db/**'
+      - 'netra_backend/tests/database/**'
+
+jobs:
+  regression-tests:
+    name: Run Database Regression Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: netra_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install rich  # For test runner output
+      
+      - name: Set up test environment
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/netra_test
+          ENVIRONMENT: testing
+          TEST_MODE: "true"
+        run: |
+          echo "Setting up test database schema..."
+          
+      - name: Run Alembic migrations
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/netra_test
+          ENVIRONMENT: testing
+        run: |
+          cd netra_backend/app
+          python -m alembic upgrade head
+      
+      - name: Run regression tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/netra_test
+          ENVIRONMENT: testing
+          TEST_MODE: "true"
+          PYTHONPATH: .
+        run: |
+          python netra_backend/tests/database/run_regression_suite.py -v
+      
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            netra_backend/tests/database/.pytest_cache/
+            **/*test*.log
+      
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Database regression tests failed. Please review the test results and fix any issues before merging.'
+            })
+  
+  schema-validation:
+    name: Validate Database Schema
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install sqlalchemy alembic psycopg2-binary
+      
+      - name: Validate model definitions
+        run: |
+          python scripts/check_database_schema.py --models-only
+      
+      - name: Check for migration conflicts
+        run: |
+          cd netra_backend/app
+          python -m alembic check

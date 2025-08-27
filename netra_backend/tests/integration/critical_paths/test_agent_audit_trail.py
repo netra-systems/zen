@@ -34,7 +34,7 @@ import pytest
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
+from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager
 from netra_backend.app.core.database_types import DatabaseType
 
 # Real components for L2 testing
