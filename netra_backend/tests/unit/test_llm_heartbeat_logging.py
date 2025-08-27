@@ -49,7 +49,8 @@ class TestHeartbeatLogger:
         """Test that stopping heartbeat cleans up resources."""
         logger = HeartbeatLogger()
 
-    def test_heartbeat_performance_monitoring_iteration_17(self):
+    @pytest.mark.asyncio
+    async def test_heartbeat_performance_monitoring_iteration_17(self):
         """Test heartbeat performance monitoring - Iteration 17."""
         import time
         

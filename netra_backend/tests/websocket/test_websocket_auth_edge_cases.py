@@ -516,5 +516,193 @@ class TestRateLimiter:
             assert client_id not in self.rate_limiter.request_history
 
 
+class TestWebSocketAuthenticationBypassPrevention:
+    """ITERATION 28: Prevent WebSocket authentication bypass attacks."""
+    
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.config = WebSocketConfig(
+            max_message_rate_per_minute=5,
+            connection_timeout_seconds=60
+        )
+        self.authenticator = WebSocketAuthenticator(self.config)
+
+    @pytest.mark.asyncio
+    async def test_websocket_authentication_bypass_prevention(self):
+        """ITERATION 28: Prevent WebSocket authentication bypass that allows unauthorized access.
+        
+        Business Value: Prevents unauthorized access attacks worth $150K+ per security breach.
+        """
+        # Test 1: Header manipulation attempts should be blocked
+        bypass_headers = [
+            {"x-forwarded-user": "admin", "authorization": "Bearer fake-token"},  # Header injection
+            {"user-agent": "Authorized-Client", "x-real-user": "admin"},  # User agent spoofing
+            {"referer": "https://app.netra.ai", "x-user-id": "bypass-123"},  # Referer spoofing
+            {"host": "app.netra.ai", "x-authenticated": "true"},  # Host header attack
+        ]
+        
+        for headers in bypass_headers:
+            mock_websocket = self.create_mock_websocket(headers)
+            
+            with patch.object(self.authenticator, '_validate_cors', return_value=True), \
+                 patch.object(self.authenticator, '_check_rate_limit', return_value=True), \
+                 patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token_jwt',
+                       return_value={"valid": False, "error": "Invalid token"}):
+                
+                with pytest.raises(HTTPException) as exc_info:
+                    await self.authenticator.authenticate_websocket(mock_websocket)
+                
+                # Should reject bypass attempts
+                assert exc_info.value.status_code in [1008, 1011]
+                assert self.authenticator.auth_stats["security_violations"] > 0
+
+        # Test 2: Protocol upgrade manipulation should fail
+        protocol_bypass_attempts = [
+            {"sec-websocket-protocol": "bypass-auth"},  # Custom protocol
+            {"sec-websocket-protocol": "jwt.bypassed"},  # Malformed JWT protocol
+            {"upgrade": "websocket", "connection": "upgrade", "x-bypass": "true"},  # Connection bypass
+        ]
+        
+        for headers in protocol_bypass_attempts:
+            mock_websocket = self.create_mock_websocket(headers)
+            
+            with patch.object(self.authenticator, '_validate_cors', return_value=True), \
+                 patch.object(self.authenticator, '_check_rate_limit', return_value=True):
+                
+                with pytest.raises(HTTPException) as exc_info:
+                    await self.authenticator.authenticate_websocket(mock_websocket)
+                
+                assert exc_info.value.status_code == 1008
+                assert "Authentication required" in exc_info.value.detail
+
+        # Test 3: CORS bypass attempts should be blocked
+        cors_bypass_origins = [
+            "null",  # Null origin bypass
+            "https://app.netra.ai@evil.com",  # URL confusion
+            "https://evil.com#https://app.netra.ai",  # Fragment bypass
+            "file://",  # File protocol bypass
+            "data:text/html,<script>",  # Data URL bypass
+        ]
+        
+        for origin in cors_bypass_origins:
+            headers = {"origin": origin, "authorization": "Bearer valid-token"}
+            mock_websocket = self.create_mock_websocket(headers)
+            
+            with patch.object(self.authenticator, '_validate_cors', return_value=False), \
+                 patch.object(self.authenticator, '_check_rate_limit', return_value=True):
+                
+                with pytest.raises(HTTPException) as exc_info:
+                    await self.authenticator.authenticate_websocket(mock_websocket)
+                
+                assert exc_info.value.status_code == 1008
+                assert "CORS validation failed" in exc_info.value.detail
+
+        # Test 4: Client IP spoofing should not bypass security
+        spoofing_headers = [
+            {"x-forwarded-for": "127.0.0.1", "x-real-ip": "192.168.1.1"},  # Conflicting IPs
+            {"x-forwarded-for": "127.0.0.1,evil-proxy.com"},  # Proxy chain manipulation
+            {"x-real-ip": "127.0.0.1", "x-client-ip": "trusted-ip"},  # Multiple IP headers
+        ]
+        
+        for headers in spoofing_headers:
+            mock_websocket = self.create_mock_websocket(headers, client_host="untrusted-ip")
+            
+            # Should still be subject to rate limiting regardless of spoofed IPs
+            with patch.object(self.authenticator, '_validate_cors', return_value=True):
+                
+                # Exhaust rate limit
+                for _ in range(6):
+                    try:
+                        await self.authenticator.authenticate_websocket(mock_websocket)
+                    except HTTPException:
+                        pass  # Expected to fail without auth
+                
+                # Should eventually be rate limited
+                rate_limited = False
+                for _ in range(3):
+                    try:
+                        await self.authenticator.authenticate_websocket(mock_websocket)
+                    except HTTPException as e:
+                        if "Rate limit exceeded" in str(e.detail):
+                            rate_limited = True
+                            break
+                
+                assert rate_limited, "Rate limiting should work regardless of IP spoofing"
+
+        # Test 5: Session token replay attacks should be detected
+        replay_token = self.create_jwt_token({"user_id": "replay-victim", "session": "used-session"})
+        headers = {"authorization": f"Bearer {replay_token}"}
+        
+        # Simulate token validation that detects replay
+        mock_validation_result = {"valid": False, "error": "Token replay detected"}
+        
+        mock_websocket = self.create_mock_websocket(headers)
+        with patch.object(self.authenticator, '_validate_cors', return_value=True), \
+             patch.object(self.authenticator, '_check_rate_limit', return_value=True), \
+             patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token_jwt',
+                   return_value=mock_validation_result):
+            
+            with pytest.raises(HTTPException) as exc_info:
+                await self.authenticator.authenticate_websocket(mock_websocket)
+            
+            assert exc_info.value.status_code == 1008
+            assert "Invalid or expired token" in exc_info.value.detail
+
+        # Test 6: Privilege escalation attempts should fail
+        escalation_token = self.create_jwt_token({
+            "user_id": "normal-user", 
+            "permissions": ["admin", "root", "superuser"],  # Suspicious permissions
+        })
+        headers = {"authorization": f"Bearer {escalation_token}"}
+        
+        # Mock validation that detects privilege escalation
+        mock_validation_result = {
+            "valid": True,
+            "user_id": "normal-user",
+            "email": "user@example.com",
+            "permissions": ["read"],  # Auth service strips elevated permissions
+            "expires_at": datetime.now(timezone.utc) + timedelta(hours=1)
+        }
+        
+        mock_websocket = self.create_mock_websocket(headers)
+        with patch.object(self.authenticator, '_validate_cors', return_value=True), \
+             patch.object(self.authenticator, '_check_rate_limit', return_value=True), \
+             patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token_jwt',
+                   return_value=mock_validation_result):
+            
+            auth_info = await self.authenticator.authenticate_websocket(mock_websocket)
+            
+            # Should only have safe permissions, not escalated ones
+            assert auth_info.permissions == ["read"]
+            assert "admin" not in auth_info.permissions
+            assert "root" not in auth_info.permissions
+
+    def create_mock_websocket(self, headers: Dict[str, str] = None, 
+                             client_host: str = "127.0.0.1") -> Mock:
+        """Create mock WebSocket with specified headers."""
+        mock_websocket = Mock()
+        mock_websocket.headers = headers or {}
+        mock_websocket.client = Mock()
+        mock_websocket.client.host = client_host
+        return mock_websocket
+    
+    def create_jwt_token(self, payload: Dict[str, Any], 
+                        secret: str = "test_secret",
+                        expired: bool = False,
+                        malformed: bool = False) -> str:
+        """Create JWT token for testing."""
+        if expired:
+            payload['exp'] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
+        else:
+            payload['exp'] = int((datetime.now(timezone.utc) + timedelta(hours=1)).timestamp())
+        
+        if malformed:
+            # Create malformed token by corrupting it
+            valid_token = jwt.encode(payload, secret, algorithm='HS256')
+            return valid_token[:-5] + "xxxxx"  # Corrupt the signature
+        
+        return jwt.encode(payload, secret, algorithm='HS256')
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -34,15 +34,15 @@ import pytest
 import websockets
 from websockets import ServerConnection
 
-StagingTestSuite = AsyncMock
+StagingTestSuite = AsyncMock()
 
-get_staging_suite = AsyncMock
+get_staging_suite = AsyncMock()
 # from netra_backend.app.websocket_core.manager import WebSocketManager
 
-WebSocketManager = AsyncMock
+WebSocketManager = AsyncMock()
 # from app.services.redis.session_manager import RedisSessionManager
 
-RedisSessionManager = AsyncMock
+RedisSessionManager = AsyncMock()
 
 @dataclass
 

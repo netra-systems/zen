@@ -507,8 +507,9 @@ class TestErrorRecoveryAndResilience:
         
         # Mock circuit breakers 
         mock_circuit_breaker = {"is_open": True, "failure_count": 3}
-        initializer.circuit_breakers = {DatabaseType.POSTGRESQL: mock_circuit_breaker}
-        initializer.circuit_breakers.get = MagicMock(return_value=mock_circuit_breaker)
+        mock_circuit_breakers = MagicMock()
+        mock_circuit_breakers.get = MagicMock(return_value=mock_circuit_breaker)
+        initializer.circuit_breakers = mock_circuit_breakers
         
         config = DatabaseConfig(
             type=DatabaseType.POSTGRESQL,

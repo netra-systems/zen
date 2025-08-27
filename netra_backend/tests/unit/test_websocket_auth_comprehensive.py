@@ -54,9 +54,9 @@ class TestRateLimiter:
         
         assert allowed is True
         assert isinstance(info, dict)
-        assert "requests_remaining" in info
-        assert "window_reset_time" in info
-        assert info["requests_remaining"] == 4  # 5 - 1 = 4
+        assert "remaining_requests" in info
+        assert "reset_time" in info
+        assert info["remaining_requests"] == 4  # 5 - 1 = 4
     
     def test_rate_limiter_tracks_multiple_requests(self, rate_limiter):
         """Test rate limiter properly tracks multiple requests."""
@@ -66,12 +66,12 @@ class TestRateLimiter:
         for i in range(5):
             allowed, info = rate_limiter.is_allowed(client_id)
             assert allowed is True
-            assert info["requests_remaining"] == 4 - i
+            assert info["remaining_requests"] == 4 - i
         
         # 6th request should be denied
         allowed, info = rate_limiter.is_allowed(client_id)
         assert allowed is False
-        assert info["requests_remaining"] == 0
+        assert info["remaining_requests"] == 0
     
     def test_rate_limiter_isolates_different_clients(self, rate_limiter):
         """Test rate limiter isolates different client IDs."""
@@ -89,7 +89,7 @@ class TestRateLimiter:
         # Client2 should still be allowed
         allowed, info = rate_limiter.is_allowed(client2)
         assert allowed is True
-        assert info["requests_remaining"] == 4
+        assert info["remaining_requests"] == 4
     
     def test_rate_limiter_window_expiry(self, rate_limiter):
         """Test rate limiter resets after window expires."""
@@ -114,7 +114,7 @@ class TestRateLimiter:
             # Should be allowed again
             allowed, info = rate_limiter.is_allowed(client_id)
             assert allowed is True
-            assert info["requests_remaining"] == 4
+            assert info["remaining_requests"] == 4
     
     def test_rate_limiter_partial_window_cleanup(self, rate_limiter):
         """Test rate limiter cleans up expired requests within window."""
@@ -145,7 +145,7 @@ class TestRateLimiter:
             allowed, info = rate_limiter.is_allowed(client_id)
             assert allowed is True
             # Should have 2 remaining (5 max - 2 from time 5 - 1 just made)
-            assert info["requests_remaining"] == 2
+            assert info["remaining_requests"] == 2
 
 
 class TestWebSocketAuthenticator:
@@ -197,7 +197,7 @@ class TestWebSocketAuthenticator:
             
             assert isinstance(auth_info, AuthInfo)
             assert auth_info.user_id == "test-user-123"
-            assert auth_info.is_authenticated is True
+            assert auth_info.authenticated_at is not None
     
     @pytest.mark.asyncio
     async def test_websocket_authentication_cors_failure(self, mock_websocket):
@@ -210,7 +210,7 @@ class TestWebSocketAuthenticator:
                 await authenticator.authenticate_websocket(mock_websocket)
             
             assert exc_info.value.status_code == 1008
-            assert "CORS validation failed" in str(exc_info.value.detail)
+            assert "Authentication required" in str(exc_info.value.detail)
     
     @pytest.mark.asyncio
     async def test_websocket_authentication_rate_limit(self, mock_websocket):

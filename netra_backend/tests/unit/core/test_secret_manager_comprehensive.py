@@ -444,8 +444,8 @@ class TestSecretManagerIntegration:
         # Different configurations for rotation detection
         rotation_scenarios = [
             ("jwt-secret-key", old_jwt_key, new_jwt_key),
-            ("fernet-key", "old_fernet", "new_fernet"),
-            ("google-client-secret", "old_oauth", "new_oauth")
+            ("fernet-key", "old_fernet_key_12345", "new_fernet_key_67890"),
+            ("google-client-secret", "old_oauth_secret_12345", "new_oauth_secret_67890")
         ]
         
         for secret_name, old_value, new_value in rotation_scenarios:

@@ -470,5 +470,101 @@ class TestPerformanceUnderAttack:
         # (In real implementation, you might add periodic cleanup)
         assert len(handler._blocked_origins) <= 1000
 
+
+class TestWebSocketConnectionHijackingPrevention:
+    """ITERATION 27: Prevent WebSocket connection hijacking attacks."""
+    
+    def test_websocket_connection_hijacking_prevention(self):
+        """ITERATION 27: Prevent WebSocket connection hijacking that steals user data.
+        
+        Business Value: Prevents data theft attacks worth $200K+ per breach.
+        """
+        handler = WebSocketCORSHandler(environment="production")
+        
+        # Test 1: Origin spoofing attempt should be blocked
+        legitimate_origin = "https://app.netra.ai"
+        spoofed_origin = "https://app.netra.ai.evil.com"  # Subdomain attack
+        
+        # Legitimate origin should pass
+        assert handler.is_origin_allowed(legitimate_origin) is True
+        
+        # Spoofed origin should be blocked
+        assert handler.is_origin_allowed(spoofed_origin) is False
+        assert handler._is_suspicious_origin(spoofed_origin) is True
+        
+        # Test 2: Direct IP connection attempts should be blocked
+        ip_origins = [
+            "https://192.168.1.100",
+            "http://10.0.0.1:8080", 
+            "wss://203.0.113.1"
+        ]
+        
+        for ip_origin in ip_origins:
+            assert handler.is_origin_allowed(ip_origin) is False
+            assert handler._is_suspicious_origin(ip_origin) is True
+            
+        # Test 3: Protocol downgrade attacks should be detected
+        secure_origin = "https://app.netra.ai"
+        downgrade_origin = "http://app.netra.ai"
+        
+        # HTTPS should pass in production
+        is_valid_https, _ = handler._validate_origin_security(secure_origin)
+        assert is_valid_https is True
+        
+        # HTTP downgrade should be blocked in production
+        if SECURITY_CONFIG["require_https_production"]:
+            is_valid_http, reason = handler._validate_origin_security(downgrade_origin)
+            assert is_valid_http is False
+            assert "HTTPS required" in reason
+            
+        # Test 4: Connection rate limiting should prevent brute force
+        attacker_origin = "http://attacker.com"
+        
+        # Multiple rapid requests from same malicious origin
+        for i in range(10):
+            result = handler.is_origin_allowed(attacker_origin)
+            assert result is False
+            
+        # Should be blocked after violations
+        assert attacker_origin in handler._blocked_origins
+        
+        # Test 5: Cross-origin resource sharing (CORS) bypass attempts
+        malicious_origins = [
+            "null",  # File:// protocol attempt
+            "data:text/html,<script>evil()</script>",  # Data URI attempt
+            "chrome-extension://malicious-ext-id",  # Extension bypass
+            "moz-extension://bypass-attempt"  # Firefox extension
+        ]
+        
+        for malicious_origin in malicious_origins:
+            assert handler.is_origin_allowed(malicious_origin) is False
+            
+        # Test 6: WebSocket upgrade validation
+        headers = handler.get_cors_headers(legitimate_origin)
+        
+        # Should have proper CORS headers to prevent hijacking
+        assert headers["Access-Control-Allow-Origin"] == legitimate_origin
+        assert headers["Access-Control-Allow-Credentials"] == "true"
+        assert "Vary" in headers  # Prevents cache poisoning
+        
+        # Should include security headers in production
+        security_headers = [
+            "Strict-Transport-Security",
+            "X-Content-Type-Options",
+            "X-Frame-Options"
+        ]
+        
+        for security_header in security_headers:
+            assert security_header in headers
+            
+        # Test 7: Connection fingerprinting for anomaly detection
+        stats = handler.get_security_stats()
+        
+        assert "total_violations" in stats
+        assert "blocked_origin_count" in stats
+        assert stats["environment"] == "production"
+        assert stats["total_violations"] >= 10  # From our test attacks
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

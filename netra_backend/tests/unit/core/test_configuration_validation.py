@@ -33,15 +33,17 @@ class TestConfigurationConsistency:
     def test_secure_configuration_boundaries_iteration_16(self):
         """Test security configuration validation - Iteration 16."""
         
-        # Test development mode detection
-        with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
+        # Test development mode detection using proper environment detection mocking
+        from netra_backend.app.core.environment_constants import get_current_environment
+        
+        with patch('netra_backend.app.core.environment_constants.get_current_environment', return_value="development"):
             assert _is_development_mode() == True
             
-        with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
+        with patch('netra_backend.app.core.environment_constants.get_current_environment', return_value="production"):
             assert _is_development_mode() == False
             
         # Test timeout configuration boundaries
-        timeout = _get_health_check_timeout("postgres")
+        timeout = _get_health_check_timeout()
         assert isinstance(timeout, (int, float))
         assert timeout > 0
         assert timeout <= 30  # Reasonable upper bound

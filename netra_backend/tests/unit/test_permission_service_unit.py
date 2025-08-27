@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -33,7 +33,10 @@ from netra_backend.app.services.permission_service import (
 def mock_db_session():
     """Mock database session."""
     # Mock: Generic component isolation for controlled unit testing
-    return Mock()
+    session = Mock()
+    # Make commit async for async methods
+    session.commit = AsyncMock(return_value=None)
+    return session
 
 @pytest.fixture
 def free_tier_user():
@@ -311,26 +314,29 @@ class TestUserRoleUpdates:
         result = PermissionService._should_elevate_to_developer(admin_user)
         assert result is False
 
-    def test_elevate_user_to_developer_updates_fields(self, mock_db_session, free_tier_user):
+    @pytest.mark.asyncio
+    async def test_elevate_user_to_developer_updates_fields(self, mock_db_session, free_tier_user):
         """Elevate user to developer updates role and developer flag."""
-        PermissionService._elevate_user_to_developer(mock_db_session, free_tier_user)
+        await PermissionService._elevate_user_to_developer(mock_db_session, free_tier_user)
         assert free_tier_user.role == "developer"
         assert free_tier_user.is_developer is True
         mock_db_session.commit.assert_called_once()
 
     @patch.dict('os.environ', {'DEV_MODE': 'true'})
-    def test_update_user_role_with_dev_detection(self, mock_db_session, free_tier_user):
+    @pytest.mark.asyncio
+    async def test_update_user_role_with_dev_detection(self, mock_db_session, free_tier_user):
         """Update user role with developer detection works."""
-        result = PermissionService.update_user_role(
+        result = await PermissionService.update_user_role(
             mock_db_session, free_tier_user, check_developer=True
         )
         assert result.role == "developer"
         assert result.is_developer is True
 
-    def test_update_user_role_without_dev_detection(self, mock_db_session, free_tier_user):
+    @pytest.mark.asyncio
+    async def test_update_user_role_without_dev_detection(self, mock_db_session, free_tier_user):
         """Update user role without developer detection preserves role."""
         original_role = free_tier_user.role
-        result = PermissionService.update_user_role(
+        result = await PermissionService.update_user_role(
             mock_db_session, free_tier_user, check_developer=False
         )
         assert result.role == original_role
@@ -338,43 +344,48 @@ class TestUserRoleUpdates:
 class TestCustomPermissions:
     """Test custom permission grants and revokes - CRITICAL for tier flexibility."""
 
-    def test_grant_permission_creates_structure(self, mock_db_session):
+    @pytest.mark.asyncio
+    async def test_grant_permission_creates_structure(self, mock_db_session):
         """Grant permission creates proper permissions structure."""
         # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.permissions = None
-        PermissionService.grant_permission(mock_db_session, user, "test_perm")
+        await PermissionService.grant_permission(mock_db_session, user, "test_perm")
         assert user.permissions is not None
         assert "additional" in user.permissions
 
-    def test_grant_permission_adds_new_permission(self, mock_db_session):
+    @pytest.mark.asyncio
+    async def test_grant_permission_adds_new_permission(self, mock_db_session):
         """Grant permission adds new permission to list."""
         user = create_user_with_custom_permissions()
-        PermissionService.grant_permission(mock_db_session, user, "new_perm")
+        await PermissionService.grant_permission(mock_db_session, user, "new_perm")
         assert "new_perm" in user.permissions["additional"]
         mock_db_session.commit.assert_called_once()
 
-    def test_grant_permission_ignores_duplicate(self, mock_db_session):
+    @pytest.mark.asyncio
+    async def test_grant_permission_ignores_duplicate(self, mock_db_session):
         """Grant permission ignores duplicate permissions."""
         user = create_user_with_custom_permissions(additional=["existing_perm"])
         mock_db_session.reset_mock()
-        PermissionService.grant_permission(mock_db_session, user, "existing_perm")
+        await PermissionService.grant_permission(mock_db_session, user, "existing_perm")
         # Should not call commit for duplicate
         mock_db_session.commit.assert_not_called()
 
-    def test_revoke_permission_creates_structure(self, mock_db_session):
+    @pytest.mark.asyncio
+    async def test_revoke_permission_creates_structure(self, mock_db_session):
         """Revoke permission creates proper revoked structure."""
         # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.permissions = None
-        PermissionService.revoke_permission(mock_db_session, user, "test_perm")
+        await PermissionService.revoke_permission(mock_db_session, user, "test_perm")
         assert user.permissions is not None
         assert "revoked" in user.permissions
 
-    def test_revoke_permission_adds_to_revoked_list(self, mock_db_session):
+    @pytest.mark.asyncio
+    async def test_revoke_permission_adds_to_revoked_list(self, mock_db_session):
         """Revoke permission adds to revoked list."""
         user = create_user_with_custom_permissions()
-        PermissionService.revoke_permission(mock_db_session, user, "revoked_perm")
+        await PermissionService.revoke_permission(mock_db_session, user, "revoked_perm")
         assert "revoked_perm" in user.permissions["revoked"]
         mock_db_session.commit.assert_called_once()
 
@@ -391,26 +402,30 @@ class TestCustomPermissions:
 class TestSetUserRole:
     """Test setting user roles and validation."""
 
-    def test_set_user_role_updates_role(self, mock_db_session, free_tier_user):
+    @pytest.mark.asyncio
+    async def test_set_user_role_updates_role(self, mock_db_session, free_tier_user):
         """Set user role updates role correctly."""
-        result = PermissionService.set_user_role(mock_db_session, free_tier_user, "power_user")
+        result = await PermissionService.set_user_role(mock_db_session, free_tier_user, "power_user")
         assert result.role == "power_user"
         mock_db_session.commit.assert_called_once()
 
-    def test_set_user_role_updates_developer_flag(self, mock_db_session, free_tier_user):
+    @pytest.mark.asyncio
+    async def test_set_user_role_updates_developer_flag(self, mock_db_session, free_tier_user):
         """Set user role updates developer flag for elevated roles."""
-        PermissionService.set_user_role(mock_db_session, free_tier_user, "developer")
+        await PermissionService.set_user_role(mock_db_session, free_tier_user, "developer")
         assert free_tier_user.is_developer is True
 
-    def test_set_user_role_validates_role(self, mock_db_session, free_tier_user):
+    @pytest.mark.asyncio
+    async def test_set_user_role_validates_role(self, mock_db_session, free_tier_user):
         """Set user role validates role exists in hierarchy."""
         with pytest.raises(ValueError, match="Invalid role"):
-            PermissionService.set_user_role(mock_db_session, free_tier_user, "invalid_role")
+            await PermissionService.set_user_role(mock_db_session, free_tier_user, "invalid_role")
 
-    def test_set_user_role_preserves_old_role_info(self, mock_db_session, pro_tier_user):
+    @pytest.mark.asyncio
+    async def test_set_user_role_preserves_old_role_info(self, mock_db_session, pro_tier_user):
         """Set user role preserves information about old role."""
         original_role = pro_tier_user.role
-        result = PermissionService.set_user_role(mock_db_session, pro_tier_user, "developer")
+        result = await PermissionService.set_user_role(mock_db_session, pro_tier_user, "developer")
         # Should have changed role
         assert result.role != original_role
         assert result.role == "developer"
