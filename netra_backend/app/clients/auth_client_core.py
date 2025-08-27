@@ -56,6 +56,11 @@ class AuthServiceClient:
         self.oauth_generator = OAuthConfigGenerator()
         self.tracing_manager = TracingManager()
         self._client = None
+        # Load service authentication credentials
+        from netra_backend.app.core.configuration import get_configuration
+        config = get_configuration()
+        self.service_id = config.service_id or "netra-backend"
+        self.service_secret = config.service_secret
     
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create new HTTP client instance."""
@@ -70,6 +75,41 @@ class AuthServiceClient:
         if not self._client:
             self._client = self._create_http_client()
         return self._client
+    
+    def _get_service_auth_headers(self) -> Dict[str, str]:
+        """Get service-to-service authentication headers."""
+        headers = {}
+        if self.service_id and self.service_secret:
+            headers["X-Service-ID"] = self.service_id
+            headers["X-Service-Secret"] = self.service_secret
+        return headers
+    
+    def _get_request_headers(self, include_auth: bool = True, bearer_token: str = None) -> Dict[str, str]:
+        """Get headers for auth service requests.
+        
+        Args:
+            include_auth: Whether to include service auth headers
+            bearer_token: Optional bearer token for user auth
+            
+        Returns:
+            Dict of headers
+        """
+        headers = {}
+        
+        # Add service authentication if enabled
+        if include_auth:
+            headers.update(self._get_service_auth_headers())
+        
+        # Add tracing headers
+        trace_headers = self.tracing_manager.inject_trace_headers()
+        headers.update(trace_headers)
+        
+        # Add bearer token if provided
+        if bearer_token:
+            from netra_backend.app.core.auth_constants import HeaderConstants
+            headers[HeaderConstants.AUTHORIZATION] = f"{HeaderConstants.BEARER_PREFIX}{bearer_token}"
+        
+        return headers
     
     async def _check_auth_service_enabled(self, token: str) -> Optional[Dict]:
         """Check if auth service is enabled."""
@@ -172,20 +212,24 @@ class AuthServiceClient:
     
     async def _send_validation_request(self, client: httpx.AsyncClient, request_data: Dict) -> Optional[Dict]:
         """Send validation request with distributed tracing headers."""
-        # Add tracing headers for cross-service communication
-        trace_headers = self.tracing_manager.inject_trace_headers()
+        # Get headers with service auth
+        headers = self._get_request_headers()
         
         response = await client.post(
             "/auth/validate", 
             json=request_data,
-            headers=trace_headers
+            headers=headers
         )
         
         # Log the trace propagation for debugging
-        logger.debug(f"Auth validation request sent with trace headers: {trace_headers}")
+        logger.debug(f"Auth validation request sent with service auth")
         
         if response.status_code == 200:
             return await self._parse_validation_response(response.json())
+        elif response.status_code == 401:
+            logger.warning("Auth service returned 401 - check service authentication")
+        elif response.status_code == 403:
+            logger.warning("Auth service returned 403 - service not authorized")
         return None
     
     async def _prepare_remote_validation(self, token: str):
@@ -220,7 +264,8 @@ class AuthServiceClient:
     async def _execute_login_request(self, request_data: Dict) -> Optional[Dict]:
         """Execute login request."""
         client = await self._get_client()
-        response = await client.post("/auth/login", json=request_data)
+        headers = self._get_request_headers()
+        response = await client.post("/auth/login", json=request_data, headers=headers)
         return response.json() if response.status_code == 200 else None
     
     async def _attempt_login(self, email: str, password: str, provider: str) -> Optional[Dict]:
@@ -251,7 +296,8 @@ class AuthServiceClient:
     async def _execute_logout_request(self, token: str, session_id: Optional[str]) -> bool:
         """Execute logout request."""
         client = await self._get_client()
-        headers = await self._build_logout_headers(token)
+        # Get headers with service auth and bearer token
+        headers = self._get_request_headers(bearer_token=token)
         payload = await self._build_logout_payload(session_id)
         response = await client.post("/auth/logout", headers=headers, json=payload)
         return response.status_code == 200
@@ -270,13 +316,13 @@ class AuthServiceClient:
             client = await self._get_client()
             request_data = {"token": token}
             
-            # Add tracing headers for cross-service communication
-            trace_headers = self.tracing_manager.inject_trace_headers()
+            # Get headers with service auth
+            headers = self._get_request_headers()
             
             response = await client.post(
                 "/auth/check-blacklist",
                 json=request_data,
-                headers=trace_headers
+                headers=headers
             )
             
             if response.status_code == 200:
@@ -316,7 +362,8 @@ class AuthServiceClient:
     async def _execute_refresh_request(self, request_data: Dict) -> Optional[Dict]:
         """Execute refresh token request."""
         client = await self._get_client()
-        response = await client.post("/auth/refresh", json=request_data)
+        headers = self._get_request_headers()
+        response = await client.post("/auth/refresh", json=request_data, headers=headers)
         return response.json() if response.status_code == 200 else None
     
     async def _attempt_token_refresh(self, refresh_token: str) -> Optional[Dict]:
@@ -354,7 +401,8 @@ class AuthServiceClient:
     async def _execute_service_token_request(self, request_data: Dict) -> Optional[str]:
         """Execute service token request."""
         client = await self._get_client()
-        response = await client.post("/auth/service-token", json=request_data)
+        headers = self._get_request_headers()
+        response = await client.post("/auth/service-token", json=request_data, headers=headers)
         if response.status_code == 200:
             return response.json().get("token")
         return None

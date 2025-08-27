@@ -83,6 +83,10 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         Raises:
             HTTPException: If authentication fails (401 or 403)
         """
+        # Skip auth for OPTIONS requests (CORS preflight)
+        if request.method == "OPTIONS":
+            return await call_next(request)
+            
         # Skip auth for excluded paths
         if self._is_excluded_path(request.url.path):
             return await call_next(request)

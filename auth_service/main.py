@@ -124,30 +124,31 @@ async def lifespan(app: FastAPI):
         # Check Google Client ID
         google_client_id = AuthConfig.get_google_client_id()
         if not google_client_id:
-            oauth_validation_errors.append("GOOGLE_CLIENT_ID is not configured")
-            logger.error("❌ CRITICAL: GOOGLE_CLIENT_ID is missing!")
+            # TOMBSTONE: GOOGLE_CLIENT_ID variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_ID_* variables
+            oauth_validation_errors.append("Google OAuth client ID is not configured")
+            logger.error("❌ CRITICAL: Google OAuth client ID is missing!")
         elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
-            oauth_validation_errors.append(f"GOOGLE_CLIENT_ID appears invalid: {google_client_id[:20]}...")
-            logger.error(f"❌ CRITICAL: GOOGLE_CLIENT_ID looks like a placeholder: {google_client_id[:20]}...")
+            oauth_validation_errors.append(f"Google OAuth client ID appears invalid: {google_client_id[:20]}...")
+            logger.error(f"❌ CRITICAL: Google OAuth client ID looks like a placeholder: {google_client_id[:20]}...")
         else:
-            logger.info(f"✅ GOOGLE_CLIENT_ID configured: {google_client_id[:20]}...")
+            logger.info(f"✅ Google OAuth client ID configured: {google_client_id[:20]}...")
         
         # Check Google Client Secret
         google_client_secret = AuthConfig.get_google_client_secret()
         if not google_client_secret:
-            oauth_validation_errors.append("GOOGLE_CLIENT_SECRET is not configured")
-            logger.error("❌ CRITICAL: GOOGLE_CLIENT_SECRET is missing!")
+            # TOMBSTONE: GOOGLE_CLIENT_SECRET variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_SECRET_* variables
+            oauth_validation_errors.append("Google OAuth client secret is not configured")
+            logger.error("❌ CRITICAL: Google OAuth client secret is missing!")
         elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
-            oauth_validation_errors.append(f"GOOGLE_CLIENT_SECRET appears invalid")
-            logger.error(f"❌ CRITICAL: GOOGLE_CLIENT_SECRET looks like a placeholder")
+            oauth_validation_errors.append(f"Google OAuth client secret appears invalid")
+            logger.error(f"❌ CRITICAL: Google OAuth client secret looks like a placeholder")
         else:
-            logger.info("✅ GOOGLE_CLIENT_SECRET configured")
+            logger.info("✅ Google OAuth client secret configured")
         
         # Check environment variables that were actually loaded
         env_manager = get_env()
+        # TOMBSTONE: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET superseded by environment-specific variables
         checked_env_vars = {
-            "GOOGLE_CLIENT_ID": env_manager.get("GOOGLE_CLIENT_ID"),
-            "GOOGLE_CLIENT_SECRET": env_manager.get("GOOGLE_CLIENT_SECRET"),
             "GOOGLE_OAUTH_CLIENT_ID_STAGING": env_manager.get("GOOGLE_OAUTH_CLIENT_ID_STAGING"),
             "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING"),
             "ENVIRONMENT": env_manager.get("ENVIRONMENT")
@@ -181,7 +182,7 @@ This is a FATAL ERROR in {env} environment.
 OAuth functionality will be completely broken without proper configuration.
 
 Required actions:
-1. Set proper GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Google Secret Manager
+1. Set proper Google OAuth credentials using environment-specific variables (e.g. GOOGLE_OAUTH_CLIENT_ID_STAGING)
 2. Ensure Cloud Run deployment has access to the secrets
 3. Verify OAuth credentials are valid in Google Cloud Console
 
