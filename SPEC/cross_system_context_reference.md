@@ -215,8 +215,21 @@ def get_backend_url():
 - DATABASE_URL (Unix socket format)
 - REDIS_URL
 - CLICKHOUSE_HOST (NOT localhost)
-- OAUTH_CLIENT_ID
-- OAUTH_CLIENT_SECRET
+- OAUTH_GOOGLE_CLIENT_ID_STAGING (OAuth Google credentials for staging)
+- OAUTH_GOOGLE_CLIENT_SECRET_STAGING (OAuth Google secret for staging)
+- OAUTH_GITHUB_CLIENT_ID_STAGING (OAuth GitHub credentials for staging)
+- OAUTH_GITHUB_CLIENT_SECRET_STAGING (OAuth GitHub secret for staging)
+
+**OAuth Environment Variable Naming Convention**:
+- **Runtime Variables (_ENV suffix)**: `OAUTH_GOOGLE_CLIENT_ID_ENV`, `OAUTH_GOOGLE_CLIENT_SECRET_ENV`
+  - Used in application code where credentials are loaded from current environment
+  - Tests use these to load environment-specific credentials
+- **Deployment Variables (_{ENVIRONMENT} suffix)**: `OAUTH_GOOGLE_CLIENT_ID_STAGING`, `OAUTH_GOOGLE_CLIENT_ID_PROD`
+  - Used in deployment configs and secret management
+  - Allows multiple environment credentials to coexist
+- **General OAuth Config (no suffix)**: `OAUTH_HMAC_SECRET`, `OAUTH_STATE_TTL_SECONDS`
+  - Non-credential OAuth configuration values
+- See: `SPEC/learnings/oauth_environment_naming_convention.xml` for complete details
 
 ### 3.3 Production Environment
 **Deploy**: `python scripts/deploy_to_gcp.py --project netra-production --run-checks`

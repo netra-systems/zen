@@ -19,7 +19,7 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
@@ -33,6 +33,7 @@
             <critical-takeaway>Always add HEAD method support to GET endpoints for CORS compatibility (auth_service_endpoint_fixes.xml).</critical-takeaway>
             <critical-takeaway>JWT validation must validate token structure before decoding to prevent malformed token errors (auth_service_endpoint_fixes.xml).</critical-takeaway>
             <critical-takeaway>CORS wildcard (*) cannot be used with credentials: 'include' - use specific origin list in dev (cors_development_wildcard.xml).</critical-takeaway>
+            <critical-takeaway>OAuth environment variables use _ENV suffix for runtime (OAUTH_GOOGLE_CLIENT_ID_ENV) and _{ENVIRONMENT} for deployment (OAUTH_GOOGLE_CLIENT_ID_STAGING) - see oauth_environment_naming_convention.xml</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
@@ -98,6 +99,15 @@
             <critical-takeaway>Add 50ms delay in OAuth callback before redirecting to ensure storage event processing.</critical-takeaway>
             <critical-takeaway>Use storage event listeners in AuthContext for real-time token detection across components.</critical-takeaway>
             <critical-takeaway>Test OAuth flows with fresh browser sessions to catch first-login timing issues.</critical-takeaway>
+        </category>
+
+        <category name="Redis Service Independence" path="SPEC/learnings/redis_service_independence.xml" keywords="Redis, Microservices, Circular Dependencies, Service Independence, Shared Components, Infrastructure">
+            <critical-takeaway>CRITICAL: Each microservice MUST have its own Redis manager - this duplication is intentional and correct.</critical-takeaway>
+            <critical-takeaway>Redis clients are STATEFUL components that must NEVER be placed in /shared directory.</critical-takeaway>
+            <critical-takeaway>Never import Redis managers or other infrastructure components from other services - violates microservice independence.</critical-takeaway>
+            <critical-takeaway>Auth service importing from backend creates circular dependencies that prevent independent deployment.</critical-takeaway>
+            <critical-takeaway>Redis manager duplication is explicitly listed as acceptable in SPEC/acceptable_duplicates.xml.</critical-takeaway>
+            <critical-takeaway>Services must communicate through APIs, not through shared stateful components.</critical-takeaway>
         </category>
         
         <category name="Frontend Configuration Loop Prevention" path="SPEC/learnings/frontend_config_loop_prevention.xml" keywords="Frontend, Auth Context, useEffect, Configuration, Loop, API Calls">
@@ -1107,6 +1117,25 @@
             <critical-takeaway>Use GEMINI_2_5_PRO (gemini-2.0-flash-thinking-exp) for tests requiring advanced reasoning capabilities.</critical-takeaway>
             <critical-takeaway>Mock client delays and traits must be configured for Gemini models to provide realistic test behavior.</critical-takeaway>
             <critical-takeaway>Do not reintroduce GPT or Claude models unless explicitly required for cross-provider compatibility testing.</critical-takeaway>
+        </category>
+        
+        <category name="SQLAlchemy AsyncSession Lifecycle" path="SPEC/learnings/sqlalchemy_session_lifecycle.xml" keywords="SQLAlchemy, AsyncSession, IllegalStateChangeError, GeneratorExit, Session Management, Database, Async">
+            <critical-takeaway>Handle GeneratorExit separately in async generators managing database sessions to prevent IllegalStateChangeError.</critical-takeaway>
+            <critical-takeaway>Never perform session operations (rollback, close) during GeneratorExit - let context manager handle cleanup.</critical-takeaway>
+            <critical-takeaway>Check session.is_active before attempting rollback in exception handlers.</critical-takeaway>
+            <critical-takeaway>SQLAlchemy async sessions conflict with operations during garbage collection if not handled properly.</critical-takeaway>
+            <critical-takeaway>Use try/except GeneratorExit/except Exception pattern for proper async session lifecycle management.</critical-takeaway>
+        </category>
+        
+        <category name="Database Manager SSOT Consolidation" path="SPEC/learnings/database_manager_ssot_consolidation.xml" keywords="Database Manager, SSOT, Single Source of Truth, Consolidation, Refactoring, Technical Debt, Database Connection">
+            <critical-takeaway>CRITICAL: Each service must have ONE canonical database manager implementation - multiple implementations violate SSOT.</critical-takeaway>
+            <critical-takeaway>Always search for existing database managers before creating new ones: grep -r "class.*Database.*Manager"</critical-takeaway>
+            <critical-takeaway>Database managers should be placed in predictable locations: app/db/database_manager.py</critical-takeaway>
+            <critical-takeaway>Extend existing managers with options/parameters instead of creating new implementations.</critical-takeaway>
+            <critical-takeaway>Test updates are often the most time-consuming part of consolidation - good test coverage helps identify all usage points.</critical-takeaway>
+            <critical-takeaway>Regular SSOT compliance audits using architecture compliance scripts prevent duplicate accumulation.</critical-takeaway>
+            <critical-takeaway>Service independence allows each service to have its own database manager, but within a service there must be only ONE.</critical-takeaway>
+            <critical-takeaway>Use dependency injection to allow test-specific behavior without creating test-only managers.</critical-takeaway>
         </category>
     </categories>
     

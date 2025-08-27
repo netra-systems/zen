@@ -138,5 +138,20 @@ python -c "from main import app" || (echo "ERROR: Isolated startup failed for ba
 
       </validation-steps>
     </protocol>
+    <protocol id="MS-VAL-002">
+      <title>Cross-Service Import Prevention</title>
+      <instruction>Services must NEVER import code from other services. This includes infrastructure components like Redis managers and database connections.</instruction>
+      <forbidden-patterns>
+        <pattern service="auth_service">from netra_backend</pattern>
+        <pattern service="netra_backend">from auth_service (except in tests)</pattern>
+        <pattern description="Redis manager sharing">Importing redis_manager from another service</pattern>
+      </forbidden-patterns>
+      <acceptable-duplicates>
+        <duplicate>Redis managers - Each service has its own</duplicate>
+        <duplicate>Database managers - Each service has its own</duplicate>
+        <duplicate>Configuration loaders - Each service has its own</duplicate>
+        <duplicate>Environment managers - Each service has its own</duplicate>
+      </acceptable-duplicates>
+    </protocol>
   </section>
 </specification>

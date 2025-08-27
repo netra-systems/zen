@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='utf-8'?>
+<learning>
+  <metadata>
+    <title>Redis Manager Service Independence</title>
+    <category>Architecture</category>
+    <priority>CRITICAL</priority>
+    <date>2025-08-27</date>
+    <tags>
+      <tag>microservices</tag>
+      <tag>redis</tag>
+      <tag>independence</tag>
+      <tag>circular-dependencies</tag>
+    </tags>
+  </metadata>
+  
+  <problem>
+    <description>
+      Circular dependency discovered where auth_service was importing Redis manager from netra_backend,
+      violating microservice independence. This created startup sequencing issues where:
+      1. Auth service depended on backend for Redis functionality
+      2. Backend depended on auth service for authentication
+      3. Services could not start independently
+    </description>
+    <impact>
+      - Services cannot be deployed independently
+      - Circular dependency prevents clean startup
+      - Violates microservice architecture principles
+      - Creates tight coupling between services
+    </impact>
+    <root_cause>
+      Misunderstanding that Redis managers should be shared across services to avoid duplication.
+      The incorrect assumption was that infrastructure components like Redis clients should be in /shared.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <principle>
+      Each microservice MUST maintain its own Redis manager implementation. This duplication is 
+      INTENTIONAL and CORRECT per microservice architecture principles.
+    </principle>
+    
+    <key_insights>
+      <insight priority="CRITICAL">
+        Redis clients are STATEFUL components that must NEVER be shared between services.
+        Each service needs its own connection pools, error handling, and configuration.
+      </insight>
+      <insight priority="HIGH">
+        The /shared directory is for STATELESS utilities only. Redis clients, database managers,
+        and other stateful components are explicitly forbidden in /shared per 
+        SPEC/shared_component_architecture.xml.
+      </insight>
+      <insight priority="HIGH">
+        Duplication of Redis managers across services is listed as an acceptable duplicate in
+        SPEC/acceptable_duplicates.xml because services may have different:
+        - Connection pooling requirements
+        - Retry strategies
+        - Error handling needs
+        - Configuration parameters
+        - Scaling characteristics
+      </insight>
+    </key_insights>
+    
+    <correct_pattern>
+      <service name="auth_service">
+        <file>auth_service/auth_core/redis_manager.py</file>
+        <description>
+          Independent Redis manager using auth service's isolated environment.
+          No imports from netra_backend or other services.
+        </description>
+      </service>
+      <service name="netra_backend">
+        <file>netra_backend/app/redis_manager.py</file>
+        <description>
+          Independent Redis manager with backend-specific features like leader locks.
+          No imports from auth_service or other services.
+        </description>
+      </service>
+      <service name="frontend">
+        <description>
+          Frontend doesn't directly connect to Redis - it uses backend APIs.
+        </description>
+      </service>
+    </correct_pattern>
+    
+    <anti_patterns>
+      <anti_pattern>
+        <description>Importing Redis manager from another service</description>
+        <example>from netra_backend.app.redis_manager import redis_manager</example>
+        <why_bad>Creates circular dependencies and violates service independence</why_bad>
+      </anti_pattern>
+      <anti_pattern>
+        <description>Putting Redis client in /shared</description>
+        <example>/shared/redis/redis_manager.py with stateful client</example>
+        <why_bad>Stateful components in /shared violate architecture principles</why_bad>
+      </anti_pattern>
+      <anti_pattern>
+        <description>Trying to eliminate Redis manager duplication</description>
+        <why_bad>This duplication is intentional and required for microservice independence</why_bad>
+      </anti_pattern>
+    </anti_patterns>
+  </solution>
+  
+  <prevention>
+    <checklist>
+      <item>Never import infrastructure components from other services</item>
+      <item>Each service must have its own Redis/database managers</item>
+      <item>Only stateless utilities go in /shared</item>
+      <item>Services communicate through APIs, not shared code</item>
+      <item>Review SPEC/acceptable_duplicates.xml before trying to eliminate duplication</item>
+      <item>Review SPEC/shared_component_architecture.xml before adding to /shared</item>
+    </checklist>
+    
+    <validation_commands>
+      <command>
+        # Check for cross-service imports in auth service
+        grep -r "from netra_backend" auth_service/ --exclude-dir=tests
+      </command>
+      <command>
+        # Check for cross-service imports in backend
+        grep -r "from auth_service" netra_backend/app/ --exclude-dir=tests
+      </command>
+      <command>
+        # Verify no stateful components in shared
+        ls -la shared/ | grep -E "redis|database|connection"
+      </command>
+    </validation_commands>
+  </prevention>
+  
+  <references>
+    <spec>SPEC/independent_services.xml</spec>
+    <spec>SPEC/shared_component_architecture.xml</spec>
+    <spec>SPEC/acceptable_duplicates.xml</spec>
+    <spec>SPEC/microservice_independence.xml</spec>
+  </references>
+</learning>
