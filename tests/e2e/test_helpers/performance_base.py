@@ -580,7 +580,7 @@ class HighVolumeThroughputClient:
                 headers = {"Authorization": f"Bearer {self.auth_token}"}
                 self.connection = await websockets.connect(
                     self.websocket_uri,
-                    extra_headers=headers,
+                    additional_headers=headers,
                     ping_interval=30,
                     ping_timeout=10,
                     close_timeout=10,

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Docker Service Management Commands</title>
+        <category>infrastructure</category>
+        <tags>docker, commands, services, refresh</tags>
+        <created>2025-08-27</created>
+        <importance>high</importance>
+    </metadata>
+    
+    <context>
+        When users reference "refresh netra docker", "restart netra", or similar commands,
+        they are referring to the selective Docker service management system.
+    </context>
+    
+    <quick_reference>
+        <command_mapping>
+            <user_intent>
+                <phrase>refresh netra docker</phrase>
+                <phrase>restart netra</phrase>
+                <phrase>reload netra backend</phrase>
+                <action>python scripts/docker_services.py restart netra</action>
+            </user_intent>
+            
+            <user_intent>
+                <phrase>start netra</phrase>
+                <phrase>run netra backend</phrase>
+                <action>python scripts/docker_services.py start netra</action>
+            </user_intent>
+            
+            <user_intent>
+                <phrase>stop docker</phrase>
+                <phrase>stop all services</phrase>
+                <action>python scripts/docker_services.py stop</action>
+            </user_intent>
+            
+            <user_intent>
+                <phrase>netra logs</phrase>
+                <phrase>view backend logs</phrase>
+                <action>python scripts/docker_services.py logs netra</action>
+            </user_intent>
+        </command_mapping>
+    </quick_reference>
+    
+    <insight>
+        The Docker service management system uses profiles to enable selective control
+        of services. The most common operation is refreshing just the Netra backend
+        without affecting databases or other services.
+    </insight>
+    
+    <best_practice>
+        Always use the docker_services.py script for selective service management
+        rather than docker-compose commands directly, as it handles dependencies
+        and profiles correctly.
+    </best_practice>
+    
+    <related_files>
+        <file>/scripts/docker_services.py</file>
+        <file>/docker-compose.dev.yml</file>
+        <file>/docs/docker-services-guide.md</file>
+        <file>/SPEC/docker_service_management.xml</file>
+    </related_files>
+</learning>

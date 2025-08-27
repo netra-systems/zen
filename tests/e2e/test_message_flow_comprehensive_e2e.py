@@ -55,7 +55,7 @@ class MessageFlowTester:
             
             # Add origin header for CORS
             extra_headers = {"Origin": "http://localhost:3000"}
-            ws = await websockets.connect(ws_url, extra_headers=extra_headers)
+            ws = await websockets.connect(ws_url, additional_headers=extra_headers)
             
             self.connections[connection_id] = {
                 "websocket": ws,

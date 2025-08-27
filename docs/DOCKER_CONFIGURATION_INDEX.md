@@ -56,16 +56,22 @@ The system maintains **two distinct Docker configuration sets**:
 ## Compose Files
 
 ### docker-compose.dev.yml
-**Purpose:** Orchestrates complete development environment  
-**Services Included:**
-- PostgreSQL (port 5432)
-- Redis (port 6379)
-- ClickHouse (ports 8123/9000, optional profile: analytics)
-- Backend (port 8000)
-- Auth Service (port 8081)
-- Frontend (port 3000)
+**Purpose:** Orchestrates complete development environment with **profile support for selective service management**
+
+**Services & Profiles:**
+| Profile | Services Included | Use Case |
+|---------|------------------|----------|
+| `netra` | PostgreSQL, Redis, Backend | Netra backend development only |
+| `backend` | PostgreSQL, Redis, Backend, Auth | Full backend development |
+| `frontend` | Frontend | Frontend development only |
+| `full` | All services | Complete stack |
+| `db` | PostgreSQL | Database only |
+| `cache` | Redis | Cache only |
+| `analytics` | ClickHouse | Analytics only |
+| `auth` | PostgreSQL, Redis, Auth | Auth service development |
 
 **Features:**
+- **Profile-based selective service control** (NEW)
 - Health checks for all services
 - Volume mounts for hot-reload
 - Database initialization scripts
@@ -76,12 +82,35 @@ The system maintains **two distinct Docker configuration sets**:
 
 ### Development Environment
 
+#### Quick Service Management (NEW)
 ```bash
-# Using Docker Dev Launcher (Recommended)
+# Refresh/Restart Netra backend only
+python scripts/docker_services.py restart netra
+
+# Start just Netra backend (with dependencies)
+python scripts/docker_services.py start netra
+
+# Start just frontend
+python scripts/docker_services.py start frontend
+
+# Start everything
+python scripts/docker_services.py start full
+
+# View logs for Netra
+python scripts/docker_services.py logs netra
+
+# Stop all services
+python scripts/docker_services.py stop
+```
+
+#### Traditional Docker Commands
+```bash
+# Using Docker Dev Launcher (Full stack)
 python scripts/docker_dev_launcher.py
 
-# Direct Docker Compose
-docker compose -f docker-compose.dev.yml up
+# Direct Docker Compose with profiles
+docker compose -f docker-compose.dev.yml --profile netra up
+docker compose -f docker-compose.dev.yml --profile full up
 
 # With specific profiles (e.g., analytics)
 docker compose -f docker-compose.dev.yml --profile analytics up
@@ -103,6 +132,7 @@ python scripts/build_staging.py
 
 | Script | Docker Files Used | Purpose |
 |--------|-------------------|---------|
+| `scripts/docker_services.py` | docker-compose.dev.yml | **Selective service management (NEW)** |
 | `scripts/docker_dev_launcher.py` | docker-compose.dev.yml | Local development launcher |
 | `scripts/deploy_to_gcp.py` | deployment/docker/*.gcp.Dockerfile | GCP deployment |
 | `scripts/build_staging.py` | deployment/docker/*.gcp.Dockerfile | Staging builds |
@@ -187,6 +217,8 @@ python scripts/validate_staging_deployment.py
 
 ## Related Documentation
 
+- [Docker Services Guide](./docker-services-guide.md) - **Complete guide for selective service management**
+- [Docker Service Management Spec](../SPEC/docker_service_management.xml) - **Service profiles and patterns**
 - [Docker Development Guide](./DOCKER_DEV_GUIDE.md)
 - [GCP Deployment Spec](../SPEC/gcp_deployment.xml)
 - [Deployment Architecture](../SPEC/deployment_architecture.xml)

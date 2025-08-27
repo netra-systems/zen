@@ -60,9 +60,9 @@ class TestThreadService:
     """Test suite for ThreadService with UnitOfWork pattern"""
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('netra_backend.app.services.thread_service.get_unit_of_work')
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.manager')
+    @patch('netra_backend.app.services.thread_service.manager')
     @pytest.mark.asyncio
     async def test_get_or_create_thread_existing(self, mock_manager, mock_get_uow, thread_service, sample_thread):
         """Test getting an existing thread"""
@@ -89,9 +89,9 @@ class TestThreadService:
         mock_manager.send_message.assert_called_once()
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('netra_backend.app.services.thread_service.get_unit_of_work')
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.manager')
+    @patch('netra_backend.app.services.thread_service.manager')
     @pytest.mark.asyncio
     async def test_create_message_success(self, mock_manager, mock_get_uow, thread_service, sample_message):
         """Test creating a message successfully"""
@@ -116,7 +116,7 @@ class TestThreadService:
         mock_uow.messages.create.assert_called_once()
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('netra_backend.app.services.thread_service.get_unit_of_work')
     @pytest.mark.asyncio
     async def test_get_thread_messages_success(self, mock_get_uow, thread_service):
         """Test retrieving thread messages"""
@@ -145,9 +145,9 @@ class TestThreadService:
         mock_uow.messages.get_by_thread.assert_called_once_with(mock_uow.session, "thread_123", 50)
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('netra_backend.app.services.thread_service.get_unit_of_work')
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.manager')
+    @patch('netra_backend.app.services.thread_service.manager')
     @pytest.mark.asyncio
     async def test_create_run_success(self, mock_manager, mock_get_uow, thread_service, sample_run, sample_thread):
         """Test creating a run successfully"""
@@ -179,7 +179,7 @@ class TestThreadService:
         mock_manager.send_message.assert_called_once()
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('netra_backend.app.services.thread_service.get_unit_of_work')
     @pytest.mark.asyncio
     async def test_update_run_status_completed(self, mock_get_uow, thread_service, sample_run):
         """Test updating run status to completed"""
@@ -211,7 +211,7 @@ class TestThreadService:
         mock_uow.runs.update.assert_called_once()
         
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('netra_backend.app.services.thread_service.get_unit_of_work')
     @pytest.mark.asyncio
     async def test_get_thread_success(self, mock_get_uow, thread_service, sample_thread):
         """Test getting a thread by ID"""
@@ -233,9 +233,9 @@ class TestThreadService:
         mock_uow.threads.get_by_id.assert_called_once_with(mock_uow.session, "thread_user123")
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('netra_backend.app.services.thread_service.get_unit_of_work')
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.services.thread_service.manager')
+    @patch('netra_backend.app.services.thread_service.manager')
     @pytest.mark.asyncio
     async def test_delete_thread_success(self, mock_manager, mock_get_uow, thread_service):
         """Test deleting a thread"""

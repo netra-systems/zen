@@ -345,9 +345,16 @@ app.add_middleware(CORSMiddleware, **cors_config)
 # Security middleware for production
 if AuthConfig.get_environment() in ["staging", "production"]:
     allowed_hosts = [
-        "*.netrasystems.ai",
-        "*.run.app",
-        "localhost"
+        "auth.staging.netrasystems.ai",  # Explicit staging auth domain
+        "api.staging.netrasystems.ai",   # Explicit staging API domain
+        "app.staging.netrasystems.ai",   # Explicit staging app domain
+        "auth.netrasystems.ai",          # Production auth domain
+        "api.netrasystems.ai",           # Production API domain
+        "app.netrasystems.ai",           # Production app domain
+        "*.netrasystems.ai",              # Wildcard for other subdomains
+        "*.run.app",                     # Cloud Run URLs
+        "localhost",                     # Local development
+        "127.0.0.1"                      # Local IP
     ]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 

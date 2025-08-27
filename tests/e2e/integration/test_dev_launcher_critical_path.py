@@ -282,7 +282,7 @@ class TestDevLauncherCriticalPath:
             # Connect to WebSocket with auth
             headers = {"Authorization": f"Bearer {token}"}
             
-            async with websockets.connect(WS_URL, extra_headers=headers) as websocket:
+            async with websockets.connect(WS_URL, additional_headers=headers) as websocket:
                 # Send a test message
                 test_message = {
                     "type": "chat",
@@ -395,7 +395,7 @@ class TestDevLauncherCriticalPath:
             # Step 2: Connect WebSocket
             headers = {"Authorization": f"Bearer {token}"}
             
-            async with websockets.connect(WS_URL, extra_headers=headers) as websocket:
+            async with websockets.connect(WS_URL, additional_headers=headers) as websocket:
                 # Step 3: Send a chat message
                 chat_message = {
                     "type": "chat",

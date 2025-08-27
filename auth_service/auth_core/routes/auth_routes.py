@@ -868,7 +868,9 @@ async def oauth_callback(
         # Exchange code for tokens
         google_client_id = AuthConfig.get_google_client_id()
         google_client_secret = AuthConfig.get_google_client_secret()
-        redirect_uri = _determine_urls()[0] + "/auth/callback"
+        # CRITICAL: Use auth service URL for redirect_uri since callback happens here
+        auth_url, _ = _determine_urls()
+        redirect_uri = f"{auth_url}/auth/callback"
         
         logger.info(f"Using redirect_uri: {redirect_uri}")
         
@@ -1108,7 +1110,9 @@ async def oauth_callback_post(
         # Exchange code for tokens with network error handling
         google_client_id = AuthConfig.get_google_client_id()
         google_client_secret = AuthConfig.get_google_client_secret()
-        redirect_uri = request.redirect_uri or (_determine_urls()[0] + "/auth/callback")
+        # CRITICAL: Use auth service URL for redirect_uri since callback happens here
+        auth_url, _ = _determine_urls()
+        redirect_uri = request.redirect_uri or f"{auth_url}/auth/callback"
         
         logger.info(f"Using redirect_uri: {redirect_uri}")
         

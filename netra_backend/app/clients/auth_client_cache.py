@@ -96,18 +96,37 @@ class AuthCircuitBreakerManager:
         return UnifiedCircuitBreaker(config)
     
     def _get_circuit_config(self) -> UnifiedCircuitConfig:
-        """Get circuit breaker configuration - more resilient settings."""
-        return UnifiedCircuitConfig(
-            name="auth_service",
-            failure_threshold=8,  # Increased from 5 - less aggressive opening
-            recovery_timeout=30,  # Reduced from 60 - faster recovery attempts
-            timeout_seconds=15,   # Reduced from 30 - faster timeout detection
-            success_threshold=2,  # Only need 2 successes to close
-            sliding_window_size=15,  # Larger window for better error rate calculation
-            error_rate_threshold=0.7,  # 70% error rate required to open
-            min_requests_threshold=5,  # Need at least 5 requests before opening
-            half_open_max_calls=5,  # Allow more test calls in half-open state
-        )
+        """Get circuit breaker configuration - Docker-friendly settings."""
+        from netra_backend.app.core.config import get_config
+        config = get_config()
+        
+        # Use more lenient settings for Docker/development environments
+        # where network conditions can be variable during startup
+        if config.environment in ["development", "testing", "docker"]:
+            return UnifiedCircuitConfig(
+                name="auth_service",
+                failure_threshold=15,  # Much higher threshold for dev environments
+                recovery_timeout=10,   # Faster recovery attempts for dev
+                timeout_seconds=30,    # Longer timeout for Docker networking
+                success_threshold=1,   # Only need 1 success to close in dev
+                sliding_window_size=20, # Larger window to smooth out startup issues
+                error_rate_threshold=0.8, # 80% error rate required in dev
+                min_requests_threshold=10, # More requests needed before opening in dev
+                half_open_max_calls=8,  # More test calls allowed in dev
+            )
+        else:
+            # Production settings - more conservative
+            return UnifiedCircuitConfig(
+                name="auth_service",
+                failure_threshold=8,   # Original setting
+                recovery_timeout=30,   # Original setting
+                timeout_seconds=15,    # Original setting
+                success_threshold=2,   # Original setting
+                sliding_window_size=15, # Original setting
+                error_rate_threshold=0.7, # Original setting
+                min_requests_threshold=5,  # Original setting
+                half_open_max_calls=5,  # Original setting
+            )
     
     async def call_with_breaker(self, func, *args, **kwargs):
         """Execute function call through circuit breaker."""
@@ -122,10 +141,12 @@ class AuthServiceSettings:
     def __init__(self):
         config = get_config()
         
-        # Use 127.0.0.1 instead of localhost for Windows compatibility
+        # Set base URL from configuration
         self.base_url = config.auth_service_url
-        # If localhost is in the URL, replace with 127.0.0.1 for Windows
-        if "localhost" in self.base_url:
+        
+        # Only replace localhost with 127.0.0.1 for Windows compatibility
+        # Skip replacement for Docker service names (don't contain 'localhost')
+        if "localhost" in self.base_url and not self.base_url.startswith("http://auth"):
             self.base_url = self.base_url.replace("localhost", "127.0.0.1")
         
         # Check environment and test mode for auth service enabling

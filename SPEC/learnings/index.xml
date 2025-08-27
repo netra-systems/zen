@@ -19,7 +19,7 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
@@ -32,6 +32,7 @@
             <critical-takeaway>Database connection args must be conditional on database type - 'command_timeout' fails with SQLite (auth_service_endpoint_fixes.xml).</critical-takeaway>
             <critical-takeaway>Always add HEAD method support to GET endpoints for CORS compatibility (auth_service_endpoint_fixes.xml).</critical-takeaway>
             <critical-takeaway>JWT validation must validate token structure before decoding to prevent malformed token errors (auth_service_endpoint_fixes.xml).</critical-takeaway>
+            <critical-takeaway>CORS wildcard (*) cannot be used with credentials: 'include' - use specific origin list in dev (cors_development_wildcard.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
@@ -229,6 +230,14 @@
             <critical-takeaway>Environment variables for optional services should be configured even if service is not running.</critical-takeaway>
         </category>
         
+        <category name="CORS Configuration" path="SPEC/learnings/cors_development_wildcard.xml" keywords="CORS, localhost, 127.0.0.1, Origin, Development, Wildcard, Cross-Origin">
+            <critical-takeaway>CRITICAL: Development CORS MUST use wildcard ("*") to handle localhost vs 127.0.0.1 mismatches.</critical-takeaway>
+            <critical-takeaway>NEVER change development CORS back to explicit origin lists - wildcard is required for proper local development.</critical-takeaway>
+            <critical-takeaway>Browsers treat 'localhost' and '127.0.0.1' as different origins even though they resolve to same address.</critical-takeaway>
+            <critical-takeaway>Security concerns do not apply in local development - staging and production have proper restrictive CORS.</critical-takeaway>
+            <critical-takeaway>shared/cors_config.py is the SINGLE source of truth for all services' CORS configuration.</critical-takeaway>
+        </category>
+        
         <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
             <critical-takeaway>RESOLVED 2025-08-25: Fixed critical SSOT violations in auth_service - removed 365+ lines of duplicate code.</critical-takeaway>
             <critical-takeaway>AuthDatabaseManager is the canonical database connection implementation - all operations delegate to it.</critical-takeaway>
@@ -293,6 +302,15 @@
             <critical-takeaway>Why not caught earlier: Local dev masked issue (same domain), staging tests didn't verify OAuth flow, mocked unit tests bypassed real redirect verification.</critical-takeaway>
             <critical-takeaway>Prevention: End-to-end OAuth tests in staging, pre-deployment validation of redirect URIs, explicit logging of callback receipt.</critical-takeaway>
             <critical-takeaway>Google OAuth Console must authorize auth service URLs only, never frontend URLs for callbacks.</critical-takeaway>
+        </category>
+        
+        <category name="Cloud Armor OAuth Callback Protection" path="SPEC/learnings/cloud_armor_oauth_callback.xml" keywords="Cloud Armor, OAuth, 403 Forbidden, WAF, Security Policy, SQL Injection False Positive, Load Balancer">
+            <critical-takeaway>Cloud Armor SQL injection rules can block OAuth callbacks due to URL-encoded parameters (%2F, %3A) in authorization codes.</critical-takeaway>
+            <critical-takeaway>Create exemption rule with priority lower than security rules for /auth/callback endpoint with OAuth parameter validation.</critical-takeaway>
+            <critical-takeaway>Security rule priority matters - exemptions must have lower priority number (higher precedence) than blocking rules.</critical-takeaway>
+            <critical-takeaway>Monitor security policy logs to identify false positives: preconfiguredExprIds shows which rule triggered the block.</critical-takeaway>
+            <critical-takeaway>OAuth exemption rule should validate: request.method == 'GET' && request.query.contains('code=') && request.query.contains('state=').</critical-takeaway>
+            <critical-takeaway>Test OAuth flows immediately after implementing Cloud Armor to catch WAF false positives before they impact users.</critical-takeaway>
         </category>
         
         <category name="ClickHouse Development Configuration" path="SPEC/learnings/clickhouse_dev_configuration.xml" keywords="ClickHouse, Port Configuration, Development Environment, Container, Testing, 8123, 8443">
@@ -1185,4 +1203,18 @@
             <documentation>SPEC/learnings/staging_secrets_fix.xml</documentation>
         </fix>
     </recent_major_fixes>
-    <frontend_stability>        <category name="Frontend Authentication Configuration" path="SPEC/learnings/frontend_config_loop_prevention.xml" keywords="React, useEffect, Authentication, Configuration Loop, Frontend, Mount Guard">            <critical-takeaway>Use mount guards (useRef) to prevent multiple authentication initialization calls in React components.</critical-takeaway>            <critical-takeaway>Remove function dependencies from useEffect arrays to prevent infinite re-render loops in authentication contexts.</critical-takeaway>            <critical-takeaway>Authentication initialization should use empty dependency arrays [] for mount-only execution.</critical-takeaway>            <critical-takeaway>Always reset mount guards in useEffect cleanup functions for proper component lifecycle management.</critical-takeaway>        </category>                <category name="OAuth First Login Timing" path="SPEC/learnings/oauth_first_login_timing.xml" keywords="OAuth, Authentication Timing, Exponential Backoff, Timeout, Auth Service">            <critical-takeaway>Implement 5-second timeouts for authentication service configuration calls to prevent infinite waits.</critical-takeaway>            <critical-takeaway>Use exponential backoff with jitter (delay * 2^i + random) for authentication retry scenarios to reduce server load.</critical-takeaway>            <critical-takeaway>Add request cancellation with AbortController to prevent resource leaks during authentication timeouts.</critical-takeaway>            <critical-takeaway>Enhanced retry logging with timing information improves authentication debugging and monitoring.</critical-takeaway>        </category>                <category name="React useEffect Dependency Management" path="SPEC/learnings/react_useeffect_dependency_management.xml" keywords="React, useEffect, Dependencies, Performance, Re-render Loops">            <critical-takeaway>Functions recreated on every render cause useEffect dependency changes and infinite loops - use useCallback or remove from dependencies.</critical-takeaway>            <critical-takeaway>Mount guards with useRef prevent race conditions and ensure single-run initialization in complex components.</critical-takeaway>            <critical-takeaway>Empty dependency arrays [] should be used for mount-only effects that run initialization code.</critical-takeaway>            <critical-takeaway>Cleanup functions must reset mount guards and component state to prevent memory leaks and state inconsistencies.</critical-takeaway>        </category>    </frontend_stability></specification>
+    <frontend_stability>        <category name="Frontend Authentication Configuration" path="SPEC/learnings/frontend_config_loop_prevention.xml" keywords="React, useEffect, Authentication, Configuration Loop, Frontend, Mount Guard">            <critical-takeaway>Use mount guards (useRef) to prevent multiple authentication initialization calls in React components.</critical-takeaway>            <critical-takeaway>Remove function dependencies from useEffect arrays to prevent infinite re-render loops in authentication contexts.</critical-takeaway>            <critical-takeaway>Authentication initialization should use empty dependency arrays [] for mount-only execution.</critical-takeaway>            <critical-takeaway>Always reset mount guards in useEffect cleanup functions for proper component lifecycle management.</critical-takeaway>        </category>                <category name="OAuth First Login Timing" path="SPEC/learnings/oauth_first_login_timing.xml" keywords="OAuth, Authentication Timing, Exponential Backoff, Timeout, Auth Service">            <critical-takeaway>Implement 5-second timeouts for authentication service configuration calls to prevent infinite waits.</critical-takeaway>            <critical-takeaway>Use exponential backoff with jitter (delay * 2^i + random) for authentication retry scenarios to reduce server load.</critical-takeaway>            <critical-takeaway>Add request cancellation with AbortController to prevent resource leaks during authentication timeouts.</critical-takeaway>            <critical-takeaway>Enhanced retry logging with timing information improves authentication debugging and monitoring.</critical-takeaway>        </category>                <category name="React useEffect Dependency Management" path="SPEC/learnings/react_useeffect_dependency_management.xml" keywords="React, useEffect, Dependencies, Performance, Re-render Loops">            <critical-takeaway>Functions recreated on every render cause useEffect dependency changes and infinite loops - use useCallback or remove from dependencies.</critical-takeaway>            <critical-takeaway>Mount guards with useRef prevent race conditions and ensure single-run initialization in complex components.</critical-takeaway>            <critical-takeaway>Empty dependency arrays [] should be used for mount-only effects that run initialization code.</critical-takeaway>            <critical-takeaway>Cleanup functions must reset mount guards and component state to prevent memory leaks and state inconsistencies.</critical-takeaway>        </category>    </frontend_stability>
+    
+    <websocket_security>
+        <category name="WebSocket Middleware Patterns and Anti-Patterns" path="SPEC/learnings/websocket_middleware_patterns.xml" keywords="WebSocket, Security, CORS, Authentication, SSOT, Middleware, Race Conditions">
+            <critical-takeaway>WebSocket upgrade detection MUST be unified in single utility - multiple implementations create security bypass vulnerabilities.</critical-takeaway>
+            <critical-takeaway>WebSocket paths MUST be excluded from HTTP-only middleware - auth and security middleware block WebSocket upgrades.</critical-takeaway>
+            <critical-takeaway>Multiple Origin headers are security vulnerability - reject ALL requests with multiple different origins regardless of environment.</critical-takeaway>
+            <critical-takeaway>Non-deterministic middleware ordering creates race conditions allowing timing attacks - use atomic configuration.</critical-takeaway>
+            <critical-takeaway>Complex classes violate SRP - WebSocketCORSHandler with 556 lines handling multiple responsibilities makes testing impossible.</critical-takeaway>
+            <critical-takeaway>Regex compilation in hot path causes 40% performance overhead - pre-compile patterns during initialization.</critical-takeaway>
+            <critical-takeaway>Unbounded violation tracking causes memory leaks - implement TTL-based cleanup to prevent exhaustion under attack.</critical-takeaway>
+            <critical-takeaway>$1M+ revenue at risk from WebSocket middleware issues - security vulnerabilities block enterprise sales.</critical-takeaway>
+        </category>
+    </websocket_security>
+</specification>

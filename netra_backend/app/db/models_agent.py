@@ -26,22 +26,18 @@ from netra_backend.app.db.base import Base
 
 
 # Use JSON instead of ARRAY for SQLite compatibility during testing
-def _get_array_type(column_type):
-    """Get appropriate array type based on configuration."""
-    try:
-        config = config_manager.get_config()
-        if getattr(config, 'testing', False):
-            # For SQLite testing, use JSON instead of ARRAY
-            return JSON
-        else:
-            # For PostgreSQL production, use ARRAY
-            return ARRAY(column_type)
-    except Exception:
-        # Fallback to ARRAY if config not available during import
-        return ARRAY(column_type)
+# For tests, always use JSON for array-like columns since SQLite doesn't support ARRAY
+def _is_test_environment():
+    """Check if we're in a test environment."""
+    return (os.environ.get('PYTEST_CURRENT_TEST') is not None or 
+            os.environ.get('TESTING') == '1' or
+            'pytest' in os.environ.get('_', ''))
 
-# Lazy evaluation - only call config when creating actual columns
-ArrayType = _get_array_type
+# Always use JSON for file_ids and other array columns in tests
+if _is_test_environment():
+    ArrayType = lambda column_type: JSON
+else:
+    ArrayType = lambda column_type: ARRAY(column_type)
 
 
 class Assistant(Base):

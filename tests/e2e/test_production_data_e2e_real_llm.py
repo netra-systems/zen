@@ -517,6 +517,99 @@ Format your response professionally for enterprise decision-makers."""
                 "error_details": str(e)
             }
     
+    async def _validate_request_data_quality(self, session_data: Dict[str, Any], request: Dict[str, Any], 
+                                           use_real_llm: bool, validator: 'DataQualityValidator') -> Dict[str, Any]:
+        """Validate data quality for a single request."""
+        try:
+            # Execute the request to get response
+            result = await self._execute_production_request(session_data, request, use_real_llm)
+            
+            # Calculate quality metrics
+            quality_score = 0.5  # Base score
+            
+            # Input data quality checks
+            if request.get("message") and len(request["message"].strip()) > 0:
+                quality_score += 0.1
+            
+            if request.get("context") and isinstance(request["context"], dict):
+                quality_score += 0.1
+            
+            # Response quality checks
+            if result.get("status") == "success":
+                quality_score += 0.2
+                
+                response_content = result.get("response", "")
+                if len(response_content) > 100:  # Meaningful response
+                    quality_score += 0.1
+                
+                # Check for expected optimization elements
+                if any(keyword in response_content.lower() for keyword in 
+                       ["cost", "optimization", "recommendation", "improvement"]):
+                    quality_score += 0.1
+            
+            return {
+                "request_id": request.get("request_id", "unknown"),
+                "quality_score": min(1.0, quality_score),
+                "input_valid": bool(request.get("message")),
+                "context_valid": bool(request.get("context")),
+                "response_status": result.get("status", "unknown"),
+                "response_length": len(result.get("response", "")),
+                "validation_timestamp": time.time()
+            }
+            
+        except Exception as e:
+            return {
+                "request_id": request.get("request_id", "unknown"),
+                "quality_score": 0.0,
+                "error": str(e),
+                "validation_timestamp": time.time()
+            }
+    
+    async def _execute_concurrent_workload(self, session_data: Dict[str, Any], workload: ProductionWorkload, 
+                                         requests: List[Dict[str, Any]], use_real_llm: bool) -> Dict[str, Any]:
+        """Execute a workload concurrently."""
+        start_time = time.time()
+        
+        try:
+            # Execute all requests for this workload concurrently
+            request_tasks = []
+            for request in requests:
+                task = self._execute_production_request(session_data, request, use_real_llm)
+                request_tasks.append(task)
+            
+            # Wait for all requests to complete
+            request_results = await asyncio.gather(*request_tasks, return_exceptions=True)
+            execution_time = time.time() - start_time
+            
+            # Process results
+            successful_results = [r for r in request_results if not isinstance(r, Exception) and r.get("status") == "success"]
+            failed_results = [r for r in request_results if isinstance(r, Exception) or r.get("status") != "success"]
+            
+            return {
+                "workload_id": workload.user_id,
+                "execution_time": execution_time,
+                "total_requests": len(requests),
+                "successful_requests": len(successful_results),
+                "failed_requests": len(failed_results),
+                "success_rate": len(successful_results) / len(requests) if requests else 0.0,
+                "avg_request_time": execution_time / len(requests) if requests else 0.0,
+                "total_tokens": sum(r.get("tokens_used", 0) for r in successful_results),
+                "concurrent_execution": True
+            }
+            
+        except Exception as e:
+            execution_time = time.time() - start_time
+            return {
+                "workload_id": workload.user_id,
+                "execution_time": execution_time,
+                "total_requests": len(requests),
+                "successful_requests": 0,
+                "failed_requests": len(requests),
+                "success_rate": 0.0,
+                "error": str(e),
+                "concurrent_execution": True
+            }
+    
     def _validate_production_performance(self, result: Dict[str, Any], scenario: ProductionScenario, execution_time: float):
         """Validate production performance meets requirements."""
         assert result["success_rate"] >= scenario.expected_success_rate, f"Success rate below threshold: {result['success_rate']:.3f}"

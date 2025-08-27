@@ -57,13 +57,18 @@ class TestColdStartCriticalIssues:
     async def test_database_table_missing_on_fresh_installation(self):
         """Test 1.1: Database hangs indefinitely when tables don't exist."""
         # Drop all tables to simulate fresh installation
-        conn = psycopg2.connect(
-            host="localhost",
-            port=5432,
-            database="netra_test",
-            user="postgres",
-            password="postgres"
-        )
+        try:
+            conn = psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="netra_test",
+                user="postgres",
+                password="postgres",
+                connect_timeout=5
+            )
+        except psycopg2.OperationalError as e:
+            pytest.skip(f"Test database not available: {e}")
+            return
         cursor = conn.cursor()
         cursor.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
         conn.commit()

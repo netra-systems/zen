@@ -60,7 +60,7 @@ class TestCostCalculatorService:
 
     def test_openai_gpt4_cost_calculation(self, calculator, enterprise_usage):
         """Test GPT-4 cost calculation for enterprise usage."""
-        cost = calculator.calculate_cost(enterprise_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        cost = calculator.calculate_cost(enterprise_usage, LLMProvider.OPENAI, "gpt-4")
         expected = (Decimal("7000000") / Decimal("1000")) * Decimal("0.03") + \
                   (Decimal("3000000") / Decimal("1000")) * Decimal("0.06")
         assert cost == expected
@@ -68,7 +68,7 @@ class TestCostCalculatorService:
 
     def test_anthropic_claude_opus_cost_calculation(self, calculator, enterprise_usage):
         """Test Claude Opus cost calculation for enterprise usage."""
-        cost = calculator.calculate_cost(enterprise_usage, LLMProvider.ANTHROPIC, LLMModel.GEMINI_2_5_FLASH.value)
+        cost = calculator.calculate_cost(enterprise_usage, LLMProvider.ANTHROPIC, "claude-3-opus")
         expected = (Decimal("7000000") / Decimal("1000")) * Decimal("0.015") + \
                   (Decimal("3000000") / Decimal("1000")) * Decimal("0.075")
         assert cost == expected
@@ -85,19 +85,19 @@ class TestCostCalculatorService:
     def test_zero_tokens_cost_calculation(self, calculator):
         """Test zero tokens returns zero cost."""
         usage = TokenUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0)
-        cost = calculator.calculate_cost(usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        cost = calculator.calculate_cost(usage, LLMProvider.OPENAI, "gpt-4")
         assert cost == Decimal("0")
 
     def test_negative_tokens_handled_safely(self, calculator):
         """Test negative token counts handled safely."""
         usage = TokenUsage(prompt_tokens=-100, completion_tokens=-50, total_tokens=-150)
-        cost = calculator.calculate_cost(usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        cost = calculator.calculate_cost(usage, LLMProvider.OPENAI, "gpt-4")
         assert cost == Decimal("0")
 
     def test_massive_usage_spike_calculation(self, calculator):
         """Test calculation for massive usage spikes."""
         spike_usage = TokenUsage(prompt_tokens=100000000, completion_tokens=50000000, total_tokens=150000000)
-        cost = calculator.calculate_cost(spike_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        cost = calculator.calculate_cost(spike_usage, LLMProvider.OPENAI, "gpt-4")
         expected = Decimal("100000") * Decimal("0.03") + Decimal("50000") * Decimal("0.06")
         assert cost == expected
         assert cost == Decimal("6000.00")  # $6000 for 150M tokens
@@ -116,13 +116,13 @@ class TestCostCalculatorService:
         balanced_model = calculator.get_cost_optimal_model(LLMProvider.OPENAI, CostTier.BALANCED)
         premium_model = calculator.get_cost_optimal_model(LLMProvider.OPENAI, CostTier.PREMIUM)
         
-        assert economy_model == LLMModel.GEMINI_2_5_FLASH.value
-        assert balanced_model == LLMModel.GEMINI_2_5_FLASH.value
-        assert premium_model == LLMModel.GEMINI_2_5_FLASH.value
+        assert economy_model == "gpt-3.5-turbo"
+        assert balanced_model == "gpt-4-turbo"
+        assert premium_model == "gpt-4"
 
     def test_budget_impact_estimation(self, calculator):
         """Test budget impact estimation accuracy."""
-        impact = calculator.estimate_budget_impact(100000, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        impact = calculator.estimate_budget_impact(100000, LLMProvider.OPENAI, "gpt-4")
         # 70% prompt (70k * 0.03/1k) + 30% completion (30k * 0.06/1k)
         expected = Decimal("2.1") + Decimal("1.8")
         assert impact == expected
@@ -130,7 +130,7 @@ class TestCostCalculatorService:
 
     def test_multi_model_cost_aggregation(self, calculator, mid_tier_usage):
         """Test multi-model cost aggregation."""
-        openai_cost = calculator.calculate_cost(mid_tier_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        openai_cost = calculator.calculate_cost(mid_tier_usage, LLMProvider.OPENAI, "gpt-4")
         anthropic_cost = calculator.calculate_cost(mid_tier_usage, LLMProvider.ANTHROPIC, "claude-3.5-sonnet")
         google_cost = calculator.calculate_cost(mid_tier_usage, LLMProvider.GOOGLE, "gemini-2.5-flash")
         
@@ -155,21 +155,21 @@ class TestBudgetManager:
     def test_budget_impact_check_within_limits(self, budget_manager, free_tier_usage):
         """Test budget check when within limits."""
         can_proceed = budget_manager.check_budget_impact(
-            free_tier_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value
+            free_tier_usage, LLMProvider.OPENAI, "gpt-4"
         )
         assert can_proceed is True
 
     def test_budget_impact_check_exceeds_limits(self, budget_manager, enterprise_usage):
         """Test budget check when exceeding limits."""
         can_proceed = budget_manager.check_budget_impact(
-            enterprise_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value
+            enterprise_usage, LLMProvider.OPENAI, "gpt-4"
         )
         assert can_proceed is False
 
     def test_usage_recording_updates_spending(self, budget_manager, free_tier_usage):
         """Test usage recording updates current spending."""
         initial_spending = budget_manager.current_spending
-        cost = budget_manager.record_usage(free_tier_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        cost = budget_manager.record_usage(free_tier_usage, LLMProvider.OPENAI, "gpt-4")
         
         assert budget_manager.current_spending > initial_spending
         assert cost > Decimal("0")
@@ -226,7 +226,7 @@ class TestCostOptimizationUtilities:
         optimized_usage = TokenUsage(prompt_tokens=10000, completion_tokens=5000, total_tokens=15000)
         
         savings = calculate_cost_savings(
-            original_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value,
+            original_usage, LLMProvider.OPENAI, "gpt-4",
             optimized_usage, LLMProvider.GOOGLE, "gemini-2.5-flash",
             calculator
         )
@@ -271,7 +271,7 @@ class TestEdgeCasesAndErrorHandling:
         huge_usage = TokenUsage(
             prompt_tokens=999999999, completion_tokens=999999999, total_tokens=1999999998
         )
-        cost = calculator.calculate_cost(huge_usage, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        cost = calculator.calculate_cost(huge_usage, LLMProvider.OPENAI, "gpt-4")
         assert cost > Decimal("0")
         assert isinstance(cost, Decimal)
 
@@ -286,9 +286,9 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_model_pricing_key_generation(self, calculator):
         """Test model pricing key generation consistency."""
-        pricing = calculator._get_model_pricing(LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
+        pricing = calculator._get_model_pricing(LLMProvider.OPENAI, "gpt-4")
         assert pricing.provider == LLMProvider.OPENAI
-        assert pricing.model_name == LLMModel.GEMINI_2_5_FLASH.value
+        assert pricing.model_name == "gpt-4"
         
         # Test unknown model falls back to defaults
         unknown_pricing = calculator._get_model_pricing(LLMProvider.OPENAI, "unknown")

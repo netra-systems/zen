@@ -183,11 +183,35 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 python scripts/deploy_to_gcp.py --project netra-production --run-checks
 ```
 
-### Docker Configuration
+### Docker Configuration & Service Management
 **IMPORTANT: Two distinct Docker configuration sets exist**
 - **Development:** `/docker/*.development.Dockerfile` - Local dev with hot-reload
 - **Production/GCP:** `/deployment/docker/*.gcp.Dockerfile` - Optimized for Cloud Run
 - **Index:** [`docs/DOCKER_CONFIGURATION_INDEX.md`](docs/DOCKER_CONFIGURATION_INDEX.md) - Complete Docker configuration mapping
+
+#### 🐳 Docker Service Management (Selective Service Control)
+- **Service Guide:** [`docs/docker-services-guide.md`](docs/docker-services-guide.md) - Complete guide for selective service management
+- **Service Manager:** `/scripts/docker_services.py` - CLI tool for selective service control
+- **Docker Launcher:** `/scripts/docker_dev_launcher.py` - Full development environment launcher
+- **Docker Compose:** `/docker-compose.dev.yml` - Development compose with profile support
+
+#### Quick Docker Commands
+```bash
+# Refresh/Restart Netra backend only
+python scripts/docker_services.py restart netra
+
+# Start just Netra backend (with dependencies)
+python scripts/docker_services.py start netra
+
+# Start everything
+python scripts/docker_services.py start full
+
+# View Netra logs
+python scripts/docker_services.py logs netra
+
+# Stop all services
+python scripts/docker_services.py stop
+```
 
 ---
 
@@ -209,9 +233,11 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 - [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) - Import rules
 
 ### Infrastructure & Deployment Specs
+- [`SPEC/unified_staging_configuration.xml`](SPEC/unified_staging_configuration.xml) - **UNIFIED staging config (Redis, LLM, deployment)**
 - [`SPEC/gcp_deployment.xml`](SPEC/gcp_deployment.xml) - GCP staging deployment guidelines
 - [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) - Deployment architecture patterns
 - [`SPEC/redis_staging_configuration.xml`](SPEC/redis_staging_configuration.xml) - **Redis endpoint configuration (10.107.0.3)**
+- [`SPEC/llm_configuration_architecture.xml`](SPEC/llm_configuration_architecture.xml) - **LLM centralized config (GEMINI_2_5_FLASH default)**
 
 ---
 

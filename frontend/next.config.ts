@@ -129,7 +129,9 @@ const nextConfig: NextConfig = {
     // Only use proxy rewrites in development
     // In production, the frontend should call backend services directly using their public URLs
     if (process.env.NODE_ENV === 'development') {
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      // Use API_URL for server-side proxying (works in Docker)
+      // Falls back to NEXT_PUBLIC_API_URL for client-side compatibility
+      const backendUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       return [
         {
           source: '/api/:path*',

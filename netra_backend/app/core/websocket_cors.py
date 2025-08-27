@@ -18,14 +18,35 @@ logger = central_logger.get_logger(__name__)
 # WebSocket CORS now uses unified configuration from shared/cors_config.py
 # No need for separate WebSocket origin management
 
-# Security configuration constants
-SECURITY_CONFIG = {
-    "max_origin_length": 253,  # Maximum valid domain length per RFC
-    "require_https_production": True,  # Require HTTPS in production
-    "block_suspicious_patterns": True,  # Block suspicious origin patterns
-    "log_security_violations": True,  # Log security violations for monitoring
-    "rate_limit_violations": True,  # Rate limit origins with violations
-}
+# Security configuration constants - more permissive in development
+def get_security_config(environment: str = "development") -> dict:
+    """Get security configuration based on environment."""
+    if environment == "development":
+        return {
+            "max_origin_length": 253,  # Maximum valid domain length per RFC
+            "require_https_production": False,  # No HTTPS requirement in dev
+            "block_suspicious_patterns": False,  # Don't block patterns in dev
+            "log_security_violations": True,  # Log but don't block
+            "rate_limit_violations": False,  # No rate limiting in dev
+        }
+    elif environment == "staging":
+        return {
+            "max_origin_length": 253,
+            "require_https_production": False,  # Allow HTTP in staging for testing
+            "block_suspicious_patterns": True,
+            "log_security_violations": True,
+            "rate_limit_violations": True,
+        }
+    else:  # production
+        return {
+            "max_origin_length": 253,
+            "require_https_production": True,
+            "block_suspicious_patterns": True,
+            "log_security_violations": True,
+            "rate_limit_violations": True,
+        }
+
+SECURITY_CONFIG = get_security_config()  # Default for backward compatibility
 
 # Suspicious patterns to block - relaxed for development
 SUSPICIOUS_PATTERNS = [
@@ -58,10 +79,16 @@ class WebSocketCORSHandler:
         
         self.allowed_origins = allowed_origins
         self.environment = environment
+        self.security_config = get_security_config(environment)  # Environment-specific config
         self._origin_patterns = self._compile_origin_patterns()
         self._suspicious_patterns = self._compile_suspicious_patterns()
         self._violation_counts = {}  # Track violations per origin
         self._blocked_origins = set()  # Temporarily blocked origins
+        
+        # Clear any existing blocks in development
+        if environment == "development":
+            self._blocked_origins.clear()
+            self._violation_counts.clear()
     
     def _compile_origin_patterns(self) -> List[re.Pattern]:
         """Compile origin patterns for efficient matching."""
@@ -80,14 +107,14 @@ class WebSocketCORSHandler:
     def _compile_suspicious_patterns(self) -> List[re.Pattern]:
         """Compile suspicious origin patterns for security blocking."""
         patterns = []
-        if SECURITY_CONFIG["block_suspicious_patterns"]:
+        if self.security_config["block_suspicious_patterns"]:
             for pattern_str in SUSPICIOUS_PATTERNS:
                 patterns.append(re.compile(pattern_str, re.IGNORECASE))
         return patterns
     
     def _is_suspicious_origin(self, origin: str) -> bool:
         """Check if origin matches suspicious patterns."""
-        if not SECURITY_CONFIG["block_suspicious_patterns"]:
+        if not self.security_config["block_suspicious_patterns"]:
             return False
         
         # In development and staging, allow localhost IP addresses for testing
@@ -113,8 +140,8 @@ class WebSocketCORSHandler:
             return False, "No origin header provided"
         
         # Check length constraints
-        if len(origin) > SECURITY_CONFIG["max_origin_length"]:
-            return False, f"Origin too long ({len(origin)} > {SECURITY_CONFIG['max_origin_length']})"
+        if len(origin) > self.security_config["max_origin_length"]:
+            return False, f"Origin too long ({len(origin)} > {self.security_config['max_origin_length']})"
         
         # Check if temporarily blocked
         if origin in self._blocked_origins:
@@ -122,7 +149,7 @@ class WebSocketCORSHandler:
         
         # Production HTTPS requirement
         if (self.environment == "production" and 
-            SECURITY_CONFIG["require_https_production"] and 
+            self.security_config["require_https_production"] and 
             not origin.startswith("https://")):
             return False, "HTTPS required in production"
         
@@ -134,7 +161,12 @@ class WebSocketCORSHandler:
     
     def _record_violation(self, origin: str, reason: str) -> None:
         """Record security violation for monitoring and rate limiting."""
-        if not SECURITY_CONFIG["log_security_violations"]:
+        if not self.security_config["log_security_violations"]:
+            return
+        
+        # In development, just log without blocking
+        if self.environment == "development":
+            logger.info(f"WebSocket CORS info (dev mode): {reason} for origin '{origin}'")
             return
         
         # Track violation count
@@ -143,7 +175,7 @@ class WebSocketCORSHandler:
         self._violation_counts[origin] += 1
         
         # Temporarily block origins with too many violations
-        if (SECURITY_CONFIG["rate_limit_violations"] and 
+        if (self.security_config["rate_limit_violations"] and 
             self._violation_counts[origin] >= 5):
             self._blocked_origins.add(origin)
             logger.warning(f"Origin {origin} temporarily blocked after {self._violation_counts[origin]} violations")
@@ -178,9 +210,24 @@ class WebSocketCORSHandler:
                 self._record_violation("", "WebSocket connection attempted without Origin header in non-development environment")
                 return False
         
+        # In development, be more permissive with localhost origins
+        if self.environment == "development":
+            # Check if it's any localhost origin
+            from shared.cors_config import _is_localhost_origin
+            if _is_localhost_origin(origin):
+                logger.debug(f"WebSocket origin allowed (dev localhost): {origin}")
+                return True
+        
         # First check security constraints
         is_secure, security_reason = self._validate_origin_security(origin)
         if not is_secure:
+            # In development, log but allow anyway for localhost
+            if self.environment == "development":
+                from shared.cors_config import _is_localhost_origin
+                if _is_localhost_origin(origin):
+                    logger.info(f"WebSocket origin allowed despite security warning (dev mode): {origin}")
+                    return True
+            
             self._record_violation(origin, f"Security validation failed: {security_reason}")
             logger.error(f"CORS ERROR: Security validation failed for '{origin}': {security_reason}")
             return False
@@ -189,6 +236,11 @@ class WebSocketCORSHandler:
         explicitly_allowed = self._is_origin_explicitly_allowed(origin)
         if explicitly_allowed:
             logger.debug(f"WebSocket origin allowed: {origin}")
+            return True
+        
+        # In development, be extra permissive
+        if self.environment == "development":
+            logger.info(f"WebSocket origin allowed (dev mode fallback): {origin}")
             return True
         
         # Record violation for denied origin
@@ -238,7 +290,7 @@ class WebSocketCORSHandler:
             "total_violations": sum(self._violation_counts.values()),
             "blocked_origin_count": len(self._blocked_origins),
             "environment": self.environment,
-            "security_config": SECURITY_CONFIG.copy()
+            "security_config": self.security_config.copy()
         }
     
     def unblock_origin(self, origin: str) -> bool:
@@ -268,11 +320,8 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
     Returns:
         True if origin is valid, False otherwise
     """
-    # Get origin from headers
-    origin = websocket.headers.get("origin")
-    if not origin:
-        # Some clients might use "Origin" with capital O
-        origin = websocket.headers.get("Origin")
+    # Get origin from headers with robust extraction
+    origin = _extract_origin_from_websocket(websocket)
     
     # Log origin details for debugging
     logger.debug(f"WebSocket connection attempt - Origin: {origin}, Environment: {cors_handler.environment}")
@@ -284,6 +333,54 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
     
     logger.info(f"WebSocket connection allowed from origin: {origin} in {cors_handler.environment} environment")
     return True
+
+
+def _extract_origin_from_websocket(websocket: WebSocket) -> Optional[str]:
+    """Extract origin from WebSocket headers with resilient handling.
+    
+    Args:
+        websocket: The WebSocket connection
+        
+    Returns:
+        Origin value or None if not found
+    """
+    # Collect all origin-related headers (case-insensitive)
+    origin_headers = []
+    for header_name, header_value in websocket.headers.items():
+        if header_name.lower() == "origin":
+            origin_headers.append(header_value)
+    
+    # Handle multiple origin headers
+    if len(origin_headers) > 1:
+        # Check if they're all the same value
+        unique_origins = set(origin_headers)
+        if len(unique_origins) == 1:
+            # All values are identical - use the first one
+            logger.debug(f"Multiple identical origin headers found: {origin_headers[0]}")
+            return origin_headers[0]
+        else:
+            # Different values - this is a potential security issue
+            logger.warning(f"Multiple different origin headers found: {origin_headers}")
+            # In development, use the first one but log the issue
+            # In production, this should be more strict
+            from netra_backend.app.core.configuration.base import get_unified_config
+            try:
+                config = get_unified_config()
+                if getattr(config, 'environment', 'production').lower() == 'development':
+                    logger.info(f"Development mode: Using first origin from multiple values: {origin_headers[0]}")
+                    return origin_headers[0]
+                else:
+                    logger.error("Production mode: Rejecting request with multiple different origin headers")
+                    return None
+            except Exception:
+                # Fallback to safe behavior
+                logger.error("Cannot determine environment: Rejecting request with multiple different origin headers")
+                return None
+    elif len(origin_headers) == 1:
+        return origin_headers[0]
+    else:
+        # No origin headers found
+        return None
 
 
 def get_environment_origins() -> List[str]:
@@ -335,14 +432,8 @@ class WebSocketCORSMiddleware:
             receive: ASGI receive callable
             send: ASGI send callable
         """
-        # Extract origin from headers
-        headers = dict(scope.get("headers", []))
-        origin = None
-        
-        for header_name, header_value in headers.items():
-            if header_name.lower() == b"origin":
-                origin = header_value.decode("latin1")
-                break
+        # Extract origin from headers with resilient handling
+        origin = self._extract_origin_from_scope(scope)
         
         # Validate origin
         if not self.cors_handler.is_origin_allowed(origin):
@@ -359,6 +450,43 @@ class WebSocketCORSMiddleware:
         
         # Continue with the application
         await self.app(scope, receive, send)
+    
+    def _extract_origin_from_scope(self, scope: Scope) -> Optional[str]:
+        """Extract origin from ASGI scope with resilient handling.
+        
+        Args:
+            scope: ASGI WebSocket scope
+            
+        Returns:
+            Origin value or None if not found
+        """
+        headers = dict(scope.get("headers", []))
+        origin_headers = []
+        
+        # Collect all origin-related headers (case-insensitive)
+        for header_name, header_value in headers.items():
+            if header_name.lower() == b"origin":
+                origin_headers.append(header_value.decode("latin1"))
+        
+        # Handle multiple origin headers (same logic as _extract_origin_from_websocket)
+        if len(origin_headers) > 1:
+            unique_origins = set(origin_headers)
+            if len(unique_origins) == 1:
+                logger.debug(f"Multiple identical origin headers in ASGI scope: {origin_headers[0]}")
+                return origin_headers[0]
+            else:
+                logger.warning(f"Multiple different origin headers in ASGI scope: {origin_headers}")
+                # In development, use first; in production, be strict
+                if self.cors_handler.environment == "development":
+                    logger.info(f"Development mode: Using first origin from ASGI scope: {origin_headers[0]}")
+                    return origin_headers[0]
+                else:
+                    logger.error("Production mode: Rejecting ASGI request with multiple different origin headers")
+                    return None
+        elif len(origin_headers) == 1:
+            return origin_headers[0]
+        else:
+            return None
 
 
 # Global CORS handler instance
@@ -420,7 +548,7 @@ def get_websocket_cors_headers(websocket: WebSocket) -> dict:
         Dictionary of CORS headers, empty if origin not allowed
     """
     cors_handler = get_websocket_cors_handler()
-    origin = websocket.headers.get("origin") or websocket.headers.get("Origin")
+    origin = _extract_origin_from_websocket(websocket)
     
     if origin and cors_handler.is_origin_allowed(origin):
         return cors_handler.get_cors_headers(origin)

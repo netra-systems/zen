@@ -16,10 +16,9 @@ from netra_backend.app.schemas.UserPlan import UserPlan
 from netra_backend.app.schemas.registry import Message, Thread, User
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 from netra_backend.app.services.cost_calculator import (
-from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
-
     CostCalculatorService as BillingService,
 )
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.app.services.user_service import user_service as UsageService
 from netra_backend.app.services.user_service import user_service as UserService
@@ -41,6 +40,41 @@ import uuid
 # ============================================================================
 # SHARED FIXTURES
 # ============================================================================
+
+@pytest.fixture
+async def async_client() -> httpx.AsyncClient:
+    """Provide async HTTP client for API testing."""
+    async with httpx.AsyncClient(
+        base_url="http://localhost:8000",
+        timeout=30.0
+    ) as client:
+        yield client
+
+@pytest.fixture
+async def authenticated_user(async_client: httpx.AsyncClient, test_user_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Provide authenticated user with access token."""
+    # Create and verify user
+    user_auth = await create_verified_user(async_client, test_user_data)
+    
+    return {
+        "user_id": user_auth.get("user_id"),
+        "access_token": user_auth.get("access_token"),
+        "refresh_token": user_auth.get("refresh_token"),
+        "email": test_user_data["email"]
+    }
+
+@pytest.fixture
+async def redis_client() -> Redis:
+    """Provide Redis client for session management."""
+    from test_framework.fixtures.database_fixtures import isolated_redis_client
+    return isolated_redis_client()
+
+@pytest.fixture
+async def async_session() -> AsyncSession:
+    """Provide async database session for testing."""
+    from test_framework.fixtures.database_fixtures import test_db_session
+    async with test_db_session() as session:
+        yield session
 
 @pytest.fixture
 

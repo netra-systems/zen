@@ -69,7 +69,7 @@ class AgentTestHarness:
     def _get_default_config(self) -> Dict[str, Any]:
         """Get default test configuration."""
         return {
-            "auth_port": 8001,
+            "auth_port": 8081,
             "backend_port": 8000,
             "frontend_port": 3000,
             "startup_timeout": 30,
@@ -158,7 +158,7 @@ class AgentTestHarness:
         ws_url = f"ws://localhost:{self.config['backend_port']}/ws"
         headers = user_auth["headers"]
         
-        websocket = await websockets.connect(ws_url, extra_headers=headers)
+        websocket = await websockets.connect(ws_url, additional_headers=headers)
         self.state.websocket_connected = True
         self.state.cleanup_tasks.append(websocket.close)
         return websocket

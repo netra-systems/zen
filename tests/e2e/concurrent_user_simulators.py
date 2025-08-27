@@ -34,7 +34,7 @@ class ConcurrentUserSimulator:
 
         self.metrics = ConcurrentUserMetrics()
 
-        self.auth_base_url = "http://localhost:8001"
+        self.auth_base_url = "http://localhost:8081"
 
         self.backend_base_url = "http://localhost:8000" 
 

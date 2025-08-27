@@ -17,6 +17,7 @@ COMPLIANCE:
 """
 
 import asyncio
+import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass

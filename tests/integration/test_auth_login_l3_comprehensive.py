@@ -100,7 +100,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_basic_login_flow_valid_credentials(self):
         """Test complete login flow with valid credentials."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -121,7 +121,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_login_invalid_credentials_rejection(self):
         """Test login rejection with invalid credentials."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.side_effect = httpx.HTTPStatusError(
@@ -139,7 +139,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_token_validation_full_cycle(self):
         """Test complete token validation cycle."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -158,7 +158,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_expired_token_detection_and_handling(self):
         """Test detection and handling of expired tokens."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -176,7 +176,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_token_refresh_complete_flow(self):
         """Test complete token refresh flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -193,7 +193,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_concurrent_login_attempts_handling(self):
         """Test handling of concurrent login attempts."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         async def login_attempt():
             with patch.object(auth_client, '_make_request') as mock_request:
@@ -216,7 +216,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_session_persistence_across_multiple_requests(self):
         """Test session persistence across multiple API requests."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             # First login
@@ -238,7 +238,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_logout_flow_token_invalidation(self):
         """Test complete logout flow and token invalidation."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             # Logout
@@ -255,7 +255,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_login_rate_limiting_enforcement(self):
         """Test rate limiting enforcement on login attempts."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             # After multiple attempts, rate limit kicks in
@@ -276,7 +276,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_oauth_login_flow_initialization(self):
         """Test OAuth login flow initialization."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -293,7 +293,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_oauth_callback_processing(self):
         """Test OAuth callback processing and token exchange."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -313,7 +313,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_mfa_authentication_complete_flow(self):
         """Test multi-factor authentication complete flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             # Initial login returns MFA requirement
@@ -339,7 +339,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_password_reset_complete_flow(self):
         """Test complete password reset flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             # Request reset
@@ -359,7 +359,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_account_lockout_after_failed_attempts(self):
         """Test account lockout after multiple failed login attempts."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.side_effect = httpx.HTTPStatusError(
@@ -382,7 +382,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_session_timeout_detection_and_handling(self):
         """Test session timeout detection and handling."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -400,7 +400,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_cross_origin_authentication_cors(self):
         """Test cross-origin authentication with CORS headers."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -421,7 +421,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_token_with_custom_claims_handling(self):
         """Test handling tokens with custom claims."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -442,7 +442,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_login_with_remember_me_option(self):
         """Test login with remember me option for extended session."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -463,7 +463,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_api_key_authentication_flow(self):
         """Test API key authentication flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -481,7 +481,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_service_account_authentication(self):
         """Test service account authentication flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -501,7 +501,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_token_introspection_detailed(self):
         """Test detailed token introspection."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -521,7 +521,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_device_code_authentication_flow(self):
         """Test device code authentication flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             # Initiate device flow
@@ -547,7 +547,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_sso_authentication_flow(self):
         """Test SSO authentication flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -565,7 +565,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_biometric_authentication_flow(self):
         """Test biometric authentication flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -591,7 +591,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_guest_authentication_flow(self):
         """Test guest authentication flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -610,7 +610,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_token_delegation_flow(self):
         """Test token delegation for sub-resources."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -632,7 +632,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_login_with_captcha_verification(self):
         """Test login flow with captcha verification."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -652,7 +652,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_emergency_access_bypass_flow(self):
         """Test emergency access bypass flow."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {
@@ -674,7 +674,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_token_rotation_on_refresh(self):
         """Test token rotation during refresh."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             # First refresh
@@ -703,7 +703,7 @@ class TestAuthLoginL3Integration:
     @pytest.mark.asyncio
     async def test_impersonation_authentication_flow(self):
         """Test impersonation authentication for admin support."""
-        auth_client = AuthClient(base_url="http://localhost:8001")
+        auth_client = AuthClient(base_url="http://localhost:8081")
         
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.return_value = {

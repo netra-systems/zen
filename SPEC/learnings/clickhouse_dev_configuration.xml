@@ -61,7 +61,7 @@
             </development>
 
             <staging-production>
-                <host>staging-clickhouse.netrasystems.ai (or cloud URL)</host>
+                <host>xedvrr4c3r.us-central1.gcp.clickhouse.cloud</host>
                 <http-port>8443</http-port>
                 <native-port>9440</native-port>
                 <protocol>https</protocol>

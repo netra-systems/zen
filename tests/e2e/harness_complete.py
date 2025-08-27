@@ -427,7 +427,7 @@ def get_test_database_url() -> str:
 
 def get_auth_service_url() -> str:
     """Get the auth service URL."""
-    return os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+    return os.environ.get("AUTH_SERVICE_URL", "http://localhost:8081")
 
 
 def get_backend_service_url() -> str:

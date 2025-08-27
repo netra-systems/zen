@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='utf-8'?>
+<learning>
+  <metadata>
+    <title>Cloud Armor OAuth Callback False Positive</title>
+    <type>security-configuration</type>
+    <date>2025-08-27</date>
+    <severity>critical</severity>
+    <services>auth_service, load_balancer</services>
+    <environments>staging, production</environments>
+  </metadata>
+
+  <problem>
+    <description>
+      OAuth callback requests to auth.staging.netrasystems.ai/auth/callback were returning 403 Forbidden,
+      preventing users from completing the authentication flow.
+    </description>
+    <symptoms>
+      - 403 Forbidden responses on /auth/callback endpoint
+      - OAuth flow fails after successful Google authentication
+      - Logs show "denied_by_security_policy" with preconfigured expression ID "owasp-crs-v030001-id942432-sqli"
+    </symptoms>
+    <root_cause>
+      Cloud Armor's SQL injection protection rule (priority 100) was incorrectly flagging OAuth callback
+      URL parameters as potential SQL injection attempts due to URL-encoded characters like %2F and %3A
+      in the authorization code and scope parameters.
+    </root_cause>
+  </problem>
+
+  <solution>
+    <approach>
+      Create a targeted exemption rule in Cloud Armor that allows legitimate OAuth callbacks
+      while maintaining security for other endpoints.
+    </approach>
+    <implementation>
+      <step order="1">
+        <action>Identify the blocking rule</action>
+        <command>
+          gcloud logging read "resource.type=\"http_load_balancer\" AND jsonPayload.enforcedSecurityPolicy.outcome=\"DENY\" AND httpRequest.requestUrl=~\"/auth/callback\"" --project=netra-staging --limit=5 --format=json
+        </command>
+        <finding>SQL injection rule (priority 100) with preconfigured expression owasp-crs-v030001-id942432-sqli</finding>
+      </step>
+      <step order="2">
+        <action>Create exemption rule with higher priority</action>
+        <command>
+          gcloud compute security-policies rules create 50 \
+            --security-policy=staging-security-policy \
+            --project=netra-staging \
+            --expression="request.path == '/auth/callback' && request.method == 'GET' && request.query.contains('code=') && request.query.contains('state=')" \
+            --action="allow" \
+            --description="Allow OAuth callback from Google/GitHub - exempts legitimate OAuth flows"
+        </command>
+        <rationale>
+          Priority 50 executes before priority 100 SQL injection rule.
+          Expression validates it's a legitimate OAuth callback by checking for required parameters.
+        </rationale>
+      </step>
+    </implementation>
+  </solution>
+
+  <prevention>
+    <recommendation priority="high">
+      When configuring Cloud Armor WAF rules, always test OAuth and other third-party integration
+      endpoints to ensure they're not incorrectly blocked by security rules.
+    </recommendation>
+    <recommendation priority="high">
+      Create specific exemption rules for known safe patterns rather than disabling security
+      rules entirely.
+    </recommendation>
+    <recommendation priority="medium">
+      Monitor security policy logs regularly to identify false positives early.
+    </recommendation>
+    <recommendation priority="medium">
+      Document all Cloud Armor exemptions with clear rationale for security audits.
+    </recommendation>
+  </prevention>
+
+  <monitoring>
+    <query name="blocked_oauth_callbacks">
+      <description>Monitor for blocked OAuth callbacks</description>
+      <gcloud_command>
+        gcloud logging read "resource.type=\"http_load_balancer\" AND jsonPayload.enforcedSecurityPolicy.outcome=\"DENY\" AND httpRequest.requestUrl=~\"/auth/callback\"" --project=PROJECT_ID --limit=10
+      </gcloud_command>
+    </query>
+    <query name="successful_oauth_callbacks">
+      <description>Verify OAuth callbacks are working</description>
+      <gcloud_command>
+        gcloud logging read "resource.type=\"http_load_balancer\" AND httpRequest.requestUrl=~\"/auth/callback\" AND httpRequest.status>=200 AND httpRequest.status&lt;400" --project=PROJECT_ID --limit=10
+      </gcloud_command>
+    </query>
+  </monitoring>
+
+  <security_considerations>
+    <consideration>
+      The exemption rule is narrowly scoped to only allow GET requests to /auth/callback
+      with required OAuth parameters (code and state), minimizing security exposure.
+    </consideration>
+    <consideration>
+      The rule does not disable SQL injection protection for other endpoints or request types.
+    </consideration>
+    <consideration>
+      OAuth state parameter validation in the application provides CSRF protection even
+      if the WAF rule is bypassed.
+    </consideration>
+  </security_considerations>
+
+  <applicable_environments>
+    <environment name="staging">
+      <security_policy>staging-security-policy</security_policy>
+      <load_balancer>staging-https-lb</load_balancer>
+      <affected_domain>auth.staging.netrasystems.ai</affected_domain>
+    </environment>
+    <environment name="production">
+      <security_policy>production-security-policy</security_policy>
+      <load_balancer>production-https-lb</load_balancer>
+      <affected_domain>auth.netrasystems.ai</affected_domain>
+      <note>Apply same exemption rule if using similar Cloud Armor configuration</note>
+    </environment>
+  </applicable_environments>
+
+  <references>
+    <reference type="gcp_doc">https://cloud.google.com/armor/docs/rule-tuning</reference>
+    <reference type="owasp">OWASP ModSecurity Core Rule Set (CRS) v3.0.0</reference>
+    <reference type="oauth_spec">OAuth 2.0 Authorization Code Flow - RFC 6749</reference>
+  </references>
+</learning>

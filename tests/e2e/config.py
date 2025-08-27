@@ -166,7 +166,7 @@ class UnifiedTestConfig:
         """Create test endpoint configuration"""
         ws_url = "ws://localhost:8000/ws"
         api_base = "http://localhost:8000"
-        auth_base = "http://localhost:8001"
+        auth_base = "http://localhost:8081"
         # Set environment variables for service discovery
         os.environ["AUTH_SERVICE_URL"] = auth_base
         os.environ["BACKEND_SERVICE_URL"] = api_base
@@ -337,9 +337,9 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
             environment_type=TestEnvironmentType.LOCAL,
             base_url="http://localhost:8000",
             ws_url="ws://localhost:8000/ws",
-            auth_url="http://localhost:8001",
+            auth_url="http://localhost:8081",
             services=TestServices(
-                auth="http://localhost:8001",
+                auth="http://localhost:8081",
                 backend="http://localhost:8000",
                 frontend="http://localhost:3000"
             )
@@ -374,7 +374,7 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
 
 def get_auth_service_url() -> str:
     """Get the auth service URL."""
-    return os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+    return os.environ.get("AUTH_SERVICE_URL", "http://localhost:8081")
 
 
 def get_backend_service_url() -> str:

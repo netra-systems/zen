@@ -130,7 +130,7 @@ class MultiAgentTestManager:
         ws_url = f"ws://localhost:8000/ws?token={token}"
         self.ws_connection = await websockets.connect(
             ws_url,
-            extra_headers={"Authorization": f"Bearer {token}"}
+            additional_headers={"Authorization": f"Bearer {token}"}
         )
     
     async def send_multi_agent_message(self) -> Dict[str, Any]:

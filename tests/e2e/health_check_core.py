@@ -54,7 +54,7 @@ class HealthCheckResult:
 # Service endpoints and timeout configurations
 SERVICE_ENDPOINTS = {
     "auth": {
-        "url": "http://localhost:8001/health",
+        "url": "http://localhost:8081/health",
         "timeout": 5.0,
         "expected_service": "auth-service",
         "critical": True
