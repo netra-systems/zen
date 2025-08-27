@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <metadata>
+    <title>SSL Certificate Regression Prevention</title>
+    <date>2025-08-27</date>
+    <environment>GCP Staging/Production</environment>
+    <category>Critical Infrastructure</category>
+    <severity>CRITICAL</severity>
+  </metadata>
+  
+  <incident_report>
+    <incident id="ssl-cert-domain-missing">
+      <title>Missing app.staging.netrasystems.ai Domain in SSL Certificate</title>
+      <date>2025-08-27</date>
+      <impact>
+        Production application became inaccessible with SSL certificate error:
+        ERR_CERT_COMMON_NAME_INVALID for app.staging.netrasystems.ai
+      </impact>
+      <root_cause>
+        The Terraform configuration for the SSL certificate was missing the
+        app.staging.netrasystems.ai domain in the managed domains list.
+        This was a pre-existing issue that got applied during infrastructure updates.
+      </root_cause>
+      <resolution>
+        Switched to using the existing complete certificate (staging-managed-cert-complete)
+        that includes all required domains.
+      </resolution>
+    </incident>
+  </incident_report>
+  
+  <critical_prevention_measures>
+    <measure id="always-verify-ssl-domains">
+      <title>Always Verify SSL Certificate Domains Before Apply</title>
+      <requirement>
+        BEFORE any Terraform apply that touches SSL certificates, verify that ALL
+        production domains are included in the certificate configuration.
+      </requirement>
+      <checklist>
+        <item>staging.netrasystems.ai (root domain)</item>
+        <item>app.staging.netrasystems.ai (main application)</item>
+        <item>api.staging.netrasystems.ai (backend API)</item>
+        <item>auth.staging.netrasystems.ai (auth service)</item>
+        <item>www.staging.netrasystems.ai (www redirect)</item>
+      </checklist>
+      <validation_command>
+        gcloud compute ssl-certificates list --project=PROJECT_ID --format="table(name,managed.domains)"
+      </validation_command>
+    </measure>
+    
+    <measure id="use-existing-certificates">
+      <title>Prefer Using Existing Certificates Over Creating New</title>
+      <requirement>
+        When a working SSL certificate already exists in GCP, use a data source
+        to reference it rather than creating a new resource that might have
+        missing domains.
+      </requirement>
+      <example>
+        <!-- Use data source for existing certificate -->
+        data "google_compute_ssl_certificate" "staging" {
+          name    = "staging-managed-cert-complete"
+          project = var.project_id
+        }
+        
+        <!-- Reference in HTTPS proxy -->
+        resource "google_compute_target_https_proxy" "https_lb" {
+          ssl_certificates = [data.google_compute_ssl_certificate.staging.id]
+        }
+      </example>
+    </measure>
+    
+    <measure id="terraform-plan-review">
+      <title>Review SSL Certificate Changes in Terraform Plan</title>
+      <requirement>
+        ANY Terraform plan that shows changes to SSL certificates MUST be
+        reviewed carefully for domain completeness before applying.
+      </requirement>
+      <warning>
+        Replacing or modifying SSL certificates can cause immediate production
+        outages if domains are missing or misconfigured.
+      </warning>
+    </measure>
+  </critical_prevention_measures>
+  
+  <regression_testing>
+    <test id="ssl-domain-coverage">
+      <title>SSL Certificate Domain Coverage Test</title>
+      <description>
+        Automated test to verify all required domains are covered by the
+        active SSL certificate on the load balancer.
+      </description>
+      <script>
+        # Check that all domains are in the certificate
+        REQUIRED_DOMAINS="staging.netrasystems.ai app.staging.netrasystems.ai api.staging.netrasystems.ai auth.staging.netrasystems.ai www.staging.netrasystems.ai"
+        
+        CERT_NAME=$(gcloud compute target-https-proxies describe staging-https-lb-proxy \
+          --project=netra-staging --format="value(sslCertificates[0].scope().segment())")
+        
+        CERT_DOMAINS=$(gcloud compute ssl-certificates describe $CERT_NAME \
+          --project=netra-staging --format="value(managed.domains)")
+        
+        for domain in $REQUIRED_DOMAINS; do
+          if [[ ! "$CERT_DOMAINS" =~ "$domain" ]]; then
+            echo "ERROR: Domain $domain missing from SSL certificate!"
+            exit 1
+          fi
+        done
+      </script>
+    </test>
+    
+    <test id="https-accessibility">
+      <title>HTTPS Accessibility Test</title>
+      <description>
+        Test that all production domains are accessible via HTTPS without
+        certificate errors.
+      </description>
+      <commands>
+        curl -I https://staging.netrasystems.ai
+        curl -I https://app.staging.netrasystems.ai
+        curl -I https://api.staging.netrasystems.ai/health
+        curl -I https://auth.staging.netrasystems.ai/health
+        curl -I https://www.staging.netrasystems.ai
+      </commands>
+    </test>
+  </regression_testing>
+  
+  <best_practices>
+    <practice id="domain-list-management">
+      <title>Centralized Domain List Management</title>
+      <description>
+        Maintain a single source of truth for all domains that need SSL
+        certificates. Use Terraform variables to ensure consistency.
+      </description>
+      <example>
+        variable "ssl_domains" {
+          description = "List of domains for SSL certificate"
+          type        = list(string)
+          default = [
+            "staging.netrasystems.ai",
+            "app.staging.netrasystems.ai",
+            "api.staging.netrasystems.ai",
+            "auth.staging.netrasystems.ai",
+            "www.staging.netrasystems.ai"
+          ]
+        }
+      </example>
+    </practice>
+    
+    <practice id="certificate-validation-ci">
+      <title>CI/CD SSL Certificate Validation</title>
+      <description>
+        Add automated checks in CI/CD pipeline to validate SSL certificate
+        configuration before deployment.
+      </description>
+      <implementation>
+        Add a pre-deployment step that validates the Terraform configuration
+        includes all required domains in the SSL certificate resource.
+      </implementation>
+    </practice>
+    
+    <practice id="gradual-rollout">
+      <title>Gradual SSL Certificate Updates</title>
+      <description>
+        When updating SSL certificates, use blue-green deployment or
+        create_before_destroy lifecycle rules to ensure zero downtime.
+      </description>
+    </practice>
+  </best_practices>
+  
+  <monitoring_alerts>
+    <alert id="ssl-expiry">
+      <title>SSL Certificate Expiry Alert</title>
+      <threshold>30 days before expiry</threshold>
+      <action>Review and renew certificate with all required domains</action>
+    </alert>
+    
+    <alert id="ssl-validation-failure">
+      <title>SSL Validation Failure Alert</title>
+      <trigger>Any HTTPS endpoint returning certificate errors</trigger>
+      <action>Immediate investigation and rollback if necessary</action>
+    </alert>
+  </monitoring_alerts>
+  
+  <references>
+    <reference type="documentation" url="https://cloud.google.com/load-balancing/docs/ssl-certificates">
+      Google Cloud SSL Certificates Documentation
+    </reference>
+    <reference type="best-practice" url="https://cloud.google.com/load-balancing/docs/ssl-policies">
+      SSL Policy Best Practices
+    </reference>
+  </references>
+</learnings>
