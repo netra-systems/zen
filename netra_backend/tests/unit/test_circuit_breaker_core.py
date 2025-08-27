@@ -487,3 +487,32 @@ class TestCircuitBreakerEdgeCases:
         circuit_breaker.timeout = -1
         status = circuit_breaker.get_status()
         assert "timeout" in str(status) or "state" in status
+
+    @pytest.mark.asyncio
+    async def test_partial_network_failure_resilience(self, circuit_breaker):
+        """Test circuit breaker behavior during partial network failures.
+        
+        BUSINESS VALUE: Prevents service degradation during partial outages by 
+        staying operational while tracking intermittent failures, protecting 
+        enterprise AI workloads from unnecessary downtime.
+        
+        Scenario: Mixed success/failure pattern typical of network instability.
+        """
+        # Simulate partial network failure: 70% success, 30% failure
+        success_count, failure_count = 0, 0
+        operations = [True, False, True, True, False, True, True, True, False, True]
+        
+        for should_succeed in operations:
+            try:
+                if should_succeed:
+                    await circuit_breaker.call(simulate_async_operation)
+                    success_count += 1
+                else:
+                    await circuit_breaker.call(simulate_failing_operation)
+            except RuntimeError:
+                failure_count += 1
+        
+        # Circuit should remain closed due to majority success (below failure threshold)
+        assert circuit_breaker.state == CircuitBreakerState.CLOSED
+        assert circuit_breaker.metrics.successful_calls == success_count
+        assert circuit_breaker.metrics.failed_calls == failure_count

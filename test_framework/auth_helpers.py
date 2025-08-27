@@ -27,6 +27,7 @@ from dataclasses import dataclass
 
 import httpx
 import websockets
+from websockets import ServerConnection
 from websockets.exceptions import ConnectionClosedError, WebSocketException
 
 from test_framework.http_client import AuthHTTPClient, ClientConfig, UnifiedHTTPClient
@@ -257,9 +258,9 @@ class WebSocketAuthTester:
         """Initialize WebSocket auth tester."""
         self.config = config or AuthTestConfig()
         self.auth_manager = AuthManager(config)
-        self.active_connections: List[websockets.legacy.server.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.ServerConnection] = []
     
-    async def connect_authenticated_websocket(self, token: Optional[str] = None) -> websockets.legacy.server.WebSocketServerProtocol:
+    async def connect_authenticated_websocket(self, token: Optional[str] = None) -> websockets.ServerConnection:
         """Connect to WebSocket with authentication."""
         if not token:
             token = await self.auth_manager.get_valid_token()
@@ -282,7 +283,7 @@ class WebSocketAuthTester:
         except Exception as e:
             raise ConnectionError(f"Failed to connect to WebSocket: {str(e)}")
     
-    async def send_authenticated_message(self, websocket: websockets.legacy.server.WebSocketServerProtocol, 
+    async def send_authenticated_message(self, websocket: websockets.ServerConnection, 
                                         message: Dict[str, Any]) -> None:
         """Send message through authenticated WebSocket."""
         try:
@@ -290,7 +291,7 @@ class WebSocketAuthTester:
         except Exception as e:
             raise ConnectionError(f"Failed to send WebSocket message: {str(e)}")
     
-    async def wait_for_message(self, websocket: websockets.legacy.server.WebSocketServerProtocol, 
+    async def wait_for_message(self, websocket: websockets.ServerConnection, 
                               timeout: Optional[float] = None) -> Dict[str, Any]:
         """Wait for message from WebSocket."""
         timeout = timeout or self.config.MESSAGE_RESPONSE_TIMEOUT

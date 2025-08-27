@@ -33,9 +33,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import websockets
+from websockets import ClientConnection
 
-StagingTestSuite = AsyncMock
-get_staging_suite = AsyncMock
+# Use real imports instead of mocks for L4 staging tests
+# StagingTestSuite = AsyncMock  
+# get_staging_suite = AsyncMock
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.redis_manager import RedisManager
 # DistributedRateLimiter doesn't exist - using EnhancedRateLimiter
@@ -102,8 +104,9 @@ class WebSocketLoadBalancingL4TestSuite:
         self.staging_suite = await get_staging_suite()
         await self.staging_suite.setup()
         
-        # Get staging load balancer URL
-        self.load_balancer_url = self.staging_suite.env_config.services.websocket_lb
+        # Get staging load balancer URL  
+        self.load_balancer_url = getattr(self.staging_suite.env_config.services, 'websocket_lb', 
+                                       self.staging_suite.env_config.services.websocket)
         
         # Initialize load balanced connection manager
         self.connection_manager = LoadBalancedConnectionManager()
@@ -250,7 +253,7 @@ class WebSocketLoadBalancingL4TestSuite:
                 "connection_time": time.time() - start_time
             }
     
-    async def _identify_assigned_server(self, websocket: websockets.legacy.server.WebSocketServerProtocol) -> str:
+    async def _identify_assigned_server(self, websocket: ClientConnection) -> str:
         """Identify which server is handling the connection."""
         try:
             # Send identification request

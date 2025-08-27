@@ -35,6 +35,7 @@ from typing import Any, Dict, Optional
 import httpx
 import pytest
 import websockets
+from websockets import ServerConnection
 
 # Use absolute imports or handle missing dependencies gracefully
 try:
@@ -67,7 +68,7 @@ class BasicUserFlowE2ETester:
         self.test_user_email = f"test-user-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         self.test_user_id: Optional[str] = None
         self.jwt_token: Optional[str] = None
-        self.websocket_connection: Optional[websockets.legacy.server.WebSocketServerProtocol] = None
+        self.websocket_connection: Optional[websockets.ServerConnection] = None
     
     async def execute_complete_user_flow(self) -> Dict[str, Any]:
         """Execute complete signup → login → chat flow with REAL services."""

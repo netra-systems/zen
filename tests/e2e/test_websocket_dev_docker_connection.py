@@ -23,8 +23,7 @@ import pytest
 import websocket
 from websocket import WebSocketApp
 
-# Add path for test framework imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# Path management handled by pytest and package structure
 
 # Mark test for dev environment only
 pytestmark = pytest.mark.dev
@@ -33,7 +32,8 @@ pytestmark = pytest.mark.dev
 class WebSocketConnectionTest:
     """Test harness for WebSocket connection issues."""
     
-    def __init__(self):
+    def setup_method(self):
+        """Setup method called before each test method."""
         self.base_url = "http://localhost:8000"
         self.ws_url = "ws://localhost:8000/ws"
         self.connection_errors = []
@@ -230,6 +230,7 @@ class TestWebSocketDevDockerConnection:
         - WebSocket handshake failures
         """
         test_harness = WebSocketConnectionTest()
+        test_harness.setup_method()
         
         # Check backend availability first
         backend_status = test_harness.test_backend_availability()
@@ -403,6 +404,7 @@ if __name__ == "__main__":
     print("="*60)
     
     test = WebSocketConnectionTest()
+    test.setup_method()
     
     # Run all tests
     backend_status = test.test_backend_availability()

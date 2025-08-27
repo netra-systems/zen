@@ -156,3 +156,28 @@ class TestStateCheckpointSessionFix:
             # Verify calls were made - specific session argument validation is complex
             # due to async context manager handling, but we confirmed the method calls
             assert len(mock_persistence.save_agent_state.call_args_list) == 3
+    
+    @pytest.mark.asyncio
+    async def test_transaction_rollback_on_error(self, mock_session, mock_state):
+        """Test transaction rollback on checkpoint save error - critical for data integrity."""
+        @asynccontextmanager
+        async def db_session_factory():
+            yield mock_session
+        
+        with patch('netra_backend.app.agents.supervisor.state_checkpoint_manager.state_persistence_service') as mock_persistence:
+            # Simulate database error during save
+            mock_persistence.save_agent_state = AsyncMock(side_effect=Exception("Database error"))
+            
+            manager = StateCheckpointManager(db_session_factory)
+            
+            # Should handle error gracefully and return False
+            success = await manager.save_state_checkpoint(
+                mock_state, "run_error", "thread_123", "user_123",
+                CheckpointType.AUTO, AgentPhase.INITIALIZATION
+            )
+            
+            assert success is False
+            # Verify rollback was called on error
+            mock_session.rollback.assert_called_once()
+            # Verify commit was never called due to error
+            mock_session.commit.assert_not_called()

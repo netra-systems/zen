@@ -48,6 +48,27 @@ class TestHeartbeatLogger:
     async def test_stop_heartbeat_cleans_up(self):
         """Test that stopping heartbeat cleans up resources."""
         logger = HeartbeatLogger()
+
+    def test_heartbeat_performance_monitoring_iteration_17(self):
+        """Test heartbeat performance monitoring - Iteration 17."""
+        import time
+        
+        logger = HeartbeatLogger()
+        
+        # Test heartbeat timing performance
+        start_time = time.time()
+        
+        # Simulate multiple heartbeat operations
+        for i in range(5):
+            correlation_id = f"perf_test_{i}"
+            logger.start_heartbeat(correlation_id, f"agent_{i}")
+            
+            # Heartbeat should start quickly
+            assert correlation_id in logger._active_tasks
+            
+        end_time = time.time()
+        total_time = end_time - start_time
+        assert total_time < 0.1  # Should be very fast
         correlation_id = "test-correlation-id"
         logger.start_heartbeat(correlation_id, "test_agent")
         logger.stop_heartbeat(correlation_id)

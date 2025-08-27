@@ -42,7 +42,7 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 
 # Handle different websockets library versions
 try:
-    from websockets.legacy.exceptions import InvalidStatusCode
+    from websockets import InvalidStatusCode
 except ImportError:
     # For newer versions of websockets
     class InvalidStatusCode(WebSocketException):

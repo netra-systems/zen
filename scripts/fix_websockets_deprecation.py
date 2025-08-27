@@ -3,9 +3,9 @@
 Script to fix websockets deprecation warnings by updating import statements.
 
 This script fixes:
-- websockets.client.WebSocketClientProtocol -> websockets.legacy.client.WebSocketClientProtocol
-- websockets.exceptions.InvalidStatusCode -> websockets.legacy.exceptions.InvalidStatusCode
-- websockets.legacy.server.WebSocketServerProtocol -> websockets.legacy.server.WebSocketServerProtocol
+- websockets.client.WebSocketClientProtocol -> websockets.ClientConnection
+- websockets.exceptions.InvalidStatusCode -> websockets.InvalidStatusCode
+- websockets.ServerConnection -> websockets.ServerConnection
 """
 
 import os
@@ -23,28 +23,28 @@ def fix_websockets_imports(file_path: str) -> bool:
         # Fix WebSocketClientProtocol import
         content = re.sub(
             r'from websockets\.client import WebSocketClientProtocol',
-            'from websockets.legacy.client import WebSocketClientProtocol',
+            'from websockets import ClientConnection as WebSocketClientProtocol',
             content
         )
         
         # Fix InvalidStatusCode import
         content = re.sub(
             r'from websockets\.exceptions import ([^\\n]*InvalidStatusCode[^\\n]*)',
-            r'from websockets.legacy.exceptions import \1',
+            r'from websockets import \1',
             content
         )
         
         # Fix WebSocketServerProtocol import
         content = re.sub(
             r'websockets\.WebSocketServerProtocol',
-            'websockets.legacy.server.WebSocketServerProtocol',
+            'websockets.ServerConnection',
             content
         )
         
         # Fix import statements that import WebSocketServerProtocol directly
         content = re.sub(
             r'import websockets\.WebSocketServerProtocol',
-            'from websockets.legacy.server import WebSocketServerProtocol',
+            'from websockets import ServerConnection as WebSocketServerProtocol',
             content
         )
         

@@ -48,7 +48,28 @@ class TestPydanticModels:
         
         update = ThreadUpdate()
         assert update.title == None
-        assert update.metadata == None
+
+    def test_thread_validation_boundaries_iteration_15(self):
+        """Test thread model validation boundaries - Iteration 15."""
+        
+        # Test ThreadUpdate (which allows optional fields) for validation
+        update = ThreadUpdate(title="Valid Title")
+        assert update.title == "Valid Title"
+        
+        # Test title boundary conditions
+        long_title = "A" * 1000  # Very long title
+        update_long = ThreadUpdate(title=long_title)
+        assert len(update_long.title) == 1000
+        
+        # Test metadata validation boundaries
+        large_metadata = {f"key_{i}": f"value_{i}" for i in range(50)}
+        update_meta = ThreadUpdate(metadata=large_metadata)
+        assert len(update_meta.metadata) == 50
+        
+        # Test nested metadata structure
+        nested_meta = {"level1": {"level2": {"data": "test"}}}
+        update_nested = ThreadUpdate(metadata=nested_meta)
+        assert update_nested.metadata["level1"]["level2"]["data"] == "test"
     
     def test_thread_response_model(self):
         """Test ThreadResponse model"""

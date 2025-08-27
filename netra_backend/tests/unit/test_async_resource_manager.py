@@ -1240,3 +1240,38 @@ class TestAsyncResourceManagerPerformanceOptimization:
         assert len(exit_ops) == 10
         
         await manager.cleanup_all()
+
+    @pytest.mark.asyncio
+    async def test_resource_exhaustion_handling_iteration_14(self):
+        """Test resource exhaustion edge case handling - Iteration 14."""
+        from netra_backend.app.core.async_resource_manager import AsyncTaskPool
+        
+        # Create small pool to test exhaustion
+        task_pool = AsyncTaskPool(max_concurrent_tasks=2)
+        
+        async def blocking_task():
+            await asyncio.sleep(0.1)  # Long enough to block
+            return "blocked"
+        
+        # Fill pool to capacity
+        task1 = task_pool.submit_background_task(blocking_task())
+        task2 = task_pool.submit_background_task(blocking_task())
+        await asyncio.sleep(0.01)  # Let tasks start
+        
+        # Pool should be at capacity
+        assert task_pool.active_task_count == 2
+        assert task_pool.available_slots == 0
+        
+        # Test resource exhaustion behavior
+        start_time = time.time()
+        task3 = asyncio.create_task(task_pool.submit_task(create_simple_task()))
+        await asyncio.sleep(0.02)  # Should still be waiting
+        
+        # Task should be queued/waiting
+        assert not task3.done()
+        
+        # Complete all tasks
+        await asyncio.gather(task1, task2, task3)
+        duration = time.time() - start_time
+        assert duration >= 0.08  # Should wait for resource
+        await task_pool.shutdown()

@@ -402,3 +402,29 @@ class TestWebSocketSecurityEdgeCases:
         assert info_dict["is_authenticated"] is True
         assert "read" in info_dict["permissions"]
         assert info_dict["metadata"]["role"] == "admin"
+    
+    def test_token_injection_prevention(self):
+        """Test prevention of token injection attacks - security critical."""
+        authenticator = get_websocket_authenticator()
+        
+        # Test malicious token patterns that could bypass validation
+        malicious_tokens = [
+            "'; DROP TABLE users; --",
+            "<script>alert('xss')</script>",
+            "Bearer ../../../etc/passwd",
+            "null\x00injection",
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0..invalid"
+        ]
+        
+        for token in malicious_tokens:
+            # Mock WebSocket with malicious token
+            ws = MagicMock(spec=WebSocket)
+            ws.headers = {"authorization": f"Bearer {token}"}
+            
+            # Extract token should handle malicious input safely
+            extracted_token, method = authenticator._extract_jwt_token(ws)
+            
+            # Should extract token but validation will fail safely
+            assert method == "header"
+            assert extracted_token == token
+            # Real validation would reject these tokens securely

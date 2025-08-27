@@ -27,6 +27,24 @@ class TestConfigurationConsistency:
     
     def test_postgres_always_critical(self):
         """Test that postgres is always critical regardless of environment."""
+        priority = _get_service_priority_for_environment('postgres')
+        assert priority == ServicePriority.CRITICAL
+
+    def test_secure_configuration_boundaries_iteration_16(self):
+        """Test security configuration validation - Iteration 16."""
+        
+        # Test development mode detection
+        with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
+            assert _is_development_mode() == True
+            
+        with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
+            assert _is_development_mode() == False
+            
+        # Test timeout configuration boundaries
+        timeout = _get_health_check_timeout("postgres")
+        assert isinstance(timeout, (int, float))
+        assert timeout > 0
+        assert timeout <= 30  # Reasonable upper bound
         
         # Mock different environments
         environments = ['production', 'staging', 'development', 'testing']

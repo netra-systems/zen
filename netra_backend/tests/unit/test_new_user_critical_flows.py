@@ -231,6 +231,13 @@ class TestNewUserCriticalFlows:
 
     def _setup_successful_user_creation(self, mock_db_session):
         """Setup database to return successful user creation."""
+        from unittest.mock import AsyncMock, MagicMock
+        
+        # Mock execute for get_by_email (should return None for new user)
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.first.return_value = None
+        mock_db_session.execute = AsyncMock(return_value=mock_result)
+        
         async def mock_refresh(obj):
             obj.id = str(uuid.uuid4())
             obj.is_active = True

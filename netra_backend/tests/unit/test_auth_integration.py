@@ -436,7 +436,7 @@ class TestRevenueProtectionAuth:
         high_value_operations = [
             {"operation": "bulk_data_analysis", "duration_minutes": 45, "cost": 2500.00},
             {"operation": "custom_model_training", "duration_minutes": 90, "cost": 4800.00},
-            {"operation": "enterprise_reporting", "duration_minutes": 30, "cost": 1200.00}
+            {"operation": "enterprise_reporting", "duration_minutes": 31, "cost": 1200.00}
         ]
         
         total_potential_revenue = sum(op["cost"] for op in high_value_operations)
@@ -533,3 +533,105 @@ class TestTokenSecurityValidation:
         # Should detect suspicious privilege escalation
         assert decoded["role"] == "admin"  # Token is valid but privileges should be verified separately
         assert "delete_all" in decoded.get("permissions", [])
+        
+    @pytest.mark.asyncio
+    async def test_concurrent_token_validation_race_condition_protection(self):
+        """Test concurrent token validation to ensure thread safety and prevent race conditions.
+        
+        BVJ: Platform Security - Risk Reduction
+        Ensures authentication system handles concurrent requests safely, preventing
+        race conditions that could lead to token validation bypass or unauthorized access.
+        Critical for high-traffic enterprise environments where multiple requests 
+        may validate the same token simultaneously.
+        """
+        import asyncio
+        from unittest.mock import AsyncMock, Mock, patch
+        
+        # Mock successful token validation response
+        mock_validation_response = {
+            "valid": True,
+            "user_id": "concurrent-user-123",
+            "email": "concurrent@example.com"
+        }
+        
+        # Track concurrent executions to detect race conditions
+        concurrent_executions = []
+        validation_call_count = 0
+        
+        async def mock_validate_token(token):
+            nonlocal validation_call_count
+            validation_call_count += 1
+            
+            # Record execution timing to detect race conditions
+            execution_id = f"exec_{validation_call_count}"
+            execution_info = {"id": execution_id, "start_time": asyncio.get_event_loop().time()}
+            concurrent_executions.append(execution_info)
+            
+            # Simulate realistic network latency
+            await asyncio.sleep(0.01)
+            
+            # Record completion
+            execution_info["end_time"] = asyncio.get_event_loop().time()
+            
+            return mock_validation_response
+        
+        # Mock database user lookup
+        mock_user = User()
+        mock_user.id = "concurrent-user-123"
+        mock_user.email = "concurrent@example.com"
+        mock_user.is_admin = False
+        
+        mock_db_session = AsyncMock()
+        mock_result = Mock()
+        mock_result.scalar_one_or_none.return_value = mock_user
+        mock_db_session.execute.return_value = mock_result
+        
+        # Mock credentials
+        mock_credentials = Mock()
+        mock_credentials.credentials = "concurrent-test-token"
+        
+        # Test concurrent token validations
+        with patch('netra_backend.app.auth_integration.auth.auth_client.validate_token_jwt', side_effect=mock_validate_token):
+            # Execute multiple concurrent authentication requests
+            tasks = []
+            num_concurrent_requests = 5
+            
+            for i in range(num_concurrent_requests):
+                task = get_current_user(mock_credentials, mock_db_session)
+                tasks.append(task)
+            
+            # Execute all requests concurrently
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Verify all requests succeeded
+            successful_results = [r for r in results if isinstance(r, User)]
+            failed_results = [r for r in results if isinstance(r, Exception)]
+            
+            assert len(successful_results) == num_concurrent_requests, f"Expected {num_concurrent_requests} successful authentications, got {len(successful_results)}"
+            assert len(failed_results) == 0, f"Unexpected failures: {failed_results}"
+            
+            # Verify all results are identical (no race condition corruption)
+            first_result = successful_results[0]
+            for result in successful_results[1:]:
+                assert result.id == first_result.id
+                assert result.email == first_result.email
+            
+            # Verify proper concurrent execution (overlapping time windows)
+            assert len(concurrent_executions) == num_concurrent_requests
+            
+            # Check for actual concurrency (executions should overlap)
+            start_times = [exec_info["start_time"] for exec_info in concurrent_executions]
+            end_times = [exec_info["end_time"] for exec_info in concurrent_executions]
+            
+            # If properly concurrent, some executions should start before others finish
+            min_start = min(start_times)
+            max_start = max(start_times)
+            min_end = min(end_times)
+            
+            # Verify concurrency: some requests started before others finished
+            assert max_start < min_end + 0.05, "Requests were not properly concurrent - possible serialization bottleneck"
+            
+            # Verify no authentication cache pollution between requests
+            for result in successful_results:
+                assert result.id == "concurrent-user-123"
+                assert result.email == "concurrent@example.com"

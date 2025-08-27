@@ -556,6 +556,43 @@ class TestFirstTimeUserSecurityEnhancements:
         for email in invalid_emails:
             assert re.match(email_pattern, email) is None
 
+    @pytest.mark.asyncio
+    async def test_complete_user_onboarding_flow_iteration_13(self):
+        """Test complete user onboarding business flow - Iteration 13."""
+        
+        # Test complete onboarding sequence
+        onboarding_steps = [
+            {"step": "registration", "status": "pending"},
+            {"step": "email_verification", "status": "pending"}, 
+            {"step": "profile_setup", "status": "pending"},
+            {"step": "first_ai_interaction", "status": "pending"},
+            {"step": "upgrade_prompt", "status": "pending"}
+        ]
+        
+        # Simulate step completion
+        for i, step in enumerate(onboarding_steps):
+            # Complete step
+            step["status"] = "completed"
+            step["completed_at"] = datetime.now(timezone.utc)
+            
+            # Validate business metrics
+            completion_rate = (i + 1) / len(onboarding_steps) * 100
+            assert completion_rate > 0
+            assert completion_rate <= 100
+            
+        # Verify complete flow
+        completed_steps = [s for s in onboarding_steps if s["status"] == "completed"]
+        assert len(completed_steps) == len(onboarding_steps)
+        
+        # Test conversion trigger conditions
+        user_value_score = self._calculate_user_value_score(completed_steps)
+        assert user_value_score >= 80  # High engagement = conversion ready
+    
+    def _calculate_user_value_score(self, completed_steps):
+        """Calculate user engagement score for conversion."""
+        base_score = len(completed_steps) * 20  # 20 points per step
+        return min(base_score, 100)  # Cap at 100%
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

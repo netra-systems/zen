@@ -551,7 +551,7 @@ class AuditTrailManager:
     
     async def _mock_execute(self, sql, *params):
         """Mock execute that stores INSERT operations."""
-        if sql.strip().startswith("INSERT INTO audit_events ("):
+        if sql.strip().startswith("INSERT INTO audit_events"):
             # Store the event data
             if "audit_events" not in self._mock_storage:
                 self._mock_storage["audit_events"] = []
@@ -592,10 +592,16 @@ class AuditTrailManager:
         
         events = self._mock_storage["audit_events"]
         
-        # Simple filtering based on agent_id
-        if "agent_id = ANY(" in sql and params:
-            agent_ids = params[0]
-            events = [e for e in events if e["agent_id"] in agent_ids]
+        # More flexible filtering - handle different SQL patterns
+        if params and len(params) > 0:
+            # Try to match agent_id filtering
+            if ("agent_id = ANY(" in sql or "agent_id IN" in sql) and params:
+                agent_ids = params[0] if isinstance(params[0], list) else [params[0]]
+                events = [e for e in events if e["agent_id"] in agent_ids]
+            # Also handle direct agent_id matching
+            elif "agent_id = $" in sql and params:
+                agent_id = params[0]
+                events = [e for e in events if e["agent_id"] == agent_id]
         
         # Create mock objects with proper dict interface for AuditEvent.from_dict
         mock_rows = []

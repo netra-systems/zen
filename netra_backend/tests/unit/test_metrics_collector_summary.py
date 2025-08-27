@@ -265,7 +265,7 @@ class TestMetricsCollectorSummary:
 
         new_metrics = [
 
-            PerformanceMetric("test", float(i), cutoff_time + timedelta(seconds=i))
+            PerformanceMetric("test", float(i), cutoff_time + timedelta(seconds=i+1))
 
             for i in range(50)
 

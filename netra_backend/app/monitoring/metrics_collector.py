@@ -375,11 +375,13 @@ class MetricsCollector:
     
     def _clean_buffer(self, metric_buffer: deque, cutoff_time: datetime) -> None:
         """Clean expired metrics from a specific buffer."""
-        while metric_buffer and hasattr(metric_buffer[0], 'timestamp'):
-            if metric_buffer[0].timestamp < cutoff_time:
-                metric_buffer.popleft()
-            else:
-                break
+        # Filter out all expired metrics regardless of position in deque
+        filtered_metrics = [
+            metric for metric in metric_buffer 
+            if hasattr(metric, 'timestamp') and metric.timestamp > cutoff_time
+        ]
+        metric_buffer.clear()
+        metric_buffer.extend(filtered_metrics)
     
     def _record_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None) -> None:
         """Record a single metric value."""

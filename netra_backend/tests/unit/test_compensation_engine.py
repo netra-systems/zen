@@ -402,3 +402,35 @@ class TestCompensationEngineEdgeCases:
         # Test get compensation status for non-existent action
         status = engine.get_compensation_status("non-existent-id")
         assert status is None
+
+    @pytest.mark.asyncio
+    async def test_high_volume_compensation_performance_iteration_12(self, engine):
+        """Test compensation engine performance under high volume - Iteration 12."""
+        import time
+        
+        # Create multiple handlers for performance testing
+        handlers = []
+        for i in range(5):
+            handler = Mock(spec=BaseCompensationHandler)
+            handler.can_compensate = AsyncMock(return_value=True)
+            handler.execute_compensation = AsyncMock(return_value=True)
+            handler.get_priority.return_value = i + 1
+            handlers.append(handler)
+            engine.register_handler(handler)
+        
+        # Test bulk action creation performance
+        start_time = time.time()
+        action_ids = []
+        context = Mock()
+        context.operation_type = OperationType.DATABASE_WRITE
+        
+        for i in range(10):  # Small number for unit test
+            action_id = await engine.create_compensation_action(
+                f"bulk_op_{i}", context, {"amount": i * 10.0}
+            )
+            if action_id:
+                action_ids.append(action_id)
+        
+        creation_time = time.time() - start_time
+        assert creation_time < 1.0  # Should complete under 1 second
+        assert len(action_ids) >= 5  # Most should succeed

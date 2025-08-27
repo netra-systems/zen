@@ -48,6 +48,7 @@ from unittest.mock import patch
 
 import pytest
 import websockets
+from websockets import ServerConnection
 from websockets.exceptions import ConnectionClosed, InvalidURI, WebSocketException
 
 # Use absolute imports per CLAUDE.md requirements
@@ -174,7 +175,7 @@ class WebSocketTestConfig:
 class WebSocketConnection:
     """Tracks individual WebSocket connection state."""
     connection_id: str
-    websocket: Optional[websockets.legacy.server.WebSocketServerProtocol]
+    websocket: Optional[websockets.ServerConnection]
     connected_at: float
     last_ping: Optional[float] = None
     messages_sent: int = 0

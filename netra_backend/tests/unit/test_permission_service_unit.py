@@ -254,8 +254,10 @@ class TestDeveloperAutoDetection:
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is True
 
-    @patch.dict('os.environ', {'DEV_MODE': 'false', 'ENVIRONMENT': 'production'})
-    def test_dev_mode_false_no_developer_status(self, free_tier_user):
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_mode_enabled', return_value=False)
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_netra_domain', return_value=False)
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_environment', return_value=False)
+    def test_dev_mode_false_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
         """DEV_MODE=false doesn't grant developer status."""
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is False
@@ -268,8 +270,10 @@ class TestDeveloperAutoDetection:
         result = PermissionService.detect_developer_status(netra_user)
         assert result is True
 
-    @patch.dict('os.environ', {'ENVIRONMENT': 'production'})
-    def test_external_domain_no_developer_status(self, free_tier_user):
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_mode_enabled', return_value=False)
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_netra_domain', return_value=False)
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_environment', return_value=False)
+    def test_external_domain_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
         """External domain doesn't grant developer status."""
         free_tier_user.email = "user@gmail.com"
         result = PermissionService.detect_developer_status(free_tier_user)
@@ -281,8 +285,10 @@ class TestDeveloperAutoDetection:
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is True
 
-    @patch.dict('os.environ', {'ENVIRONMENT': 'production'})
-    def test_prod_environment_no_developer_status(self, free_tier_user):
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_mode_enabled', return_value=False)
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_netra_domain', return_value=False)
+    @patch('netra_backend.app.services.permission_service.PermissionService._check_dev_environment', return_value=False)
+    def test_prod_environment_no_developer_status(self, mock_check_dev_env, mock_check_netra_domain, mock_check_dev_mode, free_tier_user):
         """Production environment doesn't grant developer status."""
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is False

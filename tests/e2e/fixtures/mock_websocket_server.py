@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Set
 
 import websockets
+from websockets import ServerConnection
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class MockWebSocketServer:
     def __init__(self, host: str = "localhost", port: int = 8765):
         self.host = host
         self.port = port
-        self.clients: Dict[str, websockets.legacy.server.WebSocketServerProtocol] = {}
+        self.clients: Dict[str, websockets.ServerConnection] = {}
         self.message_queue: deque = deque()
         self.processing_delay: float = 0.1
         self.simulate_failures: bool = False
@@ -34,7 +35,7 @@ class MockWebSocketServer:
         self.server = None
         self.running = False
         
-    async def handle_client(self, websocket: websockets.legacy.server.WebSocketServerProtocol, path: str):
+    async def handle_client(self, websocket: websockets.ServerConnection, path: str):
         """Handle individual client connections."""
         client_id = str(uuid.uuid4())
         self.clients[client_id] = websocket

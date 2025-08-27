@@ -38,6 +38,7 @@ import time
 import tracemalloc
 import uuid
 import websockets
+from websockets import ServerConnection
 
 try:
     import resource
@@ -510,7 +511,7 @@ class WebSocketStressTest:
 
         self.max_connections = max_connections
 
-        self.active_connections: List[websockets.legacy.server.WebSocketServerProtocol] = []
+        self.active_connections: List[websockets.ServerConnection] = []
 
         self.message_count = 0
 

@@ -51,6 +51,7 @@ from urllib.parse import urlparse
 import httpx
 import pytest
 import websockets
+from websockets import ServerConnection
 from websockets.exceptions import ConnectionClosed, InvalidURI
 
 # Use absolute imports per CLAUDE.md requirements
@@ -169,7 +170,7 @@ class ComprehensiveSystemTester:
         self.database_types = {"postgresql", "redis", "clickhouse"}
         
         # Testing state
-        self.websocket_connections: Dict[str, websockets.legacy.server.WebSocketServerProtocol] = {}
+        self.websocket_connections: Dict[str, websockets.ServerConnection] = {}
         
     def _detect_project_root(self) -> Path:
         """Detect project root directory."""

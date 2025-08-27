@@ -36,7 +36,7 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError
 try:
-    from websockets.legacy.exceptions import InvalidStatusCode
+    from websockets import InvalidStatusCode
 except ImportError:
     # For newer versions of websockets where InvalidStatusCode is deprecated
     InvalidStatusCode = Exception
