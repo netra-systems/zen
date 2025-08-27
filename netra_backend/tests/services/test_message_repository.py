@@ -12,7 +12,7 @@ import asyncio
 
 import pytest
 
-from netra_backend.tests.database_repository_helpers import (
+from netra_backend.tests.helpers.database_repository_helpers import (
     assert_pagination_result,
     create_test_message,
     create_test_messages,

@@ -83,10 +83,17 @@ async def test_tool_usage_log_datetime_defaults():
 
 @pytest.mark.asyncio
 async def test_secret_datetime_defaults():
-    """Test that Secret datetime defaults are properly callable."""
+    """Test that Secret datetime defaults are properly configured."""
     from netra_backend.app.db.models_user import Secret as SecretModel
-    assert callable(SecretModel.created_at.default.arg)
-    assert callable(SecretModel.updated_at.default.arg)
+    from sqlalchemy.sql.functions import now
+    
+    # Check that the default is set to SQLAlchemy's func.now()
+    assert SecretModel.created_at.default is not None
+    assert SecretModel.updated_at.default is not None
+    
+    # Verify the default is func.now()
+    assert isinstance(SecretModel.created_at.default.arg, now)
+    assert isinstance(SecretModel.updated_at.default.arg, now)
     
     secret = Secret(
         user_id="test-user-id",

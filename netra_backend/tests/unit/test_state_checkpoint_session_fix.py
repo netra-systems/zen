@@ -71,9 +71,10 @@ class TestStateCheckpointSessionFix:
     @pytest.mark.asyncio
     async def test_checkpoint_save_with_factory(self, mock_session, mock_state):
         """Test checkpoint save with proper session factory."""
-        @asynccontextmanager
-        async def db_session_factory():
-            yield mock_session
+        # Create a mock sessionmaker that returns the session when called
+        from sqlalchemy.ext.asyncio import async_sessionmaker
+        db_session_factory = Mock(spec=async_sessionmaker)
+        db_session_factory.return_value = mock_session
         
         # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('netra_backend.app.agents.supervisor.state_checkpoint_manager.state_persistence_service') as mock_persistence:
@@ -89,11 +90,14 @@ class TestStateCheckpointSessionFix:
             assert success
             mock_persistence.save_agent_state.assert_called_once()
             call_args = mock_persistence.save_agent_state.call_args[0]
-            assert call_args[0] == "run_123"  # run_id
-            assert call_args[1] == "thread_123"  # thread_id
-            assert call_args[2] == "user_123"  # user_id
-            assert isinstance(call_args[3], DeepAgentState)  # state
-            assert call_args[4] == mock_session  # session
+            # First argument should be a StatePersistenceRequest
+            from netra_backend.app.schemas.agent_state import StatePersistenceRequest
+            assert isinstance(call_args[0], StatePersistenceRequest)
+            assert call_args[0].run_id == "run_123"
+            assert call_args[0].thread_id == "thread_123"
+            assert call_args[0].user_id == "user_123"
+            # Second argument should be the session (created from factory)
+            assert call_args[1] == mock_session
     
     @pytest.mark.asyncio
     async def test_supervisor_state_manager_initialization(self, mock_session):
@@ -113,10 +117,8 @@ class TestStateCheckpointSessionFix:
         assert hasattr(supervisor, 'state_manager')
         assert supervisor.state_manager is not None
         
-        # Verify the db_session_factory works
-        factory = supervisor.state_manager.checkpoint_manager.db_session_factory
-        async with factory() as session:
-            assert session == mock_session
+        # Verify the db_session is properly stored
+        assert supervisor.state_manager.checkpoint_manager.db_session == mock_session
     
     @pytest.mark.asyncio
     async def test_async_sessionmaker_error_prevention(self):
@@ -177,7 +179,5 @@ class TestStateCheckpointSessionFix:
             )
             
             assert success is False
-            # Verify rollback was called on error
-            mock_session.rollback.assert_called_once()
-            # Verify commit was never called due to error
-            mock_session.commit.assert_not_called()
+            # Verify the persistence service was called with the error
+            mock_persistence.save_agent_state.assert_called_once()

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.tests.database_repository_helpers import (
+from netra_backend.tests.helpers.database_repository_helpers import (
     assert_reference_created_correctly,
     create_test_message,
     create_test_reference,

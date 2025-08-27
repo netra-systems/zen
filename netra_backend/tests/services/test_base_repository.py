@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.tests.database_repository_helpers import (
+from netra_backend.tests.helpers.database_repository_helpers import (
     assert_pagination_result,
     assert_thread_created_correctly,
     create_test_thread,

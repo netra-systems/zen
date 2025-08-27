@@ -208,8 +208,9 @@ class ConfigValidatorHelper:
         self.config = get_test_config()
     
     def is_test_environment(self) -> bool:
-        """Check if running in test environment."""
-        return self.config.environment == 'testing'
+        """SSOT: Check test environment via centralized utils."""
+        from netra_backend.app.core.project_utils import is_test_environment
+        return is_test_environment()
     
     def has_database_config(self) -> bool:
         """Check if database is configured."""

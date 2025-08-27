@@ -246,12 +246,12 @@ class TestBasicHealthChecksE2E:
             # Status should be healthy
             assert health_data.get("status") in ["healthy", "ok"], f"Service should be healthy, got: {health_data.get('status')}"
             
-            print(f"\n✅ Auth service is running and healthy:")
+            print(f"\n[SUCCESS] Auth service is running and healthy:")
             print(f"   Status: {health_data.get('status')}")
             print(f"   Service: {health_data.get('service')}")
             print(f"   Response time: {result['response_time']:.3f}s")
         else:
-            print(f"\n⚠️  Auth service not accessible: {result.get('error', 'Unknown error')}")
+            print(f"\n[WARNING] Auth service not accessible: {result.get('error', 'Unknown error')}")
             # This is OK - service might not be running
     
     @pytest.mark.asyncio
@@ -279,13 +279,13 @@ class TestBasicHealthChecksE2E:
             for field in expected_fields:
                 assert field in health_data, f"Health response should include {field}"
             
-            print(f"\n✅ Backend service is running and healthy:")
+            print(f"\n[SUCCESS] Backend service is running and healthy:")
             print(f"   Status: {health_data.get('status')}")
             print(f"   Response time: {result['response_time']:.3f}s")
             if "version" in health_data:
                 print(f"   Version: {health_data.get('version')}")
         else:
-            print(f"\n⚠️  Backend service not accessible: {result.get('error', 'Unknown error')}")
+            print(f"\n[WARNING] Backend service not accessible: {result.get('error', 'Unknown error')}")
             # This is OK - service might not be running
     
     @pytest.mark.asyncio
@@ -317,7 +317,7 @@ class TestBasicHealthChecksE2E:
         
         assert all(test_result.values()), "All framework components should be working"
         
-        print("\n✅ E2E test framework basic functionality verified:")
+        print("\n[SUCCESS] E2E test framework basic functionality verified:")
         for key, value in test_result.items():
             print(f"   {key}: {value}")
 

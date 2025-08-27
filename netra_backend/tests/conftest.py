@@ -43,7 +43,7 @@ import atexit
 
 # Apply stderr patch to prevent I/O errors during test teardown
 try:
-    from . import test_logging_patch  # Import to apply the patch
+    from netra_backend.tests import test_logging_patch  # Import to apply the patch
 except ImportError:
     pass
 
@@ -350,13 +350,41 @@ def cleanup_loguru_handlers():
         from loguru import logger
         import warnings
         import time
+        import sys
+        import os
+        
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            # Small delay to allow queued messages to be processed
-            time.sleep(0.01) 
+            
+            # Check if we're in pytest teardown phase
+            is_pytest_teardown = (
+                hasattr(sys, '_getframe') and
+                any('pytest' in str(frame.filename) for frame in 
+                    [sys._getframe(i) for i in range(10)] if frame)
+            )
+            
+            # Small delay to allow queued messages to be processed, but only if not in teardown
+            if not is_pytest_teardown:
+                time.sleep(0.01)
+            
+            # Force close any open file handlers before removing
+            try:
+                # Access internal loguru state carefully
+                if hasattr(logger, '_core') and hasattr(logger._core, 'handlers'):
+                    for handler_id, handler in list(logger._core.handlers.items()):
+                        if hasattr(handler, '_sink') and hasattr(handler._sink, '_file'):
+                            try:
+                                if hasattr(handler._sink._file, 'close'):
+                                    handler._sink._file.close()
+                            except (AttributeError, ValueError, OSError):
+                                pass
+            except (AttributeError, ValueError, OSError):
+                pass
+            
             # Remove all handlers
             logger.remove()
-    except (ImportError, ValueError, OSError):
+            
+    except (ImportError, ValueError, OSError, AttributeError):
         # Ignore any errors during cleanup - this is common during test teardown
         pass
 

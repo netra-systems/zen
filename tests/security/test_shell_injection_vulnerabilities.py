@@ -46,13 +46,9 @@ class TestShellInjectionVulnerabilities(BaseTestCase):
         self.command_patterns = []
         
     def _get_project_root(self) -> Path:
-        """Get project root directory."""
-        current = Path(__file__).parent
-        while current.parent != current:
-            if (current / "netra_backend").exists():
-                return current
-            current = current.parent
-        raise RuntimeError("Could not detect project root")
+        """SSOT: Get project root from centralized utils."""
+        from netra_backend.app.core.project_utils import get_project_root
+        return get_project_root()
     
     def test_detect_unsafe_shell_true_usage(self):
         """

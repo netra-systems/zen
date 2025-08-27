@@ -36,17 +36,17 @@ from tests.e2e.database_sync_helpers import (
     measure_performance_duration,
     setup_cache_test,
     sync_user_to_backend,
-    test_update_user_and_invalidate_cache,
-    test_execute_migration,
+    update_user_and_invalidate_cache,
+    execute_migration,
     validate_performance_results,
     verify_auth_backend_consistency,
-    test_verify_backend_user_exists,
+    verify_backend_user_exists,
     verify_cache_invalidation,
     verify_clickhouse_metrics,
     verify_event_types,
     verify_initial_cache,
     verify_metrics_consistency,
-    test_verify_migration_integrity,
+    verify_migration_integrity,
     verify_sync_consistency,
 )
 
@@ -54,11 +54,6 @@ from tests.e2e.database_sync_helpers import (
 @pytest.mark.e2e
 class TestDatabaseSync:
     """Phase 5: Database sync consistency tests."""
-    
-    @pytest.fixture
-    def sync_validator(self):
-        """Create sync validator instance."""
-        return DatabaseSyncValidator()
     
     @pytest.fixture
     @pytest.mark.e2e
@@ -74,7 +69,7 @@ class TestDatabaseSync:
         auth_user = await sync_validator.auth_service.get_user(user_id)
         await sync_validator.backend_service.sync_user_from_auth(auth_user)
         await verify_auth_backend_consistency(sync_validator, user_id)
-        await test_verify_backend_user_exists(sync_validator, user_id, test_user_data)
+        await verify_backend_user_exists(sync_validator, user_id, test_user_data)
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -100,7 +95,7 @@ class TestDatabaseSync:
         user_id = await sync_validator.auth_service.create_user(test_user_data)
         cache_key, user_json = await setup_cache_test(sync_validator, user_id, test_user_data)
         await verify_initial_cache(sync_validator, cache_key, user_json)
-        await test_update_user_and_invalidate_cache(sync_validator, user_id, test_user_data, cache_key)
+        await update_user_and_invalidate_cache(sync_validator, user_id, test_user_data, cache_key)
         await verify_cache_invalidation(sync_validator, cache_key)
     
     @pytest.mark.asyncio
@@ -108,9 +103,9 @@ class TestDatabaseSync:
     async def test_database_migration_integrity(self, sync_validator):
         """Test 4: Migration safety and rollback."""
         test_users = await create_migration_users(sync_validator)
-        migration_success = await test_execute_migration(sync_validator, test_users)
+        migration_success = await execute_migration(sync_validator, test_users)
         assert migration_success, "Migration failed"
-        await test_verify_migration_integrity(sync_validator, test_users)
+        await verify_migration_integrity(sync_validator, test_users)
 
 
 @pytest.mark.e2e

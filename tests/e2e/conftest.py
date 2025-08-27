@@ -114,6 +114,13 @@ def real_llm_config():
         "max_retries": 3
     }
 
+# Database sync validator fixture
+@pytest.fixture
+def sync_validator():
+    """Create sync validator instance for database sync tests."""
+    from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
+    return DatabaseSyncValidator()
+
 # Concurrent test fixtures
 @pytest.fixture
 async def concurrent_test_environment():

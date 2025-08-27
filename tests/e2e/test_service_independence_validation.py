@@ -398,7 +398,6 @@ class ServiceIndependenceValidator:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestServiceIndependenceValidation(BaseE2ETest):
     """E2E test suite for validating service independence after launcher completion."""
     
@@ -478,13 +477,9 @@ class TestServiceIndependenceValidation(BaseE2ETest):
         self._validate_final_system_state(result)
     
     def _get_project_root(self) -> Path:
-        """Get project root directory."""
-        current = Path(__file__).parent
-        while current.parent != current:
-            if (current / "netra_backend").exists() and (current / "dev_launcher").exists():
-                return current
-            current = current.parent
-        raise RuntimeError("Could not detect project root")
+        """SSOT: Get project root from centralized utils."""
+        from netra_backend.app.core.project_utils import get_project_root
+        return get_project_root()
     
     def _validate_final_system_state(self, result: LauncherTestResult):
         """Validate final system state after independence test."""
