@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-26T22:36:07.494920",
+    "generated_at": "2025-08-27T11:48:03.796025",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 174
   },
@@ -64,7 +64,8 @@
       "value": "activity_count",
       "category": "metrics",
       "locations": [
-        "auth_service/auth_core/core/security_manager.py:94"
+        "auth_service/auth_core/core/security_manager.py:134",
+        "auth_service/auth_core/core/session_manager.py:715"
       ]
     },
     "affected_users_count": {
@@ -158,7 +159,7 @@
       "value": "blocked_origin_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/websocket_cors.py:315"
+        "netra_backend/app/core/websocket_cors.py:317"
       ]
     },
     "blocks_count": {
@@ -537,7 +538,6 @@
       "value": "headers_count",
       "category": "metrics",
       "locations": [
-        "shared/cors_config.py:383",
         "shared/cors_config_builder.py:709"
       ]
     },
@@ -693,7 +693,7 @@
       "value": "memory_sessions_count",
       "category": "metrics",
       "locations": [
-        "auth_service/auth_core/core/session_manager.py:343"
+        "auth_service/auth_core/core/session_manager.py:433"
       ]
     },
     "memory_total": {
@@ -927,7 +927,6 @@
       "value": "origins_count",
       "category": "metrics",
       "locations": [
-        "shared/cors_config.py:379",
         "shared/cors_config_builder.py:705",
         "shared/cors_config_builder.py:764"
       ]
@@ -1443,7 +1442,7 @@
       "value": "violation_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/websocket_cors.py:198",
+        "netra_backend/app/core/websocket_cors.py:199",
         "netra_backend/app/websocket_core/auth.py:352",
         "netra_backend/app/websocket_core/auth.py:373",
         "netra_backend/app/websocket_core/auth.py:385"

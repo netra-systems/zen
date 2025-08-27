@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-08-26T22:36:07.179499",
+    "generated_at": "2025-08-27T11:48:03.523181",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 218
   },
@@ -163,9 +163,9 @@
       "value": "_expires_at",
       "category": "database",
       "locations": [
-        "auth_service/auth_core/core/session_manager.py:359",
-        "auth_service/auth_core/core/session_manager.py:375",
-        "auth_service/auth_core/core/session_manager.py:381"
+        "auth_service/auth_core/core/session_manager.py:449",
+        "auth_service/auth_core/core/session_manager.py:465",
+        "auth_service/auth_core/core/session_manager.py:471"
       ]
     },
     "_pool_id": {
@@ -662,6 +662,8 @@
       "category": "database",
       "locations": [
         "netra_backend/app/services/session_service.py:283",
+        "auth_service/auth_core/core/session_manager.py:155",
+        "auth_service/auth_core/core/session_manager.py:627",
         "auth_service/auth_core/database/repository.py:219"
       ]
     },
@@ -853,7 +855,7 @@
         "netra_backend/app/core/alert_manager.py:191",
         "netra_backend/app/core/isolated_environment.py:112",
         "netra_backend/app/mcp_client/client_core.py:313",
-        "netra_backend/app/middleware/cors_monitoring_middleware.py:378",
+        "netra_backend/app/middleware/cors_monitoring_middleware.py:382",
         "netra_backend/app/routes/websocket.py:269",
         "netra_backend/app/services/billing/revenue_calculator.py:94",
         "netra_backend/app/services/billing/revenue_calculator.py:160"
@@ -1672,8 +1674,8 @@
       "value": "secret_manager_project_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/core/secret_manager.py:38",
-        "netra_backend/app/core/secret_manager.py:43"
+        "netra_backend/app/core/secret_manager.py:41",
+        "netra_backend/app/core/secret_manager.py:48"
       ]
     },
     "select": {
@@ -1711,8 +1713,8 @@
         "netra_backend/app/core/cross_service_validators/security_validators.py:302",
         "netra_backend/app/core/cross_service_validators/security_validators.py:313",
         "netra_backend/app/core/cross_service_validators/security_validators.py:313",
-        "netra_backend/app/middleware/fastapi_auth_middleware.py:458",
-        "netra_backend/app/middleware/fastapi_auth_middleware.py:458",
+        "netra_backend/app/middleware/fastapi_auth_middleware.py:534",
+        "netra_backend/app/middleware/fastapi_auth_middleware.py:592",
         "netra_backend/app/services/mesh/service_discovery.py:102"
       ]
     },
@@ -1889,7 +1891,7 @@
       "value": "target_user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:1006"
+        "netra_backend/app/clients/auth_client_core.py:1019"
       ]
     },
     "task_id": {
@@ -2010,7 +2012,7 @@
         "netra_backend/app/agents/corpus_admin/operations_handler.py:65",
         "netra_backend/app/agents/triage_sub_agent/intent_detection.py:23",
         "netra_backend/app/agents/triage_sub_agent/intent_detector.py:23",
-        "netra_backend/app/core/secret_manager.py:231",
+        "netra_backend/app/core/secret_manager.py:236",
         "netra_backend/app/db/cache_config.py:192",
         "netra_backend/app/schemas/admin_tool_types.py:110",
         "netra_backend/app/schemas/admin_tool_types.py:151",
