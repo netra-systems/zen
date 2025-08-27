@@ -285,6 +285,20 @@
             <critical-takeaway context="Async">Always await async operations. Verify objects are not coroutines before access.</critical-takeaway>
             <critical-takeaway context="Schema">Ensure strict alignment of message fields (e.g., 'content' vs 'text') between FE/BE.</critical-takeaway>
         </category>
+        
+        <category name="WebSocket Docker Fixes [RESOLVED]" path="SPEC/learnings/websocket_docker_fixes.xml" keywords="WebSocket, Docker, Development, Authentication Bypass, CORS, Container Networking, Bridge Network, Development Environment">
+            <critical-takeaway>RESOLVED 2025-08-27: WebSocket Docker connectivity FIXED - development authentication bypass and CORS configuration implemented.</critical-takeaway>
+            <critical-takeaway>CRITICAL: Set ALLOW_DEV_AUTH_BYPASS=true and WEBSOCKET_AUTH_BYPASS=true for Docker development environment.</critical-takeaway>
+            <critical-takeaway>Authentication bypass MUST be environment-aware - only enabled when ENVIRONMENT=development with multiple safeguards.</critical-takeaway>
+            <critical-takeaway>CORS configuration enhanced with Docker service names (frontend:3000, backend:8000, auth:8081) and container names (netra-frontend, netra-backend, netra-auth).</critical-takeaway>
+            <critical-takeaway>Docker bridge network IP ranges (172.17.0.1, 172.18.0.1, etc.) added to development CORS origins for container networking.</critical-takeaway>
+            <critical-takeaway>Frontend MUST use ws://localhost:8000/ws for WebSocket URL in Docker environment - host browser to Docker backend.</critical-takeaway>
+            <critical-takeaway>Development environment made permissive for CORS validation - production/staging maintain strict validation.</critical-takeaway>
+            <critical-takeaway>Multiple origin header handling implemented for Docker proxy chains and networking complexity.</critical-takeaway>
+            <critical-takeaway>Use scripts/test_docker_websocket_fix.py for comprehensive Docker WebSocket configuration validation.</critical-takeaway>
+            <critical-takeaway>E2E testing with tests/e2e/test_websocket_dev_docker_connection.py validates connection, retry, and CORS scenarios.</critical-takeaway>
+            <critical-takeaway>Troubleshooting guide at docs/websocket_docker_troubleshooting.md provides diagnosis and solutions for common Docker WebSocket issues.</critical-takeaway>
+        </category>
 
         <category name="Configuration/Secrets" path="SPEC/learnings/configuration_secrets.xml" keywords="Env Vars, .env">
             <critical-takeaway>All configuration MUST utilize the unified config system. Direct `os.environ.get()` is forbidden outside the config module.</critical-takeaway>

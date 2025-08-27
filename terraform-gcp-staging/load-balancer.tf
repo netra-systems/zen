@@ -74,7 +74,7 @@ resource "google_compute_backend_service" "api_backend" {
   name                  = "${var.environment}-api-backend"
   protocol              = "HTTPS"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  timeout_sec           = var.backend_timeout_sec  # REQUIREMENT 2: WebSocket support
+  timeout_sec           = 30  # Cloud Run NEG limitation: max 30 seconds for serverless NEGs
   project               = var.project_id
   
   backend {
@@ -107,7 +107,7 @@ resource "google_compute_backend_service" "auth_backend" {
   name                  = "${var.environment}-auth-backend"
   protocol              = "HTTPS"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  timeout_sec           = var.backend_timeout_sec  # REQUIREMENT 2: WebSocket support
+  timeout_sec           = 30  # Cloud Run NEG limitation: max 30 seconds for serverless NEGs
   project               = var.project_id
   
   backend {
@@ -140,7 +140,7 @@ resource "google_compute_backend_service" "frontend_backend" {
   name                  = "${var.environment}-frontend-backend"
   protocol              = "HTTPS"
   load_balancing_scheme = "EXTERNAL_MANAGED"
-  timeout_sec           = var.backend_timeout_sec  # REQUIREMENT 2: WebSocket support
+  timeout_sec           = 30  # Cloud Run NEG limitation: max 30 seconds for serverless NEGs
   project               = var.project_id
   
   backend {

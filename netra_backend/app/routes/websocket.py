@@ -116,7 +116,8 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # Accept WebSocket connection
             await websocket.accept()
-            logger.info(f"WebSocket connection accepted for user: {user_id}")
+            connection_start_time = time.time()
+            logger.info(f"WebSocket connection accepted for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
             
             # Register connection with manager
             connection_id = await ws_manager.connect_user(user_id, websocket)
@@ -223,13 +224,16 @@ async def _handle_websocket_messages(
     backoff_delay = 0.1
     max_backoff = 5.0
     
-    logger.info(f"Entering message handling loop for connection: {connection_id}")
+    loop_start_time = time.time()
+    message_count = 0
+    logger.info(f"Entering message handling loop for connection: {connection_id} (user: {user_id})")
     
     try:
         while is_websocket_connected(websocket):
             try:
-                # CRITICAL FIX: Add debug logging to track loop execution
-                logger.debug(f"Message loop iteration for connection: {connection_id}, WebSocket state: {websocket.application_state}")
+                # Track loop iteration with detailed state
+                loop_duration = time.time() - loop_start_time
+                logger.debug(f"Message loop iteration #{message_count + 1} for {connection_id}, state: {websocket.application_state}, duration: {loop_duration:.1f}s")
                 
                 # Receive message with timeout
                 raw_message = await asyncio.wait_for(
@@ -237,7 +241,8 @@ async def _handle_websocket_messages(
                     timeout=WEBSOCKET_CONFIG.heartbeat_interval_seconds
                 )
                 
-                logger.debug(f"Received message from {connection_id}: {raw_message[:100]}...")
+                message_count += 1
+                logger.debug(f"Received message #{message_count} from {connection_id}: {raw_message[:100]}...")
                 
                 # Validate message size
                 if len(raw_message.encode('utf-8')) > WEBSOCKET_CONFIG.max_message_size_bytes:
@@ -292,8 +297,15 @@ async def _handle_websocket_messages(
                 continue
                 
             except WebSocketDisconnect as e:
-                # Client disconnected - break loop
-                logger.info(f"WebSocket disconnect received for {connection_id}: {e.code} - {e.reason}")
+                # Client disconnected - log with detailed information
+                disconnect_info = {
+                    "connection_id": connection_id,
+                    "user_id": user_id,
+                    "disconnect_code": e.code,
+                    "disconnect_reason": e.reason or "No reason provided",
+                    "connection_duration": time.time() - connection_monitor.get_connection_start_time(connection_id) if hasattr(connection_monitor, 'get_connection_start_time') else "Unknown"
+                }
+                logger.info(f"WebSocket disconnect: {disconnect_info}")
                 break
                 
             except Exception as e:
@@ -312,7 +324,13 @@ async def _handle_websocket_messages(
     except Exception as e:
         logger.error(f"Critical error in message handling loop for {connection_id}: {e}", exc_info=True)
     
-    logger.info(f"Exiting message handling loop for connection: {connection_id}")
+    # Log final statistics
+    loop_total_duration = time.time() - loop_start_time
+    logger.info(
+        f"Exiting message handling loop for connection: {connection_id} | "
+        f"Duration: {loop_total_duration:.1f}s | Messages processed: {message_count} | "
+        f"Errors: {error_count} | User: {user_id}"
+    )
 
 
 async def _send_format_error(websocket: WebSocket, error_message: str) -> None:

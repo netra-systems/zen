@@ -54,10 +54,18 @@
 | **OAuth Environment Config** | [`SPEC/learnings/oauth_client_environment_configuration.xml`](SPEC/learnings/oauth_client_environment_configuration.xml) | Environment-specific OAuth setup | Development, staging, production OAuth isolation |
 | **CRITICAL**: ALL authentication throughout ENTIRE system MUST use `/netra_backend/app/auth_integration/`. NO duplicate auth logic allowed. |
 
-### WebSocket Files (Complex Structure)
+### WebSocket Files (Complex Structure) ✅ Docker Development Fixed
 | File | Location | Purpose | Key Functions |
 |------|----------|---------|---------------|
+| **🔴 DOCKER CONFIG (CRITICAL)** | | | |
+| `websocket_docker_fixes.xml` | `/SPEC/learnings/websocket_docker_fixes.xml` | **Complete Docker fix documentation** | Root causes, solutions, testing |
+| `websocket_docker_troubleshooting.md` | `/docs/websocket_docker_troubleshooting.md` | **Docker troubleshooting guide** | Diagnosis, solutions, prevention |
+| `test_docker_websocket_fix.py` | `/scripts/test_docker_websocket_fix.py` | **Docker WebSocket validation** | Environment, auth, CORS testing |
+| `test_websocket_dev_docker_connection.py` | `/tests/e2e/test_websocket_dev_docker_connection.py` | **E2E Docker WebSocket tests** | Connection, retry, CORS validation |
+| **🔴 CORE WEBSOCKET FILES** | | | |
 | `websockets.py` | `/netra_backend/app/routes/websockets.py` | WebSocket endpoints | websocket_endpoint() |
+| `websocket_core/auth.py` | `/netra_backend/app/websocket_core/auth.py` | **WebSocket authentication (Docker bypass)** | Development auth bypass, JWT validation |
+| `websocket_cors.py` | `/netra_backend/app/core/websocket_cors.py` | **CORS handling (Docker origins)** | Docker service names, bridge network IPs |
 | `connection.py` | `/netra_backend/app/websocket/connection.py` | Connection management | ConnectionManager class |
 | `quality_message_handler.py` | `/netra_backend/app/services/websocket/quality_message_handler.py` | Message quality handling | QualityMessageHandler |
 | `websocket_types.py` | `/netra_backend/app/schemas/websocket_types.py` | WebSocket type definitions | WSMessage, WSResponse |

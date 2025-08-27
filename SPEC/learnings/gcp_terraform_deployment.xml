@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <metadata>
+    <title>GCP Terraform Deployment Learnings</title>
+    <date>2025-08-27</date>
+    <environment>GCP Staging</environment>
+    <category>Infrastructure</category>
+  </metadata>
+  
+  <critical_insights>
+    <insight id="cloud-run-neg-timeout">
+      <title>Cloud Run NEG Timeout Limitation</title>
+      <learning>
+        Cloud Run Network Endpoint Groups (NEGs) have a hard limit of 30 seconds for timeout_sec.
+        Attempting to set higher values (e.g., 3600 for WebSocket support) will fail with:
+        "Error 400: Invalid value for field 'resource.timeoutSec': '3600'. Timeout sec is not supported for a backend service with Serverless network endpoint groups."
+      </learning>
+      <solution>
+        Set timeout_sec to maximum of 30 for any backend service using Cloud Run NEGs.
+        For longer-lived connections (WebSockets), consider alternative architectures like GKE.
+      </solution>
+      <impact>WebSocket connections limited to 30-second timeout in Cloud Run deployments</impact>
+    </insight>
+    
+    <insight id="terraform-header-action">
+      <title>Google Compute URL Map Header Actions</title>
+      <learning>
+        The header_action block is not valid within path_rule or route_action blocks.
+        Headers must be manipulated at the URL map top level or through backend service custom headers.
+        Valid blocks within path_rule are: custom_error_response_policy, route_action, url_redirect.
+      </learning>
+      <solution>
+        Use backend service custom_request_headers for adding headers like X-Forwarded-Proto.
+        Use URL map level header_action for global header manipulations.
+      </solution>
+    </insight>
+    
+    <insight id="vpc-import-state">
+      <title>Existing Resources Import</title>
+      <learning>
+        When resources exist in GCP but not in Terraform state, apply will fail with "already exists" errors.
+        This commonly happens when resources were created manually or state was lost.
+      </learning>
+      <solution>
+        Use terraform import to bring existing resources into state:
+        terraform import 'google_compute_network.vpc[0]' projects/PROJECT_ID/global/networks/NETWORK_NAME
+      </solution>
+    </insight>
+    
+    <insight id="storage-bucket-compliance">
+      <title>GCS Bucket Organization Constraints</title>
+      <learning>
+        Organizations may enforce uniform bucket-level access through constraints.
+        Error: "Request violates constraint 'constraints/storage.uniformBucketLevelAccess'"
+      </learning>
+      <solution>
+        Add uniform_bucket_level_access = true to google_storage_bucket resources.
+        This replaces legacy ACL-based permissions with IAM-only access control.
+      </solution>
+    </insight>
+    
+    <insight id="monitoring-metric-filters">
+      <title>Cloud Monitoring Metric Filters</title>
+      <learning>
+        Metric filter resource types must match valid GCP monitoring descriptors.
+        "http_load_balancer" is not a valid resource type for loadbalancing metrics.
+      </learning>
+      <solution>
+        Use "https_lb_rule" as resource type for HTTPS load balancer metrics.
+        Response code class should be "4xx" not "400" for the label filter.
+        Example: resource.type="https_lb_rule" AND metric.label.response_code_class="4xx"
+      </solution>
+    </insight>
+    
+    <insight id="session-affinity-cookies">
+      <title>Session Affinity for WebSockets</title>
+      <learning>
+        WebSocket connections require session affinity to maintain connection to same backend.
+        GENERATED_COOKIE session affinity ensures requests from same client go to same backend instance.
+      </learning>
+      <configuration>
+        session_affinity = "GENERATED_COOKIE"
+        affinity_cookie_ttl_sec = 3600
+      </configuration>
+    </insight>
+  </critical_insights>
+  
+  <best_practices>
+    <practice id="terraform-validate">
+      <title>Always Validate Before Apply</title>
+      <description>
+        Run terraform validate before terraform apply to catch syntax errors early.
+        Many configuration issues can be caught at validation stage.
+      </description>
+    </practice>
+    
+    <practice id="plan-output">
+      <title>Save Plan Output</title>
+      <description>
+        Use terraform plan -out=tfplan to save the plan for review.
+        Apply the exact plan with terraform apply tfplan to ensure no drift.
+      </description>
+    </practice>
+    
+    <practice id="import-existing">
+      <title>Check Existing Resources</title>
+      <description>
+        Before creating resources, check if they already exist in the project.
+        Import existing resources rather than recreating them.
+      </description>
+    </practice>
+  </best_practices>
+  
+  <architecture_decisions>
+    <decision id="cloud-run-vs-gke">
+      <title>Cloud Run vs GKE for WebSockets</title>
+      <consideration>
+        Cloud Run has 30-second timeout limitation for WebSockets.
+        GKE allows configurable timeouts up to 86400 seconds.
+      </consideration>
+      <recommendation>
+        Use Cloud Run for short-lived connections and REST APIs.
+        Use GKE for long-lived WebSocket connections requiring >30 second timeout.
+      </recommendation>
+    </decision>
+    
+    <decision id="health-check-protocol">
+      <title>HTTPS Health Checks for Production</title>
+      <consideration>
+        Production load balancers should use HTTPS health checks on port 443.
+        HTTP health checks on port 8080 are suitable for development only.
+      </consideration>
+      <recommendation>
+        Always use HTTPS health checks for production deployments.
+        Ensure backend services respond to /health on port 443.
+      </recommendation>
+    </decision>
+  </architecture_decisions>
+  
+  <troubleshooting>
+    <issue id="timeout-errors">
+      <symptom>Error 400: Timeout sec is not supported for serverless NEGs</symptom>
+      <cause>Cloud Run NEGs don't support timeout > 30 seconds</cause>
+      <fix>Set timeout_sec = 30 or less for Cloud Run backend services</fix>
+    </issue>
+    
+    <issue id="already-exists">
+      <symptom>Error 409: The resource already exists</symptom>
+      <cause>Resource exists in GCP but not in Terraform state</cause>
+      <fix>Import the resource using terraform import command</fix>
+    </issue>
+    
+    <issue id="invalid-metric">
+      <symptom>The resource name does not represent a known descriptor</symptom>
+      <cause>Invalid metric filter in monitoring alert policy</cause>
+      <fix>Use correct resource type like "https_lb_rule" instead of "http_load_balancer"</fix>
+    </issue>
+  </troubleshooting>
+  
+  <references>
+    <reference type="documentation" url="https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts">
+      Cloud Run NEG Concepts and Limitations
+    </reference>
+    <reference type="documentation" url="https://cloud.google.com/load-balancing/docs/https/setting-up-https-serverless">
+      Setting up HTTPS Load Balancing with Serverless NEGs
+    </reference>
+    <reference type="documentation" url="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_url_map">
+      Terraform Google Compute URL Map Resource
+    </reference>
+  </references>
+</learnings>

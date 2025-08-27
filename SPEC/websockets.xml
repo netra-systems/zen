@@ -3,8 +3,11 @@
   <metadata>
     <name>Netra WebSockets</name>
     <type>NETRA_WEBSOCKETS</type>
-    <version>1.0</version>
-    <last_edited>2025-08-21T08:47:28.701458</last_edited>
+    <version>1.1</version>
+    <last_edited>2025-08-27T00:00:00.000000</last_edited>
+    <changes>
+      <change version="1.1" date="2025-08-27">Added Docker development configuration requirements and troubleshooting</change>
+    </changes>
   </metadata>
   <primary-spec>
     <description>Websockets Specification</description>
@@ -25,6 +28,104 @@
     <coherence>NETRA_WEBSOCKETS Auth uses existing auth concepts like SecurityService (e.g JWT) Keep all security concepts as is, only integrate</coherence>
   </coherence-requirements>
   <technical-requirements>
+    <requirement id="docker-development-configuration">
+      <title>Docker Development Configuration</title>
+      <description>WebSocket configuration requirements for Docker development environments</description>
+      <docker-specific-requirements>
+        <requirement-item priority="critical">
+          <title>WebSocket URLs for Docker vs Localhost</title>
+          <description>Frontend must use localhost URLs when connecting from host browser to Docker backend</description>
+          <configuration>
+            <env-var>NEXT_PUBLIC_WEBSOCKET_URL=ws://localhost:8000/ws</env-var>
+            <env-var>NEXT_PUBLIC_WS_URL=ws://localhost:8000</env-var>
+            <env-var>NEXT_PUBLIC_API_URL=http://localhost:8000</env-var>
+          </configuration>
+          <rationale>Docker port mapping exposes backend on localhost:8000 to host system</rationale>
+        </requirement-item>
+        <requirement-item priority="critical">
+          <title>Authentication Bypass in Development</title>
+          <description>WebSocket connections must work without authentication in development environment</description>
+          <configuration>
+            <env-var>ALLOW_DEV_AUTH_BYPASS=true</env-var>
+            <env-var>WEBSOCKET_AUTH_BYPASS=true</env-var>
+            <env-var>ENVIRONMENT=development</env-var>
+          </configuration>
+          <security-safeguards>
+            <safeguard>Only enabled when ENVIRONMENT=development</safeguard>
+            <safeguard>Multiple environment checks prevent production activation</safeguard>
+            <safeguard>Warning logs when bypass is active</safeguard>
+          </security-safeguards>
+        </requirement-item>
+        <requirement-item priority="high">
+          <title>CORS Configuration for Docker</title>
+          <description>CORS must allow Docker service names and bridge network IPs</description>
+          <allowed-origins>
+            <origin-group type="docker-services">
+              <origin>http://frontend:3000</origin>
+              <origin>http://backend:8000</origin>
+              <origin>http://auth:8081</origin>
+            </origin-group>
+            <origin-group type="docker-containers">
+              <origin>http://netra-frontend:3000</origin>
+              <origin>http://netra-backend:8000</origin>
+              <origin>http://netra-auth:8081</origin>
+            </origin-group>
+            <origin-group type="bridge-network">
+              <origin>http://172.17.0.1:3000</origin>
+              <origin>http://172.17.0.1:8000</origin>
+              <origin>http://172.18.0.1:3000</origin>
+              <origin>http://172.18.0.1:8000</origin>
+            </origin-group>
+          </allowed-origins>
+        </requirement-item>
+        <requirement-item priority="medium">
+          <title>Docker Networking Considerations</title>
+          <description>Handle Docker-specific networking challenges</description>
+          <considerations>
+            <consideration>Multiple origin headers from Docker proxy chains</consideration>
+            <consideration>Service discovery within Docker compose network</consideration>
+            <consideration>Port mapping between container and host</consideration>
+            <consideration>Bridge network IP allocation variability</consideration>
+          </considerations>
+        </requirement-item>
+      </docker-specific-requirements>
+      <testing-requirements>
+        <test-script>scripts/test_docker_websocket_fix.py - Validate Docker WebSocket configuration</test-script>
+        <test-script>tests/e2e/test_websocket_dev_docker_connection.py - E2E Docker WebSocket testing</test-script>
+        <validation-checklist>
+          <check>Environment variables properly configured</check>
+          <check>Auth bypass working in development only</check>
+          <check>CORS allowing Docker service connections</check>
+          <check>WebSocket URLs resolving correctly</check>
+          <check>End-to-end WebSocket communication working</check>
+        </validation-checklist>
+      </testing-requirements>
+      <troubleshooting>
+        <common-issue>
+          <problem>WebSocket connection refused</problem>
+          <solution>Check backend service running on port 8000</solution>
+          <solution>Verify docker-compose port mapping</solution>
+          <diagnostic>curl http://localhost:8000/health</diagnostic>
+        </common-issue>
+        <common-issue>
+          <problem>Authentication required error</problem>
+          <solution>Set ALLOW_DEV_AUTH_BYPASS=true</solution>
+          <solution>Verify ENVIRONMENT=development</solution>
+          <diagnostic>Run test_docker_websocket_fix.py</diagnostic>
+        </common-issue>
+        <common-issue>
+          <problem>CORS origin not allowed</problem>
+          <solution>Add Docker service name to CORS origins</solution>
+          <solution>Ensure development environment detected</solution>
+          <diagnostic>Check WebSocket CORS logs</diagnostic>
+        </common-issue>
+      </troubleshooting>
+      <related-documentation>
+        <doc>SPEC/learnings/websocket_docker_fixes.xml - Complete Docker fix documentation</doc>
+        <doc>docs/websocket_docker_troubleshooting.md - Troubleshooting guide</doc>
+        <doc>shared/cors_config.py - CORS configuration implementation</doc>
+      </related-documentation>
+    </requirement>
     <requirement id="json-first">
       <title>JSON First</title>
       <description>Always send and receive JSON</description>
