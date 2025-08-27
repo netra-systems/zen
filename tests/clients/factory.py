@@ -51,7 +51,7 @@ class TestClientFactory:
                 base_url = info.base_url
             else:
                 # Fallback URL when discovery is unavailable
-                base_url = "http://localhost:8001"
+                base_url = "http://localhost:8081"
                 logger.warning("Using fallback auth URL - dev_launcher discovery unavailable")
                 
             self._auth_client = AuthTestClient(base_url=base_url)

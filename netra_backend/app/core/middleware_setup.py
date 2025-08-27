@@ -25,11 +25,56 @@ logger = logging.getLogger(__name__)
 
 
 def setup_cors_middleware(app: FastAPI) -> None:
-    """Configure CORS middleware using unified configuration."""
+    """Configure CORS middleware using unified configuration.
+    
+    Note: This excludes WebSocket upgrade requests which are handled by WebSocketCORSMiddleware.
+    """
     config = get_configuration()
     cors_config = get_fastapi_cors_config(config.environment)
-    app.add_middleware(CORSMiddleware, **cors_config)
-    logger.info(f"CORS middleware configured for environment: {config.environment}")
+    
+    # Add custom CORS middleware that excludes WebSocket upgrades
+    app.add_middleware(
+        WebSocketAwareCORSMiddleware, 
+        **cors_config
+    )
+    logger.info(f"WebSocket-aware CORS middleware configured for environment: {config.environment}")
+
+
+class WebSocketAwareCORSMiddleware(CORSMiddleware):
+    """CORS middleware that excludes WebSocket upgrade requests."""
+    
+    async def __call__(self, scope, receive, send) -> None:
+        """Process requests, excluding WebSocket upgrades."""
+        # Check if this is a WebSocket upgrade request
+        if self._is_websocket_upgrade_request(scope):
+            # Skip CORS processing for WebSocket upgrades - let WebSocketCORSMiddleware handle it
+            await self.app(scope, receive, send)
+            return
+        
+        # Process regular HTTP requests with CORS
+        await super().__call__(scope, receive, send)
+    
+    def _is_websocket_upgrade_request(self, scope) -> bool:
+        """Check if the request is a WebSocket upgrade."""
+        if scope.get("type") != "http":
+            return False
+        
+        # Check for WebSocket upgrade headers
+        headers = dict(scope.get("headers", []))
+        
+        upgrade_header = headers.get(b"upgrade", b"").decode("latin1").lower()
+        connection_header = headers.get(b"connection", b"").decode("latin1").lower()
+        
+        is_websocket = (
+            upgrade_header == "websocket" and 
+            "upgrade" in connection_header
+        )
+        
+        # Debug logging to understand what's happening
+        if is_websocket:
+            logger.info(f"WebSocket upgrade detected - skipping CORS: upgrade={upgrade_header}, connection={connection_header}")
+        
+        return is_websocket
 
 
 def should_add_cors_headers(response: Any) -> bool:

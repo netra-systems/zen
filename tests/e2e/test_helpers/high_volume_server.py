@@ -302,7 +302,7 @@ class HighVolumeThroughputClient:
         try:
             self.websocket = await websockets.connect(
                 self.websocket_uri,
-                extra_headers=headers,
+                additional_headers=headers,
                 max_size=2**20,
                 ping_interval=20,
                 ping_timeout=10

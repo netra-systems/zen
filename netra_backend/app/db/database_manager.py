@@ -356,9 +356,9 @@ class DatabaseManager:
         env = get_env()
         sql_echo_env = env.get("SQL_ECHO", "false").lower() == "true"
         
-        # Also check config for TRACE mode
+        # Also check config for DEBUG or TRACE mode
         config = get_unified_config()
-        sql_echo_config = config.log_level == "TRACE" and getattr(config, 'enable_sql_logging', False)
+        sql_echo_config = (config.log_level in ["DEBUG", "TRACE"]) or (config.log_level == "TRACE" and getattr(config, 'enable_sql_logging', False))
         
         # Enable SQL echo if either environment variable is set or config enables it
         sql_echo = sql_echo_env or sql_echo_config

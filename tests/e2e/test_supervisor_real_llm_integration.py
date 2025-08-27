@@ -24,7 +24,7 @@ class TestSupervisorE2EWithRealLLM:
     def config(self):
         """Test configuration."""
         config = get_config()
-        config.OPENAI_API_KEY = "test-key"  # Will use mock in tests
+        config.openai_api_key = "test-key"  # Will use mock in tests
         return config
     
     @pytest.fixture
@@ -62,7 +62,7 @@ class TestSupervisorE2EWithRealLLM:
         state.user_request = "I need help optimizing my AI costs. My current monthly spend is $50,000 on GPT-4 calls and I'm seeing high latency."
         state.user_id = "enterprise_user_123"
         state.chat_thread_id = "thread_opt_456"
-        state.conversation_history = [
+        state.messages = [
             {"role": "user", "content": state.user_request}
         ]
         return state

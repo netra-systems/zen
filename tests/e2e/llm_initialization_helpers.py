@@ -11,6 +11,7 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from pydantic import BaseModel, Field
 
 from netra_backend.app.schemas.Config import AppConfig

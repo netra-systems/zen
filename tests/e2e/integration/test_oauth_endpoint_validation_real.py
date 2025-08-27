@@ -274,7 +274,7 @@ class OAuthEndpointValidator:
             try:
                 async with websockets.connect(
                     ws_url,
-                    extra_headers={"Authorization": f"Bearer {access_token}"},
+                    additional_headers={"Authorization": f"Bearer {access_token}"},
                     timeout=10
                 ) as websocket:
                     websocket_connected = True

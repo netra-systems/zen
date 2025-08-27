@@ -123,7 +123,7 @@ class WebSocketAuthStartupTester:
             # Attempt WebSocket connection with auth headers
             async with websockets.connect(
                 self.websocket_url,
-                extra_headers=headers,
+                additional_headers=headers,
                 timeout=self.auth_timeout
             ) as websocket:
                 connection_time = (time.time() - start_time) * 1000

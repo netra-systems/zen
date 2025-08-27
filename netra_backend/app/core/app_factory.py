@@ -86,8 +86,11 @@ def _add_security_headers_middleware(app: FastAPI) -> None:
 
 def setup_request_middleware(app: FastAPI) -> None:
     """Setup CORS, auth, error, and request logging middleware."""
+    # Setup WebSocket-aware CORS middleware that excludes WebSocket upgrades
     setup_cors_middleware(app)
+    
     # Apply WebSocket CORS middleware for WebSocket upgrade support
+    # This handles WebSocket connections specifically and works with the above CORS middleware
     wrapped_app = configure_websocket_cors(app)
     # Note: configure_websocket_cors returns the wrapped app, but FastAPI middleware
     # registration doesn't need reassignment since it modifies the app in place

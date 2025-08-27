@@ -97,7 +97,7 @@ class TestCompleteRealPipeline:
 
         start_time = asyncio.get_event_loop().time()
 
-        await agent.run(state, setup['run_id'], stream_updates=True)
+        await agent.run(state.user_request, agent.thread_id, agent.user_id, setup['run_id'])
 
         return self._create_stage_result("triage", agent.state, start_time)
     
@@ -113,7 +113,7 @@ class TestCompleteRealPipeline:
 
         start_time = asyncio.get_event_loop().time()
 
-        await agent.run(state, setup['run_id'], stream_updates=True)
+        await agent.run(state.user_request, agent.thread_id, agent.user_id, setup['run_id'])
 
         return self._create_stage_result("data", agent.state, start_time)
     
@@ -192,7 +192,7 @@ class TestRealPipelineErrorHandling:
 
             triage_agent = self._prepare_triage_agent_for_error_test(setup)
 
-            await triage_agent.run(state, setup['run_id'], stream_updates=True)
+            await triage_agent.run(state.user_request, triage_agent.thread_id, triage_agent.user_id, setup['run_id'])
 
             results["stages"].append({"name": "triage", "state": triage_agent.state})
 
@@ -272,7 +272,7 @@ class TestRealPipelineWithValidationReporting:
 
         triage_agent = self._setup_triage_for_validation(setup)
 
-        await triage_agent.run(state, setup['run_id'], True)
+        await triage_agent.run(state.user_request, triage_agent.thread_id, triage_agent.user_id, setup['run_id'])
 
         triage_report = reporter.validate_and_report_triage(state)
 
@@ -302,7 +302,7 @@ class TestRealPipelineWithValidationReporting:
 
         data_agent = self._setup_data_for_validation(setup)
 
-        await data_agent.run(state, setup['run_id'], True)
+        await data_agent.run(state.user_request, data_agent.thread_id, data_agent.user_id, setup['run_id'])
 
         self._collect_data_validation_reports(reporter, state, original_triage, results)
 
@@ -420,7 +420,7 @@ class TestRealPipelineConcurrencyAndStability:
 
         triage_agent.user_id = f"user-{task_id}"
 
-        await triage_agent.run(state, run_id, True)
+        await triage_agent.run(state.user_request, triage_agent.thread_id, triage_agent.user_id, run_id)
         
         return {"task_id": task_id, "triage_state": triage_agent.state, "run_id": run_id}
     
@@ -531,7 +531,7 @@ class TestRealPipelinePerformanceMetrics:
 
         start_time = asyncio.get_event_loop().time()
 
-        await agent.run(state, setup['run_id'], True)
+        await agent.run(state.user_request, agent.thread_id, agent.user_id, setup['run_id'])
 
         end_time = asyncio.get_event_loop().time()
         

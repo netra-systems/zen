@@ -18,8 +18,8 @@ class TestEndpoints:
     ws_url: str = "ws://localhost:8000/ws"
     api_url: str = "http://localhost:8000"
     api_base: str = "http://localhost:8000"  # Alias for compatibility
-    auth_url: str = "http://localhost:8001"
-    auth_base: str = "http://localhost:8001"  # Alias for compatibility
+    auth_url: str = "http://localhost:8081"
+    auth_base: str = "http://localhost:8081"  # Alias for compatibility
 
 
 class TestDataFactory:
@@ -60,7 +60,7 @@ TEST_ENDPOINTS = TestEndpoints()
 # Test configuration
 TEST_CONFIG = {
     "redis_enabled": False,  # Set to False for environments without Redis
-    "auth_service_url": "http://localhost:8001",
+    "auth_service_url": "http://localhost:8081",
     "websocket_timeout": 30.0,
     "token_expiry_seconds": 3600,
     "reconnection_timeout": 2.0,

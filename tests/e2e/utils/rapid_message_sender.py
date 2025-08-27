@@ -50,7 +50,7 @@ class RapidMessageSender:
         try:
             self.connection = await websockets.connect(
                 self.websocket_url,
-                extra_headers={"Authorization": f"Bearer {self.token}"}
+                additional_headers={"Authorization": f"Bearer {self.token}"}
             )
             return True
         except Exception as e:

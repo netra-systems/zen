@@ -57,7 +57,7 @@ class WebSocketConnectionTester:
         """Create authenticated WebSocket connection."""
         headers = {"Authorization": f"Bearer {auth_token}"} if auth_token else {}
         ws_url = f"ws://localhost:8000/websocket"
-        ws = await websockets.connect(ws_url, extra_headers=headers)
+        ws = await websockets.connect(ws_url, additional_headers=headers)
         self.active_connections.append(ws)
         return ws
     
@@ -134,7 +134,7 @@ async def test_websocket_connection_timeout(connection_tester):
     # Act - Create connection with short timeout
     ws = await websockets.connect(
         "ws://localhost:8000/websocket",
-        extra_headers={"Authorization": f"Bearer {valid_token}"},
+        additional_headers={"Authorization": f"Bearer {valid_token}"},
         close_timeout=1
     )
     connection_tester.active_connections.append(ws)
@@ -190,7 +190,7 @@ async def test_websocket_cors_headers(connection_tester):
     # Act
     ws = await websockets.connect(
         "ws://localhost:8000/websocket",
-        extra_headers={
+        additional_headers={
             "Authorization": f"Bearer {valid_token}",
             "Origin": origin
         }
@@ -211,7 +211,7 @@ async def test_websocket_subprotocol_negotiation(connection_tester):
     # Act
     ws = await websockets.connect(
         "ws://localhost:8000/websocket",
-        extra_headers={"Authorization": f"Bearer {valid_token}"},
+        additional_headers={"Authorization": f"Bearer {valid_token}"},
         subprotocols=["netra"]
     )
     connection_tester.active_connections.append(ws)

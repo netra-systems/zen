@@ -92,7 +92,7 @@ def event_loop_policy():
 E2E_TEST_CONFIG = {
     "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
     "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
-    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
     "skip_real_services": get_env().get("SKIP_REAL_SERVICES", "true").lower() == "true",
     "test_mode": get_env().get("HIGH_VOLUME_TEST_MODE", "mock")
 }
@@ -543,7 +543,7 @@ e2e_logger = logging.getLogger("e2e_conftest")
 
 # E2E Test Environment Configuration
 E2E_CONFIG = {
-    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8081"),
     "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
     "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
     "redis_url": get_env().get("E2E_REDIS_URL", "redis://localhost:6379"),

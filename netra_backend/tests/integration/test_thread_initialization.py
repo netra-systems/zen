@@ -17,7 +17,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine

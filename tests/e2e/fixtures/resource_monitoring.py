@@ -18,6 +18,7 @@ from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
 
 import pytest
+import pytest_asyncio
 
 from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase
 from tests.e2e.test_helpers.resource_monitoring import (
@@ -28,7 +29,7 @@ from tests.e2e.test_helpers.resource_monitoring import (
 
 logger = logging.getLogger(__name__)
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def resource_monitor():
     """Fixture providing a configured resource monitor."""
     monitor = ResourceMonitor(interval_seconds=0.5)  # High frequency for tests
@@ -39,7 +40,7 @@ async def resource_monitor():
     finally:
         await monitor.stop()
 
-@pytest.fixture  
+@pytest_asyncio.fixture  
 async def memory_leak_detector():
     """Fixture providing a memory leak detector."""
     detector = MemoryLeakDetector(threshold_mb=50.0)
@@ -52,7 +53,7 @@ async def memory_leak_detector():
     if leak_result["leak_detected"]:
         logger.warning(f"Memory leak detected at test end: {leak_result}")
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def isolation_monitor():
     """Fixture providing an agent isolation monitor."""
     monitor = AgentIsolationBase(monitoring_interval=0.5)
@@ -88,7 +89,7 @@ def isolation_test_config():
         }
     }
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_performance_baseline(resource_monitor, isolation_test_config):
     """Establish performance baseline before tests."""
     config = isolation_test_config
@@ -145,7 +146,7 @@ async def test_resource_monitoring_session(test_name: str, monitoring_config: Op
                 memory_stats = final_stats["memory"]
                 logger.info(f"Memory: avg={memory_stats.get('avg_mb', 0):.2f}MB, growth={memory_stats.get('growth_mb', 0):.2f}MB")
 
-@pytest.fixture 
+@pytest_asyncio.fixture 
 async def monitoring_session(request):
     """Fixture providing a monitoring session for the current test."""
     test_name = request.node.name
@@ -168,7 +169,7 @@ def resource_limits():
         "cross_tenant_impact": 5.0      # Max 5% cross-tenant impact
     }
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def tenant_isolation_context(isolation_monitor, resource_limits):
     """Context for multi-tenant isolation testing."""
     context = {

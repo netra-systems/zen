@@ -72,7 +72,7 @@ class WebSocketAuthTester:
         
         ws = await websockets.connect(
             "ws://localhost:8000/websocket",
-            extra_headers={"Authorization": f"Bearer {token}"}
+            additional_headers={"Authorization": f"Bearer {token}"}
         )
         self.active_connections[connection_id] = ws
         return ws, token
@@ -123,7 +123,7 @@ async def test_websocket_invalid_jwt_token(auth_tester):
     with pytest.raises(websockets.exceptions.ConnectionClosedError):
         await websockets.connect(
             "ws://localhost:8000/websocket",
-            extra_headers={"Authorization": "Bearer invalid_token"}
+            additional_headers={"Authorization": "Bearer invalid_token"}
         )
 
 
@@ -141,7 +141,7 @@ async def test_websocket_expired_jwt_token(auth_tester):
     with pytest.raises(websockets.exceptions.ConnectionClosedError):
         await websockets.connect(
             "ws://localhost:8000/websocket",
-            extra_headers={"Authorization": f"Bearer {expired_token}"}
+            additional_headers={"Authorization": f"Bearer {expired_token}"}
         )
 
 
@@ -266,7 +266,7 @@ async def test_websocket_auth_state_recovery(auth_tester):
     # Reconnect with same token
     ws2 = await websockets.connect(
         "ws://localhost:8000/websocket",
-        extra_headers={"Authorization": f"Bearer {token}"}
+        additional_headers={"Authorization": f"Bearer {token}"}
     )
     auth_tester.active_connections["recovered_conn"] = ws2
     

@@ -61,7 +61,7 @@ class WebSocketMessagingTester:
         token = await self.jwt_helper.create_valid_jwt_token()
         ws = await websockets.connect(
             "ws://localhost:8000/websocket",
-            extra_headers={"Authorization": f"Bearer {token}"}
+            additional_headers={"Authorization": f"Bearer {token}"}
         )
         self.connections[connection_id] = ws
         self.message_log[connection_id] = []

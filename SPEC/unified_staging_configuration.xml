@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <name>Unified Staging Configuration</name>
+    <version>2.0.0</version>
+    <created>2025-08-26</created>
+    <type>infrastructure</type>
+    <status>active</status>
+    <description>
+      Comprehensive unified staging configuration consolidating all staging environment 
+      settings, Redis configuration, LLM defaults, and deployment procedures.
+    </description>
+  </metadata>
+  
+  <critical_updates>
+    <update date="2025-08-26">
+      Consolidated Redis staging configuration with correct IP (10.107.0.3)
+    </update>
+    <update date="2025-08-26">
+      Integrated LLM configuration with GEMINI_2_5_FLASH as default
+    </update>
+    <update date="2025-08-26">
+      Updated deployment scripts to use correct Redis endpoints
+    </update>
+  </critical_updates>
+  
+  <infrastructure>
+    <gcp_project>
+      <project_id>netra-staging</project_id>
+      <region>us-central1</region>
+      <zone>us-central1-a</zone>
+      <billing_account>netra-billing</billing_account>
+    </gcp_project>
+    
+    <networking>
+      <vpc>
+        <name>staging-vpc</name>
+        <cidr>10.107.0.0/16</cidr>
+        <subnets>
+          <subnet name="default" cidr="10.107.0.0/24" />
+          <subnet name="serverless" cidr="10.107.1.0/24" />
+          <subnet name="private-services" cidr="10.107.2.0/24" />
+        </subnets>
+      </vpc>
+      <cloud_nat>
+        <name>staging-nat</name>
+        <ip_allocation>automatic</ip_allocation>
+      </cloud_nat>
+    </networking>
+    
+    <services>
+      <cloud_run>
+        <backend>
+          <name>netra-backend-staging</name>
+          <image>gcr.io/netra-staging/netra-backend:latest</image>
+          <url>https://netra-backend-staging-xyz.a.run.app</url>
+          <cpu>2</cpu>
+          <memory>4Gi</memory>
+          <min_instances>0</min_instances>
+          <max_instances>10</max_instances>
+          <concurrency>100</concurrency>
+        </backend>
+        <auth_service>
+          <name>netra-auth-service</name>
+          <image>gcr.io/netra-staging/auth-service:latest</image>
+          <url>https://netra-auth-service-xyz.a.run.app</url>
+          <cpu>1</cpu>
+          <memory>2Gi</memory>
+          <min_instances>0</min_instances>
+          <max_instances>5</max_instances>
+        </auth_service>
+        <frontend>
+          <name>netra-frontend-staging</name>
+          <image>gcr.io/netra-staging/netra-frontend:latest</image>
+          <url>https://app.staging.netrasystems.ai</url>
+          <cpu>1</cpu>
+          <memory>2Gi</memory>
+          <min_instances>0</min_instances>
+          <max_instances>5</max_instances>
+        </frontend>
+      </cloud_run>
+      
+      <redis>
+        <instance_name>staging-shared-redis</instance_name>
+        <tier>STANDARD_HA</tier>
+        <memory_size_gb>1</memory_size_gb>
+        <version>REDIS_7_0</version>
+        <auth_enabled>true</auth_enabled>
+        <transit_encryption>ENABLED</transit_encryption>
+        <endpoints>
+          <primary>
+            <host>10.107.0.3</host>
+            <port>6379</port>
+          </primary>
+        </endpoints>
+        <connection_string>redis://default:${REDIS_PASSWORD}@10.107.0.3:6379/0</connection_string>
+      </redis>
+      
+      <postgresql>
+        <instance_name>staging-postgres</instance_name>
+        <version>POSTGRES_15</version>
+        <tier>db-custom-2-7680</tier>
+        <storage_gb>100</storage_gb>
+        <high_availability>false</high_availability>
+        <backup_enabled>true</backup_enabled>
+        <private_ip>10.107.0.5</private_ip>
+        <databases>
+          <database name="netra_staging" />
+          <database name="auth_staging" />
+        </databases>
+      </postgresql>
+      
+      <clickhouse>
+        <deployment_type>cloud_run</deployment_type>
+        <instance_name>clickhouse-staging</instance_name>
+        <image>clickhouse/clickhouse-server:24.3</image>
+        <storage>
+          <type>persistent_disk</type>
+          <size_gb>50</size_gb>
+        </storage>
+      </clickhouse>
+    </services>
+  </infrastructure>
+  
+  <secrets_management>
+    <google_secret_manager>
+      <secret name="database-url-staging">
+        <value>postgresql://netra:${DB_PASSWORD}@10.107.0.5/netra_staging</value>
+        <services>backend, auth</services>
+      </secret>
+      <secret name="redis-url-staging">
+        <value>redis://default:${REDIS_PASSWORD}@10.107.0.3:6379/0</value>
+        <services>backend, auth</services>
+      </secret>
+      <secret name="clickhouse-url-staging">
+        <value>clickhouse://default:${CH_PASSWORD}@clickhouse-staging:8123/staging</value>
+        <services>backend</services>
+      </secret>
+      <secret name="google-api-key">
+        <description>Google AI API key for LLM operations (Gemini)</description>
+        <services>backend</services>
+      </secret>
+      <secret name="jwt-secret">
+        <description>JWT signing secret for authentication</description>
+        <services>auth, backend</services>
+      </secret>
+    </google_secret_manager>
+    
+    <environment_variables>
+      <backend>
+        <env name="ENVIRONMENT">staging</env>
+        <env name="DATABASE_URL">secret:database-url-staging</env>
+        <env name="REDIS_URL">secret:redis-url-staging</env>
+        <env name="CLICKHOUSE_URL">secret:clickhouse-url-staging</env>
+        <env name="GOOGLE_API_KEY">secret:google-api-key</env>
+        <env name="DEFAULT_LLM_MODEL">gemini-2.5-flash</env>
+        <env name="CORS_ALLOWED_ORIGINS">https://app.staging.netrasystems.ai</env>
+        <env name="AUTH_SERVICE_URL">https://netra-auth-service-xyz.a.run.app</env>
+      </backend>
+      <auth_service>
+        <env name="ENVIRONMENT">staging</env>
+        <env name="DATABASE_URL">secret:database-url-staging</env>
+        <env name="REDIS_URL">secret:redis-url-staging</env>
+        <env name="JWT_SECRET">secret:jwt-secret</env>
+      </auth_service>
+      <frontend>
+        <env name="NEXT_PUBLIC_API_URL">https://netra-backend-staging-xyz.a.run.app</env>
+        <env name="NEXT_PUBLIC_AUTH_URL">https://netra-auth-service-xyz.a.run.app</env>
+        <env name="NEXT_PUBLIC_ENVIRONMENT">staging</env>
+      </frontend>
+    </environment_variables>
+  </secrets_management>
+  
+  <llm_configuration>
+    <default_model>gemini-2.5-flash</default_model>
+    <models>
+      <model name="gemini-2.5-flash" provider="google" status="default">
+        <cost_per_1k_tokens>0.001</cost_per_1k_tokens>
+        <max_tokens>8192</max_tokens>
+        <temperature>0.0</temperature>
+        <timeout>30</timeout>
+      </model>
+      <model name="gemini-2.5-pro" provider="google" status="available">
+        <cost_per_1k_tokens>0.01</cost_per_1k_tokens>
+        <max_tokens>8192</max_tokens>
+        <temperature>0.0</temperature>
+        <timeout>60</timeout>
+      </model>
+    </models>
+    <api_keys>
+      <key provider="google" env_var="GOOGLE_API_KEY" required="true" />
+      <key provider="openai" env_var="OPENAI_API_KEY" required="false" deprecated="true" />
+    </api_keys>
+  </llm_configuration>
+  
+  <deployment>
+    <methods>
+      <method name="terraform">
+        <description>Infrastructure as Code deployment</description>
+        <directory>terraform-gcp-staging</directory>
+        <commands>
+          <init>terraform init</init>
+          <plan>terraform plan -var-file=staging.tfvars</plan>
+          <apply>terraform apply -var-file=staging.tfvars -auto-approve</apply>
+        </commands>
+      </method>
+      
+      <method name="script">
+        <description>Python deployment script with validation</description>
+        <script>scripts/deploy_to_gcp.py</script>
+        <commands>
+          <fast>python scripts/deploy_to_gcp.py --project netra-staging --build-local</fast>
+          <with_checks>python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks</with_checks>
+          <cloud_build>python scripts/deploy_to_gcp.py --project netra-staging</cloud_build>
+        </commands>
+        <known_issues>
+          <issue>
+            Line 786 contains incorrect Redis IP (10.128.0.3), should be 10.107.0.3
+          </issue>
+        </known_issues>
+      </method>
+      
+      <method name="github_actions">
+        <description>CI/CD automated deployment</description>
+        <workflow>.github/workflows/deploy-staging.yml</workflow>
+        <triggers>
+          <trigger>push to main branch</trigger>
+          <trigger>manual workflow dispatch</trigger>
+        </triggers>
+      </method>
+    </methods>
+    
+    <validation>
+      <step order="1">Verify terraform outputs match expected values</step>
+      <step order="2">Check all secrets are properly configured in Secret Manager</step>
+      <step order="3">Validate Redis connectivity at 10.107.0.3:6379</step>
+      <step order="4">Confirm PostgreSQL accessible at 10.107.0.5</step>
+      <step order="5">Test Cloud Run services are responding</step>
+      <step order="6">Verify CORS configuration allows frontend origin</step>
+      <step order="7">Validate LLM API key and model configuration</step>
+      <step order="8">Run staging test suite</step>
+    </validation>
+  </deployment>
+  
+  <testing>
+    <test_runner>
+      <command>python unified_test_runner.py --env staging</command>
+      <categories>
+        <category name="smoke">Basic connectivity and health checks</category>
+        <category name="integration">Service integration tests</category>
+        <category name="e2e">End-to-end user flows</category>
+      </categories>
+      <environment_specific>
+        <marker>@pytest.mark.staging</marker>
+        <skip_conditions>
+          - Tests marked with @pytest.mark.prod_only
+          - Tests requiring local filesystem access
+          - Tests modifying production data
+        </skip_conditions>
+      </environment_specific>
+    </test_runner>
+    
+    <staging_specific_tests>
+      <test>Redis connection at correct IP (10.107.0.3)</test>
+      <test>PostgreSQL SSL connection validation</test>
+      <test>Cloud Run service health endpoints</test>
+      <test>Secret Manager access permissions</test>
+      <test>LLM API connectivity with Gemini models</test>
+      <test>CORS preflight requests</test>
+      <test>WebSocket connection establishment</test>
+    </staging_specific_tests>
+  </testing>
+  
+  <monitoring>
+    <cloud_logging>
+      <project>netra-staging</project>
+      <log_retention_days>30</log_retention_days>
+      <severity_filter>INFO</severity_filter>
+    </cloud_logging>
+    
+    <cloud_monitoring>
+      <metrics>
+        <metric name="cloud_run_request_count" />
+        <metric name="cloud_run_request_latencies" />
+        <metric name="cloud_run_instance_count" />
+        <metric name="redis_memory_usage_ratio" />
+        <metric name="postgres_connections" />
+        <metric name="llm_api_requests" />
+        <metric name="llm_api_costs" />
+      </metrics>
+      <alerts>
+        <alert name="high_error_rate" threshold="5%" />
+        <alert name="high_latency" threshold="1000ms" />
+        <alert name="redis_memory_high" threshold="80%" />
+        <alert name="llm_cost_spike" threshold="$10/hour" />
+      </alerts>
+    </cloud_monitoring>
+  </monitoring>
+  
+  <troubleshooting>
+    <common_issues>
+      <issue id="redis-connection-failed">
+        <symptom>Connection refused to Redis</symptom>
+        <cause>Incorrect IP address in connection string</cause>
+        <solution>
+          1. Verify Redis IP is 10.107.0.3 (not 10.128.0.3)
+          2. Check Secret Manager has correct connection string
+          3. Verify VPC connector is attached to Cloud Run service
+        </solution>
+      </issue>
+      
+      <issue id="llm-api-failure">
+        <symptom>LLM API calls failing</symptom>
+        <cause>Missing or incorrect API key</cause>
+        <solution>
+          1. Verify GOOGLE_API_KEY is set in Secret Manager
+          2. Check model is set to gemini-2.5-flash
+          3. Validate API key has Gemini API enabled
+        </solution>
+      </issue>
+      
+      <issue id="cors-errors">
+        <symptom>CORS errors in browser console</symptom>
+        <cause>Mismatched origins in CORS configuration</cause>
+        <solution>
+          1. Verify CORS_ALLOWED_ORIGINS includes frontend URL
+          2. Check preflight request handling
+          3. Validate WebSocket CORS configuration
+        </solution>
+      </issue>
+    </common_issues>
+    
+    <diagnostic_commands>
+      <command>gcloud redis instances describe staging-shared-redis --region=us-central1</command>
+      <command>gcloud secrets versions access latest --secret=redis-url-staging</command>
+      <command>gcloud run services describe netra-backend-staging --region=us-central1</command>
+      <command>gcloud logging read "severity>=ERROR" --limit 50 --project netra-staging</command>
+    </diagnostic_commands>
+  </troubleshooting>
+  
+  <compliance>
+    <requirements>
+      <requirement>All services must use private IPs for internal communication</requirement>
+      <requirement>Redis must use correct IP address (10.107.0.3)</requirement>
+      <requirement>LLM configuration must use centralized defaults</requirement>
+      <requirement>Secrets must be managed through Secret Manager only</requirement>
+      <requirement>All tests must be environment-aware</requirement>
+      <requirement>Deployment must validate configuration before applying</requirement>
+    </requirements>
+    
+    <validation_scripts>
+      <script>python scripts/check_architecture_compliance.py</script>
+      <script>python scripts/llm_compliance_report.py</script>
+      <script>python scripts/validate_staging_config.py</script>
+    </validation_scripts>
+  </compliance>
+  
+  <references>
+    <spec>staging_environment.xml</spec>
+    <spec>redis_staging_configuration.xml</spec>
+    <spec>llm_configuration_architecture.xml</spec>
+    <spec>deployment_architecture.xml</spec>
+    <spec>environment_aware_testing.xml</spec>
+  </references>
+</specification>

@@ -104,7 +104,7 @@ class CORSValidationTester:
         
         try:
             # Try to connect with origin header
-            ws = await websockets.connect(ws_url, extra_headers=extra_headers)
+            ws = await websockets.connect(ws_url, additional_headers=extra_headers)
             await ws.close()
             return {"connection_successful": True, "origin": origin}
         except websockets.exceptions.InvalidStatusCode as e:

@@ -92,7 +92,7 @@ class WebSocketClientSimulator:
             
             self.connection = await websockets.connect(
                 f"{self.base_url}/websocket",
-                extra_headers=headers
+                additional_headers=headers
             )
             
             self.metrics.connection_time = time.time() - start_time

@@ -122,8 +122,11 @@ class ServiceStartupCoordinator:
         self.readiness_manager.register_checker("frontend", frontend_checker)
         
         # Auth service readiness checker
-        auth_config = self.services_config.auth_service.get_config()
-        auth_port = auth_config.get("port", 8081)
+        if self.services_config and hasattr(self.services_config, 'auth_service') and self.services_config.auth_service:
+            auth_config = self.services_config.auth_service.get_config()
+            auth_port = auth_config.get("port", 8081)
+        else:
+            auth_port = 8081  # Default auth port
         auth_checker = AuthServiceReadinessChecker(auth_port)
         self.readiness_manager.register_checker("auth", auth_checker)
         

@@ -3,6 +3,7 @@ Unified base conftest fixtures for all test infrastructure.
 Consolidates common fixtures from multiple conftest.py files across the project.
 
 This module provides:
+- Docker Compose based test infrastructure (default)
 - Common environment setup
 - Shared mock fixtures  
 - Database fixtures
@@ -11,6 +12,12 @@ This module provides:
 - Service mocks
 
 USAGE: Import specific fixtures in service-specific conftest.py files as needed.
+
+TEST INFRASTRUCTURE:
+By default, tests use Docker Compose for service isolation. This can be controlled via:
+- TEST_SERVICE_MODE=docker (default) - Use Docker Compose
+- TEST_SERVICE_MODE=local - Use dev_launcher (legacy)  
+- TEST_SERVICE_MODE=mock - Use mocks only (no real services)
 """
 
 import asyncio
@@ -23,6 +30,14 @@ from typing import Any, AsyncGenerator, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+# Import Docker test manager for service orchestration
+from test_framework.docker_test_manager import (
+    DockerTestManager,
+    ServiceMode,
+    get_test_manager,
+    setup_test_services
+)
 
 # Use centralized environment management for test framework
 try:
@@ -504,6 +519,75 @@ def isolated_test_users():
         users.append(user)
     
     return users
+
+# =============================================================================
+# DOCKER TEST SERVICE MANAGEMENT 
+# =============================================================================
+
+@pytest.fixture(scope="session")
+async def docker_test_manager():
+    """
+    Session-scoped Docker test service manager.
+    Automatically starts and stops test services for the entire test session.
+    """
+    manager = get_test_manager()
+    manager.configure_test_environment()
+    
+    # Start core services (postgres, redis) by default
+    # Tests requiring additional services can start them separately
+    await manager.start_services(
+        services=["postgres-test", "redis-test"],
+        wait_healthy=True,
+        timeout=60
+    )
+    
+    yield manager
+    
+    # Cleanup after all tests
+    await manager.stop_services(cleanup_volumes=True)
+
+@pytest.fixture(scope="function")
+async def test_services():
+    """
+    Function-scoped test service fixture.
+    Provides access to test services without managing lifecycle.
+    Use this for tests that need service URLs or status checks.
+    """
+    manager = get_test_manager()
+    return manager
+
+@pytest.fixture
+async def e2e_services():
+    """
+    Start full E2E service stack (backend, auth, frontend).
+    Use this fixture for end-to-end integration tests.
+    """
+    manager = get_test_manager()
+    
+    # Start E2E services with the e2e profile
+    await manager.start_services(
+        services=["backend-test", "auth-test"],
+        profiles=["e2e"],
+        wait_healthy=True,
+        timeout=120
+    )
+    
+    yield manager
+    
+    # E2E services are stopped by session fixture
+
+@pytest.fixture
+def service_urls(test_services):
+    """
+    Provides URLs for all test services.
+    """
+    return {
+        "postgres": test_services.get_service_url("postgres"),
+        "redis": test_services.get_service_url("redis"),
+        "backend": test_services.get_service_url("backend"),
+        "auth": test_services.get_service_url("auth"),
+        "frontend": test_services.get_service_url("frontend")
+    }
 
 # =============================================================================
 # REAL LLM TESTING
