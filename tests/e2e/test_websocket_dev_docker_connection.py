@@ -46,7 +46,7 @@ class WebSocketConnectionTest:
         
     def on_error(self, ws, error):
         """Capture WebSocket errors."""
-        error_msg = str(error)
+        error_msg = str(error) if error is not None else "Unknown WebSocket error"
         print(f"WebSocket error: {error_msg}")
         self.connection_errors.append(error_msg)
         self.error_logs.append({
@@ -97,7 +97,7 @@ class WebSocketConnectionTest:
             time.sleep(5)
             
             # Force close if still running
-            if self.ws_app:
+            if self.ws_app and hasattr(self.ws_app, 'sock') and self.ws_app.sock:
                 self.ws_app.close()
                 
             ws_thread.join(timeout=2)

@@ -4,7 +4,7 @@ Validates backup completeness, restoration procedures, and recovery time objecti
 """
 import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any
 
 
@@ -34,7 +34,7 @@ class TestDisasterRecoveryBackupValidation:
             # Simulate backup creation
             backup_manifest = {
                 "backup_id": "backup_20250827_120000",
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "components": {
                     "user_data": {"records": 10000, "size_mb": 150},
                     "thread_history": {"records": 50000, "size_mb": 800},
@@ -65,7 +65,7 @@ class TestDisasterRecoveryBackupValidation:
         restoration_service = Mock()
         
         def restore_from_backup(backup_id: str) -> Dict[str, Any]:
-            start_time = datetime.utcnow()
+            start_time = datetime.now(timezone.utc)
             
             # Simulate restoration steps with timing
             steps = [
@@ -102,7 +102,7 @@ class TestDisasterRecoveryBackupValidation:
         backup_manager = Mock()
         
         # Simulate backup history over time
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         backup_history = []
         
         for days_ago in range(0, 100, 1):  # 100 days of daily backups
@@ -132,7 +132,8 @@ class TestDisasterRecoveryBackupValidation:
         retention_result = backup_manager.enforce_retention(backup_history)
         
         # Validate retention enforcement
-        assert retention_result["active_backups"] == recovery_objectives["retention_days"]
-        assert retention_result["expired_backups"] == 10  # 100 - 90 days
+        # With 100 days of backups (0-99) and 90 day retention, we expect 91 active backups (0-90) and 9 expired (91-99)
+        assert retention_result["active_backups"] == recovery_objectives["retention_days"] + 1  # Day 0 to day 90 = 91 days
+        assert retention_result["expired_backups"] == 9  # Days 91-99 = 9 days
         assert retention_result["retention_policy_enforced"] == True
         assert retention_result["storage_freed_mb"] > 0

@@ -249,19 +249,22 @@ class AuditStorage:
     
     async def _cache_recent_event(self, event: AuditEvent) -> None:
         """Cache recent event in Redis."""
-        # Skip caching if Redis client is not available
-        if not self.redis_service.client:
-            return
+        try:
+            # Skip caching if Redis client is not available
+            if not self.redis_service.client:
+                return
+                
+            # Cache last 1000 events per agent using individual Redis operations
+            cache_key = f"audit_recent:{event.agent_id}"
+            event_data = json.dumps(event.to_dict())
             
-        # Cache last 1000 events per agent
-        cache_key = f"audit_recent:{event.agent_id}"
-        event_data = json.dumps(event.to_dict())
-        
-        pipe = self.redis_service.client.pipeline()
-        pipe.lpush(cache_key, event_data)
-        pipe.ltrim(cache_key, 0, 999)  # Keep last 1000
-        pipe.expire(cache_key, 86400)  # 24 hour TTL
-        await pipe.execute()
+            # Use public method for list operations to avoid async loop conflicts
+            await self.redis_service._manager.add_to_list(cache_key, event_data, max_size=1000)
+            await self.redis_service.expire(cache_key, 86400)  # 24 hour TTL
+        except Exception as e:
+            # Log but don't fail - caching is non-critical
+            logger.warning(f"Failed to cache audit event {event.event_id}: {e}")
+            pass
     
     async def _store_encrypted(self, event: AuditEvent) -> None:
         """Store encrypted copy of sensitive event."""
@@ -487,12 +490,12 @@ class AuditTrailManager:
         self._mock_storage = {}  # Store events in memory
         
         # Mock connection that actually stores data
-        conn = AsyncMock()
-        conn.execute = AsyncMock(side_effect=self._mock_execute)
-        conn.fetch = AsyncMock(side_effect=self._mock_fetch)
-        conn.fetchrow = AsyncMock(side_effect=self._mock_fetchrow)
+        self._mock_conn = AsyncMock()
+        self._mock_conn.execute = AsyncMock(side_effect=self._mock_execute)
+        self._mock_conn.fetch = AsyncMock(side_effect=self._mock_fetch)
+        self._mock_conn.fetchrow = AsyncMock(side_effect=self._mock_fetchrow)
         
-        self.db_manager.get_connection = AsyncMock(return_value=conn)
+        self.db_manager.get_connection = AsyncMock(return_value=self._mock_conn)
         self.db_manager.return_connection = AsyncMock()
         
         self.redis_service = RedisService(test_mode=True)
@@ -507,11 +510,8 @@ class AuditTrailManager:
     
     async def create_test_schema(self):
         """Create test database schema."""
-        # Mock connection and its methods
-        conn = AsyncMock()
-        conn.execute = AsyncMock()
-        self.db_manager.get_connection.return_value = conn
-        self.db_manager.return_connection = AsyncMock()
+        # Use the existing mock connection instead of creating a new one
+        conn = await self.db_manager.get_connection()
         
         try:
             await conn.execute("""
@@ -551,17 +551,33 @@ class AuditTrailManager:
     
     async def _mock_execute(self, sql, *params):
         """Mock execute that stores INSERT operations."""
-        if sql.strip().startswith("INSERT INTO audit_events"):
+        if sql.strip().startswith("INSERT INTO audit_events_encrypted"):
+            # Handle encrypted events first (3 parameters)
+            if "audit_events_encrypted" not in self._mock_storage:
+                self._mock_storage["audit_events_encrypted"] = []
+            
+            encrypted_data = {
+                "event_id": params[0],
+                "encrypted_data": params[1],
+                "created_at": params[2]
+            }
+            self._mock_storage["audit_events_encrypted"].append(encrypted_data)
+        elif sql.strip().startswith("INSERT INTO audit_events"):
             # Store the event data
             if "audit_events" not in self._mock_storage:
                 self._mock_storage["audit_events"] = []
             
-            # Parse the parameters
+            # Parse the parameters - convert datetime to string like a real database would
+            # Add safety check for parameter length
+            if len(params) < 14:
+                logger.error(f"Expected 14 parameters but got {len(params)}: {params}")
+                return
+                
             event_data = {
                 "event_id": params[0],
                 "event_type": params[1],
                 "level": params[2],
-                "timestamp": params[3],
+                "timestamp": params[3].isoformat() if params[3] else None,
                 "agent_id": params[4],
                 "user_id": params[5],
                 "session_id": params[6],
@@ -574,16 +590,6 @@ class AuditTrailManager:
                 "encrypted": params[13]
             }
             self._mock_storage["audit_events"].append(event_data)
-        elif sql.strip().startswith("INSERT INTO audit_events_encrypted"):
-            if "audit_events_encrypted" not in self._mock_storage:
-                self._mock_storage["audit_events_encrypted"] = []
-            
-            encrypted_data = {
-                "event_id": params[0],
-                "encrypted_data": params[1],
-                "created_at": params[2]
-            }
-            self._mock_storage["audit_events_encrypted"].append(encrypted_data)
     
     async def _mock_fetch(self, sql, *params):
         """Mock fetch for SELECT queries."""
@@ -594,29 +600,64 @@ class AuditTrailManager:
         
         # More flexible filtering - handle different SQL patterns
         if params and len(params) > 0:
-            # Try to match agent_id filtering
-            if ("agent_id = ANY(" in sql or "agent_id IN" in sql) and params:
-                agent_ids = params[0] if isinstance(params[0], list) else [params[0]]
+            # Track parameter index for sequential filtering
+            param_idx = 0
+            
+            # Handle agent_id filtering
+            if ("agent_id = ANY(" in sql or "agent_id IN" in sql) and param_idx < len(params):
+                agent_ids = params[param_idx] if isinstance(params[param_idx], list) else [params[param_idx]]
                 events = [e for e in events if e["agent_id"] in agent_ids]
-            # Also handle direct agent_id matching
-            elif "agent_id = $" in sql and params:
-                agent_id = params[0]
+                param_idx += 1
+            elif "agent_id = $" in sql and param_idx < len(params):
+                agent_id = params[param_idx]
                 events = [e for e in events if e["agent_id"] == agent_id]
+                param_idx += 1
+                
+            # Handle event_type filtering
+            if "event_type = ANY(" in sql and param_idx < len(params):
+                event_types = params[param_idx] if isinstance(params[param_idx], list) else [params[param_idx]]
+                events = [e for e in events if e["event_type"] in event_types]
+                param_idx += 1
+                
+            # Handle level filtering
+            if "level = ANY(" in sql and param_idx < len(params):
+                levels = params[param_idx] if isinstance(params[param_idx], list) else [params[param_idx]]
+                events = [e for e in events if e["level"] in levels]
+                param_idx += 1
+                
+            # Handle message ILIKE filtering
+            if "message ILIKE" in sql and param_idx < len(params):
+                message_pattern = params[param_idx].strip('%').lower()
+                events = [e for e in events if message_pattern in e["message"].lower()]
+                param_idx += 1
         
         # Create mock objects with proper dict interface for AuditEvent.from_dict
         mock_rows = []
         for event in events:
-            mock_row = Mock()
-            # Make the mock behave like a dict when dict() is called on it
-            mock_row.__iter__ = lambda self=event: iter(event.keys())
-            mock_row.keys = lambda self=event: event.keys()
-            mock_row.values = lambda self=event: event.values()
-            mock_row.items = lambda self=event: event.items()
-            mock_row.__getitem__ = lambda key, self=event: event[key]
-            # Support both dict(row) and row[key] access patterns
-            for key, value in event.items():
-                setattr(mock_row, key, value)
-            mock_rows.append(mock_row)
+            # Create a mock that properly implements dict-like behavior
+            class MockRow:
+                def __init__(self, data):
+                    self._data = data
+                    # Set attributes for direct access
+                    for key, value in data.items():
+                        setattr(self, key, value)
+                
+                def __iter__(self):
+                    return iter(self._data.keys())
+                
+                def __getitem__(self, key):
+                    return self._data[key]
+                
+                def keys(self):
+                    return self._data.keys()
+                
+                def values(self):
+                    return self._data.values()
+                
+                def items(self):
+                    return self._data.items()
+            
+            mock_rows.append(MockRow(event))
         
         return mock_rows
     
@@ -627,15 +668,38 @@ class AuditTrailManager:
             if "audit_events_encrypted" in self._mock_storage:
                 for event in self._mock_storage["audit_events_encrypted"]:
                     if event["event_id"] == event_id:
-                        return Mock(**event)
+                        # Use MockRow for proper dictionary access like regular audit events
+                        class MockRow:
+                            def __init__(self, data):
+                                self._data = data
+                                for key, value in data.items():
+                                    setattr(self, key, value)
+                            def __getitem__(self, key):
+                                return self._data[key]
+                        return MockRow(event)
         return None
     
     async def cleanup(self):
         """Clean up resources."""
-        if self.audit_logger:
-            await self.audit_logger.flush_events()
-        if self.redis_service:
-            await self.redis_service.disconnect()
+        try:
+            if self.audit_logger:
+                await self.audit_logger.flush_events()
+        except Exception as e:
+            logger.warning(f"Failed to flush audit events: {e}")
+            
+        try:
+            if self.redis_service:
+                # Attempt graceful disconnect, ignore loop errors
+                await self.redis_service.disconnect()
+        except RuntimeError as e:
+            if "Event loop is closed" in str(e):
+                # Expected on teardown, safe to ignore
+                pass
+            else:
+                logger.warning(f"Redis disconnect error: {e}")
+        except Exception as e:
+            logger.warning(f"Redis disconnect error: {e}")
+            
         if self.db_manager:
             # Mock manager doesn't need shutdown
             pass
@@ -942,6 +1006,11 @@ async def test_redis_caching(audit_manager):
     manager = audit_manager
     
     agent_id = "cache_test_agent"
+    
+    # Clear any existing cache for this agent to avoid test pollution
+    cache_key = f"audit_recent:{agent_id}"
+    if manager.redis_service.client:
+        await manager.redis_service.delete(cache_key)
     
     # Log events
     for i in range(5):

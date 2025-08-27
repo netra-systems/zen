@@ -4,7 +4,7 @@ Validates data consistency across replicated systems and backup integrity.
 """
 import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 from typing import Dict, List, Any
 
@@ -23,7 +23,7 @@ class TestDisasterRecoveryDataReplication:
     
     def test_real_time_replication_consistency(self, replication_config):
         """Ensures data changes are consistently replicated across all replicas."""
-        primary_data = {"user_123": {"name": "John", "email": "john@test.com", "updated_at": datetime.utcnow()}}
+        primary_data = {"user_123": {"name": "John", "email": "john@test.com", "updated_at": datetime.now(timezone.utc)}}
         replica_data = {}
         replication_log = []
         
@@ -38,7 +38,7 @@ class TestDisasterRecoveryDataReplication:
             primary_checksum = hashlib.md5(str(sorted(primary_data.items())).encode()).hexdigest()
             replica_checksum = hashlib.md5(str(sorted(replica_data.items())).encode()).hexdigest()
             
-            replication_lag = (datetime.utcnow() - replication_log[-1]["timestamp"]).total_seconds() if replication_log else 0
+            replication_lag = (datetime.now(timezone.utc) - replication_log[-1]["timestamp"]).total_seconds() if replication_log else 0
             
             return {
                 "checksums_match": primary_checksum == replica_checksum,
@@ -47,7 +47,7 @@ class TestDisasterRecoveryDataReplication:
             }
         
         # Simulate data change and replication
-        replicate_change("change_1", primary_data, datetime.utcnow())
+        replicate_change("change_1", primary_data, datetime.now(timezone.utc))
         
         consistency_check = verify_consistency()
         assert consistency_check["checksums_match"] == True
@@ -60,13 +60,13 @@ class TestDisasterRecoveryDataReplication:
         # Simulate backup data with checksums
         backup_metadata = {
             "backup_20250827_001": {
-                "timestamp": datetime.utcnow() - timedelta(hours=1),
+                "timestamp": datetime.now(timezone.utc) - timedelta(hours=1),
                 "checksum": "abc123def456",
                 "size_bytes": 1048576,
                 "status": "completed"
             },
             "backup_20250827_002": {
-                "timestamp": datetime.utcnow() - timedelta(minutes=30),
+                "timestamp": datetime.now(timezone.utc) - timedelta(minutes=30),
                 "checksum": "def456abc123", 
                 "size_bytes": 1048580,
                 "status": "completed"
@@ -85,7 +85,7 @@ class TestDisasterRecoveryDataReplication:
             return {
                 "valid": expected_checksum == actual_checksum,
                 "size_bytes": metadata["size_bytes"],
-                "age_hours": (datetime.utcnow() - metadata["timestamp"]).total_seconds() / 3600
+                "age_hours": (datetime.now(timezone.utc) - metadata["timestamp"]).total_seconds() / 3600
             }
         
         backup_service.validate_integrity = validate_backup_integrity
@@ -100,9 +100,9 @@ class TestDisasterRecoveryDataReplication:
         """Monitors cross-region replication health and detects failures."""
         replication_monitor = Mock()
         region_status = {
-            "us-east-1": {"lag_seconds": 5, "last_sync": datetime.utcnow(), "healthy": True},
-            "us-west-2": {"lag_seconds": 15, "last_sync": datetime.utcnow() - timedelta(seconds=15), "healthy": True},
-            "eu-west-1": {"lag_seconds": 120, "last_sync": datetime.utcnow() - timedelta(seconds=120), "healthy": False}
+            "us-east-1": {"lag_seconds": 5, "last_sync": datetime.now(timezone.utc), "healthy": True},
+            "us-west-2": {"lag_seconds": 15, "last_sync": datetime.now(timezone.utc) - timedelta(seconds=15), "healthy": True},
+            "eu-west-1": {"lag_seconds": 120, "last_sync": datetime.now(timezone.utc) - timedelta(seconds=120), "healthy": False}
         }
         
         def check_replication_health() -> List[Dict[str, Any]]:
@@ -122,4 +122,4 @@ class TestDisasterRecoveryDataReplication:
         alerts = replication_monitor.get_health_alerts()
         assert len(alerts) == 1
         assert alerts[0]["region"] == "eu-west-1"
-        assert alerts[0]["severity"] == "critical"
+        assert alerts[0]["severity"] == "warning"  # 120s > 60s but < 300s = warning

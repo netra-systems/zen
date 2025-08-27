@@ -23,7 +23,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.Agent import SubAgentLifecycle
 
 # Test implementation of AgentLifecycleMixin
-class TestAgent(AgentLifecycleMixin):
+class MockAgent(AgentLifecycleMixin):
     """Test implementation of AgentLifecycleMixin."""
     
     def __init__(self, name="test_agent"):
@@ -71,7 +71,7 @@ class TestAgent(AgentLifecycleMixin):
 @pytest.fixture
 def test_agent():
     """Test agent instance."""
-    return TestAgent()
+    return MockAgent()
 
 @pytest.fixture
 def deep_agent_state():
@@ -481,7 +481,7 @@ class TestIntegrationScenarios:
     @pytest.mark.asyncio
     async def test_agent_with_custom_user_id(self, deep_agent_state):
         """Agent with custom user ID works correctly."""
-        agent = TestAgent()
+        agent = MockAgent()
         agent.user_id = "custom_user"
         user_id = agent._get_websocket_user_id("test_run")
         assert user_id == "custom_user"

@@ -32,14 +32,17 @@ class TestDisasterRecoveryFailover:
                 raise ConnectionError(f"Primary DB unavailable (attempt {connection_attempts['primary']})")
             return Mock(status="connected", endpoint=endpoint)
         
-        # Simulate failover logic
+        # Simulate failover logic with retry
         async def get_db_connection():
-            try:
-                return await mock_db_connect("primary")
-            except ConnectionError:
-                if connection_attempts["primary"] >= failover_config["failover_threshold"]:
-                    return await mock_db_connect("backup")
-                raise
+            while connection_attempts["primary"] < failover_config["failover_threshold"]:
+                try:
+                    return await mock_db_connect("primary")
+                except ConnectionError:
+                    if connection_attempts["primary"] >= failover_config["failover_threshold"]:
+                        break
+                    continue  # Retry
+            # Failover to backup
+            return await mock_db_connect("backup")
         
         # Test failover trigger
         connection = await get_db_connection()
