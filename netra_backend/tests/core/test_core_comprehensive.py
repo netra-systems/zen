@@ -57,7 +57,7 @@ try:
     from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, UnifiedCircuitBreakerState
     from netra_backend.app.core.resilience.unified_retry_handler_enhanced import UnifiedRetryHandler
     from netra_backend.app.core.environment.isolated_environment import IsolatedEnvironment
-    from netra_backend.app.core.database.database_manager import DatabaseManager
+    from netra_backend.app.db.database_manager import DatabaseManager
 except ImportError as e:
     # Some modules may not be available in all test environments
     print(f"Warning: Could not import some core modules: {e}")

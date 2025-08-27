@@ -24,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
+from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.monitoring.alerting_service import AlertingService
