@@ -61,7 +61,7 @@ class TestDatabaseConnectionPoolMonitoring:
         
         # Test main backend pool monitoring - THIS SHOULD FAIL
         try:
-            from netra_backend.app.database.core_database_manager import CoreDatabaseManager
+            from netra_backend.app.db.database_manager import DatabaseManager as CoreDatabaseManager
             
             # This should fail if not implemented
             with pytest.raises(AttributeError) as exc_info:
@@ -324,7 +324,7 @@ class TestDatabaseConnectionPoolMonitoring:
         # For now, just verify the monitoring interfaces exist
         
         try:
-            from netra_backend.app.database.core_database_manager import CoreDatabaseManager
+            from netra_backend.app.db.database_manager import DatabaseManager as CoreDatabaseManager
             from auth_service.auth_core.database.database_manager import AuthDatabaseManager
             
             # Test that both database managers support pool monitoring
