@@ -123,20 +123,44 @@ class AuthConfig:
     @staticmethod
     def get_jwt_access_expiry_minutes() -> int:
         """Get JWT access token expiry in minutes"""
-        # @marked: JWT access token expiry configuration
-        return int(get_env().get("JWT_ACCESS_EXPIRY_MINUTES", "15"))
+        # @marked: JWT access token expiry configuration using JWT Configuration Builder
+        try:
+            from shared.jwt_config_builder import JWTConfigBuilder
+            builder = JWTConfigBuilder(service="auth_service")
+            return builder.timing.get_access_token_expire_minutes()
+        except Exception as e:
+            logger.warning(f"Failed to load JWT config from builder, using fallback: {e}")
+            # Fallback to environment variable with CANONICAL name
+            return int(get_env().get("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", 
+                      get_env().get("JWT_ACCESS_EXPIRY_MINUTES", "15")))
     
     @staticmethod
     def get_jwt_refresh_expiry_days() -> int:
         """Get JWT refresh token expiry in days"""
-        # @marked: JWT refresh token expiry configuration
-        return int(get_env().get("JWT_REFRESH_EXPIRY_DAYS", "7"))
+        # @marked: JWT refresh token expiry configuration using JWT Configuration Builder
+        try:
+            from shared.jwt_config_builder import JWTConfigBuilder
+            builder = JWTConfigBuilder(service="auth_service")
+            return builder.timing.get_refresh_token_expire_days()
+        except Exception as e:
+            logger.warning(f"Failed to load JWT refresh config from builder, using fallback: {e}")
+            # Fallback to environment variable with CANONICAL name
+            return int(get_env().get("JWT_REFRESH_TOKEN_EXPIRE_DAYS", 
+                      get_env().get("JWT_REFRESH_EXPIRY_DAYS", "7")))
     
     @staticmethod
     def get_jwt_service_expiry_minutes() -> int:
         """Get JWT service token expiry in minutes"""
-        # @marked: JWT service token expiry configuration
-        return int(get_env().get("JWT_SERVICE_EXPIRY_MINUTES", "60"))
+        # @marked: JWT service token expiry configuration using JWT Configuration Builder
+        try:
+            from shared.jwt_config_builder import JWTConfigBuilder
+            builder = JWTConfigBuilder(service="auth_service")
+            return builder.timing.get_service_token_expire_minutes()
+        except Exception as e:
+            logger.warning(f"Failed to load JWT service config from builder, using fallback: {e}")
+            # Fallback to environment variable with CANONICAL name
+            return int(get_env().get("JWT_SERVICE_TOKEN_EXPIRE_MINUTES", 
+                      get_env().get("JWT_SERVICE_EXPIRY_MINUTES", "60")))
     
     @staticmethod
     def get_frontend_url() -> str:

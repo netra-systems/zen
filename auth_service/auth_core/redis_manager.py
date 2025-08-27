@@ -147,7 +147,7 @@ class AuthRedisManager:
         """Close Redis connection"""
         if self.redis_client:
             try:
-                await self.redis_client.close()
+                await self.redis_client.aclose()
                 logger.info("Auth service Redis connection closed")
             except Exception as e:
                 logger.warning(f"Error closing Redis connection: {e}")
