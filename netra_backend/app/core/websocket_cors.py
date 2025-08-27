@@ -5,6 +5,7 @@ which require special handling compared to regular HTTP CORS.
 """
 
 import re
+import time
 from typing import List, Optional, Union
 
 from fastapi import Request, WebSocket
@@ -168,7 +169,7 @@ class WebSocketCORSHandler:
         return True, ""
     
     def _record_violation(self, origin: str, reason: str) -> None:
-        """Record security violation for monitoring and rate limiting."""
+        """Record security violation for monitoring and rate limiting with enhanced logging."""
         if not self.security_config["log_security_violations"]:
             return
         
@@ -188,9 +189,26 @@ class WebSocketCORSHandler:
             self._blocked_origins.add(origin)
             logger.warning(f"Origin {origin} temporarily blocked after {self._violation_counts[origin]} violations")
         
-        # Enhanced logging for debugging CORS issues
-        logger.warning(f"WebSocket CORS security violation: {reason} for origin '{origin}' in environment '{self.environment}'")
-        logger.info(f"CORS violation details - Origin: '{origin}', Environment: '{self.environment}', Allowed origins count: {len(self.allowed_origins)}")
+        # Enhanced security logging with structured data
+        violation_details = {
+            "event": "websocket_cors_violation",
+            "origin": origin,
+            "reason": reason,
+            "environment": self.environment,
+            "violation_count": self._violation_counts[origin],
+            "total_allowed_origins": len(self.allowed_origins),
+            "blocked": origin in self._blocked_origins,
+            "timestamp": time.time()
+        }
+        
+        # Log at appropriate level based on severity
+        if "suspicious" in reason.lower() or "blocked" in reason.lower():
+            logger.error(f"WebSocket CORS SECURITY ALERT: {reason} for origin '{origin}' in environment '{self.environment}' - Details: {violation_details}")
+        else:
+            logger.warning(f"WebSocket CORS security violation: {reason} for origin '{origin}' in environment '{self.environment}'")
+        
+        # Always log structured details for monitoring
+        logger.info(f"CORS violation details: {violation_details}")
     
     def _is_origin_explicitly_allowed(self, origin: str) -> bool:
         """Check if origin is explicitly allowed by patterns."""
@@ -241,12 +259,17 @@ class WebSocketCORSHandler:
         # Then check against allowed patterns
         explicitly_allowed = self._is_origin_explicitly_allowed(origin)
         if explicitly_allowed:
-            logger.debug(f"WebSocket origin allowed: {origin}")
+            # Log successful validation with details for monitoring
+            logger.info(f"WebSocket origin ALLOWED: '{origin}' in environment '{self.environment}'")
+            logger.debug(f"WebSocket origin validation details - Environment: '{self.environment}', Origin patterns matched: True")
             return True
         
-        # Record violation for denied origin
+        # Record violation for denied origin with enhanced context
         self._record_violation(origin, "Origin not in allowed list")
-        logger.error(f"WebSocket origin denied: '{origin}' not in allowed list for environment '{self.environment}'")
+        
+        # Log denial with helpful context for debugging
+        sample_allowed = [o for o in self.allowed_origins[:3] if 'localhost' in o or 'staging' in o]
+        logger.error(f"WebSocket origin DENIED: '{origin}' not in allowed list for environment '{self.environment}' (Sample allowed: {sample_allowed})")
         return False
     
     def get_cors_headers(self, origin: str) -> dict:
@@ -386,14 +409,42 @@ def _extract_origin_from_websocket(websocket: WebSocket) -> Optional[str]:
 
 def get_environment_origins() -> List[str]:
     """Get allowed origins based on environment using unified CORS configuration."""
+    try:
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
+        env = getattr(config, 'environment', 'development').lower()
+        logger.info(f"WebSocket CORS: Using config environment: '{env}'")
+    except Exception as e:
+        from shared.cors_config import _detect_environment
+        env = _detect_environment()
+        logger.warning(f"WebSocket CORS: Config unavailable, using fallback environment: '{env}' (Error: {e})")
+    
+    return get_environment_origins_for_environment(env)
+
+
+def get_environment_origins_for_environment(environment: str) -> List[str]:
+    """Get allowed origins for specific environment.
+    
+    Args:
+        environment: Target environment name
+        
+    Returns:
+        List of allowed origins for the environment
+    """
     from shared.cors_config import get_websocket_cors_origins
-    from netra_backend.app.core.configuration.base import get_unified_config
     
-    config = get_unified_config()
-    env = getattr(config, 'environment', 'development').lower()
+    origins = get_websocket_cors_origins(environment)
+    logger.info(f"WebSocket CORS configured for environment '{environment}' with {len(origins)} allowed origins")
     
-    origins = get_websocket_cors_origins(env)
-    logger.info(f"WebSocket CORS configured for environment '{env}' with {len(origins)} allowed origins")
+    # Add explicit logging for critical staging/production detection
+    if environment in ['staging', 'production']:
+        logger.info(f"WebSocket CORS: CRITICAL - Running in {environment.upper()} mode with restricted origins")
+        staging_count = sum(1 for o in origins if 'staging' in o or 'run.app' in o)
+        localhost_count = sum(1 for o in origins if 'localhost' in o or '127.0.0.1' in o)
+        logger.info(f"WebSocket CORS: {environment} origins - staging/cloud: {staging_count}, localhost: {localhost_count}")
+    elif environment == 'development':
+        logger.info(f"WebSocket CORS: Running in DEVELOPMENT mode with permissive origins")
+    
     return origins
 
 
@@ -494,33 +545,59 @@ class WebSocketCORSMiddleware:
 _global_cors_handler: Optional[WebSocketCORSHandler] = None
 
 
-def get_websocket_cors_handler() -> WebSocketCORSHandler:
-    """Get global WebSocket CORS handler instance."""
+def get_websocket_cors_handler(environment: Optional[str] = None) -> WebSocketCORSHandler:
+    """Get global WebSocket CORS handler instance with explicit environment detection.
+    
+    Args:
+        environment: Optional explicit environment. If None, detects from config.
+    """
     global _global_cors_handler
     
+    # Detect environment with explicit logging
+    if environment is None:
+        try:
+            from netra_backend.app.core.configuration.base import get_unified_config
+            config = get_unified_config()
+            environment = getattr(config, 'environment', 'development').lower()
+            logger.info(f"WebSocket CORS: Detected environment from config: '{environment}'")
+        except Exception as e:
+            # Fallback to shared CORS config environment detection
+            from shared.cors_config import _detect_environment
+            environment = _detect_environment()
+            logger.warning(f"WebSocket CORS: Config unavailable, using fallback detection: '{environment}' (Error: {e})")
+    else:
+        logger.info(f"WebSocket CORS: Using explicit environment: '{environment}'")
+    
+    # Always recreate handler if environment is explicitly provided
+    if environment and _global_cors_handler and _global_cors_handler.environment != environment:
+        logger.info(f"WebSocket CORS: Environment changed from '{_global_cors_handler.environment}' to '{environment}', recreating handler")
+        _global_cors_handler = None
+    
     if _global_cors_handler is None:
-        from netra_backend.app.core.configuration.base import get_unified_config
-        config = get_unified_config()
-        environment = getattr(config, 'environment', 'development').lower()
-        _global_cors_handler = WebSocketCORSHandler(
-            get_environment_origins(), 
-            environment=environment
-        )
+        origins = get_environment_origins_for_environment(environment)
+        logger.info(f"WebSocket CORS: Creating handler for environment '{environment}' with {len(origins)} origins")
+        _global_cors_handler = WebSocketCORSHandler(origins, environment=environment)
+        
+        # Log some example origins for debugging (without exposing secrets)
+        example_origins = [o for o in origins[:3] if 'localhost' in o or 'staging' in o]
+        if example_origins:
+            logger.debug(f"WebSocket CORS: Example allowed origins: {example_origins}")
     
     return _global_cors_handler
 
 
-def configure_websocket_cors(app: ASGIApp) -> ASGIApp:
+def configure_websocket_cors(app: ASGIApp, environment: Optional[str] = None) -> ASGIApp:
     """Configure WebSocket CORS for FastAPI application.
     
     Args:
         app: The FastAPI application
+        environment: Optional explicit environment for CORS configuration
         
     Returns:
         App wrapped with WebSocket CORS middleware
     """
-    cors_handler = get_websocket_cors_handler()
-    logger.info(f"Configuring WebSocket CORS with {len(cors_handler.allowed_origins)} allowed origins")
+    cors_handler = get_websocket_cors_handler(environment=environment)
+    logger.info(f"Configuring WebSocket CORS with {len(cors_handler.allowed_origins)} allowed origins for environment '{cors_handler.environment}'")
     
     return WebSocketCORSMiddleware(app, cors_handler)
 

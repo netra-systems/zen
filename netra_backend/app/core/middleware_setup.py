@@ -12,7 +12,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse, Response
 
 from netra_backend.app.core.configuration import get_configuration
-from shared.cors_config import get_fastapi_cors_config
+from shared.cors_config import get_fastapi_cors_config, log_cors_security_event
 
 logger = logging.getLogger(__name__)
 
@@ -54,18 +54,32 @@ def should_add_cors_headers(response: Any) -> bool:
 
 
 def add_cors_headers_to_response(response: Any, origin: str) -> None:
-    """Add CORS headers to response."""
+    """Add CORS headers to response with security enhancements."""
     response.headers["Access-Control-Allow-Origin"] = origin
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-Name"
+    # CORS-005: Add Vary: Origin header to prevent CDN cache poisoning
+    response.headers["Vary"] = "Origin"
+    # CORS-006: Add Access-Control-Max-Age for preflight caching
+    response.headers["Access-Control-Max-Age"] = "3600"
 
 
 def process_cors_if_needed(request: Request, response: Any) -> None:
-    """Process CORS headers if needed."""
+    """Process CORS headers if needed with security logging."""
     if should_add_cors_headers(response):
         origin = request.headers.get("origin")
         if origin:
+            # Log CORS redirect handling for security monitoring
+            config = get_configuration()
+            request_id = request.headers.get("x-request-id", "unknown")
+            log_cors_security_event(
+                event_type="cors_redirect_handling",
+                origin=origin,
+                path=request.url.path,
+                environment=config.environment,
+                request_id=request_id
+            )
             add_cors_headers_to_response(response, origin)
 
 
