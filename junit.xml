@@ -1,9 +1,251 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="6" time="0.839" timestamp="2025-08-26T19:14:01.550572-07:00" hostname="Anthony"><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_google_oauth_initiation" time="0.337" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_redirect_uri_configuration" time="0.002" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_state_csrf_protection" time="0.013" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_callback_handling" time="0.022"><failure message="assert 401 in [200, 302, 400]&#10; +  where 401 = &lt;Response [401 Unauthorized]&gt;.status_code">auth_service\tests\test_auth_comprehensive.py:257: in test_oauth_callback_handling
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="5" failures="29" skipped="1" tests="65" time="5.381" timestamp="2025-08-26T22:10:01.019255-07:00" hostname="Anthony"><testcase classname="tests.test_auth_comprehensive.TestAuthConfiguration" name="test_environment_setup" time="0.420" /><testcase classname="tests.test_auth_comprehensive.TestAuthConfiguration" name="test_auth_config_initialization" time="0.006"><failure message="AssertionError: assert 0 &gt; 0&#10; +  where 0 = len('')">auth_service\tests\test_auth_comprehensive.py:68: in test_auth_config_initialization
+    assert len(client_id) &gt; 0
+E   AssertionError: assert 0 &gt; 0
+E    +  where 0 = len('')</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestAuthConfiguration" name="test_auth_provider_enum" time="0.001" /><testcase classname="tests.test_auth_comprehensive.TestDatabaseOperations" name="test_database_connection_initialization" time="0.001" /><testcase classname="tests.test_auth_comprehensive.TestDatabaseOperations" name="test_database_connection_parameters" time="0.002" /><testcase classname="tests.test_auth_comprehensive.TestJWTTokenHandling" name="test_jwt_token_structure_validation" time="0.008" /><testcase classname="tests.test_auth_comprehensive.TestJWTTokenHandling" name="test_jwt_secret_configuration" time="0.002" /><testcase classname="tests.test_auth_comprehensive.TestJWTTokenHandling" name="test_jwt_token_generation" time="0.006" /><testcase classname="tests.test_auth_comprehensive.TestJWTTokenHandling" name="test_jwt_token_expiration" time="0.012" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_google_oauth_initiation" time="0.030"><failure message="assert 500 == 302&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">auth_service\tests\test_auth_comprehensive.py:170: in test_google_oauth_initiation
+    assert response.status_code == 302  # Should redirect
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 500 == 302
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_redirect_uri_configuration" time="0.002" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_state_csrf_protection" time="0.012" /><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_callback_handling" time="0.023"><failure message="assert 401 in [200, 302, 400]&#10; +  where 401 = &lt;Response [401 Unauthorized]&gt;.status_code">auth_service\tests\test_auth_comprehensive.py:257: in test_oauth_callback_handling
     assert response.status_code in [200, 302, 400]  # Added 400 for invalid state
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   assert 401 in [200, 302, 400]
-E    +  where 401 = &lt;Response [401 Unauthorized]&gt;.status_code</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_error_scenarios" time="0.013"><failure message="assert 422 in [400, 401, 403]&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">auth_service\tests\test_auth_comprehensive.py:270: in test_oauth_error_scenarios
+E    +  where 401 = &lt;Response [401 Unauthorized]&gt;.status_code</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_error_scenarios" time="0.014"><failure message="assert 422 in [400, 401, 403]&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">auth_service\tests\test_auth_comprehensive.py:270: in test_oauth_error_scenarios
     assert response.status_code in [400, 401, 403]  # Authentication/authorization error
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E   assert 422 in [400, 401, 403]
-E    +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_staging_configuration" time="0.005" /></testsuite></testsuites>
+E    +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestOAuthFlows" name="test_oauth_staging_configuration" time="0.001" /><testcase classname="tests.test_auth_comprehensive.TestAPIEndpoints" name="test_health_endpoint" time="0.008" /><testcase classname="tests.test_auth_comprehensive.TestAPIEndpoints" name="test_auth_endpoints_head_method_support" time="0.028" /><testcase classname="tests.test_auth_comprehensive.TestAPIEndpoints" name="test_cors_headers" time="0.007"><failure message="AssertionError: assert 'access-control-allow-origin' in ['content-length', 'content-type', 'x-service-name', 'x-service-version']">auth_service\tests\test_auth_comprehensive.py:319: in test_cors_headers
+    assert "access-control-allow-origin" in [h.lower() for h in response.headers.keys()]
+E   AssertionError: assert 'access-control-allow-origin' in ['content-length', 'content-type', 'x-service-name', 'x-service-version']</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestAPIEndpoints" name="test_login_endpoint_validation" time="0.053" /><testcase classname="tests.test_auth_comprehensive.TestSecurityScenarios" name="test_sql_injection_protection" time="0.012"><failure message="assert 'table' not in '{\'detail\': [{\'type\': \'value_error\', \'loc\': [\'body\', \'email\'], \'msg\': \'value is not a valid email address: an email address must have an @-sign.\', \'input\': &quot;\'; drop table users; --&quot;, \'ctx\': {\'reason\': \'an email address must have an @-sign.\'}}]}'&#10;  &#10;  'table' is contained here:&#10;    {'detail': [{'type': 'value_error', 'loc': ['body', 'email'], 'msg': 'value is not a valid email address: an email address must have an @-sign.', 'input': &quot;'; drop table users; --&quot;, 'ctx': {'reason': 'an email address must have an @-sign.'}}]}&#10;  ?                                                                                                                                                                     +++++">auth_service\tests\test_auth_comprehensive.py:362: in test_sql_injection_protection
+    assert "table" not in error_msg
+E   assert 'table' not in '{\'detail\': [{\'type\': \'value_error\', \'loc\': [\'body\', \'email\'], \'msg\': \'value is not a valid email address: an email address must have an @-sign.\', \'input\': "\'; drop table users; --", \'ctx\': {\'reason\': \'an email address must have an @-sign.\'}}]}'
+E     
+E     'table' is contained here:
+E       {'detail': [{'type': 'value_error', 'loc': ['body', 'email'], 'msg': 'value is not a valid email address: an email address must have an @-sign.', 'input': "'; drop table users; --", 'ctx': {'reason': 'an email address must have an @-sign.'}}]}
+E     ?                                                                                                                                                                     +++++</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestSecurityScenarios" name="test_rate_limiting_protection" time="0.218" /><testcase classname="tests.test_auth_comprehensive.TestSecurityScenarios" name="test_password_security_validation" time="0.033" /><testcase classname="tests.test_auth_comprehensive.TestRedisOperations" name="test_redis_connection_availability" time="0.001"><skipped type="pytest.skip" message="Redis not available in test environment">C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_auth_comprehensive.py:412: Redis not available in test environment</skipped></testcase><testcase classname="tests.test_auth_comprehensive.TestRedisOperations" name="test_redis_failover_graceful_degradation" time="0.010" /><testcase classname="tests.test_auth_comprehensive.TestErrorHandling" name="test_database_connection_error_handling" time="0.009" /><testcase classname="tests.test_auth_comprehensive.TestErrorHandling" name="test_invalid_jwt_token_handling" time="0.040"><failure message="ExceptionGroup: multiple unraisable exception warnings (3 sub-exceptions)">+ Exception Group Traceback (most recent call last):
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 344, in from_call
+  |     result: TResult | None = func()
+  |                              ^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\runner.py", line 246, in &lt;lambda&gt;
+  |     lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_hooks.py", line 512, in __call__
+  |     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_manager.py", line 120, in _hookexec
+  |     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 167, in _multicall
+  |     raise exception
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+  |     teardown.throw(exception)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\logging.py", line 850, in pytest_runtest_call
+  |     yield
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+  |     teardown.throw(exception)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 53, in run_old_style_hookwrapper
+  |     return result.get_result()
+  |            ^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_result.py", line 103, in get_result
+  |     raise exc.with_traceback(tb)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 38, in run_old_style_hookwrapper
+  |     res = yield
+  |           ^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+  |     teardown.throw(exception)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\capture.py", line 900, in pytest_runtest_call
+  |     return (yield)
+  |             ^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+  |     teardown.throw(exception)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 53, in run_old_style_hookwrapper
+  |     return result.get_result()
+  |            ^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_result.py", line 103, in get_result
+  |     raise exc.with_traceback(tb)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 38, in run_old_style_hookwrapper
+  |     res = yield
+  |           ^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+  |     teardown.throw(exception)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 53, in run_old_style_hookwrapper
+  |     return result.get_result()
+  |            ^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_result.py", line 103, in get_result
+  |     raise exc.with_traceback(tb)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 38, in run_old_style_hookwrapper
+  |     res = yield
+  |           ^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 139, in _multicall
+  |     teardown.throw(exception)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\skipping.py", line 263, in pytest_runtest_call
+  |     return (yield)
+  |             ^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pluggy\_callers.py", line 121, in _multicall
+  |     res = hook_impl.function(*args)
+  |           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\unraisableexception.py", line 158, in pytest_runtest_call
+  |     collect_unraisable(item.config)
+  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\unraisableexception.py", line 81, in collect_unraisable
+  |     raise ExceptionGroup("multiple unraisable exception warnings", errors)
+  | ExceptionGroup: multiple unraisable exception warnings (3 sub-exceptions)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\antho\miniconda3\Lib\warnings.py", line 555, in _warn_unawaited_coroutine
+    |     warn(msg, category=RuntimeWarning, stacklevel=2, source=coro)
+    | RuntimeWarning: coroutine 'JWTHandler._check_token_in_redis' was never awaited
+    | 
+    | The above exception was the direct cause of the following exception:
+    | 
+    | Traceback (most recent call last):
+    |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\unraisableexception.py", line 67, in collect_unraisable
+    |     warnings.warn(pytest.PytestUnraisableExceptionWarning(msg))
+    | pytest.PytestUnraisableExceptionWarning: Exception ignored in: &lt;coroutine object JWTHandler._check_token_in_redis at 0x000001EEFF89AA70&gt;
+    | Enable tracemalloc to get traceback where the object was allocated.
+    | See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    +---------------- 2 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\antho\miniconda3\Lib\warnings.py", line 555, in _warn_unawaited_coroutine
+    |     warn(msg, category=RuntimeWarning, stacklevel=2, source=coro)
+    | RuntimeWarning: coroutine 'JWTHandler._check_token_in_redis' was never awaited
+    | 
+    | The above exception was the direct cause of the following exception:
+    | 
+    | Traceback (most recent call last):
+    |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\unraisableexception.py", line 67, in collect_unraisable
+    |     warnings.warn(pytest.PytestUnraisableExceptionWarning(msg))
+    | pytest.PytestUnraisableExceptionWarning: Exception ignored in: &lt;coroutine object JWTHandler._check_token_in_redis at 0x000001EEFF899D50&gt;
+    | Enable tracemalloc to get traceback where the object was allocated.
+    | See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    +---------------- 3 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\antho\miniconda3\Lib\warnings.py", line 555, in _warn_unawaited_coroutine
+    |     warn(msg, category=RuntimeWarning, stacklevel=2, source=coro)
+    | RuntimeWarning: coroutine 'JWTHandler._check_token_in_redis' was never awaited
+    | 
+    | The above exception was the direct cause of the following exception:
+    | 
+    | Traceback (most recent call last):
+    |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\_pytest\unraisableexception.py", line 67, in collect_unraisable
+    |     warnings.warn(pytest.PytestUnraisableExceptionWarning(msg))
+    | pytest.PytestUnraisableExceptionWarning: Exception ignored in: &lt;coroutine object JWTHandler._check_token_in_redis at 0x000001EEFF898040&gt;
+    | Enable tracemalloc to get traceback where the object was allocated.
+    | See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    +------------------------------------</failure></testcase><testcase classname="tests.test_auth_comprehensive.TestErrorHandling" name="test_malformed_request_handling" time="0.031" /><testcase classname="tests.test_auth_comprehensive.TestEnvironmentCompatibility" name="test_development_environment_features" time="0.002" /><testcase classname="tests.test_auth_comprehensive.TestEnvironmentCompatibility" name="test_staging_environment_features" time="0.003"><failure message="AssertionError: assert 'test' == 'staging'&#10;  &#10;  - staging&#10;  + test">auth_service\tests\test_auth_comprehensive.py:509: in test_staging_environment_features
+    assert env_vars.get("ENVIRONMENT") == "staging"
+E   AssertionError: assert 'test' == 'staging'
+E     
+E     - staging
+E     + test</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestAuthPortConfigurationConsistency" name="test_port_configuration_sources_consistency" time="0.003" /><testcase classname="tests.test_auth_port_configuration.TestAuthPortConfigurationConsistency" name="test_auth_service_startup_completion_with_correct_port" time="0.010"><failure message="AssertionError: Auth service URL port (8001) does not match expected port (8081). This inconsistency prevents startup completion.&#10;assert '8001' == '8081'&#10;  &#10;  - 8081&#10;  ?   ^&#10;  + 8001&#10;  ?   ^">auth_service\tests\test_auth_port_configuration.py:95: in test_auth_service_startup_completion_with_correct_port
+    assert configured_port == expected_port, (
+E   AssertionError: Auth service URL port (8001) does not match expected port (8081). This inconsistency prevents startup completion.
+E   assert '8001' == '8081'
+E     
+E     - 8081
+E     ?   ^
+E     + 8001
+E     ?   ^</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestAuthPortConfigurationConsistency" name="test_auth_port_environment_variable_precedence" time="0.011" /><testcase classname="tests.test_auth_port_configuration.TestAuthPortConfigurationConsistency" name="test_auth_service_url_generation_with_port_validation" time="0.008"><failure message="AssertionError: Auth service URL port (8001) does not match binding port (8081). Generated URL: http://127.0.0.1:8001. This mismatch prevents proper service communication.&#10;assert '8001' == '8081'&#10;  &#10;  - 8081&#10;  ?   ^&#10;  + 8001&#10;  ?   ^">auth_service\tests\test_auth_port_configuration.py:169: in test_auth_service_url_generation_with_port_validation
+    assert url_port == binding_port, (
+E   AssertionError: Auth service URL port (8001) does not match binding port (8081). Generated URL: http://127.0.0.1:8001. This mismatch prevents proper service communication.
+E   assert '8001' == '8081'
+E     
+E     - 8081
+E     ?   ^
+E     + 8001
+E     ?   ^</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestAuthPortConfigurationConsistency" name="test_hardcoded_port_detection" time="0.008"><failure message="AssertionError: Auth service URL contains hardcoded port 8001! URL: http://127.0.0.1:8001. This suggests hardcoded configuration is overriding environment variables.&#10;assert '8001' not in 'http://127.0.0.1:8001'&#10;  &#10;  '8001' is contained here:&#10;    http://127.0.0.1:8001&#10;  ?                  ++++">auth_service\tests\test_auth_port_configuration.py:198: in test_hardcoded_port_detection
+    assert bad_port not in auth_url, (
+E   AssertionError: Auth service URL contains hardcoded port 8001! URL: http://127.0.0.1:8001. This suggests hardcoded configuration is overriding environment variables.
+E   assert '8001' not in 'http://127.0.0.1:8001'
+E     
+E     '8001' is contained here:
+E       http://127.0.0.1:8001
+E     ?                  ++++</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestAuthPortConfigurationConsistency" name="test_auth_service_port_binding_matches_url_configuration" time="0.006"><failure message="AssertionError: Auth service URL port (8001) does not match binding port (8081). This prevents successful service communication. URL: http://127.0.0.1:8001&#10;assert 8001 == 8081">auth_service\tests\test_auth_port_configuration.py:234: in test_auth_service_port_binding_matches_url_configuration
+    assert url_port == test_port, (
+E   AssertionError: Auth service URL port (8001) does not match binding port (8081). This prevents successful service communication. URL: http://127.0.0.1:8001
+E   assert 8001 == 8081</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestAuthServiceConfigurationValidation" name="test_configuration_validation_detects_port_mismatch" time="0.006"><failure message="Failed: Configuration validation should catch port mismatches gracefully, but got exception: Configuration validation failed! Binding port None != URL port 8001. AuthConfig should validate port consistency.&#10;assert None == '8001'">auth_service\tests\test_auth_port_configuration.py:288: in test_configuration_validation_detects_port_mismatch
+    assert binding_port == url_port, (
+E   AssertionError: Configuration validation failed! Binding port None != URL port 8001. AuthConfig should validate port consistency.
+E   assert None == '8001'
+
+During handling of the above exception, another exception occurred:
+auth_service\tests\test_auth_port_configuration.py:296: in test_configuration_validation_detects_port_mismatch
+    pytest.fail(
+E   Failed: Configuration validation should catch port mismatches gracefully, but got exception: Configuration validation failed! Binding port None != URL port 8001. AuthConfig should validate port consistency.
+E   assert None == '8001'</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestAuthServiceConfigurationValidation" name="test_auth_service_startup_validation" time="0.006"><failure message="AssertionError: Auth service startup should detect port mismatch! Binding port: None, URL port: 8001. Service will fail to respond correctly with this configuration.&#10;assert None == '8001'">auth_service\tests\test_auth_port_configuration.py:330: in test_auth_service_startup_validation
+    assert binding_port == url_port, (
+E   AssertionError: Auth service startup should detect port mismatch! Binding port: None, URL port: 8001. Service will fail to respond correctly with this configuration.
+E   assert None == '8001'</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestAuthServiceConfigurationValidation" name="test_development_vs_production_port_configuration" time="0.008"><failure message="AssertionError: Development auth service URL port (8001) should match PORT env var (8081) in development&#10;assert '8001' == '8081'&#10;  &#10;  - 8081&#10;  ?   ^&#10;  + 8001&#10;  ?   ^">auth_service\tests\test_auth_port_configuration.py:361: in test_development_vs_production_port_configuration
+    assert url_port == expected_port, (
+E   AssertionError: Development auth service URL port (8001) should match PORT env var (8081) in development
+E   assert '8001' == '8081'
+E     
+E     - 8081
+E     ?   ^
+E     + 8001
+E     ?   ^</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestPortConfigurationRecovery" name="test_port_configuration_error_reporting" time="0.007"><failure message="AssertionError: Port configuration mismatch detected:&#10;    Binding port: None&#10;    URL port: 8001&#10;    Service URL: http://localhost:8001&#10;  This will cause service communication failures.&#10;assert False">auth_service\tests\test_auth_port_configuration.py:423: in test_port_configuration_error_reporting
+    assert False, error_message
+E   AssertionError: Port configuration mismatch detected:
+E       Binding port: None
+E       URL port: 8001
+E       Service URL: http://localhost:8001
+E     This will cause service communication failures.
+E   assert False</failure></testcase><testcase classname="tests.test_auth_port_configuration.TestPortConfigurationRecovery" name="test_port_configuration_auto_correction" time="0.007"><failure message="AssertionError: Auth service should auto-correct URL to match binding port. Expected: http://localhost:None, Got: http://127.0.0.1:8001&#10;assert 'http://127.0.0.1:8001' == 'http://localhost:None'&#10;  &#10;  - http://localhost:None&#10;  + http://127.0.0.1:8001">auth_service\tests\test_auth_port_configuration.py:445: in test_port_configuration_auto_correction
+    assert actual_url == expected_corrected_url, (
+E   AssertionError: Auth service should auto-correct URL to match binding port. Expected: http://localhost:None, Got: http://127.0.0.1:8001
+E   assert 'http://127.0.0.1:8001' == 'http://localhost:None'
+E     
+E     - http://localhost:None
+E     + http://127.0.0.1:8001</failure></testcase><testcase classname="tests.test_auth_session_persistence_edge_cases" name="test_session_persistence_during_service_restart" time="0.008"><failure message="TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'">auth_service\tests\test_auth_session_persistence_edge_cases.py:25: in test_session_persistence_during_service_restart
+    session_token = await session_manager.create_session(user)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'</failure></testcase><testcase classname="tests.test_auth_session_persistence_edge_cases" name="test_session_consistency_during_database_failover" time="0.006"><failure message="TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'">auth_service\tests\test_auth_session_persistence_edge_cases.py:41: in test_session_consistency_during_database_failover
+    session_token = await session_manager.create_session(user)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'</failure></testcase><testcase classname="tests.test_auth_session_persistence_edge_cases" name="test_cross_service_session_sync_consistency" time="0.006"><failure message="TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'">auth_service\tests\test_auth_session_persistence_edge_cases.py:58: in test_cross_service_session_sync_consistency
+    session_token = await session_manager.create_session(user)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'</failure></testcase><testcase classname="tests.test_auth_session_persistence_edge_cases" name="test_session_cleanup_on_user_logout" time="0.008"><failure message="TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'">auth_service\tests\test_auth_session_persistence_edge_cases.py:83: in test_session_cleanup_on_user_logout
+    session_token = await session_manager.create_session(user)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: SessionManager.create_session() missing 1 required positional argument: 'user_data'</failure></testcase><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_state_generation" time="0.003" /><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_state_storage_and_retrieval" time="0.003" /><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_state_validation_wrong_session" time="0.002" /><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_state_validation_no_session" time="0.002" /><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_oauth_initiation_creates_session_cookie" time="0.013"><failure message="assert 500 == 302&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">auth_service\tests\test_oauth_state_validation.py:89: in test_oauth_initiation_creates_session_cookie
+    assert response.status_code == 302
+E   assert 500 == 302
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_oauth_callback_validates_state" time="0.007"><failure message="AttributeError: module 'auth_service.auth_core.routes.auth_routes' has no attribute 'auth_db'">auth_service\tests\test_oauth_state_validation.py:131: in test_oauth_callback_validates_state
+    with patch('auth_service.auth_core.routes.auth_routes.auth_db.create_tables'):
+..\..\..\..\miniconda3\Lib\unittest\mock.py:1442: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\pkgutil.py:528: in resolve_name
+    result = getattr(result, p)
+             ^^^^^^^^^^^^^^^^^^
+E   AttributeError: module 'auth_service.auth_core.routes.auth_routes' has no attribute 'auth_db'</failure></testcase><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_oauth_callback_rejects_invalid_state" time="0.773"><failure message="assert 'Invalid state parameter' in '{&quot;detail&quot;:&quot;Failed to exchange code&quot;}'&#10; +  where '{&quot;detail&quot;:&quot;Failed to exchange code&quot;}' = &lt;Response [401 Unauthorized]&gt;.text">auth_service\tests\test_oauth_state_validation.py:159: in test_oauth_callback_rejects_invalid_state
+    assert "Invalid state parameter" in response.text
+E   assert 'Invalid state parameter' in '{"detail":"Failed to exchange code"}'
+E    +  where '{"detail":"Failed to exchange code"}' = &lt;Response [401 Unauthorized]&gt;.text</failure></testcase><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_oauth_callback_rejects_missing_session" time="0.372"><failure message="assert 'Invalid session state' in '{&quot;detail&quot;:&quot;Failed to exchange code&quot;}'&#10; +  where '{&quot;detail&quot;:&quot;Failed to exchange code&quot;}' = &lt;Response [401 Unauthorized]&gt;.text">auth_service\tests\test_oauth_state_validation.py:174: in test_oauth_callback_rejects_missing_session
+    assert "Invalid session state" in response.text
+E   assert 'Invalid session state' in '{"detail":"Failed to exchange code"}'
+E    +  where '{"detail":"Failed to exchange code"}' = &lt;Response [401 Unauthorized]&gt;.text</failure></testcase><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_state_expiration" time="0.002"><failure message="assert True is False">auth_service\tests\test_oauth_state_validation.py:194: in test_state_expiration
+    assert valid is False
+E   assert True is False</failure></testcase><testcase classname="tests.test_oauth_state_validation.TestOAuthStateValidation" name="test_concurrent_oauth_flows" time="0.003" /><testcase classname="tests.test_oauth_state_validation.TestOAuthFlowIntegration" name="test_complete_oauth_flow" time="0.013"><failure message="assert 500 == 302&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">auth_service\tests\test_oauth_state_validation.py:230: in test_complete_oauth_flow
+    assert init_response.status_code == 302
+E   assert 500 == 302
+E    +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code</failure></testcase><testcase classname="tests.test_session_security_cycles_36_40.TestSessionSecurity" name="test_session_hijacking_prevention_validates_client_fingerprint" time="0.005"><error message="failed on setup with &quot;AttributeError: 'SessionManager' object has no attribute 'initialize'&quot;">auth_service\tests\test_session_security_cycles_36_40.py:43: in session_manager
+    await manager.initialize()
+          ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SessionManager' object has no attribute 'initialize'</error></testcase><testcase classname="tests.test_session_security_cycles_36_40.TestSessionSecurity" name="test_concurrent_session_limit_prevents_account_sharing" time="0.006"><error message="failed on setup with &quot;AttributeError: 'SessionManager' object has no attribute 'initialize'&quot;">auth_service\tests\test_session_security_cycles_36_40.py:43: in session_manager
+    await manager.initialize()
+          ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SessionManager' object has no attribute 'initialize'</error></testcase><testcase classname="tests.test_session_security_cycles_36_40.TestSessionSecurity" name="test_session_timeout_enforcement_prevents_stale_access" time="0.006"><error message="failed on setup with &quot;AttributeError: 'SessionManager' object has no attribute 'initialize'&quot;">auth_service\tests\test_session_security_cycles_36_40.py:43: in session_manager
+    await manager.initialize()
+          ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SessionManager' object has no attribute 'initialize'</error></testcase><testcase classname="tests.test_session_security_cycles_36_40.TestSessionSecurity" name="test_session_activity_tracking_detects_anomalous_behavior" time="0.009"><error message="failed on setup with &quot;AttributeError: 'SessionManager' object has no attribute 'initialize'&quot;">auth_service\tests\test_session_security_cycles_36_40.py:43: in session_manager
+    await manager.initialize()
+          ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SessionManager' object has no attribute 'initialize'</error></testcase><testcase classname="tests.test_session_security_cycles_36_40.TestSessionSecurity" name="test_session_invalidation_cascade_prevents_orphaned_sessions" time="0.006"><error message="failed on setup with &quot;AttributeError: 'SessionManager' object has no attribute 'initialize'&quot;">auth_service\tests\test_session_security_cycles_36_40.py:43: in session_manager
+    await manager.initialize()
+          ^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'SessionManager' object has no attribute 'initialize'</error></testcase><testcase classname="tests.test_token_validation_security_cycles_31_35.TestTokenValidationSecurity" name="test_jwt_signature_tampering_detection_prevents_privilege_escalation" time="0.003" /><testcase classname="tests.test_token_validation_security_cycles_31_35.TestTokenValidationSecurity" name="test_token_expiration_enforcement_prevents_stale_access" time="1.505"><failure message="Failed: DID NOT RAISE &lt;class 'jwt.exceptions.ExpiredSignatureError'&gt;">auth_service\tests\test_token_validation_security_cycles_31_35.py:129: in test_token_expiration_enforcement_prevents_stale_access
+    with pytest.raises(jwt.ExpiredSignatureError):
+E   Failed: DID NOT RAISE &lt;class 'jwt.exceptions.ExpiredSignatureError'&gt;</failure></testcase><testcase classname="tests.test_token_validation_security_cycles_31_35.TestTokenValidationSecurity" name="test_token_replay_attack_detection_prevents_reuse" time="0.005"><failure message="AssertionError: Token replay not detected&#10;assert False">auth_service\tests\test_token_validation_security_cycles_31_35.py:162: in test_token_replay_attack_detection_prevents_reuse
+    assert is_replay, "Token replay not detected"
+E   AssertionError: Token replay not detected
+E   assert False</failure></testcase><testcase classname="tests.test_token_validation_security_cycles_31_35.TestTokenValidationSecurity" name="test_token_revocation_enforcement_blocks_compromised_tokens" time="0.007" /><testcase classname="tests.test_token_validation_security_cycles_31_35.TestTokenValidationSecurity" name="test_concurrent_token_validation_prevents_race_conditions" time="0.015" /></testsuite></testsuites>

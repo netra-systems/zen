@@ -6,21 +6,35 @@ Tests the API endpoints for tool management including:
 - Getting tool categories
 - Executing tools
 - Permission checking
+- CORS validation for all endpoints
+
+Business Value Justification (BVJ):
+- Segment: ALL (Tools API is core to platform functionality)
+- Business Goal: Ensure tools API works correctly with CORS for frontend access
+- Value Impact: Critical for user interactions with AI optimization tools
+- Strategic Impact: Foundation for tool marketplace and AI capabilities
 """
 
 import pytest
 from httpx import AsyncClient
 from unittest.mock import patch, AsyncMock, MagicMock
+from typing import Dict, Any
 
 from netra_backend.app.main import app
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.unified_tool_registry import UnifiedTool
 from netra_backend.tests.test_utils import create_test_user, create_test_token
+from tests.integration.cors_validation_utils import (
+    CORSTestMixin, create_cors_request_headers, assert_cors_valid
+)
 
 
-@pytest.mark.asyncio
-class TestUnifiedToolsAPI:
-    """Test unified tools API endpoints"""
+class TestUnifiedToolsAPI(CORSTestMixin):
+    """Test unified tools API endpoints with CORS validation"""
+    
+    def setup_method(self):
+        """Set up CORS testing for each test method."""
+        self.setUp_cors("development")
     
     @pytest.fixture
     async def client(self):
@@ -336,3 +350,86 @@ class TestUnifiedToolsAPI:
         assert results[0]["success"] is True
         assert results[1]["success"] is True
         assert results[2]["success"] is False
+    
+    # CORS Validation Tests
+    
+    async def test_tools_api_cors_preflight(self, client, mock_registry):
+        """Test CORS preflight requests work for tools API endpoints"""
+        test_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+        endpoints = ["/api/tools/", "/api/tools/execute", "/api/tools/plan"]
+        
+        for origin in test_origins:
+            for endpoint in endpoints:
+                headers = create_cors_request_headers(origin, "OPTIONS")
+                response = await client.options(endpoint, headers=headers)
+                
+                # Should get CORS headers even for auth-required endpoints
+                assert response.status_code in [200, 204, 401]  # 401 is OK for OPTIONS
+                
+                if response.status_code in [200, 204]:
+                    assert_cors_valid(response, origin)
+    
+    async def test_tools_api_cors_actual_requests(self, client, auth_headers, mock_registry):
+        """Test actual CORS requests work for tools API endpoints"""
+        origin = "http://localhost:3000"
+        
+        # Test GET endpoints
+        get_endpoints = ["/api/tools/", "/api/tools/plan"]
+        
+        for endpoint in get_endpoints:
+            headers = {**auth_headers, **create_cors_request_headers(origin, "GET")}
+            response = await client.get(endpoint, headers=headers)
+            
+            assert response.status_code == 200
+            assert_cors_valid(response, origin)
+    
+    async def test_tools_api_cors_post_requests(self, client, auth_headers, mock_registry):
+        """Test POST CORS requests work for tools API endpoints"""
+        origin = "http://localhost:3000"
+        
+        # Test POST endpoint
+        headers = {**auth_headers, **create_cors_request_headers(origin, "POST")}
+        request_data = {
+            "tool_name": "analyzer",
+            "parameters": {"input": "test"}
+        }
+        
+        mock_registry.execute_tool = AsyncMock(return_value={
+            "success": True,
+            "result": {"output": "test_result"},
+            "error": None
+        })
+        
+        response = await client.post("/api/tools/execute", json=request_data, headers=headers)
+        
+        assert response.status_code == 200
+        assert_cors_valid(response, origin)
+    
+    async def test_tools_api_cors_invalid_origin_rejected(self, client, auth_headers, mock_registry):
+        """Test invalid origins are properly rejected"""
+        invalid_origin = "http://malicious-site.com"
+        
+        headers = {**auth_headers, **create_cors_request_headers(invalid_origin, "GET")}
+        response = await client.get("/api/tools/", headers=headers)
+        
+        # Should still return 200 for the API call but not have CORS approval
+        assert response.status_code == 200
+        
+        # Should not get CORS approval for invalid origin
+        cors_origin = response.headers.get("Access-Control-Allow-Origin")
+        assert cors_origin != invalid_origin
+    
+    async def test_tools_api_cors_credentials_support(self, client, auth_headers, mock_registry):
+        """Test tools API supports CORS with credentials"""
+        origin = "http://localhost:3000"
+        
+        headers = create_cors_request_headers(origin, "OPTIONS")
+        response = await client.options("/api/tools/", headers=headers)
+        
+        if response.status_code in [200, 204]:
+            credentials_header = response.headers.get("Access-Control-Allow-Credentials")
+            assert credentials_header == "true"
+    
+    async def test_tools_api_cors_all_endpoints(self, client, auth_headers, mock_registry):
+        """Test CORS for all major tools API endpoints"""
+        await self.test_cors_for_all_origins(client, "/api/tools/")

@@ -117,10 +117,6 @@ services:
       GEMINI_API_KEY: ${TEST_GEMINI_API_KEY:-test-gemini-api-key}
       GOOGLE_API_KEY: ${TEST_GOOGLE_API_KEY:-test-google-api-key}
       
-      # OAuth Test Config
-      GOOGLE_CLIENT_ID: test-google-client-id-for-integration-testing
-      GOOGLE_CLIENT_SECRET: test-google-client-secret-for-integration-testing
-      
       # Frontend URL
       FRONTEND_URL: http://localhost:3001
       CORS_ORIGINS: '["http://localhost:3001", "http://frontend-test:3001"]'

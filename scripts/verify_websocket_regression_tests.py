@@ -44,7 +44,7 @@ class WebSocketRegressionVerifier:
     def backup_files(self):
         """Backup original files."""
         self.backup_dir = tempfile.mkdtemp(prefix="websocket_backup_")
-        print(f"📁 Backing up files to: {self.backup_dir}")
+        print(f"Backing up files to: {self.backup_dir}")
         
         # Backup utils.py
         shutil.copy2(self.utils_file, Path(self.backup_dir) / "utils.py")
@@ -57,7 +57,7 @@ class WebSocketRegressionVerifier:
         if not self.backup_dir:
             return
         
-        print("♻️  Restoring original files...")
+        print("Restoring original files...")
         
         # Restore utils.py
         shutil.copy2(Path(self.backup_dir) / "utils.py", self.utils_file)
@@ -71,7 +71,7 @@ class WebSocketRegressionVerifier:
     
     def break_state_checking(self):
         """Break is_websocket_connected to only check application_state."""
-        print("🔨 Breaking WebSocket state checking (simulating bug)...")
+        print("Breaking WebSocket state checking (simulating bug)...")
         
         with open(self.utils_file, 'r') as f:
             content = f.read()
@@ -90,11 +90,11 @@ class WebSocketRegressionVerifier:
         with open(self.utils_file, 'w') as f:
             f.write(content)
         
-        print("   ❌ State checking broken - only checks application_state")
+        print("   [BROKEN] State checking broken - only checks application_state")
     
     def break_subprotocol_negotiation(self):
         """Remove subprotocol from websocket.accept()."""
-        print("🔨 Breaking WebSocket subprotocol negotiation (simulating bug)...")
+        print("Breaking WebSocket subprotocol negotiation (simulating bug)...")
         
         with open(self.websocket_file, 'r') as f:
             content = f.read()
@@ -112,11 +112,11 @@ class WebSocketRegressionVerifier:
         with open(self.websocket_file, 'w') as f:
             f.write(content)
         
-        print("   ❌ Subprotocol negotiation broken - accept() missing subprotocol")
+        print("   [BROKEN] Subprotocol negotiation broken - accept() missing subprotocol")
     
     def run_tests(self, test_file: str) -> Tuple[bool, str]:
         """Run a test file and return success status and output."""
-        print(f"🧪 Running: {test_file}")
+        print(f"Running: {test_file}")
         
         test_path = self.project_root / test_file
         if not test_path.exists():
@@ -162,7 +162,7 @@ class WebSocketRegressionVerifier:
         self.break_state_checking()
         self.break_subprotocol_negotiation()
         
-        print("\n📊 Running tests with broken implementation...")
+        print("\nRunning tests with broken implementation...")
         
         results = {}
         for test_file in self.test_files:
@@ -171,18 +171,18 @@ class WebSocketRegressionVerifier:
             
             test_name = Path(test_file).name
             if success:
-                print(f"   ⚠️  {test_name}: PASSED (should have FAILED!)")
+                print(f"   WARNING: {test_name}: PASSED (should have FAILED!)")
             else:
-                print(f"   ✅ {test_name}: FAILED as expected - {output}")
+                print(f"   GOOD: {test_name}: FAILED as expected - {output}")
         
         # Check if tests properly failed
         all_failed = all(not success for success, _ in results.values())
         
         if all_failed:
-            print("\n✅ SUCCESS: All tests FAILED with broken implementation (they catch the bugs!)")
+            print("\nSUCCESS: All tests FAILED with broken implementation (they catch the bugs!)")
             return True
         else:
-            print("\n❌ ERROR: Some tests PASSED with broken implementation (not catching bugs!)")
+            print("\nERROR: Some tests PASSED with broken implementation (not catching bugs!)")
             for test_file, (success, output) in results.items():
                 if success:
                     print(f"   Problem test: {test_file}")
@@ -197,7 +197,7 @@ class WebSocketRegressionVerifier:
         # Restore the correct implementation
         self.restore_files()
         
-        print("\n📊 Running tests with fixed implementation...")
+        print("\nRunning tests with fixed implementation...")
         
         results = {}
         for test_file in self.test_files:
@@ -206,18 +206,18 @@ class WebSocketRegressionVerifier:
             
             test_name = Path(test_file).name
             if success:
-                print(f"   ✅ {test_name}: PASSED - {output}")
+                print(f"   GOOD: {test_name}: PASSED - {output}")
             else:
-                print(f"   ❌ {test_name}: FAILED (should have PASSED!)")
+                print(f"   ERROR: {test_name}: FAILED (should have PASSED!)")
         
         # Check if all tests passed
         all_passed = all(success for success, _ in results.values())
         
         if all_passed:
-            print("\n✅ SUCCESS: All tests PASSED with fixed implementation!")
+            print("\nSUCCESS: All tests PASSED with fixed implementation!")
             return True
         else:
-            print("\n❌ ERROR: Some tests FAILED with fixed implementation!")
+            print("\nERROR: Some tests FAILED with fixed implementation!")
             for test_file, (success, output) in results.items():
                 if not success:
                     print(f"   Problem test: {test_file}")
@@ -225,7 +225,7 @@ class WebSocketRegressionVerifier:
     
     def run_verification(self) -> bool:
         """Run the complete verification process."""
-        print("🔍 WebSocket Regression Test Verification")
+        print("WebSocket Regression Test Verification")
         print("=========================================")
         print("This will verify that regression tests properly catch the bugs.\n")
         
@@ -245,7 +245,7 @@ class WebSocketRegressionVerifier:
             print("="*60)
             
             if tests_catch_bugs and tests_validate_fixes:
-                print("✅ All regression tests are working correctly!")
+                print("SUCCESS: All regression tests are working correctly!")
                 print("   - They FAIL when bugs are present")
                 print("   - They PASS when fixes are applied")
                 print("\nThese tests will prevent regression of:")
@@ -253,7 +253,7 @@ class WebSocketRegressionVerifier:
                 print("   2. WebSocket subprotocol negotiation bug")
                 return True
             else:
-                print("❌ Regression tests need attention:")
+                print("ERROR: Regression tests need attention:")
                 if not tests_catch_bugs:
                     print("   - Tests don't properly detect the bugs")
                 if not tests_validate_fixes:
@@ -261,7 +261,7 @@ class WebSocketRegressionVerifier:
                 return False
                 
         except Exception as e:
-            print(f"❌ Verification failed with error: {e}")
+            print(f"ERROR: Verification failed with error: {e}")
             return False
         finally:
             # Always restore original files
@@ -274,7 +274,7 @@ def main():
     
     # Check if we're in Docker environment
     if os.path.exists("/.dockerenv"):
-        print("⚠️  Running in Docker environment")
+        print("WARNING: Running in Docker environment")
         print("   Make sure backend service is accessible at localhost:8000")
         response = input("Continue? [y/N]: ")
         if response.lower() != 'y':
