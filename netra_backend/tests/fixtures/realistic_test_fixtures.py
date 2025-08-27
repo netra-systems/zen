@@ -6,6 +6,8 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import asyncio
 from typing import Any, Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -116,7 +118,7 @@ async def realistic_llm_responses(realistic_fixtures):
     service = realistic_fixtures.data_service
     
     responses = []
-    for model in ["gpt-4", "claude-3-opus", "gemini-pro"]:
+    for model in [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "gemini-pro"]:
         for _ in range(10):
             response = service.generate_realistic_llm_response(
                 model=model,

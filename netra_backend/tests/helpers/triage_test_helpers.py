@@ -7,6 +7,8 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent import (
@@ -221,7 +223,7 @@ class EntityExtractionHelpers:
     def create_complex_entities():
         """Create complex entities for testing"""
         return ExtractedEntities(
-            models_mentioned=["gpt-4", "claude-2", "llama-2"],
+            models_mentioned=[LLMModel.GEMINI_2_5_FLASH.value, "claude-2", "llama-2"],
             metrics_mentioned=["cost", "latency", "throughput", "accuracy"],
             thresholds=[
                 {"type": "time", "value": 100, "unit": "ms"},
@@ -250,7 +252,7 @@ class EntityExtractionHelpers:
     @staticmethod
     def get_expected_models():
         """Get expected model names"""
-        return {"gpt-4-turbo", "claude-3-opus", "llama-2-70b-chat", 
+        return {LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "llama-2-70b-chat", 
                 "gemini-pro", "palm-2"}
 
 class IntentHelpers:

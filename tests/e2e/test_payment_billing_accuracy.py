@@ -28,6 +28,8 @@ REQUIREMENTS:
 import time
 import uuid
 from decimal import Decimal
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -124,9 +126,9 @@ async def test_usage_tracking_cost_calculation_accuracy():
         
         # Record multiple usage events
         usage_events = [
-            {"operation": "data_optimization", "tokens": 5000, "model": "gpt-4"},
-            {"operation": "analytics_generation", "tokens": 3000, "model": "gpt-4-turbo"},
-            {"operation": "report_creation", "tokens": 2000, "model": "gpt-3.5-turbo"}
+            {"operation": "data_optimization", "tokens": 5000, "model": LLMModel.GEMINI_2_5_FLASH.value},
+            {"operation": "analytics_generation", "tokens": 3000, "model": LLMModel.GEMINI_2_5_FLASH.value},
+            {"operation": "report_creation", "tokens": 2000, "model": LLMModel.GEMINI_2_5_FLASH.value}
         ]
         
         total_expected_cost_cents = 0
@@ -193,7 +195,7 @@ async def test_subscription_renewal_invoice_generation():
             # Record usage during billing period
             for _ in range(10):  # Simulate 10 operations
                 billing_validator.usage_tracker.record_usage(
-                    user_data["id"], "ai_optimization", 1500, "gpt-4"
+                    user_data["id"], "ai_optimization", 1500, LLMModel.GEMINI_2_5_FLASH.value
                 )
             
             # Generate renewal invoice
@@ -386,7 +388,7 @@ async def test_enterprise_tier_billing_accuracy_comprehensive():
             for i in range(50):  # 50 high-value operations
                 billing_validator.usage_tracker.record_usage(
                     user_data["id"], f"enterprise_operation_{i}", 
-                    10000, "gpt-4"  # Large token usage
+                    10000, LLMModel.GEMINI_2_5_FLASH.value  # Large token usage
                 )
             
             # Execute comprehensive billing validation
@@ -461,7 +463,7 @@ async def test_billing_system_performance_under_load():
             # Add usage for each user
             for _ in range(5):
                 billing_validator.usage_tracker.record_usage(
-                    user_data["id"], "load_test_operation", 2000, "gpt-4"
+                    user_data["id"], "load_test_operation", 2000, LLMModel.GEMINI_2_5_FLASH.value
                 )
             
             # Validate billing accuracy for each

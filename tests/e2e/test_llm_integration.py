@@ -9,6 +9,8 @@ import time
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -58,8 +60,8 @@ class MockCostCalculator:
     
     def get_cost_optimal_model(self, provider, cost_tier: str) -> Optional[str]:
         """Get mock optimal model for cost tier"""
-        tier_models = {"economy": "gpt-3.5-turbo", "premium": "gpt-4"}
-        return tier_models.get(cost_tier, "gpt-3.5-turbo")
+        tier_models = {"economy": LLMModel.GEMINI_2_5_FLASH.value, "premium": LLMModel.GEMINI_2_5_FLASH.value}
+        return tier_models.get(cost_tier, LLMModel.GEMINI_2_5_FLASH.value)
     
     def estimate_budget_impact(self, token_count: int, provider, model: str) -> Decimal:
         """Estimate budget impact for token usage"""
@@ -289,7 +291,7 @@ class TestLLMCostTracking:
     def test_llm_cost_tracking_token_calculation(self, llm_tester, sample_token_usage):
         """Test accurate token cost calculation"""
         cost = llm_tester.cost_calculator.calculate_cost(
-            sample_token_usage, "openai", "gpt-3.5-turbo"
+            sample_token_usage, "openai", LLMModel.GEMINI_2_5_FLASH.value
         )
         assert isinstance(cost, Decimal)
         assert cost > 0
@@ -309,7 +311,7 @@ class TestLLMCostTracking:
     def test_llm_cost_tracking_budget_impact_estimation(self, llm_tester):
         """Test budget impact estimation for usage planning"""
         impact = llm_tester.cost_calculator.estimate_budget_impact(
-            10000, "openai", "gpt-4"
+            10000, "openai", LLMModel.GEMINI_2_5_FLASH.value
         )
         assert isinstance(impact, Decimal)
         assert impact > 0
@@ -322,7 +324,7 @@ class TestLLMCostTracking:
     
     def _calculate_provider_cost(self, tester: LLMIntegrationTester, provider: str, usage: MockTokenUsage) -> Decimal:
         """Calculate cost for specific provider"""
-        models = {"openai": "gpt-3.5-turbo", "anthropic": "claude-3-haiku"}
+        models = {"openai": LLMModel.GEMINI_2_5_FLASH.value, "anthropic": "claude-3-haiku"}
         return tester.cost_calculator.calculate_cost(usage, provider, models[provider])
 
 

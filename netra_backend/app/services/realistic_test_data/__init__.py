@@ -6,6 +6,8 @@ realistic patterns for LLM responses, logs, workloads, and performance scenarios
 """
 
 from typing import Any, Dict, List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.services.realistic_test_data.llm_response_generator import (
     LLMResponseGenerator,
@@ -36,7 +38,7 @@ class RealisticTestDataService:
     
     def generate_realistic_llm_response(
         self,
-        model: str = "gpt-4",
+        model: str = LLMModel.GEMINI_2_5_FLASH.value,
         prompt_tokens: Optional[int] = None,
         include_errors: bool = True
     ) -> Dict[str, Any]:

@@ -7,6 +7,8 @@ Maximum 300 lines, functions ≤8 lines.
 from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
 from typing import Dict, Optional, Tuple
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from pydantic import BaseModel
 
@@ -61,17 +63,17 @@ class CostCalculatorService:
         """Get OpenAI model pricing configuration."""
         return {
             "openai_gpt-4": ModelCostInfo(
-                provider=LLMProvider.OPENAI, model_name="gpt-4",
+                provider=LLMProvider.OPENAI, model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 prompt_cost_per_1k=Decimal("0.03"), completion_cost_per_1k=Decimal("0.06"),
                 cost_tier=CostTier.PREMIUM, performance_score=95.0
             ),
             "openai_gpt-4-turbo": ModelCostInfo(
-                provider=LLMProvider.OPENAI, model_name="gpt-4-turbo",
+                provider=LLMProvider.OPENAI, model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 prompt_cost_per_1k=Decimal("0.01"), completion_cost_per_1k=Decimal("0.03"),
                 cost_tier=CostTier.BALANCED, performance_score=92.0
             ),
             "openai_gpt-3.5-turbo": ModelCostInfo(
-                provider=LLMProvider.OPENAI, model_name="gpt-3.5-turbo",
+                provider=LLMProvider.OPENAI, model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 prompt_cost_per_1k=Decimal("0.0015"), completion_cost_per_1k=Decimal("0.002"),
                 cost_tier=CostTier.ECONOMY, performance_score=75.0
             )
@@ -81,7 +83,7 @@ class CostCalculatorService:
         """Get Anthropic model pricing configuration."""
         return {
             "anthropic_claude-3-opus": ModelCostInfo(
-                provider=LLMProvider.ANTHROPIC, model_name="claude-3-opus",
+                provider=LLMProvider.ANTHROPIC, model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 prompt_cost_per_1k=Decimal("0.015"), completion_cost_per_1k=Decimal("0.075"),
                 cost_tier=CostTier.PREMIUM, performance_score=96.0
             ),

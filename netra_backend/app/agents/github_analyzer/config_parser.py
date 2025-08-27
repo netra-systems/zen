@@ -32,7 +32,7 @@ class ConfigurationExtractor:
     def _get_api_keys(self) -> List[str]:
         """Get API key patterns."""
         return [
-            "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "CLAUDE_API_KEY",
+            "GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "CLAUDE_API_KEY",
             "HUGGINGFACE_TOKEN", "COHERE_API_KEY", "AI21_API_KEY",
             "REPLICATE_API_TOKEN", "AZURE_OPENAI_KEY"
         ]

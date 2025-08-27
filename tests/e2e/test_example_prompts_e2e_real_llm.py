@@ -19,6 +19,8 @@ ARCHITECTURAL COMPLIANCE:
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 
@@ -99,7 +101,7 @@ class ExamplePromptsTestData:
             ExamplePromptTestCase(
                 prompt_id="EP-005", 
                 category="model-selection",
-                prompt_text="I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
+                prompt_text="I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
                 expected_agents=["triage", "data", "optimization_core", "reporting"],
                 expected_output_type="model_effectiveness_analysis",
                 complexity_score=9,

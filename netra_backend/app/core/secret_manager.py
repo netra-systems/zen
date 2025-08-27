@@ -438,7 +438,7 @@ class SecretManager:
     def _get_additional_environment_mapping(self) -> Dict[str, str]:
         """Get additional service environment variable mappings."""
         return {
-            "anthropic-api-key": "ANTHROPIC_API_KEY", "openai-api-key": "OPENAI_API_KEY",
+            "anthropic-api-key": "ANTHROPIC_API_KEY", "openai-api-key": "GOOGLE_API_KEY",
             "cohere-api-key": "COHERE_API_KEY", "mistral-api-key": "MISTRAL_API_KEY",
             "slack-webhook-url": "SLACK_WEBHOOK_URL", "sendgrid-api-key": "SENDGRID_API_KEY",
             "sentry-dsn": "SENTRY_DSN"

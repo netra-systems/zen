@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Load Balancer and Cloud Armor Deployment</title>
+  <date>2025-08-26</date>
+  <category>Infrastructure</category>
+  <subcategory>GCP Load Balancer</subcategory>
+  
+  <summary>
+    Successfully deployed Google Cloud Load Balancer with Cloud Armor protection for staging environment.
+    Key achievements include centralized security, DDoS protection, WAF rules, and CDN configuration.
+  </summary>
+
+  <environment>
+    <project>netra-staging</project>
+    <region>us-central1</region>
+    <ip_address>34.54.41.44</ip_address>
+  </environment>
+
+  <key_learnings>
+    <learning id="1" priority="high">
+      <title>Load Balancer Host-Based Routing</title>
+      <description>
+        Load Balancers use HTTP Host headers for routing, not DNS. All subdomains point to the same IP,
+        and the Load Balancer examines the Host header to determine which backend service to route to.
+      </description>
+      <impact>Simplified DNS management and centralized traffic control</impact>
+    </learning>
+
+    <learning id="2" priority="high">
+      <title>Cloud Run Domain Mappings Conflict</title>
+      <description>
+        Cloud Run domain mappings must be removed when using Load Balancer to avoid routing conflicts
+        and security bypass. Direct Cloud Run URLs remain available for emergency access.
+      </description>
+      <commands>
+        <command>gcloud beta run domain-mappings delete --domain=api.staging.netrasystems.ai --region=us-central1 --quiet</command>
+      </commands>
+    </learning>
+
+    <learning id="3" priority="high">
+      <title>Serverless NEG Limitations</title>
+      <description>
+        Serverless Network Endpoint Groups (NEGs) for Cloud Run don't support health checks.
+        Health checking is managed internally by Cloud Run.
+      </description>
+      <solution>Remove health_checks parameter from backend services using serverless NEGs</solution>
+    </learning>
+
+    <learning id="4" priority="medium">
+      <title>Cloud Armor Expression Syntax</title>
+      <description>
+        Cloud Armor uses a limited subset of CEL (Common Expression Language).
+        No support for 'in' operator, regex capture groups, or case-insensitive flags.
+      </description>
+      <examples>
+        <example type="incorrect">origin.region_code in ['CN', 'RU', 'KP']</example>
+        <example type="correct">origin.region_code == 'CN' || origin.region_code == 'RU' || origin.region_code == 'KP'</example>
+        <example type="incorrect">request.headers['user-agent'].matches('(?i)(bot|crawler)')</example>
+        <example type="correct">request.headers['user-agent'].lower().contains('bot')</example>
+      </examples>
+    </learning>
+
+    <learning id="5" priority="medium">
+      <title>SSL Certificate Limitations</title>
+      <description>
+        Google-managed SSL certificates don't support wildcard domains. Each subdomain must be
+        explicitly listed. Certificates provision automatically after DNS points to Load Balancer.
+      </description>
+      <provisioning_time>15-60 minutes after DNS propagation</provisioning_time>
+    </learning>
+
+    <learning id="6" priority="high">
+      <title>Service Account Permissions</title>
+      <description>
+        Service account requires compute.admin role for creating Load Balancer and Security Policies.
+        Standard deployment service accounts may need additional permissions.
+      </description>
+      <required_role>roles/compute.admin</required_role>
+    </learning>
+
+    <learning id="7" priority="medium">
+      <title>Terraform Deployment Strategy</title>
+      <description>
+        Use targeted applies with -target flag for complex infrastructure to handle dependencies
+        and avoid timeout issues. Verify with terraform state list after apparent timeouts.
+      </description>
+      <order>
+        <step>Core resources (IP, security policy)</step>
+        <step>SSL certificates and NEGs</step>
+        <step>Backend services</step>
+        <step>URL maps and proxies</step>
+        <step>Forwarding rules</step>
+      </order>
+    </learning>
+
+    <learning id="8" priority="low">
+      <title>CDN Configuration for Frontend</title>
+      <description>
+        CDN must be explicitly enabled with enable_cdn = true for backend services that need caching.
+        CDN policy configuration requires cache_key_policy to be defined.
+      </description>
+    </learning>
+  </key_learnings>
+
+  <issues_and_solutions>
+    <issue>
+      <problem>Missing notification_channels variable in Terraform</problem>
+      <solution>Add variable definition with empty default list</solution>
+    </issue>
+    
+    <issue>
+      <problem>Cloud Armor expression syntax errors</problem>
+      <solution>Replace array membership checks with OR operators, remove regex flags</solution>
+    </issue>
+    
+    <issue>
+      <problem>Backend service already exists error</problem>
+      <solution>Use terraform import to import existing resource into state</solution>
+      <command>terraform import google_compute_backend_service.frontend_backend projects/netra-staging/global/backendServices/staging-frontend-backend</command>
+    </issue>
+  </issues_and_solutions>
+
+  <verification_steps>
+    <step>Check Load Balancer IP: gcloud compute addresses describe staging-lb-ip --global</step>
+    <step>Verify backend services: gcloud compute backend-services list --filter="name:staging*"</step>
+    <step>Test routing: curl -I -H "Host: api.staging.netrasystems.ai" http://34.54.41.44</step>
+    <step>Monitor SSL status: gcloud compute ssl-certificates describe staging-ssl-cert</step>
+    <step>Check security events: gcloud logging read "jsonPayload.enforcedSecurityPolicy.outcome='DENY'"</step>
+  </verification_steps>
+
+  <cost_analysis>
+    <component name="Load Balancer" monthly_cost="18" currency="USD"/>
+    <component name="Cloud Armor" monthly_cost="5" currency="USD" additional="1 per million requests"/>
+    <component name="SSL Certificates" monthly_cost="0" currency="USD" note="Google-managed certificates are free"/>
+    <total_estimated monthly_cost="35-50" currency="USD" note="Plus usage-based charges"/>
+  </cost_analysis>
+
+  <security_improvements>
+    <improvement>DDoS protection with adaptive protection</improvement>
+    <improvement>WAF rules for OWASP Top 10</improvement>
+    <improvement>Rate limiting per IP and per endpoint</improvement>
+    <improvement>Geographic restrictions and throttling</improvement>
+    <improvement>Centralized security logging</improvement>
+  </security_improvements>
+
+  <emergency_procedures>
+    <procedure type="rollback">
+      <step>Re-enable Cloud Run domain mappings if needed</step>
+      <step>Update DNS to point back to Cloud Run</step>
+      <step>Remove Load Balancer forwarding rules</step>
+    </procedure>
+    <direct_access_urls>
+      <url service="backend">https://netra-backend-staging-fmk3y4dxgq-uc.a.run.app</url>
+      <url service="auth">https://netra-auth-service-fmk3y4dxgq-uc.a.run.app</url>
+      <url service="frontend">https://netra-frontend-staging-fmk3y4dxgq-uc.a.run.app</url>
+    </direct_access_urls>
+  </emergency_procedures>
+
+  <next_steps>
+    <step priority="1">Update DNS records to point to Load Balancer IP</step>
+    <step priority="2">Wait for SSL certificate provisioning</step>
+    <step priority="3">Update Cloud Run ingress settings</step>
+    <step priority="4">Monitor traffic and security events</step>
+  </next_steps>
+</learning>

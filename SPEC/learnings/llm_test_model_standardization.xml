@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>LLM Test Model Standardization to Gemini</title>
+    
+    <context>
+        The LLM test infrastructure was using GPT-4 and Claude-3-Opus as default test models.
+        This created inconsistency with actual deployment and increased test maintenance complexity.
+    </context>
+    
+    <learning>
+        Standardize all LLM test configurations to use Gemini models (GEMINI_2_5_FLASH and GEMINI_2_5_PRO)
+        as the default test models for consistency and better alignment with production usage.
+    </learning>
+    
+    <implementation>
+        <change>
+            <file>netra_backend/tests/e2e/infrastructure/llm_test_manager.py</file>
+            <description>
+                - Updated LLMTestModel enum to prioritize Gemini models
+                - Removed GPT_4 and CLAUDE_3_OPUS
+                - Added GEMINI_2_5_FLASH and GEMINI_2_5_PRO
+                - Updated default model in ask_llm to use gemini-2.0-flash-exp
+                - Updated client creation logic to focus on Gemini clients
+            </description>
+        </change>
+        
+        <change>
+            <file>netra_backend/tests/e2e/infrastructure/test_llm_test_manager.py</file>
+            <description>
+                - Updated test_config fixture to use GEMINI_2_5_FLASH and GEMINI_2_5_PRO
+                - Replaced all GPT_4 references with GEMINI_2_5_FLASH
+                - Updated environment test models to use Gemini model names
+            </description>
+        </change>
+        
+        <change>
+            <file>netra_backend/tests/e2e/infrastructure/llm_mock_client.py</file>
+            <description>
+                - Updated model delays to reflect new Gemini models
+                - Updated model traits to provide appropriate characteristics for Gemini models
+            </description>
+        </change>
+    </implementation>
+    
+    <benefits>
+        <benefit>Consistent test model usage across the codebase</benefit>
+        <benefit>Better alignment with production deployment using Gemini models</benefit>
+        <benefit>Reduced confusion about which models to use for testing</benefit>
+        <benefit>Simplified client creation logic focusing on fewer providers</benefit>
+    </benefits>
+    
+    <prevention>
+        To prevent regression:
+        1. Always use GEMINI_2_5_FLASH as the default test model
+        2. Use GEMINI_2_5_PRO for tests requiring advanced reasoning
+        3. Do not reintroduce GPT or Claude models unless explicitly required for cross-provider testing
+        4. Update any new test fixtures to use the standard Gemini models
+        5. Ensure model enum values match actual API model names (e.g., "gemini-2.0-flash-exp")
+        
+        Critical checkpoints:
+        - When creating new test fixtures, copy from existing fixtures that use Gemini models
+        - During code reviews, verify no hardcoded "gpt-4" or "claude-3-opus" strings
+        - Run validation script: python scripts/validate_llm_test_models.py
+        - Check that LLMTestModel enum only contains approved models
+        - Ensure mock client configurations support all active models
+        
+        Common mistakes to avoid:
+        - DO NOT use "gpt-4" as fallback model in error handlers
+        - DO NOT hardcode model names in test data files
+        - DO NOT create test fixtures with models=[LLMTestModel.GPT_4, ...]
+        - DO NOT assume OpenAI API key availability in test environments
+    </prevention>
+    
+    <regression-indicators>
+        Signs that regression has occurred:
+        - Tests failing with "AttributeError: type object 'LLMTestModel' has no attribute 'GPT_4'"
+        - Environment configuration looking for OPENAI_API_KEY
+        - Mock clients returning GPT-4 specific response patterns
+        - Test fixtures using outdated model lists
+        - Import errors related to removed OpenAI client initialization
+    </regression-indicators>
+    
+    <related>
+        <spec>test_infrastructure_architecture.xml</spec>
+        <spec>testing.xml</spec>
+        <spec>environment_aware_testing.xml</spec>
+    </related>
+</learning>

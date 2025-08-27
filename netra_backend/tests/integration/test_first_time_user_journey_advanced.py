@@ -12,6 +12,8 @@ Advanced first-time user journey tests including API integration and team featur
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -241,7 +243,7 @@ class TestFirstTimeUserJourneyAdvanced:
 
     async def _configure_model_routing(self, setup, user, llm_system):
         """Configure intelligent model routing"""
-        routing_config = {"user_id": user.id, "routing_rules": {"cost_optimization": "gemini-2.5-flash", "complex_analysis": "gpt-4", "simple_queries": "claude-haiku"}, "optimization_enabled": True}
+        routing_config = {"user_id": user.id, "routing_rules": {"cost_optimization": "gemini-2.5-flash", "complex_analysis": LLMModel.GEMINI_2_5_FLASH.value, "simple_queries": "claude-haiku"}, "optimization_enabled": True}
         
         llm_system.route_model.return_value = {"model_selected": "gemini-2.5-flash", "reason": "cost_optimal"}
         

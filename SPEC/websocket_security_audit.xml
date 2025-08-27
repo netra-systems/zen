@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>WebSocket Security Configuration Audit</title>
+    <category>security</category>
+    <version>1.0</version>
+    <date>2025-08-26</date>
+    <status>verified</status>
+    <priority>high</priority>
+  </metadata>
+
+  <summary>
+    Comprehensive audit of WebSocket security configuration across development, staging, and production environments.
+    Verifies that appropriate security measures are in place for each environment while maintaining development efficiency.
+  </summary>
+
+  <business_value>
+    <segment>Platform/Internal</segment>
+    <goal>Security & Compliance</goal>
+    <impact>Ensures secure WebSocket communications in production while maintaining development velocity</impact>
+  </business_value>
+
+  <current_state>
+    <overview>
+      WebSocket security is correctly configured with environment-appropriate settings.
+      Development uses unencrypted connections (ws://) for simplicity, while staging/production enforce secure connections (wss://).
+    </overview>
+
+    <environment_configurations>
+      <development>
+        <protocol>ws://</protocol>
+        <endpoint>ws://localhost:8000/ws</endpoint>
+        <useWebSocketSecure>false</useWebSocketSecure>
+        <useHttps>false</useHttps>
+        <corsEnabled>false</corsEnabled>
+        <dynamicDiscovery>true</dynamicDiscovery>
+        <justification>
+          Local development doesn't require SSL certificates. Using ws:// is correct and expected.
+          SSL/TLS would add unnecessary complexity without security benefits on localhost.
+        </justification>
+      </development>
+
+      <test>
+        <protocol>ws://</protocol>
+        <endpoint>ws://localhost:8000/ws</endpoint>
+        <useWebSocketSecure>false</useWebSocketSecure>
+        <useHttps>false</useHttps>
+        <corsEnabled>false</corsEnabled>
+        <dynamicDiscovery>false</dynamicDiscovery>
+        <justification>Test environment mirrors development configuration for consistency</justification>
+      </test>
+
+      <staging>
+        <protocol>wss://</protocol>
+        <endpoint>wss://api.staging.netrasystems.ai/ws</endpoint>
+        <useWebSocketSecure>true</useWebSocketSecure>
+        <useHttps>true</useHttps>
+        <corsEnabled>true</corsEnabled>
+        <dynamicDiscovery>false</dynamicDiscovery>
+        <justification>Staging enforces secure connections to match production security posture</justification>
+      </staging>
+
+      <production>
+        <protocol>wss://</protocol>
+        <endpoint>wss://api.netrasystems.ai/ws</endpoint>
+        <useWebSocketSecure>true</useWebSocketSecure>
+        <useHttps>true</useHttps>
+        <corsEnabled>true</corsEnabled>
+        <dynamicDiscovery>false</dynamicDiscovery>
+        <justification>Production requires encrypted connections for security compliance</justification>
+      </production>
+    </environment_configurations>
+
+    <security_features>
+      <authentication>
+        <method>JWT via WebSocket subprotocol</method>
+        <implementation>
+          - Frontend encodes JWT token as Base64URL for safe transmission
+          - Token sent via Sec-WebSocket-Protocol header (browser-compatible)
+          - Backend validates JWT from subprotocol or Authorization header
+          - Tokens never exposed in URLs or query parameters
+        </implementation>
+      </authentication>
+
+      <token_security>
+        <location>frontend/services/webSocketService.ts</location>
+        <method>createSecureWebSocket</method>
+        <features>
+          - Automatic Bearer prefix handling
+          - Base64URL encoding for subprotocol safety
+          - Token prefix obfuscation in logs
+          - Secure URL generation removes any token parameters
+        </features>
+      </token_security>
+
+      <cors_handling>
+        <websocket_cors>Configured via configure_websocket_cors middleware</websocket_cors>
+        <upgrade_support>Proper handling of WebSocket upgrade requests</upgrade_support>
+      </cors_handling>
+    </security_features>
+
+    <key_files>
+      <frontend>
+        <file>frontend/lib/unified-api-config.ts</file>
+        <file>frontend/services/webSocketService.ts</file>
+        <file>frontend/providers/WebSocketProvider.tsx</file>
+      </frontend>
+      <backend>
+        <file>netra_backend/app/routes/websocket.py</file>
+        <file>netra_backend/app/websocket_core/auth.py</file>
+        <file>netra_backend/app/core/websocket_cors.py</file>
+      </backend>
+    </key_files>
+  </current_state>
+
+  <validation_results>
+    <check status="PASS">Development correctly uses ws:// protocol</check>
+    <check status="PASS">Staging enforces wss:// protocol</check>
+    <check status="PASS">Production enforces wss:// protocol</check>
+    <check status="PASS">JWT tokens secured via subprotocol, not URL parameters</check>
+    <check status="PASS">No localhost references in production/staging configs</check>
+    <check status="PASS">Environment detection is explicit and clear</check>
+    <check status="PASS">Single unified /ws endpoint reduces routing confusion</check>
+    <check status="PASS">Proper CORS configuration for WebSocket upgrades</check>
+  </validation_results>
+
+  <security_boundaries>
+    <development>
+      <boundary>Local network only</boundary>
+      <encryption>Not required (localhost)</encryption>
+      <rationale>Development on localhost doesn't benefit from SSL/TLS encryption</rationale>
+    </development>
+    <staging_production>
+      <boundary>Public internet</boundary>
+      <encryption>Required (wss://)</encryption>
+      <rationale>All production traffic must be encrypted for security compliance</rationale>
+    </staging_production>
+  </security_boundaries>
+
+  <best_practices>
+    <practice>Use ws:// for local development to avoid SSL certificate complexity</practice>
+    <practice>Enforce wss:// for all non-localhost environments</practice>
+    <practice>Send authentication tokens via WebSocket subprotocol, not URLs</practice>
+    <practice>Maintain clear environment detection logic</practice>
+    <practice>Use single unified WebSocket endpoint to reduce complexity</practice>
+    <practice>Implement proper CORS handling for WebSocket upgrade requests</practice>
+  </best_practices>
+
+  <recommendations>
+    <recommendation priority="info">
+      Current configuration is correct. No changes needed.
+      The use of ws:// in development is intentional and appropriate.
+    </recommendation>
+    <recommendation priority="low">
+      Consider adding WebSocket connection metrics/monitoring in production
+    </recommendation>
+    <recommendation priority="low">
+      Document WebSocket reconnection strategy for network interruptions
+    </recommendation>
+  </recommendations>
+
+  <compliance_notes>
+    <note>
+      This configuration complies with security best practices by:
+      1. Using appropriate encryption for each environment
+      2. Never exposing tokens in URLs
+      3. Implementing proper authentication mechanisms
+      4. Maintaining clear security boundaries
+    </note>
+  </compliance_notes>
+</spec>

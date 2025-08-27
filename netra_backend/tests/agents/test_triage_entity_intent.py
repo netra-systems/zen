@@ -5,6 +5,8 @@ Refactored to comply with 25-line function limit and 450-line file limit
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -103,7 +105,7 @@ class TestAdvancedEntityExtraction:
     
     def _assert_providers_extracted(self, request, entities):
         """Assert providers were extracted"""
-        assert "gpt-4" in entities.models_mentioned
+        assert LLMModel.GEMINI_2_5_FLASH.value in entities.models_mentioned
         assert len(entities.models_mentioned) >= 3
         
         request_lower = request.lower()
@@ -174,7 +176,7 @@ class TestAdvancedToolRecommendation:
     def _create_cost_entities(self):
         """Create entities for cost optimization"""
         return ExtractedEntities(
-            models_mentioned=["gpt-4"],
+            models_mentioned=[LLMModel.GEMINI_2_5_FLASH.value],
             metrics_mentioned=["cost", "latency"],
             thresholds=[{"type": "cost", "value": 1000, "unit": "USD"}]
         )

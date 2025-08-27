@@ -16,6 +16,8 @@ import json
 from typing import Dict, List, Optional
 import uuid
 import time
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 @pytest.mark.e2e
@@ -177,7 +179,7 @@ class TestUserJourney:
                     },
                     "language": "en-US",
                     "ai_preferences": {
-                        "default_model": "gpt-4",
+                        "default_model": LLMModel.GEMINI_2_5_FLASH.value,
                         "temperature": 0.7,
                         "max_tokens": 2000
                     }
@@ -207,7 +209,7 @@ class TestUserJourney:
                 assert prefs.get('language') == 'en-US', "Language not saved"
                 
                 ai_prefs = prefs.get('ai_preferences', {})
-                assert ai_prefs.get('default_model') == 'gpt-4', \
+                assert ai_prefs.get('default_model') == LLMModel.GEMINI_2_5_FLASH.value, \
                     "AI model preference not saved"
             
             # Test avatar upload (mock)
@@ -506,7 +508,7 @@ class TestUserJourney:
                     "thread_id": thread_id,
                     "content": "Hello AI, this is my first message. Can you explain what AI optimization means?",
                     "role": "user",
-                    "model": "gpt-3.5-turbo",
+                    "model": LLMModel.GEMINI_2_5_FLASH.value,
                     "temperature": 0.7,
                     "max_tokens": 500
                 }

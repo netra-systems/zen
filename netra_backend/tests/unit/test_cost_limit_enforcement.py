@@ -4,6 +4,8 @@ import pytest
 from decimal import Decimal
 from datetime import datetime
 from unittest.mock import Mock, patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.services.llm.llm_manager import LLMManager, RequestStatus
 from netra_backend.app.services.cost_calculator import TokenUsage
@@ -29,7 +31,7 @@ class TestCostLimitEnforcement:
         large_prompt = "test " * 10000  # Very large prompt  
         request_id = await llm_manager.create_request(
             prompt=large_prompt,
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         
         # Process the request - should be blocked
@@ -50,7 +52,7 @@ class TestCostLimitEnforcement:
         small_prompt = "Hello, world!"
         request_id = await llm_manager.create_request(
             prompt=small_prompt,
-            model="gpt-3.5-turbo"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         
         # Process the request - should succeed
@@ -74,7 +76,7 @@ class TestCostLimitEnforcement:
         large_prompt = "test " * 10000
         request_id = await llm_manager.create_request(
             prompt=large_prompt,
-            model="gpt-4"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         
         # Process the request - should succeed even though it's expensive
@@ -97,7 +99,7 @@ class TestCostLimitEnforcement:
         for i in range(3):
             request_id = await llm_manager.create_request(
                 prompt=f"Request {i}",
-                model="gpt-3.5-turbo"
+                model=LLMModel.GEMINI_2_5_FLASH.value
             )
             await llm_manager.process_request(request_id)
         
@@ -125,11 +127,11 @@ class TestCostLimitEnforcement:
     def test_check_cost_limit_method(self, llm_manager):
         """Test the internal cost limit checking method."""
         # Test with low token count - should pass
-        result = llm_manager._check_cost_limit("gpt-3.5-turbo", 100)
+        result = llm_manager._check_cost_limit(LLMModel.GEMINI_2_5_FLASH.value, 100)
         assert result is True
         
         # Test with very high token count - should fail
-        result = llm_manager._check_cost_limit("gpt-4", 1000000)
+        result = llm_manager._check_cost_limit(LLMModel.GEMINI_2_5_FLASH.value, 1000000)
         assert result is False
     
     def test_record_usage_method(self, llm_manager):
@@ -137,7 +139,7 @@ class TestCostLimitEnforcement:
         initial_spending = llm_manager.budget_manager.current_spending
         
         # Record some usage
-        llm_manager._record_usage("gpt-3.5-turbo", 1000)
+        llm_manager._record_usage(LLMModel.GEMINI_2_5_FLASH.value, 1000)
         
         # Check that spending increased
         assert llm_manager.budget_manager.current_spending > initial_spending
@@ -150,7 +152,7 @@ class TestCostLimitEnforcement:
         
         request_id = await llm_manager.create_request(
             prompt="Test request",
-            model="gpt-3.5-turbo"
+            model=LLMModel.GEMINI_2_5_FLASH.value
         )
         await llm_manager.process_request(request_id)
         

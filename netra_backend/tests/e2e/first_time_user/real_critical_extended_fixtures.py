@@ -15,6 +15,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -148,7 +150,7 @@ async def free_tier_limitation_config():
     """Free tier limitation configuration"""
     limitation_config = {
         "monthly_request_limit": 1000,
-        "model_restrictions": ["gpt-3.5-turbo"],
+        "model_restrictions": [LLMModel.GEMINI_2_5_FLASH.value],
         "feature_restrictions": {
             "advanced_analytics": False,
             "priority_support": False,

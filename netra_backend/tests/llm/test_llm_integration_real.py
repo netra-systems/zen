@@ -8,6 +8,8 @@ Maximum 300 lines, functions ≤8 lines per architecture requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -52,13 +54,13 @@ def test_llm_config():
         llm_configs={
             "primary": LLMConfig(
                 provider="openai",
-                model_name="gpt-4",
+                model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 api_key="test-key",
                 generation_config={"temperature": 0.7}
             ),
             "fallback": LLMConfig(
                 provider="openai",
-                model_name="gpt-3.5-turbo",
+                model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 api_key="test-key",
                 generation_config={"temperature": 0.5}
             )
@@ -215,7 +217,7 @@ class TestCostOptimization:
             choices=[{"message": {"content": "positive"}}],
             usage=TokenUsage(prompt_tokens=20, completion_tokens=5, total_tokens=25),
             provider=LLMProvider.OPENAI,
-            model="gpt-3.5-turbo",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             response_time_ms=100.0
         )
         
@@ -235,7 +237,7 @@ class TestCostOptimization:
             choices=[{"message": {"content": "Detailed analysis..."}}],
             usage=TokenUsage(prompt_tokens=100, completion_tokens=50, total_tokens=150),
             provider=LLMProvider.OPENAI,
-            model="gpt-4",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             response_time_ms=200.0
         )
         
@@ -313,7 +315,7 @@ class TestTokenUsageMonitoring:
             choices=[{"message": {"content": "Test response"}}],
             usage=TokenUsage(prompt_tokens=50, completion_tokens=25, total_tokens=75),
             provider=LLMProvider.OPENAI,
-            model="gpt-4",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             response_time_ms=150.0
         )
         
@@ -336,7 +338,7 @@ class TestProviderSwitching:
             choices=[{"message": {"content": "Anthropic response"}}],
             usage=TokenUsage(prompt_tokens=50, completion_tokens=30, total_tokens=80),
             provider=LLMProvider.OPENAI,  # In reality would be ANTHROPIC
-            model="gpt-4",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             response_time_ms=100.0
         )
         

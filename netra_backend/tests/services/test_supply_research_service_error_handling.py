@@ -5,6 +5,8 @@ Tests unusual scenarios, boundary conditions, and error recovery
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -170,8 +172,8 @@ class TestEdgeCaseScenarios:
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyUpdateLog'):
                 # Simulate concurrent updates
-                result1 = service.create_or_update_supply_item("openai", "gpt-4", update_data_1)
-                result2 = service.create_or_update_supply_item("openai", "gpt-4", update_data_2)
+                result1 = service.create_or_update_supply_item("openai", LLMModel.GEMINI_2_5_FLASH.value, update_data_1)
+                result2 = service.create_or_update_supply_item("openai", LLMModel.GEMINI_2_5_FLASH.value, update_data_2)
         
         # Both updates should succeed without conflicts
         assert result1 == sample_item
@@ -279,7 +281,7 @@ class TestDataConsistency:
                 mock_log_instance = MagicMock()
                 mock_log.return_value = mock_log_instance
                 
-                service.create_or_update_supply_item("openai", "gpt-4", new_data)
+                service.create_or_update_supply_item("openai", LLMModel.GEMINI_2_5_FLASH.value, new_data)
                 
                 # Should create log only for changed field
                 assert mock_log.called

@@ -11,6 +11,8 @@ All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -134,8 +136,8 @@ class TestMetricsAggregationAccuracy:
         """Test metrics aggregation produces accurate billing calculations"""
         # Arrange - Create test usage data for billing calculation
         test_usage_data = [
-            {"tokens": 1000, "cost": 0.02, "model": "gpt-4"},
-            {"tokens": 2000, "cost": 0.04, "model": "gpt-4"},
+            {"tokens": 1000, "cost": 0.02, "model": LLMModel.GEMINI_2_5_FLASH.value},
+            {"tokens": 2000, "cost": 0.04, "model": LLMModel.GEMINI_2_5_FLASH.value},
             {"tokens": 500, "cost": 0.01, "model": "gpt-3.5"}
         ]
         
@@ -366,7 +368,7 @@ class TestCostTrackingPrecision:
         """Test AI cost tracking maintains precision for billing"""
         # Arrange - Create cost tracking scenario
         usage_events = [
-            {"model": "gpt-4", "tokens": 1000, "rate_per_1k": 0.03},
+            {"model": LLMModel.GEMINI_2_5_FLASH.value, "tokens": 1000, "rate_per_1k": 0.03},
             {"model": "gpt-3.5", "tokens": 2000, "rate_per_1k": 0.002},
             {"model": "claude-3", "tokens": 1500, "rate_per_1k": 0.025}
         ]

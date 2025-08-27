@@ -4,6 +4,8 @@ Provides shared fixtures and helper methods for test execution
 """
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -69,7 +71,7 @@ EXAMPLE_PROMPTS = [
 
     "I need to optimize the 'user_authentication' function. What advanced methods can I use?",
 
-    "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
+    "I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
 
     "I want to audit all uses of KV caching in my system to find optimization opportunities.",
 

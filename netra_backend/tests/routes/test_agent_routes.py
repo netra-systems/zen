@@ -11,6 +11,8 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from typing import Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
@@ -256,7 +258,7 @@ class TestAgentRoute:
             "metrics": {
                 "processing_time_ms": 150,
                 "tokens_used": 75,
-                "model": "gpt-4"
+                "model": LLMModel.GEMINI_2_5_FLASH.value
             }
         })
         

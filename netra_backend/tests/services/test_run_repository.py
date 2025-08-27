@@ -7,6 +7,8 @@ run-specific data access patterns work correctly.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -31,7 +33,7 @@ class TestRunRepository:
                 "thread_id": thread.id,
                 "status": "in_progress",
                 "tools": ["code_interpreter", "retrieval"],
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "instructions": "Test instructions"
             })
             

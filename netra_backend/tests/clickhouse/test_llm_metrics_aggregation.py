@@ -5,6 +5,8 @@ Test LLM-specific metrics and optimizations
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -16,7 +18,7 @@ from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_quer
 def llm_metrics_batch():
     """Mock fixture for LLM metrics batch data"""
     return {
-        "model": "gpt-4",
+        "model": LLMModel.GEMINI_2_5_FLASH.value,
         "workload_type": "analysis",
         "latency_ms": 150,
         "cost_cents": 5,
@@ -27,7 +29,7 @@ def generate_llm_metrics():
     """Mock function for generating LLM metrics"""
     return [
         {
-            "model": "gpt-4",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "workload_type": "analysis",
             "latency_ms": 150,
             "cost_cents": 5,

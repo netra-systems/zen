@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <name>Redis Staging Configuration</name>
+    <type>infrastructure</type>
+    <version>1.0</version>
+    <last_updated>2025-08-26</last_updated>
+    <description>Authoritative configuration for Redis endpoints in GCP staging environment</description>
+  </metadata>
+  
+  <critical_configuration>
+    <redis_instance>
+      <name>staging-shared-redis</name>
+      <project>netra-staging</project>
+      <region>us-central1</region>
+      <tier>STANDARD_HA</tier>
+      <memory_size_gb>1</memory_size_gb>
+    </redis_instance>
+    
+    <network_configuration>
+      <vpc_network>staging-vpc</vpc_network>
+      <connection_mode>Private service access</connection_mode>
+      <ip_range>10.107.0.0/29</ip_range>
+      <primary_endpoint>
+        <host>10.107.0.3</host>
+        <port>6379</port>
+        <description>Primary Redis endpoint for all read/write operations</description>
+      </primary_endpoint>
+      <read_endpoint>
+        <status>Not available</status>
+        <reason>Redis Standard tier does not provide read replicas</reason>
+      </read_endpoint>
+    </network_configuration>
+  </critical_configuration>
+  
+  <service_connections>
+    <backend_service>
+      <name>netra-backend-staging</name>
+      <connection_method>Google Secret Manager</connection_method>
+      <secret_name>redis-url-staging</secret_name>
+      <connection_string>redis://default:${REDIS_PASSWORD}@10.107.0.3:6379/0</connection_string>
+      <uses_primary>true</uses_primary>
+    </backend_service>
+    
+    <auth_service>
+      <name>netra-auth-service</name>
+      <connection_method>Google Secret Manager</connection_method>
+      <secret_name>redis-url-staging</secret_name>
+      <connection_string>redis://default:${REDIS_PASSWORD}@10.107.0.3:6379/0</connection_string>
+      <uses_primary>true</uses_primary>
+    </auth_service>
+  </service_connections>
+  
+  <deployment_configuration>
+    <terraform_managed>
+      <resource>google_redis_instance.redis</resource>
+      <file>terraform-gcp-staging/redis.tf</file>
+      <outputs>
+        <output>redis_host</output>
+        <output>redis_port</output>
+        <output>redis_url_secret_id</output>
+      </outputs>
+    </terraform_managed>
+    
+    <secret_manager>
+      <secret_id>staging-redis-url</secret_id>
+      <format>redis://${google_redis_instance.redis.host}:${google_redis_instance.redis.port}</format>
+      <note>Terraform automatically populates this with the correct endpoint from the Redis instance</note>
+    </secret_manager>
+  </deployment_configuration>
+  
+  <verification>
+    <cloud_console>
+      <url>https://console.cloud.google.com/memorystore/redis/locations/us-central1/instances/staging-shared-redis/details/overview?project=netra-staging</url>
+      <check>Verify Primary Endpoint matches 10.107.0.3</check>
+    </cloud_console>
+    
+    <terraform_verification>
+      <command>cd terraform-gcp-staging && terraform output redis_host</command>
+      <expected_output>10.107.0.3</expected_output>
+    </terraform_verification>
+    
+    <secret_verification>
+      <command>gcloud secrets versions access latest --secret=staging-redis-url --project=netra-staging</command>
+      <expected_pattern>redis://10.107.0.3:6379</expected_pattern>
+    </secret_verification>
+  </verification>
+  
+  <known_issues>
+    <issue id="deployment-script-mismatch">
+      <description>scripts/deploy_to_gcp.py contains hardcoded incorrect Redis IP (10.128.0.3)</description>
+      <impact>Manual secret creation uses wrong endpoint</impact>
+      <resolution>Update line 786 to use correct IP: 10.107.0.3</resolution>
+      <file>scripts/deploy_to_gcp.py:786</file>
+    </issue>
+  </known_issues>
+  
+  <best_practices>
+    <practice>
+      <rule>Always use Terraform-managed secrets for Redis URL</rule>
+      <reason>Ensures endpoint is automatically updated if Redis instance changes</reason>
+    </practice>
+    <practice>
+      <rule>Never hardcode Redis IPs in application code</rule>
+      <reason>Use environment variables or Secret Manager for flexibility</reason>
+    </practice>
+    <practice>
+      <rule>Verify Redis connectivity during service startup</rule>
+      <reason>Fail fast if Redis is unreachable to prevent cascading failures</reason>
+    </practice>
+  </best_practices>
+</specification>

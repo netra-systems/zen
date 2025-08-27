@@ -40,7 +40,7 @@ class TestLLMManagerProviderSwitching:
     def _should_use_real_llm(self) -> bool:
         """Determine if real LLM should be used based on environment"""
         # Use real LLM if explicitly requested via pytest marker or env vars
-        real_llm_keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+        real_llm_keys = ["GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
         return any(os.getenv(key) for key in real_llm_keys)
     
     @pytest.fixture

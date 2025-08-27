@@ -7,6 +7,8 @@ Maintains 25-line function limit and focused responsibility.
 
 import time
 from typing import List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -303,7 +305,7 @@ class DatabaseChecker:
         return {
             "id": "netra-assistant", "object": "assistant",
             "created_at": int(time.time()), "name": "Netra AI Optimization Assistant",
-            "model": "gpt-4", "file_ids": []
+            "model": LLMModel.GEMINI_2_5_FLASH.value, "file_ids": []
         }
     
     def _get_assistant_advanced_props(self) -> dict:

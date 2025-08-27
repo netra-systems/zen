@@ -64,7 +64,7 @@ class SecretManager:
         return {
             "GEMINI_API_KEY": self._get_gemini_api_key_mapping(),
             "ANTHROPIC_API_KEY": self._get_anthropic_api_key_mapping(),
-            "OPENAI_API_KEY": self._get_openai_api_key_mapping()
+            "GOOGLE_API_KEY": self._get_openai_api_key_mapping()
         }
     
     def _get_gemini_api_key_mapping(self) -> Dict[str, Any]:
@@ -362,7 +362,7 @@ class SecretManager:
             "CLICKHOUSE_PASSWORD": "CLICKHOUSE_PASSWORD",
             "REDIS_PASSWORD": "REDIS_PASSWORD",
             "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
-            "OPENAI_API_KEY": "OPENAI_API_KEY"
+            "GOOGLE_API_KEY": "GOOGLE_API_KEY"
         }
     
     def _is_gcp_available(self) -> bool:

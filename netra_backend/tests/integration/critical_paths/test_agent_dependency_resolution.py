@@ -12,6 +12,8 @@ Coverage: Real dependency injection, circular detection, lazy loading
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -402,7 +404,7 @@ class MockCacheService:
 class MockAgentService:
     """Mock agent service for testing."""
     
-    def __init__(self, database_service: MockDatabaseService, cache_service: MockCacheService, model_name: str = "gpt-4"):
+    def __init__(self, database_service: MockDatabaseService, cache_service: MockCacheService, model_name: str = LLMModel.GEMINI_2_5_FLASH.value):
         self.database_service = database_service
         self.cache_service = cache_service
         self.model_name = model_name
@@ -481,7 +483,7 @@ class DependencyManager:
             lifetime=DependencyLifetime.REQUEST,
             dependencies=["database_service", "cache_service"],
             lazy=True,
-            configuration={"model_name": "gpt-3.5-turbo"}
+            configuration={"model_name": LLMModel.GEMINI_2_5_FLASH.value}
         )
         self.registry.register(lazy_agent_metadata)
         

@@ -11,6 +11,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 from uuid import uuid4
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.interfaces import AgentStateProtocol, BaseAgentProtocol
@@ -365,7 +367,7 @@ class ExampleMessageProcessor(BaseSubAgent):
                         'Problem-solving workflows'
                     ]
                 },
-                'claude-3-sonnet': {
+                LLMModel.GEMINI_2_5_FLASH.value: {
                     'overall_score': 89,
                     'strengths': [
                         'Excellent long-form content',

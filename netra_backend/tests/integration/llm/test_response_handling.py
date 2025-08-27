@@ -16,6 +16,8 @@ REQUIREMENTS:
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -137,10 +139,10 @@ class TestResponseHandling:
         """BVJ: Validates response tracks which model was used."""
         prompt = "Model tracking test"
         
-        response = await mock_llm_manager.generate_response(prompt, model="gpt-4")
+        response = await mock_llm_manager.generate_response(prompt, model=LLMModel.GEMINI_2_5_FLASH.value)
         
         assert "model" in response
-        assert response["model"] == "gpt-4"
+        assert response["model"] == LLMModel.GEMINI_2_5_FLASH.value
 
     @pytest.mark.asyncio
     async def test_concurrent_response_handling(self, mock_llm_manager):

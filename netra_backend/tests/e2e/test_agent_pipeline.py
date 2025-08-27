@@ -25,6 +25,8 @@ COVERAGE:
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -320,7 +322,7 @@ class TestSubAgentExecution:
             "tool_name": "cost_calculator",
             "parameters": {
                 "usage_volume": 1000000,
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "optimization_level": "aggressive"
             }
         }

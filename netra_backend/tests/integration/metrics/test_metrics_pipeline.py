@@ -17,6 +17,8 @@ REQUIREMENTS:
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -72,7 +74,7 @@ class TestMetricsPipeline:
                     "agent_type": "optimization",
                     "response_time": 1.0 + (msg_idx * 0.5),
                     "tokens_used": 100 + (msg_idx * 50),
-                    "model": "gpt-4-turbo"
+                    "model": LLMModel.GEMINI_2_5_FLASH.value
                 })
                 total_actions += 1
         

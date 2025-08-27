@@ -20,6 +20,8 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.logging_config import central_logger
 
@@ -125,7 +127,7 @@ class AnalyticsDataGenerator:
     def generate_cost_tracking_data(self, count: int = 50) -> List[Dict[str, Any]]:
         """Generate cost tracking data for testing."""
         data = []
-        models = ["gpt-4", "gpt-3.5-turbo", "claude-3"]
+        models = [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-3"]
         for i in range(count):
             record = {
                 "operation_id": str(uuid.uuid4()),

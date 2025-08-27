@@ -9,6 +9,8 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -43,7 +45,7 @@ def generate_realistic_logs(count: int) -> List[Dict]:
 
 def generate_llm_metrics(count: int) -> List[Dict]:
     """Generate realistic LLM metrics"""
-    models = ["gpt-4", "gpt-3.5-turbo", "claude-3", "gemini-pro"]
+    models = [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-3", "gemini-pro"]
     
     metrics = []
     for i in range(count):

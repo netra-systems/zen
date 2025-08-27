@@ -4,6 +4,8 @@ Tests for structured generation functionality in LLM Manager.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -40,7 +42,7 @@ def test_config():
     import os
     
     # Use real API key if available, otherwise use test key
-    api_key = os.environ.get("OPENAI_API_KEY", "test-openai-key")
+    api_key = os.environ.get("GOOGLE_API_KEY", "test-openai-key")
     
     # If we have a Gemini API key but testing with OpenAI, skip real testing
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true" and api_key == "test-openai-key":
@@ -62,7 +64,7 @@ def test_config():
         llm_configs={
             "test": LLMConfig(
                 provider="openai",
-                model_name="gpt-3.5-turbo",
+                model_name=LLMModel.GEMINI_2_5_FLASH.value,
                 api_key=api_key,
                 generation_config={"temperature": 0.7}
             )

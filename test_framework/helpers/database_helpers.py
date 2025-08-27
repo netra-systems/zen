@@ -14,6 +14,8 @@ Business Value Justification (BVJ):
 import asyncio
 from typing import Any, Dict, List, Optional
 from unittest.mock import patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 def create_test_thread_data(
@@ -45,7 +47,7 @@ def create_test_run_data(
         "thread_id": thread_id,
         "status": "completed",
         "assistant_id": "test_assistant",
-        "model": "gpt-4",
+        "model": LLMModel.GEMINI_2_5_FLASH.value,
         "metadata_": {"user_id": "test_user_001"},
         "created_at": 1640995200,
         "completed_at": 1640995260,

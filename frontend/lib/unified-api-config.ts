@@ -87,6 +87,15 @@ function detectEnvironment(): Environment {
 }
 
 /**
+ * Check if running inside Docker container
+ * Uses Docker-specific environment variables set in docker-compose.yml
+ */
+function isRunningInDocker(): boolean {
+  // Check for Docker-specific environment variables
+  return process.env.API_URL !== undefined || process.env.AUTH_URL !== undefined;
+}
+
+/**
  * Get environment-specific configuration
  * NO localhost references in staging/production
  */
@@ -198,20 +207,25 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
       
     case 'development':
     default:
+      // Check if running in Docker (Docker sets NEXT_PUBLIC_API_URL)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+      const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081';
+      
       return {
         environment: 'development',
         urls: {
-          api: 'http://localhost:8000', // Force port 8000 for backend API
-          websocket: 'ws://localhost:8000', // Force port 8000 for WebSocket
-          auth: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081',
+          api: apiUrl,
+          websocket: wsUrl,
+          auth: authUrl,
           frontend: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
         },
         endpoints: {
-          // Development uses proxied paths for local Next.js rewrites
-          health: '/health',
-          ready: '/health/ready',
-          threads: '/api/threads',
-          websocket: 'ws://localhost:8000/ws', // Force port 8000 for WebSocket endpoint
+          // Use direct URLs to bypass Next.js proxy issues
+          health: `${apiUrl}/health`,
+          ready: `${apiUrl}/health/ready`,
+          threads: `${apiUrl}/api/threads`,
+          websocket: `${wsUrl}/ws`,
           
           // Auth endpoints use direct URLs even in development
           authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,

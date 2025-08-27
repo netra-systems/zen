@@ -6,6 +6,8 @@ These are foundational types with no dependencies on other LLM schema modules.
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from pydantic import BaseModel, Field
 
@@ -25,11 +27,11 @@ class LLMProvider(str, Enum):
 
 class LLMModel(str, Enum):
     """Available LLM models"""
-    GPT_4 = "gpt-4"
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_35_TURBO = "gpt-3.5-turbo"
-    CLAUDE_3_OPUS = "claude-3-opus"
-    CLAUDE_3_SONNET = "claude-3-sonnet"
+    GPT_4 = LLMModel.GEMINI_2_5_FLASH.value
+    GPT_4_TURBO = LLMModel.GEMINI_2_5_FLASH.value
+    GPT_35_TURBO = LLMModel.GEMINI_2_5_FLASH.value
+    CLAUDE_3_OPUS = LLMModel.GEMINI_2_5_FLASH.value
+    CLAUDE_3_SONNET = LLMModel.GEMINI_2_5_FLASH.value
     CLAUDE_3_HAIKU = "claude-3-haiku"
     CLAUDE_35_SONNET = "claude-3.5-sonnet"
     GEMINI_PRO = "gemini-pro"
@@ -75,7 +77,7 @@ class TokenUsage(BaseModel):
     
     def _calculate_default_cost(self, calculator) -> float:
         """Calculate cost using default provider and model."""
-        cost = calculator.calculate_cost(self, LLMProvider.OPENAI, "gpt-3.5-turbo")
+        cost = calculator.calculate_cost(self, LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)
         return float(cost)
     
     def calculate_precise_cost(self, provider: "LLMProvider", model: str) -> Optional[float]:

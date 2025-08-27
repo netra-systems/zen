@@ -6,6 +6,8 @@ to enable isolated testing without dependencies on real services.
 
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 class MockLLMService:
     """Mock LLM service for testing."""
@@ -178,7 +180,7 @@ def setup_unified_mock_services() -> ServiceRegistry:
     registry = ServiceRegistry()
     
     # Register mock LLM services
-    registry.register_llm_service("gpt-4", MockLLMService("gpt-4"))
+    registry.register_llm_service(LLMModel.GEMINI_2_5_FLASH.value, MockLLMService(LLMModel.GEMINI_2_5_FLASH.value))
     registry.register_llm_service("claude-3", MockLLMService("claude-3"))
     
     # Register mock OAuth providers

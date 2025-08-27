@@ -15,6 +15,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.websocket_core.manager import get_websocket_manager
@@ -69,8 +71,8 @@ class CriticalUserJourneyHelpers:
     def create_ai_provider_credentials():
         """Create AI provider credentials for connection testing"""
         return {
-            "openai": {"api_key": "test-openai-key", "model": "gpt-4"},
-            "anthropic": {"api_key": "test-claude-key", "model": "claude-3-sonnet"},
+            "openai": {"api_key": "test-openai-key", "model": LLMModel.GEMINI_2_5_FLASH.value},
+            "anthropic": {"api_key": "test-claude-key", "model": LLMModel.GEMINI_2_5_FLASH.value},
             "google": {"api_key": "test-gemini-key", "model": "gemini-pro"}
         }
 

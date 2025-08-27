@@ -400,7 +400,7 @@ class ServiceAvailabilityChecker:
     
     async def _check_openai_api(self) -> ServiceStatus:
         """Check OpenAI API availability."""
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             return ServiceStatus(
                 name="openai",

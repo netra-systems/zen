@@ -73,7 +73,7 @@ class TestComprehensiveSecretValidation:
             'SECRET_KEY': ' very_long_secret_key_for_application\n\r ',
             
             # API and service secrets
-            'OPENAI_API_KEY': ' sk-proj-abcd1234\n',
+            'GOOGLE_API_KEY': ' sk-proj-abcd1234\n',
             'ANTHROPIC_API_KEY': 'sk-ant-abcd1234 ',
             'service_secret': '\tservice_secret_value\r',
             

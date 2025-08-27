@@ -15,6 +15,8 @@ import asyncio
 import os
 from datetime import datetime
 from unittest.mock import patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -102,7 +104,7 @@ class TestRealLLMEnvironment:
         async with test_session_context(
             test_level="integration", 
             use_real_llm=True,
-            llm_model="claude-3-sonnet",
+            llm_model=LLMModel.GEMINI_2_5_FLASH.value,
             datasets=["basic_optimization", "complex_workflows"]
         ) as (session_id, orchestrator):
             
@@ -129,15 +131,15 @@ class TestRealLLMEnvironment:
                 
                 # Step 1: Data collection agent
                 data_prompt = "Collect AI usage metrics for analysis: analyze 1000 requests over 7 days"
-                data_response = await llm_manager.execute_llm_call(data_prompt, "claude-3-sonnet")
+                data_response = await llm_manager.execute_llm_call(data_prompt, LLMModel.GEMINI_2_5_FLASH.value)
                 
                 # Step 2: Analysis agent  
                 analysis_prompt = f"Based on this data collection: {data_response['content'][:200]}, identify usage patterns"
-                analysis_response = await llm_manager.execute_llm_call(analysis_prompt, "claude-3-sonnet")
+                analysis_response = await llm_manager.execute_llm_call(analysis_prompt, LLMModel.GEMINI_2_5_FLASH.value)
                 
                 # Step 3: Optimization agent
                 optimization_prompt = f"Generate optimization recommendations based on: {analysis_response['content'][:200]}"
-                optimization_response = await llm_manager.execute_llm_call(optimization_prompt, "claude-3-sonnet")
+                optimization_response = await llm_manager.execute_llm_call(optimization_prompt, LLMModel.GEMINI_2_5_FLASH.value)
                 
                 # Validate coordination worked
                 assert all(resp['real_llm'] for resp in [data_response, analysis_response, optimization_response])
@@ -280,7 +282,7 @@ class TestRealLLMIntegration:
         async with test_session_context(
             test_level="comprehensive",
             use_real_llm=True,
-            llm_model="gpt-4",  # Use more capable model for complex analysis
+            llm_model=LLMModel.GEMINI_2_5_FLASH.value,  # Use more capable model for complex analysis
             datasets=["basic_optimization", "complex_workflows", "edge_cases"]
         ) as (session_id, orchestrator):
             
@@ -313,7 +315,7 @@ class TestRealLLMIntegration:
                 4. Expected savings and performance impact
                 """
                 
-                response = await llm_manager.execute_llm_call(analysis_prompt, "gpt-4")
+                response = await llm_manager.execute_llm_call(analysis_prompt, LLMModel.GEMINI_2_5_FLASH.value)
                 
                 # Validate comprehensive response
                 assert response['real_llm'] is True
@@ -330,7 +332,7 @@ class TestRealLLMIntegration:
                 assert any(indicator in content for indicator in recommendation_indicators)
                 
                 # Should mention specific models
-                models_mentioned = ['gpt-4', 'claude', 'gemini']
+                models_mentioned = [LLMModel.GEMINI_2_5_FLASH.value, 'claude', 'gemini']
                 assert any(model in content for model in models_mentioned)
                 
                 # Verify execution stats

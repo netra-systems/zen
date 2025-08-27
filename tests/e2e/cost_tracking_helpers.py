@@ -19,6 +19,8 @@ import time
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.UserPlan import PlanTier
@@ -91,7 +93,7 @@ class AIOperationSimulator:
     
     def __init__(self):
         self.operation_cost_map = {PlanTier.PRO: {"tokens": 1000, "cost_cents": 15}}
-        self.provider_models = {LLMProvider.OPENAI: {"tokens": 1000, "cost_cents": 15, "model": "gpt-4"}}
+        self.provider_models = {LLMProvider.OPENAI: {"tokens": 1000, "cost_cents": 15, "model": LLMModel.GEMINI_2_5_FLASH.value}}
     
     def create_data_analysis_operation(self, user_id: str, expected_tokens: int = 1200, 
                                      expected_cost_cents: int = 18) -> Dict[str, Any]:
@@ -104,7 +106,7 @@ class AIOperationSimulator:
             "expected_tokens": expected_tokens,
             "expected_cost_cents": expected_cost_cents,
             "provider": LLMProvider.OPENAI.value,
-            "model": "gpt-4-turbo"
+            "model": LLMModel.GEMINI_2_5_FLASH.value
         }
     
     def create_optimization_operation(self, user_id: str) -> Dict[str, Any]:
@@ -130,7 +132,7 @@ class AIOperationSimulator:
             "expected_tokens": 1500,
             "expected_cost_cents": 22,
             "provider": LLMProvider.OPENAI.value,
-            "model": "gpt-4"
+            "model": LLMModel.GEMINI_2_5_FLASH.value
         }
     
     def create_report_generation_operation(self, user_id: str) -> Dict[str, Any]:

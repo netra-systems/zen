@@ -19,6 +19,8 @@ Each test follows 25-line function limit through delegation to specialized helpe
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -209,7 +211,7 @@ class TestRealCriticalUserJourney:
 
     async def _test_real_free_tier_limits(self):
         """Test real free tier limits"""
-        limits = {"monthly_requests": 1000, "models_allowed": ["gpt-3.5-turbo"]}
+        limits = {"monthly_requests": 1000, "models_allowed": [LLMModel.GEMINI_2_5_FLASH.value]}
         usage = {"requests_made": 1000, "limit_reached": True}
         return {"limits": limits, "usage": usage}
 

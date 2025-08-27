@@ -10,6 +10,8 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 
 class LLMProvider(Enum):
@@ -57,10 +59,10 @@ class LLMManager:
         }
         
         self.model_costs = {
-            "gpt-4": {"input": 0.03, "output": 0.06},
-            "gpt-3.5-turbo": {"input": 0.0015, "output": 0.002},
-            "claude-3-opus": {"input": 0.015, "output": 0.075},
-            "claude-3-sonnet": {"input": 0.003, "output": 0.015},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": 0.03, "output": 0.06},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": 0.0015, "output": 0.002},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": 0.015, "output": 0.075},
+            LLMModel.GEMINI_2_5_FLASH.value: {"input": 0.003, "output": 0.015},
             "claude-3-haiku": {"input": 0.00025, "output": 0.00125}
         }
         
@@ -258,8 +260,8 @@ class LLMManager:
     def get_available_models(self) -> Dict[str, List[str]]:
         """Get available models by provider."""
         return {
-            "openai": ["gpt-4", "gpt-3.5-turbo"],
-            "anthropic": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"],
+            "openai": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value],
+            "anthropic": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value, "claude-3-haiku"],
             "google": ["gemini-pro", "palm-2"],
             "local": ["llama-2", "mistral-7b"]
         }

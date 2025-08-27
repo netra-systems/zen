@@ -5,6 +5,8 @@ Tests comprehensive data validation logic and boundary conditions
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from typing import Any, Dict, List
 from unittest.mock import patch, AsyncMock, MagicMock
@@ -133,7 +135,7 @@ class TestDataValidation:
         """Helper to create valid supply data"""
         return {
             "provider": "openai",
-            "model_name": "gpt-4",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "pricing_input": "0.03",
             "pricing_output": "0.06",
             "context_window": 8192,
@@ -145,14 +147,14 @@ class TestDataValidation:
         """Helper to create base valid data for edge case testing"""
         return {
             "provider": "openai",
-            "model_name": "gpt-4"
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value
         }
     
     def _create_negative_pricing_data(self) -> Dict[str, Any]:
         """Helper to create data with negative pricing"""
         return {
             "provider": "openai",
-            "model_name": "gpt-4",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "pricing_input": "-0.03",
             "pricing_output": "-0.06"
         }
@@ -161,7 +163,7 @@ class TestDataValidation:
         """Helper to create data with unrealistic pricing"""
         return {
             "provider": "openai",
-            "model_name": "gpt-4",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "pricing_input": "15000",  # Extremely high
             "pricing_output": "20000"
         }
@@ -170,7 +172,7 @@ class TestDataValidation:
         """Helper to create malformed data"""
         return {
             "provider": "openai",
-            "model_name": "gpt-4",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "pricing_input": "not-a-number",
             "context_window": "also-not-a-number",
             "confidence_score": "invalid-score"
@@ -180,7 +182,7 @@ class TestDataValidation:
         """Helper to create boundary value data"""
         return {
             "provider": "openai",
-            "model_name": "gpt-4",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "context_window": -1000,  # Negative
             "confidence_score": 1.5,   # Out of range
             "availability_status": "invalid_status"
@@ -190,7 +192,7 @@ class TestDataValidation:
         """Helper to create data with specific status"""
         return {
             "provider": "openai",
-            "model_name": "gpt-4",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "availability_status": status
         }
     
@@ -224,7 +226,7 @@ class TestValidationHelpers:
         valid_formats = ["0.03", "0", "100.50", "0.001"]
         invalid_formats = ["abc", "", "0.03.05", "not-a-number", None]
         
-        base_data = {"provider": "openai", "model_name": "gpt-4"}
+        base_data = {"provider": "openai", "model_name": LLMModel.GEMINI_2_5_FLASH.value}
         
         for valid_price in valid_formats:
             data = {**base_data, "pricing_input": valid_price}

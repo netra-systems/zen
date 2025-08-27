@@ -7,6 +7,8 @@ import json
 from datetime import datetime
 from decimal import Decimal
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -194,10 +196,10 @@ def _get_pricing_test_case():
         "parsed": {
             "research_type": ResearchType.PRICING,
             "provider": "openai",
-            "model_name": "gpt-4",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "timeframe": "current"
         },
-        "expected_keywords": ["pricing", "cost", "tokens", "gpt-4"]
+        "expected_keywords": ["pricing", "cost", "tokens", LLMModel.GEMINI_2_5_FLASH.value]
     }
 
 def _get_capabilities_test_case():
@@ -232,7 +234,7 @@ def anomaly_test_data():
     return {
         "all_changes": [{
             "provider": "openai",
-            "model": "gpt-4",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "field": "pricing_input",
             "percent_change": 150,
             "old_value": 10,

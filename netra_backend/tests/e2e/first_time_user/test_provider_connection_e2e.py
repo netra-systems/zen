@@ -13,6 +13,8 @@ These tests validate Tests 3, 4, and 6 from the critical conversion paths.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -115,7 +117,7 @@ class TestProviderConnectionE2E:
 
     async def _run_first_optimization(self, env):
         """Execute user's first actual optimization"""
-        optimization_config = {"type": "model_selection", "target": "gpt-3.5-turbo", "fallback": "gpt-4"}
+        optimization_config = {"type": "model_selection", "target": LLMModel.GEMINI_2_5_FLASH.value, "fallback": LLMModel.GEMINI_2_5_FLASH.value}
         execution_result = {"status": "success", "time_ms": 1200, "savings_achieved": "$127"}
         env["metrics_tracker"].first_optimization_time = datetime.now(timezone.utc)
         return {"config": optimization_config, "result": execution_result}
@@ -150,7 +152,7 @@ class TestProviderConnectionE2E:
     async def _execute_with_real_llm(self, env, interaction_result, llm_manager):
         """Execute first interaction with real LLM for authentic experience"""
         prompt = interaction_result["prompt"]
-        llm_response = await llm_manager.generate_response(prompt, model="gpt-3.5-turbo")
+        llm_response = await llm_manager.generate_response(prompt, model=LLMModel.GEMINI_2_5_FLASH.value)
         execution_result = {"prompt": prompt, "response": llm_response, "success": True}
         return execution_result
 

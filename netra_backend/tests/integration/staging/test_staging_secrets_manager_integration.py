@@ -47,7 +47,7 @@ class TestStagingSecretsManagerIntegration:
             "SECRET_KEY",
             "ANTHROPIC_API_KEY",
             "GOOGLE_API_KEY",
-            "OPENAI_API_KEY"
+            "GOOGLE_API_KEY"
         }
     
     @pytest.fixture

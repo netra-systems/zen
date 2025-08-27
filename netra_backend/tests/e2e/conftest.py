@@ -6,6 +6,8 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.containers_utils import TestcontainerHelper
 from netra_backend.app.core.isolated_environment import get_env
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Basic test setup fixtures
 @pytest.fixture
@@ -108,7 +110,7 @@ def setup_database_mocking(mock_database_factory):
     mock_run.thread_id = "test_thread_123"
     mock_run.status = "completed"
     mock_run.assistant_id = "test_assistant"
-    mock_run.model = "gpt-4"
+    mock_run.model = LLMModel.GEMINI_2_5_FLASH.value
     mock_run.metadata_ = {"user_id": "test_user_001"}
     mock_run.created_at = 1640995200
     

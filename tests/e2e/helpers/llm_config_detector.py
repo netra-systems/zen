@@ -69,7 +69,7 @@ class LLMConfigDetector:
     def _has_real_llm_keys(self) -> bool:
         """Check if real LLM API keys are available."""
         # Check for OpenAI API key
-        if os.environ.get("OPENAI_API_KEY"):
+        if os.environ.get("GOOGLE_API_KEY"):
             return True
             
         # Check for Anthropic API key

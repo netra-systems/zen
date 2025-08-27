@@ -118,7 +118,7 @@ class TestLLMServiceIntegration:
             "timeout_seconds": 30,
             "max_retries": 3,
             "test_mode": True,
-            "openai_api_key": os.getenv("OPENAI_API_KEY"),
+            "openai_api_key": os.getenv("GOOGLE_API_KEY"),
             "anthropic_api_key": os.getenv("ANTHROPIC_API_KEY"),
         }
 
@@ -646,7 +646,7 @@ class RedTeamLLMTestUtils:
     def is_api_key_available(provider: str) -> bool:
         """Check if API key is available for a provider."""
         key_env_vars = {
-            "openai": "OPENAI_API_KEY",
+            "openai": "GOOGLE_API_KEY",
             "anthropic": "ANTHROPIC_API_KEY",
             "cohere": "COHERE_API_KEY"
         }

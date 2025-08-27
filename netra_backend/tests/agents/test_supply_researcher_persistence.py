@@ -5,6 +5,8 @@ Modular design with ≤300 lines, ≤8 lines per function
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -85,7 +87,7 @@ class TestSupplyResearcherPersistence:
         return patch.object(service.market_ops.price_ops, 'calculate_price_changes', return_value={
             "all_changes": [{
                 "provider": "openai",
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "field": "pricing_input",
                 "percent_change": 150,  # 150% increase
                 "old_value": 10,
@@ -155,7 +157,7 @@ class TestSupplyResearcherPersistence:
         """Create test supply data (≤8 lines)"""
         return {
             "provider": "openai",
-            "model": "gpt-4",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "pricing_input": Decimal("30.00"),
             "pricing_output": Decimal("60.00"),
             "context_window": 128000
@@ -177,7 +179,7 @@ class TestSupplyResearcherPersistence:
         """Create concurrent update test data (≤8 lines)"""
         return {
             "provider": "openai",
-            "model": "gpt-4",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "pricing_input": Decimal("35.00"),
             "last_updated": "2024-01-01T00:00:00Z"
         }
@@ -227,7 +229,7 @@ class TestSupplyResearcherPersistence:
         # Test actual persistence functionality using real service methods
         mock_db.query.return_value.filter.return_value.all.return_value = [
             # Mock: OpenAI API isolation for testing without external service dependencies
-            Mock(provider="openai", model="gpt-4", 
+            Mock(provider="openai", model=LLMModel.GEMINI_2_5_FLASH.value, 
                  pricing_input=Decimal("30")),
         ]
         
@@ -236,7 +238,7 @@ class TestSupplyResearcherPersistence:
             mock_validate.return_value = (True, [])
             is_valid, errors = agent.supply_service.validate_supply_data({
                 "provider": "openai", 
-                "model": "gpt-4", 
+                "model": LLMModel.GEMINI_2_5_FLASH.value, 
                 "pricing_input": 30
             })
             

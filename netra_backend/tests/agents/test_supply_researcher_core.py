@@ -5,6 +5,8 @@ Modular design with ≤300 lines, ≤8 lines per function
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -43,7 +45,7 @@ class TestSupplyResearcherCore:
         response = {
             "research_type": "pricing",
             "provider": "anthropic", 
-            "model_name": "claude-3-opus",
+            "model_name": LLMModel.GEMINI_2_5_FLASH.value,
             "timeframe": "latest"
         }
         mock_llm_manager.ask_llm.return_value = json.dumps(response)

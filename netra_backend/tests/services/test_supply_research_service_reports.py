@@ -5,6 +5,8 @@ Tests comprehensive market report generation with all sections
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from datetime import UTC, datetime
 from typing import Any, Dict, List
@@ -80,7 +82,7 @@ class TestMarketReportGeneration:
         """Helper to create report generation dependencies"""
         return {
             "provider_comparison": {
-                "providers": {"openai": {"flagship_model": "gpt-4"}},
+                "providers": {"openai": {"flagship_model": LLMModel.GEMINI_2_5_FLASH.value}},
                 "analysis": {"cheapest_input": {"provider": "anthropic"}}
             },
             "price_changes": {
@@ -247,7 +249,7 @@ class TestReportSectionsIndividually:
         return {
             "providers": {
                 "openai": {
-                    "flagship_model": "gpt-4",
+                    "flagship_model": LLMModel.GEMINI_2_5_FLASH.value,
                     "input_price": 0.03,
                     "model_count": 3
                 },

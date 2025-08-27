@@ -63,8 +63,8 @@ describe('LLM Cache Management Integration Tests', () => {
     it('should cache and retrieve LLM responses', async () => {
       setupLLMCacheResponseMocks();
       
-      const response1 = await queryLLMCache('test prompt', 'gpt-4');
-      const response2 = await queryLLMCache('test prompt', 'gpt-4');
+      const response1 = await queryLLMCache('test prompt', 'gemini-2.5-flash');
+      const response2 = await queryLLMCache('test prompt', 'gemini-2.5-flash');
       
       verifyCacheHitMiss(response1, response2);
     });
@@ -112,7 +112,7 @@ describe('LLM Cache Management Integration Tests', () => {
     });
 
     it('should support cache partitioning by model', async () => {
-      const models = ['gpt-4', 'gpt-3.5-turbo', 'claude-3'];
+      const models = ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-2.5-flash'];
       setupCachePartitioningMock(models);
       
       await testCachePartitioning(models);

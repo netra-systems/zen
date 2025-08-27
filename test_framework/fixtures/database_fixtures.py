@@ -14,6 +14,8 @@ Business Value Justification (BVJ):
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Skip heavy imports during collection to avoid side effects
 import os
@@ -225,7 +227,7 @@ def mock_run_data():
         thread_id="test_thread_123",
         status="completed",
         assistant_id="test_assistant",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         metadata_={"user_id": "test_user_001"},
         created_at=1640995200
     )

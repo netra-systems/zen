@@ -18,6 +18,8 @@ import asyncio
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker,
@@ -170,7 +172,7 @@ class LLMCircuitBreaker:
     
     Usage Examples:
         # Basic usage
-        llm_breaker = LLMCircuitBreaker("gpt4", model="gpt-4")
+        llm_breaker = LLMCircuitBreaker("gpt4", model=LLMModel.GEMINI_2_5_FLASH.value)
         response = await llm_breaker.call_llm(llm_function, prompt, tokens=1000)
         
         # With cost tracking

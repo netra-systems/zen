@@ -19,6 +19,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -90,7 +92,7 @@ class MultiAgentL4TestSuite:
                 "user_request": "Our AI infrastructure costs have increased 300% this quarter to $75K/month. We need immediate cost optimization while maintaining response quality for our customer-facing chatbot.",
                 "context": {
                     "monthly_spend": 75000,
-                    "current_models": ["gpt-4", "gpt-3.5-turbo"],
+                    "current_models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value],
                     "request_volume": 2000000,
                     "business_impact": "customer_satisfaction"
                 }

@@ -12,6 +12,8 @@ Coverage: Real cost tracking, budget management, usage analytics, cost optimizat
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -206,14 +208,14 @@ class ProviderPricing:
     def __init__(self):
         self.pricing_data = {
             "openai": {
-                "gpt-4": {"input": Decimal("0.03"), "output": Decimal("0.06")},
-                "gpt-4-turbo": {"input": Decimal("0.01"), "output": Decimal("0.03")},
-                "gpt-3.5-turbo": {"input": Decimal("0.0015"), "output": Decimal("0.002")},
+                LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.03"), "output": Decimal("0.06")},
+                LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.01"), "output": Decimal("0.03")},
+                LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.0015"), "output": Decimal("0.002")},
                 "text-embedding-ada-002": {"input": Decimal("0.0001"), "output": Decimal("0.0001")}
             },
             "anthropic": {
-                "claude-3-opus": {"input": Decimal("0.015"), "output": Decimal("0.075")},
-                "claude-3-sonnet": {"input": Decimal("0.003"), "output": Decimal("0.015")},
+                LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.015"), "output": Decimal("0.075")},
+                LLMModel.GEMINI_2_5_FLASH.value: {"input": Decimal("0.003"), "output": Decimal("0.015")},
                 "claude-3-haiku": {"input": Decimal("0.00025"), "output": Decimal("0.00125")}
             },
             "cohere": {
@@ -712,7 +714,7 @@ class CostOptimizer:
                 efficiency_score -= 0.2
             
             # Check for underutilized premium models
-            premium_models = [m for m in model_breakdown if "gpt-4" in m["model"].lower() and m["requests"] < 10]
+            premium_models = [m for m in model_breakdown if LLMModel.GEMINI_2_5_FLASH.value in m["model"].lower() and m["requests"] < 10]
             if premium_models:
                 recommendations.append({
                     "type": "usage_optimization",
@@ -848,7 +850,7 @@ async def test_basic_cost_tracking(cost_manager):
     entry_id = await manager.cost_tracker.track_usage(
         agent_id="test_agent_001",
         provider="openai",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         input_tokens=100,
         output_tokens=50,
         category=CostCategory.MODEL_INFERENCE,
@@ -873,7 +875,7 @@ async def test_provider_pricing_calculation(cost_manager):
     pricing = manager.cost_tracker.pricing
     
     # Test OpenAI GPT-4 pricing
-    input_cost, output_cost, total_cost = pricing.calculate_cost("openai", "gpt-4", 1000, 500)
+    input_cost, output_cost, total_cost = pricing.calculate_cost("openai", LLMModel.GEMINI_2_5_FLASH.value, 1000, 500)
     
     # GPT-4: $0.03 input, $0.06 output per 1K tokens
     expected_input = Decimal("0.03")  # 1000 tokens
@@ -908,7 +910,7 @@ async def test_cost_summary_generation(cost_manager):
         await manager.cost_tracker.track_usage(
             agent_id="summary_test_agent",
             provider="openai",
-            model="gpt-3.5-turbo",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             input_tokens=100 + i * 10,
             output_tokens=50 + i * 5,
             category=CostCategory.MODEL_INFERENCE,
@@ -942,7 +944,7 @@ async def test_realtime_cache_updates(cost_manager):
     await manager.cost_tracker.track_usage(
         agent_id="cache_test_agent",
         provider="openai",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         input_tokens=200,
         output_tokens=100,
         category=CostCategory.MODEL_INFERENCE
@@ -979,7 +981,7 @@ async def test_budget_creation_and_monitoring(cost_manager):
         await manager.cost_tracker.track_usage(
             agent_id="budget_test_agent",
             provider="openai",
-            model="gpt-4",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             input_tokens=1000,
             output_tokens=500,
             category=CostCategory.MODEL_INFERENCE
@@ -1018,7 +1020,7 @@ async def test_budget_alert_thresholds(cost_manager):
     await manager.cost_tracker.track_usage(
         agent_id="alert_test_agent",
         provider="openai",
-        model="gpt-4",
+        model=LLMModel.GEMINI_2_5_FLASH.value,
         input_tokens=1000,  # This should cost ~$0.30
         output_tokens=500,  # This should cost ~$0.30, total ~$0.60
         category=CostCategory.MODEL_INFERENCE
@@ -1060,7 +1062,7 @@ async def test_budget_forecasting(cost_manager):
         await manager.cost_tracker.track_usage(
             agent_id="forecast_test_agent",
             provider="openai",
-            model="gpt-3.5-turbo",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             input_tokens=500,
             output_tokens=250,
             category=CostCategory.MODEL_INFERENCE
@@ -1085,10 +1087,10 @@ async def test_cost_optimization_analysis(cost_manager):
     
     # Add usage with expensive models
     expensive_usage = [
-        ("openai", "gpt-4", 2000, 1000),  # Expensive model
-        ("openai", "gpt-4", 1500, 800),
-        ("openai", "gpt-3.5-turbo", 1000, 500),  # Cheaper alternative
-        ("openai", "gpt-3.5-turbo", 800, 400)
+        ("openai", LLMModel.GEMINI_2_5_FLASH.value, 2000, 1000),  # Expensive model
+        ("openai", LLMModel.GEMINI_2_5_FLASH.value, 1500, 800),
+        ("openai", LLMModel.GEMINI_2_5_FLASH.value, 1000, 500),  # Cheaper alternative
+        ("openai", LLMModel.GEMINI_2_5_FLASH.value, 800, 400)
     ]
     
     for provider, model, input_tokens, output_tokens in expensive_usage:
@@ -1128,7 +1130,7 @@ async def test_concurrent_cost_tracking(cost_manager):
         task = manager.cost_tracker.track_usage(
             agent_id=f"concurrent_agent_{i % 5}",
             provider="openai",
-            model="gpt-3.5-turbo",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             input_tokens=100 + i,
             output_tokens=50 + i // 2,
             category=CostCategory.MODEL_INFERENCE,
@@ -1165,7 +1167,7 @@ async def test_cost_tracking_performance(cost_manager):
         task = manager.cost_tracker.track_usage(
             agent_id=f"perf_agent_{i % 10}",
             provider="openai",
-            model="gpt-3.5-turbo",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             input_tokens=100,
             output_tokens=50,
             category=CostCategory.MODEL_INFERENCE,

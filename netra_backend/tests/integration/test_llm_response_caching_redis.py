@@ -9,6 +9,8 @@ Tests LLM response caching with real Redis containers and cache strategies.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -106,21 +108,21 @@ class TestLLMResponseCachingRedisL3:
             "simple_question": {
                 "prompt": "What is the capital of France?",
                 "response": "The capital of France is Paris.",
-                "model": "gpt-3.5-turbo",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens": 12,
                 "cost": 0.00024
             },
             "complex_analysis": {
                 "prompt": "Analyze the economic impact of renewable energy adoption",
                 "response": "Renewable energy adoption has significant positive economic impacts including job creation, reduced energy costs, and increased energy independence...",
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens": 350,
                 "cost": 0.021
             },
             "code_generation": {
                 "prompt": "Write a Python function to calculate fibonacci numbers",
                 "response": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)",
-                "model": "gpt-3.5-turbo",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens": 45,
                 "cost": 0.0009
             }
@@ -274,13 +276,13 @@ class TestLLMResponseCachingRedisL3:
         assert initial_count >= 3
         
         # Test model-specific invalidation
-        await cache_manager.invalidate_by_model("gpt-3.5-turbo")
+        await cache_manager.invalidate_by_model(LLMModel.GEMINI_2_5_FLASH.value)
         
         # Check that only gpt-4 responses remain
-        remaining_responses = await cache_manager.get_cached_responses_by_model("gpt-4")
+        remaining_responses = await cache_manager.get_cached_responses_by_model(LLMModel.GEMINI_2_5_FLASH.value)
         assert len(remaining_responses) >= 1
         
-        gpt35_responses = await cache_manager.get_cached_responses_by_model("gpt-3.5-turbo")
+        gpt35_responses = await cache_manager.get_cached_responses_by_model(LLMModel.GEMINI_2_5_FLASH.value)
         assert len(gpt35_responses) == 0
         
         # Test category-based invalidation
@@ -338,7 +340,7 @@ class TestLLMResponseCachingRedisL3:
         
         await response_processor.process_and_cache(
             prompt=base_prompt,
-            model="gpt-4",
+            model=LLMModel.GEMINI_2_5_FLASH.value,
             response=base_response,
             metadata={"tokens": 150, "cost": 0.009}
         )
@@ -355,7 +357,7 @@ class TestLLMResponseCachingRedisL3:
         for similar_prompt in similar_prompts:
             result = await response_processor.get_cached_response(
                 prompt=similar_prompt,
-                model="gpt-4",
+                model=LLMModel.GEMINI_2_5_FLASH.value,
                 similarity_threshold=0.7
             )
             
@@ -441,19 +443,19 @@ class TestLLMResponseCachingRedisL3:
         warming_prompts = [
             {
                 "prompt": "Explain machine learning concepts",
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "expected_response": "Machine learning is a subset of artificial intelligence...",
                 "priority": "high"
             },
             {
                 "prompt": "Best practices for API design",
-                "model": "gpt-3.5-turbo", 
+                "model": LLMModel.GEMINI_2_5_FLASH.value, 
                 "expected_response": "Good API design follows REST principles...",
                 "priority": "medium"
             },
             {
                 "prompt": "Python performance optimization tips",
-                "model": "gpt-4",
+                "model": LLMModel.GEMINI_2_5_FLASH.value,
                 "expected_response": "To optimize Python performance: use list comprehensions...",
                 "priority": "high"
             }

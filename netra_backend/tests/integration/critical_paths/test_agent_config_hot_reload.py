@@ -12,6 +12,8 @@ Coverage: Real configuration management, file watching, graceful updates
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -449,7 +451,7 @@ class ConfigHotReloadManager:
             model_settings={
                 "max_tokens": 2000,
                 "temperature": 0.7,
-                "model": "gpt-4"
+                "model": LLMModel.GEMINI_2_5_FLASH.value
             },
             rate_limits={
                 "requests_per_minute": 60,

@@ -7,6 +7,8 @@ import asyncio
 import os
 import time
 from typing import Any, Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -46,14 +48,14 @@ class TestLLMManagerLoadBalancing:
     
     def _detect_real_llm_environment(self) -> bool:
         """Detect if real LLM environment is available"""
-        api_keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+        api_keys = ["GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
         return any(os.getenv(key) for key in api_keys)
     
     def _create_load_balancing_providers(self) -> List[tuple]:
         """Create providers with different capabilities"""
         return [
-            ('FAST_openai', MockLLMClient(LLMProvider.OPENAI, 'gpt-3.5-turbo')),
-            ('SLOW_openai', MockLLMClient(LLMProvider.OPENAI, 'gpt-4')),
+            ('FAST_openai', MockLLMClient(LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)),
+            ('SLOW_openai', MockLLMClient(LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value)),
             ('FAST_google', MockLLMClient(LLMProvider.GOOGLE, 'gemini-pro')),
         ]
     

@@ -6,6 +6,8 @@ Maximum 300 lines, functions ≤8 lines.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -124,7 +126,7 @@ def _validate_metadata_propagation(results: List[Dict], state: DeepAgentState):
     """Validate metadata propagation through workflow."""
     assert all(r['workflow_state'] is state for r in results)
     candidate_models = state.metadata.custom_fields.get('candidate_models', '')
-    assert 'gpt-4o' in candidate_models and 'claude-3-sonnet' in candidate_models
+    assert 'gpt-4o' in candidate_models and LLMModel.GEMINI_2_5_FLASH.value in candidate_models
     assert all(r['state_updated'] for r in results if r['agent_state'] == SubAgentLifecycle.COMPLETED)
 
 def _validate_recommendation_consistency(results: List[Dict], state: DeepAgentState):

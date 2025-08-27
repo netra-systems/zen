@@ -5,6 +5,8 @@ Tests price change calculations, provider comparisons, and anomaly detection
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -35,7 +37,7 @@ def sample_openai_item() -> AISupplyItem:
     # Mock: Service component isolation for predictable testing behavior
     item = MagicMock(spec=AISupplyItem)
     item.provider = "openai"
-    item.model_name = "gpt-4"
+    item.model_name = LLMModel.GEMINI_2_5_FLASH.value
     item.pricing_input = Decimal("0.03")
     item.pricing_output = Decimal("0.06")
     item.context_window = 8192
@@ -61,7 +63,7 @@ class TestPriceChangeCalculations:
     def test_calculate_price_changes_with_increases(self, service):
         """Test price change calculations with price increases"""
         log = self._create_price_log("0.02", "0.03", "item-1")
-        item = self._create_test_item("openai", "gpt-4")
+        item = self._create_test_item("openai", LLMModel.GEMINI_2_5_FLASH.value)
         
         with patch.object(service.db, 'query') as mock_query:
             self._setup_price_query_mock(mock_query, [log])
@@ -79,7 +81,7 @@ class TestPriceChangeCalculations:
     def test_calculate_price_changes_with_decreases(self, service):
         """Test price change calculations with price decreases"""
         log = self._create_price_log("0.04", "0.03", "item-1")
-        item = self._create_test_item("openai", "gpt-4")
+        item = self._create_test_item("openai", LLMModel.GEMINI_2_5_FLASH.value)
         
         with patch.object(service.db, 'query') as mock_query:
             self._setup_price_query_mock(mock_query, [log])
@@ -97,21 +99,21 @@ class TestPriceChangeCalculations:
         """Test that price changes are sorted by magnitude"""
         log_small = self._create_price_log("0.02", "0.022", "item-1")  # 10% change
         log_large = self._create_price_log("0.02", "0.03", "item-2")   # 50% change
-        item = self._create_test_item("openai", "gpt-4")
+        item = self._create_test_item("openai", LLMModel.GEMINI_2_5_FLASH.value)
         
         # Mock the price_ops.calculate_price_changes method directly
         expected_result = {
             "all_changes": [
                 {
                     "provider": "openai",
-                    "model": "gpt-4", 
+                    "model": LLMModel.GEMINI_2_5_FLASH.value, 
                     "field": "pricing_input",
                     "percent_change": 50.0,
                     "direction": "increase"
                 },
                 {
                     "provider": "openai",
-                    "model": "gpt-4",
+                    "model": LLMModel.GEMINI_2_5_FLASH.value,
                     "field": "pricing_input", 
                     "percent_change": 10.0,
                     "direction": "increase"
@@ -133,7 +135,7 @@ class TestPriceChangeCalculations:
     def test_calculate_price_changes_with_provider_filter(self, service):
         """Test price calculations filtered by provider"""
         log = self._create_price_log("0.02", "0.03", "item-1")
-        item = self._create_test_item("openai", "gpt-4")
+        item = self._create_test_item("openai", LLMModel.GEMINI_2_5_FLASH.value)
         
         with patch.object(service.db, 'query') as mock_query:
             self._setup_filtered_price_query_mock(mock_query, [log])
@@ -215,7 +217,7 @@ class TestProviderComparison:
     
     def _verify_openai_data(self, openai_data: Dict[str, Any]):
         """Helper to verify OpenAI provider data"""
-        assert openai_data["flagship_model"] == "gpt-4"
+        assert openai_data["flagship_model"] == LLMModel.GEMINI_2_5_FLASH.value
         assert openai_data["input_price"] == 0.03
         assert openai_data["model_count"] == 1
     
@@ -254,7 +256,7 @@ class TestAnomalyDetection:
             "all_changes": [
                 {
                     "provider": "openai",
-                    "model": "gpt-4",
+                    "model": LLMModel.GEMINI_2_5_FLASH.value,
                     "field": "pricing_input",
                     "percent_change": 75.0,  # High change
                     "updated_at": datetime.now(UTC).isoformat()

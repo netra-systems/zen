@@ -5,6 +5,8 @@ Tests service initialization, Redis handling, and supply item retrieval methods
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -32,7 +34,7 @@ def sample_supply_item() -> AISupplyItem:
     item = MagicMock(spec=AISupplyItem)
     item.id = "supply-item-1"
     item.provider = "openai"
-    item.model_name = "gpt-4"
+    item.model_name = LLMModel.GEMINI_2_5_FLASH.value
     item.pricing_input = Decimal("0.03")
     item.pricing_output = Decimal("0.06")
     item.confidence_score = 0.9

@@ -4,6 +4,8 @@ Tests for specific example prompts (EP-005, EP-008, EP-009) with real LLM valida
 """
 
 from typing import Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -46,8 +48,8 @@ class TestExamplePromptsModelSelection:
 def _create_ep_005_state() -> DeepAgentState:
     """Create state for EP-005 example prompt test."""
     return DeepAgentState(
-        user_request="I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
-        metadata={'test_type': 'ep_005', 'prompt_id': 'EP-005', 'candidate_models': ['gpt-4o', 'claude-3-sonnet']}
+        user_request="I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
+        metadata={'test_type': 'ep_005', 'prompt_id': 'EP-005', 'candidate_models': ['gpt-4o', LLMModel.GEMINI_2_5_FLASH.value]}
     )
 
 def _create_ep_008_state() -> DeepAgentState:

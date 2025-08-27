@@ -16,6 +16,8 @@ Each test failure = potential lost customer = lost $99-999/month recurring reven
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import json
 import os
@@ -121,7 +123,7 @@ class TestFirstTimeUserRealCritical:
         # Test real token usage calculation
         usage = TokenUsage(prompt_tokens=1000, completion_tokens=500)
         provider = LLMProvider.OPENAI
-        model = "gpt-4"
+        model = LLMModel.GEMINI_2_5_FLASH.value
         
         # Calculate REAL cost using actual pricing
         calculated_cost = cost_service.calculate_cost(usage, provider, model)

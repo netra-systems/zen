@@ -6,6 +6,8 @@ Refactored to comply with 25-line function limit and 450-line file limit
 import asyncio
 import os
 from typing import Any, Dict, List
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 from pydantic import BaseModel
@@ -54,13 +56,13 @@ class TestLLMManagerStructuredOutput:
     
     def _has_real_llm_keys(self) -> bool:
         """Check if real LLM API keys are available"""
-        keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+        keys = ["GOOGLE_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
         return any(os.getenv(key) for key in keys)
     
     def _create_structured_output_providers(self) -> List[MockLLMClient]:
         """Create providers with structured output support"""
         return [
-            MockLLMClient(LLMProvider.OPENAI, 'gpt-4'),
+            MockLLMClient(LLMProvider.OPENAI, LLMModel.GEMINI_2_5_FLASH.value),
             MockLLMClient(LLMProvider.GOOGLE, 'gemini-pro')
         ]
     

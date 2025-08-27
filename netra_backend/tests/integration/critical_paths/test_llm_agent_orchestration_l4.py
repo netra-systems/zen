@@ -17,6 +17,8 @@ This test validates real-world LLM agent orchestration including:
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -143,7 +145,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
             PromptTestScenario(
                 name="model_selection_optimization",
                 category="Model Selection",
-                prompt="I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
+                prompt="I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",
                 expected_agent_flow=["triage", "model_analysis", "performance_comparison", "cost_calculator"],
                 quality_requirements={
                     "response_completeness": 0.90,

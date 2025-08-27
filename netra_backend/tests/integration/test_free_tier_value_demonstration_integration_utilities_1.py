@@ -2,6 +2,8 @@
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -47,7 +49,7 @@ class TestSyntaxFix:
         if pattern == "minimal":
             return "gemini-2.5-flash"  # Cheapest model
         elif pattern == "burst":
-            return "gpt-4-turbo"  # Premium model for peaks
+            return LLMModel.GEMINI_2_5_FLASH.value  # Premium model for peaks
         elif pattern == "high":
             return "claude-3.5-sonnet"  # Balanced performance
         else:

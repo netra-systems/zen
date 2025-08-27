@@ -16,6 +16,8 @@ REQUIREMENTS:
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -99,7 +101,7 @@ class TestMetricCollection:
             "agent_type": "optimization",
             "response_time": 2.5,
             "tokens_used": 150,
-            "model": "gpt-4-turbo",
+            "model": LLMModel.GEMINI_2_5_FLASH.value,
             "quality_score": 0.85
         }
         
@@ -125,7 +127,7 @@ class TestMetricCollection:
     async def test_token_usage_metric_capture(self, user_action_tracker, metrics_collector):
         """BVJ: Validates token usage metrics are captured correctly."""
         user_id = "token_test_user"
-        response_action_data = {"tokens_used": 150, "model": "gpt-4-turbo"}
+        response_action_data = {"tokens_used": 150, "model": LLMModel.GEMINI_2_5_FLASH.value}
         
         await user_action_tracker.track_user_action("agent_response", user_id, response_action_data)
         
@@ -134,7 +136,7 @@ class TestMetricCollection:
         
         token_metric = token_metrics[0]
         assert token_metric.metric_value == 150, "Token usage value incorrect"
-        assert token_metric.labels["model"] == "gpt-4-turbo", "Model not captured"
+        assert token_metric.labels["model"] == LLMModel.GEMINI_2_5_FLASH.value, "Model not captured"
 
     @pytest.mark.asyncio
     async def test_multiple_response_scenarios(self, user_action_tracker, metrics_collector):

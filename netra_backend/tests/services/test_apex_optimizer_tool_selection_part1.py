@@ -5,6 +5,8 @@ Tests tool selection logic, helper classes, and basic optimization routing
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import asyncio
 import json
@@ -111,7 +113,7 @@ class MockLLMConnector:
             },
             'model': {
                 "tool_name": "new_model_effectiveness_analysis",
-                "arguments": {"model_candidates": ["gpt-4", "claude-3"], "metrics": ["accuracy", "speed"]}
+                "arguments": {"model_candidates": [LLMModel.GEMINI_2_5_FLASH.value, "claude-3"], "metrics": ["accuracy", "speed"]}
             },
             'multi': {
                 "tool_name": "multi_objective_optimization",

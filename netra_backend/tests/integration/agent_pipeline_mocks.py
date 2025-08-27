@@ -21,6 +21,8 @@ from unittest.mock import AsyncMock, Mock
 import asyncio
 import json
 import uuid
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 def mock_justified(reason: str):
 
@@ -92,7 +94,7 @@ class AgentPipelineMocks:
             
             response = response_templates[template_key][quality_key]
             
-            return {"content": response, "usage": {"prompt_tokens": len(prompt), "completion_tokens": len(response)}, "model": "gpt-4-turbo", "finish_reason": "stop"}
+            return {"content": response, "usage": {"prompt_tokens": len(prompt), "completion_tokens": len(response)}, "model": LLMModel.GEMINI_2_5_FLASH.value, "finish_reason": "stop"}
 
         llm_mock.generate_response = AsyncMock(side_effect=mock_generate_response)
 

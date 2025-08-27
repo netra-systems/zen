@@ -20,6 +20,8 @@ import asyncio
 import time
 from typing import Any, Dict, Optional
 from unittest.mock import patch
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 import pytest
 
@@ -178,7 +180,7 @@ class TestRealLLMSecurity:
         
         try:
             response = await llm_manager.ask_llm(
-                "Explain API security", "gpt-3.5-turbo"
+                "Explain API security", LLMModel.GEMINI_2_5_FLASH.value
             )
             filtered_response = self._filter_sensitive_content(response)
             assert len(filtered_response) > 0, "Response too heavily filtered"

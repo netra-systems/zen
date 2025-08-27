@@ -7,6 +7,8 @@ Maximum 300 lines, functions ≤8 lines.
 from datetime import datetime, timezone
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import (
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
@@ -39,7 +41,7 @@ EXAMPLE_PROMPTS = [
 
     "I need to optimize the 'user_authentication' function. What advanced methods can I use?",  # EP-004
 
-    "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",  # EP-005
+    "I'm considering using the new 'gpt-4o' and LLMModel.GEMINI_2_5_FLASH.value models. How effective would they be in my current setup?",  # EP-005
 
     "I want to audit all uses of KV caching in my system to find optimization opportunities.",  # EP-006
 

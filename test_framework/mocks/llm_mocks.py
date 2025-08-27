@@ -7,6 +7,8 @@ import asyncio
 from typing import Any, Dict, List, Optional, Type, TypeVar
 from unittest.mock import AsyncMock, MagicMock
 from pydantic import BaseModel
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -236,7 +238,7 @@ class MockOpenAIClient:
     def chat_completions_create(
         self, 
         messages: List[Dict[str, str]], 
-        model: str = "gpt-3.5-turbo",
+        model: str = LLMModel.GEMINI_2_5_FLASH.value,
         **kwargs
     ) -> Dict[str, Any]:
         """Mock chat completion creation."""

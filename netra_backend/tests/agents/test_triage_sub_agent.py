@@ -5,6 +5,8 @@ Tests all major functionality including categorization, caching, fallback, and e
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -139,7 +141,7 @@ class TestEntityExtraction:
         request = "Compare GPT-4 with Claude-2 and Llama-2 performance"
         entities = triage_agent._extract_entities_from_request(request)
         
-        assert "gpt-4" in entities.models_mentioned
+        assert LLMModel.GEMINI_2_5_FLASH.value in entities.models_mentioned
         assert "claude-2" in entities.models_mentioned
         assert "llama-2" in entities.models_mentioned
     
@@ -203,7 +205,7 @@ class TestToolRecommendation:
     
     def test_recommend_tools_for_cost_optimization(self, triage_agent):
         """Test tool recommendations for cost optimization."""
-        entities = ExtractedEntities(models_mentioned=["gpt-4"], metrics_mentioned=["cost"])
+        entities = ExtractedEntities(models_mentioned=[LLMModel.GEMINI_2_5_FLASH.value], metrics_mentioned=["cost"])
         tools = triage_agent._recommend_tools("Cost Optimization", entities)
         
         assert len(tools) > 0

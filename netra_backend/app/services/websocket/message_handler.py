@@ -6,6 +6,8 @@ Uses message queue system for better scalability and error handling.
 import json
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -88,7 +90,7 @@ class StartAgentHandler(BaseMessageHandler):
         """Create run for agent execution"""
         return await uow.runs.create_run(
             uow.session, thread_id=thread.id, assistant_id="netra-assistant",
-            model="gpt-4", instructions="You are Netra AI Workload Optimization Assistant"
+            model=LLMModel.GEMINI_2_5_FLASH.value, instructions="You are Netra AI Workload Optimization Assistant"
         )
     
     async def _execute_agent_workflow(self, user_request: str, thread_id: str, user_id: str, run_id: str):
@@ -193,7 +195,7 @@ class UserMessageHandler(BaseMessageHandler):
         """Create run for user message processing"""
         return await uow.runs.create_run(
             uow.session, thread_id=thread.id, assistant_id="netra-assistant",
-            model="gpt-4", instructions="You are Netra AI Workload Optimization Assistant"
+            model=LLMModel.GEMINI_2_5_FLASH.value, instructions="You are Netra AI Workload Optimization Assistant"
         )
     
     async def _process_user_message_workflow(self, text: str, thread_id: str, user_id: str, run_id: str):

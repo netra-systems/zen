@@ -1,5 +1,7 @@
 # app/services/supply_catalog_service.py
 from typing import List, Optional
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -67,7 +69,7 @@ class SupplyCatalogService:
             return
 
         default_options = [
-            SupplyOptionCreate(provider="OpenAI", family="GPT-4", name="gpt-4-turbo", cost_per_million_tokens_usd={"prompt": 10.00, "completion": 30.00}, quality_score=0.95),
+            SupplyOptionCreate(provider="OpenAI", family="GPT-4", name=LLMModel.GEMINI_2_5_FLASH.value, cost_per_million_tokens_usd={"prompt": 10.00, "completion": 30.00}, quality_score=0.95),
             SupplyOptionCreate(provider="OpenAI", family="GPT-4", name="gpt-4o", cost_per_million_tokens_usd={"prompt": 5.00, "completion": 15.00}, quality_score=0.97),
             SupplyOptionCreate(provider="Anthropic", family="Claude 3", name="claude-3-opus-20240229", cost_per_million_tokens_usd={"prompt": 15.00, "completion": 75.00}, quality_score=0.98),
             SupplyOptionCreate(provider="Anthropic", family="Claude 3", name="claude-3-sonnet-20240229", cost_per_million_tokens_usd={"prompt": 3.00, "completion": 15.00}, quality_score=0.92),

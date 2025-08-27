@@ -15,6 +15,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Import from the auth helpers module
 from netra_backend.tests.e2e.first_time_user.real_critical_auth_helpers import CriticalUserJourneyHelpers
@@ -29,7 +31,7 @@ class OptimizationHelpers:
             "monthly_requests": 15000,
             "average_response_time": 1200,
             "monthly_cost": 2400,
-            "primary_models": ["gpt-4", "claude-3-sonnet"],
+            "primary_models": [LLMModel.GEMINI_2_5_FLASH.value, LLMModel.GEMINI_2_5_FLASH.value],
             "use_cases": ["customer_support", "content_generation"]
         }
         return usage_data

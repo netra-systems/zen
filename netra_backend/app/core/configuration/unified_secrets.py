@@ -1,4 +1,6 @@
 from netra_backend.app.core.isolated_environment import get_env
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 """Unified Secret Management Module
 
 Provides a unified interface for all secret management operations.
@@ -81,7 +83,7 @@ class UnifiedSecretManager:
             "DATABASE_PASSWORD",
             "REDIS_PASSWORD",
             "LLM_API_KEY",
-            "OPENAI_API_KEY",
+            "GOOGLE_API_KEY",
             "ANTHROPIC_API_KEY",
             "GEMINI_API_KEY",
             "CLICKHOUSE_PASSWORD",
@@ -264,12 +266,12 @@ class UnifiedSecretManager:
         
         credentials = {
             "provider": provider,
-            "model": get_env().get("LLM_MODEL", "gpt-4")
+            "model": get_env().get("LLM_MODEL", LLMModel.GEMINI_2_5_FLASH.value)
         }
         
         # Get provider-specific API key
         if provider == "openai":
-            credentials["api_key"] = self.get_secret("OPENAI_API_KEY", "")
+            credentials["api_key"] = self.get_secret("GOOGLE_API_KEY", "")
         elif provider == "anthropic":
             credentials["api_key"] = self.get_secret("ANTHROPIC_API_KEY", "")
         elif provider == "gemini":
@@ -405,7 +407,7 @@ class UnifiedSecretManager:
             "DATABASE_PASSWORD": "DATABASE_PASSWORD",
             "REDIS_PASSWORD": "REDIS_PASSWORD",
             "LLM_API_KEY": "LLM_API_KEY",
-            "OPENAI_API_KEY": "OPENAI_API_KEY",
+            "GOOGLE_API_KEY": "GOOGLE_API_KEY",
             "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
             "GEMINI_API_KEY": "GEMINI_API_KEY",
             "CLICKHOUSE_PASSWORD": "CLICKHOUSE_PASSWORD"

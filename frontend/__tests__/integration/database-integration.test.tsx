@@ -39,7 +39,7 @@ describe('Database Repository Pattern Integration', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: 'Test Thread',
-            model: 'gpt-4'
+            model: 'gemini-2.5-flash'
           })
         });
         
@@ -64,7 +64,7 @@ describe('Database Repository Pattern Integration', () => {
       data: {
         id: 'thread-123',
         title: 'Test Thread',
-        model: 'gpt-4'
+        model: 'gemini-2.5-flash'
       }
     });
     

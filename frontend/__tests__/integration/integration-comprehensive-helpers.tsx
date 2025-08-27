@@ -274,7 +274,7 @@ export const setupComprehensiveLLMCacheResponseMocks = () => {
       json: async () => ({ 
         cached: false, 
         response: 'test response',
-        model: 'gpt-4',
+        model: 'gemini-2.5-flash',
         tokens: 100
       })
     })

@@ -126,7 +126,7 @@ class TestStagingDatabaseConnectionResilience:
         """Test ClickHouse connection handling with staging-specific port configuration."""
         # Test HTTP connection on port 8123
         http_config = {
-            "host": "staging-clickhouse.netrasystems.ai",
+            "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
             "port": 8123,
             "protocol": "http",
             "user": "staging_user",
@@ -135,7 +135,7 @@ class TestStagingDatabaseConnectionResilience:
         
         # Test native connection on port 9000
         native_config = {
-            "host": "staging-clickhouse.netrasystems.ai", 
+            "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud", 
             "port": 9000,
             "protocol": "native",
             "user": "staging_user",
@@ -144,7 +144,7 @@ class TestStagingDatabaseConnectionResilience:
         
         # Test HTTPS connection on port 8443
         https_config = {
-            "host": "staging-clickhouse.netrasystems.ai",
+            "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
             "port": 8443,
             "protocol": "https",
             "user": "staging_user",

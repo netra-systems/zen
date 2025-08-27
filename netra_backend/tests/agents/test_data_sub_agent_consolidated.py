@@ -8,6 +8,8 @@ Business Value: Ensures 15-30% cost savings identification works reliably.
 
 import sys
 from pathlib import Path
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 # Test framework import - using pytest fixtures instead
 
@@ -485,7 +487,7 @@ class TestClickHouseClient:
                 "workload_type": "chat_completion",
                 "latency_ms": 150.5,
                 "cost_cents": 2.3,
-                "model_name": "gpt-3.5-turbo",
+                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens": 1000,
                 "status": "completed"
             },
@@ -496,7 +498,7 @@ class TestClickHouseClient:
                 "workload_type": "text_generation",
                 "latency_ms": 220.3,
                 "cost_cents": 4.1,
-                "model_name": "gpt-4",
+                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens": 1500,
                 "status": "completed"
             },
@@ -580,7 +582,7 @@ class TestDataValidator:
                 "workload_type": "chat_completion",
                 "latency_ms": 150.5,
                 "cost_cents": 2.3,
-                "model_name": "gpt-3.5-turbo",
+                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens": 1000,
                 "status": "completed"
             },
@@ -591,7 +593,7 @@ class TestDataValidator:
                 "workload_type": "text_generation",
                 "latency_ms": 220.3,
                 "cost_cents": 4.1,
-                "model_name": "gpt-4",
+                "model_name": LLMModel.GEMINI_2_5_FLASH.value,
                 "tokens": 1500,
                 "status": "completed"
             },

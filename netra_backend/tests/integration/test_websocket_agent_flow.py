@@ -23,6 +23,8 @@ import json
 import pytest
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
+from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
@@ -129,7 +131,7 @@ class TestWebSocketAgentFlow:
             type=MessageType.START_AGENT,
             payload={
                 "user_request": "Optimize my AI workload configuration",
-                "context": {"model": "gpt-4"},
+                "context": {"model": LLMModel.GEMINI_2_5_FLASH.value},
                 "settings": {"max_tokens": 1000}
             },
             user_id="test_user",
