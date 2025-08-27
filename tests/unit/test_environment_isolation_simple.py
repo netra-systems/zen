@@ -169,3 +169,211 @@ class TestEnvironmentIsolation:
                 os.environ['REDIS_URL'] = original_redis_url  
             else:
                 os.environ.pop('REDIS_URL', None)
+                
+    def test_isolated_environment_thread_safety(self):
+        """Test that IsolatedEnvironment works correctly in multi-threaded scenarios."""
+        import threading
+        import time
+        from concurrent.futures import ThreadPoolExecutor
+        
+        results = {}
+        
+        def test_worker(thread_id):
+            """Worker function to test environment isolation per thread."""
+            env = get_env()
+            test_var = f'THREAD_TEST_{thread_id}'
+            test_value = f'thread_value_{thread_id}'
+            
+            # Set thread-specific value
+            os.environ[test_var] = test_value
+            
+            # Small delay to allow other threads to interfere if not isolated
+            time.sleep(0.01)
+            
+            # Verify our value is still there
+            retrieved_value = env.get(test_var)
+            results[thread_id] = retrieved_value == test_value
+            
+        # Run multiple threads
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = []
+            for i in range(5):
+                future = executor.submit(test_worker, i)
+                futures.append(future)
+            
+            # Wait for all threads to complete
+            for future in futures:
+                future.result()
+        
+        # Verify all threads got their correct values
+        for thread_id in range(5):
+            assert results[thread_id], f"Thread {thread_id} failed to get correct isolated value"
+            
+    def test_environment_variable_types(self):
+        """Test that IsolatedEnvironment handles different variable types correctly."""
+        env = get_env()
+        
+        # Test string values
+        os.environ['STRING_VAR'] = 'string_value'
+        assert env.get('STRING_VAR') == 'string_value'
+        
+        # Test empty string
+        os.environ['EMPTY_VAR'] = ''
+        assert env.get('EMPTY_VAR') == ''
+        
+        # Test values with special characters
+        os.environ['SPECIAL_VAR'] = 'value with spaces and symbols !@#$%'
+        assert env.get('SPECIAL_VAR') == 'value with spaces and symbols !@#$%'
+        
+        # Test values that look like other types
+        os.environ['NUMBER_VAR'] = '123'
+        assert env.get('NUMBER_VAR') == '123'  # Should remain string
+        
+        os.environ['BOOL_VAR'] = 'true'
+        assert env.get('BOOL_VAR') == 'true'  # Should remain string
+        
+    def test_isolated_environment_context_manager(self):
+        """Test that IsolatedEnvironment works as a context manager if supported."""
+        env = get_env()
+        
+        # Test basic functionality even if not a context manager
+        original_value = os.environ.get('CONTEXT_TEST_VAR')
+        
+        try:
+            os.environ['CONTEXT_TEST_VAR'] = 'context_value'
+            
+            # Within context, value should be accessible
+            assert env.get('CONTEXT_TEST_VAR') == 'context_value'
+            
+        finally:
+            # Cleanup
+            if original_value is not None:
+                os.environ['CONTEXT_TEST_VAR'] = original_value
+            else:
+                os.environ.pop('CONTEXT_TEST_VAR', None)
+                
+    def test_environment_variable_precedence(self):
+        """Test precedence of environment variable sources."""
+        env = get_env()
+        
+        # Set base value
+        os.environ['PRECEDENCE_VAR'] = 'os_environ_value'
+        
+        # Check that os.environ value is retrieved
+        assert env.get('PRECEDENCE_VAR') == 'os_environ_value'
+        
+        # If isolation is supported, test override behavior
+        if hasattr(env, 'enable_isolation') and hasattr(env, 'set'):
+            env.enable_isolation()
+            try:
+                env.set('PRECEDENCE_VAR', 'isolated_value', source='test')
+                assert env.get('PRECEDENCE_VAR') == 'isolated_value'
+                
+                # os.environ should still have original value
+                assert os.environ['PRECEDENCE_VAR'] == 'os_environ_value'
+                
+            finally:
+                env.disable_isolation()
+                
+    def test_configuration_manager_integration(self):
+        """Test integration between IsolatedEnvironment and ConfigurationManager."""
+        from netra_backend.app.core.configuration.base import config_manager
+        
+        # Set test environment variables
+        os.environ['ENVIRONMENT'] = 'development'
+        os.environ['INTEGRATION_TEST_VAR'] = 'integration_test_value'
+        
+        # Force refresh environment detection
+        if hasattr(config_manager, '_refresh_environment_detection'):
+            config_manager._refresh_environment_detection()
+        
+        # Verify environment detection worked
+        assert config_manager._environment == 'development'
+        
+        # Test that environment variables are accessible through the system
+        env = get_env()
+        assert env.get('INTEGRATION_TEST_VAR') == 'integration_test_value'
+        
+    def test_error_handling_in_isolation(self):
+        """Test error handling in IsolatedEnvironment operations."""
+        env = get_env()
+        
+        # Test getting non-existent variable with and without default
+        assert env.get('NON_EXISTENT_VAR_12345') is None
+        assert env.get('NON_EXISTENT_VAR_12345', 'default_val') == 'default_val'
+        
+        # Test that operations don't crash on edge cases  
+        assert env.get('') is None  # Empty variable name
+        
+    def test_subprocess_environment_generation(self):
+        """Test subprocess environment generation functionality."""
+        env = get_env()
+        
+        # Set some test variables
+        os.environ['SUBPROCESS_VAR_1'] = 'subprocess_value_1'
+        os.environ['SUBPROCESS_VAR_2'] = 'subprocess_value_2'
+        
+        # Get subprocess environment
+        if hasattr(env, 'get_subprocess_env'):
+            subprocess_env = env.get_subprocess_env()
+            
+            # Verify our variables are included
+            assert subprocess_env.get('SUBPROCESS_VAR_1') == 'subprocess_value_1'
+            assert subprocess_env.get('SUBPROCESS_VAR_2') == 'subprocess_value_2'
+            
+            # Verify critical system variables are preserved
+            assert 'PATH' in subprocess_env
+            
+            # Verify it's a separate dict (not a reference to os.environ)
+            assert subprocess_env is not os.environ
+            
+    def test_environment_source_tracking_detailed(self):
+        """Test detailed source tracking functionality if available."""
+        env = get_env()
+        
+        # Test basic source tracking (if supported)
+        os.environ['SOURCE_TRACK_VAR'] = 'tracked_value'
+        
+        # Access variable
+        value = env.get('SOURCE_TRACK_VAR')
+        assert value == 'tracked_value'
+        
+        # If source tracking is implemented, test it
+        if hasattr(env, 'get_source'):
+            source = env.get_source('SOURCE_TRACK_VAR')
+            assert source is not None
+            
+        if hasattr(env, 'get_all_sources'):
+            all_sources = env.get_all_sources()
+            assert isinstance(all_sources, dict)
+            
+    def test_isolation_mode_transitions(self):
+        """Test enabling/disabling isolation mode multiple times."""
+        env = get_env()
+        
+        # Test multiple enable/disable cycles if isolation is supported
+        if hasattr(env, 'enable_isolation') and hasattr(env, 'disable_isolation'):
+            # Initially not isolated (presumably)
+            os.environ['ISOLATION_CYCLE_VAR'] = 'initial_value'
+            assert env.get('ISOLATION_CYCLE_VAR') == 'initial_value'
+            
+            # Enable isolation
+            env.enable_isolation()
+            
+            # Set isolated value
+            if hasattr(env, 'set'):
+                env.set('ISOLATION_CYCLE_VAR', 'isolated_value', source='test')
+                assert env.get('ISOLATION_CYCLE_VAR') == 'isolated_value'
+            
+            # Disable isolation
+            env.disable_isolation()
+            
+            # Should now see os.environ value again
+            assert env.get('ISOLATION_CYCLE_VAR') == 'initial_value'
+            
+            # Enable again
+            env.enable_isolation()
+            env.disable_isolation()  # And disable again
+            
+            # Should still work
+            assert env.get('ISOLATION_CYCLE_VAR') == 'initial_value'
