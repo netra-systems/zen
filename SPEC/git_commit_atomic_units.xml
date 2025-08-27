@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <name>Git Commit Atomic Units via Claude</name>
+  <version>1.0.0</version>
+  <purpose>
+    Define how Claude should intelligently group changes into atomic, reasonable commits
+    that represent coherent units of work, balancing granularity with practicality.
+  </purpose>
+  
+  <critical_principles>
+    <principle name="atomic_completeness">
+      Each commit must represent a complete, functional change that leaves the system stable.
+      Never commit partial implementations or broken intermediate states.
+    </principle>
+    <principle name="logical_grouping">
+      Related changes should be grouped together when they form a single logical unit of work.
+      100 untracked files might be 1 commit or 50 commits depending on their relationships.
+    </principle>
+    <principle name="business_value_alignment">
+      Commits should align with business value delivery - each commit should represent
+      a meaningful increment of functionality or improvement.
+    </principle>
+  </critical_principles>
+
+  <commit_unit_determination>
+    <analysis_phase>
+      <step id="1">Run git status and git diff to understand full scope of changes</step>
+      <step id="2">Categorize files by service/module/feature area</step>
+      <step id="3">Identify logical relationships between changed files</step>
+      <step id="4">Determine if changes represent single or multiple units of work</step>
+    </analysis_phase>
+
+    <grouping_criteria>
+      <criterion name="feature_coherence">
+        <description>Files implementing a single feature belong together</description>
+        <example>
+          - New authentication flow: auth service files + frontend login components + tests
+          - WebSocket implementation: WebSocket handler + client + message types + tests
+        </example>
+      </criterion>
+      
+      <criterion name="refactor_scope">
+        <description>Refactoring changes that affect multiple files for same purpose</description>
+        <example>
+          - Renaming a service: All import updates + references + tests
+          - SSOT consolidation: Removing duplicates + updating references + tests
+        </example>
+      </criterion>
+      
+      <criterion name="dependency_chain">
+        <description>Changes that depend on each other must be committed together</description>
+        <example>
+          - API endpoint + its model + validation + tests
+          - Database migration + model changes + repository updates
+        </example>
+      </criterion>
+      
+      <criterion name="test_coupling">
+        <description>Tests must be committed with their implementation</description>
+        <example>
+          - New function + its unit tests
+          - Bug fix + regression test
+        </example>
+      </criterion>
+    </grouping_criteria>
+
+    <splitting_triggers>
+      <trigger name="service_boundary">
+        <description>Changes spanning multiple microservices should be separate commits</description>
+        <exception>Unless they implement a single cross-service feature</exception>
+      </trigger>
+      
+      <trigger name="unrelated_features">
+        <description>Independent features should have independent commits</description>
+        <example>
+          - Bug fix in auth service vs new dashboard component
+          - Database optimization vs UI styling updates
+        </example>
+      </trigger>
+      
+      <trigger name="reversibility">
+        <description>Changes that might need independent rollback should be separate</description>
+        <example>
+          - Risky refactor separate from safe feature addition
+          - Performance optimization separate from functional changes
+        </example>
+      </trigger>
+      
+      <trigger name="review_complexity">
+        <description>Split if single commit would be too complex to review effectively</description>
+        <guideline>If diff exceeds ~500 lines across >20 files, consider splitting</guideline>
+      </trigger>
+    </splitting_triggers>
+  </commit_unit_determination>
+
+  <commit_workflow>
+    <phase name="analysis">
+      <task>Run git status to see all untracked and modified files</task>
+      <task>Run git diff to understand nature of changes</task>
+      <task>Run git log --oneline -10 to understand recent commit style</task>
+      <task>Categorize changes into logical work units</task>
+    </phase>
+    
+    <phase name="planning">
+      <task>Group related changes based on grouping_criteria</task>
+      <task>Check for splitting_triggers that require separate commits</task>
+      <task>Order commits by dependency (foundational changes first)</task>
+      <task>Draft commit messages for each planned commit</task>
+    </phase>
+    
+    <phase name="validation">
+      <task>Ensure each commit passes tests independently</task>
+      <task>Verify no partial implementations in any commit</task>
+      <task>Check that commit messages accurately describe changes</task>
+      <task>Confirm system stability after each commit</task>
+    </phase>
+    
+    <phase name="execution">
+      <task>Stage files for first logical unit: git add [files]</task>
+      <task>Create commit with descriptive message</task>
+      <task>Run tests to verify stability</task>
+      <task>Repeat for each additional logical unit</task>
+    </phase>
+  </commit_workflow>
+
+  <commit_message_standards>
+    <structure>
+      <format>type(scope): description</format>
+      <types>
+        <type name="feat">New feature or capability</type>
+        <type name="fix">Bug fix or issue resolution</type>
+        <type name="refactor">Code restructuring without behavior change</type>
+        <type name="test">Test additions or modifications</type>
+        <type name="docs">Documentation updates</type>
+        <type name="chore">Maintenance tasks, dependency updates</type>
+        <type name="perf">Performance improvements</type>
+        <type name="style">Code style/formatting changes</type>
+      </types>
+    </structure>
+    
+    <guidelines>
+      <guideline>First line: 50 chars max, imperative mood</guideline>
+      <guideline>Body: Explain why, not what (code shows what)</guideline>
+      <guideline>Reference issues/tickets when applicable</guideline>
+      <guideline>Include Business Value Justification for features</guideline>
+      <guideline>Always include Claude attribution footer</guideline>
+    </guidelines>
+    
+    <template>
+      <![CDATA[
+type(scope): concise description of change
+
+- Explain the business value or problem solved
+- Note any important technical decisions
+- List any breaking changes or migration needs
+- Reference related specs or learnings
+
+BVJ: [Segment: X, Goal: Y, Impact: Z]
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>
+      ]]>
+    </template>
+  </commit_message_standards>
+
+  <practical_examples>
+    <example name="single_feature_multiple_files">
+      <scenario>20 files changed for WebSocket implementation</scenario>
+      <decision>Single commit - all files implement one coherent feature</decision>
+      <message>feat(websocket): implement real-time WebSocket communication
+
+- Add WebSocket handler with auth and rate limiting
+- Implement client-side connection management
+- Create message type definitions and validation
+- Add comprehensive test coverage
+
+BVJ: [Segment: Early/Mid, Goal: Expansion, Impact: Real-time updates]
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>
+      </message>
+    </example>
+    
+    <example name="mixed_changes_requiring_split">
+      <scenario>
+        - 10 files: auth service bug fixes
+        - 15 files: new dashboard component
+        - 5 files: database migration
+      </scenario>
+      <decision>3 separate commits - unrelated units of work</decision>
+      <commits>
+        <commit>fix(auth): resolve JWT validation edge cases</commit>
+        <commit>feat(dashboard): add usage metrics dashboard</commit>
+        <commit>chore(db): migrate user table for performance</commit>
+      </commits>
+    </example>
+    
+    <example name="massive_refactor">
+      <scenario>100 files: converting all relative to absolute imports</scenario>
+      <decision>Single commit if automated, or split by service if manual</decision>
+      <approach>
+        <option1>Single: refactor(imports): convert all imports to absolute paths</option1>
+        <option2>Multiple: refactor(auth): convert auth service to absolute imports</option2>
+      </approach>
+    </example>
+    
+    <example name="test_file_organization">
+      <scenario>50 test files moved to match new structure</scenario>
+      <decision>Single commit - one logical reorganization</decision>
+      <message>refactor(tests): reorganize test structure to match SPEC/folder_structure_rules
+
+- Move service tests to service-specific directories
+- Consolidate E2E tests in /tests/e2e/
+- Update all imports to use absolute paths
+- Remove duplicate test files
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>
+      </message>
+    </example>
+  </practical_examples>
+
+  <edge_cases>
+    <case name="generated_files">
+      <description>Large number of auto-generated files (migrations, compiled assets)</description>
+      <approach>Group with their source/configuration changes</approach>
+    </case>
+    
+    <case name="emergency_fixes">
+      <description>Critical production fixes needing immediate deployment</description>
+      <approach>Minimal atomic commit for just the fix, cleanup in follow-up</approach>
+    </case>
+    
+    <case name="work_in_progress">
+      <description>Incomplete feature with many files changed</description>
+      <approach>Do NOT commit. Complete the work or stash for later</approach>
+    </case>
+    
+    <case name="vendor_updates">
+      <description>Package updates affecting lock files and dependencies</description>
+      <approach>Separate commit per major dependency or group minor updates</approach>
+    </case>
+  </edge_cases>
+
+  <anti_patterns>
+    <anti_pattern name="kitchen_sink">
+      <description>Committing all changes as "various updates"</description>
+      <impact>Impossible to review, debug, or rollback effectively</impact>
+    </anti_pattern>
+    
+    <anti_pattern name="micro_commits">
+      <description>One commit per file regardless of relationships</description>
+      <impact>Cluttered history, broken atomic operations</impact>
+    </anti_pattern>
+    
+    <anti_pattern name="broken_commits">
+      <description>Committing code that doesn't pass tests</description>
+      <impact>Breaks bisection, CI/CD, and system stability</impact>
+    </anti_pattern>
+    
+    <anti_pattern name="mixed_concerns">
+      <description>Combining unrelated changes in one commit</description>
+      <impact>Difficult review, risky deployments, complex rollbacks</impact>
+    </anti_pattern>
+  </anti_patterns>
+
+  <automation_helpers>
+    <helper name="commit_analyzer">
+      <purpose>Analyze changes and suggest commit groupings</purpose>
+      <implementation>
+        1. Parse git status output
+        2. Group by directory/service
+        3. Analyze file relationships via imports
+        4. Suggest logical commit boundaries
+      </implementation>
+    </helper>
+    
+    <helper name="pre_commit_validator">
+      <purpose>Ensure commit meets atomic requirements</purpose>
+      <checks>
+        - All tests pass
+        - No partial implementations
+        - No mixed service changes (unless justified)
+        - Commit message follows standards
+      </checks>
+    </helper>
+  </automation_helpers>
+
+  <integration_with_specs>
+    <spec>SPEC/atomic_change_specification.xml - Atomic change requirements</spec>
+    <spec>SPEC/code_changes.xml - Change validation checklist</spec>
+    <spec>SPEC/anti_regression.xml - Stability requirements</spec>
+    <spec>CLAUDE.md - Section on git committing</spec>
+  </integration_with_specs>
+
+  <metrics_for_success>
+    <metric name="commit_revert_rate">
+      <target>Less than 5% of commits need reverting</target>
+    </metric>
+    <metric name="review_time">
+      <target>Average PR review under 30 minutes</target>
+    </metric>
+    <metric name="bisect_effectiveness">
+      <target>Git bisect finds issues within 5 steps</target>
+    </metric>
+    <metric name="deployment_confidence">
+      <target>Each commit deployable independently</target>
+    </metric>
+  </metrics_for_success>
+</spec>
