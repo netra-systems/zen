@@ -603,7 +603,12 @@ CMD ["npm", "start"]
             env_vars.extend([
                 f"NEXT_PUBLIC_API_URL={staging_api_url}",
                 f"NEXT_PUBLIC_AUTH_URL={staging_auth_url}",
-                f"NEXT_PUBLIC_WS_URL={staging_ws_url}"
+                f"NEXT_PUBLIC_WS_URL={staging_ws_url}",
+                # GTM Configuration
+                "NEXT_PUBLIC_GTM_CONTAINER_ID=GTM-WKP28PNQ",
+                "NEXT_PUBLIC_GTM_ENABLED=true",
+                "NEXT_PUBLIC_GTM_DEBUG=false",
+                "NEXT_PUBLIC_ENVIRONMENT=staging"
             ])
         
         if env_vars:
