@@ -21,7 +21,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
@@ -113,7 +113,7 @@ class SubscriptionTierEnforcementL3Manager:
                 "id": user_id,
                 "email": f"{user_id}@test-tier-enforcement.com",
                 "tier": tier.value,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "status": "active",
                 "monthly_usage": 0,
                 "current_requests": 0,

@@ -14,6 +14,9 @@ import time
 import websockets
 import httpx
 import pytest
+import jwt
+import datetime
+from datetime import timezone
 from typing import Dict, Any, Optional
 
 
@@ -81,14 +84,11 @@ class WebSocketAuthStartupTester:
             # For now, we'll test with a basic token structure
             
             # Create a minimal test token payload
-            import jwt
-            import datetime
-            
             payload = {
                 "user_id": "test_websocket_user",
                 "email": "test@websocket.com",
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
-                "iat": datetime.datetime.utcnow()
+                "exp": datetime.datetime.now(timezone.utc) + datetime.timedelta(minutes=30),
+                "iat": datetime.datetime.now(timezone.utc)
             }
             
             # Use a test secret (in real usage this comes from config)

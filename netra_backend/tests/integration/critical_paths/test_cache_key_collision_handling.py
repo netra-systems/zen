@@ -26,7 +26,7 @@ import time
 import uuid
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
@@ -284,7 +284,7 @@ class CacheKeyCollisionHandlingL3Manager:
             data = {
                 "origin_id": f"origin_{i}",
                 "creation_context": f"birthday_test_{i}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "sequence": i,
                 "namespace": "birthday_test"
             }
@@ -367,7 +367,7 @@ class CacheKeyCollisionHandlingL3Manager:
                     "creation_context": f"{namespace}_context_{i}",
                     "namespace": namespace,
                     "sequence": i,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
                 # Generate key that might collide across namespaces
@@ -437,7 +437,7 @@ class CacheKeyCollisionHandlingL3Manager:
                 "integrity_id": f"integrity_test_{i}",
                 "sensitive_data": f"sensitive_value_{i}",
                 "checksum": hashlib.md5(f"sensitive_value_{i}".encode()).hexdigest(),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "sequence": i
             }
             
@@ -453,7 +453,7 @@ class CacheKeyCollisionHandlingL3Manager:
                 "integrity_id": f"collision_test_{i}",
                 "sensitive_data": f"collision_value_{i}",
                 "checksum": hashlib.md5(f"collision_value_{i}".encode()).hexdigest(),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "sequence": i + 10000  # Different sequence
             }
             
@@ -519,7 +519,7 @@ class CacheKeyCollisionHandlingL3Manager:
                     data = {
                         "worker_id": worker_id,
                         "operation": op,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                         "origin_id": f"worker_{worker_id}_op_{op}"
                     }
                     

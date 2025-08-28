@@ -66,7 +66,7 @@ class TestUserStatePersistenceCompleteL4:
                 'cursor_positions': {'file1.py': 42, 'file2.js': 100}
             },
             'session_data': {
-                'last_activity': datetime.utcnow().isoformat(),
+                'last_activity': datetime.now(timezone.utc).isoformat(),
                 'active_features': ['ai_assist', 'code_review'],
                 'usage_credits': 1000
             }

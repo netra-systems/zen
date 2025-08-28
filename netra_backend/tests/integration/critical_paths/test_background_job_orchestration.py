@@ -17,7 +17,7 @@ import asyncio
 import json
 import sys
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -104,7 +104,7 @@ class BackgroundJobOrchestrationTester:
         headers = {"Authorization": f"Bearer {self.auth_token}"}
         
         # Schedule job for 5 seconds from now
-        run_at = (datetime.utcnow() + timedelta(seconds=5)).isoformat()
+        run_at = (datetime.now(timezone.utc) + timedelta(seconds=5)).isoformat()
         
         job_data = {
             "name": "test_delayed_job",

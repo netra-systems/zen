@@ -29,15 +29,15 @@ conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 cur = conn.cursor()
 
 # Check if the database exists
-cur.execute("SELECT 1 FROM pg_database WHERE datname = 'netra'")
+cur.execute("SELECT 1 FROM pg_database WHERE datname = 'netra_dev'")
 exists = cur.fetchone()
 
 if not exists:
     # Create the database
-    cur.execute("CREATE DATABASE netra")
-    print("Database 'netra' created successfully.")
+    cur.execute("CREATE DATABASE netra_dev")
+    print("Database 'netra_dev' created successfully.")
 else:
-    print("Database 'netra' already exists.")
+    print("Database 'netra_dev' already exists.")
 
 # Close the cursor and connection
 cur.close()

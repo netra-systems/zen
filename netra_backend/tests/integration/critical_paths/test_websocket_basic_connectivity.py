@@ -13,7 +13,7 @@ import asyncio
 import json
 import pytest
 import websockets
-from datetime import datetime
+from datetime import datetime, timezone
 
 from test_framework.test_patterns import L3IntegrationTest
 
@@ -43,7 +43,7 @@ class TestWebSocketBasicConnectivity(L3IntegrationTest):
                 # Send a simple ping message
                 ping_message = {
                     "type": "ping",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "data": {"test": "hello"}
                 }
                 
@@ -82,7 +82,7 @@ class TestWebSocketBasicConnectivity(L3IntegrationTest):
                 # Send agent status request
                 agent_message = {
                     "type": "agent_status",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "data": {
                         "action": "get_supervisor_status"
                     }

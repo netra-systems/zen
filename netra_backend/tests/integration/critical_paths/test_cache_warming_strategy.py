@@ -25,7 +25,7 @@ import time
 import uuid
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
@@ -203,7 +203,7 @@ class CacheWarmingStrategyL3Manager:
             access_pattern[key] = {
                 "access_frequency": random.randint(50, 200),
                 "priority": "high",
-                "last_access": datetime.utcnow().isoformat(),
+                "last_access": datetime.now(timezone.utc).isoformat(),
                 "data": f"hot_data_{key}"
             }
         
@@ -212,7 +212,7 @@ class CacheWarmingStrategyL3Manager:
             access_pattern[key] = {
                 "access_frequency": random.randint(1, 10),
                 "priority": "low",
-                "last_access": (datetime.utcnow() - timedelta(hours=random.randint(1, 24))).isoformat(),
+                "last_access": (datetime.now(timezone.utc) - timedelta(hours=random.randint(1, 24))).isoformat(),
                 "data": f"cold_data_{key}"
             }
         
@@ -229,7 +229,7 @@ class CacheWarmingStrategyL3Manager:
         all_keys = [f"temporal_key_{i}_{uuid.uuid4().hex[:8]}" for i in range(data_size)]
         
         access_pattern = {}
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         
         for i, key in enumerate(all_keys):
             # Simulate different access times
@@ -283,7 +283,7 @@ class CacheWarmingStrategyL3Manager:
                 "access_frequency": frequency,
                 "priority": priority,
                 "user_tier": tier,
-                "last_access": datetime.utcnow().isoformat(),
+                "last_access": datetime.now(timezone.utc).isoformat(),
                 "data": f"user_data_{tier}_{key}"
             }
         
@@ -315,7 +315,7 @@ class CacheWarmingStrategyL3Manager:
                 "access_frequency": frequency,
                 "priority": priority,
                 "region": region,
-                "last_access": datetime.utcnow().isoformat(),
+                "last_access": datetime.now(timezone.utc).isoformat(),
                 "data": f"geo_data_{region}_{key}"
             }
         
@@ -436,7 +436,7 @@ class CacheWarmingStrategyL3Manager:
     async def _execute_predictive_warming(self, cache_client, access_pattern: Dict[str, Any]) -> Dict[str, Any]:
         """Execute predictive warming strategy."""
         # Predictive warming based on patterns and time
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         
         warmed_keys = 0
         failed_keys = 0

@@ -878,7 +878,7 @@ class DatabaseInitializer:
                 type=DatabaseType.POSTGRESQL,
                 host="localhost",
                 port=5432,
-                database="netra",
+                database="netra_dev",
                 user="postgres",
                 password="postgres"
             )
@@ -889,7 +889,7 @@ class DatabaseInitializer:
                 type=DatabaseType.POSTGRESQL,
                 host=parsed.hostname or "localhost",
                 port=parsed.port or 5432,
-                database=parsed.path.lstrip("/") if parsed.path else "netra",
+                database=parsed.path.lstrip("/") if parsed.path else "netra_dev",
                 user=parsed.username or "postgres",
                 password=parsed.password or "postgres"
             )

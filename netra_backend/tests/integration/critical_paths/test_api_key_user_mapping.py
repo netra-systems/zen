@@ -35,7 +35,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -81,7 +81,7 @@ class MockAPIKeyStore:
         self.api_keys[api_key] = {
             "user_id": user_id,
             "permissions": permissions,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "last_used": None
         }
         self.rate_limits[api_key] = 1000
@@ -140,7 +140,7 @@ class UserResolver:
             "tier": "enterprise" if user_id.startswith("ent_") else "free",
             "permissions": ["read", "write", "api_access"],
             "rate_limit": 5000 if user_id.startswith("ent_") else 1000,
-            "resolved_at": datetime.utcnow().isoformat()
+            "resolved_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Cache for 5 minutes
@@ -165,7 +165,7 @@ class AuditLogger:
             audit_entry = {
                 "event_id": str(uuid.uuid4()),
                 "event_type": "api_key_access",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 **event_data
             }
             
@@ -207,7 +207,7 @@ class RateLimiter:
                 "allowed": False,
                 "current_count": current_count,
                 "limit": user_limit,
-                "reset_time": datetime.utcnow() + timedelta(seconds=self.window_size)
+                "reset_time": datetime.now(timezone.utc) + timedelta(seconds=self.window_size)
             }
         
         # Increment counter

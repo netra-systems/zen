@@ -9,7 +9,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -39,7 +39,7 @@ class StagingEnvironmentCleaner:
         self.github_token = env.get("GITHUB_TOKEN")
         self.github_repo = env.get("GITHUB_REPOSITORY", "netra-ai/netra-platform")
         self.cleanup_report = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "environments_checked": 0,
             "environments_cleaned": 0,
             "resources_freed": {},
@@ -124,7 +124,7 @@ class StagingEnvironmentCleaner:
         """Check if environment is older than max age"""
         try:
             created_time = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
-            age = datetime.utcnow().replace(tzinfo=created_time.tzinfo) - created_time
+            age = datetime.now(timezone.utc).replace(tzinfo=created_time.tzinfo) - created_time
             return age.days > max_age_days
         except Exception as e:
             print(f"Error parsing timestamp {created_at}: {e}")
@@ -134,7 +134,7 @@ class StagingEnvironmentCleaner:
         """Check if environment has been inactive"""
         try:
             updated_time = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
-            inactive_time = datetime.utcnow().replace(tzinfo=updated_time.tzinfo) - updated_time
+            inactive_time = datetime.now(timezone.utc).replace(tzinfo=updated_time.tzinfo) - updated_time
             return inactive_time.total_seconds() > (inactive_hours * 3600)
         except Exception as e:
             print(f"Error parsing timestamp {updated_at}: {e}")
@@ -297,7 +297,7 @@ class StagingEnvironmentCleaner:
             comment = f"""## 🧹 Staging Environment Cleaned Up
 
 **Reason:** {reason}
-**Timestamp:** {datetime.utcnow().isoformat()}
+**Timestamp:** {datetime.now(timezone.utc).isoformat()}
 
 The staging environment for this PR has been automatically cleaned up to free resources.
 

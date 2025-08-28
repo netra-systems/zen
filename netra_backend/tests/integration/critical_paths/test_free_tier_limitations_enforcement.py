@@ -22,7 +22,7 @@ import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
@@ -617,7 +617,7 @@ class FreeTierLimitsTester:
                     # Verify reset time is within 24 hours
                     if reset_time:
                         reset_dt = datetime.fromisoformat(reset_time.replace('Z', '+00:00'))
-                        now = datetime.utcnow()
+                        now = datetime.now(timezone.utc)
                         time_until_reset = (reset_dt - now).total_seconds() / 3600
                         
                         if 0 < time_until_reset <= 24:

@@ -234,6 +234,15 @@ class RedisService:
     async def ttl(self, key: str) -> int:
         """Get time to live for key."""
         return await self._manager.ttl(key)
+    
+    # Compatibility aliases for tests
+    async def initialize(self):
+        """Initialize Redis service (alias for connect)."""
+        await self.connect()
+        
+    async def shutdown(self):
+        """Shutdown Redis service (alias for disconnect)."""
+        await self.disconnect()
 
 
 # Global Redis service instance

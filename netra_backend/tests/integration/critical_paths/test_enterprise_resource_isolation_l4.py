@@ -28,7 +28,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 from unittest.mock import AsyncMock, MagicMock
 
@@ -425,7 +425,7 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
                         violation_type=f"{test_type}_isolation_breach",
                         resource_affected=test_type,
                         severity="critical",
-                        timestamp=datetime.utcnow(),
+                        timestamp=datetime.now(timezone.utc),
                         details=result
                     )
                     self.isolation_violations.append(violation)

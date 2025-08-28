@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -83,8 +83,8 @@ class TestEnterpriseDomainNetwork:
             certificates[domain_name] = {
                 "certificate_id": str(uuid.uuid4()),
                 "issuer": "Let's Encrypt",
-                "valid_from": datetime.utcnow(),
-                "valid_until": datetime.utcnow() + timedelta(days=90),
+                "valid_from": datetime.now(timezone.utc),
+                "valid_until": datetime.now(timezone.utc) + timedelta(days=90),
                 "certificate_status": "active"
             }
         
@@ -208,7 +208,7 @@ class TestEnterpriseDomainNetwork:
             "validation_id": str(uuid.uuid4()),
             "connectivity_results": connectivity_results,
             "overall_connectivity": "all_regions_healthy",
-            "validation_timestamp": datetime.utcnow()
+            "validation_timestamp": datetime.now(timezone.utc)
         }
 
     async def _configure_custom_load_balancing(self, infra, validation):

@@ -1,6 +1,6 @@
 """Factory Status Reporter for SPEC Compliance Scoring."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -87,7 +87,7 @@ class FactoryStatusReporter:
     def _cache_report(self, report: Dict[str, Any]) -> None:
         """Cache the report with timestamp."""
         self.metrics_cache = report
-        self.last_update = datetime.utcnow()
+        self.last_update = datetime.now(timezone.utc)
 
     def _calculate_overall_score(self, module_scores: Dict[str, ComplianceScore]) -> float:
         """Calculate overall compliance score."""
@@ -120,7 +120,7 @@ class FactoryStatusReporter:
     
     def _is_cache_expired(self) -> bool:
         """Check if cache is expired."""
-        age = datetime.utcnow() - self.last_update
+        age = datetime.now(timezone.utc) - self.last_update
         return age > timedelta(hours=1)
 
     async def trigger_claude_review(self, modules: List[str]) -> Dict[str, Any]:

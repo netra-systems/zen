@@ -18,7 +18,7 @@ system startup when databases exist but lack proper migration tracking.
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple, Any
 from pathlib import Path
 
@@ -89,7 +89,7 @@ class MigrationStateAnalyzer:
                     "current_revision": current_revision,
                     "existing_tables": existing_tables,
                     "missing_expected_tables": recovery_info.get("missing_tables", []),
-                    "analysis_timestamp": datetime.utcnow().isoformat()
+                    "analysis_timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
         except Exception as e:
@@ -100,7 +100,7 @@ class MigrationStateAnalyzer:
                 "requires_recovery": False,
                 "recovery_strategy": "ANALYSIS_FAILED",
                 "error": str(e),
-                "analysis_timestamp": datetime.utcnow().isoformat()
+                "analysis_timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     async def _get_existing_tables(self, conn) -> List[str]:
@@ -414,7 +414,7 @@ class MigrationStateManager:
             "migration_state": state,
             "health_status": "HEALTHY" if not state["requires_recovery"] else "REQUIRES_RECOVERY",
             "recommended_action": state["recovery_strategy"],
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 

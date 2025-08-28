@@ -23,7 +23,7 @@ import statistics
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
 
 # from app.services.cache.invalidation_service import CacheInvalidationService  # Class may not exist, commented out
@@ -175,7 +175,7 @@ class CacheCoherenceL4Manager:
             value = {
                 "user_id": f"user_{i}",
                 "data": f"test_data_{i}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "metadata": {"test": True, "iteration": i}
             }
             
@@ -457,7 +457,7 @@ class CacheCoherenceL4Manager:
             user_id = f"session_test_user_{i}_{uuid.uuid4().hex[:8]}"
             session_data = {
                 "user_id": user_id,
-                "login_time": datetime.utcnow().isoformat(),
+                "login_time": datetime.now(timezone.utc).isoformat(),
                 "permissions": ["read", "write"],
                 "tier": "enterprise"
             }
@@ -477,7 +477,7 @@ class CacheCoherenceL4Manager:
             })
             
             # Update session
-            await self.session_cache.update_session(session_id, {"last_activity": datetime.utcnow().isoformat()})
+            await self.session_cache.update_session(session_id, {"last_activity": datetime.now(timezone.utc).isoformat()})
             session_operations.append({
                 "operation": "update_session", 
                 "success": True,

@@ -15,7 +15,7 @@ Tests comprehensive password policy enforcement including:
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -79,7 +79,7 @@ class TestPasswordStrengthValidation:
             auth_provider='local',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_password_minimum_length_validation(self, password_policy_service, strict_password_policy):
@@ -213,17 +213,17 @@ class TestPasswordHistoryEnforcement:
         return [
             {
                 'password_hash': 'hash1',
-                'created_at': datetime.utcnow() - timedelta(days=30),
+                'created_at': datetime.now(timezone.utc) - timedelta(days=30),
                 'salt': 'salt1'
             },
             {
                 'password_hash': 'hash2', 
-                'created_at': datetime.utcnow() - timedelta(days=60),
+                'created_at': datetime.now(timezone.utc) - timedelta(days=60),
                 'salt': 'salt2'
             },
             {
                 'password_hash': 'hash3',
-                'created_at': datetime.utcnow() - timedelta(days=90),
+                'created_at': datetime.now(timezone.utc) - timedelta(days=90),
                 'salt': 'salt3'
             }
         ]
@@ -254,7 +254,7 @@ class TestPasswordHistoryEnforcement:
         for i in range(15):  # More than the 12-password limit
             extensive_history.append({
                 'password_hash': f'hash_{i}',
-                'created_at': datetime.utcnow() - timedelta(days=i*30),
+                'created_at': datetime.now(timezone.utc) - timedelta(days=i*30),
                 'salt': f'salt_{i}'
             })
         
@@ -334,8 +334,8 @@ class TestPasswordExpirationPolicies:
         """Test password expiration validation."""
         # Mock expired password
         mock_auth_service.get_user_password_info.return_value = {
-            'password_created_at': datetime.utcnow() - timedelta(days=100),  # Older than 90-day policy
-            'password_updated_at': datetime.utcnow() - timedelta(days=100),
+            'password_created_at': datetime.now(timezone.utc) - timedelta(days=100),  # Older than 90-day policy
+            'password_updated_at': datetime.now(timezone.utc) - timedelta(days=100),
             'is_expired': True
         }
         
@@ -354,8 +354,8 @@ class TestPasswordExpirationPolicies:
         """Test password expiration warning before actual expiration."""
         # Mock password nearing expiration (75 days old, policy is 90 days)
         mock_auth_service.get_user_password_info.return_value = {
-            'password_created_at': datetime.utcnow() - timedelta(days=75),
-            'password_updated_at': datetime.utcnow() - timedelta(days=75),
+            'password_created_at': datetime.now(timezone.utc) - timedelta(days=75),
+            'password_updated_at': datetime.now(timezone.utc) - timedelta(days=75),
             'is_expired': False,
             'days_until_expiration': 15
         }
@@ -376,7 +376,7 @@ class TestPasswordExpirationPolicies:
         """Test forcing password reset when password is expired."""
         # Mock expired password
         mock_auth_service.get_user_password_info.return_value = {
-            'password_created_at': datetime.utcnow() - timedelta(days=100),
+            'password_created_at': datetime.now(timezone.utc) - timedelta(days=100),
             'is_expired': True
         }
         
@@ -394,7 +394,7 @@ class TestPasswordExpirationPolicies:
 
     async def test_password_age_calculation(self, password_policy_service):
         """Test accurate calculation of password age."""
-        password_created_at = datetime.utcnow() - timedelta(days=45, hours=12, minutes=30)
+        password_created_at = datetime.now(timezone.utc) - timedelta(days=45, hours=12, minutes=30)
         
         age_info = password_policy_service.calculate_password_age(password_created_at)
         

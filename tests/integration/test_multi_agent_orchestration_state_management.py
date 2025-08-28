@@ -17,7 +17,7 @@ import asyncio
 import json
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -210,7 +210,7 @@ class MultiAgentOrchestrator:
         for update in state_updates:
             transition = {
                 "thread_id": thread_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "from_state": self.state_store.get(thread_id, {}).get("state", "initial"),
                 "to_state": update.get("state", "processing"),
                 "agent": update.get("agent", "unknown"),

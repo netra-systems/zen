@@ -14,7 +14,7 @@ import pytest
 import asyncio
 import json
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from auth_service.auth_core.models.auth_models import User
@@ -65,7 +65,7 @@ class TestWebSocketAuthenticationEdgeCases:
             auth_provider='local',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_websocket_auth_with_expired_token(self, mock_websocket, mock_jwt_service, sample_user):
@@ -87,7 +87,7 @@ class TestWebSocketAuthenticationEdgeCases:
         # Initially valid token
         mock_jwt_service.verify_token.return_value = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         middleware = AuthMiddleware(mock_jwt_service)
@@ -117,7 +117,7 @@ class TestWebSocketAuthenticationEdgeCases:
         mock_jwt_service.verify_token.side_effect = None
         mock_jwt_service.verify_token.return_value = {
             'user_id': str(uuid4()),
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         # Should allow retry with valid token
@@ -155,7 +155,7 @@ class TestWebSocketAuthenticationEdgeCases:
         
         mock_jwt_service.verify_token.return_value = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         middleware = AuthMiddleware(mock_jwt_service)
@@ -193,7 +193,7 @@ class TestWebSocketAuthenticationEdgeCases:
         
         mock_jwt_service.verify_token.return_value = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         middleware = AuthMiddleware(mock_jwt_service)
@@ -210,7 +210,7 @@ class TestWebSocketAuthenticationEdgeCases:
         """Test WebSocket session hijacking prevention measures."""
         mock_jwt_service.verify_token.return_value = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600,
+            'exp': datetime.now(timezone.utc).timestamp() + 3600,
             'session_id': 'original_session_123'
         }
         
@@ -239,7 +239,7 @@ class TestWebSocketAuthenticationEdgeCases:
         """Test handling multiple concurrent WebSocket connections for same user."""
         token_payload = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         mock_jwt_service.verify_token.return_value = token_payload
         
@@ -283,10 +283,10 @@ class TestWebSocketAuthenticationEdgeCases:
     async def test_websocket_auth_token_replay_attack(self, mock_websocket, mock_jwt_service, sample_user):
         """Test prevention of JWT token replay attacks."""
         # Token with past timestamp but still technically valid
-        past_time = datetime.utcnow() - timedelta(minutes=5)
+        past_time = datetime.now(timezone.utc) - timedelta(minutes=5)
         token_payload = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600,
+            'exp': datetime.now(timezone.utc).timestamp() + 3600,
             'iat': past_time.timestamp(),  # Issued at past time
             'jti': 'token_id_123'  # JWT ID for replay prevention
         }
@@ -312,7 +312,7 @@ class TestWebSocketAuthenticationEdgeCases:
         """Test WebSocket authentication with revoked token."""
         token_payload = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600,
+            'exp': datetime.now(timezone.utc).timestamp() + 3600,
             'jti': 'revoked_token_456'
         }
         
@@ -338,12 +338,12 @@ class TestWebSocketAuthenticationEdgeCases:
             auth_provider='local',
             is_active=False,  # Account disabled
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
         
         token_payload = {
             'user_id': disabled_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         mock_jwt_service.verify_token.return_value = token_payload
@@ -364,7 +364,7 @@ class TestWebSocketAuthenticationMetrics:
         """Test that successful WebSocket authentications are recorded in metrics."""
         mock_jwt_service.verify_token.return_value = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         middleware = AuthMiddleware(mock_jwt_service)
@@ -390,7 +390,7 @@ class TestWebSocketAuthenticationMetrics:
         """Test that WebSocket authentication duration is recorded."""
         mock_jwt_service.verify_token.return_value = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         middleware = AuthMiddleware(mock_jwt_service)
@@ -408,7 +408,7 @@ class TestWebSocketAuthenticationAuditLogging:
         """Test that successful WebSocket authentications are audit logged."""
         mock_jwt_service.verify_token.return_value = {
             'user_id': sample_user.id,
-            'exp': datetime.utcnow().timestamp() + 3600
+            'exp': datetime.now(timezone.utc).timestamp() + 3600
         }
         
         middleware = AuthMiddleware(mock_jwt_service)

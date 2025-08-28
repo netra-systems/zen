@@ -5,6 +5,7 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 import asyncio
+import time
 import uuid
 from typing import Dict, List
 from unittest.mock import AsyncMock, MagicMock

@@ -19,7 +19,7 @@ import asyncio
 import os
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -358,7 +358,7 @@ class TestNewUserRegistrationFlow:
         mock_user.full_name = registration_data["full_name"]
         mock_user.company = registration_data.get("company")
         mock_user.phone = registration_data.get("phone")
-        mock_user.created_at = datetime.utcnow()
+        mock_user.created_at = datetime.now(timezone.utc)
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.create_user', return_value=mock_user):

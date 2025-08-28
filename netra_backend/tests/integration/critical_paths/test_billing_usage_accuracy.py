@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
@@ -73,7 +73,7 @@ class BillingAccuracyManager:
                               quantity: float, metadata: Dict = None) -> Dict[str, Any]:
         """Track a usage event with accuracy validation."""
         event_id = str(uuid.uuid4())
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         
         try:
             usage_event = UsageEvent(
@@ -150,7 +150,7 @@ class BillingAccuracyManager:
                 "usage_events_count": len(usage_data.get("events", [])),
                 "total_amount": billing_result.get("total_amount", Decimal("0")),
                 "billing_breakdown": billing_result.get("breakdown", {}),
-                "calculation_timestamp": datetime.utcnow(),
+                "calculation_timestamp": datetime.now(timezone.utc),
                 "success": billing_result.get("success", False)
             }
             
@@ -169,7 +169,7 @@ class BillingAccuracyManager:
                 "calculation_id": calculation_id,
                 "user_id": user_id,
                 "error": str(e),
-                "calculation_timestamp": datetime.utcnow(),
+                "calculation_timestamp": datetime.now(timezone.utc),
                 "success": False
             }
             
@@ -192,8 +192,8 @@ class BillingAccuracyManager:
                 "calculation_id": billing_calculation["calculation_id"],
                 "total_amount": billing_calculation["total_amount"],
                 "breakdown": billing_calculation["breakdown"],
-                "due_date": datetime.utcnow() + timedelta(days=30),
-                "generated_at": datetime.utcnow()
+                "due_date": datetime.now(timezone.utc) + timedelta(days=30),
+                "generated_at": datetime.now(timezone.utc)
             }
             
             generation_result = await self.invoice_generator.generate_invoice(invoice_data)
@@ -204,7 +204,7 @@ class BillingAccuracyManager:
                     "user_id": user_id,
                     "total_amount": billing_calculation["total_amount"],
                     "status": "generated",
-                    "generated_at": datetime.utcnow(),
+                    "generated_at": datetime.now(timezone.utc),
                     "invoice_data": generation_result.get("invoice_data", {})
                 }
                 
@@ -249,7 +249,7 @@ class BillingAccuracyManager:
                 "amount": invoice["total_amount"],
                 "payment_method": payment_method,
                 "status": payment_result.get("status", "failed"),
-                "processed_at": datetime.utcnow(),
+                "processed_at": datetime.now(timezone.utc),
                 "success": payment_result.get("success", False)
             }
             
@@ -258,7 +258,7 @@ class BillingAccuracyManager:
             # Update invoice status
             if payment_result.get("success"):
                 invoice["status"] = "paid"
-                invoice["paid_at"] = datetime.utcnow()
+                invoice["paid_at"] = datetime.now(timezone.utc)
             
             return {
                 "transaction_id": transaction_id,
@@ -271,7 +271,7 @@ class BillingAccuracyManager:
                 "transaction_id": transaction_id,
                 "invoice_id": invoice_id,
                 "error": str(e),
-                "processed_at": datetime.utcnow(),
+                "processed_at": datetime.now(timezone.utc),
                 "success": False
             }
             
@@ -365,9 +365,9 @@ async def test_usage_tracking_accuracy(billing_manager):
     
     # Define expected usage events
     expected_events = [
-        {"type": "api_call", "quantity": 1.0, "timestamp": datetime.utcnow()},
-        {"type": "llm_request", "quantity": 5.0, "timestamp": datetime.utcnow()},
-        {"type": "api_call", "quantity": 2.0, "timestamp": datetime.utcnow()}
+        {"type": "api_call", "quantity": 1.0, "timestamp": datetime.now(timezone.utc)},
+        {"type": "llm_request", "quantity": 5.0, "timestamp": datetime.now(timezone.utc)},
+        {"type": "api_call", "quantity": 2.0, "timestamp": datetime.now(timezone.utc)}
     ]
     
     # Track events
@@ -402,8 +402,8 @@ async def test_billing_calculation_accuracy(billing_manager):
         )
     
     # Calculate billing
-    start_date = datetime.utcnow() - timedelta(hours=1)
-    end_date = datetime.utcnow() + timedelta(hours=1)
+    start_date = datetime.now(timezone.utc) - timedelta(hours=1)
+    end_date = datetime.now(timezone.utc) + timedelta(hours=1)
     
     billing_result = await billing_manager.calculate_billing_for_period(
         user_id, start_date, end_date

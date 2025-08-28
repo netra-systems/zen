@@ -25,7 +25,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
@@ -240,7 +240,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
                 "tier": scenario.tier,
                 "monthly_quota_tokens": scenario.monthly_quota,
                 "cost_per_token_usd": float(scenario.cost_per_token),
-                "quota_reset_date": (datetime.utcnow() + timedelta(days=30)).isoformat(),
+                "quota_reset_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
                 "overage_allowed": scenario.tier in ["mid", "enterprise"],
                 "overage_rate_multiplier": 1.5 if scenario.tier == "enterprise" else 2.0
             }
@@ -434,7 +434,7 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
                     token_usage=actual_tokens,
                     model_used=model_used,
                     cost_usd=Decimal(str(cost_usd)),
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.now(timezone.utc)
                 )
                 
                 self.usage_operations.append(usage_op)

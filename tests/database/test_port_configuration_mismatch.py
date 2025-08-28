@@ -208,7 +208,7 @@ class TestDatabasePortConfigurationMismatch:
         
         all_consistent = True
         for port, result in results.items():
-            status = "✅ CONSISTENT" if result['overall_consistent'] else "❌ INCONSISTENT"
+            status = "[OK] CONSISTENT" if result['overall_consistent'] else "[FAIL] INCONSISTENT"
             print(f"Port {port}: {status}")
             if result['issues']:
                 for issue in result['issues']:
@@ -262,10 +262,10 @@ class TestDatabasePortConfigurationMismatch:
                     conn = await asyncpg.connect(async_connection_url, timeout=2)
                     await conn.close()
                     async_works = True
-                    print("✅ Async connection successful")
+                    print("[OK] Async connection successful")
                 except Exception as e:
                     async_works = False
-                    print(f"❌ Async connection failed: {e}")
+                    print(f"[FAIL] Async connection failed: {e}")
                 
                 # Test sync URL (might fail - tries to connect to 5432)
                 sync_connection_url = DatabaseURLBuilder.format_for_asyncpg_driver(sync_url)
@@ -275,10 +275,10 @@ class TestDatabasePortConfigurationMismatch:
                     conn = await asyncpg.connect(sync_connection_url, timeout=2)
                     await conn.close()
                     sync_works = True
-                    print("✅ Sync URL connection successful")
+                    print("[OK] Sync URL connection successful")
                 except Exception as e:
                     sync_works = False
-                    print(f"❌ Sync URL connection failed: {e}")
+                    print(f"[FAIL] Sync URL connection failed: {e}")
                 
                 # If async works but sync doesn't, we've proven the port mismatch issue
                 if async_works and not sync_works:

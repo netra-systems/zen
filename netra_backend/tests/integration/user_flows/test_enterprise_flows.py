@@ -17,7 +17,7 @@ from pathlib import Path
 import asyncio
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
 from unittest.mock import patch, AsyncMock, MagicMock
 
@@ -130,8 +130,8 @@ async def test_enterprise_audit_logging_and_compliance(
     response = await async_client.get(
         "/api/audit/logs",
         params={
-            "start_date": datetime.utcnow().isoformat(),
-            "end_date": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
+            "start_date": datetime.now(timezone.utc).isoformat(),
+            "end_date": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
             "action_types": ["chat_message", "data_export", "api_access"]
         },
         headers=headers
@@ -197,8 +197,8 @@ async def test_enterprise_dedicated_support_access(
             "topic": "AI cost optimization strategy",
             "duration_minutes": 60,
             "preferred_times": [
-                (datetime.utcnow() + timedelta(days=1)).isoformat(),
-                (datetime.utcnow() + timedelta(days=2)).isoformat()
+                (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
+                (datetime.now(timezone.utc) + timedelta(days=2)).isoformat()
             ]
         },
         headers=headers

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Enhanced script to fix datetime.utcnow() deprecation warnings in all patterns"""
+"""Enhanced script to fix datetime.now(timezone.utc) deprecation warnings in all patterns"""
 
 import os
 import re
@@ -48,7 +48,7 @@ def _add_utc_import(content: str) -> str:
 
 
 def _update_from_import(content: str, import_match) -> str:
-    """Update from datetime import line to include UTC."""
+    """Update from datetime import line to include UTC.""", timezone
     import_line = import_match.group(1)
     if ', UTC' not in import_line and 'UTC' not in import_line:
         new_import = import_line.rstrip() + ', UTC'
@@ -69,15 +69,15 @@ def _add_separate_utc_import(content: str) -> str:
 
 def _replace_datetime_patterns(content: str) -> str:
     """Replace all datetime.utcnow patterns."""
-    # 1. datetime.utcnow() -> datetime.now(UTC)
-    content = content.replace('datetime.utcnow()', 'datetime.now(UTC)')
+    # 1. datetime.now(timezone.utc) -> datetime.now(UTC)
+    content = content.replace('datetime.now(timezone.utc)', 'datetime.now(UTC)')
     # 2. Field patterns
     content = re.sub(r'Field\(default_factory=datetime\.utcnow', 
                      r'Field(default_factory=lambda: datetime.now(UTC)', content)
     # 3. field patterns  
     content = re.sub(r'field\(default_factory=datetime\.utcnow',
                      r'field(default_factory=lambda: datetime.now(UTC)', content)
-    # 4. datetime.datetime.utcnow() -> datetime.datetime.now(UTC)
+    # 4. datetime.datetime.now(timezone.utc) -> datetime.datetime.now(UTC)
     content = re.sub(r'datetime\.datetime\.utcnow\(\)', 'datetime.datetime.now(UTC)', content)
     return content
 

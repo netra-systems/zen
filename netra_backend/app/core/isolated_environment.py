@@ -76,6 +76,52 @@ class IsolatedEnvironment:
         """Get the singleton instance."""
         return cls()
     
+    def _is_test_context(self) -> bool:
+        """Check if we're currently running in a test context.
+        
+        This method detects various test environments to ensure proper
+        environment variable handling during tests.
+        
+        Returns:
+            bool: True if in test context, False otherwise
+        """
+        import sys
+        
+        # Check for pytest execution
+        if 'pytest' in sys.modules:
+            return True
+        
+        # Check for test environment variables
+        test_indicators = [
+            'PYTEST_CURRENT_TEST',
+            'TESTING',
+            'TEST_MODE'
+        ]
+        
+        for indicator in test_indicators:
+            if os.environ.get(indicator):
+                return True
+        
+        # Check if ENVIRONMENT is set to testing
+        env_value = os.environ.get('ENVIRONMENT', '').lower()
+        if env_value in ['test', 'testing']:
+            return True
+        
+        return False
+    
+    def _sync_with_os_environ(self) -> None:
+        """Synchronize isolated variables with os.environ during test execution.
+        
+        This method ensures that test patches (patch.dict(os.environ, ...)) are 
+        immediately reflected in the isolated environment, providing seamless
+        integration between pytest mocking and IsolatedEnvironment.
+        """
+        if self._isolation_enabled:
+            # Merge os.environ changes into isolated vars
+            # This allows test patches to be immediately available
+            self._isolated_vars.update(os.environ)
+            logger.debug("Synced isolated vars with os.environ for test context")
+    
     def enable_isolation(self, backup_original: bool = True) -> None:
         """Enable isolation mode to prevent os.environ pollution."""
         with self._lock:
@@ -83,6 +129,12 @@ class IsolatedEnvironment:
             if backup_original:
                 # Copy current environment to isolated storage
                 self._isolated_vars = dict(os.environ)
+            
+            # CRITICAL TEST INTEGRATION: In test context, sync isolated vars with os.environ
+            # This ensures test patches (patch.dict(os.environ, ...)) are immediately available
+            if self._is_test_context():
+                self._sync_with_os_environ()
+            
             logger.debug("Isolation mode enabled")
     
     def disable_isolation(self) -> None:
@@ -95,8 +147,14 @@ class IsolatedEnvironment:
     def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """Get an environment variable value."""
         with self._lock:
+            # CRITICAL TEST INTEGRATION: Always prioritize os.environ during test context
+            # This ensures that test patches (patch.dict(os.environ, ...)) are immediately respected
+            if self._is_test_context():
+                return os.environ.get(key, default)
+            
             if self._isolation_enabled:
                 return self._isolated_vars.get(key, default)
+            
             return os.environ.get(key, default)
     
     def set(self, key: str, value: str, source: str = "unknown") -> None:

@@ -22,7 +22,7 @@ import asyncio
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
@@ -119,7 +119,7 @@ class ConversionFlowManager:
                 user_id=user_id,
                 tier=tier,
                 features=plan_features,
-                started_at=datetime.utcnow(),
+                started_at=datetime.now(timezone.utc),
                 payment_status="active" if tier != PlanTier.FREE else "free"
             )
             
@@ -129,7 +129,7 @@ class ConversionFlowManager:
                 "user_id": user_id,
                 "user": user,
                 "plan": user_plan,
-                "created_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc)
             })
             
             return {
@@ -175,7 +175,7 @@ class ConversionFlowManager:
                     execution_time_ms=150,
                     status="success",
                     plan_tier=user_plan.tier.value,
-                    created_at=datetime.utcnow()
+                    created_at=datetime.now(timezone.utc)
                 )
                 
                 # Record usage
@@ -187,7 +187,7 @@ class ConversionFlowManager:
                         "user_id": user_id,
                         "tool": target_tool,
                         "count": usage_count,
-                        "timestamp": datetime.utcnow()
+                        "timestamp": datetime.now(timezone.utc)
                     })
                     
                     # Check if limit reached
@@ -239,7 +239,7 @@ class ConversionFlowManager:
                     "reason": "usage_limit_reached",
                     "current_plan": usage_status["current_plan"],
                     "upgrade_options": upgrade_options,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             )
             
@@ -252,7 +252,7 @@ class ConversionFlowManager:
                 self.websocket_messages.append({
                     "user_id": user_id,
                     "type": "upgrade_prompt",
-                    "sent_at": datetime.utcnow()
+                    "sent_at": datetime.now(timezone.utc)
                 })
             
             return {
@@ -299,7 +299,7 @@ class ConversionFlowManager:
                 "conversion_id": conversion_id,
                 "user_id": user_id,
                 "target_tier": target_tier.value,
-                "started_at": datetime.utcnow(),
+                "started_at": datetime.now(timezone.utc),
                 "status": "initiated"
             })
             
@@ -331,7 +331,7 @@ class ConversionFlowManager:
                 "amount": amount,
                 "status": payment_result["status"],
                 "transaction_id": payment_result.get("transaction_id"),
-                "processed_at": datetime.utcnow()
+                "processed_at": datetime.now(timezone.utc)
             })
             
             if not payment_result["success"]:
@@ -391,7 +391,7 @@ class ConversionFlowManager:
                 user_id=user_id,
                 tier=target_tier,
                 features=target_plan_def.features,
-                started_at=datetime.utcnow(),
+                started_at=datetime.now(timezone.utc),
                 auto_renew=True,
                 payment_status="active",
                 upgraded_from=current_plan.tier.value
@@ -414,7 +414,7 @@ class ConversionFlowManager:
                 "user_id": user_id,
                 "conversion_id": conversion_id,
                 "features_updated": feature_result.get("features", []),
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.now(timezone.utc)
             })
             
             # Reset usage counters
@@ -428,7 +428,7 @@ class ConversionFlowManager:
                     "conversion_id": conversion_id,
                     "new_tier": target_tier.value,
                     "features_unlocked": target_plan_def.features.feature_flags,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             )
             
@@ -439,7 +439,7 @@ class ConversionFlowManager:
             self.websocket_messages.append({
                 "user_id": user_id,
                 "type": "subscription_upgraded",
-                "sent_at": datetime.utcnow()
+                "sent_at": datetime.now(timezone.utc)
             })
             
             return {
@@ -457,7 +457,7 @@ class ConversionFlowManager:
         for attempt in self.conversion_attempts:
             if attempt["conversion_id"] == conversion_id:
                 attempt["status"] = status
-                attempt["updated_at"] = datetime.utcnow()
+                attempt["updated_at"] = datetime.now(timezone.utc)
                 break
 
     async def validate_conversion_complete(self, user_id: str, conversion_id: str) -> Dict[str, Any]:
@@ -715,7 +715,7 @@ class MockPaymentProcessor:
             "amount": amount,
             "currency": currency,
             "status": "completed" if success else "failed",
-            "processed_at": datetime.utcnow()
+            "processed_at": datetime.now(timezone.utc)
         }
         
         self.transactions[transaction_id] = transaction

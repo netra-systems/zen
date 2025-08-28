@@ -8,8 +8,10 @@ Business Value Justification (BVJ):
 - Value Impact: Consistent async patterns, improved auth response times
 - Strategic Impact: Enables scalable authentication for enterprise
 """
+import asyncio
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import AsyncGenerator, Optional
 
 from auth_service.auth_core.isolated_environment import get_env
@@ -316,6 +318,7 @@ class AuthDatabaseConnection:
             timeout: Maximum time to wait for graceful shutdown in seconds
         """
         if not self.engine:
+            logger.debug("Auth database close() called but no engine exists (already closed)")
             return
             
         import asyncio
@@ -323,7 +326,7 @@ class AuthDatabaseConnection:
         try:
             # Attempt graceful shutdown with timeout
             await asyncio.wait_for(self.engine.dispose(), timeout=timeout)
-            logger.info("Auth database connections closed gracefully")
+            logger.debug("Auth database connections closed gracefully (normal shutdown)")
         except asyncio.TimeoutError:
             logger.warning(f"Database shutdown timeout exceeded ({timeout}s), forcing closure")
             # Force close by setting a shorter timeout on the underlying pool
@@ -343,11 +346,13 @@ class AuthDatabaseConnection:
         finally:
             self._initialized = False
             self.engine = None
-            logger.info("Auth database shutdown completed")
+            # Use debug level for normal shutdown to avoid confusion in logs
+            # This is normal behavior during development file watching restarts
+            logger.debug("Auth database shutdown completed (graceful)")
     
     def get_status(self) -> dict:
         """Get current database status for monitoring"""
-        return {
+        status = {
             "status": "active" if self._initialized else "not_initialized",
             "environment": self.environment,
             "is_cloud_run": self.is_cloud_run,
@@ -357,6 +362,56 @@ class AuthDatabaseConnection:
             "url_valid": AuthDatabaseManager.validate_auth_url() if self._initialized else None,
             "pool_type": "NullPool" if (self.is_cloud_run or self.is_test_mode) else "AsyncAdaptedQueuePool",
         }
+        
+        # Add pool status if engine exists
+        if self.engine and hasattr(self.engine, 'pool'):
+            try:
+                pool_status = AuthDatabaseManager.get_pool_status(self.engine)
+                status["pool_status"] = pool_status
+            except Exception as e:
+                logger.debug(f"Could not get pool status: {e}")
+                status["pool_status"] = {"error": str(e)}
+        
+        return status
+    
+    async def get_connection_health(self) -> dict:
+        """Get detailed connection health information for monitoring and debugging.
+        
+        Returns:
+            Dictionary with connection health metrics and diagnostics
+        """
+        health = {
+            "initialized": self._initialized,
+            "environment": self.environment,
+            "engine_exists": self.engine is not None,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        if not self._initialized or not self.engine:
+            health["status"] = "not_initialized"
+            return health
+        
+        try:
+            # Test connectivity with short timeout
+            is_ready = await asyncio.wait_for(self.is_ready(timeout=5.0), timeout=6.0)
+            health["connectivity_test"] = "passed" if is_ready else "failed"
+            
+            # Get pool information if available
+            if hasattr(self.engine, 'pool'):
+                pool_status = AuthDatabaseManager.get_pool_status(self.engine)
+                health["pool_metrics"] = pool_status
+            
+            health["status"] = "healthy" if is_ready else "unhealthy"
+            
+        except asyncio.TimeoutError:
+            health["status"] = "timeout"
+            health["connectivity_test"] = "timeout"
+        except Exception as e:
+            health["status"] = "error"
+            health["error"] = str(e)
+            health["connectivity_test"] = "failed"
+        
+        return health
 
 
 # Compatibility aliases for existing code that expects the old class names

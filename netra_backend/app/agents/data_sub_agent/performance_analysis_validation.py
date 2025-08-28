@@ -6,7 +6,7 @@ Extracted to maintain 450-line module limit.
 Business Value: Ensures performance analysis data quality.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.base.interface import ExecutionContext
@@ -52,7 +52,7 @@ class PerformanceAnalysisValidator:
             return False
         # Check if time range is not too far in the past (e.g., max 1 year)
         max_age_days = 365
-        if (datetime.utcnow() - start_time).days > max_age_days:
+        if (datetime.now(timezone.utc) - start_time).days > max_age_days:
             return False
         return True
     

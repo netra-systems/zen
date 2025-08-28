@@ -370,7 +370,7 @@ async def test_supervisor_orchestration():
 # tests/routes/test_websocket_advanced.py
 import pytest
 import json
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from netra_backend.app.ws_manager import WebSocketManager
 
 @pytest.mark.asyncio
@@ -448,7 +448,7 @@ async def test_thread_repository_crud():
 import pytest
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from netra_backend.app.main import app
 from netra_backend.app.db.models_postgres import Base
 from netra_backend.app.auth.auth import create_access_token
@@ -478,7 +478,7 @@ async def test_db():
 @pytest.fixture
 async def async_client(test_db):
     """Create async test client"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
 
 @pytest.fixture
@@ -616,7 +616,7 @@ Priority 4 (Heavy) → integration-comprehensive, critical (limited parallel)
 ```python
 # tests/integration/test_api_integration.py
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 @pytest.mark.asyncio
 async def test_complete_user_flow(async_client: AsyncClient):

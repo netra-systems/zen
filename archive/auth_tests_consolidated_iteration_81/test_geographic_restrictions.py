@@ -57,7 +57,7 @@ class TestIPGeolocationControl:
             auth_provider='local',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_allowed_country_access(self, mock_geolocation_service, sample_user):
@@ -215,7 +215,7 @@ class TestCountryBasedRestrictions:
         mock_restriction_service.create_country_restriction.return_value = {
             'restriction_id': str(uuid4()),
             'restriction_name': 'GDPR_Compliance',
-            'created_at': datetime.utcnow(),
+            'created_at': datetime.now(timezone.utc),
             'is_active': True,
             'affected_users_count': 1250
         }
@@ -277,13 +277,13 @@ class TestCountryBasedRestrictions:
         mock_restriction_service.apply_emergency_override.return_value = {
             'override_granted': True,
             'override_id': str(uuid4()),
-            'valid_until': datetime.utcnow() + timedelta(hours=24),
+            'valid_until': datetime.now(timezone.utc) + timedelta(hours=24),
             'conditions': [
                 'enhanced_monitoring',
                 'mfa_required',
                 'session_timeout_reduced'
             ],
-            'approval_timestamp': datetime.utcnow()
+            'approval_timestamp': datetime.now(timezone.utc)
         }
         
         # Apply emergency override
@@ -316,12 +316,12 @@ class TestGeographicAnomalyDetection:
             'previous_location': {
                 'country_code': 'US',
                 'city': 'New York',
-                'timestamp': datetime.utcnow() - timedelta(hours=2)
+                'timestamp': datetime.now(timezone.utc) - timedelta(hours=2)
             },
             'current_location': {
                 'country_code': 'JP',
                 'city': 'Tokyo',
-                'timestamp': datetime.utcnow()
+                'timestamp': datetime.now(timezone.utc)
             }
         }
         
@@ -475,7 +475,7 @@ class TestRegionalCompliance:
             'data_must_remain_local': True,
             'cross_border_transfer_prohibited': True,
             'local_storage_required': True,
-            'compliance_deadline': datetime.utcnow() + timedelta(days=30),
+            'compliance_deadline': datetime.now(timezone.utc) + timedelta(days=30),
             'affected_data_types': [
                 'authentication_logs',
                 'user_profiles',
@@ -533,7 +533,7 @@ class TestGeofencing:
         mock_geofence_service.create_geofence.return_value = {
             'geofence_id': str(uuid4()),
             'geofence_name': 'admin_operations_fence',
-            'created_at': datetime.utcnow(),
+            'created_at': datetime.now(timezone.utc),
             'is_active': True,
             'affected_operations_count': 15
         }
@@ -557,7 +557,7 @@ class TestGeofencing:
                 'ip_address': '1.2.3.4'
             },
             'is_vpn': False,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Mock geofence violation check

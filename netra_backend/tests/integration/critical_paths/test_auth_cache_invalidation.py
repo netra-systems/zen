@@ -34,7 +34,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -86,7 +86,7 @@ class CacheInvalidator:
             invalidation_event = {
                 "user_id": user_id,
                 "reason": reason,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "cache_keys_invalidated": cache_keys,
                 "deleted_count": deleted_count,
                 "invalidation_id": str(uuid.uuid4())
@@ -131,7 +131,7 @@ class CacheInvalidator:
             permission_event = {
                 "permission": permission,
                 "affected_users": affected_users,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "deleted_count": deleted_count,
                 "invalidation_id": str(uuid.uuid4())
             }
@@ -198,7 +198,7 @@ class PubSubNotifier:
                     decoded_message = {
                         'channel': message['channel'].decode(),
                         'data': json.loads(message['data'].decode()),
-                        'received_at': datetime.utcnow().isoformat()
+                        'received_at': datetime.now(timezone.utc).isoformat()
                     }
                     messages.append(decoded_message)
                     self.received_messages.append(decoded_message)
@@ -238,7 +238,7 @@ class WebSocketNotifier:
             self.active_connections[connection_id] = {
                 "user_id": user_id,
                 "websocket_url": websocket_url,
-                "connected_at": datetime.utcnow().isoformat(),
+                "connected_at": datetime.now(timezone.utc).isoformat(),
                 "status": "active"
             }
             
@@ -271,7 +271,7 @@ class WebSocketNotifier:
                 "type": "auth_cache_invalidated",
                 "user_id": user_id,
                 "invalidation_data": invalidation_data,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "action_required": "refresh_auth_state"
             }
             
@@ -332,7 +332,7 @@ class CrossServiceAuthSync:
             sync_event = {
                 "event_type": "user_logout",
                 "user_id": user_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "tokens_invalidated": len(token_keys),
                 "sync_id": str(uuid.uuid4())
             }
@@ -343,7 +343,7 @@ class CrossServiceAuthSync:
                     "service": service_name,
                     "endpoint": endpoint,
                     "event": sync_event,
-                    "notified_at": datetime.utcnow().isoformat()
+                    "notified_at": datetime.now(timezone.utc).isoformat()
                 })
             
             sync_time = time.time() - sync_start
@@ -373,7 +373,7 @@ class CrossServiceAuthSync:
                 json.dumps({
                     "user_id": user_id,
                     "permissions": new_permissions,
-                    "updated_at": datetime.utcnow().isoformat()
+                    "updated_at": datetime.now(timezone.utc).isoformat()
                 })
             )
             
@@ -382,7 +382,7 @@ class CrossServiceAuthSync:
                 "event_type": "permission_update",
                 "user_id": user_id,
                 "new_permissions": new_permissions,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "sync_id": str(uuid.uuid4())
             }
             
@@ -391,7 +391,7 @@ class CrossServiceAuthSync:
                 self.sync_events.append({
                     "service": service_name,
                     "event": permission_event,
-                    "synced_at": datetime.utcnow().isoformat()
+                    "synced_at": datetime.now(timezone.utc).isoformat()
                 })
             
             return {

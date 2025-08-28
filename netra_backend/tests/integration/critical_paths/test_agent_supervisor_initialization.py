@@ -12,7 +12,7 @@ import asyncio
 import json
 import pytest
 import websockets
-from datetime import datetime
+from datetime import datetime, timezone
 
 from test_framework.test_patterns import L3IntegrationTest
 
@@ -51,7 +51,7 @@ class TestAgentSupervisorInitialization(L3IntegrationTest):
                 # Try to send a simple message to trigger agent supervisor usage
                 test_message = {
                     "type": "agent_request",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "data": {
                         "action": "ping"
                     }
@@ -114,7 +114,7 @@ class TestAgentSupervisorInitialization(L3IntegrationTest):
                 
                 for i, message in enumerate(test_messages):
                     message["id"] = f"test_{i}"
-                    message["timestamp"] = datetime.utcnow().isoformat()
+                    message["timestamp"] = datetime.now(timezone.utc).isoformat()
                     
                     try:
                         await websocket.send(json.dumps(message))

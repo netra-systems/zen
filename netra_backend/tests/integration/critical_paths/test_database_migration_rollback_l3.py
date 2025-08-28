@@ -21,7 +21,7 @@ import json
 import subprocess
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -120,7 +120,7 @@ class DatabaseMigrationTester:
             self.migration_log.append({
                 "action": "check_version",
                 "version": self.initial_schema_version,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
             
             return True
@@ -242,7 +242,7 @@ class DatabaseMigrationTester:
                 "action": "forward_migration",
                 "from_version": self.initial_schema_version,
                 "to_version": new_version,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
             
             return True
@@ -392,7 +392,7 @@ class DatabaseMigrationTester:
                         "action": "failed_migration",
                         "attempted_version": failed_version,
                         "error": str(migration_error)[:200],
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                     
                     return True
@@ -466,7 +466,7 @@ class DatabaseMigrationTester:
                     "action": "rollback",
                     "from_version": self.current_schema_version,
                     "to_version": new_version,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 })
                 
                 self.current_schema_version = new_version

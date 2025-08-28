@@ -18,7 +18,7 @@ import json
 import os
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
@@ -157,7 +157,7 @@ class TestDatabaseInitialization:
             for key in cache_keys:
                 await redis_client.setex(key, 3600, json.dumps({
                     "initialized": True,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }))
             
             # Verify cache warming
@@ -555,7 +555,7 @@ class TestWebSocketInfrastructure:
                     # Send test message
                     await backend_ws.send_json({
                         "type": "ping",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                     
                     # Wait for pong
@@ -621,7 +621,7 @@ class TestWebSocketInfrastructure:
             "payload": {
                 "content": "Test cross-service routing",
                 "user_id": str(uuid.uuid4()),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         
@@ -818,7 +818,7 @@ class TestAuthenticationUserFlow:
             session_data = {
                 "user_id": user_id,
                 "email": "test@example.com",
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "services": ["backend", "auth", "frontend"]
             }
             

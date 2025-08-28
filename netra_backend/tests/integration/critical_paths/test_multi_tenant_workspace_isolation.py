@@ -26,7 +26,7 @@ import os
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock
 
@@ -146,7 +146,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                 INSERT INTO organizations (id, name, tier, created_at, status, metadata)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (tenant_id, org_name, tier, datetime.utcnow(), "active",
+                (tenant_id, org_name, tier, datetime.now(timezone.utc), "active",
                  {"test_tenant": True, "l4_test": True, "created_by": "l4_workspace_isolation_test"})
             )
             
@@ -162,7 +162,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                     INSERT INTO users (id, email, organization_id, role, created_at, status)
                     VALUES (%s, %s, %s, %s, %s, %s)
                     """,
-                    (user_id, email, tenant_id, role, datetime.utcnow(), "active")
+                    (user_id, email, tenant_id, role, datetime.now(timezone.utc), "active")
                 )
                 users.append(user_id)
             
@@ -243,7 +243,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                 INSERT INTO workspaces (id, name, tenant_id, created_by, tier, created_at, status, metadata)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                (workspace_id, workspace_name, tenant_id, created_by, tier, datetime.utcnow(), "active",
+                (workspace_id, workspace_name, tenant_id, created_by, tier, datetime.now(timezone.utc), "active",
                  {"test_workspace": True, "l4_test": True, "isolation_level": "strict"})
             )
             
@@ -259,7 +259,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                                                    created_at, data, isolation_verified)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """,
-                    (resource_id, workspace_id, tenant_id, resource_type, datetime.utcnow(),
+                    (resource_id, workspace_id, tenant_id, resource_type, datetime.now(timezone.utc),
                      {"confidential_data": f"sensitive_{workspace_name}_{resource_type}",
                       "tenant_id": tenant_id, "workspace_id": workspace_id}, True)
                 )
@@ -303,7 +303,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                                                      permission, granted_at, granted_by)
                     VALUES (%s, %s, %s, %s, %s, %s)
                     """,
-                    (created_by, workspace_id, tenant_id, permission, datetime.utcnow(), created_by)
+                    (created_by, workspace_id, tenant_id, permission, datetime.now(timezone.utc), created_by)
                 )
             
             # Set up resource-level permissions
@@ -315,7 +315,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                                                         tenant_id, permission, granted_at)
                         VALUES (%s, %s, %s, %s, %s, %s)
                         """,
-                        (created_by, resource_id, workspace_id, tenant_id, permission, datetime.utcnow())
+                        (created_by, resource_id, workspace_id, tenant_id, permission, datetime.now(timezone.utc))
                     )
             
         except Exception as e:
@@ -332,7 +332,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                                               usage_tracking, cost_allocation)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (tenant_id, billing_namespace, tier, datetime.utcnow(), True, True)
+                (tenant_id, billing_namespace, tier, datetime.now(timezone.utc), True, True)
             )
             
             # Initialize usage tracking
@@ -342,7 +342,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                                           api_calls, storage_used, compute_hours)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                (tenant_id, billing_namespace, datetime.utcnow().strftime("%Y-%m"), 0, 0, 0)
+                (tenant_id, billing_namespace, datetime.now(timezone.utc).strftime("%Y-%m"), 0, 0, 0)
             )
             
         except Exception as e:
@@ -368,7 +368,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                 INSERT INTO workspace_billing (workspace_id, tenant_id, billing_data, created_at)
                 VALUES (%s, %s, %s, %s)
                 """,
-                (workspace_id, tenant_id, billing_data, datetime.utcnow())
+                (workspace_id, tenant_id, billing_data, datetime.now(timezone.utc))
             )
             
             return billing_data

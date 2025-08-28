@@ -11,7 +11,7 @@ These tests use real database operations and will expose actual data consistency
 import pytest
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional
 import json
 from unittest.mock import patch, AsyncMock, MagicMock
@@ -133,7 +133,7 @@ class TestThreadCrudOperationsDataConsistency:
             "title": "Test Thread Consistency",
             "user_id": test_user_id,
             "status": ThreadStatus.ACTIVE,
-            "metadata": {"test": "immediate_retrieval", "timestamp": datetime.utcnow().isoformat()}
+            "metadata": {"test": "immediate_retrieval", "timestamp": datetime.now(timezone.utc).isoformat()}
         }
         
         # Create thread

@@ -69,7 +69,8 @@ class TestConfigurationManagement:
         """Test isolated environment variable access."""
         try:
             # Test accessing a common environment variable
-            testing_var = get_env('TESTING')
+            env = get_env()
+            testing_var = env.get('TESTING')
             
             # Should return something or None
             # In test environment, TESTING should be set to '1'
@@ -107,7 +108,8 @@ class TestConfigurationManagement:
             assert direct_access == 'test_value'
             
             # Test isolated access
-            isolated_access = get_env('TEST_CONFIG_VAR')
+            env = get_env()
+            isolated_access = env.get('TEST_CONFIG_VAR')
             
             # Isolated access may return different value or None
             # depending on isolation implementation

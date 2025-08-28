@@ -29,7 +29,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import patch, AsyncMock, MagicMock
 
@@ -102,7 +102,7 @@ class TokenPropagationTestManager:
                 "email": email,
                 "token": test_token,
                 "permissions": permissions,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "auth_response": auth_response.to_dict()
             }
             
@@ -168,7 +168,7 @@ class TokenPropagationTestManager:
                     "user_id": session_data["user_id"],
                     "session_id": session_data["session_id"],
                     "query_type": "user_lookup",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
                 return {
@@ -201,7 +201,7 @@ class TokenPropagationTestManager:
                 "token": token,
                 "user_id": session_data["user_id"],
                 "permissions": session_data["permissions"],
-                "cached_at": datetime.utcnow().isoformat()
+                "cached_at": datetime.now(timezone.utc).isoformat()
             }
             
             await redis_client.setex(user_cache_key, 300, json.dumps(cache_data))

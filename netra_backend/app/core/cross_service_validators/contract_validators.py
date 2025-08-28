@@ -7,7 +7,7 @@ Prevents breaking changes and integration failures at service boundaries.
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 
 import httpx
@@ -160,7 +160,7 @@ class APIContractValidator(BaseValidator):
         service_pair: str
     ) -> ValidationResult:
         """Validate a specific endpoint contract."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         # Mock validation - in real implementation would make actual API calls
         # For now, we validate that the endpoint specification is well-formed
@@ -179,7 +179,7 @@ class APIContractValidator(BaseValidator):
         if endpoint.method in ["POST", "PUT"] and not endpoint.request_schema:
             issues.append("Request schema required for POST/PUT methods")
         
-        execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+        execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
         
         if issues:
             return self.create_result(
@@ -280,13 +280,13 @@ class WebSocketContractValidator(BaseValidator):
                 "type": "user_message",
                 "payload": {"text": "Hello"},
                 "message_id": "test-123",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             {
                 "type": "start_agent", 
                 "payload": {"agent_type": "triage"},
                 "message_id": "test-124",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         ]
         
@@ -337,7 +337,7 @@ class WebSocketContractValidator(BaseValidator):
                     "type": msg_type,
                     "payload": {"status": "success"},
                     "message_id": f"server-{msg_type}",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
                 msg = WebSocketMessage(**test_msg)

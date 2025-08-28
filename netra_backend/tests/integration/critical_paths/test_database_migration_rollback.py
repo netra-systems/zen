@@ -21,7 +21,7 @@ import os
 import tempfile
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -128,7 +128,7 @@ class DatabaseMigrationManager:
             "up_sql": self.generate_migration_sql(migration_name, "up", db_type),
             "down_sql": self.generate_migration_sql(migration_name, "down", db_type),
             "dependencies": [],
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc)
         }
         
         return migration_definition
@@ -818,7 +818,7 @@ async def test_migration_validation_prevents_dangerous_operations(migration_mana
         "up_sql": "DROP DATABASE production; DELETE FROM users;",
         "down_sql": "SELECT 1;",
         "dependencies": [],
-        "created_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc)
     }
     
     # Attempt to execute dangerous migration

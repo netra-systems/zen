@@ -37,7 +37,7 @@ import logging
 import time
 import uuid
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from urllib.parse import parse_qs, urlparse
@@ -96,7 +96,7 @@ class MockIdPConnector:
                     },
                     "assertion_id": str(uuid.uuid4()),
                     "issuer": self.idp_metadata["entity_id"],
-                    "issued_at": datetime.utcnow().isoformat()
+                    "issued_at": datetime.now(timezone.utc).isoformat()
                 }
             else:
                 return {
@@ -187,7 +187,7 @@ class SAMLHandler:
         cache_key = f"saml_assertion:{assertion_id}"
         cache_data = {
             "assertion_id": assertion_id,
-            "cached_at": datetime.utcnow().isoformat(),
+            "cached_at": datetime.now(timezone.utc).isoformat(),
             "user_email": validation_result["user_attributes"]["email"]
         }
         
@@ -279,9 +279,9 @@ class UserProvisioner:
             "permissions": permissions,
             "department": attributes.get("department", ""),
             "employee_id": attributes.get("employee_id", ""),
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "auth_provider": "saml_sso",
-            "last_login": datetime.utcnow().isoformat()
+            "last_login": datetime.now(timezone.utc).isoformat()
         }
         
         # Cache user data
@@ -300,7 +300,7 @@ class UserProvisioner:
             "first_name": attributes.get("first_name", existing_user.get("first_name", "")),
             "last_name": attributes.get("last_name", existing_user.get("last_name", "")),
             "department": attributes.get("department", existing_user.get("department", "")),
-            "last_login": datetime.utcnow().isoformat()
+            "last_login": datetime.now(timezone.utc).isoformat()
         })
         
         # Update role and permissions if changed
@@ -349,8 +349,8 @@ class SessionCreator:
                 "user_email": user_email,
                 "auth_method": "saml_sso",
                 "assertion_id": assertion_id,
-                "created_at": datetime.utcnow().isoformat(),
-                "expires_at": (datetime.utcnow() + timedelta(seconds=self.session_duration)).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "expires_at": (datetime.now(timezone.utc) + timedelta(seconds=self.session_duration)).isoformat(),
                 "permissions": permissions,
                 "role": user_data["role"]
             }

@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -215,7 +215,7 @@ class TestEnterpriseResourceHealth:
             "validation_id": str(uuid.uuid4()),
             "validation_results": validation_results,
             "overall_health_score": 1.0,
-            "validation_timestamp": datetime.utcnow(),
+            "validation_timestamp": datetime.now(timezone.utc),
             "validation_status": "all_systems_healthy"
         }
 

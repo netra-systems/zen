@@ -20,7 +20,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -137,7 +137,7 @@ async def simulate_websocket_message(self, user_id: str, message_content: str,
 
                 user_id=user_id,
 
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
 
                 metadata={"source": "test_pipeline"}
 
@@ -418,7 +418,7 @@ async def deliver_response(self, original_message: WebSocketMessage,
 
                 },
 
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
 
                 "status": "delivered"
 

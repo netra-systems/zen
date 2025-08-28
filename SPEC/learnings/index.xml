@@ -1236,6 +1236,16 @@
             <critical-takeaway>Test deployment by checking browser network tab - no localhost URLs should appear in staging/production.</critical-takeaway>
             <critical-takeaway>This was working before - regression introduced when Dockerfile was modified without understanding Next.js build-time requirements.</critical-takeaway>
         </category>
+
+        <category name="Staging Deployment Critical Fixes 2025-08-28" path="SPEC/learnings/staging_deployment_critical_fixes_20250828.xml" keywords="Staging Deployment, SECRET_KEY, OAuth, NEXT_PUBLIC, Build Time, Configuration">
+            <critical-takeaway>CRITICAL: NEXT_PUBLIC_* environment variables in Next.js are compile-time constants, must be set in Dockerfile before npm run build</critical-takeaway>
+            <critical-takeaway>SECRET_KEY must be cryptographically secure (32+ chars) - never use placeholder text in staging configuration</critical-takeaway>
+            <critical-takeaway>JWT_SECRET_KEY requires 64+ characters for production-grade security</critical-takeaway>
+            <critical-takeaway>OAuth credentials must be configured (even as placeholders) to prevent auth service startup failures</critical-takeaway>
+            <critical-takeaway>Auth service OAuth routes properly registered: /auth/login, /auth/callback, /oauth/providers, /oauth/config</critical-takeaway>
+            <critical-takeaway>Frontend Docker builds must use staging URLs: https://api.staging.netrasystems.ai, not localhost</critical-takeaway>
+            <critical-takeaway>Configuration validation pipeline prevents deployment failures - check secret lengths before deployment</critical-takeaway>
+        </category>
         
     </categories>
     

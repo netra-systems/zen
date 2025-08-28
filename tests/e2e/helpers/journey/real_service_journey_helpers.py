@@ -166,12 +166,18 @@ class RealWebSocketHelper:
         try:
             # Connect directly to WebSocket using websockets library for real connection
             backend_info = await discovery.get_service_info("backend")
-            ws_url = f"ws://localhost:{backend_info.port}/ws?token={access_token}"
+            ws_url = f"ws://localhost:{backend_info.port}/ws"
             
-            # Real WebSocket connection to backend service
+            # Prepare authentication headers - WebSocket expects Authorization header
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "User-Agent": "Netra-E2E-Test-Client/1.0"
+            }
+            
+            # Real WebSocket connection to backend service with authentication
             if websockets:
                 websocket = await asyncio.wait_for(
-                    websockets.connect(ws_url),
+                    websockets.connect(ws_url, additional_headers=headers),
                     timeout=10.0
                 )
             else:

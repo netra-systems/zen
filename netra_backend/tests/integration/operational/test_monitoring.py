@@ -21,7 +21,7 @@ from pathlib import Path
 
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -82,7 +82,7 @@ class TestSystemMonitoring:
             },
             "detailed_metrics": validation["threshold_results"],
             "trend_analysis": "Quality metrics improving over past 30 days",
-            "report_generated_at": datetime.utcnow()
+            "report_generated_at": datetime.now(timezone.utc)
         }
         
         return quality_report

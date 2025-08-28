@@ -18,7 +18,7 @@ import asyncio
 import json
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
@@ -112,7 +112,7 @@ class WebSocketAuthHandshakeTester:
                 auth_message = {
                     "type": "auth",
                     "token": auth_token,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 await websocket.send(json.dumps(auth_message))
                 

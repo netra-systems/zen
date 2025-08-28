@@ -24,7 +24,7 @@ import statistics
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
@@ -195,7 +195,7 @@ class CacheConsistencyAcrossRegionsL3Manager:
             value_with_metadata = {
                 **value,
                 "region_origin": region,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "version": value.get("version", 1)
             }
             
@@ -479,7 +479,7 @@ class CacheConsistencyAcrossRegionsL3Manager:
             # Update winner's version and sync to loser
             winner_value["version"] = winner_value.get("version", 1) + 1
             winner_value["conflict_resolved"] = True
-            winner_value["resolution_timestamp"] = datetime.utcnow().isoformat()
+            winner_value["resolution_timestamp"] = datetime.now(timezone.utc).isoformat()
             
             # Write winning value to both regions
             await asyncio.gather(

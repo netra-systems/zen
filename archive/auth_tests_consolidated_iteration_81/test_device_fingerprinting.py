@@ -57,7 +57,7 @@ class TestBrowserFingerprinting:
             auth_provider='local',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     @pytest.fixture
@@ -96,7 +96,7 @@ class TestBrowserFingerprinting:
             'uniqueness_estimate': 0.00012,  # 1 in 8,333 devices
             'characteristics_analyzed': 15,
             'fingerprint_version': '2.1',
-            'generation_timestamp': datetime.utcnow()
+            'generation_timestamp': datetime.now(timezone.utc)
         }
         
         # Generate browser fingerprint
@@ -499,7 +499,7 @@ class TestDeviceTrustScoring:
                 'occasional_location_changes'
             ],
             'trust_trend': 'stable',
-            'last_updated': datetime.utcnow()
+            'last_updated': datetime.now(timezone.utc)
         }
         
         # Calculate trust score
@@ -519,7 +519,7 @@ class TestDeviceTrustScoring:
             'new_trust_score': 85,
             'previous_trust_score': 82,
             'change_reason': 'consistent_usage_pattern',
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Mock trust history update
@@ -616,7 +616,7 @@ class TestDeviceRegistrationManagement:
             'device_id': str(uuid4()),
             'device_name': 'Work Laptop - Chrome',
             'fingerprint_id': str(uuid4()),
-            'registration_timestamp': datetime.utcnow(),
+            'registration_timestamp': datetime.now(timezone.utc),
             'initial_trust_score': 75,
             'trust_level': 'medium',
             'requires_verification': False,
@@ -637,7 +637,7 @@ class TestDeviceRegistrationManagement:
         device_id = str(uuid4())
         update_data = {
             'device_id': device_id,
-            'last_seen': datetime.utcnow(),
+            'last_seen': datetime.now(timezone.utc),
             'authentication_count': 156,
             'location_info': {
                 'country_code': 'US',
@@ -657,7 +657,7 @@ class TestDeviceRegistrationManagement:
             'trust_score_change': -2,  # Small decrease due to fingerprint changes
             'location_flagged': False,
             'fingerprint_drift_detected': True,
-            'update_timestamp': datetime.utcnow()
+            'update_timestamp': datetime.now(timezone.utc)
         }
         
         # Update device profile
@@ -680,7 +680,7 @@ class TestDeviceRegistrationManagement:
                     'device_name': 'Work Laptop - Chrome',
                     'device_type': 'desktop',
                     'trust_score': 87,
-                    'last_seen': datetime.utcnow() - timedelta(hours=2),
+                    'last_seen': datetime.now(timezone.utc) - timedelta(hours=2),
                     'status': 'active'
                 },
                 {
@@ -688,7 +688,7 @@ class TestDeviceRegistrationManagement:
                     'device_name': 'iPhone 13',
                     'device_type': 'mobile',
                     'trust_score': 82,
-                    'last_seen': datetime.utcnow() - timedelta(minutes=30),
+                    'last_seen': datetime.now(timezone.utc) - timedelta(minutes=30),
                     'status': 'active'
                 },
                 {
@@ -696,7 +696,7 @@ class TestDeviceRegistrationManagement:
                     'device_name': 'Home Desktop - Firefox',
                     'device_type': 'desktop',
                     'trust_score': 45,
-                    'last_seen': datetime.utcnow() - timedelta(days=15),
+                    'last_seen': datetime.now(timezone.utc) - timedelta(days=15),
                     'status': 'inactive'
                 }
             ]
@@ -720,7 +720,7 @@ class TestDeviceRegistrationManagement:
         mock_device_manager.revoke_device.return_value = {
             'revocation_successful': True,
             'device_id': device_id,
-            'revoked_at': datetime.utcnow(),
+            'revoked_at': datetime.now(timezone.utc),
             'revocation_reason': revocation_reason,
             'active_sessions_terminated': 2,
             'tokens_invalidated': 3,
@@ -783,7 +783,7 @@ class TestAntiFingerprintingCountermeasures:
         """Test fingerprint authenticity validation."""
         fingerprint_data = {
             'fingerprint_hash': 'fp_hash_test123',
-            'generation_timestamp': datetime.utcnow(),
+            'generation_timestamp': datetime.now(timezone.utc),
             'characteristics_count': 15,
             'entropy_score': 16.2,
             'consistency_checks_passed': 13,

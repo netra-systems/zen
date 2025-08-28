@@ -33,7 +33,7 @@ import psycopg2
 import redis
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 # Add project root to path
 
@@ -947,7 +947,7 @@ async def test_cors_configuration_dynamic_port_mismatch(test_env):
     app = create_app()
     
     # Simulate request from dynamic frontend port
-    async with AsyncClient(app=app, base_url="http://localhost:8081") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://localhost:8081") as client:
         response = await client.options(
             "/api/health",
             headers={

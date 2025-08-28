@@ -6,7 +6,7 @@ Provides common utilities for all test files.
 import sys
 import jwt
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -90,8 +90,8 @@ def create_test_token(user_id: str, expires_in: int = 3600) -> str:
     
     payload = {
         "sub": str(user_id),
-        "exp": datetime.utcnow() + timedelta(seconds=expires_in),
-        "iat": datetime.utcnow()
+        "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
+        "iat": datetime.now(timezone.utc)
     }
     
     return jwt.encode(payload, secret, algorithm="HS256")

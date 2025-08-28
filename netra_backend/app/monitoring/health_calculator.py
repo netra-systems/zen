@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical for Enterprise SLA monitoring
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -65,7 +65,7 @@ class HealthScoreCalculator:
                 "overall_score": avg_score,
                 "overall_status": overall_status.value,
                 "component_scores": scores,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:

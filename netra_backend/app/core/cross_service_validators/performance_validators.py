@@ -7,7 +7,7 @@ latency, throughput, resource usage, and communication overhead.
 
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from statistics import mean, median, stdev
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -192,7 +192,7 @@ class LatencyValidator(BaseValidator):
                 operation=f"{endpoint['method']} {endpoint['path']}",
                 latency_ms=latency_ms,
                 success=success,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 service_pair="frontend-backend"
             ))
         
@@ -223,7 +223,7 @@ class LatencyValidator(BaseValidator):
                 operation=f"websocket_{message_type}",
                 latency_ms=latency_ms,
                 success=success,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 service_pair="frontend-backend"
             ))
         
@@ -255,7 +255,7 @@ class LatencyValidator(BaseValidator):
                 operation=f"auth_{operation}",
                 latency_ms=latency_ms,
                 success=success,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 service_pair="backend-auth"
             ))
         
@@ -291,7 +291,7 @@ class LatencyValidator(BaseValidator):
                 operation=f"e2e_{flow_name}",
                 latency_ms=latency_ms,
                 success=success,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 service_pair="frontend-backend-auth"
             ))
         

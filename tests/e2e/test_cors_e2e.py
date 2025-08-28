@@ -221,16 +221,13 @@ class TestCORSPREnvironmentValidation:
     async def test_pr_environment_dynamic_validation(self, pr_origins):
         """Test PR environment dynamic origin validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "staging"}):
-            from netra_backend.app.core.middleware_setup import (
-                get_cors_origins,
-                is_origin_allowed,
-            )
+            from netra_backend.app.core.network_constants import URLConstants
             
-            origins = get_cors_origins()
+            origins = URLConstants.get_cors_origins("staging")
             
             # All PR origins should be allowed in staging
             for pr_origin in pr_origins:
-                assert is_origin_allowed(pr_origin, origins), f"PR origin should be allowed: {pr_origin}"
+                assert pr_origin in origins, f"PR origin should be allowed: {pr_origin}"
             
             # Non-PR staging origins should also work
             regular_origins = [

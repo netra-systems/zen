@@ -9,7 +9,7 @@
 # Review: Pending | Score: 85
 # ================================
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
@@ -333,7 +333,7 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
             agent_name=self.agent_name,
             state=state,
             stream_updates=stream_updates,
-            start_time=datetime.utcnow(),
+            start_time=datetime.now(timezone.utc),
             correlation_id=generate_llm_correlation_id()
         )
     
@@ -358,13 +358,13 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     async def _core_execution_wrapper(self, context: ExecutionContext) -> ExecutionResult:
         """Wrapper for core execution logic."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         try:
             result = await self.execute_core_logic(context)
-            execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             return self._create_success_execution_result(result, execution_time)
         except Exception as e:
-            execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             return self._create_error_execution_result(str(e), execution_time)
     
     def _create_success_execution_result(self, result: Dict[str, Any], 

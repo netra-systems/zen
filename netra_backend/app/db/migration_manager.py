@@ -14,7 +14,7 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 from typing import Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
@@ -201,7 +201,7 @@ class MigrationLockManager:
                     "lock_key": self.MIGRATION_LOCK_KEY,
                     "active_locks": locks,
                     "lock_count": len(locks),
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
         except Exception as e:
@@ -209,7 +209,7 @@ class MigrationLockManager:
             return {
                 "lock_key": self.MIGRATION_LOCK_KEY,
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     async def force_release_all_locks(self) -> int:

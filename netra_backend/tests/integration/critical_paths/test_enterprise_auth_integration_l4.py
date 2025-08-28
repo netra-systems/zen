@@ -23,7 +23,7 @@ import secrets
 
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -681,7 +681,7 @@ async def test_enterprise_auth_integration():
         print("\n" + "="*80)
         print("ENTERPRISE AUTHENTICATION TEST REPORT")
         print("="*80)
-        print(f"Timestamp: {datetime.utcnow().isoformat()}")
+        print(f"Timestamp: {datetime.now(timezone.utc).isoformat()}")
         print("="*80)
         
         # Test results

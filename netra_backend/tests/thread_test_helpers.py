@@ -1,6 +1,6 @@
 """Thread test helpers for testing thread-related functionality."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
@@ -16,8 +16,8 @@ def create_mock_thread(
         "id": thread_id or str(uuid4()),
         "user_id": user_id or str(uuid4()),
         "title": title or "Test Thread",
-        "created_at": datetime.utcnow().isoformat(),
-        "updated_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
         "message_count": kwargs.get("message_count", 0),
         "is_active": kwargs.get("is_active", True),
         "metadata": kwargs.get("metadata", {}),
@@ -118,7 +118,7 @@ class ThreadTestDataGenerator:
                 "id": str(uuid4()),
                 "thread_id": thread["id"],
                 "content": f"Test message {i}",
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "role": "user" if i % 2 == 0 else "assistant"
             }
             for i in range(message_count)
@@ -132,6 +132,6 @@ class ThreadTestDataGenerator:
             "title": "Updated Thread Title",
             "metadata": {
                 "updated": True,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }

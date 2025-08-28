@@ -22,7 +22,7 @@ import random
 import sys
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -178,7 +178,7 @@ class AgentFailoverTester:
                     "complexity": random.choice(["low", "medium", "high"]),
                     "timeout": random.randint(10, 60)
                 },
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "status": "pending"
             }
             
@@ -623,7 +623,7 @@ async def test_agent_failover_recovery():
         print("\n" + "="*80)
         print("AGENT FAILOVER & RECOVERY TEST REPORT")
         print("="*80)
-        print(f"Timestamp: {datetime.utcnow().isoformat()}")
+        print(f"Timestamp: {datetime.now(timezone.utc).isoformat()}")
         print(f"Agents Tested: {len(tester.agents)}")
         print(f"Tasks Created: {len(tester.tasks)}")
         print("="*80)

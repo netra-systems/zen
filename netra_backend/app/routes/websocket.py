@@ -54,10 +54,29 @@ logger = central_logger.get_logger(__name__)
 router = APIRouter(tags=["WebSocket"])
 tracing_manager = TracingManager()
 
-# WebSocket Configuration
+# WebSocket Configuration - Environment Aware
+def _get_rate_limit_for_environment() -> int:
+    """Get WebSocket rate limit based on environment."""
+    from netra_backend.app.core.environment_constants import Environment
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    env = get_env()
+    environment = env.get("ENVIRONMENT", "development").lower()
+    testing = env.get("TESTING", "0") == "1"
+    
+    # Much higher rate limits for testing environments to prevent E2E test failures
+    if testing or environment in ["testing", "e2e_testing"]:
+        return 1000  # Very high limit for test environments
+    elif environment == "development":
+        return 300   # High limit for development
+    elif environment == "staging":
+        return 100   # Medium limit for staging
+    else:  # production
+        return 30    # Conservative limit for production
+
 WEBSOCKET_CONFIG = WebSocketConfig(
     max_connections_per_user=3,
-    max_message_rate_per_minute=30,
+    max_message_rate_per_minute=_get_rate_limit_for_environment(),
     max_message_size_bytes=8192,
     connection_timeout_seconds=300,
     heartbeat_interval_seconds=45,

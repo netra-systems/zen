@@ -8,7 +8,7 @@ These are simplified implementations focused on testing the core patterns.
 import asyncio
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
 
@@ -299,14 +299,14 @@ class MockDataSubAgentExtensions:
                     agent.cost_history.append({
                         "operation": data.get("operation", "unknown"),
                         "cost": cost,
-                        "timestamp": datetime.utcnow()
+                        "timestamp": datetime.now(timezone.utc)
                     })
                     
                 if agent.enable_performance_tracking:
                     agent.performance_metrics.append({
                         "operation": data.get("operation", "unknown"),
                         "execution_time": execution_time,
-                        "timestamp": datetime.utcnow()
+                        "timestamp": datetime.now(timezone.utc)
                     })
                     
                 agent.operation_counter += 1

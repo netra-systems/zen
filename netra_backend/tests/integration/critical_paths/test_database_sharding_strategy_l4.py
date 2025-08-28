@@ -23,7 +23,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
@@ -295,7 +295,7 @@ class DatabaseShardingL4TestSuite:
                 "user_id": user_id,
                 "email": f"test_user_{i}@netra-sharding-test.com",
                 "tier": "enterprise" if i % 10 == 0 else "free",
-                "created_at": datetime.utcnow() - timedelta(days=random.randint(1, 365)),
+                "created_at": datetime.now(timezone.utc) - timedelta(days=random.randint(1, 365)),
                 "region": "us-east" if i % 2 == 0 else "us-west"
             }
             
@@ -313,7 +313,7 @@ class DatabaseShardingL4TestSuite:
                     "thread_id": thread_id,
                     "user_id": user_id,
                     "title": f"Test Thread {i}-{j}",
-                    "created_at": datetime.utcnow() - timedelta(hours=random.randint(1, 48)),
+                    "created_at": datetime.now(timezone.utc) - timedelta(hours=random.randint(1, 48)),
                     "assigned_shard": assigned_shard  # Same shard as user for co-location
                 }
                 test_threads.append(thread_data)
@@ -557,7 +557,7 @@ class DatabaseShardingL4TestSuite:
                 "user_id": user_id,
                 "email": f"imbalance_test_user_{i}@netra-test.com",
                 "tier": "free",
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "region": "test",
                 "assigned_shard": target_shard.shard_id
             }

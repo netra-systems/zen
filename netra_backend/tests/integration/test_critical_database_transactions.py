@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
@@ -109,7 +109,7 @@ class TestDatabaseTransactionIntegration:
     async def _simulate_system_restart(self, manager):
         """Simulate complete system restart"""
         manager["runtime_state"] = {}
-        manager["restart_timestamp"] = datetime.utcnow()
+        manager["restart_timestamp"] = datetime.now(timezone.utc)
 
     async def _execute_state_recovery(self, manager):
         """Execute state recovery process"""
@@ -139,7 +139,7 @@ class TestDatabaseTransactionIntegration:
             "gpu_config": {"tensor_parallel": True, "batch_size": 32},
             "performance_metrics": {"latency_p95": 250, "throughput": 1200},
             "cost_savings": 0.35,
-            "updated_at": datetime.utcnow().isoformat()
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
 
     async def _propagate_cache_update(self, topology, data):
@@ -168,7 +168,7 @@ class TestDatabaseTransactionIntegration:
         """Test cascade invalidation on data updates"""
         updated_data = data.copy()
         updated_data["cost_savings"] = 0.45
-        updated_data["updated_at"] = datetime.utcnow().isoformat()
+        updated_data["updated_at"] = datetime.now(timezone.utc).isoformat()
         
         await self._propagate_cache_update(topology, updated_data)
         

@@ -38,39 +38,87 @@ class ServiceHealthChecker:
         self.client_timeout = 30.0  # Overall client timeout
     
     async def check_service_endpoint(self, service_name: str, config: Dict[str, Any]) -> HealthCheckResult:
-        """Check individual service health endpoint with comprehensive error handling."""
+        """Check individual service health endpoint with comprehensive error handling and multiple URL fallbacks."""
         start_time = time.time()
         
-        try:
-            async with httpx.AsyncClient(timeout=config["timeout"], follow_redirects=True) as client:
-                response = await client.get(config["url"])
-                response_time_ms = (time.time() - start_time) * 1000
+        # Support both single URL (legacy) and multiple URLs (new format)
+        urls = config.get("urls", [config.get("url")]) if config.get("urls") else [config.get("url")]
+        urls = [url for url in urls if url]  # Filter out None values
+        
+        last_error = None
+        
+        for url in urls:
+            try:
+                async with httpx.AsyncClient(timeout=config["timeout"], follow_redirects=True) as client:
+                    response = await client.get(url)
+                    response_time_ms = (time.time() - start_time) * 1000
+                    
+                    result = self._process_service_response(
+                        service_name, response, response_time_ms, config
+                    )
+                    
+                    # If this URL succeeded, return the result
+                    if result.is_healthy():
+                        logger.info(f"Service {service_name} health check succeeded at {url}")
+                        return result
+                    else:
+                        logger.debug(f"Service {service_name} returned unhealthy status at {url}: {result.error}")
+                        last_error = result.error
+                        
+            except asyncio.TimeoutError:
+                last_error = f"Timeout at {url}"
+                logger.debug(f"Service {service_name} timeout at {url}")
+                continue
                 
-                return self._process_service_response(
-                    service_name, response, response_time_ms, config
-                )
+            except httpx.ConnectError as e:
+                last_error = f"Connection failed at {url}: {str(e)}"
+                logger.debug(f"Service {service_name} connection failed at {url}: {e}")
+                continue
                 
-        except asyncio.TimeoutError:
-            response_time_ms = config["timeout"] * 1000
-            return create_timeout_result(service_name, response_time_ms)
-            
-        except httpx.ConnectError as e:
-            response_time_ms = (time.time() - start_time) * 1000
+            except httpx.RequestError as e:
+                last_error = f"Request error at {url}: {str(e)}"
+                logger.debug(f"Service {service_name} request error at {url}: {e}")
+                continue
+                
+            except Exception as e:
+                last_error = f"Unexpected error at {url}: {str(e)}"
+                logger.debug(f"Service {service_name} unexpected error at {url}: {e}")
+                continue
+        
+        # If we get here, all URLs failed
+        response_time_ms = (time.time() - start_time) * 1000
+        
+        # Try port connectivity as final fallback
+        if await self._check_port_fallback(service_name, config):
             return create_service_error_result(
-                service_name, f"Connection failed: {str(e)}", response_time_ms
+                service_name, 
+                f"Port accessible but health endpoints failed. Last error: {last_error}", 
+                response_time_ms
             )
-            
-        except httpx.RequestError as e:
-            response_time_ms = (time.time() - start_time) * 1000
-            return create_service_error_result(
-                service_name, f"Request error: {str(e)}", response_time_ms
-            )
-            
-        except Exception as e:
-            response_time_ms = (time.time() - start_time) * 1000
-            return create_service_error_result(
-                service_name, f"Unexpected error: {str(e)}", response_time_ms
-            )
+        
+        return create_service_error_result(
+            service_name, 
+            f"All endpoints failed. Last error: {last_error}. URLs tried: {urls}", 
+            response_time_ms
+        )
+    
+    async def _check_port_fallback(self, service_name: str, config: Dict[str, Any]) -> bool:
+        """Check if service ports are accessible as a fallback diagnostic."""
+        import socket
+        
+        fallback_ports = config.get("fallback_ports", [])
+        for port in fallback_ports:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(2.0)
+                result = sock.connect_ex(('localhost', port))
+                sock.close()
+                if result == 0:
+                    logger.info(f"Service {service_name} port {port} is accessible")
+                    return True
+            except Exception:
+                continue
+        return False
     
     def _process_service_response(self, service_name: str, response: httpx.Response, 
                                 response_time_ms: float, config: Dict[str, Any]) -> HealthCheckResult:

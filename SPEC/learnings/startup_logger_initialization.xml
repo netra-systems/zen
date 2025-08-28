@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <id>startup-logger-initialization</id>
+    <title>Startup Module Logger Initialization Error</title>
+    <category>startup,logging,python,exception-handling</category>
+    <priority>CRITICAL</priority>
+    <created>2025-08-28</created>
+    
+    <problem>
+        <description>Backend startup failing due to logger variable not being initialized before use in exception handlers</description>
+        <error_message>Error in robust startup: cannot access local variable 'logger' where it is not associated with a value</error_message>
+        <impact>Complete backend failure - service cannot start, making entire system unusable</impact>
+        <root_cause>Logger variable referenced in exception handler before being assigned in certain error paths</root_cause>
+    </problem>
+    
+    <solution>
+        <description>Implement robust logger initialization with fallback mechanisms</description>
+        <implementation>
+            <file>netra_backend/app/startup_module.py</file>
+            <changes>
+                - Added exception-safe logger initialization at function start
+                - Implemented fallback logger creation if primary logger fails
+                - Added safety checks in exception handlers before using logger
+                - Ensured logger is always defined before any potential exception
+            </changes>
+        </implementation>
+    </solution>
+    
+    <best_practices>
+        <practice>Always initialize logger at the beginning of functions, not within try blocks</practice>
+        <practice>Use fallback logging mechanism (print or basic logging) if logger initialization fails</practice>
+        <practice>Check logger existence before using in exception handlers</practice>
+        <practice>Consider using module-level logger initialization for reliability</practice>
+    </best_practices>
+    
+    <prevention>
+        <step>Initialize logger as first statement in functions that use exception handling</step>
+        <step>Use defensive programming: check if logger exists before using</step>
+        <step>Consider using getLogger() at module level instead of function level</step>
+        <step>Add static analysis rules to detect uninitialized variable usage</step>
+    </prevention>
+    
+    <verification>
+        <command>curl -s http://localhost:8000/health</command>
+        <expected_output>{"status":"healthy","service":"netra-ai-platform","version":"1.0.0",...}</expected_output>
+        <startup_check>docker logs netra-backend | grep "Application startup complete"</startup_check>
+    </verification>
+    
+    <code_pattern>
+        <bad>
+            ```python
+            def startup():
+                try:
+                    logger = get_logger()
+                    # ... code ...
+                except Exception as e:
+                    logger.error(f"Error: {e}")  # logger may not exist here
+            ```
+        </bad>
+        <good>
+            ```python
+            def startup():
+                # Initialize logger first, with fallback
+                try:
+                    logger = get_logger()
+                except:
+                    logger = logging.getLogger(__name__)
+                
+                try:
+                    # ... code ...
+                except Exception as e:
+                    if logger:
+                        logger.error(f"Error: {e}")
+                    else:
+                        print(f"Error: {e}")
+            ```
+        </good>
+    </code_pattern>
+    
+    <related_files>
+        <file>netra_backend/app/startup_module.py</file>
+        <file>netra_backend/app/core/logging_config.py</file>
+    </related_files>
+    
+    <tags>
+        <tag>startup</tag>
+        <tag>logging</tag>
+        <tag>exception-handling</tag>
+        <tag>python-scoping</tag>
+        <tag>critical-fix</tag>
+    </tags>
+</learning>

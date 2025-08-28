@@ -17,7 +17,7 @@ import asyncio
 import json
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -310,7 +310,7 @@ class AuthenticationSessionTester:
             
         # Check if token is near expiry
         if self.token_expiry:
-            time_to_expiry = (self.token_expiry - datetime.utcnow()).total_seconds()
+            time_to_expiry = (self.token_expiry - datetime.now(timezone.utc)).total_seconds()
             
             if time_to_expiry < 300:  # Less than 5 minutes
                 print(f"[INFO] Token expiring in {time_to_expiry}s, refreshing...")

@@ -8,7 +8,7 @@ permission enforcement, audit trail consistency, and service authentication.
 import asyncio
 import hashlib
 import hmac
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 from uuid import uuid4
 
@@ -86,8 +86,8 @@ class TokenValidationValidator(BaseValidator):
             payload = {
                 "user_id": "test-user-123",
                 "email": "test@example.com",
-                "exp": datetime.utcnow() + timedelta(hours=1),
-                "iat": datetime.utcnow(),
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+                "iat": datetime.now(timezone.utc),
                 "jti": str(uuid4())
             }
             
@@ -147,8 +147,8 @@ class TokenValidationValidator(BaseValidator):
             expired_payload = {
                 "user_id": "test-user-456",
                 "email": "test2@example.com",
-                "exp": datetime.utcnow() - timedelta(minutes=10),  # Expired 10 minutes ago
-                "iat": datetime.utcnow() - timedelta(hours=1),
+                "exp": datetime.now(timezone.utc) - timedelta(minutes=10),  # Expired 10 minutes ago
+                "iat": datetime.now(timezone.utc) - timedelta(hours=1),
                 "jti": str(uuid4())
             }
             
@@ -211,8 +211,8 @@ class TokenValidationValidator(BaseValidator):
             payload = {
                 "user_id": "test-user-789",
                 "email": "test3@example.com",
-                "exp": datetime.utcnow() + timedelta(hours=1),
-                "iat": datetime.utcnow(),
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+                "iat": datetime.now(timezone.utc),
                 "jti": str(uuid4())
             }
             
@@ -280,8 +280,8 @@ class TokenValidationValidator(BaseValidator):
             service_payload = {
                 "service_id": "backend-service",
                 "permissions": ["user.read", "threads.manage"],
-                "exp": datetime.utcnow() + timedelta(hours=24),
-                "iat": datetime.utcnow(),
+                "exp": datetime.now(timezone.utc) + timedelta(hours=24),
+                "iat": datetime.now(timezone.utc),
                 "jti": str(uuid4()),
                 "token_type": "service"
             }
@@ -1218,7 +1218,7 @@ class ServiceAuthValidator(BaseValidator):
     
     def _generate_service_auth_token(self, service: str, secret: str) -> str:
         """Generate service authentication token."""
-        payload = f"{service}:{datetime.utcnow().isoformat()}"
+        payload = f"{service}:{datetime.now(timezone.utc).isoformat()}"
         signature = hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
         return f"{payload}.{signature}"
     

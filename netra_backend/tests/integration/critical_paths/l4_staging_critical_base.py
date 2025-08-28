@@ -21,7 +21,7 @@ import time
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -362,7 +362,7 @@ class L4StagingCriticalPathTestBase(ABC):
                 "billing_tier": tier,
                 "monthly_quota": self._get_tier_quota(tier),
                 "current_usage": 0,
-                "billing_cycle_start": datetime.utcnow().isoformat(),
+                "billing_cycle_start": datetime.now(timezone.utc).isoformat(),
                 "test_account": True
             }
             

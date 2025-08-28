@@ -16,7 +16,7 @@ import json
 import uuid
 import pytest
 import websockets
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
@@ -140,7 +140,7 @@ class AgentWebSocketTester:
                     "max_retries": 3
                 }
             },
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(timezone.utc)
         )
         
         response = await self.send_message(message)
@@ -161,7 +161,7 @@ class AgentWebSocketTester:
             message_type=MessageType.AGENT_MESSAGE,
             agent_id=agent_id,
             content=content,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(timezone.utc)
         )
         
         return await self.send_message(message)
@@ -173,7 +173,7 @@ class AgentWebSocketTester:
             message_type=MessageType.AGENT_STATUS,
             agent_id=agent_id,
             content={},
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(timezone.utc)
         )
         
         response = await self.send_message(message)

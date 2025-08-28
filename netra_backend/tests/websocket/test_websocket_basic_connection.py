@@ -74,7 +74,7 @@ class TestWebSocketBasicConnection:
                 assert "server_time" in welcome_data
                 assert "message" in welcome_data
                 
-                print(f"✅ Received welcome message: {welcome_data}")
+                print(f"SUCCESS: Received welcome message: {welcome_data}")
     
     @pytest.mark.asyncio
     async def test_websocket_ping_pong(self):
@@ -119,7 +119,7 @@ class TestWebSocketBasicConnection:
                 }
                 
                 await websocket.send(json.dumps(ping_message))
-                print(f"📤 Sent ping: {ping_message}")
+                print(f"SENT: Ping message: {ping_message}")
                 
                 # Wait for pong response
                 response = await websocket.recv()
@@ -129,7 +129,7 @@ class TestWebSocketBasicConnection:
                 assert response_data["type"] == "pong"
                 assert "timestamp" in response_data
                 
-                print(f"📥 Received pong: {response_data}")
+                print(f"RECEIVED: Pong response: {response_data}")
                 
                 # Verify websocket.send was called with correct data
                 websocket.send.assert_called_once_with(json.dumps(ping_message))
@@ -175,7 +175,7 @@ class TestWebSocketBasicConnection:
                 
                 # Send echo message
                 await websocket.send(json.dumps(echo_message))
-                print(f"📤 Sent echo: {echo_message}")
+                print(f"SENT: Echo message: {echo_message}")
                 
                 # Wait for echo response
                 response = await websocket.recv()
@@ -187,7 +187,7 @@ class TestWebSocketBasicConnection:
                 assert "timestamp" in response_data
                 assert response_data["original"] == echo_message
                 
-                print(f"📥 Received echo response: {response_data}")
+                print(f"RECEIVED: Echo response: {response_data}")
                 
                 # Verify websocket.send was called with correct data
                 websocket.send.assert_called_once_with(json.dumps(echo_message))
@@ -226,7 +226,7 @@ class TestWebSocketBasicConnection:
                 invalid_json = "{ this is not valid json }"
                 
                 await websocket.send(invalid_json)
-                print(f"📤 Sent invalid JSON: {invalid_json}")
+                print(f"SENT: Invalid JSON: {invalid_json}")
                 
                 # Wait for error response
                 response = await websocket.recv()
@@ -237,7 +237,7 @@ class TestWebSocketBasicConnection:
                 assert "message" in response_data
                 assert "Invalid JSON" in response_data["message"]
                 
-                print(f"📥 Received error response: {response_data}")
+                print(f"RECEIVED: Error response: {response_data}")
                 
                 # Verify websocket.send was called with invalid JSON
                 websocket.send.assert_called_once_with(invalid_json)
@@ -279,7 +279,7 @@ class TestWebSocketBasicConnection:
                 }
                 
                 await websocket.send(json.dumps(unknown_message))
-                print(f"📤 Sent unknown type: {unknown_message}")
+                print(f"SENT: Unknown message type: {unknown_message}")
                 
                 # Wait for acknowledgment
                 response = await websocket.recv()
@@ -290,7 +290,7 @@ class TestWebSocketBasicConnection:
                 assert response_data["received_type"] == "unknown_message_type"
                 assert "timestamp" in response_data
                 
-                print(f"📥 Received ack: {response_data}")
+                print(f"RECEIVED: Ack response: {response_data}")
                 
                 # Verify websocket.send was called with unknown message
                 websocket.send.assert_called_once_with(json.dumps(unknown_message))
@@ -333,10 +333,10 @@ class TestWebSocketBasicConnection:
                     assert heartbeat_data["type"] == "heartbeat"
                     assert "timestamp" in heartbeat_data
                     
-                    print(f"📥 Received heartbeat: {heartbeat_data}")
+                    print(f"RECEIVED: Heartbeat: {heartbeat_data}")
                     
                 except asyncio.TimeoutError:
-                    print("⚠️  No heartbeat received within timeout (this may be expected)")
+                    print("WARNING: No heartbeat received within timeout (this may be expected)")
                     # This might be expected behavior, so don't fail
                     assert True
     
@@ -387,13 +387,13 @@ class TestWebSocketBasicConnection:
                 
                 for i, message in enumerate(messages):
                     await websocket.send(json.dumps(message))
-                    print(f"📤 Sent message {i+1}: {message}")
+                    print(f"SENT: Message {i+1}: {message}")
                     
                     # Receive response
                     response = await websocket.recv()
                     response_data = json.loads(response)
                     responses.append(response_data)
-                    print(f"📥 Received response {i+1}: {response_data}")
+                    print(f"RECEIVED: Response {i+1}: {response_data}")
                 
                 # Verify we got responses to all messages
                 assert len(responses) == len(messages), f"Expected {len(messages)} responses, got {len(responses)}"

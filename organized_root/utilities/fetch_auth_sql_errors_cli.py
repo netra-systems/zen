@@ -8,7 +8,7 @@ SQL-related issues with the auth_core service in staging.
 import json
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 def run_gcloud_command(cmd):
@@ -36,7 +36,7 @@ def fetch_auth_sql_errors():
     run_gcloud_command("gcloud config set project netra-staging")
     
     # Define time range (last 24 hours)
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     start_time = end_time - timedelta(hours=24)
     
     print(f"\nAnalyzing logs from {start_time.isoformat()}Z to {end_time.isoformat()}Z")

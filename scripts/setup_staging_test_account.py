@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 import secrets
 import hashlib
@@ -47,7 +47,7 @@ class StagingTestAccountManager:
             "test_id": "test-google-id-" + secrets.token_hex(8),
             "oauth_token": self._generate_test_oauth_token(),
             "refresh_token": self._generate_test_refresh_token(),
-            "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat()
+            "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
         }
     
     def _generate_test_oauth_token(self) -> str:
@@ -89,7 +89,7 @@ class StagingTestAccountManager:
             "email": "agent.test@staging.netrasystems.ai",
             "name": "Test Agent",
             "permissions": ["read", "write", "admin"],
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
     
     def create_bypass_token(self) -> Dict[str, Any]:
@@ -139,7 +139,7 @@ class StagingTestAccountManager:
             "user_id": "test-browser-user",
             "email": "browser.test@staging.netrasystems.ai",
             "authenticated": True,
-            "expires": (datetime.utcnow() + timedelta(hours=4)).isoformat()
+            "expires": (datetime.now(timezone.utc) + timedelta(hours=4)).isoformat()
         }
         
         # Encode session data
@@ -177,7 +177,7 @@ class StagingTestAccountManager:
         Returns a report of available methods.
         """
         report = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "methods": {},
             "recommendations": []
         }
@@ -246,7 +246,7 @@ class StagingTestAccountManager:
     def save_test_credentials(self, output_file: str = "staging_test_credentials.json"):
         """Save all test credentials to a file"""
         credentials = {
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "environment": "staging",
             "accounts": {
                 "api_key": self.create_api_key_account(),

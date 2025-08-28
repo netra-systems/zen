@@ -25,7 +25,7 @@ import statistics
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Set
 
 import pytest
@@ -117,7 +117,7 @@ class CacheStampedePreventionL3Manager:
         result = {
             "key": key,
             "result": f"computed_value_{computation_hash[:8]}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "computation_time": duration,
             "computed_by": f"worker_{random.randint(1, 100)}"
         }

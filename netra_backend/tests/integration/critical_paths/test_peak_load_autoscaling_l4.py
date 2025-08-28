@@ -29,7 +29,7 @@ import random
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import patch, AsyncMock, MagicMock
 
@@ -120,7 +120,7 @@ class AutoScalingOrchestrator:
                 "current_instances": current_instances,
                 "target_instances": target_instances,
                 "scaling_reason": scaling_reason,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "scaling_direction": "up" if target_instances > current_instances else "down"
             }
             
@@ -174,7 +174,7 @@ class AutoScalingOrchestrator:
                 "current_instance_type": current_type,
                 "target_instance_type": target_instance_type,
                 "scaling_reason": scaling_reason,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             # Vertical scaling typically takes longer
@@ -220,7 +220,7 @@ class AutoScalingOrchestrator:
                 "service_name": service_name,
                 "instance_count": len(instances),
                 "instances": instances,
-                "update_timestamp": datetime.utcnow().isoformat(),
+                "update_timestamp": datetime.now(timezone.utc).isoformat(),
                 "propagation_delay": random.uniform(1, 5)  # 1-5 seconds
             }
             
@@ -302,7 +302,7 @@ class AutoScalingOrchestrator:
             "recommendations": recommendations,
             "current_metrics": metrics,
             "thresholds": self.performance_thresholds,
-            "analysis_timestamp": datetime.utcnow().isoformat()
+            "analysis_timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
@@ -612,7 +612,7 @@ class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
             # Record scaling analysis
             self.scaling_events.append({
                 "phase": phase,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "metrics": current_metrics,
                 "analysis": scaling_analysis
             })

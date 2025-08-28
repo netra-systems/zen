@@ -17,7 +17,7 @@ Tests advanced security edge cases including:
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -61,7 +61,7 @@ class TestTimingAttackMitigation:
             auth_provider='local',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_constant_time_password_comparison(self, mock_timing_protection):
@@ -260,7 +260,7 @@ class TestCSRFProtection:
         # Mock CSRF token generation
         mock_csrf_protection.generate_csrf_token.return_value = {
             'csrf_token': 'csrf_token_abcdef123456789',
-            'token_expiry': datetime.utcnow() + timedelta(hours=1),
+            'token_expiry': datetime.now(timezone.utc) + timedelta(hours=1),
             'session_binding': sample_user.id,
             'entropy_bits': 128,
             'token_type': 'synchronizer_token'
@@ -287,7 +287,7 @@ class TestCSRFProtection:
             'token_valid': True,
             'session_match': True,
             'token_expired': False,
-            'validation_timestamp': datetime.utcnow(),
+            'validation_timestamp': datetime.now(timezone.utc),
             'token_used': False,
             'security_level': 'high'
         }

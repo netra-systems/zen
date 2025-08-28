@@ -16,7 +16,7 @@ Business Value Justification (BVJ):
 """
 
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from unittest.mock import patch, AsyncMock, MagicMock
 from typing import Dict, Any
 
@@ -39,13 +39,13 @@ class TestUnifiedToolsAPI(CORSTestMixin):
     @pytest.fixture
     async def client(self):
         """Create test client"""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             yield client
     
     @pytest.fixture
-    async def auth_headers(self, test_db):
+    async def auth_headers(self, test_db_session):
         """Create authenticated headers"""
-        user = await create_test_user(test_db, email="test@example.com")
+        user = await create_test_user(test_db_session, email="test@example.com")
         token = create_test_token(user.id)
         return {"Authorization": f"Bearer {token}"}
     

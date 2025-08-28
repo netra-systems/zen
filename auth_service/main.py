@@ -252,19 +252,24 @@ Auth Service startup ABORTED.
     # Graceful shutdown
     logger.info("Shutting down Auth Service...")
     
-    # Wait for shutdown signal with timeout to prevent hanging
-    try:
-        # Set a timeout for graceful shutdown (Cloud Run gives 10 seconds by default)
-        shutdown_timeout = float(get_env().get("SHUTDOWN_TIMEOUT_SECONDS", "8"))
-        logger.info(f"Waiting up to {shutdown_timeout} seconds for graceful shutdown...")
-        
-        # Use asyncio.wait_for with proper timeout handling
-        await asyncio.wait_for(shutdown_event.wait(), timeout=shutdown_timeout)
-        logger.info("Shutdown signal received, proceeding with cleanup")
-    except asyncio.TimeoutError:
-        logger.warning(f"Shutdown timeout ({shutdown_timeout}s) exceeded, forcing cleanup")
-    except Exception as e:
-        logger.error(f"Error during shutdown wait: {e}, proceeding with cleanup")
+    # Skip waiting for shutdown event in development - proceed directly to cleanup
+    env = AuthConfig.get_environment()
+    if env == "development":
+        logger.info("Development environment - proceeding directly to cleanup")
+    else:
+        # Wait for shutdown signal with timeout to prevent hanging (production/staging only)
+        try:
+            # Set a timeout for graceful shutdown (Cloud Run gives 10 seconds by default)
+            shutdown_timeout = float(get_env().get("SHUTDOWN_TIMEOUT_SECONDS", "3"))
+            logger.info(f"Waiting up to {shutdown_timeout} seconds for graceful shutdown...")
+            
+            # Use asyncio.wait_for with proper timeout handling
+            await asyncio.wait_for(shutdown_event.wait(), timeout=shutdown_timeout)
+            logger.info("Shutdown signal received, proceeding with cleanup")
+        except asyncio.TimeoutError:
+            logger.info(f"Shutdown timeout ({shutdown_timeout}s) reached, proceeding with cleanup")
+        except Exception as e:
+            logger.warning(f"Error during shutdown wait: {e}, proceeding with cleanup")
     
     # Close connections gracefully
     tasks = []
@@ -273,9 +278,9 @@ Auth Service startup ABORTED.
     async def close_database():
         try:
             await auth_db.close()
-            logger.info("Database connection closed successfully")
+            logger.debug("Database connection closed successfully during graceful shutdown")
         except Exception as e:
-            logger.warning(f"Error closing database: {e}")
+            logger.warning(f"Error closing database during shutdown: {e}")
     
     tasks.append(close_database())
     
@@ -293,7 +298,9 @@ Auth Service startup ABORTED.
     # Execute all cleanup tasks concurrently with timeout
     if tasks:
         try:
-            cleanup_timeout = float(get_env().get("CLEANUP_TIMEOUT_SECONDS", "5"))
+            # Use shorter cleanup timeout in development for faster shutdown
+            default_cleanup_timeout = "2" if env == "development" else "5"
+            cleanup_timeout = float(get_env().get("CLEANUP_TIMEOUT_SECONDS", default_cleanup_timeout))
             logger.info(f"Running cleanup tasks with {cleanup_timeout}s timeout...")
             
             results = await asyncio.wait_for(

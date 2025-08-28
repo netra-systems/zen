@@ -164,11 +164,12 @@ def create_mock_websocket_message(
 ) -> Dict[str, Any]:
     """Create a mock WebSocket message."""
     import datetime
+    from datetime import timezone
     return {
         "type": message_type,
         "data": data or {},
         "connection_id": connection_id,
-        "timestamp": timestamp or datetime.datetime.utcnow().isoformat()
+        "timestamp": timestamp or datetime.datetime.now(timezone.utc).isoformat()
     }
 
 

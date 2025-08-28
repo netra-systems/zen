@@ -5,7 +5,7 @@ Integrates with existing supervisor, state management, and error handling.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
@@ -272,7 +272,7 @@ class GitHubAnalyzerService(BaseSubAgent):
             "configurations": configs,
             "llm_mappings": llm_map,
             "tool_mappings": tool_map,
-            "analyzed_at": datetime.utcnow()
+            "analyzed_at": datetime.now(timezone.utc)
         }
     
     async def _report_progress(
@@ -329,7 +329,7 @@ class GitHubAnalyzerService(BaseSubAgent):
         """Build result metadata."""
         return {
             "agent": self.name,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     async def handle_delegation(

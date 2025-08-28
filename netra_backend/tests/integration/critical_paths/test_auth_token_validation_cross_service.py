@@ -19,7 +19,7 @@ import asyncio
 import os
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -58,9 +58,9 @@ class TestAuthTokenValidationCrossService:
 
             "email": "test@example.com",
 
-            "exp": datetime.utcnow() + timedelta(hours=1),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
 
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
 
             "type": "access",
 
@@ -88,9 +88,9 @@ class TestAuthTokenValidationCrossService:
 
             "email": "test@example.com",
 
-            "exp": datetime.utcnow() - timedelta(hours=1),  # Expired
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1),  # Expired
 
-            "iat": datetime.utcnow() - timedelta(hours=2),
+            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
 
             "type": "access"
 
@@ -208,9 +208,9 @@ class TestAuthTokenValidationCrossService:
 
             "email": "test@example.com",
 
-            "exp": datetime.utcnow() + timedelta(hours=1),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
 
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
 
             "type": "access"
 
@@ -319,9 +319,9 @@ class TestAuthTokenValidationCrossService:
 
             "email": "limited@example.com",
 
-            "exp": datetime.utcnow() + timedelta(hours=1),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
 
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
 
             "type": "access",
 
@@ -368,9 +368,9 @@ class TestAuthTokenValidationCrossService:
 
             "email": "admin@example.com",
 
-            "exp": datetime.utcnow() + timedelta(minutes=5),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
 
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
 
             "type": "access",
 
@@ -386,9 +386,9 @@ class TestAuthTokenValidationCrossService:
 
             "email": "admin@example.com",
 
-            "exp": datetime.utcnow() + timedelta(hours=1),  # New expiry
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),  # New expiry
 
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
 
             "type": "access",
 

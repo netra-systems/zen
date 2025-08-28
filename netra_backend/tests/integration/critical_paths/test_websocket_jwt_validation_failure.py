@@ -235,7 +235,7 @@ async def test_websocket_successful_valid_oauth_token():
     Test successful WebSocket connection with valid OAuth token.
     Simulates production scenario with valid JWT from OAuth provider.
     """
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
 
     import jwt
 
@@ -247,8 +247,8 @@ async def test_websocket_successful_valid_oauth_token():
         "user_id": "oauth_user_123",
         "email": "user@example.com",
         "role": "user",
-        "exp": datetime.utcnow() + timedelta(hours=1),
-        "iat": datetime.utcnow(),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+        "iat": datetime.now(timezone.utc),
         "iss": "netra-auth-service"
     }
     valid_jwt = jwt.encode(payload, secret_key, algorithm="HS256")
@@ -261,7 +261,7 @@ async def test_websocket_successful_valid_oauth_token():
             "user_id": "oauth_user_123",
             "email": "user@example.com",
             "role": "user",
-            "exp": (datetime.utcnow() + timedelta(hours=1)).isoformat()
+            "exp": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
         }
         
         with TestClient(app) as client:
@@ -343,7 +343,7 @@ async def test_websocket_token_refresh_during_connection():
     Test WebSocket connection handles token refresh properly.
     Simulates scenario where token is refreshed while connection is active.
     """
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
 
     from netra_backend.app.main import app
     
@@ -354,7 +354,7 @@ async def test_websocket_token_refresh_during_connection():
             "valid": True,
             "user_id": "refresh_user",
             "role": "user",
-            "exp": (datetime.utcnow() + timedelta(minutes=5)).isoformat()
+            "exp": (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
         }
         
         with TestClient(app) as client:

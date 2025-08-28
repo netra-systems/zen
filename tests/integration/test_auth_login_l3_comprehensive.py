@@ -9,7 +9,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -145,7 +145,7 @@ class TestAuthLoginL3Integration:
             mock_request.return_value = {
                 "valid": True,
                 "user_id": "user_123",
-                "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat()
+                "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
             result = await auth_client.validate_token_jwt("valid_token_123")

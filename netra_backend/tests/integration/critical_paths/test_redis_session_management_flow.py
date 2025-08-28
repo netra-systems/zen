@@ -18,7 +18,7 @@ import json
 import os
 import sys
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -88,8 +88,8 @@ class RedisSessionTester:
                 session_id = f"session_{uuid.uuid4().hex[:16]}"
                 session_data = {
                     "user_id": f"user_{i}",
-                    "created_at": datetime.utcnow().isoformat(),
-                    "data": {"counter": 0, "last_access": datetime.utcnow().isoformat()}
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "data": {"counter": 0, "last_access": datetime.now(timezone.utc).isoformat()}
                 }
                 
                 # Store via API
@@ -247,7 +247,7 @@ class RedisSessionTester:
             # For now, test session replication
             
             migration_session_id = f"migrate_{uuid.uuid4().hex[:8]}"
-            session_data = {"migrate_test": "data", "timestamp": datetime.utcnow().isoformat()}
+            session_data = {"migrate_test": "data", "timestamp": datetime.now(timezone.utc).isoformat()}
             
             # Create session
             async with self.session.post(

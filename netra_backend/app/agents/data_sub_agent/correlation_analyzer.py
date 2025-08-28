@@ -7,7 +7,7 @@ Complies with 450-line module and 25-line function limits.
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
@@ -94,7 +94,7 @@ class CorrelationAnalyzer(BaseExecutionInterface):
         })
         return ExecutionContext(
             run_id=f"corr_analysis_{int(time.time())}", agent_name=self.agent_name,
-            state=state, start_time=datetime.utcnow()
+            state=state, start_time=datetime.now(timezone.utc)
         )
     
     async def _execute_analysis_logic(self, context: ExecutionContext) -> ExecutionResult:

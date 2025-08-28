@@ -5,7 +5,7 @@ Tests WebSocket connections, messaging, reconnection, and real-time features
 """
 
 # Add app to path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
@@ -916,7 +916,7 @@ class TestWebSocketL3Integration:
 
             "ip_address": "192.168.1.100",
 
-            "connected_at": datetime.utcnow()
+            "connected_at": datetime.now(timezone.utc)
 
         }
         

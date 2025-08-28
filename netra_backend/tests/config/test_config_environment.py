@@ -113,14 +113,31 @@ class TestConfigEnvironmentDetection:
         """Test environment detection defaults to development"""
         # Arrange
         # Mock: Component isolation for testing without external dependencies
+        # Also need to clear TESTING flag since it takes highest priority
+        from netra_backend.app.core.isolated_environment import get_env
+        env = get_env()
+        
         with patch('netra_backend.app.core.environment_constants.EnvironmentDetector.detect_cloud_environment') as mock_detect:
             mock_detect.return_value = None
             
-            # Act
-            result = config_env.detect()
+            # Temporarily clear testing flags to test development default
+            original_testing = env.get('TESTING')
+            original_pytest = env.get('PYTEST_CURRENT_TEST')
+            env.set('TESTING', '')  # Clear testing flag
+            env.set('PYTEST_CURRENT_TEST', '')  # Clear pytest flag
             
-            # Assert
-            assert result == "development"
+            try:
+                # Act
+                result = config_env.detect()
+                
+                # Assert
+                assert result == "development"
+            finally:
+                # Restore testing flags
+                if original_testing:
+                    env.set('TESTING', original_testing)
+                if original_pytest:
+                    env.set('PYTEST_CURRENT_TEST', original_pytest)
 
     def test_get_environment_explicit_environment_var(self, config_env, clean_environment):
         """Test environment detection with explicit ENVIRONMENT variable"""

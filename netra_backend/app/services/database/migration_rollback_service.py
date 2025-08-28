@@ -15,7 +15,7 @@ import asyncio
 import hashlib
 import json
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -186,7 +186,7 @@ class MigrationRollbackService:
             
             snapshot = MigrationSnapshot(
                 migration_id=migration_id,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
                 table_schemas=table_schemas,
                 table_counts=table_counts,
                 index_definitions=index_definitions,
@@ -244,13 +244,13 @@ class MigrationRollbackService:
             raise ValueError(f"No rollback plan found for migration {migration_id}")
         
         plan = self._rollback_plans[migration_id]
-        rollback_id = f"rollback_{migration_id}_{int(datetime.utcnow().timestamp())}"
+        rollback_id = f"rollback_{migration_id}_{int(datetime.now(timezone.utc).timestamp())}"
         
         execution = RollbackExecution(
             rollback_id=rollback_id,
             migration_id=migration_id,
             status=RollbackStatus.PENDING,
-            started_at=datetime.utcnow(),
+            started_at=datetime.now(timezone.utc),
             total_steps=len(plan.rollback_sql) + len(plan.safety_checks)
         )
         
@@ -274,7 +274,7 @@ class MigrationRollbackService:
                 await self._run_safety_checks(execution, plan.safety_checks, "post-rollback")
             
             execution.status = RollbackStatus.COMPLETED
-            execution.completed_at = datetime.utcnow()
+            execution.completed_at = datetime.now(timezone.utc)
             execution.duration_seconds = int(
                 (execution.completed_at - execution.started_at).total_seconds()
             )
@@ -284,7 +284,7 @@ class MigrationRollbackService:
         except Exception as e:
             execution.status = RollbackStatus.FAILED
             execution.error_message = str(e)
-            execution.completed_at = datetime.utcnow()
+            execution.completed_at = datetime.now(timezone.utc)
             
             logger.error(f"Rollback {rollback_id} failed: {e}")
             
@@ -305,7 +305,7 @@ class MigrationRollbackService:
         results = {
             "migration_id": migration_id,
             "snapshot_checksum": snapshot.checksum,
-            "verification_time": datetime.utcnow(),
+            "verification_time": datetime.now(timezone.utc),
             "schema_matches": True,
             "count_matches": True,
             "integrity_score": 0.0,
@@ -701,7 +701,7 @@ class MigrationRollbackService:
     
     def cleanup_old_snapshots(self, older_than_days: int = 30) -> int:
         """Clean up old snapshots."""
-        cutoff_date = datetime.utcnow() - timedelta(days=older_than_days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=older_than_days)
         
         to_remove = [
             migration_id for migration_id, snapshot in self._snapshots.items()

@@ -99,9 +99,11 @@ async def agent_service(l3_services):
     
     # Create proper async coroutine function to avoid "coroutine was never awaited" warnings
     async def mock_execute_structured_with_fallback(*args, **kwargs):
-        return {"category": "Data", "severity": "Low", "requires_approval": False}
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        return TriageResult(category="Data", severity="Low", requires_approval=False)
     
-    mock_fallback_handler.execute_structured_with_fallback = mock_execute_structured_with_fallback
+    # Ensure the mock returns the async function properly
+    mock_fallback_handler.execute_structured_with_fallback = AsyncMock(side_effect=mock_execute_structured_with_fallback)
     
     # Mock LLM manager methods that are used during agent initialization
     llm_manager.get_fallback_handler = Mock(return_value=mock_fallback_handler)
@@ -127,23 +129,25 @@ async def agent_service(l3_services):
         mock_triage_instance = AsyncMock()
         mock_triage_instance.llm_fallback_handler = mock_fallback_handler
         
-        # Create proper async execute functions
+        # Create proper async execute functions that return the expected types
         async def mock_triage_execute(*args, **kwargs):
-            return {"category": "Data", "severity": "Low"}
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            return TriageResult(category="Data", severity="Low", requires_approval=False)
         
         async def mock_data_execute(*args, **kwargs):
-            return {"status": "success"}
+            return {"status": "success", "data": "mock_data"}
         
         async def mock_generic_execute(*args, **kwargs):
-            return {"status": "success"}
+            return {"status": "success", "result": "mock_result"}
         
-        mock_triage_instance.execute = mock_triage_execute
+        # Use AsyncMock with side_effect to ensure proper async handling
+        mock_triage_instance.execute = AsyncMock(side_effect=mock_triage_execute)
         mock_triage_agent.return_value = mock_triage_instance
         
         # Configure the data agent mock
         mock_data_instance = AsyncMock()
         mock_data_instance.llm_fallback_handler = mock_fallback_handler
-        mock_data_instance.execute = mock_data_execute
+        mock_data_instance.execute = AsyncMock(side_effect=mock_data_execute)
         mock_data_agent.return_value = mock_data_instance
         
         # Configure other agent mocks
@@ -154,7 +158,7 @@ async def agent_service(l3_services):
         ]:
             mock_instance = AsyncMock()
             mock_instance.llm_fallback_handler = mock_fallback_handler
-            mock_instance.execute = mock_generic_execute
+            mock_instance.execute = AsyncMock(side_effect=mock_generic_execute)
             mock_agent.return_value = mock_instance
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)

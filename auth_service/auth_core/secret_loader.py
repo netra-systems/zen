@@ -161,8 +161,16 @@ class AuthSecretLoader:
             # First check staging-specific env var
             client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_STAGING")
             if client_id:
-                logger.info("Using GOOGLE_OAUTH_CLIENT_ID_STAGING from environment")
+                # CRITICAL: Log full client ID for staging debugging
+                logger.info(f"🔍 STAGING OAuth: Using GOOGLE_OAUTH_CLIENT_ID_STAGING = {client_id}")
+                logger.info(f"🔍 STAGING OAuth: Client ID length = {len(client_id)}")
+                logger.info(f"🔍 STAGING OAuth: Client ID starts with: {client_id[:30]}...")
                 return client_id
+            else:
+                # Log what variables are available
+                logger.error("❌ STAGING OAuth: GOOGLE_OAUTH_CLIENT_ID_STAGING is NOT set!")
+                available_vars = [k for k in env_manager.get_all().keys() if 'GOOGLE' in k and 'CLIENT' in k]
+                logger.error(f"❌ STAGING OAuth: Available Google client vars: {available_vars}")
         elif env == "production":
             client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
             if client_id:
@@ -170,7 +178,8 @@ class AuthSecretLoader:
                 return client_id
         
         # No fallback to generic GOOGLE_CLIENT_ID - use environment-specific variables only
-        logger.warning(f"No Google Client ID found for {env} environment")
+        logger.error(f"❌ CRITICAL: No Google Client ID found for {env} environment")
+        logger.error(f"❌ CRITICAL: Expected variable for {env}: GOOGLE_OAUTH_CLIENT_ID_{env.upper()}")
         return ""
     
     @staticmethod
@@ -197,8 +206,14 @@ class AuthSecretLoader:
             # First check staging-specific env var
             secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
             if secret:
-                logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_STAGING from environment")
+                # CRITICAL: Log secret presence for staging debugging (not the actual secret)
+                logger.info(f"🔍 STAGING OAuth: Using GOOGLE_OAUTH_CLIENT_SECRET_STAGING (length={len(secret)})")
+                logger.info(f"🔍 STAGING OAuth: Secret starts with: {secret[:5]}...")
                 return secret
+            else:
+                logger.error("❌ STAGING OAuth: GOOGLE_OAUTH_CLIENT_SECRET_STAGING is NOT set!")
+                available_vars = [k for k in env_manager.get_all().keys() if 'GOOGLE' in k and 'SECRET' in k]
+                logger.error(f"❌ STAGING OAuth: Available Google secret vars: {available_vars}")
         elif env == "production":
             secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION")
             if secret:
@@ -206,7 +221,8 @@ class AuthSecretLoader:
                 return secret
         
         # No fallback to generic GOOGLE_CLIENT_SECRET - use environment-specific variables only
-        logger.warning(f"No Google Client Secret found for {env} environment")
+        logger.error(f"❌ CRITICAL: No Google Client Secret found for {env} environment")
+        logger.error(f"❌ CRITICAL: Expected variable for {env}: GOOGLE_OAUTH_CLIENT_SECRET_{env.upper()}")
         return ""
     
     @staticmethod

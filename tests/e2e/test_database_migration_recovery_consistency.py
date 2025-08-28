@@ -267,7 +267,8 @@ class DatabaseMigrationConsistencyTester:
         # PostgreSQL connection
         if self.config.test_postgresql:
             try:
-                pg_url = get_env("DATABASE_URL")
+                env = get_env()
+                pg_url = env.get("DATABASE_URL")
                 if pg_url:
                     start_time = time.time()
                     self.pg_connection = await asyncpg.connect(pg_url)
@@ -281,7 +282,8 @@ class DatabaseMigrationConsistencyTester:
         # Redis connection
         if self.config.test_redis:
             try:
-                redis_url = get_env("REDIS_URL") or "redis://localhost:6379"
+                env = get_env()
+                redis_url = env.get("REDIS_URL") or "redis://localhost:6379"
                 start_time = time.time()
                 self.redis_client = redis.from_url(redis_url)
                 await self.redis_client.ping()
@@ -293,8 +295,9 @@ class DatabaseMigrationConsistencyTester:
         # ClickHouse connection
         if self.config.test_clickhouse:
             try:
-                clickhouse_host = get_env("CLICKHOUSE_HOST") or "localhost"
-                clickhouse_port = int(get_env("CLICKHOUSE_PORT") or "8123")
+                env = get_env()
+                clickhouse_host = env.get("CLICKHOUSE_HOST") or "localhost"
+                clickhouse_port = int(env.get("CLICKHOUSE_PORT") or "8123")
                 start_time = time.time()
                 self.clickhouse_client = await get_async_client(
                     host=clickhouse_host,
@@ -310,7 +313,8 @@ class DatabaseMigrationConsistencyTester:
         try:
             # Initialize Alembic state recovery manager with database URL
             from dev_launcher.isolated_environment import get_env
-            database_url = get_env("DATABASE_URL")
+            env = get_env()
+            database_url = env.get("DATABASE_URL")
             if database_url:
                 self.alembic_recovery_manager = AlembicStateRecovery(database_url)
                 logger.info("Alembic recovery manager initialized")

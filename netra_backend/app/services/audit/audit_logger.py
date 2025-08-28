@@ -5,7 +5,7 @@ Provides a generic audit logging interface for integration testing.
 Wraps the CorpusAuditLogger for actual implementation.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 import asyncio
 
@@ -38,7 +38,7 @@ class AuditLogger:
             await self.initialize()
         
         event = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "event_type": event_type,
             "tenant_id": tenant_id,
             "user_id": user_id,

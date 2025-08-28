@@ -13,7 +13,7 @@ import sys
 import asyncio
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
 
@@ -298,7 +298,7 @@ class TestSessionStateSync:
 
             "permissions": ["read", "write"],
 
-            "metadata": {"login_time": datetime.utcnow().isoformat()}
+            "metadata": {"login_time": datetime.now(timezone.utc).isoformat()}
 
         }
         
@@ -373,7 +373,7 @@ class TestSessionStateSync:
 
             "connection_id": str(uuid.uuid4()),
 
-            "connected_at": datetime.utcnow().isoformat(),
+            "connected_at": datetime.now(timezone.utc).isoformat(),
 
             "active_threads": ["thread_1", "thread_2"]
 

@@ -9,7 +9,7 @@ import asyncio
 import json
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import aiohttp
@@ -43,7 +43,7 @@ class BaseIntegrationTest:
             "email": email,
             "username": email.split("@")[0],
             "tier": tier,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "is_active": True
         }
         
@@ -263,7 +263,7 @@ class L4IntegrationTest(BaseIntegrationTest):
     
     async def setup_method(self):
         """Setup method called before each test method."""
-        self._session_metrics["start_time"] = datetime.utcnow()
+        self._session_metrics["start_time"] = datetime.now(timezone.utc)
         # Override in subclasses for specific setup
         pass
     
@@ -275,7 +275,7 @@ class L4IntegrationTest(BaseIntegrationTest):
     async def _log_session_metrics(self):
         """Log session metrics for L4 test analysis."""
         if self._session_metrics["start_time"]:
-            duration = datetime.utcnow() - self._session_metrics["start_time"]
+            duration = datetime.now(timezone.utc) - self._session_metrics["start_time"]
             print(f"L4 Test Session Duration: {duration.total_seconds():.2f}s")
             print(f"Operations Performed: {len(self._session_metrics['operations'])}")
             if self._session_metrics["errors"]:
@@ -285,7 +285,7 @@ class L4IntegrationTest(BaseIntegrationTest):
         """Track an operation for metrics collection."""
         self._session_metrics["operations"].append({
             "name": operation_name,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "details": kwargs
         })
     
@@ -295,7 +295,7 @@ class L4IntegrationTest(BaseIntegrationTest):
             "error": str(error),
             "type": type(error).__name__,
             "context": context,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
     
     async def execute_user_workflow(self, workflow_steps: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -315,10 +315,10 @@ class L4IntegrationTest(BaseIntegrationTest):
             "errors": []
         }
         
-        workflow_start = datetime.utcnow()
+        workflow_start = datetime.now(timezone.utc)
         
         for i, step in enumerate(workflow_steps):
-            step_start = datetime.utcnow()
+            step_start = datetime.now(timezone.utc)
             step_name = step.get("name", f"step_{i}")
             
             try:
@@ -327,7 +327,7 @@ class L4IntegrationTest(BaseIntegrationTest):
                 # Execute step - this would be customized per workflow
                 step_result = await self._execute_workflow_step(step)
                 
-                step_duration = (datetime.utcnow() - step_start).total_seconds()
+                step_duration = (datetime.now(timezone.utc) - step_start).total_seconds()
                 
                 results["steps"].append({
                     "name": step_name,
@@ -338,7 +338,7 @@ class L4IntegrationTest(BaseIntegrationTest):
                 
             except Exception as e:
                 self.track_error(e, f"workflow_step_{step_name}")
-                step_duration = (datetime.utcnow() - step_start).total_seconds()
+                step_duration = (datetime.now(timezone.utc) - step_start).total_seconds()
                 
                 results["steps"].append({
                     "name": step_name,
@@ -350,7 +350,7 @@ class L4IntegrationTest(BaseIntegrationTest):
                 results["errors"].append(str(e))
                 results["success"] = False
         
-        results["total_duration"] = (datetime.utcnow() - workflow_start).total_seconds()
+        results["total_duration"] = (datetime.now(timezone.utc) - workflow_start).total_seconds()
         return results
     
     async def _execute_workflow_step(self, step: Dict[str, Any]) -> Any:
@@ -409,13 +409,13 @@ class L4IntegrationTest(BaseIntegrationTest):
         
         async def run_with_semaphore(operation):
             async with semaphore:
-                start_time = datetime.utcnow()
+                start_time = datetime.now(timezone.utc)
                 try:
                     result = await operation
-                    duration = (datetime.utcnow() - start_time).total_seconds()
+                    duration = (datetime.now(timezone.utc) - start_time).total_seconds()
                     return {"success": True, "result": result, "duration": duration}
                 except Exception as e:
-                    duration = (datetime.utcnow() - start_time).total_seconds()
+                    duration = (datetime.now(timezone.utc) - start_time).total_seconds()
                     return {"success": False, "error": str(e), "duration": duration}
         
         results = await asyncio.gather(*[run_with_semaphore(op) for op in operations])

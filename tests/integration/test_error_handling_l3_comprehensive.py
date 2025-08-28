@@ -9,7 +9,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -196,7 +196,7 @@ class TestErrorHandlingL3Integration:
             mock_dlq.return_value = {
                 "queued": True,
                 "dlq_id": "dlq_456",
-                "retry_after": datetime.utcnow() + timedelta(hours=1)
+                "retry_after": datetime.now(timezone.utc) + timedelta(hours=1)
             }
             
             result = await error_handler.send_to_dlq(failed_message)
@@ -245,7 +245,7 @@ class TestErrorHandlingL3Integration:
             mock_log.return_value = {
                 "logged": True,
                 "log_id": "log_123",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             result = await logging_service.log_error(
@@ -422,7 +422,7 @@ class TestErrorHandlingL3Integration:
             "user_id": "user_123",
             "session_id": "session_456",
             "request_path": "/api/orders",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
         with patch.object(error_handler, 'wrap_with_context') as mock_wrap:

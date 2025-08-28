@@ -44,7 +44,7 @@ import ssl
 import time
 import dns.resolver
 from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 import subprocess
 
@@ -83,8 +83,8 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
         # Create expired token
         expired_token_payload = {
             'sub': 'test-user-expired',
-            'iat': (datetime.utcnow() - timedelta(hours=2)).timestamp(),
-            'exp': (datetime.utcnow() - timedelta(hours=1)).timestamp(),  # Expired 1 hour ago
+            'iat': (datetime.now(timezone.utc) - timedelta(hours=2)).timestamp(),
+            'exp': (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp(),  # Expired 1 hour ago
             'iss': 'netra-auth',
             'aud': 'netra-backend'
         }
@@ -334,8 +334,8 @@ class TestAuthenticationEdgeCasesAndNetworkFailures(BaseE2ETest):
             # Create token with mismatched key
             token_payload = {
                 'sub': f'test-user-{scenario_name}',
-                'iat': datetime.utcnow().timestamp(),
-                'exp': (datetime.utcnow() + timedelta(minutes=15)).timestamp(),
+                'iat': datetime.now(timezone.utc).timestamp(),
+                'exp': (datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp(),
                 'iss': 'netra-auth',
                 'aud': 'netra-backend'
             }

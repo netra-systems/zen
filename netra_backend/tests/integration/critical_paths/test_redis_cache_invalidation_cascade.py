@@ -22,7 +22,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
 
 import pytest
@@ -136,7 +136,7 @@ class CacheInvalidationCascadeL3Manager:
             key = f"single_level_test_{i}_{uuid.uuid4().hex[:8]}"
             value = {
                 "data": f"test_data_{i}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "level": "l1_cache"
             }
             
@@ -193,7 +193,7 @@ class CacheInvalidationCascadeL3Manager:
             key = f"cascade_test_{i}_{uuid.uuid4().hex[:8]}"
             value = {
                 "data": f"cascade_data_{i}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "version": 1
             }
             
@@ -307,7 +307,7 @@ class CacheInvalidationCascadeL3Manager:
                 value = {
                     "service": service_name,
                     "data": f"service_data_{i}",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
                 # Write to random cache levels (simulate different service caching strategies)

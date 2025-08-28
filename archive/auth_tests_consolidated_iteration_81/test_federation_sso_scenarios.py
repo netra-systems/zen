@@ -18,7 +18,7 @@ import json
 import base64
 import xml.etree.ElementTree as ET
 from unittest.mock import AsyncMock, patch, MagicMock, Mock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -104,7 +104,7 @@ class TestSAMLFederation:
                 'first_name': 'John',
                 'last_name': 'Doe'
             },
-            valid_until=datetime.utcnow() + timedelta(hours=1)
+            valid_until=datetime.now(timezone.utc) + timedelta(hours=1)
         )
 
     async def test_saml_authentication_request_generation(self, mock_saml_service, sample_identity_provider):
@@ -193,7 +193,7 @@ class TestSAMLFederation:
             issuer=sample_identity_provider.entity_id,
             subject='expired@corp.example.com',
             attributes={'email': 'expired@corp.example.com'},
-            valid_until=datetime.utcnow() - timedelta(hours=1)  # Already expired
+            valid_until=datetime.now(timezone.utc) - timedelta(hours=1)  # Already expired
         )
         
         # Mock expiry validation failure
@@ -282,9 +282,9 @@ class TestOIDCFederation:
             preferred_username='jane.smith@corp.com',
             iss='https://login.microsoftonline.com/tenant/v2.0',
             aud='12345678-1234-1234-1234-123456789abc',
-            exp=datetime.utcnow().timestamp() + 3600,
-            iat=datetime.utcnow().timestamp(),
-            auth_time=datetime.utcnow().timestamp()
+            exp=datetime.now(timezone.utc).timestamp() + 3600,
+            iat=datetime.now(timezone.utc).timestamp(),
+            auth_time=datetime.now(timezone.utc).timestamp()
         )
 
     async def test_oidc_authorization_url_generation(self, mock_oidc_service, sample_oidc_provider):
@@ -539,7 +539,7 @@ class TestSSOManager:
             'user_id': user_id,
             'identity_provider': 'saml-corp',
             'applications': ['app1', 'app2'],
-            'expires_at': datetime.utcnow() + timedelta(hours=8)
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=8)
         }
         
         # Create SSO session
@@ -587,7 +587,7 @@ class TestSSOManager:
             'entity_id': saml_idp.entity_id,
             'sso_url': 'https://corp.example.com/saml/sso/updated',
             'x509_cert': 'updated_certificate_data',
-            'last_updated': datetime.utcnow()
+            'last_updated': datetime.now(timezone.utc)
         }
         
         # Refresh IdP metadata
@@ -606,7 +606,7 @@ class TestSSOManager:
             'session_id': session_id,
             'logged_out_applications': ['app1', 'app2', 'app3'],
             'failed_applications': [],
-            'logout_timestamp': datetime.utcnow()
+            'logout_timestamp': datetime.now(timezone.utc)
         }
         
         # Propagate logout across SSO session
@@ -624,9 +624,9 @@ class TestSSOManager:
             'provider_id': 'saml-corp',
             'status': 'healthy',
             'response_time_ms': 150,
-            'last_check': datetime.utcnow(),
+            'last_check': datetime.now(timezone.utc),
             'metadata_valid': True,
-            'certificate_expires_at': datetime.utcnow() + timedelta(days=365)
+            'certificate_expires_at': datetime.now(timezone.utc) + timedelta(days=365)
         }
         
         # Check IdP health
@@ -636,7 +636,7 @@ class TestSSOManager:
         assert health_status['status'] == 'healthy'
         assert health_status['response_time_ms'] < 1000
         assert health_status['metadata_valid'] is True
-        assert health_status['certificate_expires_at'] > datetime.utcnow()
+        assert health_status['certificate_expires_at'] > datetime.now(timezone.utc)
 
 
 class TestFederationSecurityScenarios:

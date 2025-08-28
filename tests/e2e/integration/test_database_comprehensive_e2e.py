@@ -20,7 +20,7 @@ from pathlib import Path
 
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -65,7 +65,7 @@ class DatabaseE2ETester:
         transaction = {
             "id": str(uuid.uuid4()),
             "user_id": user_id,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "operations": []
         }
         self.transaction_log.append(transaction)
@@ -76,13 +76,13 @@ class DatabaseE2ETester:
         try:
             # Auth service update
             auth_result = await self.harness.auth_service.update_user_profile(
-                transaction["user_id"], {"last_active": datetime.utcnow()}
+                transaction["user_id"], {"last_active": datetime.now(timezone.utc)}
             )
             transaction["operations"].append({"service": "auth", "result": auth_result})
             
             # Backend service update
             backend_result = await self.harness.backend_service.update_workspace(
-                transaction["user_id"], {"modified": datetime.utcnow()}
+                transaction["user_id"], {"modified": datetime.now(timezone.utc)}
             )
             transaction["operations"].append({"service": "backend", "result": backend_result})
             
@@ -179,7 +179,7 @@ class TestDatabaseComprehensiveE2E:
             event = {
                 "user_id": user_id,
                 "event_type": f"test_event_{i}",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             }
             await tester.db_ops.insert_clickhouse_event(event)
             events.append(event)
@@ -354,12 +354,12 @@ class TestDatabaseComprehensiveE2E:
             db_tester.test_data[f"user_{user_id}"] = user_id
         
         # Measure query performance
-        start = datetime.utcnow()
+        start = datetime.now(timezone.utc)
         
         # Batch query
         users = await db_tester.db_ops.get_users_batch(user_ids[:10])
         
-        duration = (datetime.utcnow() - start).total_seconds()
+        duration = (datetime.now(timezone.utc) - start).total_seconds()
         
         # Verify meets performance SLA (< 100ms for batch of 10)
         assert duration < 0.1, f"Query too slow: {duration}s"

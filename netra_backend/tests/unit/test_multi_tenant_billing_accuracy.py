@@ -4,7 +4,7 @@ Ensures accurate usage tracking and billing attribution across tenants.
 """
 import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 
@@ -36,7 +36,7 @@ class TestMultiTenantBillingAccuracy:
         usage_tracker.record = record_usage
         
         # Record usage for multiple tenants
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         usage_tracker.record("tenant-123", "api_calls", Decimal("100"), now)
         usage_tracker.record("tenant-456", "api_calls", Decimal("500"), now)
         usage_tracker.record("tenant-123", "storage_gb", Decimal("2.5"), now)
@@ -86,8 +86,8 @@ class TestMultiTenantBillingAccuracy:
         
         billing_service.calculate_bill = get_tenant_bill
         
-        start = datetime.utcnow() - timedelta(days=30)
-        end = datetime.utcnow()
+        start = datetime.now(timezone.utc) - timedelta(days=30)
+        end = datetime.now(timezone.utc)
         
         bill_123 = billing_service.calculate_bill("tenant-123", start, end)
         bill_456 = billing_service.calculate_bill("tenant-456", start, end)

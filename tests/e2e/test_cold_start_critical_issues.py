@@ -11,6 +11,7 @@ import time
 import pytest
 import psycopg2
 import httpx
+from httpx import ASGITransport
 import websockets
 import json
 import redis
@@ -241,7 +242,7 @@ class TestColdStartCriticalIssues:
         with patch('netra_backend.app.app_factory_route_imports.register_websocket_routes'):
             from netra_backend.main import app
             
-            async with httpx.AsyncClient(app=app) as client:
+            async with httpx.AsyncClient(transport=ASGITransport(app=app)) as client:
                 # Attempt WebSocket connection
                 with pytest.raises(httpx.HTTPStatusError) as exc_info:
                     response = await client.get("/ws")

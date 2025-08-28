@@ -29,7 +29,7 @@ import asyncio
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
@@ -104,7 +104,7 @@ class TestAuthFailoverScenarios:
                 url="http://auth-primary.netrasystems.ai",
                 role="primary",
                 status="healthy",
-                last_heartbeat=datetime.utcnow(),
+                last_heartbeat=datetime.now(timezone.utc),
                 session_count=0,
                 replication_lag_ms=0,
                 priority=1
@@ -115,7 +115,7 @@ class TestAuthFailoverScenarios:
                 url="http://auth-secondary.netrasystems.ai",
                 role="secondary",
                 status="healthy",
-                last_heartbeat=datetime.utcnow(),
+                last_heartbeat=datetime.now(timezone.utc),
                 session_count=0,
                 replication_lag_ms=50,
                 priority=2
@@ -126,7 +126,7 @@ class TestAuthFailoverScenarios:
                 url="http://auth-standby.netrasystems.ai",
                 role="standby",
                 status="healthy",
-                last_heartbeat=datetime.utcnow(),
+                last_heartbeat=datetime.now(timezone.utc),
                 session_count=0,
                 replication_lag_ms=100,
                 priority=3
@@ -190,8 +190,8 @@ class TestAuthFailoverScenarios:
                 SessionInfo(
                     session_id=session.session_id,
                     user_id=session.user_id,
-                    created_at=datetime.utcnow(),
-                    last_activity=datetime.utcnow(),
+                    created_at=datetime.now(timezone.utc),
+                    last_activity=datetime.now(timezone.utc),
                     metadata={"node_id": nodes["primary"].node_id}
                 )
             )
@@ -200,7 +200,7 @@ class TestAuthFailoverScenarios:
         # Simulate primary failure
         failure_time = time.time()
         nodes["primary"].status = "failed"
-        nodes["primary"].last_heartbeat = datetime.utcnow() - timedelta(minutes=5)
+        nodes["primary"].last_heartbeat = datetime.now(timezone.utc) - timedelta(minutes=5)
         
         # Trigger failover detection
         detected = await coordinator.detect_failure()
@@ -472,8 +472,8 @@ class TestAuthFailoverScenarios:
                 SessionInfo(
                     session_id=session.session_id,
                     user_id=session.user_id,
-                    created_at=datetime.utcnow(),
-                    last_activity=datetime.utcnow(),
+                    created_at=datetime.now(timezone.utc),
+                    last_activity=datetime.now(timezone.utc),
                     metadata={"node_id": nodes["secondary"].node_id}
                 )
             )

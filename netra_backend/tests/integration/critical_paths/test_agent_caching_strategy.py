@@ -41,6 +41,73 @@ from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
 
+
+class MockRedisClient:
+    """In-memory mock Redis client for testing when TEST_DISABLE_REDIS=true."""
+    
+    def __init__(self):
+        self._data = {}
+        self._expiry = {}
+    
+    async def ping(self):
+        """Mock ping - always succeeds."""
+        return True
+    
+    async def get(self, key: str):
+        """Get value by key."""
+        if key in self._data:
+            # Check expiry
+            if key in self._expiry:
+                if time.time() > self._expiry[key]:
+                    del self._data[key]
+                    del self._expiry[key]
+                    return None
+            return self._data[key]
+        return None
+    
+    async def set(self, key: str, value: str, ex: Optional[int] = None):
+        """Set key-value pair with optional expiry."""
+        self._data[key] = value
+        if ex:
+            self._expiry[key] = time.time() + ex
+        return True
+    
+    async def setex(self, key: str, time_seconds: int, value: str):
+        """Set key-value pair with expiry (Redis setex format)."""
+        self._data[key] = value
+        self._expiry[key] = time.time() + time_seconds
+        return True
+    
+    async def delete(self, key: str):
+        """Delete key."""
+        deleted = 0
+        if key in self._data:
+            del self._data[key]
+            deleted = 1
+        if key in self._expiry:
+            del self._expiry[key]
+        return deleted
+    
+    async def close(self):
+        """Close connection (no-op for mock)."""
+        pass
+
+
+class MockRedisService:
+    """Mock Redis service that wraps MockRedisClient."""
+    
+    def __init__(self):
+        self.client = MockRedisClient()
+    
+    async def initialize(self):
+        """Initialize mock service (no-op)."""
+        pass
+    
+    async def shutdown(self):
+        """Shutdown mock service."""
+        await self.client.close()
+
+
 class CacheStrategy(Enum):
     """Different caching strategies."""
     LRU = "lru"  # Least Recently Used
@@ -639,7 +706,17 @@ class CacheTestManager:
         
     async def initialize_services(self):
         """Initialize required services."""
-        self.redis_service = RedisService()
+        import os
+        
+        # Check if Redis is disabled for tests
+        redis_disabled = os.getenv("TEST_DISABLE_REDIS", "false").lower() == "true"
+        
+        if redis_disabled:
+            logger.info("Using mock Redis service for cache testing (TEST_DISABLE_REDIS=true)")
+            self.redis_service = MockRedisService()
+        else:
+            self.redis_service = RedisService()
+        
         await self.redis_service.initialize()
         
         # Initialize with LRU eviction policy (10MB limit)
@@ -935,6 +1012,9 @@ async def test_lru_eviction_policy(cache_manager):
     
     # Set a small cache size for testing
     manager.cache_manager.eviction_policy.max_size_bytes = 1024  # 1KB
+    
+    # Set short cleanup interval for testing (instead of 5 minutes)
+    manager.cache_manager.auto_cleanup_interval = 0  # No throttling for tests
     
     # Cache entries that will exceed the limit
     large_responses = []

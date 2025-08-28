@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -76,7 +76,7 @@ class TestEnterpriseEnvironmentConfig:
             "validation_id": str(uuid.uuid4()),
             "config_valid": all(result.get("valid", True) for result in validation_results.values()),
             "validation_results": validation_results,
-            "validated_at": datetime.utcnow()
+            "validated_at": datetime.now(timezone.utc)
         })
         
         return await infra["config_validator"].validate_environment(config)
@@ -176,7 +176,7 @@ class TestEnterpriseEnvironmentConfig:
             "validation_id": str(uuid.uuid4()),
             "validation_results": validation_results,
             "overall_compliance": True,
-            "validation_timestamp": datetime.utcnow()
+            "validation_timestamp": datetime.now(timezone.utc)
         })
         
         return await infra["config_validator"].validate_enterprise_requirements(requirements)

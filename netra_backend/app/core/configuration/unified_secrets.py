@@ -232,7 +232,7 @@ class UnifiedSecretManager:
         return {
             "host": get_env().get("DATABASE_HOST", "localhost"),
             "port": int(get_env().get("DATABASE_PORT", "5432")),
-            "database": get_env().get("DATABASE_NAME", "netra"),
+            "database": get_env().get("DATABASE_NAME", "netra_dev"),
             "username": get_env().get("DATABASE_USER", "postgres"),
             "password": self.get_secret("DATABASE_PASSWORD", "")
         }

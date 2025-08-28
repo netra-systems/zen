@@ -119,7 +119,7 @@ async def wait_for_condition(condition, timeout: float = 5.0):
 
 from typing import Dict, Any
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 class TestDataFactory:
     \"\"\"Factory for creating test data.\"\"\"
@@ -130,7 +130,7 @@ class TestDataFactory:
         return {
             "id": str(uuid.uuid4()),
             "email": email or f"test_{uuid.uuid4().hex[:8]}@example.com",
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             **kwargs
         }
     
@@ -140,7 +140,7 @@ class TestDataFactory:
         return {
             "id": str(uuid.uuid4()),
             "name": f"Thread {uuid.uuid4().hex[:8]}",
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             **kwargs
         }
     
@@ -150,7 +150,7 @@ class TestDataFactory:
         return {
             "id": str(uuid.uuid4()),
             "content": content or "Test message",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **kwargs
         }
 """),

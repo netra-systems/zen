@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 """
 
 import warnings
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from netra_backend.app.core.exceptions_base import NetraException
@@ -52,7 +52,7 @@ def _build_mock_audit_entry(entry_id: str, action: str, user_id: str) -> Dict[st
         "id": entry_id,
         "action": action,
         "user_id": user_id,
-        "timestamp": datetime.utcnow().isoformat() + "Z"
+        "timestamp": datetime.now(timezone.utc).isoformat() + "Z"
     }
 
 

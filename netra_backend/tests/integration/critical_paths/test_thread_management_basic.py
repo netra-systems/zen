@@ -14,7 +14,7 @@ from pathlib import Path
 import asyncio
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 import aiohttp
@@ -292,7 +292,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             for i in range(10):
                 thread_data = {
                     "title": f"Concurrent Thread {i}",
-                    "description": f"Created concurrently at {datetime.utcnow()}"
+                    "description": f"Created concurrently at {datetime.now(timezone.utc)}"
                 }
                 
                 tasks.append(session.post(

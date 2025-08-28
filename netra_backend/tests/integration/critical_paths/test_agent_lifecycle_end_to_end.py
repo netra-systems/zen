@@ -19,7 +19,7 @@ import subprocess
 import sys
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
@@ -129,7 +129,7 @@ class AgentLifecycleTester:
                 },
                 "metadata": {
                     "test_id": str(uuid.uuid4()),
-                    "created_at": datetime.utcnow().isoformat()
+                    "created_at": datetime.now(timezone.utc).isoformat()
                 }
             }
             

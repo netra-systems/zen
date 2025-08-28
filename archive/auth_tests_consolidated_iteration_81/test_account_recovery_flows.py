@@ -15,7 +15,7 @@ Tests comprehensive account recovery scenarios including:
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -94,7 +94,7 @@ class TestPasswordResetFlow:
             auth_provider='local',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     @pytest.fixture
@@ -105,11 +105,11 @@ class TestPasswordResetFlow:
             user_id=str(uuid4()),
             token='recovery_token_12345',
             token_type='password_reset',
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
             is_used=False,
             attempts=0,
             max_attempts=3,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_initiate_password_reset(self, mock_recovery_service, mock_email_service, sample_user):
@@ -118,7 +118,7 @@ class TestPasswordResetFlow:
         mock_recovery_service.initiate_password_reset.return_value = {
             'token_id': str(uuid4()),
             'email_sent': True,
-            'expires_at': datetime.utcnow() + timedelta(hours=1),
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=1),
             'recovery_methods': ['email']
         }
         
@@ -259,8 +259,8 @@ class TestAccountLockoutRecovery:
         mock_lockout_service.check_lockout_status.return_value = {
             'is_locked': True,
             'lockout_reason': 'too_many_failed_attempts',
-            'locked_at': datetime.utcnow() - timedelta(minutes=15),
-            'unlock_at': datetime.utcnow() + timedelta(minutes=15),
+            'locked_at': datetime.now(timezone.utc) - timedelta(minutes=15),
+            'unlock_at': datetime.now(timezone.utc) + timedelta(minutes=15),
             'remaining_lockout_minutes': 15,
             'recovery_methods_available': ['email', 'sms']
         }
@@ -281,7 +281,7 @@ class TestAccountLockoutRecovery:
             'recovery_initiated': True,
             'recovery_token': 'lockout_recovery_token_123',
             'recovery_method': 'email',
-            'expires_at': datetime.utcnow() + timedelta(hours=2),
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=2),
             'instructions_sent': True
         }
         
@@ -323,7 +323,7 @@ class TestAccountLockoutRecovery:
         # Mock account unlock
         mock_lockout_service.unlock_account.return_value = {
             'account_unlocked': True,
-            'unlocked_at': datetime.utcnow(),
+            'unlocked_at': datetime.now(timezone.utc),
             'lockout_cleared': True,
             'failed_attempts_reset': True,
             'security_log_updated': True
@@ -377,7 +377,7 @@ class TestMultiFactorAuthenticationRecovery:
             'recovery_initiated': True,
             'available_methods': ['backup_codes', 'recovery_email', 'admin_reset'],
             'recovery_token': 'mfa_recovery_token_123',
-            'expires_at': datetime.utcnow() + timedelta(hours=1)
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=1)
         }
         
         # Initiate MFA recovery
@@ -500,7 +500,7 @@ class TestEmailVerificationRecovery:
             'email_sent': True,
             'recipient': sample_user.email,
             'new_token_generated': True,
-            'expires_at': datetime.utcnow() + timedelta(hours=24),
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=24),
             'attempt_count': 2
         }
         
@@ -524,7 +524,7 @@ class TestEmailVerificationRecovery:
             'email_verified': True,
             'account_activated': True,
             'token_consumed': True,
-            'verified_at': datetime.utcnow()
+            'verified_at': datetime.now(timezone.utc)
         }
         
         # Verify email with token
@@ -547,7 +547,7 @@ class TestEmailVerificationRecovery:
             'verification_sent_to_old': True,
             'verification_sent_to_new': True,
             'change_token': 'email_change_token_123',
-            'expires_at': datetime.utcnow() + timedelta(hours=2)
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=2)
         }
         
         # Initiate email change
@@ -656,7 +656,7 @@ class TestSecurityQuestionRecovery:
             'recovery_successful': True,
             'reset_token_generated': True,
             'reset_token': 'security_recovery_token_123',
-            'expires_at': datetime.utcnow() + timedelta(hours=1),
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=1),
             'notification_sent': True
         }
         
@@ -714,7 +714,7 @@ class TestRecoveryTokenManagement:
         mock_token_manager.generate_recovery_token.return_value = {
             'token': 'recovery_token_abcdef123456',
             'token_id': str(uuid4()),
-            'expires_at': datetime.utcnow() + timedelta(hours=2),
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=2),
             'token_type': 'password_reset',
             'max_attempts': 3
         }
@@ -762,7 +762,7 @@ class TestRecoveryTokenManagement:
         # Mock token invalidation
         mock_token_manager.invalidate_token.return_value = {
             'token_invalidated': True,
-            'invalidated_at': datetime.utcnow(),
+            'invalidated_at': datetime.now(timezone.utc),
             'reason': 'used_successfully'
         }
         
@@ -782,7 +782,7 @@ class TestRecoveryTokenManagement:
         # Mock token cleanup
         mock_token_manager.cleanup_expired_tokens.return_value = {
             'tokens_cleaned': 15,
-            'cleanup_completed_at': datetime.utcnow(),
+            'cleanup_completed_at': datetime.now(timezone.utc),
             'oldest_token_age_days': 30
         }
         

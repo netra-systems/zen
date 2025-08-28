@@ -6,7 +6,7 @@ Last Updated: 2025-01-22
 Business Value: Provides transparency through compressed trace display.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 
@@ -30,7 +30,7 @@ class TraceLogger:
     def _create_trace_entry(self, action: str, details: Any) -> Dict[str, Any]:
         """Create a trace entry."""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "action": action,
             "details": self._format_details(details)
         }

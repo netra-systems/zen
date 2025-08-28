@@ -38,7 +38,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from fastapi.testclient import TestClient
 from fastapi import HTTPException, status
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Configuration-related imports
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
@@ -151,8 +151,8 @@ class TestBackendAuthenticationIntegrationFailures:
             valid_token = jwt.encode(
                 {
                     "sub": "test-user",
-                    "iat": datetime.utcnow().timestamp(),
-                    "exp": (datetime.utcnow() + timedelta(hours=1)).timestamp(),
+                    "iat": datetime.now(timezone.utc).timestamp(),
+                    "exp": (datetime.now(timezone.utc) + timedelta(hours=1)).timestamp(),
                     "iss": "netra-auth",
                     "aud": "netra-backend"
                 },

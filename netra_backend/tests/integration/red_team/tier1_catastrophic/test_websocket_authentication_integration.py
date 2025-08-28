@@ -14,7 +14,7 @@ import websockets
 import jwt
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 from typing import Dict, Any
@@ -130,7 +130,7 @@ class TestWebSocketAuthenticationIntegration:
                 test_message = {
                     "type": "test_message",
                     "content": "Hello WebSocket",
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 await websocket.send(json.dumps(test_message))
                 
@@ -338,7 +338,7 @@ class TestWebSocketAuthenticationIntegration:
                     message = {
                         "type": "identify",
                         "user_id": user_id,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     await websocket.send(json.dumps(message))
                     

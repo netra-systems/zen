@@ -465,7 +465,8 @@ class TestDatabaseManagerErrorHandling:
                     with patch("sys.argv", ["python"]):
                         result = DatabaseManager._get_default_database_url()
                         # Should default to development settings with public schema search_path
-                        assert result == "postgresql://postgres:password@localhost:5432/netra?options=-c%20search_path%3Dpublic"
+                        # For unknown environments, it defaults to development with netra_dev database
+                        assert result == "postgresql://postgres:password@localhost:5432/netra_dev?options=-c%20search_path%3Dpublic"
 
 
 class TestDatabaseManagerIntegration:

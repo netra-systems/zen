@@ -9,7 +9,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -239,7 +239,7 @@ class TestCoreAPIL3Integration:
             mock_update.return_value = {
                 "id": "resource_123",
                 **update_data,
-                "updated_at": datetime.utcnow().isoformat()
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
             
             result = await api_service.update_resource("resource_123", update_data)
@@ -342,7 +342,7 @@ class TestCoreAPIL3Integration:
         with patch.object(api_service, 'export_data') as mock_export:
             mock_export.return_value = {
                 "export_url": "https://example.com/exports/123.csv",
-                "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat()
+                "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
             result = await api_service.export_data(export_params)
@@ -550,7 +550,7 @@ class TestCoreAPIL3Integration:
                     {"type": "message", "data": "New message"},
                     {"type": "notification", "data": "Alert"}
                 ],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             result = await api_service.long_poll(timeout=30)

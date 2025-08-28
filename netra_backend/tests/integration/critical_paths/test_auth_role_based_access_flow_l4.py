@@ -32,7 +32,7 @@ import time
 import json
 from typing import Dict, Any, List, Optional, Set, Tuple
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 import httpx
 import jwt
@@ -323,7 +323,7 @@ class TestAuthRoleBasedAccessFlow:
                     # Record audit event
                     await audit_tracker["record"](
                         AuditEvent(
-                            timestamp=datetime.utcnow(),
+                            timestamp=datetime.now(timezone.utc),
                             user_id=getattr(login_response, 'user_id', 'unknown'),
                             action=test_case.action,
                             resource=test_case.resource,
@@ -541,7 +541,7 @@ class TestAuthRoleBasedAccessFlow:
         # Record audit event
         await audit_tracker["record"](
             AuditEvent(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 user_id=getattr(admin_session, 'user_id', 'unknown'),
                 action="impersonate",
                 resource=f"user:{getattr(dev_session, 'user_id', 'unknown')}",
@@ -595,7 +595,7 @@ class TestAuthRoleBasedAccessFlow:
                 # Record audit event
                 await audit_tracker["record"](
                     AuditEvent(
-                        timestamp=datetime.utcnow(),
+                        timestamp=datetime.now(timezone.utc),
                         user_id=getattr(session, 'user_id', 'unknown') if session else "unknown",
                         action=op_name,
                         resource="auth_system",
@@ -607,7 +607,7 @@ class TestAuthRoleBasedAccessFlow:
                 # Record audit event
                 await audit_tracker["record"](
                     AuditEvent(
-                        timestamp=datetime.utcnow(),
+                        timestamp=datetime.now(timezone.utc),
                         user_id=getattr(session, 'user_id', 'unknown') if session else "unknown",
                         action=op_name,
                         resource="auth_system",

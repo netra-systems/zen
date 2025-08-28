@@ -884,8 +884,15 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     """Run complete startup sequence with improved initialization handling."""
     # Use the global startup manager instance
     
-    # Initialize logger FIRST - before any try block to ensure it's always available
-    logger = central_logger.get_logger(__name__)
+    # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
+    logger = None
+    try:
+        logger = central_logger.get_logger(__name__)
+    except Exception as e:
+        # Fallback logger initialization if central_logger fails
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to initialize central logger, using fallback: {e}")
     
     # Check if we should use the new robust startup system
     config = get_config()
@@ -933,6 +940,12 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
             return start_time, logger
             
         except Exception as e:
+            # Ensure logger is available in exception handler - safety check
+            if logger is None:
+                logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                logger = logging.getLogger(__name__)
+                logger.error("Logger was None in exception handler, using fallback")
+            
             logger.error(f"Error in robust startup: {e}")
             # Set startup failure flags
             app.state.startup_complete = False

@@ -43,6 +43,8 @@ from test_framework.environment_markers import (
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor
+from dev_launcher.launcher import DevLauncher
+from dev_launcher.service_discovery import ServiceDiscovery
 class ServiceInfo:
     """Service information container."""
     
@@ -372,7 +374,7 @@ class TestStartupEnvironment:
     @pytest.mark.asyncio
     async def test_database_schemas_exist(self):
         """Test database schemas are properly initialized."""
-        from netra_backend.app.db.client import get_postgres_client
+        from netra_backend.app.db.postgres import get_async_db as get_postgres_client
         
         client = await get_postgres_client()
         

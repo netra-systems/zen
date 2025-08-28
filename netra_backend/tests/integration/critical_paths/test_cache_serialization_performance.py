@@ -27,7 +27,7 @@ import sys
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
@@ -184,7 +184,7 @@ class CacheSerializationPerformanceL3Manager:
                 "id": random.randint(1, 10000),
                 "name": f"test_object_{uuid.uuid4().hex[:8]}",
                 "value": random.uniform(0, 1000),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "active": random.choice([True, False]),
                 "tags": [f"tag_{i}" for i in range(multiplier)]
             }
@@ -203,7 +203,7 @@ class CacheSerializationPerformanceL3Manager:
                     "activity_history": [
                         {
                             "action": f"action_{i}",
-                            "timestamp": (datetime.utcnow() - timedelta(hours=i)).isoformat(),
+                            "timestamp": (datetime.now(timezone.utc) - timedelta(hours=i)).isoformat(),
                             "metadata": {"key": f"value_{i}", "score": random.randint(1, 100)}
                         }
                         for i in range(multiplier * 5)
@@ -211,8 +211,8 @@ class CacheSerializationPerformanceL3Manager:
                 },
                 "session_data": {
                     "session_id": str(uuid.uuid4()),
-                    "created_at": datetime.utcnow().isoformat(),
-                    "last_activity": datetime.utcnow().isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "last_activity": datetime.now(timezone.utc).isoformat(),
                     "permissions": [f"perm_{i}" for i in range(multiplier * 2)]
                 }
             }
@@ -227,7 +227,7 @@ class CacheSerializationPerformanceL3Manager:
                         "data": f"data_at_depth_{depth}_item_{i}",
                         "nested": create_nested_structure(depth - 1, width),
                         "metadata": {
-                            "created": datetime.utcnow().isoformat(),
+                            "created": datetime.now(timezone.utc).isoformat(),
                             "index": i,
                             "random_value": random.uniform(0, 100)
                         }
@@ -246,7 +246,7 @@ class CacheSerializationPerformanceL3Manager:
                 "content_type": "application/octet-stream",
                 "binary_data": bytes([random.randint(0, 255) for _ in range(binary_size)]),
                 "metadata": {
-                    "upload_time": datetime.utcnow().isoformat(),
+                    "upload_time": datetime.now(timezone.utc).isoformat(),
                     "checksum": f"md5_{uuid.uuid4().hex}"
                 }
             }

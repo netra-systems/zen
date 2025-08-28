@@ -22,7 +22,7 @@ import ssl
 import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urlparse
@@ -354,7 +354,7 @@ class NetworkHandler:
         """Resolve hostname to IP addresses with caching."""
         if use_cache and hostname in self.dns_cache:
             ips, cached_at = self.dns_cache[hostname]
-            if datetime.utcnow() - cached_at < timedelta(seconds=self.dns_config.cache_ttl):
+            if datetime.now(timezone.utc) - cached_at < timedelta(seconds=self.dns_config.cache_ttl):
                 self.metrics.dns_cache_hit_rate += 1
                 return ips
         
@@ -367,7 +367,7 @@ class NetworkHandler:
                 oldest = min(self.dns_cache.items(), key=lambda x: x[1][1])
                 del self.dns_cache[oldest[0]]
             
-            self.dns_cache[hostname] = (ips, datetime.utcnow())
+            self.dns_cache[hostname] = (ips, datetime.now(timezone.utc))
             
             self.logger.debug("DNS resolution successful", extra={
                 "hostname": hostname,
@@ -565,7 +565,7 @@ class NetworkHandler:
     
     async def _cleanup_dns_cache(self) -> None:
         """Clean up expired DNS cache entries."""
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         expired_keys = []
         
         for hostname, (ips, cached_at) in self.dns_cache.items():

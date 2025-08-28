@@ -29,7 +29,7 @@ import statistics
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -731,14 +731,14 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
                 "conflict_scenario": scenario,
                 "value": f"data_from_{region1}",
                 "region_source": region1,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             data2 = {
                 "conflict_scenario": scenario,
                 "value": f"data_from_{region2}",
                 "region_source": region2,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             # Perform concurrent writes
@@ -812,7 +812,7 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
                 **winner_data,
                 "conflict_resolved": True,
                 "resolution_strategy": "last_writer_wins",
-                "resolution_timestamp": datetime.utcnow().isoformat(),
+                "resolution_timestamp": datetime.now(timezone.utc).isoformat(),
                 "original_conflict_regions": [region1, region2]
             }
             
@@ -992,7 +992,7 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
         
         test_results = {
             "test_phase": "cross_region_consistency_l4",
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(timezone.utc).isoformat(),
             "service_calls": 0
         }
         
@@ -1032,7 +1032,7 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
             # Collect comprehensive metrics
             test_results["cross_region_metrics"] = self._get_cross_region_metrics_summary()
             
-            test_results["end_time"] = datetime.utcnow().isoformat()
+            test_results["end_time"] = datetime.now(timezone.utc).isoformat()
             test_results["success"] = True
             
             logger.info("L4 cross-region consistency critical path test completed successfully")
@@ -1040,7 +1040,7 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
         except Exception as e:
             test_results["success"] = False
             test_results["error"] = str(e)
-            test_results["end_time"] = datetime.utcnow().isoformat()
+            test_results["end_time"] = datetime.now(timezone.utc).isoformat()
             logger.error(f"L4 cross-region consistency test failed: {e}")
         
         return test_results

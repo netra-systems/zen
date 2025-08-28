@@ -24,7 +24,7 @@ import statistics
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
 
 import psutil
@@ -129,7 +129,7 @@ class MemoryPressureEvictionL3Manager:
                 key = f"pressure_test_{i}_{uuid.uuid4().hex[:8]}"
                 value = {
                     "data": "x" * 10000,  # ~10KB payload
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "index": i
                 }
                 
@@ -213,7 +213,7 @@ class MemoryPressureEvictionL3Manager:
         # Create "old" keys
         for i in range(50):
             key = f"old_key_{i}_{uuid.uuid4().hex[:8]}"
-            value = {"data": f"old_data_{i}", "created": datetime.utcnow().isoformat()}
+            value = {"data": f"old_data_{i}", "created": datetime.now(timezone.utc).isoformat()}
             await client.setex(key, 3600, json.dumps(value))
             old_keys.append(key)
             self.test_keys.add(key)
@@ -224,7 +224,7 @@ class MemoryPressureEvictionL3Manager:
         # Create "recent" keys
         for i in range(50):
             key = f"recent_key_{i}_{uuid.uuid4().hex[:8]}"
-            value = {"data": f"recent_data_{i}", "created": datetime.utcnow().isoformat()}
+            value = {"data": f"recent_data_{i}", "created": datetime.now(timezone.utc).isoformat()}
             await client.setex(key, 3600, json.dumps(value))
             recent_keys.append(key)
             self.test_keys.add(key)

@@ -8,7 +8,7 @@ Business Value: Reduces query latency by 40% through schema caching.
 
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
@@ -69,7 +69,7 @@ class SchemaCache:
                 return False
                 
             # Check if cache is still valid
-            age = datetime.utcnow() - last_updated
+            age = datetime.now(timezone.utc) - last_updated
             return age < timedelta(seconds=self.ttl_seconds)
     
     async def _fetch_and_cache_schema(self, table_name: str, clickhouse_client = None) -> Dict[str, Any]:
@@ -83,7 +83,7 @@ class SchemaCache:
             # Cache the schema
             async with self._lock:
                 self._cache[table_name] = schema
-                self._last_updated[table_name] = datetime.utcnow()
+                self._last_updated[table_name] = datetime.now(timezone.utc)
             
             self.logger.info(f"Cached schema for table: {table_name}")
             return schema

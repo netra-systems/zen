@@ -20,7 +20,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -96,7 +96,7 @@ class MultiTenantIsolationManager:
                 id=tenant_id,
                 name=tenant_name,
                 tier=tier,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
                 status="active",
                 metadata={
                     "test_tenant": True,
@@ -160,7 +160,7 @@ class MultiTenantIsolationManager:
                 "id": user_id,
                 "email": email,
                 "tenant_id": tenant_id,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "status": "active"
             }
             
@@ -177,7 +177,7 @@ class MultiTenantIsolationManager:
                 id=resource_id,
                 tenant_id=tenant_id,
                 resource_type=resource_type,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
                 metadata={"test_resource": True}
             )
             
@@ -196,7 +196,7 @@ class MultiTenantIsolationManager:
                         tenant_id=tenant_id,
                         permission_type=permission_type,
                         resource_type=resource_type,
-                        granted_at=datetime.utcnow()
+                        granted_at=datetime.now(timezone.utc)
                     )
                     
                     await self.permissions_service.grant_permission(tenant_id, permission)

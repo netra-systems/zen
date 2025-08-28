@@ -15,7 +15,7 @@ Tests comprehensive integration scenarios including:
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -60,7 +60,7 @@ class TestMultiServiceAuthenticationFlows:
             auth_provider='google',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_cross_service_authentication_orchestration(self, mock_auth_orchestrator, sample_user):
@@ -90,7 +90,7 @@ class TestMultiServiceAuthenticationFlows:
             'services_authenticated': 3,
             'mfa_completed': True,
             'session_established': True,
-            'expires_at': datetime.utcnow() + timedelta(hours=1)
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=1)
         }
         
         # Orchestrate cross-service authentication
@@ -185,10 +185,10 @@ class TestCrossPlatformAuthConsistency:
     async def test_multi_platform_authentication_consistency(self, mock_platform_manager, sample_user):
         """Test authentication consistency across platforms."""
         platforms = [
-            {'platform': 'web', 'session_id': 'web_session_123', 'last_activity': datetime.utcnow() - timedelta(minutes=5)},
-            {'platform': 'mobile_ios', 'session_id': 'ios_session_456', 'last_activity': datetime.utcnow() - timedelta(minutes=2)},
-            {'platform': 'mobile_android', 'session_id': 'android_session_789', 'last_activity': datetime.utcnow() - timedelta(minutes=1)},
-            {'platform': 'api', 'session_id': 'api_session_abc', 'last_activity': datetime.utcnow()}
+            {'platform': 'web', 'session_id': 'web_session_123', 'last_activity': datetime.now(timezone.utc) - timedelta(minutes=5)},
+            {'platform': 'mobile_ios', 'session_id': 'ios_session_456', 'last_activity': datetime.now(timezone.utc) - timedelta(minutes=2)},
+            {'platform': 'mobile_android', 'session_id': 'android_session_789', 'last_activity': datetime.now(timezone.utc) - timedelta(minutes=1)},
+            {'platform': 'api', 'session_id': 'api_session_abc', 'last_activity': datetime.now(timezone.utc)}
         ]
         
         # Mock platform consistency validation
@@ -562,7 +562,7 @@ class TestSystemCleanupAndMaintenance:
             'storage_freed_mb': 125.7,
             'cleanup_duration_seconds': 45,
             'errors_encountered': 0,
-            'next_cleanup_scheduled': datetime.utcnow() + timedelta(hours=24)
+            'next_cleanup_scheduled': datetime.now(timezone.utc) + timedelta(hours=24)
         }
         
         # Execute session cleanup
@@ -703,7 +703,7 @@ class TestSystemCleanupAndMaintenance:
             'system_downtime_minutes': 0,
             'performance_impact_minimal': True,
             'rollback_required': False,
-            'next_maintenance_scheduled': datetime.utcnow() + timedelta(days=7)
+            'next_maintenance_scheduled': datetime.now(timezone.utc) + timedelta(days=7)
         }
         
         # Execute maintenance plan

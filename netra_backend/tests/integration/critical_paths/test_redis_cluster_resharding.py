@@ -24,7 +24,7 @@ import statistics
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
@@ -160,7 +160,7 @@ class ClusterReshardingL3Manager:
             base_key = f"cluster_test_{i}_{uuid.uuid4().hex[:8]}"
             value = {
                 "data": f"cluster_data_{i}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "node_assignment": None
             }
             

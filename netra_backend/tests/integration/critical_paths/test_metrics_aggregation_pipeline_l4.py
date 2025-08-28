@@ -26,7 +26,7 @@ import random
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
@@ -213,7 +213,7 @@ class MetricsAggregationPipelineL4TestSuite:
         ]
         
         # Generate time-series data points
-        start_time = datetime.utcnow() - timedelta(hours=time_range_hours)
+        start_time = datetime.now(timezone.utc) - timedelta(hours=time_range_hours)
         time_interval = timedelta(hours=time_range_hours) / data_points
         
         for i in range(data_points):

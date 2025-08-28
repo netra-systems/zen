@@ -21,7 +21,7 @@ import logging
 import os
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
 import pytest
 from test_framework.containers_utils import TestcontainerHelper
@@ -67,7 +67,7 @@ class AuditLogger:
     async def log_access_attempt(self, user_id: str, resource: str, allowed: bool):
         """Log access attempt."""
         self.logs.append({
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "user_id": user_id,
             "resource": resource,
             "allowed": allowed
@@ -159,7 +159,7 @@ class MultiTenantIsolationL4Manager:
                 "id": org_id,
                 "name": org_name,
                 "tier": tier,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "status": "active",
                 "environment": "staging",
                 "isolation_level": "enterprise",
@@ -192,7 +192,7 @@ class MultiTenantIsolationL4Manager:
                     INSERT INTO users (id, email, organization_id, created_at, status)
                     VALUES (%s, %s, %s, %s, %s)
                     """,
-                    (user_id, email, org_id, datetime.utcnow(), "active")
+                    (user_id, email, org_id, datetime.now(timezone.utc), "active")
                 )
                 users.append(user_id)
             
@@ -207,7 +207,7 @@ class MultiTenantIsolationL4Manager:
                     INSERT INTO tenant_resources (id, organization_id, resource_type, created_at, data)
                     VALUES (%s, %s, %s, %s, %s)
                     """,
-                    (resource_id, org_id, resource_type, datetime.utcnow(), 
+                    (resource_id, org_id, resource_type, datetime.now(timezone.utc), 
                      {"test_data": f"confidential_{org_name}_{resource_type}"})
                 )
                 resources.append(resource_id)
@@ -267,7 +267,7 @@ class MultiTenantIsolationL4Manager:
                         INSERT INTO permissions (user_id, organization_id, action, resource_type, granted_at)
                         VALUES (%s, %s, %s, %s, %s)
                         """,
-                        (user_id, org_id, action, "all", datetime.utcnow())
+                        (user_id, org_id, action, "all", datetime.now(timezone.utc))
                     )
             
         except Exception as e:

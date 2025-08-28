@@ -23,7 +23,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
@@ -99,7 +99,7 @@ class LoggingMetricsTester:
             "status": "active",
             "collection_interval": 10,  # seconds
             "metrics_buffer": [],
-            "started_at": datetime.utcnow().isoformat()
+            "started_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Simulate log aggregator initialization  
@@ -108,7 +108,7 @@ class LoggingMetricsTester:
             "log_level": "INFO",
             "structured_format": True,
             "correlation_enabled": True,
-            "started_at": datetime.utcnow().isoformat()
+            "started_at": datetime.now(timezone.utc).isoformat()
         }
         
         await asyncio.sleep(0.5)  # Initialization delay
@@ -155,7 +155,7 @@ class LoggingMetricsTester:
         login_event = {
             "type": "user_login",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "auth_service",
             "level": "INFO",
             "message": "User login successful",
@@ -172,7 +172,7 @@ class LoggingMetricsTester:
         token_refresh_event = {
             "type": "token_refresh",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "auth_service", 
             "level": "DEBUG",
             "message": "JWT token refreshed",
@@ -191,14 +191,14 @@ class LoggingMetricsTester:
                 "type": "counter",
                 "value": 1,
                 "labels": {"user_id": self.test_user_id, "status": "success"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             {
                 "name": "auth_token_refresh_total", 
                 "type": "counter",
                 "value": 1,
                 "labels": {"user_id": self.test_user_id, "token_type": "access"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         ]
         self.metrics_collected.extend(auth_metrics)
@@ -220,7 +220,7 @@ class LoggingMetricsTester:
             api_event = {
                 "type": "api_request",
                 "user_id": self.test_user_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "service": "backend_service",
                 "level": "INFO", 
                 "message": f"{endpoint['method']} {endpoint['path']}",
@@ -247,7 +247,7 @@ class LoggingMetricsTester:
                         "path": endpoint["path"],
                         "status_code": "200"
                     },
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 },
                 {
                     "name": "http_requests_total",
@@ -258,7 +258,7 @@ class LoggingMetricsTester:
                         "path": endpoint["path"],
                         "status_code": "200"
                     },
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             ]
             self.metrics_collected.extend(api_metrics)
@@ -273,7 +273,7 @@ class LoggingMetricsTester:
         agent_startup_event = {
             "type": "agent_startup",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "backend_service",
             "level": "INFO",
             "message": "Agent started successfully",
@@ -291,7 +291,7 @@ class LoggingMetricsTester:
         agent_exec_event = {
             "type": "agent_execution",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "backend_service",
             "level": "INFO",
             "message": "Agent task completed",
@@ -313,21 +313,21 @@ class LoggingMetricsTester:
                 "type": "histogram",
                 "value": 1.2,
                 "labels": {"agent_type": "supervisor_agent"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             {
                 "name": "agent_execution_duration_seconds",
                 "type": "histogram", 
                 "value": 3.4,
                 "labels": {"agent_type": "supervisor_agent", "task_type": "message_processing"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             {
                 "name": "agent_tokens_used_total",
                 "type": "counter",
                 "value": 1250,
                 "labels": {"agent_type": "supervisor_agent"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         ]
         self.metrics_collected.extend(agent_metrics)
@@ -342,7 +342,7 @@ class LoggingMetricsTester:
         ws_connect_event = {
             "type": "websocket_connect",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "backend_service",
             "level": "INFO",
             "message": "WebSocket connection established",
@@ -359,7 +359,7 @@ class LoggingMetricsTester:
         ws_message_event = {
             "type": "websocket_message",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "backend_service",
             "level": "DEBUG",
             "message": "WebSocket message sent",
@@ -380,14 +380,14 @@ class LoggingMetricsTester:
                 "type": "gauge",
                 "value": 1,
                 "labels": {"service": "backend_service"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             {
                 "name": "websocket_messages_total",
                 "type": "counter",
                 "value": 1,
                 "labels": {"message_type": "agent_response", "direction": "outbound"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         ]
         self.metrics_collected.extend(ws_metrics)
@@ -402,7 +402,7 @@ class LoggingMetricsTester:
         app_error_event = {
             "type": "application_error",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "backend_service",
             "level": "ERROR",
             "message": "Database connection timeout",
@@ -421,7 +421,7 @@ class LoggingMetricsTester:
         rate_limit_event = {
             "type": "rate_limit_exceeded",
             "user_id": self.test_user_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "service": "auth_service",
             "level": "WARNING",
             "message": "Rate limit exceeded for user",
@@ -444,14 +444,14 @@ class LoggingMetricsTester:
                 "type": "counter",
                 "value": 1,
                 "labels": {"service": "backend_service", "error_type": "database_timeout"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             {
                 "name": "rate_limits_exceeded_total",
                 "type": "counter",
                 "value": 1,
                 "labels": {"service": "auth_service", "limit_type": "api_requests"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         ]
         self.metrics_collected.extend(error_metrics)
@@ -1036,7 +1036,7 @@ async def test_observability_dashboard_data_consistency():
         assert dashboard_data["total_metrics_points"] == len(tester.metrics_collected), "Metrics count mismatch"
         
         # Validate data freshness (all events within last minute)
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         fresh_events = 0
         for entry in tester.log_entries:
             entry_time = datetime.fromisoformat(entry["timestamp"].replace('Z', '+00:00').replace('+00:00', ''))

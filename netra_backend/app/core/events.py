@@ -6,7 +6,7 @@ Provides a simple event bus for decoupled component communication.
 import asyncio
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -45,18 +45,26 @@ class EventBus:
         self._async_handlers[event_type].append(handler)
         logger.debug(f"Subscribed async handler to event type: {event_type}")
     
-    def publish(self, event: Event) -> None:
-        """Publish an event to all subscribers."""
-        # Handle synchronous handlers
+    async def publish(self, event_or_type, data=None) -> None:
+        """Publish an event to all subscribers. Supports both Event objects and (type, data) format."""
+        if isinstance(event_or_type, Event):
+            event = event_or_type
+        else:
+            # Support legacy (type, data) format
+            event = Event(
+                type=event_or_type,
+                data=data or {},
+                timestamp=datetime.now(timezone.utc)
+            )
+        
+        # Handle synchronous handlers first
         handlers = self._handlers.get(event.type, [])
         for handler in handlers:
             try:
                 handler(event)
             except Exception as e:
                 logger.error(f"Error in event handler for {event.type}: {e}")
-    
-    async def publish_async(self, event: Event) -> None:
-        """Publish an event to all async subscribers."""
+        
         # Handle async handlers
         async_handlers = self._async_handlers.get(event.type, [])
         if async_handlers:
@@ -69,6 +77,26 @@ class EventBus:
             
             if tasks:
                 await asyncio.gather(*tasks, return_exceptions=True)
+    
+    def publish_sync(self, event_or_type, data=None) -> None:
+        """Publish an event to synchronous subscribers only. Supports both Event objects and (type, data) format."""
+        if isinstance(event_or_type, Event):
+            event = event_or_type
+        else:
+            # Support legacy (type, data) format
+            event = Event(
+                type=event_or_type,
+                data=data or {},
+                timestamp=datetime.now(timezone.utc)
+            )
+        
+        # Handle synchronous handlers only
+        handlers = self._handlers.get(event.type, [])
+        for handler in handlers:
+            try:
+                handler(event)
+            except Exception as e:
+                logger.error(f"Error in event handler for {event.type}: {e}")
     
     def unsubscribe(self, event_type: str, handler: Callable) -> None:
         """Remove a handler from event subscriptions."""
@@ -94,6 +122,6 @@ def create_event(event_type: str, data: Dict[str, Any], source: Optional[str] = 
     return Event(
         type=event_type,
         data=data,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         source=source
     )

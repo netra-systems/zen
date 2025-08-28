@@ -23,7 +23,7 @@ Business Value Justification (BVJ):
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -134,7 +134,7 @@ class TestCompleteUserRegistrationFlow:
             'valid': True,
             'user_id': user_id,
             'email': sample_user_data['email'],
-            'exp': (datetime.utcnow() + timedelta(hours=1)).timestamp()
+            'exp': (datetime.now(timezone.utc) + timedelta(hours=1)).timestamp()
         }
         
         token_validation = jwt_handler.validate_token(access_token)
@@ -374,8 +374,8 @@ class TestJWTTokenLifecycleManagement:
             'user_id': user_id,
             'email': user_data['email'],
             'roles': user_data['roles'],
-            'exp': (datetime.utcnow() + timedelta(hours=1)).timestamp(),
-            'iat': datetime.utcnow().timestamp()
+            'exp': (datetime.now(timezone.utc) + timedelta(hours=1)).timestamp(),
+            'iat': datetime.now(timezone.utc).timestamp()
         }
         
         validation_result = jwt_handler.validate_token(access_token)
@@ -410,7 +410,7 @@ class TestJWTTokenLifecycleManagement:
         jwt_handler.validate_token.return_value = {
             'valid': False,
             'error': 'token_expired',
-            'expired_at': (datetime.utcnow() - timedelta(minutes=1)).timestamp()
+            'expired_at': (datetime.now(timezone.utc) - timedelta(minutes=1)).timestamp()
         }
         
         validation_result = jwt_handler.validate_token(expired_token)
@@ -453,8 +453,8 @@ class TestJWTTokenLifecycleManagement:
             'session_id': session_id,
             'user_id': user_id,
             'access_token': access_token,
-            'created_at': datetime.utcnow(),
-            'expires_at': datetime.utcnow() + timedelta(hours=1)
+            'created_at': datetime.now(timezone.utc),
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=1)
         }
         
         session = await session_manager.create_session(
@@ -506,7 +506,7 @@ class TestPasswordResetIntegration:
         auth_service.initiate_password_reset.return_value = {
             'email_sent': True,
             'reset_token_id': str(uuid4()),
-            'expires_at': datetime.utcnow() + timedelta(hours=2)
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=2)
         }
         
         reset_initiation = await auth_service.initiate_password_reset(email)
@@ -519,7 +519,7 @@ class TestPasswordResetIntegration:
             'valid': True,
             'user_id': str(uuid4()),
             'email': email,
-            'expires_at': datetime.utcnow() + timedelta(hours=1)
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=1)
         }
         
         token_validation = await auth_service.validate_reset_token(reset_token)
@@ -582,7 +582,7 @@ class TestPasswordResetIntegration:
         auth_service.validate_reset_token.return_value = {
             'valid': False,
             'error': 'token_expired',
-            'expired_at': datetime.utcnow() - timedelta(minutes=1)
+            'expired_at': datetime.now(timezone.utc) - timedelta(minutes=1)
         }
         
         validation_result = await auth_service.validate_reset_token(expired_token)
@@ -680,21 +680,21 @@ class TestAuthStateManagementIntegration:
                 'user_id': user_id,
                 'device_type': 'web',
                 'ip_address': '192.168.1.100',
-                'created_at': datetime.utcnow() - timedelta(hours=2)
+                'created_at': datetime.now(timezone.utc) - timedelta(hours=2)
             },
             {
                 'session_id': str(uuid4()),
                 'user_id': user_id,
                 'device_type': 'mobile',
                 'ip_address': '192.168.1.101',
-                'created_at': datetime.utcnow() - timedelta(minutes=30)
+                'created_at': datetime.now(timezone.utc) - timedelta(minutes=30)
             },
             {
                 'session_id': str(uuid4()),
                 'user_id': user_id,
                 'device_type': 'desktop',
                 'ip_address': '192.168.1.102',
-                'created_at': datetime.utcnow() - timedelta(minutes=5)
+                'created_at': datetime.now(timezone.utc) - timedelta(minutes=5)
             }
         ]
         
@@ -727,7 +727,7 @@ class TestAuthStateManagementIntegration:
             'is_active': True,
             'is_verified': True,
             'status': 'active',
-            'last_login': datetime.utcnow() - timedelta(minutes=30)
+            'last_login': datetime.now(timezone.utc) - timedelta(minutes=30)
         }
         
         user_data = await auth_database.get_user_by_id(user_id)

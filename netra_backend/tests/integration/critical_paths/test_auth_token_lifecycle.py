@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
@@ -51,7 +51,7 @@ class TestAuthTokenLifecycleL3:
         
         # Create expired token
         expired_token = jwt.encode(
-            {"sub": "123", "exp": datetime.utcnow() - timedelta(hours=1)},
+            {"sub": "123", "exp": datetime.now(timezone.utc) - timedelta(hours=1)},
             settings.SECRET_KEY,
             algorithm="HS256"
         )

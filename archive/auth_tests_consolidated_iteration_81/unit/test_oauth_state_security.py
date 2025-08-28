@@ -97,7 +97,7 @@ class TestOAuthStateParameterSecurity:
         with patch('auth_service.auth_core.security.oauth_security.datetime') as mock_datetime:
             # Store state at current time
             mock_datetime.now.return_value = datetime.now(timezone.utc)
-            mock_datetime.utcnow.return_value = datetime.utcnow()
+            mock_datetime.utcnow.return_value = datetime.now(timezone.utc)
             security_manager.store_state_parameter(state, "test_session")
             
             # Validate immediately - should work

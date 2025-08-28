@@ -23,7 +23,7 @@ import random
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -245,7 +245,7 @@ class CostOptimizationWorkflowL4TestSuite:
                 "tier": selected_tier["tier"],
                 "monthly_budget": selected_tier["base_budget"] + random.randint(-20, 50),
                 "region": "us-east" if i % 2 == 0 else "us-west",
-                "created_at": datetime.utcnow() - timedelta(days=random.randint(1, 90)),
+                "created_at": datetime.now(timezone.utc) - timedelta(days=random.randint(1, 90)),
                 "current_usage": Decimal("0.00"),
                 "optimization_enabled": True
             }
@@ -309,7 +309,7 @@ class CostOptimizationWorkflowL4TestSuite:
         ]
         
         # Generate usage events across time range
-        start_time = datetime.utcnow() - timedelta(hours=time_range_hours)
+        start_time = datetime.now(timezone.utc) - timedelta(hours=time_range_hours)
         time_interval = timedelta(hours=time_range_hours) / usage_events
         
         for i in range(usage_events):
@@ -430,8 +430,8 @@ class CostOptimizationWorkflowL4TestSuite:
                 # Get calculated cost from billing engine
                 calculated_cost_result = await self.billing_engine.calculate_user_cost(
                     user["user_id"],
-                    start_date=datetime.utcnow() - timedelta(hours=72),
-                    end_date=datetime.utcnow()
+                    start_date=datetime.now(timezone.utc) - timedelta(hours=72),
+                    end_date=datetime.now(timezone.utc)
                 )
                 
                 calculation_time = time.time() - calculation_start
@@ -490,8 +490,8 @@ class CostOptimizationWorkflowL4TestSuite:
                 # Get current usage cost for user
                 cost_result = await self.billing_engine.calculate_user_cost(
                     user["user_id"],
-                    start_date=datetime.utcnow().replace(day=1),  # Start of month
-                    end_date=datetime.utcnow()
+                    start_date=datetime.now(timezone.utc).replace(day=1),  # Start of month
+                    end_date=datetime.now(timezone.utc)
                 )
                 
                 if cost_result["success"]:
@@ -534,7 +534,7 @@ class CostOptimizationWorkflowL4TestSuite:
                                 threshold_percentage=float(usage_percentage),
                                 current_usage=current_cost,
                                 budget_limit=monthly_budget,
-                                triggered_at=datetime.utcnow()
+                                triggered_at=datetime.now(timezone.utc)
                             )
                             
                             self.cost_alerts.append(cost_alert)

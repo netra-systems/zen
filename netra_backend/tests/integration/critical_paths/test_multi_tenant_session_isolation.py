@@ -18,7 +18,7 @@ import random
 import sys
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -228,7 +228,7 @@ class MultiTenantIsolationTester:
                     message_data = {
                         "thread_id": thread_id,
                         "content": f"Message {i} from {tenant.config['name']}",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     
                     async with tenant.session.post(

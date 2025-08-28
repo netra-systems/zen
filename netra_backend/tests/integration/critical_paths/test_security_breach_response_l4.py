@@ -25,7 +25,7 @@ import random
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import quote
 
@@ -893,7 +893,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
         """Log security event for monitoring and analysis."""
         try:
             security_event = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "event_type": "security_test",
                 "attack_vector": attack_vector.name,
                 "attack_type": attack_vector.attack_type,
@@ -924,7 +924,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
         """Log detection result for metrics tracking."""
         try:
             detection_log = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "attack_vector": attack_vector.name,
                 "attack_type": attack_vector.attack_type,
                 "detected": detected,
@@ -1317,7 +1317,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
                 "type": "critical_security_breach",
                 "severity": "critical",
                 "description": "Multiple failed authentication attempts detected",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "source": "security_test",
                 "affected_systems": ["auth_service", "backend_api"],
                 "attack_vectors": [av.name for av in self.attack_vectors[:3]]
@@ -1375,7 +1375,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
                     # Log escalation
                     escalation_record = {
                         "incident_id": incident["incident_id"],
-                        "escalated_at": datetime.utcnow().isoformat(),
+                        "escalated_at": datetime.now(timezone.utc).isoformat(),
                         "escalation_time": escalation_time,
                         "escalation_level": "immediate"
                     }
@@ -1416,7 +1416,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
                         "type": "security_incident",
                         "severity": incident["severity"],
                         "message": f"Security incident {incident['incident_id']} requires immediate attention",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     
                     response = await self.test_client.post(endpoint, json=notification_data)

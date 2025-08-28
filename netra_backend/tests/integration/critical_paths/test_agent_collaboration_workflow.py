@@ -22,7 +22,7 @@ import sys
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -36,6 +36,29 @@ BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
 WEBSOCKET_URL = os.getenv("WEBSOCKET_URL", "ws://localhost:8000/websocket")
 AGENT_SERVICE_URL = os.getenv("AGENT_SERVICE_URL", "http://localhost:8083")
+
+
+async def check_service_availability(url: str) -> bool:
+    """Check if a service is available at the given URL."""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=2)) as response:
+                return response.status < 500  # Accept any non-server error status
+    except Exception:
+        return False
+
+
+async def check_all_services() -> bool:
+    """Check if all required services are available."""
+    services_to_check = [
+        AUTH_SERVICE_URL + "/health",  # Auth service health check
+        AGENT_SERVICE_URL + "/health"  # Agent service health check  
+    ]
+    
+    for service_url in services_to_check:
+        if not await check_service_availability(service_url):
+            return False
+    return True
 
 # Agent types
 class AgentType(Enum):
@@ -407,7 +430,7 @@ class AgentCollaborationTester:
                         "action": "share_results",
                         "data": {"test": "value"}
                     },
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
                 # Send message via API
@@ -487,7 +510,7 @@ class AgentCollaborationTester:
                                 "confidence": 0.95
                             }
                         },
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     
                     async with self.session.post(
@@ -867,9 +890,13 @@ class AgentCollaborationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
-@pytest.mark.asyncio
 async def test_agent_collaboration_workflow():
     """Test complete agent collaboration workflow."""
+    # Skip if required services are not available
+    services_available = await check_all_services()
+    if not services_available:
+        pytest.skip("Required services (auth_service, agent_service) are not available")
+    
     async with AgentCollaborationTester() as tester:
         results = await tester.run_all_tests()
         

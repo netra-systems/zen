@@ -3,7 +3,7 @@
 
 import argparse
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -168,7 +168,7 @@ class TestResultProcessor:
         
         return {
             "status": "success" if summary.get("failed", 0) == 0 else "failure",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "summary": summary,
             "failed_tests": [
                 {

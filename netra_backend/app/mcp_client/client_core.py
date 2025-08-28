@@ -18,7 +18,7 @@ Function limit: ≤8 lines per function (architectural requirement)
 import asyncio
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.core.exceptions import NetraException, ServiceError
@@ -175,7 +175,7 @@ class MCPClient:
             server_name=config.name,
             transport=config.transport,
             status=ConnectionStatus.CONNECTING,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
     
     async def _establish_connection(self, connection: MCPConnection, config: MCPServerConfig) -> None:

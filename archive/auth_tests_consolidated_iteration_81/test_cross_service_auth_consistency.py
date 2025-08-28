@@ -23,7 +23,7 @@ Business Value Justification (BVJ):
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock, call
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -72,7 +72,7 @@ class TestAuthServiceToBackendIntegration:
             'user_id': user_id,
             'email': 'user@example.com',
             'roles': ['user'],
-            'exp': (datetime.utcnow() + timedelta(hours=1)).timestamp()
+            'exp': (datetime.now(timezone.utc) + timedelta(hours=1)).timestamp()
         }
         
         auth_validation = await auth_service.validate_token(auth_token)
@@ -107,7 +107,7 @@ class TestAuthServiceToBackendIntegration:
             'is_active': True,
             'is_verified': True,
             'roles': ['user'],
-            'last_updated': datetime.utcnow()
+            'last_updated': datetime.now(timezone.utc)
         }
         
         auth_profile = await auth_service.get_user_by_id(user_id)
@@ -120,7 +120,7 @@ class TestAuthServiceToBackendIntegration:
             'is_active': True,
             'is_verified': True,
             'roles': ['user'],
-            'synchronized_at': datetime.utcnow()
+            'synchronized_at': datetime.now(timezone.utc)
         }
         
         backend_profile = await mock_backend_client.get_user_profile(user_id)
@@ -143,7 +143,7 @@ class TestAuthServiceToBackendIntegration:
             'user_id': user_id,
             'old_status': 'active',
             'new_status': new_status,
-            'updated_at': datetime.utcnow()
+            'updated_at': datetime.now(timezone.utc)
         }
         
         auth_update = await auth_service.update_user_status(user_id, new_status)
@@ -153,7 +153,7 @@ class TestAuthServiceToBackendIntegration:
             'user_id': user_id,
             'status_synchronized': True,
             'new_status': new_status,
-            'synchronized_at': datetime.utcnow()
+            'synchronized_at': datetime.now(timezone.utc)
         }
         
         backend_sync = await mock_backend_client.sync_user_status(
@@ -303,7 +303,7 @@ class TestFrontendAuthIntegration:
             'user_id': user_id,
             'token_revoked': True,
             'session_ended': True,
-            'logout_time': datetime.utcnow()
+            'logout_time': datetime.now(timezone.utc)
         }
         
         auth_response = await auth_service.logout_user(
@@ -326,7 +326,7 @@ class TestFrontendAuthIntegration:
             'refresh_token': refresh_token,
             'client_info': {
                 'session_id': str(uuid4()),
-                'last_activity': datetime.utcnow() - timedelta(minutes=30)
+                'last_activity': datetime.now(timezone.utc) - timedelta(minutes=30)
             }
         }
         
@@ -420,7 +420,7 @@ class TestAPIGatewayAuthIntegration:
             'user_id': user_id,
             'email': 'api_user@example.com',
             'scopes': ['api:read', 'api:write'],
-            'exp': (datetime.utcnow() + timedelta(hours=1)).timestamp()
+            'exp': (datetime.now(timezone.utc) + timedelta(hours=1)).timestamp()
         }
         
         token_validation = jwt_handler.validate_token(token)
@@ -512,7 +512,7 @@ class TestAPIGatewayAuthIntegration:
             'rate_limit_ok': False,
             'user_id': user_id,
             'requests_remaining': 0,
-            'reset_time': datetime.utcnow() + timedelta(minutes=15),
+            'reset_time': datetime.now(timezone.utc) + timedelta(minutes=15),
             'limit_exceeded': True
         }
         
@@ -567,7 +567,7 @@ class TestServiceToServiceAuthentication:
             'source_service': source_service,
             'target_service': target_service,
             'scopes': ['user:read', 'auth:validate'],
-            'expires_at': datetime.utcnow() + timedelta(minutes=5)
+            'expires_at': datetime.now(timezone.utc) + timedelta(minutes=5)
         }
         
         token_validation = await service_auth_manager.validate_service_token(
@@ -615,7 +615,7 @@ class TestServiceToServiceAuthentication:
         service_auth_manager.validate_service_token.return_value = {
             'valid': False,
             'error': 'token_expired',
-            'expired_at': datetime.utcnow() - timedelta(minutes=1)
+            'expired_at': datetime.now(timezone.utc) - timedelta(minutes=1)
         }
         
         validation_result = await service_auth_manager.validate_service_token(

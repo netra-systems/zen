@@ -20,7 +20,7 @@ import asyncio
 import json
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.schemas.UserPlan import PlanTier
@@ -133,7 +133,7 @@ class MultiAgentFlowSimulator:
             "turn_id": turn_id,
             "require_multi_agent": True,
             "real_llm": real_llm,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     def create_agent_handoff_validation(self, user_id: str, 

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <id>alembic-migration-execution</id>
+    <title>Alembic Migration Function Not Called</title>
+    <category>database,migrations,alembic,schema</category>
+    <priority>CRITICAL</priority>
+    <created>2025-08-28</created>
+    
+    <problem>
+        <description>Schema validation failing due to missing columns that were defined in migration but not executed</description>
+        <error_message>Missing columns in table research_sessions: ['completed_at', 'error_message']</error_message>
+        <impact>Research sessions feature completely non-functional due to missing database columns</impact>
+        <root_cause>Migration function _add_research_sessions_completion_columns() was defined but never called in the upgrade() function</root_cause>
+    </problem>
+    
+    <solution>
+        <description>Add missing function call to execute the column addition in migration</description>
+        <implementation>
+            <file>netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py</file>
+            <change>
+                Modified _modify_research_sessions_table() to include missing function call:
+                ```python
+                def _modify_research_sessions_table() -> None:
+                    """Modify research_sessions table structure."""
+                    _add_research_sessions_columns()
+                    _add_research_sessions_completion_columns()  # Added this line
+                    _alter_research_sessions_columns()
+                    _drop_research_sessions_columns()
+                ```
+            </change>
+        </implementation>
+    </solution>
+    
+    <best_practices>
+        <practice>Always verify all defined migration functions are actually called in upgrade()</practice>
+        <practice>Use schema validation service after migrations to detect missing changes</practice>
+        <practice>Review migration files to ensure all table modifications are executed</practice>
+        <practice>Test migrations in development environment before production deployment</practice>
+    </best_practices>
+    
+    <prevention>
+        <step>Create migration checklist ensuring all defined functions are called</step>
+        <step>Add automated tests that verify schema matches model definitions</step>
+        <step>Use migration linting tools to detect orphaned functions</step>
+        <step>Implement pre-deployment schema validation checks</step>
+    </prevention>
+    
+    <verification>
+        <command>python -c "from netra_backend.app.services.schema_validation_service import run_comprehensive_validation; print(run_comprehensive_validation())"</command>
+        <expected_output>{'passed': True, 'missing_tables': [], 'missing_columns': {}, ...}</expected_output>
+        <smoke_test>python unified_test_runner.py --category smoke</smoke_test>
+    </verification>
+    
+    <related_files>
+        <file>netra_backend/app/db/models_supply.py</file>
+        <file>netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py</file>
+        <file>netra_backend/app/services/schema_validation_service.py</file>
+        <file>netra_backend/app/db/migration_utils.py</file>
+    </related_files>
+    
+    <tags>
+        <tag>alembic</tag>
+        <tag>migrations</tag>
+        <tag>database-schema</tag>
+        <tag>research-sessions</tag>
+        <tag>schema-validation</tag>
+        <tag>postgresql</tag>
+    </tags>
+</learning>
