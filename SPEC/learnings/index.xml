@@ -248,6 +248,15 @@
             <critical-takeaway>Container startup probes require comprehensive success/failure/recovery testing.</critical-takeaway>
         </category>
         
+        <category name="Async Event Loop Blocking" path="SPEC/learnings/async_sleep_blocking_issue.xml" keywords="Performance, Async, Await, Event Loop, time.sleep, asyncio.sleep, Blocking, WebSocket, Retry, Delay">
+            <critical-takeaway>CRITICAL: NEVER use time.sleep() in async functions - blocks entire event loop causing service freezes</critical-takeaway>
+            <critical-takeaway>ALWAYS use await asyncio.sleep() in async functions for non-blocking delays</critical-takeaway>
+            <critical-takeaway>Blocking sleep in async code freezes ALL concurrent requests, timeouts WebSockets, and queues database queries</critical-takeaway>
+            <critical-takeaway>Separate retry handlers needed: async functions use await asyncio.sleep(), sync functions use time.sleep()</critical-takeaway>
+            <critical-takeaway>Event loop blocking can cause 50-80% of performance issues during retry operations under load</critical-takeaway>
+            <critical-takeaway>Search pattern: Find async functions with grep "async def" then check for time.sleep usage</critical-takeaway>
+        </category>
+        
         <category name="Deployment and Docker Configuration" path="SPEC/learnings/deployment.xml" keywords="Deployment, Docker, Dockerfile, Container, Frontend, Backend, Auth, Cloud Run, GCP, Staging">
             <critical-takeaway>CRITICAL: Frontend Dockerfile MUST use deployment/docker/frontend.gcp.Dockerfile - NEVER create new ones</critical-takeaway>
             <critical-takeaway>All service Dockerfiles follow pattern: deployment/docker/{service}.gcp.Dockerfile</critical-takeaway>
