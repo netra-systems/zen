@@ -7,7 +7,7 @@ export default function LoginButton() {
 
   if (user) {
     return (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4" data-testid="auth-component">
         {user.picture && (
           <Image
             src={user.picture}
@@ -17,11 +17,11 @@ export default function LoginButton() {
             className="rounded-full"
           />
         )}
-        <span>{user.full_name}</span>
-        <Button onClick={logout}>Logout</Button>
+        <span data-testid="user-email">{user.full_name}</span>
+        <Button onClick={logout} data-testid="logout-button">Logout</Button>
       </div>
     );
   }
 
-  return <Button onClick={login} size="lg">Login with Google</Button>;
+  return <Button onClick={login} size="lg" data-testid="login-button">Login with Google</Button>;
 }

@@ -34,7 +34,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   showLoading = true
 }) => {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, initialized } = useAuth();
   const { trackError, trackPageView } = useGTMEvent();
   
   // Track if we've already reported auth failure for this mount
@@ -43,7 +43,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const lastPathname = useRef<string>();
 
   useEffect(() => {
-    if (!loading) {
+    // Only proceed with auth checks after initialization is complete
+    if (!loading && initialized) {
       const isAuthenticated = !!user;
       const currentPath = window.location.pathname;
       
@@ -66,10 +67,10 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
       
       onAuthCheckComplete?.(isAuthenticated);
     }
-  }, [loading, user, router, redirectTo, onAuthCheckComplete, trackError, trackPageView]);
+  }, [loading, initialized, user, router, redirectTo, onAuthCheckComplete, trackError, trackPageView]);
 
-  // Show loading state while checking auth
-  if (loading || !user) {
+  // Show loading state while checking auth or during initialization
+  if (loading || !initialized || !user) {
     if (showLoading) {
       return <LoadingScreen />;
     }
@@ -85,7 +86,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
  */
 const LoadingScreen: React.FC = () => {
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50" data-testid="loading">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         <div className="text-sm text-gray-600">Verifying authentication...</div>

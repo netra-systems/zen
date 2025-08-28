@@ -12,7 +12,9 @@ import { jwtDecode } from 'jwt-decode';
 
 const TOKEN_KEY = 'jwt_token';
 const DEV_LOGOUT_FLAG = 'dev_logout_flag';
-const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
+// Dynamic refresh threshold based on environment and token expiry
+// For short tokens (< 5 minutes), refresh at 25% of lifetime
+// For normal tokens (>= 5 minutes), refresh 5 minutes before expiry
 
 interface JWTPayload {
   exp?: number;
@@ -179,7 +181,7 @@ export class UnifiedAuthService {
   }
 
   /**
-   * Check if token needs refresh
+   * Check if token needs refresh - environment-aware for short-lived tokens
    */
   needsRefresh(token: string): boolean {
     try {
@@ -192,11 +194,32 @@ export class UnifiedAuthService {
       const currentTime = Date.now();
       const timeUntilExpiry = expiryTime - currentTime;
       
-      const needsRefresh = timeUntilExpiry < REFRESH_THRESHOLD_MS;
+      // Handle cases where token is already expired or will expire very soon
+      if (timeUntilExpiry <= 0) {
+        return true; // Token is expired or about to expire
+      }
+      
+      // Calculate total token lifetime for dynamic threshold
+      const issuedTime = decoded.iat ? decoded.iat * 1000 : (currentTime - 15 * 60 * 1000);
+      const totalLifetime = expiryTime - issuedTime;
+      
+      // Dynamic refresh threshold based on token lifetime
+      let refreshThreshold;
+      if (totalLifetime < 5 * 60 * 1000) { // Tokens < 5 minutes
+        // For short tokens (like 30s tokens), refresh when 25% of lifetime remains
+        refreshThreshold = totalLifetime * 0.25;
+      } else {
+        // For normal tokens (>= 5 minutes), refresh 5 minutes before expiry
+        refreshThreshold = 5 * 60 * 1000;
+      }
+      
+      const needsRefresh = timeUntilExpiry <= refreshThreshold;
       
       logger.debug('Token refresh check', {
         needsRefresh,
         timeUntilExpiry: Math.floor(timeUntilExpiry / 1000),
+        totalLifetime: Math.floor(totalLifetime / 1000),
+        refreshThreshold: Math.floor(refreshThreshold / 1000),
         environment: this.environment
       });
       

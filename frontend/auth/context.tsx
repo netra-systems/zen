@@ -16,6 +16,7 @@ export interface AuthContextType {
   loading: boolean;
   authConfig: AuthConfigResponse | null;
   token: string | null;
+  initialized: boolean; // Track if auth initialization is complete
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize token from localStorage immediately on mount
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false); // Track initialization completion
   const [authConfig, setAuthConfig] = useState<AuthConfigResponse | null>(null);
   const [token, setToken] = useState<string | null>(() => {
     // Check for token in localStorage during initial state creation
@@ -125,18 +127,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [syncAuthStore]);
 
   /**
-   * Schedule automatic token refresh check
+   * Schedule automatic token refresh check - environment-aware timing
    */
   const scheduleTokenRefreshCheck = useCallback((tokenToCheck: string) => {
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
     }
 
-    // Check every 2 minutes for token refresh needs
+    // Dynamic check interval based on token lifetime
+    let checkInterval;
+    try {
+      const decoded = jwtDecode(tokenToCheck) as any;
+      if (decoded.exp && decoded.iat) {
+        const tokenLifetime = (decoded.exp - decoded.iat) * 1000;
+        if (tokenLifetime < 5 * 60 * 1000) { // Short tokens (< 5 minutes)
+          // Check every 10 seconds for short tokens
+          checkInterval = 10 * 1000;
+        } else {
+          // Check every 2 minutes for normal tokens
+          checkInterval = 2 * 60 * 1000;
+        }
+      } else {
+        // Default to 2 minutes if can't determine token lifetime
+        checkInterval = 2 * 60 * 1000;
+      }
+    } catch (error) {
+      // Default to 2 minutes if token parsing fails
+      checkInterval = 2 * 60 * 1000;
+      logger.debug('Failed to parse token for refresh scheduling', error as Error);
+    }
+
     refreshTimeoutRef.current = setTimeout(() => {
       handleTokenRefresh(tokenToCheck);
       scheduleTokenRefreshCheck(tokenToCheck);
-    }, 2 * 60 * 1000);
+    }, checkInterval);
+    
+    logger.debug('Scheduled token refresh check', {
+      checkInterval: Math.floor(checkInterval / 1000),
+      component: 'AuthContext',
+      action: 'schedule_refresh_check'
+    });
   }, [handleTokenRefresh]);
 
   const fetchAuthConfig = useCallback(async () => {
@@ -255,6 +285,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } finally {
       setLoading(false);
+      setInitialized(true); // Mark initialization as complete
     }
   }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh]);
 
@@ -342,7 +373,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, authConfig, token }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, authConfig, token, initialized }}>
       {children}
     </AuthContext.Provider>
   );
