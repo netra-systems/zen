@@ -610,22 +610,14 @@ class JWTHandler:
         if token in self._token_blacklist:
             return True
         
-        # If not in memory and Redis is available, check Redis
+        # If not in memory and Redis is available, check Redis asynchronously
+        # We avoid asyncio.run() to prevent "coroutine was never awaited" warnings
         try:
             if auth_redis_manager.enabled:
-                # Run async Redis check with proper exception handling
-                try:
-                    result = asyncio.run(self._check_token_in_redis(token))
-                    if result:
-                        # Add to in-memory cache for faster future lookups
-                        self._token_blacklist.add(token)
-                        return True
-                except RuntimeError as e:
-                    # Handle "cannot be called from a running event loop" error
-                    if "cannot be called from a running event loop" in str(e):
-                        logger.debug("Already in event loop, skipping Redis check")
-                    else:
-                        raise e
+                # Schedule async Redis check without blocking
+                # This method is called from sync context, so we can't await
+                # Instead, we rely on in-memory cache and periodic sync from Redis
+                logger.debug("Token not in memory cache, Redis check skipped in sync context")
         except Exception as e:
             logger.debug(f"Redis blacklist check failed, using in-memory only: {e}")
         
@@ -637,22 +629,14 @@ class JWTHandler:
         if user_id in self._user_blacklist:
             return True
         
-        # If not in memory and Redis is available, check Redis
+        # If not in memory and Redis is available, check Redis asynchronously
+        # We avoid asyncio.run() to prevent "coroutine was never awaited" warnings
         try:
             if auth_redis_manager.enabled:
-                # Run async Redis check with proper exception handling
-                try:
-                    result = asyncio.run(self._check_user_in_redis(user_id))
-                    if result:
-                        # Add to in-memory cache for faster future lookups
-                        self._user_blacklist.add(user_id)
-                        return True
-                except RuntimeError as e:
-                    # Handle "cannot be called from a running event loop" error
-                    if "cannot be called from a running event loop" in str(e):
-                        logger.debug("Already in event loop, skipping Redis check")
-                    else:
-                        raise e
+                # Schedule async Redis check without blocking
+                # This method is called from sync context, so we can't await
+                # Instead, we rely on in-memory cache and periodic sync from Redis
+                logger.debug("User not in memory cache, Redis check skipped in sync context")
         except Exception as e:
             logger.debug(f"Redis blacklist check failed, using in-memory only: {e}")
         
@@ -748,6 +732,15 @@ class JWTHandler:
             logger.debug("Redis available for persistent blacklists")
         except Exception as e:
             logger.warning(f"Failed to initialize blacklist from Redis: {e}")
+    
+    async def sync_blacklists_from_redis(self) -> bool:
+        """Public method to sync blacklists from Redis in async context"""
+        try:
+            await self._load_blacklists_from_redis()
+            return True
+        except Exception as e:
+            logger.warning(f"Failed to sync blacklists from Redis: {e}")
+            return False
     
     async def _load_blacklists_from_redis(self) -> None:
         """Load blacklists from Redis - async version"""

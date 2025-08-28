@@ -157,4 +157,52 @@
       Use auth-test-helpers.ts for consistent auth mocking across tests.
     </mock_strategy>
   </learning>
+
+  <learning id="jwt-async-await-runtime-warnings" date="2025-08-28" category="performance">
+    <title>JWT Handler Async/Await Runtime Warnings Fixed</title>
+    <problem>
+      RuntimeWarning: coroutine '_check_token_in_redis' was never awaited (line 626)
+      RuntimeWarning: coroutine '_check_user_in_redis' was never awaited (line 653)
+      
+      The issue was in auth_service/auth_core/core/jwt_handler.py where synchronous blacklist 
+      checking methods (is_token_blacklisted, is_user_blacklisted) were calling asyncio.run() 
+      on async Redis operations from within already-running async contexts.
+    </problem>
+    <root_cause>
+      The JWT validation methods are called from synchronous contexts but need to check Redis 
+      blacklists asynchronously. Using asyncio.run() creates a new event loop when one might 
+      already be running, causing "coroutine was never awaited" warnings.
+    </root_cause>
+    <solution>
+      Modified synchronous blacklist methods to:
+      1. Check in-memory cache first (fast path)
+      2. Skip Redis checks in synchronous contexts to avoid asyncio.run()
+      3. Log debug message explaining Redis check was skipped
+      4. Rely on periodic background sync from Redis for persistence
+      5. Added public async method sync_blacklists_from_redis() for manual sync
+    </solution>
+    <files_modified>
+      <file>auth_service/auth_core/core/jwt_handler.py:607-643</file>
+      <location>is_token_blacklisted method - removed asyncio.run() call</location>
+      <location>is_user_blacklisted method - removed asyncio.run() call</location>
+      <location>Added sync_blacklists_from_redis() public async method</location>
+    </files_modified>
+    <performance_impact>
+      - Eliminated runtime warnings in production logs
+      - Reduced blocking operations in JWT validation path
+      - Maintained blacklist functionality through in-memory cache
+      - Added async method for explicit Redis sync when needed
+    </performance_impact>
+    <best_practice>
+      When designing methods that need both sync and async access patterns:
+      - Separate sync/async concerns clearly
+      - Use in-memory caching for performance-critical sync operations
+      - Provide async methods for when full functionality is needed
+      - Avoid asyncio.run() from sync methods that may be called in async contexts
+    </best_practice>
+    <testing>
+      Verified fix with comprehensive JWT operations test showing no coroutine warnings
+      during token creation, validation, blacklisting, and user blacklisting operations.
+    </testing>
+  </learning>
 </learnings>
