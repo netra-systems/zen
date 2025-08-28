@@ -58,6 +58,7 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="flex justify-start mt-4 mb-4"
+      data-testid="thinking-indicator"
     >
       <div className="relative">
         <div className={`absolute inset-0 bg-gradient-to-r opacity-20 blur-xl rounded-2xl ${getColorScheme()}`} />

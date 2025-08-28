@@ -179,7 +179,7 @@ const MainChat: React.FC = () => {
   }
 
   return (
-    <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50" data-testid="main-chat">
       {/* Sidebar removed - handled by AppWithLayout */}
       
       <div className="flex flex-col flex-1 max-w-full">
@@ -188,7 +188,7 @@ const MainChat: React.FC = () => {
         
         {/* Main Content Area */}
         <div className="flex-grow overflow-hidden relative">
-          <div className="h-full overflow-y-auto">
+          <div className="h-full overflow-y-auto" data-testid="main-content">
             {/* Empty State with Example Prompts - shown when no thread is selected OR thread selected but no messages */}
             <AnimatePresence mode="wait">
               {(shouldShowEmptyState || shouldShowExamplePrompts) && (

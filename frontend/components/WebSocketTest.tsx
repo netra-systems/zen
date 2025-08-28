@@ -14,11 +14,17 @@ export const WebSocketTest: React.FC = () => {
   };
 
   return (
-    <div>
+    <div data-testid="websocket-component">
       <h2>WebSocket Test</h2>
-      <p>Connection Status: {status}</p>
-      <button onClick={handleSendMessage} disabled={status !== 'OPEN'}>
+      <p data-testid="connection-status">Connection Status: {status}</p>
+      <button onClick={handleSendMessage} disabled={status !== 'OPEN'} data-testid="connect-btn">
         Send Message
+      </button>
+      <button data-testid="disconnect-btn" disabled={status !== 'OPEN'}>
+        Disconnect
+      </button>
+      <button data-testid="send-message-btn" onClick={handleSendMessage} disabled={status !== 'OPEN'}>
+        Send Test Message
       </button>
       {messages.length > 0 && (
         <div>
