@@ -87,6 +87,35 @@ class AuthDatabaseManager:
         return AuthDatabaseManager._normalize_database_url(database_url)
     
     @staticmethod
+    def get_auth_database_url() -> str:
+        """Get sync database URL for auth service"""
+        # Get database URL from AuthSecretLoader in sync format
+        from auth_service.auth_core.secret_loader import AuthSecretLoader
+        database_url = AuthSecretLoader.get_database_url()
+        
+        if not database_url:
+            raise ValueError("Database URL not configured for auth service")
+        
+        # Convert to sync format and normalize
+        sync_url = database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+        return AuthDatabaseManager._normalize_database_url(sync_url)
+    
+    @staticmethod
+    def get_auth_database_url_sync() -> str:
+        """Get sync database URL for auth service (alias for compatibility)"""
+        return AuthDatabaseManager.get_auth_database_url()
+    
+    @staticmethod
+    def _normalize_database_url(database_url: str) -> str:
+        """Normalize database URL format for auth service"""
+        if not database_url:
+            return database_url
+        
+        # Use DatabaseURLBuilder for consistent normalization
+        from shared.database_url_builder import DatabaseURLBuilder
+        return DatabaseURLBuilder.normalize_postgres_url(database_url)
+    
+    @staticmethod
     def validate_auth_url(url: str = None) -> bool:
         """Validate auth URL"""
         if not url:
