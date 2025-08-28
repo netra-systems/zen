@@ -475,18 +475,39 @@ class DatabaseManager:
         
         # Add pool sizing only for non-NullPool configurations
         if pool_class != NullPool:
-            engine_args.update({
-                # Optimized pool sizes for cold start resilience
-                "pool_size": 10,  # Reduced from 25 for faster startup
-                "max_overflow": 15,  # Reduced from 35 (total max: 25)
-                # CRITICAL FIX: Align pool timeout with readiness check timeouts (5.0s - faster than readiness timeout)
-                "pool_timeout": 5.0,  # Reduced from 60s to prevent readiness timeout issues
-            })
+            # Get optimized pool configuration
+            pool_config = DatabaseManager._get_optimized_pool_config()
+            engine_args.update(pool_config)
         
         if connect_args:
             engine_args["connect_args"] = connect_args
         
         return create_async_engine(app_url, **engine_args)
+    
+    @staticmethod
+    def _get_optimized_pool_config() -> Dict[str, Any]:
+        """Get optimized connection pool configuration for state persistence performance.
+        
+        Returns:
+            Dictionary with optimized pool parameters
+        """
+        # Check if optimized persistence is enabled
+        optimized_enabled = get_env().get("ENABLE_OPTIMIZED_PERSISTENCE", "false").lower() == "true"
+        
+        if optimized_enabled:
+            # Larger pool for optimized persistence workloads
+            return {
+                "pool_size": 15,  # Increased from 10 for higher throughput
+                "max_overflow": 25,  # Increased from 15 (total max: 40)  
+                "pool_timeout": 3.0,  # Reduced timeout for faster failure detection
+            }
+        else:
+            # Standard pool configuration
+            return {
+                "pool_size": 10,  # Standard pool size for regular workloads
+                "max_overflow": 15,  # Standard overflow (total max: 25)
+                "pool_timeout": 5.0,  # Standard timeout aligned with readiness checks
+            }
     
     @staticmethod
     def get_migration_session():
