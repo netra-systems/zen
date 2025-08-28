@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 import asyncio
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -103,8 +103,8 @@ class TransactionCoordinator:
             transaction = DistributedTransaction(
                 transaction_id=transaction_id,
                 state=TransactionState.PENDING,
-                created_at=datetime.utcnow(),
-                timeout_at=datetime.utcnow() + timedelta(seconds=self._transaction_timeout),
+                created_at=datetime.now(timezone.utc),
+                timeout_at=datetime.now(timezone.utc) + timedelta(seconds=self._transaction_timeout),
                 metadata=metadata or {}
             )
             
@@ -177,7 +177,7 @@ class TransactionCoordinator:
                 
                 if postgres_committed and clickhouse_committed:
                     transaction.state = TransactionState.COMMITTED
-                    transaction.committed_at = datetime.utcnow()
+                    transaction.committed_at = datetime.now(timezone.utc)
                     logger.info(f"Successfully committed distributed transaction: {transaction_id}")
                     return True
                 else:
@@ -201,7 +201,7 @@ class TransactionCoordinator:
             return
         
         transaction.state = TransactionState.ABORTED
-        transaction.aborted_at = datetime.utcnow()
+        transaction.aborted_at = datetime.now(timezone.utc)
         
         # Compensate any operations that were partially committed
         if transaction.postgres_operations or transaction.clickhouse_operations:
@@ -375,7 +375,7 @@ class TransactionCoordinator:
                 await self._execute_clickhouse_compensation(action)
             
             action.executed = True
-            action.execution_time = datetime.utcnow()
+            action.execution_time = datetime.now(timezone.utc)
             
         except Exception as e:
             logger.error(f"Failed to execute compensation action: {e}")
@@ -430,7 +430,7 @@ class TransactionCoordinator:
             try:
                 await asyncio.sleep(60)  # Check every minute
                 
-                current_time = datetime.utcnow()
+                current_time = datetime.now(timezone.utc)
                 expired_transactions = []
                 
                 async with self._coordination_lock:

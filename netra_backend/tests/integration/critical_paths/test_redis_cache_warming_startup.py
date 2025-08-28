@@ -25,7 +25,7 @@ import time
 import uuid
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
@@ -107,7 +107,7 @@ class DatabaseSourceMock:
             profiles[f"profile:{user_id}"] = {
                 "user_id": user_id,
                 "tier": random.choice(["free", "early", "mid", "enterprise"]),
-                "last_active": datetime.utcnow().isoformat(),
+                "last_active": datetime.now(timezone.utc).isoformat(),
                 "preferences": {"theme": "dark", "notifications": True},
                 "usage_stats": {"daily_requests": random.randint(10, 500)}
             }
@@ -126,7 +126,7 @@ class DatabaseSourceMock:
             key = f"frequent:{uuid.uuid4().hex[:12]}"
             frequent_data[key] = {
                 "access_count": random.randint(100, 1000),
-                "last_access": datetime.utcnow().isoformat(),
+                "last_access": datetime.now(timezone.utc).isoformat(),
                 "data_size": random.randint(1024, 10240),
                 "content": f"Frequently accessed content {i}"
             }
@@ -150,7 +150,7 @@ class DatabaseSourceMock:
                 "type": config_type,
                 "value": random.randint(100, 10000),
                 "enabled": random.choice([True, False]),
-                "last_updated": datetime.utcnow().isoformat()
+                "last_updated": datetime.now(timezone.utc).isoformat()
             }
         
         return {
@@ -168,8 +168,8 @@ class DatabaseSourceMock:
             sessions[f"session:{session_id}"] = {
                 "session_id": session_id,
                 "user_id": f"user_{i % 50}",  # Some overlap
-                "created_at": datetime.utcnow().isoformat(),
-                "expires_at": (datetime.utcnow() + timedelta(hours=24)).isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "expires_at": (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat(),
                 "active": True
             }
         

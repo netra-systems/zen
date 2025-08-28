@@ -90,7 +90,7 @@ class DependencyProxy:
     async def _ensure_initialized(self):
         """Ensure the dependency is initialized."""
         if not self._initialized:
-            self._instance = await self._resolver.resolve(self._dependency_name)
+            self._instance = await self._resolver.resolve(self._dependency_name, force_eager=True)
             self._initialized = True
     
     def __getattr__(self, name):
@@ -130,10 +130,14 @@ class DependencyRegistry:
         """Register an alias for a dependency."""
         self.aliases[alias] = target
         
+    def get_canonical_name(self, name: str) -> str:
+        """Get the canonical name for a dependency (resolves aliases)."""
+        return self.aliases.get(name, name)
+        
     def get_metadata(self, name: str) -> Optional[DependencyMetadata]:
         """Get dependency metadata."""
         # Resolve alias if present
-        actual_name = self.aliases.get(name, name)
+        actual_name = self.get_canonical_name(name)
         return self.dependencies.get(actual_name)
         
     def get_all_dependencies(self) -> List[str]:
@@ -156,8 +160,15 @@ class DependencyGraph:
         """Build the dependency graph."""
         self.graph.clear()
         
+        # Initialize all nodes
+        for name in self.registry.dependencies.keys():
+            self.graph[name] = set()
+        
+        # Add edges: if A depends on B, then B -> A (B comes before A)
         for name, metadata in self.registry.dependencies.items():
-            self.graph[name] = set(metadata.dependencies)
+            for dep_name in metadata.dependencies:
+                if dep_name in self.graph:
+                    self.graph[dep_name].add(name)
     
     def detect_cycles(self) -> List[List[str]]:
         """Detect circular dependencies using DFS."""
@@ -260,33 +271,48 @@ class DependencyResolver:
         self.container = DependencyContainer()
         self.graph = DependencyGraph(registry)
         self.resolving: Set[str] = set()  # Track currently resolving dependencies
+        self._locks: Dict[str, asyncio.Lock] = {}  # Per-dependency locks
         
-    async def resolve(self, name: str, context: Optional[Dict[str, Any]] = None) -> Any:
+    async def resolve(self, name: str, context: Optional[Dict[str, Any]] = None, force_eager: bool = False) -> Any:
         """Resolve a dependency by name."""
-        if name in self.resolving:
-            raise CircularDependencyError([name])
+        # Resolve alias to canonical name
+        canonical_name = self.registry.get_canonical_name(name)
         
         metadata = self.registry.get_metadata(name)
         if not metadata:
             raise DependencyResolutionError(f"Dependency '{name}' not registered")
         
-        # Check if instance already exists
-        existing_instance = self.container.get_instance(name, metadata.scope)
+        # Check if instance already exists (use canonical name for storage)
+        existing_instance = self.container.get_instance(canonical_name, metadata.scope)
         if existing_instance:
             return existing_instance
         
-        # Handle lazy loading
-        if metadata.lazy:
-            return DependencyProxy(name, self)
+        # Handle lazy loading (unless forced to be eager)
+        if metadata.lazy and not force_eager:
+            return DependencyProxy(canonical_name, self)
         
-        # Resolve dependencies
-        self.resolving.add(name)
-        try:
-            instance = await self._create_instance(metadata, context)
-            self.container.store_instance(name, instance, metadata.scope)
-            return instance
-        finally:
-            self.resolving.remove(name)
+        # Get or create lock for this dependency
+        if canonical_name not in self._locks:
+            self._locks[canonical_name] = asyncio.Lock()
+        
+        async with self._locks[canonical_name]:
+            # Double-check if instance was created while waiting for lock
+            existing_instance = self.container.get_instance(canonical_name, metadata.scope)
+            if existing_instance:
+                return existing_instance
+            
+            # Check for circular dependency
+            if canonical_name in self.resolving:
+                raise CircularDependencyError([canonical_name])
+            
+            # Resolve dependencies
+            self.resolving.add(canonical_name)
+            try:
+                instance = await self._create_instance(metadata, context)
+                self.container.store_instance(canonical_name, instance, metadata.scope)
+                return instance
+            finally:
+                self.resolving.remove(canonical_name)
     
     async def _create_instance(self, metadata: DependencyMetadata, context: Optional[Dict[str, Any]]) -> Any:
         """Create an instance of a dependency."""

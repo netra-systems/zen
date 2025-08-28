@@ -5,15 +5,31 @@ duplication and ensure consistency. All functions ≤8 lines.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.core_models import HealthCheckResult
+
+if TYPE_CHECKING:
+    from netra_backend.app.schemas.core_models import HealthCheckResult
 
 logger = central_logger.get_logger(__name__)
+
+
+@dataclass
+class HealthCheckResult:
+    """Result of a health check operation - simplified to avoid circular imports."""
+    component_name: str
+    success: bool
+    health_score: float
+    response_time_ms: float
+    status: Optional[str] = None
+    response_time: Optional[float] = None  # Legacy field for compatibility
+    error_message: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    details: Dict[str, Any] = field(default_factory=dict)
 
 
 class HealthStatus(Enum):
@@ -27,10 +43,14 @@ class HealthStatus(Enum):
 
 class AlertSeverity(Enum):
     """Alert severity levels."""
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    CRITICAL = "critical"
+    # Legacy values for backward compatibility
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
-    CRITICAL = "critical"
     URGENT = "urgent"
 
 
@@ -77,15 +97,26 @@ class DatabaseHealthChecker(HealthChecker):
         """Create healthy result with response time."""
         status = HealthStatus.HEALTHY if response_time < 1.0 else HealthStatus.DEGRADED
         return HealthCheckResult(
-            status=status, response_time=response_time,
-            details={'connection_count': self.db_pool.size}
+            component_name="database",
+            success=True,
+            health_score=95.0 if status == HealthStatus.HEALTHY else 75.0,
+            response_time_ms=response_time * 1000,
+            status=status.value,
+            response_time=response_time,
+            details={'connection_count': getattr(self.db_pool, 'size', 0)}
         )
     
     def _create_unhealthy_result(self, start_time: datetime, error: Exception) -> HealthCheckResult:
         """Create unhealthy result with error details."""
         response_time = self._calculate_response_time(start_time)
         return HealthCheckResult(
-            status=HealthStatus.UNHEALTHY, response_time=response_time,
+            component_name="database",
+            success=False,
+            health_score=0.0,
+            response_time_ms=response_time * 1000,
+            status=HealthStatus.UNHEALTHY.value,
+            response_time=response_time,
+            error_message=str(error),
             details={'error': str(error)}
         )
 

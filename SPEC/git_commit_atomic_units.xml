@@ -9,16 +9,30 @@
   
   <critical_principles>
     <principle name="atomic_completeness">
+      ATOMIC means a small, focused, complete unit of work - NOT everything in one massive commit.
       Each commit must represent a complete, functional change that leaves the system stable.
       Never commit partial implementations or broken intermediate states.
     </principle>
     <principle name="logical_grouping">
       Related changes should be grouped together when they form a single logical unit of work.
       100 untracked files might be 1 commit or 50 commits depending on their relationships.
+      ATOMIC = small focused groups, NOT one giant commit.
     </principle>
     <principle name="business_value_alignment">
       Commits should align with business value delivery - each commit should represent
       a meaningful increment of functionality or improvement.
+    </principle>
+    <principle name="atomic_not_monolithic">
+      CRITICAL: "Atomic" means self-contained and complete, NOT massive.
+      Prefer multiple small atomic commits over one large commit.
+      Each atomic commit should be reviewable in under 1 minute.
+    </principle>
+    <principle name="concept_over_file_count">
+      CRITICAL: Group by CONCEPT, not by file count.
+      300 files changing one import = ONE commit (single concept).
+      1 file with major changes = ONE commit (focused change).
+      3 related files = ONE commit (unified concept).
+      File count is IRRELEVANT - conceptual unity is EVERYTHING.
     </principle>
   </critical_principles>
 
@@ -87,8 +101,12 @@
       </trigger>
       
       <trigger name="review_complexity">
-        <description>Split if single commit would be too complex to review effectively</description>
-        <guideline>If diff exceeds ~500 lines across >20 files, consider splitting</guideline>
+        <description>Split if CONCEPTUALLY complex, NOT based on file count</description>
+        <guideline>Single concept = single commit, regardless of file count</guideline>
+        <guideline>Multiple unrelated concepts = multiple commits, even if just 2 files</guideline>
+        <guideline>Target: Each commit reviewable in under 1 minute by understanding ONE concept</guideline>
+        <guideline>300 files with one repeated change = simple review = one commit</guideline>
+        <guideline>2 files with unrelated changes = complex review = two commits</guideline>
       </trigger>
     </splitting_triggers>
   </commit_unit_determination>
@@ -196,12 +214,28 @@ Co-Authored-By: Claude <noreply@anthropic.com>
     </example>
     
     <example name="massive_refactor">
-      <scenario>100 files: converting all relative to absolute imports</scenario>
-      <decision>Single commit if automated, or split by service if manual</decision>
-      <approach>
-        <option1>Single: refactor(imports): convert all imports to absolute paths</option1>
-        <option2>Multiple: refactor(auth): convert auth service to absolute imports</option2>
-      </approach>
+      <scenario>300 files: converting all relative to absolute imports</scenario>
+      <decision>SINGLE COMMIT - one concept applied uniformly</decision>
+      <reasoning>
+        Single concept (import style change) applied consistently.
+        Reviewer understands in seconds: "all imports now absolute".
+        File count irrelevant when concept is singular.
+      </reasoning>
+      <message>refactor(imports): convert all imports to absolute paths</message>
+    </example>
+    
+    <example name="single_file_multiple_concepts">
+      <scenario>1 file with: bug fix + new feature + refactor</scenario>
+      <decision>THREE COMMITS - three distinct concepts</decision>
+      <reasoning>
+        Even though it's one file, there are three unrelated concepts.
+        Each needs separate review and potential rollback.
+      </reasoning>
+      <commits>
+        <commit>fix(auth): resolve JWT expiration bug</commit>
+        <commit>feat(auth): add refresh token support</commit>
+        <commit>refactor(auth): simplify token validation logic</commit>
+      </commits>
     </example>
     
     <example name="test_file_organization">

@@ -163,6 +163,90 @@ class GoogleOAuthProvider:
         """Check if OAuth provider is properly configured."""
         return bool(self._client_id and self._client_secret)
     
+    def validate_configuration(self) -> tuple[bool, str]:
+        """Comprehensive validation of OAuth configuration.
+        
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        # Check client ID
+        if not self._client_id:
+            return False, "OAuth client ID is not configured"
+        if len(self._client_id) < 50:
+            return False, f"OAuth client ID appears too short ({len(self._client_id)} chars)"
+        if not self._client_id.endswith(".apps.googleusercontent.com"):
+            return False, "OAuth client ID has invalid format (should end with .apps.googleusercontent.com)"
+        
+        # Check client secret
+        if not self._client_secret:
+            return False, "OAuth client secret is not configured"
+        if len(self._client_secret) < 20:
+            return False, f"OAuth client secret appears too short ({len(self._client_secret)} chars)"
+        if self._client_secret.startswith("REPLACE_"):
+            return False, "OAuth client secret appears to be a placeholder"
+        
+        # Check redirect URI
+        redirect_uri = self.get_redirect_uri()
+        if not redirect_uri:
+            return False, "OAuth redirect URI not configured"
+        
+        # Environment-specific validation
+        if self.env == "staging":
+            if "staging" not in redirect_uri and "localhost" not in redirect_uri:
+                return False, f"Invalid redirect URI for staging: {redirect_uri}"
+        elif self.env == "production":
+            if "localhost" in redirect_uri or "staging" in redirect_uri:
+                return False, f"Invalid redirect URI for production: {redirect_uri}"
+        
+        return True, "OAuth configuration is valid"
+    
+    def self_check(self) -> Dict[str, Any]:
+        """Perform comprehensive self-check of OAuth provider.
+        
+        Returns:
+            Dictionary with check results and any errors found
+        """
+        results = {
+            "provider": "google",
+            "environment": self.env,
+            "checks_passed": [],
+            "checks_failed": [],
+            "is_healthy": False
+        }
+        
+        # Check basic configuration
+        is_valid, error_msg = self.validate_configuration()
+        if is_valid:
+            results["checks_passed"].append("configuration_validation")
+        else:
+            results["checks_failed"].append(f"configuration_validation: {error_msg}")
+            results["error"] = error_msg
+            return results
+        
+        # Check authorization URL generation
+        try:
+            test_url = self.get_authorization_url("test-state")
+            if test_url and "accounts.google.com" in test_url:
+                results["checks_passed"].append("authorization_url_generation")
+            else:
+                results["checks_failed"].append("authorization_url_generation: Invalid URL generated")
+        except Exception as e:
+            results["checks_failed"].append(f"authorization_url_generation: {str(e)}")
+        
+        # Check redirect URI
+        redirect_uri = self.get_redirect_uri()
+        if redirect_uri:
+            results["checks_passed"].append("redirect_uri_configured")
+            results["redirect_uri"] = redirect_uri
+        else:
+            results["checks_failed"].append("redirect_uri_configured")
+        
+        # Overall health
+        results["is_healthy"] = len(results["checks_failed"]) == 0
+        results["client_id_prefix"] = self._client_id[:30] if self._client_id else None
+        
+        return results
+    
     def get_configuration_status(self) -> Dict[str, Any]:
         """Get OAuth configuration status for monitoring."""
         return {

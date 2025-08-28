@@ -17,7 +17,7 @@ import asyncio
 import json
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -81,8 +81,8 @@ class CrossServiceSessionSynchronizer:
             "session_id": session_id,
             "user_id": user_id,
             "email": email,
-            "created_at": datetime.utcnow().isoformat(),
-            "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
             "roles": ["user"],
             "metadata": {
                 "ip_address": "127.0.0.1",
@@ -158,8 +158,8 @@ class CrossServiceSessionSynchronizer:
             "session_id": session_id,
             "user_id": session_data["user_id"],
             "connection_id": f"ws_{session_id}",
-            "connected_at": datetime.utcnow().isoformat(),
-            "last_heartbeat": datetime.utcnow().isoformat()
+            "connected_at": datetime.now(timezone.utc).isoformat(),
+            "last_heartbeat": datetime.now(timezone.utc).isoformat()
         }
         
         # Store in local state
@@ -197,7 +197,7 @@ class CrossServiceSessionSynchronizer:
             "session_id": session_id,
             "data": json.dumps(session_data),
             "ttl": 3600,
-            "stored_at": datetime.utcnow().isoformat()
+            "stored_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Store in local state

@@ -24,7 +24,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import MagicMock, patch
 
@@ -288,7 +288,7 @@ class DatabaseTransactionCoordinatorL3:
                         "event_id": f"event_{uuid.uuid4().hex[:8]}",
                         "user_id": user_id,
                         "event_type": "session_start",
-                        "timestamp": datetime.utcnow(),
+                        "timestamp": datetime.now(timezone.utc),
                         "metadata": json.dumps({"session_id": session_id})
                     },
                     "metric": {
@@ -296,7 +296,7 @@ class DatabaseTransactionCoordinatorL3:
                         "session_id": session_id,
                         "metric_type": "initial_cost",
                         "value": 1000.0,
-                        "timestamp": datetime.utcnow()
+                        "timestamp": datetime.now(timezone.utc)
                     }
                 }
             ),
@@ -321,7 +321,7 @@ class DatabaseTransactionCoordinatorL3:
                         "event_id": f"event_{uuid.uuid4().hex[:8]}",
                         "user_id": user_id,
                         "event_type": "session_start",
-                        "timestamp": datetime.utcnow(),
+                        "timestamp": datetime.now(timezone.utc),
                         "metadata": json.dumps({"session_id": session_id})
                     }
                 },

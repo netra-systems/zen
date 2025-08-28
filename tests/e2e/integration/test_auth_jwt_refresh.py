@@ -83,9 +83,14 @@ class JWTRefreshTestManager(JWTGenerationTestManager):
 
         user_id = refresh_payload["sub"]
 
+        # Add delay to ensure different timestamps for refreshed tokens (needs to cross second boundary)
+        await asyncio.sleep(1.1)
+        
         now = datetime.now(timezone.utc)
-
+        now_timestamp = int(now.timestamp())
         expires_at = now + timedelta(minutes=15)
+        expires_timestamp = int(expires_at.timestamp())
+        refresh_expires_timestamp = int((now + timedelta(days=7)).timestamp())
         
         # Create new access token
 
@@ -95,9 +100,9 @@ class JWTRefreshTestManager(JWTGenerationTestManager):
 
             "email": "test@example.com",
 
-            "iat": now,
+            "iat": now_timestamp,
 
-            "exp": expires_at,
+            "exp": expires_timestamp,
 
             "token_type": "access",
 
@@ -113,9 +118,9 @@ class JWTRefreshTestManager(JWTGenerationTestManager):
 
             "sub": user_id,
 
-            "iat": now,
+            "iat": now_timestamp,
 
-            "exp": now + timedelta(days=7),
+            "exp": refresh_expires_timestamp,
 
             "token_type": "refresh",
 

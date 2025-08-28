@@ -6,7 +6,7 @@ Collects and aggregates billing-related metrics for cost tracking and analysis.
 import asyncio
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
@@ -105,13 +105,13 @@ class BillingMetricsCollector:
             raise RuntimeError("Billing metrics collector not initialized")
         
         async with self._lock:
-            event_id = f"billing_{datetime.utcnow().timestamp()}"
+            event_id = f"billing_{datetime.now(timezone.utc).timestamp()}"
             
             event = BillingEvent(
                 id=event_id,
                 event_type=event_type,
                 user_id=user_id,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 amount=Decimal(str(amount)),
                 metadata=metadata or {}
             )
@@ -203,7 +203,7 @@ class BillingMetricsCollector:
         days: int = 30
     ) -> List[Dict[str, Any]]:
         """Get daily metrics for the specified number of days."""
-        end_date = datetime.utcnow().date()
+        end_date = datetime.now(timezone.utc).date()
         start_date = end_date - timedelta(days=days)
         
         daily_metrics = []
@@ -308,7 +308,7 @@ class BillingMetricsCollector:
         revenue_metrics = await self.get_revenue_metrics(start_time, end_time)
         
         return {
-            "export_timestamp": datetime.utcnow().isoformat(),
+            "export_timestamp": datetime.now(timezone.utc).isoformat(),
             "period": {
                 "start": start_time.isoformat(),
                 "end": end_time.isoformat()
@@ -327,7 +327,7 @@ class BillingMetricsCollector:
         """Perform health check of billing metrics collector."""
         recent_events = [
             e for e in self.events
-            if e.timestamp >= datetime.utcnow() - timedelta(hours=1)
+            if e.timestamp >= datetime.now(timezone.utc) - timedelta(hours=1)
         ]
         
         return {

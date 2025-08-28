@@ -35,7 +35,7 @@ import logging
 import time
 import uuid
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -88,7 +88,7 @@ class TierResolver:
             "user_id": user_id,
             "tier": tier,
             "limits": self.TIER_LIMITS[tier],
-            "resolved_at": datetime.utcnow().isoformat()
+            "resolved_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Cache for 10 minutes
@@ -270,7 +270,7 @@ class LoadBalancer:
             "request_id": str(uuid.uuid4()),
             "user_id": user_id,
             "tier": tier,
-            "queued_at": datetime.utcnow().isoformat(),
+            "queued_at": datetime.now(timezone.utc).isoformat(),
             "data": request_data
         }
         

@@ -27,6 +27,10 @@ class RateLimiter:
     
     async def set_rate_limit(self, user_id: str, endpoint: str, limit: int, window_seconds: int):
         """Set rate limit for a user/endpoint combination."""
+        # Normalize identifiers to prevent bypass vulnerabilities
+        user_id = self._normalize_identifier(user_id)
+        endpoint = self._normalize_identifier(endpoint)
+        
         key = f"rate_limit_config:{user_id}:{endpoint}"
         config = {
             "limit": limit,
@@ -46,6 +50,10 @@ class RateLimiter:
     
     async def check_rate_limit(self, user_id: str, endpoint: str) -> bool:
         """Check if request is within rate limit."""
+        # Normalize user_id and endpoint to prevent bypass vulnerabilities
+        user_id = self._normalize_identifier(user_id)
+        endpoint = self._normalize_identifier(endpoint)
+        
         key = f"rate_limit:{user_id}:{endpoint}"
         config_key = f"{user_id}:{endpoint}"
         
@@ -257,3 +265,34 @@ class RateLimiter:
         self.service_limits.clear()
         if hasattr(self, '_memory_counters'):
             self._memory_counters.clear()
+    
+    def _normalize_identifier(self, identifier: str) -> str:
+        """Normalize identifier to prevent bypass attacks."""
+        if not identifier:
+            return identifier
+        
+        # Convert to lowercase and strip whitespace to prevent case/space bypass
+        normalized = identifier.lower().strip()
+        
+        # URL decode common encodings
+        import urllib.parse
+        normalized = urllib.parse.unquote(normalized)
+        
+        # Remove common URL encoding and special characters that could be used for bypass
+        import re
+        # Remove query parameters, fragments, and path traversal attempts
+        normalized = re.sub(r'[?#].*$', '', normalized)
+        normalized = re.sub(r'\.{2,}', '', normalized)  # Remove path traversal
+        
+        # Remove trailing slashes for endpoint consistency
+        if normalized.endswith('/') and len(normalized) > 1:
+            normalized = normalized.rstrip('/')
+        
+        # Remove control characters and normalize whitespace
+        normalized = re.sub(r'[\n\r\t\f\v]', '', normalized)
+        normalized = re.sub(r'\s+', '', normalized)  # Remove all whitespace
+        
+        # Keep only safe characters for URLs and IDs
+        normalized = re.sub(r'[^\w\-_/:]', '', normalized)
+        
+        return normalized

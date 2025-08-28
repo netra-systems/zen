@@ -24,6 +24,21 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.redis_manager import RedisManager
 from test_framework.test_patterns import L3IntegrationTest
 
+
+async def check_backend_availability() -> bool:
+    """Check if backend service is available."""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://localhost:8000/health", timeout=aiohttp.ClientTimeout(total=2)) as response:
+                return response.status < 500  # Accept any non-server error status
+    except Exception:
+        return False
+
+
+@pytest.mark.skipif(
+    not asyncio.run(check_backend_availability()),
+    reason="Backend service is not available at http://localhost:8000"
+)
 class TestAgentCommunicationBasic(L3IntegrationTest):
     """Test agent communication patterns from multiple angles."""
     

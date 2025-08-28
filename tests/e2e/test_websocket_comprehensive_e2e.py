@@ -22,7 +22,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 import pytest
@@ -359,7 +359,7 @@ class TestWebSocketComprehensiveE2E:
         conn_id = await ws_tester.create_authenticated_connection(user_id, token)
         
         # Send ping
-        ping = {"type": "ping", "timestamp": datetime.utcnow().isoformat()}
+        ping = {"type": "ping", "timestamp": datetime.now(timezone.utc).isoformat()}
         await ws_tester.send_message(conn_id, ping)
         
         # Should receive pong

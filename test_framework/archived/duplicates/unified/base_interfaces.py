@@ -8,7 +8,7 @@ Adheres to SPEC/type_safety.xml and SPEC/conventions.xml.
 import asyncio
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, AsyncIterator, Dict, Generic, List, Optional, Protocol, TypeVar
 
@@ -73,7 +73,7 @@ class TestResult:
     
     def __post_init__(self):
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow()
+            self.timestamp = datetime.now(timezone.utc)
         if self.metadata is None:
             self.metadata = {}
 
@@ -90,7 +90,7 @@ class HealthCheckResult:
     
     def __post_init__(self):
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow()
+            self.timestamp = datetime.now(timezone.utc)
         if self.details is None:
             self.details = {}
 

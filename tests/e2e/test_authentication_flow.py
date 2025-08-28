@@ -42,11 +42,12 @@ class TestAuthenticationFlow:
         auth_service_url = "http://localhost:8001"
         
         async with aiohttp.ClientSession() as session:
-            # Get available OAuth providers
-            providers_response = await session.get(f"{auth_service_url}/auth/providers")
+            # Get available OAuth providers  
+            providers_response = await session.get(f"{auth_service_url}/oauth/providers")
             assert providers_response.status == 200, "OAuth providers endpoint not accessible"
             
-            providers = await providers_response.json()
+            providers_data = await providers_response.json()
+            providers = providers_data.get('providers', [])
             assert len(providers) >= 2, f"Insufficient OAuth providers: {providers}"
             
             # Check Google OAuth configuration

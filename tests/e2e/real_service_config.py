@@ -230,12 +230,12 @@ class RealServiceConfigManager:
         if conn_info:
             host = conn_info.get("host", "localhost")
             port = conn_info.get("port", 5432)
-            database = conn_info.get("database", "netra")
+            database = conn_info.get("database", "netra_dev")
             # Use generic credentials for constructed URL
             return f"postgresql://postgres:password@{host}:{port}/{database}"
         
         # Fallback
-        return "postgresql://postgres:password@localhost:5432/netra"
+        return "postgresql://postgres:password@localhost:5432/netra_dev"
     
     def _get_test_postgres_url(self) -> str:
         """Get test PostgreSQL URL (SQLite fallback)."""

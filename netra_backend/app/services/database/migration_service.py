@@ -11,7 +11,7 @@ This service manages database migrations with rollback capabilities and safety c
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -155,12 +155,12 @@ class MigrationService:
             migration = self._applied_migrations[migration_id]
             
             # Execute rollback
-            start_time = datetime.utcnow()
+            start_time = datetime.now(timezone.utc)
             
             # In a real implementation, this would execute the down_sql
             logger.info(f"Rolling back migration {migration_id}")
             
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             execution_time = int((end_time - start_time).total_seconds() * 1000)
             
             # Update migration status
@@ -269,7 +269,7 @@ class MigrationService:
         Returns:
             Migration execution result
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
             # Update status
@@ -282,7 +282,7 @@ class MigrationService:
             import asyncio
             await asyncio.sleep(0.1)
             
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             execution_time = int((end_time - start_time).total_seconds() * 1000)
             
             # Update migration
@@ -311,7 +311,7 @@ class MigrationService:
             result = MigrationResult(
                 migration_id=migration.id,
                 success=False,
-                execution_time_ms=int((datetime.utcnow() - start_time).total_seconds() * 1000),
+                execution_time_ms=int((datetime.now(timezone.utc) - start_time).total_seconds() * 1000),
                 error_message=str(e)
             )
             

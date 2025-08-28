@@ -20,7 +20,7 @@ import json
 import random
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -169,7 +169,7 @@ class RateLimitTester:
                         "user": user["email"],
                         "endpoint": endpoint,
                         "status": response.status,
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                     
             if rate_limited_count > 0:

@@ -54,7 +54,16 @@ class WebSocketResilienceTestCore:
     
     def _create_auth_headers(self, user_id: str) -> Dict[str, str]:
         """Create authentication headers for user."""
-        token = f"test_token_{user_id}"
+        # Import JWT helper to create proper tokens
+        from tests.e2e.jwt_token_helpers import JWTTestHelper
+        
+        jwt_helper = JWTTestHelper()
+        # Create proper JWT token for the user
+        token = jwt_helper.create_access_token(
+            user_id=user_id,
+            email=f"{user_id}@test.com",
+            permissions=["read", "write", "agent_access"]
+        )
         return TestDataFactory.create_websocket_auth(token)
     
     def _check_server_availability(self) -> bool:

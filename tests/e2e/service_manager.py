@@ -161,7 +161,8 @@ class ServiceManager:
         # Set test mode variables
         test_env.update({
             "TESTING": "1",
-            "ENVIRONMENT": "test",
+            "ENVIRONMENT": "development",  # Use development for dev endpoints to work
+            "NETRA_ENVIRONMENT": "development",  # Also set this variant
             "LOG_LEVEL": "WARNING",
             "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
             "AUTH_FAST_TEST_MODE": "true",

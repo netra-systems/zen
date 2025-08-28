@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 
 import asyncio
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock
 
@@ -32,7 +32,7 @@ class RevenueTestHelpers:
             "user_id": user_id,
             "plan": plan,
             "status": "active",
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "billing_cycle": "monthly" if plan != "free" else None,
             "features": {
                 "free": ["basic_chat", "limited_agents"],
@@ -56,7 +56,7 @@ class RevenueTestHelpers:
             "user_id": user_id,
             "from_plan": from_plan,
             "to_plan": to_plan,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "revenue_impact": {
                 "free": 0, "early": 29, "mid": 99, "enterprise": 299
             }.get(to_plan, 0) - {
@@ -73,12 +73,12 @@ class AuthenticationTestHelpers:
     def create_test_jwt_token(user_id: str = "test-user", exp_minutes: int = 60) -> str:
         """Create test JWT token for authentication."""
         import jwt
-        from datetime import datetime, timedelta
+        from datetime import datetime, timezone, timedelta
         
         payload = {
             "user_id": user_id,
-            "exp": datetime.utcnow() + timedelta(minutes=exp_minutes),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=exp_minutes),
+            "iat": datetime.now(timezone.utc),
             "type": "access_token"
         }
         return jwt.encode(payload, "test-secret", algorithm="HS256")
@@ -90,8 +90,8 @@ class AuthenticationTestHelpers:
             "session_id": f"session_{user_id}_{int(time.time())}",
             "user_id": user_id,
             "authenticated": True,
-            "created_at": datetime.utcnow().isoformat(),
-            "expires_at": (datetime.utcnow().timestamp() + 3600),  # 1 hour
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "expires_at": (datetime.now(timezone.utc).timestamp() + 3600),  # 1 hour
             "permissions": ["read", "write", "admin"] if user_id == "admin" else ["read", "write"]
         }
     
@@ -127,7 +127,7 @@ class WebSocketTestHelpers:
         return {
             "type": message_type,
             "data": data,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "message_id": f"msg_{int(time.time() * 1000)}"
         }
     
@@ -155,7 +155,7 @@ class AgentTestHelpers:
             "agent_type": agent_type,
             "input": user_input,
             "context": {},
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "priority": "normal"
         }
     
@@ -168,7 +168,7 @@ class AgentTestHelpers:
                 "status": "completed",
                 "response": "Test agent response",
                 "execution_time_ms": 150,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         else:
             return {
@@ -176,7 +176,7 @@ class AgentTestHelpers:
                 "status": "error",
                 "error": "Test agent error",
                 "execution_time_ms": 50,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     @staticmethod
@@ -215,8 +215,8 @@ class DatabaseTestHelpers:
         """Create test database record."""
         base_record = {
             "id": int(time.time() * 1000),
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         base_record.update(kwargs)
         return base_record
@@ -240,7 +240,7 @@ class MiscTestHelpers:
     def create_test_timestamp(offset_seconds: int = 0) -> str:
         """Create test timestamp with optional offset."""
         from datetime import timedelta
-        timestamp = datetime.utcnow() + timedelta(seconds=offset_seconds)
+        timestamp = datetime.now(timezone.utc) + timedelta(seconds=offset_seconds)
         return timestamp.isoformat()
     
     @staticmethod

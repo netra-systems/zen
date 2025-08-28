@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fix datetime.utcnow() deprecation warnings by replacing with datetime.now(UTC)"""
+"""Fix datetime.now(timezone.utc) deprecation warnings by replacing with datetime.now(UTC)"""
 
 import os
 import re
@@ -23,8 +23,8 @@ def fix_datetime_in_file(filepath):
     # Check if UTC is imported
     has_utc_import = bool(re.search(r'from datetime import.*UTC', content))
     
-    # Replace datetime.utcnow() with datetime.now(UTC)
-    if 'datetime.utcnow()' in content:
+    # Replace datetime.now(timezone.utc) with datetime.now(UTC)
+    if 'datetime.now(timezone.utc)' in content:
         # Add UTC import if needed
         if not has_utc_import:
             # Find the datetime import line
@@ -41,11 +41,11 @@ def fix_datetime_in_file(filepath):
                 if datetime_import_match:
                     content = content.replace(
                         datetime_import_match.group(1),
-                        'import datetime\nfrom datetime import UTC\n'
+                        'import datetime\nfrom datetime import UTC\n', timezone
                     )
         
         # Replace all occurrences
-        content = content.replace('datetime.utcnow()', 'datetime.now(UTC)')
+        content = content.replace('datetime.now(timezone.utc)', 'datetime.now(UTC)')
         
         # Also handle cases where utcnow is imported directly
         content = re.sub(r'datetime\.datetime\.utcnow\(\)', 'datetime.datetime.now(UTC)', content)

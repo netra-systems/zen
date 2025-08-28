@@ -164,7 +164,7 @@ def _get_postgres_defaults():
         shared_config={
             "host": "34.93.246.241",
             "port": 5432,
-            "database": "netra",
+            "database": "netra_dev",
             "user": "netra_dev",
             "password": "bGBaG2g4Cfa&Q@cNxGZ3"
         },

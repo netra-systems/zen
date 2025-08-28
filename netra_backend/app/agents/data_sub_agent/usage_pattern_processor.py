@@ -8,7 +8,7 @@ BVJ: Growth & Enterprise | Usage Analytics | +20% optimization value capture
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.interface import (
@@ -110,7 +110,7 @@ class UsagePatternProcessor(BaseExecutionInterface):
             "success": True,
             "pattern_analysis": result,
             "processor": "UsagePatternProcessor",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     def _log_processing_error(self, error: Exception, execution_time: float) -> None:

@@ -15,7 +15,7 @@ Tests authentication metrics collection and monitoring including:
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock, call
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -82,7 +82,7 @@ class TestAuthenticationMetrics:
             auth_provider='google',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_login_metrics_collection(self, mock_metrics_service, sample_user):
@@ -92,7 +92,7 @@ class TestAuthenticationMetrics:
             'auth_provider': 'google',
             'ip_address': '127.0.0.1',
             'user_agent': 'Mozilla/5.0',
-            'login_time': datetime.utcnow(),
+            'login_time': datetime.now(timezone.utc),
             'session_id': str(uuid4())
         }
         
@@ -107,7 +107,7 @@ class TestAuthenticationMetrics:
         logout_data = {
             'user_id': sample_user.id,
             'session_id': str(uuid4()),
-            'logout_time': datetime.utcnow(),
+            'logout_time': datetime.now(timezone.utc),
             'session_duration_seconds': 3600,
             'logout_reason': 'user_initiated'
         }
@@ -125,7 +125,7 @@ class TestAuthenticationMetrics:
             'ip_address': '192.168.1.100',
             'failure_reason': 'invalid_credentials',
             'auth_provider': 'local',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'user_agent': 'Mozilla/5.0'
         }
         
@@ -142,7 +142,7 @@ class TestAuthenticationMetrics:
             'session_id': str(uuid4()),
             'duration_seconds': 7200,  # 2 hours
             'activity_count': 25,
-            'last_activity': datetime.utcnow(),
+            'last_activity': datetime.now(timezone.utc),
             'session_end_reason': 'timeout'
         }
         
@@ -183,7 +183,7 @@ class TestAuthenticationMetrics:
         auth_event = {
             'event_type': 'login_success',
             'user_id': str(uuid4()),
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'metadata': {'auth_provider': 'google', 'ip_address': '127.0.0.1'}
         }
         
@@ -248,7 +248,7 @@ class TestPerformanceMetrics:
             'response_time_ms': 245,
             'status_code': 200,
             'auth_provider': 'google',
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Record response time
@@ -264,7 +264,7 @@ class TestPerformanceMetrics:
             'requests_per_minute': 150,
             'successful_requests': 147,
             'failed_requests': 3,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Record throughput
@@ -281,7 +281,7 @@ class TestPerformanceMetrics:
             'error_requests': 25,
             'error_rate_percentage': 2.5,
             'time_window_minutes': 60,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Record error rate
@@ -371,7 +371,7 @@ class TestSecurityMetrics:
             'attempt_count': 15,
             'time_window_minutes': 5,
             'risk_score': 85,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Record suspicious activity
@@ -388,7 +388,7 @@ class TestSecurityMetrics:
             'reason': 'multiple_failed_attempts',
             'severity': 'medium',
             'ip_address': '10.0.0.50',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'action_taken': 'account_locked_30min'
         }
         
@@ -411,7 +411,7 @@ class TestSecurityMetrics:
                 'rate_limiting_enabled',
                 'suspicious_ip_monitoring'
             ],
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Track threat level
@@ -588,7 +588,7 @@ class TestAlerting:
         resolution_data = {
             'alert_id': alert_id,
             'resolved_by': 'admin@example.com',
-            'resolution_time': datetime.utcnow(),
+            'resolution_time': datetime.now(timezone.utc),
             'resolution_notes': 'Issue resolved by restarting auth service',
             'root_cause': 'temporary_database_connection_issue'
         }
@@ -674,7 +674,7 @@ class TestDashboardMetrics:
             'concurrent_users': 1234,
             'response_time_p95_ms': 320,
             'error_rate_percentage': 1.8,
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Get real-time stats
@@ -727,7 +727,7 @@ class TestDashboardMetrics:
             'time_range': '7d',
             'file_size_bytes': 245780,
             'download_url': 'https://api.example.com/exports/metrics-123456.json',
-            'expires_at': datetime.utcnow() + timedelta(hours=24)
+            'expires_at': datetime.now(timezone.utc) + timedelta(hours=24)
         }
         
         # Export metrics
@@ -762,7 +762,7 @@ class TestMetricsRetention:
         mock_retention_service.cleanup_old_metrics.return_value = {
             'records_deleted': 150000,
             'disk_space_freed_mb': 45.7,
-            'oldest_retained_date': datetime.utcnow() - timedelta(days=90),
+            'oldest_retained_date': datetime.now(timezone.utc) - timedelta(days=90),
             'cleanup_duration_seconds': 12.5
         }
         
@@ -807,7 +807,7 @@ class TestMetricsRetention:
             'aggregated_metrics_days': 365,
             'archived_metrics_years': 7,
             'compliance_status': 'compliant',
-            'next_cleanup_date': datetime.utcnow() + timedelta(days=1),
+            'next_cleanup_date': datetime.now(timezone.utc) + timedelta(days=1),
             'storage_usage': {
                 'raw_data_gb': 2.3,
                 'aggregated_data_gb': 0.8,

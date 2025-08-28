@@ -5,7 +5,7 @@ Business Value: Foundation for all AI optimization workflows and value creation.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -169,7 +169,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
             stream_updates=stream_updates,
             thread_id=getattr(state, 'chat_thread_id', run_id),
             user_id=getattr(state, 'user_id', 'default_user'),
-            start_time=datetime.utcnow(),
+            start_time=datetime.now(timezone.utc),
             metadata={"description": self.description}
         )
     

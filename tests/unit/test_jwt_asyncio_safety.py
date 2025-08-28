@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Add parent directories to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -59,7 +59,7 @@ class TestJWTAsyncioSafety:
         handler = JWTHandler()
         
         # Create a test token
-        test_payload = {"user_id": "123", "exp": datetime.utcnow() + timedelta(hours=1)}
+        test_payload = {"user_id": "123", "exp": datetime.now(timezone.utc) + timedelta(hours=1)}
         test_token = jwt.encode(test_payload, handler.secret, algorithm="HS256")
         
         # Test from async context - should use fallback
@@ -106,7 +106,7 @@ class TestJWTAsyncioSafety:
         handler = ProperJWTHandler()
         
         # Create test token
-        test_payload = {"user_id": "123", "exp": datetime.utcnow() + timedelta(hours=1)}
+        test_payload = {"user_id": "123", "exp": datetime.now(timezone.utc) + timedelta(hours=1)}
         test_token = jwt.encode(test_payload, handler.secret, algorithm="HS256")
         
         # Test from async context - should work
@@ -199,7 +199,7 @@ class TestJWTAsyncioSafety:
                     # Generate new access token
                     new_payload = {
                         "user_id": payload["user_id"],
-                        "exp": datetime.utcnow() + timedelta(hours=1)
+                        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                     }
                     new_token = jwt.encode(new_payload, self.secret, algorithm="HS256")
                     

@@ -10,7 +10,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -76,7 +76,7 @@ class TestL4CriticalAuthIntegration:
         # Create expired token
         expired_payload = {
             "sub": "test_user_id",
-            "exp": datetime.utcnow() - timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1)
         }
         expired_token = jwt.encode(expired_payload, settings.SECRET_KEY, algorithm="HS256")
         

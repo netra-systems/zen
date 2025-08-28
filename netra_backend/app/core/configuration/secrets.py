@@ -558,3 +558,63 @@ class SecretManager:
             return self._secret_cache.get("JWT_SECRET_KEY")
         
         return self._secret_cache.get(secret_name)
+    
+    def _load_secrets(self) -> Dict[str, Any]:
+        """Load secrets from all configured sources.
+        
+        **TEST METHOD**: Provides interface for test mocking.
+        Returns dictionary of all loaded secrets.
+        """
+        self._load_secrets_from_sources()
+        return dict(self._secret_cache)
+    
+    def _get_secret_mappings(self) -> Dict[str, dict]:
+        """Get secret to configuration field mappings.
+        
+        **TEST METHOD**: Provides interface for test mocking.
+        Returns the secret mappings dictionary.
+        """
+        return dict(self._secret_mappings)
+    
+    def _analyze_critical_secrets(self, secrets: Dict[str, Any]) -> Tuple[List[str], List[str], List[str]]:
+        """Analyze critical secrets status.
+        
+        **TEST METHOD**: Provides interface for test mocking.
+        Returns (all_critical, applied, missing) secret lists.
+        """
+        critical_secrets = ["JWT_SECRET_KEY", "FERNET_KEY", "SERVICE_SECRET"]
+        applied = [s for s in critical_secrets if s in secrets and secrets[s]]
+        missing = [s for s in critical_secrets if s not in secrets or not secrets[s]]
+        return critical_secrets, applied, missing
+    
+    def _apply_direct_mapping(self, config: AppConfig, mapping: Dict[str, Any], secret_value: str) -> None:
+        """Apply direct field mapping for secret.
+        
+        **TEST METHOD**: Provides interface for test mocking.
+        Sets the secret value on the config object directly.
+        """
+        field_name = mapping.get("field")
+        if field_name:
+            setattr(config, field_name, secret_value)
+    
+    def _apply_nested_mapping(self, config: AppConfig, mapping: Dict[str, Any], secret_value: str) -> None:
+        """Apply nested field mapping for secret.
+        
+        **TEST METHOD**: Provides interface for test mocking.
+        Sets the secret value on nested config objects.
+        """
+        targets = mapping.get("targets", [])
+        field_name = mapping.get("field")
+        
+        if targets and field_name:
+            # Navigate to nested object and set field
+            try:
+                obj = config
+                for target in targets:
+                    if hasattr(obj, target):
+                        obj = getattr(obj, target)
+                    else:
+                        return  # Target path doesn't exist
+                setattr(obj, field_name, secret_value)
+            except AttributeError:
+                pass  # Nested path doesn't exist

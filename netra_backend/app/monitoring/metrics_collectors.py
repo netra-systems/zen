@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -56,7 +56,7 @@ class SystemMetricsCollector:
                     "free_gb": disk.free / (1024 * 1024 * 1024),
                     "total_gb": disk.total / (1024 * 1024 * 1024)
                 },
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         except Exception as e:
             logger.error(f"Error collecting system metrics: {e}")
@@ -84,7 +84,7 @@ class GitMetricsCollector:
                     "active": 1,
                     "total": 1
                 },
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         except Exception as e:
             logger.error(f"Error collecting Git metrics: {e}")
@@ -117,7 +117,7 @@ class CodeQualityMetricsCollector:
                     "passed": 0,
                     "failed": 0
                 },
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         except Exception as e:
             logger.error(f"Error collecting code quality metrics: {e}")
@@ -145,7 +145,7 @@ class PerformanceMetricsCollector:
                     "uptime_percent": 100.0,
                     "last_downtime": None
                 },
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         except Exception as e:
             logger.error(f"Error collecting performance metrics: {e}")

@@ -9,7 +9,7 @@ import os
 import subprocess
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 
 import requests
@@ -104,7 +104,7 @@ class AuthServiceDiagnostic:
         print("\n🔍 Checking recent error logs...")
         
         # Get logs from last 30 minutes
-        timestamp = (datetime.utcnow() - timedelta(minutes=30)).isoformat() + "Z"
+        timestamp = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat() + "Z"
         
         cmd = [
             "gcloud", "logging", "read",

@@ -22,7 +22,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -151,7 +151,7 @@ class AgentOrchestrationRevenuePathL4Manager:
                 "id": user_id,
                 "email": f"{user_id}@revenue-path-test.com",
                 "tier": tier.value,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "status": "active",
                 "revenue_testing": True,
                 "monthly_spend_target": self._get_tier_spend_target(tier)

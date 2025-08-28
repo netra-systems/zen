@@ -11,7 +11,7 @@ import asyncio
 import json
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 
 import aiohttp
@@ -41,7 +41,7 @@ class StagingE2ETester:
         result = {
             "test_name": test_name,
             "success": success,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "details": details or {},
             "error": error
         }
@@ -244,7 +244,7 @@ class StagingE2ETester:
     async def run_all_tests(self):
         """Run all test suites."""
         print(f"[START] Starting E2E tests against: {self.base_url}")
-        print(f"[TIME] Test started at: {datetime.utcnow().isoformat()}")
+        print(f"[TIME] Test started at: {datetime.now(timezone.utc).isoformat()}")
         
         # Run all test suites
         await self.test_health_endpoints()
@@ -300,12 +300,12 @@ class StagingE2ETester:
             print("   Recommendation: Significant issues need resolution")
         
         # Save results
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         results_file = f"staging_e2e_results_{timestamp}.json"
         with open(results_file, 'w') as f:
             json.dump({
                 "test_run": {
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "base_url": self.base_url,
                     "total_tests": total_tests,
                     "passed_tests": passed_tests,

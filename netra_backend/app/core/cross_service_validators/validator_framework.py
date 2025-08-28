@@ -7,7 +7,7 @@ Modular design enables targeted validation of specific service aspects.
 
 import asyncio
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type, Union
 
@@ -169,7 +169,7 @@ class CrossServiceValidatorFramework:
         context: Optional[Dict[str, Any]] = None
     ) -> ValidationReport:
         """Run cross-service validation."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         report = ValidationReport(
             report_id=f"validation_{int(start_time.timestamp())}",
             services_validated=services
@@ -185,7 +185,7 @@ class CrossServiceValidatorFramework:
         await self._run_validators(validators_to_run, validation_context, report)
         
         # Finalize report
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         report.execution_time_ms = (end_time - start_time).total_seconds() * 1000
         report.recommendations = self._generate_recommendations(report)
         
@@ -271,9 +271,9 @@ class CrossServiceValidatorFramework:
     ) -> List[ValidationResult]:
         """Run a single validator with error handling."""
         try:
-            start_time = datetime.utcnow()
+            start_time = datetime.now(timezone.utc)
             results = await validator.validate(context)
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             
             # Add execution time to results
             execution_time = (end_time - start_time).total_seconds() * 1000

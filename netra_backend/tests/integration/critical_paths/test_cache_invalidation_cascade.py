@@ -21,7 +21,7 @@ import json
 import random
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
@@ -68,7 +68,7 @@ class CacheLayer:
         """Set value in cache."""
         self.data[key] = {
             "value": value,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "ttl": ttl
         }
         
@@ -218,7 +218,7 @@ class CacheInvalidationTester:
                         "id": i,
                         "category": category,
                         "data": f"test_data_{category}_{i}",
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                         "metadata": {
                             "version": 1,
                             "checksum": hashlib.md5(f"{category}{i}".encode()).hexdigest()
@@ -336,7 +336,7 @@ class CacheInvalidationTester:
             self.invalidation_log.append({
                 "type": "single_key",
                 "key": test_key,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "layers_affected": len(self.cache_layers) + 1  # +1 for Redis
             })
             
@@ -412,7 +412,7 @@ class CacheInvalidationTester:
             self.invalidation_log.append({
                 "type": "pattern",
                 "pattern": pattern,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "keys_invalidated": total_invalidated
             })
             

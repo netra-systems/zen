@@ -6,7 +6,7 @@ Provides utilities for testing billing operations with ClickHouse.
 
 import asyncio
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ClickHouseBillingHelper:
@@ -28,7 +28,7 @@ class ClickHouseBillingHelper:
             "usage_type": usage_type,
             "amount": amount,
             "metadata": metadata or {},
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
         self.billing_records.append(record)
     

@@ -7,7 +7,7 @@ and prevent data corruption or inconsistencies between services.
 
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 from uuid import UUID
 
@@ -687,8 +687,8 @@ class CrossServiceDataValidator(BaseValidator):
         for entity in sync_entities:
             try:
                 # Simulate checking sync status
-                last_sync = datetime.utcnow() - timedelta(minutes=5)
-                sync_lag = (datetime.utcnow() - last_sync).total_seconds()
+                last_sync = datetime.now(timezone.utc) - timedelta(minutes=5)
+                sync_lag = (datetime.now(timezone.utc) - last_sync).total_seconds()
                 max_lag = 300  # 5 minutes
                 
                 if sync_lag <= max_lag:

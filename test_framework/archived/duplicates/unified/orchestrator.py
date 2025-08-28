@@ -9,7 +9,7 @@ import json
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type
 
@@ -214,7 +214,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
         for hook in self.config.hooks:
             await hook.before_test(test_name, test)
         
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
             if self.config.dry_run:
@@ -239,7 +239,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
                 level=test_config.level,
                 environment=test_config.environment,
                 status=False,
-                duration_ms=(datetime.utcnow() - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
                 error_message="Test timeout"
             )
         except Exception as e:
@@ -248,7 +248,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
                 level=test_config.level,
                 environment=test_config.environment,
                 status=False,
-                duration_ms=(datetime.utcnow() - start_time).total_seconds() * 1000,
+                duration_ms=(datetime.now(timezone.utc) - start_time).total_seconds() * 1000,
                 error_message=str(e)
             )
             
@@ -309,7 +309,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
                 "pass_rate": f"{pass_rate:.2f}%",
                 "total_duration_ms": total_duration,
                 "avg_duration_ms": avg_duration,
-                "execution_time": datetime.utcnow().isoformat()
+                "execution_time": datetime.now(timezone.utc).isoformat()
             },
             "by_level": {
                 level: {
@@ -368,7 +368,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
             results.append(result)
         
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "environment": environment.value,
             "services": [
                 {
@@ -403,7 +403,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
         dependency_issues = await validator.validate_dependencies(service_configs)
         
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "environment": environment.value,
             "deployment_status": deployment_status,
             "dependency_issues": dependency_issues,
@@ -540,7 +540,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
     
     async def _save_report(self, report: Dict[str, Any]) -> None:
         """Save test report to file."""
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         report_file = self.config.report_dir / f"test_report_{timestamp}.json"
         
         # Ensure report directory exists

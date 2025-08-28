@@ -23,7 +23,7 @@ import statistics
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -281,7 +281,7 @@ class MessagePipelineL4Manager:
 
                 "user_id": f"test_user_{i % 10}",
 
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
 
                 "priority": priority.value,
 
@@ -302,7 +302,7 @@ class MessagePipelineL4Manager:
 
                     priority=priority.value,
 
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
 
                     retry_count=0
 
@@ -536,7 +536,7 @@ class MessagePipelineL4Manager:
 
                 priority="low",
 
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
 
                 retry_count=message.retry_count + 1,
 
@@ -697,7 +697,7 @@ class MessagePipelineL4Manager:
 
                 "user_id": f"error_user_{i}",
 
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
 
             }
             
@@ -711,7 +711,7 @@ class MessagePipelineL4Manager:
 
                 priority="normal",
 
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
 
                 retry_count=0
 
@@ -791,7 +791,7 @@ class MessagePipelineL4Manager:
 
                         "message_id": f"{connection_id}_delivery_{i}",
 
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
 
                     }
                     

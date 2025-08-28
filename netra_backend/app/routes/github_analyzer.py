@@ -4,7 +4,7 @@ API endpoints for GitHub code analysis agent.
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -42,7 +42,7 @@ def _store_analysis_initial_status(analysis_id: str, request: AnalysisRequest, u
     """Store initial analysis status."""
     analysis_store[analysis_id] = {
         "status": "started", "progress": 0, "message": "Initializing analysis",
-        "started_at": datetime.utcnow(), "repository_url": request.repository_url,
+        "started_at": datetime.now(timezone.utc), "repository_url": request.repository_url,
         "user_id": user_id
     }
 
@@ -57,7 +57,7 @@ def _build_analysis_response(analysis_id: str, request: AnalysisRequest) -> Anal
     """Build analysis response."""
     return AnalysisResponse(
         success=True, analysis_id=analysis_id, repository_url=request.repository_url,
-        analyzed_at=datetime.utcnow(), status="started"
+        analyzed_at=datetime.now(timezone.utc), status="started"
     )
 
 async def _process_analysis_request(request: AnalysisRequest, background_tasks: BackgroundTasks, current_user: User, db: AsyncSession) -> AnalysisResponse:
@@ -195,7 +195,7 @@ def _build_analysis_context(request: AnalysisRequest) -> Dict[str, Any]:
 def _set_analysis_completion(analysis_id: str) -> None:
     """Set analysis completion status."""
     _update_analysis_status(analysis_id, "completed", 100, "Analysis completed")
-    analysis_store[analysis_id]["completed_at"] = datetime.utcnow()
+    analysis_store[analysis_id]["completed_at"] = datetime.now(timezone.utc)
 
 def _process_analysis_result(analysis_id: str, result: Any) -> None:
     """Process analysis result based on success status."""
@@ -219,7 +219,7 @@ async def _handle_analysis_error(analysis_id: str, error: Exception) -> None:
     """Handle analysis errors and update status."""
     logger.error(f"Analysis {analysis_id} failed: {str(error)}")
     _mark_analysis_failed(analysis_id, str(error))
-    analysis_store[analysis_id]["completed_at"] = datetime.utcnow()
+    analysis_store[analysis_id]["completed_at"] = datetime.now(timezone.utc)
 
 
 def _update_analysis_status(analysis_id: str, status: str, progress: int, message: str) -> None:

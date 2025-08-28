@@ -19,7 +19,7 @@ import asyncio
 import os
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -52,7 +52,7 @@ class TestExistingUserLoginFlow:
         user.full_name = "Existing User"
         user.is_active = True
         user.email_verified = True
-        user.last_login = datetime.utcnow() - timedelta(days=1)
+        user.last_login = datetime.now(timezone.utc) - timedelta(days=1)
         user.failed_login_attempts = 0
         # Mock: Service component isolation for predictable testing behavior
         user.check_password = MagicMock(return_value=True)
@@ -162,7 +162,7 @@ class TestExistingUserLoginFlow:
         """Test 3: Account should be locked after multiple failed login attempts."""
         mock_existing_user.check_password.return_value = False
         mock_existing_user.failed_login_attempts = 5  # Already at limit
-        mock_existing_user.locked_until = datetime.utcnow() + timedelta(minutes=15)
+        mock_existing_user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=15)
         
         login_data = {
             "email": "existing@example.com",
@@ -188,8 +188,8 @@ class TestExistingUserLoginFlow:
         mock_session = MagicMock()
         mock_session.id = str(uuid.uuid4())
         mock_session.user_id = mock_existing_user.id
-        mock_session.created_at = datetime.utcnow()
-        mock_session.last_activity = datetime.utcnow()
+        mock_session.created_at = datetime.now(timezone.utc)
+        mock_session.last_activity = datetime.now(timezone.utc)
         
         mock_session_service.create_session.return_value = mock_session
         

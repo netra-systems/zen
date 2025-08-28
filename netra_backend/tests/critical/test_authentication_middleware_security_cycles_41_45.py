@@ -15,7 +15,7 @@ import pytest
 import asyncio
 import time
 from unittest.mock import patch, MagicMock, AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 
 from netra_backend.app.middleware.fastapi_auth_middleware import FastAPIAuthMiddleware
@@ -163,7 +163,7 @@ class TestAuthenticationMiddlewareSecurity:
         user_data = {
             "user_id": "test_user_43",
             "role": "user",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         valid_token = token_service.create_token(user_data)
         
@@ -218,7 +218,7 @@ class TestAuthenticationMiddlewareSecurity:
             "user_id": "regular_user_44",
             "role": "user",
             "permissions": ["read"],
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         user_token = token_service.create_token(user_token_data)
         
@@ -226,7 +226,7 @@ class TestAuthenticationMiddlewareSecurity:
             "user_id": "admin_user_44", 
             "role": "admin",
             "permissions": ["read", "write", "admin"],
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         admin_token = token_service.create_token(admin_token_data)
         

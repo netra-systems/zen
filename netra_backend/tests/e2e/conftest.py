@@ -200,7 +200,7 @@ async def real_agent_setup():
     supervisor.user_id = str(uuid.uuid4())
     
     # Mock the run method to complete successfully
-    async def mock_run(user_prompt: str, thread_id: str, user_id: str, run_id: str):
+    async def mock_run(state_or_prompt, run_id: str = None, **kwargs):
         """Mock run method that completes successfully."""
         from netra_backend.app.schemas.agent import SubAgentLifecycle
         from netra_backend.app.agents.state import DeepAgentState
@@ -228,13 +228,20 @@ async def real_agent_setup():
             metadata=TriageMetadata(triage_duration_ms=100)
         )
         
-        result_state = DeepAgentState(
-            user_request=user_prompt,
-            chat_thread_id=thread_id,
-            user_id=user_id,
-            triage_result=mock_triage_result
-        )
-        return result_state
+        # Handle different call patterns - if first arg is already a state, return it updated
+        if hasattr(state_or_prompt, 'user_request'):
+            # It's a state object, update and return it
+            state_or_prompt.triage_result = mock_triage_result
+            return state_or_prompt
+        else:
+            # It's a prompt string, create new state
+            result_state = DeepAgentState(
+                user_request=state_or_prompt,
+                chat_thread_id=supervisor.thread_id,
+                user_id=supervisor.user_id,
+                triage_result=mock_triage_result
+            )
+            return result_state
     
     supervisor.run = mock_run
     

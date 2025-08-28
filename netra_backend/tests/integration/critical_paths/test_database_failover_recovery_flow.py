@@ -22,7 +22,7 @@ import os
 import sys
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -148,11 +148,11 @@ class DatabaseFailoverTester:
         try:
             # Insert test data in primary
             test_id = uuid.uuid4()
-            test_value = f"sync_test_{datetime.utcnow().isoformat()}"
+            test_value = f"sync_test_{datetime.now(timezone.utc).isoformat()}"
             
             await self.primary_conn.execute(
                 "INSERT INTO test_replication (id, value, created_at) VALUES ($1, $2, $3)",
-                test_id, test_value, datetime.utcnow()
+                test_id, test_value, datetime.now(timezone.utc)
             )
             print(f"[OK] Test data inserted to primary: {test_id}")
             
@@ -299,12 +299,12 @@ class DatabaseFailoverTester:
                         
                         if status == "failover_in_progress":
                             print("[INFO] Failover in progress...")
-                            self.checkpoints.append(("failover_started", datetime.utcnow()))
+                            self.checkpoints.append(("failover_started", datetime.now(timezone.utc)))
                         elif status == "failover_completed":
                             failover_completed = True
                             elapsed = time.time() - start_time
                             print(f"[OK] Failover completed in {elapsed:.2f} seconds")
-                            self.checkpoints.append(("failover_completed", datetime.utcnow()))
+                            self.checkpoints.append(("failover_completed", datetime.now(timezone.utc)))
                             break
                         elif status == "normal":
                             print("[INFO] System operating normally")
@@ -334,7 +334,7 @@ class DatabaseFailoverTester:
     async def capture_database_state(self) -> Dict[str, Any]:
         """Capture current database state for comparison."""
         state = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "tables": {},
             "sequences": {},
             "checksums": {}
@@ -520,7 +520,7 @@ class DatabaseFailoverTester:
                     "type": "test_transaction",
                     "data": {
                         "value": f"test_value_{i}",
-                        "timestamp": datetime.utcnow().isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                 }
                 test_transactions.append(tx_data)

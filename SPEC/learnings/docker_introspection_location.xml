@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <id>docker-introspection-scripts-location</id>
+  <category>tooling</category>
+  <date>2025-01-28</date>
+  
+  <title>Docker Introspection Scripts Location</title>
+  
+  <problem>Need to identify and use existing Docker log introspection tools</problem>
+  
+  <solution>
+    Existing Docker introspection scripts are located at:
+    - scripts/docker_log_introspection.py - Main introspection tool for analyzing Docker container logs
+    - scripts/docker_compose_log_introspector.py - Docker Compose specific log introspection
+  </solution>
+  
+  <implementation>
+    <!-- Primary script for Docker log analysis -->
+    <script>scripts/docker_log_introspection.py</script>
+    
+    <!-- Usage -->
+    <usage>
+      python scripts/docker_log_introspection.py [hours_back] [target_service]
+      # Default: 24 hours, backend service
+      # Returns exit code 2 if errors found needing remediation
+    </usage>
+    
+    <!-- Features -->
+    <features>
+      - Categorizes errors by type (database, auth, config, etc.)
+      - Prioritizes errors by severity and frequency
+      - Generates JSON report with top issues
+      - Provides context around errors
+    </features>
+  </implementation>
+  
+  <outcome>
+    Use existing introspection tools instead of creating new ones.
+    Script provides prioritized error list for systematic remediation.
+  </outcome>
+  
+  <cross_references>
+    <ref>scripts/docker_health_check.py</ref>
+    <ref>DOCKER_INTROSPECTION_REPORT.md</ref>
+    <ref>docker_health_check.json</ref>
+  </cross_references>
+</learning>

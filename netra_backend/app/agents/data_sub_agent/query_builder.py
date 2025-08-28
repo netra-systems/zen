@@ -2,7 +2,7 @@
 
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.interface import (
@@ -132,7 +132,7 @@ class QueryBuilder(BaseExecutionInterface):
                                 execution_time_ms: float) -> None:
         """Update query execution history."""
         history_entry = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'query_type': request.query_type,
             'user_id': request.user_id,
             'execution_time_ms': execution_time_ms
@@ -300,5 +300,5 @@ class QueryBuilder(BaseExecutionInterface):
             'status': 'healthy' if performance['total_queries_built'] >= 0 else 'unknown',
             'uptime_queries': performance['total_queries_built'],
             'avg_performance_ms': performance['average_build_time_ms'],
-            'last_updated': datetime.utcnow().isoformat()
+            'last_updated': datetime.now(timezone.utc).isoformat()
         }

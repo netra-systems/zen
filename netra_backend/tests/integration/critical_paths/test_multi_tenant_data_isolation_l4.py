@@ -23,7 +23,7 @@ import secrets
 import sys
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
@@ -236,7 +236,7 @@ class MultiTenantIsolationTester:
                         "content": f"Sensitive data for {tenant.name}: {secrets.token_hex(16)}",
                         "metadata": {
                             "tenant_id": tenant.tenant_id,
-                            "created_at": datetime.utcnow().isoformat(),
+                            "created_at": datetime.now(timezone.utc).isoformat(),
                             "encryption_key_id": tenant.encryption_key[:8]
                         }
                     }
@@ -640,7 +640,7 @@ async def test_multi_tenant_data_isolation():
         print("\n" + "="*80)
         print("MULTI-TENANT ISOLATION TEST REPORT")
         print("="*80)
-        print(f"Timestamp: {datetime.utcnow().isoformat()}")
+        print(f"Timestamp: {datetime.now(timezone.utc).isoformat()}")
         print(f"Tenants Tested: {len(tester.tenants)}")
         print("="*80)
         

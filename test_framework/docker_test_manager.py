@@ -363,7 +363,7 @@ class DockerTestManager:
             if effective_mode == ServiceMode.DOCKER:
                 return f"postgresql://test:test@localhost:{port}/netra_test"
             else:
-                return f"postgresql://netra:netra123@localhost:{port}/netra_db"
+                return f"postgresql://netra:netra123@localhost:{port}/netra_dev"
         elif service == "redis":
             return f"redis://localhost:{port}/0"
         else:

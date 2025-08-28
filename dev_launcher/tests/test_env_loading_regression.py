@@ -235,7 +235,7 @@ class TestEnvironmentLoadingRegression:
         
         # 3. Load actual environment variables during loading
         loader_results = manager.bulk_set_environment({
-            "DATABASE_URL": "postgresql://localhost/netra",
+            "DATABASE_URL": "postgresql://localhost/netra_dev",
             "JWT_SECRET_KEY": "super_secret_key",
             "REDIS_URL": "redis://localhost:6379"
         }, source="secret_loader")
@@ -251,7 +251,7 @@ class TestEnvironmentLoadingRegression:
         assert manager.get("NETRA_SECRETS_LOADING") is None
         
         # 6. But actual secrets should remain accessible
-        assert manager.get("DATABASE_URL") == "postgresql://localhost/netra"
+        assert manager.get("DATABASE_URL") == "postgresql://localhost/netra_dev"
         assert manager.get("JWT_SECRET_KEY") == "super_secret_key"
         assert manager.get("REDIS_URL") == "redis://localhost:6379"
 

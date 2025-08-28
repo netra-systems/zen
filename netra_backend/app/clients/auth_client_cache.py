@@ -4,7 +4,7 @@ Handles token caching and resilience patterns for auth service calls.
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig
@@ -25,11 +25,11 @@ class CachedToken:
     
     def __init__(self, data: Dict, ttl_seconds: int):
         self.data = data
-        self.expires_at = datetime.utcnow() + timedelta(seconds=ttl_seconds)
+        self.expires_at = datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)
     
     def is_valid(self) -> bool:
         """Check if cache entry is still valid."""
-        return datetime.utcnow() < self.expires_at
+        return datetime.now(timezone.utc) < self.expires_at
 
 
 class AuthTokenCache:

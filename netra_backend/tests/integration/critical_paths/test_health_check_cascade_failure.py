@@ -16,7 +16,7 @@ This test ensures the system correctly detects and handles cascading failures.
 import asyncio
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -100,7 +100,7 @@ class HealthCheckCascadeTester:
         self.failure_log.append({
             "root_cause": "database",
             "affected": affected_services,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
         return len(affected_services) > 0

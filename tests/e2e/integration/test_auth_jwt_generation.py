@@ -72,14 +72,17 @@ class JWTGenerationTestManager:
         # This simulates what the auth service would do
         user_id = f"test-user-{uuid4().hex[:8]}"
         now = datetime.now(timezone.utc)
+        now_timestamp = int(now.timestamp())
         expires_at = now + timedelta(minutes=15)
+        expires_timestamp = int(expires_at.timestamp())
+        refresh_expires_timestamp = int((now + timedelta(days=7)).timestamp())
         
         # Create access token payload
         access_payload = {
             "sub": user_id,
             "email": email,
-            "iat": now,
-            "exp": expires_at,
+            "iat": now_timestamp,
+            "exp": expires_timestamp,
             "token_type": "access",
             "iss": "netra-auth-service",
             "permissions": ["read", "write"]
@@ -88,8 +91,8 @@ class JWTGenerationTestManager:
         # Create refresh token payload
         refresh_payload = {
             "sub": user_id,
-            "iat": now,
-            "exp": now + timedelta(days=7),
+            "iat": now_timestamp,
+            "exp": refresh_expires_timestamp,
             "token_type": "refresh",
             "iss": "netra-auth-service"
         }

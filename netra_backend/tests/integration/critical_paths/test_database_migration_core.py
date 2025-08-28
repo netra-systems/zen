@@ -21,7 +21,7 @@ import os
 import tempfile
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -126,7 +126,7 @@ class DatabaseMigrationCoreManager:
             "db_type": db_type,
             "up_sql": self.generate_migration_sql(migration_name, "up", db_type),
             "down_sql": self.generate_migration_sql(migration_name, "down", db_type),
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             "dependencies": [],
             "checksum": f"checksum_{uuid.uuid4().hex[:16]}"
         }
@@ -221,7 +221,7 @@ class DatabaseMigrationCoreManager:
                 "migration_id": migration_id,
                 "name": migration["name"],
                 "db_type": target_db_type,
-                "executed_at": datetime.utcnow(),
+                "executed_at": datetime.now(timezone.utc),
                 "execution_time": migration_time,
                 "success": execution_result["success"] and verification_result["verified"],
                 "backup_id": backup_result.get("backup_id"),
@@ -244,7 +244,7 @@ class DatabaseMigrationCoreManager:
                 "migration_id": migration_id,
                 "name": migration["name"],
                 "db_type": target_db_type,
-                "executed_at": datetime.utcnow(),
+                "executed_at": datetime.now(timezone.utc),
                 "execution_time": time.time() - start_time,
                 "success": False,
                 "error": str(e)

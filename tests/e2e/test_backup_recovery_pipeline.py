@@ -22,7 +22,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -118,7 +118,7 @@ class BackupRecoveryTester:
                 "profile": {
                     "tier": "pro",
                     "settings": {"theme": "dark", "notifications": True},
-                    "created_at": datetime.utcnow().isoformat()
+                    "created_at": datetime.now(timezone.utc).isoformat()
                 }
             }
             
@@ -156,7 +156,7 @@ class BackupRecoveryTester:
             threads_created.append({
                 "thread_id": thread_id,
                 "message_count": messages_in_thread,
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.now(timezone.utc).isoformat()
             })
         
         return {
@@ -179,7 +179,7 @@ class BackupRecoveryTester:
                 "user_id": self.test_user_id,
                 "content": f"Test message {i} for backup validation",
                 "metadata": {"test": True, "backup_session": self.test_session_id},
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.now(timezone.utc).isoformat()
             }
             
             # Store for backup validation
@@ -202,7 +202,7 @@ class BackupRecoveryTester:
                     "current_task": f"backup-test-task-{i}",
                     "context": {"test_mode": True, "session": self.test_session_id}
                 },
-                "last_activity": datetime.utcnow().isoformat()
+                "last_activity": datetime.now(timezone.utc).isoformat()
             }
             
             agent_states.append(state_data)
@@ -212,7 +212,7 @@ class BackupRecoveryTester:
     
     async def _create_backup_snapshots(self) -> Dict[str, Any]:
         """Create backup snapshots of all test data."""
-        backup_timestamp = datetime.utcnow().isoformat()
+        backup_timestamp = datetime.now(timezone.utc).isoformat()
         
         # Simulate backup creation process
         backup_metadata = {
@@ -253,7 +253,7 @@ class BackupRecoveryTester:
             corruption_scenarios.append({
                 "type": "thread_corruption",
                 "thread_id": thread_id,
-                "corrupted_at": datetime.utcnow().isoformat()
+                "corrupted_at": datetime.now(timezone.utc).isoformat()
             })
         
         # Simulate message loss
@@ -262,14 +262,14 @@ class BackupRecoveryTester:
             corruption_scenarios.append({
                 "type": "message_loss",
                 "message_id": message_id,
-                "lost_at": datetime.utcnow().isoformat()
+                "lost_at": datetime.now(timezone.utc).isoformat()
             })
         
         # Simulate agent state corruption
         corruption_scenarios.append({
             "type": "agent_state_corruption",
             "affected_agents": 1,
-            "corrupted_at": datetime.utcnow().isoformat()
+            "corrupted_at": datetime.now(timezone.utc).isoformat()
         })
         
         return {
@@ -596,7 +596,7 @@ async def test_disaster_recovery_failover():
             "primary_db_failure": True,
             "service_failures": ["auth_service", "backend_service"],
             "network_partition": True,
-            "simulated_at": datetime.utcnow().isoformat()
+            "simulated_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Wait for disaster simulation

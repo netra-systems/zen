@@ -15,7 +15,7 @@ Tests comprehensive security audit logging including:
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -58,7 +58,7 @@ class TestAuthenticationAuditLogging:
             auth_provider='google',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_login_success_audit_logging(self, mock_audit_service, sample_user):
@@ -71,7 +71,7 @@ class TestAuthenticationAuditLogging:
             'ip_address': '127.0.0.1',
             'user_agent': 'Mozilla/5.0',
             'session_id': str(uuid4()),
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'login_method': 'oauth2',
                 'device_fingerprint': 'device_123',
@@ -93,7 +93,7 @@ class TestAuthenticationAuditLogging:
             'failure_reason': 'invalid_credentials',
             'ip_address': '192.168.1.100',
             'user_agent': 'curl/7.68.0',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'attempt_count': 5,
                 'account_locked': False,
@@ -117,10 +117,10 @@ class TestAuthenticationAuditLogging:
             'logout_reason': 'user_initiated',
             'session_duration_seconds': 3600,
             'ip_address': '127.0.0.1',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'activities_during_session': 15,
-                'last_activity_timestamp': datetime.utcnow() - timedelta(minutes=5)
+                'last_activity_timestamp': datetime.now(timezone.utc) - timedelta(minutes=5)
             }
         }
         
@@ -138,7 +138,7 @@ class TestAuthenticationAuditLogging:
             'email': sample_user.email,
             'change_method': 'user_initiated',
             'ip_address': '127.0.0.1',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'password_strength_score': 85,
                 'previous_password_age_days': 45,
@@ -160,7 +160,7 @@ class TestAuthenticationAuditLogging:
             'mfa_method': 'totp',
             'verification_result': 'success',
             'ip_address': '127.0.0.1',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'device_name': 'iPhone 12',
                 'backup_code_used': False,
@@ -194,7 +194,7 @@ class TestAuthorizationAuditLogging:
             'action': 'read',
             'permission_level': 'admin',
             'decision_reason': 'user_has_admin_role',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'roles': ['admin', 'user'],
                 'permissions': ['users:read', 'users:write'],
@@ -216,7 +216,7 @@ class TestAuthorizationAuditLogging:
             'resource': '/api/admin/system',
             'action': 'write',
             'denial_reason': 'insufficient_privileges',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'required_permission': 'system:admin',
                 'user_permissions': ['users:read', 'users:write'],
@@ -239,7 +239,7 @@ class TestAuthorizationAuditLogging:
             'requested_role': 'admin',
             'escalation_method': 'role_request',
             'approval_status': 'pending',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'justification': 'Need admin access for system maintenance',
                 'approver_required': 'admin@example.com',
@@ -277,7 +277,7 @@ class TestSecurityPolicyViolationLogging:
                 'minimum_required_strength': 70
             },
             'ip_address': '127.0.0.1',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'violation_count': 3,
                 'enforcement_action': 'password_rejected',
@@ -302,7 +302,7 @@ class TestSecurityPolicyViolationLogging:
                 'allowed_requests_per_minute': 60,
                 'violation_duration_seconds': 300
             },
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'enforcement_action': 'ip_temporarily_blocked',
                 'block_duration_minutes': 15,
@@ -325,10 +325,10 @@ class TestSecurityPolicyViolationLogging:
             'failed_attempt_count': 5,
             'lockout_duration_minutes': 30,
             'ip_address': '192.168.1.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'automatic_unlock': True,
-                'unlock_timestamp': datetime.utcnow() + timedelta(minutes=30),
+                'unlock_timestamp': datetime.now(timezone.utc) + timedelta(minutes=30),
                 'notification_sent': True
             }
         }
@@ -366,7 +366,7 @@ class TestAdministrativeActionLogging:
                 'verification_required': True
             },
             'ip_address': '10.0.0.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'creation_method': 'admin_panel',
                 'welcome_email_sent': True,
@@ -391,7 +391,7 @@ class TestAdministrativeActionLogging:
             'target_user_email': sample_user.email,
             'deletion_reason': 'account_closure_request',
             'ip_address': '10.0.0.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'data_retention_period_days': 30,
                 'anonymization_applied': True,
@@ -418,7 +418,7 @@ class TestAdministrativeActionLogging:
             'new_roles': ['user', 'moderator'],
             'assignment_reason': 'promotion',
             'ip_address': '10.0.0.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'role_expiry': None,
                 'temporary_assignment': False,
@@ -448,7 +448,7 @@ class TestAdministrativeActionLogging:
             },
             'change_reason': 'security_enhancement',
             'ip_address': '10.0.0.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'change_approval_id': str(uuid4()),
                 'rollback_possible': True,
@@ -483,7 +483,7 @@ class TestDataAccessLogging:
             'access_method': 'api',
             'fields_accessed': ['email', 'full_name', 'created_at'],
             'ip_address': '10.0.0.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'api_endpoint': '/api/users/profile',
                 'purpose': 'profile_view',
@@ -506,12 +506,12 @@ class TestDataAccessLogging:
             'export_type': 'user_audit_report',
             'record_count': 10000,
             'date_range': {
-                'start': datetime.utcnow() - timedelta(days=30),
-                'end': datetime.utcnow()
+                'start': datetime.now(timezone.utc) - timedelta(days=30),
+                'end': datetime.now(timezone.utc)
             },
             'export_format': 'csv',
             'ip_address': '10.0.0.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'export_reason': 'compliance_audit',
                 'approval_id': str(uuid4()),
@@ -536,7 +536,7 @@ class TestDataAccessLogging:
             'access_reason': 'security_investigation',
             'fields_accessed': ['password_hash', 'mfa_secrets'],
             'ip_address': '10.0.0.100',
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'additional_data': {
                 'investigation_id': str(uuid4()),
                 'supervisor_approval': True,
@@ -572,7 +572,7 @@ class TestLogIntegrityAndTamperDetection:
             'id': str(uuid4()),
             'event_type': 'authentication_success',
             'user_id': str(uuid4()),
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'data': {'ip_address': '127.0.0.1'}
         }
         
@@ -581,7 +581,7 @@ class TestLogIntegrityAndTamperDetection:
             'hash': 'sha256:abcdef123456789...',
             'algorithm': 'sha256',
             'salt': 'random_salt_123',
-            'timestamp': datetime.utcnow()
+            'timestamp': datetime.now(timezone.utc)
         }
         
         # Generate log hash
@@ -603,7 +603,7 @@ class TestLogIntegrityAndTamperDetection:
             'is_valid': True,
             'log_id': log_id,
             'hash_match': True,
-            'verification_timestamp': datetime.utcnow(),
+            'verification_timestamp': datetime.now(timezone.utc),
             'tamper_detected': False
         }
         
@@ -625,7 +625,7 @@ class TestLogIntegrityAndTamperDetection:
             'tampering_detected': True,
             'affected_logs': [str(uuid4()), str(uuid4())],
             'tamper_type': 'hash_mismatch',
-            'detection_timestamp': datetime.utcnow(),
+            'detection_timestamp': datetime.now(timezone.utc),
             'severity': 'high',
             'recommended_actions': [
                 'isolate_affected_logs',
@@ -648,9 +648,9 @@ class TestLogIntegrityAndTamperDetection:
     async def test_integrity_chain_creation(self, mock_integrity_service):
         """Test creation of integrity chain for logs."""
         log_batch = [
-            {'id': str(uuid4()), 'timestamp': datetime.utcnow()},
-            {'id': str(uuid4()), 'timestamp': datetime.utcnow()},
-            {'id': str(uuid4()), 'timestamp': datetime.utcnow()}
+            {'id': str(uuid4()), 'timestamp': datetime.now(timezone.utc)},
+            {'id': str(uuid4()), 'timestamp': datetime.now(timezone.utc)},
+            {'id': str(uuid4()), 'timestamp': datetime.now(timezone.utc)}
         ]
         
         # Mock integrity chain creation
@@ -658,7 +658,7 @@ class TestLogIntegrityAndTamperDetection:
             'chain_id': str(uuid4()),
             'log_count': 3,
             'chain_hash': 'sha256:fedcba987654321...',
-            'creation_timestamp': datetime.utcnow(),
+            'creation_timestamp': datetime.now(timezone.utc),
             'chain_links': [
                 {'log_id': log_batch[0]['id'], 'hash': 'hash1', 'previous_hash': None},
                 {'log_id': log_batch[1]['id'], 'hash': 'hash2', 'previous_hash': 'hash1'},
@@ -696,7 +696,7 @@ class TestAuditLogRetentionAndArchival:
             'archived_logs_count': 500000,
             'archive_size_mb': 450.7,
             'archive_location': 's3://audit-archive/2024/01/audit-logs.gz',
-            'archival_timestamp': datetime.utcnow(),
+            'archival_timestamp': datetime.now(timezone.utc),
             'compression_ratio': 0.12,
             'integrity_hash': 'sha256:archive_hash_123...'
         }
@@ -719,8 +719,8 @@ class TestAuditLogRetentionAndArchival:
         mock_retention_service.cleanup_expired_logs.return_value = {
             'deleted_logs_count': 100000,
             'freed_space_mb': 85.3,
-            'cleanup_timestamp': datetime.utcnow(),
-            'oldest_remaining_log_date': datetime.utcnow() - timedelta(days=365),
+            'cleanup_timestamp': datetime.now(timezone.utc),
+            'oldest_remaining_log_date': datetime.now(timezone.utc) - timedelta(days=365),
             'cleanup_duration_seconds': 45.2
         }
         
@@ -769,19 +769,19 @@ class TestAuditLogRetentionAndArchival:
         mock_retention_service.restore_from_archive.return_value = {
             'restored_logs_count': 50000,
             'restoration_id': str(uuid4()),
-            'estimated_completion_time': datetime.utcnow() + timedelta(hours=2),
+            'estimated_completion_time': datetime.now(timezone.utc) + timedelta(hours=2),
             'restoration_status': 'in_progress',
             'restored_date_range': {
-                'start': datetime.utcnow() - timedelta(days=120),
-                'end': datetime.utcnow() - timedelta(days=90)
+                'start': datetime.now(timezone.utc) - timedelta(days=120),
+                'end': datetime.now(timezone.utc) - timedelta(days=90)
             }
         }
         
         # Restore from archive
         restoration_result = await mock_retention_service.restore_from_archive(
             archive_id='archive_2024_01',
-            date_range={'start': datetime.utcnow() - timedelta(days=120),
-                       'end': datetime.utcnow() - timedelta(days=90)}
+            date_range={'start': datetime.now(timezone.utc) - timedelta(days=120),
+                       'end': datetime.now(timezone.utc) - timedelta(days=90)}
         )
         
         # Verify restoration
@@ -820,7 +820,7 @@ class TestComplianceAuditing:
                 'Update data processor agreements',
                 'Implement automated consent withdrawal'
             ],
-            'audit_timestamp': datetime.utcnow()
+            'audit_timestamp': datetime.now(timezone.utc)
         }
         
         # Check GDPR compliance
@@ -838,8 +838,8 @@ class TestComplianceAuditing:
             'report_id': str(uuid4()),
             'report_type': 'quarterly_compliance',
             'report_period': {
-                'start': datetime.utcnow() - timedelta(days=90),
-                'end': datetime.utcnow()
+                'start': datetime.now(timezone.utc) - timedelta(days=90),
+                'end': datetime.now(timezone.utc)
             },
             'overall_compliance_score': 88,
             'framework_scores': {

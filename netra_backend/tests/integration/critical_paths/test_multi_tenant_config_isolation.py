@@ -23,7 +23,7 @@ import os
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Set
 
@@ -133,7 +133,7 @@ class MultiTenantConfigIsolationL3Manager:
                 "config_namespace": config_namespace,
                 "encryption_key_id": f"key_{tenant_id}",
                 "data_residency": region,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "status": "active",
                 "isolation_level": "strict"
             }
@@ -858,7 +858,7 @@ class MultiTenantConfigIsolationL3Manager:
             VALUES (%s, %s, %s, %s, %s)
             """,
             (f"{tenant_id}_test_data_{uuid.uuid4().hex[:8]}", tenant_id, 
-             "test_data", data_value, datetime.utcnow())
+             "test_data", data_value, datetime.now(timezone.utc))
         )
     
     async def _query_tenant_data(self, tenant_id: str) -> List[Dict[str, Any]]:

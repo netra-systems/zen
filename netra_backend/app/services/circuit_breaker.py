@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 import asyncio
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -101,7 +101,7 @@ class CircuitBreaker:
         # Legacy compatibility properties
         self.metrics = CircuitBreakerMetrics()
         self._state_lock = asyncio.Lock()
-        self._last_state_change = datetime.utcnow()
+        self._last_state_change = datetime.now(timezone.utc)
         self._sliding_window: List[Dict[str, Any]] = []
         self._recovery_task: Optional[asyncio.Task] = None
         
@@ -145,7 +145,7 @@ class CircuitBreaker:
         self.metrics.successful_requests += 1
         self.metrics.current_consecutive_successes += 1
         self.metrics.current_consecutive_failures = 0
-        self.metrics.last_success_time = datetime.utcnow()
+        self.metrics.last_success_time = datetime.now(timezone.utc)
         
     def _update_legacy_metrics_on_failure(self) -> None:
         """Update legacy metrics on failed call for backward compatibility."""
@@ -153,7 +153,7 @@ class CircuitBreaker:
         self.metrics.failed_requests += 1
         self.metrics.current_consecutive_failures += 1
         self.metrics.current_consecutive_successes = 0
-        self.metrics.last_failure_time = datetime.utcnow()
+        self.metrics.last_failure_time = datetime.now(timezone.utc)
     
     async def _execute_call(self, func: Callable, *args, **kwargs) -> Any:
         """Execute the actual function call with timeout and error handling."""
@@ -210,7 +210,7 @@ class CircuitBreaker:
             self.metrics.successful_requests += 1
             self.metrics.current_consecutive_successes += 1
             self.metrics.current_consecutive_failures = 0
-            self.metrics.last_success_time = datetime.utcnow()
+            self.metrics.last_success_time = datetime.now(timezone.utc)
             
             # Update average response time
             total_successful = self.metrics.successful_requests
@@ -240,7 +240,7 @@ class CircuitBreaker:
     async def _record_failure(self, error_type: str) -> None:
         """Record a failed request."""
         self.metrics.failed_requests += 1
-        self.metrics.last_failure_time = datetime.utcnow()
+        self.metrics.last_failure_time = datetime.now(timezone.utc)
         
         # Add to sliding window
         self._sliding_window.append({
@@ -287,7 +287,7 @@ class CircuitBreaker:
         if self.state != CircuitState.OPEN:
             self.state = CircuitState.OPEN
             self.metrics.circuit_opened_count += 1
-            self._last_state_change = datetime.utcnow()
+            self._last_state_change = datetime.now(timezone.utc)
             logger.error(f"Circuit breaker {self.name} OPENED after {self.metrics.current_consecutive_failures} failures")
             
             # Start recovery timer
@@ -300,7 +300,7 @@ class CircuitBreaker:
             self.state = CircuitState.CLOSED
             self.metrics.circuit_closed_count += 1
             self.metrics.current_consecutive_failures = 0
-            self._last_state_change = datetime.utcnow()
+            self._last_state_change = datetime.now(timezone.utc)
             logger.info(f"Circuit breaker {self.name} CLOSED after {self.metrics.current_consecutive_successes} successes")
     
     async def _should_attempt_recovery(self) -> bool:
@@ -308,7 +308,7 @@ class CircuitBreaker:
         if self.state != CircuitState.OPEN:
             return False
         
-        time_since_open = datetime.utcnow() - self._last_state_change
+        time_since_open = datetime.now(timezone.utc) - self._last_state_change
         return time_since_open.total_seconds() >= self.config.recovery_timeout
     
     async def _schedule_recovery(self) -> None:
@@ -342,7 +342,7 @@ class CircuitBreaker:
             self.state = CircuitState.CLOSED
             self.metrics = CircuitBreakerMetrics()
             self._sliding_window.clear()
-            self._last_state_change = datetime.utcnow()
+            self._last_state_change = datetime.now(timezone.utc)
             
             if self._recovery_task and not self._recovery_task.done():
                 self._recovery_task.cancel()

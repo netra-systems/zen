@@ -1,6 +1,6 @@
 """Score calculator for compliance metrics."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 from netra_backend.app.services.factory_status.spec_analyzer_core import ComplianceScore
@@ -40,7 +40,7 @@ class ScoreCalculator:
             "module_name": module_metrics["name"],
             "overall_score": self.calculate_overall_score(scores),
             "violations": module_metrics.get("violations", []),
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
     
     def _extract_individual_scores(self, scores: Dict[str, float]) -> Dict[str, float]:

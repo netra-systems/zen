@@ -20,7 +20,7 @@ import json
 import os
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -72,7 +72,7 @@ class WebhookReliabilityTester:
         headers = dict(request.headers)
         
         self.received_webhooks.append({
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "body": body.decode(),
             "headers": headers
         })
@@ -151,7 +151,7 @@ class WebhookReliabilityTester:
                         "event_type": "test.event",
                         "payload": {
                             "test_id": uuid.uuid4().hex,
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
                             "data": {"value": "test_value"}
                         }
                     }

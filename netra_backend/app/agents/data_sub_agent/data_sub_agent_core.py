@@ -7,7 +7,7 @@ Business Value: Core data analysis engine for customer insights generation.
 BVJ: Growth & Enterprise | Data Intelligence Core | +20% performance capture
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
@@ -160,7 +160,7 @@ class DataSubAgentCore:
     def _format_analysis_result(self, result: Dict[str, Any]) -> Dict[str, Any]:
         """Format analysis result for standardized output."""
         if isinstance(result, dict) and "error" not in result:
-            result["timestamp"] = datetime.utcnow().isoformat()
+            result["timestamp"] = datetime.now(timezone.utc).isoformat()
             result["status"] = result.get("status", "completed")
             
         return result

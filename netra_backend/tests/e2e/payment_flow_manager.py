@@ -6,7 +6,7 @@ Provides utilities for testing payment flows and operations.
 
 import asyncio
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 
@@ -34,7 +34,7 @@ class MockPaymentProvider:
                 "payment_id": payment_id,
                 "status": PaymentStatus.FAILED,
                 "error": "Mock payment failure",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             }
         
         payment_record = {
@@ -43,7 +43,7 @@ class MockPaymentProvider:
             "currency": currency,
             "status": PaymentStatus.COMPLETED,
             "provider": self.name,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
         
         self.payments[payment_id] = payment_record
@@ -61,7 +61,7 @@ class MockPaymentProvider:
         return {
             "payment_id": payment_id,
             "status": "refunded",
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
     
     def set_failure_mode(self, should_fail: bool) -> None:
@@ -113,7 +113,7 @@ class PaymentFlowManager:
                 "currency": currency,
                 "provider": provider_name,
                 "result": result,
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             }
             
             self.payment_history.append(flow_record)
@@ -125,7 +125,7 @@ class PaymentFlowManager:
                 "payment_id": payment_id,
                 "error": str(e),
                 "status": "error",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             }
             self.payment_history.append(error_record)
             return error_record
@@ -141,7 +141,7 @@ class PaymentFlowManager:
         webhook_data = {
             "payment_id": payment_id,
             "status": status,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "webhook_id": f"webhook_{len(self.payment_history)}"
         }
         return webhook_data

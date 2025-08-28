@@ -12,7 +12,7 @@ import sys
 
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
@@ -40,7 +40,7 @@ class TestAuthToWebSocketFlow:
 
             "email": "test@example.com",
 
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
 
         }
 
@@ -62,7 +62,7 @@ class TestAuthToWebSocketFlow:
 
             is_active=True,
 
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
 
         )
     
@@ -116,7 +116,7 @@ class TestAuthToWebSocketFlow:
 
             "user_id": user.id,
 
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
 
         })
         
@@ -157,7 +157,7 @@ class TestAuthToWebSocketFlow:
 
             "sub": "test_user",
 
-            "exp": datetime.utcnow() - timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1)
 
         }
 

@@ -62,16 +62,16 @@ class TestApiGatewayRateLimitingAccuracy:
                 self.client = client
             
             async def get(self, key):
-                yield await self.client.get(key)
+                return await self.client.get(key)
             
             async def set(self, key, value, ex=None):
-                yield await self.client.set(key, value, ex=ex)
+                return await self.client.set(key, value, ex=ex)
             
             async def incr(self, key):
-                yield await self.client.incr(key)
+                return await self.client.incr(key)
             
             async def expire(self, key, seconds):
-                yield await self.client.expire(key, seconds)
+                return await self.client.expire(key, seconds)
         
         yield MockRedisManager(redis_client)
     

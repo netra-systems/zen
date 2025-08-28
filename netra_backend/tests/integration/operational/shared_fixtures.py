@@ -12,7 +12,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
@@ -136,7 +136,7 @@ class SupplyResearchTestHelper:
                         "topic": topic["topic"],
                         "region": region,
                         "provider": provider,
-                        "scheduled_time": datetime.utcnow() + timedelta(minutes=5),
+                        "scheduled_time": datetime.now(timezone.utc) + timedelta(minutes=5),
                         "estimated_duration": 10
                     }
                     scheduled_jobs.append(job)
@@ -171,7 +171,7 @@ class ErrorRecoveryTestHelper:
             "primary_error": {
                 "type": scenario["initial_failure"],
                 "severity": "critical",
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "affected_components": scenario["affected_systems"]
             },
             "cascade_errors": [
@@ -191,7 +191,7 @@ class QualityMonitoringTestHelper:
     async def create_quality_monitoring_scenario():
         """Create quality monitoring scenario."""
         return {
-            "monitoring_period": {"start": datetime.utcnow() - timedelta(hours=24), "end": datetime.utcnow()},
+            "monitoring_period": {"start": datetime.now(timezone.utc) - timedelta(hours=24), "end": datetime.now(timezone.utc)},
             "quality_dimensions": ["response_accuracy", "system_performance", "user_experience", "data_quality"],
             "sla_requirements": {"availability": 0.995, "response_time": 200, "accuracy": 0.95}
         }

@@ -17,7 +17,7 @@ import os
 import subprocess
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -306,7 +306,7 @@ class DevEnvironmentTester:
             test_message = {
                 "type": "test_message",
                 "content": "Hello from test",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             await self.ws_connection.send(json.dumps(test_message))

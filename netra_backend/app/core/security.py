@@ -15,7 +15,7 @@ import hashlib
 import hmac
 import re
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
@@ -64,7 +64,7 @@ class SecurityEvent(BaseModel):
     user_id: Optional[str] = None
     endpoint: str
     payload: Dict[str, Any] = {}
-    timestamp: datetime = datetime.utcnow()
+    timestamp: datetime = datetime.now(timezone.utc)
     blocked: bool = True
     details: str = ""
 
@@ -282,7 +282,7 @@ class ThreatDetector:
     def _check_rate_limit(self, source_ip: str, endpoint: str, max_requests: int = 100, window_minutes: int = 1) -> bool:
         """Check if source IP exceeds rate limit for endpoint."""
         key = f"{source_ip}:{endpoint}"
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         window_start = now - timedelta(minutes=window_minutes)
         
         if key not in self._rate_limits:
@@ -333,7 +333,7 @@ class ThreatDetector:
     
     def _generate_event_id(self) -> str:
         """Generate unique security event ID."""
-        return f"SEC_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{secrets.token_hex(4)}"
+        return f"SEC_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{secrets.token_hex(4)}"
 
 
 class SecurityService:

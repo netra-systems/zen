@@ -34,7 +34,7 @@ from pathlib import Path
 import asyncio
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import MagicMock, patch
 
@@ -146,9 +146,9 @@ class TestJWTTokenExpiryHandling:
             
             lifecycle = TokenLifecycle(
                 token_id=token_data.jti,
-                created_at=datetime.utcnow(),
-                expires_at=datetime.utcnow() + timedelta(minutes=5),
-                last_used=datetime.utcnow()
+                created_at=datetime.now(timezone.utc),
+                expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
+                last_used=datetime.now(timezone.utc)
             )
             
             # Advance time to 1 minute before expiry
@@ -165,7 +165,7 @@ class TestJWTTokenExpiryHandling:
                     token_id=token_data.jti,
                     expires_in_seconds=60,
                     notification_type="warning",
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.now(timezone.utc)
                 )
             )
             metrics.notifications_sent += 1
@@ -264,7 +264,7 @@ class TestJWTTokenExpiryHandling:
                     options={"verify_signature": False}
                 )
                 new_exp = datetime.fromtimestamp(decoded["exp"])
-                assert new_exp > datetime.utcnow() + timedelta(minutes=14)
+                assert new_exp > datetime.now(timezone.utc) + timedelta(minutes=14)
                 
             except Exception:
                 metrics.auto_refresh_failed += 1
@@ -287,7 +287,7 @@ class TestJWTTokenExpiryHandling:
                 sliding_window=True
             )
             
-            initial_exp = datetime.utcnow() + timedelta(minutes=30)
+            initial_exp = datetime.now(timezone.utc) + timedelta(minutes=30)
             
             # Simulate activity at 10 minutes
             frozen_time.move_to("2024-01-01 12:10:00")
@@ -329,7 +329,7 @@ class TestJWTTokenExpiryHandling:
                 )
                 tokens.append({
                     "token": token,
-                    "expires_at": datetime.utcnow() + timedelta(minutes=expire_minutes)
+                    "expires_at": datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
                 })
                 metrics.tokens_created += 1
             
@@ -339,7 +339,7 @@ class TestJWTTokenExpiryHandling:
                 
                 # Check which tokens expired
                 for token_info in tokens:
-                    if token_info["expires_at"] <= datetime.utcnow():
+                    if token_info["expires_at"] <= datetime.now(timezone.utc):
                         status = await token_manager.check_token_status(
                             token_info["token"].access_token
                         )
@@ -349,7 +349,7 @@ class TestJWTTokenExpiryHandling:
             # Verify expiry counts
             expected_expired = sum(
                 1 for t in tokens 
-                if t["expires_at"] <= datetime.utcnow()
+                if t["expires_at"] <= datetime.now(timezone.utc)
             )
             assert metrics.tokens_expired >= expected_expired * 0.95, \
                 "Not all expected tokens marked as expired"
@@ -529,7 +529,7 @@ class TestJWTTokenExpiryHandling:
                             token_id=token_data.jti,
                             expires_in_seconds=minutes_before * 60,
                             notification_type=notification_type,
-                            timestamp=datetime.utcnow()
+                            timestamp=datetime.now(timezone.utc)
                         )
                     )
                     metrics.notifications_sent += 1
@@ -540,7 +540,7 @@ class TestJWTTokenExpiryHandling:
                             token_id=token_data.jti,
                             expires_in_seconds=0,
                             notification_type=notification_type,
-                            timestamp=datetime.utcnow()
+                            timestamp=datetime.now(timezone.utc)
                         )
                     )
                     metrics.notifications_sent += 1

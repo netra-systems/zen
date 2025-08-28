@@ -33,7 +33,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
@@ -159,7 +159,7 @@ class SystemStartupL4TestSuite:
             
             if health_ok:
                 service.status = "healthy"
-                service.last_health_check = datetime.utcnow()
+                service.last_health_check = datetime.now(timezone.utc)
             else:
                 service.status = "degraded"
                 service.error_message = "Health check failed"
@@ -439,15 +439,15 @@ class TestSystemStartupSequencesL4:
             SessionInfo(
                 session_id="session_1",
                 user_id="user_1",
-                created_at=datetime.utcnow() - timedelta(hours=1),
-                last_activity=datetime.utcnow() - timedelta(minutes=5),
+                created_at=datetime.now(timezone.utc) - timedelta(hours=1),
+                last_activity=datetime.now(timezone.utc) - timedelta(minutes=5),
                 metadata={"tier": "enterprise"}
             ),
             SessionInfo(
                 session_id="session_2",
                 user_id="user_2",
-                created_at=datetime.utcnow() - timedelta(hours=2),
-                last_activity=datetime.utcnow() - timedelta(minutes=10),
+                created_at=datetime.now(timezone.utc) - timedelta(hours=2),
+                last_activity=datetime.now(timezone.utc) - timedelta(minutes=10),
                 metadata={"tier": "mid"}
             )
         ]

@@ -15,7 +15,7 @@ Architecture:
 - Strong typing with proper error handling
 """
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from email_validator import EmailNotValidError, validate_email
@@ -160,13 +160,13 @@ def validate_expires_at(expires_at: datetime) -> bool:
     """Validate expiration timestamp"""
     if not expires_at:
         return False
-    if expires_at <= datetime.utcnow():
+    if expires_at <= datetime.now(timezone.utc):
         return False
     return _check_max_expiry(expires_at)
 
 def _check_max_expiry(expires_at: datetime) -> bool:
     """Check if expiry is within maximum allowed timeframe."""
-    max_expiry = datetime.utcnow() + timedelta(days=365)
+    max_expiry = datetime.now(timezone.utc) + timedelta(days=365)
     return expires_at <= max_expiry
 
 
@@ -255,7 +255,7 @@ def validate_permission_list(permissions: List[str]) -> bool:
 
 def validate_auth_request_timing(request_time: datetime) -> bool:
     """Validate auth request is within acceptable time window"""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     time_diff = abs((now - request_time).total_seconds())
     
     # Allow requests within 5 minutes of current time
@@ -268,7 +268,7 @@ def create_validation_error(field: str, message: str) -> Dict[str, Any]:
         "field": field,
         "message": message,
         "code": "VALIDATION_ERROR",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 

@@ -4,7 +4,7 @@ Minimal implementation to support test collection.
 """
 
 from typing import Dict, Any, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 class SecurityManager:
@@ -28,7 +28,7 @@ class SecurityManager:
         self._suspicious_activities[session_id].append({
             "type": activity_type,
             "ip": client_ip,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
     
     def get_suspicious_activity_count(self, session_id: str) -> int:

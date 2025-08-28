@@ -11,7 +11,7 @@ import json
 import os
 import random
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -118,7 +118,7 @@ class StagingDataSeeder:
             "username": f"admin{index+1}_pr{self.pr_number}", "full_name": fake.name(),
             "hashed_password": get_password_hash("TestPassword123!"), "is_active": True,
             "is_superuser": True, "role": "admin", "plan_tier": "enterprise",
-            "created_at": datetime.utcnow() - timedelta(days=random.randint(30, 365)),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=random.randint(30, 365)),
             "usage_quota": 100000, "usage_current": random.randint(0, 50000)
         }
     
@@ -129,7 +129,7 @@ class StagingDataSeeder:
             "username": f"manager{index+1}_pr{self.pr_number}", "full_name": fake.name(),
             "hashed_password": get_password_hash("TestPassword123!"), "is_active": True,
             "is_superuser": False, "role": "manager", "plan_tier": "professional",
-            "created_at": datetime.utcnow() - timedelta(days=random.randint(30, 180)),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=random.randint(30, 180)),
             "usage_quota": 50000, "usage_current": random.randint(0, 25000)
         }
     
@@ -140,7 +140,7 @@ class StagingDataSeeder:
             "username": f"user{index+1}_pr{self.pr_number}", "full_name": fake.name(),
             "hashed_password": get_password_hash("TestPassword123!"), "is_active": True,
             "is_superuser": False, "role": "user",
-            "created_at": datetime.utcnow() - timedelta(days=random.randint(1, 90)),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=random.randint(1, 90)),
             "plan_tier": random.choice(["free", "starter", "professional"]),
             "usage_quota": random.choice([1000, 10000, 50000]), "usage_current": random.randint(0, 1000)
         }
@@ -233,8 +233,8 @@ class StagingDataSeeder:
     def _generate_request_timestamps(self) -> Dict[str, datetime]:
         """Generate request creation and update timestamps."""
         return {
-            "created_at": datetime.utcnow() - timedelta(hours=random.randint(1, 720)),
-            "updated_at": datetime.utcnow() - timedelta(hours=random.randint(0, 24))
+            "created_at": datetime.now(timezone.utc) - timedelta(hours=random.randint(1, 720)),
+            "updated_at": datetime.now(timezone.utc) - timedelta(hours=random.randint(0, 24))
         }
 
     def _generate_completed_request_results(self) -> Dict[str, Any]:
@@ -258,7 +258,7 @@ class StagingDataSeeder:
         
         if characteristics["status"] == "completed":
             request_data["results"] = self._generate_completed_request_results()
-            request_data["completed_at"] = datetime.utcnow() - timedelta(hours=random.randint(0, 12))
+            request_data["completed_at"] = datetime.now(timezone.utc) - timedelta(hours=random.randint(0, 12))
         
         return request_data
 
@@ -285,7 +285,7 @@ class StagingDataSeeder:
 
     def _generate_metric_timestamp(self, time_range_days: int) -> datetime:
         """Generate a random timestamp within the specified range."""
-        return datetime.utcnow() - timedelta(
+        return datetime.now(timezone.utc) - timedelta(
             days=random.randint(0, time_range_days),
             hours=random.randint(0, 23),
             minutes=random.randint(0, 59)
@@ -343,7 +343,7 @@ class StagingDataSeeder:
         """Generate summary of seeded data"""
         return {
             "pr_number": self.pr_number,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "summary": {
                 "users": len(self.created_data["users"]),
                 "threads": len(self.created_data["threads"]),

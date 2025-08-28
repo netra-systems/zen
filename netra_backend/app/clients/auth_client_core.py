@@ -574,7 +574,7 @@ class AuthServiceClient:
         """Create a mock JWT token for testing."""
         import jwt as pyjwt
         import uuid
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         
         if not user_id:
             user_id = str(uuid.uuid4())
@@ -608,8 +608,8 @@ class AuthServiceClient:
             "email": user_email,
             "role": user_role,
             "permissions": role_permissions.get(user_role, []),
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "iat": datetime.now(timezone.utc),
             "jti": str(uuid.uuid4())
         }
         
@@ -996,7 +996,7 @@ class AuthServiceClient:
             # Create mock impersonation token
             import jwt as pyjwt
             import uuid
-            from datetime import datetime, timedelta
+            from datetime import datetime, timedelta, timezone
             
             # Assume target user is developer for testing
             target_role = 'developer'
@@ -1008,8 +1008,8 @@ class AuthServiceClient:
                 "role": target_role,
                 "permissions": ["agents:read", "agents:write", "analytics:read"],
                 "impersonated_by": admin_user_id,
-                "exp": datetime.utcnow() + timedelta(minutes=duration_minutes),
-                "iat": datetime.utcnow(),
+                "exp": datetime.now(timezone.utc) + timedelta(minutes=duration_minutes),
+                "iat": datetime.now(timezone.utc),
                 "jti": str(uuid.uuid4())
             }
             

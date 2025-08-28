@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Dev Login Environment Configuration Fix</name>
+        <type>Core.Authentication</type>
+        <version>1.0</version>
+        <created>2025-08-28</created>
+        <description>Fix for dev login endpoint returning 403 due to environment detection issues</description>
+        <cross_references>
+            <ref>auth.xml</ref>
+            <ref>unified_environment_management.xml</ref>
+            <ref>independent_services.xml</ref>
+        </cross_references>
+    </metadata>
+
+    <problem_description>
+        <title>Dev Login Endpoint Returns 403 Forbidden</title>
+        <symptoms>
+            <symptom>Tests attempting to use /auth/dev/login receive 403 Forbidden responses</symptom>
+            <symptom>Auth service config shows development_mode: false and dev_login: null</symptom>
+            <symptom>Service correctly detects development environment in logs but disables dev login</symptom>
+        </symptoms>
+        <root_cause>
+            Auth service environment detection logic was working correctly, but the service was being started 
+            without proper environment variables set, causing it to default to production-like behavior.
+            The specific issue was:
+            1. ENVIRONMENT variable not being properly passed to the service process
+            2. PORT variable not being set, causing service to run on default port 8081 instead of expected 8001
+            3. Tests expecting service on port 8001 but service running on port 8081
+        </root_cause>
+    </problem_description>
+
+    <solution_implemented>
+        <title>Environment Variable Configuration Fix</title>
+        <steps>
+            <step id="1">
+                <description>Identify the auth service uses PORT environment variable (not SERVER_PORT)</description>
+                <code_location>auth_service/main.py: port = int(get_env().get("PORT", "8081"))</code_location>
+            </step>
+            <step id="2">
+                <description>Set proper environment variables for development mode</description>
+                <environment_variables>
+                    <var name="ENVIRONMENT" value="development" />
+                    <var name="PORT" value="8001" />
+                    <var name="AUTH_SERVICE_URL" value="http://localhost:8001" />
+                </environment_variables>
+            </step>
+            <step id="3">
+                <description>Start auth service with environment variables properly set</description>
+                <command>python -c "os.environ.update({'ENVIRONMENT': 'development', 'PORT': '8001'}); exec(open('auth_service/main.py').read())"</command>
+            </step>
+        </steps>
+    </solution_implemented>
+
+    <verification_steps>
+        <verification id="1">
+            <description>Verify auth service starts in development mode</description>
+            <command>curl -X GET "http://localhost:8001/auth/config"</command>
+            <expected_result>{"development_mode": true, "endpoints": {"dev_login": "http://localhost:8001/auth/dev/login"}}</expected_result>
+        </verification>
+        <verification id="2">
+            <description>Verify dev login endpoint works</description>
+            <command>curl -X POST "http://localhost:8001/auth/dev/login" -H "Content-Type: application/json" -d "{}"</command>
+            <expected_result>Returns valid JWT tokens with status 200</expected_result>
+        </verification>
+        <verification id="3">
+            <description>Verify service logs show correct configuration</description>
+            <expected_logs>
+                <log>Environment: development</log>
+                <log>Port: 8001</log>
+                <log>Starting Auth Service on port 8001</log>
+                <log>Uvicorn running on http://0.0.0.0:8001</log>
+            </expected_logs>
+        </verification>
+    </verification_steps>
+
+    <critical_patterns>
+        <pattern id="1">
+            <title>Environment Variable Precedence</title>
+            <description>
+                Auth service reads configuration in this order:
+                1. Environment variables (highest priority)
+                2. .env file values
+                3. Default hardcoded values (lowest priority)
+                
+                The PORT environment variable must be set correctly for the service to bind to the expected port.
+            </description>
+        </pattern>
+        <pattern id="2">
+            <title>Development Mode Detection</title>
+            <description>
+                Dev login is only enabled when ALL conditions are met:
+                1. ENVIRONMENT=development
+                2. Environment is not "staging" or "production" (explicit checks)
+                3. Service detects development mode correctly via AuthConfig.get_environment()
+            </description>
+            <code_reference>auth_service/auth_core/routes/auth_routes.py lines 724-730</code_reference>
+        </pattern>
+        <pattern id="3">
+            <title>Service Port Configuration</title>
+            <description>
+                Different parts of the system expect different ports:
+                - E2E tests expect auth service on port 8001
+                - Default auth service configuration uses port 8081
+                - Main backend service runs on port 8000
+                - Frontend runs on port 3000
+                
+                Port consistency is critical for test success.
+            </description>
+        </pattern>
+    </critical_patterns>
+
+    <prevention_guidelines>
+        <guideline id="1">
+            <title>Always Verify Environment Variables</title>
+            <description>
+                Before starting services for testing, verify all required environment variables are set:
+                - ENVIRONMENT should match expected environment (development, staging, production)
+                - PORT should match test expectations
+                - Service URLs should be consistent across configuration
+            </description>
+        </guideline>
+        <guideline id="2">
+            <title>Check Service Configuration Endpoints</title>
+            <description>
+                Use the /auth/config endpoint to verify service configuration before running tests.
+                Look for:
+                - development_mode: true (for dev tests)
+                - dev_login endpoint present (not null)
+                - Correct service URLs in endpoints
+            </description>
+        </guideline>
+        <guideline id="3">
+            <title>Environment Variable Setting on Windows</title>
+            <description>
+                Windows cmd/bash environment variable setting with 'set' doesn't persist across commands.
+                Use Python scripts or explicit os.environ setting for reliable environment configuration.
+            </description>
+        </guideline>
+    </prevention_guidelines>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>Development Velocity and Test Reliability</business_goal>
+        <value_impact>
+            <impact>Enables E2E tests to run successfully</impact>
+            <impact>Prevents development environment setup issues</impact>
+            <impact>Reduces debugging time for authentication issues</impact>
+            <impact>Maintains test reliability and confidence</impact>
+        </value_impact>
+        <strategic_impact>
+            <impact>Protects entire authentication testing pipeline</impact>
+            <impact>Enables continuous integration reliability</impact>
+            <impact>Supports rapid development cycles</impact>
+        </strategic_impact>
+    </business_value>
+
+    <compliance_checklist>
+        <check>Environment variables properly configured for auth service</check>
+        <check>Service starts on expected port (8001 for E2E tests)</check>
+        <check>Development mode correctly detected and enabled</check>
+        <check>Dev login endpoint accessible and functional</check>
+        <check>Auth config endpoint returns correct development configuration</check>
+        <check>Service logs confirm correct environment and port</check>
+        <check>E2E tests can successfully authenticate via dev login</check>
+    </compliance_checklist>
+</specification>

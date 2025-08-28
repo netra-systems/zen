@@ -1,6 +1,6 @@
 """Report Analysis for Factory Status Integration."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from netra_backend.app.services.factory_status.spec_compliance_scorer import (
@@ -114,7 +114,7 @@ class ReportAnalyzer:
     def _get_basic_report_fields(self, overall_score: float) -> Dict[str, Any]:
         """Get basic report fields."""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "overall_compliance_score": overall_score
         }
     

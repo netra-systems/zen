@@ -21,7 +21,7 @@ from pathlib import Path
 
 import asyncio
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -50,7 +50,7 @@ class TestAdminOperations:
                 {"type": "system_maintenance", "count": 1},
                 {"type": "usage_analysis", "count": 10}
             ],
-            "time_window": {"start": datetime.utcnow(), "end": datetime.utcnow() + timedelta(hours=2)}
+            "time_window": {"start": datetime.now(timezone.utc), "end": datetime.now(timezone.utc) + timedelta(hours=2)}
         }
 
     async def _execute_user_management_operations(self, infra, scenario):

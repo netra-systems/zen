@@ -3,10 +3,10 @@
   <metadata>
     <name>Auth Learnings</name>
     <type>learnings</type>
-    <version>2.0</version>
-    <last_updated>2025-08-22</last_updated>
-    <description>Comprehensive authentication learnings including cold start fixes</description>
-    <last_edited>2025-08-22T10:00:00</last_edited>
+    <version>2.1</version>
+    <last_updated>2025-08-28</last_updated>
+    <description>Comprehensive authentication learnings including OAuth startup validation</description>
+    <last_edited>2025-08-28T15:35:00</last_edited>
     <critical>true</critical>
     <business_impact>Mission Critical - Authentication Required for All User Access</business_impact>
   </metadata>
@@ -91,6 +91,49 @@
             Revenue: Prevents auth service downtime from impacting customers.
             Testing: Consistent dev user creation for reliable testing.
         </business_impact>
+  </learning>
+  <learning id="oauth-startup-validation" priority="CRITICAL">
+    <title>🔴 CRITICAL: OAuth Must Be Validated at Service Startup</title>
+    <problem>
+      Auth service can start with missing or invalid OAuth configuration, causing:
+      - Users unable to login via OAuth in staging/production
+      - Silent failures where service appears healthy but OAuth is broken
+      - Missing GOOGLE_OAUTH_CLIENT_ID_STAGING and GOOGLE_OAUTH_CLIENT_SECRET_STAGING
+      - Invalid OAuth credentials (placeholders, wrong format)
+    </problem>
+    <root_cause>
+      No startup validation of OAuth configuration.
+      Service starts successfully even without OAuth credentials.
+      Health checks don't verify OAuth provider availability.
+      OAuth failures only discovered when users try to login.
+    </root_cause>
+    <solution>
+      <step>Added comprehensive OAuth validation at startup in main.py lifespan</step>
+      <step>Validate OAuth client ID format (must end with .apps.googleusercontent.com)</step>
+      <step>Check for placeholder values (REPLACE_*)</step>
+      <step>Verify OAuth provider can initialize and generate URLs</step>
+      <step>FAIL FAST in staging/production if OAuth is misconfigured</step>
+      <step>Added self_check() and validate_configuration() to OAuth providers</step>
+      <step>Created /oauth/status endpoint for runtime monitoring</step>
+    </solution>
+    <files_modified>
+      <file>auth_service/main.py - Added OAuth validation at startup (lines 121-235)</file>
+      <file>auth_service/auth_core/oauth/google_oauth.py - Added validate_configuration() and self_check()</file>
+      <file>auth_service/main.py - Added /oauth/status endpoint (lines 598-666)</file>
+    </files_modified>
+    <prevention>
+      ALWAYS validate OAuth at startup in staging/production.
+      NEVER allow auth service to start without valid OAuth in production.
+      Monitor /oauth/status endpoint for OAuth health.
+      Run OAuth self-check before every deployment.
+      Validate OAuth client ID format, not just presence.
+    </prevention>
+    <business_impact>
+      Revenue: Prevents authentication failures that block user access ($75K+ MRR impact).
+      User Experience: Users can always login via OAuth when service is running.
+      Operations: Fail fast prevents silent OAuth failures in production.
+      Monitoring: /oauth/status provides real-time OAuth health visibility.
+    </business_impact>
   </learning>
   <learning id="oauth-local-staging-mismatch">
     <title>OAuth Configuration Mismatch for Local Development</title>

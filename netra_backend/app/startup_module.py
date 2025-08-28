@@ -517,7 +517,16 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
     app.state.llm_manager = LLMManager(settings)
-    app.state.clickhouse_client = None
+    
+    # CRITICAL FIX: Set ClickHouse availability flag based on configuration
+    config = get_config()
+    from netra_backend.app.core.isolated_environment import get_env
+    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+    
+    # ClickHouse is available if required or if not in staging/development
+    clickhouse_available = clickhouse_required or config.environment not in ["staging", "development"]
+    app.state.clickhouse_available = clickhouse_available
+    app.state.clickhouse_client = None  # Will be initialized on-demand
 
 
 async def initialize_clickhouse(logger: logging.Logger) -> None:
@@ -526,37 +535,48 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
     clickhouse_mode = config.clickhouse_mode.lower()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
-    # CRITICAL FIX: Skip ClickHouse in staging environment entirely
-    if config.environment == "staging":
-        logger.info("Skipping ClickHouse initialization entirely in staging environment (infrastructure not available)")
+    # CRITICAL FIX: Check if ClickHouse is explicitly required
+    from netra_backend.app.core.isolated_environment import get_env
+    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+    
+    # Skip ClickHouse in staging and development unless explicitly required
+    if config.environment in ["staging", "development"] and not clickhouse_required:
+        logger.info(f"Skipping ClickHouse initialization in {config.environment} environment (optional service - may not be available)")
+        config.clickhouse_mode = "mock"  # Ensure mock mode is set
         return
     
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         try:
-            # Add timeout protection for ClickHouse initialization
+            # CRITICAL FIX: Reduce timeout for faster startup failure in optional environments
+            timeout = 10.0 if config.environment in ["staging", "development"] else 30.0
+            
             await asyncio.wait_for(
                 _setup_clickhouse_tables(logger, clickhouse_mode),
-                timeout=30.0  # 30 second timeout for ClickHouse
+                timeout=timeout
             )
         except asyncio.TimeoutError:
-            timeout_msg = "ClickHouse initialization timed out after 30 seconds"
+            timeout_msg = f"ClickHouse initialization timed out after {timeout} seconds"
             logger.error(timeout_msg)
-            if graceful_startup:
+            
+            # CRITICAL FIX: Always use graceful startup for optional services
+            if graceful_startup or not clickhouse_required:
                 logger.warning(f"{timeout_msg} - continuing without ClickHouse (optional service)")
                 config.clickhouse_mode = "mock"
             else:
                 raise RuntimeError(timeout_msg)
+                
         except Exception as e:
             # Enhanced error handling for common ClickHouse connection issues
             error_msg = str(e).lower()
             is_connection_error = any(keyword in error_msg for keyword in [
-                'connection', 'refused', 'timeout', 'unreachable', 'network', 'dns'
+                'connection', 'refused', 'timeout', 'unreachable', 'network', 'dns', 'httpsconnectionpool'
             ])
             
-            if is_connection_error and graceful_startup:
-                logger.warning(f"ClickHouse connection failed but continuing (optional service): {e}")
+            # CRITICAL FIX: Always use graceful degradation unless explicitly required
+            if (is_connection_error or graceful_startup) and not clickhouse_required:
+                logger.warning(f"ClickHouse connection/initialization failed but continuing (optional service): {e}")
                 config.clickhouse_mode = "mock"
-            elif graceful_startup:
+            elif graceful_startup and not clickhouse_required:
                 logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
                 config.clickhouse_mode = "mock"
             else:
@@ -566,14 +586,32 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
 
 
 async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
-    """Setup ClickHouse tables."""
-    from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
+    """Setup ClickHouse tables with timeout and error handling."""
+    import asyncio
+    from netra_backend.app.core.isolated_environment import get_env
+    
     try:
         _log_clickhouse_start(logger, mode)
-        await initialize_clickhouse_tables()
+        
+        # CRITICAL FIX: Add timeout protection for table initialization
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        init_timeout = 8.0 if environment in ["staging", "development"] else 20.0
+        
+        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
+        
+        await asyncio.wait_for(
+            initialize_clickhouse_tables(), 
+            timeout=init_timeout
+        )
+        
         logger.info("ClickHouse tables initialization complete")
+        
+    except asyncio.TimeoutError as e:
+        logger.error(f"ClickHouse table initialization timed out after {init_timeout}s")
+        raise ConnectionError(f"ClickHouse table initialization timeout") from e
     except Exception as e:
         logger.error(f"Failed to initialize ClickHouse tables: {e}")
+        raise
 
 
 def _log_clickhouse_start(logger: logging.Logger, mode: str) -> None:
@@ -884,8 +922,15 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     """Run complete startup sequence with improved initialization handling."""
     # Use the global startup manager instance
     
-    # Initialize logger FIRST - before any try block to ensure it's always available
-    logger = central_logger.get_logger(__name__)
+    # Initialize logger FIRST - before any logic to ensure it's always available in all scopes
+    logger = None
+    try:
+        logger = central_logger.get_logger(__name__)
+    except Exception as e:
+        # Fallback logger initialization if central_logger fails
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to initialize central logger, using fallback: {e}")
     
     # Check if we should use the new robust startup system
     config = get_config()

@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
@@ -53,7 +53,7 @@ class TestAuthSessionIntegration:
         """Simulate complete OAuth authentication flow"""
         access_token = f"access_token_{uuid.uuid4()}"
         refresh_token = f"refresh_token_{uuid.uuid4()}"
-        expires_at = datetime.utcnow() + timedelta(hours=1)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         return {"access": access_token, "refresh": refresh_token, "expires": expires_at}
 
     async def _test_token_refresh_cycle(self, tokens, user):
@@ -62,7 +62,7 @@ class TestAuthSessionIntegration:
         with patch('netra_backend.app.clients.auth_client.refresh_token') as mock_refresh:
             mock_refresh.return_value = {"access_token": f"new_{tokens['access']}"}
             expired_token = tokens.copy()
-            expired_token['expires'] = datetime.utcnow() - timedelta(minutes=5)
+            expired_token['expires'] = datetime.now(timezone.utc) - timedelta(minutes=5)
             refreshed = await self._perform_token_refresh(expired_token)
             assert refreshed["access_token"] != tokens["access"]
 
@@ -106,7 +106,7 @@ class TestAuthSessionIntegration:
     async def _simulate_connection_failure(self, connection_state):
         """Simulate network connection failure"""
         connection_state["websocket"].client_state = WebSocketState.DISCONNECTED
-        connection_state["failure_time"] = datetime.utcnow()
+        connection_state["failure_time"] = datetime.now(timezone.utc)
 
     async def _test_automatic_reconnection(self, ws_manager, user, original_state):
         """Test automatic reconnection with state recovery"""

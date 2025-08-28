@@ -290,7 +290,24 @@ class StatePersistenceService:
     
     def _prepare_json_safe_data(self, state_data: Dict[str, Any]) -> Dict[str, Any]:
         """Prepare JSON-safe data for database storage."""
-        return json.loads(json.dumps(state_data, cls=DateTimeEncoder))
+        import copy
+        # Use deep copy instead of double JSON serialization to avoid performance overhead
+        # This preserves the data structure without the expensive serialize/deserialize cycle
+        json_safe_data = copy.deepcopy(state_data)
+        
+        # Convert any datetime objects to ISO strings for JSON compatibility
+        return self._convert_datetime_objects(json_safe_data)
+    
+    def _convert_datetime_objects(self, data: Any) -> Any:
+        """Convert datetime objects to ISO strings recursively."""
+        if isinstance(data, datetime):
+            return data.isoformat()
+        elif isinstance(data, dict):
+            return {key: self._convert_datetime_objects(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self._convert_datetime_objects(item) for item in data]
+        else:
+            return data
     
     def _build_snapshot_record(self, snapshot_id: str, request: StatePersistenceRequest,
                               serialization_format: SerializationFormat, 

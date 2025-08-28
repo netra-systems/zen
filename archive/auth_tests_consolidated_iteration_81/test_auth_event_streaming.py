@@ -14,7 +14,7 @@ import pytest
 import asyncio
 import json
 from unittest.mock import AsyncMock, patch, MagicMock, call
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any
 
@@ -53,7 +53,7 @@ class TestAuthEventStreaming:
             auth_provider='google',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     @pytest.fixture
@@ -69,7 +69,7 @@ class TestAuthEventStreaming:
         login_event = AuthEvent(
             event_type=AuthEventType.USER_LOGIN,
             user_id=sample_user.id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={
                 'ip_address': '127.0.0.1',
                 'user_agent': 'Mozilla/5.0',
@@ -98,7 +98,7 @@ class TestAuthEventStreaming:
         logout_event = AuthEvent(
             event_type=AuthEventType.USER_LOGOUT,
             user_id=sample_user.id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={
                 'session_id': session_id,
                 'logout_reason': 'user_initiated'
@@ -123,7 +123,7 @@ class TestAuthEventStreaming:
         failure_event = AuthEvent(
             event_type=AuthEventType.AUTH_FAILURE,
             user_id=None,  # User ID might not be known for failures
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={
                 'email': 'attacker@malicious.com',
                 'ip_address': '192.168.1.100',
@@ -156,7 +156,7 @@ class TestAuthEventStreaming:
         expiration_event = AuthEvent(
             event_type=AuthEventType.SESSION_EXPIRED,
             user_id=sample_user.id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={
                 'session_id': session_id,
                 'expiration_reason': 'timeout',
@@ -182,7 +182,7 @@ class TestAuthEventStreaming:
         password_event = AuthEvent(
             event_type=AuthEventType.PASSWORD_CHANGED,
             user_id=sample_user.id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={
                 'ip_address': '127.0.0.1',
                 'change_method': 'user_initiated',
@@ -212,7 +212,7 @@ class TestAuthEventStreaming:
         lockout_event = AuthEvent(
             event_type=AuthEventType.ACCOUNT_LOCKED,
             user_id=sample_user.id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={
                 'lock_reason': 'too_many_failed_attempts',
                 'failed_attempt_count': 5,
@@ -253,19 +253,19 @@ class TestEventStreamSubscriptions:
             AuthEvent(
                 event_type=AuthEventType.USER_LOGIN,
                 user_id=user_id,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 metadata={'ip_address': '127.0.0.1'}
             ),
             AuthEvent(
                 event_type=AuthEventType.AUTH_FAILURE,
                 user_id=None,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 metadata={'ip_address': '192.168.1.100'}
             ),
             AuthEvent(
                 event_type=AuthEventType.USER_LOGOUT,
                 user_id=user_id,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 metadata={'session_id': str(uuid4())}
             )
         ]
@@ -426,9 +426,9 @@ class TestEventStreamReliability:
         
         # Publish events including one that causes error
         events = [
-            AuthEvent(AuthEventType.USER_LOGIN, str(uuid4()), datetime.utcnow(), {}),
-            AuthEvent(AuthEventType.AUTH_FAILURE, None, datetime.utcnow(), {}),
-            AuthEvent(AuthEventType.USER_LOGOUT, str(uuid4()), datetime.utcnow(), {})
+            AuthEvent(AuthEventType.USER_LOGIN, str(uuid4()), datetime.now(timezone.utc), {}),
+            AuthEvent(AuthEventType.AUTH_FAILURE, None, datetime.now(timezone.utc), {}),
+            AuthEvent(AuthEventType.USER_LOGOUT, str(uuid4()), datetime.now(timezone.utc), {})
         ]
         
         for event in events:
@@ -454,7 +454,7 @@ class TestEventStreamReliability:
             event = AuthEvent(
                 event_type=AuthEventType.USER_LOGIN,
                 user_id=str(uuid4()),
-                timestamp=datetime.utcnow() + timedelta(seconds=i),
+                timestamp=datetime.now(timezone.utc) + timedelta(seconds=i),
                 metadata={'sequence': i}
             )
             events.append(event)
@@ -481,7 +481,7 @@ class TestEventStreamReliability:
         duplicate_event = AuthEvent(
             event_type=AuthEventType.USER_LOGIN,
             user_id=str(uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={'event_id': event_id}
         )
         
@@ -511,7 +511,7 @@ class TestEventStreamReliability:
             event = AuthEvent(
                 event_type=AuthEventType.USER_LOGIN,
                 user_id=str(uuid4()),
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 metadata={'index': i}
             )
             await event_stream.publish(event)
@@ -537,7 +537,7 @@ class TestEventStreamReliability:
         initial_event = AuthEvent(
             AuthEventType.USER_LOGIN,
             str(uuid4()),
-            datetime.utcnow(),
+            datetime.now(timezone.utc),
             {'phase': 'before_failure'}
         )
         await event_stream.publish(initial_event)
@@ -549,7 +549,7 @@ class TestEventStreamReliability:
             failure_event = AuthEvent(
                 AuthEventType.USER_LOGIN,
                 str(uuid4()),
-                datetime.utcnow(),
+                datetime.now(timezone.utc),
                 {'phase': 'during_failure'}
             )
             await event_stream.publish(failure_event)
@@ -558,7 +558,7 @@ class TestEventStreamReliability:
         recovery_event = AuthEvent(
             AuthEventType.USER_LOGIN,
             str(uuid4()),
-            datetime.utcnow(),
+            datetime.now(timezone.utc),
             {'phase': 'after_recovery'}
         )
         await event_stream.publish(recovery_event)
@@ -579,7 +579,7 @@ class TestEventStreamMetrics:
         event = AuthEvent(
             event_type=AuthEventType.USER_LOGIN,
             user_id=str(uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={}
         )
         
@@ -616,7 +616,7 @@ class TestEventStreamMetrics:
         event = AuthEvent(
             event_type=AuthEventType.USER_LOGIN,
             user_id=str(uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={}
         )
         

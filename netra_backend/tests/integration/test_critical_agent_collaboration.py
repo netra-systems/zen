@@ -12,7 +12,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
@@ -150,7 +150,7 @@ class TestAgentCollaborationIntegration:
         """Process MCP tool execution result"""
         return {
             "execution_id": request["execution_id"],
-            "processed_at": datetime.utcnow().isoformat(),
+            "processed_at": datetime.now(timezone.utc).isoformat(),
             "insights_generated": True
         }
 
@@ -200,7 +200,7 @@ class TestAgentCollaborationIntegration:
     async def _schedule_research_job(self, infrastructure, job):
         """Schedule individual research job"""
         infrastructure["job_queue"]["size"] += 1
-        return {"scheduled_at": datetime.utcnow(), "job_id": job["id"], "success": True}
+        return {"scheduled_at": datetime.now(timezone.utc), "job_id": job["id"], "success": True}
 
     async def _execute_research_job(self, infrastructure, job):
         """Execute individual research job"""
@@ -209,7 +209,7 @@ class TestAgentCollaborationIntegration:
         else:
             result = {"availability_score": 0.85, "peak_times": ["14:00-16:00"]}
         
-        return {"result": result, "completed_at": datetime.utcnow(), "success": True}
+        return {"result": result, "completed_at": datetime.now(timezone.utc), "success": True}
 
     async def _verify_research_job_completion(self, flow, original_jobs):
         """Verify research job completion and results"""

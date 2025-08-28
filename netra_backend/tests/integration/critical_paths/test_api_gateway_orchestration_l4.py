@@ -23,7 +23,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
@@ -236,8 +236,8 @@ class APIGatewayOrchestrationL4TestSuite:
             "user_id": user_id,
             "email": f"test_user_{session_id[:8]}@netra-gateway-test.com",
             "tier": user_tier,
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         
         access_token = create_access_token(token_payload)

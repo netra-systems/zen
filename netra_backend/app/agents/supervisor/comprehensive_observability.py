@@ -6,7 +6,7 @@ Business Value: Enables real-time monitoring and performance optimization.
 
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
@@ -136,7 +136,7 @@ class SupervisorObservability:
     def get_metrics_snapshot(self) -> Dict[str, Any]:
         """Get current metrics snapshot."""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "metrics": self._metrics.copy(),
             "active_traces": len(self._traces),
             "performance_percentiles": self._calculate_performance_percentiles()
@@ -161,7 +161,7 @@ class SupervisorObservability:
         log_data = {
             "event": event,
             "trace_id": trace_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             **data
         }
         logger.info(f"Supervisor trace event: {json.dumps(log_data)}")
@@ -172,7 +172,7 @@ class SupervisorObservability:
             "event": "agent_error",
             "agent_name": agent_name,
             "error": error,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         logger.error(f"Supervisor agent error: {json.dumps(log_data)}")
     

@@ -27,8 +27,7 @@ import requests
 from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, Any, List
 
-from netra_backend.app.core.health.interface import HealthChecker
-from netra_backend.app.core.configuration.unified_config import UnifiedConfig
+from netra_backend.app.services.health_checker import HealthChecker
 
 
 @pytest.mark.staging

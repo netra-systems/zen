@@ -23,7 +23,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -304,7 +304,7 @@ class ErrorScenarioTester:
         """Log error scenario for analysis."""
         self.error_log.append({
             "scenario": scenario,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "details": details
         })
     

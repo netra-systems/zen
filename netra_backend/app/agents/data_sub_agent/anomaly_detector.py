@@ -4,7 +4,7 @@ Business Value: Standardized anomaly detection with reliability patterns.
 Provides consistent execution workflow for anomaly detection operations.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.base.errors import (
@@ -316,7 +316,7 @@ class AnomalyDetector(BaseExecutionInterface):
     ) -> Dict[str, Any]:
         """Build base anomaly detail parameters."""
         return {
-            'timestamp': row.get('timestamp', datetime.utcnow()),
+            'timestamp': row.get('timestamp', datetime.now(timezone.utc)),
             'metric_name': metric_name,
             'actual_value': actual_value,
             'expected_value': expected_value

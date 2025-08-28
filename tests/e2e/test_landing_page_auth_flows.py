@@ -7,7 +7,7 @@ import asyncio
 import json
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 import os
 
@@ -217,8 +217,8 @@ class TestLandingPageAuthFlows:
         short_token = jwt.encode(
             {
                 **user_data,
-                "exp": datetime.utcnow() + timedelta(seconds=1),
-                "iat": datetime.utcnow()
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=1),
+                "iat": datetime.now(timezone.utc)
             },
             jwt_secret,
             algorithm="HS256"
@@ -331,7 +331,7 @@ class TestLandingPageAuthFlows:
             "user_id": "existing_user_123",
             "email": "existing@example.com",
             "name": "Existing User",
-            "created_at": datetime.utcnow() - timedelta(days=30)
+            "created_at": datetime.now(timezone.utc) - timedelta(days=30)
         }
         
         # Create user in database

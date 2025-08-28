@@ -19,7 +19,7 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
@@ -34,6 +34,10 @@
             <critical-takeaway>JWT validation must validate token structure before decoding to prevent malformed token errors (auth_service_endpoint_fixes.xml).</critical-takeaway>
             <critical-takeaway>CORS wildcard (*) cannot be used with credentials: 'include' - use specific origin list in dev (cors_development_wildcard.xml).</critical-takeaway>
             <critical-takeaway>OAuth environment variables use _ENV suffix for runtime (OAUTH_GOOGLE_CLIENT_ID_ENV) and _{ENVIRONMENT} for deployment (OAUTH_GOOGLE_CLIENT_ID_STAGING) - see oauth_environment_naming_convention.xml</critical-takeaway>
+            <critical-takeaway>CRITICAL: Auth service MUST validate OAuth client configuration at startup and FAIL FAST in staging/production if misconfigured (oauth_startup_validation.xml).</critical-takeaway>
+            <critical-takeaway>OAuth client ID must end with .apps.googleusercontent.com and be at least 50 characters - validate format not just presence (oauth_validation_requirements.xml).</critical-takeaway>
+            <critical-takeaway>OAuth providers must implement self_check() and validate_configuration() methods for comprehensive health monitoring (oauth_provider_health.xml).</critical-takeaway>
+            <critical-takeaway>/oauth/status endpoint provides runtime OAuth health monitoring - returns 503 if unhealthy in staging/production (oauth_monitoring.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
@@ -415,6 +419,15 @@
             <critical-takeaway>Test OAuth flows immediately after implementing Cloud Armor to catch WAF false positives before they impact users.</critical-takeaway>
         </category>
         
+        <category name="Cloud Armor WAF Removal Decision" path="SPEC/learnings/cloud_armor_waf_removal.xml" keywords="Cloud Armor, OWASP, WAF, False Positives, 403 Forbidden, Security Architecture, Production Incident">
+            <critical-takeaway>CRITICAL: OWASP WAF rules are fundamentally incompatible with modern SPAs and cause excessive false positives - DO NOT RE-ADD without extensive testing.</critical-takeaway>
+            <critical-takeaway>Rules like owasp-crs-v030001-id942421-sqli block normal homepage access, health checks, and login pages.</critical-takeaway>
+            <critical-takeaway>Application-level security (input validation, parameterized queries, JWT auth) is more effective than generic WAF rules.</critical-takeaway>
+            <critical-takeaway>If WAF rules keep returning via Terraform, update cloud-armor.tf, commit changes, and use direct gcloud commands if needed.</critical-takeaway>
+            <critical-takeaway>Retain DDoS protection, rate limiting, and geographic throttling - these don't cause false positives.</critical-takeaway>
+            <critical-takeaway>Monitor 403 error rates as key health indicator after security policy changes.</critical-takeaway>
+        </category>
+        
         <category name="ClickHouse Development Configuration" path="SPEC/learnings/clickhouse_dev_configuration.xml" keywords="ClickHouse, Port Configuration, Development Environment, Container, Testing, 8123, 8443">
             <critical-takeaway>Local development ClickHouse runs on HTTP port 8123, not HTTPS port 8443 - many scripts had wrong defaults.</critical-takeaway>
             <critical-takeaway>Container netra-clickhouse-dev uses standard ClickHouse config: HTTP on 8123, native on 9000, http://localhost:8123 for connections.</critical-takeaway>
@@ -734,6 +747,17 @@
             <critical-takeaway>ClickHouse service initialization requires retry logic with exponential backoff (3 attempts: 1s, 2s, 4s) for transient network issues</critical-takeaway>
             <critical-takeaway>Environment-aware error handling: staging allows optional services, production enforces required services</critical-takeaway>
             <critical-takeaway>Import ordering critical: module imports must always follow module docstrings to avoid circular dependency issues</critical-takeaway>
+        </category>
+        
+        <category name="ClickHouse Graceful Failure Handling [FIXED 2025-08-28]" path="SPEC/learnings/clickhouse_graceful_failure.xml" keywords="ClickHouse, Timeout, Graceful Failure, Optional Service, Startup Blocking, Connection Timeout, Staging, HTTPSConnectionPool">
+            <critical-takeaway>FIXED 2025-08-28: ClickHouse must be optional by default in staging/development to prevent backend startup blocking</critical-takeaway>
+            <critical-takeaway>Use environment-aware timeouts: 3-5s in staging/dev, 10-30s in production to fail fast when infrastructure unavailable</critical-takeaway>
+            <critical-takeaway>Implement graceful degradation with mock client fallback when real connections fail in optional environments</critical-takeaway>
+            <critical-takeaway>Skip ClickHouse initialization entirely in optional environments unless CLICKHOUSE_REQUIRED=true</critical-takeaway>
+            <critical-takeaway>Health checks must respect service optionality - skip or report "optional_unavailable" for optional services</critical-takeaway>
+            <critical-takeaway>Layer multiple timeout protections: connection, operation, initialization, and wrapper timeouts</critical-takeaway>
+            <critical-takeaway>HTTPSConnectionPool timeout errors indicate infrastructure unavailability - use fast failure patterns</critical-takeaway>
+            <critical-takeaway>Backend startup time reduced from 60s+ to &lt;30s by preventing ClickHouse connection blocking</critical-takeaway>
         </category>
         
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
@@ -1245,6 +1269,16 @@
             <critical-takeaway>Test deployment by checking browser network tab - no localhost URLs should appear in staging/production.</critical-takeaway>
             <critical-takeaway>This was working before - regression introduced when Dockerfile was modified without understanding Next.js build-time requirements.</critical-takeaway>
         </category>
+
+        <category name="Staging Deployment Critical Fixes 2025-08-28" path="SPEC/learnings/staging_deployment_critical_fixes_20250828.xml" keywords="Staging Deployment, SECRET_KEY, OAuth, NEXT_PUBLIC, Build Time, Configuration">
+            <critical-takeaway>CRITICAL: NEXT_PUBLIC_* environment variables in Next.js are compile-time constants, must be set in Dockerfile before npm run build</critical-takeaway>
+            <critical-takeaway>SECRET_KEY must be cryptographically secure (32+ chars) - never use placeholder text in staging configuration</critical-takeaway>
+            <critical-takeaway>JWT_SECRET_KEY requires 64+ characters for production-grade security</critical-takeaway>
+            <critical-takeaway>OAuth credentials must be configured (even as placeholders) to prevent auth service startup failures</critical-takeaway>
+            <critical-takeaway>Auth service OAuth routes properly registered: /auth/login, /auth/callback, /oauth/providers, /oauth/config</critical-takeaway>
+            <critical-takeaway>Frontend Docker builds must use staging URLs: https://api.staging.netrasystems.ai, not localhost</critical-takeaway>
+            <critical-takeaway>Configuration validation pipeline prevents deployment failures - check secret lengths before deployment</critical-takeaway>
+        </category>
         
     </categories>
     
@@ -1392,4 +1426,16 @@
             <critical-takeaway>$1M+ revenue at risk from WebSocket middleware issues - security vulnerabilities block enterprise sales.</critical-takeaway>
         </category>
     </websocket_security>
+    
+    <windows_development>
+        <category name="Windows Socket Permission Errors" path="SPEC/learnings/windows_development.xml" keywords="Windows, Port 8000, Socket Permission, WinError 10013, Backend Binding, Process Cleanup">
+            <critical-takeaway>Windows port 8000 permission errors usually caused by processes holding the port, not actual permission issues.</critical-takeaway>
+            <critical-takeaway>Use scripts/fix_port_8000_windows.py to diagnose and fix Windows socket permission errors automatically.</critical-takeaway>
+            <critical-takeaway>Port 8000 is safe from Windows dynamic port range (49152-65535) but can be held by orphaned processes.</critical-takeaway>
+            <critical-takeaway>Windows dev launcher uses enhanced process tree management with taskkill /F /T for proper cleanup.</critical-takeaway>
+            <critical-takeaway>Test socket binding independently using scripts/test_backend_port_binding.py before full dev launcher startup.</critical-takeaway>
+            <critical-takeaway>Windows firewall rules rarely cause port 8000 issues but can be created with --create-firewall-rule flag.</critical-takeaway>
+            <critical-takeaway>Always use graceful shutdown (Ctrl+C) to prevent orphaned processes that hold ports on Windows.</critical-takeaway>
+        </category>
+    </windows_development>
 </specification>

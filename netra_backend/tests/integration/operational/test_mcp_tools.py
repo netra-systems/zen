@@ -22,6 +22,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import datetime, timedelta
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -185,11 +186,15 @@ class TestMCPTools:
             "error": "Tool discovery timeout"
         }
         
-        operational_infrastructure["mcp_registry"].discover_tools.return_value = discovery_result
+        # Configure mock to return error result
+        operational_infrastructure["mcp_registry"].discover_tools = AsyncMock(return_value=discovery_result)
         
-        assert discovery_result["all_tools_available"] is False
-        assert "error" in discovery_result
-        assert discovery_result["discovery_time_ms"] > 500
+        # Execute the error scenario
+        error_result = await operational_infrastructure["mcp_registry"].discover_tools(mcp_scenario)
+        
+        assert error_result["all_tools_available"] is False
+        assert "error" in error_result
+        assert error_result["discovery_time_ms"] > 500
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

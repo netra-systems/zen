@@ -8,7 +8,7 @@ SQL-related issues with the auth_core service in staging.
 import asyncio
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Add the project root to path
@@ -35,7 +35,7 @@ async def analyze_auth_sql_errors():
     print("=" * 80)
     
     # Define time range (last 24 hours)
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     start_time = end_time - timedelta(hours=24)
     
     print(f"\nAnalyzing logs from {start_time} to {end_time}")
@@ -140,7 +140,7 @@ async def analyze_auth_sql_errors():
     # 6. Save detailed report
     report_file = "auth_sql_error_report.json"
     report = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "time_range": {
             "start": start_time.isoformat(),
             "end": end_time.isoformat()

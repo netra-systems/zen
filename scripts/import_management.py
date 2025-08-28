@@ -16,7 +16,7 @@ import logging
 import os
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -190,7 +190,7 @@ class ImportManagementSystem:
         logger.info("\nGenerating comprehensive report...")
         
         report = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'statistics': self.stats,
             'tools_available': list(self.tools.keys()),
             'recommendations': []

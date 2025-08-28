@@ -50,9 +50,21 @@ class TestDatabaseConnectionPoolResilience:
             return {"leaks_detected": False, "leaked_count": 0}
         
         async def mock_configure_circuit_breaker(**kwargs):
+            # Use the real circuit breaker configuration if available
+            if hasattr(manager, '_circuit_breaker') and manager._circuit_breaker:
+                return await manager.configure_circuit_breaker(**kwargs)
             return None
         
+        # Use the real circuit breaker status from the manager
         async def mock_get_circuit_breaker_status():
+            if hasattr(manager, '_circuit_breaker') and manager._circuit_breaker:
+                status = manager._circuit_breaker.get_status()
+                return {
+                    "state": status["state"].upper(),
+                    "failure_count": status["metrics"]["consecutive_failures"],
+                    "total_calls": status["metrics"]["total_calls"],
+                    "failed_calls": status["metrics"]["failed_calls"]
+                }
             return {"state": "CLOSED"}
         
         async def mock_get_pool_configuration():
@@ -75,6 +87,8 @@ class TestDatabaseConnectionPoolResilience:
                 pass
         
         def mock_get_connection():
+            # Return a MockConnection directly (not async)
+            # The test expects to use it as an async context manager
             return MockConnection()
         
         def mock_get_connection_raw():
@@ -256,13 +270,18 @@ class TestDatabaseConnectionPoolResilience:
         logger.info("Connection pool leak detection verified")
 
     @pytest.mark.cycle_29
-    async def test_connection_pool_circuit_breaker_prevents_cascade_failures(self, environment, pool_manager):
+    async def test_connection_pool_circuit_breaker_prevents_cascade_failures(self, environment):
         """
         Cycle 29: Test connection pool circuit breaker prevents cascade failures.
         
         Revenue Protection: $380K annually from preventing cascade failures.
         """
         logger.info("Testing connection pool circuit breaker - Cycle 29")
+        
+        # Create a real DatabaseManager instance to test circuit breaker functionality
+        # Don't use the fixture that overrides methods
+        from netra_backend.app.db.database_manager import DatabaseManager
+        pool_manager = DatabaseManager()
         
         # Configure circuit breaker for testing
         await pool_manager.configure_circuit_breaker(
@@ -274,11 +293,12 @@ class TestDatabaseConnectionPoolResilience:
         # Simulate repeated connection failures to trip circuit breaker
         failure_count = 0
         
-        with patch.object(pool_manager, '_create_connection', side_effect=SQLAlchemyError("Database unavailable")):
+        with patch.object(pool_manager, '_create_connection_protected', side_effect=SQLAlchemyError("Database unavailable")):
             for attempt in range(5):
                 try:
-                    async with pool_manager.get_connection() as conn:
-                        await conn.execute("SELECT 1")
+                    conn = await pool_manager.get_connection()
+                    async with conn as c:
+                        await c.execute("SELECT 1")
                 except Exception as e:
                     failure_count += 1
                     logger.info(f"Expected failure {failure_count}: {e}")
@@ -290,8 +310,9 @@ class TestDatabaseConnectionPoolResilience:
         # Attempts should now fail fast
         start_time = time.time()
         try:
-            async with pool_manager.get_connection() as conn:
-                await conn.execute("SELECT 1")
+            conn = await pool_manager.get_connection()
+            async with conn as c:
+                await c.execute("SELECT 1")
         except Exception as e:
             fast_fail_time = time.time() - start_time
             assert fast_fail_time < 0.5, f"Circuit breaker not failing fast: {fast_fail_time}s"

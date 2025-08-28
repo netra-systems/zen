@@ -32,7 +32,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
@@ -149,7 +149,7 @@ class TestAuthAuditTrailIntegrity:
             req = requirements.get(standard, {})
             
             # Check retention
-            age_days = (datetime.utcnow() - audit_record.timestamp).days
+            age_days = (datetime.now(timezone.utc) - audit_record.timestamp).days
             if age_days > req.get("retention_days", 365):
                 yield False
             
@@ -194,7 +194,7 @@ class TestAuthAuditTrailIntegrity:
             # Create audit event
             event = AuditRecord(
                 event_id=str(uuid.uuid4()),
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 event_type=op_type,
                 user_id=op_data.get("user"),
                 session_id=op_data.get("session_id"),
@@ -225,7 +225,7 @@ class TestAuthAuditTrailIntegrity:
         async with get_async_db() as db:
             result = await db.fetch(
                 "SELECT COUNT(*) as count FROM audit_log WHERE timestamp > $1",
-                datetime.utcnow() - timedelta(minutes=5)
+                datetime.now(timezone.utc) - timedelta(minutes=5)
             )
             assert result[0]["count"] >= metrics.events_captured
     
@@ -245,7 +245,7 @@ class TestAuthAuditTrailIntegrity:
         for i in range(10):
             event = AuditRecord(
                 event_id=str(uuid.uuid4()),
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 event_type="test_event",
                 user_id=f"user_{i}",
                 session_id=f"session_{i}",
@@ -300,7 +300,7 @@ class TestAuthAuditTrailIntegrity:
         # Create legitimate audit event
         event = AuditRecord(
             event_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             event_type="sensitive_action",
             user_id="admin_user",
             session_id="admin_session",
@@ -335,8 +335,8 @@ class TestAuthAuditTrailIntegrity:
         
         # Run integrity check
         integrity_report = await audit_logger.verify_integrity(
-            start_time=datetime.utcnow() - timedelta(minutes=5),
-            end_time=datetime.utcnow()
+            start_time=datetime.now(timezone.utc) - timedelta(minutes=5),
+            end_time=datetime.now(timezone.utc)
         )
         
         # Should detect tampering
@@ -360,7 +360,7 @@ class TestAuthAuditTrailIntegrity:
         # SOC2 event - financial transaction
         test_events.append(AuditRecord(
             event_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             event_type="payment_processed",
             user_id="customer_123",
             session_id="session_456",
@@ -377,7 +377,7 @@ class TestAuthAuditTrailIntegrity:
         # ISO27001 event - security incident
         test_events.append(AuditRecord(
             event_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             event_type="security_alert",
             user_id=None,
             session_id=None,
@@ -394,7 +394,7 @@ class TestAuthAuditTrailIntegrity:
         # GDPR event - data access
         test_events.append(AuditRecord(
             event_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             event_type="personal_data_access",
             user_id="processor_789",
             session_id="session_999",
@@ -419,8 +419,8 @@ class TestAuthAuditTrailIntegrity:
         for standard in compliance_standards:
             report = await audit_logger.generate_compliance_report(
                 standard=standard,
-                start_date=datetime.utcnow() - timedelta(days=30),
-                end_date=datetime.utcnow()
+                start_date=datetime.now(timezone.utc) - timedelta(days=30),
+                end_date=datetime.now(timezone.utc)
             )
             
             # Check compliance for each event
@@ -448,7 +448,7 @@ class TestAuthAuditTrailIntegrity:
         # Simulate security incident
         attacker_ip = "192.168.100.50"
         victim_user = "victim_user_123"
-        incident_time = datetime.utcnow()
+        incident_time = datetime.now(timezone.utc)
         
         # Create attack pattern
         attack_events = []
@@ -542,7 +542,7 @@ class TestAuthAuditTrailIntegrity:
         for i in range(5):
             event = AuditRecord(
                 event_id=str(uuid.uuid4()),
-                timestamp=datetime.utcnow() - timedelta(days=i),
+                timestamp=datetime.now(timezone.utc) - timedelta(days=i),
                 event_type="recent_event",
                 user_id=f"user_{i}",
                 session_id=f"session_{i}",
@@ -560,7 +560,7 @@ class TestAuthAuditTrailIntegrity:
         for i in range(5):
             event = AuditRecord(
                 event_id=str(uuid.uuid4()),
-                timestamp=datetime.utcnow() - timedelta(days=100+i),
+                timestamp=datetime.now(timezone.utc) - timedelta(days=100+i),
                 event_type="old_event",
                 user_id=f"old_user_{i}",
                 session_id=f"old_session_{i}",
@@ -596,7 +596,7 @@ class TestAuthAuditTrailIntegrity:
                 FROM audit_log 
                 WHERE timestamp > $1
                 """,
-                datetime.utcnow() - timedelta(days=90)
+                datetime.now(timezone.utc) - timedelta(days=90)
             )
             assert recent[0]["count"] >= 5, "Recent events missing"
             
@@ -607,7 +607,7 @@ class TestAuthAuditTrailIntegrity:
                 FROM audit_log 
                 WHERE timestamp < $1
                 """,
-                datetime.utcnow() - timedelta(days=90)
+                datetime.now(timezone.utc) - timedelta(days=90)
             )
             assert old[0]["count"] == 0, "Old events not archived"
     
@@ -625,7 +625,7 @@ class TestAuthAuditTrailIntegrity:
         for i in range(1000):
             event = AuditRecord(
                 event_id=str(uuid.uuid4()),
-                timestamp=datetime.utcnow() - timedelta(minutes=i),
+                timestamp=datetime.now(timezone.utc) - timedelta(minutes=i),
                 event_type="bulk_event",
                 user_id=f"user_{i % 100}",  # 100 unique users
                 session_id=f"session_{i % 50}",  # 50 unique sessions
@@ -651,8 +651,8 @@ class TestAuthAuditTrailIntegrity:
             ("user_activity", {"user_id": "user_10", "limit": 100}),
             # Time range
             ("time_range", {
-                "start": datetime.utcnow() - timedelta(hours=1),
-                "end": datetime.utcnow()
+                "start": datetime.now(timezone.utc) - timedelta(hours=1),
+                "end": datetime.now(timezone.utc)
             }),
             # Failed operations
             ("failures", {"result": "failure", "limit": 50}),

@@ -72,7 +72,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "memory_test_user",
                 "email": "memory@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -114,7 +114,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     async def test_cold_start_valid_auth_clock_skew(self, auth_service_config, mock_postgres, mock_redis):
         """Test 1.2 (Depth): Cold start with significant clock skew between client and server."""
         # Create token with future timestamp (simulating clock skew)
-        future_time = datetime.utcnow() + timedelta(minutes=5)
+        future_time = datetime.now(timezone.utc) + timedelta(minutes=5)
         
         token = jwt.encode(
             {
@@ -152,7 +152,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "attacker",
                 "email": "attacker@evil.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             "none",  # Try to use 'none' algorithm
             algorithm="none"
@@ -181,7 +181,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "user_id": f"pool_user_{i}",
                     "email": f"pool{i}@example.com",
                     "tier": "early",
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -224,7 +224,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "dns_delay_user",
                 "email": "dns@example.com",
                 "tier": "free",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -268,7 +268,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "binary_user",
                 "email": "binary@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -306,7 +306,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "replay_user",
                 "email": "replay@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() - timedelta(hours=1),
+                "exp": datetime.now(timezone.utc) - timedelta(hours=1),
                 "nonce": "abc123"  # Add nonce for replay detection
             },
             auth_service_config["jwt_secret"],
@@ -339,7 +339,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "timing_user",
                 "email": "timing@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() - timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) - timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -392,7 +392,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "boundary_user",
                 "email": "boundary@example.com",
                 "tier": "early",
-                "exp": datetime.utcnow() + timedelta(seconds=1)
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -472,7 +472,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": user_id,
                 "email": "cache@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -491,7 +491,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": user_id,  # Same user ID
                 "email": "cache@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() - timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) - timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -518,7 +518,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "email": "sensitive@secretcorp.com",
                 "tier": "enterprise",
                 "internal_id": "SECRET-123-ABC",
-                "exp": datetime.utcnow() - timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) - timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -552,7 +552,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "race_user",
                 "email": "race@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(seconds=5)
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=5)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -600,7 +600,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "rotation_user",
                 "email": "rotation@example.com",
                 "tier": "early",
-                "exp": datetime.utcnow() + timedelta(minutes=1),
+                "exp": datetime.now(timezone.utc) + timedelta(minutes=1),
                 "generation": 0
             },
             auth_service_config["jwt_secret"],
@@ -648,7 +648,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "invalid_refresh_user",
                 "email": "invalid@example.com",
                 "tier": "free",
-                "exp": datetime.utcnow() + timedelta(seconds=5)
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=5)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -691,7 +691,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "tier_upgrade_user",
                 "email": "upgrade@example.com",
                 "tier": "free",
-                "exp": datetime.utcnow() + timedelta(seconds=5)
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=5)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -734,7 +734,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "maintenance_user",
                 "email": "maintenance@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(seconds=5)
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=5)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -769,7 +769,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "ip_change_user",
                 "email": "ipchange@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(seconds=5),
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=5),
                 "client_ip": "192.168.1.100"
             },
             auth_service_config["jwt_secret"],
@@ -814,7 +814,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "user_id": f"herd_user_{i}",
                     "email": f"herd{i}@example.com",
                     "tier": random.choice(["free", "early", "mid", "enterprise"]),
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -862,7 +862,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "user_id": user,
                     "email": f"{user}@example.com",
                     "tier": "mid",
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -925,7 +925,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "email": f"high{i}@example.com",
                     "tier": "enterprise",
                     "priority": "high",
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -938,7 +938,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "email": f"low{i}@example.com",
                     "tier": "free",
                     "priority": "low",
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -986,7 +986,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "victim_user",
                 "email": "victim@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -997,7 +997,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "attacker_user",
                 "email": "attacker@example.com",
                 "tier": "free",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1057,7 +1057,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "user_id": f"lb_user_{i}",
                     "email": f"lb{i}@example.com",
                     "tier": "mid",
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -1107,7 +1107,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "user_id": f"circuit_user_{i}",
                     "email": f"circuit{i}@example.com",
                     "tier": "early",
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -1169,7 +1169,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "cache_consistency_user",
                 "email": "consistency@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1224,7 +1224,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "user_id": f"split_brain_user_{i}",
                     "email": f"split{i}@example.com",
                     "tier": "mid",
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -1283,7 +1283,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "degradation_user",
                 "email": "degrade@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1330,7 +1330,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "recovery_sync_user",
                 "email": "recovery@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1386,7 +1386,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "cache_expiry_user",
                 "email": "expiry@example.com",
                 "tier": "early",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1430,7 +1430,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "failover_user",
                 "email": "failover@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1490,7 +1490,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "tier": "free",
                 "roles": ["user"],
                 "permissions": ["read:own_data"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1546,8 +1546,8 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "roles": ["manager", "team_lead"],
                 "inherited_roles": ["user", "viewer"],
                 "delegated_from": "director_user",
-                "delegation_expires": (datetime.utcnow() + timedelta(minutes=30)).isoformat(),
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "delegation_expires": (datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat(),
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1610,7 +1610,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "email": "dynamic@example.com",
                 "tier": "early",
                 "roles": ["user"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1669,7 +1669,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "tier": "enterprise",
                 "tenant_id": "tenant_a",
                 "roles": ["admin"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1682,7 +1682,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "tier": "enterprise",
                 "tenant_id": "tenant_b",
                 "roles": ["admin"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1732,7 +1732,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "email": "free@example.com",
                 "tier": "free",
                 "roles": ["user"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1744,7 +1744,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "email": "premium@example.com",
                 "tier": "enterprise",
                 "roles": ["premium_user"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1795,7 +1795,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "email": "audit@example.com",
                 "tier": "enterprise",
                 "roles": ["admin", "auditor"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1851,7 +1851,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "attacker",
                 "email": "attacker@evil.com",
                 "tier": "free",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1874,7 +1874,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "victim",
                 "email": "victim@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1905,7 +1905,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "distributed_user",
                 "email": "distributed@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -1961,7 +1961,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "timeout_user",
                 "email": "timeout@example.com",
                 "tier": "early",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2008,7 +2008,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             "user_id": user_id,
             "email": "devices@example.com",
             "tier": "enterprise",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         
         # Create tokens for different devices
@@ -2078,7 +2078,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "failover_user",
                 "email": "failover@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2134,7 +2134,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "storage_limit_user",
                 "email": "storage@example.com",
                 "tier": "free",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2179,7 +2179,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "distributed_rate_user",
                 "email": "distrate@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2230,7 +2230,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         base_token_data = {
             "email": "bypass@example.com",
             "tier": "free",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)
         }
         
         ws_url = f"ws://localhost:8000/websocket"
@@ -2285,7 +2285,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "window_test_user",
                 "email": "window@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2352,7 +2352,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                     "user_id": f"{tier}_user",
                     "email": f"{tier}@example.com",
                     "tier": tier,
-                    "exp": datetime.utcnow() + timedelta(hours=1)
+                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)
                 },
                 auth_service_config["jwt_secret"],
                 algorithm="HS256"
@@ -2394,7 +2394,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "geo_rate_user",
                 "email": "georate@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2449,7 +2449,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "backoff_user",
                 "email": "backoff@example.com",
                 "tier": "free",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2514,7 +2514,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "tier": "enterprise",
                 "mfa_enabled": True,
                 "mfa_secret": secret,
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2543,7 +2543,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] == "mfa_verified"
             
             # Test with time drift (30 seconds in past)
-            past_code = totp.at(datetime.utcnow() - timedelta(seconds=30))
+            past_code = totp.at(datetime.now(timezone.utc) - timedelta(seconds=30))
             await ws.send(json.dumps({
                 "type": "mfa_verify",
                 "code": past_code
@@ -2555,7 +2555,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] in ["mfa_verified", "mfa_accepted_with_drift"]
             
             # Test with excessive drift (5 minutes)
-            old_code = totp.at(datetime.utcnow() - timedelta(minutes=5))
+            old_code = totp.at(datetime.now(timezone.utc) - timedelta(minutes=5))
             await ws.send(json.dumps({
                 "type": "mfa_verify",
                 "code": old_code
@@ -2580,7 +2580,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "tier": "mid",
                 "mfa_enabled": True,
                 "backup_codes": backup_codes,
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2638,7 +2638,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "email": "bypass@example.com",
                 "tier": "enterprise",
                 "mfa_enabled": True,
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2699,7 +2699,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "email": "multimfa@example.com",
                 "tier": "enterprise",
                 "mfa_methods": ["totp", "sms", "email", "biometric"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2746,7 +2746,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "device_reg_user",
                 "email": "devreg@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2812,7 +2812,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "mfa_enabled": True,
                 "recovery_email": "backup@example.com",
                 "recovery_phone": "+1234567890",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2883,7 +2883,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "cors_wildcard_user",
                 "email": "wildcard@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2925,7 +2925,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "null_origin_user",
                 "email": "null@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -2975,7 +2975,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "preflight_user",
                 "email": "preflight@example.com",
                 "tier": "early",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -3025,7 +3025,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "dynamic_cors_user",
                 "email": "dynamic@example.com",
                 "tier": "enterprise",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -3071,7 +3071,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "subdomain_user",
                 "email": "subdomain@example.com",
                 "tier": "mid",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"
@@ -3124,7 +3124,7 @@ class TestWebSocketAuthColdStartExtendedL3:
                 "user_id": "protocol_user",
                 "email": "protocol@example.com",
                 "tier": "early",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             auth_service_config["jwt_secret"],
             algorithm="HS256"

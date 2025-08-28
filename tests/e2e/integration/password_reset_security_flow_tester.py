@@ -19,7 +19,7 @@ REQUIREMENTS:
 import asyncio
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
@@ -290,7 +290,7 @@ class PasswordResetSecurityValidator:
     def validate_token_expiry(self, token_created: datetime) -> bool:
         """Validate token hasn't expired."""
         expiry_time = token_created + timedelta(minutes=self.security_config["token_expiry_minutes"])
-        return datetime.utcnow() < expiry_time
+        return datetime.now(timezone.utc) < expiry_time
     
     def validate_reset_attempt_limit(self, attempt_count: int) -> bool:
         """Validate reset attempts haven't exceeded limit."""
@@ -316,7 +316,7 @@ class PasswordResetTokenManager:
         
         self.active_tokens[token] = {
             "user_email": user_email,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
             "used": False,
             "attempts": 0
         }
@@ -350,7 +350,7 @@ class PasswordResetTokenManager:
     
     def cleanup_expired_tokens(self):
         """Clean up expired tokens."""
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         expired_tokens = []
         
         for token, data in self.active_tokens.items():

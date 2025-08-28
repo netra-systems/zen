@@ -11,7 +11,7 @@ This service provides tenant isolation functionality for multi-tenant architectu
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.core.exceptions import NetraException
@@ -84,7 +84,7 @@ class TenantService:
                 id=tenant_data.get('id'),
                 name=tenant_data.get('name'),
                 status=tenant_data.get('status', 'active'),
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
                 metadata=tenant_data.get('metadata', {}),
                 isolation_level=tenant_data.get('isolation_level', 'strict')
             )

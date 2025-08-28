@@ -1,0 +1,19 @@
+{
+  "audit_timestamp": "2025-08-28T06:51:00.169404",
+  "platform": "Windows",
+  "docker_command": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.EXE",
+  "summary": {
+    "total_issues": 0,
+    "critical_count": 0,
+    "high_count": 0,
+    "medium_count": 0,
+    "low_count": 0,
+    "containers_analyzed": 6,
+    "containers_with_issues": []
+  },
+  "issues_by_severity": {},
+  "issues_by_container": {},
+  "issue_categories": {},
+  "container_stats": {},
+  "remediation_priorities": []
+}

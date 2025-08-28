@@ -8,7 +8,7 @@ IMPACT: 100ms+ latency on every API call degrades user experience
 
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -40,7 +40,7 @@ class MockAuthService:
         """Mock token validation with latency simulation."""
         await asyncio.sleep(self.latency_ms / 1000)  # Simulate network latency
         self.call_count += 1
-        call_time = datetime.utcnow()
+        call_time = datetime.now(timezone.utc)
         self.call_log.append({"token": token, "time": call_time})
         
         return self.responses.get(token, {

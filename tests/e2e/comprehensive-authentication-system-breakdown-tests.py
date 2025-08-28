@@ -48,7 +48,7 @@ import httpx
 import json
 import socket
 from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 import subprocess
 import psutil
@@ -167,8 +167,8 @@ class TestComprehensiveAuthenticationSystemBreakdown(BaseE2ETest):
         # Test JWT key synchronization across all services
         test_payload = {
             'sub': 'jwt-sync-test-user',
-            'iat': datetime.utcnow().timestamp(),
-            'exp': (datetime.utcnow() + timedelta(minutes=15)).timestamp(),
+            'iat': datetime.now(timezone.utc).timestamp(),
+            'exp': (datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp(),
             'iss': 'netra-auth',
             'aud': 'netra-services'
         }

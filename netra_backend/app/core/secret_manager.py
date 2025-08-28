@@ -579,3 +579,19 @@ class SecretManager:
                 return True
                 
         return False
+    
+    def _get_secret_names(self) -> List[str]:
+        """Get list of secret names from environment mappings.
+        
+        **TEST METHOD**: Provides interface for test mocking.
+        Returns all known secret names from environment mappings.
+        """
+        all_mappings = {}
+        all_mappings.update(self._get_environment_mapping())
+        all_mappings.update(self._get_core_service_mapping())
+        all_mappings.update(self._get_database_mapping())
+        all_mappings.update(self._get_security_mapping())
+        all_mappings.update(self._get_additional_environment_mapping())
+        
+        # Return the keys (secret names)
+        return list(all_mappings.keys())

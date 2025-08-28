@@ -757,35 +757,38 @@ def _drop_userbase_indexes() -> None:
     """Drop obsolete userbase indexes.
     
     Prerequisites: Assumes indexes may or may not exist due to different database states.
-    Uses IF EXISTS to ensure idempotent operation that can be run multiple times safely.
+    Uses SQL-based existence check to ensure idempotent operation that can be run multiple times safely.
     
     CAUTION: This operation is idempotent and will not fail if indexes don't exist.
     """
-    try:
-        op.drop_index(op.f('idx_userbase_created_at'), table_name='userbase', if_exists=True)
-    except Exception:
-        # Index may not exist - continue with other operations
-        pass
+    connection = op.get_bind()
     
-    try:
-        op.drop_index(op.f('idx_userbase_email'), table_name='userbase', if_exists=True)
-    except Exception:
-        pass
+    # List of indexes to drop - only drop if they exist
+    indexes_to_drop = [
+        'idx_userbase_created_at',
+        'idx_userbase_email', 
+        'idx_userbase_plan_tier_is_active',
+        'idx_userbase_role_is_developer',
+        'ix_userbase_role'
+    ]
     
-    try:
-        op.drop_index(op.f('idx_userbase_plan_tier_is_active'), table_name='userbase', if_exists=True)
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index(op.f('idx_userbase_role_is_developer'), table_name='userbase', if_exists=True)
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index(op.f('ix_userbase_role'), table_name='userbase', if_exists=True)
-    except Exception:
-        pass
+    for index_name in indexes_to_drop:
+        # Check if index exists before attempting to drop it
+        try:
+            result = connection.execute(sa.text("""
+                SELECT 1 FROM pg_class c 
+                JOIN pg_namespace n ON n.oid = c.relnamespace 
+                WHERE c.relname = :index_name 
+                AND c.relkind = 'i'
+                AND n.nspname = current_schema()
+            """), {"index_name": index_name})
+            
+            if result.fetchone():
+                # Index exists, safe to drop it
+                connection.execute(sa.text(f'DROP INDEX IF EXISTS "{index_name}"'))
+        except Exception:
+            # If there's any error in checking or dropping, continue with other indexes
+            pass
 
 
 def upgrade() -> None:
@@ -818,35 +821,39 @@ def _restore_userbase_indexes() -> None:
     """Restore userbase indexes.
     
     Prerequisites: Assumes indexes may or may not exist due to rollback scenarios.
-    Uses IF NOT EXISTS to ensure idempotent operation for index restoration.
+    Uses SQL-based existence check to ensure idempotent operation for index restoration.
     
     CAUTION: This operation is idempotent and will not fail if indexes already exist.
     """
-    try:
-        op.create_index(op.f('ix_userbase_role'), 'userbase', ['role'], unique=False, if_not_exists=True)
-    except Exception:
-        # Index may already exist - continue with other operations
-        pass
+    connection = op.get_bind()
     
-    try:
-        op.create_index(op.f('idx_userbase_role_is_developer'), 'userbase', ['role', 'is_developer'], unique=False, if_not_exists=True)
-    except Exception:
-        pass
+    # List of indexes to restore with their definitions
+    indexes_to_restore = [
+        ('ix_userbase_role', ['role']),
+        ('idx_userbase_role_is_developer', ['role', 'is_developer']),
+        ('idx_userbase_plan_tier_is_active', ['plan_tier', 'is_active']),
+        ('idx_userbase_email', ['email']),
+        ('idx_userbase_created_at', ['created_at'])
+    ]
     
-    try:
-        op.create_index(op.f('idx_userbase_plan_tier_is_active'), 'userbase', ['plan_tier', 'is_active'], unique=False, if_not_exists=True)
-    except Exception:
-        pass
-    
-    try:
-        op.create_index(op.f('idx_userbase_email'), 'userbase', ['email'], unique=False, if_not_exists=True)
-    except Exception:
-        pass
-    
-    try:
-        op.create_index(op.f('idx_userbase_created_at'), 'userbase', ['created_at'], unique=False, if_not_exists=True)
-    except Exception:
-        pass
+    for index_name, columns in indexes_to_restore:
+        try:
+            # Check if index exists
+            result = connection.execute(sa.text("""
+                SELECT 1 FROM pg_class c 
+                JOIN pg_namespace n ON n.oid = c.relnamespace 
+                WHERE c.relname = :index_name 
+                AND c.relkind = 'i'
+                AND n.nspname = current_schema()
+            """), {"index_name": index_name})
+            
+            if not result.fetchone():
+                # Index doesn't exist, safe to create it
+                columns_sql = ', '.join(f'"{col}"' for col in columns)
+                connection.execute(sa.text(f'CREATE INDEX "{index_name}" ON userbase ({columns_sql})'))
+        except Exception:
+            # If there's any error in checking or creating, continue with other indexes
+            pass
 
 
 def _restore_userbase_columns() -> None:

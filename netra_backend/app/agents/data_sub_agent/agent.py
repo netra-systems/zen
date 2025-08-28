@@ -685,10 +685,11 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
                          external: bool = False) -> Dict[str, Any]:
         """Enrich data with metadata and optionally external data."""
         import datetime
+        from datetime import timezone
         
         enriched = input_data.copy()
         enriched["metadata"] = {
-            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "timestamp": datetime.datetime.now(timezone.utc).isoformat(),
             "source": input_data.get("source", "unknown"),
             "enriched_by": "DataSubAgent"
         }

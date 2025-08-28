@@ -20,7 +20,7 @@ import asyncio
 import time
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import patch, AsyncMock, MagicMock
 
@@ -58,7 +58,7 @@ class DatabasePoolMetrics:
         self.initialization_times.append({
             "service": service,
             "duration": duration,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
     
     def record_connection_time(self, service: str, duration: float, success: bool):
@@ -67,7 +67,7 @@ class DatabasePoolMetrics:
             "service": service,
             "duration": duration,
             "success": success,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
     
     def record_pool_status(self, service: str, status: Dict[str, Any]):
@@ -75,7 +75,7 @@ class DatabasePoolMetrics:
         self.pool_statuses.append({
             "service": service,
             "status": status,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
     
     def record_exhaustion_event(self, service: str, details: Dict[str, Any]):
@@ -83,7 +83,7 @@ class DatabasePoolMetrics:
         self.exhaustion_events.append({
             "service": service,
             "details": details,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
     
     def record_recovery_time(self, service: str, duration: float):
@@ -91,7 +91,7 @@ class DatabasePoolMetrics:
         self.recovery_times.append({
             "service": service,
             "duration": duration,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
     
     def record_failover_time(self, service: str, duration: float, success: bool):
@@ -100,7 +100,7 @@ class DatabasePoolMetrics:
             "service": service,
             "duration": duration,
             "success": success,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         })
 
 class DatabasePoolInitializationManager:

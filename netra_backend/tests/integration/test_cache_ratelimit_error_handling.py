@@ -13,7 +13,7 @@ import sys
 import asyncio
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
@@ -237,7 +237,7 @@ class TestErrorPropagation:
 
             "code": "ERR_001",
 
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
 
         }
         
@@ -264,7 +264,7 @@ class TestErrorPropagation:
 
             "error_id": "err_12345",
 
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
 
         }
         

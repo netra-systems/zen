@@ -157,7 +157,7 @@ class BaseExecutionInterface(ABC):
                 "thought": thought,
                 "agent_name": context.agent_name,
                 "step_number": step_number,
-                "timestamp": datetime.utcnow().timestamp()
+                "timestamp": datetime.now(timezone.utc).timestamp()
             }
         }
         await self._send_websocket_update(context, update)
@@ -173,7 +173,7 @@ class BaseExecutionInterface(ABC):
                 "content": content,
                 "agent_name": context.agent_name,
                 "is_complete": is_complete,
-                "timestamp": datetime.utcnow().timestamp()
+                "timestamp": datetime.now(timezone.utc).timestamp()
             }
         }
         await self._send_websocket_update(context, update)
@@ -188,7 +188,7 @@ class BaseExecutionInterface(ABC):
             "payload": {
                 "tool_name": tool_name,
                 "agent_name": context.agent_name,
-                "timestamp": datetime.utcnow().timestamp()
+                "timestamp": datetime.now(timezone.utc).timestamp()
             }
         }
         await self._send_websocket_update(context, update)
@@ -204,7 +204,7 @@ class BaseExecutionInterface(ABC):
                 "report": report,
                 "total_duration_ms": duration_ms,
                 "agent_name": context.agent_name,
-                "timestamp": datetime.utcnow().timestamp()
+                "timestamp": datetime.now(timezone.utc).timestamp()
             }
         }
         await self._send_websocket_update(context, update)

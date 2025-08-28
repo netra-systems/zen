@@ -15,7 +15,7 @@ Tests comprehensive token rotation strategies including:
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from typing import Dict, List, Any, Optional
 
@@ -58,7 +58,7 @@ class TestJWTTokenRotation:
             auth_provider='local',
             is_active=True,
             is_verified=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
 
     async def test_automatic_jwt_rotation(self, mock_rotation_service, sample_user):
@@ -70,7 +70,7 @@ class TestJWTTokenRotation:
             'new_token_id': 'jwt_new_456',
             'new_access_token': 'eyJ0eXAi...',
             'new_refresh_token': 'refresh_new_789',
-            'rotation_timestamp': datetime.utcnow(),
+            'rotation_timestamp': datetime.now(timezone.utc),
             'rotation_reason': 'scheduled_rotation',
             'old_token_invalidated': True
         }
@@ -96,7 +96,7 @@ class TestJWTTokenRotation:
             'new_refresh_token': 'refresh_manual_123',
             'rotation_reason': 'user_requested',
             'manual_rotation': True,
-            'rotation_timestamp': datetime.utcnow()
+            'rotation_timestamp': datetime.now(timezone.utc)
         }
         
         # Perform manual rotation
@@ -132,7 +132,7 @@ class TestRefreshTokenRotation:
             'new_refresh_token': 'refresh_new_456',
             'new_access_token': 'eyJ0eXAi...',
             'old_refresh_token_invalidated': True,
-            'rotation_timestamp': datetime.utcnow(),
+            'rotation_timestamp': datetime.now(timezone.utc),
             'usage_count': 1
         }
         
@@ -169,9 +169,9 @@ class TestAPIKeyRotation:
             'old_api_key_id': api_key_id,
             'new_api_key_id': str(uuid4()),
             'new_api_key': 'ak_new_abcdef123456',
-            'rotation_timestamp': datetime.utcnow(),
+            'rotation_timestamp': datetime.now(timezone.utc),
             'grace_period_hours': 24,
-            'old_key_expires_at': datetime.utcnow() + timedelta(hours=24)
+            'old_key_expires_at': datetime.now(timezone.utc) + timedelta(hours=24)
         }
         
         # Perform API key rotation
@@ -217,7 +217,7 @@ class TestTokenRotationPolicies:
         mock_policy_service.create_rotation_policy.return_value = {
             'policy_id': str(uuid4()),
             'policy_name': policy_config['policy_name'],
-            'created_at': datetime.utcnow(),
+            'created_at': datetime.now(timezone.utc),
             'is_active': True,
             'applies_to_users': 'all'
         }
@@ -259,7 +259,7 @@ class TestRotationRollback:
             'rollback_successful': True,
             'old_tokens_restored': True,
             'new_tokens_invalidated': True,
-            'rollback_timestamp': datetime.utcnow(),
+            'rollback_timestamp': datetime.now(timezone.utc),
             'rollback_reason': 'application_error'
         }
         

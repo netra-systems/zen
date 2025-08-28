@@ -12,7 +12,7 @@ This service handles email verification tokens and user notification emails.
 import asyncio
 import uuid
 from typing import Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from netra_backend.app.core.unified_logging import get_logger
 
@@ -44,10 +44,10 @@ class EmailService:
         """
         try:
             # Store verification token with expiration
-            expiration = datetime.utcnow() + timedelta(hours=24)
+            expiration = datetime.now(timezone.utc) + timedelta(hours=24)
             self.verification_tokens[verification_token] = {
                 "email": email,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "expires_at": expiration,
                 "used": False
             }
@@ -59,7 +59,7 @@ class EmailService:
             self.sent_emails[email] = {
                 "type": "verification",
                 "token": verification_token,
-                "sent_at": datetime.utcnow()
+                "sent_at": datetime.now(timezone.utc)
             }
             
             return True
@@ -91,13 +91,13 @@ class EmailService:
                 return False
             
             # Check if token is expired
-            if datetime.utcnow() > token_data["expires_at"]:
+            if datetime.now(timezone.utc) > token_data["expires_at"]:
                 logger.warning(f"Verification token expired: {verification_token}")
                 return False
             
             # Mark token as used
             token_data["used"] = True
-            token_data["verified_at"] = datetime.utcnow()
+            token_data["verified_at"] = datetime.now(timezone.utc)
             
             logger.info(f"Email verification successful for token: {verification_token}")
             return True
@@ -124,7 +124,7 @@ class EmailService:
             self.sent_emails[email] = {
                 "type": "welcome",
                 "user_name": user_name,
-                "sent_at": datetime.utcnow()
+                "sent_at": datetime.now(timezone.utc)
             }
             
             return True
@@ -152,7 +152,7 @@ class EmailService:
         Returns:
             int: Number of tokens cleaned up
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expired_tokens = [
             token for token, data in self.verification_tokens.items()
             if data["expires_at"] < now

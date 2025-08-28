@@ -25,7 +25,7 @@ from pathlib import Path
 import asyncio
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
@@ -193,7 +193,7 @@ class TestDevModeAuthentication:
         Business Value: < 2 second total dev environment startup
         enables immediate testing and development iteration
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
@@ -219,7 +219,7 @@ class TestDevModeAuthentication:
                 response = websocket.receive_json()
                 
                 # Check response time < 2 seconds
-                elapsed = (datetime.utcnow() - start_time).total_seconds()
+                elapsed = (datetime.now(timezone.utc) - start_time).total_seconds()
                 assert elapsed < 2.0, f"Dev mode response took {elapsed}s, should be < 2s"
                 
                 # Verify: Chat immediately ready
@@ -433,14 +433,14 @@ class TestDevModeAuthentication:
 
             # Test: Multiple rapid requests (dev mode should handle burst)
             for i in range(5):
-                start_time = datetime.utcnow()
+                start_time = datetime.now(timezone.utc)
                 
                 response = client_with_dev_mode.get(
                     "/health",
                     headers={"Authorization": "Bearer dev-token"}
                 )
                 
-                end_time = datetime.utcnow()
+                end_time = datetime.now(timezone.utc)
                 duration = (end_time - start_time).total_seconds()
                 performance_metrics.append(duration)
                 

@@ -18,7 +18,7 @@ import json
 import os
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -71,7 +71,7 @@ class MessageQueueTester:
                 message = {
                     "id": f"msg_{uuid.uuid4().hex[:8]}",
                     "type": "test_message",
-                    "payload": {"index": i, "timestamp": datetime.utcnow().isoformat()},
+                    "payload": {"index": i, "timestamp": datetime.now(timezone.utc).isoformat()},
                     "priority": i % 3
                 }
                 

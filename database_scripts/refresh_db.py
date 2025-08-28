@@ -15,7 +15,7 @@ except ImportError:
     def get_env():
         return FallbackEnv()
 
-DATABASE_NAME = "netra"
+DATABASE_NAME = "netra_dev"
 
 # SECURITY: Get password from environment variable using IsolatedEnvironment
 env = get_env()

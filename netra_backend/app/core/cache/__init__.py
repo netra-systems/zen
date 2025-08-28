@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
@@ -23,7 +23,7 @@ class CacheEntry(BaseModel):
     key: str
     value: Any
     expires_at: Optional[datetime] = None
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = datetime.now(timezone.utc)
     hit_count: int = 0
     size_bytes: int = 0
 
@@ -102,7 +102,7 @@ class InMemoryCache(CacheInterface):
         entry = self._cache[key]
         
         # Check expiration
-        if entry.expires_at and datetime.utcnow() > entry.expires_at:
+        if entry.expires_at and datetime.now(timezone.utc) > entry.expires_at:
             await self.delete(key)
             self._stats.miss_count += 1
             return None
@@ -120,9 +120,9 @@ class InMemoryCache(CacheInterface):
         
         expires_at = None
         if ttl:
-            expires_at = datetime.utcnow() + timedelta(seconds=ttl)
+            expires_at = datetime.now(timezone.utc) + timedelta(seconds=ttl)
         elif self.default_ttl:
-            expires_at = datetime.utcnow() + timedelta(seconds=self.default_ttl)
+            expires_at = datetime.now(timezone.utc) + timedelta(seconds=self.default_ttl)
         
         # Estimate size (rough approximation)
         size_bytes = len(str(value)) if value else 0
@@ -152,7 +152,7 @@ class InMemoryCache(CacheInterface):
             return False
         
         entry = self._cache[key]
-        if entry.expires_at and datetime.utcnow() > entry.expires_at:
+        if entry.expires_at and datetime.now(timezone.utc) > entry.expires_at:
             await self.delete(key)
             return False
         

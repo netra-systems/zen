@@ -131,21 +131,21 @@ class AuthJWTRedisManager:
             
             try:
                 # 1. Generate JWT token
-                token = self.jwt_validator.create_access_token(
+                token = await self.jwt_validator.create_access_token(
                     user_id=user_id,
                     email=f"{user_id}@test.com",
                     permissions=["read", "write"],
-                    expires_minutes=60
+                    expire_minutes=60
                 )
                 
-                refresh_token = self.jwt_validator.create_refresh_token(user_id)
+                refresh_token = await self.jwt_validator.create_refresh_token(user_id)
                 
                 lifecycle_results["successful_generations"] += 1
                 self.auth_stats["tokens_generated"] += 1
                 self.test_tokens.append(token)
                 
                 # 2. Validate token
-                validation_result = self.jwt_validator.validate_token_jwt(token)
+                validation_result = await self.jwt_validator.validate_token_jwt(token)
                 
                 if validation_result.valid:
                     lifecycle_results["successful_validations"] += 1
@@ -169,11 +169,11 @@ class AuthJWTRedisManager:
                     continue
                 
                 # 4. Refresh token (simulate)
-                new_token = self.jwt_validator.create_access_token(
+                new_token = await self.jwt_validator.create_access_token(
                     user_id=user_id,
                     email=f"{user_id}@test.com",
                     permissions=["read", "write"],
-                    expires_minutes=60
+                    expire_minutes=60
                 )
                 
                 lifecycle_results["successful_refreshes"] += 1
@@ -207,7 +207,7 @@ class AuthJWTRedisManager:
             try:
                 # Generate token
                 permissions = ["read", "write", "admin"] if i % 5 == 0 else ["read"]
-                token = self.jwt_validator.create_access_token(
+                token = await self.jwt_validator.create_access_token(
                     user_id=user_id,
                     email=f"{user_id}@test.com",
                     permissions=permissions,
@@ -294,7 +294,7 @@ class AuthJWTRedisManager:
             
             try:
                 # Generate token
-                token = self.jwt_validator.create_access_token(
+                token = await self.jwt_validator.create_access_token(
                     user_id=user_id,
                     email=f"{user_id}@test.com",
                     permissions=["read", "write"],
@@ -317,18 +317,18 @@ class AuthJWTRedisManager:
                 await asyncio.sleep(0.1)
                 
                 # Refresh token (simulate)
-                new_token = self.jwt_validator.create_access_token(
+                new_token = await self.jwt_validator.create_access_token(
                     user_id=user_id,
                     email=f"{user_id}@test.com",
                     permissions=["read", "write"],
-                    expires_minutes=60
+                    expire_minutes=60
                 )
                 
                 refresh_results["successful_refreshes"] += 1
                 self.test_tokens.append(new_token)
                 
                 # Validate new token
-                validation_result = self.jwt_validator.validate_token_jwt(new_token)
+                validation_result = await self.jwt_validator.validate_token_jwt(new_token)
                 if validation_result.valid:
                     refresh_results["token_validations"] += 1
                 
@@ -366,7 +366,7 @@ class AuthJWTRedisManager:
             try:
                 # Generate token
                 permissions = ["read", "write", "delete"]
-                token = self.jwt_validator.create_access_token(
+                token = await self.jwt_validator.create_access_token(
                     user_id=user_id,
                     email=f"{user_id}@test.com",
                     permissions=permissions,

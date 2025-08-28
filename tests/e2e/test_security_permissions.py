@@ -20,7 +20,7 @@ import hashlib
 import json
 import secrets
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -442,7 +442,7 @@ class CustomerTierBasedFeatureGating:
             cost_cents=2250,
             status="success",
             plan_tier="pro",
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
         db_session.add(high_usage_log)
         db_session.commit()
@@ -501,7 +501,7 @@ class TestJWTSecurity:
         # Test 2: Expired token handling
         # Create token with past expiration
         expired_payload = decoded_payload.copy()
-        expired_payload["exp"] = int((datetime.utcnow() - timedelta(hours=1)).timestamp())
+        expired_payload["exp"] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
         
         expired_payload_encoded = jwt.utils.base64url_encode(json.dumps(expired_payload).encode())
         expired_token = f"{header}.{expired_payload_encoded}.{signature}"

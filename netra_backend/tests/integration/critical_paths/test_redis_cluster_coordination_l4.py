@@ -22,7 +22,7 @@ import random
 
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
@@ -547,7 +547,7 @@ async def test_redis_cluster_coordination():
         print("\n" + "="*80)
         print("REDIS CLUSTER COORDINATION TEST REPORT")
         print("="*80)
-        print(f"Timestamp: {datetime.utcnow().isoformat()}")
+        print(f"Timestamp: {datetime.now(timezone.utc).isoformat()}")
         print(f"Cluster Nodes: {len(REDIS_NODES)}")
         print("="*80)
         

@@ -2,6 +2,7 @@
 Auth Service API Routes
 FastAPI endpoints for authentication operations
 """
+import asyncio
 import logging
 import os
 import secrets
@@ -125,7 +126,9 @@ async def get_oauth_providers(request: Request):
             providers.append({
                 "name": "google",
                 "display_name": "Google",
-                "available": True
+                "available": True,
+                "client_id": google_client_id,
+                "authorize_url": "https://accounts.google.com/o/oauth2/v2/auth"
             })
         else:
             providers.append({
@@ -135,12 +138,14 @@ async def get_oauth_providers(request: Request):
                 "reason": "Client ID not configured"
             })
         
-        # GitHub provider
+        # GitHub provider  
         if github_client_id and len(github_client_id) > 10:
             providers.append({
                 "name": "github",
                 "display_name": "GitHub",
-                "available": True
+                "available": True,
+                "client_id": github_client_id,
+                "authorize_url": "https://github.com/login/oauth/authorize"
             })
         else:
             providers.append({
@@ -1603,4 +1608,77 @@ async def websocket_validate_token(token: str):
         return {
             "valid": False,
             "error": "Token validation service error"
+        }
+
+@router.get("/providers")
+async def auth_providers_alias(request: Request):
+    """OAuth providers endpoint alias for backward compatibility
+    
+    This is an alias for /oauth/providers to maintain API compatibility
+    with tests and clients that expect the endpoint under /auth/
+    """
+    return await get_oauth_providers(request)
+
+@router.get("/diagnostics/database")
+async def database_diagnostics(
+    x_service_id: Optional[str] = Header(None, alias="X-Service-ID")
+):
+    """Database connection diagnostics endpoint for monitoring and troubleshooting.
+    
+    This endpoint provides detailed information about the database connection
+    health, pool status, and configuration for debugging and monitoring purposes.
+    Only accessible in development environment for security.
+    """
+    env = _detect_environment()
+    
+    # Only allow in development environment for security
+    if env not in ["development", "test"]:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Database diagnostics not available in {env} environment"
+        )
+    
+    try:
+        from auth_service.auth_core.database.connection import auth_db
+        
+        # Get comprehensive health information
+        health_info = await auth_db.get_connection_health()
+        
+        # Add basic status information
+        status_info = auth_db.get_status()
+        
+        # Test basic connectivity if possible
+        connectivity_test = None
+        if auth_db._initialized:
+            try:
+                connectivity_test = await auth_db.test_connection(timeout=5.0)
+            except Exception as e:
+                connectivity_test = f"Test failed: {str(e)}"
+        
+        response = {
+            "service": "auth-service",
+            "environment": env,
+            "timestamp": datetime.now().isoformat(),
+            "health": health_info,
+            "status": status_info,
+            "connectivity_test": connectivity_test,
+            "diagnostics": {
+                "message": "Database diagnostics retrieved successfully",
+                "note": "This endpoint is only available in development/test environments"
+            }
+        }
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Database diagnostics failed: {e}")
+        return {
+            "service": "auth-service",
+            "environment": env,
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e),
+            "diagnostics": {
+                "message": "Failed to retrieve database diagnostics",
+                "status": "error"
+            }
         }

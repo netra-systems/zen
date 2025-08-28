@@ -12,7 +12,7 @@ from typing import Dict, List, Any
 from urllib.parse import urlparse, parse_qs
 
 # Staging URLs
-AUTH_SERVICE_URL = "https://netra-auth-service-701982941522.us-central1.run.app"
+AUTH_SERVICE_URL = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
 
 class StagingAuthTester:
     def __init__(self):

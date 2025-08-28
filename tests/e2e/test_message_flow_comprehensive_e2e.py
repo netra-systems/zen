@@ -23,7 +23,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -62,7 +62,7 @@ class MessageFlowTester:
                 "user_id": user_id,
                 "messages_sent": [],
                 "messages_received": [],
-                "connected_at": datetime.utcnow()
+                "connected_at": datetime.now(timezone.utc)
             }
             
             # Start message listener
@@ -82,7 +82,7 @@ class MessageFlowTester:
                 message_data = json.loads(message)
                 self.connections[connection_id]["messages_received"].append({
                     "data": message_data,
-                    "timestamp": datetime.utcnow(),
+                    "timestamp": datetime.now(timezone.utc),
                     "connection_id": connection_id
                 })
         except websockets.exceptions.ConnectionClosed:
@@ -102,7 +102,7 @@ class MessageFlowTester:
             
             self.connections[connection_id]["messages_sent"].append({
                 "data": message,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "connection_id": connection_id
             })
             
@@ -163,7 +163,7 @@ class MessageFlowTester:
             message = {
                 "type": "test_ordering",
                 "sequence_number": i,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "test_id": str(uuid.uuid4())
             }
             
@@ -186,7 +186,7 @@ class MessageFlowTester:
             "connected_at": conn_data["connected_at"],
             "messages_sent_count": len(conn_data["messages_sent"]),
             "messages_received_count": len(conn_data["messages_received"]),
-            "connection_duration": (datetime.utcnow() - conn_data["connected_at"]).total_seconds(),
+            "connection_duration": (datetime.now(timezone.utc) - conn_data["connected_at"]).total_seconds(),
             "is_connected": not conn_data["websocket"].closed
         }
     
@@ -228,7 +228,7 @@ class TestMessageFlowComprehensiveE2E:
         test_message = {
             "type": "ping",
             "data": "test_message",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
         success = await message_flow_tester.send_message(connection_id, test_message)
@@ -345,7 +345,7 @@ class TestMessageFlowComprehensiveE2E:
             message = {
                 "type": "concurrent_test",
                 "user_index": i,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             task = message_flow_tester.send_message(conn_id, message)
             send_tasks.append(task)
@@ -461,7 +461,7 @@ class TestMessageFlowComprehensiveE2E:
             message = {
                 "type": "rate_test",
                 "sequence": i,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             success = await message_flow_tester.send_message(connection_id, message)
             rapid_messages.append(success)

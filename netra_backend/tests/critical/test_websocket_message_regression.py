@@ -21,7 +21,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional, Any
 
 import pytest
@@ -67,7 +67,7 @@ class TestWebSocketMessageRegression:
             "payload": {
                 "content": content,
                 "thread_id": thread_id,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
 
@@ -116,7 +116,7 @@ class TestWebSocketMessageRegression:
                 "thread_id": f"thread-{uuid.uuid4().hex[:8]}",
                 # Missing content field
                 "references": [],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         

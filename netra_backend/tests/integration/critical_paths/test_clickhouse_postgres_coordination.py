@@ -24,7 +24,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -109,7 +109,7 @@ class ClickHousePostgresCoordinator:
                 "user_id": user_id,
                 "metric_type": "api_usage",
                 "value": 100.0,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "source": "billing_sync"
             },
             billing_data={

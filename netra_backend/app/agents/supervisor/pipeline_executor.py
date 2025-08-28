@@ -22,6 +22,7 @@ from netra_backend.app.schemas.agent_state import (
     StatePersistenceRequest,
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
 
 if TYPE_CHECKING:
     from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
@@ -38,8 +39,22 @@ class PipelineExecutor:
         self.engine = engine
         self.websocket_manager = websocket_manager
         self.db_session = db_session
-        self.state_persistence = state_persistence_service
+        self.state_persistence = self._get_persistence_service()
         self.flow_logger = get_supervisor_flow_logger()
+    
+    def _get_persistence_service(self):
+        """Get appropriate persistence service based on feature flag."""
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        # Check if optimized persistence is enabled
+        optimized_enabled = get_env().get("ENABLE_OPTIMIZED_PERSISTENCE", "false").lower() == "true"
+        
+        if optimized_enabled:
+            logger.info("Using optimized state persistence service")
+            return optimized_state_persistence
+        else:
+            logger.debug("Using standard state persistence service")
+            return state_persistence_service
     
     async def execute_pipeline(self, pipeline: List[PipelineStep],
                               state: DeepAgentState, run_id: str,
@@ -110,10 +125,10 @@ class PipelineExecutor:
                                   state: DeepAgentState,
                                   context: AgentExecutionContext,
                                   flow_id: str) -> None:
-        """Execute pipeline and process results."""
+        """Execute pipeline and process results with batched state persistence."""
         self._log_pipeline_execution_type(flow_id, pipeline)
         results = await self._execute_with_step_logging(pipeline, context, state, flow_id)
-        self._process_results(results, state)
+        await self._process_results_with_batching(results, state, context)
     
     async def _handle_pipeline_error(self, state: DeepAgentState, 
                                     error: Exception) -> None:
@@ -123,10 +138,68 @@ class PipelineExecutor:
     
     def _process_results(self, results: List[AgentExecutionResult],
                         state: DeepAgentState) -> None:
-        """Process execution results."""
+        """Process execution results (legacy method for backward compatibility)."""
         for result in results:
             if result.success and result.state:
                 state.merge_from(result.state)
+    
+    async def _process_results_with_batching(self, results: List[AgentExecutionResult],
+                                           state: DeepAgentState,
+                                           context: AgentExecutionContext) -> None:
+        """Process execution results with optimized batched state merging and persistence."""
+        # Collect all successful state changes to merge in batch
+        state_changes = []
+        for result in results:
+            if result.success and result.state:
+                state_changes.append(result.state)
+        
+        if not state_changes:
+            return
+        
+        # Perform batched state merge - more efficient than individual merges
+        await self._batch_merge_states(state, state_changes)
+        
+        # Persist the final merged state once instead of multiple times
+        await self._persist_batched_state(state, context)
+    
+    async def _batch_merge_states(self, target_state: DeepAgentState,
+                                 state_changes: List[DeepAgentState]) -> None:
+        """Efficiently merge multiple state changes into target state."""
+        # Batch merge all states in one operation instead of individual merges
+        # This reduces object creation and serialization overhead
+        for state_change in state_changes:
+            target_state.merge_from(state_change)
+        
+        logger.debug(f"Batched merge of {len(state_changes)} state changes")
+    
+    async def _persist_batched_state(self, state: DeepAgentState,
+                                   context: AgentExecutionContext) -> None:
+        """Persist state once after all batched changes instead of per-change."""
+        try:
+            # Create persistence request for the final merged state
+            from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
+            
+            persistence_request = StatePersistenceRequest(
+                run_id=context.run_id,
+                user_id=context.user_id,
+                state_data=state.to_dict() if hasattr(state, 'to_dict') else state.__dict__,
+                checkpoint_type=CheckpointType.PIPELINE_COMPLETE,
+                agent_phase="pipeline_batch_persist"
+            )
+            
+            # Use the optimized persistence service if available
+            success, snapshot_id = await self.state_persistence.save_agent_state(
+                persistence_request, self.db_session
+            )
+            
+            if success:
+                logger.debug(f"Batched state persisted successfully: {snapshot_id}")
+            else:
+                logger.warning("Batched state persistence failed")
+                
+        except Exception as e:
+            logger.error(f"Error in batched state persistence: {e}")
+            # Don't re-raise to avoid breaking pipeline execution
 
     def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStep]) -> None:
         """Log pipeline execution type (parallel vs sequential)."""

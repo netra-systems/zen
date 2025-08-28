@@ -43,7 +43,7 @@ class FrozenTime:
             
         self.patches.append(patch('datetime.datetime.now', side_effect=mock_now))
         
-        # Mock datetime.utcnow()
+        # Mock datetime.now(timezone.utc)
         self.patches.append(patch('datetime.datetime.utcnow', 
                                 return_value=self.frozen_datetime.replace(tzinfo=None)))
         

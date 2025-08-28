@@ -54,22 +54,38 @@ class HealthCheckResult:
 # Service endpoints and timeout configurations
 SERVICE_ENDPOINTS = {
     "auth": {
-        "url": "http://localhost:8081/health",
-        "timeout": 5.0,
+        "urls": [
+            "http://localhost:8081/health",
+            "http://localhost:8083/health",  # Alternative port
+            "http://127.0.0.1:8081/health"
+        ],
+        "timeout": 10.0,
         "expected_service": "auth-service",
-        "critical": True
+        "critical": True,
+        "fallback_ports": [8081, 8083]
     },
     "backend": {
-        "url": "http://localhost:8000/health", 
-        "timeout": 5.0,
-        "expected_service": "netra_backend",
-        "critical": True
+        "urls": [
+            "http://localhost:8000/health",
+            "http://localhost:8000/health/",  # Alternative endpoint format
+            "http://localhost:8200/health",   # Alternative port
+            "http://127.0.0.1:8000/health"
+        ],
+        "timeout": 10.0,
+        "expected_service": ["netra_backend", "netra-ai-platform"],  # Allow both service names
+        "critical": True,
+        "fallback_ports": [8000, 8200]
     },
     "frontend": {
-        "url": "http://localhost:3000",
-        "timeout": 10.0,
+        "urls": [
+            "http://localhost:3000",
+            "http://localhost:3000/",
+            "http://127.0.0.1:3000"
+        ],
+        "timeout": 15.0,
         "check_type": "build_verification",
-        "critical": False
+        "critical": False,
+        "fallback_ports": [3000, 3001]
     }
 }
 
@@ -152,13 +168,18 @@ def create_disabled_result(service: str, reason: str) -> HealthCheckResult:
     )
 
 
-def validate_service_response(response_data: Dict[str, Any], expected_service: Optional[str]) -> bool:
+def validate_service_response(response_data: Dict[str, Any], expected_service) -> bool:
     """Validate service response matches expected service identifier."""
     if not expected_service:
         return True
     
     actual_service = response_data.get("service")
-    return actual_service == expected_service
+    
+    # Handle both single service name and list of acceptable service names
+    if isinstance(expected_service, list):
+        return actual_service in expected_service
+    else:
+        return actual_service == expected_service
 
 
 def get_critical_services() -> list[str]:

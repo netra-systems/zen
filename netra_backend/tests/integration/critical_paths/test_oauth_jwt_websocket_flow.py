@@ -627,7 +627,7 @@ async def test_oauth_jwt_websocket_security_validation(oauth_jwt_ws_manager):
     assert "iat" in access_payload, "Missing issued at claim"
     
     # Test token expiration validation
-    expired_payload = {**access_payload, "exp": datetime.utcnow() - timedelta(hours=1)}
+    expired_payload = {**access_payload, "exp": datetime.now(timezone.utc) - timedelta(hours=1)}
     expired_token = jwt_lib.encode(expired_payload, "test_secret", algorithm="HS256")
     
     expired_validation = manager.jwt_handler.validate_token_jwt(expired_token, "access")

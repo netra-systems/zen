@@ -31,7 +31,7 @@ import time
 import uuid
 from typing import Dict, Any, List, Optional, Set, Tuple
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import redis.sentinel
 import httpx
 from unittest.mock import patch, AsyncMock, MagicMock
@@ -101,7 +101,7 @@ class TestDistributedAuthStateSync:
                 node_id="node-us-east-1",
                 region="us-east",
                 is_primary=True,
-                last_heartbeat=datetime.utcnow(),
+                last_heartbeat=datetime.now(timezone.utc),
                 session_count=0,
                 lag_ms=0.0,
                 status="healthy"
@@ -110,7 +110,7 @@ class TestDistributedAuthStateSync:
                 node_id="node-us-west-1",
                 region="us-west",
                 is_primary=False,
-                last_heartbeat=datetime.utcnow(),
+                last_heartbeat=datetime.now(timezone.utc),
                 session_count=0,
                 lag_ms=10.0,
                 status="healthy"
@@ -119,7 +119,7 @@ class TestDistributedAuthStateSync:
                 node_id="node-eu-central-1",
                 region="eu-central",
                 is_primary=False,
-                last_heartbeat=datetime.utcnow(),
+                last_heartbeat=datetime.now(timezone.utc),
                 session_count=0,
                 lag_ms=50.0,
                 status="healthy"
@@ -177,8 +177,8 @@ class TestDistributedAuthStateSync:
         session = SessionInfo(
             session_id=str(uuid.uuid4()),
             user_id=str(uuid.uuid4()),
-            created_at=datetime.utcnow(),
-            last_activity=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
+            last_activity=datetime.now(timezone.utc),
             metadata={
                 "origin_region": "us-east",
                 "tier": "enterprise"
@@ -193,7 +193,7 @@ class TestDistributedAuthStateSync:
         # Record replication start
         await replication_monitor["record"](
             ReplicationEvent(
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 source_node=primary_node.node_id,
                 target_nodes=[n.node_id for n in distributed_nodes.values() if n != primary_node],
                 operation="session_create",
@@ -224,7 +224,7 @@ class TestDistributedAuthStateSync:
                         latency = (time.time() - start_time) * 1000
                         await replication_monitor["record"](
                             ReplicationEvent(
-                                timestamp=datetime.utcnow(),
+                                timestamp=datetime.now(timezone.utc),
                                 source_node=primary_node.node_id,
                                 target_nodes=[node.node_id],
                                 operation="session_replicate",
@@ -366,8 +366,8 @@ class TestDistributedAuthStateSync:
             session = SessionInfo(
                 session_id=f"session_pre_{i}",
                 user_id=f"user_{i}",
-                created_at=datetime.utcnow(),
-                last_activity=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
+                last_activity=datetime.now(timezone.utc),
                 metadata={"partition": "before"}
             )
             await distributed_nodes["us-east"].cache.set_session(session)
@@ -383,8 +383,8 @@ class TestDistributedAuthStateSync:
             session = SessionInfo(
                 session_id=f"session_during_{i}",
                 user_id=f"user_during_{i}",
-                created_at=datetime.utcnow(),
-                last_activity=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
+                last_activity=datetime.now(timezone.utc),
                 metadata={"partition": "during"}
             )
             # Only US nodes get these
@@ -434,8 +434,8 @@ class TestDistributedAuthStateSync:
         session = SessionInfo(
             session_id=str(uuid.uuid4()),
             user_id=str(uuid.uuid4()),
-            created_at=datetime.utcnow(),
-            last_activity=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
+            last_activity=datetime.now(timezone.utc),
             metadata={"ttl_seconds": 2}
         )
         

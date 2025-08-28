@@ -71,9 +71,9 @@ class DatabaseConfigManager:
     def _load_connection_templates(self) -> Dict[str, str]:
         """Load database connection URL templates."""
         return {
-            "postgres_dev": "postgresql+asyncpg://postgres:postgres@localhost:5432/netra",
-            "postgres_staging": "postgresql+asyncpg://user:pass@staging-host:5432/netra",
-            "postgres_production": "postgresql+asyncpg://user:pass@prod-host:5432/netra",
+            "postgres_dev": "postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev",
+            "postgres_staging": "postgresql+asyncpg://user:pass@staging-host:5432/netra_staging",
+            "postgres_production": "postgresql+asyncpg://user:pass@prod-host:5432/netra_production",
             "clickhouse_dev": "clickhouse://default:@localhost:8123/default",
             "clickhouse_http_dev": "http://localhost:8123"
         }

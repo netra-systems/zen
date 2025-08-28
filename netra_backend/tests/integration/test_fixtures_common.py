@@ -12,7 +12,7 @@ import asyncio
 import os
 import tempfile
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock
 
@@ -165,7 +165,7 @@ def create_test_optimization_data():
 
         "cost_savings": 0.35,
 
-        "updated_at": datetime.utcnow().isoformat()
+        "updated_at": datetime.now(timezone.utc).isoformat()
 
     }
 

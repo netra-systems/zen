@@ -13,7 +13,7 @@ from pathlib import Path
 import asyncio
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 import aiohttp
@@ -98,7 +98,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
         token = await self.get_auth_token(user_data)
         
         async with aiohttp.ClientSession() as session:
-            start_time = datetime.utcnow()
+            start_time = datetime.now(timezone.utc)
             
             # Make request to endpoint that requires retries
             async with session.post(
@@ -106,7 +106,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                 json={"attempts_to_succeed": 3},
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
-                end_time = datetime.utcnow()
+                end_time = datetime.now(timezone.utc)
                 duration = (end_time - start_time).total_seconds()
                 
                 # Should eventually succeed

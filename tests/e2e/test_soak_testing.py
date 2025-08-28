@@ -20,7 +20,7 @@ Monitoring: Real-time resource tracking with 1-minute granularity
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 from typing import Any, Dict, List, Optional, Tuple, Union
 import asyncio
@@ -698,7 +698,7 @@ class DatabaseStressTest:
 
                     "name": f"soak_test_{self.query_count}",
 
-                    "created_at": datetime.utcnow()
+                    "created_at": datetime.now(timezone.utc)
 
                 }
 
@@ -744,9 +744,9 @@ class SoakTestOrchestrator:
 
         self.test_results = SoakTestResults(
 
-            test_start=datetime.utcnow(),
+            test_start=datetime.now(timezone.utc),
 
-            test_end=datetime.utcnow(),
+            test_end=datetime.now(timezone.utc),
 
             total_duration_hours=0.0
 
@@ -799,7 +799,7 @@ class SoakTestOrchestrator:
             
             # Generate final results
 
-            self.test_results.test_end = datetime.utcnow()
+            self.test_results.test_end = datetime.now(timezone.utc)
 
             self.test_results.total_duration_hours = (
 

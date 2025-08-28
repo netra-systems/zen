@@ -15,7 +15,7 @@ import sys
 import asyncio
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock
 
@@ -66,7 +66,7 @@ class TestFirstMessageThreadInit:
 
             "title": "First conversation",
 
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
 
             "messages": [],
 
@@ -171,7 +171,7 @@ class TestFirstMessageThreadInit:
 
             title="Cost optimization query",
 
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
 
         )
         
@@ -366,7 +366,7 @@ class TestFirstMessageThreadInit:
 
                 "thread": thread_data,
 
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
 
             }
 

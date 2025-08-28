@@ -5,7 +5,7 @@ Extracted from test_first_time_user_flows_comprehensive.py to comply with size l
 
 # Test data generation
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import status
 from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from redis.asyncio import Redis
@@ -24,7 +24,7 @@ def generate_test_user_data() -> Dict[str, Any]:
 
     user_id = str(uuid.uuid4())
 
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now(timezone.utc).isoformat()
     
     return {
 
@@ -84,7 +84,7 @@ def generate_test_thread_data() -> Dict[str, Any]:
 
         "description": "Integration test thread",
 
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
 
         "status": "active"
 
@@ -494,7 +494,7 @@ async def setup_test_infrastructure() -> Dict[str, Any]:
 
         "cache": MagicMock(),
 
-        "started_at": datetime.utcnow()
+        "started_at": datetime.now(timezone.utc)
 
     }
     
@@ -515,7 +515,7 @@ async def teardown_test_infrastructure(infrastructure: Dict[str, Any]) -> None:
 
     if "started_at" in infrastructure:
 
-        duration = (datetime.utcnow() - infrastructure["started_at"]).total_seconds()
+        duration = (datetime.now(timezone.utc) - infrastructure["started_at"]).total_seconds()
 
         print(f"Test infrastructure ran for {duration:.2f} seconds")
 
@@ -549,7 +549,7 @@ class DatabaseTestHelpers:
             "amount": amount,
             "type": transaction_type,
             "status": "completed",
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         self.transactions.append(transaction)
         return transaction
@@ -575,7 +575,7 @@ class MiscTestHelpers:
     def create_mock_request_data(self, **kwargs) -> Dict[str, Any]:
         """Create mock HTTP request data."""
         base_data = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "request_id": self.generate_test_id("req"),
             "user_agent": "TestClient/1.0"
         }
@@ -605,7 +605,7 @@ class RevenueTestHelpers:
             "user_id": user_id,
             "plan": plan,
             "status": status,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "billing_period": "monthly" if plan != "free" else None,
             "amount": 0 if plan == "free" else 29.99
         }
@@ -619,14 +619,14 @@ class RevenueTestHelpers:
             "user_id": user_id,
             "event_type": event_type,  # e.g., "subscription", "upgrade", "usage"
             "amount": amount,
-            "recorded_at": datetime.utcnow().isoformat()
+            "recorded_at": datetime.now(timezone.utc).isoformat()
         }
         self.revenue_records.append(event)
         return event
     
     async def calculate_test_revenue(self, user_id: str, period_days: int = 30) -> float:
         """Calculate total revenue for a user within a period."""
-        cutoff_date = datetime.utcnow() - timedelta(days=period_days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=period_days)
         total_revenue = 0.0
         
         for record in self.revenue_records:

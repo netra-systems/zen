@@ -22,7 +22,7 @@ import statistics
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
@@ -215,7 +215,7 @@ class BillingAccuracyL4Manager:
 
                 "quantity": token_count_result["total_tokens"],
 
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
 
                 "metadata": {
 
@@ -378,7 +378,7 @@ class BillingAccuracyL4Manager:
         try:
             # Get usage data for the user
 
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
 
             start_time = end_time - timedelta(hours=1)
             

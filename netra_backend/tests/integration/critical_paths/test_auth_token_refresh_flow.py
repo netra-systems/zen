@@ -16,7 +16,7 @@ from pathlib import Path
 import asyncio
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
 import aiohttp
@@ -199,7 +199,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
             )
             
             exp_time = datetime.fromtimestamp(decoded["exp"])
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             
             # Refresh token should have longer expiry (e.g., 7 days)
             time_diff = (exp_time - now).total_seconds()

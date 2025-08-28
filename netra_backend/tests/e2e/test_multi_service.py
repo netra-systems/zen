@@ -129,7 +129,7 @@ class TestCrossServiceAuthentication:
         """Test complete auth flow from frontend through backend to auth service."""
         # Mock the complete auth chain
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate, \
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate, \
              patch('app.services.user_service.CRUDUser.get') as mock_get_user:
             
             mock_validate.return_value = test_user_data
@@ -166,7 +166,7 @@ class TestCrossServiceAuthentication:
         
         # Mock consistent validation across services
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = test_user_data
             
             # Validate token in multiple contexts
@@ -187,7 +187,7 @@ class TestDatabaseConsistency:
         # Mock database clients
         # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres, \
-             patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
+             patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
             
             # Mock user data in PostgreSQL
             # Mock: PostgreSQL database isolation for testing without real database connections
@@ -285,7 +285,7 @@ class TestDatabaseConsistency:
             
             # Simulate read from analytics database (ClickHouse)
             # Mock: ClickHouse database isolation for fast testing without external database dependency
-            with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
+            with patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
                 # Mock: Generic component isolation for controlled unit testing
                 mock_ch_client = AsyncMock()
                 mock_ch_client.query.return_value = [{"user_id": "sync_test_user", "synced_at": write_time}]
@@ -396,7 +396,7 @@ class TestErrorPropagation:
         """Test system prevents cascade failures across services."""
         # Simulate auth service failure
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
             mock_validate.side_effect = Exception("Auth service unavailable")
             
             # Backend should handle auth failure gracefully
@@ -415,7 +415,7 @@ class TestErrorPropagation:
     async def test_graceful_degradation_modes(self):
         """Test services operate in graceful degradation modes."""
         # Simulate ClickHouse unavailability
-        with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
+        with patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
             mock_clickhouse.side_effect = Exception("ClickHouse unavailable")
             
             # System should continue operating without analytics
@@ -484,7 +484,7 @@ class TestMultiServiceIntegration:
         """Test complete user journey across all services."""
         # 1. User authentication (Frontend -> Auth Service)
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_auth:
             mock_auth.return_value = {"user_id": "journey_user", "email": "journey@test.com"}
             
             user_token = "valid_journey_token"
@@ -515,7 +515,7 @@ class TestMultiServiceIntegration:
                     
                     # 4. Analytics logging (Backend -> ClickHouse)
                     # Mock: ClickHouse database isolation for fast testing without external database dependency
-                    with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
+                    with patch('netra_backend.app.database.get_clickhouse_client') as mock_clickhouse:
                         # Mock: Generic component isolation for controlled unit testing
                         mock_client = AsyncMock()
                         mock_clickhouse.return_value = mock_client
@@ -535,7 +535,7 @@ class TestMultiServiceIntegration:
         """Test high availability scenarios with service failures."""
         # Scenario 1: Auth service temporary failure
         # Mock: Authentication service isolation for testing without real auth flows
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
+        with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_auth:
             # First call fails, second succeeds (recovery)
             mock_auth.side_effect = [
                 Exception("Auth service down"),
@@ -581,7 +581,7 @@ class TestMultiServiceIntegration:
         async def simulate_request(request_id):
             # Mock service chain: Frontend -> Backend -> Auth -> Database
             # Mock: Authentication service isolation for testing without real auth flows
-            with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth, \
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_auth, \
                  patch('app.services.user_service.CRUDUser.get') as mock_user:
                 
                 mock_auth.return_value = {"user_id": f"user_{request_id}"}

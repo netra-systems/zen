@@ -8,7 +8,7 @@ reporting, and integration with monitoring systems.
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -114,7 +114,7 @@ class ValidationScheduler:
     ) -> None:
         """Handle scheduled validation report."""
         # Save report
-        report_path = Path(f"reports/scheduled_{schedule_name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
+        report_path = Path(f"reports/scheduled_{schedule_name}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json")
         report_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(report_path, 'w') as f:
@@ -151,7 +151,7 @@ class ValidationReporter:
         format: str = "json"
     ) -> str:
         """Generate detailed validation report."""
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         
         if format == "json":
             return await self._generate_json_report(report, timestamp)

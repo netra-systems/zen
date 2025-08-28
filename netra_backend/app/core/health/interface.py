@@ -5,6 +5,7 @@ Supports Enterprise SLA requirements with circuit breaker integration.
 """
 
 import asyncio
+import time
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from enum import Enum
@@ -117,7 +118,7 @@ class HealthInterface:
             "status": "healthy",
             "service": self.service_name,
             "version": self.version,
-            "timestamp": datetime.now(UTC).isoformat()
+            "timestamp": time.time()
         }
     
     async def _get_standard_health(self) -> Dict[str, Any]:
@@ -129,7 +130,7 @@ class HealthInterface:
     def _build_standard_health_response(self, status: HealthStatus, checks: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
         """Build standard health response."""
         return {"status": status.value, "service": self.service_name, "version": self.version,
-                "uptime_seconds": self._get_uptime_seconds(), "timestamp": datetime.now(UTC).isoformat(),
+                "uptime_seconds": self._get_uptime_seconds(), "timestamp": time.time(),
                 "checks": {name: result.details.get("success", True) for name, result in checks.items()}}
     
     async def _get_comprehensive_health(self) -> Dict[str, Any]:
@@ -141,7 +142,7 @@ class HealthInterface:
     async def _build_comprehensive_health_response(self, status: HealthStatus, checks: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
         """Build comprehensive health response."""
         return {"status": status.value, "service": self.service_name, "version": self.version,
-                "uptime_seconds": self._get_uptime_seconds(), "timestamp": datetime.now(UTC).isoformat(),
+                "uptime_seconds": self._get_uptime_seconds(), "timestamp": time.time(),
                 "checks": self._format_detailed_checks(checks), "metrics": await self._get_service_metrics()}
     
     async def _run_critical_checks(self) -> Dict[str, HealthCheckResult]:

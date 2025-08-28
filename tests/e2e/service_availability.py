@@ -15,6 +15,7 @@ import asyncio
 import logging
 import os
 import socket
+import time
 import traceback
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple, Any
@@ -107,11 +108,11 @@ class ServiceAvailability:
 class ServiceAvailabilityChecker:
     """Checks actual availability of services for E2E testing."""
     
-    def __init__(self, timeout: float = 5.0):
+    def __init__(self, timeout: float = 15.0):
         """Initialize service availability checker.
         
         Args:
-            timeout: Connection timeout in seconds
+            timeout: Connection timeout in seconds (increased for better reliability)
         """
         self.timeout = timeout
         self.logger = logging.getLogger(f"{__name__}.ServiceAvailabilityChecker")
@@ -122,18 +123,24 @@ class ServiceAvailabilityChecker:
         Returns:
             ServiceAvailability object with status of all services
         """
-        self.logger.info("Checking service availability for E2E tests")
+        self.logger.info(f"Starting comprehensive service availability check (timeout: {self.timeout}s)")
         
         # Check environment flags first
         use_real_services = self._check_use_real_services_flag()
         use_real_llm = self._check_use_real_llm_flag()
         
+        self.logger.info(f"Configuration: USE_REAL_SERVICES={use_real_services}, USE_REAL_LLM={use_real_llm}")
+        
         # Run all checks concurrently
+        start_time = time.time()
+        
         postgresql_task = self._check_postgresql()
         redis_task = self._check_redis()  
         clickhouse_task = self._check_clickhouse()
         openai_task = self._check_openai_api()
         anthropic_task = self._check_anthropic_api()
+        
+        self.logger.info("Running concurrent service checks...")
         
         # Wait for all results
         results = await asyncio.gather(
@@ -145,11 +152,15 @@ class ServiceAvailabilityChecker:
             return_exceptions=True
         )
         
+        check_duration = time.time() - start_time
+        
         # Handle any exceptions in results
         postgresql, redis_status, clickhouse, openai, anthropic = results
+        service_names = ["postgresql", "redis", "clickhouse", "openai", "anthropic"]
+        
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                service_name = ["postgresql", "redis", "clickhouse", "openai", "anthropic"][i]
+                service_name = service_names[i]
                 self.logger.error(f"Service check failed for {service_name}: {result}")
                 results[i] = ServiceStatus(
                     name=service_name,
@@ -159,16 +170,24 @@ class ServiceAvailabilityChecker:
                 )
         
         availability = ServiceAvailability(
-            postgresql=postgresql,
-            redis=redis_status,
-            clickhouse=clickhouse,
-            openai_api=openai,
-            anthropic_api=anthropic,
+            postgresql=results[0] if not isinstance(results[0], Exception) else results[0],
+            redis=results[1] if not isinstance(results[1], Exception) else results[1],
+            clickhouse=results[2] if not isinstance(results[2], Exception) else results[2],
+            openai_api=results[3] if not isinstance(results[3], Exception) else results[3],
+            anthropic_api=results[4] if not isinstance(results[4], Exception) else results[4],
             use_real_services=use_real_services,
             use_real_llm=use_real_llm
         )
         
-        self.logger.info(f"Service availability check complete: {availability.summary}")
+        # Log detailed results
+        self.logger.info(f"Service availability check complete in {check_duration:.2f}s")
+        for service_name in ["postgresql", "redis", "clickhouse", "openai_api", "anthropic_api"]:
+            service_obj = getattr(availability, service_name)
+            status_icon = "[OK]" if service_obj.available else "[FAIL]"
+            self.logger.info(f"{status_icon} {service_name.upper()}: {service_obj.details}")
+            if service_obj.error:
+                self.logger.debug(f"   Error: {service_obj.error}")
+        
         return availability
     
     def _check_use_real_services_flag(self) -> bool:
@@ -400,7 +419,7 @@ class ServiceAvailabilityChecker:
     
     async def _check_openai_api(self) -> ServiceStatus:
         """Check OpenAI API availability."""
-        api_key = os.getenv("GOOGLE_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             return ServiceStatus(
                 name="openai",

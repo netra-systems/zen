@@ -13,7 +13,7 @@ BVJ: Growth & Enterprise | Increase Reliability | +10% system uptime
 
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 from unittest.mock import AsyncMock
 
@@ -298,7 +298,7 @@ class ModernPerformanceAnalyzer(BaseExecutionInterface):
     
     def _create_default_time_range(self) -> Tuple[datetime, datetime]:
         """Create default time range for last 24 hours."""
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
         return (start_time, end_time)
     
