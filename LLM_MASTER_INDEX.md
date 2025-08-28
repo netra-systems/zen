@@ -111,6 +111,17 @@
 | Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python -m test_framework.runner --service frontend` |
 | E2E Tests | `/tests/e2e/` | `test_*.py` | `python -m test_framework.runner --level e2e` |
 
+### Google Tag Manager (GTM) Integration
+| Component | Location | Purpose | Status |
+|-----------|----------|---------|--------|
+| **GTM Provider** | `/frontend/providers/GTMProvider.tsx` | Core GTM integration component | ✅ OPERATIONAL |
+| **GTM Hooks** | `/frontend/hooks/useGTM.ts` | Event tracking hooks | ✅ Implemented |
+| **GTM Spec** | `/SPEC/google_tag_manager.xml` | GTM specification & requirements | ✅ Updated |
+| **GTM Learnings** | `/SPEC/learnings/gtm_implementation.xml` | Implementation learnings & fixes | ✅ Documented |
+| **GTM Test Script** | `/scripts/test_gtm_loading.py` | Automated GTM verification | ✅ Working |
+| **GTM Audit Report** | `/GTM_AUDIT_REPORT.md` | Comprehensive audit documentation | ✅ Complete |
+| **Container ID** | `GTM-WKP28PNQ` | Universal container across all envs | ✅ Configured |
+
 #### Critical Security Tests (New Implementation - Cycle 1)
 | Test File | Location | Purpose | Protection Value |
 |-----------|----------|---------|------------------|

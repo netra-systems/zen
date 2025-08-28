@@ -218,6 +218,17 @@
             <critical-takeaway>Container startup probes require comprehensive success/failure/recovery testing.</critical-takeaway>
         </category>
         
+        <category name="Deployment and Docker Configuration" path="SPEC/learnings/deployment.xml" keywords="Deployment, Docker, Dockerfile, Container, Frontend, Backend, Auth, Cloud Run, GCP, Staging">
+            <critical-takeaway>CRITICAL: Frontend Dockerfile MUST use deployment/docker/frontend.gcp.Dockerfile - NEVER create new ones</critical-takeaway>
+            <critical-takeaway>All service Dockerfiles follow pattern: deployment/docker/{service}.gcp.Dockerfile</critical-takeaway>
+            <critical-takeaway>If frontend/Dockerfile is deleted in git, DO NOT recreate it - use canonical location</critical-takeaway>
+            <critical-takeaway>Docker build context must exclude node_modules - use proper .dockerignore configuration</critical-takeaway>
+            <critical-takeaway>Next.js standalone builds require specific Docker configuration - copy .next/standalone and run server.js directly</critical-takeaway>
+            <critical-takeaway>Frontend requires NEXT_PUBLIC_API_URL environment variable for API connectivity</critical-takeaway>
+            <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run deployments, not plain uvicorn</critical-takeaway>
+            <critical-takeaway>NEVER create minimal backend versions (main_minimal.py) for deployment - breaks functionality</critical-takeaway>
+        </category>
+        
         <category name="Project Structure" path="SPEC/learnings/project_structure_enforcement.xml" keywords="Structure, Imports, netra_backend, Canonical">
             <critical-takeaway>THE canonical structure: netra_backend/app/ for production, netra_backend/tests/ for tests. This is PERMANENT.</critical-takeaway>
             <critical-takeaway>All imports MUST use netra_backend.app.* prefix. Fix imports, NOT the structure.</critical-takeaway>
@@ -293,6 +304,17 @@
             <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
             <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>
             <critical-takeaway>Use multi-agent coordination for large migrations: Principal (strategy), Implementation (execution), QA (verification), DevOps (deployment).</critical-takeaway>
+        </category>
+        
+        <category name="GTM Implementation" path="SPEC/learnings/gtm_implementation.xml" keywords="GTM, Google Tag Manager, Analytics, Tracking, Container, DataLayer, Script Loading, Environment Variables">
+            <critical-takeaway>GTMProvider must be explicitly enabled - check NODE_ENV and NEXT_PUBLIC_GTM_ENABLED conditions.</critical-takeaway>
+            <critical-takeaway>GTM environment variables MUST be added to Cloud Run deployment script for staging/production.</critical-takeaway>
+            <critical-takeaway>Container ID (GTM-WKP28PNQ) must be consistent across all environments.</critical-takeaway>
+            <critical-takeaway>DataLayer must be initialized BEFORE GTM script loads to prevent tracking issues.</critical-takeaway>
+            <critical-takeaway>Use Next.js Script component with afterInteractive strategy for optimal performance.</critical-takeaway>
+            <critical-takeaway>Always include noscript iframe fallback for accessibility compliance.</critical-takeaway>
+            <critical-takeaway>Test GTM loading with automated script (scripts/test_gtm_loading.py) before deployment.</critical-takeaway>
+            <critical-takeaway>Environment variables must be prefixed with NEXT_PUBLIC_ for browser availability.</critical-takeaway>
         </category>
         
         <category name="WebSocket Connection Lifecycle" path="SPEC/learnings/websocket.xml" keywords="WebSocket, Accept, Connection, Lifecycle, Authentication, Context Manager, State Management">
@@ -1187,6 +1209,15 @@
             <critical-takeaway>ExecutionMetadata has start_time but ExecutionContext itself needs separate timestamp for error handler expectations</critical-takeaway>
             <critical-takeaway>Error messages like "Data analysis failed" may mask underlying AttributeError issues in error handling code itself</critical-takeaway>
             <critical-takeaway>Always verify context objects have required attributes before using them in error handlers and logging systems</critical-takeaway>
+        </category>
+        
+        <category name="GTM Event Tracking" path="SPEC/learnings/gtm_event_tracking.xml" keywords="GTM, Google Tag Manager, analytics, tracking, events, dataLayer, useGTMEvent, conversion, engagement">
+            <critical-takeaway>Track events at the source of truth (auth context, message sending hook) not in UI components to prevent duplicate events</critical-takeaway>
+            <critical-takeaway>Use useGTMEvent hook for all functional components, direct dataLayer.push for class components like ErrorBoundary</critical-takeaway>
+            <critical-takeaway>Always include relevant context (threadId, message length, error details) with events for meaningful analysis</critical-takeaway>
+            <critical-takeaway>Auth events tracked in auth/context.tsx, chat events in hooks/useMessageSending.ts for single source of truth</critical-takeaway>
+            <critical-takeaway>Test GTM implementation with automated Selenium scripts (test_gtm_tracking.py) to verify dataLayer pushes</critical-takeaway>
+            <critical-takeaway>Event categories: authentication (login/signup), engagement (chat/messages), conversion (trials/upgrades), errors</critical-takeaway>
         </category>
         
     </categories>

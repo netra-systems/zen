@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <GTMProvider enabled={process.env.NODE_ENV !== 'test'}>
+        <GTMProvider enabled={process.env.NEXT_PUBLIC_GTM_ENABLED !== 'false' && process.env.NODE_ENV !== 'test'}>
           <AuthProvider>
             <WebSocketProvider>
               <AppWithLayout>{children}</AppWithLayout>

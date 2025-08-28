@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='utf-8'?>
+<learnings>
+  <metadata>
+    <name>GTM Implementation Learnings</name>
+    <type>learnings</type>
+    <version>1.0</version>
+    <created>2025-08-28</created>
+    <description>Critical learnings from GTM implementation and debugging</description>
+    <cross_references>
+      <spec>google_tag_manager.xml</spec>
+      <doc>GTM_AUDIT_REPORT.md</doc>
+      <doc>docs/GTM_USAGE_GUIDE.md</doc>
+      <script>scripts/test_gtm_loading.py</script>
+    </cross_references>
+  </metadata>
+
+  <learning id="gtm-provider-enablement">
+    <title>GTMProvider Must Be Explicitly Enabled</title>
+    <problem>GTM scripts were not rendering in development despite proper configuration</problem>
+    <root_cause>GTMProvider was disabled by NODE_ENV check that was too restrictive</root_cause>
+    <solution>
+      <code><![CDATA[
+// CORRECT: Enable GTM by default except in test environment
+<GTMProvider enabled={process.env.NEXT_PUBLIC_GTM_ENABLED !== 'false' && process.env.NODE_ENV !== 'test'}>
+
+// INCORRECT: Too restrictive, disabled in development
+<GTMProvider enabled={process.env.NODE_ENV !== 'test'}>
+      ]]></code>
+    </solution>
+    <impact>Critical - GTM completely non-functional without this fix</impact>
+  </learning>
+
+  <learning id="gtm-deployment-env-vars">
+    <title>GTM Environment Variables Must Be Added to Cloud Run Deployment</title>
+    <problem>GTM would not work in staging despite local configuration</problem>
+    <root_cause>Cloud Run deployment script didn't include GTM environment variables</root_cause>
+    <solution>
+      <file>scripts/deploy_to_gcp.py</file>
+      <code><![CDATA[
+# Add to frontend service environment variables
+env_vars.extend([
+    "NEXT_PUBLIC_GTM_CONTAINER_ID=GTM-WKP28PNQ",
+    "NEXT_PUBLIC_GTM_ENABLED=true",
+    "NEXT_PUBLIC_GTM_DEBUG=false",
+    "NEXT_PUBLIC_ENVIRONMENT=staging"
+])
+      ]]></code>
+    </solution>
+    <impact>High - Staging/production GTM non-functional without deployment config</impact>
+  </learning>
+
+  <learning id="gtm-container-consistency">
+    <title>GTM Container ID Must Be Consistent Across Environments</title>
+    <principle>Use the same GTM container ID across all environments</principle>
+    <details>
+      <container_id>GTM-WKP28PNQ</container_id>
+      <reason>GTM workspace environments handle staging/production separation internally</reason>
+      <validation>Always verify container ID matches expected value in tests</validation>
+    </details>
+  </learning>
+
+  <learning id="gtm-script-loading-strategy">
+    <title>Use Next.js Script Component with afterInteractive Strategy</title>
+    <problem>GTM scripts need proper loading strategy for performance</problem>
+    <solution>
+      <code><![CDATA[
+<Script
+  id="gtm-script"
+  src={`https://www.googletagmanager.com/gtm.js?id=${config.containerId}`}
+  strategy="afterInteractive"
+  onLoad={handleScriptLoad}
+  onError={handleScriptError}
+/>
+      ]]></code>
+    </solution>
+    <benefits>
+      - Non-blocking page load
+      - Proper error handling
+      - Performance optimized
+    </benefits>
+  </learning>
+
+  <learning id="gtm-datalayer-initialization">
+    <title>DataLayer Must Be Initialized Before GTM Script Loads</title>
+    <principle>Initialize window.dataLayer array before GTM script execution</principle>
+    <implementation>
+      <code><![CDATA[
+// Initialize dataLayer if it doesn't exist
+if (typeof window !== 'undefined' && !window.dataLayer) {
+  window.dataLayer = [];
+  window.dataLayer.push({
+    'gtm.start': new Date().getTime(),
+    event: 'gtm.js',
+    environment: config.environment,
+    debug_mode: config.debug
+  });
+}
+      ]]></code>
+    </implementation>
+    <timing>Must occur in useEffect before Script component loads</timing>
+  </learning>
+
+  <learning id="gtm-testing-strategy">
+    <title>Automated Testing Essential for GTM Verification</title>
+    <tools>
+      <script>scripts/test_gtm_loading.py</script>
+      <purpose>Verify GTM loading across environments</purpose>
+    </tools>
+    <checklist>
+      - Container ID presence and correctness
+      - Script tag loading
+      - NoScript fallback present
+      - DataLayer initialization
+      - Environment variables set correctly
+    </checklist>
+  </learning>
+
+  <learning id="gtm-hooks-architecture">
+    <title>Centralized Hook Architecture for GTM Events</title>
+    <structure>
+      <hook name="useGTM">Core hook providing all GTM functionality</hook>
+      <hook name="useGTMEvent">Specialized event tracking</hook>
+      <hook name="useGTMDebug">Debug utilities and monitoring</hook>
+    </structure>
+    <note>Hooks are implemented but not yet used in components - future work needed</note>
+  </learning>
+
+  <learning id="gtm-environment-config">
+    <title>Environment-Specific Configuration Strategy</title>
+    <files>
+      <dev>frontend/.env.local</dev>
+      <staging>frontend/.env.staging</staging>
+      <production>frontend/.env.production</production>
+    </files>
+    <variables>
+      <var name="NEXT_PUBLIC_GTM_CONTAINER_ID">Container identifier</var>
+      <var name="NEXT_PUBLIC_GTM_ENABLED">Enable/disable GTM</var>
+      <var name="NEXT_PUBLIC_GTM_DEBUG">Debug mode toggle</var>
+    </variables>
+  </learning>
+
+  <learning id="gtm-noscript-fallback">
+    <title>NoScript Fallback Required for Accessibility</title>
+    <requirement>Always include noscript iframe for users with JavaScript disabled</requirement>
+    <implementation>
+      <code><![CDATA[
+<noscript>
+  <iframe
+    src={`https://www.googletagmanager.com/ns.html?id=${config.containerId}`}
+    height="0"
+    width="0"
+    style={{ display: 'none', visibility: 'hidden' }}
+  />
+</noscript>
+      ]]></code>
+    </implementation>
+  </learning>
+
+  <best_practices>
+    <practice>Always test GTM in actual browser, not just curl</practice>
+    <practice>Use Google Tag Assistant Chrome extension for debugging</practice>
+    <practice>Enable debug mode in development environments only</practice>
+    <practice>Document all custom events in GTM workspace</practice>
+    <practice>Never expose sensitive data in dataLayer</practice>
+    <practice>Test with both JavaScript enabled and disabled</practice>
+  </best_practices>
+
+  <common_issues>
+    <issue id="port-mismatch">
+      <problem>Frontend running on different port than expected</problem>
+      <solution>Check actual port in console output, update test scripts</solution>
+    </issue>
+    <issue id="env-var-not-loaded">
+      <problem>Environment variables not available in browser</problem>
+      <solution>Ensure variables prefixed with NEXT_PUBLIC_</solution>
+    </issue>
+    <issue id="script-not-rendering">
+      <problem>GTM script tags not appearing in HTML</problem>
+      <solution>Check GTMProvider enabled prop and NODE_ENV</solution>
+    </issue>
+  </common_issues>
+
+  <future_work>
+    <task>Implement actual event tracking in components</task>
+    <task>Add conversion tracking for business metrics</task>
+    <task>Configure GA4 integration in GTM workspace</task>
+    <task>Set up custom triggers and tags</task>
+    <task>Add enhanced ecommerce tracking</task>
+  </future_work>
+</learnings>
