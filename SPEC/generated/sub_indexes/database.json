@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-08-28T10:43:48.348035",
+    "generated_at": "2025-08-28T14:13:40.959938",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 219
   },
@@ -1696,9 +1696,9 @@
       "locations": [
         "netra_backend/app/agents/data_sub_agent/llm_query_detector.py:120",
         "netra_backend/app/core/performance_query_optimizer.py:102",
-        "netra_backend/app/db/clickhouse.py:523",
-        "netra_backend/app/db/clickhouse.py:533",
-        "netra_backend/app/db/clickhouse.py:553",
+        "netra_backend/app/db/clickhouse.py:560",
+        "netra_backend/app/db/clickhouse.py:570",
+        "netra_backend/app/db/clickhouse.py:590",
         "auth_service/auth_core/routes/auth_routes.py:518",
         "frontend/components/GenericInput.tsx:13",
         "frontend/components/GenericInput.tsx:59",
@@ -1718,7 +1718,7 @@
       "value": "service_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:397",
+        "netra_backend/app/clients/auth_client_core.py:413",
         "netra_backend/app/core/auth_constants.py:31",
         "netra_backend/app/core/cross_service_validators/security_validators.py:281",
         "netra_backend/app/core/cross_service_validators/security_validators.py:302",
@@ -1741,7 +1741,7 @@
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:351",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:579",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:1048",
-        "netra_backend/app/clients/auth_client_core.py:294",
+        "netra_backend/app/clients/auth_client_core.py:310",
         "netra_backend/app/core/cross_service_validators/data_consistency_validators.py:223",
         "netra_backend/app/core/cross_service_validators/data_consistency_validators.py:244"
       ]
@@ -1905,7 +1905,7 @@
       "value": "target_user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:1021"
+        "netra_backend/app/clients/auth_client_core.py:1037"
       ]
     },
     "task_id": {

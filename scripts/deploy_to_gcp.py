@@ -785,6 +785,7 @@ CMD ["npm", "start"]
             "postgres-user-staging": "postgres",
             "postgres-password-staging": "qNdlZRHu(Mlc#)6K8LHm-lYi[7sc}25K",  # version 2
             "jwt-secret-key-staging": jwt_secret_value,  # Backend uses JWT_SECRET_KEY
+            "secret-key-staging": "your-secure-secret-key-for-backend-staging-32-chars-minimum-required",  # Backend SECRET_KEY
             "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
             "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",

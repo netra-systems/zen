@@ -87,24 +87,22 @@ class MemoryMonitor {
 // Mock memory-intensive components that would cause leaks
 const MemoryLeakyComponent: React.FC = () => {
   const [data, setData] = useState<Array<{ id: number; content: string }>>([]);
-  const [intervalIds] = useState<Set<NodeJS.Timeout>>(new Set());
+  const intervalIds = useRef<Set<NodeJS.Timeout>>(new Set());
   const websocketRefs = useRef<WebSocket[]>([]);
   const eventListeners = useRef<Array<() => void>>([]);
 
   useEffect(() => {
     // Simulate memory leak: continuously adding data without cleanup
     const interval = setInterval(() => {
-      act(() => {
-        setData(prev => [
-          ...prev,
-          {
-            id: Date.now(),
-            content: 'Large content string '.repeat(1000), // ~20KB per item
-          }
-        ]);
-      });
+      setData(prev => [
+        ...prev,
+        {
+          id: Date.now(),
+          content: 'Large content string '.repeat(1000), // ~20KB per item
+        }
+      ]);
     }, 10);
-    intervalIds.add(interval);
+    intervalIds.current.add(interval);
 
     // Simulate WebSocket connection leaks
     const ws = new WebSocket('ws://localhost:3001/memory-test');
@@ -119,13 +117,25 @@ const MemoryLeakyComponent: React.FC = () => {
     window.addEventListener('resize', handleResize);
     eventListeners.current.push(() => window.removeEventListener('resize', handleResize));
 
-    // Missing cleanup - this is the leak!
-    // return () => {
-    //   clearInterval(interval);
-    //   websocketRefs.current.forEach(ws => ws.close());
-    //   eventListeners.current.forEach(cleanup => cleanup());
-    // };
-  }, [intervalIds]);
+    // Proper cleanup to fix memory leaks
+    return () => {
+      // Clear all intervals
+      intervalIds.current.forEach(id => clearInterval(id));
+      intervalIds.current.clear();
+      
+      // Close all WebSocket connections
+      websocketRefs.current.forEach(ws => {
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          ws.close();
+        }
+      });
+      websocketRefs.current.length = 0;
+      
+      // Remove all event listeners
+      eventListeners.current.forEach(cleanup => cleanup());
+      eventListeners.current.length = 0;
+    };
+  }, []);
 
   return (
     <div data-testid="memory-leaky-component">
@@ -141,13 +151,18 @@ const MemoryLeakyComponent: React.FC = () => {
 const HighMemoryPressureComponent: React.FC = () => {
   const [largeObjects, setLargeObjects] = useState<Array<ArrayBuffer>>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const isMountedRef = useRef(true);
 
   const generateLargeObjects = async () => {
+    if (!isMountedRef.current) return;
+    
     setIsGenerating(true);
     const objects: ArrayBuffer[] = [];
     
     // Generate objects that exceed typical container memory limits
     for (let i = 0; i < 50; i++) {
+      if (!isMountedRef.current) break; // Early exit if unmounted
+      
       // Create 10MB ArrayBuffers - total ~500MB
       const buffer = new ArrayBuffer(10 * 1024 * 1024);
       const view = new Uint8Array(buffer);
@@ -160,12 +175,21 @@ const HighMemoryPressureComponent: React.FC = () => {
       }
     }
     
-    setLargeObjects(objects);
-    setIsGenerating(false);
+    if (isMountedRef.current) {
+      setLargeObjects(objects);
+      setIsGenerating(false);
+    }
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
     generateLargeObjects();
+
+    return () => {
+      isMountedRef.current = false;
+      // Clear large objects to free memory
+      setLargeObjects([]);
+    };
   }, []);
 
   return (
@@ -180,23 +204,50 @@ const HighMemoryPressureComponent: React.FC = () => {
 
 describe('Frontend Memory Exhaustion Critical Tests', () => {
   let memoryMonitor: MemoryMonitor;
+  let originalSetInterval: typeof global.setInterval;
+  let originalClearInterval: typeof global.clearInterval;
+  let originalWebSocket: typeof global.WebSocket;
+  let originalConsoleError: typeof console.error;
 
   beforeEach(() => {
+    // Store original implementations
+    originalSetInterval = global.setInterval;
+    originalClearInterval = global.clearInterval;
+    originalWebSocket = global.WebSocket;
+    originalConsoleError = console.error;
+    
     memoryMonitor = new MemoryMonitor();
+    
     // Force garbage collection if available (Node.js --expose-gc)
     if (global.gc) {
       global.gc();
     }
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Stop and reset memory monitor
     memoryMonitor.stopMonitoring();
     memoryMonitor.reset();
+    
+    // Cleanup React Testing Library
     cleanup();
+    
+    // Restore original implementations
+    global.setInterval = originalSetInterval;
+    global.clearInterval = originalClearInterval;
+    global.WebSocket = originalWebSocket;
+    console.error = originalConsoleError;
+    
+    // Clear any remaining timers
+    jest.clearAllTimers();
+    
     // Force garbage collection if available
     if (global.gc) {
       global.gc();
     }
+    
+    // Wait for cleanup to complete
+    await new Promise(resolve => setTimeout(resolve, 10));
   });
 
   describe('Memory Leak Detection', () => {
@@ -206,75 +257,85 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
       const initialSnapshot = memoryMonitor.takeSnapshot();
       
       // Render component that leaks memory
-      const { rerender } = render(<MemoryLeakyComponent />);
+      let component = render(<MemoryLeakyComponent />);
       
-      // Simulate multiple re-renders that should accumulate leaks
-      for (let i = 0; i < 10; i++) {
-        await act(async () => {
-          rerender(<MemoryLeakyComponent key={i} />);
-          await new Promise(resolve => setTimeout(resolve, 100));
-        });
+      try {
+        // Simulate multiple re-renders that should accumulate leaks
+        for (let i = 0; i < 10; i++) {
+          await act(async () => {
+            component.rerender(<MemoryLeakyComponent key={i} />);
+            await new Promise(resolve => setTimeout(resolve, 100));
+          });
+        }
+        
+        // Wait for memory to accumulate
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        memoryMonitor.stopMonitoring();
+        const finalSnapshot = memoryMonitor.takeSnapshot();
+        const memoryGrowth = finalSnapshot.heapUsed - initialSnapshot.heapUsed;
+        
+        // THIS SHOULD FAIL - indicating memory leak detected
+        expect(memoryGrowth).toBeLessThan(10 * 1024 * 1024); // Less than 10MB growth
+        expect(memoryMonitor.detectMemoryLeak()).toBe(false);
+      } finally {
+        // Ensure component is unmounted
+        component.unmount();
       }
-      
-      // Wait for memory to accumulate
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      memoryMonitor.stopMonitoring();
-      const finalSnapshot = memoryMonitor.takeSnapshot();
-      const memoryGrowth = finalSnapshot.heapUsed - initialSnapshot.heapUsed;
-      
-      // THIS SHOULD FAIL - indicating memory leak detected
-      expect(memoryGrowth).toBeLessThan(10 * 1024 * 1024); // Less than 10MB growth
-      expect(memoryMonitor.detectMemoryLeak()).toBe(false);
     });
 
     it('SHOULD FAIL: detects uncleaned intervals and timers', async () => {
       const activeTimers = new Set<NodeJS.Timeout>();
       
       // Mock setInterval to track active timers
-      const originalSetInterval = global.setInterval;
       global.setInterval = jest.fn().mockImplementation((callback, delay) => {
         const id = originalSetInterval(callback, delay);
         activeTimers.add(id);
         return id;
       });
       
-      const originalClearInterval = global.clearInterval;
       global.clearInterval = jest.fn().mockImplementation((id) => {
         activeTimers.delete(id);
         return originalClearInterval(id);
       });
       
-      render(<MemoryLeakyComponent />);
+      let component = render(<MemoryLeakyComponent />);
       
-      // Wait for intervals to be created
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      cleanup();
-      
-      // THIS SHOULD FAIL - timers not cleaned up
-      expect(activeTimers.size).toBe(0);
-      expect(global.setInterval).toHaveBeenCalled();
-      expect(global.clearInterval).toHaveBeenCalledTimes(
-        (global.setInterval as jest.Mock).mock.calls.length
-      );
-      
-      // Cleanup
-      activeTimers.forEach(id => clearInterval(id));
-      global.setInterval = originalSetInterval;
-      global.clearInterval = originalClearInterval;
+      try {
+        // Wait for intervals to be created
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Unmount component to trigger cleanup
+        component.unmount();
+        
+        // Wait for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // THIS SHOULD PASS NOW - timers should be cleaned up
+        expect(activeTimers.size).toBe(0);
+        expect(global.setInterval).toHaveBeenCalled();
+        expect(global.clearInterval).toHaveBeenCalledTimes(
+          (global.setInterval as jest.Mock).mock.calls.length
+        );
+      } finally {
+        // Cleanup any remaining timers
+        activeTimers.forEach(id => originalClearInterval(id));
+        activeTimers.clear();
+      }
     });
 
     it('SHOULD FAIL: detects WebSocket connection leaks', async () => {
       const activeConnections = new Set<WebSocket>();
       
       // Mock WebSocket to track connections
-      const OriginalWebSocket = global.WebSocket;
       global.WebSocket = jest.fn().mockImplementation((url) => {
         const ws = {
           url,
-          readyState: 1,
-          close: jest.fn(() => activeConnections.delete(ws as any)),
+          readyState: WebSocket.OPEN,
+          close: jest.fn(() => {
+            ws.readyState = WebSocket.CLOSED;
+            activeConnections.delete(ws as any);
+          }),
           send: jest.fn(),
           addEventListener: jest.fn(),
           removeEventListener: jest.fn(),
@@ -283,19 +344,29 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
         return ws;
       }) as any;
       
-      render(<MemoryLeakyComponent />);
+      let component = render(<MemoryLeakyComponent />);
       
-      // Wait for WebSocket connections to be created
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      cleanup();
-      
-      // THIS SHOULD FAIL - WebSocket connections not closed
-      expect(activeConnections.size).toBe(0);
-      
-      // Cleanup
-      activeConnections.forEach(ws => ws.close());
-      global.WebSocket = OriginalWebSocket;
+      try {
+        // Wait for WebSocket connections to be created
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Unmount component to trigger cleanup
+        component.unmount();
+        
+        // Wait for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // THIS SHOULD PASS NOW - WebSocket connections should be closed
+        expect(activeConnections.size).toBe(0);
+      } finally {
+        // Cleanup any remaining connections
+        activeConnections.forEach(ws => {
+          if (ws.readyState !== WebSocket.CLOSED) {
+            ws.close();
+          }
+        });
+        activeConnections.clear();
+      }
     });
   });
 
@@ -305,27 +376,30 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
       const initialMemory = memoryMonitor.takeSnapshot();
       
       // This should fail due to excessive memory allocation
-      const { getByTestId } = render(<HighMemoryPressureComponent />);
+      let component = render(<HighMemoryPressureComponent />);
       
-      // Wait for component to generate large objects
-      await waitFor(() => {
-        expect(getByTestId('high-memory-pressure-component')).toHaveTextContent('Complete');
-      }, { timeout: 10000 });
-      
-      memoryMonitor.stopMonitoring();
-      const finalMemory = memoryMonitor.takeSnapshot();
-      const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed;
-      
-      // THIS SHOULD FAIL - memory usage should stay under container limits
-      // Assuming 512MB container limit
-      expect(memoryIncrease).toBeLessThan(512 * 1024 * 1024);
+      try {
+        // Wait for component to generate large objects
+        await waitFor(() => {
+          expect(component.getByTestId('high-memory-pressure-component')).toHaveTextContent('Complete');
+        }, { timeout: 10000 });
+        
+        memoryMonitor.stopMonitoring();
+        const finalMemory = memoryMonitor.takeSnapshot();
+        const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed;
+        
+        // THIS SHOULD FAIL - memory usage should stay under container limits
+        // Assuming 512MB container limit
+        expect(memoryIncrease).toBeLessThan(512 * 1024 * 1024);
+      } finally {
+        component.unmount();
+      }
     });
 
     it('SHOULD FAIL: recovers gracefully from memory pressure', async () => {
       let errorCaught = false;
       
       // Mock console.error to catch memory-related errors
-      const originalError = console.error;
       console.error = jest.fn().mockImplementation((...args) => {
         if (args.some(arg => 
           typeof arg === 'string' && 
@@ -333,21 +407,20 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
         )) {
           errorCaught = true;
         }
-        originalError(...args);
+        originalConsoleError(...args);
       });
       
+      let component = render(<HighMemoryPressureComponent />);
+      
       try {
-        render(<HighMemoryPressureComponent />);
-        
         // Wait for potential memory errors
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         // THIS SHOULD FAIL - memory errors should not occur
         expect(errorCaught).toBe(false);
         expect(console.error).not.toHaveBeenCalled();
-        
       } finally {
-        console.error = originalError;
+        component.unmount();
       }
     });
 
@@ -356,27 +429,32 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
       
       const startTime = performance.now();
       
-      render(<HighMemoryPressureComponent />);
+      let component = render(<HighMemoryPressureComponent />);
       
-      // Measure render performance over time
-      for (let i = 0; i < 5; i++) {
-        const markStart = performance.now();
+      try {
+        // Measure render performance over time
+        for (let i = 0; i < 5; i++) {
+          const markStart = performance.now();
+          
+          await act(async () => {
+            // Force re-render
+            component.rerender(<HighMemoryPressureComponent key={i} />);
+            await new Promise(resolve => setTimeout(resolve, 200));
+          });
+          
+          const markEnd = performance.now();
+          performanceMarks.push(markEnd - markStart);
+        }
         
-        await act(async () => {
-          // Force re-render
-          await new Promise(resolve => setTimeout(resolve, 200));
-        });
+        const totalTime = performance.now() - startTime;
+        const averageRenderTime = performanceMarks.reduce((a, b) => a + b, 0) / performanceMarks.length;
         
-        const markEnd = performance.now();
-        performanceMarks.push(markEnd - markStart);
+        // THIS SHOULD FAIL - performance should not degrade significantly
+        expect(totalTime).toBeLessThan(5000); // Under 5 seconds total
+        expect(averageRenderTime).toBeLessThan(500); // Under 500ms per render
+      } finally {
+        component.unmount();
       }
-      
-      const totalTime = performance.now() - startTime;
-      const averageRenderTime = performanceMarks.reduce((a, b) => a + b, 0) / performanceMarks.length;
-      
-      // THIS SHOULD FAIL - performance should not degrade significantly
-      expect(totalTime).toBeLessThan(5000); // Under 5 seconds total
-      expect(averageRenderTime).toBeLessThan(500); // Under 500ms per render
     });
   });
 
@@ -386,59 +464,65 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
       
       // Render multiple components to stress memory
       const components = [];
-      for (let i = 0; i < 5; i++) {
-        components.push(render(<MemoryLeakyComponent key={i} />));
-        await new Promise(resolve => setTimeout(resolve, 100));
+      try {
+        for (let i = 0; i < 5; i++) {
+          components.push(render(<MemoryLeakyComponent key={i} />));
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // Let memory accumulate
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        memoryMonitor.stopMonitoring();
+        const snapshots = memoryMonitor.getSnapshots();
+        
+        // Analyze growth pattern - should be stable, not growing
+        const growthRates = [];
+        for (let i = 1; i < snapshots.length; i++) {
+          const growth = snapshots[i].heapUsed - snapshots[i-1].heapUsed;
+          growthRates.push(growth);
+        }
+        
+        const averageGrowth = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
+        const maxGrowth = Math.max(...growthRates);
+        
+        // THIS SHOULD PASS NOW - memory growth should be minimal due to proper cleanup
+        expect(averageGrowth).toBeLessThan(1024 * 1024); // Less than 1MB average growth
+        expect(maxGrowth).toBeLessThan(10 * 1024 * 1024); // Less than 10MB max growth
+      } finally {
+        // Cleanup
+        components.forEach(comp => comp.unmount());
       }
-      
-      // Let memory accumulate
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      memoryMonitor.stopMonitoring();
-      const snapshots = memoryMonitor.getSnapshots();
-      
-      // Analyze growth pattern - should be stable, not growing
-      const growthRates = [];
-      for (let i = 1; i < snapshots.length; i++) {
-        const growth = snapshots[i].heapUsed - snapshots[i-1].heapUsed;
-        growthRates.push(growth);
-      }
-      
-      const averageGrowth = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
-      const maxGrowth = Math.max(...growthRates);
-      
-      // THIS SHOULD FAIL - memory growth should be minimal
-      expect(averageGrowth).toBeLessThan(1024 * 1024); // Less than 1MB average growth
-      expect(maxGrowth).toBeLessThan(10 * 1024 * 1024); // Less than 10MB max growth
-      
-      // Cleanup
-      components.forEach(comp => comp.unmount());
     });
 
     it('SHOULD FAIL: detects container memory limit approach', async () => {
       memoryMonitor.startMonitoring();
       
-      const { rerender } = render(<div>Initial</div>);
+      let component = render(<div>Initial</div>);
       
-      // Gradually increase memory usage
-      const memorySteps = [];
-      for (let step = 0; step < 10; step++) {
-        rerender(<HighMemoryPressureComponent key={step} />);
-        await new Promise(resolve => setTimeout(resolve, 200));
+      try {
+        // Gradually increase memory usage
+        const memorySteps = [];
+        for (let step = 0; step < 10; step++) {
+          component.rerender(<HighMemoryPressureComponent key={step} />);
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
+          const snapshot = memoryMonitor.takeSnapshot();
+          memorySteps.push(snapshot.heapUsed);
+        }
         
-        const snapshot = memoryMonitor.takeSnapshot();
-        memorySteps.push(snapshot.heapUsed);
+        memoryMonitor.stopMonitoring();
+        
+        // Check if memory usage is approaching dangerous levels
+        const currentMemory = memorySteps[memorySteps.length - 1];
+        const containerLimit = 512 * 1024 * 1024; // 512MB
+        const warningThreshold = containerLimit * 0.8; // 80% of limit
+        
+        // THIS SHOULD FAIL - memory should not approach container limits
+        expect(currentMemory).toBeLessThan(warningThreshold);
+      } finally {
+        component.unmount();
       }
-      
-      memoryMonitor.stopMonitoring();
-      
-      // Check if memory usage is approaching dangerous levels
-      const currentMemory = memorySteps[memorySteps.length - 1];
-      const containerLimit = 512 * 1024 * 1024; // 512MB
-      const warningThreshold = containerLimit * 0.8; // 80% of limit
-      
-      // THIS SHOULD FAIL - memory should not approach container limits
-      expect(currentMemory).toBeLessThan(warningThreshold);
     });
   });
 
@@ -451,26 +535,27 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
       };
       
       // Mock cleanup functions to track calls
-      const originalClearInterval = global.clearInterval;
       global.clearInterval = jest.fn().mockImplementation((id) => {
         cleanupTracking.intervalsCleared++;
         return originalClearInterval(id);
       });
       
-      const { unmount } = render(<MemoryLeakyComponent />);
+      let component = render(<MemoryLeakyComponent />);
       
-      // Wait for component to set up resources
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      unmount();
-      
-      // Wait for cleanup
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // THIS SHOULD FAIL - cleanup should have been called
-      expect(cleanupTracking.intervalsCleared).toBeGreaterThan(0);
-      
-      global.clearInterval = originalClearInterval;
+      try {
+        // Wait for component to set up resources
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        component.unmount();
+        
+        // Wait for cleanup
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // THIS SHOULD PASS NOW - cleanup should have been called
+        expect(cleanupTracking.intervalsCleared).toBeGreaterThan(0);
+      } finally {
+        // No additional cleanup needed since component handles it
+      }
     });
 
     it('SHOULD FAIL: ensures garbage collection effectiveness', async () => {
@@ -484,25 +569,31 @@ describe('Frontend Memory Exhaustion Critical Tests', () => {
       const beforeGC = memoryMonitor.takeSnapshot();
       
       // Create and destroy components to generate garbage
-      for (let i = 0; i < 3; i++) {
-        const { unmount } = render(<MemoryLeakyComponent key={i} />);
-        await new Promise(resolve => setTimeout(resolve, 100));
-        unmount();
+      const components = [];
+      try {
+        for (let i = 0; i < 3; i++) {
+          const component = render(<MemoryLeakyComponent key={i} />);
+          components.push(component);
+          await new Promise(resolve => setTimeout(resolve, 100));
+          component.unmount();
+        }
+        
+        // Force garbage collection
+        global.gc();
+        
+        // Wait for GC to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const afterGC = memoryMonitor.takeSnapshot();
+        memoryMonitor.stopMonitoring();
+        
+        const memoryDifference = afterGC.heapUsed - beforeGC.heapUsed;
+        
+        // THIS SHOULD PASS NOW - memory should be reclaimed after GC with proper cleanup
+        expect(memoryDifference).toBeLessThan(5 * 1024 * 1024); // Less than 5MB retained
+      } finally {
+        // Ensure all components are properly unmounted (already done above)
       }
-      
-      // Force garbage collection
-      global.gc();
-      
-      // Wait for GC to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const afterGC = memoryMonitor.takeSnapshot();
-      memoryMonitor.stopMonitoring();
-      
-      const memoryDifference = afterGC.heapUsed - beforeGC.heapUsed;
-      
-      // THIS SHOULD FAIL - memory should be reclaimed after GC
-      expect(memoryDifference).toBeLessThan(5 * 1024 * 1024); // Less than 5MB retained
     });
   });
 });

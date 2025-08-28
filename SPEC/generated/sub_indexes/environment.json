@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-08-28T10:43:48.350948",
+    "generated_at": "2025-08-28T14:13:40.963948",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 140
   },
@@ -172,7 +172,7 @@
         "auth_service/auth_core/config.py:88",
         "auth_service/auth_core/config.py:102",
         "auth_service/auth_core/database/connection.py:39",
-        "auth_service/auth_core/database/database_manager.py:110",
+        "auth_service/auth_core/database/database_manager.py:139",
         "auth_service/auth_core/performance/startup_optimizer.py:98",
         "auth_service/auth_core/validation/pre_deployment_validator.py:594",
         "auth_service/auth_core/validation/pre_deployment_validator.py:709",
@@ -469,7 +469,7 @@
         "scripts/audit_staging_oauth_secrets.py:90",
         "scripts/audit_staging_oauth_secrets.py:244",
         "scripts/audit_staging_oauth_secrets.py:245",
-        "scripts/deploy_to_gcp.py:794"
+        "scripts/deploy_to_gcp.py:795"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_SECRET_DEV": {
@@ -520,7 +520,7 @@
         "scripts/audit_staging_oauth_secrets.py:95",
         "scripts/audit_staging_oauth_secrets.py:249",
         "scripts/audit_staging_oauth_secrets.py:250",
-        "scripts/deploy_to_gcp.py:795",
+        "scripts/deploy_to_gcp.py:796",
         "scripts/validate_oauth_deployment.py:61"
       ]
     },
@@ -1131,7 +1131,7 @@
       "category": "environment",
       "locations": [
         "scripts/audit_staging_oauth_secrets.py:58",
-        "scripts/deploy_to_gcp.py:794"
+        "scripts/deploy_to_gcp.py:795"
       ]
     },
     "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET": {
@@ -1139,14 +1139,14 @@
       "category": "environment",
       "locations": [
         "scripts/audit_staging_oauth_secrets.py:74",
-        "scripts/deploy_to_gcp.py:795"
+        "scripts/deploy_to_gcp.py:796"
       ]
     },
     "REPLACE_WITH_REDIS_PASSWORD": {
       "value": "REPLACE_WITH_REDIS_PASSWORD",
       "category": "environment",
       "locations": [
-        "scripts/deploy_to_gcp.py:811",
+        "scripts/deploy_to_gcp.py:812",
         "scripts/fix_staging_secrets.py:91"
       ]
     },

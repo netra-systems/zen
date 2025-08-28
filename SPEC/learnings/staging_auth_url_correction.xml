@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>Staging Auth Service URL Configuration</title>
+    <date>2025-08-28</date>
+    <category>configuration</category>
+    <severity>critical</severity>
+    
+    <issue>
+        <description>401 authentication errors on staging caused by incorrect auth service URL assumptions</description>
+        <symptoms>
+            - Threads endpoint returning 401 for valid JWT tokens
+            - Direct validation with auth service works
+            - Backend validation fails consistently
+        </symptoms>
+        <root_cause>Initial assumption that staging auth URL was misconfigured at https://netra-auth-service-701982941522.us-central1.run.app</root_cause>
+    </issue>
+    
+    <resolution>
+        <correct_url>https://auth.staging.netrasystems.ai</correct_url>
+        <explanation>
+            The staging auth service is correctly configured at https://auth.staging.netrasystems.ai
+            This URL is properly set in the services.py configuration file.
+            The Google Cloud Run URL (netra-auth-service-*.run.app) is the underlying implementation,
+            but the canonical URL is auth.staging.netrasystems.ai which provides proper routing and SSL.
+        </explanation>
+        <configuration_location>netra_backend/app/core/configuration/services.py:93</configuration_location>
+    </resolution>
+    
+    <debugging>
+        <steps>
+            1. Verify JWT token structure and expiry
+            2. Test direct validation with auth service
+            3. Check backend's auth client configuration
+            4. Verify service-to-service authentication credentials
+            5. Confirm auth service URL configuration
+        </steps>
+        <key_findings>
+            - JWT tokens are valid and not expired
+            - Auth service validates tokens successfully
+            - Backend fails to validate same tokens
+            - Issue is in backend-to-auth-service communication
+        </key_findings>
+    </debugging>
+    
+    <implications>
+        <deployment>Always use canonical domain names (auth.staging.netrasystems.ai) not Cloud Run URLs</deployment>
+        <monitoring>Monitor auth service connectivity from backend services</monitoring>
+        <configuration>Ensure AUTH_SERVICE_URL environment variable is properly set in deployments</configuration>
+    </implications>
+    
+    <prevention>
+        <recommendations>
+            - Add health checks for auth service connectivity
+            - Improve error logging in auth client
+            - Document canonical URLs for all environments
+            - Add integration tests for cross-service authentication
+        </recommendations>
+    </prevention>
+    
+    <related_files>
+        - netra_backend/app/core/configuration/services.py
+        - netra_backend/app/clients/auth_client_core.py
+        - netra_backend/app/clients/auth_client_cache.py
+        - auth_service/auth_core/routes/auth_routes.py
+    </related_files>
+</learning>

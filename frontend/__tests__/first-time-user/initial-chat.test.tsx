@@ -78,7 +78,18 @@ jest.mock('@/providers/WebSocketProvider', () => ({
 }));
 
 jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
+  useLoadingState: () => {
+    const mockInstance = mockUseLoadingState();
+    // Ensure we always return a proper mock with consistent values
+    return {
+      loadingState: mockInstance.loadingState || 'READY',
+      shouldShowLoading: mockInstance.shouldShowLoading || false,
+      shouldShowEmptyState: mockInstance.shouldShowEmptyState !== undefined ? mockInstance.shouldShowEmptyState : true,
+      shouldShowExamplePrompts: mockInstance.shouldShowExamplePrompts !== undefined ? mockInstance.shouldShowExamplePrompts : true,
+      loadingMessage: mockInstance.loadingMessage || '',
+      isInitialized: mockInstance.isInitialized !== undefined ? mockInstance.isInitialized : true
+    };
+  }
 }));
 
 jest.mock('@/hooks/useEventProcessor', () => ({
@@ -107,6 +118,39 @@ jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
 
 jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
   useTextareaResize: mockUseTextareaResize
+}));
+
+// Mock additional services needed by useMessageSending
+jest.mock('@/services/threadService', () => ({
+  ThreadService: {
+    createThread: jest.fn().mockResolvedValue({ id: 'test-thread-id', title: 'Test Thread' }),
+    getThread: jest.fn().mockResolvedValue({ id: 'test-thread-id', metadata: {} })
+  }
+}));
+
+jest.mock('@/services/threadRenameService', () => ({
+  ThreadRenameService: {
+    autoRenameThread: jest.fn()
+  }
+}));
+
+jest.mock('@/services/optimistic-updates', () => ({
+  optimisticMessageManager: {
+    addOptimisticUserMessage: jest.fn().mockReturnValue({ id: 'opt-user', localId: 'opt-user-local' }),
+    addOptimisticAiMessage: jest.fn().mockReturnValue({ id: 'opt-ai', localId: 'opt-ai-local' }),
+    getFailedMessages: jest.fn().mockReturnValue([]),
+    retryMessage: jest.fn().mockResolvedValue(undefined)
+  }
+}));
+
+jest.mock('@/hooks/useGTMEvent', () => ({
+  useGTMEvent: jest.fn().mockReturnValue({
+    trackChatStarted: jest.fn(),
+    trackMessageSent: jest.fn(),
+    trackThreadCreated: jest.fn(),
+    trackError: jest.fn(),
+    trackAgentActivated: jest.fn()
+  })
 }));
 
 // Mock child components
@@ -165,19 +209,7 @@ jest.mock('@/utils/debug-logger', () => ({
   }
 }));
 
-jest.mock('@/components/chat/utils/messageInputUtils', () => ({
-  getPlaceholder: jest.fn((isAuthenticated, isProcessing, messageLength) => {
-    if (!isAuthenticated) return 'Please sign in to send messages';
-    if (isProcessing) return 'Agent is thinking...';
-    if (messageLength > 9000) return `${10000 - messageLength} characters remaining`;
-    return 'Start typing your AI optimization request... (Shift+Enter for new line)';
-  }),
-  getTextareaClassName: jest.fn(() => 'w-full resize-none rounded-2xl px-4 py-3 pr-12 bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all duration-200 ease-in-out placeholder:text-gray-400 text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed'),
-  getCharCountClassName: jest.fn(() => 'text-xs text-gray-500 mt-1'),
-  shouldShowCharCount: jest.fn((len) => len > 8000),
-  isMessageDisabled: jest.fn((isProcessing, isAuthenticated, isSending) => isProcessing || !isAuthenticated || isSending),
-  canSendMessage: jest.fn((isDis, msg, len) => !isDis && !!msg.trim() && len <= 10000)
-}));
+// Remove the mock for messageInputUtils to use the real implementation
 
 jest.mock('@/components/chat/types', () => ({
   MESSAGE_INPUT_CONSTANTS: {
@@ -187,16 +219,7 @@ jest.mock('@/components/chat/types', () => ({
   }
 }));
 
-// Mock MessageInput component specifically for this test
-jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => React.createElement('div', { 
-    'data-testid': 'message-input-mock' 
-  }, React.createElement('textarea', { 
-    role: 'textbox',
-    placeholder: 'Type your message...',
-    'data-testid': 'message-textarea'
-  }))
-}));
+// Don't mock MessageInput - use the real component
 
 // Import components after mocks
 import MainChat from '@/components/chat/MainChat';
@@ -235,11 +258,14 @@ describe('First-Time User Initial Chat', () => {
       isConnected: true
     });
     
+    // FIXED: Set loading state properly to show content instead of loading spinner
     mockUseLoadingState.mockReturnValue({
+      loadingState: 'READY',
       shouldShowLoading: false,
       shouldShowEmptyState: true,
       shouldShowExamplePrompts: true,
-      loadingMessage: ''
+      loadingMessage: '',
+      isInitialized: true
     });
     
     mockUseEventProcessor.mockReturnValue({
@@ -270,27 +296,6 @@ describe('First-Time User Initial Chat', () => {
       isSending: false,
       handleSend: mockHandleSend
     });
-    
-    // Setup remaining hooks that the working test has - already set above
-    // mockUseWebSocket already configured with complete mock
-    
-    mockUseEventProcessor.mockReturnValue({
-      processedCount: 0,
-      queueSize: 0
-    });
-    
-    mockUseThreadNavigation.mockReturnValue({
-      currentThreadId: null,
-      isNavigating: false
-    });
-    
-    // Default loading state for first-time user
-    mockUseLoadingState.mockReturnValue({
-      shouldShowLoading: false,
-      shouldShowEmptyState: true,
-      shouldShowExamplePrompts: true,
-      loadingMessage: ''
-    });
   });
 
   it('allows first-time user to type in message input', () => {
@@ -316,7 +321,7 @@ describe('First-Time User Initial Chat', () => {
   it('shows example prompts for first-time users', async () => {
     // Force the loading state to immediately show example prompts
     mockUseLoadingState.mockReturnValue({
-      loadingState: 'THREAD_READY',
+      loadingState: 'READY',
       shouldShowLoading: false,
       shouldShowEmptyState: true,
       shouldShowExamplePrompts: true,
@@ -334,6 +339,19 @@ describe('First-Time User Initial Chat', () => {
       isConnected: true
     });
     
+    // Ensure no thread is active to show empty state
+    mockUseUnifiedChatStore.mockReturnValue({
+      isProcessing: false,
+      messages: [],
+      fastLayerData: null,
+      mediumLayerData: null,
+      slowLayerData: null,
+      currentRunId: null,
+      activeThreadId: null,
+      isThreadLoading: false,
+      handleWebSocketEvent: jest.fn()
+    });
+    
     render(<MainChat />);
     
     await waitFor(() => {
@@ -342,6 +360,11 @@ describe('First-Time User Initial Chat', () => {
   });
 
   it('handles message sending for first-time user', async () => {
+    // Set up proper authentication state
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true
+    });
+    
     render(<MessageInput />);
     
     const textarea = screen.getByRole('textbox');
@@ -353,11 +376,12 @@ describe('First-Time User Initial Chat', () => {
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
     
     // Wait for async operations to complete
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await waitFor(() => {
+      expect(mockHandleSend).toHaveBeenCalled();
+    }, { timeout: 1000 });
     
     console.log('Message sending test - handleSend calls:', mockHandleSend.mock.calls.length);
     console.log('Message sending test - handleSend call args:', mockHandleSend.mock.calls);
-    expect(mockHandleSend).toHaveBeenCalled();
   });
 
   it('shows processing state when user sends first message', async () => {
@@ -375,10 +399,12 @@ describe('First-Time User Initial Chat', () => {
     });
     
     mockUseLoadingState.mockReturnValue({
+      loadingState: 'PROCESSING',
       shouldShowLoading: false,
       shouldShowEmptyState: false,
       shouldShowExamplePrompts: false,
-      loadingMessage: ''
+      loadingMessage: 'Processing...',
+      isInitialized: true
     });
     
     mockUseThreadNavigation.mockReturnValue({
@@ -395,6 +421,15 @@ describe('First-Time User Initial Chat', () => {
 
   it('transitions from empty state to chat after first message', async () => {
     // Start with empty state
+    mockUseLoadingState.mockReturnValue({
+      loadingState: 'READY',
+      shouldShowLoading: false,
+      shouldShowEmptyState: true,
+      shouldShowExamplePrompts: true,
+      loadingMessage: '',
+      isInitialized: true
+    });
+    
     render(<MainChat />);
     
     await waitFor(() => {
@@ -403,10 +438,12 @@ describe('First-Time User Initial Chat', () => {
     
     // Simulate after sending first message - should hide welcome
     mockUseLoadingState.mockReturnValue({
+      loadingState: 'THREAD_READY',
       shouldShowLoading: false,
       shouldShowEmptyState: false,
       shouldShowExamplePrompts: false,
-      loadingMessage: ''
+      loadingMessage: '',
+      isInitialized: true
     });
     
     // Re-render with updated state
@@ -416,6 +453,16 @@ describe('First-Time User Initial Chat', () => {
   });
 
   it('shows message input is always available for interaction', async () => {
+    // Set up proper state to render content
+    mockUseLoadingState.mockReturnValue({
+      loadingState: 'READY',
+      shouldShowLoading: false,
+      shouldShowEmptyState: true,
+      shouldShowExamplePrompts: true,
+      loadingMessage: '',
+      isInitialized: true
+    });
+    
     render(<MainChat />);
     
     await waitFor(() => {

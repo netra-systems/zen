@@ -501,4 +501,39 @@
       <backward_compatibility_check>PASSED - All legacy exports maintained</backward_compatibility_check>
     </validation_results>
   </error_handler_modernization>
+  <method_signatures>
+    <critical_fix date="2025-08-28">
+      <issue>TypeError in analyze_performance_metrics method calls</issue>
+      <root_cause>Multiple methods with same name but different signatures causing confusion</root_cause>
+      <methods>
+        <method class="ModernClickHouseOperations">
+          <signature>analyze_performance_metrics(self, run_id: str = None, stream_updates: bool = False) -> Dict[str, Any]</signature>
+          <purpose>Analyze ClickHouse operation performance (internal metrics)</purpose>
+          <arguments>0-2 optional arguments</arguments>
+        </method>
+        <method class="PerformanceAnalyzer">
+          <signature>analyze_performance_metrics(self, user_id: int, workload_id: Optional[str], time_range: Tuple[datetime, datetime]) -> Dict[str, Any]</signature>
+          <purpose>Analyze user workload performance metrics</purpose>
+          <arguments>3 required arguments</arguments>
+        </method>
+        <method class="PerformanceAnalysisOperations">
+          <signature>analyze_performance_metrics(self, user_id: int, workload_id: Optional[str], time_range: Tuple[datetime, datetime]) -> Dict[str, Any]</signature>
+          <purpose>Wrapper for PerformanceAnalyzer.analyze_performance_metrics</purpose>
+          <arguments>3 required arguments</arguments>
+        </method>
+      </methods>
+      <resolution>
+        <action>Fixed test helper signatures to match production code</action>
+        <action>Corrected import paths in test compatibility modules</action>
+        <action>Ensured consistent 3-argument signature for user metrics analysis</action>
+        <action>Kept ClickHouse operations method separate with different signature</action>
+      </resolution>
+      <usage_guidelines>
+        <guideline>Use performance_ops.analyze_performance_metrics() for user metrics (3 args)</guideline>
+        <guideline>Use clickhouse_ops.analyze_performance_metrics() for DB metrics (0-2 args)</guideline>
+        <guideline>Never mix the two - they serve different purposes</guideline>
+        <guideline>Test helpers must match production signatures exactly</guideline>
+      </usage_guidelines>
+    </critical_fix>
+  </method_signatures>
 </specification>

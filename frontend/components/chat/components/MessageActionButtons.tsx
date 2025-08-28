@@ -91,6 +91,7 @@ const SendButton: React.FC<{
         isSending ? "w-auto px-4 h-12" : "w-12 h-12"
       )}
       aria-label="Send message"
+      data-testid="send-button"
     >
       {isSending ? (
         <div className="flex items-center gap-2">

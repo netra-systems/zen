@@ -75,6 +75,7 @@
     "invalidated_count",
     "isolation_policies_count",
     "issue_count",
+    "iteration_count",
     "leaked_count",
     "leaky_bucket",
     "line_count",

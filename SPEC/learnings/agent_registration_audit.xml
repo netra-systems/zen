@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Agent Registration Process Audit</title>
+    <date>2025-08-28</date>
+    <category>Architecture</category>
+    <subcategory>Agent System</subcategory>
+    <priority>Medium</priority>
+  </metadata>
+
+  <problem>
+    <description>
+      Audit revealed that agent registration logs during normal startup may appear as if 
+      the system is restarting unnecessarily, but it's actually the expected initialization flow.
+      However, the system lacks safeguards against duplicate registration.
+    </description>
+    <symptoms>
+      <symptom>Multiple "Registered agent" log messages during startup</symptom>
+      <symptom>No warnings when agents are re-registered</symptom>
+      <symptom>Potential for silent overwrites during hot reload or error recovery</symptom>
+    </symptoms>
+  </problem>
+
+  <analysis>
+    <finding id="1">
+      <title>Normal Initialization Sequence</title>
+      <description>
+        The agent registration happens as part of the normal startup flow:
+        1. SupervisorAgent created in startup_module._build_supervisor_agent()
+        2. SupervisorAgent.__init__() creates AgentRegistry
+        3. AgentRegistry.register_default_agents() registers all 7 sub-agents
+        4. NetraMCPServer registers its components separately
+        5. MCPService initializes with FastMCP 2
+      </description>
+      <location>netra_backend/app/agents/supervisor_consolidated.py:144</location>
+      <location>netra_backend/app/agents/supervisor/agent_registry.py:38-40</location>
+    </finding>
+
+    <finding id="2">
+      <title>No Duplicate Prevention</title>
+      <description>
+        The AgentRegistry.register() method simply overwrites existing agents without checking 
+        for duplicates. This could lead to silent re-registration during development or error 
+        recovery scenarios.
+      </description>
+      <code_snippet>
+        def register(self, name: str, agent: BaseSubAgent) -> None:
+            if self.websocket_manager:
+                agent.websocket_manager = self.websocket_manager
+            self.agents[name] = agent  # Simply overwrites if exists
+            logger.info(f"Registered agent: {name}")
+      </code_snippet>
+      <location>netra_backend/app/agents/supervisor/agent_registry.py:75-80</location>
+    </finding>
+
+    <finding id="3">
+      <title>Multiple Registration Paths</title>
+      <description>
+        Both SupervisorAgent and NetraMCPServer perform their own registration sequences 
+        independently, which could lead to confusion in logs and potential timing issues.
+      </description>
+      <location>netra_backend/app/netra_mcp/modules/netra_mcp_core.py:25</location>
+    </finding>
+  </analysis>
+
+  <solution>
+    <recommendation id="1">
+      <title>Add Registration Guards</title>
+      <description>
+        Implement duplicate detection in AgentRegistry to prevent silent overwrites
+      </description>
+      <implementation>
+        <![CDATA[
+        def register(self, name: str, agent: BaseSubAgent) -> None:
+            if name in self.agents:
+                logger.warning(f"Agent {name} already registered, skipping re-registration")
+                return
+            if self.websocket_manager:
+                agent.websocket_manager = self.websocket_manager
+            self.agents[name] = agent
+            logger.info(f"Registered agent: {name}")
+        ]]>
+      </implementation>
+    </recommendation>
+
+    <recommendation id="2">
+      <title>Track Initialization State</title>
+      <description>
+        Add a flag to prevent re-initialization of the entire registry
+      </description>
+      <implementation>
+        <![CDATA[
+        def __init__(self, llm_manager: 'LLMManager', tool_dispatcher: 'ToolDispatcher'):
+            self.llm_manager = llm_manager
+            self.tool_dispatcher = tool_dispatcher
+            self.agents: Dict[str, BaseSubAgent] = {}
+            self.websocket_manager = None
+            self._initialized = False
+            
+        def register_default_agents(self) -> None:
+            """Register default sub-agents"""
+            if self._initialized:
+                logger.debug("Agents already registered, skipping")
+                return
+            self._register_core_agents()
+            self._register_auxiliary_agents()
+            self._initialized = True
+        ]]>
+      </implementation>
+    </recommendation>
+
+    <recommendation id="3">
+      <title>Improve Logging Clarity</title>
+      <description>
+        Add context to registration logs to distinguish between initial registration 
+        and re-registration attempts
+      </description>
+      <implementation>
+        <![CDATA[
+        def register(self, name: str, agent: BaseSubAgent) -> None:
+            action = "Re-registered" if name in self.agents else "Registered"
+            if self.websocket_manager:
+                agent.websocket_manager = self.websocket_manager
+            self.agents[name] = agent
+            logger.info(f"{action} agent: {name}")
+        ]]>
+      </implementation>
+    </recommendation>
+  </solution>
+
+  <impact>
+    <positive>
+      <item>Prevents silent overwrites of agents during development</item>
+      <item>Provides clear logging for debugging registration issues</item>
+      <item>Guards against duplicate registration during hot reload</item>
+      <item>Improves system resilience during error recovery</item>
+    </positive>
+    <negative>
+      <item>None - these are defensive improvements with no functional impact</item>
+    </negative>
+  </impact>
+
+  <validation>
+    <test>Verify agents are only registered once during normal startup</test>
+    <test>Confirm warning logs appear when attempting duplicate registration</test>
+    <test>Test hot reload scenarios don't cause agent duplication</test>
+    <test>Verify error recovery doesn't lead to multiple registrations</test>
+  </validation>
+
+  <related_specs>
+    <spec>SPEC/core.xml</spec>
+    <spec>SPEC/agent_architecture.xml</spec>
+    <spec>SPEC/startup.xml</spec>
+  </related_specs>
+</learning>
