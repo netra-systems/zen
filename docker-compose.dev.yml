@@ -11,16 +11,22 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
       POSTGRES_DB: ${POSTGRES_DB:-netra_db}
       POSTGRES_HOST_AUTH_METHOD: trust
+      # Enable proper shutdown handling
+      POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netra}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netra} && psql -U ${POSTGRES_USER:-netra} -d netra_dev -c 'SELECT 1' > /dev/null 2>&1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
+    # Graceful shutdown configuration
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
     networks:
       - netra-network
 
@@ -107,6 +113,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
       FERNET_KEY: ${FERNET_KEY:-dev-fernet-key-change-in-production}
+      SERVICE_SECRET: ${SERVICE_SECRET}
       
       # API Keys (from host environment)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}

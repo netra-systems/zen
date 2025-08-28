@@ -229,6 +229,14 @@
             <critical-takeaway>NEVER create minimal backend versions (main_minimal.py) for deployment - breaks functionality</critical-takeaway>
         </category>
         
+        <category name="Logging Depth Configuration" path="SPEC/learnings/logging_depth_configuration.xml" keywords="Logging, Loguru, Depth, Source Location, UnifiedLogger, Stack Trace, Debug">
+            <critical-takeaway>CRITICAL: UnifiedLogger must use logger.opt(depth=3) to show actual caller location, not wrapper location.</critical-takeaway>
+            <critical-takeaway>The depth parameter skips wrapper methods: _emit_log, _log, and the specific level method (error/warning/info).</critical-takeaway>
+            <critical-takeaway>Without proper depth, logs show unified_logging.py:202 instead of the actual error source.</critical-takeaway>
+            <critical-takeaway>Test logging output to verify source locations are correctly reported, not wrapper locations.</critical-takeaway>
+            <critical-takeaway>If adding new wrapper layers, adjust depth parameter accordingly to maintain accurate source reporting.</critical-takeaway>
+        </category>
+        
         <category name="Project Structure" path="SPEC/learnings/project_structure_enforcement.xml" keywords="Structure, Imports, netra_backend, Canonical">
             <critical-takeaway>THE canonical structure: netra_backend/app/ for production, netra_backend/tests/ for tests. This is PERMANENT.</critical-takeaway>
             <critical-takeaway>All imports MUST use netra_backend.app.* prefix. Fix imports, NOT the structure.</critical-takeaway>
@@ -1218,6 +1226,15 @@
             <critical-takeaway>Auth events tracked in auth/context.tsx, chat events in hooks/useMessageSending.ts for single source of truth</critical-takeaway>
             <critical-takeaway>Test GTM implementation with automated Selenium scripts (test_gtm_tracking.py) to verify dataLayer pushes</critical-takeaway>
             <critical-takeaway>Event categories: authentication (login/signup), engagement (chat/messages), conversion (trials/upgrades), errors</critical-takeaway>
+        </category>
+        
+        <category name="Frontend Staging URL Regression" path="SPEC/learnings/frontend_staging_url_regression_fix.xml" keywords="Next.js, NEXT_PUBLIC, Docker, Environment Variables, Staging, Frontend, Build Time, localhost, URL Configuration">
+            <critical-takeaway>CRITICAL: Next.js NEXT_PUBLIC_* environment variables are baked into build at BUILD TIME, not runtime - must be set in Dockerfile before npm run build.</critical-takeaway>
+            <critical-takeaway>Frontend Docker builds MUST include environment-specific NEXT_PUBLIC_* variables or will default to localhost URLs.</critical-takeaway>
+            <critical-takeaway>Cloud Run environment variables CANNOT override NEXT_PUBLIC_* after build - they are compile-time constants.</critical-takeaway>
+            <critical-takeaway>Create separate Dockerfiles for staging (frontend.gcp.Dockerfile) and production (frontend.prod.Dockerfile) with different baked-in configs.</critical-takeaway>
+            <critical-takeaway>Test deployment by checking browser network tab - no localhost URLs should appear in staging/production.</critical-takeaway>
+            <critical-takeaway>This was working before - regression introduced when Dockerfile was modified without understanding Next.js build-time requirements.</critical-takeaway>
         </category>
         
     </categories>

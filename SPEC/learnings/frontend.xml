@@ -10,6 +10,12 @@
         <business_impact>Critical - Frontend performance impacts user experience and conversions</business_impact>
     </metadata>
     
+    <related_learnings>
+        <reference path="SPEC/learnings/frontend_staging_url_regression_fix.xml">
+            Critical: Frontend staging URL regression - Next.js NEXT_PUBLIC_* variables are build-time constants
+        </reference>
+    </related_learnings>
+    
     <learnings>
         <learning>
             <id>zustand-selector-infinite-loop</id>

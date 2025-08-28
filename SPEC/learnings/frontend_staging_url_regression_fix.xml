@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Frontend Staging URL Regression - localhost URLs in Production</title>
+    <date>2025-01-28</date>
+    <severity>CRITICAL</severity>
+    <category>deployment,frontend,configuration</category>
+    <environments>staging,production</environments>
+  </metadata>
+
+  <problem_statement>
+    Frontend deployed to staging was making requests to localhost:8081 instead of 
+    https://auth.staging.netrasystems.ai. This caused complete authentication failure
+    in staging environment.
+  </problem_statement>
+
+  <root_cause>
+    <issue>Next.js NEXT_PUBLIC_* environment variables are baked into the build at BUILD TIME, not runtime</issue>
+    <details>
+      - The frontend Docker image was being built without staging-specific environment variables
+      - unified-api-config.ts environment detection falls back to localhost when NEXT_PUBLIC_ENVIRONMENT is not set
+      - Domain-based detection only works in browser AFTER page loads, not during SSR or build
+      - Setting environment variables in Cloud Run deployment has NO EFFECT on NEXT_PUBLIC_* variables
+    </details>
+  </root_cause>
+
+  <investigation_path>
+    <step number="1">Identified issue: Auth requests going to http://localhost:8081/auth/config</step>
+    <step number="2">Checked unified-api-config.ts - correctly configured with staging URLs</step>
+    <step number="3">Checked auth-service-client.ts - correctly using unified config</step>
+    <step number="4">Analyzed environment detection logic - falls back to development when no env vars</step>
+    <step number="5">Discovered Docker build missing environment variables at build time</step>
+    <step number="6">Realized Next.js NEXT_PUBLIC_* vars must be set during Docker build, not runtime</step>
+  </investigation_path>
+
+  <solution>
+    <description>Add staging environment variables to Dockerfile during build stage</description>
+    <files_modified>
+      <file>deployment/docker/frontend.gcp.Dockerfile</file>
+      <file>deployment/docker/frontend.prod.Dockerfile (new)</file>
+    </files_modified>
+    <code_changes>
+      <change>
+        <file>deployment/docker/frontend.gcp.Dockerfile</file>
+        <description>Added staging environment variables before npm run build</description>
+        <snippet><![CDATA[
+# Set staging environment variables for build time
+# These NEXT_PUBLIC vars are baked into the build
+ENV NEXT_PUBLIC_ENVIRONMENT=staging
+ENV NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai
+ENV NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai
+ENV NEXT_PUBLIC_AUTH_URL=https://auth.staging.netrasystems.ai
+ENV NEXT_PUBLIC_FRONTEND_URL=https://staging.netrasystems.ai
+
+# Build the application (creates standalone build)
+RUN npm run build
+        ]]></snippet>
+      </change>
+    </code_changes>
+  </solution>
+
+  <prevention>
+    <guideline>ALWAYS set NEXT_PUBLIC_* environment variables in Dockerfile BEFORE build command</guideline>
+    <guideline>Create separate Dockerfiles for staging and production to avoid env var conflicts</guideline>
+    <guideline>Never rely on runtime environment variables for Next.js NEXT_PUBLIC_* configuration</guideline>
+    <guideline>Test environment detection by checking window.__NEXT_DATA__.buildId in browser console</guideline>
+  </prevention>
+
+  <testing>
+    <test>Build Docker image locally and verify environment variables are baked in</test>
+    <test>Deploy to staging and verify auth requests go to https://auth.staging.netrasystems.ai</test>
+    <test>Check browser network tab to ensure no localhost URLs appear</test>
+    <test>Run: curl https://staging.netrasystems.ai/_next/static/chunks/pages/_app*.js | grep -o 'auth.*netrasystems'</test>
+  </testing>
+
+  <related_issues>
+    <issue>Environment detection fallback logic may need improvement for server-side rendering</issue>
+    <issue>Consider using Next.js publicRuntimeConfig for truly runtime configuration</issue>
+    <issue>Document build-time vs runtime environment variables in deployment guide</issue>
+  </related_issues>
+
+  <key_insights>
+    <insight>Next.js NEXT_PUBLIC_* variables are compile-time constants, not runtime variables</insight>
+    <insight>Docker builds must include environment-specific configuration</insight>
+    <insight>Cloud Run environment variables cannot override NEXT_PUBLIC_* after build</insight>
+    <insight>Staging and production need separate Docker images with different baked-in configs</insight>
+  </key_insights>
+
+  <deployment_checklist>
+    <item>Verify Dockerfile has correct NEXT_PUBLIC_* environment variables for target environment</item>
+    <item>Ensure cloudbuild.yaml uses correct Dockerfile for environment</item>
+    <item>Test locally with: docker build -f deployment/docker/frontend.gcp.Dockerfile .</item>
+    <item>Verify built assets contain correct URLs: docker run IMAGE cat /app/.next/static/chunks/pages/_app*.js | grep auth</item>
+    <item>Deploy and verify network requests in browser developer tools</item>
+  </deployment_checklist>
+</learning>

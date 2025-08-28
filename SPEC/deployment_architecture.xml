@@ -11,6 +11,7 @@
             <ref>test_infrastructure_architecture.xml</ref>
             <ref>gcp_deployment.xml</ref>
             <ref>unified_environment_management.xml</ref>
+            <ref>learnings/frontend_staging_url_regression_fix.xml</ref>
         </cross_references>
     </metadata>
 

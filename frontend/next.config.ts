@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     // Disable TypeScript checking during builds (for staging)
     ignoreBuildErrors: true,
   },
-  swcMinify: process.env.NODE_ENV === 'production',
   // Optimize based on environment
   experimental: {
     optimizeCss: process.env.NODE_ENV === 'production',
