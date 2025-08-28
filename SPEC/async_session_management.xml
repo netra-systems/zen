@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <title>Async Session Management Best Practices</title>
+  <category>Database</category>
+  <priority>CRITICAL</priority>
+  <last_updated>2025-08-27</last_updated>
+  
+  <overview>
+    Comprehensive specification for managing SQLAlchemy async sessions to prevent
+    concurrency issues, particularly IllegalStateChangeError and connection leaks.
+  </overview>
+  
+  <requirements>
+    <requirement id="ASM-001" priority="CRITICAL">
+      All async session contexts MUST handle asyncio.CancelledError explicitly
+    </requirement>
+    <requirement id="ASM-002" priority="CRITICAL">
+      Session state MUST be checked before any commit/rollback operations
+    </requirement>
+    <requirement id="ASM-003" priority="CRITICAL">
+      GeneratorExit MUST be handled silently in async generators
+    </requirement>
+    <requirement id="ASM-004" priority="HIGH">
+      Session cleanup MUST be delegated to the async context manager
+    </requirement>
+    <requirement id="ASM-005" priority="HIGH">
+      asyncio.shield() MUST NOT be used around session close operations
+    </requirement>
+  </requirements>
+  
+  <standard_pattern>
+    <description>
+      The canonical pattern for async session management across all services
+    </description>
+    <code><![CDATA[
+from contextlib import asynccontextmanager
+import asyncio
+from sqlalchemy.ext.asyncio import AsyncSession
+
+@asynccontextmanager
+async def get_async_session() -> AsyncSession:
+    """Standard async session pattern with proper lifecycle management."""
+    async_session_factory = get_application_session()
+    async with async_session_factory() as session:
+        try:
+            yield session
+            # Only commit if session is active and not in transaction
+            if session.is_active and not session.in_transaction():
+                await session.commit()
+        except asyncio.CancelledError:
+            # Handle task cancellation - don't attempt any session operations
+            # The async context manager will handle cleanup
+            raise
+        except GeneratorExit:
+            # Handle generator cleanup gracefully
+            # Session context manager will handle cleanup
+            pass
+        except Exception:
+            # Only rollback if session is still active
+            if session.is_active:
+                await session.rollback()
+            raise
+    ]]></code>
+  </standard_pattern>
+  
+  <anti_patterns>
+    <anti_pattern id="AP-001">
+      <name>Unconditional Commit/Rollback</name>
+      <description>
+        Attempting to commit or rollback without checking session state
+      </description>
+      <bad_example><![CDATA[
+# BAD - No state check
+try:
+    yield session
+    await session.commit()  # May fail if session is closing
+except Exception:
+    await session.rollback()  # May fail if session is inactive
+      ]]></bad_example>
+    </anti_pattern>
+    
+    <anti_pattern id="AP-002">
+      <name>Using asyncio.shield on Session Close</name>
+      <description>
+        Using asyncio.shield() to protect session cleanup causes state conflicts
+      </description>
+      <bad_example><![CDATA[
+# BAD - Creates race condition
+async with session:
+    try:
+        yield session
+    finally:
+        await asyncio.shield(session.close())  # Causes IllegalStateChangeError
+      ]]></bad_example>
+    </anti_pattern>
+    
+    <anti_pattern id="AP-003">
+      <name>Manual Session Close in Finally Block</name>
+      <description>
+        Explicitly closing session in finally block when context manager handles it
+      </description>
+      <bad_example><![CDATA[
+# BAD - Double close attempt
+async with session_factory() as session:
+    try:
+        yield session
+    finally:
+        await session.close()  # Context manager already handles this
+      ]]></bad_example>
+    </anti_pattern>
+  </anti_patterns>
+  
+  <testing_requirements>
+    <test_scenario id="TEST-001">
+      <name>Task Cancellation</name>
+      <description>
+        Test that cancelled tasks don't cause IllegalStateChangeError
+      </description>
+      <implementation>
+        Create async task, cancel it mid-transaction, verify CancelledError is raised
+      </implementation>
+    </test_scenario>
+    
+    <test_scenario id="TEST-002">
+      <name>Concurrent Sessions</name>
+      <description>
+        Test multiple concurrent sessions don't interfere
+      </description>
+      <implementation>
+        Run multiple async operations with separate sessions simultaneously
+      </implementation>
+    </test_scenario>
+    
+    <test_scenario id="TEST-003">
+      <name>Exception Handling</name>
+      <description>
+        Test proper rollback when exceptions occur
+      </description>
+      <implementation>
+        Raise exception during transaction, verify rollback only if session active
+      </implementation>
+    </test_scenario>
+    
+    <test_scenario id="TEST-004">
+      <name>Rapid Session Creation</name>
+      <description>
+        Test rapid session creation/destruction
+      </description>
+      <implementation>
+        Create and close many sessions quickly to test pool management
+      </implementation>
+    </test_scenario>
+  </testing_requirements>
+  
+  <migration_guide>
+    <step number="1">
+      Search for all async session contexts in codebase:
+      grep -r "async with.*session" --include="*.py"
+    </step>
+    <step number="2">
+      Add asyncio import if missing:
+      import asyncio
+    </step>
+    <step number="3">
+      Update session context to use standard pattern with state checks
+    </step>
+    <step number="4">
+      Remove any manual session.close() calls in finally blocks
+    </step>
+    <step number="5">
+      Remove any use of asyncio.shield() around session operations
+    </step>
+    <step number="6">
+      Run test suite to verify no regressions
+    </step>
+  </migration_guide>
+  
+  <monitoring>
+    <metric name="IllegalStateChangeError_count">
+      Count of IllegalStateChangeError exceptions in logs
+    </metric>
+    <metric name="session_leak_count">
+      Number of sessions not properly closed
+    </metric>
+    <metric name="cancelled_task_errors">
+      Errors from improperly handled task cancellation
+    </metric>
+    <alert name="session_concurrency_error">
+      Trigger when IllegalStateChangeError detected in production
+    </alert>
+  </monitoring>
+  
+  <references>
+    <reference>SPEC/learnings/sqlalchemy_session_concurrency.xml</reference>
+    <reference>SQLAlchemy AsyncSession Documentation</reference>
+    <reference>Python asyncio CancelledError handling</reference>
+  </references>
+</spec>

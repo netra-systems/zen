@@ -321,23 +321,35 @@ class TestUsageTracking:
     @pytest.mark.asyncio
     async def test_record_tool_usage_increments_counters(self, rate_limiter):
         """Record tool usage increments all period counters."""
+        # Reset mock call counts to ensure clean state
+        rate_limiter.redis.incr.reset_mock()
+        rate_limiter.redis.expire.reset_mock()
+        
         await rate_limiter.record_tool_usage("user123", "tool", 500, "success")
         
         # Should call incr for minute, hour, and day keys
-        assert rate_limiter.redis.incr.call_count == 3
-        assert rate_limiter.redis.expire.call_count == 3
+        incr_calls = rate_limiter.redis.incr.call_count
+        expire_calls = rate_limiter.redis.expire.call_count
+        
+        assert incr_calls == 3, f"Expected 3 incr calls, got {incr_calls}. Calls: {rate_limiter.redis.incr.call_args_list}"
+        assert expire_calls == 3, f"Expected 3 expire calls, got {expire_calls}. Calls: {rate_limiter.redis.expire.call_args_list}"
 
     @pytest.mark.asyncio
     async def test_record_tool_usage_sets_expiry(self, rate_limiter):
         """Record tool usage sets appropriate expiry times."""
+        # Reset mock call counts to ensure clean state
+        rate_limiter.redis.expire.reset_mock()
+        
         await rate_limiter.record_tool_usage("user123", "tool", 500, "success")
         
         # Check that expire was called with correct TTL values
         expire_calls = rate_limiter.redis.expire.call_args_list
-        ttl_values = [call[0][1] for call in expire_calls]
-        assert 60 in ttl_values      # minute TTL
-        assert 3600 in ttl_values    # hour TTL
-        assert 86400 in ttl_values   # day TTL
+        ttl_values = [call[0][1] for call in expire_calls if len(call[0]) > 1]
+        
+        assert len(ttl_values) > 0, f"No TTL values found. Expire calls: {expire_calls}"
+        assert 60 in ttl_values, f"Minute TTL (60) not found in {ttl_values}"
+        assert 3600 in ttl_values, f"Hour TTL (3600) not found in {ttl_values}"
+        assert 86400 in ttl_values, f"Day TTL (86400) not found in {ttl_values}"
 
     @pytest.mark.asyncio
     async def test_record_tool_usage_without_redis(self, rate_limiter_no_redis):

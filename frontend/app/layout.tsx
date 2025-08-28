@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { AppWithLayout } from '@/components/AppWithLayout';
 import { AuthProvider } from '@/auth';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
+import { GTMProvider } from '@/providers/GTMProvider';
 import './globals.css';
 import '@/styles/glassmorphism.css';
 
@@ -18,11 +19,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <WebSocketProvider>
-            <AppWithLayout>{children}</AppWithLayout>
-          </WebSocketProvider>
-        </AuthProvider>
+        <GTMProvider enabled={process.env.NODE_ENV !== 'test'}>
+          <AuthProvider>
+            <WebSocketProvider>
+              <AppWithLayout>{children}</AppWithLayout>
+            </WebSocketProvider>
+          </AuthProvider>
+        </GTMProvider>
       </body>
     </html>
   );

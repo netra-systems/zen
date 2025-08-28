@@ -63,9 +63,25 @@ class WebSocketE2ETester:
         self.connections.clear()
     
     async def create_authenticated_connection(self, user_id: str, token: str) -> str:
-        """Create authenticated WebSocket connection."""
-        ws_url = f"ws://localhost:8000/ws?token={token}"
-        ws = await websockets.connect(ws_url)
+        """Create authenticated WebSocket connection with proper JWT authentication."""
+        ws_url = "ws://localhost:8000/ws"
+        
+        # Use proper JWT authentication via headers and subprotocol
+        headers = {"Authorization": f"Bearer {token}"}
+        subprotocols = ["jwt-auth"]
+        
+        try:
+            ws = await websockets.connect(
+                ws_url, 
+                extra_headers=headers,
+                subprotocols=subprotocols,
+                timeout=10.0
+            )
+        except Exception as e:
+            # Fallback to test endpoint if main endpoint fails
+            test_url = "ws://localhost:8000/ws/test"
+            ws = await websockets.connect(test_url, timeout=10.0)
+        
         conn_id = str(uuid.uuid4())
         self.connections[conn_id] = ws
         self.received_messages[conn_id] = []

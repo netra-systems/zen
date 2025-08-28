@@ -69,6 +69,7 @@ def _get_extended_business_configs(modules: dict) -> dict:
 def _get_health_business_configs(modules: dict) -> dict:
     """Get health-related business route configurations."""
     return {"health": (modules["health"].router, "/health", ["health"]),
+            "health_api": (modules["health"].router, "/api/health", ["health"]),
             "health_extended": (modules["health_extended_router"], "", ["monitoring"])}
 
 

@@ -11,7 +11,7 @@ failures that could impact API partnerships and third-party integrations.
 import sys
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
-from datetime import datetime, timezone, UTC
+from datetime import datetime, timezone, UTC, timedelta
 import uuid
 import pytest
 
@@ -620,7 +620,7 @@ class TestMCPServiceCore:
         
         # Create session data with old activity time
         old_session = {
-            "last_activity": now.replace(hour=now.hour-2)  # 2 hours ago
+            "last_activity": now - timedelta(hours=2)  # 2 hours ago
         }
         
         # Test with 60 minute timeout (should timeout)

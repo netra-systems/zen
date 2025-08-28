@@ -248,6 +248,15 @@
             <critical-takeaway>shared/cors_config.py is the SINGLE source of truth for all services' CORS configuration.</critical-takeaway>
         </category>
         
+        <category name="State Persistence Foreign Key Violations" path="SPEC/learnings/state_persistence_foreign_key.xml" keywords="Foreign Key, State Persistence, User Validation, IntegrityError, dev-temp, Agent State, Database Constraints">
+            <critical-takeaway>CRITICAL: Always validate foreign key references exist before database operations to prevent IntegrityErrors.</critical-takeaway>
+            <critical-takeaway>Auto-create development/test users (dev-temp-*, test-*) when saving state to prevent FK violations in dev environments.</critical-takeaway>
+            <critical-takeaway>NEVER auto-create production users - this is a security boundary that must be maintained.</critical-takeaway>
+            <critical-takeaway>Pattern match on user_id to distinguish dev/test users from production users for special handling.</critical-takeaway>
+            <critical-takeaway>The _ensure_user_exists_for_snapshot method in state_persistence.py prevents FK violations proactively.</critical-takeaway>
+            <critical-takeaway>Dev users should be created with minimal permissions and default passwords for security.</critical-takeaway>
+        </category>
+        
         <category name="Agent Error Handler Unified Integration" path="SPEC/learnings/agent_error_handler_unified.xml" keywords="AgentErrorHandler, handle_execution_error, unified_error_handler, backward compatibility, error handling, agent execution, reliability failure, missing attribute">
             <critical-takeaway>AgentErrorHandler convenience class MUST expose handle_execution_error method for backward compatibility.</critical-takeaway>
             <critical-takeaway>handle_execution_error can be an alias to handle_error but MUST exist for agent execution.</critical-takeaway>
@@ -284,6 +293,14 @@
             <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
             <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>
             <critical-takeaway>Use multi-agent coordination for large migrations: Principal (strategy), Implementation (execution), QA (verification), DevOps (deployment).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket Connection Lifecycle" path="SPEC/learnings/websocket.xml" keywords="WebSocket, Accept, Connection, Lifecycle, Authentication, Context Manager, State Management">
+            <critical-takeaway>CRITICAL: websocket.accept() MUST be called before ANY WebSocket operations to prevent "WebSocket is not connected" errors.</critical-takeaway>
+            <critical-takeaway>Authentication and context managers must execute AFTER accept() to ensure connection is established.</critical-takeaway>
+            <critical-takeaway>Error handling and close operations only safe after successful accept() - check is_websocket_connected() first.</critical-takeaway>
+            <critical-takeaway>Context managers performing WebSocket operations must be designed to work with already-accepted connections.</critical-takeaway>
+            <critical-takeaway>Test WebSocket flows must track call order to verify accept() happens first.</critical-takeaway>
         </category>
         
         <category name="Import Refactoring Crisis" path="SPEC/learnings/import_refactoring_2025-08-23.xml" keywords="Import Errors, ModuleNotFoundError, Refactoring, PerformanceMonitor, ConnectionManager, BackgroundTaskManager, ATOMIC SCOPE">
@@ -1162,6 +1179,14 @@
             <critical-takeaway>Security feature migration requires coordinated deployment with overlapping protection during transition.</critical-takeaway>
             <critical-takeaway>Well-isolated middleware components can be cleanly removed with minimal regression risk.</critical-takeaway>
             <critical-takeaway>Load balancer security provides better performance, advanced threat detection, and centralized management.</critical-takeaway>
+        </category>
+        
+        <category name="Agent Execution Context" path="SPEC/learnings/execution_context_timestamp_issue.xml" keywords="ExecutionContext, timestamp, AttributeError, error handling, agent execution, unified_error_handler, retry_exhausted, data analysis failed">
+            <critical-takeaway>ExecutionContext MUST have timestamp attribute for error handling compatibility - unified_error_handler.py expects error.context.timestamp</critical-takeaway>
+            <critical-takeaway>Context classes used in error flows must include timestamp, trace_id, and operation attributes for proper tracking</critical-takeaway>
+            <critical-takeaway>ExecutionMetadata has start_time but ExecutionContext itself needs separate timestamp for error handler expectations</critical-takeaway>
+            <critical-takeaway>Error messages like "Data analysis failed" may mask underlying AttributeError issues in error handling code itself</critical-takeaway>
+            <critical-takeaway>Always verify context objects have required attributes before using them in error handlers and logging systems</critical-takeaway>
         </category>
         
     </categories>

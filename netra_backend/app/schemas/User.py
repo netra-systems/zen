@@ -19,5 +19,6 @@ class UserUpdate(UserBase):
     """User update model."""
     pass
 
+
 # Alias for backward compatibility
 UserInDB = User

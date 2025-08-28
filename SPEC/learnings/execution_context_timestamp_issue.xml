@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>ExecutionContext Missing Timestamp Attribute</title>
+        <category>agent-execution</category>
+        <severity>high</severity>
+        <date>2025-08-27</date>
+        <affected-services>netra_backend</affected-services>
+    </metadata>
+
+    <problem>
+        <description>ExecutionContext class missing timestamp attribute causing runtime failures</description>
+        <error-message>'ExecutionContext' object has no attribute 'timestamp'</error-message>
+        <context>Data analysis failed: Reliability failure (retry_exhausted)</context>
+        <root-cause>
+            The ExecutionContext class in netra_backend/app/agents/base/execution_context.py
+            did not have a timestamp attribute, but unified_error_handler.py line 678 was
+            attempting to access error.context.timestamp for AgentError instances.
+        </root-cause>
+    </problem>
+
+    <solution>
+        <description>Add timestamp attribute to ExecutionContext initialization</description>
+        <changes>
+            <change>
+                <file>netra_backend/app/agents/base/execution_context.py</file>
+                <modification>Added timestamp attribute in __init__ method</modification>
+                <code><![CDATA[
+# In __init__ method:
+self.timestamp = datetime.now(timezone.utc)
+                ]]></code>
+            </change>
+            <change>
+                <file>netra_backend/app/agents/base/execution_context.py</file>
+                <modification>Updated to_dict() method to include timestamp</modification>
+                <code><![CDATA[
+# In to_dict() method:
+"timestamp": self.timestamp.isoformat() if isinstance(self.timestamp, datetime) else self.timestamp
+                ]]></code>
+            </change>
+            <change>
+                <file>netra_backend/app/agents/base/execution_context.py</file>
+                <modification>Added datetime import</modification>
+                <code><![CDATA[
+from datetime import datetime, timezone
+                ]]></code>
+            </change>
+        </changes>
+    </solution>
+
+    <testing>
+        <test-file>netra_backend/tests/unit/test_execution_context_timestamp.py</test-file>
+        <test-cases>
+            <test>test_execution_context_has_timestamp_attribute - Verifies ExecutionContext has timestamp</test>
+            <test>test_agent_execution_context_has_timestamp - Verifies AgentExecutionContext inherits timestamp</test>
+            <test>test_execution_context_timestamp_in_unified_error_handler_scenario - Simulates actual error scenario</test>
+            <test>test_execution_metadata_has_timestamp_compatibility - Verifies metadata timestamp handling</test>
+        </test-cases>
+    </testing>
+
+    <insights>
+        <insight>
+            ExecutionContext is used by error handling code in unified_error_handler.py
+            which expects a timestamp attribute for logging and tracking purposes.
+        </insight>
+        <insight>
+            The ExecutionMetadata class already had a start_time field, but ExecutionContext
+            itself needed its own timestamp for compatibility with error handling expectations.
+        </insight>
+        <insight>
+            When creating context classes that will be used in error handling flows,
+            always include timestamp attributes for proper error tracking and debugging.
+        </insight>
+        <insight>
+            The error manifested as "Data analysis failed" which was misleading - the actual
+            issue was in the error handling code itself trying to access a missing attribute.
+        </insight>
+    </insights>
+
+    <prevention>
+        <recommendation>
+            Always ensure context objects used in error handling have required attributes
+            like timestamp, trace_id, and operation for proper error tracking.
+        </recommendation>
+        <recommendation>
+            When creating new context classes, review how they'll be used in error handlers
+            and logging systems to ensure all expected attributes are present.
+        </recommendation>
+        <recommendation>
+            Add type hints and dataclass decorators to context classes to catch
+            missing attributes during development rather than runtime.
+        </recommendation>
+    </prevention>
+
+    <related-files>
+        <file>netra_backend/app/core/unified_error_handler.py</file>
+        <file>netra_backend/app/agents/base/execution_context.py</file>
+        <file>netra_backend/app/core/error_logger_core.py</file>
+        <file>SPEC/learnings/agent_error_handler_unified.xml</file>
+    </related-files>
+
+    <keywords>
+        ExecutionContext, timestamp, AttributeError, error handling, agent execution,
+        unified_error_handler, retry_exhausted, data analysis failed
+    </keywords>
+</learning>

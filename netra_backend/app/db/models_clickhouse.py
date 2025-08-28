@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS {WORKLOAD_EVENTS_TABLE_NAME} (
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (user_id, timestamp, event_id)
-TTL timestamp + INTERVAL 90 DAY
+TTL toDateTime(timestamp) + INTERVAL 90 DAY
 """
 
 def _get_event_metadata_columns() -> str:

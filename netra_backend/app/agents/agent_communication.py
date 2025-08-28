@@ -12,6 +12,7 @@ from starlette.websockets import WebSocketDisconnect
 
 # Import error types directly to avoid circular imports
 from netra_backend.app.core.exceptions_database import DatabaseError
+from netra_backend.app.agents.base.timing_decorators import time_operation, TimingCategory
 
 # Define WebSocketError locally to avoid circular imports
 class WebSocketError(Exception):
@@ -34,6 +35,7 @@ logger = central_logger.get_logger(__name__)
 class AgentCommunicationMixin:
     """Mixin providing agent communication functionality"""
     
+    @time_operation("send_websocket_update", TimingCategory.NETWORK)
     async def _send_update(self, run_id: str, data: Dict[str, Any]) -> None:
         """Send WebSocket update with proper error recovery."""
         if not self.websocket_manager:

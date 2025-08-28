@@ -1,9 +1,15 @@
 """Direct ClickHouse reset script - drops all tables for both cloud and local instances."""
 
+import asyncio
 import os
+import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 import clickhouse_connect
+
+# Add the project root to Python path for table creation imports
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
 # ClickHouse configurations
 CLOUD_CONFIG = {
@@ -205,18 +211,21 @@ def show_menu_and_get_choice() -> str:
     print("1. Cloud only")
     print("2. Local only")
     print("3. Both Cloud and Local")
-    print("4. Exit")
-    return input("\nEnter choice (1-4): ").strip()
+    print("4. Reset and recreate tables (Local only)")
+    print("5. Exit")
+    return input("\nEnter choice (1-5): ").strip()
 
-def determine_configs_from_choice(choice: str) -> List[Dict[str, Any]]:
+def determine_configs_from_choice(choice: str) -> tuple:
     """Determine which configurations to use based on choice."""
     if choice == '1':
-        return [CLOUD_CONFIG]
+        return [CLOUD_CONFIG], False
     elif choice == '2':
-        return [LOCAL_CONFIG]
+        return [LOCAL_CONFIG], False
     elif choice == '3':
-        return [CLOUD_CONFIG, LOCAL_CONFIG]
-    return []
+        return [CLOUD_CONFIG, LOCAL_CONFIG], False
+    elif choice == '4':
+        return [LOCAL_CONFIG], True
+    return [], False
 
 def print_confirmation_header(configs: List[Dict[str, Any]]) -> None:
     """Print confirmation header with selected instances."""
@@ -253,31 +262,58 @@ def print_operation_summary(results: List[Tuple[str, bool]]) -> None:
         print(f"{status} {name}")
     print("\nOperation complete!")
 
-def handle_user_choice() -> List[Dict[str, Any]]:
+def handle_user_choice() -> tuple:
     """Handle user menu choice and return selected configurations."""
     choice = show_menu_and_get_choice()
-    if choice == '4':
+    if choice == '5':
         print("Exiting...")
-        return []
-    configs = determine_configs_from_choice(choice)
+        return [], False
+    configs, recreate_tables = determine_configs_from_choice(choice)
     if not configs:
         print("Invalid choice. Exiting...")
-    return configs
+    return configs, recreate_tables
 
-def execute_reset_operation(configs: List[Dict[str, Any]]) -> None:
+async def recreate_tables_if_needed(config: Dict[str, Any], recreate_tables: bool) -> bool:
+    """Recreate standard ClickHouse tables if requested."""
+    if not recreate_tables:
+        return True
+        
+    print(f"\n--- Recreating tables for {config['name']} ---")
+    try:
+        # Import the initialization function
+        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
+        
+        print("Initializing ClickHouse tables...")
+        await initialize_clickhouse_tables(verbose=True)
+        print("[OK] Tables recreated successfully!")
+        return True
+    except Exception as e:
+        print(f"[ERROR] Failed to recreate tables: {e}")
+        return False
+
+def execute_reset_operation(configs: List[Dict[str, Any]], recreate_tables: bool = False) -> None:
     """Execute reset operation with user confirmation."""
     print_confirmation_header(configs)
     skip_individual = get_batch_confirmation()
     results = process_all_instances(configs, skip_individual)
+    
+    # If requested, recreate tables after reset
+    if recreate_tables and results and any(success for _, success in results):
+        print("\n" + "=" * 60)
+        print("RECREATING TABLES")
+        print("=" * 60)
+        for config in configs:
+            asyncio.run(recreate_tables_if_needed(config, recreate_tables))
+    
     print_operation_summary(results)
 
 def main():
     """Main function to reset ClickHouse instances."""
     print_main_header()
-    configs = handle_user_choice()
+    configs, recreate_tables = handle_user_choice()
     if not configs:
         return
-    execute_reset_operation(configs)
+    execute_reset_operation(configs, recreate_tables)
 
 if __name__ == "__main__":
     main()

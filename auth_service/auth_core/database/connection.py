@@ -251,19 +251,27 @@ class AuthDatabaseConnection:
     @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """Get async database session with automatic transaction management"""
+        import asyncio
         if not self._initialized:
             await self.initialize()
         
         async with self.async_session_maker() as session:
             try:
                 yield session
-                await session.commit()
-            except Exception as e:
-                await session.rollback()
-                logger.error(f"Auth database transaction rolled back: {e}")
+                # Only commit if session is active and not in an error state
+                if session.is_active and not session.in_transaction():
+                    await session.commit()
+            except asyncio.CancelledError:
+                # Handle task cancellation - don't attempt any session operations
+                # The async context manager will handle cleanup
                 raise
-            finally:
-                await session.close()
+            except Exception as e:
+                # Only rollback if session is still active
+                if session.is_active:
+                    await session.rollback()
+                    logger.error(f"Auth database transaction rolled back: {e}")
+                raise
+            # Note: removed finally block with session.close() - the context manager handles this
     
     async def test_connection(self, timeout: float = 10.0) -> bool:
         """Test database connectivity with timeout handling"""

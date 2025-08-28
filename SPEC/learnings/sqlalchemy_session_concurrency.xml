@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>SQLAlchemy Async Session Concurrency Management</title>
+  <date>2025-08-27</date>
+  <severity>CRITICAL</severity>
+  
+  <problem>
+    <description>
+      IllegalStateChangeError occurs when SQLAlchemy tries to close a session while another 
+      operation (_connection_for_bind()) is in progress. This happens when:
+      1. Async tasks are cancelled mid-transaction
+      2. The session context manager uses asyncio.shield() for cleanup
+      3. Multiple coroutines interact with the same session concurrently
+    </description>
+    <error_signature>
+      IllegalStateChangeError("Method 'close()' can't be called here; method '_connection_for_bind()' 
+      is already in progress and this would cause an unexpected state change to &lt;SessionTransactionState.CLOSED: 5&gt;")
+    </error_signature>
+    <impact>
+      - Tasks fail with unhandled exceptions
+      - Database connections leak
+      - Application stability compromised
+      - Error logs polluted with "Task exception was never retrieved"
+    </impact>
+  </problem>
+  
+  <root_cause>
+    <description>
+      The session lifecycle management didn't properly handle:
+      1. asyncio.CancelledError when tasks are cancelled
+      2. Session state checks before commit/rollback operations
+      3. GeneratorExit handling in async generators
+      4. Transaction state verification before operations
+    </description>
+  </root_cause>
+  
+  <solution>
+    <description>
+      Implement proper session lifecycle management with state checks and cancellation handling.
+    </description>
+    <implementation>
+      <![CDATA[
+      @asynccontextmanager
+      async def get_async_session():
+          """Get async database session with proper lifecycle management."""
+          async_session_factory = get_application_session()
+          async with async_session_factory() as session:
+              try:
+                  yield session
+                  # Only commit if session is active and not in transaction
+                  if session.is_active and not session.in_transaction():
+                      await session.commit()
+              except asyncio.CancelledError:
+                  # Handle task cancellation - don't attempt any session operations
+                  # The async context manager will handle cleanup
+                  raise
+              except GeneratorExit:
+                  # Handle generator cleanup gracefully
+                  # Session context manager will handle cleanup
+                  pass
+              except Exception:
+                  # Only rollback if session is still active
+                  if session.is_active:
+                      await session.rollback()
+                  raise
+      ]]>
+    </implementation>
+  </solution>
+  
+  <best_practices>
+    <practice>Always check session.is_active before operations</practice>
+    <practice>Explicitly handle asyncio.CancelledError without session operations</practice>
+    <practice>Let the async context manager handle cleanup on cancellation</practice>
+    <practice>Check session.in_transaction() before attempting commit</practice>
+    <practice>Never use asyncio.shield() around session close operations</practice>
+    <practice>Handle GeneratorExit silently in async generators</practice>
+  </best_practices>
+  
+  <testing_requirements>
+    <requirement>Test concurrent session operations</requirement>
+    <requirement>Test task cancellation during transactions</requirement>
+    <requirement>Test exception handling with active sessions</requirement>
+    <requirement>Test rapid sequential operations (stress test)</requirement>
+    <requirement>Test mixed success/failure scenarios</requirement>
+  </testing_requirements>
+  
+  <files_affected>
+    <file>netra_backend/app/database/__init__.py</file>
+    <file>netra_backend/app/db/database_manager.py</file>
+  </files_affected>
+  
+  <prevention>
+    <measure>Use the standardized session management pattern across all services</measure>
+    <measure>Run session concurrency tests in CI/CD pipeline</measure>
+    <measure>Monitor for IllegalStateChangeError in production logs</measure>
+    <measure>Use connection pooling with proper timeout settings</measure>
+    <measure>Implement circuit breakers for database operations</measure>
+  </prevention>
+</learning>

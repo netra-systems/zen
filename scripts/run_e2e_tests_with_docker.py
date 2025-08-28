@@ -34,7 +34,7 @@ def run_command(cmd, capture=False):
 
 def start_docker_services():
     """Start Docker test services"""
-    print("\n🐳 Starting Docker test services...")
+    print("\n[Docker] Starting Docker test services...")
     
     # Start test services using docker-compose
     cmd = ["docker-compose", "-f", "docker-compose.test.yml", "up", "-d",
@@ -42,10 +42,10 @@ def start_docker_services():
     result = run_command(cmd)
     
     if result.returncode != 0:
-        print("❌ Failed to start Docker services")
+        print("[FAIL] Failed to start Docker services")
         return False
     
-    print("✅ Docker services started")
+    print("[OK] Docker services started")
     return True
 
 
@@ -59,10 +59,10 @@ def wait_for_services():
     result = run_command(cmd)
     
     if result.returncode != 0:
-        print("❌ Services did not become ready in time")
+        print("[FAIL] Services did not become ready in time")
         return False
         
-    print("✅ All services are ready")
+    print("[OK] All services are ready")
     return True
 
 
@@ -116,7 +116,7 @@ def stop_docker_services():
     if result.returncode != 0:
         print("⚠️  Failed to stop some Docker services")
     else:
-        print("✅ Docker services stopped")
+        print("[OK] Docker services stopped")
 
 
 def main():
@@ -160,10 +160,10 @@ def main():
             stop_docker_services()
     
     if success:
-        print("\n✅ E2E tests completed successfully!")
+        print("\n[OK] E2E tests completed successfully!")
         return 0
     else:
-        print("\n❌ E2E tests failed!")
+        print("\n[FAIL] E2E tests failed!")
         return 1
 
 
