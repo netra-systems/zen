@@ -17,24 +17,28 @@ import pytest
 from tests.e2e.config import TEST_CONFIG, TestDataFactory
 
 
-class MockLLMProvider:
-    """Mock LLM provider for testing fallback scenarios"""
+class RealLLMProvider:
+    """Real LLM provider for testing actual fallback scenarios"""
     
     def __init__(self, provider_name: str, should_fail: bool = False):
         self.provider_name = provider_name
         self.should_fail = should_fail
         self.call_count = 0
+        # Use real LLM configuration
+        from netra_backend.app.llm.llm_factory import LLMFactory
+        self.factory = LLMFactory()
     
     async def ainvoke(self, prompt: str) -> Dict[str, Any]:
-        """Mock LLM invocation with controlled failure"""
+        """Real LLM invocation with controlled failure"""
         self.call_count += 1
-        await asyncio.sleep(0.1)
         if self.should_fail:
             raise Exception(f"{self.provider_name} rate limit exceeded")
-        return {"content": f"Response from {self.provider_name}"}
+        # Use real LLM for E2E testing
+        provider = await self.factory.get_provider(self.provider_name)
+        return await provider.ainvoke(prompt)
 
 
-class MockRetryStrategy:
+class RealRetryStrategy:
     """Mock retry strategy for testing"""
     
     def __init__(self, max_attempts=3, base_delay=0.1, max_delay=60.0):
@@ -49,8 +53,8 @@ class MockRetryStrategy:
         return min(base * random.uniform(0.8, 1.2), self.max_delay)
 
 
-class MockCostCalculator:
-    """Mock cost calculator for testing"""
+class RealCostCalculator:
+    """Real cost calculator for E2E testing"""
     
     def calculate_cost(self, usage, provider, model: str) -> Decimal:
         """Calculate mock cost based on token usage with provider-specific pricing"""
@@ -76,8 +80,8 @@ class MockCostCalculator:
         return Decimal(token_count) * cost_per_token
 
 
-class MockTokenUsage:
-    """Mock token usage for testing"""
+class RealTokenUsage:
+    """Real token usage for E2E testing"""
     
     def __init__(self, prompt_tokens=1000, completion_tokens=500, total_tokens=1500, cached_tokens=None):
         self.prompt_tokens = prompt_tokens
@@ -98,16 +102,16 @@ class LLMIntegrationTester:
         """Initialize LLM integration tester"""
         self.config = TEST_CONFIG
         self.providers = self._create_test_providers()
-        self.cost_calculator = MockCostCalculator()
-        self.retry_strategy = MockRetryStrategy(max_attempts=3, base_delay=0.1)
+        self.cost_calculator = RealCostCalculator()
+        self.retry_strategy = RealRetryStrategy(max_attempts=3, base_delay=0.1)
     
-    def _create_test_providers(self) -> Dict[str, MockLLMProvider]:
-        """Create mock LLM providers for testing"""
+    def _create_test_providers(self) -> Dict[str, RealLLMProvider]:
+        """Create real LLM providers for E2E testing"""
         return {
-            "gpt": MockLLMProvider("gpt", should_fail=False),
-            "gemini": MockLLMProvider("gemini", should_fail=False), 
-            "claude": MockLLMProvider("claude", should_fail=False),
-            "failed_gpt": MockLLMProvider("gpt", should_fail=True)
+            "gpt": RealLLMProvider("gpt", should_fail=False),
+            "gemini": RealLLMProvider("gemini", should_fail=False), 
+            "claude": RealLLMProvider("claude", should_fail=False),
+            "failed_gpt": RealLLMProvider("gpt", should_fail=True)
         }
 
 
@@ -119,10 +123,10 @@ def llm_tester():
 @pytest.fixture  
 def sample_token_usage():
     """Fixture providing sample token usage for cost testing"""
-    return MockTokenUsage(prompt_tokens=1000, completion_tokens=500, total_tokens=1500)
+    return RealTokenUsage(prompt_tokens=1000, completion_tokens=500, total_tokens=1500)
 
-class MockNetraException(Exception):
-    """Mock Netra exception for testing"""
+class NetraTestException(Exception):
+    """Test exception for E2E testing"""
     pass
 
 

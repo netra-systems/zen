@@ -6,7 +6,8 @@ BVJ: Shared testing infrastructure reduces duplication and ensures consistency
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
+from typing import Any, Dict
+import asyncio
 
 import pytest
 
@@ -14,26 +15,39 @@ from tests.e2e.config import CustomerTier
 
 
 @pytest.fixture
-def mock_supervisor_agent():
-    """Mock supervisor agent for orchestration testing"""
-    supervisor = MagicMock()
-    supervisor.route_request = AsyncMock()
-    supervisor.execute_pipeline = AsyncMock() 
-    supervisor.handle_agent_failure = AsyncMock()
-    supervisor.get_health_status = MagicMock(return_value={"status": "healthy"})
-    supervisor.get_performance_metrics = MagicMock(return_value={})
-    supervisor.get_resource_metrics = MagicMock(return_value={})
+async def real_supervisor_agent():
+    """Real supervisor agent for E2E orchestration testing"""
+    from netra_backend.app.agents.supervisor_agent import SupervisorAgent
+    from netra_backend.app.services.agent_factory import AgentFactory
+    
+    # Create real supervisor agent
+    factory = AgentFactory()
+    supervisor = await factory.create_supervisor()
+    
+    # Ensure all required methods are available
+    assert hasattr(supervisor, 'route_request')
+    assert hasattr(supervisor, 'execute_pipeline')
+    assert hasattr(supervisor, 'handle_agent_failure')
+    assert hasattr(supervisor, 'get_health_status')
+    assert hasattr(supervisor, 'get_performance_metrics')
+    assert hasattr(supervisor, 'get_resource_metrics')
+    
     return supervisor
 
 
 @pytest.fixture
-def mock_sub_agents():
-    """Mock sub-agents for coordination testing"""
+async def real_sub_agents():
+    """Real sub-agents for E2E coordination testing"""
+    from netra_backend.app.services.agent_factory import AgentFactory
+    
+    factory = AgentFactory()
+    
+    # Create real sub-agents for E2E testing
     return {
-        "data": MagicMock(execute=AsyncMock(), name="DataSubAgent"),
-        "optimizations": MagicMock(execute=AsyncMock(), name="OptimizationsSubAgent"), 
-        "actions": MagicMock(execute=AsyncMock(), name="ActionsSubAgent"),
-        "reporting": MagicMock(execute=AsyncMock(), name="ReportingSubAgent")
+        "data": await factory.create_data_agent(),
+        "optimizations": await factory.create_optimization_agent(), 
+        "actions": await factory.create_action_agent(),
+        "reporting": await factory.create_reporting_agent()
     }
 
 
@@ -50,13 +64,21 @@ def sample_agent_state():
 
 
 @pytest.fixture
-def websocket_mock():
-    """Mock WebSocket for streaming response testing"""
-    ws = AsyncMock()
-    ws.send_json = AsyncMock()
-    ws.receive_text = AsyncMock()
-    ws.close = AsyncMock()
-    return ws
+async def real_websocket():
+    """Real WebSocket connection for E2E streaming response testing"""
+    import aiohttp
+    from tests.e2e.config import TEST_ENDPOINTS
+    
+    session = aiohttp.ClientSession()
+    ws_url = TEST_ENDPOINTS.ws_url
+    
+    # Create real WebSocket connection
+    ws = await session.ws_connect(ws_url)
+    
+    yield ws
+    
+    await ws.close()
+    await session.close()
 
 
 @pytest.fixture

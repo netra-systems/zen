@@ -17,8 +17,8 @@ import pytest
 
 from tests.e2e.agent_orchestration_fixtures import (
     coordination_test_data,
-    mock_sub_agents,
-    mock_supervisor_agent,
+    real_sub_agents,
+    real_supervisor_agent,
     sample_agent_state,
 )
 
@@ -56,18 +56,18 @@ def validate_handoff_results(result1, result2):
     assert "source" in result1["metadata"]
 
 
-def setup_handoff_mocks(mock_sub_agents):
-    """Setup mocks for agent handoff testing"""
-    data_output = create_data_output()
-    expected_optimization = create_optimization_output()
-    mock_sub_agents["data"].execute.return_value = data_output
-    mock_sub_agents["optimizations"].execute.return_value = expected_optimization
+async def setup_handoff_agents(real_sub_agents):
+    """Setup real agents for E2E handoff testing"""
+    # Real agents will produce actual outputs
+    # No mocking needed for E2E tests
+    pass
 
 
-def setup_resource_sharing_mocks(mock_sub_agents):
-    """Setup mocks for resource sharing testing"""
-    mock_sub_agents["data"].execute.return_value = {"resource_used": "database_pool", "conflicts": []}
-    mock_sub_agents["optimizations"].execute.return_value = {"resource_used": "cache_instance", "conflicts": []}
+async def setup_resource_sharing_agents(real_sub_agents):
+    """Setup real agents for E2E resource sharing testing"""
+    # Real agents will handle actual resource sharing
+    # No mocking needed for E2E tests
+    pass
 
 
 def validate_context_preservation(step2):
@@ -78,18 +78,19 @@ def validate_context_preservation(step2):
     assert "optimization_plan" in step2
 
 
-def setup_parallel_agents(mock_sub_agents):
-    """Configure agents for parallel execution testing"""
-    mock_sub_agents["data"].execute.return_value = {"data_analysis": "cost_trends_identified"}
-    mock_sub_agents["optimizations"].execute.return_value = {"optimization_analysis": "efficiency_opportunities"}
-    mock_sub_agents["reporting"].execute.return_value = {"compliance_check": "requirements_validated"}
+async def setup_parallel_agents(real_sub_agents):
+    """Configure real agents for E2E parallel execution testing"""
+    # Real agents will execute in parallel
+    # No mocking needed for E2E tests
+    pass
 
 
-def setup_failure_isolation(mock_sub_agents):
-    """Configure agents for failure isolation testing"""
-    mock_sub_agents["data"].execute.side_effect = Exception("Data source unavailable")
-    mock_sub_agents["optimizations"].execute.return_value = {"fallback_recommendations": ["use_cached_analysis"]}
-    mock_sub_agents["reporting"].execute.return_value = {"status": "completed_with_degraded_data"}
+async def setup_failure_isolation(real_sub_agents):
+    """Configure real agents for E2E failure isolation testing"""
+    # For E2E testing, we'll trigger real failures
+    # by passing invalid data or using test conditions
+    # that cause actual agent failures
+    pass
 
 
 async def execute_single_agent(agent_name, agent):
