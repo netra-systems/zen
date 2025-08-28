@@ -41,29 +41,40 @@ class UnifiedDatabaseManager:
     async def postgres_session() -> AsyncGenerator[AsyncSession, None]:
         """Get PostgreSQL session via DatabaseManager - single source of truth.
         
-        CRITICAL FIX: Improved session lifecycle management to prevent state errors.
-        Properly handles cancellation and ensures no operations on closing sessions.
+        CRITICAL FIX: Improved session lifecycle management to prevent IllegalStateChangeError.
+        Uses proper session state checking to avoid concurrent operations.
         """
         # Use DatabaseManager's session factory directly
         async_session_factory = DatabaseManager.get_application_session()
         async with async_session_factory() as session:
+            session_yielded = False
             try:
+                session_yielded = True
                 yield session
-                # Only commit if session is active and not in an error state
-                if session.is_active and not session.in_transaction():
-                    await session.commit()
+                # CRITICAL FIX: Only attempt commit if session is properly active
+                # and not already committed/rolled back
+                if hasattr(session, 'is_active') and session.is_active:
+                    # Check if there's an active transaction to commit
+                    if hasattr(session, 'in_transaction') and session.in_transaction():
+                        await session.commit()
             except asyncio.CancelledError:
-                # Handle task cancellation - don't attempt any session operations
-                # The async context manager will handle cleanup
+                # Handle task cancellation - minimal session operations
+                # Don't attempt rollback as the context manager will handle cleanup
                 raise
             except GeneratorExit:
-                # Handle generator cleanup gracefully without operations
-                # Session is already closing, no need for rollback
+                # Handle generator cleanup - session context manager handles this
                 pass
             except Exception:
-                # Only rollback if session is still active
-                if session.is_active:
-                    await session.rollback()
+                # CRITICAL FIX: Only rollback if session is still in a valid state
+                # and has an active transaction
+                if (session_yielded and 
+                    hasattr(session, 'is_active') and session.is_active and
+                    hasattr(session, 'in_transaction') and session.in_transaction()):
+                    try:
+                        await session.rollback()
+                    except Exception:
+                        # If rollback fails, let the context manager handle cleanup
+                        pass
                 raise
     
     @staticmethod
@@ -105,9 +116,9 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     This is the SINGLE source of truth for PostgreSQL sessions in netra_backend.
     All database access delegates to DatabaseManager implementation.
     
-    CRITICAL FIX: Use async for to properly handle async generator from postgres_session()
+    CRITICAL FIX: Use async context manager instead of async for to prevent state conflicts.
     """
-    async for session in _db_manager.postgres_session():
+    async with DatabaseManager.get_async_session() as session:
         yield session
 
 # SINGLE SOURCE OF TRUTH for ClickHouse connections
