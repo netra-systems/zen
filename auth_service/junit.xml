@@ -1,1 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="3" time="4.977" timestamp="2025-08-28T01:41:34.788869-07:00" hostname="Anthony"><testcase classname="tests.test_auth_comprehensive.TestAuthConfiguration" name="test_environment_setup" time="0.218" /><testcase classname="tests.test_auth_comprehensive.TestAuthConfiguration" name="test_auth_config_initialization" time="0.002" /><testcase classname="tests.test_auth_comprehensive.TestAuthConfiguration" name="test_auth_provider_enum" time="0.003" /></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="5.522" timestamp="2025-08-28T10:11:28.942505-07:00" hostname="Anthony"><testcase classname="tests.test_refresh_endpoint_simple" name="test_refresh_endpoint_accepts_multiple_formats" time="0.186"><error message="failed on setup with &quot;RuntimeError: Auth database initialization failed: Invalid argument(s) 'pool_size','max_overflow','pool_timeout' sent to create_engine(), using configuration SQLiteDialect_aiosqlite/StaticPool/Engine.  Please check that the keyword arguments are appropriate for this combination of components.&quot;">auth_core\database\connection.py:60: in initialize
+    self.engine = await asyncio.wait_for(
+C:\Users\antho\miniconda3\Lib\asyncio\tasks.py:520: in wait_for
+    return await fut
+           ^^^^^^^^^
+auth_core\database\connection.py:181: in _create_async_engine_with_timeout
+    return AuthDatabaseManager.create_async_engine(
+auth_core\database\database_manager.py:58: in create_async_engine
+    engine = create_async_engine(
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\ext\asyncio\engine.py:120: in create_async_engine
+    sync_engine = _create_engine(url, **kw)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\engine\create.py:715: in create_engine
+    raise TypeError(
+E   TypeError: Invalid argument(s) 'pool_size','max_overflow','pool_timeout' sent to create_engine(), using configuration SQLiteDialect_aiosqlite/StaticPool/Engine.  Please check that the keyword arguments are appropriate for this combination of components.
+
+The above exception was the direct cause of the following exception:
+C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pytest_asyncio\plugin.py:683: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests\conftest.py:86: in initialize_test_database
+    loop.run_until_complete(setup_db())
+C:\Users\antho\miniconda3\Lib\asyncio\base_events.py:687: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests\conftest.py:68: in setup_db
+    await auth_db.initialize()
+auth_core\database\connection.py:127: in initialize
+    raise RuntimeError(f"Auth database initialization failed: {e}") from e
+E   RuntimeError: Auth database initialization failed: Invalid argument(s) 'pool_size','max_overflow','pool_timeout' sent to create_engine(), using configuration SQLiteDialect_aiosqlite/StaticPool/Engine.  Please check that the keyword arguments are appropriate for this combination of components.</error></testcase></testsuite></testsuites>
