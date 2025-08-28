@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Optional
 import numpy as np
 
 if TYPE_CHECKING:
-    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+    from netra_backend.app.schemas.generation import SyntheticDataGenParams
 
 
 def _setup_temporal_config(config: 'SyntheticDataGenParams'):

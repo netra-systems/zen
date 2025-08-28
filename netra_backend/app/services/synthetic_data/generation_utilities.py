@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
     from netra_backend.app.schemas.data_ingestion_types import IngestionConfig
-    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+    from netra_backend.app.schemas.generation import SyntheticDataGenParams
 
 from netra_backend.app import schemas
 

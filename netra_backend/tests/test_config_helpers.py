@@ -127,9 +127,9 @@ def assert_config_uses_unified_system():
     assert hasattr(config, 'database_url'), "Config missing database_url attribute"
     # Verify it's from unified system by checking config type
     try:
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
     except ImportError:
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
     assert isinstance(config, AppConfig), "Config not from unified system"
 
 

@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from netra_backend.app.db import models_postgres
-from netra_backend.app.schemas.Supply import (
+from netra_backend.app.schemas.supply import (
     SupplyOptionCreate,
     SupplyOptionUpdate,
 )

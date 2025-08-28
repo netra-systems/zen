@@ -9,7 +9,7 @@ from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.unified_tools.database_utils import get_daily_usage_count
 from netra_backend.app.schemas.unified_tools import UserPlanResponse
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier
 
 logger = central_logger
 

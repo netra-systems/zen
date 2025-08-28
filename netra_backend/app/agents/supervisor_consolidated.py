@@ -62,7 +62,7 @@ from netra_backend.app.agents.supervisor.workflow_execution import (
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Agent import (
+from netra_backend.app.schemas.agent import (
     AgentCompleted,
     AgentStarted,
     SubAgentLifecycle,

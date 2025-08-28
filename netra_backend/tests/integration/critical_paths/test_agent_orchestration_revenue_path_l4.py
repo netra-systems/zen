@@ -33,7 +33,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.audit_service import AuditService

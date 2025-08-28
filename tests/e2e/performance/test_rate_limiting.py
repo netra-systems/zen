@@ -44,7 +44,7 @@ except ImportError:
             self.remaining = remaining
 
 try:
-    from netra_backend.app.schemas.UserPlan import PlanTier
+    from netra_backend.app.schemas.user_plan import PlanTier
 except ImportError:
     # Fallback for missing schemas
     

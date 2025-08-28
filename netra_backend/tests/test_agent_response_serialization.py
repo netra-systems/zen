@@ -15,13 +15,13 @@ from typing import Any, Dict
 import pytest
 
 # Import backend schemas
-from netra_backend.app.schemas.Agent import (
+from netra_backend.app.schemas.agent import (
     AgentCompleted,
     AgentErrorMessage,
     AgentStarted,
 )
 from netra_backend.app.schemas.registry import AgentUpdate
-from netra_backend.app.schemas.Tool import ToolCompleted, ToolStarted, ToolStatus
+from netra_backend.app.schemas.tool import ToolCompleted, ToolStarted, ToolStatus
 
 class TestAgentResponseSerialization:
     """Test agent response serialization for frontend consumption."""

@@ -64,7 +64,7 @@ from netra_backend.app.schemas.rate_limit_types import (
     SlidingWindowCounter,
     TokenBucket,
 )
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from netra_backend.app.websocket_core.rate_limiter import AdaptiveRateLimiter, RateLimiter
 
 class BackpressureTestHarness:

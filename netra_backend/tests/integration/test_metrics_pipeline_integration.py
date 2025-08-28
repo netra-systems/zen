@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
-from netra_backend.app.schemas.Metrics import CorpusMetric, MetricsSnapshot, MetricType
+from netra_backend.app.schemas.metrics import CorpusMetric, MetricsSnapshot, MetricType
 from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 from netra_backend.app.services.metrics.core_collector import CoreMetricsCollector
 

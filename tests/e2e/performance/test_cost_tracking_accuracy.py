@@ -41,7 +41,7 @@ from tests.e2e.cost_tracking_helpers import (
     BillingAccuracyValidator,
     FrontendCostDisplayValidator
 )
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 @pytest.mark.asyncio

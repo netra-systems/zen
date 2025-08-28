@@ -30,7 +30,10 @@
       "Bash(set -a)",
       "Bash(source .env)",
       "Bash(set +a)",
-      "Bash(uvicorn:*)"
+      "Bash(uvicorn:*)",
+      "Bash(docker logs:*)",
+      "WebSearch",
+      "Bash(git mv:*)"
     ],
     "deny": []
   },

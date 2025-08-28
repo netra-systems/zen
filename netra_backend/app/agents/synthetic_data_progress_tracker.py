@@ -9,7 +9,7 @@ from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core import get_websocket_manager
-from netra_backend.app.schemas.Generation import GenerationStatus
+from netra_backend.app.schemas.generation import GenerationStatus
 
 logger = central_logger.get_logger(__name__)
 

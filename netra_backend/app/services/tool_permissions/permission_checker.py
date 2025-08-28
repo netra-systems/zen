@@ -3,12 +3,12 @@
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     BusinessRequirement,
     PermissionCheckResult,
     ToolExecutionContext,
 )
-from netra_backend.app.schemas.UserPlan import PlanTier, UserPlan
+from netra_backend.app.schemas.user_plan import PlanTier, UserPlan
 
 logger = central_logger
 

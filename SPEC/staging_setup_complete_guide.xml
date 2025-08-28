@@ -1,0 +1,700 @@
+<?xml version='1.0' encoding='utf-8'?>
+<staging_setup_complete_guide>
+  <metadata>
+    <title>Netra Apex Staging Environment Setup - Complete Guide for New Engineers</title>
+    <description>Step-by-step guide for setting up Netra staging environment when infrastructure already exists</description>
+    <version>2.0.0</version>
+    <last_updated>2025-08-28</last_updated>
+    <audience>New engineers joining the team with existing GCP infrastructure</audience>
+  </metadata>
+
+  <overview>
+    <purpose>
+      This guide helps new engineers set up and deploy the Netra Apex staging environment when all GCP 
+      infrastructure (project, service accounts, databases) already exists. Focus is on configuration,
+      secrets setup, and deployment steps.
+    </purpose>
+    <assumptions>
+      <assumption>GCP project "netra-staging" already exists</assumption>
+      <assumption>Service accounts and IAM permissions are configured</assumption>
+      <assumption>Cloud SQL PostgreSQL instance is running</assumption>
+      <assumption>You have been granted access to the GCP project</assumption>
+      <assumption>Redis instance exists (if required)</assumption>
+    </assumptions>
+    <architecture>
+      <service name="Backend">netra-backend-staging (Port 8888, Cloud Run)</service>
+      <service name="Auth">netra-auth-service (Port 8001, Cloud Run)</service>
+      <service name="Frontend">netra-frontend-staging (Port 3000, Cloud Run)</service>
+    </architecture>
+  </overview>
+
+  <phase_1_local_setup>
+    <title>Setting Up Your Local Development Environment</title>
+    
+    <step order="1">
+      <title>Install Required Tools</title>
+      <description>Ensure you have the necessary tools installed</description>
+      <requirements>
+        <tool name="Python 3.11+">
+          <check>python --version</check>
+          <install>https://www.python.org/downloads/</install>
+        </tool>
+        <tool name="Node.js 18+">
+          <check>node --version</check>
+          <install>https://nodejs.org/</install>
+        </tool>
+        <tool name="Docker Desktop">
+          <check>docker --version</check>
+          <install>https://www.docker.com/products/docker-desktop/</install>
+        </tool>
+        <tool name="gcloud CLI">
+          <check>gcloud --version</check>
+          <install>
+            <macos>brew install google-cloud-sdk</macos>
+            <windows>Download from https://cloud.google.com/sdk/docs/install</windows>
+            <linux>curl https://sdk.cloud.google.com | bash</linux>
+          </install>
+        </tool>
+      </requirements>
+    </step>
+
+    <step order="2">
+      <title>Clone and Setup Repository</title>
+      <description>Get the codebase and install dependencies</description>
+      <commands>
+        <command>git clone https://github.com/netra-systems/netra-apex.git</command>
+        <command>cd netra-apex</command>
+        <command>python -m venv venv</command>
+        <command>source venv/bin/activate  # Windows: venv\Scripts\activate</command>
+        <command>pip install -r requirements.txt</command>
+        <command>pip install google-cloud-secret-manager google-cloud-run cryptography</command>
+      </commands>
+    </step>
+
+    <step order="3">
+      <title>Authenticate with Google Cloud</title>
+      <description>Connect to the existing GCP project</description>
+      <commands>
+        <command>gcloud auth login  # Use your Google account with access to netra-staging</command>
+        <command>gcloud config set project netra-staging</command>
+        <command>gcloud config set compute/region us-central1</command>
+        <command>gcloud auth application-default login</command>
+        <command>gcloud auth configure-docker  # Configure Docker to push to GCR</command>
+      </commands>
+      <verification>
+        <command>gcloud config get-value project  # Should show: netra-staging</command>
+        <command>gcloud run services list --region us-central1  # Should list existing services</command>
+      </verification>
+    </step>
+  </phase_1_local_setup>
+
+  <phase_2_secrets_configuration>
+    <title>Configuring Secrets and API Keys</title>
+    <important>All sensitive values are stored in Google Secret Manager, NOT in code or .env files</important>
+    
+    <step order="1">
+      <title>Check Existing Secrets</title>
+      <description>View what secrets already exist in the project</description>
+      <commands>
+        <command>gcloud secrets list --project=netra-staging</command>
+      </commands>
+      <expected_secrets>
+        <secret>database-url-staging - PostgreSQL connection string</secret>
+        <secret>jwt-secret-key-staging - JWT signing key for backend</secret>
+        <secret>jwt-secret-staging - JWT signing key for auth service</secret>
+        <secret>session-secret-key-staging - Session encryption key</secret>
+        <secret>fernet-key-staging - Data encryption key</secret>
+        <secret>openai-api-key-staging - OpenAI API key</secret>
+        <secret>google-client-id-staging - Google OAuth client ID (optional)</secret>
+        <secret>google-client-secret-staging - Google OAuth secret (optional)</secret>
+      </expected_secrets>
+    </step>
+
+    <step order="2">
+      <title>Update Database Connection String</title>
+      <description>Get database details and update the connection URL</description>
+      <get_current_info>
+        <command>
+          # Get current database IP
+          gcloud sql instances describe netra-postgres-staging \
+            --format="value(ipAddresses[0].ipAddress)"
+        </command>
+        <command>
+          # View current database URL (if you have access)
+          gcloud secrets versions access latest --secret=database-url-staging
+        </command>
+      </get_current_info>
+      <update_if_needed>
+        <note>Only update if the IP or credentials have changed</note>
+        <command>
+          # Format: postgresql://netra_user:PASSWORD@IP:5432/netra?sslmode=require
+          echo -n "postgresql://netra_user:YOUR_DB_PASSWORD@34.132.142.103:5432/netra?sslmode=require" | \
+          gcloud secrets versions add database-url-staging --data-file=-
+        </command>
+      </update_if_needed>
+      <credentials_location>
+        Ask your team lead for:
+        - Database password
+        - Correct database IP address (should be 34.132.142.103 for current staging)
+      </credentials_location>
+    </step>
+
+    <step order="3">
+      <title>Add OpenAI API Key</title>
+      <description>Configure the OpenAI API key for LLM operations</description>
+      <check_existing>
+        <command>
+          # Check if OpenAI key exists
+          gcloud secrets describe openai-api-key-staging 2>/dev/null || echo "Secret does not exist"
+        </command>
+      </check_existing>
+      <create_or_update>
+        <command>
+          # If secret doesn't exist, create it:
+          echo -n "sk-proj-YOUR_ACTUAL_OPENAI_API_KEY" | \
+          gcloud secrets create openai-api-key-staging --data-file=-
+          
+          # If secret exists but needs updating:
+          echo -n "sk-proj-YOUR_ACTUAL_OPENAI_API_KEY" | \
+          gcloud secrets versions add openai-api-key-staging --data-file=-
+        </command>
+      </create_or_update>
+      <where_to_get_key>
+        1. Get from your OpenAI account: https://platform.openai.com/api-keys
+        2. Or ask your team lead for the staging API key
+        3. For testing only, you can use a dummy value: "sk-proj-staging-dummy-key"
+      </where_to_get_key>
+    </step>
+
+    <step order="4">
+      <title>Generate or Update Encryption Keys</title>
+      <description>Ensure all encryption keys are properly set</description>
+      <check_and_create>
+        <fernet_key>
+          <check>gcloud secrets describe fernet-key-staging 2>/dev/null || echo "Missing"</check>
+          <generate>python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"</generate>
+          <create>
+            echo -n "YOUR_GENERATED_FERNET_KEY" | \
+            gcloud secrets create fernet-key-staging --data-file=-
+          </create>
+        </fernet_key>
+        <jwt_secret>
+          <check>gcloud secrets describe jwt-secret-key-staging 2>/dev/null || echo "Missing"</check>
+          <generate>python -c "import secrets; print(secrets.token_urlsafe(64))"</generate>
+          <create>
+            # Create both jwt secrets with the SAME value
+            echo -n "YOUR_GENERATED_JWT_SECRET" | \
+            gcloud secrets create jwt-secret-key-staging --data-file=-
+            
+            echo -n "YOUR_GENERATED_JWT_SECRET" | \
+            gcloud secrets create jwt-secret-staging --data-file=-
+          </create>
+          <critical>Both JWT secrets MUST have the same value for auth to work!</critical>
+        </jwt_secret>
+      </check_and_create>
+    </step>
+
+    <step order="5">
+      <title>Configure Google OAuth (Optional)</title>
+      <description>Set up Google OAuth for social login</description>
+      <prerequisites>
+        1. Go to Google Cloud Console: https://console.cloud.google.com
+        2. Navigate to APIs & Services > Credentials
+        3. Create OAuth 2.0 Client ID (Web application)
+        4. Add authorized redirect URIs:
+           - https://auth.staging.netrasystems.ai/oauth/callback
+           - http://localhost:8001/oauth/callback (for local testing)
+      </prerequisites>
+      <add_secrets>
+        <command>
+          echo -n "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com" | \
+          gcloud secrets create google-client-id-staging --data-file=-
+        </command>
+        <command>
+          echo -n "YOUR_GOOGLE_CLIENT_SECRET" | \
+          gcloud secrets create google-client-secret-staging --data-file=-
+        </command>
+      </add_secrets>
+    </step>
+
+    <step order="6">
+      <title>Verify All Required Secrets</title>
+      <description>Ensure all necessary secrets are configured</description>
+      <verification_script>
+        <command>
+          # Create a verification script
+          cat > check_secrets.py << 'EOF'
+import subprocess
+import json
+
+required_secrets = [
+    'database-url-staging',
+    'jwt-secret-key-staging',
+    'jwt-secret-staging',
+    'session-secret-key-staging',
+    'fernet-key-staging',
+    'openai-api-key-staging'
+]
+
+optional_secrets = [
+    'google-client-id-staging',
+    'google-client-secret-staging',
+    'anthropic-api-key-staging'
+]
+
+print("Checking required secrets...")
+missing = []
+for secret in required_secrets:
+    result = subprocess.run(
+        f"gcloud secrets describe {secret} --project=netra-staging",
+        shell=True, capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"❌ MISSING: {secret}")
+        missing.append(secret)
+    else:
+        print(f"✅ Found: {secret}")
+
+print("\nChecking optional secrets...")
+for secret in optional_secrets:
+    result = subprocess.run(
+        f"gcloud secrets describe {secret} --project=netra-staging",
+        shell=True, capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"⚠️  Optional missing: {secret}")
+    else:
+        print(f"✅ Found: {secret}")
+
+if missing:
+    print(f"\n❌ Missing {len(missing)} required secrets: {', '.join(missing)}")
+    print("Please create these secrets before deploying!")
+else:
+    print("\n✅ All required secrets are configured!")
+EOF
+          python check_secrets.py
+        </command>
+      </verification_script>
+    </step>
+  </phase_2_secrets_configuration>
+
+  <phase_3_deployment>
+    <title>Deploying to Staging Environment</title>
+    
+    <step order="1">
+      <title>Test Deployment Configuration</title>
+      <description>Validate everything is ready before actual deployment</description>
+      <commands>
+        <command>
+          # Run pre-deployment check
+          python scripts/deploy_to_gcp.py \
+            --project netra-staging \
+            --check-only
+        </command>
+      </commands>
+      <expected_output>
+        ✓ Project netra-staging is accessible
+        ✓ Required APIs are enabled
+        ✓ Docker is configured
+        ✓ All required secrets exist
+      </expected_output>
+    </step>
+
+    <step order="2">
+      <title>Deploy All Services (Recommended)</title>
+      <description>Deploy backend, auth, and frontend services together</description>
+      <commands>
+        <command>
+          # Fast deployment using local Docker builds
+          python scripts/deploy_to_gcp.py \
+            --project netra-staging \
+            --build-local
+        </command>
+      </commands>
+      <what_happens>
+        1. Builds Docker images locally (5-10x faster than Cloud Build)
+        2. Pushes images to Google Container Registry
+        3. Deploys to Cloud Run with proper secret mappings
+        4. Outputs service URLs for each deployed service
+      </what_happens>
+      <expected_output>
+        Backend URL: https://netra-backend-staging-xxxxx.run.app
+        Auth URL: https://netra-auth-service-xxxxx.run.app  
+        Frontend URL: https://netra-frontend-staging-xxxxx.run.app
+      </expected_output>
+    </step>
+
+    <step order="3">
+      <title>Deploy Individual Services (If Needed)</title>
+      <description>Deploy specific services one at a time</description>
+      <commands>
+        <backend>
+          python scripts/deploy_to_gcp.py \
+            --project netra-staging \
+            --service backend \
+            --build-local
+        </backend>
+        <auth>
+          python scripts/deploy_to_gcp.py \
+            --project netra-staging \
+            --service auth \
+            --build-local
+        </auth>
+        <frontend>
+          python scripts/deploy_to_gcp.py \
+            --project netra-staging \
+            --service frontend \
+            --build-local
+        </frontend>
+      </commands>
+    </step>
+
+    <step order="4">
+      <title>Verify Deployment Success</title>
+      <description>Check that all services are running properly</description>
+      <commands>
+        <command>
+          # List all deployed services
+          gcloud run services list --platform managed --region us-central1
+        </command>
+        <command>
+          # Get backend URL and check health
+          BACKEND_URL=$(gcloud run services describe netra-backend-staging \
+            --region us-central1 --format='value(status.url)')
+          curl $BACKEND_URL/health
+        </command>
+        <command>
+          # Check auth service health
+          AUTH_URL=$(gcloud run services describe netra-auth-service \
+            --region us-central1 --format='value(status.url)')
+          curl $AUTH_URL/health
+        </command>
+      </commands>
+      <expected_response>{"status":"healthy","service":"backend","environment":"staging"}</expected_response>
+    </step>
+  </phase_3_deployment>
+
+  <phase_4_post_deployment>
+    <title>Post-Deployment Configuration and Testing</title>
+    
+    <step order="1">
+      <title>Access the Frontend Application</title>
+      <description>Test the complete application flow</description>
+      <steps>
+        1. Get the frontend URL:
+           <command>
+             gcloud run services describe netra-frontend-staging \
+               --region us-central1 --format='value(status.url)'
+           </command>
+        2. Open the URL in your browser
+        3. Check browser console for any errors (F12 → Console tab)
+        4. Try logging in if OAuth is configured
+      </steps>
+    </step>
+
+    <step order="2">
+      <title>Monitor Service Logs</title>
+      <description>Check for any errors or issues</description>
+      <commands>
+        <view_recent_logs>
+          # View last 50 log entries
+          gcloud run services logs read netra-backend-staging \
+            --limit 50 --region us-central1
+        </view_recent_logs>
+        <stream_live_logs>
+          # Stream logs in real-time
+          gcloud run services logs tail netra-backend-staging \
+            --region us-central1
+        </stream_live_logs>
+        <filter_errors>
+          # View only error logs
+          gcloud logging read "resource.type=cloud_run_revision \
+            AND resource.labels.service_name=netra-backend-staging \
+            AND severity>=ERROR" --limit 20 --format json
+        </filter_errors>
+      </commands>
+    </step>
+
+    <step order="3">
+      <title>Run Integration Tests</title>
+      <description>Validate the staging environment is working correctly</description>
+      <commands>
+        <command>
+          # Run staging-specific tests
+          python unified_test_runner.py \
+            --env staging \
+            --categories smoke integration \
+            --no-coverage
+        </command>
+      </commands>
+    </step>
+
+    <step order="4">
+      <title>Configure Custom Domains (Optional)</title>
+      <description>Set up user-friendly URLs if DNS is configured</description>
+      <domains>
+        <backend>api.staging.netrasystems.ai</backend>
+        <auth>auth.staging.netrasystems.ai</auth>
+        <frontend>app.staging.netrasystems.ai</frontend>
+      </domains>
+      <note>DNS configuration is typically handled by the infrastructure team</note>
+    </step>
+  </phase_4_post_deployment>
+
+  <common_tasks>
+    <title>Day-to-Day Operations</title>
+    
+    <task>
+      <name>Update Code and Redeploy</name>
+      <description>Deploy your code changes to staging</description>
+      <steps>
+        <command>git pull origin main  # Get latest changes</command>
+        <command>
+          # Redeploy all services
+          python scripts/deploy_to_gcp.py \
+            --project netra-staging \
+            --build-local
+        </command>
+        <command>
+          # Or deploy only the service you changed
+          python scripts/deploy_to_gcp.py \
+            --project netra-staging \
+            --service backend \
+            --build-local
+        </command>
+      </steps>
+    </task>
+
+    <task>
+      <name>Update a Secret Value</name>
+      <description>Change a secret without redeploying</description>
+      <steps>
+        <command>
+          # Update secret (example: OpenAI key)
+          echo -n "sk-proj-NEW_API_KEY" | \
+          gcloud secrets versions add openai-api-key-staging --data-file=-
+        </command>
+        <command>
+          # Restart service to pick up new secret
+          gcloud run services update netra-backend-staging \
+            --region us-central1 \
+            --update-env-vars=RESTART_TIME=$(date +%s)
+        </command>
+      </steps>
+    </task>
+
+    <task>
+      <name>Debug Service Issues</name>
+      <description>Troubleshoot when services aren't working</description>
+      <steps>
+        <command>
+          # Check service status
+          gcloud run services describe netra-backend-staging \
+            --region us-central1 --format="value(status.conditions[0])"
+        </command>
+        <command>
+          # View error logs
+          gcloud run services logs read netra-backend-staging \
+            --region us-central1 --limit 100 | grep -i error
+        </command>
+        <command>
+          # Check secret access
+          gcloud run services describe netra-backend-staging \
+            --region us-central1 --format="export" | grep -A5 "secrets:"
+        </command>
+      </steps>
+    </task>
+
+    <task>
+      <name>Local Development with Staging Services</name>
+      <description>Connect local frontend to staging backend</description>
+      <env_setup>
+        Create .env.local in frontend directory:
+        ```
+        NEXT_PUBLIC_API_URL=https://netra-backend-staging-xxxxx.run.app
+        NEXT_PUBLIC_WS_URL=wss://netra-backend-staging-xxxxx.run.app/ws
+        ```
+      </env_setup>
+      <command>
+        cd frontend
+        npm install
+        npm run dev
+      </command>
+    </task>
+  </common_tasks>
+
+  <troubleshooting>
+    <title>Common Issues and Solutions</title>
+    
+    <issue>
+      <problem>Service fails with "LLM API keys missing"</problem>
+      <cause>OpenAI API key secret not created or not mapped</cause>
+      <solution>
+        <command>
+          # Check if secret exists
+          gcloud secrets describe openai-api-key-staging
+          
+          # If missing, create it
+          echo -n "sk-proj-YOUR_KEY" | \
+          gcloud secrets create openai-api-key-staging --data-file=-
+          
+          # Update service to use the secret
+          gcloud run services update netra-backend-staging \
+            --update-secrets=OPENAI_API_KEY=openai-api-key-staging:latest \
+            --region us-central1
+        </command>
+      </solution>
+    </issue>
+
+    <issue>
+      <problem>Database connection refused</problem>
+      <cause>Wrong IP or credentials in DATABASE_URL</cause>
+      <solution>
+        <command>
+          # Get correct IP
+          gcloud sql instances describe netra-postgres-staging \
+            --format="value(ipAddresses[0].ipAddress)"
+          
+          # Update secret with correct IP (get password from team)
+          echo -n "postgresql://netra_user:CORRECT_PASSWORD@CORRECT_IP:5432/netra?sslmode=require" | \
+          gcloud secrets versions add database-url-staging --data-file=-
+          
+          # Restart service
+          gcloud run services update netra-backend-staging \
+            --region us-central1 --update-env-vars=RESTART=$(date +%s)
+        </command>
+      </solution>
+    </issue>
+
+    <issue>
+      <problem>Authentication fails between services</problem>
+      <cause>JWT secrets don't match between backend and auth</cause>
+      <solution>
+        <command>
+          # Generate new JWT secret
+          NEW_JWT=$(python -c "import secrets; print(secrets.token_urlsafe(64))")
+          
+          # Update both secrets with same value
+          echo -n "$NEW_JWT" | gcloud secrets versions add jwt-secret-key-staging --data-file=-
+          echo -n "$NEW_JWT" | gcloud secrets versions add jwt-secret-staging --data-file=-
+          
+          # Restart both services
+          gcloud run services update netra-backend-staging --region us-central1 --update-env-vars=R=$(date +%s)
+          gcloud run services update netra-auth-service --region us-central1 --update-env-vars=R=$(date +%s)
+        </command>
+      </solution>
+    </issue>
+
+    <issue>
+      <problem>Frontend shows CORS errors</problem>
+      <cause>Backend CORS configuration doesn't include frontend URL</cause>
+      <solution>
+        Check backend environment variables include correct CORS settings.
+        Frontend URL must be in CORS_ALLOWED_ORIGINS.
+        Redeploy backend if configuration needs updating.
+      </solution>
+    </issue>
+
+    <issue>
+      <problem>Permission denied errors</problem>
+      <cause>Not authenticated or missing permissions</cause>
+      <solution>
+        <command>
+          # Re-authenticate
+          gcloud auth login
+          gcloud auth application-default login
+          
+          # Check your access
+          gcloud projects get-iam-policy netra-staging \
+            --filter="bindings.members:$(gcloud config get-value account)"
+        </command>
+        Contact team lead if you need additional permissions.
+      </solution>
+    </issue>
+  </troubleshooting>
+
+  <quick_reference>
+    <title>Essential Commands Cheat Sheet</title>
+    
+    <deployment>
+      <all_services>python scripts/deploy_to_gcp.py --project netra-staging --build-local</all_services>
+      <backend_only>python scripts/deploy_to_gcp.py --project netra-staging --service backend --build-local</backend_only>
+      <check_only>python scripts/deploy_to_gcp.py --project netra-staging --check-only</check_only>
+    </deployment>
+
+    <secrets>
+      <list>gcloud secrets list --project=netra-staging</list>
+      <view>gcloud secrets versions access latest --secret=SECRET_NAME</view>
+      <create>echo -n "VALUE" | gcloud secrets create SECRET_NAME --data-file=-</create>
+      <update>echo -n "VALUE" | gcloud secrets versions add SECRET_NAME --data-file=-</update>
+    </secrets>
+
+    <monitoring>
+      <services>gcloud run services list --region us-central1</services>
+      <logs>gcloud run services logs tail SERVICE_NAME --region us-central1</logs>
+      <health>curl $(gcloud run services describe SERVICE_NAME --region us-central1 --format='value(status.url)')/health</health>
+    </monitoring>
+
+    <testing>
+      <staging>python unified_test_runner.py --env staging</staging>
+      <smoke>python unified_test_runner.py --env staging --categories smoke</smoke>
+    </testing>
+  </quick_reference>
+
+  <important_notes>
+    <note priority="high">
+      <title>Never Commit Secrets</title>
+      <description>
+        NEVER put API keys, passwords, or secrets in code or .env files.
+        Always use Google Secret Manager for sensitive data.
+      </description>
+    </note>
+    
+    <note priority="high">
+      <title>JWT Secret Consistency</title>
+      <description>
+        The JWT secret MUST be identical for both backend and auth services.
+        If they don't match, authentication will fail.
+      </description>
+    </note>
+
+    <note priority="medium">
+      <title>Use Local Builds</title>
+      <description>
+        Always use --build-local flag for faster deployments (5-10x faster).
+        Only use Cloud Build if local Docker is not available.
+      </description>
+    </note>
+
+    <note priority="medium">
+      <title>Check Logs After Deployment</title>
+      <description>
+        Always monitor logs after deploying to catch any startup issues.
+        Services may take 30-60 seconds to become fully healthy.
+      </description>
+    </note>
+
+    <note priority="low">
+      <title>Staging vs Production</title>
+      <description>
+        This guide is for staging only. Production deployment has additional
+        security requirements and should be done with senior team supervision.
+      </description>
+    </note>
+  </important_notes>
+
+  <contact_info>
+    <title>Getting Help</title>
+    <resources>
+      <slack>#netra-engineering - For general questions</slack>
+      <slack>#netra-staging - For staging environment issues</slack>
+      <docs>/SPEC/gcp_deployment.xml - Detailed deployment documentation</docs>
+      <docs>/SPEC/staging_secrets_requirements.xml - Secret requirements</docs>
+    </resources>
+    <team_contacts>
+      <role name="Infrastructure Lead">For GCP permissions and infrastructure</role>
+      <role name="Backend Lead">For API and service issues</role>
+      <role name="Frontend Lead">For UI and frontend deployment</role>
+    </team_contacts>
+  </contact_info>
+</staging_setup_complete_guide>

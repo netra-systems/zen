@@ -207,7 +207,7 @@ class TestApexOptimizerToolSelection:
     @pytest.fixture
     def sample_agent_state(self):
         """Create sample agent state"""
-        from netra_backend.app.schemas.Request import (
+        from netra_backend.app.schemas.request import (
             DataSource,
             TimeRange,
             Workload,

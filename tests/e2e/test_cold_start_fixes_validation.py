@@ -78,7 +78,7 @@ class TestColdStartFixesValidation:
         os.environ["CLICKHOUSE_HTTP_PORT"] = "8123"
         os.environ["CLICKHOUSE_HTTPS_PORT"] = "8443"
         
-        from netra_backend.app.schemas.Config import ClickHouseHTTPConfig
+        from netra_backend.app.schemas.config import ClickHouseHTTPConfig
         
         config = ClickHouseHTTPConfig()
         assert config.port == 8123, "Should use HTTP port 8123 for local development"

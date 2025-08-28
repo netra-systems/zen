@@ -8,7 +8,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
 
 try:
-    from netra_backend.app.schemas.Config import AppConfig
+    from netra_backend.app.schemas.config import AppConfig
 except ImportError:
     from schemas.Config import AppConfig
 

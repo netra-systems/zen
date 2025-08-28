@@ -29,7 +29,7 @@ from netra_backend.app.schemas.admin_tool_types import (
     ToolSuccessResponse,
 )
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.schemas.Tool import ToolInput
+from netra_backend.app.schemas.tool import ToolInput
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_core import AdminToolDispatcher

@@ -30,7 +30,7 @@ import pytest
 from netra_backend.app.services.rate_limiting.rate_limiting_service import RateLimitingService as TierEnforcementService
 from netra_backend.app.redis_manager import RedisManager
 
-from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord
+from netra_backend.app.schemas.user_plan import PlanTier, PlanUsageSummary, UsageRecord
 from netra_backend.app.services.audit_service import AuditService
 from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector

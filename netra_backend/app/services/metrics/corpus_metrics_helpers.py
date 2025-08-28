@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Metrics import (
+from netra_backend.app.schemas.metrics import (
     CorpusMetric,
     MetricsSnapshot,
     MetricType,

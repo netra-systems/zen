@@ -20,7 +20,7 @@ from decimal import Decimal
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
-from netra_backend.app.schemas.UserPlan import PlanTier, ToolAllowance
+from netra_backend.app.schemas.user_plan import PlanTier, ToolAllowance
 
 
 class TestPlanEnforcementBilling:

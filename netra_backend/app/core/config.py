@@ -20,7 +20,7 @@ from netra_backend.app.core.configuration.base import (
 
 # Import from the actual unified configuration system
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 
 @lru_cache(maxsize=1)
@@ -38,7 +38,7 @@ def get_settings() -> AppConfig:
         return get_unified_config()
     except Exception as e:
         # Fallback for test environments or when unified config fails
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
         return AppConfig()
 
 

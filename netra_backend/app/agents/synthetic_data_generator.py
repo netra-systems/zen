@@ -22,7 +22,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.logging_config import central_logger
 
 # Import consolidated types from single source of truth
-from netra_backend.app.schemas.Generation import GenerationStatus, SyntheticDataResult
+from netra_backend.app.schemas.generation import GenerationStatus, SyntheticDataResult
 
 logger = central_logger.get_logger(__name__)
 

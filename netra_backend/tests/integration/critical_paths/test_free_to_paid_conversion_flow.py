@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 import pytest
 from netra_backend.app.websocket_core.manager import get_websocket_manager
 
-from netra_backend.app.schemas.UserPlan import (
+from netra_backend.app.schemas.user_plan import (
     PLAN_DEFINITIONS,
     PlanDefinition,
     PlanFeatures,

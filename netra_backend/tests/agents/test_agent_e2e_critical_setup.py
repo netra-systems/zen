@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.Agent import (
+from netra_backend.app.schemas.agent import (
     AgentCompleted,
     AgentStarted,
     SubAgentLifecycle,

@@ -120,7 +120,7 @@ class TestClickHouseGracefulDegradation:
         STAGING ISSUE: ClickHouse should be optional in staging for reliability.
         This test verifies the configuration supports graceful degradation.
         """
-        from netra_backend.app.schemas.Config import StagingConfig
+        from netra_backend.app.schemas.config import StagingConfig
         
         # Test staging configuration allows ClickHouse to be optional
         config = StagingConfig()

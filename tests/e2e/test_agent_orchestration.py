@@ -24,7 +24,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.Agent import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.websocket_core.manager import WebSocketManager
 UnifiedWebSocketManager = WebSocketManager  # Alias for backward compatibility
 

@@ -14,7 +14,7 @@ from datetime import datetime
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType
-from netra_backend.app.schemas.Agent import SubAgentState
+from netra_backend.app.schemas.agent import SubAgentState
 
 class TestRunner:
     """Runs individual test cases for example prompts"""

@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import pytest
-from netra_backend.app.schemas.Tool import ToolResult
+from netra_backend.app.schemas.tool import ToolResult
 
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.tests.helpers.tool_dispatcher_helpers import (

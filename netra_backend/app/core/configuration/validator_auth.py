@@ -11,7 +11,7 @@ Each function ≤8 lines, file ≤300 lines.
 from typing import List
 from urllib.parse import urlparse
 
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 
 class AuthValidator:

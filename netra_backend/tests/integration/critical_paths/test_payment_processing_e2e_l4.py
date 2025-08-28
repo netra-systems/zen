@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 import httpx
 import pytest
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 from netra_backend.tests.integration.critical_paths.test_base import (
     CriticalPathMetrics,

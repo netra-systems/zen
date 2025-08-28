@@ -22,7 +22,7 @@ import time
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, patch
 
-from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord
+from netra_backend.app.schemas.user_plan import PlanTier, UsageRecord
 from tests.e2e.config import TEST_USERS
 from tests.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore

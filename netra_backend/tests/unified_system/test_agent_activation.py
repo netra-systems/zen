@@ -28,7 +28,7 @@ from netra_backend.app.agents.base.execution_context import AgentExecutionContex
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 logger = central_logger.get_logger(__name__)
 

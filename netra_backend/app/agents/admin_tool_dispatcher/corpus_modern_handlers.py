@@ -17,7 +17,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionContext,
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Corpus import CorpusCreate
+from netra_backend.app.schemas.corpus import CorpusCreate
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 

@@ -20,7 +20,7 @@ from pydantic import ValidationError
 
 from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 # Import actual configuration managers
 try:
@@ -238,7 +238,7 @@ class UnifiedConfigManager:
     
     def _get_config_class_for_environment(self) -> type:
         """Get configuration class for current environment."""
-        from netra_backend.app.schemas.Config import (
+        from netra_backend.app.schemas.config import (
             DevelopmentConfig,
             NetraTestingConfig,
             ProductionConfig,

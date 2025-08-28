@@ -33,7 +33,7 @@ from test_framework.environment_markers import (
 from netra_backend.app.config import get_config, reload_config, validate_configuration
 
 from netra_backend.app.core.configuration.base import config_manager, get_unified_config
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from test_framework.mock_utils import mock_justified
 
 class TestConfigurationIntegration:

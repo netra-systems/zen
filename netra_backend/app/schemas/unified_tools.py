@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
-from netra_backend.app.schemas.Agent import AgentCompleted, SubAgentLifecycle
+from netra_backend.app.schemas.agent import AgentCompleted, SubAgentLifecycle
 
 # Import agent-related types from their canonical locations
 from netra_backend.app.schemas.registry import AgentResult, AgentState

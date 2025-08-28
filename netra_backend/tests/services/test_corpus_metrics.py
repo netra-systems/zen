@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.schemas.Metrics import ExportFormat, QualityMetrics
+from netra_backend.app.schemas.metrics import ExportFormat, QualityMetrics
 
 from netra_backend.app.services.metrics import CorpusMetricsCollector
 
@@ -239,7 +239,7 @@ class TestMetricsExporter:
     @pytest.mark.asyncio
     async def test_json_export(self):
         """Test JSON export functionality"""
-        from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType
+        from netra_backend.app.schemas.metrics import CorpusMetric, MetricType
         from netra_backend.app.services.metrics.exporter import MetricsExporter
         
         exporter = MetricsExporter()
@@ -265,7 +265,7 @@ class TestMetricsExporter:
     @pytest.mark.asyncio
     async def test_prometheus_export(self):
         """Test Prometheus export functionality"""
-        from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType
+        from netra_backend.app.schemas.metrics import CorpusMetric, MetricType
         from netra_backend.app.services.metrics.exporter import MetricsExporter
         
         exporter = MetricsExporter()

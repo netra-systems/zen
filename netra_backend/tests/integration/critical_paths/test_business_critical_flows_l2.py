@@ -32,7 +32,7 @@ import pytest
 from netra_backend.app.core.exceptions_base import NetraException, PaymentException
 from netra_backend.app.core.unified_logging import get_central_logger
 # from netra_backend.app.db.models_postgres import Subscription, UsageRecord, User  # FIXME: Missing models
-from netra_backend.app.schemas.UserPlan import PlanDefinition, PlanTier, UserPlan
+from netra_backend.app.schemas.user_plan import PlanDefinition, PlanTier, UserPlan
 from netra_backend.app.services.billing.payment_processor import PaymentProcessor
 from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
 # from netra_backend.app.services.billing.subscription_manager import SubscriptionManager  # FIXME: Missing service

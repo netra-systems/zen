@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.app.schemas.UserPlan import (
+from netra_backend.app.schemas.user_plan import (
     PLAN_DEFINITIONS,
     PlanFeatures,
     PlanTier,

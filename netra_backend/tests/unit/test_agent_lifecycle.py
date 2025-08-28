@@ -20,7 +20,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.Agent import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 # Test implementation of AgentLifecycleMixin
 class MockAgent(AgentLifecycleMixin):

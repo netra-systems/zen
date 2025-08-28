@@ -26,7 +26,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.postgres import get_async_db
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 manager = get_unified_manager()

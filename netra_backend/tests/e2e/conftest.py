@@ -202,7 +202,7 @@ async def real_agent_setup():
     # Mock the run method to complete successfully
     async def mock_run(state_or_prompt, run_id: str = None, **kwargs):
         """Mock run method that completes successfully."""
-        from netra_backend.app.schemas.Agent import SubAgentLifecycle
+        from netra_backend.app.schemas.agent import SubAgentLifecycle
         from netra_backend.app.agents.state import DeepAgentState
         
         # Set agent to completed state

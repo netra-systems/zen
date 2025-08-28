@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.app.schemas.ToolPermission import PermissionLevel
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
+from netra_backend.app.schemas.tool_permission import PermissionLevel
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.tests.helpers.tool_permission_helpers import (

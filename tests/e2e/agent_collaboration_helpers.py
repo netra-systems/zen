@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
 from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient

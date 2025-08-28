@@ -129,7 +129,7 @@ class AgentConversationTestCore:
     
     async def establish_conversation_session(self, plan_tier) -> Dict[str, Any]:
         """Establish authenticated conversation session."""
-        from netra_backend.app.schemas.UserPlan import PlanTier
+        from netra_backend.app.schemas.user_plan import PlanTier
         from tests.e2e.config import TEST_USERS
         
         # Map plan tier to test user

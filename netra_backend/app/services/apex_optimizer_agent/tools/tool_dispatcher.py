@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.services.apex_optimizer_agent.models import AgentState
 
 

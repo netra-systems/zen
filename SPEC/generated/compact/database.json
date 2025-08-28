@@ -52,6 +52,7 @@
     "completed_at",
     "connected_at",
     "connection_id",
+    "container_id",
     "context_id",
     "contract_id",
     "conversation_id",

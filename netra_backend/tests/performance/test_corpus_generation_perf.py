@@ -20,7 +20,7 @@ import pytest
 
 from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
 from netra_backend.app.agents.corpus_admin.models import CorpusMetadata
-from netra_backend.app.schemas.Corpus import Corpus
+from netra_backend.app.schemas.corpus import Corpus
 
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService

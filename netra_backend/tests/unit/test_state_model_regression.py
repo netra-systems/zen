@@ -95,7 +95,7 @@ class TestAllStateModelsInit:
         """Test LangChainAgentState initialization."""
         from langchain_core.messages import HumanMessage
 
-        from netra_backend.app.schemas.Agent import LangChainAgentState
+        from netra_backend.app.schemas.agent import LangChainAgentState
         
         # Test with required fields
         state = LangChainAgentState(
@@ -108,7 +108,7 @@ class TestAllStateModelsInit:
         """Test SubAgentState initialization."""
         from langchain_core.messages import HumanMessage
 
-        from netra_backend.app.schemas.Agent import SubAgentState
+        from netra_backend.app.schemas.agent import SubAgentState
         
         # Test with required fields
         state = SubAgentState(
@@ -160,7 +160,7 @@ class TestValidationErrorMessages:
     
     def test_missing_required_field_error_message(self):
         """Test error message when required field is missing."""
-        from netra_backend.app.schemas.Agent import LangChainAgentState
+        from netra_backend.app.schemas.agent import LangChainAgentState
         
         with pytest.raises(ValidationError) as exc_info:
             # Missing required 'messages' field

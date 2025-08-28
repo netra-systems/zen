@@ -13,7 +13,7 @@
         <workflow>
             <step>1. Analyze the task description for relevant keywords/domains.</step>
             <step>2. Query this index for matching categories.</step>
-            <step>3. Prioritize and integrate the `<critical-takeaway>` elements into the execution plan.</step>
+            <step>3. Prioritize and integrate the critical-takeaway elements into the execution plan.</step>
             <step>4. If necessary, retrieve the detailed learning file using the `path` attribute.</step>
         </workflow>
     </retrieval-protocol>
@@ -411,7 +411,7 @@
             <critical-takeaway>Create exemption rule with priority lower than security rules for /auth/callback endpoint with OAuth parameter validation.</critical-takeaway>
             <critical-takeaway>Security rule priority matters - exemptions must have lower priority number (higher precedence) than blocking rules.</critical-takeaway>
             <critical-takeaway>Monitor security policy logs to identify false positives: preconfiguredExprIds shows which rule triggered the block.</critical-takeaway>
-            <critical-takeaway>OAuth exemption rule should validate: request.method == 'GET' && request.query.contains('code=') && request.query.contains('state=').</critical-takeaway>
+            <critical-takeaway>OAuth exemption rule should validate: request.method == 'GET' and request.query.contains('code=') and request.query.contains('state=').</critical-takeaway>
             <critical-takeaway>Test OAuth flows immediately after implementing Cloud Armor to catch WAF false positives before they impact users.</critical-takeaway>
         </category>
         
@@ -634,6 +634,15 @@
             <critical-takeaway>When renaming classes, create backwards compatibility aliases (e.g., CostOptimizer = LLMCostOptimizer)</critical-takeaway>
             <critical-takeaway>Missing Enum import is common - always check for standard library imports</critical-takeaway>
             <critical-takeaway>Use import_management.py for comprehensive import checking and fixing</critical-takeaway>
+        </category>
+        
+        <category name="Python Module Naming and Case Sensitivity" path="SPEC/learnings/python_module_naming_case_sensitivity.xml" keywords="Python Module Naming, PEP 8, Case Sensitivity, Docker, Schema Files, Uppercase, Lowercase, Import Failures, Production, Filesystem">
+            <critical-takeaway>CRITICAL: All Python modules MUST use lowercase naming with underscores (PEP 8) - uppercase module names cause import failures in production</critical-takeaway>
+            <critical-takeaway>Case-insensitive filesystems (macOS/Windows) mask production issues - always test in Docker/Linux environments</critical-takeaway>
+            <critical-takeaway>Mixed naming conventions violate SSOT principle - maintain one consistent naming pattern across all modules</critical-takeaway>
+            <critical-takeaway>Schema file renames require atomic updates - all 22 schema files and 243 import statements must be updated together</critical-takeaway>
+            <critical-takeaway>Pre-commit hooks must validate Python file naming: ^[a-z][a-z0-9_]*\.py$ pattern enforcement</critical-takeaway>
+            <critical-takeaway>Import failures in Docker containers indicate case sensitivity issues - validate all module names against PEP 8</critical-takeaway>
         </category>
 
         <category name="Database/Migration" path="SPEC/learnings/alembic_asyncpg_greenlet.xml" keywords="Alembic, Migration, AsyncPG, Greenlet, SQLAlchemy">
@@ -1313,7 +1322,7 @@
                 <metric>Developer Productivity: Eliminated 40+ hours/week of debugging time</metric>
                 <metric>Platform Stability: Prevented production issues through comprehensive testing</metric>
                 <metric>Cross-Platform Support: Enabled Windows development environments</metric>
-                <metric>Performance Validation: JWT authentication meets <10ms SLA requirements</metric>
+                <metric>Performance Validation: JWT authentication meets sub-10ms SLA requirements</metric>
                 <metric>Security Assurance: Proper replay protection and XSS prevention implemented</metric>
             </business_value>
             <documentation>SPEC/learnings/test_fixing_session_2025.xml</documentation>

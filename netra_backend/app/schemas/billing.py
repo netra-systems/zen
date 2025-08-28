@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 # Re-export from UserPlan for compatibility
-from netra_backend.app.schemas.UserPlan import PlanTier as BillingTier
+from netra_backend.app.schemas.user_plan import PlanTier as BillingTier
 
 
 class UsageEventType(str, Enum):
