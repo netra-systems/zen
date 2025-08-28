@@ -613,9 +613,9 @@ class AgentErrorHandler:
     
     def __init__(self, unified_handler: UnifiedErrorHandler):
         self._handler = unified_handler
-        # Create recovery coordinator for backward compatibility
-        from netra_backend.app.core.error_handlers.error_recovery import RecoveryCoordinator
-        self.recovery_coordinator = RecoveryCoordinator()
+        # Create recovery manager for backward compatibility
+        from netra_backend.app.core.error_recovery import ErrorRecoveryManager
+        self.recovery_coordinator = ErrorRecoveryManager()
     
     @property
     def max_history(self) -> int:

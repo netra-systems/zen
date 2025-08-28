@@ -14,7 +14,7 @@ BVJ: Growth & Enterprise | Customer Intelligence | +20% performance fee capture
 from typing import Any, Callable, Dict, Optional
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,

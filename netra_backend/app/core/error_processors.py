@@ -9,29 +9,26 @@ from typing import Optional
 
 from fastapi import Request
 
-from netra_backend.app.core.error_handlers.processors import (
-    ExceptionProcessor as CanonicalExceptionProcessor,
-)
+# Use unified error handler instead of deleted processors
+from netra_backend.app.core.unified_error_handler import api_error_handler
 from netra_backend.app.core.error_response import ErrorResponse
 
 # Issue deprecation warning when this module is imported
 warnings.warn(
     "netra_backend.app.core.error_processors is deprecated. "
-    "Use netra_backend.app.core.error_handlers.processors.ExceptionProcessor instead.",
+    "Use netra_backend.app.core.unified_error_handler instead.",
     DeprecationWarning,
     stacklevel=2
 )
 
 # Backward compatibility alias
-ErrorProcessor = CanonicalExceptionProcessor
-
-# Global processor instance for backward compatibility
-_error_processor = CanonicalExceptionProcessor()
+ErrorProcessor = api_error_handler
 
 def process_exception(
     exc: Exception,
     request: Optional[Request] = None,
     trace_id: Optional[str] = None
 ) -> ErrorResponse:
-    """Convenient function to process exceptions using the canonical processor."""
-    return _error_processor.process_exception(exc, request, trace_id)
+    """Convenient function to process exceptions using the unified error handler."""
+    import asyncio
+    return asyncio.run(api_error_handler.handle_exception(exc, request, trace_id))

@@ -13,12 +13,8 @@ from netra_backend.app.agents.base.agent_errors import (
     ValidationError,
 )
 
-# Import error classification without importing execution handler to avoid circular import
-from netra_backend.app.core.error_handlers.error_classification import (
-    ErrorCategory,
-    ErrorClassification,
-    ErrorClassifier,
-)
+# Import error classification from schemas - no longer in error_handlers
+from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -29,7 +25,5 @@ __all__ = [
     'ValidationError', 
     'ExternalServiceError',
     'DatabaseError',
-    'ErrorCategory',
-    'ErrorClassification',
-    'ErrorClassifier'
+    'ErrorCategory'
 ]

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from sqlalchemy.exc import DataError, IntegrityError
 
-from netra_backend.app.core.error_handlers import ApiErrorHandler
+from netra_backend.app.core.unified_error_handler import api_error_handler as ApiErrorHandler
 from netra_backend.app.core.exceptions_database import ErrorCode
 
 

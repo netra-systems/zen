@@ -7,7 +7,7 @@ comprehensive error recovery, health monitoring, and resilience patterns.
 import time
 from typing import Any, Awaitable, Callable, Dict, Optional
 
-from netra_backend.app.core.error_handlers.agents.agent_error_handler import AgentErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as AgentErrorHandler
 from netra_backend.app.core.agent_health_monitor import AgentHealthMonitor
 from netra_backend.app.core.agent_recovery import AgentRecoveryManager
 from netra_backend.app.core.agent_reliability_types import AgentHealthStatus

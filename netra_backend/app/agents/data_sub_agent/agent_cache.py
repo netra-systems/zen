@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,

@@ -17,7 +17,7 @@ from netra_backend.app.agents.agent_error_types import (
     AgentValidationError as ValidationError,
 )
 from netra_backend.app.schemas.core_enums import ErrorCategory
-from netra_backend.app.core.error_handlers.error_recovery import ErrorRecoveryStrategy
+from netra_backend.app.core.error_recovery import ErrorRecoveryStrategy
 from netra_backend.app.core.error_codes import ErrorSeverity
 
 class TestErrorRecoveryStrategy:

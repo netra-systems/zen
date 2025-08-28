@@ -13,7 +13,7 @@ from netra_backend.app.services.synthetic_data.audit_logger import (
     SyntheticDataAuditLogger,
 )
 from netra_backend.app.services.synthetic_data.enums import GenerationStatus
-from netra_backend.app.core.error_handlers.agents.agent_error_handler import global_agent_error_handler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as global_agent_error_handler
 from netra_backend.app.services.synthetic_data.generation_engine import GenerationEngine
 from netra_backend.app.services.synthetic_data.generation_utilities import (
     GenerationUtilities,

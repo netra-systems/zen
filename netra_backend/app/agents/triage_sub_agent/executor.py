@@ -19,7 +19,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent.execution_helpers import (
     TriageExecutionHelpers, TriageValidationHelpers
 )
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

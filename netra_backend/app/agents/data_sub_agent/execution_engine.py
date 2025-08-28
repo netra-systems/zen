@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
