@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <metadata>
+        <title>Docker Error Fixes - Circuit Breaker, AgentError, and Serialization</title>
+        <date>2025-08-28</date>
+        <category>debugging</category>
+        <impact>critical</impact>
+    </metadata>
+
+    <issues_identified>
+        <issue id="1" severity="high">
+            <description>Circuit breaker 'llm_fallback_triage' timing out at 10 seconds despite configuration changes</description>
+            <root_cause>Timeout configuration in client_config.py was reverted or not being used by the actual circuit breaker</root_cause>
+            <attempted_fix>Increased timeout values in client_config.py but changes were not effective</attempted_fix>
+            <status>Deferred - requires deeper investigation of circuit breaker instantiation</status>
+        </issue>
+
+        <issue id="2" severity="critical">
+            <description>AgentError object has no attribute 'success'</description>
+            <error_message>Data analysis failed: Reliability failure (retry_exhausted): 'AgentError' object has no attribute 'success'</error_message>
+            <root_cause>Error handler returning AgentError object instead of ExecutionResult</root_cause>
+            <fix_applied>
+                <file>netra_backend/app/agents/base/executor.py</file>
+                <change>Modified _execute_direct to wrap AgentError in ExecutionResult</change>
+                <code><![CDATA[
+                    error = await self.error_handler.handle_execution_error(e, context)
+                    # Wrap AgentError in ExecutionResult for compatibility
+                    if hasattr(error, 'message'):
+                        return self._create_error_result(context, error.message)
+                    return self._create_error_result(context, str(error))
+                ]]></code>
+            </fix_applied>
+            <status>FIXED</status>
+        </issue>
+
+        <issue id="3" severity="critical">
+            <description>DeepAgentState not JSON serializable</description>
+            <error_message>Object of type DeepAgentState is not JSON serializable</error_message>
+            <root_cause>WebSocket manager trying to serialize raw DeepAgentState objects</root_cause>
+            <fix_applied>
+                <file>netra_backend/app/websocket_core/manager.py</file>
+                <change>Added check for to_dict method and use model_dump with json mode</change>
+                <code><![CDATA[
+                    if hasattr(message, 'model_dump'):
+                        message_dict = message.model_dump(mode='json')
+                    elif hasattr(message, 'to_dict'):
+                        message_dict = message.to_dict()
+                ]]></code>
+            </fix_applied>
+            <status>FIXED</status>
+        </issue>
+
+        <issue id="4" severity="high">
+            <description>Foreign key constraint violation for agent_state_snapshots</description>
+            <error_message>insert or update on table "agent_state_snapshots" violates foreign key constraint "agent_state_snapshots_user_id_fkey"</error_message>
+            <root_cause>Attempting to save state for non-existent user dev-temp-116bb609</root_cause>
+            <status>Pending - requires database user creation or fix to user handling</status>
+        </issue>
+
+        <issue id="5" severity="medium">
+            <description>WebSocket connection errors - WebSocket is not connected</description>
+            <error_message>WebSocket is not connected. Need to call "accept" first</error_message>
+            <root_cause>WebSocket connection lifecycle issue</root_cause>
+            <status>Pending - requires WebSocket connection management review</status>
+        </issue>
+    </issues_identified>
+
+    <patterns_discovered>
+        <pattern>
+            <name>Type Incompatibility in Error Handling</name>
+            <description>Error handlers returning different types than expected by calling code</description>
+            <solution>Always wrap error objects in expected result types</solution>
+        </pattern>
+        
+        <pattern>
+            <name>JSON Serialization for WebSocket</name>
+            <description>Objects must be converted to JSON-serializable dicts before WebSocket transmission</description>
+            <solution>Use model_dump(mode='json') or to_dict() methods consistently</solution>
+        </pattern>
+        
+        <pattern>
+            <name>Circuit Breaker Configuration Override</name>
+            <description>Circuit breaker configurations may be overridden at instantiation</description>
+            <solution>Find and fix where circuit breakers are actually created, not just where configs are defined</solution>
+        </pattern>
+    </patterns_discovered>
+
+    <best_practices>
+        <practice>
+            <title>Error Result Wrapping</title>
+            <description>Always return consistent result types from error handlers</description>
+            <implementation>
+                Create wrapper functions that convert various error types to expected result format
+            </implementation>
+        </practice>
+        
+        <practice>
+            <title>WebSocket Message Serialization</title>
+            <description>Ensure all objects sent via WebSocket are JSON-serializable</description>
+            <implementation>
+                Add serialization checks in WebSocket send methods to handle various object types
+            </implementation>
+        </practice>
+        
+        <practice>
+            <title>Database Constraint Validation</title>
+            <description>Validate foreign key constraints before attempting database operations</description>
+            <implementation>
+                Check if referenced entities exist before creating dependent records
+            </implementation>
+        </practice>
+    </best_practices>
+
+    <testing_notes>
+        <note>Run docker logs introspection after each fix to verify errors are resolved</note>
+        <note>Test with both mock and real LLM services to ensure compatibility</note>
+        <note>Verify WebSocket connections remain stable after fixes</note>
+    </testing_notes>
+</learnings>
