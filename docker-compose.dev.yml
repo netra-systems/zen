@@ -185,9 +185,11 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       
       # Auth Config
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-zZyIqeCZia66c1NxEgNowZFWbwMGROFg}
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      SERVICE_SECRET: xNp9hKjT5mQ8w2fE7vR4yU3iO6aS1gL9cB0zZ8tN6wX2eR4vY7uI0pQ3s9dF5gH8
+      SERVICE_ID: auth
       
       # OAuth Configuration
       GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT:-dev-oauth-client-id}

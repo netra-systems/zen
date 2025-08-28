@@ -1,11 +1,11 @@
 {
-  "audit_timestamp": "2025-08-28T12:21:30.107479",
+  "audit_timestamp": "2025-08-28T12:21:59.367359",
   "summary": {
-    "total_issues": 100,
+    "total_issues": 158,
     "critical_count": 0,
-    "high_count": 39,
-    "medium_count": 58,
-    "low_count": 3,
+    "high_count": 71,
+    "medium_count": 82,
+    "low_count": 5,
     "containers_analyzed": 7,
     "containers_with_issues": [
       "netra-postgres",
@@ -621,6 +621,270 @@
         "full_line": "2025-08-28T19:21:11.365390394Z \u001b[32m2025-08-28 19:21:11.347\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_82832879-d18a-466e-b068-6501959c8428\u001b[0m"
       },
       {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:30.417182115Z",
+        "line_number": 1010,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.llm.fallback_strategies\u001b[0m:\u001b[36m_log_retry_warning\u001b[0m:\u001b[36m102\u001b[0m | \u001b[33m\u001b[1mLLM operation triage_analysis failed (attempt 1/3): None. Retrying in 1.28s\u001b[0m",
+        "full_line": "2025-08-28T19:21:30.417182115Z \u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.llm.fallback_strategies\u001b[0m:\u001b[36m_log_retry_warning\u001b[0m:\u001b[36m102\u001b[0m | \u001b[33m\u001b[1mLLM operation triage_analysis failed (attempt 1/3): None. Retrying in 1.28s\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:30.417228311Z",
+        "line_number": 1011,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.core.resilience.unified_circuit_breaker\u001b[0m:\u001b[36m_transition_to_open\u001b[0m:\u001b[36m513\u001b[0m | \u001b[33m\u001b[1mCircuit breaker 'CircuitConfig(name='llm_fallback_triage', failure_threshold=3, recovery_timeout=30.0, half_open_max_calls=3, timeout_seconds=10.0, adaptive_threshold=True, slow_call_threshold=5.0, sliding_window_size=100)' -> OPEN\u001b[0m",
+        "full_line": "2025-08-28T19:21:30.417228311Z \u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.core.resilience.unified_circuit_breaker\u001b[0m:\u001b[36m_transition_to_open\u001b[0m:\u001b[36m513\u001b[0m | \u001b[33m\u001b[1mCircuit breaker 'CircuitConfig(name='llm_fallback_triage', failure_threshold=3, recovery_timeout=30.0, half_open_max_calls=3, timeout_seconds=10.0, adaptive_threshold=True, slow_call_threshold=5.0, sliding_window_size=100)' -> OPEN\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:31.705249129Z",
+        "line_number": 1019,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:31.699\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_82832879-d18a-466e-b068-6501959c8428\u001b[0m",
+        "full_line": "2025-08-28T19:21:31.705249129Z \u001b[32m2025-08-28 19:21:31.699\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_82832879-d18a-466e-b068-6501959c8428\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:31.823278915Z",
+        "line_number": 1021,
+        "log_excerpt": "/usr/local/lib/python3.11/site-packages/websockets/legacy/server.py:1178: DeprecationWarning: remove second argument of ws_handler",
+        "full_line": "2025-08-28T19:21:31.823278915Z /usr/local/lib/python3.11/site-packages/websockets/legacy/server.py:1178: DeprecationWarning: remove second argument of ws_handler"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:31.823347297Z",
+        "line_number": 1022,
+        "log_excerpt": "warnings.warn(\"remove second argument of ws_handler\", DeprecationWarning)",
+        "full_line": "2025-08-28T19:21:31.823347297Z   warnings.warn(\"remove second argument of ws_handler\", DeprecationWarning)"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:31.878046201Z",
+        "line_number": 1045,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:31.874\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+        "full_line": "2025-08-28T19:21:31.878046201Z \u001b[32m2025-08-28 19:21:31.874\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:31.925337566Z",
+        "line_number": 1049,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:31.922\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+        "full_line": "2025-08-28T19:21:31.925337566Z \u001b[32m2025-08-28 19:21:31.922\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:32.105434486Z",
+        "line_number": 1074,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:32.103\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+        "full_line": "2025-08-28T19:21:32.105434486Z \u001b[32m2025-08-28 19:21:32.103\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:32.113028148Z",
+        "line_number": 1075,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:32.112\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+        "full_line": "2025-08-28T19:21:32.113028148Z \u001b[32m2025-08-28 19:21:32.112\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:32.275744499Z",
+        "line_number": 1102,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:32.273\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+        "full_line": "2025-08-28T19:21:32.275744499Z \u001b[32m2025-08-28 19:21:32.273\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:32.307738684Z",
+        "line_number": 1104,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:32.294\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+        "full_line": "2025-08-28T19:21:32.307738684Z \u001b[32m2025-08-28 19:21:32.294\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Operation retry detected",
+        "pattern_matched": "retry|retrying",
+        "timestamp": "2025-08-28T19:21:41.327788220Z",
+        "line_number": 1153,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.327788220Z \u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Operation retry detected",
+        "pattern_matched": "retry|retrying",
+        "timestamp": "2025-08-28T19:21:41.348633691Z",
+        "line_number": 1154,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.348633691Z \u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.356213489Z",
+        "line_number": 1163,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate",
+        "full_line": "2025-08-28T19:21:41.356213489Z \u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Operation retry detected",
+        "pattern_matched": "retry|retrying",
+        "timestamp": "2025-08-28T19:21:41.359400700Z",
+        "line_number": 1169,
+        "log_excerpt": "[parameters: ('ee802322-6a3e-4d02-a734-9b56ca5f1c44', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (1764 characters truncated) ... \", \"last_updated\": \"2025-08-28T19:20:40.710338Z\", \"execution_context\": {}, \"custom_fields\": {}, \"retry_count\": 0, \"tags\": []}, \"quality_metrics\"",
+        "full_line": "2025-08-28T19:21:41.359400700Z [parameters: ('ee802322-6a3e-4d02-a734-9b56ca5f1c44', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (1764 characters truncated) ... \", \"last_updated\": \"2025-08-28T19:20:40.710338Z\", \"execution_context\": {}, \"custom_fields\": {}, \"retry_count\": 0, \"tags\": []}, \"quality_metrics\": {}}', 'compressed_json', None, 0, None, '{}', datetime.datetime(2025, 9, 4, 19, 21, 41, 354427, tzinfo=datetime.timezone.utc), False, None, None)]"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.359761098Z",
+        "line_number": 1171,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.358\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_thread\u001b[0m:\u001b[36m300\u001b[0m | \u001b[33m\u001b[1mNo active connections found for thread thread_dev-temp-f2eec4b3\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.359761098Z \u001b[32m2025-08-28 19:21:41.358\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_thread\u001b[0m:\u001b[36m300\u001b[0m | \u001b[33m\u001b[1mNo active connections found for thread thread_dev-temp-f2eec4b3\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.365990430Z",
+        "line_number": 1177,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.362\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_no_session_warning\u001b[0m:\u001b[36m136\u001b[0m | \u001b[33m\u001b[1mNo state found for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.365990430Z \u001b[32m2025-08-28 19:21:41.362\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_no_session_warning\u001b[0m:\u001b[36m136\u001b[0m | \u001b[33m\u001b[1mNo state found for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.369160264Z",
+        "line_number": 1179,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate",
+        "full_line": "2025-08-28T19:21:41.369160264Z \u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Operation retry detected",
+        "pattern_matched": "retry|retrying",
+        "timestamp": "2025-08-28T19:21:41.374485881Z",
+        "line_number": 1186,
+        "log_excerpt": "[parameters: ('484490ad-ee34-4b00-a712-727e1524deb0', 'run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989', 'thread_dev-temp-d6a41665', 'dev-temp-d6a41665', '1.0', '1.0', 'auto', '{\"user_request\": \"Help me reduce my AI costs by 30% while maintaining quality. I\\'m spending $5000/month on GPT-4 calls.\", \"chat_thread_id\": \"thread_ ... (424 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\":",
+        "full_line": "2025-08-28T19:21:41.374485881Z [parameters: ('484490ad-ee34-4b00-a712-727e1524deb0', 'run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989', 'thread_dev-temp-d6a41665', 'dev-temp-d6a41665', '1.0', '1.0', 'auto', '{\"user_request\": \"Help me reduce my AI costs by 30% while maintaining quality. I\\'m spending $5000/month on GPT-4 calls.\", \"chat_thread_id\": \"thread_ ... (424 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\": {}}', 'json', None, 0, 'initialization', '{\"step_count\": 0}', datetime.datetime(2025, 9, 4, 19, 21, 41, 366808, tzinfo=datetime.timezone.utc), True, None, None)]"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.406105502Z",
+        "line_number": 1202,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.376\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.agents.optimizations_core_sub_agent\u001b[0m:\u001b[36m_create_fallback_result\u001b[0m:\u001b[36m165\u001b[0m | \u001b[33m\u001b[1mUsing fallback optimization for run_id: run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.406105502Z \u001b[32m2025-08-28 19:21:41.376\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.agents.optimizations_core_sub_agent\u001b[0m:\u001b[36m_create_fallback_result\u001b[0m:\u001b[36m165\u001b[0m | \u001b[33m\u001b[1mUsing fallback optimization for run_id: run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.406309171Z",
+        "line_number": 1203,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.377\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.406309171Z \u001b[32m2025-08-28 19:21:41.377\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.414251199Z",
+        "line_number": 1206,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.379\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.414251199Z \u001b[32m2025-08-28 19:21:41.379\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Performance issue",
+        "pattern_matched": "slow query|performance",
+        "timestamp": "2025-08-28T19:21:41.414253710Z",
+        "line_number": 1207,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.414253710Z \u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "MEDIUM",
+        "issue_type": "Warning condition",
+        "pattern_matched": "WARNING|WARN",
+        "timestamp": "2025-08-28T19:21:41.414425803Z",
+        "line_number": 1208,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.414425803Z \u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+      },
+      {
         "container": "buildx_buildkit_staging-builder0",
         "container_id": "28b5e0fb7c93",
         "severity": "MEDIUM",
@@ -687,6 +951,28 @@
         "line_number": 685,
         "log_excerpt": "\u001b[32m2025-08-28 19:10:37.243\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.03s: 10/10 successful, 0 degraded, 0 failed\u001b[0m",
         "full_line": "2025-08-28T19:10:37.256459839Z \u001b[32m2025-08-28 19:10:37.243\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.03s: 10/10 successful, 0 degraded, 0 failed\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "LOW",
+        "issue_type": "Informational error",
+        "pattern_matched": "INFO.*failed|INFO.*error",
+        "timestamp": "2025-08-28T19:21:41.419897760Z",
+        "line_number": 1215,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.419897760Z \u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "LOW",
+        "issue_type": "Informational error",
+        "pattern_matched": "INFO.*failed|INFO.*error",
+        "timestamp": "2025-08-28T19:21:42.925225980Z",
+        "line_number": 1223,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m",
+        "full_line": "2025-08-28T19:21:42.925225980Z \u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m"
       }
     ],
     "HIGH": [
@@ -1109,6 +1395,336 @@
         "full_line": "2025-08-28T19:20:40.787084313Z \u001b[32m2025-08-28 19:20:40.784\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.actions_to_meet_goals_sub_agent\u001b[0m:\u001b[36m_handle_execution_failure\u001b[0m:\u001b[36m230\u001b[0m | \u001b[31m\u001b[1mExecution failed: UNKNOWN: Agent Missing required state: optimizations_result and data_result required execution failed in Missing required state: optimizations_result and data_result required\u001b[0m"
       },
       {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.051934799Z",
+        "line_number": 1111,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:35.045\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[31m\u001b[1mTask exception was never retrieved",
+        "full_line": "2025-08-28T19:21:35.051934799Z \u001b[32m2025-08-28 19:21:35.045\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[31m\u001b[1mTask exception was never retrieved"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.051982473Z",
+        "line_number": 1112,
+        "log_excerpt": "future: <Task finished name='Task-2739' coro=<<async_generator_athrow without __name__>()> exception=IllegalStateChangeError(\"Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5>\")>\u001b[0m",
+        "full_line": "2025-08-28T19:21:35.051982473Z future: <Task finished name='Task-2739' coro=<<async_generator_athrow without __name__>()> exception=IllegalStateChangeError(\"Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5>\")>\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.051988953Z",
+        "line_number": 1113,
+        "log_excerpt": "\u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m",
+        "full_line": "2025-08-28T19:21:35.051988953Z \u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.052008600Z",
+        "line_number": 1120,
+        "log_excerpt": "\u001b[1mDuring handling of the above exception, another exception occurred:\u001b[0m",
+        "full_line": "2025-08-28T19:21:35.052008600Z \u001b[1mDuring handling of the above exception, another exception occurred:\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.052035525Z",
+        "line_number": 1122,
+        "log_excerpt": "\u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m",
+        "full_line": "2025-08-28T19:21:35.052035525Z \u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.052047397Z",
+        "line_number": 1126,
+        "log_excerpt": "await self.gen.athrow(typ, value, traceback)",
+        "full_line": "2025-08-28T19:21:35.052047397Z     await self.gen.athrow(typ, value, traceback)"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.052087425Z",
+        "line_number": 1141,
+        "log_excerpt": "raise sa_exc.IllegalStateChangeError(",
+        "full_line": "2025-08-28T19:21:35.052087425Z     raise sa_exc.IllegalStateChangeError("
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:35.052089766Z",
+        "line_number": 1142,
+        "log_excerpt": "\u001b[31m\u001b[1msqlalchemy.exc.IllegalStateChangeError\u001b[0m:\u001b[1m Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5> (Background on this error at: https://sqlalche.me/e/20/isce)\u001b[0m",
+        "full_line": "2025-08-28T19:21:35.052089766Z \u001b[31m\u001b[1msqlalchemy.exc.IllegalStateChangeError\u001b[0m:\u001b[1m Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5> (Background on this error at: https://sqlalche.me/e/20/isce)\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.327788220Z",
+        "line_number": 1153,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.327788220Z \u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.348633691Z",
+        "line_number": 1154,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.348633691Z \u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.351721671Z",
+        "line_number": 1160,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.349\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.supervisor.pipeline_executor\u001b[0m:\u001b[36m_persist_batched_state\u001b[0m:\u001b[36m201\u001b[0m | \u001b[31m\u001b[1mError in batched state persistence: PIPELINE_COMPLETE\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.351721671Z \u001b[32m2025-08-28 19:21:41.349\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.supervisor.pipeline_executor\u001b[0m:\u001b[36m_persist_batched_state\u001b[0m:\u001b[36m201\u001b[0m | \u001b[31m\u001b[1mError in batched state persistence: PIPELINE_COMPLETE\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.356213489Z",
+        "line_number": 1163,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate",
+        "full_line": "2025-08-28T19:21:41.356213489Z \u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.356225327Z",
+        "line_number": 1165,
+        "log_excerpt": "value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-f2eec4b3@dev.local', input_type=str]\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.356225327Z   value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-f2eec4b3@dev.local', input_type=str]\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.359297438Z",
+        "line_number": 1166,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.357\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_82832879-d18a-466e-b068-6501959c8428: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+        "full_line": "2025-08-28T19:21:41.359297438Z \u001b[32m2025-08-28 19:21:41.357\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_82832879-d18a-466e-b068-6501959c8428: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.359405916Z",
+        "line_number": 1170,
+        "log_excerpt": "(Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.359405916Z (Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.369160264Z",
+        "line_number": 1179,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate",
+        "full_line": "2025-08-28T19:21:41.369160264Z \u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.369174261Z",
+        "line_number": 1181,
+        "log_excerpt": "value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-d6a41665@dev.local', input_type=str]\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.369174261Z   value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-d6a41665@dev.local', input_type=str]\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.374455063Z",
+        "line_number": 1183,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.372\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+        "full_line": "2025-08-28T19:21:41.374455063Z \u001b[32m2025-08-28 19:21:41.372\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.374499505Z",
+        "line_number": 1187,
+        "log_excerpt": "(Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.374499505Z (Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.414253710Z",
+        "line_number": 1207,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.414253710Z \u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.415914567Z",
+        "line_number": 1210,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.381\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.actions_to_meet_goals_sub_agent\u001b[0m:\u001b[36m_handle_execution_failure\u001b[0m:\u001b[36m230\u001b[0m | \u001b[31m\u001b[1mExecution failed: UNKNOWN: Agent Missing required state: optimizations_result and data_result required execution failed in Missing required state: optimizations_result and data_result required\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.415914567Z \u001b[32m2025-08-28 19:21:41.381\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.actions_to_meet_goals_sub_agent\u001b[0m:\u001b[36m_handle_execution_failure\u001b[0m:\u001b[36m230\u001b[0m | \u001b[31m\u001b[1mExecution failed: UNKNOWN: Agent Missing required state: optimizations_result and data_result required execution failed in Missing required state: optimizations_result and data_result required\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.419345032Z",
+        "line_number": 1214,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_send_to_connection\u001b[0m:\u001b[36m374\u001b[0m | \u001b[31m\u001b[1mError sending to connection conn_dev-temp-f2eec4b3_91381c66: Object of type DeepAgentState is not JSON serializable\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.419345032Z \u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_send_to_connection\u001b[0m:\u001b[36m374\u001b[0m | \u001b[31m\u001b[1mError sending to connection conn_dev-temp-f2eec4b3_91381c66: Object of type DeepAgentState is not JSON serializable\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.419897760Z",
+        "line_number": 1215,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.419897760Z \u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.421061670Z",
+        "line_number": 1217,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.420\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.421061670Z \u001b[32m2025-08-28 19:21:41.420\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.522656448Z",
+        "line_number": 1218,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.521\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.522656448Z \u001b[32m2025-08-28 19:21:41.521\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.723282390Z",
+        "line_number": 1219,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:41.722\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+        "full_line": "2025-08-28T19:21:41.723282390Z \u001b[32m2025-08-28 19:21:41.722\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:42.123748866Z",
+        "line_number": 1220,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:42.123\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+        "full_line": "2025-08-28T19:21:42.123748866Z \u001b[32m2025-08-28 19:21:42.123\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:42.925177284Z",
+        "line_number": 1221,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:42.923\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+        "full_line": "2025-08-28T19:21:42.925177284Z \u001b[32m2025-08-28 19:21:42.923\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:42.925222713Z",
+        "line_number": 1222,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m371\u001b[0m | \u001b[31m\u001b[1mToo many errors, closing connection conn_dev-temp-f2eec4b3_91381c66\u001b[0m",
+        "full_line": "2025-08-28T19:21:42.925222713Z \u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m371\u001b[0m | \u001b[31m\u001b[1mToo many errors, closing connection conn_dev-temp-f2eec4b3_91381c66\u001b[0m"
+      },
+      {
+        "container": "netra-backend",
+        "container_id": "52dfd9900297",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:42.925225980Z",
+        "line_number": 1223,
+        "log_excerpt": "\u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m",
+        "full_line": "2025-08-28T19:21:42.925225980Z \u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m"
+      },
+      {
         "container": "netra-postgres",
         "container_id": "23288d999f8c",
         "severity": "HIGH",
@@ -1118,6 +1734,28 @@
         "line_number": 3,
         "log_excerpt": "2025-08-28 19:20:40.761 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
         "full_line": "2025-08-28T19:20:40.761996903Z 2025-08-28 19:20:40.761 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+      },
+      {
+        "container": "netra-postgres",
+        "container_id": "23288d999f8c",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.356507503Z",
+        "line_number": 6,
+        "log_excerpt": "2025-08-28 19:21:41.356 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+        "full_line": "2025-08-28T19:21:41.356507503Z 2025-08-28 19:21:41.356 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+      },
+      {
+        "container": "netra-postgres",
+        "container_id": "23288d999f8c",
+        "severity": "HIGH",
+        "issue_type": "Application error",
+        "pattern_matched": "ERROR|Exception|Traceback",
+        "timestamp": "2025-08-28T19:21:41.370304698Z",
+        "line_number": 9,
+        "log_excerpt": "2025-08-28 19:21:41.370 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+        "full_line": "2025-08-28T19:21:41.370304698Z 2025-08-28 19:21:41.370 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
       }
     ]
   },
@@ -1728,6 +2366,270 @@
           "line_number": 984,
           "log_excerpt": "\u001b[32m2025-08-28 19:21:11.347\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_82832879-d18a-466e-b068-6501959c8428\u001b[0m",
           "full_line": "2025-08-28T19:21:11.365390394Z \u001b[32m2025-08-28 19:21:11.347\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_82832879-d18a-466e-b068-6501959c8428\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:30.417182115Z",
+          "line_number": 1010,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.llm.fallback_strategies\u001b[0m:\u001b[36m_log_retry_warning\u001b[0m:\u001b[36m102\u001b[0m | \u001b[33m\u001b[1mLLM operation triage_analysis failed (attempt 1/3): None. Retrying in 1.28s\u001b[0m",
+          "full_line": "2025-08-28T19:21:30.417182115Z \u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.llm.fallback_strategies\u001b[0m:\u001b[36m_log_retry_warning\u001b[0m:\u001b[36m102\u001b[0m | \u001b[33m\u001b[1mLLM operation triage_analysis failed (attempt 1/3): None. Retrying in 1.28s\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:30.417228311Z",
+          "line_number": 1011,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.core.resilience.unified_circuit_breaker\u001b[0m:\u001b[36m_transition_to_open\u001b[0m:\u001b[36m513\u001b[0m | \u001b[33m\u001b[1mCircuit breaker 'CircuitConfig(name='llm_fallback_triage', failure_threshold=3, recovery_timeout=30.0, half_open_max_calls=3, timeout_seconds=10.0, adaptive_threshold=True, slow_call_threshold=5.0, sliding_window_size=100)' -> OPEN\u001b[0m",
+          "full_line": "2025-08-28T19:21:30.417228311Z \u001b[32m2025-08-28 19:21:30.416\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.core.resilience.unified_circuit_breaker\u001b[0m:\u001b[36m_transition_to_open\u001b[0m:\u001b[36m513\u001b[0m | \u001b[33m\u001b[1mCircuit breaker 'CircuitConfig(name='llm_fallback_triage', failure_threshold=3, recovery_timeout=30.0, half_open_max_calls=3, timeout_seconds=10.0, adaptive_threshold=True, slow_call_threshold=5.0, sliding_window_size=100)' -> OPEN\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:31.705249129Z",
+          "line_number": 1019,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:31.699\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_82832879-d18a-466e-b068-6501959c8428\u001b[0m",
+          "full_line": "2025-08-28T19:21:31.705249129Z \u001b[32m2025-08-28 19:21:31.699\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_82832879-d18a-466e-b068-6501959c8428\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:31.823278915Z",
+          "line_number": 1021,
+          "log_excerpt": "/usr/local/lib/python3.11/site-packages/websockets/legacy/server.py:1178: DeprecationWarning: remove second argument of ws_handler",
+          "full_line": "2025-08-28T19:21:31.823278915Z /usr/local/lib/python3.11/site-packages/websockets/legacy/server.py:1178: DeprecationWarning: remove second argument of ws_handler"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:31.823347297Z",
+          "line_number": 1022,
+          "log_excerpt": "warnings.warn(\"remove second argument of ws_handler\", DeprecationWarning)",
+          "full_line": "2025-08-28T19:21:31.823347297Z   warnings.warn(\"remove second argument of ws_handler\", DeprecationWarning)"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:31.878046201Z",
+          "line_number": 1045,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:31.874\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+          "full_line": "2025-08-28T19:21:31.878046201Z \u001b[32m2025-08-28 19:21:31.874\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:31.925337566Z",
+          "line_number": 1049,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:31.922\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+          "full_line": "2025-08-28T19:21:31.925337566Z \u001b[32m2025-08-28 19:21:31.922\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:32.105434486Z",
+          "line_number": 1074,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:32.103\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+          "full_line": "2025-08-28T19:21:32.105434486Z \u001b[32m2025-08-28 19:21:32.103\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:32.113028148Z",
+          "line_number": 1075,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:32.112\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+          "full_line": "2025-08-28T19:21:32.113028148Z \u001b[32m2025-08-28 19:21:32.112\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:32.275744499Z",
+          "line_number": 1102,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:32.273\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+          "full_line": "2025-08-28T19:21:32.275744499Z \u001b[32m2025-08-28 19:21:32.273\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:32.307738684Z",
+          "line_number": 1104,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:32.294\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m",
+          "full_line": "2025-08-28T19:21:32.307738684Z \u001b[32m2025-08-28 19:21:32.294\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mUsing dev user: dev@example.com\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Operation retry detected",
+          "pattern_matched": "retry|retrying",
+          "timestamp": "2025-08-28T19:21:41.327788220Z",
+          "line_number": 1153,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.327788220Z \u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Operation retry detected",
+          "pattern_matched": "retry|retrying",
+          "timestamp": "2025-08-28T19:21:41.348633691Z",
+          "line_number": 1154,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.348633691Z \u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.356213489Z",
+          "line_number": 1163,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate",
+          "full_line": "2025-08-28T19:21:41.356213489Z \u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Operation retry detected",
+          "pattern_matched": "retry|retrying",
+          "timestamp": "2025-08-28T19:21:41.359400700Z",
+          "line_number": 1169,
+          "log_excerpt": "[parameters: ('ee802322-6a3e-4d02-a734-9b56ca5f1c44', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (1764 characters truncated) ... \", \"last_updated\": \"2025-08-28T19:20:40.710338Z\", \"execution_context\": {}, \"custom_fields\": {}, \"retry_count\": 0, \"tags\": []}, \"quality_metrics\"",
+          "full_line": "2025-08-28T19:21:41.359400700Z [parameters: ('ee802322-6a3e-4d02-a734-9b56ca5f1c44', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (1764 characters truncated) ... \", \"last_updated\": \"2025-08-28T19:20:40.710338Z\", \"execution_context\": {}, \"custom_fields\": {}, \"retry_count\": 0, \"tags\": []}, \"quality_metrics\": {}}', 'compressed_json', None, 0, None, '{}', datetime.datetime(2025, 9, 4, 19, 21, 41, 354427, tzinfo=datetime.timezone.utc), False, None, None)]"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.359761098Z",
+          "line_number": 1171,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.358\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_thread\u001b[0m:\u001b[36m300\u001b[0m | \u001b[33m\u001b[1mNo active connections found for thread thread_dev-temp-f2eec4b3\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.359761098Z \u001b[32m2025-08-28 19:21:41.358\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_thread\u001b[0m:\u001b[36m300\u001b[0m | \u001b[33m\u001b[1mNo active connections found for thread thread_dev-temp-f2eec4b3\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.365990430Z",
+          "line_number": 1177,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.362\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_no_session_warning\u001b[0m:\u001b[36m136\u001b[0m | \u001b[33m\u001b[1mNo state found for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.365990430Z \u001b[32m2025-08-28 19:21:41.362\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_no_session_warning\u001b[0m:\u001b[36m136\u001b[0m | \u001b[33m\u001b[1mNo state found for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.369160264Z",
+          "line_number": 1179,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate",
+          "full_line": "2025-08-28T19:21:41.369160264Z \u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Operation retry detected",
+          "pattern_matched": "retry|retrying",
+          "timestamp": "2025-08-28T19:21:41.374485881Z",
+          "line_number": 1186,
+          "log_excerpt": "[parameters: ('484490ad-ee34-4b00-a712-727e1524deb0', 'run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989', 'thread_dev-temp-d6a41665', 'dev-temp-d6a41665', '1.0', '1.0', 'auto', '{\"user_request\": \"Help me reduce my AI costs by 30% while maintaining quality. I\\'m spending $5000/month on GPT-4 calls.\", \"chat_thread_id\": \"thread_ ... (424 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\":",
+          "full_line": "2025-08-28T19:21:41.374485881Z [parameters: ('484490ad-ee34-4b00-a712-727e1524deb0', 'run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989', 'thread_dev-temp-d6a41665', 'dev-temp-d6a41665', '1.0', '1.0', 'auto', '{\"user_request\": \"Help me reduce my AI costs by 30% while maintaining quality. I\\'m spending $5000/month on GPT-4 calls.\", \"chat_thread_id\": \"thread_ ... (424 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\": {}}', 'json', None, 0, 'initialization', '{\"step_count\": 0}', datetime.datetime(2025, 9, 4, 19, 21, 41, 366808, tzinfo=datetime.timezone.utc), True, None, None)]"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.406105502Z",
+          "line_number": 1202,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.376\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.agents.optimizations_core_sub_agent\u001b[0m:\u001b[36m_create_fallback_result\u001b[0m:\u001b[36m165\u001b[0m | \u001b[33m\u001b[1mUsing fallback optimization for run_id: run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.406105502Z \u001b[32m2025-08-28 19:21:41.376\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.agents.optimizations_core_sub_agent\u001b[0m:\u001b[36m_create_fallback_result\u001b[0m:\u001b[36m165\u001b[0m | \u001b[33m\u001b[1mUsing fallback optimization for run_id: run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.406309171Z",
+          "line_number": 1203,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.377\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.406309171Z \u001b[32m2025-08-28 19:21:41.377\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.414251199Z",
+          "line_number": 1206,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.379\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.414251199Z \u001b[32m2025-08-28 19:21:41.379\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Performance issue",
+          "pattern_matched": "slow query|performance",
+          "timestamp": "2025-08-28T19:21:41.414253710Z",
+          "line_number": 1207,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.414253710Z \u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:21:41.414425803Z",
+          "line_number": 1208,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.414425803Z \u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36msend_to_user\u001b[0m:\u001b[36m242\u001b[0m | \u001b[33m\u001b[1mNo connections found for user run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989\u001b[0m"
         }
       ],
       "LOW": [
@@ -1763,6 +2665,28 @@
           "line_number": 685,
           "log_excerpt": "\u001b[32m2025-08-28 19:10:37.243\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.03s: 10/10 successful, 0 degraded, 0 failed\u001b[0m",
           "full_line": "2025-08-28T19:10:37.256459839Z \u001b[32m2025-08-28 19:10:37.243\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.03s: 10/10 successful, 0 degraded, 0 failed\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "LOW",
+          "issue_type": "Informational error",
+          "pattern_matched": "INFO.*failed|INFO.*error",
+          "timestamp": "2025-08-28T19:21:41.419897760Z",
+          "line_number": 1215,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.419897760Z \u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "LOW",
+          "issue_type": "Informational error",
+          "pattern_matched": "INFO.*failed|INFO.*error",
+          "timestamp": "2025-08-28T19:21:42.925225980Z",
+          "line_number": 1223,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m",
+          "full_line": "2025-08-28T19:21:42.925225980Z \u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m"
         }
       ],
       "HIGH": [
@@ -2183,6 +3107,336 @@
           "line_number": 923,
           "log_excerpt": "\u001b[32m2025-08-28 19:20:40.784\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.actions_to_meet_goals_sub_agent\u001b[0m:\u001b[36m_handle_execution_failure\u001b[0m:\u001b[36m230\u001b[0m | \u001b[31m\u001b[1mExecution failed: UNKNOWN: Agent Missing required state: optimizations_result and data_result required execution failed in Missing required state: optimizations_result and data_result required\u001b[0m",
           "full_line": "2025-08-28T19:20:40.787084313Z \u001b[32m2025-08-28 19:20:40.784\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.actions_to_meet_goals_sub_agent\u001b[0m:\u001b[36m_handle_execution_failure\u001b[0m:\u001b[36m230\u001b[0m | \u001b[31m\u001b[1mExecution failed: UNKNOWN: Agent Missing required state: optimizations_result and data_result required execution failed in Missing required state: optimizations_result and data_result required\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.051934799Z",
+          "line_number": 1111,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:35.045\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[31m\u001b[1mTask exception was never retrieved",
+          "full_line": "2025-08-28T19:21:35.051934799Z \u001b[32m2025-08-28 19:21:35.045\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[31m\u001b[1mTask exception was never retrieved"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.051982473Z",
+          "line_number": 1112,
+          "log_excerpt": "future: <Task finished name='Task-2739' coro=<<async_generator_athrow without __name__>()> exception=IllegalStateChangeError(\"Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5>\")>\u001b[0m",
+          "full_line": "2025-08-28T19:21:35.051982473Z future: <Task finished name='Task-2739' coro=<<async_generator_athrow without __name__>()> exception=IllegalStateChangeError(\"Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5>\")>\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.051988953Z",
+          "line_number": 1113,
+          "log_excerpt": "\u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m",
+          "full_line": "2025-08-28T19:21:35.051988953Z \u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.052008600Z",
+          "line_number": 1120,
+          "log_excerpt": "\u001b[1mDuring handling of the above exception, another exception occurred:\u001b[0m",
+          "full_line": "2025-08-28T19:21:35.052008600Z \u001b[1mDuring handling of the above exception, another exception occurred:\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.052035525Z",
+          "line_number": 1122,
+          "log_excerpt": "\u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m",
+          "full_line": "2025-08-28T19:21:35.052035525Z \u001b[33m\u001b[1mTraceback (most recent call last):\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.052047397Z",
+          "line_number": 1126,
+          "log_excerpt": "await self.gen.athrow(typ, value, traceback)",
+          "full_line": "2025-08-28T19:21:35.052047397Z     await self.gen.athrow(typ, value, traceback)"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.052087425Z",
+          "line_number": 1141,
+          "log_excerpt": "raise sa_exc.IllegalStateChangeError(",
+          "full_line": "2025-08-28T19:21:35.052087425Z     raise sa_exc.IllegalStateChangeError("
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:35.052089766Z",
+          "line_number": 1142,
+          "log_excerpt": "\u001b[31m\u001b[1msqlalchemy.exc.IllegalStateChangeError\u001b[0m:\u001b[1m Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5> (Background on this error at: https://sqlalche.me/e/20/isce)\u001b[0m",
+          "full_line": "2025-08-28T19:21:35.052089766Z \u001b[31m\u001b[1msqlalchemy.exc.IllegalStateChangeError\u001b[0m:\u001b[1m Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress and this would cause an unexpected state change to <SessionTransactionState.CLOSED: 5> (Background on this error at: https://sqlalche.me/e/20/isce)\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.327788220Z",
+          "line_number": 1153,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.327788220Z \u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.348633691Z",
+          "line_number": 1154,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.348633691Z \u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.351721671Z",
+          "line_number": 1160,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.349\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.supervisor.pipeline_executor\u001b[0m:\u001b[36m_persist_batched_state\u001b[0m:\u001b[36m201\u001b[0m | \u001b[31m\u001b[1mError in batched state persistence: PIPELINE_COMPLETE\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.351721671Z \u001b[32m2025-08-28 19:21:41.349\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.supervisor.pipeline_executor\u001b[0m:\u001b[36m_persist_batched_state\u001b[0m:\u001b[36m201\u001b[0m | \u001b[31m\u001b[1mError in batched state persistence: PIPELINE_COMPLETE\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.356213489Z",
+          "line_number": 1163,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate",
+          "full_line": "2025-08-28T19:21:41.356213489Z \u001b[32m2025-08-28 19:21:41.354\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-f2eec4b3: 1 validation error for UserCreate"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.356225327Z",
+          "line_number": 1165,
+          "log_excerpt": "value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-f2eec4b3@dev.local', input_type=str]\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.356225327Z   value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-f2eec4b3@dev.local', input_type=str]\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.359297438Z",
+          "line_number": 1166,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.357\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_82832879-d18a-466e-b068-6501959c8428: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+          "full_line": "2025-08-28T19:21:41.359297438Z \u001b[32m2025-08-28 19:21:41.357\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_82832879-d18a-466e-b068-6501959c8428: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.359405916Z",
+          "line_number": 1170,
+          "log_excerpt": "(Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.359405916Z (Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.369160264Z",
+          "line_number": 1179,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate",
+          "full_line": "2025-08-28T19:21:41.369160264Z \u001b[32m2025-08-28 19:21:41.366\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_ensure_user_exists_for_snapshot\u001b[0m:\u001b[36m449\u001b[0m | \u001b[33m\u001b[1mCould not auto-create dev user dev-temp-d6a41665: 1 validation error for UserCreate"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.369174261Z",
+          "line_number": 1181,
+          "log_excerpt": "value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-d6a41665@dev.local', input_type=str]\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.369174261Z   value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email. [type=value_error, input_value='dev-temp-d6a41665@dev.local', input_type=str]\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.374455063Z",
+          "line_number": 1183,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.372\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+          "full_line": "2025-08-28T19:21:41.374455063Z \u001b[32m2025-08-28 19:21:41.372\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.services.state_persistence\u001b[0m:\u001b[36m_handle_save_error\u001b[0m:\u001b[36m402\u001b[0m | \u001b[31m\u001b[1mFailed to save state for run run_8aa3dc6f-53f7-407d-a4ee-c5e50e1bf989: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.ForeignKeyViolationError'>: insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.374499505Z",
+          "line_number": 1187,
+          "log_excerpt": "(Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.374499505Z (Background on this error at: https://sqlalche.me/e/20/gkpj)\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.414253710Z",
+          "line_number": 1207,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.414253710Z \u001b[32m2025-08-28 19:21:41.380\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.data_sub_agent.execution_engine\u001b[0m:\u001b[36mexecute_analysis\u001b[0m:\u001b[36m210\u001b[0m | \u001b[31m\u001b[1mData analysis failed: 'ModernClickHouseOperations' object has no attribute 'analyze_performance_metrics'\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.415914567Z",
+          "line_number": 1210,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.381\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.actions_to_meet_goals_sub_agent\u001b[0m:\u001b[36m_handle_execution_failure\u001b[0m:\u001b[36m230\u001b[0m | \u001b[31m\u001b[1mExecution failed: UNKNOWN: Agent Missing required state: optimizations_result and data_result required execution failed in Missing required state: optimizations_result and data_result required\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.415914567Z \u001b[32m2025-08-28 19:21:41.381\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.agents.actions_to_meet_goals_sub_agent\u001b[0m:\u001b[36m_handle_execution_failure\u001b[0m:\u001b[36m230\u001b[0m | \u001b[31m\u001b[1mExecution failed: UNKNOWN: Agent Missing required state: optimizations_result and data_result required execution failed in Missing required state: optimizations_result and data_result required\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.419345032Z",
+          "line_number": 1214,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_send_to_connection\u001b[0m:\u001b[36m374\u001b[0m | \u001b[31m\u001b[1mError sending to connection conn_dev-temp-f2eec4b3_91381c66: Object of type DeepAgentState is not JSON serializable\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.419345032Z \u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_send_to_connection\u001b[0m:\u001b[36m374\u001b[0m | \u001b[31m\u001b[1mError sending to connection conn_dev-temp-f2eec4b3_91381c66: Object of type DeepAgentState is not JSON serializable\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.419897760Z",
+          "line_number": 1215,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.419897760Z \u001b[32m2025-08-28 19:21:41.417\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.manager\u001b[0m:\u001b[36m_cleanup_connection\u001b[0m:\u001b[36m220\u001b[0m | \u001b[1mWebSocket closed for connection conn_dev-temp-f2eec4b3_91381c66: 1011 - Send error\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.421061670Z",
+          "line_number": 1217,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.420\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.421061670Z \u001b[32m2025-08-28 19:21:41.420\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.522656448Z",
+          "line_number": 1218,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.521\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.522656448Z \u001b[32m2025-08-28 19:21:41.521\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.723282390Z",
+          "line_number": 1219,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.722\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.723282390Z \u001b[32m2025-08-28 19:21:41.722\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:42.123748866Z",
+          "line_number": 1220,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:42.123\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+          "full_line": "2025-08-28T19:21:42.123748866Z \u001b[32m2025-08-28 19:21:42.123\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:42.925177284Z",
+          "line_number": 1221,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:42.923\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m",
+          "full_line": "2025-08-28T19:21:42.925177284Z \u001b[32m2025-08-28 19:21:42.923\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m368\u001b[0m | \u001b[31m\u001b[1mMessage handling error for conn_dev-temp-f2eec4b3_91381c66: WebSocket is not connected. Need to call \"accept\" first.\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:42.925222713Z",
+          "line_number": 1222,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m371\u001b[0m | \u001b[31m\u001b[1mToo many errors, closing connection conn_dev-temp-f2eec4b3_91381c66\u001b[0m",
+          "full_line": "2025-08-28T19:21:42.925222713Z \u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m371\u001b[0m | \u001b[31m\u001b[1mToo many errors, closing connection conn_dev-temp-f2eec4b3_91381c66\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:42.925225980Z",
+          "line_number": 1223,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m",
+          "full_line": "2025-08-28T19:21:42.925225980Z \u001b[32m2025-08-28 19:21:42.924\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36m_handle_websocket_messages\u001b[0m:\u001b[36m383\u001b[0m | \u001b[1mExiting message handling loop for connection: conn_dev-temp-f2eec4b3_91381c66 | Duration: 71.3s | Messages processed: 1 | Errors: 5 | User: dev-temp-f2eec4b3\u001b[0m"
         }
       ]
     },
@@ -2235,85 +3489,107 @@
           "line_number": 3,
           "log_excerpt": "2025-08-28 19:20:40.761 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
           "full_line": "2025-08-28T19:20:40.761996903Z 2025-08-28 19:20:40.761 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+        },
+        {
+          "container": "netra-postgres",
+          "container_id": "23288d999f8c",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.356507503Z",
+          "line_number": 6,
+          "log_excerpt": "2025-08-28 19:21:41.356 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+          "full_line": "2025-08-28T19:21:41.356507503Z 2025-08-28 19:21:41.356 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
+        },
+        {
+          "container": "netra-postgres",
+          "container_id": "23288d999f8c",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:21:41.370304698Z",
+          "line_number": 9,
+          "log_excerpt": "2025-08-28 19:21:41.370 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\"",
+          "full_line": "2025-08-28T19:21:41.370304698Z 2025-08-28 19:21:41.370 UTC [13755] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user_id_fkey\""
         }
       ]
     }
   },
   "issue_categories": {
-    "Warning condition": 46,
-    "Performance issue": 9,
+    "Warning condition": 65,
+    "Performance issue": 10,
     "Validation error": 2,
-    "Operation retry detected": 1,
-    "Informational error": 3,
+    "Operation retry detected": 5,
+    "Informational error": 5,
     "Authentication issue": 2,
-    "Application error": 37
+    "Application error": 69
   },
   "container_stats": {
     "netra-auth": {
-      "cpu_usage": "6.41%",
-      "memory_usage": "109.6MiB / 31.19GiB",
-      "memory_percent": "0.34%",
-      "network_io": "30.2kB / 26.6kB",
-      "block_io": "9.42MB / 0B"
+      "cpu_usage": "3.90%",
+      "memory_usage": "104.3MiB / 31.19GiB",
+      "memory_percent": "0.33%",
+      "network_io": "45.5kB / 37.2kB",
+      "block_io": "9.55MB / 0B"
     },
     "netra-backend": {
-      "cpu_usage": "5.79%",
-      "memory_usage": "294.7MiB / 31.19GiB",
+      "cpu_usage": "5.06%",
+      "memory_usage": "293.4MiB / 31.19GiB",
       "memory_percent": "0.92%",
-      "network_io": "268kB / 794kB",
-      "block_io": "44.5MB / 0B"
+      "network_io": "387kB / 928kB",
+      "block_io": "44.6MB / 0B"
     },
     "buildx_buildkit_staging-builder0": {
-      "cpu_usage": "0.01%",
+      "cpu_usage": "0.00%",
       "memory_usage": "231.8MiB / 31.19GiB",
       "memory_percent": "0.73%",
       "network_io": "231MB / 3.16MB",
       "block_io": "210MB / 2.4GB"
     },
     "netra-frontend": {
-      "cpu_usage": "0.03%",
-      "memory_usage": "1.342GiB / 31.19GiB",
-      "memory_percent": "4.30%",
-      "network_io": "1.4MB / 30.8MB",
-      "block_io": "460MB / 248MB"
+      "cpu_usage": "0.01%",
+      "memory_usage": "1.459GiB / 31.19GiB",
+      "memory_percent": "4.68%",
+      "network_io": "1.46MB / 32.7MB",
+      "block_io": "473MB / 261MB"
     },
     "netra-postgres": {
       "cpu_usage": "0.00%",
-      "memory_usage": "44.95MiB / 31.19GiB",
-      "memory_percent": "0.14%",
-      "network_io": "1.8MB / 1.78MB",
-      "block_io": "65.9MB / 1.02MB"
+      "memory_usage": "52.95MiB / 31.19GiB",
+      "memory_percent": "0.17%",
+      "network_io": "1.87MB / 1.83MB",
+      "block_io": "71.3MB / 1.1MB"
     },
     "netra-clickhouse": {
-      "cpu_usage": "23.45%",
-      "memory_usage": "469.8MiB / 31.19GiB",
-      "memory_percent": "1.47%",
+      "cpu_usage": "0.49%",
+      "memory_usage": "509.2MiB / 31.19GiB",
+      "memory_percent": "1.59%",
       "network_io": "124kB / 782kB",
-      "block_io": "482MB / 4.44GB"
+      "block_io": "484MB / 4.45GB"
     },
     "netra-redis": {
-      "cpu_usage": "0.37%",
-      "memory_usage": "12.14MiB / 31.19GiB",
+      "cpu_usage": "0.45%",
+      "memory_usage": "12.89MiB / 31.19GiB",
       "memory_percent": "0.04%",
-      "network_io": "49.1kB / 25.8kB",
-      "block_io": "34MB / 2.75MB"
+      "network_io": "49.8kB / 26.1kB",
+      "block_io": "36.1MB / 2.76MB"
     }
   },
   "remediation_priorities": [
     {
       "container": "netra-backend",
-      "priority_score": 4353,
+      "priority_score": 7595,
       "issues": {
-        "MEDIUM": 55,
-        "LOW": 3,
-        "HIGH": 38
+        "MEDIUM": 79,
+        "LOW": 5,
+        "HIGH": 68
       }
     },
     {
       "container": "netra-postgres",
-      "priority_score": 100,
+      "priority_score": 300,
       "issues": {
-        "HIGH": 1
+        "HIGH": 3
       }
     },
     {

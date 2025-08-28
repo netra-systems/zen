@@ -1,11 +1,11 @@
 {
-  "generated_at": "2025-08-28T12:21:30.116308",
+  "generated_at": "2025-08-28T12:21:59.387224",
   "agent_assignments": [
     {
       "agent_type": "general_remediation_agent",
       "issue_type": "Warning condition",
       "severity": "MEDIUM",
-      "issue_count": 46,
+      "issue_count": 65,
       "affected_containers": [
         "netra-backend",
         "buildx_buildkit_staging-builder0"
@@ -50,7 +50,7 @@
       "agent_type": "performance_optimization_agent",
       "issue_type": "Performance issue",
       "severity": "MEDIUM",
-      "issue_count": 9,
+      "issue_count": 10,
       "affected_containers": [
         "netra-backend"
       ],
@@ -127,7 +127,7 @@
       "agent_type": "general_remediation_agent",
       "issue_type": "Operation retry detected",
       "severity": "MEDIUM",
-      "issue_count": 1,
+      "issue_count": 5,
       "affected_containers": [
         "netra-backend"
       ],
@@ -142,6 +142,28 @@
           "line_number": 899,
           "log_excerpt": "[parameters: ('e4fe04e6-5fe2-464a-a3f1-6680f14f5590', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (420 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\":",
           "full_line": "2025-08-28T19:20:40.763496109Z [parameters: ('e4fe04e6-5fe2-464a-a3f1-6680f14f5590', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (420 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\": {}}', 'json', None, 0, 'initialization', '{\"step_count\": 0}', datetime.datetime(2025, 9, 4, 19, 20, 40, 749374, tzinfo=datetime.timezone.utc), True, None, None)]"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Operation retry detected",
+          "pattern_matched": "retry|retrying",
+          "timestamp": "2025-08-28T19:21:41.327788220Z",
+          "line_number": 1153,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.327788220Z \u001b[32m2025-08-28 19:21:41.326\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_reporting failed after 2 attempts: None\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Operation retry detected",
+          "pattern_matched": "retry|retrying",
+          "timestamp": "2025-08-28T19:21:41.348633691Z",
+          "line_number": 1154,
+          "log_excerpt": "\u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m",
+          "full_line": "2025-08-28T19:21:41.348633691Z \u001b[32m2025-08-28 19:21:41.347\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.llm.retry_helpers\u001b[0m:\u001b[36mlog_final_failure\u001b[0m:\u001b[36m51\u001b[0m | \u001b[31m\u001b[1mLLM operation execute_triage failed after 2 attempts: None\u001b[0m"
         }
       ]
     },
@@ -149,7 +171,7 @@
       "agent_type": "general_remediation_agent",
       "issue_type": "Informational error",
       "severity": "LOW",
-      "issue_count": 3,
+      "issue_count": 5,
       "affected_containers": [
         "netra-backend"
       ],
@@ -226,7 +248,7 @@
       "agent_type": "error_remediation_agent",
       "issue_type": "Application error",
       "severity": "HIGH",
-      "issue_count": 37,
+      "issue_count": 69,
       "affected_containers": [
         "netra-postgres",
         "netra-backend"
@@ -274,161 +296,175 @@
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Authentication issue",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "auth_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Authentication issue",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "auth_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "HIGH",
       "container": "netra-backend",
       "issue": "Application error",
-      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "scheduled_for": "2025-08-28T12:26:59.387224",
       "assigned_agent": "error_remediation_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Warning condition",
-      "scheduled_for": "2025-08-28T12:51:30.116308",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Warning condition",
-      "scheduled_for": "2025-08-28T12:51:30.116308",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Performance issue",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "performance_optimization_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Performance issue",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "performance_optimization_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Warning condition",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Warning condition",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Performance issue",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "performance_optimization_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Warning condition",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Warning condition",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "MEDIUM",
       "container": "netra-backend",
       "issue": "Warning condition",
-      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "scheduled_for": "2025-08-28T12:51:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "LOW",
       "container": "netra-backend",
       "issue": "Informational error",
-      "scheduled_for": "2025-08-28T13:21:30.117312",
+      "scheduled_for": "2025-08-28T13:21:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "LOW",
       "container": "netra-backend",
       "issue": "Informational error",
-      "scheduled_for": "2025-08-28T13:21:30.117312",
+      "scheduled_for": "2025-08-28T13:21:59.387224",
       "assigned_agent": "general_remediation_agent"
     },
     {
       "priority": "LOW",
       "container": "netra-backend",
       "issue": "Informational error",
-      "scheduled_for": "2025-08-28T13:21:30.117312",
+      "scheduled_for": "2025-08-28T13:21:59.387224",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "LOW",
+      "container": "netra-backend",
+      "issue": "Informational error",
+      "scheduled_for": "2025-08-28T13:21:59.387224",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "LOW",
+      "container": "netra-backend",
+      "issue": "Informational error",
+      "scheduled_for": "2025-08-28T13:21:59.387224",
       "assigned_agent": "general_remediation_agent"
     }
   ]

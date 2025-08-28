@@ -89,6 +89,10 @@ langchain-google-genai>=2.0.0
 # FastMCP enables Model Context Protocol (MCP) integration for tool use and context sharing
 fastmcp==2.11.3
 
+# --- Google Cloud Services ---
+# Google Cloud Secret Manager for secure secret management
+google-cloud-secret-manager>=2.20.0
+
 # --- Utilities ---
 # General-purpose retrying library.
 tenacity>=9.1.2
