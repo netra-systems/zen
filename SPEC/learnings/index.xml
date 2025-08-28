@@ -1449,4 +1449,17 @@
             <critical-takeaway>Always use graceful shutdown (Ctrl+C) to prevent orphaned processes that hold ports on Windows.</critical-takeaway>
         </category>
     </windows_development>
+    
+    <performance_optimization>
+        <category name="State Persistence Optimization" path="SPEC/learnings/state_persistence_optimization.xml" keywords="State Persistence, Performance Optimization, Database Writes, Caching, Deduplication, Pipeline Batching, Facade Pattern">
+            <critical-takeaway>CRITICAL: State persistence optimization achieves 35-45% performance improvement but requires fixing critical security and reliability issues before production deployment</critical-takeaway>
+            <critical-takeaway>CRITICAL: MD5 hashing vulnerability must be resolved immediately - replace with SHA-256 for production safety</critical-takeaway>
+            <critical-takeaway>Facade pattern with composition enables SSOT-compliant optimization of existing services while maintaining backwards compatibility</critical-takeaway>
+            <critical-takeaway>Feature flags provide essential safety mechanism for gradual rollout of performance optimizations in production</critical-takeaway>
+            <critical-takeaway>Application-level caching with hash-based deduplication effectively reduces database write load without requiring database architecture changes</critical-takeaway>
+            <critical-takeaway>Deep copy operations prevent double JSON serialization bugs when modifying request objects containing already-serialized data</critical-takeaway>
+            <critical-takeaway>Optimize only non-critical checkpoints (AUTO, INTERMEDIATE, PIPELINE_COMPLETE) while preserving standard persistence for critical save points</critical-takeaway>
+            <critical-takeaway>Pipeline executor batching integration offers additional 20-30% performance gains once base optimization is stable</critical-takeaway>
+        </category>
+    </performance_optimization>
 </specification>
