@@ -383,6 +383,17 @@
             <critical-takeaway>Environment variables must be prefixed with NEXT_PUBLIC_ for browser availability.</critical-takeaway>
         </category>
         
+        <category name="GTM Infinite Loop Prevention" path="SPEC/learnings/gtm_infinite_loop_prevention.xml" keywords="GTM, Circuit Breaker, Infinite Loop, AuthGuard, Event Deduplication, Rate Limiting, Performance, Memory Leak">
+            <critical-takeaway>CRITICAL: AuthGuard component can cause infinite GTM event loops - use refs to track if events already fired.</critical-takeaway>
+            <critical-takeaway>Implement circuit breaker pattern for ALL analytics integrations to prevent event storms.</critical-takeaway>
+            <critical-takeaway>Event deduplication window (2 seconds) prevents duplicate events from rapid re-renders.</critical-takeaway>
+            <critical-takeaway>Rate limiting (100 events per type/minute) protects against legitimate event spam.</critical-takeaway>
+            <critical-takeaway>Circuit breaker trips after 50 failures in 10 seconds, auto-recovers after 30 seconds.</critical-takeaway>
+            <critical-takeaway>Memory management critical - cleanup old tracking data every minute to prevent leaks.</critical-takeaway>
+            <critical-takeaway>GTMProvider must integrate circuit breaker checks BEFORE pushing to dataLayer.</critical-takeaway>
+            <critical-takeaway>Test suites must verify: no infinite loops, deduplication works, rate limits enforced, circuit breaker trips/recovers.</critical-takeaway>
+        </category>
+        
         <category name="WebSocket Connection Lifecycle" path="SPEC/learnings/websocket.xml" keywords="WebSocket, Accept, Connection, Lifecycle, Authentication, Context Manager, State Management">
             <critical-takeaway>CRITICAL: websocket.accept() MUST be called before ANY WebSocket operations to prevent "WebSocket is not connected" errors.</critical-takeaway>
             <critical-takeaway>Authentication and context managers must execute AFTER accept() to ensure connection is established.</critical-takeaway>
