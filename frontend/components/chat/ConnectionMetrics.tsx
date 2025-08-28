@@ -76,7 +76,7 @@ const ReconnectionDisplay: React.FC<{ count: number; lastTime: number | null }> 
   );
 };
 
-export const ConnectionMetrics: React.FC<ConnectionMetricsProps> = ({
+const ConnectionMetrics: React.FC<ConnectionMetricsProps> = ({
   metrics,
   isExpanded = false,
   className = ''
@@ -104,5 +104,7 @@ export const ConnectionMetrics: React.FC<ConnectionMetricsProps> = ({
     </div>
   );
 };
+
+ConnectionMetrics.displayName = 'ConnectionMetrics';
 
 export default ConnectionMetrics;

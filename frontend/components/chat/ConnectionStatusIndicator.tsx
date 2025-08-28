@@ -3,16 +3,19 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Wifi, WifiOff, RotateCw } from 'lucide-react';
 import { useWebSocketContext } from '@/providers/WebSocketProvider';
 import { webSocketService } from '@/services/webSocketService';
-import { ConnectionMetrics } from './ConnectionMetrics';
+import ConnectionMetricsComponent from './ConnectionMetrics';
 import { 
   ConnectionState, 
   ConnectionMetrics as IConnectionMetrics,
   getConnectionState, 
   getStatusInfo 
 } from '@/utils/connection-status-utils';
+
+// Import icons individually to avoid potential undefined issues
+import * as LucideIcons from 'lucide-react';
+const { ChevronDown, Wifi, WifiOff, RotateCw } = LucideIcons;
 
 interface ConnectionStatusIndicatorProps {
   className?: string;
@@ -36,20 +39,20 @@ const StatusDot: React.FC<{
   );
 };
 
-// Status icon component
+// Status icon component - with null checks
 const StatusIcon: React.FC<{ state: ConnectionState }> = ({ state }) => {
   const iconProps = { size: 14, className: "text-zinc-600" };
   
   switch (state) {
     case 'connected':
-      return <Wifi {...iconProps} className="text-emerald-600" />;
+      return Wifi ? <Wifi {...iconProps} className="text-emerald-600" /> : <div className="w-3 h-3 bg-emerald-600 rounded" />;
     case 'connecting':
     case 'reconnecting':
-      return <RotateCw {...iconProps} className="animate-spin" />;
+      return RotateCw ? <RotateCw {...iconProps} className="animate-spin" /> : <div className="w-3 h-3 bg-blue-600 rounded animate-spin" />;
     case 'disconnected':
     case 'error':
     default:
-      return <WifiOff {...iconProps} className="text-red-600" />;
+      return WifiOff ? <WifiOff {...iconProps} className="text-red-600" /> : <div className="w-3 h-3 bg-red-600 rounded" />;
   }
 };
 
@@ -93,7 +96,7 @@ const useConnectionMetrics = (): IConnectionMetrics => {
   return metrics;
 };
 
-export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
+const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
   className = '',
   compact = false
 }) => {
@@ -158,7 +161,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ChevronDown size={16} className="text-zinc-500" />
+            {ChevronDown ? <ChevronDown size={16} className="text-zinc-500" /> : <div className="w-4 h-4 bg-zinc-500" />}
           </motion.div>
         </div>
         
@@ -171,7 +174,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden"
             >
-              <ConnectionMetrics metrics={metrics} isExpanded={true} />
+              <ConnectionMetricsComponent metrics={metrics} isExpanded={true} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -179,5 +182,7 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
     </div>
   );
 };
+
+ConnectionStatusIndicator.displayName = 'ConnectionStatusIndicator';
 
 export default ConnectionStatusIndicator;
