@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Intelligent Docker Authentication Issue Remediation</title>
+        <category>intelligent_remediation</category>
+        <tags>docker, authentication, security, remediation, auth_service, backend</tags>
+        <created>2025-08-28</created>
+        <importance>high</importance>
+        <consolidates>
+            <learning>intelligent_remediation_auth_iteration_1-4</learning>
+            <learning>intelligent_remediation_backend_iteration_1-7</learning>
+        </consolidates>
+    </metadata>
+    
+    <context>
+        Multiple authentication issues were detected and remediated across both netra-auth
+        and netra-backend containers using the intelligent Docker remediation system with
+        security_specialist agents.
+    </context>
+    
+    <issue_description>
+        Authentication failures detected in Docker containers with patterns:
+        - netra-auth: 4 occurrences of authentication failures
+        - netra-backend: 7 occurrences of authentication issues
+        
+        Pattern matched: authentication.*failed|unauthorized|(?:status|response|error|HTTP)[:\s]+(?:401|403)
+    </issue_description>
+    
+    <remediation_statistics>
+        <auth_service>
+            <total_remediations>4</total_remediations>
+            <average_success_rate>58%</average_success_rate>
+            <successful_commands>7</successful_commands>
+            <total_commands>12</total_commands>
+        </auth_service>
+        <backend_service>
+            <total_remediations>7</total_remediations>
+            <average_success_rate>67%</average_success_rate>
+            <successful_commands>14</successful_commands>
+            <total_commands>21</total_commands>
+        </backend_service>
+    </remediation_statistics>
+    
+    <agent_deployment>
+        <type>security_specialist</type>
+        <total_deployments>11</total_deployments>
+        <deployment_pattern>Automatic deployment on authentication issue detection</deployment_pattern>
+    </agent_deployment>
+    
+    <common_actions>
+        <action>Verify auth_service status</action>
+        <action>Check JWT configuration</action>
+        <action>Validate certificates</action>
+        <action>Update security middleware</action>
+        <action>Test authentication flow</action>
+        <action>Check auth errors in logs</action>
+        <action>Attempt service restart</action>
+    </common_actions>
+    
+    <execution_patterns>
+        <successful_commands>
+            <command>Check auth service status</command>
+            <command>Check auth errors in logs</command>
+            <command>Validate JWT configuration</command>
+        </successful_commands>
+        <failed_commands>
+            <command>Restart auth service (often failed due to container naming issues)</command>
+            <command>Update security middleware (requires file system access)</command>
+        </failed_commands>
+    </execution_patterns>
+    
+    <insights>
+        <insight>Security specialist agents deployed consistently for authentication issues</insight>
+        <insight>Service restart commands frequently failed due to incorrect container naming</insight>
+        <insight>Log checking and status verification commands had high success rates</insight>
+        <insight>Backend authentication issues outnumbered auth service issues 7:4</insight>
+        <insight>Container naming must match docker-compose.dev.yml exactly: netra-auth, netra-backend</insight>
+    </insights>
+    
+    <recommendations>
+        <recommendation>Fix container naming in remediation scripts to use exact names from docker-compose</recommendation>
+        <recommendation>Implement health check endpoints for authentication validation</recommendation>
+        <recommendation>Add JWT token refresh mechanism to prevent auth failures</recommendation>
+        <recommendation>Consider implementing circuit breaker pattern for auth service</recommendation>
+        <recommendation>Add automated rollback mechanism if remediation fails</recommendation>
+    </recommendations>
+    
+    <related_learnings>
+        <learning>docker_container_naming_remediation.xml</learning>
+        <learning>auth_service_critical_issues_fixed.xml</learning>
+        <learning>authentication_bypass_vulnerability_fix_2025.xml</learning>
+    </related_learnings>
+</learning>

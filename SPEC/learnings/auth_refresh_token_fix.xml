@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Auth Refresh Token 422 Error Fix</title>
+    <date>2025-08-28</date>
+    <category>authentication</category>
+    <severity>critical</severity>
+    <services>auth_service, frontend</services>
+  </metadata>
+  
+  <problem>
+    <description>
+      Auth refresh endpoint returning 422 Unprocessable Content error when frontend attempts to refresh tokens.
+      This causes authentication to fail after access token expires, requiring users to log in repeatedly.
+    </description>
+    
+    <symptoms>
+      <symptom>HTTP 422 error from POST /auth/refresh endpoint</symptom>
+      <symptom>Error message: "refresh_token field is required"</symptom>
+      <symptom>Frontend sends empty request body to refresh endpoint</symptom>
+      <symptom>Users unable to maintain authenticated sessions</symptom>
+    </symptoms>
+    
+    <root_cause>
+      Frontend auth-service-client.ts was not sending the refresh token in the request body.
+      The refresh endpoint expects a JSON body with refresh_token field, but frontend was sending
+      an empty POST request with only credentials: 'include' for cookies.
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <changes>
+      <change>
+        <file>frontend/lib/auth-service-client.ts</file>
+        <description>
+          Modified refreshToken() method to:
+          1. Retrieve refresh_token from localStorage
+          2. Send it in JSON request body with Content-Type header
+          3. Handle new refresh tokens in response
+          4. Clear tokens on 401/422 errors
+        </description>
+      </change>
+    </changes>
+    
+    <code_before><![CDATA[
+async refreshToken(): Promise<{ access_token: string; refresh_token?: string }> {
+  logger.debug('Refreshing access token', { environment: this.environment });
+  
+  const response = await fetch(this.endpoints.authRefresh, {
+    method: 'POST',
+    credentials: 'include', // Needed for refresh token cookie
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Token refresh failed: ${response.status}`);
+  }
+  
+  const tokens = await response.json();
+  logger.info('Token refreshed successfully');
+  return tokens;
+}
+    ]]></code_before>
+    
+    <code_after><![CDATA[
+async refreshToken(): Promise<{ access_token: string; refresh_token?: string }> {
+  logger.debug('Refreshing access token', { environment: this.environment });
+  
+  // Get refresh token from localStorage
+  const refreshToken = localStorage.getItem('refresh_token');
+  
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+  
+  const response = await fetch(this.endpoints.authRefresh, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Needed for cookies if any
+    body: JSON.stringify({ 
+      refresh_token: refreshToken 
+    }),
+  });
+  
+  if (!response.ok) {
+    // If refresh fails, clear tokens
+    if (response.status === 401 || response.status === 422) {
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('jwt_token');
+    }
+    throw new Error(`Token refresh failed: ${response.status}`);
+  }
+  
+  const tokens = await response.json();
+  
+  // Update stored refresh token if a new one was provided
+  if (tokens.refresh_token) {
+    localStorage.setItem('refresh_token', tokens.refresh_token);
+  }
+  
+  logger.info('Token refreshed successfully');
+  return tokens;
+}
+    ]]></code_after>
+  </solution>
+  
+  <testing_requirements>
+    <requirement>
+      <type>e2e</type>
+      <description>Test complete refresh flow from frontend to auth service</description>
+      <scenarios>
+        <scenario>Successful token refresh with valid refresh token</scenario>
+        <scenario>Error handling for missing refresh token</scenario>
+        <scenario>Error handling for invalid/expired refresh token</scenario>
+        <scenario>Race condition protection for concurrent refresh requests</scenario>
+      </scenarios>
+    </requirement>
+    
+    <requirement>
+      <type>integration</type>
+      <description>Test auth service refresh endpoint integration</description>
+      <scenarios>
+        <scenario>Accepts refresh_token in request body</scenario>
+        <scenario>Accepts refreshToken (camelCase) field name</scenario>
+        <scenario>Returns 422 when refresh_token field is missing</scenario>
+        <scenario>Returns 401 for invalid/expired tokens</scenario>
+      </scenarios>
+    </requirement>
+    
+    <requirement>
+      <type>unit</type>
+      <description>Test frontend and backend components individually</description>
+      <scenarios>
+        <scenario>Frontend stores refresh token from OAuth callback</scenario>
+        <scenario>Frontend retrieves and sends refresh token correctly</scenario>
+        <scenario>Backend validates refresh token format and expiry</scenario>
+        <scenario>Backend generates new token pair on successful refresh</scenario>
+      </scenarios>
+    </requirement>
+  </testing_requirements>
+  
+  <prevention>
+    <guideline>Always test token refresh flow end-to-end after auth changes</guideline>
+    <guideline>Ensure frontend and backend contract alignment for auth endpoints</guideline>
+    <guideline>Add request/response logging for auth endpoints in staging</guideline>
+    <guideline>Document expected request format in auth service OpenAPI spec</guideline>
+    <guideline>Add health checks that validate auth refresh flow</guideline>
+  </prevention>
+  
+  <related_issues>
+    <issue>Frontend OAuth callback stores refresh token in localStorage</issue>
+    <issue>Auth service accepts multiple field name formats for compatibility</issue>
+    <issue>Token storage and retrieval must be consistent across frontend</issue>
+    <issue>Race condition protection needed for concurrent refresh requests</issue>
+  </related_issues>
+</learning>

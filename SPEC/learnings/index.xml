@@ -298,6 +298,14 @@
             <critical-takeaway>Environment variables for optional services should be configured even if service is not running.</critical-takeaway>
         </category>
         
+        <category name="Docker Container Naming in Remediation Scripts" path="SPEC/learnings/docker_container_naming_remediation.xml" keywords="Docker, Container Names, Remediation, Auth Service, Database, Postgres, ClickHouse">
+            <critical-takeaway>CRITICAL: Container names in Netra use "netra-" prefix consistently: netra-auth, netra-postgres, netra-clickhouse, netra-backend, netra-frontend, netra-redis</critical-takeaway>
+            <critical-takeaway>Docker remediation scripts must use exact container names from docker-compose.dev.yml - Docker doesn't accept partial matches for specific container operations</critical-takeaway>
+            <critical-takeaway>ALWAYS verify actual container names from docker-compose.dev.yml before hardcoding in scripts to prevent "container not found" errors</critical-takeaway>
+            <critical-takeaway>Test remediation commands manually before deploying intelligent remediation to avoid cascading failures</critical-takeaway>
+            <critical-takeaway>When using docker ps filters, "name=auth" works for finding "netra-auth" but "docker restart auth_service" fails - be specific</critical-takeaway>
+        </category>
+        
         <category name="CORS Configuration" path="SPEC/learnings/cors_development_wildcard.xml" keywords="CORS, localhost, 127.0.0.1, Origin, Development, Wildcard, Cross-Origin">
             <critical-takeaway>CRITICAL: Development CORS MUST use wildcard ("*") to handle localhost vs 127.0.0.1 mismatches.</critical-takeaway>
             <critical-takeaway>NEVER change development CORS back to explicit origin lists - wildcard is required for proper local development.</critical-takeaway>
@@ -1526,4 +1534,25 @@
             <critical-takeaway>Test mock proliferation is expected and healthy for proper test isolation - not an SSOT violation.</critical-takeaway>
         </category>
     </ssot_compliance>
+    
+    <intelligent_remediation>
+        <category name="Intelligent Docker Authentication Remediation" path="SPEC/learnings/intelligent_remediation_auth_consolidated.xml" keywords="Docker, Remediation, Authentication, Security, Agent Deployment, Container Management, Auth Service, Backend, netra-auth, netra-backend">
+            <critical-takeaway>Docker container names MUST match docker-compose.dev.yml exactly: netra-auth, netra-backend, netra-postgres, netra-clickhouse, netra-frontend, netra-redis</critical-takeaway>
+            <critical-takeaway>Security specialist agents automatically deployed for authentication issues (401/403 errors) across containers</critical-takeaway>
+            <critical-takeaway>Service restart commands frequently fail without correct container naming - docker restart requires exact names</critical-takeaway>
+            <critical-takeaway>Backend authentication issues outnumber auth service issues 7:4 - focus remediation on backend middleware</critical-takeaway>
+            <critical-takeaway>Log analysis commands have highest success rate (>80%), service restarts lowest (<30%) due to container naming</critical-takeaway>
+            <critical-takeaway>Intelligent remediation saves learnings with meaningful names: intelligent_remediation_{category}_{timestamp}.xml</critical-takeaway>
+            <critical-takeaway>Implement health check endpoints for authentication validation before attempting service restarts</critical-takeaway>
+            <critical-takeaway>Add JWT token refresh mechanism to prevent authentication failures that trigger remediation cycles</critical-takeaway>
+        </category>
+        
+        <category name="Docker Container Naming Standards" path="SPEC/learnings/docker_container_naming_remediation.xml" keywords="Docker, Container Names, docker-compose, Remediation Scripts, netra-prefix">
+            <critical-takeaway>ALL Netra containers use consistent "netra-" prefix: netra-auth, netra-postgres, netra-clickhouse, netra-backend, netra-frontend, netra-redis</critical-takeaway>
+            <critical-takeaway>Docker commands require EXACT container names - partial matches work for filters but NOT for specific operations</critical-takeaway>
+            <critical-takeaway>ALWAYS verify container names from docker-compose.dev.yml before hardcoding in remediation scripts</critical-takeaway>
+            <critical-takeaway>Test all Docker remediation commands against actual running containers before deployment</critical-takeaway>
+            <critical-takeaway>Container name validation should be included in pre-deployment checks for remediation scripts</critical-takeaway>
+        </category>
+    </intelligent_remediation>
 </specification>
