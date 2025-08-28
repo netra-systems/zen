@@ -32,7 +32,7 @@ def _process_results(self, results, state):
             state.merge_from(result.state)  # Triggers persistence
 ```
 **Problem:** Every state merge triggers database write
-**Fix:** Batch state updates, persist once at pipeline end
+*
 
 ## 4. ✅ ACTUAL ISSUE: Synchronous Time Measurements
 **File:** `base/executor.py:119-121`
