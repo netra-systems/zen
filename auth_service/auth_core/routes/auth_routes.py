@@ -200,7 +200,13 @@ async def get_auth_config(request: Request):
     try:
         auth_url, frontend_url = _determine_urls()
         env = _detect_environment()
-        dev_mode = env == "development"
+        # CRITICAL FIX: Only enable dev_mode for development environment
+        # Never enable dev_mode for staging or production
+        dev_mode = env == "development" and env != "staging" and env != "production"
+        
+        # Log environment detection for debugging
+        logger.info(f"Auth config endpoint - Environment: {env}, Dev mode: {dev_mode}")
+        logger.info(f"Auth config endpoint - Auth URL: {auth_url}, Frontend URL: {frontend_url}")
         
         # CRITICAL: Validate OAuth configuration for frontend
         google_client_id = AuthConfig.get_google_client_id()
@@ -710,8 +716,13 @@ async def dev_login(
 ):
     """Development mode login endpoint - creates/uses real database user"""
     env = _detect_environment()
-    if env != "development":
-        raise HTTPException(status_code=403, detail="Dev login only available in development mode")
+    # CRITICAL: Strict check - dev login ONLY in development, NEVER in staging/production
+    if env != "development" or env == "staging" or env == "production":
+        logger.error(f"SECURITY: Dev login attempted in non-development environment: {env}")
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Dev login is strictly forbidden in {env} environment. Use OAuth authentication."
+        )
     
     import uuid
 
