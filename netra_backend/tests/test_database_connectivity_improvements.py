@@ -27,11 +27,19 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.db.clickhouse_reliable_manager import (
-    ClickHouseHealth,
-    MockClickHouseClient,
-    ReliableClickHouseManager,
+from netra_backend.app.db.clickhouse import (
+    MockClickHouseDatabase as MockClickHouseClient,
+    ClickHouseService as ReliableClickHouseManager,
+    get_clickhouse_service,
 )
+from enum import Enum
+
+class ClickHouseHealth(Enum):
+    """ClickHouse connection health states."""
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    MOCK_MODE = "mock_mode"
+    UNAVAILABLE = "unavailable"
 from netra_backend.app.db.comprehensive_health_monitor import (
     AlertSeverity,
     ComprehensiveHealthMonitor,

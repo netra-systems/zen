@@ -48,15 +48,8 @@ class MetricType(str, Enum):
     OVERALL = "overall"
 
 
-class User(BaseModel):
-    """Strongly typed User model for quality routes."""
-    id: str = Field(description="User identifier")
-    email: str = Field(description="User email address")
-    role: str = Field(description="User role")
-    permissions: List[str] = Field(default_factory=list, description="User permissions")
-    is_active: bool = Field(default=True, description="Whether user is active")
-    created_at: datetime = Field(description="User creation timestamp")
-    last_login: Optional[datetime] = Field(default=None, description="Last login timestamp")
+# User moved to shared.types.user_types for SSOT compliance
+from shared.types.user_types import ExtendedUser as User
 
 
 class QualityMetrics(BaseModel):

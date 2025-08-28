@@ -23,6 +23,9 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client
 # Import ClickHouse initialization function and client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
 
+# Create a clickhouse_client instance for backward compatibility
+clickhouse_client = get_clickhouse_service()
+
 # Import shared models from central location
 from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse,
@@ -62,6 +65,7 @@ __all__ = [
     # CLICKHOUSE UTILITIES
     'create_workload_events_table_if_missing',
     'get_clickhouse_client',
+    'clickhouse_client',  # Backward compatibility
     
     # LEGACY - Deprecated, remove after migration
     'LegacyDataSubAgent',

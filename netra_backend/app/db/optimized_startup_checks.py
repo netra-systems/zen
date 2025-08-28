@@ -344,11 +344,9 @@ class OptimizedStartupChecker:
     async def _quick_clickhouse_check(self, app, check_name: str) -> StartupCheckResult:
         """Quick ClickHouse connectivity check."""
         try:
-            from netra_backend.app.db.clickhouse_reliable_manager import (
-                reliable_clickhouse_service,
-            )
+            from netra_backend.app.db.clickhouse import get_clickhouse_client
             
-            async with reliable_clickhouse_service.get_client() as client:
+            async with get_clickhouse_client() as client:
                 await client.execute("SELECT 1")
                 
             return StartupCheckResult(
@@ -395,11 +393,9 @@ class OptimizedStartupChecker:
     async def _background_clickhouse_tables(self, app, check_name: str) -> StartupCheckResult:
         """Background ClickHouse table verification."""
         try:
-            from netra_backend.app.db.clickhouse_reliable_manager import (
-                reliable_clickhouse_service,
-            )
+            from netra_backend.app.db.clickhouse import get_clickhouse_client
             
-            async with reliable_clickhouse_service.get_client() as client:
+            async with get_clickhouse_client() as client:
                 # Check if in mock mode
                 if client.is_mock_mode():
                     return StartupCheckResult(
