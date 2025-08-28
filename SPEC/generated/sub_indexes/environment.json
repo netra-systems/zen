@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-08-28T14:37:52.843936",
-    "root_directory": "/Users/rindhujajohnson/Netra/GitHub/netra-apex",
-    "total_literals": 141
+    "generated_at": "2025-08-28T10:43:48.350948",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 140
   },
   "literals": {
     "AI21_API_KEY": {
@@ -18,7 +18,7 @@
       "value": "ALLOW_DEV_AUTH_BYPASS",
       "category": "environment",
       "locations": [
-        "netra_backend/app/websocket_core/auth.py:252"
+        "netra_backend/app/websocket_core/auth.py:268"
       ]
     },
     "ANTHROPIC_API_KEY": {
@@ -137,21 +137,21 @@
       "value": "AUTH_CONFIG_FAILURE",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:284"
+        "auth_service/auth_core/routes/auth_routes.py:289"
       ]
     },
     "AUTH_ENV": {
       "value": "AUTH_ENV",
       "category": "environment",
       "locations": [
-        "shared/cors_config_builder.py:84"
+        "shared/config_builder_base.py:104"
       ]
     },
     "AUTH_ERROR": {
       "value": "AUTH_ERROR",
       "category": "environment",
       "locations": [
-        "netra_backend/app/routes/websocket.py:188",
+        "netra_backend/app/routes/websocket.py:207",
         "frontend/providers/EnhancedWebSocketProvider.tsx:556"
       ]
     },
@@ -171,12 +171,12 @@
         "auth_service/auth_core/config.py:67",
         "auth_service/auth_core/config.py:88",
         "auth_service/auth_core/config.py:102",
-        "auth_service/auth_core/database/connection.py:37",
+        "auth_service/auth_core/database/connection.py:39",
+        "auth_service/auth_core/database/database_manager.py:110",
         "auth_service/auth_core/performance/startup_optimizer.py:98",
         "auth_service/auth_core/validation/pre_deployment_validator.py:594",
         "auth_service/auth_core/validation/pre_deployment_validator.py:709",
-        "auth_service/main.py:210",
-        "scripts/deploy_to_gcp.py:122"
+        "auth_service/main.py:250"
       ]
     },
     "AUTH_MODE": {
@@ -201,14 +201,14 @@
       "locations": [
         "netra_backend/app/core/configuration/services.py:341",
         "scripts/fix_authentication_system.py:91",
-        "scripts/fix_authentication_system.py:286"
+        "scripts/fix_authentication_system.py:285"
       ]
     },
     "AUTH_SERVICE_PORT": {
       "value": "AUTH_SERVICE_PORT",
       "category": "environment",
       "locations": [
-        "scripts/fix_authentication_system.py:175"
+        "scripts/fix_authentication_system.py:174"
       ]
     },
     "AUTH_SERVICE_URL": {
@@ -224,7 +224,7 @@
         "scripts/deploy_to_gcp.py:112",
         "scripts/fetch_secrets_to_env.py:93",
         "scripts/fetch_secrets_to_env.py:170",
-        "scripts/fix_authentication_system.py:160"
+        "scripts/fix_authentication_system.py:159"
       ]
     },
     "AUTH_TOKEN_EXPIRED": {
@@ -324,7 +324,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/auth_constants.py:124",
-        "netra_backend/app/core/configuration/base.py:339",
+        "netra_backend/app/core/configuration/base.py:402",
         "netra_backend/app/core/configuration/database.py:157",
         "netra_backend/app/core/configuration/database.py:157",
         "netra_backend/app/core/configuration/database.py:546",
@@ -447,7 +447,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/secret_loader.py:167",
+        "auth_service/auth_core/secret_loader.py:175",
         "auth_service/health_config.py:53",
         "scripts/validate_oauth_deployment.py:62",
         "scripts/validate_oauth_deployment.py:62",
@@ -460,16 +460,16 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_STAGING",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:371",
-        "auth_service/auth_core/routes/auth_routes.py:371",
+        "auth_service/auth_core/routes/auth_routes.py:376",
+        "auth_service/auth_core/routes/auth_routes.py:376",
         "auth_service/auth_core/secret_loader.py:162",
         "auth_service/health_config.py:51",
-        "auth_service/main.py:155",
-        "auth_service/main.py:155",
-        "scripts/deploy_to_gcp.py:794",
-        "scripts/validate_oauth_deployment.py:60",
-        "scripts/validate_oauth_deployment.py:60",
-        "scripts/validate_oauth_deployment.py:69"
+        "auth_service/main.py:158",
+        "auth_service/main.py:158",
+        "scripts/audit_staging_oauth_secrets.py:90",
+        "scripts/audit_staging_oauth_secrets.py:244",
+        "scripts/audit_staging_oauth_secrets.py:245",
+        "scripts/deploy_to_gcp.py:794"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_SECRET_DEV": {
@@ -483,7 +483,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/secret_loader.py:192",
+        "auth_service/auth_core/secret_loader.py:201",
         "scripts/setup_dev_oauth.py:48",
         "scripts/verify_oauth_config.py:112",
         "shared/secret_manager_builder.py:836"
@@ -500,7 +500,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/secret_loader.py:203",
+        "auth_service/auth_core/secret_loader.py:218",
         "scripts/validate_oauth_deployment.py:63",
         "scripts/validate_oauth_deployment.py:63",
         "scripts/validate_oauth_deployment.py:72",
@@ -512,16 +512,16 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_STAGING",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:372",
-        "auth_service/auth_core/routes/auth_routes.py:372",
-        "auth_service/auth_core/secret_loader.py:198",
-        "auth_service/main.py:156",
-        "auth_service/main.py:156",
+        "auth_service/auth_core/routes/auth_routes.py:377",
+        "auth_service/auth_core/routes/auth_routes.py:377",
+        "auth_service/auth_core/secret_loader.py:207",
+        "auth_service/main.py:159",
+        "auth_service/main.py:159",
+        "scripts/audit_staging_oauth_secrets.py:95",
+        "scripts/audit_staging_oauth_secrets.py:249",
+        "scripts/audit_staging_oauth_secrets.py:250",
         "scripts/deploy_to_gcp.py:795",
-        "scripts/validate_oauth_deployment.py:61",
-        "scripts/validate_oauth_deployment.py:61",
-        "scripts/validate_oauth_deployment.py:69",
-        "scripts/validate_oauth_deployment.py:164"
+        "scripts/validate_oauth_deployment.py:61"
       ]
     },
     "GROQ_API_KEY": {
@@ -628,7 +628,8 @@
       "locations": [
         "netra_backend/app/core/project_utils.py:61",
         "netra_backend/app/routes/auth_proxy.py:32",
-        "shared/cors_config_builder.py:83"
+        "netra_backend/app/websocket_core/auth.py:156",
+        "shared/config_builder_base.py:102"
       ]
     },
     "NETRA_ENVIRONMENT": {
@@ -637,8 +638,10 @@
       "locations": [
         "netra_backend/app/redis_manager.py:75",
         "netra_backend/app/redis_manager.py:75",
+        "shared/config_builder_base.py:101",
+        "shared/config_builder_base.py:268",
+        "shared/config_builder_base.py:268",
         "shared/database/core_database_manager.py:199",
-        "shared/redis_config_builder.py:112",
         "shared/secret_manager_builder.py:146"
       ]
     },
@@ -672,25 +675,18 @@
         "auth_service/auth_core/validation/pre_deployment_validator.py:389"
       ]
     },
-    "OAUTH_CLIENT_ID": {
-      "value": "OAUTH_CLIENT_ID",
-      "category": "environment",
-      "locations": [
-        "scripts/fix_authentication_system.py:94"
-      ]
-    },
     "OAUTH_CLIENT_SECRET": {
       "value": "OAUTH_CLIENT_SECRET",
       "category": "environment",
       "locations": [
-        "scripts/fix_authentication_system.py:95"
+        "scripts/fix_authentication_system.py:94"
       ]
     },
     "OAUTH_CONFIGURATION_BROKEN": {
       "value": "OAUTH_CONFIGURATION_BROKEN",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:405"
+        "auth_service/auth_core/routes/auth_routes.py:410"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID_ENV": {
@@ -768,42 +764,42 @@
       "value": "REDIS_CLUSTER_MAX_CONNECTIONS",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:506"
+        "shared/redis_config_builder.py:453"
       ]
     },
     "REDIS_CLUSTER_MODE": {
       "value": "REDIS_CLUSTER_MODE",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:495"
+        "shared/redis_config_builder.py:442"
       ]
     },
     "REDIS_CLUSTER_NODES": {
       "value": "REDIS_CLUSTER_NODES",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:511"
+        "shared/redis_config_builder.py:458"
       ]
     },
     "REDIS_CONNECTION_METRICS": {
       "value": "REDIS_CONNECTION_METRICS",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:563"
+        "shared/redis_config_builder.py:510"
       ]
     },
     "REDIS_CONNECTION_STRING": {
       "value": "REDIS_CONNECTION_STRING",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:164"
+        "shared/redis_config_builder.py:122"
       ]
     },
     "REDIS_CONNECT_TIMEOUT": {
       "value": "REDIS_CONNECT_TIMEOUT",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:242"
+        "shared/redis_config_builder.py:200"
       ]
     },
     "REDIS_DB": {
@@ -826,7 +822,7 @@
       "value": "REDIS_DECODE_RESPONSES",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:243"
+        "shared/redis_config_builder.py:201"
       ]
     },
     "REDIS_DISABLED": {
@@ -841,22 +837,22 @@
       "value": "REDIS_DSN",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:165"
+        "shared/redis_config_builder.py:123"
       ]
     },
     "REDIS_ENABLE_HEALTH_CHECKS": {
       "value": "REDIS_ENABLE_HEALTH_CHECKS",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:539"
+        "shared/redis_config_builder.py:486"
       ]
     },
     "REDIS_ENABLE_MONITORING": {
       "value": "REDIS_ENABLE_MONITORING",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:549",
-        "shared/redis_config_builder.py:551"
+        "shared/redis_config_builder.py:496",
+        "shared/redis_config_builder.py:498"
       ]
     },
     "REDIS_FALLBACK_ENABLED": {
@@ -869,23 +865,23 @@
         "netra_backend/app/core/configuration/database.py:397",
         "netra_backend/app/redis_manager.py:85",
         "netra_backend/app/redis_manager.py:85",
-        "shared/redis_config_builder.py:616",
-        "shared/redis_config_builder.py:662"
+        "shared/redis_config_builder.py:563",
+        "shared/redis_config_builder.py:609"
       ]
     },
     "REDIS_HEALTH_CHECK_INTERVAL": {
       "value": "REDIS_HEALTH_CHECK_INTERVAL",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:245",
-        "shared/redis_config_builder.py:538"
+        "shared/redis_config_builder.py:203",
+        "shared/redis_config_builder.py:485"
       ]
     },
     "REDIS_HEALTH_CHECK_TIMEOUT": {
       "value": "REDIS_HEALTH_CHECK_TIMEOUT",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:540"
+        "shared/redis_config_builder.py:487"
       ]
     },
     "REDIS_HOST": {
@@ -908,28 +904,28 @@
       "value": "REDIS_LOG_SLOW_QUERIES",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:561"
+        "shared/redis_config_builder.py:508"
       ]
     },
     "REDIS_MAX_CONNECTIONS": {
       "value": "REDIS_MAX_CONNECTIONS",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:384"
+        "shared/redis_config_builder.py:331"
       ]
     },
     "REDIS_MAX_HEALTH_FAILURES": {
       "value": "REDIS_MAX_HEALTH_FAILURES",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:541"
+        "shared/redis_config_builder.py:488"
       ]
     },
     "REDIS_METRICS_ENABLED": {
       "value": "REDIS_METRICS_ENABLED",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:560"
+        "shared/redis_config_builder.py:507"
       ]
     },
     "REDIS_MODE": {
@@ -937,7 +933,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/environment_constants.py:70",
-        "netra_backend/app/schemas/config.py:558",
+        "netra_backend/app/schemas/config.py:573",
         "netra_backend/app/services/startup_fixes_integration.py:49",
         "netra_backend/app/services/startup_fixes_integration.py:52",
         "netra_backend/app/services/startup_fixes_integration.py:135"
@@ -963,10 +959,10 @@
       "value": "REDIS_POOL_SIZE",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:240",
-        "shared/redis_config_builder.py:404",
-        "shared/redis_config_builder.py:406",
-        "shared/redis_config_builder.py:408"
+        "shared/redis_config_builder.py:198",
+        "shared/redis_config_builder.py:351",
+        "shared/redis_config_builder.py:353",
+        "shared/redis_config_builder.py:355"
       ]
     },
     "REDIS_PORT": {
@@ -1011,36 +1007,37 @@
         "netra_backend/app/core/configuration/database.py:398",
         "netra_backend/app/redis_manager.py:86",
         "netra_backend/app/redis_manager.py:86",
-        "shared/redis_config_builder.py:617",
-        "shared/redis_config_builder.py:661"
+        "netra_backend/app/routes/health.py:346",
+        "shared/redis_config_builder.py:564",
+        "shared/redis_config_builder.py:608"
       ]
     },
     "REDIS_REQUIRE_SSL": {
       "value": "REDIS_REQUIRE_SSL",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:429"
+        "shared/redis_config_builder.py:376"
       ]
     },
     "REDIS_SKIP_COVERAGE_CHECK": {
       "value": "REDIS_SKIP_COVERAGE_CHECK",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:505"
+        "shared/redis_config_builder.py:452"
       ]
     },
     "REDIS_SLOW_QUERY_THRESHOLD": {
       "value": "REDIS_SLOW_QUERY_THRESHOLD",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:562"
+        "shared/redis_config_builder.py:509"
       ]
     },
     "REDIS_SOCKET_TIMEOUT": {
       "value": "REDIS_SOCKET_TIMEOUT",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:241"
+        "shared/redis_config_builder.py:199"
       ]
     },
     "REDIS_SSL": {
@@ -1053,35 +1050,35 @@
         "netra_backend/app/core/configuration/database.py:396",
         "netra_backend/app/redis_manager.py:84",
         "netra_backend/app/redis_manager.py:84",
-        "shared/redis_config_builder.py:419"
+        "shared/redis_config_builder.py:366"
       ]
     },
     "REDIS_SSL_CA_CERTS": {
       "value": "REDIS_SSL_CA_CERTS",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:444"
+        "shared/redis_config_builder.py:391"
       ]
     },
     "REDIS_SSL_CERT": {
       "value": "REDIS_SSL_CERT",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:449"
+        "shared/redis_config_builder.py:396"
       ]
     },
     "REDIS_SSL_CERT_REQS": {
       "value": "REDIS_SSL_CERT_REQS",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:462"
+        "shared/redis_config_builder.py:409"
       ]
     },
     "REDIS_SSL_KEY": {
       "value": "REDIS_SSL_KEY",
       "category": "environment",
       "locations": [
-        "shared/redis_config_builder.py:454"
+        "shared/redis_config_builder.py:401"
       ]
     },
     "REDIS_STAGING_HOST": {
@@ -1105,7 +1102,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/auth_constants.py:125",
-        "netra_backend/app/core/configuration/base.py:339",
+        "netra_backend/app/core/configuration/base.py:402",
         "netra_backend/app/core/configuration/database.py:109",
         "netra_backend/app/core/configuration/database.py:109",
         "netra_backend/app/core/configuration/database.py:390",
@@ -1126,13 +1123,14 @@
         "netra_backend/app/core/configuration/database.py:395",
         "netra_backend/app/redis_manager.py:83",
         "netra_backend/app/redis_manager.py:83",
-        "shared/redis_config_builder.py:222"
+        "shared/redis_config_builder.py:180"
       ]
     },
     "REPLACE_WITH_REAL_OAUTH_CLIENT_ID": {
       "value": "REPLACE_WITH_REAL_OAUTH_CLIENT_ID",
       "category": "environment",
       "locations": [
+        "scripts/audit_staging_oauth_secrets.py:58",
         "scripts/deploy_to_gcp.py:794"
       ]
     },
@@ -1140,6 +1138,7 @@
       "value": "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET",
       "category": "environment",
       "locations": [
+        "scripts/audit_staging_oauth_secrets.py:74",
         "scripts/deploy_to_gcp.py:795"
       ]
     },
@@ -1225,7 +1224,7 @@
       "value": "WEBSOCKET_AUTH_BYPASS",
       "category": "environment",
       "locations": [
-        "netra_backend/app/websocket_core/auth.py:253"
+        "netra_backend/app/websocket_core/auth.py:269"
       ]
     },
     "WS_AUTH_FAILED": {

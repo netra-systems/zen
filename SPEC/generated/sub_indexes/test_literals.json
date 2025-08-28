@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-08-28T14:37:52.984549",
-    "root_directory": "/Users/rindhujajohnson/Netra/GitHub/netra-apex",
-    "total_literals": 7900
+    "generated_at": "2025-08-28T10:43:48.704320",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 8161
   },
   "literals": {
     "\u001b[0m": {
@@ -1111,6 +1111,13 @@
         "scripts/test_coordination_fixes.py:25"
       ]
     },
+    "%(levelname)s: %(message)s": {
+      "value": "%(levelname)s: %(message)s",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:18"
+      ]
+    },
     "%)": {
       "value": "%)",
       "category": "test_literals",
@@ -1185,6 +1192,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:711"
+      ]
+    },
+    "' crashed:": {
+      "value": "' crashed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:358"
       ]
     },
     "' defined in test file": {
@@ -1277,6 +1291,13 @@
       "locations": [
         "scripts/test_cors_implementation.py:83",
         "scripts/test_cors_implementation.py:128"
+      ]
+    },
+    "' should be valid": {
+      "value": "' should be valid",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:155"
       ]
     },
     "' spans": {
@@ -1773,7 +1794,7 @@
       "value": ")",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:228",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:318",
         "scripts/add_test_markers.py:101",
         "scripts/align_test_imports.py:386",
         "scripts/align_test_imports.py:388",
@@ -2649,7 +2670,7 @@
       "value": ", expected client-id-",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:228"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:318"
       ]
     },
     ", first import at line": {
@@ -3811,6 +3832,20 @@
         "scripts/test_websocket_middleware.py:150"
       ]
     },
+    "- refreshToken (camelCase) - Frontend format": {
+      "value": "- refreshToken (camelCase) - Frontend format",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:151"
+      ]
+    },
+    "- refresh_token (snake_case) - Original backend format": {
+      "value": "- refresh_token (snake_case) - Original backend format",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:150"
+      ]
+    },
     "- remove for security": {
       "value": "- remove for security",
       "category": "test_literals",
@@ -3830,6 +3865,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_violations.py:815"
+      ]
+    },
+    "- token (simple) - Alternative format": {
+      "value": "- token (simple) - Alternative format",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:152"
       ]
     },
     "--": {
@@ -3870,6 +3912,27 @@
       "category": "test_literals",
       "locations": [
         "scripts/automated_test_fix_loop.py:132"
+      ]
+    },
+    "--> Helpful debugging info provided": {
+      "value": "--> Helpful debugging info provided",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:139"
+      ]
+    },
+    "--> The fix is NOT working. Frontend will fail to refresh.": {
+      "value": "--> The fix is NOT working. Frontend will fail to refresh.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:65"
+      ]
+    },
+    "--> The fix is working! Frontend can now refresh tokens.": {
+      "value": "--> The fix is working! Frontend can now refresh tokens.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:62"
       ]
     },
     "--all": {
@@ -5899,7 +5962,7 @@
       "value": ".apps.googleusercontent.com",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:66"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:76"
       ]
     },
     ".cache": {
@@ -6285,6 +6348,13 @@
         "scripts/batch_fix_and_test.py:121"
       ]
     },
+    "/3:": {
+      "value": "/3:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:240"
+      ]
+    },
     "/__init__.py": {
       "value": "/__init__.py",
       "category": "test_literals",
@@ -6363,6 +6433,7 @@
         "auth_service/tests/auth-service-down-critical-scenarios.py:183",
         "auth_service/tests/auth-service-down-critical-scenarios.py:370",
         "scripts/test_cors_implementation.py:39",
+        "scripts/test_staging_auth_e2e.py:37",
         "scripts/test_staging_env.py:121"
       ]
     },
@@ -6386,6 +6457,7 @@
       "locations": [
         "scripts/test_cold_start_e2e.py:324",
         "scripts/test_cors_implementation.py:41",
+        "scripts/test_staging_auth_e2e.py:203",
         "scripts/test_staging_deployment.py:104",
         "scripts/test_staging_env.py:69",
         "scripts/test_staging_env.py:107",
@@ -6496,6 +6568,14 @@
         "scripts/test_cold_start_e2e.py:230"
       ]
     },
+    "/auth/dev/login": {
+      "value": "/auth/dev/login",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:236",
+        "scripts/test_staging_auth_e2e.py:65"
+      ]
+    },
     "/auth/dev_login": {
       "value": "/auth/dev_login",
       "category": "test_literals",
@@ -6543,12 +6623,35 @@
         "scripts/test_oauth_local.py:186"
       ]
     },
+    "/auth/logout": {
+      "value": "/auth/logout",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:300"
+      ]
+    },
     "/auth/me": {
       "value": "/auth/me",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_comprehensive.py:486",
         "scripts/test_oauth_local.py:302"
+      ]
+    },
+    "/auth/refresh": {
+      "value": "/auth/refresh",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:54",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:71",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:86",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:97",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:107",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:123",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:137",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:148",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:159",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:170"
       ]
     },
     "/auth/register": {
@@ -6582,7 +6685,10 @@
         "auth_service/tests/auth-service-down-critical-scenarios.py:329",
         "auth_service/tests/auth-service-down-critical-scenarios.py:442",
         "auth_service/tests/auth-service-down-critical-scenarios.py:475",
-        "scripts/test_auth_integration.py:89"
+        "scripts/test_auth_integration.py:89",
+        "scripts/test_staging_auth_e2e.py:104",
+        "scripts/test_staging_auth_e2e.py:263",
+        "scripts/test_staging_auth_e2e.py:311"
       ]
     },
     "/cloudsql/": {
@@ -6748,6 +6854,13 @@
         "scripts/test_cold_start_e2e.py:450"
       ]
     },
+    "/test": {
+      "value": "/test",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:57"
+      ]
+    },
     "/tests/": {
       "value": "/tests/",
       "category": "test_literals",
@@ -6857,17 +6970,18 @@
       "value": "0",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:47",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:84",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:120",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:259",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:297"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:57",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:113",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:171",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:367",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:426"
       ]
     },
     "0.0.0.0": {
       "value": "0.0.0.0",
       "category": "test_literals",
       "locations": [
+        "scripts/test_backend_port_binding.py:64",
         "scripts/test_websocket_dev_mode.py:56"
       ]
     },
@@ -7221,11 +7335,25 @@
         "scripts/test_auth_database_sessions.py:125"
       ]
     },
+    "1. Testing service health checks...": {
+      "value": "1. Testing service health checks...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:31"
+      ]
+    },
     "1. Testing session management patterns...": {
       "value": "1. Testing session management patterns...",
       "category": "test_literals",
       "locations": [
         "scripts/test_auth_database_sessions.py:303"
+      ]
+    },
+    "1. Testing snake_case format (refresh_token)...": {
+      "value": "1. Testing snake_case format (refresh_token)...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:30"
       ]
     },
     "1. VERIFY which database should be used:": {
@@ -7331,6 +7459,7 @@
       "value": "127.0.0.1",
       "category": "test_literals",
       "locations": [
+        "scripts/test_backend_port_binding.py:31",
         "scripts/test_cors.py:313",
         "scripts/test_cors.py:346",
         "scripts/test_ssl_certificates_staging.py:115"
@@ -7707,6 +7836,20 @@
         "scripts/test_auth_database_sessions.py:329"
       ]
     },
+    "2. Testing camelCase format (refreshToken) - FRONTEND FORMAT...": {
+      "value": "2. Testing camelCase format (refreshToken) - FRONTEND FORMAT...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:52"
+      ]
+    },
+    "2. Testing dev login...": {
+      "value": "2. Testing dev login...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:59"
+      ]
+    },
     "2. Testing invalid URLs...": {
       "value": "2. Testing invalid URLs...",
       "category": "test_literals",
@@ -7882,6 +8025,17 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_log_introspection.py:78"
+      ]
+    },
+    "24h": {
+      "value": "24h",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:71",
+        "scripts/test_data_validator_backup.py:83",
+        "scripts/test_data_validator_backup.py:106",
+        "scripts/test_data_validator_backup.py:135",
+        "scripts/test_data_validator_backup.py:151"
       ]
     },
     "2d": {
@@ -8124,6 +8278,20 @@
         "scripts/test_auth_database_sessions.py:244"
       ]
     },
+    "3. Testing simple format (token)...": {
+      "value": "3. Testing simple format (token)...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:76"
+      ]
+    },
+    "3. Testing token validation...": {
+      "value": "3. Testing token validation...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:95"
+      ]
+    },
     "3. UPDATE: Secret Manager to use 'netra_staging' if that's the intended DB": {
       "value": "3. UPDATE: Secret Manager to use 'netra_staging' if that's the intended DB",
       "category": "test_literals",
@@ -8303,6 +8471,13 @@
         "auth_service/test_actual_staging_credentials.py:132"
       ]
     },
+    "4. Testing empty body...": {
+      "value": "4. Testing empty body...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:98"
+      ]
+    },
     "4. Testing engine creation configuration...": {
       "value": "4. Testing engine creation configuration...",
       "category": "test_literals",
@@ -8322,6 +8497,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_db_direct.py:100"
+      ]
+    },
+    "4. Testing token refresh (snake_case)...": {
+      "value": "4. Testing token refresh (snake_case)...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:124"
       ]
     },
     "4. Update hardcoded strings 'gpt-4' to 'gemini-2.0-flash-exp'": {
@@ -8380,6 +8562,20 @@
         "scripts/test_oauth_local.py:410"
       ]
     },
+    "5. Testing token refresh (camelCase - frontend format)...": {
+      "value": "5. Testing token refresh (camelCase - frontend format)...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:158"
+      ]
+    },
+    "5. Testing wrong field name...": {
+      "value": "5. Testing wrong field name...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:125"
+      ]
+    },
     "5. Use parameterized tests to reduce duplication": {
       "value": "5. Use parameterized tests to reduce duplication",
       "category": "test_literals",
@@ -8431,6 +8627,13 @@
         "scripts/test_oauth_local.py:414"
       ]
     },
+    "6. Testing authenticated backend API call...": {
+      "value": "6. Testing authenticated backend API call...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:193"
+      ]
+    },
     "6.1f": {
       "value": "6.1f",
       "category": "test_literals",
@@ -8455,6 +8658,13 @@
         "scripts/test_oauth_local.py:418"
       ]
     },
+    "7. Testing session persistence...": {
+      "value": "7. Testing session persistence...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:230"
+      ]
+    },
     "701982941522": {
       "value": "701982941522",
       "category": "test_literals",
@@ -8468,6 +8678,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_failure_scanner.py:240"
+      ]
+    },
+    "8. Testing logout...": {
+      "value": "8. Testing logout...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:291"
       ]
     },
     "8000": {
@@ -8530,7 +8747,7 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/agents/test_agent_initialization.py:204",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:235",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:325",
         "auth_service/tests/factories/permission_factory.py:57",
         "auth_service/tests/factories/permission_factory.py:89",
         "auth_service/tests/factories/permission_factory.py:110",
@@ -8648,6 +8865,7 @@
       "value": ": HTTP",
       "category": "test_literals",
       "locations": [
+        "scripts/test_staging_auth_e2e.py:49",
         "scripts/test_staging_login_automated.py:210"
       ]
     },
@@ -8775,14 +8993,14 @@
       "value": ": wrong client ID (got",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:228"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:318"
       ]
     },
     ": wrong client secret": {
       "value": ": wrong client secret",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:232"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:322"
       ]
     },
     ":(\\d+)": {
@@ -10168,6 +10386,13 @@
         "scripts/test_websocket_connection.py:185"
       ]
     },
+    "All tests completed!": {
+      "value": "All tests completed!",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:128"
+      ]
+    },
     "All tests comply with real test requirements!": {
       "value": "All tests comply with real test requirements!",
       "category": "test_literals",
@@ -10187,6 +10412,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_verify_workflow.py:95"
+      ]
+    },
+    "All tokens unique:": {
+      "value": "All tokens unique:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:285"
       ]
     },
     "Allow production tests to run (requires explicit flag)": {
@@ -10245,6 +10477,18 @@
         "scripts/auto_fix_test_violations.py:1005"
       ]
     },
+    "Analysis completed": {
+      "value": "Analysis completed",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:344",
+        "scripts/test_data_validator_backup.py:357",
+        "scripts/test_data_validator_backup.py:370",
+        "scripts/test_data_validator_backup.py:383",
+        "scripts/test_data_validator_backup.py:396",
+        "scripts/test_data_validator_backup.py:413"
+      ]
+    },
     "Analysis failed:": {
       "value": "Analysis failed:",
       "category": "test_literals",
@@ -10257,6 +10501,27 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_refactor_helper.py:705"
+      ]
+    },
+    "Analysis should produce at least one finding": {
+      "value": "Analysis should produce at least one finding",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:378"
+      ]
+    },
+    "Analysis type '": {
+      "value": "Analysis type '",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:155"
+      ]
+    },
+    "Analysis type is required": {
+      "value": "Analysis type is required",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:89"
       ]
     },
     "Analyze current test coverage": {
@@ -10701,6 +10966,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_async_postgres.py:171",
+        "scripts/test_staging_auth_e2e.py:35",
         "scripts/test_staging_login_automated.py:180"
       ]
     },
@@ -10865,6 +11131,14 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/auth-service-down-critical-scenarios.py:448"
+      ]
+    },
+    "Auth Service:": {
+      "value": "Auth Service:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:335",
+        "scripts/test_staging_refresh_format.py:21"
       ]
     },
     "Auth Service: [green]✓ Healthy[/green]": {
@@ -11159,6 +11433,13 @@
         "auth_service/tests/factories/__init__.py:14"
       ]
     },
+    "Authenticated API Call": {
+      "value": "Authenticated API Call",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:348"
+      ]
+    },
     "Authentication service tests": {
       "value": "Authentication service tests",
       "category": "test_literals",
@@ -11206,9 +11487,9 @@
         "scripts/test_cold_start_e2e.py:383",
         "scripts/test_docker_websocket_fix.py:82",
         "scripts/test_oauth_local.py:303",
-        "scripts/test_staging_deployment.py:105",
-        "scripts/test_staging_deployment.py:107",
-        "scripts/test_staging_deployment.py:109"
+        "scripts/test_staging_auth_e2e.py:205",
+        "scripts/test_staging_auth_e2e.py:302",
+        "scripts/test_staging_deployment.py:105"
       ]
     },
     "Authorization code reuse should be blocked": {
@@ -11393,6 +11674,13 @@
         "scripts/unified_test_runner.py:1122"
       ]
     },
+    "Average latency increased by 15%": {
+      "value": "Average latency increased by 15%",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:321"
+      ]
+    },
     "BACKEND": {
       "value": "BACKEND",
       "category": "test_literals",
@@ -11538,11 +11826,26 @@
         "scripts/test_auth_integration.py:78"
       ]
     },
+    "Backend Main Import": {
+      "value": "Backend Main Import",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:158"
+      ]
+    },
     "Backend Service": {
       "value": "Backend Service",
       "category": "test_literals",
       "locations": [
-        "scripts/test_async_postgres.py:167"
+        "scripts/test_async_postgres.py:167",
+        "scripts/test_staging_auth_e2e.py:36"
+      ]
+    },
+    "Backend Service:": {
+      "value": "Backend Service:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:336"
       ]
     },
     "Backend Service: [green]✓ Healthy[/green]": {
@@ -11592,6 +11895,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_environment_detection.py:52"
+      ]
+    },
+    "Backend configured to run on:": {
+      "value": "Backend configured to run on:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:135"
       ]
     },
     "Backend health check failed with status": {
@@ -11772,6 +12082,13 @@
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:160"
       ]
     },
+    "Basic Socket Binding": {
+      "value": "Basic Socket Binding",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:157"
+      ]
+    },
     "Batch Test Fixer - Systematically fixes test failures\nProcesses tests in batches and either:\n1. Aligns tests with current code\n2. Implements missing functionality if tests are correct": {
       "value": "Batch Test Fixer - Systematically fixes test failures\nProcesses tests in batches and either:\n1. Aligns tests with current code\n2. Implements missing functionality if tests are correct",
       "category": "test_literals",
@@ -11803,10 +12120,10 @@
         "auth_service/tests/test_auth_comprehensive.py:484",
         "auth_service/tests/test_oauth_state_validation.py:117",
         "auth_service/tests/test_oauth_state_validation.py:262",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:62",
         "auth_service/tests/utils/assertion_helpers.py:142",
         "scripts/setup_staging_test_account.py:205",
-        "scripts/test_cold_start_e2e.py:274",
-        "scripts/test_cold_start_e2e.py:321"
+        "scripts/test_cold_start_e2e.py:274"
       ]
     },
     "Bearer fake-token-for-testing": {
@@ -13117,6 +13434,13 @@
         "scripts/comprehensive_test_fixer.py:2"
       ]
     },
+    "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis": {
+      "value": "Comprehensive Unit Tests for DataValidator\n\nTests all data validation operations including request validation,\nraw data quality checks, analysis result validation, and quality scoring.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Data quality assurance and reliable analytics\n- Value Impact: Prevents incorrect insights that could impact revenue\n- Strategic Impact: Critical for data integrity and trustworthy analysis",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:1"
+      ]
+    },
     "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development auth bypass works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features": {
       "value": "Comprehensive WebSocket CORS Test Script\n\nThis script tests WebSocket connectivity in various scenarios to ensure CORS is properly configured\nfor Docker development environment. It tests connections with different origins and validates\nthat the development auth bypass works properly.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Ensure WebSocket reliability in development\n- Value Impact: Prevents connection issues that block development\n- Strategic Impact: Foundation for real-time features",
       "category": "test_literals",
@@ -13206,6 +13530,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_size_validator.py:2"
+      ]
+    },
+    "Comprehensive test suite for auth refresh endpoint field naming compatibility.\nTests various field naming conventions and error scenarios.": {
+      "value": "Comprehensive test suite for auth refresh endpoint field naming compatibility.\nTests various field naming conventions and error scenarios.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:1"
       ]
     },
     "Computed startup order:": {
@@ -13540,6 +13871,13 @@
         "scripts/test_cors.py:352"
       ]
     },
+    "Consider optimizing slow queries": {
+      "value": "Consider optimizing slow queries",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:325"
+      ]
+    },
     "Consistently Failing Tests:": {
       "value": "Consistently Failing Tests:",
       "category": "test_literals",
@@ -13559,8 +13897,10 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_comprehensive.py:506",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:172",
         "scripts/debug_cors_test.py:17",
         "scripts/test_cors.py:103",
+        "scripts/test_staging_auth_e2e.py:206",
         "scripts/test_staging_deployment.py:130"
       ]
     },
@@ -13626,6 +13966,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_verify_workflow_status_corrected.py:2"
+      ]
+    },
+    "Cost optimization opportunities identified": {
+      "value": "Cost optimization opportunities identified",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:322"
       ]
     },
     "Cost savings of $1,200/month achieved.": {
@@ -13698,6 +14045,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:366"
+      ]
+    },
+    "Create an authenticated user and return tokens": {
+      "value": "Create an authenticated user and return tokens",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:233"
       ]
     },
     "Create isolated session manager for testing.": {
@@ -14623,6 +14977,13 @@
         "scripts/test_verify_workflow_status_corrected.py:24"
       ]
     },
+    "Detail:": {
+      "value": "Detail:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:115"
+      ]
+    },
     "Detailed Results:": {
       "value": "Detailed Results:",
       "category": "test_literals",
@@ -14673,11 +15034,25 @@
         "scripts/test_staging_migrations.py:189"
       ]
     },
+    "Dev Login": {
+      "value": "Dev Login",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:344"
+      ]
+    },
     "Dev launcher exited unexpectedly": {
       "value": "Dev launcher exited unexpectedly",
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:131"
+      ]
+    },
+    "Dev login not available in test environment": {
+      "value": "Dev login not available in test environment",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:242"
       ]
     },
     "Dev login not enabled": {
@@ -15082,8 +15457,8 @@
         "auth_service/test_url_construction.py:63",
         "auth_service/test_url_construction.py:189",
         "auth_service/tests/conftest.py:33",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:46",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:83"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:50",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:56"
       ]
     },
     "ENVIRONMENT DETECTION TEST SUITE": {
@@ -15434,6 +15809,13 @@
         "scripts/test_example_message_flow.py:53"
       ]
     },
+    "End-to-end test for staging authentication flow.\nTests login, token refresh, and session persistence.": {
+      "value": "End-to-end test for staging authentication flow.\nTests login, token refresh, and session persistence.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:2"
+      ]
+    },
     "End-to-end tests": {
       "value": "End-to-end tests",
       "category": "test_literals",
@@ -15523,9 +15905,9 @@
       "value": "Environment",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:228",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:232",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:235"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:318",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:322",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:325"
       ]
     },
     "Environment Variables:": {
@@ -15645,6 +16027,20 @@
       "locations": [
         "scripts/add_pytest_markers.py:154",
         "scripts/apply_fast_test_decorators.py:178"
+      ]
+    },
+    "Error 1": {
+      "value": "Error 1",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:452"
+      ]
+    },
+    "Error 2": {
+      "value": "Error 2",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:452"
       ]
     },
     "Error Detection": {
@@ -16368,6 +16764,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_session_security_cycles_36_40.py:206"
+      ]
+    },
+    "Expires in:": {
+      "value": "Expires in:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:112"
       ]
     },
     "Export configuration to environment": {
@@ -17395,6 +17798,13 @@
         "scripts/rapid_test_consolidation.py:489"
       ]
     },
+    "Findings must be a list": {
+      "value": "Findings must be a list",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:365"
+      ]
+    },
     "First Time User Critical Paths": {
       "value": "First Time User Critical Paths",
       "category": "test_literals",
@@ -17836,6 +18246,20 @@
         "scripts/test_staging_env.py:146"
       ]
     },
+    "Frontend Service": {
+      "value": "Frontend Service",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:37"
+      ]
+    },
+    "Frontend Service:": {
+      "value": "Frontend Service:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:337"
+      ]
+    },
     "Frontend Startup Tests": {
       "value": "Frontend Startup Tests",
       "category": "test_literals",
@@ -18183,32 +18607,24 @@
         "scripts/test_secret_manager_builder_critical.py:249"
       ]
     },
-    "GOOGLE_CLIENT": {
-      "value": "GOOGLE_CLIENT",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:124",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:301"
-      ]
-    },
     "GOOGLE_CLIENT_ID": {
       "value": "GOOGLE_CLIENT_ID",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:52",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:63",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:89",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:164",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:419",
         "scripts/setup_staging_test_account.py:65",
         "scripts/test_backend.py:92",
         "scripts/test_oauth_dev_config.py:27",
         "scripts/test_oauth_dev_config.py:39",
-        "scripts/test_oauth_dev_config.py:54",
-        "scripts/test_oauth_dev_config.py:72",
-        "scripts/test_oauth_local.py:398",
-        "scripts/test_secret_manager_builder_critical.py:85",
-        "scripts/test_secret_manager_builder_critical.py:325"
+        "scripts/test_oauth_dev_config.py:54"
       ]
     },
-    "GOOGLE_CLIENT_ID=google-client-id-staging": {
-      "value": "GOOGLE_CLIENT_ID=google-client-id-staging",
+    "GOOGLE_CLIENT_ID=google-oauth-client-id-staging": {
+      "value": "GOOGLE_CLIENT_ID=google-oauth-client-id-staging",
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_simplified.py:74"
@@ -18218,24 +18634,16 @@
       "value": "GOOGLE_CLIENT_SECRET",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:89",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:108",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:119",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:144",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:164",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:419",
         "scripts/test_backend.py:93",
         "scripts/test_oauth_dev_config.py:28",
         "scripts/test_oauth_dev_config.py:40",
         "scripts/test_oauth_dev_config.py:72",
-        "scripts/test_oauth_local.py:400",
-        "scripts/test_secret_manager_builder_critical.py:86",
-        "scripts/test_secret_manager_builder_critical.py:330",
-        "scripts/unified_test_runner.py:237"
-      ]
-    },
-    "GOOGLE_OAUTH_CLIENT": {
-      "value": "GOOGLE_OAUTH_CLIENT",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:124",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:263",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:301"
+        "scripts/test_oauth_local.py:400"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT": {
@@ -18243,7 +18651,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:37",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:199",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:278",
         "scripts/test_oauth_dev_config.py:25",
         "scripts/test_oauth_dev_config.py:53",
         "scripts/test_oauth_dev_config.py:73"
@@ -18260,7 +18668,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:194",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:273",
         "scripts/test_oauth_dev_config.py:75"
       ]
     },
@@ -18271,12 +18679,13 @@
         "auth_service/test_actual_staging_credentials.py:45",
         "auth_service/test_url_construction.py:46",
         "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:51",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:151",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:189",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:335",
-        "auth_service/tests/test_auth_comprehensive.py:279",
-        "scripts/test_oauth_dev_config.py:51",
-        "scripts/test_oauth_dev_config.py:74"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:61",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:87",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:163",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:214",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:220",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:249",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:268"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT": {
@@ -18284,7 +18693,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:38",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:200",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:279",
         "scripts/test_oauth_dev_config.py:26",
         "scripts/test_oauth_dev_config.py:73"
       ]
@@ -18300,7 +18709,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:195",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:274",
         "scripts/test_oauth_dev_config.py:75"
       ]
     },
@@ -18310,11 +18719,14 @@
       "locations": [
         "auth_service/test_actual_staging_credentials.py:46",
         "auth_service/test_url_construction.py:47",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:88",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:152",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:190",
-        "scripts/test_oauth_dev_config.py:52",
-        "scripts/test_oauth_dev_config.py:74"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:107",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:117",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:142",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:163",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:215",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:221",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:251",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:269"
       ]
     },
     "GPT_35_TURBO": {
@@ -18552,7 +18964,7 @@
       "value": "Google OAuth provider should be available",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:279"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:387"
       ]
     },
     "Got:": {
@@ -18627,6 +19039,8 @@
       "locations": [
         "auth_service/tests/factories/token_factory.py:20",
         "auth_service/tests/test_auth_comprehensive.py:157",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:34",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:46",
         "scripts/setup_staging_test_account.py:72",
         "scripts/setup_staging_test_account.py:117"
       ]
@@ -18693,6 +19107,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_login_automated.py:143"
+      ]
+    },
+    "Health Checks": {
+      "value": "Health Checks",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:343"
       ]
     },
     "Health Endpoints": {
@@ -18956,6 +19377,13 @@
         "scripts/test_backend_optimized.py:345"
       ]
     },
+    "Implement caching for frequent requests": {
+      "value": "Implement caching for frequent requests",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:326"
+      ]
+    },
     "Implement memory monitoring and alerting": {
       "value": "Implement memory monitoring and alerting",
       "category": "test_literals",
@@ -19173,6 +19601,13 @@
         "scripts/test_frontend.py:50"
       ]
     },
+    "Insufficient timestamps": {
+      "value": "Insufficient timestamps",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:584"
+      ]
+    },
     "Integration Tests": {
       "value": "Integration Tests",
       "category": "test_literals",
@@ -19238,6 +19673,14 @@
         "scripts/test_database_url_builder_comprehensive.py:189"
       ]
     },
+    "Invalid JSON body": {
+      "value": "Invalid JSON body",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:177",
+        "auth_service/tests/test_refresh_endpoint_simple.py:79"
+      ]
+    },
     "Invalid JWT format: expected 3 parts, got": {
       "value": "Invalid JWT format: expected 3 parts, got",
       "category": "test_literals",
@@ -19249,14 +19692,14 @@
       "value": "Invalid OAuth client ID format",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:66"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:76"
       ]
     },
     "Invalid OAuth login URL": {
       "value": "Invalid OAuth login URL",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:316"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:445"
       ]
     },
     "Invalid PKCE challenge should fail:": {
@@ -19271,6 +19714,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/utils/assertion_helpers.py:31"
+      ]
+    },
+    "Invalid analysis type": {
+      "value": "Invalid analysis type",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:112"
       ]
     },
     "Invalid auth provider:": {
@@ -19315,11 +19765,25 @@
         "scripts/test_websocket_dev_mode.py:132"
       ]
     },
+    "Invalid latency_ms value": {
+      "value": "Invalid latency_ms value",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:286"
+      ]
+    },
     "Invalid max-age value:": {
       "value": "Invalid max-age value:",
       "category": "test_literals",
       "locations": [
         "scripts/test_cors.py:243"
+      ]
+    },
+    "Invalid metrics: ['invalid_metric']": {
+      "value": "Invalid metrics: ['invalid_metric']",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:142"
       ]
     },
     "Invalid permission format:": {
@@ -19334,6 +19798,15 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/utils/assertion_helpers.py:244"
+      ]
+    },
+    "Invalid refresh token": {
+      "value": "Invalid refresh token",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:129",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:143",
+        "auth_service/tests/test_refresh_endpoint_simple.py:98"
       ]
     },
     "Invalid session state": {
@@ -19771,6 +20244,13 @@
         "netra_backend/app/services/realistic_test_data/__init__.py:84"
       ]
     },
+    "LLM_MODE": {
+      "value": "LLM_MODE",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:124"
+      ]
+    },
     "LOAD_SECRETS": {
       "value": "LOAD_SECRETS",
       "category": "test_literals",
@@ -20046,6 +20526,13 @@
         "scripts/test_cold_start_e2e.py:254"
       ]
     },
+    "Logout": {
+      "value": "Logout",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:350"
+      ]
+    },
     "Long-duration soak testing": {
       "value": "Long-duration soak testing",
       "category": "test_literals",
@@ -20058,6 +20545,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_failure_scanner.py:47"
+      ]
+    },
+    "Low data point count": {
+      "value": "Low data point count",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:218"
       ]
     },
     "MAJOR (should fix)": {
@@ -20183,6 +20677,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_manual.py:124"
+      ]
+    },
+    "Main entry point": {
+      "value": "Main entry point",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:384"
       ]
     },
     "Main entry point for optimized test execution": {
@@ -20401,6 +20902,13 @@
         "scripts/test_example_message_flow.py:304"
       ]
     },
+    "Message:": {
+      "value": "Message:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:111"
+      ]
+    },
     "Method '": {
       "value": "Method '",
       "category": "test_literals",
@@ -20556,6 +21064,20 @@
       "locations": [
         "auth_service/tests/utils/assertion_helpers.py:95",
         "auth_service/tests/utils/assertion_helpers.py:114"
+      ]
+    },
+    "Missing required field: findings": {
+      "value": "Missing required field: findings",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:351"
+      ]
+    },
+    "Missing required field: recommendations": {
+      "value": "Missing required field: recommendations",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:352"
       ]
     },
     "Missing required permission:": {
@@ -20998,6 +21520,14 @@
         "auth_service/tests/auth-service-down-critical-scenarios.py:320"
       ]
     },
+    "New access token: ...": {
+      "value": "New access token: ...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:144",
+        "scripts/test_staging_auth_e2e.py:179"
+      ]
+    },
     "New files created:": {
       "value": "New files created:",
       "category": "test_literals",
@@ -21170,6 +21700,13 @@
         "scripts/analyze_test_overlap.py:542"
       ]
     },
+    "No data provided for validation": {
+      "value": "No data provided for validation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:200"
+      ]
+    },
     "No env vars set:": {
       "value": "No env vars set:",
       "category": "test_literals",
@@ -21295,6 +21832,14 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_discovery_report.py:132"
+      ]
+    },
+    "No refresh token available": {
+      "value": "No refresh token available",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:251",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:269"
       ]
     },
     "No response from WebSocket": {
@@ -21431,6 +21976,10 @@
       "locations": [
         "scripts/test_cors.py:386",
         "scripts/test_secret_manager_builder_critical.py:543",
+        "scripts/test_staging_auth_e2e.py:79",
+        "scripts/test_staging_auth_e2e.py:80",
+        "scripts/test_staging_auth_e2e.py:144",
+        "scripts/test_staging_auth_e2e.py:179",
         "scripts/test_websocket_cors_comprehensive.py:57",
         "scripts/test_websocket_simple.py:24"
       ]
@@ -21477,6 +22026,14 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:83"
+      ]
+    },
+    "Not a list": {
+      "value": "Not a list",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:358",
+        "scripts/test_data_validator_backup.py:385"
       ]
     },
     "Not in a git repository or git not available": {
@@ -21619,56 +22176,56 @@
       "value": "OAuth callback handling broken without full configuration:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:359"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:507"
       ]
     },
     "OAuth callback processing fails (confirms the bug)": {
       "value": "OAuth callback processing fails (confirms the bug)",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:352"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:500"
       ]
     },
     "OAuth client ID configuration missing in staging:": {
       "value": "OAuth client ID configuration missing in staging:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:70"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:80"
       ]
     },
     "OAuth client ID missing in staging as expected (this confirms the bug)": {
       "value": "OAuth client ID missing in staging as expected (this confirms the bug)",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:62"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:72"
       ]
     },
     "OAuth client ID should be valid length": {
       "value": "OAuth client ID should be valid length",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:65"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:75"
       ]
     },
     "OAuth client secret configuration missing in staging:": {
       "value": "OAuth client secret configuration missing in staging:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:106"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:135"
       ]
     },
     "OAuth client secret missing in staging as expected (this confirms the bug)": {
       "value": "OAuth client secret missing in staging as expected (this confirms the bug)",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:99"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:128"
       ]
     },
     "OAuth client secret should be valid length": {
       "value": "OAuth client secret should be valid length",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:102"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:131"
       ]
     },
     "OAuth config for": {
@@ -21682,7 +22239,7 @@
       "value": "OAuth configuration not environment-specific:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:239"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:329"
       ]
     },
     "OAuth flow tests": {
@@ -21710,21 +22267,21 @@
       "value": "OAuth login URL generation fails (confirms the bug)",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:313"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:442"
       ]
     },
     "OAuth login URL missing client_id": {
       "value": "OAuth login URL missing client_id",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:317"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:446"
       ]
     },
     "OAuth login flow broken without configuration:": {
       "value": "OAuth login flow broken without configuration:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:321"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:450"
       ]
     },
     "OAuth provider connectivity loss causing Auth Service to hang": {
@@ -21745,70 +22302,70 @@
       "value": "OAuth provider initialization fails without credentials:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:137"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:188"
       ]
     },
     "OAuth provider missing redirect URI configuration method": {
       "value": "OAuth provider missing redirect URI configuration method",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:174"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:242"
       ]
     },
     "OAuth provider should not initialize without client ID": {
       "value": "OAuth provider should not initialize without client ID",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:132"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:183"
       ]
     },
     "OAuth provider should not initialize without client secret": {
       "value": "OAuth provider should not initialize without client secret",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:133"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:184"
       ]
     },
     "OAuth providers empty in staging (confirms the bug exists)": {
       "value": "OAuth providers empty in staging (confirms the bug exists)",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:276"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:384"
       ]
     },
     "OAuth redirect URI incorrect for staging:": {
       "value": "OAuth redirect URI incorrect for staging:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:167"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:235"
       ]
     },
     "OAuth redirect URI missing for staging": {
       "value": "OAuth redirect URI missing for staging",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:162"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:230"
       ]
     },
     "OAuth redirect URI should use HTTPS in staging:": {
       "value": "OAuth redirect URI should use HTTPS in staging:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:170"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:238"
       ]
     },
     "OAuth service integration broken:": {
       "value": "OAuth service integration broken:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:283"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:391"
       ]
     },
     "OAuth user info should contain email": {
       "value": "OAuth user info should contain email",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:355"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:503"
       ]
     },
     "OAuth...": {
@@ -22760,6 +23317,13 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:1"
       ]
     },
+    "Performance analysis completed": {
+      "value": "Performance analysis completed",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:319"
+      ]
+    },
     "Performance and SLA validation tests": {
       "value": "Performance and SLA validation tests",
       "category": "test_literals",
@@ -22955,6 +23519,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_port_configuration.py:418"
+      ]
+    },
+    "Port is already in use by another process": {
+      "value": "Port is already in use by another process",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:43"
       ]
     },
     "Port mismatch detected! Auth service binds to port": {
@@ -23618,6 +24189,14 @@
         "scripts/test_error_monitor_logic.py:203"
       ]
     },
+    "Received keys:": {
+      "value": "Received keys:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:113",
+        "scripts/test_staging_refresh_format.py:138"
+      ]
+    },
     "Received response:": {
       "value": "Received response:",
       "category": "test_literals",
@@ -23637,6 +24216,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/optimize_test_performance.py:406"
+      ]
+    },
+    "Recommendations must be a list": {
+      "value": "Recommendations must be a list",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:391"
       ]
     },
     "Recommendations:": {
@@ -23812,6 +24398,13 @@
       "locations": [
         "scripts/test_cors_issue.py:18",
         "scripts/test_cors_issue.py:39"
+      ]
+    },
+    "Refresh cycle": {
+      "value": "Refresh cycle",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:240"
       ]
     },
     "Remaining L3 files:": {
@@ -24061,7 +24654,11 @@
         "scripts/test_oauth_local.py:212",
         "scripts/test_oauth_local.py:270",
         "scripts/test_oauth_local.py:273",
-        "scripts/test_oauth_local.py:322"
+        "scripts/test_oauth_local.py:322",
+        "scripts/test_staging_auth_e2e.py:86",
+        "scripts/test_staging_auth_e2e.py:149",
+        "scripts/test_staging_auth_e2e.py:184",
+        "scripts/test_staging_auth_e2e.py:221"
       ]
     },
     "Result": {
@@ -24077,6 +24674,7 @@
       "locations": [
         "scripts/test_auth_database_sessions.py:181",
         "scripts/test_auth_database_sessions.py:200",
+        "scripts/test_backend_port_binding.py:168",
         "scripts/test_verify_workflow.py:36",
         "scripts/test_verify_workflow.py:48",
         "scripts/test_verify_workflow.py:71"
@@ -24204,6 +24802,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_manual.py:107"
+      ]
+    },
+    "Run all E2E tests": {
+      "value": "Run all E2E tests",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:330"
       ]
     },
     "Run all WebSocket configuration tests.": {
@@ -24971,6 +25576,13 @@
         "scripts/rapid_test_consolidation.py:334"
       ]
     },
+    "STAGING AUTHENTICATION E2E TEST": {
+      "value": "STAGING AUTHENTICATION E2E TEST",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:332"
+      ]
+    },
     "STAGING CONFIGURATION SIMPLIFICATION TEST": {
       "value": "STAGING CONFIGURATION SIMPLIFICATION TEST",
       "category": "test_literals",
@@ -25011,6 +25623,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_login_automated.py:303"
+      ]
+    },
+    "STAGING REFRESH ENDPOINT FORMAT TEST": {
+      "value": "STAGING REFRESH ENDPOINT FORMAT TEST",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:18"
       ]
     },
     "STAGING STARTUP SEQUENCE TESTS": {
@@ -25251,6 +25870,7 @@
         "scripts/comprehensive_test_fixer.py:389",
         "scripts/test_gtm_loading.py:140",
         "scripts/test_log_introspection.py:161",
+        "scripts/test_staging_refresh_format.py:147",
         "scripts/test_staging_simplified.py:114"
       ]
     },
@@ -25295,6 +25915,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/setup_staging_test_account.py:303"
+      ]
+    },
+    "Savings percentage must be between 0-50%": {
+      "value": "Savings percentage must be between 0-50%",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:408"
       ]
     },
     "Scale horizontally to reduce CPU load": {
@@ -25769,6 +26396,13 @@
         "auth_service/tests/test_oauth_security_vulnerabilities.py:156"
       ]
     },
+    "Session Persistence": {
+      "value": "Session Persistence",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:349"
+      ]
+    },
     "Session Test Data Factory\nCreates test sessions with proper expiration and metadata.\nSupports both active and expired sessions for comprehensive testing.": {
       "value": "Session Test Data Factory\nCreates test sessions with proper expiration and metadata.\nSupports both active and expired sessions for comprehensive testing.",
       "category": "test_literals",
@@ -25943,6 +26577,14 @@
       "category": "test_literals",
       "locations": [
         "scripts/remove_test_stubs.py:331"
+      ]
+    },
+    "Short time span": {
+      "value": "Short time span",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:304",
+        "scripts/test_data_validator_backup.py:574"
       ]
     },
     "Should accept JSON output format": {
@@ -26187,6 +26829,13 @@
         "scripts/simple_test_fix_loop.py:2"
       ]
     },
+    "Simple test for refresh endpoint field naming without database dependencies.": {
+      "value": "Simple test for refresh endpoint field naming without database dependencies.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:1"
+      ]
+    },
     "Simple test script to verify service startup orchestration.\nTests the core startup sequence without complex integration.": {
       "value": "Simple test script to verify service startup orchestration.\nTests the core startup sequence without complex integration.",
       "category": "test_literals",
@@ -26255,6 +26904,24 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_secret_manager_builder_critical.py:537"
+      ]
+    },
+    "Some finding": {
+      "value": "Some finding",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:384",
+        "scripts/test_data_validator_backup.py:397",
+        "scripts/test_data_validator_backup.py:414"
+      ]
+    },
+    "Some recommendation": {
+      "value": "Some recommendation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:372",
+        "scripts/test_data_validator_backup.py:398",
+        "scripts/test_data_validator_backup.py:415"
       ]
     },
     "Some services are not available!": {
@@ -26676,6 +27343,13 @@
         "scripts/analyze_test_overlap.py:71"
       ]
     },
+    "Starting test uvicorn server...": {
+      "value": "Starting test uvicorn server...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:73"
+      ]
+    },
     "Startup Test Executor\nHandles execution of backend, frontend, and E2E tests": {
       "value": "Startup Test Executor\nHandles execution of backend, frontend, and E2E tests",
       "category": "test_literals",
@@ -26766,6 +27440,15 @@
         "scripts/test_cors_issue.py:42",
         "scripts/test_cors_issue.py:64",
         "scripts/test_oauth_local.py:373"
+      ]
+    },
+    "Status: 401 Unauthorized (expected for invalid token)": {
+      "value": "Status: 401 Unauthorized (expected for invalid token)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:39",
+        "scripts/test_staging_refresh_format.py:61",
+        "scripts/test_staging_refresh_format.py:85"
       ]
     },
     "Stderr:": {
@@ -27280,6 +27963,7 @@
       "locations": [
         "scripts/test_database_url_builder_comprehensive.py:330",
         "scripts/test_log_introspection.py:412",
+        "scripts/test_staging_auth_e2e.py:363",
         "scripts/test_staging_deployment.py:213",
         "scripts/test_staging_env.py:186",
         "scripts/test_staging_login_automated.py:333",
@@ -27297,11 +27981,11 @@
       "value": "TESTING",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:47",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:84",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:120",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:259",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:297",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:57",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:113",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:171",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:367",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:426",
         "scripts/test_backend.py:78",
         "scripts/test_environment_detection.py:19",
         "scripts/unified_test_runner.py:235"
@@ -27705,6 +28389,13 @@
         "scripts/compliance/test_size_validator.py:278",
         "scripts/fix_all_test_issues.py:156",
         "scripts/test_oauth_local.py:350"
+      ]
+    },
+    "Test '": {
+      "value": "Test '",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:358"
       ]
     },
     "Test 1: Testing /ws/test endpoint": {
@@ -28490,6 +29181,13 @@
         "scripts/test_staging_migrations.py:1"
       ]
     },
+    "Test dev login to get initial tokens": {
+      "value": "Test dev login to get initial tokens",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:58"
+      ]
+    },
     "Test direct asyncpg connection using staging credentials.": {
       "value": "Test direct asyncpg connection using staging credentials.",
       "category": "test_literals",
@@ -28729,11 +29427,25 @@
         "scripts/test_frontend_simple.py:77"
       ]
     },
+    "Test logout functionality": {
+      "value": "Test logout functionality",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:290"
+      ]
+    },
     "Test main API endpoints": {
       "value": "Test main API endpoints",
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_deployment.py:102"
+      ]
+    },
+    "Test making an authenticated API call to the backend": {
+      "value": "Test making an authenticated API call to the backend",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:192"
       ]
     },
     "Test message for validation": {
@@ -28816,6 +29528,27 @@
         "scripts/compliance/test_refactor_helper.py:2"
       ]
     },
+    "Test refresh endpoint accepts different field naming formats": {
+      "value": "Test refresh endpoint accepts different field naming formats",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:13"
+      ]
+    },
+    "Test refresh with real token using camelCase": {
+      "value": "Test refresh with real token using camelCase",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:266"
+      ]
+    },
+    "Test refresh with real token using snake_case": {
+      "value": "Test refresh with real token using snake_case",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:248"
+      ]
+    },
     "Test report saved to: workflow_verification_test_report.md": {
       "value": "Test report saved to: workflow_verification_test_report.md",
       "category": "test_literals",
@@ -28877,6 +29610,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/test_staging_db_connection.py:1"
+      ]
+    },
+    "Test script to specifically check backend port 8000 binding.\nThis isolates the socket permission error from other dev launcher issues.": {
+      "value": "Test script to specifically check backend port 8000 binding.\nThis isolates the socket permission error from other dev launcher issues.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:2"
       ]
     },
     "Test script to validate SQLAlchemy 2.0 migration": {
@@ -29040,11 +29780,39 @@
         "scripts/test_verify_workflow_status.py:139"
       ]
     },
+    "Test that all services are healthy": {
+      "value": "Test that all services are healthy",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:30"
+      ]
+    },
     "Test that dependency resolution prevents early startup.": {
       "value": "Test that dependency resolution prevents early startup.",
       "category": "test_literals",
       "locations": [
         "scripts/test_coordination_fixes.py:81"
+      ]
+    },
+    "Test that session persists across multiple refreshes": {
+      "value": "Test that session persists across multiple refreshes",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:229"
+      ]
+    },
+    "Test that the access token is valid": {
+      "value": "Test that the access token is valid",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:94"
+      ]
+    },
+    "Test that the staging auth service refresh endpoint accepts different field formats.\nThis is the critical fix we deployed.": {
+      "value": "Test that the staging auth service refresh endpoint accepts different field formats.\nThis is the critical fix we deployed.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:2"
       ]
     },
     "Test the /ws/test endpoint (no auth required).": {
@@ -29095,6 +29863,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:236"
+      ]
+    },
+    "Test token refresh with camelCase format (frontend format)": {
+      "value": "Test token refresh with camelCase format (frontend format)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:157"
+      ]
+    },
+    "Test token refresh with snake_case format": {
+      "value": "Test token refresh with snake_case format",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:123"
       ]
     },
     "Test token validation": {
@@ -29566,6 +30348,13 @@
         "scripts/test_coordination_fixes.py:123"
       ]
     },
+    "Testing refresh endpoint field naming compatibility...": {
+      "value": "Testing refresh endpoint field naming compatibility...",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:102"
+      ]
+    },
     "Testing report generation...": {
       "value": "Testing report generation...",
       "category": "test_literals",
@@ -29841,6 +30630,13 @@
         "auth_service/test_staging_db_connection.py:321"
       ]
     },
+    "The backend is rejecting the token": {
+      "value": "The backend is rejecting the token",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:217"
+      ]
+    },
     "The codebase is compliant with LLM test model standardization.": {
       "value": "The codebase is compliant with LLM test model standardization.",
       "category": "test_literals",
@@ -29853,6 +30649,13 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:161"
+      ]
+    },
+    "The frontend can now successfully refresh authentication tokens.": {
+      "value": "The frontend can now successfully refresh authentication tokens.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:155"
       ]
     },
     "The issue is likely with the actual database connection in Cloud Run": {
@@ -29869,11 +30672,25 @@
         "scripts/test_and_fix_cors.py:145"
       ]
     },
+    "The refresh endpoint now accepts multiple field formats:": {
+      "value": "The refresh endpoint now accepts multiple field formats:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:149"
+      ]
+    },
     "The service coordination system should now handle:": {
       "value": "The service coordination system should now handle:",
       "category": "test_literals",
       "locations": [
         "scripts/test_coordination_fixes.py:415"
+      ]
+    },
+    "The socket permission error may be resolved or intermittent.": {
+      "value": "The socket permission error may be resolved or intermittent.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:187"
       ]
     },
     "The system analysis reveals the following insights:": {
@@ -29939,6 +30756,13 @@
         "auth_service/tests/test_auth_port_configuration.py:460"
       ]
     },
+    "This confirms there's a Windows socket permission problem.": {
+      "value": "This confirms there's a Windows socket permission problem.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:191"
+      ]
+    },
     "This demo shows Fix #2: Test Size Limits Enforcement implementation": {
       "value": "This demo shows Fix #2: Test Size Limits Enforcement implementation",
       "category": "test_literals",
@@ -29951,6 +30775,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_simplified.py:21"
+      ]
+    },
+    "This fixes the 422 errors the frontend was experiencing.": {
+      "value": "This fixes the 422 errors the frontend was experiencing.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:154"
+      ]
+    },
+    "This is the [WinError 10013] permission error!": {
+      "value": "This is the [WinError 10013] permission error!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:41"
       ]
     },
     "This might be expected if not running on GCP or without proxy": {
@@ -30030,6 +30868,20 @@
         "scripts/test_staging_login_automated.py:80"
       ]
     },
+    "Threads count:": {
+      "value": "Threads count:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:213"
+      ]
+    },
+    "Timeframe is required": {
+      "value": "Timeframe is required",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:100"
+      ]
+    },
     "Timeout": {
       "value": "Timeout",
       "category": "test_literals",
@@ -30063,8 +30915,10 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cors.py:460",
+        "scripts/test_staging_auth_e2e.py:334",
         "scripts/test_staging_deployment.py:188",
         "scripts/test_staging_login_automated.py:305",
+        "scripts/test_staging_refresh_format.py:20",
         "scripts/test_websocket_connection.py:176"
       ]
     },
@@ -30152,6 +31006,20 @@
         "scripts/test_staging_deployment.py:129"
       ]
     },
+    "Token Refresh (camelCase)": {
+      "value": "Token Refresh (camelCase)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:347"
+      ]
+    },
+    "Token Refresh (snake_case)": {
+      "value": "Token Refresh (snake_case)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:346"
+      ]
+    },
     "Token Test Data Factory\nCreates JWT tokens and OAuth tokens for auth service testing.\nSupports access tokens, refresh tokens, and service tokens with proper claims.": {
       "value": "Token Test Data Factory\nCreates JWT tokens and OAuth tokens for auth service testing.\nSupports access tokens, refresh tokens, and service tokens with proper claims.",
       "category": "test_literals",
@@ -30164,7 +31032,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_auth_integration.py:95",
-        "scripts/test_auth_integration.py:101"
+        "scripts/test_auth_integration.py:101",
+        "scripts/test_staging_auth_e2e.py:345"
       ]
     },
     "Token expiration enforcement verified": {
@@ -30256,6 +31125,14 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/utils/__init__.py:16"
+      ]
+    },
+    "Tokens changed:": {
+      "value": "Tokens changed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:145",
+        "scripts/test_staging_auth_e2e.py:180"
       ]
     },
     "Tokens generated with 'test-secret':": {
@@ -30489,6 +31366,13 @@
         "scripts/analyze_test_mocks.py:167"
       ]
     },
+    "Total savings must be non-negative": {
+      "value": "Total savings must be non-negative",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:425"
+      ]
+    },
     "Total system load time:": {
       "value": "Total system load time:",
       "category": "test_literals",
@@ -30551,8 +31435,23 @@
         "scripts/test_database_url_builder_comprehensive.py:347",
         "scripts/test_log_introspection.py:422",
         "scripts/test_ssl_certificates_staging.py:304",
+        "scripts/test_staging_auth_e2e.py:373",
         "scripts/test_staging_migrations.py:324",
         "scripts/test_staging_startup.py:271"
+      ]
+    },
+    "Try running as Administrator or use the port cleanup script.": {
+      "value": "Try running as Administrator or use the port cleanup script.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:192"
+      ]
+    },
+    "Try running the dev launcher again.": {
+      "value": "Try running the dev launcher again.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:188"
       ]
     },
     "Tuple[": {
@@ -31016,6 +31915,20 @@
         "auth_service/tests/utils/assertion_helpers.py:180"
       ]
     },
+    "User ID consistent:": {
+      "value": "User ID consistent:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:270"
+      ]
+    },
+    "User ID:": {
+      "value": "User ID:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:111"
+      ]
+    },
     "User Profile": {
       "value": "User Profile",
       "category": "test_literals",
@@ -31179,6 +32092,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cors.py:216"
+      ]
+    },
+    "Uvicorn Binding": {
+      "value": "Uvicorn Binding",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:159"
       ]
     },
     "VALIDATION ERROR:": {
@@ -31648,6 +32568,27 @@
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:113"
+      ]
+    },
+    "Warning 1": {
+      "value": "Warning 1",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:466"
+      ]
+    },
+    "Warning 2": {
+      "value": "Warning 2",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:466"
+      ]
+    },
+    "Warning 3": {
+      "value": "Warning 3",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:466"
       ]
     },
     "Warning: Categories not found:": {
@@ -32574,6 +33515,17 @@
         "scripts/test_async_postgres.py:157"
       ]
     },
+    "[ERROR] Request failed:": {
+      "value": "[ERROR] Request failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:47",
+        "scripts/test_staging_refresh_format.py:71",
+        "scripts/test_staging_refresh_format.py:93",
+        "scripts/test_staging_refresh_format.py:120",
+        "scripts/test_staging_refresh_format.py:143"
+      ]
+    },
     "[ERROR] Scanning": {
       "value": "[ERROR] Scanning",
       "category": "test_literals",
@@ -32717,6 +33669,27 @@
         "scripts/test_failure_scanner.py:177"
       ]
     },
+    "[FAIL] API call error:": {
+      "value": "[FAIL] API call error:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:225"
+      ]
+    },
+    "[FAIL] API call failed: HTTP": {
+      "value": "[FAIL] API call failed: HTTP",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:220"
+      ]
+    },
+    "[FAIL] Authentication failed: HTTP 403 Forbidden": {
+      "value": "[FAIL] Authentication failed: HTTP 403 Forbidden",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:216"
+      ]
+    },
     "[FAIL] Backend startup tests failed": {
       "value": "[FAIL] Backend startup tests failed",
       "category": "test_literals",
@@ -32759,11 +33732,32 @@
         "netra_backend/app/agents/test_agent_initialization.py:177"
       ]
     },
+    "[FAIL] Error handling test failed:": {
+      "value": "[FAIL] Error handling test failed:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:114"
+      ]
+    },
     "[FAIL] Error testing auth bypass:": {
       "value": "[FAIL] Error testing auth bypass:",
       "category": "test_literals",
       "locations": [
         "scripts/test_docker_websocket_fix.py:276"
+      ]
+    },
+    "[FAIL] Error:": {
+      "value": "[FAIL] Error:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:279"
+      ]
+    },
+    "[FAIL] FAIL": {
+      "value": "[FAIL] FAIL",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:370"
       ]
     },
     "[FAIL] FAILED:": {
@@ -32787,11 +33781,34 @@
         "scripts/startup_test_executor.py:171"
       ]
     },
+    "[FAIL] Got 422 Unprocessable Entity - field not accepted!": {
+      "value": "[FAIL] Got 422 Unprocessable Entity - field not accepted!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:41",
+        "scripts/test_staging_refresh_format.py:64",
+        "scripts/test_staging_refresh_format.py:87"
+      ]
+    },
     "[FAIL] InitializationManager test failed:": {
       "value": "[FAIL] InitializationManager test failed:",
       "category": "test_literals",
       "locations": [
         "netra_backend/app/agents/test_agent_initialization.py:80"
+      ]
+    },
+    "[FAIL] Invalid JSON test failed:": {
+      "value": "[FAIL] Invalid JSON test failed:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:120"
+      ]
+    },
+    "[FAIL] Invalid token test failed:": {
+      "value": "[FAIL] Invalid token test failed:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:126"
       ]
     },
     "[FAIL] Iteration": {
@@ -32806,6 +33823,83 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_frontend.py:470"
+      ]
+    },
+    "[FAIL] Login error:": {
+      "value": "[FAIL] Login error:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:90"
+      ]
+    },
+    "[FAIL] Login failed: HTTP": {
+      "value": "[FAIL] Login failed: HTTP",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:84"
+      ]
+    },
+    "[FAIL] Logout error:": {
+      "value": "[FAIL] Logout error:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:326"
+      ]
+    },
+    "[FAIL] Logout failed: HTTP": {
+      "value": "[FAIL] Logout failed: HTTP",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:322"
+      ]
+    },
+    "[FAIL] Multiple formats test failed:": {
+      "value": "[FAIL] Multiple formats test failed:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:108"
+      ]
+    },
+    "[FAIL] New token validation failed": {
+      "value": "[FAIL] New token validation failed",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:272"
+      ]
+    },
+    "[FAIL] No access token available": {
+      "value": "[FAIL] No access token available",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:98",
+        "scripts/test_staging_auth_e2e.py:196",
+        "scripts/test_staging_auth_e2e.py:294"
+      ]
+    },
+    "[FAIL] No refresh token available": {
+      "value": "[FAIL] No refresh token available",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:127",
+        "scripts/test_staging_auth_e2e.py:161",
+        "scripts/test_staging_auth_e2e.py:233"
+      ]
+    },
+    "[FAIL] Refresh error:": {
+      "value": "[FAIL] Refresh error:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:153",
+        "scripts/test_staging_auth_e2e.py:188"
+      ]
+    },
+    "[FAIL] Refresh failed: HTTP": {
+      "value": "[FAIL] Refresh failed: HTTP",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:148",
+        "scripts/test_staging_auth_e2e.py:183",
+        "scripts/test_staging_auth_e2e.py:275"
       ]
     },
     "[FAIL] Result doesn't match expectation. Expected:": {
@@ -32857,6 +33951,20 @@
         "scripts/automated_test_fix_loop.py:115"
       ]
     },
+    "[FAIL] Token still valid after logout!": {
+      "value": "[FAIL] Token still valid after logout!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:319"
+      ]
+    },
+    "[FAIL] Token validation failed: HTTP": {
+      "value": "[FAIL] Token validation failed: HTTP",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:115"
+      ]
+    },
     "[FAIL] Type checking failed.": {
       "value": "[FAIL] Type checking failed.",
       "category": "test_literals",
@@ -32869,6 +33977,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_environment_detection.py:179"
+      ]
+    },
+    "[FAIL] Validation error:": {
+      "value": "[FAIL] Validation error:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:119"
       ]
     },
     "[FAIL] WebSocket Connection:": {
@@ -32932,6 +34047,17 @@
       "category": "test_literals",
       "locations": [
         "scripts/manage_test_services.py:141"
+      ]
+    },
+    "[INFO] Got status": {
+      "value": "[INFO] Got status",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:44",
+        "scripts/test_staging_refresh_format.py:68",
+        "scripts/test_staging_refresh_format.py:90",
+        "scripts/test_staging_refresh_format.py:117",
+        "scripts/test_staging_refresh_format.py:141"
       ]
     },
     "[INFO] Including ClickHouse service...": {
@@ -33126,6 +34252,13 @@
         "scripts/test_docker_websocket_fix.py:296"
       ]
     },
+    "[OK] Access token: ...": {
+      "value": "[OK] Access token: ...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:79"
+      ]
+    },
     "[OK] All critical checks passed! WebSocket should work in Docker development environment.": {
       "value": "[OK] All critical checks passed! WebSocket should work in Docker development environment.",
       "category": "test_literals",
@@ -33222,6 +34355,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_chat_errors.py:55"
+      ]
+    },
+    "[OK] Authenticated API call successful": {
+      "value": "[OK] Authenticated API call successful",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:212"
       ]
     },
     "[OK] Backend database connection closed": {
@@ -33337,6 +34477,27 @@
         "scripts/startup_test_executor.py:261"
       ]
     },
+    "[OK] Endpoint accepted camelCase format!": {
+      "value": "[OK] Endpoint accepted camelCase format!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:60"
+      ]
+    },
+    "[OK] Endpoint accepted simple token format": {
+      "value": "[OK] Endpoint accepted simple token format",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:84"
+      ]
+    },
+    "[OK] Endpoint accepted snake_case format": {
+      "value": "[OK] Endpoint accepted snake_case format",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:38"
+      ]
+    },
     "[OK] Exit code:": {
       "value": "[OK] Exit code:",
       "category": "test_literals",
@@ -33379,6 +34540,20 @@
         "scripts/fix_authentication_test_tokens.py:132"
       ]
     },
+    "[OK] Got expected 422 for empty body": {
+      "value": "[OK] Got expected 422 for empty body",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:106"
+      ]
+    },
+    "[OK] Got expected 422 for wrong field": {
+      "value": "[OK] Got expected 422 for wrong field",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:133"
+      ]
+    },
     "[OK] Health Check:": {
       "value": "[OK] Health Check:",
       "category": "test_literals",
@@ -33398,6 +34573,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_cors_comprehensive.py:297"
+      ]
+    },
+    "[OK] Login successful": {
+      "value": "[OK] Login successful",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:78"
+      ]
+    },
+    "[OK] Logout successful": {
+      "value": "[OK] Logout successful",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:307"
       ]
     },
     "[OK] No changes needed:": {
@@ -33428,6 +34617,13 @@
         "scripts/test_gtm_loading.py:122"
       ]
     },
+    "[OK] PASS": {
+      "value": "[OK] PASS",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:370"
+      ]
+    },
     "[OK] PostgreSQL is running on localhost:": {
       "value": "[OK] PostgreSQL is running on localhost:",
       "category": "test_literals",
@@ -33449,6 +34645,13 @@
         "scripts/test_chat_errors.py:65"
       ]
     },
+    "[OK] Refresh token: ...": {
+      "value": "[OK] Refresh token: ...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:80"
+      ]
+    },
     "[OK] Script Tag:": {
       "value": "[OK] Script Tag:",
       "category": "test_literals",
@@ -33461,6 +34664,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_startup.py:69"
+      ]
+    },
+    "[OK] Session persisted across": {
+      "value": "[OK] Session persisted across",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:284"
       ]
     },
     "[OK] Set": {
@@ -33476,6 +34686,48 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_startup.py:209"
+      ]
+    },
+    "[OK] Token is valid": {
+      "value": "[OK] Token is valid",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:110"
+      ]
+    },
+    "[OK] Token properly invalidated after logout": {
+      "value": "[OK] Token properly invalidated after logout",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:316"
+      ]
+    },
+    "[OK] Token refreshed and valid": {
+      "value": "[OK] Token refreshed and valid",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:269"
+      ]
+    },
+    "[OK] Token refreshed successfully (camelCase)": {
+      "value": "[OK] Token refreshed successfully (camelCase)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:178"
+      ]
+    },
+    "[OK] Token refreshed successfully (snake_case)": {
+      "value": "[OK] Token refreshed successfully (snake_case)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:143"
+      ]
+    },
+    "[OK] User ID:": {
+      "value": "[OK] User ID:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:81"
       ]
     },
     "[OK] WebSocket endpoint found at": {
@@ -33649,6 +34901,13 @@
         "scripts/test_environment_detection.py:46"
       ]
     },
+    "[PASS] Error handling test passed": {
+      "value": "[PASS] Error handling test passed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:112"
+      ]
+    },
     "[PASS] Execution context created:": {
       "value": "[PASS] Execution context created:",
       "category": "test_literals",
@@ -33719,11 +34978,32 @@
         "netra_backend/app/agents/test_agent_initialization.py:56"
       ]
     },
+    "[PASS] Invalid JSON test passed": {
+      "value": "[PASS] Invalid JSON test passed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:118"
+      ]
+    },
+    "[PASS] Invalid token test passed": {
+      "value": "[PASS] Invalid token test passed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:124"
+      ]
+    },
     "[PASS] Iteration": {
       "value": "[PASS] Iteration",
       "category": "test_literals",
       "locations": [
         "scripts/batch_fix_and_test.py:86"
+      ]
+    },
+    "[PASS] Multiple field formats test passed": {
+      "value": "[PASS] Multiple field formats test passed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:106"
       ]
     },
     "[PASS] No legacy CORS code found": {
@@ -34039,6 +35319,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cors_ssot_compliance.py:216"
+      ]
+    },
+    "[SUCCESS] ALL TESTS PASSED! Authentication is working correctly.": {
+      "value": "[SUCCESS] ALL TESTS PASSED! Authentication is working correctly.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:376"
       ]
     },
     "[SUCCESS] All OAuth credential loading tests passed!": {
@@ -34434,6 +35721,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_websocket_cors_comprehensive.py:312"
+      ]
+    },
+    "[WARNING]  Some tests failed. Review the output above for details.": {
+      "value": "[WARNING]  Some tests failed. Review the output above for details.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:378"
       ]
     },
     "[WARNING] Backend server is not running. Starting it...": {
@@ -35103,8 +36397,8 @@
         "auth_service/tests/test_auth_comprehensive.py:577",
         "auth_service/tests/test_auth_port_configuration.py:456",
         "auth_service/tests/test_oauth_state_validation.py:302",
-        "scripts/add_pytest_markers.py:221",
-        "scripts/add_test_markers.py:247"
+        "auth_service/tests/test_refresh_endpoint_simple.py:101",
+        "scripts/add_pytest_markers.py:221"
       ]
     },
     "__pycache__": {
@@ -35577,6 +36871,13 @@
         "scripts/remove_test_stubs.py:211"
       ]
     },
+    "access": {
+      "value": "access",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:298"
+      ]
+    },
     "access-control": {
       "value": "access-control",
       "category": "test_literals",
@@ -35642,11 +36943,11 @@
         "auth_service/tests/test_auth_comprehensive.py:227",
         "auth_service/tests/test_oauth_state_validation.py:115",
         "auth_service/tests/test_oauth_state_validation.py:260",
-        "auth_service/tests/utils/assertion_helpers.py:137",
-        "auth_service/tests/utils/assertion_helpers.py:145",
-        "auth_service/tests/utils/assertion_helpers.py:149",
-        "scripts/test_cold_start_e2e.py:243",
-        "scripts/test_oauth_local.py:252"
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:60",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:77",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:92",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:260",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:262"
       ]
     },
     "access_token=": {
@@ -35686,7 +36987,7 @@
       "value": "accounts.google.com",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:316",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:445",
         "auth_service/tests/test_auth_comprehensive.py:174",
         "auth_service/tests/test_oauth_state_validation.py:91",
         "scripts/test_staging_login_automated.py:264"
@@ -36015,6 +37316,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/comprehensive_test_fixer.py:192"
+      ]
+    },
+    "also_not_a_number": {
+      "value": "also_not_a_number",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:276"
       ]
     },
     "alternative": {
@@ -36517,8 +37825,10 @@
       "locations": [
         "auth_service/tests/auth-service-down-critical-scenarios.py:136",
         "auth_service/tests/test_auth_comprehensive.py:506",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:172",
         "scripts/test_and_fix_cors.py:66",
         "scripts/test_cors.py:103",
+        "scripts/test_staging_auth_e2e.py:206",
         "scripts/test_staging_deployment.py:130",
         "scripts/test_staging_login_automated.py:158"
       ]
@@ -36978,11 +38288,40 @@
         "auth_service/tests/test_oauth_state_validation.py:280"
       ]
     },
+    "auth_service.auth_core.routes.auth_routes.auth_service": {
+      "value": "auth_service.auth_core.routes.auth_routes.auth_service",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:22",
+        "auth_service/tests/test_refresh_endpoint_simple.py:87"
+      ]
+    },
+    "auth_service.auth_core.routes.auth_routes.logger": {
+      "value": "auth_service.auth_core.routes.auth_routes.logger",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:312"
+      ]
+    },
     "auth_service.auth_core.security.oauth_security.time": {
       "value": "auth_service.auth_core.security.oauth_security.time",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_oauth_state_validation.py:193"
+      ]
+    },
+    "auth_service.auth_core.services.auth_service.auth_service.refresh_tokens": {
+      "value": "auth_service.auth_core.services.auth_service.auth_service.refresh_tokens",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:50",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:67",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:82",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:119",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:133",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:181",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:208",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:297"
       ]
     },
     "auth_service.main": {
@@ -38315,16 +39654,16 @@
       "value": "client-id-",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:214",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:226"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:305",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:316"
       ]
     },
     "client-secret-": {
       "value": "client-secret-",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:215",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:230"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:306",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:320"
       ]
     },
     "client.get": {
@@ -38359,7 +39698,7 @@
       "value": "client_id=",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:317"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:446"
       ]
     },
     "client_secret": {
@@ -39137,6 +40476,22 @@
         "scripts/test_example_message_flow.py:407"
       ]
     },
+    "cost_cents": {
+      "value": "cost_cents",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:46",
+        "scripts/test_data_validator_backup.py:72",
+        "scripts/test_data_validator_backup.py:136",
+        "scripts/test_data_validator_backup.py:176",
+        "scripts/test_data_validator_backup.py:184",
+        "scripts/test_data_validator_backup.py:257",
+        "scripts/test_data_validator_backup.py:262",
+        "scripts/test_data_validator_backup.py:267",
+        "scripts/test_data_validator_backup.py:621",
+        "scripts/test_data_validator_backup.py:625"
+      ]
+    },
     "cost_data": {
       "value": "cost_data",
       "category": "test_literals",
@@ -39151,7 +40506,8 @@
         "scripts/business_value_test_index.py:99",
         "scripts/business_value_test_index.py:422",
         "scripts/business_value_test_index.py:471",
-        "scripts/business_value_test_index.py:493"
+        "scripts/business_value_test_index.py:493",
+        "scripts/test_data_validator_backup.py:146"
       ]
     },
     "cost_per_1k_input": {
@@ -39197,6 +40553,15 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/workload_simulator.py:239"
+      ]
+    },
+    "cost_savings": {
+      "value": "cost_savings",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:328",
+        "scripts/test_data_validator_backup.py:399",
+        "scripts/test_data_validator_backup.py:416"
       ]
     },
     "cost_usd": {
@@ -39744,6 +41109,18 @@
         "scripts/test_gtm_loading.py:123"
       ]
     },
+    "data_points": {
+      "value": "data_points",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:190",
+        "scripts/test_data_validator_backup.py:201",
+        "scripts/test_data_validator_backup.py:441",
+        "scripts/test_data_validator_backup.py:454",
+        "scripts/test_data_validator_backup.py:467",
+        "scripts/test_data_validator_backup.py:480"
+      ]
+    },
     "data_validators": {
       "value": "data_validators",
       "category": "test_literals",
@@ -40220,6 +41597,22 @@
         "scripts/final_test_status_check.py:71"
       ]
     },
+    "detail": {
+      "value": "detail",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:101",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:102",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:113",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:115",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:115",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:129",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:143",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:154",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:165",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:177"
+      ]
+    },
     "detailed_analysis": {
       "value": "detailed_analysis",
       "category": "test_literals",
@@ -40306,6 +41699,22 @@
         "scripts/test_secret_manager_builder_critical.py:427"
       ]
     },
+    "dev123": {
+      "value": "dev123",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:237",
+        "scripts/test_staging_auth_e2e.py:68"
+      ]
+    },
+    "dev@example.com": {
+      "value": "dev@example.com",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:237",
+        "scripts/test_staging_auth_e2e.py:67"
+      ]
+    },
     "devDependencies": {
       "value": "devDependencies",
       "category": "test_literals",
@@ -40331,7 +41740,7 @@
       "value": "development",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:198",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:277",
         "auth_service/tests/test_auth_comprehensive.py:64",
         "auth_service/tests/test_auth_comprehensive.py:523",
         "auth_service/tests/test_auth_comprehensive.py:525",
@@ -40439,6 +41848,7 @@
         "scripts/test_backend.py:359",
         "scripts/test_backend.py:366",
         "scripts/test_backend.py:367",
+        "scripts/test_backend_port_binding.py:124",
         "scripts/unified_test_runner.py:1014"
       ]
     },
@@ -40759,7 +42169,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:167",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:355",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:503",
         "auth_service/tests/factories/token_factory.py:37",
         "auth_service/tests/factories/token_factory.py:224",
         "auth_service/tests/factories/user_factory.py:38",
@@ -40968,10 +42378,10 @@
       "value": "env",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:188",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:193",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:198",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:208",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:267",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:272",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:277",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:299",
         "scripts/business_value_test_index.py:131",
         "scripts/compliance/project_test_validator.py:42",
         "scripts/compliance/test_size_validator.py:157",
@@ -41492,13 +42902,13 @@
         "auth_service/tests/factories/token_factory.py:41",
         "auth_service/tests/factories/token_factory.py:135",
         "auth_service/tests/test_auth_comprehensive.py:152",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:31",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:43",
         "auth_service/tests/test_token_validation_security_cycles_31_35.py:66",
         "auth_service/tests/test_token_validation_security_cycles_31_35.py:116",
         "auth_service/tests/test_token_validation_security_cycles_31_35.py:148",
         "auth_service/tests/test_token_validation_security_cycles_31_35.py:184",
-        "auth_service/tests/test_token_validation_security_cycles_31_35.py:222",
-        "scripts/setup_staging_test_account.py:64",
-        "scripts/setup_staging_test_account.py:111"
+        "auth_service/tests/test_token_validation_security_cycles_31_35.py:222"
       ]
     },
     "expect": {
@@ -41546,10 +42956,11 @@
       "value": "expected_client_id_key",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:189",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:194",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:199",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:209"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:268",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:273",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:278",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:289",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:300"
       ]
     },
     "expected_exit_code": {
@@ -41603,10 +43014,11 @@
       "value": "expected_secret_key",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:190",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:195",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:200",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:210"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:269",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:274",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:279",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:290",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:301"
       ]
     },
     "expected_secret_log": {
@@ -41659,7 +43071,9 @@
         "auth_service/tests/factories/token_factory.py:196",
         "auth_service/tests/test_auth_comprehensive.py:229",
         "auth_service/tests/test_oauth_state_validation.py:116",
-        "auth_service/tests/test_oauth_state_validation.py:261"
+        "auth_service/tests/test_oauth_state_validation.py:261",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:63",
+        "scripts/test_staging_auth_e2e.py:112"
       ]
     },
     "exponential": {
@@ -42491,6 +43905,18 @@
         "netra_backend/app/services/factory_status/test_coverage_calculator.py:71"
       ]
     },
+    "findings": {
+      "value": "findings",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:320",
+        "scripts/test_data_validator_backup.py:358",
+        "scripts/test_data_validator_backup.py:371",
+        "scripts/test_data_validator_backup.py:384",
+        "scripts/test_data_validator_backup.py:397",
+        "scripts/test_data_validator_backup.py:414"
+      ]
+    },
     "fingerprint_mismatch": {
       "value": "fingerprint_mismatch",
       "category": "test_literals",
@@ -42689,6 +44115,14 @@
       "locations": [
         "scripts/team_updates_test_analyzer.py:147",
         "scripts/team_updates_test_analyzer.py:157"
+      ]
+    },
+    "float": {
+      "value": "float",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:53",
+        "scripts/test_data_validator_backup.py:503"
       ]
     },
     "flu_season": {
@@ -44038,7 +45472,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:169",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:279",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:387",
         "auth_service/tests/test_auth_comprehensive.py:72",
         "auth_service/tests/utils/assertion_helpers.py:104",
         "scripts/setup_staging_test_account.py:44",
@@ -44480,6 +45914,14 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:163"
       ]
     },
+    "high_null_fields": {
+      "value": "high_null_fields",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:247",
+        "scripts/test_data_validator_backup.py:248"
+      ]
+    },
     "high_risk": {
       "value": "high_risk",
       "category": "test_literals",
@@ -44573,6 +46015,7 @@
       "locations": [
         "auth_service/test_staging_db_connection.py:55",
         "auth_service/test_staging_db_connection.py:92",
+        "scripts/test_backend_port_binding.py:135",
         "scripts/test_redis_config_critical_failure.py:264",
         "scripts/test_redis_config_critical_failure.py:285",
         "scripts/test_ssl_certificates_staging.py:110",
@@ -44683,6 +46126,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_chat_errors.py:35"
+      ]
+    },
+    "http://127.0.0.1:8000/test": {
+      "value": "http://127.0.0.1:8000/test",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:91"
       ]
     },
     "http://127.0.0.1:8081/health": {
@@ -44966,7 +46416,7 @@
       "value": "https://",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:169",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:237",
         "auth_service/tests/test_auth_comprehensive.py:548",
         "scripts/test_cors.py:137",
         "scripts/test_cors.py:321"
@@ -45068,6 +46518,7 @@
         "scripts/test_cors_ssot_compliance.py:60",
         "scripts/test_staging.py:25",
         "scripts/test_staging.py:29",
+        "scripts/test_staging_auth_e2e.py:23",
         "scripts/test_staging_deployment.py:21",
         "scripts/test_staging_login_automated.py:39"
       ]
@@ -45128,11 +46579,33 @@
         "auth_service/tests/test_auth_comprehensive.py:189"
       ]
     },
+    "https://netra-auth-service-701982941522.us-central1.run.app": {
+      "value": "https://netra-auth-service-701982941522.us-central1.run.app",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:20",
+        "scripts/test_staging_refresh_format.py:15"
+      ]
+    },
+    "https://netra-backend-staging-701982941522.us-central1.run.app": {
+      "value": "https://netra-backend-staging-701982941522.us-central1.run.app",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:19"
+      ]
+    },
     "https://netra-frontend-701982941522.us-central1.run.app": {
       "value": "https://netra-frontend-701982941522.us-central1.run.app",
       "category": "test_literals",
       "locations": [
         "scripts/test_cors_implementation.py:36"
+      ]
+    },
+    "https://netra-frontend-staging-701982941522.us-central1.run.app": {
+      "value": "https://netra-frontend-staging-701982941522.us-central1.run.app",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:18"
       ]
     },
     "https://netrasystems.ai": {
@@ -45232,6 +46705,8 @@
       "locations": [
         "auth_service/tests/factories/token_factory.py:40",
         "auth_service/tests/factories/token_factory.py:134",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:32",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:44",
         "scripts/setup_staging_test_account.py:63",
         "scripts/setup_staging_test_account.py:110"
       ]
@@ -45582,7 +47057,8 @@
       "value": "info",
       "category": "test_literals",
       "locations": [
-        "scripts/start_test_services.py:23"
+        "scripts/start_test_services.py:23",
+        "scripts/test_backend_port_binding.py:67"
       ]
     },
     "infrastructure_costs_usd": {
@@ -45651,6 +47127,20 @@
         "scripts/fix_test_batch.py:191"
       ]
     },
+    "instead of 8000": {
+      "value": "instead of 8000",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:141"
+      ]
+    },
+    "int": {
+      "value": "int",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:503"
+      ]
+    },
     "integration": {
       "value": "integration",
       "category": "test_literals",
@@ -45709,7 +47199,15 @@
       "locations": [
         "auth_service/tests/test_auth_comprehensive.py:110",
         "auth_service/tests/test_auth_comprehensive.py:495",
+        "auth_service/tests/test_refresh_endpoint_simple.py:91",
         "scripts/test_workflows_with_act.py:210"
+      ]
+    },
+    "invalid json": {
+      "value": "invalid json",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:171"
       ]
     },
     "invalid syntax": {
@@ -45775,6 +47273,13 @@
         "scripts/test_verify_workflow_status_corrected.py:104"
       ]
     },
+    "invalid_metric": {
+      "value": "invalid_metric",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:136"
+      ]
+    },
     "invalid_run_id": {
       "value": "invalid_run_id",
       "category": "test_literals",
@@ -45782,14 +47287,29 @@
         "scripts/test_verify_workflow_status_corrected.py:148"
       ]
     },
+    "invalid_timestamp": {
+      "value": "invalid_timestamp",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:592"
+      ]
+    },
     "invalid_token": {
       "value": "invalid_token",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:124",
         "scripts/test_verify_workflow_status.py:111",
         "scripts/test_verify_workflow_status.py:113",
         "scripts/test_verify_workflow_status_corrected.py:126",
         "scripts/test_verify_workflow_status_corrected.py:128"
+      ]
+    },
+    "invalid_type": {
+      "value": "invalid_type",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:105"
       ]
     },
     "invalid_url": {
@@ -46304,7 +47824,11 @@
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:306",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:307",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:349",
-        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403"
+        "netra_backend/app/services/realistic_test_data/performance_simulator.py:403",
+        "scripts/test_data_validator_backup.py:45",
+        "scripts/test_data_validator_backup.py:50",
+        "scripts/test_data_validator_backup.py:72",
+        "scripts/test_data_validator_backup.py:136"
       ]
     },
     "latency_p50_ms": {
@@ -47066,7 +48590,11 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:95",
-        "scripts/real_service_test_metrics.py:187"
+        "scripts/real_service_test_metrics.py:187",
+        "scripts/test_data_validator_backup.py:52",
+        "scripts/test_data_validator_backup.py:501",
+        "scripts/test_data_validator_backup.py:505",
+        "scripts/test_data_validator_backup.py:506"
       ]
     },
     "max_age": {
@@ -47108,6 +48636,20 @@
         "scripts/test_secret_manager_builder_critical.py:165",
         "scripts/test_secret_manager_builder_critical.py:177",
         "scripts/test_secret_manager_builder_critical.py:462"
+      ]
+    },
+    "max_null_percentage": {
+      "value": "max_null_percentage",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:40"
+      ]
+    },
+    "max_outlier_percentage": {
+      "value": "max_outlier_percentage",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:42"
       ]
     },
     "max_time_ms": {
@@ -47337,7 +48879,11 @@
         "netra_backend/app/services/realistic_test_data/log_generator.py:54",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:125",
         "scripts/team_updates_test_analyzer.py:18",
-        "scripts/test_backend_optimized.py:219"
+        "scripts/test_backend_optimized.py:219",
+        "scripts/test_data_validator_backup.py:72",
+        "scripts/test_data_validator_backup.py:136",
+        "scripts/test_data_validator_backup.py:264",
+        "scripts/test_data_validator_backup.py:284"
       ]
     },
     "microsoft/vscode": {
@@ -47384,7 +48930,18 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:94",
-        "scripts/real_service_test_metrics.py:186"
+        "scripts/real_service_test_metrics.py:186",
+        "scripts/test_data_validator_backup.py:51",
+        "scripts/test_data_validator_backup.py:500",
+        "scripts/test_data_validator_backup.py:504",
+        "scripts/test_data_validator_backup.py:506"
+      ]
+    },
+    "min_data_points": {
+      "value": "min_data_points",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:39"
       ]
     },
     "min_time_ms": {
@@ -47394,6 +48951,13 @@
         "scripts/test_secret_manager_builder_critical.py:588",
         "scripts/test_secret_manager_builder_critical.py:611",
         "scripts/test_secret_manager_builder_critical.py:626"
+      ]
+    },
+    "min_time_span_hours": {
+      "value": "min_time_span_hours",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:41"
       ]
     },
     "minimal": {
@@ -47500,6 +49064,14 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:668"
+      ]
+    },
+    "missing_fields": {
+      "value": "missing_fields",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:231",
+        "scripts/test_data_validator_backup.py:231"
       ]
     },
     "missing_item": {
@@ -48081,7 +49653,7 @@
       "value": "netra-auth-service",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:165"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:233"
       ]
     },
     "netra-backend": {
@@ -48651,6 +50223,27 @@
         "scripts/auto_fix_test_violations.py:1008"
       ]
     },
+    "new_access": {
+      "value": "new_access",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:23",
+        "auth_service/tests/test_refresh_endpoint_simple.py:31",
+        "auth_service/tests/test_refresh_endpoint_simple.py:38",
+        "auth_service/tests/test_refresh_endpoint_simple.py:44"
+      ]
+    },
+    "new_access_token": {
+      "value": "new_access_token",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:51",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:68",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:83",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:182",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:210"
+      ]
+    },
     "new_device": {
       "value": "new_device",
       "category": "test_literals",
@@ -48665,6 +50258,27 @@
         "scripts/auto_fix_test_sizes.py:620",
         "scripts/auto_fix_test_sizes.py:663",
         "scripts/auto_fix_test_sizes.py:751"
+      ]
+    },
+    "new_refresh": {
+      "value": "new_refresh",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:23",
+        "auth_service/tests/test_refresh_endpoint_simple.py:32",
+        "auth_service/tests/test_refresh_endpoint_simple.py:39",
+        "auth_service/tests/test_refresh_endpoint_simple.py:45"
+      ]
+    },
+    "new_refresh_token": {
+      "value": "new_refresh_token",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:51",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:68",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:83",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:182",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:210"
       ]
     },
     "new_secret_found": {
@@ -48857,6 +50471,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_ssl_certificates_staging.py:82"
+      ]
+    },
+    "not_a_number": {
+      "value": "not_a_number",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:275"
       ]
     },
     "not_configured": {
@@ -49088,6 +50709,7 @@
       "value": "ok",
       "category": "test_literals",
       "locations": [
+        "scripts/test_backend_port_binding.py:59",
         "scripts/test_staging_login_automated.py:202",
         "scripts/test_staging_login_automated.py:233",
         "scripts/test_staging_login_automated.py:343"
@@ -49320,6 +50942,17 @@
         "scripts/compliance/test_refactor_helper.py:213",
         "scripts/test_cors.py:309",
         "scripts/test_cors.py:326"
+      ]
+    },
+    "outliers": {
+      "value": "outliers",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:265",
+        "scripts/test_data_validator_backup.py:266",
+        "scripts/test_data_validator_backup.py:267",
+        "scripts/test_data_validator_backup.py:532",
+        "scripts/test_data_validator_backup.py:537"
       ]
     },
     "output": {
@@ -49583,8 +51216,8 @@
         "auth_service/tests/test_auth_comprehensive.py:397",
         "auth_service/tests/test_auth_comprehensive.py:412",
         "auth_service/tests/test_auth_comprehensive.py:420",
-        "scripts/compliance/test_limits_examples.py:11",
-        "scripts/compliance/test_limits_examples.py:18"
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:237",
+        "scripts/compliance/test_limits_examples.py:11"
       ]
     },
     "password123": {
@@ -49970,6 +51603,9 @@
       "locations": [
         "auth_service/test_staging_db_connection.py:56",
         "auth_service/test_staging_db_connection.py:93",
+        "scripts/test_backend_port_binding.py:135",
+        "scripts/test_backend_port_binding.py:137",
+        "scripts/test_backend_port_binding.py:141",
         "scripts/test_coordination_fixes.py:310",
         "scripts/test_coordination_fixes.py:322",
         "scripts/test_redis_config_critical_failure.py:265",
@@ -50457,7 +52093,7 @@
       "value": "production",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:193",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:272",
         "auth_service/tests/test_auth_port_configuration.py:347",
         "auth_service/tests/test_auth_port_configuration.py:368",
         "auth_service/tests/test_auth_port_configuration.py:377",
@@ -50929,7 +52565,19 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:629",
-        "scripts/business_value_test_index.py:746"
+        "scripts/business_value_test_index.py:746",
+        "scripts/test_data_validator_backup.py:229",
+        "scripts/test_data_validator_backup.py:246",
+        "scripts/test_data_validator_backup.py:264",
+        "scripts/test_data_validator_backup.py:284",
+        "scripts/test_data_validator_backup.py:302"
+      ]
+    },
+    "quality_score": {
+      "value": "quality_score",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:191"
       ]
     },
     "quality_scores": {
@@ -51033,6 +52681,13 @@
       "locations": [
         "netra_backend/app/services/realistic_test_data/models.py:113",
         "scripts/unified_test_config.py:108"
+      ]
+    },
+    "raw body": {
+      "value": "raw body",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:322"
       ]
     },
     "raw_output": {
@@ -51169,6 +52824,17 @@
         "scripts/test_oauth_local.py:374",
         "scripts/test_oauth_local.py:375",
         "scripts/test_oauth_local.py:417"
+      ]
+    },
+    "received_keys": {
+      "value": "received_keys",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:115",
+        "scripts/test_staging_refresh_format.py:112",
+        "scripts/test_staging_refresh_format.py:113",
+        "scripts/test_staging_refresh_format.py:137",
+        "scripts/test_staging_refresh_format.py:138"
       ]
     },
     "recent_runs": {
@@ -51362,15 +53028,53 @@
         "scripts/autonomous_review/test_reviewer.py:294"
       ]
     },
+    "refresh": {
+      "value": "refresh",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:30",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:42",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:298"
+      ]
+    },
+    "refreshToken": {
+      "value": "refreshToken",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:72",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:194",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:273",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:294",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:315",
+        "auth_service/tests/test_refresh_endpoint_simple.py:36",
+        "scripts/test_staging_auth_e2e.py:169",
+        "scripts/test_staging_auth_e2e.py:247",
+        "scripts/test_staging_refresh_format.py:56"
+      ]
+    },
     "refresh_token": {
       "value": "refresh_token",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/token_factory.py:194",
-        "auth_service/tests/utils/assertion_helpers.py:137",
-        "auth_service/tests/utils/assertion_helpers.py:146",
-        "auth_service/tests/utils/assertion_helpers.py:150",
-        "scripts/setup_staging_test_account.py:49"
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:55",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:61",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:78",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:93",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:124",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:138",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:149",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:160",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:187"
+      ]
+    },
+    "refresh_token field is required": {
+      "value": "refresh_token field is required",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:102",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:115",
+        "auth_service/tests/test_refresh_endpoint_simple.py:62"
       ]
     },
     "refresh_token_": {
@@ -51386,6 +53090,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/session_factory.py:113"
+      ]
+    },
+    "refreshes": {
+      "value": "refreshes",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:284"
       ]
     },
     "related": {
@@ -51996,6 +53707,15 @@
         "scripts/test_websocket_connection.py:152"
       ]
     },
+    "savings_percentage": {
+      "value": "savings_percentage",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:329",
+        "scripts/test_data_validator_backup.py:400",
+        "scripts/test_data_validator_backup.py:417"
+      ]
+    },
     "scan_timestamp": {
       "value": "scan_timestamp",
       "category": "test_literals",
@@ -52112,6 +53832,7 @@
         "scripts/test_backend_optimized.py:329",
         "scripts/test_secret_manager_builder_critical.py:651",
         "scripts/test_secret_manager_builder_critical.py:652",
+        "scripts/test_staging_auth_e2e.py:112",
         "scripts/unified_test_runner.py:514",
         "scripts/unified_test_runner.py:521"
       ]
@@ -52966,6 +54687,13 @@
         "scripts/analyze_test_mocks.py:48"
       ]
     },
+    "some_token": {
+      "value": "some_token",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:108"
+      ]
+    },
     "source": {
       "value": "source",
       "category": "test_literals",
@@ -53098,7 +54826,8 @@
       "value": "sqlite:///test.db",
       "category": "test_literals",
       "locations": [
-        "scripts/test_auth_database_sessions.py:173"
+        "scripts/test_auth_database_sessions.py:173",
+        "scripts/test_backend_port_binding.py:125"
       ]
     },
     "src": {
@@ -53180,10 +54909,10 @@
         "auth_service/test_url_construction.py:32",
         "auth_service/test_url_construction.py:63",
         "auth_service/test_url_construction.py:189",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:46",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:83",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:119",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:150"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:56",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:112",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:170",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:219"
       ]
     },
     "staging-clickhouse-secure-password-production-grade": {
@@ -53333,6 +55062,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_login_automated.py:380"
+      ]
+    },
+    "staging_refresh_token_format": {
+      "value": "staging_refresh_token_format",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:294"
       ]
     },
     "staging_session": {
@@ -53570,7 +55306,9 @@
       "value": "structure",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_auth_comprehensive.py:495"
+        "auth_service/tests/test_auth_comprehensive.py:495",
+        "scripts/test_data_validator_backup.py:229",
+        "scripts/test_data_validator_backup.py:246"
       ]
     },
     "stub": {
@@ -53588,6 +55326,8 @@
         "auth_service/tests/factories/token_factory.py:36",
         "auth_service/tests/factories/token_factory.py:132",
         "auth_service/tests/factories/token_factory.py:248",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:29",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:41",
         "scripts/setup_staging_test_account.py:58",
         "scripts/setup_staging_test_account.py:106"
       ]
@@ -54146,7 +55886,7 @@
       "value": "test-authorization-code",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:344"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:492"
       ]
     },
     "test-branch": {
@@ -54174,8 +55914,8 @@
       "value": "test-client-id",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:151",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:335",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:220",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:482",
         "auth_service/tests/test_oauth_state_validation.py:85",
         "auth_service/tests/test_oauth_state_validation.py:108",
         "auth_service/tests/test_oauth_state_validation.py:152",
@@ -54188,7 +55928,7 @@
       "value": "test-client-secret",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:152"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:221"
       ]
     },
     "test-code-verifier-1234567890abcdef": {
@@ -54446,8 +56186,8 @@
       "value": "test-state",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:309",
-        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:345"
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:438",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:493"
       ]
     },
     "test-token": {
@@ -55091,6 +56831,22 @@
         "scripts/test_websocket_cors_comprehensive.py:307"
       ]
     },
+    "test_oauth_regression": {
+      "value": "test_oauth_regression",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:56",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:57",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:61",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:63",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:85",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:87",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:89",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:112",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:113",
+        "auth_service/tests/critical/test_oauth_configuration_missing_staging_regression.py:117"
+      ]
+    },
     "test_overlap_report.json": {
       "value": "test_overlap_report.json",
       "category": "test_literals",
@@ -55124,6 +56880,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/add_test_markers.py:206"
+      ]
+    },
+    "test_refresh_token_123": {
+      "value": "test_refresh_token_123",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_simple.py:19"
+      ]
+    },
+    "test_refresh_token_12345": {
+      "value": "test_refresh_token_12345",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:25"
       ]
     },
     "test_report_": {
@@ -55257,6 +57027,14 @@
         "scripts/generate_test_audit.py:214"
       ]
     },
+    "test_secret": {
+      "value": "test_secret",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:27",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:39"
+      ]
+    },
     "test_server_startup_timeout_fix.py": {
       "value": "test_server_startup_timeout_fix.py",
       "category": "test_literals",
@@ -55314,6 +57092,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/team_updates_test_analyzer.py:27"
+      ]
+    },
+    "test_token": {
+      "value": "test_token",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:315"
       ]
     },
     "test_type": {
@@ -55437,6 +57222,14 @@
         "scripts/compliance/test_limits_examples.py:77"
       ]
     },
+    "test_user_id": {
+      "value": "test_user_id",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:29",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:41"
+      ]
+    },
     "test_utils": {
       "value": "test_utils",
       "category": "test_literals",
@@ -55546,6 +57339,7 @@
         "auth_service/test_url_construction.py:238",
         "scripts/test_cors.py:542",
         "scripts/test_failure_scanner.py:180",
+        "scripts/test_staging_auth_e2e.py:373",
         "scripts/test_verify_workflow_status.py:223",
         "scripts/test_verify_workflow_status_corrected.py:211"
       ]
@@ -56021,6 +57815,13 @@
         "scripts/optimize_test_performance.py:221"
       ]
     },
+    "threads": {
+      "value": "threads",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_auth_e2e.py:213"
+      ]
+    },
     "threshold_based": {
       "value": "threshold_based",
       "category": "test_literals",
@@ -56032,7 +57833,16 @@
       "value": "throughput",
       "category": "test_literals",
       "locations": [
-        "netra_backend/app/services/realistic_test_data/models.py:101"
+        "netra_backend/app/services/realistic_test_data/models.py:101",
+        "scripts/test_data_validator_backup.py:47",
+        "scripts/test_data_validator_backup.py:177",
+        "scripts/test_data_validator_backup.py:184",
+        "scripts/test_data_validator_backup.py:622",
+        "scripts/test_data_validator_backup.py:625",
+        "scripts/test_data_validator_backup.py:641",
+        "scripts/test_data_validator_backup.py:645",
+        "scripts/test_data_validator_backup.py:663",
+        "scripts/test_data_validator_backup.py:664"
       ]
     },
     "throughput_rps": {
@@ -56150,6 +57960,21 @@
         "scripts/test_secret_manager_builder_critical.py:419"
       ]
     },
+    "time_span": {
+      "value": "time_span",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:302"
+      ]
+    },
+    "time_span_hours": {
+      "value": "time_span_hours",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:559",
+        "scripts/test_data_validator_backup.py:599"
+      ]
+    },
     "time_utilities": {
       "value": "time_utilities",
       "category": "test_literals",
@@ -56163,6 +57988,17 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_example_message_flow.py:121"
+      ]
+    },
+    "timeframe": {
+      "value": "timeframe",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:71",
+        "scripts/test_data_validator_backup.py:83",
+        "scripts/test_data_validator_backup.py:106",
+        "scripts/test_data_validator_backup.py:135",
+        "scripts/test_data_validator_backup.py:151"
       ]
     },
     "timeout": {
@@ -56272,10 +58108,10 @@
         "auth_service/tests/auth-service-down-critical-scenarios.py:330",
         "auth_service/tests/auth-service-down-critical-scenarios.py:443",
         "auth_service/tests/auth-service-down-critical-scenarios.py:476",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:87",
+        "auth_service/tests/test_refresh_endpoint_simple.py:42",
         "scripts/analyze_test_mocks.py:44",
-        "scripts/auto_fix_test_sizes.py:338",
-        "scripts/test_auth_integration.py:90",
-        "scripts/test_cold_start_e2e.py:286"
+        "scripts/auto_fix_test_sizes.py:338"
       ]
     },
     "token replacements in": {
@@ -56357,6 +58193,7 @@
         "auth_service/tests/test_auth_comprehensive.py:228",
         "auth_service/tests/test_oauth_state_validation.py:117",
         "auth_service/tests/test_oauth_state_validation.py:262",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:62",
         "auth_service/tests/utils/assertion_helpers.py:137",
         "auth_service/tests/utils/assertion_helpers.py:142",
         "auth_service/tests/utils/assertion_helpers.py:143"
@@ -56370,6 +58207,16 @@
         "scripts/test_oauth_local.py:311",
         "scripts/test_oauth_local.py:324",
         "scripts/test_oauth_local.py:335"
+      ]
+    },
+    "tokens_input": {
+      "value": "tokens_input",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:276",
+        "scripts/test_data_validator_backup.py:281",
+        "scripts/test_data_validator_backup.py:516",
+        "scripts/test_data_validator_backup.py:517"
       ]
     },
     "too": {
@@ -56600,6 +58447,15 @@
         "scripts/optimize_test_performance.py:99"
       ]
     },
+    "total_potential_savings_cents": {
+      "value": "total_potential_savings_cents",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:330",
+        "scripts/test_data_validator_backup.py:401",
+        "scripts/test_data_validator_backup.py:418"
+      ]
+    },
     "total_requests": {
       "value": "total_requests",
       "category": "test_literals",
@@ -56715,6 +58571,13 @@
         "netra_backend/app/services/realistic_test_data/workload_simulator.py:72"
       ]
     },
+    "trend_analysis": {
+      "value": "trend_analysis",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:146"
+      ]
+    },
     "trigger": {
       "value": "trigger",
       "category": "test_literals",
@@ -56771,13 +58634,13 @@
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:69",
         "auth_service/tests/factories/token_factory.py:38",
         "auth_service/tests/factories/token_factory.py:133",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:30",
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:42",
         "scripts/analyze_test_mocks.py:104",
         "scripts/analyze_test_mocks.py:125",
         "scripts/analyze_test_mocks.py:180",
         "scripts/analyze_test_overlap.py:427",
-        "scripts/analyze_test_overlap.py:578",
-        "scripts/business_value_test_index.py:660",
-        "scripts/business_value_test_index.py:668"
+        "scripts/analyze_test_overlap.py:578"
       ]
     },
     "typescript": {
@@ -56906,6 +58769,7 @@
         "scripts/test_cors.py:88",
         "scripts/test_coverage_system.py:80",
         "scripts/test_coverage_system.py:95",
+        "scripts/test_staging_auth_e2e.py:46",
         "scripts/test_staging_login_automated.py:198",
         "scripts/test_staging_login_automated.py:344",
         "scripts/test_websocket_connection.py:89",
@@ -57115,6 +58979,26 @@
         "auth_service/tests/test_oauth_state_validation.py:285"
       ]
     },
+    "user_": {
+      "value": "user_",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:173",
+        "scripts/test_data_validator_backup.py:239",
+        "scripts/test_data_validator_backup.py:294",
+        "scripts/test_data_validator_backup.py:618",
+        "scripts/test_data_validator_backup.py:670"
+      ]
+    },
+    "user_1": {
+      "value": "user_1",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:208",
+        "scripts/test_data_validator_backup.py:255",
+        "scripts/test_data_validator_backup.py:274"
+      ]
+    },
     "user_agent": {
       "value": "user_agent",
       "category": "test_literals",
@@ -57254,7 +59138,13 @@
         "auth_service/test_staging_db_connection.py:260",
         "auth_service/test_staging_db_connection.py:270",
         "scripts/compliance/test_refactor_helper.py:612",
-        "scripts/compliance/test_refactor_helper.py:732"
+        "scripts/compliance/test_refactor_helper.py:732",
+        "scripts/test_data_validator_backup.py:189",
+        "scripts/test_data_validator_backup.py:199",
+        "scripts/test_data_validator_backup.py:216",
+        "scripts/test_data_validator_backup.py:230",
+        "scripts/test_data_validator_backup.py:283",
+        "scripts/test_data_validator_backup.py:558"
       ]
     },
     "validate": {
@@ -57565,7 +59455,14 @@
       "locations": [
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:231",
         "auth_service/tests/auth-service-down-critical-scenarios.py:378",
-        "scripts/ci/check_test_stubs.py:97"
+        "scripts/ci/check_test_stubs.py:97",
+        "scripts/test_data_validator_backup.py:303",
+        "scripts/test_data_validator_backup.py:304",
+        "scripts/test_data_validator_backup.py:560",
+        "scripts/test_data_validator_backup.py:573",
+        "scripts/test_data_validator_backup.py:574",
+        "scripts/test_data_validator_backup.py:583",
+        "scripts/test_data_validator_backup.py:584"
       ]
     },
     "warnings": {
@@ -57870,6 +59767,25 @@
         "scripts/test_cold_start_e2e.py:54"
       ]
     },
+    "workload_": {
+      "value": "workload_",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:174",
+        "scripts/test_data_validator_backup.py:619",
+        "scripts/test_data_validator_backup.py:671"
+      ]
+    },
+    "workload_id": {
+      "value": "workload_id",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:174",
+        "scripts/test_data_validator_backup.py:619",
+        "scripts/test_data_validator_backup.py:638",
+        "scripts/test_data_validator_backup.py:671"
+      ]
+    },
     "workload_patterns": {
       "value": "workload_patterns",
       "category": "test_literals",
@@ -57914,6 +59830,20 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/token_factory.py:159"
+      ]
+    },
+    "wrongField": {
+      "value": "wrongField",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_refresh_format.py:129"
+      ]
+    },
+    "wrong_field": {
+      "value": "wrong_field",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_refresh_endpoint_compatibility.py:108"
       ]
     },
     "wrongpassword": {
@@ -58008,6 +59938,13 @@
       "locations": [
         "scripts/test_staging.py:31",
         "scripts/test_staging_deployment.py:147"
+      ]
+    },
+    "wörk-löad_ñoñé": {
+      "value": "wörk-löad_ñoñé",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:638"
       ]
     },
     "x": {
@@ -58410,6 +60347,13 @@
         "scripts/test_workflows_with_act.py:73"
       ]
     },
+    "⚠️  Backend is configured to use port": {
+      "value": "⚠️  Backend is configured to use port",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:141"
+      ]
+    },
     "⚠️  Exiting with warning due to": {
       "value": "⚠️  Exiting with warning due to",
       "category": "test_literals",
@@ -58788,6 +60732,13 @@
         "scripts/rapid_test_consolidation.py:515"
       ]
     },
+    "✅ Backend is configured to use port 8000": {
+      "value": "✅ Backend is configured to use port 8000",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:138"
+      ]
+    },
     "✅ Builder created for service:": {
       "value": "✅ Builder created for service:",
       "category": "test_literals",
@@ -58984,6 +60935,8 @@
       "locations": [
         "scripts/test_and_fix_cors.py:116",
         "scripts/test_and_fix_cors.py:132",
+        "scripts/test_backend_port_binding.py:168",
+        "scripts/test_backend_port_binding.py:179",
         "scripts/test_cold_start_e2e.py:486",
         "scripts/test_cors_implementation.py:187",
         "scripts/test_secret_manager_builder_critical.py:495",
@@ -59150,6 +61103,13 @@
         "scripts/rapid_test_consolidation.py:519"
       ]
     },
+    "✅ Successfully bound to port": {
+      "value": "✅ Successfully bound to port",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:35"
+      ]
+    },
     "✅ Successfully connected to ClickHouse!": {
       "value": "✅ Successfully connected to ClickHouse!",
       "category": "test_literals",
@@ -59162,6 +61122,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/fix_test_utils_imports.py:96"
+      ]
+    },
+    "✅ Successfully imported backend main module": {
+      "value": "✅ Successfully imported backend main module",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:131"
       ]
     },
     "✅ Syntax valid": {
@@ -59225,6 +61192,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_clickhouse.py:127"
+      ]
+    },
+    "✅ Uvicorn server started successfully and is responding": {
+      "value": "✅ Uvicorn server started successfully and is responding",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:93"
       ]
     },
     "✅ WebSocket authentication bypass may need explicit enabling": {
@@ -59878,6 +61852,13 @@
         "scripts/test_secret_manager_debug.py:105"
       ]
     },
+    "❌ Backend main test failed:": {
+      "value": "❌ Backend main test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:148"
+      ]
+    },
     "❌ Backward compatibility error:": {
       "value": "❌ Backward compatibility error:",
       "category": "test_literals",
@@ -59925,6 +61906,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_clickhouse.py:196"
+      ]
+    },
+    "❌ Could not connect to test server": {
+      "value": "❌ Could not connect to test server",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:105"
       ]
     },
     "❌ Debug info failed:": {
@@ -60003,6 +61991,8 @@
       "locations": [
         "scripts/test_and_fix_cors.py:116",
         "scripts/test_and_fix_cors.py:132",
+        "scripts/test_backend_port_binding.py:168",
+        "scripts/test_backend_port_binding.py:179",
         "scripts/test_cold_start_e2e.py:486",
         "scripts/test_cors_implementation.py:187",
         "scripts/test_secret_manager_builder_critical.py:495",
@@ -60089,6 +62079,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_secret_manager_debug.py:172"
+      ]
+    },
+    "❌ Failed to import backend main:": {
+      "value": "❌ Failed to import backend main:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:145"
       ]
     },
     "❌ Failed to load": {
@@ -60191,6 +62188,13 @@
         "scripts/test_example_message_flow.py:297"
       ]
     },
+    "❌ Missing required package:": {
+      "value": "❌ Missing required package:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:112"
+      ]
+    },
     "❌ Prerequisites check failed": {
       "value": "❌ Prerequisites check failed",
       "category": "test_literals",
@@ -60203,6 +62207,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_example_message_flow.py:423"
+      ]
+    },
+    "❌ Request failed:": {
+      "value": "❌ Request failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:108"
       ]
     },
     "❌ SOME TESTS FAILED": {
@@ -60219,11 +62230,25 @@
         "scripts/test_staging.py:113"
       ]
     },
+    "❌ Server responded with status": {
+      "value": "❌ Server responded with status",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:101"
+      ]
+    },
     "❌ Services failed to become healthy within timeout": {
       "value": "❌ Services failed to become healthy within timeout",
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:168"
+      ]
+    },
+    "❌ Socket binding failed:": {
+      "value": "❌ Socket binding failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:39"
       ]
     },
     "❌ Some coordination fixes failed validation": {
@@ -60274,6 +62299,13 @@
       "locations": [
         "scripts/test_secret_manager_debug.py:175",
         "scripts/test_websocket_connection.py:116"
+      ]
+    },
+    "❌ Uvicorn test failed:": {
+      "value": "❌ Uvicorn test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:115"
       ]
     },
     "❌ Validation error:": {
@@ -60332,6 +62364,13 @@
         "scripts/test_staging_clickhouse.py:246"
       ]
     },
+    "用户_测试_123": {
+      "value": "用户_测试_123",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_data_validator_backup.py:637"
+      ]
+    },
     "🌍": {
       "value": "🌍",
       "category": "test_literals",
@@ -60358,6 +62397,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_coordination_fixes.py:414"
+      ]
+    },
+    "🎉 ALL TESTS PASSED - Port 8000 should work for the backend!": {
+      "value": "🎉 ALL TESTS PASSED - Port 8000 should work for the backend!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:186"
       ]
     },
     "🎉 ALL TESTS PASSED!": {
@@ -60496,6 +62542,20 @@
         "scripts/test_example_message_flow.py:125"
       ]
     },
+    "💥 Exception:": {
+      "value": "💥 Exception:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:170"
+      ]
+    },
+    "💥 SOME TESTS FAILED - Port 8000 binding has issues": {
+      "value": "💥 SOME TESTS FAILED - Port 8000 binding has issues",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:190"
+      ]
+    },
     "💥 Test execution failed:": {
       "value": "💥 Test execution failed:",
       "category": "test_literals",
@@ -60618,6 +62678,13 @@
         "scripts/test_websocket_manual.py:121"
       ]
     },
+    "📊 TEST SUMMARY:": {
+      "value": "📊 TEST SUMMARY:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:174"
+      ]
+    },
     "📋 MEDIUM: Schedule": {
       "value": "📋 MEDIUM: Schedule",
       "category": "test_literals",
@@ -60637,6 +62704,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_example_message_flow.py:58"
+      ]
+    },
+    "📋 Running test:": {
+      "value": "📋 Running test:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:164"
       ]
     },
     "📋 Test Report": {
@@ -60957,6 +63031,13 @@
         "scripts/test_websocket_manual.py:108"
       ]
     },
+    "🚀 Starting comprehensive port 8000 binding test": {
+      "value": "🚀 Starting comprehensive port 8000 binding test",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:153"
+      ]
+    },
     "🚀 TESTING": {
       "value": "🚀 TESTING",
       "category": "test_literals",
@@ -61050,6 +63131,27 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cors_implementation.py:236"
+      ]
+    },
+    "🧪 Testing backend main module import...": {
+      "value": "🧪 Testing backend main module import...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:120"
+      ]
+    },
+    "🧪 Testing basic socket binding to port 8000...": {
+      "value": "🧪 Testing basic socket binding to port 8000...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:25"
+      ]
+    },
+    "🧪 Testing uvicorn binding to port 8000...": {
+      "value": "🧪 Testing uvicorn binding to port 8000...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_backend_port_binding.py:48"
       ]
     },
     "🧪 Testing workflow:": {

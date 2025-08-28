@@ -210,6 +210,9 @@ def check_no_test_logic():
     <reference>CLAUDE.md Section 2.1 - Single Source of Truth (SSOT)</reference>
     <reference>SPEC/type_safety.xml - No duplication principle</reference>
     <reference>SPEC/testing.xml - Test isolation principles</reference>
+    <reference>SPEC/clickhouse.xml - ClickHouse configuration and query patterns</reference>
+    <reference>SPEC/learnings/clickhouse_ssot_violation_remediation.xml - Detailed remediation learning</reference>
+    <reference>SPEC/learnings/index.xml - ClickHouse SSOT category in learnings index</reference>
     <reference>clickhouse_audit_report_20250828.md - Original violation report</reference>
   </references>
   
