@@ -113,6 +113,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
       FERNET_KEY: ${FERNET_KEY:-dev-fernet-key-change-in-production}
+      SERVICE_SECRET: ${SERVICE_SECRET}
       
       # API Keys (from host environment)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}

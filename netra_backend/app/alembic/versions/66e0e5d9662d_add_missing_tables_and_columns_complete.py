@@ -562,6 +562,7 @@ def _modify_corpora_table() -> None:
 def _modify_research_sessions_table() -> None:
     """Modify research_sessions table structure."""
     _add_research_sessions_columns()
+    _add_research_sessions_completion_columns()
     _alter_research_sessions_columns()
     _drop_research_sessions_columns()
 

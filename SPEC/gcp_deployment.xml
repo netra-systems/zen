@@ -9,6 +9,11 @@
   </metadata>
   
   <critical_principles>
+    <principle id="frontend-build-time-config">
+      <rule>CRITICAL: Next.js NEXT_PUBLIC_* environment variables MUST be set in Dockerfile before build</rule>
+      <reason>NEXT_PUBLIC_* variables are compile-time constants, not runtime variables</reason>
+      <reference>learnings/frontend_staging_url_regression_fix.xml</reference>
+    </principle>
     <principle id="use-existing-infra">
       <rule>ALWAYS use scripts/deploy_to_gcp.py - NEVER create new deployment scripts</rule>
       <reason>Maintains consistency, prevents duplication, leverages tested infrastructure</reason>
