@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <name>Google Tag Manager Integration</name>
+  <version>1.0.0</version>
+  <status>active</status>
+  <created>2025-08-28</created>
+  <updated>2025-08-28</updated>
+  
+  <overview>
+    <purpose>Integrate Google Tag Manager (GTM) into the Netra Apex frontend for analytics tracking, conversion monitoring, and marketing optimization</purpose>
+    <scope>Frontend application-wide integration</scope>
+    <container_id>GTM-WKP28PNQ</container_id>
+  </overview>
+
+  <business_value_justification>
+    <segment>Free, Early, Mid, Enterprise</segment>
+    <business_goal>Conversion, Expansion, Retention</business_goal>
+    <value_impact>
+      - Enables precise tracking of user behavior across all customer segments
+      - Provides conversion funnel optimization data for free-to-paid journey
+      - Tracks feature usage patterns to inform product development
+      - Enables A/B testing and marketing campaign effectiveness measurement
+    </value_impact>
+    <strategic_revenue_impact>
+      - Directly improves conversion rates through data-driven optimization (5-15% typical improvement)
+      - Reduces customer acquisition cost through better attribution
+      - Enables targeted remarketing to increase trial-to-paid conversion
+      - Provides ROI metrics for marketing spend optimization
+    </strategic_revenue_impact>
+  </business_value_justification>
+
+  <technical_requirements>
+    <integration_points>
+      <head_script>
+        <placement>As high as possible in the head tag</placement>
+        <script><![CDATA[
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WKP28PNQ');</script>
+<!-- End Google Tag Manager -->
+        ]]></script>
+      </head_script>
+      
+      <body_noscript>
+        <placement>Immediately after opening body tag</placement>
+        <noscript><![CDATA[
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WKP28PNQ"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+        ]]></noscript>
+      </body_noscript>
+    </integration_points>
+    
+    <next_js_considerations>
+      <next_script>Use Next.js Script component for optimal loading performance</next_script>
+      <strategy>afterInteractive - load after page becomes interactive</strategy>
+      <data_layer>Initialize dataLayer before GTM script loads</data_layer>
+    </next_js_considerations>
+  </technical_requirements>
+
+  <implementation_approach>
+    <phases>
+      <phase number="1">
+        <name>Core Integration</name>
+        <tasks>
+          - Create GTMProvider component for script injection
+          - Integrate with Next.js layout.tsx
+          - Ensure proper script loading order
+          - Handle CSP (Content Security Policy) requirements
+        </tasks>
+      </phase>
+      
+      <phase number="2">
+        <name>Event Tracking Setup</name>
+        <tasks>
+          - Implement dataLayer push utilities
+          - Create event tracking hooks (useGTMEvent)
+          - Define standard event taxonomy
+          - Integrate with existing analytics infrastructure
+        </tasks>
+      </phase>
+      
+      <phase number="3">
+        <name>Business Events Implementation</name>
+        <tasks>
+          - Track authentication events (login, signup, logout)
+          - Monitor chat interactions and agent usage
+          - Capture feature engagement metrics
+          - Track conversion funnel events
+        </tasks>
+      </phase>
+    </phases>
+  </implementation_approach>
+
+  <event_taxonomy>
+    <authentication>
+      <event name="user_login" category="authentication"/>
+      <event name="user_signup" category="authentication"/>
+      <event name="user_logout" category="authentication"/>
+      <event name="oauth_complete" category="authentication"/>
+    </authentication>
+    
+    <engagement>
+      <event name="chat_started" category="engagement"/>
+      <event name="message_sent" category="engagement"/>
+      <event name="agent_activated" category="engagement"/>
+      <event name="thread_created" category="engagement"/>
+      <event name="feature_used" category="engagement"/>
+    </engagement>
+    
+    <conversion>
+      <event name="trial_started" category="conversion"/>
+      <event name="plan_upgraded" category="conversion"/>
+      <event name="payment_completed" category="conversion"/>
+      <event name="demo_requested" category="conversion"/>
+    </conversion>
+  </event_taxonomy>
+
+  <testing_requirements>
+    <unit_tests>
+      - GTM script injection verification
+      - DataLayer initialization tests
+      - Event tracking function tests
+      - CSP compliance validation
+    </unit_tests>
+    
+    <integration_tests>
+      - End-to-end event flow validation
+      - Multi-environment configuration tests
+      - Performance impact assessment
+      - Privacy compliance verification
+    </integration_tests>
+    
+    <validation>
+      - Use GTM Preview Mode for debugging
+      - Verify events in Google Analytics
+      - Test across all major browsers
+      - Validate mobile responsiveness
+    </validation>
+  </testing_requirements>
+
+  <security_privacy>
+    <gdpr_compliance>
+      - Implement consent management
+      - Provide opt-out mechanisms
+      - Handle data retention policies
+    </gdpr_compliance>
+    
+    <security>
+      - Update Content Security Policy headers
+      - Validate GTM container integrity
+      - Prevent sensitive data exposure in events
+      - Implement event data sanitization
+    </security>
+  </security_privacy>
+
+  <monitoring>
+    <metrics>
+      - Script load performance impact
+      - Event delivery success rate
+      - DataLayer queue size
+      - Browser console errors
+    </metrics>
+    
+    <alerts>
+      - GTM script load failures
+      - Event tracking errors
+      - Abnormal event volumes
+      - Privacy compliance violations
+    </alerts>
+  </monitoring>
+
+  <rollback_plan>
+    <steps>
+      - Feature flag to enable/disable GTM
+      - Remove GTMProvider component usage
+      - Clean up event tracking code
+      - Revert CSP policy changes
+    </steps>
+  </rollback_plan>
+
+  <dependencies>
+    <external>
+      - Google Tag Manager account access
+      - Container ID: GTM-WKP28PNQ
+      - Google Analytics property (optional)
+    </external>
+    
+    <internal>
+      - Next.js 14+ (for Script component)
+      - React 18+ (for proper hydration)
+      - TypeScript for type safety
+    </internal>
+  </dependencies>
+
+  <learnings>
+    <best_practices>
+      - Always initialize dataLayer before GTM loads
+      - Use afterInteractive strategy for better performance
+      - Implement proper error boundaries around GTM code
+      - Keep sensitive data out of tracking events
+      - Use structured event naming conventions
+    </best_practices>
+    
+    <pitfalls_to_avoid>
+      - Don't block page render on GTM load
+      - Avoid tracking PII in events
+      - Don't duplicate event tracking
+      - Prevent memory leaks from event listeners
+    </pitfalls_to_avoid>
+  </learnings>
+</spec>
