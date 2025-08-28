@@ -25,7 +25,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from dev_launcher import DevLauncher, LauncherConfig
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.core.database_types import DatabaseType
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
@@ -94,27 +93,26 @@ class DatabaseConnectionTester:
     async def test_connection_pooling(self) -> Tuple[bool, Optional[str]]:
         """Test database connection pooling works correctly."""
         try:
-            manager = DatabaseConnectionManager(DatabaseType.POSTGRES)
-            await manager.create_pool("test", self.postgres_url, min_size=2, max_size=5)
+            # Use DatabaseManager singleton - the canonical implementation
+            manager = DatabaseManager.get_connection_manager()
             
-            # Test multiple concurrent connections
+            # Test multiple concurrent connections using the canonical async session
             tasks = []
             for i in range(3):
-                task = asyncio.create_task(self._test_pool_connection(manager, "test"))
+                task = asyncio.create_task(self._test_pool_connection())
                 tasks.append(task)
             
             results = await asyncio.gather(*tasks, return_exceptions=True)
             success = all(r is True for r in results if not isinstance(r, Exception))
             
-            await manager.close_pool("test")
             return success, None
         except Exception as e:
             return False, str(e)
     
-    async def _test_pool_connection(self, manager: DatabaseConnectionManager, pool_name: str) -> bool:
-        """Test individual connection from pool."""
-        async with manager.get_connection(pool_name) as conn:
-            result = await conn.execute(text("SELECT 1"))
+    async def _test_pool_connection(self) -> bool:
+        """Test individual connection from pool using canonical DatabaseManager."""
+        async with DatabaseManager.get_async_session() as session:
+            result = await session.execute(text("SELECT 1"))
             return result.scalar() == 1
 
 

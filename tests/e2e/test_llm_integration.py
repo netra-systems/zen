@@ -17,6 +17,36 @@ import pytest
 from tests.e2e.config import TEST_CONFIG, TestDataFactory
 
 
+class MockNetraException(Exception):
+    """Mock Netra exception for testing"""
+    pass
+
+
+class MockTokenUsage:
+    """Mock token usage for testing cost calculations"""
+    
+    def __init__(self, input_tokens: int = 1000, output_tokens: int = 500):
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+        self.total_tokens = input_tokens + output_tokens
+
+
+class MockLLMProvider:
+    """Mock LLM provider for testing fallback scenarios"""
+    
+    def __init__(self, provider_name: str, should_fail: bool = False):
+        self.provider_name = provider_name
+        self.should_fail = should_fail
+        self.call_count = 0
+    
+    async def ainvoke(self, prompt: str) -> Dict[str, Any]:
+        """Mock LLM invocation with controlled failure"""
+        self.call_count += 1
+        if self.should_fail:
+            raise Exception(f"{self.provider_name} rate limit exceeded")
+        return {"response": f"Mock response from {self.provider_name}", "cost": 0.001}
+
+
 class RealLLMProvider:
     """Real LLM provider for testing actual fallback scenarios"""
     

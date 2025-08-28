@@ -15,6 +15,22 @@ from tests.e2e.config import CustomerTier
 
 
 @pytest.fixture
+async def mock_supervisor_agent():
+    """Mock supervisor agent for E2E orchestration testing"""
+    from unittest.mock import AsyncMock, MagicMock
+    
+    mock = AsyncMock()
+    mock.route_request = AsyncMock()
+    mock.execute_pipeline = AsyncMock()
+    mock.handle_agent_failure = AsyncMock()
+    mock.get_health_status = AsyncMock()
+    mock.get_performance_metrics = AsyncMock()
+    mock.get_resource_metrics = AsyncMock()
+    
+    return mock
+
+
+@pytest.fixture
 async def real_supervisor_agent():
     """Real supervisor agent for E2E orchestration testing"""
     from netra_backend.app.agents.supervisor_agent import SupervisorAgent
@@ -33,6 +49,19 @@ async def real_supervisor_agent():
     assert hasattr(supervisor, 'get_resource_metrics')
     
     return supervisor
+
+
+@pytest.fixture
+async def mock_sub_agents():
+    """Mock sub-agents for E2E coordination testing"""
+    from unittest.mock import AsyncMock
+    
+    return {
+        "data": AsyncMock(),
+        "optimizations": AsyncMock(),
+        "actions": AsyncMock(), 
+        "reporting": AsyncMock()
+    }
 
 
 @pytest.fixture
@@ -61,6 +90,23 @@ def sample_agent_state():
         "tier": CustomerTier.ENTERPRISE.value,
         "context": {"monthly_spend": 50000}
     }
+
+
+@pytest.fixture
+async def websocket_mock():
+    """Mock WebSocket connection for E2E streaming response testing"""
+    from unittest.mock import AsyncMock, MagicMock
+    
+    mock = AsyncMock()
+    mock.send_str = AsyncMock()
+    mock.send_json = AsyncMock()
+    mock.receive = AsyncMock()
+    mock.receive_str = AsyncMock()
+    mock.receive_json = AsyncMock()
+    mock.close = AsyncMock()
+    mock.closed = False
+    
+    return mock
 
 
 @pytest.fixture
