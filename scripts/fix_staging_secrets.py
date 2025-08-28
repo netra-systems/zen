@@ -128,9 +128,9 @@ def check_duplicate_secrets(project: str):
     secrets = list_secrets(project)
     
     # Known duplicates/issues from audit
+    # NOTE: Removed GOOGLE_OAUTH_CLIENT_CLIENT_* entries as they are incorrectly named secrets
+    # that should be deleted from GCP, not used as duplicates to check
     duplicates = {
-        "GOOGLE_OAUTH_CLIENT_CLIENT_ID_STAGING": "google-client-id-staging",
-        "GOOGLE_OAUTH_CLIENT_CLIENT_SECRET_STAGING": "google-client-secret-staging",
         "redis-url": "redis-url-staging",
         "clickhouse-default-password-staging": "clickhouse-password-staging",
     }
