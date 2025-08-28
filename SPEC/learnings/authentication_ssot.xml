@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <learning id="auth-ssot-implementation" date="2025-08-28" category="authentication">
+    <title>SSOT Authentication Implementation</title>
+    <problem>
+      Multiple duplicate authentication check implementations across frontend pages violated SSOT principle.
+      Each protected page had its own useEffect checking for user and redirecting to login.
+    </problem>
+    <solution>
+      Created centralized AuthGuard component (frontend/components/AuthGuard.tsx) that encapsulates all authentication logic.
+      All protected routes now use this single component.
+    </solution>
+    <implementation>
+      <file>frontend/components/AuthGuard.tsx</file>
+      <pattern>
+        &lt;AuthGuard&gt;
+          &lt;ProtectedComponent /&gt;
+        &lt;/AuthGuard&gt;
+      </pattern>
+    </implementation>
+    <impact>
+      - Eliminated 7 duplicate auth implementations
+      - Single place to modify auth behavior
+      - Consistent UX across all protected routes
+      - Easier testing and maintenance
+    </impact>
+  </learning>
+
+  <learning id="thread-route-authentication" date="2025-08-28" category="security">
+    <title>Thread Routes Missing Authentication</title>
+    <problem>
+      Critical security issue: /chat and /chat/[threadId] routes had NO authentication guards.
+      Users could access thread management without being logged in.
+    </problem>
+    <solution>
+      Added AuthGuard wrapper to both chat pages ensuring authentication is required.
+    </solution>
+    <files_modified>
+      <file>frontend/app/chat/page.tsx</file>
+      <file>frontend/app/chat/[threadId]/page.tsx</file>
+    </files_modified>
+    <security_impact>High - Prevented unauthorized access to user threads and conversations</security_impact>
+  </learning>
+
+  <learning id="auth-token-flow" date="2025-08-28" category="architecture">
+    <title>Multi-Layer Authentication Flow</title>
+    <discovery>
+      Authentication works through multiple layers:
+      1. Page level: AuthGuard component checks user state
+      2. API level: AuthInterceptor adds Bearer token to all requests
+      3. Service level: API proxy adds service account tokens
+      4. WebSocket level: JWT passed via Sec-WebSocket-Protocol
+    </discovery>
+    <key_components>
+      <component>frontend/auth/context.tsx - Token management and refresh</component>
+      <component>frontend/lib/auth-interceptor.ts - Request authentication</component>
+      <component>frontend/services/apiClientWrapper.ts - API client with auth</component>
+      <component>frontend/services/webSocketService.ts - WebSocket auth</component>
+    </key_components>
+    <best_practice>
+      Each layer has specific responsibility:
+      - AuthGuard: Route protection
+      - AuthContext: Token lifecycle
+      - AuthInterceptor: Request enhancement
+      - API Proxy: Service authentication
+    </best_practice>
+  </learning>
+
+  <learning id="token-refresh-strategy" date="2025-08-28" category="reliability">
+    <title>Automatic Token Refresh Strategy</title>
+    <implementation>
+      Three-tier token refresh approach:
+      1. Proactive refresh: Check every 2 minutes if token expires soon
+      2. Reactive refresh: On 401 response, refresh and retry
+      3. WebSocket refresh: Maintain connection during token refresh
+    </implementation>
+    <code_locations>
+      <location>frontend/auth/context.tsx:126-136 - scheduleTokenRefreshCheck</location>
+      <location>frontend/lib/auth-interceptor.ts:57-95 - handle401Response</location>
+      <location>frontend/services/webSocketService.ts:1060-1125 - setupTokenRefresh</location>
+    </code_locations>
+    <benefits>
+      - Seamless user experience
+      - No manual re-authentication
+      - Persistent WebSocket connections
+    </benefits>
+  </learning>
+
+  <learning id="websocket-auth-browser-limitation" date="2025-08-28" category="technical">
+    <title>WebSocket Authentication in Browsers</title>
+    <constraint>
+      Browser WebSocket API doesn't support custom headers like Authorization.
+    </constraint>
+    <workaround>
+      Use Sec-WebSocket-Protocol header to pass JWT token:
+      - Encode JWT as base64URL
+      - Pass as subprotocol: jwt.{encoded_token}
+      - Backend extracts and validates from protocol header
+    </workaround>
+    <implementation_detail>
+      frontend/services/webSocketService.ts:962-1006 - createSecureWebSocket method
+    </implementation_detail>
+    <security_note>
+      This is a secure method as the protocol header is protected by CORS and not accessible to JavaScript after connection.
+    </security_note>
+  </learning>
+
+  <learning id="development-mode-auth" date="2025-08-28" category="developer-experience">
+    <title>Development Mode Authentication</title>
+    <feature>
+      Automatic authentication in development mode for better DX.
+    </feature>
+    <implementation>
+      - AuthContext checks for development_mode flag
+      - Auto-login if flag is true and user hasn't explicitly logged out
+      - WebSocket allows connections without token in dev mode
+      - API calls work without auth in dev environment
+    </implementation>
+    <safeguards>
+      - Only enabled when NODE_ENV=development
+      - Explicit logout flag prevents unwanted auto-login
+      - Production builds never enable dev mode
+    </safeguards>
+  </learning>
+
+  <learning id="service-to-service-auth" date="2025-08-28" category="infrastructure">
+    <title>Service-to-Service Authentication</title>
+    <context>
+      Frontend API proxy needs to authenticate with backend on behalf of users.
+    </context>
+    <multi_layer_approach>
+      <layer priority="1">Forward client's Bearer token if present</layer>
+      <layer priority="2">Use NETRA_SERVICE_ACCOUNT_TOKEN if no client token</layer>
+      <layer priority="3">Include NETRA_API_KEY as additional verification</layer>
+      <layer priority="4">Add X-Service-Account header for GCP identity</layer>
+    </multi_layer_approach>
+    <implementation>
+      frontend/app/api/threads/route.ts:12-46 - getServiceAuthHeaders function
+    </implementation>
+    <benefit>
+      Multiple fallback mechanisms ensure reliable service communication even if primary auth fails.
+    </benefit>
+  </learning>
+
+  <learning id="auth-testing-strategy" date="2025-08-28" category="testing">
+    <title>Authentication Testing Approach</title>
+    <test_levels>
+      <unit>Test AuthGuard component behavior</unit>
+      <integration>Test auth flow with mocked services</integration>
+      <e2e>Test complete login/logout flow</e2e>
+    </test_levels>
+    <key_test_files>
+      <file>frontend/__tests__/auth/*.test.tsx</file>
+      <file>frontend/cypress/e2e/auth.cy.ts</file>
+    </key_test_files>
+    <mock_strategy>
+      Use auth-test-helpers.ts for consistent auth mocking across tests.
+    </mock_strategy>
+  </learning>
+</learnings>

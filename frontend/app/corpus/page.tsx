@@ -2,8 +2,7 @@
 
 import { NextPage } from 'next';
 import { authService } from '@/auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { AuthGuard } from '@/components/AuthGuard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CorpusHeader } from './components/corpus-header';
 import { CorpusStatsGrid } from './components/corpus-stats';
@@ -18,32 +17,18 @@ import { corpusData, statsData, STORAGE_USED_PERCENTAGE } from './data/corpus-da
 
 
 const CorpusPage: NextPage = () => {
-  const { user, loading } = authService.useAuth();
-  const router = useRouter();
   const corpusState = useCorpusState();
 
-  useAuth(loading, user, router);
-
-  if (loading || !user) {
-    return <LoadingScreen />;
-  }
-
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <CorpusHeader />
-      <CorpusStatsGrid stats={statsData} />
-      <CorpusStorage storageUsed={STORAGE_USED_PERCENTAGE} />
-      <CorpusTabs corpusState={corpusState} />
-    </div>
+    <AuthGuard>
+      <div className="container mx-auto p-6 space-y-6">
+        <CorpusHeader />
+        <CorpusStatsGrid stats={statsData} />
+        <CorpusStorage storageUsed={STORAGE_USED_PERCENTAGE} />
+        <CorpusTabs corpusState={corpusState} />
+      </div>
+    </AuthGuard>
   );
-};
-
-const useAuth = (loading: boolean, user: any, router: any) => {
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [loading, user, router]);
 };
 
 const LoadingScreen = () => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { SyntheticDataGenerator } from '@/components/synthetic-data-generator';
+import { AuthGuard } from '@/components/AuthGuard';
 import { logger } from '@/utils/debug-logger';
 
 export default function SyntheticDataGeneratorPage() {
@@ -9,5 +10,9 @@ export default function SyntheticDataGeneratorPage() {
     logger.info('Synthetic data generation completed');
   };
 
-  return <SyntheticDataGenerator onGenerationComplete={handleGenerationComplete} />;
+  return (
+    <AuthGuard>
+      <SyntheticDataGenerator onGenerationComplete={handleGenerationComplete} />
+    </AuthGuard>
+  );
 }
