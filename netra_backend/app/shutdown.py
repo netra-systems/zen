@@ -24,19 +24,31 @@ def shutdown_cleanup(logger: logging.Logger) -> None:
 async def _stop_performance_monitoring(app: FastAPI, logger: logging.Logger) -> None:
     """Stop performance monitoring service."""
     if hasattr(app.state, 'performance_monitor'):
-        await app.state.performance_monitor.stop_monitoring()
-        logger.info("Performance monitoring stopped")
+        try:
+            await app.state.performance_monitor.stop_monitoring()
+            logger.info("Performance monitoring stopped")
+        except asyncio.CancelledError:
+            logger.info("Performance monitoring stop cancelled during shutdown")
+            raise
 
 async def _stop_performance_manager(app: FastAPI, logger: logging.Logger) -> None:
     """Stop performance optimization manager."""
     if hasattr(app.state, 'performance_manager'):
-        await app.state.performance_manager.shutdown()
-        logger.info("Performance optimization manager stopped")
+        try:
+            await app.state.performance_manager.shutdown()
+            logger.info("Performance optimization manager stopped")
+        except asyncio.CancelledError:
+            logger.info("Performance manager stop cancelled during shutdown")
+            raise
 
 async def _stop_database_monitoring(app: FastAPI, logger: logging.Logger) -> None:
     """Stop database monitoring task."""
     if hasattr(app.state, 'monitoring_task'):
-        await _stop_monitoring_task(app, logger)
+        try:
+            await _stop_monitoring_task(app, logger)
+        except asyncio.CancelledError:
+            logger.info("Database monitoring stop cancelled during shutdown")
+            raise
 
 async def stop_monitoring(app: FastAPI, logger: logging.Logger) -> None:
     """Stop comprehensive monitoring and optimization gracefully."""
@@ -44,6 +56,10 @@ async def stop_monitoring(app: FastAPI, logger: logging.Logger) -> None:
         await _stop_performance_monitoring(app, logger)
         await _stop_performance_manager(app, logger)
         await _stop_database_monitoring(app, logger)
+    except asyncio.CancelledError:
+        logger.info("Monitoring shutdown cancelled - this is expected during application shutdown")
+        # Re-raise to allow proper cancellation propagation
+        raise
     except Exception as e:
         logger.error(f"Error stopping monitoring and optimizations: {e}")
 
@@ -64,12 +80,19 @@ async def _wait_for_monitoring_shutdown(task: asyncio.Task) -> None:
     try:
         await task
     except asyncio.CancelledError:
+        # This is expected when cancelling monitoring tasks during shutdown
+        central_logger.get_logger(__name__).info("Monitoring task cancelled successfully during shutdown")
         pass
 
 
 async def close_database_connections() -> None:
     """Close Redis connection."""
-    await redis_manager.disconnect()
+    try:
+        await redis_manager.disconnect()
+    except asyncio.CancelledError:
+        central_logger.get_logger(__name__).info("Redis disconnection cancelled during shutdown")
+        # Re-raise to allow proper cancellation propagation if needed
+        raise
 
 
 async def cleanup_resources(app: FastAPI) -> None:
@@ -83,8 +106,13 @@ async def cleanup_resources(app: FastAPI) -> None:
             await asyncio.wait_for(app.state.background_task_manager.shutdown(), timeout=5.0)
         else:
             logger.info("Background task manager not initialized, skipping shutdown")
-    except (asyncio.TimeoutError, AttributeError, Exception) as e:
-        logger.warning(f"Background task manager shutdown timeout/error: {e}")
+    except asyncio.CancelledError:
+        logger.info("Background task manager shutdown cancelled during application shutdown")
+        # Continue cleanup despite cancellation
+    except asyncio.TimeoutError:
+        logger.warning("Background task manager shutdown timed out after 5 seconds")
+    except (AttributeError, Exception) as e:
+        logger.warning(f"Background task manager shutdown error: {e}")
     
     # Shutdown agent supervisor with timeout  
     try:
@@ -92,22 +120,35 @@ async def cleanup_resources(app: FastAPI) -> None:
             await asyncio.wait_for(app.state.agent_supervisor.shutdown(), timeout=5.0)
         else:
             logger.info("Agent supervisor not initialized, skipping shutdown")
-    except (asyncio.TimeoutError, AttributeError, Exception) as e:
-        logger.warning(f"Agent supervisor shutdown timeout/error: {e}")
+    except asyncio.CancelledError:
+        logger.info("Agent supervisor shutdown cancelled during application shutdown")
+        # Continue cleanup despite cancellation
+    except asyncio.TimeoutError:
+        logger.warning("Agent supervisor shutdown timed out after 5 seconds")
+    except (AttributeError, Exception) as e:
+        logger.warning(f"Agent supervisor shutdown error: {e}")
     
     # Shutdown WebSocket manager with timeout to prevent blocking
     try:
         await asyncio.wait_for(websocket_manager.shutdown(), timeout=3.0)
         logger.info("WebSocket manager shutdown completed")
+    except asyncio.CancelledError:
+        logger.info("WebSocket manager shutdown cancelled during application shutdown")
+        # Continue cleanup despite cancellation
     except asyncio.TimeoutError:
-        logger.warning("WebSocket manager shutdown timed out - forcing cleanup")
+        logger.warning("WebSocket manager shutdown timed out after 3 seconds - forcing cleanup")
     except Exception as e:
         logger.warning(f"WebSocket manager shutdown error: {e}")
 
 
 async def finalize_shutdown() -> None:
     """Finalize shutdown process."""
-    await central_logger.shutdown()
+    try:
+        await central_logger.shutdown()
+    except asyncio.CancelledError:
+        # Logger shutdown cancelled - this is expected during forced shutdown
+        # Don't re-raise here as it's the final step
+        pass
 
 
 async def run_complete_shutdown(app: FastAPI, logger: logging.Logger) -> None:
@@ -125,11 +166,31 @@ async def run_complete_shutdown(app: FastAPI, logger: logging.Logger) -> None:
             logger.info("Shutting down global background task manager...")
             await background_task_manager.shutdown()
             logger.info("Global background task manager shutdown complete")
+    except asyncio.CancelledError:
+        logger.info("Background task manager shutdown cancelled - continuing with remaining cleanup")
+        # Continue with the rest of the shutdown sequence
     except Exception as e:
         logger.error(f"Error shutting down background task manager: {e}")
     
-    await stop_monitoring(app, logger)
-    await cleanup_resources(app)
-    await close_database_connections()
-    await finalize_shutdown()
+    # Continue shutdown sequence even if individual components are cancelled
+    try:
+        await stop_monitoring(app, logger)
+    except asyncio.CancelledError:
+        logger.info("Monitoring shutdown cancelled - continuing with resource cleanup")
+    
+    try:
+        await cleanup_resources(app)
+    except asyncio.CancelledError:
+        logger.info("Resource cleanup cancelled - continuing with database connections")
+    
+    try:
+        await close_database_connections()
+    except asyncio.CancelledError:
+        logger.info("Database connection cleanup cancelled - continuing with finalization")
+    
+    try:
+        await finalize_shutdown()
+    except asyncio.CancelledError:
+        logger.info("Shutdown finalization cancelled")
+    
     logger.info("Application shutdown complete.")

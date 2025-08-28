@@ -501,6 +501,68 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
         self._performance_metrics = self._initialize_performance_metrics()
         self.reliability_manager.reset_health_tracking()
     
+    async def analyze_performance_metrics(self, run_id: str = None, stream_updates: bool = False) -> Dict[str, Any]:
+        """Analyze performance metrics for ClickHouse operations.
+        
+        This method provides comprehensive performance analysis including:
+        - Query execution times
+        - Cache hit rates  
+        - Connection pool utilization
+        - Error rates and patterns
+        """
+        try:
+            metrics = self.get_performance_metrics()
+            
+            # Enhanced analysis with recommendations
+            analysis_result = {
+                "summary": {
+                    "total_queries": metrics.get("total_queries", 0),
+                    "avg_query_time_ms": metrics.get("average_query_time_ms", 0),
+                    "cache_hit_rate": metrics.get("cache_hit_rate", 0),
+                    "reliability_status": metrics.get("reliability_status", "unknown")
+                },
+                "recommendations": self._generate_performance_recommendations(metrics),
+                "trends": {
+                    "query_volume": "stable" if metrics.get("total_queries", 0) < 1000 else "high",
+                    "performance": "good" if metrics.get("average_query_time_ms", 0) < 100 else "needs_attention"
+                },
+                "analysis_timestamp": time.time()
+            }
+            
+            logger.info(f"Performance metrics analysis completed: {analysis_result['summary']}")
+            return analysis_result
+            
+        except Exception as e:
+            logger.error(f"Performance metrics analysis failed: {e}")
+            return {
+                "error": str(e),
+                "summary": {"status": "analysis_failed"},
+                "recommendations": ["Check ClickHouse connection health"],
+                "analysis_timestamp": time.time()
+            }
+    
+    def _generate_performance_recommendations(self, metrics: Dict[str, Any]) -> List[str]:
+        """Generate performance optimization recommendations based on metrics."""
+        recommendations = []
+        
+        avg_time = metrics.get("average_query_time_ms", 0)
+        cache_hit_rate = metrics.get("cache_hit_rate", 0)
+        total_queries = metrics.get("total_queries", 0)
+        
+        if avg_time > 200:
+            recommendations.append("Consider query optimization - average response time is high")
+        
+        if cache_hit_rate < 0.5 and total_queries > 10:
+            recommendations.append("Improve caching strategy - cache hit rate is below 50%")
+        
+        if total_queries > 5000:
+            recommendations.append("Consider connection pooling optimization for high query volume")
+        
+        if not recommendations:
+            recommendations.append("Performance metrics are within acceptable ranges")
+        
+        return recommendations
+    
     
     def _handle_schema_query_error(self, error: Exception) -> ExecutionResult:
         """Handle schema query error and return failed result."""

@@ -318,6 +318,25 @@ class ExecutionMonitor:
         logger.info("Execution monitoring started")
         # Monitoring is event-driven and doesn't require background tasks
         # This method exists for compatibility with startup expectations
+    
+    async def stop_monitoring(self) -> None:
+        """Stop the execution monitoring system.
+        
+        Cleanly shuts down monitoring, clears active executions, and logs shutdown.
+        This method is idempotent and safe to call multiple times.
+        """
+        try:
+            # Clear all active executions being tracked
+            active_count = len(self._active_executions)
+            self._active_executions.clear()
+            
+            # Reset active executions counter in health indicators
+            self._health_indicators["active_executions"] = 0
+            
+            logger.info(f"Execution monitoring stopped - cleared {active_count} active executions")
+        except Exception as e:
+            logger.error(f"Error during monitoring shutdown: {e}")
+            # Don't re-raise to ensure graceful shutdown continues
 
 
 # Import MetricsCollector from canonical location - CONSOLIDATED

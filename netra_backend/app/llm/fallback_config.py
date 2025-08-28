@@ -15,12 +15,12 @@ from netra_backend.app.llm.error_classification import FailureType
 
 @dataclass
 class FallbackConfig:
-    """Configuration for fallback behavior"""
-    max_retries: int = 3
-    base_delay: float = 1.0
-    max_delay: float = 30.0
-    exponential_base: float = 2.0
-    timeout: float = 60.0
+    """Configuration for fallback behavior - optimized for performance"""
+    max_retries: int = 2  # Reduced from 3 for faster failure detection
+    base_delay: float = 0.5  # Reduced from 1.0 for faster recovery
+    max_delay: float = 15.0  # Reduced from 30.0 for better responsiveness
+    exponential_base: float = 1.5  # Reduced from 2.0 for gentler backoff
+    timeout: float = 30.0  # Reduced from 60.0 for faster timeout detection
     use_circuit_breaker: bool = True
     log_circuit_breaker_warnings: bool = False
 

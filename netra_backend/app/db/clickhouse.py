@@ -201,14 +201,34 @@ def get_clickhouse_config():
 
 
 async def _create_mock_client():
-    """Create and manage mock ClickHouse client."""
+    """Create and manage mock ClickHouse client.
+    
+    Enhanced with async generator protection against corruption.
+    """
+    import asyncio
+    
     config = get_configuration()
     logger.info(f"[ClickHouse] Using MOCK client for {config.environment}")
     client = MockClickHouseDatabase()
+    client_yielded = False
+    
     try:
+        client_yielded = True
         yield client
+    except asyncio.CancelledError:
+        # Handle task cancellation gracefully
+        logger.warning("[ClickHouse Mock] Client cancelled, performing cleanup")
+        # Re-raise after cleanup is shielded
+        raise
+    except GeneratorExit:
+        # Handle generator cleanup silently
+        pass
     finally:
-        await client.disconnect()
+        # CRITICAL FIX: Shield cleanup from cancellation
+        try:
+            await asyncio.shield(client.disconnect())
+        except asyncio.CancelledError:
+            logger.warning("[ClickHouse Mock] Cleanup cancelled, resources may leak")
 
 @asynccontextmanager
 async def get_clickhouse_client():
@@ -288,18 +308,32 @@ def _create_base_client(config, use_secure: bool):
     return ClickHouseDatabase(**params)
 
 async def _test_and_yield_client(client):
-    """Test connection and yield client with timeout handling."""
+    """Test connection and yield client with timeout handling.
+    
+    Enhanced with async generator protection against corruption.
+    """
     import asyncio
     from netra_backend.app.core.isolated_environment import get_env
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
+    client_yielded = False
     
     try:
         # CRITICAL FIX: Reduce timeout in staging/development to fail fast
         timeout = 5.0 if environment in ["staging", "development"] else 15.0
-        await asyncio.wait_for(client.test_connection(), timeout=timeout)
+        # Shield connection test from cancellation
+        await asyncio.shield(asyncio.wait_for(client.test_connection(), timeout=timeout))
         logger.info("[ClickHouse] REAL connection established")
+        client_yielded = True
         yield client
+    except asyncio.CancelledError:
+        # Handle task cancellation gracefully
+        logger.warning(f"[ClickHouse] Connection test cancelled for {environment}")
+        # If already yielded, let cleanup proceed normally
+        if client_yielded:
+            raise
+        # Otherwise, re-raise after potential cleanup
+        raise
     except asyncio.TimeoutError as e:
         logger.error(f"[ClickHouse] Connection test timeout after {timeout} seconds")
         # In staging/development, this is expected - don't raise, let graceful degradation handle it
@@ -307,6 +341,9 @@ async def _test_and_yield_client(client):
             logger.warning("[ClickHouse] Connection timeout in optional environment - graceful degradation")
             raise ConnectionError(f"ClickHouse connection timeout after {timeout}s") from e
         raise asyncio.TimeoutError("ClickHouse connection timeout") from e
+    except GeneratorExit:
+        # Handle generator cleanup silently
+        pass
 
 def _log_connection_attempt(config, use_secure: bool):
     """Log ClickHouse connection attempt."""

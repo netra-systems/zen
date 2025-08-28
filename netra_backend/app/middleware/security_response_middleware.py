@@ -11,7 +11,9 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical security hardening against reconnaissance attacks
 """
 
+import asyncio
 from typing import Callable
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -36,7 +38,13 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
         logger.info("SecurityResponseMiddleware initialized")
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        """Process request and secure responses."""
+        """Process request and secure responses.
+        
+        Enhanced with async generator protection to prevent
+        'aclose(): asynchronous generator is already running' errors.
+        """
+        import asyncio
+        
         try:
             # CRITICAL FIX: Skip middleware for health checks to prevent startup blocking
             if request.url.path in ["/health", "/health/live", "/health/ready"]:
@@ -45,8 +53,9 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
             # Debug logging to see if middleware is being called
             logger.debug(f"SecurityResponseMiddleware processing: {request.url.path}")
             
-            # CRITICAL FIX: Wrap call_next in try-catch to prevent async generator corruption
-            response = await call_next(request)
+            # CRITICAL FIX: Use shield to protect response handling from cancellation
+            # This prevents async generator corruption during response processing
+            response = await asyncio.shield(call_next(request))
             
             # Debug logging for response
             logger.debug(f"Response for {request.url.path}: status={response.status_code}, is_api={self._is_api_endpoint(request.url.path)}, has_auth={self._has_valid_auth(request)}")
@@ -58,6 +67,15 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
                 
                 logger.warning(f"Converting HTTP {response.status_code} to 401 for protected endpoint: {request.url.path}")
                 
+                # CRITICAL FIX: Ensure proper response cleanup for streaming responses
+                # Close any potential async generators in the original response
+                if hasattr(response, 'body_iterator') and hasattr(response.body_iterator, 'aclose'):
+                    try:
+                        await response.body_iterator.aclose()
+                    except RuntimeError:
+                        # Generator already closed, ignore
+                        pass
+                
                 return JSONResponse(
                     status_code=401,
                     content={"error": "authentication_failed", "message": "Authentication required"},
@@ -65,6 +83,16 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
                 )
             
             return response
+            
+        except asyncio.CancelledError:
+            # CRITICAL FIX: Handle task cancellation gracefully
+            logger.warning(f"SecurityResponseMiddleware cancelled for {request.url.path}")
+            
+            # Return a basic response to prevent generator corruption
+            return JSONResponse(
+                status_code=503,
+                content={"error": "service_unavailable", "message": "Request cancelled"}
+            )
             
         except Exception as e:
             # CRITICAL FIX: Handle middleware exceptions gracefully to prevent async generator issues
