@@ -123,7 +123,30 @@
             <severity>HIGH</severity>
             <note>Multiple configuration loaders and validators</note>
         </violation>
+        <violation>
+            <category>WebSocket Manager Implementation</category>
+            <count>1 (Appears as 30+ due to aliases/mocks)</count>
+            <severity>NONE - COMPLIANT</severity>
+            <note>Only ONE canonical WebSocketManager at websocket_core/manager.py. High count due to:
+                - 6+ aliases for backward compatibility (all point to same implementation)
+                - 28 test mocks (required for test isolation)
+                - 2 specialized managers (HeartbeatManager, QualityManager) for different concerns
+                See SPEC/learnings/websocket_manager_ssot_compliance.xml for details</note>
+        </violation>
     </additional_violations>
+    
+    <counting_methodology>
+        <principle>Count only distinct implementations of the SAME concept</principle>
+        <exclusions>
+            <exclusion>Aliases and compatibility wrappers (point to same implementation)</exclusion>
+            <exclusion>Test mocks and fixtures (required for test isolation)</exclusion>
+            <exclusion>Specialized single-purpose managers (different concerns per SRP)</exclusion>
+        </exclusions>
+        <example category="WebSocket">
+            <raw_count>30+ classes with "WebSocket" and "Manager"</raw_count>
+            <actual_violations>0 - One implementation, multiple aliases/mocks</actual_violations>
+        </example>
+    </counting_methodology>
     
     <impact_analysis>
         <business_impact>

@@ -99,6 +99,22 @@
       When adding features, extend the existing implementation rather than creating
       a parallel one. This maintains SSOT and prevents divergence.
     </insight>
+    <insight>
+      Agent-specific client implementations violate service architecture principles.
+      All agents should use shared infrastructure services through dependency injection.
+    </insight>
+    <insight>
+      Direct class instantiation (ClickHouseClient()) bypasses configuration management
+      and connection pooling. Always use factory functions like get_clickhouse_client().
+    </insight>
+    <insight>
+      Duplicate implementations create synchronization challenges where bug fixes
+      must be applied multiple times, leading to inconsistent behavior across system.
+    </insight>
+    <insight>
+      Mock logic embedded in production classes (MockClickHouseDatabase within client files)
+      creates deployment risks and violates clean architecture principles.
+    </insight>
   </key_insights>
   
   <patterns>
@@ -155,7 +171,191 @@ class MyService:
             pass
       </example>
     </anti_pattern>
+    <anti_pattern>
+      <name>Agent-Specific Client Implementation</name>
+      <example>
+        # WRONG - Agent should not have own ClickHouse client
+        class DataSubAgent:
+            def __init__(self):
+                self.clickhouse_client = AgentClickHouseClient()  # Violates SSOT
+      </example>
+    </anti_pattern>
+    <anti_pattern>
+      <name>Importing from Deleted Clients</name>
+      <example>
+        # WRONG - These imports will fail after remediation
+        from netra_backend.app.db.clickhouse_client import ClickHouseClient
+        from netra_backend.app.db.client_clickhouse import ClickHouseDatabaseClient
+        from netra_backend.app.agents.data_sub_agent.clickhouse_client import AgentClickHouseClient
+      </example>
+    </anti_pattern>
+    <anti_pattern>
+      <name>Mixed Client Usage</name>
+      <example>
+        # WRONG - Different parts of code using different clients
+        # File A uses:
+        client = ClickHouseClient()
+        # File B uses:
+        client = get_clickhouse_client()
+        # This creates inconsistent behavior
+      </example>
+    </anti_pattern>
   </anti_patterns>
+  
+  <testing_patterns>
+    <test_pattern>
+      <name>Canonical Client Testing</name>
+      <description>Test using the canonical implementation with proper fixtures</description>
+      <code><![CDATA[
+# CORRECT - Test with canonical client
+import pytest
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from test_framework.fixtures.clickhouse_fixtures import mock_clickhouse
+
+@pytest.mark.asyncio
+async def test_query_execution(mock_clickhouse):
+    async with get_clickhouse_client() as client:
+        result = await client.execute("SELECT 1")
+        assert result is not None
+      ]]></code>
+    </test_pattern>
+    
+    <test_pattern>
+      <name>Agent Integration Testing</name>
+      <description>Test agents using canonical ClickHouse client through dependency injection</description>
+      <code><![CDATA[
+# CORRECT - Test agent with canonical ClickHouse integration
+@pytest.mark.asyncio
+async def test_data_sub_agent_clickhouse_integration():
+    from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
+    
+    agent = DataSubAgent()
+    # Agent uses get_clickhouse_client() internally
+    result = await agent.query_analytics_data("test_query")
+    assert result is not None
+      ]]></code>
+    </test_pattern>
+    
+    <test_pattern>
+      <name>SSOT Compliance Verification</name>
+      <description>Automated tests to prevent SSOT violations</description>
+      <code><![CDATA[
+# CORRECT - Test prevents duplicate client implementations
+def test_no_duplicate_clickhouse_clients(project_root):
+    """Ensure only one ClickHouse client implementation exists."""
+    client_files = []
+    forbidden_patterns = [
+        r'class\s+\w*ClickHouse\w*Client',
+        r'class\s+\w*ClickHouse\w*Database\w*Client'
+    ]
+    
+    # Scan for violations
+    for py_file in (project_root / 'netra_backend' / 'app').rglob('*.py'):
+        if 'test' in str(py_file).lower() or str(py_file).endswith('clickhouse.py'):
+            continue  # Skip tests and canonical implementation
+            
+        with open(py_file, 'r') as f:
+            content = f.read()
+            for pattern in forbidden_patterns:
+                if re.search(pattern, content):
+                    client_files.append(str(py_file))
+                    
+    assert len(client_files) == 0, f"SSOT violation: {client_files}"
+      ]]></code>
+    </test_pattern>
+  </testing_patterns>
+  
+  <migration_patterns>
+    <migration_step>
+      <name>Identify Duplicate Clients</name>
+      <command>find netra_backend/app -name "*.py" -exec grep -l "class.*ClickHouse.*Client" {} \;</command>
+      <description>Find all files containing ClickHouse client class definitions</description>
+    </migration_step>
+    
+    <migration_step>
+      <name>Audit Client Usage</name>
+      <command>grep -r "ClickHouse.*Client()" --include="*.py" netra_backend/app/</command>
+      <description>Find all direct instantiations that need migration</description>
+    </migration_step>
+    
+    <migration_step>
+      <name>Update Import Statements</name>
+      <before>from netra_backend.app.db.clickhouse_client import ClickHouseClient</before>
+      <after>from netra_backend.app.db.clickhouse import get_clickhouse_client</after>
+      <description>Migrate all imports to canonical implementation</description>
+    </migration_step>
+    
+    <migration_step>
+      <name>Update Usage Patterns</name>
+      <before>client = ClickHouseClient()
+result = client.execute(query)</before>
+      <after>async with get_clickhouse_client() as client:
+    result = await client.execute(query)</after>
+      <description>Migrate to context manager pattern with async support</description>
+    </migration_step>
+    
+    <migration_step>
+      <name>Verify No Regressions</name>
+      <command>python -m pytest netra_backend/tests/test_clickhouse_ssot_compliance.py -v</command>
+      <description>Run compliance tests to ensure successful migration</description>
+    </migration_step>
+  </migration_patterns>
+  
+  <common_mistakes>
+    <mistake>
+      <issue>Forgetting to update agent initialization code</issue>
+      <symptoms>AttributeError: AgentClickHouseClient not found</symptoms>
+      <fix>Update agents to use get_clickhouse_client() through dependency injection</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>Missing async/await conversion</issue>
+      <symptoms>TypeError: object is not callable, awaitable expected</symptoms>
+      <fix>Add async/await to all ClickHouse operations and use context manager</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>Test fixtures still using old mock classes</issue>
+      <symptoms>ImportError: cannot import MockClickHouseClient</symptoms>
+      <fix>Update test fixtures to use test_framework/fixtures/clickhouse_fixtures.py</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>Import statements referencing deleted files</issue>
+      <symptoms>ModuleNotFoundError: No module named 'clickhouse_client'</symptoms>
+      <fix>Update all imports to use netra_backend.app.db.clickhouse</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>Configuration not using canonical client settings</issue>
+      <symptoms>Connection failures, different SSL/timeout behavior</symptoms>
+      <fix>Ensure all ClickHouse config flows through canonical implementation</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>Tests passing with mocks but failing in real environment</issue>
+      <symptoms>Mock behavior differs from canonical implementation</symptoms>
+      <fix>Use real ClickHouse client in integration tests, proper fixtures for unit tests</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>SSOT compliance tests failing after initial remediation</issue>
+      <symptoms>test_no_test_logic_in_production, test_all_imports_use_canonical_client failures</symptoms>
+      <fix>Indicates incomplete migration - still have MockClickHouseDatabase in production and old imports in test files</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>Integration tests still importing deleted clients</issue>
+      <symptoms>from netra_backend.app.db.client_clickhouse import statements</symptoms>
+      <fix>Update all test files to use canonical import: from netra_backend.app.db.clickhouse import get_clickhouse_client</fix>
+    </mistake>
+    
+    <mistake>
+      <issue>Features missing from canonical implementation</issue>
+      <symptoms>test_canonical_client_has_required_features fails with "Missing SSL/TLS support"</symptoms>
+      <fix>Enhance canonical implementation to include all features from deleted clients</fix>
+    </mistake>
+  </common_mistakes>
   
   <references>
     <reference>CLAUDE.md Section 2.1 - Single Source of Truth (SSOT)</reference>
@@ -173,8 +373,65 @@ class MyService:
   </metrics>
   
   <validation_commands>
-    <command>python netra_backend/tests/test_clickhouse_ssot_compliance.py</command>
+    <command>python -m pytest netra_backend/tests/test_clickhouse_ssot_compliance.py -v</command>
     <command>python scripts/check_architecture_compliance.py</command>
     <command>grep -r "class.*ClickHouse.*Client" --include="*.py" netra_backend/app/</command>
+    <command>grep -r "from netra_backend.app.db.clickhouse_client" --include="*.py" .</command>
+    <command>grep -r "from netra_backend.app.db.client_clickhouse" --include="*.py" .</command>
+    <command>grep -r "from netra_backend.app.agents.data_sub_agent.clickhouse_client" --include="*.py" .</command>
   </validation_commands>
+  
+  <post_remediation_checklist>
+    <step>
+      <description>Verify no duplicate client classes remain</description>
+      <command>find netra_backend/app -name "*.py" -exec grep -l "class.*ClickHouse.*Client" {} \;</command>
+      <expected_result>Only netra_backend/app/db/clickhouse.py should appear (and potentially MockClickHouseDatabase)</expected_result>
+    </step>
+    
+    <step>
+      <description>Ensure all imports use canonical client</description>
+      <command>grep -r "from.*clickhouse_client\|from.*client_clickhouse" --include="*.py" .</command>
+      <expected_result>No results (all files updated to import from canonical location)</expected_result>
+    </step>
+    
+    <step>
+      <description>Verify deleted files no longer exist</description>
+      <command>ls netra_backend/app/db/clickhouse_client.py netra_backend/app/db/client_clickhouse.py netra_backend/app/agents/data_sub_agent/clickhouse_client.py</command>
+      <expected_result>ls: cannot access files (files should be deleted)</expected_result>
+    </step>
+    
+    <step>
+      <description>Run SSOT compliance tests</description>
+      <command>python -m pytest netra_backend/tests/test_clickhouse_ssot_compliance.py -v</command>
+      <expected_result>All tests pass (10 passed, 0 failed)</expected_result>
+    </step>
+    
+    <step>
+      <description>Verify canonical client has all required features</description>
+      <check>SSL/TLS support with proper certificate handling</check>
+      <check>Retry logic with exponential backoff</check>
+      <check>Circuit breaker pattern for fault tolerance</check>
+      <check>Async/await support for concurrent operations</check>
+      <check>Query timeout management</check>
+      <check>Environment-aware configuration</check>
+    </step>
+    
+    <step>
+      <description>Confirm no test logic in production</description>
+      <command>grep -n "_simulate_\|MockClickHouse\|is_testing" netra_backend/app/db/clickhouse.py</command>
+      <expected_result>Only MockClickHouseDatabase class definition allowed (for dev fallback), no _simulate_ methods</expected_result>
+    </step>
+    
+    <step>
+      <description>Integration tests use canonical imports</description>
+      <command>grep -r "get_clickhouse_client" --include="*.py" netra_backend/tests/integration/</command>
+      <expected_result>All integration tests use canonical import pattern</expected_result>
+    </step>
+    
+    <step>
+      <description>Architecture compliance check passes</description>
+      <command>python scripts/compliance/ssot_checker.py --clickhouse-only</command>
+      <expected_result>No SSOT violations reported for ClickHouse components</expected_result>
+    </step>
+  </post_remediation_checklist>
 </learning>

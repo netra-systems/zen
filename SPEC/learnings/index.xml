@@ -159,6 +159,14 @@
             <critical-takeaway>Auth service MUST use unified configuration via lazy loading pattern while maintaining service independence (unified_config_auth_service.xml).</critical-takeaway>
         </category>
 
+        <category name="Auth Refresh Endpoint Field Naming" path="SPEC/learnings/auth_refresh_endpoint_field_naming.xml" keywords="API Compatibility, Field Naming, CamelCase, Snake_Case, 422 Error, Refresh Token">
+            <critical-takeaway>Auth refresh endpoint must accept both camelCase (refreshToken) and snake_case (refresh_token) field names for frontend compatibility.</critical-takeaway>
+            <critical-takeaway>FastAPI's strict Pydantic validation causes 422 errors when field names don't match exactly - use raw request body for flexible parsing.</critical-takeaway>
+            <critical-takeaway>Frontend frameworks use camelCase while Python backends use snake_case - API endpoints must bridge this naming convention gap.</critical-takeaway>
+            <critical-takeaway>Debug 422 errors by logging raw request bodies and received field names to identify naming mismatches quickly.</critical-takeaway>
+            <critical-takeaway>Critical auth endpoints should support multiple field naming conventions to prevent integration failures.</critical-takeaway>
+        </category>
+
         <category name="Staging Authentication Failures [CRITICAL]" path="SPEC/learnings/staging_authentication_failures_2025.xml" keywords="Staging, Authentication, 403 Forbidden, Service-to-Service, Token Refresh, JWT Secret, OAuth">
             <critical-takeaway>CRITICAL: Authentication failures in staging indicate imminent production failures that will cause complete platform unavailability and 100% revenue loss.</critical-takeaway>
             <critical-takeaway>MANDATORY: All authentication tests must run in staging environment (@pytest.mark.env("staging")) to catch environment-specific configuration issues.</critical-takeaway>
@@ -773,6 +781,25 @@
             <critical-takeaway>Layer multiple timeout protections: connection, operation, initialization, and wrapper timeouts</critical-takeaway>
             <critical-takeaway>HTTPSConnectionPool timeout errors indicate infrastructure unavailability - use fast failure patterns</critical-takeaway>
             <critical-takeaway>Backend startup time reduced from 60s+ to &lt;30s by preventing ClickHouse connection blocking</critical-takeaway>
+        </category>
+        
+        <category name="ClickHouse SSOT Violation Remediation [CRITICAL FIXED 2025-08-28]" path="SPEC/learnings/clickhouse_ssot_violation_remediation.xml" keywords="ClickHouse, SSOT, Single Source of Truth, Duplicate Clients, Code Duplication, Client Architecture, get_clickhouse_client, canonical implementation, technical debt, maintenance burden">
+            <critical-takeaway>CATASTROPHIC: Had 4 different ClickHouse client implementations violating SSOT principle - consolidated to 1 canonical implementation at netra_backend/app/db/clickhouse.py</critical-takeaway>
+            <critical-takeaway>ALWAYS use get_clickhouse_client() context manager - NEVER create new ClickHouse client classes or direct instantiation</critical-takeaway>
+            <critical-takeaway>Test logic in production (MockClickHouseDatabase, _simulate_* methods) violates clean architecture - use test_framework/fixtures/clickhouse_fixtures.py</critical-takeaway>
+            <critical-takeaway>Search First, Create Second - ALWAYS check for existing ClickHouse implementation before creating parallel ones</critical-takeaway>
+            <critical-takeaway>Agent-specific client implementations violate service architecture - use dependency injection with canonical client</critical-takeaway>
+            <critical-takeaway>SSOT violations compound quickly - 4 implementations created 834+ lines of duplicate code requiring synchronized updates</critical-takeaway>
+            <critical-takeaway>Direct class instantiation (ClickHouseClient()) bypasses configuration management and connection pooling</critical-takeaway>
+            <critical-takeaway>Run python -m pytest netra_backend/tests/test_clickhouse_ssot_compliance.py to prevent SSOT regressions</critical-takeaway>
+            <critical-takeaway>Migration pattern: Replace import/instantiation with async with get_clickhouse_client() as client context manager</critical-takeaway>
+            <critical-takeaway>Deleted files: clickhouse_client.py, client_clickhouse.py, agents/data_sub_agent/clickhouse_client.py - imports will fail</critical-takeaway>
+            <critical-takeaway>Automated compliance checks in scripts/compliance/ssot_checker.py prevent new duplicate client implementations</critical-takeaway>
+            <critical-takeaway>SSOT compliance tests must pass: test_no_duplicate_clickhouse_clients, test_no_test_logic_in_production, test_all_imports_use_canonical_client</critical-takeaway>
+            <critical-takeaway>MockClickHouseDatabase in production violates clean architecture - move to test_framework/fixtures/clickhouse_fixtures.py</critical-takeaway>
+            <critical-takeaway>Integration tests importing deleted clients fail with ModuleNotFoundError - update to canonical imports</critical-takeaway>
+            <critical-takeaway>Canonical client must include ALL features from deleted implementations: SSL/TLS support, circuit breakers, retry logic</critical-takeaway>
+            <critical-takeaway>Post-remediation verification: grep -r "from.*clickhouse_client\|from.*client_clickhouse" should return NO results</critical-takeaway>
         </category>
         
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
@@ -1466,4 +1493,14 @@
             <critical-takeaway>Pipeline executor batching integration offers additional 20-30% performance gains once base optimization is stable</critical-takeaway>
         </category>
     </performance_optimization>
+    
+    <ssot_compliance>
+        <category name="WebSocket Manager SSOT Compliance" path="SPEC/learnings/websocket_manager_ssot_compliance.xml" keywords="WebSocket, SSOT, Single Source of Truth, Audit, Manager Count, Aliases, Mocks, False Positives">
+            <critical-takeaway>WebSocket implementation is SSOT COMPLIANT - only ONE canonical WebSocketManager at websocket_core/manager.py.</critical-takeaway>
+            <critical-takeaway>Audit tools must distinguish between implementations vs aliases vs mocks - 30+ count includes 28 test mocks and 6+ aliases.</critical-takeaway>
+            <critical-takeaway>Specialized managers (HeartbeatManager, QualityManager) are NOT duplicates - they handle different single responsibilities.</critical-takeaway>
+            <critical-takeaway>SSOT means one implementation per CONCEPT, not one class with "Manager" in the name.</critical-takeaway>
+            <critical-takeaway>Test mock proliferation is expected and healthy for proper test isolation - not an SSOT violation.</critical-takeaway>
+        </category>
+    </ssot_compliance>
 </specification>
