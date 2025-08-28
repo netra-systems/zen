@@ -40,6 +40,7 @@
 | File | Location | Purpose | Key Functions |
 |------|----------|---------|---------------|
 | **🔴 CANONICAL MANAGER** | `/netra_backend/app/db/database_manager.py` | **Single database manager (SSOT)** | DatabaseManager.get_connection_manager() |
+| `clickhouse_client.py` | `/netra_backend/app/db/clickhouse_client.py` | ClickHouse client with async support | connect_async(), execute_async(), health_check_async() |
 | `clickhouse.py` | `/netra_backend/app/db/clickhouse.py` | ClickHouse connection | get_clickhouse_client() |
 | `postgres.py` | `/netra_backend/app/db/postgres.py` | PostgreSQL connection | get_postgres_db() |
 | `clickhouse_operations.py` | `/netra_backend/app/agents/` | ClickHouse data operations | Agent-specific queries |
@@ -94,6 +95,17 @@
 | - Performance Tools | `/netra_backend/app/services/apex_optimizer_agent/tools/` | `performance_*.py`, `latency_*.py` | Performance optimization |
 | - Log Analysis Tools | `/netra_backend/app/services/apex_optimizer_agent/tools/` | `log_*.py` | Log analysis and pattern detection |
 | - Optimization Tools | `/netra_backend/app/services/apex_optimizer_agent/tools/` | `optimization_*.py`, `optimal_*.py` | Various optimization strategies |
+
+### Performance Optimization Components (CRITICAL - 2025-08-28)
+| Component | Location | Purpose | Key Features |
+|-----------|----------|---------|-------------|
+| **🔴 EXECUTION ENGINE** | `/netra_backend/app/agents/supervisor/execution_engine.py` | **Parallel pipeline execution** | asyncio.gather() parallelization, automatic fallback to sequential |
+| **🔴 CLICKHOUSE ASYNC** | `/netra_backend/app/db/clickhouse_client.py` | **Async-safe database operations** | connect_async(), execute_async(), health_check_async() |
+| **🔴 STATE PERSISTENCE** | `/netra_backend/app/services/state_persistence_optimized.py` | **Optimized state management** | Delegation pattern, feature flag controlled |
+| **🔴 PIPELINE EXECUTOR** | `/netra_backend/app/agents/supervisor/pipeline_executor.py` | **State batching and optimization** | Feature flag integration, optimized service selection |
+| **🔴 FEATURE FLAGS** | `/netra_backend/app/core/isolated_environment.py` | **Performance configuration** | ENABLE_OPTIMIZED_PERSISTENCE, cache size, compression settings |
+| **🔴 INTEGRATION TESTS** | `/netra_backend/tests/services/test_optimized_persistence_integration.py` | **Performance optimization testing** | Feature flag testing, delegation pattern validation |
+| **Performance Learnings** | [`SPEC/learnings/state_persistence_optimization.xml`](SPEC/learnings/state_persistence_optimization.xml) | **Optimization best practices** | 35-45% performance improvement, async safety patterns |
 
 ### Test Files (Unified Testing System)
 | Component | Location | Purpose | Documentation |
