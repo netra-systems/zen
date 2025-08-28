@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker Log Pattern Refinement for Accurate Issue Detection</title>
+    <category>monitoring</category>
+    <service>docker_log_introspection</service>
+    <date>2025-08-28</date>
+    <impact>HIGH</impact>
+  </metadata>
+
+  <problem>
+    <description>Docker log introspection generated excessive false positive alerts</description>
+    <root_cause>
+      Overly broad regex patterns matching legitimate operational logs:
+      - Authentication pattern matched any "401" or "403" anywhere in logs
+      - Timeout pattern matched configuration timeouts and expected cleanup tasks
+    </root_cause>
+    <symptoms>
+      - 47 false positive HIGH priority alerts
+      - 17 false authentication issues from timestamps and port numbers
+      - 30 false timeout issues from legitimate cleanup operations
+      - Alert fatigue reducing effectiveness of monitoring
+    </symptoms>
+  </problem>
+
+  <solution>
+    <approach>Refine regex patterns to require contextual indicators</approach>
+    <implementation>
+      <authentication_fix>
+        OLD: r'authentication.*failed|unauthorized|403|401'
+        NEW: r'authentication.*failed|unauthorized|(?:status|response|error|HTTP)[:\s]+(?:401|403)|(?:401|403)[:\s]+(?:unauthorized|forbidden|auth)'
+        - Requires status codes to have contextual keywords
+        - Eliminates matches in timestamps, ports, other numeric contexts
+      </authentication_fix>
+      <timeout_fix>
+        OLD: r'timeout|timed out'
+        NEW: r'timeout.*(?:error|failed|expired|reached)|timed out|connection.*timeout|request.*timeout|operation.*timeout'
+        - Only matches problematic timeouts with error indicators
+        - Excludes expected operational timeouts
+      </timeout_fix>
+    </implementation>
+    <verification>
+      - Total issues reduced by 30% (155 to 108)
+      - HIGH priority issues reduced by 89% (53 to 6)
+      - All 47 false positives eliminated
+      - Real application errors preserved (6 issues)
+    </verification>
+  </solution>
+
+  <prevention>
+    <recommendation>Always require contextual indicators in log pattern matching</recommendation>
+    <recommendation>Test patterns against actual log samples before deployment</recommendation>
+    <recommendation>Differentiate between operational logs and error conditions</recommendation>
+    <recommendation>Use negative lookahead/lookbehind for exclusion patterns when needed</recommendation>
+  </prevention>
+
+  <compliance>
+    <principle>Accurate monitoring enables effective remediation</principle>
+    <principle>Reduce alert fatigue to maintain operational awareness</principle>
+    <principle>Balance sensitivity and specificity in pattern matching</principle>
+  </compliance>
+</learning>

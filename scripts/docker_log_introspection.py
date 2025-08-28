@@ -28,8 +28,8 @@ class DockerLogIntrospector:
         ],
         'HIGH': [
             (r'ERROR|Exception|Traceback', 'Application error'),
-            (r'authentication.*failed|unauthorized|403|401', 'Authentication issue'),
-            (r'timeout|timed out', 'Timeout error'),
+            (r'authentication.*failed|unauthorized|(?:status|response|error|HTTP)[:\s]+(?:401|403)|(?:401|403)[:\s]+(?:unauthorized|forbidden|auth)', 'Authentication issue'),
+            (r'timeout.*(?:error|failed|expired|reached)|timed out|connection.*timeout|request.*timeout|operation.*timeout', 'Timeout error'),
             (r'failed to connect|connection failed', 'Network connectivity issue'),
             (r'invalid.*config|configuration.*error', 'Configuration error'),
             (r'SSL.*error|certificate.*invalid', 'SSL/TLS issue'),
