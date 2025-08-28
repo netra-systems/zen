@@ -48,12 +48,12 @@ class DynamicPortManager:
             clickhouse=8123
         ),
         TestMode.DOCKER: ServicePorts(
-            backend=8001,  # Test backend port
-            auth=8082,     # Test auth port
-            frontend=3001, # Test frontend port
-            postgres=5433, # Test postgres port
-            redis=6380,    # Test redis port
-            clickhouse=8124 # Test clickhouse port
+            backend=8000,  # Docker backend port (matches docker-compose)
+            auth=8081,     # Docker auth port (matches docker-compose)
+            frontend=3000, # Docker frontend port (matches docker-compose) 
+            postgres=5432, # Docker postgres port (matches docker-compose)
+            redis=6379,    # Docker redis port (matches docker-compose)
+            clickhouse=8123 # Docker clickhouse port (matches docker-compose)
         ),
         TestMode.CI: ServicePorts(
             backend=0,  # Dynamic allocation

@@ -180,9 +180,9 @@ class UnifiedTestConfig:
             api_base = urls["backend"]
             auth_base = urls["auth"]
         else:
-            # Fallback to environment or defaults
+            # Fallback to environment or defaults (Docker uses 8081 for auth)
             backend_port = os.environ.get("TEST_BACKEND_PORT", "8000")
-            auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
+            auth_port = os.environ.get("TEST_AUTH_PORT", "8081")  # Docker default
             ws_url = f"ws://localhost:{backend_port}/ws"
             api_base = f"http://localhost:{backend_port}"
             auth_base = f"http://localhost:{auth_port}"
@@ -371,9 +371,9 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
                 clickhouse_port=port_mgr.ports.clickhouse
             )
         else:
-            # Fallback to defaults
+            # Fallback to defaults (Docker uses 8081 for auth)
             backend_port = int(os.environ.get("TEST_BACKEND_PORT", "8000"))
-            auth_port = int(os.environ.get("TEST_AUTH_PORT", "8081"))
+            auth_port = int(os.environ.get("TEST_AUTH_PORT", "8081"))  # Docker default
             frontend_port = int(os.environ.get("TEST_FRONTEND_PORT", "3000"))
             return TestEnvironmentConfig(
                 environment_type=TestEnvironmentType.LOCAL,
@@ -424,8 +424,8 @@ def get_auth_service_url() -> str:
         port_mgr = get_port_manager()
         urls = port_mgr.get_service_urls()
         return urls["auth"]
-    # Fallback to default
-    auth_port = os.environ.get("TEST_AUTH_PORT", "8081")
+    # Fallback to default (Docker uses 8081 for auth)
+    auth_port = os.environ.get("TEST_AUTH_PORT", "8081")  # Docker default
     return f"http://localhost:{auth_port}"
 
 

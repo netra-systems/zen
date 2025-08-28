@@ -314,7 +314,7 @@ class TestDevLauncherRealStartup:
             if not is_available:
                 # Try to free the port by finding and killing the process
                 await self._attempt_port_cleanup(port)
-                time.sleep(2)  # Wait for cleanup
+                await asyncio.sleep(2)  # Wait for cleanup
                 
                 # Re-check availability
                 if not tester.is_port_available(port):

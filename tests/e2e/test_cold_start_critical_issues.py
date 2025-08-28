@@ -331,7 +331,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             stderr=subprocess.PIPE
         )
         
-        time.sleep(5)
+        await asyncio.sleep(5)
         stderr_output = process.stderr.read().decode()
         process.terminate()
         
@@ -593,7 +593,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         )
         
         # Wait 5 minutes
-        time.sleep(300)
+        await asyncio.sleep(300)
         
         # Check if process crashed
         return_code = process.poll()
@@ -751,7 +751,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         )
         
         # Wait for startup
-        time.sleep(5)
+        await asyncio.sleep(5)
         
         # Check if process crashed
         return_code = process.poll()

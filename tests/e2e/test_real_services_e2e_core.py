@@ -25,7 +25,7 @@ from test_framework.environment_markers import env, env_requires, dev_and_stagin
 
 class ServiceEndpoints:
     """Real service endpoint configuration."""
-    auth_service_url: str = "http://localhost:8001"
+    auth_service_url: str = "http://localhost:8081"  # Docker default port
     backend_url: str = "http://localhost:8000"
     websocket_url: str = "ws://localhost:8000/ws"
     redis_url: str = "redis://localhost:6379"
