@@ -9,7 +9,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LoginButton } from '@/auth/components';
-import { authService } from '@/auth/unified-auth-service';
+import { authService } from '@/auth/service';
 import '@testing-library/jest-dom';
 
 // Mock auth service for component testing

@@ -431,55 +431,28 @@ jest.mock('@/auth/unified-auth-service', () => ({
     refreshToken: jest.fn().mockResolvedValue({ access_token: mockJWTToken }),
     setToken: jest.fn(),
     getEnvironment: jest.fn().mockReturnValue('test'),
-    useAuth: jest.fn(() => getMockAuthContextValue())
+    useAuth: jest.fn(() => {
+      const currentState = global.mockAuthState || {
+        user: mockUser,
+        loading: false,
+        error: null,
+        authConfig: mockAuthConfig,
+        token: mockJWTToken,
+        isAuthenticated: true,
+        initialized: true
+      };
+      
+      return {
+        ...currentState,
+        login: jest.fn(),
+        logout: jest.fn()
+      };
+    })
   }
 }));
 
 // Mock auth service that combines unifiedAuthService with useAuth hook
 jest.mock('@/auth/service', () => {
-  const getMockAuthContextValue = () => {
-    const currentState = global.mockAuthState || {
-      user: mockUser,
-      loading: false,
-      error: null,
-      authConfig: mockAuthConfig,
-      token: mockJWTToken,
-      isAuthenticated: true,
-      initialized: true
-    };
-    
-    return {
-      ...currentState,
-      login: jest.fn((credentials) => {
-        if (global.localStorage) {
-          global.localStorage.setItem('jwt_token', mockJWTToken);
-          global.localStorage.setItem('token', mockJWTToken);
-          global.localStorage.setItem('auth_token', mockJWTToken);
-        }
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: mockUser,
-          token: mockJWTToken,
-          isAuthenticated: true
-        };
-        return Promise.resolve({ token: mockJWTToken, user: mockUser });
-      }),
-      logout: jest.fn(() => {
-        if (global.localStorage) {
-          global.localStorage.removeItem('jwt_token');
-          global.localStorage.removeItem('token');
-          global.localStorage.removeItem('auth_token');
-        }
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: null,
-          token: null,
-          isAuthenticated: false
-        };
-        return Promise.resolve();
-      })
-    };
-  };
 
   return {
     authService: {
@@ -589,64 +562,45 @@ jest.mock('@/auth/service', () => {
 // Mock auth context
 jest.mock('@/auth/context', () => {
   const mockReact = require('react');
-  
-  // Create a function that returns the current mock auth state
-  const getMockAuthContextValue = () => {
-    const currentState = global.mockAuthState || {
-      user: {
-        id: 'test-user',
-        email: 'test@example.com',
-        full_name: 'Test User'
-      },
-      loading: false,
-      error: null,
-      authConfig: mockAuthConfig,
-      token: mockJWTToken,
-      isAuthenticated: true,
-      initialized: true
-    };
-    
-    return {
-      ...currentState,
-      login: jest.fn((credentials) => {
-        if (global.localStorage) {
-          global.localStorage.setItem('jwt_token', mockJWTToken);
-          global.localStorage.setItem('token', mockJWTToken);
-          global.localStorage.setItem('auth_token', mockJWTToken);
-        }
-        // Update global state
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: mockUser,
-          token: mockJWTToken,
-          isAuthenticated: true
-        };
-        return Promise.resolve({ token: mockJWTToken, user: mockUser });
-      }),
-      logout: jest.fn(() => {
-        if (global.localStorage) {
-          global.localStorage.removeItem('jwt_token');
-          global.localStorage.removeItem('token');
-          global.localStorage.removeItem('auth_token');
-        }
-        // Update global state
-        global.mockAuthState = {
-          ...global.mockAuthState,
-          user: null,
-          token: null,
-          isAuthenticated: false
-        };
-        return Promise.resolve();
-      })
-    };
-  };
 
-  const MockAuthContext = mockReact.createContext(getMockAuthContextValue());
+  const mockContextDefault = {
+    user: {
+      id: 'test-user',
+      email: 'test@example.com',
+      full_name: 'Test User'
+    },
+    loading: false,
+    error: null,
+    authConfig: mockAuthConfig,
+    token: mockJWTToken,
+    isAuthenticated: true,
+    initialized: true,
+    login: jest.fn(),
+    logout: jest.fn()
+  };
+  
+  const MockAuthContext = mockReact.createContext(mockContextDefault);
 
   return {
     AuthContext: MockAuthContext,
     AuthProvider: ({ children }) => {
-      const contextValue = getMockAuthContextValue();
+      const contextValue = {
+        ...(global.mockAuthState || {
+          user: {
+            id: 'test-user',
+            email: 'test@example.com',
+            full_name: 'Test User'
+          },
+          loading: false,
+          error: null,
+          authConfig: mockAuthConfig,
+          token: mockJWTToken,
+          isAuthenticated: true,
+          initialized: true
+        }),
+        login: jest.fn(),
+        logout: jest.fn()
+      };
       return mockReact.createElement(MockAuthContext.Provider, { value: contextValue }, children);
     },
     useAuth: () => {

@@ -167,7 +167,7 @@ describe('AuthContext Storage Event Listener - Critical Cross-Tab & Security Tes
             key,
             oldValue,
             newValue: value,
-            storageArea: mockLocalStorage
+            storageArea: localStorage  // Use the actual localStorage object
           });
           
           // Trigger registered storage event listeners
