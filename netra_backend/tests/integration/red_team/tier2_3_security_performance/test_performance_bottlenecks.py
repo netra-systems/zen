@@ -519,7 +519,7 @@ class TestPerformanceBottlenecks:
                 
                 # Small delay to avoid overwhelming
                 if i % 10 == 0:
-                    time.sleep(0.1)
+                    await asyncio.sleep(0.1)
             
             # Wait for all connection attempts
             for thread in threads:
