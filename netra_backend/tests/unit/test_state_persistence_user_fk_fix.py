@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.db.models_postgres import User
+from netra_backend.app.db.models_user import User
 from netra_backend.app.schemas.agent_state import CheckpointType, StatePersistenceRequest
 from netra_backend.app.services.state_persistence import state_persistence_service
 
@@ -59,7 +59,7 @@ async def test_state_persistence_creates_missing_dev_user(mock_db_session, persi
     """Test that missing dev users are auto-created during state persistence."""
     
     # Mock user_service to simulate user not existing, then being created
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+    with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         # First call to get returns None (user doesn't exist)
         mock_user_service.get = AsyncMock(return_value=None)
         # Create should succeed
@@ -96,7 +96,7 @@ async def test_state_persistence_creates_missing_dev_user(mock_db_session, persi
 async def test_state_persistence_handles_existing_user(mock_db_session, persistence_request):
     """Test that existing users are not recreated."""
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+    with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         # User already exists
         existing_user = User(
             id="dev-temp-test123",
@@ -132,7 +132,7 @@ async def test_state_persistence_handles_test_prefix_users(mock_db_session, samp
         execution_context={"step_count": 0}
     )
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+    with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         mock_user_service.get = AsyncMock(return_value=None)
         mock_user_service.create = AsyncMock(return_value=User(
             id="test-user456",
@@ -163,7 +163,7 @@ async def test_state_persistence_skips_creation_for_regular_users(mock_db_sessio
         execution_context={"step_count": 0}
     )
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+    with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         mock_user_service.get = AsyncMock(return_value=None)
         mock_user_service.create = AsyncMock()
         
@@ -190,7 +190,7 @@ async def test_state_persistence_handles_empty_user_id(mock_db_session, sample_s
         execution_context={"step_count": 0}
     )
     
-    with patch('netra_backend.app.services.user_service.user_service') as mock_user_service:
+    with patch('netra_backend.app.services.state_persistence.user_service') as mock_user_service:
         mock_user_service.get = AsyncMock()
         mock_user_service.create = AsyncMock()
         
