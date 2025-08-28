@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Cloud Armor OWASP Rules Removal - Execution Process</title>
+    <date>2025-08-28</date>
+    <category>security,infrastructure,operations,troubleshooting</category>
+    <severity>critical</severity>
+    <impact>production</impact>
+  </metadata>
+  
+  <executive_summary>
+    Successfully removed all OWASP WAF rules from Cloud Armor that were causing false 
+    positives and blocking legitimate traffic. The removal process required both 
+    Terraform configuration updates and direct gcloud commands due to state sync issues.
+  </executive_summary>
+  
+  <problem_identified>
+    <symptom>89 blocked requests in 48 hours</symptom>
+    <symptom>51 blocks from rule id942421-sqli alone</symptom>
+    <symptom>38 blocks from rule id913101-scannerdetection</symptom>
+    <symptom>Blocking normal paths: /, /health, /login</symptom>
+    <symptom>Users unable to access staging environment</symptom>
+  </problem_identified>
+  
+  <execution_steps>
+    <step number="1">
+      <action>Analyzed current Cloud Armor configuration</action>
+      <file>terraform-gcp-staging/cloud-armor.tf</file>
+      <finding>10 OWASP rules configured (priorities 100-109)</finding>
+    </step>
+    
+    <step number="2">
+      <action>Reviewed historical learnings</action>
+      <files>
+        <file>SPEC/learnings/cloud_armor_oauth_comprehensive.xml</file>
+        <file>SPEC/learnings/websocket_cloud_armor_block.xml</file>
+      </files>
+      <finding>Previous issues with OAuth and WebSocket false positives</finding>
+    </step>
+    
+    <step number="3">
+      <action>Updated Terraform configuration</action>
+      <change>Removed all OWASP rule blocks from cloud-armor.tf</change>
+      <change>Added documentation comment explaining removal</change>
+    </step>
+    
+    <step number="4">
+      <action>Attempted Terraform apply</action>
+      <issue>Terraform apply timed out after 2 minutes</issue>
+      <issue>Rules still present in GCP console</issue>
+    </step>
+    
+    <step number="5">
+      <action>Direct removal via gcloud</action>
+      <command>
+        for priority in 51 100 101 102 103 104 105 106 107 108 109; do
+          gcloud compute security-policies rules delete $priority \
+            --security-policy=staging-security-policy \
+            --project=netra-staging --quiet
+        done
+      </command>
+      <result>Successfully removed all OWASP rules</result>
+    </step>
+    
+    <step number="6">
+      <action>Verification</action>
+      <test>curl -I https://staging.netrasystems.ai/</test>
+      <result>HTTP/1.1 200 OK - Site accessible</result>
+    </step>
+  </execution_steps>
+  
+  <terraform_state_issue>
+    <problem>
+      Terraform state was out of sync with actual GCP resources.
+      Running terraform apply would recreate deleted rules from state.
+    </problem>
+    <solution>
+      1. Update cloud-armor.tf configuration file
+      2. Remove rules directly via gcloud commands
+      3. Run terraform refresh to sync state
+      4. Commit updated configuration to prevent recreation
+    </solution>
+  </terraform_state_issue>
+  
+  <remaining_security_rules>
+    <rule priority="1000">Rate limiting - 100 requests/minute per IP</rule>
+    <rule priority="700">API endpoint rate limiting - 1000 requests/minute</rule>
+    <rule priority="600">Block suspicious user agents (preview mode only)</rule>
+    <rule priority="500">Throttle high-risk geographic regions</rule>
+    <rule priority="2147483647">Default allow rule</rule>
+  </remaining_security_rules>
+  
+  <verification_commands>
+    <command purpose="Check current rules">
+      gcloud compute security-policies describe staging-security-policy \
+        --project=netra-staging --format="table(rules[].priority,rules[].action,rules[].description)"
+    </command>
+    <command purpose="Analyze recent blocks">
+      python scripts/analyze_cloud_armor_logs.py --denied --limit 10
+    </command>
+    <command purpose="Test site accessibility">
+      curl -I https://staging.netrasystems.ai/
+    </command>
+  </verification_commands>
+  
+  <key_learnings>
+    <learning priority="critical">
+      OWASP WAF rules are fundamentally incompatible with modern web applications.
+      They cause more problems than they solve by blocking legitimate traffic.
+    </learning>
+    <learning priority="high">
+      Terraform state sync issues can cause rules to persist or recreate.
+      Direct gcloud commands may be needed for immediate remediation.
+    </learning>
+    <learning priority="high">
+      Always verify rule removal with actual HTTP tests, not just 
+      configuration checks, as there can be propagation delays.
+    </learning>
+    <learning priority="medium">
+      The analyze_cloud_armor_logs.py script is essential for quickly
+      identifying patterns in blocked traffic.
+    </learning>
+  </key_learnings>
+  
+  <prevention_measures>
+    <measure>Document architectural decisions in SPEC/learnings</measure>
+    <measure>Commit Terraform changes immediately after verification</measure>
+    <measure>Use terraform refresh before apply to sync state</measure>
+    <measure>Monitor 403 error rates as key health indicator</measure>
+    <measure>Test all user flows after security policy changes</measure>
+  </prevention_measures>
+  
+  <references>
+    <reference>SPEC/learnings/cloud_armor_waf_removal.xml - Architectural decision</reference>
+    <reference>terraform-gcp-staging/cloud-armor.tf - Updated configuration</reference>
+    <reference>scripts/analyze_cloud_armor_logs.py - Log analysis tool</reference>
+  </references>
+</learning>

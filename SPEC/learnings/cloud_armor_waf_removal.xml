@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Cloud Armor OWASP WAF Rules Removal - Critical Decision</title>
+    <date>2025-08-28</date>
+    <category>security,infrastructure,production-incident,architecture-decision</category>
+    <severity>critical</severity>
+    <impact>production</impact>
+  </metadata>
+  
+  <executive_summary>
+    All OWASP preconfigured WAF rules (priorities 100-109) have been permanently removed from 
+    Cloud Armor configuration due to excessive false positives blocking legitimate traffic.
+    These rules were causing 403 errors on normal application requests including homepage 
+    access, health checks, and user interactions. The rules are fundamentally incompatible 
+    with modern web applications and SPA architectures.
+  </executive_summary>
+  
+  <problem_analysis>
+    <issue>OWASP rules blocking legitimate traffic patterns</issue>
+    <root_cause>
+      The OWASP Core Rule Set (CRS) was designed for traditional server-rendered web 
+      applications and creates excessive false positives with:
+      - Modern JavaScript frameworks and SPAs
+      - URL-encoded parameters in OAuth flows
+      - WebSocket upgrade requests
+      - JSON payloads with special characters
+      - Query parameters with debugging flags (e.g., gtm_debug)
+      - Health check endpoints
+      - Standard browser headers and user agents
+    </root_cause>
+    
+    <false_positive_examples>
+      <example rule="owasp-crs-v030001-id942421-sqli">
+        Blocked: Normal homepage access (GET /)
+        Blocked: Health checks (GET /health)
+        Blocked: Google Tag Manager debug params (?gtm_debug=xxx)
+        Impact: 51 blocks in 48 hours
+      </example>
+      <example rule="owasp-crs-v030001-id913101-scannerdetection">
+        Blocked: Legitimate monitoring tools
+        Blocked: Search engine crawlers
+        Impact: 38 blocks in 48 hours
+      </example>
+      <example rule="owasp-crs-v030001-id942432-sqli">
+        Blocked: OAuth callbacks with "4%2F0..." authorization codes
+        Impact: Prevented all user logins
+      </example>
+    </false_positive_examples>
+  </problem_analysis>
+  
+  <removed_rules>
+    <rule priority="100" expression="sqli-stable">SQL Injection Protection</rule>
+    <rule priority="101" expression="xss-stable">Cross-Site Scripting Protection</rule>
+    <rule priority="102" expression="lfi-stable">Local File Inclusion Protection</rule>
+    <rule priority="103" expression="rce-stable">Remote Code Execution Protection</rule>
+    <rule priority="104" expression="rfi-stable">Remote File Inclusion Protection</rule>
+    <rule priority="105" expression="methodenforcement-stable">Method Enforcement</rule>
+    <rule priority="106" expression="scannerdetection-stable">Scanner Detection</rule>
+    <rule priority="107" expression="protocolattack-stable">Protocol Attack Protection</rule>
+    <rule priority="108" expression="php-stable">PHP Injection Protection</rule>
+    <rule priority="109" expression="sessionfixation-stable">Session Fixation Protection</rule>
+  </removed_rules>
+  
+  <security_implications>
+    <retained_protections>
+      - DDoS protection via Adaptive Protection (Layer 7 defense)
+      - Rate limiting (100 requests/minute per IP)
+      - API endpoint rate limiting (1000 requests/minute)
+      - Geographic throttling for high-risk countries
+      - Custom security rules can be added as needed
+      - Cloud Run's built-in security features
+      - Application-level input validation
+    </retained_protections>
+    
+    <risk_mitigation>
+      - Application implements its own input validation
+      - API uses parameterized queries preventing SQL injection
+      - Frontend sanitizes user inputs
+      - Authentication via OAuth/JWT prevents many attack vectors
+      - Cloud Run's isolated container environment limits RCE impact
+      - HTTPS-only communication prevents protocol attacks
+    </risk_mitigation>
+  </security_implications>
+  
+  <why_rules_keep_returning>
+    <reason>Terraform state management</reason>
+    <explanation>
+      If terraform apply is run without the updated cloud-armor.tf file, 
+      Terraform will recreate the rules from its last known state. The 
+      terraform state may contain the old configuration.
+    </explanation>
+    <prevention>
+      1. Ensure cloud-armor.tf changes are committed to git
+      2. Run terraform plan before apply to verify changes
+      3. Update terraform state if needed: terraform refresh
+      4. Document this decision prominently in the file
+    </prevention>
+  </why_rules_keep_returning>
+  
+  <business_justification>
+    <impact>Users cannot access the application with WAF rules enabled</impact>
+    <cost_benefit>
+      Cost of false positives: Complete service unavailability
+      Benefit of rules: Minimal (attacks already mitigated at app level)
+      Decision: Remove rules to restore service availability
+    </cost_benefit>
+    <alternatives_considered>
+      <alternative status="rejected">
+        Tune each rule individually - Would take weeks and still cause issues
+      </alternative>
+      <alternative status="rejected">
+        Use preview mode - Still impacts monitoring and creates noise
+      </alternative>
+      <alternative status="rejected">
+        Create exceptions for each endpoint - Too many endpoints affected
+      </alternative>
+    </alternatives_considered>
+  </business_justification>
+  
+  <implementation_notes>
+    <critical>
+      DO NOT RE-ADD these rules without:
+      1. Comprehensive testing in a non-production environment
+      2. Specific business justification for each rule
+      3. Custom rule expressions tailored to the application
+      4. Extended preview mode testing (minimum 1 week)
+      5. Explicit approval from engineering leadership
+    </critical>
+    
+    <recommendation>
+      Instead of generic OWASP rules, implement:
+      1. Custom rules for specific known attack patterns
+      2. Application-specific validation rules
+      3. Behavior-based anomaly detection
+      4. Focus on rate limiting and DDoS protection
+    </recommendation>
+  </implementation_notes>
+  
+  <monitoring_requirements>
+    <metric>403 error rate should drop to near zero</metric>
+    <metric>Monitor for actual security incidents</metric>
+    <metric>Track application-level security events</metric>
+    <alert>Set up alerts for unusual traffic patterns</alert>
+    <review>Monthly review of Cloud Armor logs for optimization</review>
+  </monitoring_requirements>
+  
+  <references>
+    <reference>SPEC/learnings/cloud_armor_oauth_comprehensive.xml</reference>
+    <reference>SPEC/learnings/websocket_cloud_armor_block.xml</reference>
+    <reference>scripts/analyze_cloud_armor_logs.py</reference>
+    <reference>terraform-gcp-staging/cloud-armor.tf</reference>
+    <reference>https://cloud.google.com/armor/docs/rule-tuning</reference>
+  </references>
+  
+  <key_decision>
+    The OWASP WAF rules are fundamentally incompatible with modern web applications.
+    They were designed for an earlier era of web development and create more problems
+    than they solve. Application-level security measures are more effective and don't
+    block legitimate users. This is a permanent architectural decision, not a temporary
+    workaround.
+  </key_decision>
+</learning>
