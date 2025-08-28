@@ -2,14 +2,19 @@
 <specification>
   <metadata>
     <title>ClickHouse Configuration and Troubleshooting</title>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <description>Comprehensive ClickHouse configuration, query patterns, best practices, and troubleshooting guide</description>
     <created>2025-01-11</created>
-    <updated>2025-01-12</updated>
+    <updated>2025-08-28</updated>
   </metadata>
 
   <overview>
     <purpose>Time-series log data storage, corpus management, and analytics</purpose>
+    <canonical_implementation>
+      <location>/netra_backend/app/db/clickhouse.py</location>
+      <entry_point>get_clickhouse_client()</entry_point>
+      <warning>CRITICAL: Only use the canonical implementation - SSOT compliance enforced as of 2025-08-28</warning>
+    </canonical_implementation>
     <use_cases>
       <use_case>Workload events tracking with structured metrics</use_case>
       <use_case>Content corpus storage and retrieval</use_case>
@@ -148,12 +153,29 @@
       <format>clickhouse://user:password@host:port/database</format>
       <default>clickhouse://default:@localhost:9000/default</default>
     </connection>
+    <usage_pattern>
+      <import>from netra_backend.app.db.clickhouse import get_clickhouse_client</import>
+      <context_manager>async with get_clickhouse_client() as client: ...</context_manager>
+      <compliance>All ClickHouse operations MUST use this pattern - see SPEC/clickhouse_client_architecture.xml</compliance>
+    </usage_pattern>
   </configuration>
 
   <fix_reference>
     <file>SPEC/clickhouse_nested_arrays_fix.xml</file>
     <description>Detailed specification for fixing nested array type errors</description>
   </fix_reference>
+
+  <ssot_compliance>
+    <architecture_spec>SPEC/clickhouse_client_architecture.xml</architecture_spec>
+    <learning_record>SPEC/learnings/clickhouse_ssot_violation_remediation.xml</learning_record>
+    <compliance_test>netra_backend/tests/test_clickhouse_ssot_compliance.py</compliance_test>
+    <remediation_date>2025-08-28</remediation_date>
+    <deleted_duplicates>
+      <file>/netra_backend/app/db/clickhouse_client.py</file>
+      <file>/netra_backend/app/db/client_clickhouse.py</file>
+      <file>/netra_backend/app/agents/data_sub_agent/clickhouse_client.py</file>
+    </deleted_duplicates>
+  </ssot_compliance>
 
   <query_patterns>
     <pattern name="Performance Metrics Aggregation">
