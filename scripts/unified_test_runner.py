@@ -71,6 +71,13 @@ from test_framework.environment_markers import TestEnvironment, filter_tests_by_
 # Cypress integration
 from test_framework.cypress_runner import CypressTestRunner, CypressExecutionOptions
 
+# Test execution tracking
+try:
+    from scripts.test_execution_tracker import TestExecutionTracker, TestRunRecord
+except ImportError:
+    TestExecutionTracker = None
+    TestRunRecord = None
+
 
 class UnifiedTestRunner:
     """Modern test runner with category-based execution and progress tracking."""
@@ -91,6 +98,9 @@ class UnifiedTestRunner:
         self.test_splitter = None
         self.fail_fast_strategy = None
         self.execution_plan = None
+        
+        # Initialize test execution tracker
+        self.test_tracker = TestExecutionTracker(self.project_root) if TestExecutionTracker else None
         
         # Initialize Cypress runner lazily to avoid Docker issues during init
         self.cypress_runner = None
@@ -148,6 +158,13 @@ class UnifiedTestRunner:
         # Configure environment
         self._configure_environment(args)
         
+        # Start test tracking session
+        if self.test_tracker:
+            self.test_tracker.start_session(
+                environment=args.env,
+                categories=args.categories if hasattr(args, 'categories') else None
+            )
+        
         # Determine categories to run
         categories_to_run = self._determine_categories_to_run(args)
         if not categories_to_run:
@@ -190,6 +207,20 @@ class UnifiedTestRunner:
         
         # Generate report
         self._generate_report(results, args)
+        
+        # End test tracking session
+        if self.test_tracker:
+            session_summary = self.test_tracker.end_session(metadata={
+                "args": vars(args),
+                "execution_plan": self.execution_plan.to_dict() if self.execution_plan and hasattr(self.execution_plan, 'to_dict') else None
+            })
+            print(f"\nSession Summary: {session_summary['total_tests']} tests, "
+                  f"{session_summary['passed']} passed, {session_summary['failed']} failed, "
+                  f"Pass rate: {session_summary['pass_rate']:.1f}%")
+            
+            # Show test tracking report if verbose
+            if args.verbose:
+                print("\n" + self.test_tracker.generate_report())
         
         return 0 if all(r["success"] for r in results.values()) else 1
     
@@ -270,9 +301,13 @@ class UnifiedTestRunner:
         if args.categories:
             categories.extend(args.categories)
         
-        # Default to common categories if none specified
+        # Default to categories marked as default in tracker
         if not categories:
-            categories = ["unit", "integration", "api"]
+            if self.test_tracker:
+                categories = self.test_tracker.get_default_categories()
+            else:
+                # Fallback defaults: quick tests that should usually pass
+                categories = ["smoke", "unit", "integration"]
         
         # Filter categories that exist in the system
         valid_categories = [cat for cat in categories if cat in self.category_system.categories]
@@ -375,6 +410,10 @@ class UnifiedTestRunner:
             result = self._execute_single_category(category_name, args)
             results[category_name] = result
             
+            # Record test results in tracker
+            if self.test_tracker and TestRunRecord:
+                self._record_test_results(category_name, result, args.env)
+            
             # Update progress tracking
             if self.progress_tracker:
                 test_counts = self._extract_test_counts_from_result(result)
@@ -441,7 +480,9 @@ class UnifiedTestRunner:
             "agent": ["backend"],
             "security": ["auth"],
             "frontend": ["frontend"],
-            "e2e": ["backend"],  # E2E tests run from backend but include all test directories
+            "e2e": ["backend"],  # E2E tests run from backend
+            "e2e_critical": ["backend"],  # Critical e2e tests
+            "e2e_full": ["backend"],  # Full e2e suite
             "cypress": ["cypress"],  # Special handler for Cypress E2E tests
             "performance": ["backend", "auth"]
         }
@@ -692,7 +733,10 @@ class UnifiedTestRunner:
             "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
             "agent": ["netra_backend/tests/agents"],
             "security": [str(config["test_dir"]), "-k", '"auth or security"'],
-            "e2e": ["tests/e2e", "netra_backend/tests", "auth_service/tests"],
+            # FIXED: E2E category now points only to actual e2e tests
+            "e2e_critical": ["tests/e2e/critical"],  # Curated critical e2e tests
+            "e2e": ["tests/e2e/integration"],  # Actual e2e integration tests only
+            "e2e_full": ["tests/e2e"],  # Full e2e suite (use with caution - may timeout),
             "performance": [str(config["test_dir"]), "-k", "performance"]
         }
         
@@ -846,6 +890,85 @@ class UnifiedTestRunner:
         test_counts["total"] = test_counts["passed"] + test_counts["failed"]
         
         return test_counts
+    
+    def _record_test_results(self, category_name: str, result: Dict, environment: str):
+        """Record test execution results in the tracker."""
+        if not self.test_tracker or not TestRunRecord:
+            return
+            
+        import re
+        from datetime import datetime
+        
+        # Parse output to extract individual test results if possible
+        output = result.get("output", "")
+        
+        # Try to parse pytest output for individual test results
+        test_pattern = r"(\S+\.py::\S+)\s+(PASSED|FAILED|SKIPPED|ERROR)"
+        matches = re.findall(test_pattern, output)
+        
+        if matches:
+            # Record individual test results
+            for test_path, status in matches:
+                # Extract file path and test name
+                parts = test_path.split("::") 
+                file_path = parts[0] if parts else test_path
+                test_name = parts[1] if len(parts) > 1 else "unknown"
+                
+                # Map status
+                status_map = {
+                    "PASSED": "passed",
+                    "FAILED": "failed",
+                    "SKIPPED": "skipped",
+                    "ERROR": "error"
+                }
+                
+                record = TestRunRecord(
+                    test_id="",  # Will be generated by tracker
+                    file_path=file_path,
+                    test_name=test_name,
+                    category=category_name,
+                    subcategory=self._determine_subcategory(file_path),
+                    status=status_map.get(status, "unknown"),
+                    duration=0.0,  # Would need more parsing to extract
+                    timestamp=datetime.now().isoformat(),
+                    environment=environment,
+                    error_message=None,  # Would need more parsing
+                    failure_type=None
+                )
+                
+                self.test_tracker.record_test_run(record)
+        else:
+            # Record category-level result
+            record = TestRunRecord(
+                test_id="",
+                file_path=f"category_{category_name}",
+                test_name=f"{category_name}_tests",
+                category=category_name,
+                subcategory=category_name,
+                status="passed" if result["success"] else "failed",
+                duration=result.get("duration", 0.0),
+                timestamp=datetime.now().isoformat(),
+                environment=environment,
+                error_message=result.get("errors") if not result["success"] else None,
+                failure_type="category_failure" if not result["success"] else None
+            )
+            
+            self.test_tracker.record_test_run(record)
+    
+    def _determine_subcategory(self, file_path: str) -> str:
+        """Determine test subcategory from file path."""
+        if "unit" in file_path:
+            return "unit"
+        elif "integration" in file_path:
+            return "integration"
+        elif "e2e" in file_path:
+            return "e2e"
+        elif "api" in file_path:
+            return "api"
+        elif "websocket" in file_path:
+            return "websocket"
+        else:
+            return "other"
     
     def _safe_print_unicode(self, text):
         """Safely print text with Unicode characters, falling back to ASCII on encoding errors."""
