@@ -21,7 +21,7 @@ describe('WebSocket Performance and Advanced Tests', () => {
 
   beforeEach(() => {
     // Use real WebSocket simulation instead of mocks
-    wsManager = WebSocketTestManager.createWebSocketManager(undefined, true);
+    wsManager = createWebSocketManager(undefined, true);
     advancedTester = new AdvancedWebSocketTester();
     wsManager.setup();
   });
@@ -233,7 +233,7 @@ describe('WebSocket Performance and Advanced Tests', () => {
       // Benchmark real simulation
       const realStart = performance.now();
       for (let i = 0; i < iterations; i++) {
-        const realManager = WebSocketTestManager.createWebSocketManager(undefined, true);
+        const realManager = createWebSocketManager(undefined, true);
         realManager.setup();
         await realManager.waitForConnection();
         realManager.sendMessage({ test: i });
@@ -244,7 +244,7 @@ describe('WebSocket Performance and Advanced Tests', () => {
       // Benchmark mock simulation (should be faster but less realistic)
       const mockStart = performance.now();
       for (let i = 0; i < iterations; i++) {
-        const mockManager = WebSocketTestManager.createWebSocketManager(undefined, false);
+        const mockManager = createWebSocketManager(undefined, false);
         mockManager.setup();
         // Mock connections don't need real waiting
         mockManager.sendMessage({ test: i });
@@ -265,7 +265,7 @@ describe('WebSocket Performance and Advanced Tests', () => {
       const connectionTimes: number[] = [];
       
       for (let i = 0; i < connectionCount; i++) {
-        const manager = WebSocketTestManager.createWebSocketManager(undefined, true);
+        const manager = createWebSocketManager(undefined, true);
         
         const startTime = performance.now();
         manager.setup();

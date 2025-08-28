@@ -122,7 +122,7 @@ beforeEach(() => {
   mockCreateWebSocketManager.mockReturnValue(mockWsManager);
   
   try {
-    wsManager = WebSocketTestManager.createWebSocketManager();
+    wsManager = mockCreateWebSocketManager();
     wsManager.setup();
   } catch (error) {
     // Fallback if websocket manager fails
