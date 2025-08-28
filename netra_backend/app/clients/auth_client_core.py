@@ -145,6 +145,9 @@ class AuthServiceClient:
     async def _handle_validation_error(self, token: str, error: Exception) -> Optional[Dict]:
         """Handle validation error with detailed error information and fallback."""
         logger.error(f"Token validation failed: {error}")
+        logger.error(f"Auth service URL: {self.settings.base_url}")
+        logger.error(f"Auth service enabled: {self.settings.enabled}")
+        logger.error(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
         
         # Provide specific error information for debugging
         error_type = type(error).__name__
@@ -157,11 +160,13 @@ class AuthServiceClient:
         if fallback_result and fallback_result.get("valid", False):
             fallback_result["error_context"] = f"Primary validation failed: {error_msg}"
             fallback_result["error_type"] = error_type
+            logger.info(f"Using fallback validation: {fallback_result.get('source', 'unknown')}")
             return fallback_result
         
         # If fallback also failed or returned invalid token
         # Check if this is a connection/service error
         if any(conn_err in error_msg.lower() for conn_err in ['connection', 'timeout', 'network', 'unreachable', 'circuit breaker', 'service_unavailable']):
+            logger.warning(f"Auth service appears unreachable: {error_msg}")
             return {"valid": False, "error": "auth_service_unreachable", "details": error_msg}
         
         # For other errors, return the fallback result with error details
@@ -182,7 +187,12 @@ class AuthServiceClient:
     async def _execute_token_validation(self, token: str) -> Optional[Dict]:
         """Execute token validation with error handling."""
         try:
-            return await self._try_validation_steps(token)
+            result = await self._try_validation_steps(token)
+            if result is None:
+                logger.warning("Token validation returned None - auth service may have rejected the token")
+                # Try fallback when auth service rejects token
+                return await self._local_validate(token)
+            return result
         except Exception as e:
             return await self._handle_validation_error(token, e)
     
@@ -215,6 +225,10 @@ class AuthServiceClient:
         # Get headers with service auth
         headers = self._get_request_headers()
         
+        # Log if service credentials are missing (common staging issue)
+        if not self.service_secret:
+            logger.warning("SERVICE_SECRET not configured - auth service communication may fail in staging/production")
+        
         response = await client.post(
             "/auth/validate", 
             json=request_data,
@@ -228,8 +242,10 @@ class AuthServiceClient:
             return await self._parse_validation_response(response.json())
         elif response.status_code == 401:
             logger.warning("Auth service returned 401 - check service authentication")
+            logger.warning(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
         elif response.status_code == 403:
             logger.warning("Auth service returned 403 - service not authorized")
+            logger.warning(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
         return None
     
     async def _prepare_remote_validation(self, token: str):

@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     AgentExecutionMixin,
     BaseExecutionInterface,
@@ -46,7 +46,7 @@ class ModernToolHandler(BaseExecutionInterface, AgentExecutionMixin):
         self.tool_name = tool_name
         self.reliability_manager = self._create_reliability_manager()
         self.monitor = ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler
+        self.error_handler = ExecutionErrorHandler()
     
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager for tool execution."""

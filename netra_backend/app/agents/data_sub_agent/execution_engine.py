@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
@@ -96,7 +96,7 @@ class DataSubAgentExecutionEngine(BaseExecutionInterface):
         monitor = ExecutionMonitor(max_history_size=1000)
         self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
         self.execution_monitor = monitor
-        self.error_handler = ExecutionErrorHandler
+        self.error_handler = ExecutionErrorHandler()
         
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager with circuit breaker and retry."""

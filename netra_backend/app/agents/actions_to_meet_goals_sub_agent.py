@@ -18,7 +18,7 @@ from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
     ValidationError,
 )
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
@@ -78,7 +78,7 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         self.execution_engine = BaseExecutionEngine(
             self.reliability_manager, self.monitor
         )
-        self.error_handler = ExecutionErrorHandler
+        self.error_handler = ExecutionErrorHandler()
 
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create configured reliability manager."""

@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor

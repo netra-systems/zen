@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
 )
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
@@ -48,7 +48,7 @@ class BaseExecutionEngine:
                  monitor: Optional[ExecutionMonitor] = None):
         self.reliability_manager = reliability_manager
         self.monitor = monitor or ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler
+        self.error_handler = ExecutionErrorHandler()
         
     async def execute(self, agent: 'BaseExecutionInterface', 
                      context: ExecutionContext) -> ExecutionResult:
