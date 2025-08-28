@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import Script from 'next/script';
 import { logger } from '@/lib/logger';
+import { getGTMCircuitBreaker } from '@/lib/gtm-circuit-breaker';
 import type { 
   GTMConfig, 
   GTMProviderProps, 
@@ -103,7 +104,7 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
     }
   }, [config.enabled, config.containerId, config.environment, config.debug]);
 
-  // Push event to dataLayer with error handling
+  // Push event to dataLayer with error handling and circuit breaker
   const pushEvent = useCallback((eventData: GTMEventData) => {
     if (!config.enabled || typeof window === 'undefined' || !window.dataLayer) {
       if (config.debug) {
@@ -118,6 +119,22 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
         throw new GTMEventError('Event data must include an "event" property');
       }
 
+      // Check circuit breaker before pushing event
+      const circuitBreaker = getGTMCircuitBreaker();
+      const eventKey = {
+        event: eventData.event,
+        category: eventData.event_category || 'unknown',
+        action: eventData.event_action || eventData.event,
+        context: eventData.page_path || window.location.pathname
+      };
+
+      if (!circuitBreaker.canSendEvent(eventKey)) {
+        if (config.debug) {
+          console.warn('[GTM] Event blocked by circuit breaker:', eventData);
+        }
+        return;
+      }
+
       // Add timestamp and environment context
       const enrichedEventData = {
         ...eventData,
@@ -129,6 +146,9 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
 
       // Push to dataLayer
       window.dataLayer.push(enrichedEventData);
+
+      // Record successful event with circuit breaker
+      circuitBreaker.recordEventSent(eventKey);
 
       // Update debug state
       setDebugState(prev => ({
@@ -158,6 +178,16 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
         action: 'event_push_failed',
         metadata: { eventType: eventData.event }
       });
+
+      // Record failure with circuit breaker
+      const circuitBreaker = getGTMCircuitBreaker();
+      const eventKey = {
+        event: eventData.event,
+        category: eventData.event_category || 'unknown',
+        action: eventData.event_action || eventData.event,
+        context: eventData.page_path || window.location.pathname
+      };
+      circuitBreaker.recordEventFailure(eventKey, error as Error);
 
       setDebugState(prev => ({
         ...prev,
