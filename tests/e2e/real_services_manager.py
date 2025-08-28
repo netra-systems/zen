@@ -312,6 +312,21 @@ class RealServicesManager:
                 
         logger.info("All services stopped")
     
+    def cleanup(self) -> None:
+        """Synchronous cleanup method for test teardown."""
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Schedule cleanup for later if loop is running
+                loop.create_task(self.stop_all_services())
+            else:
+                # Run cleanup synchronously if no loop is running
+                loop.run_until_complete(self.stop_all_services())
+        except RuntimeError:
+            # No event loop, create one
+            asyncio.run(self.stop_all_services())
+    
     def get_service_urls(self) -> Dict[str, str]:
         """Get URLs for all services, using environment configuration when available."""
         # Use environment configuration if available

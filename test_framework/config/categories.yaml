@@ -124,6 +124,22 @@ categories:
     - e2e
     - user-journeys
     - end-to-end
+  e2e_critical:
+    description: Critical E2E tests for fast validation
+    priority: HIGH
+    category_type: e2e
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    dependencies:
+    - unit
+    requires_real_services: false
+    parallel_safe: true
+    max_parallel_instances: 4
+    tags:
+    - e2e
+    - critical
+    - fast
+    - validation
   cypress:
     description: Cypress E2E tests with full service integration
     priority: MEDIUM
