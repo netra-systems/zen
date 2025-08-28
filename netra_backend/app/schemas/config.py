@@ -100,6 +100,11 @@ class ClickHouseNativeConfig(BaseModel):
     user: str = "default"
     password: str = ""
     database: str = "default"
+    # Timeout configurations for enterprise reliability
+    connect_timeout: int = 10  # Connection timeout in seconds
+    read_timeout: int = 30     # Read timeout in seconds  
+    write_timeout: int = 30    # Write timeout in seconds
+    query_timeout: int = 30    # Query execution timeout in seconds
 
 class ClickHouseHTTPConfig(BaseModel):
     host: str = "localhost"
@@ -107,6 +112,11 @@ class ClickHouseHTTPConfig(BaseModel):
     user: str = "default"
     password: str = ""
     database: str = "default"
+    # Timeout configurations for enterprise reliability
+    connect_timeout: int = 10  # Connection timeout in seconds
+    read_timeout: int = 30     # Read timeout in seconds
+    write_timeout: int = 30    # Write timeout in seconds
+    query_timeout: int = 30    # Query execution timeout in seconds
 
 class ClickHouseHTTPSConfig(BaseModel):
     host: str = "localhost"
@@ -114,6 +124,11 @@ class ClickHouseHTTPSConfig(BaseModel):
     user: str = "default"
     password: str = ""
     database: str = "default"
+    # Timeout configurations for enterprise reliability
+    connect_timeout: int = 10  # Connection timeout in seconds
+    read_timeout: int = 30     # Read timeout in seconds
+    write_timeout: int = 30    # Write timeout in seconds  
+    query_timeout: int = 30    # Query execution timeout in seconds
 
 
 
