@@ -1,6 +1,6 @@
 """
 Search and query operations for corpus management
-Handles content retrieval, statistics, and analytical queries
+Handles content retrieval, statistics, analytical queries, and symbol search
 """
 
 import json
@@ -12,6 +12,7 @@ from netra_backend.app.services.corpus.base import (
     ClickHouseOperationError,
     CorpusNotAvailableError,
 )
+from netra_backend.app.services.corpus.symbol_extractor import symbol_extractor
 
 
 class SearchOperations:
@@ -312,3 +313,170 @@ class SearchOperations:
             "earliest_record": earliest.isoformat() if earliest else None,
             "latest_record": latest.isoformat() if latest else None
         }
+    
+    async def search_symbols(self, db_corpus, query: str, symbol_type: Optional[str] = None,
+                           limit: int = 50) -> List[Dict]:
+        """Search for symbols in indexed code files
+        
+        Args:
+            db_corpus: Corpus database object
+            query: Symbol name or partial name to search for
+            symbol_type: Optional filter for symbol type (class, function, method, etc.)
+            limit: Maximum number of results to return
+            
+        Returns:
+            List of matching symbols with their locations
+        """
+        self._validate_corpus_availability(db_corpus)
+        
+        try:
+            async with get_clickhouse_client() as client:
+                # Build and execute symbol search query
+                query_str = self._build_symbol_search_query(
+                    db_corpus.table_name, query, symbol_type, limit
+                )
+                result = await client.execute(query_str)
+                
+                # Process and extract symbols from matching documents
+                symbols = []
+                for row in result:
+                    doc_symbols = self._extract_symbols_from_row(row, query, symbol_type)
+                    symbols.extend(doc_symbols)
+                
+                # Sort by relevance and limit results
+                symbols = self._rank_symbol_results(symbols, query)[:limit]
+                return symbols
+                
+        except Exception as e:
+            central_logger.error(f"Failed to search symbols in corpus {db_corpus.id}: {str(e)}")
+            raise ClickHouseOperationError(f"Symbol search failed: {str(e)}")
+    
+    def _build_symbol_search_query(self, table_name: str, query: str, 
+                                  symbol_type: Optional[str], limit: int) -> str:
+        """Build query to search for documents containing code"""
+        # Search in metadata for file extension and in content for code patterns
+        escaped_query = self._escape_text_search(query.lower())
+        
+        conditions = []
+        # Look for code files based on metadata
+        conditions.append("(metadata LIKE '%.py%' OR metadata LIKE '%.js%' OR metadata LIKE '%.ts%')")
+        
+        # Search for the symbol name in content
+        if query:
+            conditions.append(f"(lower(prompt) LIKE '%{escaped_query}%' OR lower(response) LIKE '%{escaped_query}%')")
+        
+        where_clause = " WHERE " + " AND ".join(conditions) if conditions else ""
+        
+        return f"""
+            SELECT record_id, prompt, response, metadata 
+            FROM {table_name}
+            {where_clause}
+            LIMIT {limit * 3}
+        """
+    
+    def _extract_symbols_from_row(self, row, query: str, symbol_type: Optional[str]) -> List[Dict]:
+        """Extract symbols from a document row"""
+        record_id = str(row[0])
+        content = row[1] + "\n" + row[2]  # Combine prompt and response
+        metadata = self._parse_metadata(row[3])
+        
+        # Extract filename from metadata if available
+        filename = metadata.get("filename", metadata.get("file", f"doc_{record_id}.py"))
+        
+        # Extract symbols using the symbol extractor
+        document = {"filename": filename, "content": content}
+        symbols = symbol_extractor.extract_symbols_from_dict(document)
+        
+        # Filter symbols based on query and type
+        filtered_symbols = []
+        query_lower = query.lower() if query else ""
+        
+        for symbol in symbols:
+            # Filter by name match
+            if query and query_lower not in symbol["name"].lower():
+                continue
+            
+            # Filter by type if specified
+            if symbol_type and symbol["type"] != symbol_type:
+                continue
+            
+            # Add document context
+            symbol["document_id"] = record_id
+            symbol["filename"] = filename
+            filtered_symbols.append(symbol)
+        
+        return filtered_symbols
+    
+    def _rank_symbol_results(self, symbols: List[Dict], query: str) -> List[Dict]:
+        """Rank symbol results by relevance to query"""
+        if not query:
+            return symbols
+        
+        query_lower = query.lower()
+        
+        def calculate_score(symbol: Dict) -> float:
+            name_lower = symbol["name"].lower()
+            full_name_lower = symbol["full_name"].lower()
+            
+            # Exact match gets highest score
+            if name_lower == query_lower:
+                return 1.0
+            
+            # Full name exact match
+            if full_name_lower == query_lower:
+                return 0.9
+            
+            # Starts with query
+            if name_lower.startswith(query_lower):
+                return 0.8
+            
+            # Contains query
+            if query_lower in name_lower:
+                return 0.6
+            
+            # Full name contains query
+            if query_lower in full_name_lower:
+                return 0.5
+            
+            return 0.0
+        
+        # Add scores to symbols
+        for symbol in symbols:
+            symbol["relevance_score"] = calculate_score(symbol)
+        
+        # Sort by score (highest first) and then by name
+        return sorted(symbols, key=lambda s: (-s["relevance_score"], s["name"]))
+    
+    async def get_document_symbols(self, db_corpus, document_id: str) -> List[Dict]:
+        """Get all symbols from a specific document
+        
+        Args:
+            db_corpus: Corpus database object
+            document_id: ID of the document to extract symbols from
+            
+        Returns:
+            List of symbols found in the document
+        """
+        self._validate_corpus_availability(db_corpus)
+        
+        try:
+            async with get_clickhouse_client() as client:
+                # Get the specific document
+                query = f"""
+                    SELECT record_id, prompt, response, metadata 
+                    FROM {db_corpus.table_name}
+                    WHERE record_id = '{document_id}'
+                    LIMIT 1
+                """
+                result = await client.execute(query)
+                
+                if not result:
+                    return []
+                
+                # Extract all symbols from the document
+                symbols = self._extract_symbols_from_row(result[0], None, None)
+                return symbols
+                
+        except Exception as e:
+            central_logger.error(f"Failed to get symbols for document {document_id}: {str(e)}")
+            raise ClickHouseOperationError(f"Document symbol extraction failed: {str(e)}")

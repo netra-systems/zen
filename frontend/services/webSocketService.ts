@@ -76,8 +76,7 @@ class WebSocketService {
   private isBasicWebSocketMessage(obj: any): obj is WebSocketMessage {
     return obj && 
            typeof obj === 'object' && 
-           typeof obj.type === 'string' && 
-           typeof obj.payload === 'object';
+           typeof obj.type === 'string';
   }
 
   private isUnifiedWebSocketEvent(obj: any): obj is UnifiedWebSocketEvent {
@@ -93,25 +92,45 @@ class WebSocketService {
     private validateAgentMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
     const agentTypes = ['agent_started', 'tool_executing', 'agent_thinking', 'partial_result', 'agent_completed'];
     if (!agentTypes.includes(obj.type)) return null;
-    return obj.payload && typeof obj.payload === 'object' ? obj : null;
+    // Agent messages require payload
+    if (!obj.payload || typeof obj.payload !== 'object') {
+      logger.warn('Agent message missing payload', undefined, {
+        component: 'WebSocketService',
+        action: 'validate_agent_message',
+        metadata: { type: obj.type }
+      });
+      return null;
+    }
+    return obj;
   }
 
   private validateThreadMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
     const threadTypes = ['thread_created', 'thread_loading', 'thread_loaded', 'thread_renamed'];
     if (!threadTypes.includes(obj.type)) return null;
-    return obj.payload && typeof obj.payload === 'object' ? obj : null;
+    // Thread messages require payload
+    if (!obj.payload || typeof obj.payload !== 'object') {
+      logger.warn('Thread message missing payload', undefined, {
+        component: 'WebSocketService',
+        action: 'validate_thread_message',
+        metadata: { type: obj.type }
+      });
+      return null;
+    }
+    return obj;
   }
 
   private validateSystemMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
-    const systemTypes = ['auth', 'ping', 'pong'];
+    const systemTypes = ['auth', 'ping', 'pong', 'server_shutdown'];
     if (!systemTypes.includes(obj.type)) return null;
+    // System messages don't require payload but may have metadata
     return obj;
   }
 
   private validateReportMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
-    const reportTypes = ['final_report', 'error'];
+    const reportTypes = ['final_report', 'error', 'step_created'];
     if (!reportTypes.includes(obj.type)) return null;
-    return obj.payload && typeof obj.payload === 'object' ? obj : null;
+    // Report messages may or may not have payload
+    return obj;
   }
 
   private handleUnknownMessageType(obj: any): WebSocketMessage | UnifiedWebSocketEvent {
@@ -120,17 +139,52 @@ class WebSocketService {
       action: 'unknown_message_type',
       metadata: { type: obj.type }
     });
-    return obj;
+    // Unknown messages should at least have a type field
+    // Add a default empty payload if missing to maintain compatibility
+    if (!obj.payload) {
+      obj.payload = {};
+    }
+    return obj as WebSocketMessage;
   }
 
   private validateWebSocketMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
-    if (!this.isBasicWebSocketMessage(obj)) return null;
+    // First check if it's a valid object
+    if (!obj || typeof obj !== 'object') {
+      logger.warn('WebSocket message is not an object', undefined, {
+        component: 'WebSocketService',
+        action: 'validate_message',
+        metadata: { messageType: typeof obj }
+      });
+      return null;
+    }
+
+    // Check for large message types first (they have different structure)
+    if (this.isLargeMessage(obj)) {
+      return obj as WebSocketMessage;
+    }
+
+    // Check if it has a type field (required for all standard messages)
+    if (!obj.type || typeof obj.type !== 'string') {
+      logger.warn('WebSocket message missing type field', undefined, {
+        component: 'WebSocketService',
+        action: 'validate_message',
+        metadata: { hasType: !!obj.type, typeType: typeof obj.type }
+      });
+      return null;
+    }
     
-    return this.validateAgentMessage(obj) ||
-           this.validateThreadMessage(obj) ||
-           this.validateSystemMessage(obj) ||
-           this.validateReportMessage(obj) ||
-           this.handleUnknownMessageType(obj);
+    // Try to categorize and validate based on message type
+    const validated = this.validateAgentMessage(obj) ||
+                     this.validateThreadMessage(obj) ||
+                     this.validateSystemMessage(obj) ||
+                     this.validateReportMessage(obj);
+    
+    // If no specific validator matched, handle as unknown type
+    if (!validated) {
+      return this.handleUnknownMessageType(obj);
+    }
+    
+    return validated;
   }
 
   private setupConnectionState(url: string, options: WebSocketOptions): boolean {
@@ -272,18 +326,40 @@ class WebSocketService {
   }
 
   private handleInvalidMessage(rawMessage: any, options: WebSocketOptions): void {
+    const errorDetails = this.getInvalidMessageDetails(rawMessage);
+    
     logger.warn('Invalid WebSocket message received', undefined, {
       component: 'WebSocketService',
       action: 'invalid_message',
-      metadata: { message: rawMessage }
+      metadata: { 
+        message: rawMessage,
+        reason: errorDetails
+      }
     });
+    
     options.onError?.({
       code: 1003,
-      message: 'Invalid message structure',
+      message: `Invalid message structure: ${errorDetails}`,
       timestamp: Date.now(),
       type: 'parse',
       recoverable: true
     });
+  }
+
+  private getInvalidMessageDetails(rawMessage: any): string {
+    if (rawMessage === null || rawMessage === undefined) {
+      return 'message is null or undefined';
+    }
+    if (typeof rawMessage !== 'object') {
+      return `message is not an object (type: ${typeof rawMessage})`;
+    }
+    if (!rawMessage.type) {
+      return 'missing required type field';
+    }
+    if (typeof rawMessage.type !== 'string') {
+      return `type field is not a string (type: ${typeof rawMessage.type})`;
+    }
+    return 'unknown validation failure';
   }
 
   private handleMessageParseError(error: Error, options: WebSocketOptions): void {

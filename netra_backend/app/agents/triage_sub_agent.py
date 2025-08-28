@@ -18,7 +18,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import (
     CircuitBreakerConfig as ModernCircuitConfig,
 )
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components

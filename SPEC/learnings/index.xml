@@ -538,7 +538,7 @@
             <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
         </category>
 
-        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner, Environment Testing, E2E Tests, Resource Cleanup, AsyncMock">
+        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner, Environment Testing, E2E Tests, Resource Cleanup, AsyncMock, Test Tracking, Test Dashboard, Flaky Tests">
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>
             <critical-takeaway>All test directories MUST be added to test_scanners.py for discovery (test-discovery-all-directories).</critical-takeaway>
@@ -551,6 +551,9 @@
             <critical-takeaway>Redis fixtures must implement both aclose() and close() methods with proper cleanup lifecycle.</critical-takeaway>
             <critical-takeaway>WebSocket fixtures must close all active connections with timeout protection (max 5s) to prevent hanging tests.</critical-takeaway>
             <critical-takeaway>Event loop stability requires SelectorEventLoop policy on Windows and proper atexit cleanup registration.</critical-takeaway>
+            <critical-takeaway>CRITICAL: E2E categories must be precisely scoped - use e2e_critical for curated tests, not entire directories (test_system_improvements.xml).</critical-takeaway>
+            <critical-takeaway>Test execution tracking with SQLite enables flaky test detection and smart prioritization (test_system_improvements.xml).</critical-takeaway>
+            <critical-takeaway>Default test categories should be data-driven based on recent pass rates, not hardcoded (test_system_improvements.xml).</critical-takeaway>
         </category>
         
         <category name="E2E Test Discovery [CRITICAL]" path="SPEC/learnings/e2e_test_discovery_patterns.xml" keywords="E2E, End-to-End, Test Discovery, Test Runner, pytest, Test Organization, Cross-Service Tests">
@@ -560,6 +563,19 @@
             <critical-takeaway>Cross-service tests belong in centralized tests/e2e directory, not scattered in service-specific directories.</critical-takeaway>
             <critical-takeaway>Validate test discovery with: pytest tests/e2e -m "e2e" --collect-only to ensure all tests found.</critical-takeaway>
             <critical-takeaway>CI/CD should assert minimum E2E test count (500+) to catch discovery regressions.</critical-takeaway>
+        </category>
+        
+        <category name="Test System Improvements (2025-01-28)" path="SPEC/learnings/test_system_improvements.xml" keywords="Test Tracking, Test History, Flaky Detection, Test Dashboard, E2E Fix, Test Prioritization, Test Metrics, SQLite Tracking">
+            <critical-takeaway>CRITICAL: E2E category was running 3,091 tests from multiple directories causing timeouts - must scope precisely to actual e2e tests.</critical-takeaway>
+            <critical-takeaway>Create separate e2e categories: e2e_critical (curated ~20 tests), e2e (integration only), e2e_full (complete suite).</critical-takeaway>
+            <critical-takeaway>Test execution tracking with SQLite provides persistent history for pattern detection and metrics.</critical-takeaway>
+            <critical-takeaway>Flaky test detection uses alternation pattern analysis - tests that flip between pass/fail frequently.</critical-takeaway>
+            <critical-takeaway>Smart test prioritization: run recently failed tests first, then by business value, then by speed.</critical-takeaway>
+            <critical-takeaway>Default test categories should be data-driven - categories with >80% pass rate in last 7 days.</critical-takeaway>
+            <critical-takeaway>Test dashboard provides actionable recommendations based on failure trends and performance metrics.</critical-takeaway>
+            <critical-takeaway>Helper classes must be outside test directories to prevent test discovery confusion.</critical-takeaway>
+            <critical-takeaway>Track every test execution with metadata: duration, status, environment, error details.</critical-takeaway>
+            <critical-takeaway>HTML dashboard generation enables team-wide visibility into test health trends.</critical-takeaway>
         </category>
         
         <category name="Frontend Staging Errors (Five Whys)" path="SPEC/learnings/frontend_staging_errors_2025_08_24.xml" keywords="Five Whys, Type Conflicts, SSOT, Authentication, HTTPS, Mixed Content, Root Cause, Frontend, Staging">

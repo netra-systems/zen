@@ -23,7 +23,7 @@ import pytest
 import websockets
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.core.error_handlers import get_http_status_code, handle_exception
+from netra_backend.app.core.unified_error_handler import get_http_status_code, handle_exception
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig

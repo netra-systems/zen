@@ -1517,7 +1517,93 @@
                 <practice>USE jest.mocked() for type-safe mock access in TypeScript</practice>
                 <practice>MOCK framer-motion as simple HTML elements to avoid animation issues</practice>
                 <practice>SET consistent environment variables for all test scenarios</practice>
+                <practice>UNMOCK modules when testing actual implementation using jest.unmock()</practice>
+                <practice>USE fixed timestamps with jest.spyOn(Date, 'now') for consistent token expiry testing</practice>
             </best_practices_established>
+        </learning>
+        
+        <learning id="auth-token-refresh-testing" date="2025-08-28" priority="high">
+            <title>Testing Token Refresh Logic with JWT Mocks</title>
+            <problem>
+                Token refresh tests failing because global mocks in jest.setup.js prevented testing real implementation.
+                The unifiedAuthService was mocked globally, causing needsRefresh() to always return the mocked value.
+                Tests showed 0 mock calls despite attempting to test the actual function.
+            </problem>
+            <solution>
+                Unmock the service being tested and its dependencies to test actual implementation.
+                Use jest.unmock() before imports to override global mocks from jest.setup.js.
+                Mock only the external dependencies (like jwt-decode) that need controlled behavior.
+            </solution>
+            <implementation>
+                <pattern name="unmocking_for_implementation_tests">
+                    // First unmock the service to test real implementation
+                    jest.unmock('@/auth/unified-auth-service');
+                    jest.unmock('@/lib/unified-api-config');
+                    jest.unmock('@/lib/logger');
+                    jest.unmock('@/lib/auth-service-client');
+                    
+                    import { unifiedAuthService } from '@/auth/unified-auth-service';
+                    import { jwtDecode } from 'jwt-decode';
+                    
+                    // Mock only external dependencies
+                    jest.mock('jwt-decode', () => ({
+                      jwtDecode: jest.fn(),
+                    }));
+                </pattern>
+                <pattern name="fixed_timestamps_for_token_tests">
+                    // Use fixed timestamps to ensure consistent behavior
+                    const fixedNow = 1640995200000; // Fixed timestamp
+                    jest.spyOn(Date, 'now').mockReturnValue(fixedNow);
+                    
+                    const nowInSeconds = Math.floor(fixedNow / 1000);
+                    const iat = nowInSeconds - 23; // issued 23 seconds ago
+                    const exp = nowInSeconds + 7;  // expires in 7 seconds
+                    
+                    // Clean up after test
+                    jest.restoreAllMocks();
+                </pattern>
+            </implementation>
+            <best_practices>
+                <practice>CHECK if a module is globally mocked when tests unexpectedly fail</practice>
+                <practice>UNMOCK services being tested to test real implementation</practice>
+                <practice>MOCK only external dependencies that need controlled behavior</practice>
+                <practice>USE fixed timestamps for time-sensitive tests like token expiry</practice>
+                <practice>VERIFY mock calls with mockFn.mock.calls.length for debugging</practice>
+            </best_practices>
+        </learning>
+        
+        <learning id="storage-event-construction" date="2025-08-28" priority="high">
+            <title>Correct StorageEvent Construction in Tests</title>
+            <problem>
+                StorageEvent constructor failed with "parameter 2 has member 'storageArea' that is not of type 'Storage'".
+                Mock localStorage objects don't satisfy the Storage interface required by StorageEvent.
+            </problem>
+            <solution>
+                Use the actual localStorage object from the test environment instead of mock objects.
+                The global localStorage in jest environment already implements the Storage interface.
+            </solution>
+            <implementation>
+                <pattern name="correct_storage_event_construction">
+                    // GOOD: Use actual localStorage object
+                    const storageEvent = new StorageEvent('storage', {
+                      key,
+                      oldValue,
+                      newValue: value,
+                      storageArea: localStorage  // Use actual localStorage
+                    });
+                    
+                    // BAD: Using mock object that doesn't implement Storage
+                    const mockLocalStorage = { getItem: jest.fn(), setItem: jest.fn() };
+                    const storageEvent = new StorageEvent('storage', {
+                      storageArea: mockLocalStorage  // Fails - not a Storage object
+                    });
+                </pattern>
+            </implementation>
+            <best_practices>
+                <practice>USE actual browser API objects when constructing events in tests</practice>
+                <practice>VERIFY interface requirements for event constructors</practice>
+                <practice>PREFER using real DOM/Browser APIs over custom mocks when possible</practice>
+            </best_practices>
         </learning>
     </learnings>
     

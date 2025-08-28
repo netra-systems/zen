@@ -21,6 +21,8 @@
 | **CORS Configuration** | `/shared/cors_config.py` | **Unified CORS configuration for all services** | [`SPEC/cors_configuration.xml`](SPEC/cors_configuration.xml) |
 | **Shared Component Library** | `/shared/` | Universal utilities & schemas | [`SPEC/shared_component_architecture.xml`](SPEC/shared_component_architecture.xml) |
 | **Test Infrastructure** | `/test_framework/` | Unified test utilities | [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) |
+| **Test Execution Tracker** | `/scripts/test_execution_tracker.py` | Test history & metrics tracking | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
+| **Test Dashboard** | `/scripts/test_dashboard.py` | Interactive test health monitoring | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
 | **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
 | **Deployment System** | `/scripts/deploy_to_gcp.py` | Official deployment script | [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) |
 | **Root Folder Organization** | `/` root directory | Clean root structure enforcement | [`SPEC/root_folder_organization.xml`](SPEC/root_folder_organization.xml) |
@@ -283,6 +285,14 @@ python scripts/docker_services.py stop
 - [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) - Deployment architecture patterns
 - [`SPEC/redis_staging_configuration.xml`](SPEC/redis_staging_configuration.xml) - **Redis endpoint configuration (10.107.0.3)**
 - [`SPEC/llm_configuration_architecture.xml`](SPEC/llm_configuration_architecture.xml) - **LLM centralized config (GEMINI_2_5_FLASH default)**
+
+### Test System & Quality (2025-01-28 IMPROVED)
+- **🔴 TEST EXECUTION TRACKER** | `/scripts/test_execution_tracker.py` | Test history, flaky detection, prioritization
+- **🔴 TEST DASHBOARD** | `/scripts/test_dashboard.py` | Interactive metrics, HTML reports, recommendations  
+- **🔴 UNIFIED TEST RUNNER** | `/scripts/unified_test_runner.py` | **FIXED E2E categories**, integrated tracking
+- [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) - **E2E fix & test tracking learnings**
+- [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) - Test architecture patterns
+- [`E2E_TEST_BLOCKING_AUDIT.md`](E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation
 
 ---
 

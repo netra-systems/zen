@@ -20,7 +20,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.errors import ValidationError
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern execution pattern imports

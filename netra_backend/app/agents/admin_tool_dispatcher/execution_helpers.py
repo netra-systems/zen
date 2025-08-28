@@ -15,7 +15,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.admin_tool_types import (
     ToolFailureResponse, ToolResponse, ToolSuccessResponse
 )
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 

@@ -19,7 +19,7 @@ from netra_backend.app.agents.prompts import triage_prompt_template
 from netra_backend.app.agents.triage_sub_agent.models import (
     ExtractedEntities, TriageResult
 )
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.triage_sub_agent.processing_monitoring import (
     TriageProcessingErrorHelper,
     TriageProcessingMonitor,

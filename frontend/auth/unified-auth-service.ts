@@ -18,6 +18,7 @@ const DEV_LOGOUT_FLAG = 'dev_logout_flag';
 
 interface JWTPayload {
   exp?: number;
+  iat?: number;
   sub?: string;
   email?: string;
   [key: string]: any;
@@ -206,7 +207,8 @@ export class UnifiedAuthService {
       // Dynamic refresh threshold based on token lifetime
       let refreshThreshold;
       if (totalLifetime < 5 * 60 * 1000) { // Tokens < 5 minutes
-        // For short tokens (like 30s tokens), refresh when 25% of lifetime remains
+        // For short tokens (like 30s tokens), refresh when 75% of lifetime has passed
+        // (i.e., when 25% of lifetime remains)
         refreshThreshold = totalLifetime * 0.25;
       } else {
         // For normal tokens (>= 5 minutes), refresh 5 minutes before expiry

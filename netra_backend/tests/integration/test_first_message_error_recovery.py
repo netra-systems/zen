@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.core.error_handlers import ErrorRecoveryStrategy
+from netra_backend.app.core.error_recovery import ErrorRecoveryStrategy
 from netra_backend.app.services.agent_service_core import AgentService
 
 from netra_backend.app.services.message_handlers import MessageHandlerService

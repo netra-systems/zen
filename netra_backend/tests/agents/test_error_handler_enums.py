@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from netra_backend.app.schemas.core_enums import ErrorCategory
-from netra_backend.app.core.error_handlers.error_recovery import ErrorRecoveryStrategy
+from netra_backend.app.core.error_recovery import ErrorRecoveryStrategy
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.tests.agents.helpers.shared_test_types import (

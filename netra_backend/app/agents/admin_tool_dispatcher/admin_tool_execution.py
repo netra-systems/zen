@@ -18,7 +18,7 @@ from netra_backend.app.core.resilience.domain_circuit_breakers import (
 )
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
-from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import ReliabilityManager
 from netra_backend.app.logging_config import central_logger
