@@ -15,13 +15,13 @@ COPY shared/ ../shared/
 # Set memory limit for build process
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# Set staging environment variables for build time
+# Set production environment variables for build time
 # These NEXT_PUBLIC vars are baked into the build
-ENV NEXT_PUBLIC_ENVIRONMENT=staging
-ENV NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai
-ENV NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai
-ENV NEXT_PUBLIC_AUTH_URL=https://auth.staging.netrasystems.ai
-ENV NEXT_PUBLIC_FRONTEND_URL=https://staging.netrasystems.ai
+ENV NEXT_PUBLIC_ENVIRONMENT=production
+ENV NEXT_PUBLIC_API_URL=https://api.netrasystems.ai
+ENV NEXT_PUBLIC_WS_URL=wss://api.netrasystems.ai
+ENV NEXT_PUBLIC_AUTH_URL=https://auth.netrasystems.ai
+ENV NEXT_PUBLIC_FRONTEND_URL=https://app.netrasystems.ai
 
 # Build the application (creates standalone build)
 RUN npm run build
