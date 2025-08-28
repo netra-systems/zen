@@ -134,8 +134,8 @@ async def lifespan(app: FastAPI):
             oauth_validation_errors.append(f"Google OAuth client ID appears invalid: {google_client_id[:20]}...")
             logger.error(f"❌ CRITICAL: Google OAuth client ID looks like a placeholder: {google_client_id[:20]}...")
         elif not google_client_id.endswith(".apps.googleusercontent.com"):
-            oauth_validation_errors.append(f"Google OAuth client ID has invalid format (should end with .apps.googleusercontent.com): {google_client_id[:20]}...")
-            logger.error(f"❌ CRITICAL: Google OAuth client ID has invalid format: {google_client_id[:20]}...")
+            oauth_validation_errors.append(f"Google OAuth client ID has invalid format (should end with .apps.googleusercontent.com): {google_client_id}")
+            logger.error(f"❌ CRITICAL: Google OAuth client ID has invalid format: {google_client_id}")
         else:
             logger.info(f"✅ Google OAuth client ID configured: {google_client_id[:20]}...")
         
