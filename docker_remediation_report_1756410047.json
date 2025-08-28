@@ -1,0 +1,506 @@
+{
+  "timestamp": "2025-08-28T12:40:47.121528",
+  "iteration": 4,
+  "docker_status": {
+    "available": true,
+    "daemon_running": true
+  },
+  "containers_discovered": 6,
+  "issues_summary": {
+    "total": 48,
+    "resolved": 0,
+    "critical": 48,
+    "high": 0,
+    "medium": 0,
+    "low": 0
+  },
+  "issues_by_category": {
+    "startup_failure": 48
+  },
+  "remediation_attempts": 0,
+  "detailed_issues": [
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-postgres",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-redis",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-clickhouse",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-backend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-auth",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    },
+    {
+      "container": "netra-frontend",
+      "category": "startup_failure",
+      "severity": "critical",
+      "description": "Container is in 'exited' state",
+      "resolved": false,
+      "remediation_attempts": [],
+      "root_cause": "Container failed to start or stopped unexpectedly",
+      "recommendations": []
+    }
+  ],
+  "recommendations": [
+    "Address critical issues immediately - system may be unusable"
+  ]
+}

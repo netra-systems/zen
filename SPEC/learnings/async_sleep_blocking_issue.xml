@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Async Sleep Blocking Event Loop Issue</title>
+        <category>performance</category>
+        <subcategory>async-await</subcategory>
+        <priority>critical</priority>
+        <date>2025-08-28</date>
+        <impact>high</impact>
+        <affected_services>
+            <service>netra_backend</service>
+            <service>auth_service</service>
+            <service>websocket_handlers</service>
+        </affected_services>
+    </metadata>
+    
+    <problem>
+        <description>
+            Using time.sleep() in async functions blocks the entire event loop, causing severe performance degradation.
+            This can freeze ALL concurrent requests, timeout WebSocket connections, queue database queries, and make
+            the entire service unresponsive during retry operations or delays.
+        </description>
+        <symptoms>
+            <symptom>Service freezes during retry operations</symptom>
+            <symptom>WebSocket connections timeout unexpectedly</symptom>
+            <symptom>Concurrent requests become unresponsive</symptom>
+            <symptom>Database connection pool exhaustion</symptom>
+            <symptom>Test flakiness with timing-dependent operations</symptom>
+        </symptoms>
+        <root_cause>
+            time.sleep() is a blocking operation that pauses the entire thread. In async code, this prevents the
+            event loop from processing other coroutines, effectively freezing all async operations.
+        </root_cause>
+    </problem>
+    
+    <solution>
+        <principle>
+            ALWAYS use await asyncio.sleep() in async functions. NEVER use time.sleep() in async code.
+        </principle>
+        
+        <correct_pattern>
+            <async_delay>
+                <!-- Correct: Async functions use await asyncio.sleep() -->
+                <code><![CDATA[
+async def retry_with_delay():
+    for attempt in range(max_attempts):
+        try:
+            return await operation()
+        except Exception as e:
+            if attempt < max_attempts - 1:
+                await asyncio.sleep(delay)  # CORRECT: Non-blocking
+            else:
+                raise
+                ]]></code>
+            </async_delay>
+            
+            <sync_delay>
+                <!-- Correct: Sync functions can use time.sleep() -->
+                <code><![CDATA[
+def retry_with_delay_sync():
+    for attempt in range(max_attempts):
+        try:
+            return operation()
+        except Exception as e:
+            if attempt < max_attempts - 1:
+                time.sleep(delay)  # CORRECT: Sync function
+            else:
+                raise
+                ]]></code>
+            </sync_delay>
+        </correct_pattern>
+        
+        <incorrect_pattern>
+            <!-- WRONG: Never use time.sleep() in async functions -->
+            <code><![CDATA[
+async def bad_retry():  # ASYNC function
+    for attempt in range(max_attempts):
+        try:
+            return await operation()
+        except Exception as e:
+            if attempt < max_attempts - 1:
+                time.sleep(delay)  # WRONG: Blocks event loop!
+            else:
+                raise
+            ]]></code>
+        </incorrect_pattern>
+        
+        <separation_pattern>
+            <!-- EXCELLENT: Separate handlers for async and sync contexts -->
+            <code><![CDATA[
+class RetryHandler:
+    async def _handle_retry_delay(self, delay: float) -> None:
+        """Handle retry delay for async operations."""
+        await asyncio.sleep(delay)
+    
+    def _handle_retry_delay_sync(self, delay: float) -> None:
+        """Handle retry delay for sync operations."""
+        time.sleep(delay)
+            ]]></code>
+        </separation_pattern>
+    </solution>
+    
+    <verification>
+        <search_command>
+            <!-- Search for violations in async functions -->
+            <description>Find async functions using time.sleep</description>
+            <grep>grep -r "async def" --include="*.py" | xargs grep -l "time\.sleep"</grep>
+        </search_command>
+        
+        <test_pattern>
+            <!-- Test async delay behavior -->
+            <code><![CDATA[
+import asyncio
+import time
+
+async def test_non_blocking_delay():
+    """Verify delay doesn't block event loop."""
+    start = time.time()
+    
+    async def delayed_task(delay, task_id):
+        await asyncio.sleep(delay)
+        return task_id, time.time() - start
+    
+    # Run multiple tasks concurrently
+    results = await asyncio.gather(
+        delayed_task(0.1, 1),
+        delayed_task(0.1, 2),
+        delayed_task(0.1, 3)
+    )
+    
+    # All should complete around same time (0.1s)
+    # NOT 0.3s which would indicate blocking
+    max_time = max(r[1] for r in results)
+    assert max_time < 0.2, "Tasks not running concurrently"
+            ]]></code>
+        </test_pattern>
+    </verification>
+    
+    <related_files>
+        <file>netra_backend/app/core/unified/retry_decorator.py</file>
+        <file>netra_backend/app/core/resilience/unified_retry_handler.py</file>
+        <file>netra_backend/app/core/health/unified_health_checker.py</file>
+        <file>netra_backend/app/db/postgres_core.py</file>
+    </related_files>
+    
+    <prevention>
+        <guideline>
+            When implementing retry logic or delays:
+            1. Check if function is async (async def)
+            2. If async: use await asyncio.sleep()
+            3. If sync: use time.sleep()
+            4. Consider creating separate async and sync versions
+        </guideline>
+        
+        <code_review_checklist>
+            <item>Search for time.sleep in async functions</item>
+            <item>Verify all async retry handlers use await asyncio.sleep</item>
+            <item>Check WebSocket handlers don't block event loop</item>
+            <item>Ensure database retry logic is non-blocking in async context</item>
+        </code_review_checklist>
+        
+        <linting_rule>
+            <!-- Add to .flake8 or similar -->
+            <description>Consider adding async linting rules to catch time.sleep in async functions</description>
+        </linting_rule>
+    </prevention>
+    
+    <performance_impact>
+        <metric name="event_loop_blocking">
+            <before>Up to 100% blocking during retry delays</before>
+            <after>0% blocking with proper async sleep</after>
+        </metric>
+        <metric name="concurrent_request_handling">
+            <before>All requests freeze during time.sleep()</before>
+            <after>Requests continue processing during await asyncio.sleep()</after>
+        </metric>
+        <metric name="websocket_stability">
+            <before>Connections timeout during blocking delays</before>
+            <after>Connections remain stable during async delays</after>
+        </metric>
+    </performance_impact>
+    
+    <cross_references>
+        <reference>SPEC/learnings/performance_optimization.xml</reference>
+        <reference>SPEC/websockets.xml</reference>
+        <reference>SPEC/testing.xml</reference>
+    </cross_references>
+</learning>

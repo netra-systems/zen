@@ -26,35 +26,11 @@ from netra_backend.app.schemas.tool_permission import (
 from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from test_framework.mocks import MockRedisClient
 
-class MockRedisClient:
-    """Mock Redis client for testing"""
-    def __init__(self):
-        self.data = {}
-        self.expires = {}
-    
-    async def get(self, key):
-        if key in self.expires and datetime.now(UTC) > self.expires[key]:
-            del self.data[key]
-            del self.expires[key]
-            return None
-        return self.data.get(key)
-    
-    async def set(self, key, value, ex=None):
-        self.data[key] = str(value)
-        if ex:
-            self.expires[key] = datetime.now(UTC) + timedelta(seconds=ex)
-        return True
-    
-    async def incr(self, key):
-        current = int(self.data.get(key, "0"))
-        self.data[key] = str(current + 1)
-        return current + 1
-    
-    async def expire(self, key, seconds):
-        if key in self.data:
-            self.expires[key] = datetime.now(UTC) + timedelta(seconds=seconds)
-        return True
+# MockRedisClient now imported from canonical test_framework location
+# OLD class MockRedisClient:
+# Removed - using canonical MockRedisClient from test_framework.mocks
 
 @pytest.fixture
 def mock_redis():

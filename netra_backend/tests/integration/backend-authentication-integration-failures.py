@@ -53,9 +53,9 @@ except ImportError:
     Database = None
 
 try:
-    from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+    from netra_backend.app.db.clickhouse import get_clickhouse_client
 except ImportError:
-    ClickHouseClient = None
+    get_clickhouse_client = None
 
 try:
     from netra_backend.app.redis_manager import RedisManager as RedisClient
@@ -324,17 +324,20 @@ class TestBackendAuthenticationIntegrationFailures:
             assert str(clickhouse_port) == expected_port, f"ClickHouse port should be {expected_port}, got: {clickhouse_port}"
         
         # Test connection (this will fail due to timeout)
-        if ClickHouseClient:
+        if get_clickhouse_client:
             try:
-                client = ClickHouseClient()
-                # This should succeed but will timeout
+                # Use canonical ClickHouse client
                 import asyncio
-                result = asyncio.run(client.connect())  # Use the actual connect method
+                async def test_connection():
+                    async with get_clickhouse_client() as client:
+                        return await client.test_connection()
+                
+                result = asyncio.run(test_connection())
                 assert result is True, "ClickHouse connection should succeed in staging"
             except Exception as e:
                 assert False, f"ClickHouse connection should work but failed: {e}"
         else:
-            assert False, "ClickHouseClient should be available for connection testing"
+            assert False, "get_clickhouse_client should be available for connection testing"
 
     @pytest.mark.integration 
     @pytest.mark.critical

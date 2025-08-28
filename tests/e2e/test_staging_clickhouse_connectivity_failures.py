@@ -191,30 +191,23 @@ class TestStagingClickHouseConnectivityFailures:
         """
         # Test ClickHouse client import and instantiation
         try:
-            from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+            from netra_backend.app.db.clickhouse import get_clickhouse_client
         except ImportError as e:
             assert False, (
                 f"CLICKHOUSE CLIENT IMPORT FAILURE: Cannot import ClickHouseClient. "
                 f"Error: {e}. This indicates missing dependencies or incorrect module structure."
             )
         
-        # Test client instantiation
-        try:
-            client = ClickHouseClient()
-        except Exception as e:
-            assert False, (
-                f"CLICKHOUSE CLIENT INSTANTIATION FAILURE: Cannot create ClickHouseClient instance. "
-                f"Error: {e}. Check client configuration and dependencies."
-            )
-        
         # Test client connection with timeout enforcement
         start_time = time.time()
         try:
-            # Use asyncio.wait_for to enforce strict timeout
-            connection_result = await asyncio.wait_for(
-                client.connect(),
-                timeout=10.0
-            )
+            # Use canonical ClickHouse client with context manager
+            async with get_clickhouse_client() as client:
+                # Use asyncio.wait_for to enforce strict timeout
+                connection_result = await asyncio.wait_for(
+                    client.test_connection(),
+                    timeout=10.0
+                )
             connection_time = time.time() - start_time
             
             # Connection succeeded

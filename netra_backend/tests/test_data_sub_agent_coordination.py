@@ -10,7 +10,7 @@ import asyncio
 from unittest.mock import AsyncMock, patch, Mock
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 
 class TestDataSubAgentCoordination:
@@ -30,7 +30,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_clickhouse_client_initialization_flow(self):
         """Test the complete ClickHouse client initialization flow."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             # Setup mock client
             mock_client = AsyncMock()
             mock_client.test_connection = AsyncMock()
@@ -50,7 +50,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_error_recovery_patterns(self):
         """Test error recovery patterns in data sub agent."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_client = AsyncMock()
             
             # Simulate initial connection failure, then success
@@ -77,7 +77,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_query_execution_coordination(self):
         """Test coordination between health checks and query execution."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_client = AsyncMock()
             mock_client.test_connection = AsyncMock()
             mock_client.execute = AsyncMock(return_value=[{"test": "data"}])
@@ -99,7 +99,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_concurrent_client_operations(self):
         """Test concurrent operations don't interfere with each other."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_client = AsyncMock()
             mock_client.test_connection = AsyncMock()
             mock_client.execute = AsyncMock(return_value=[{"concurrent": "result"}])
@@ -124,7 +124,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_health_status_coordination(self):
         """Test health status coordination across operations."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_client = AsyncMock()
             
             # First connection succeeds
@@ -160,7 +160,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_resource_cleanup_patterns(self):
         """Test that resources are properly cleaned up."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_client = AsyncMock()
             mock_context_manager = AsyncMock()
             mock_context_manager.__aenter__ = AsyncMock(return_value=mock_client)
@@ -177,7 +177,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_logging_coordination(self):
         """Test logging coordination across operations."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_client = AsyncMock()
             mock_client.test_connection = AsyncMock()
             mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
@@ -201,7 +201,7 @@ class TestDataSubAgentCoordination:
     @pytest.mark.asyncio
     async def test_parameter_handling_coordination(self):
         """Test coordination of parameter handling across methods."""
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_client = AsyncMock()
             mock_client.test_connection = AsyncMock()
             mock_client.execute = AsyncMock(return_value=[])

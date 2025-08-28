@@ -157,7 +157,7 @@ class TestCompatibilityMixin:
     async def _analyze_performance_metrics(self, user_id: int, workload_id: Optional[str], 
                                          time_range: Tuple[datetime, datetime]) -> Dict[str, Any]:
         """Alias for analyze_performance_metrics for backward compatibility."""
-        from netra_backend.tests.helpers.analysis_operations import AnalysisOperations
+        from netra_backend.app.agents.data_sub_agent.analysis_operations import AnalysisOperations
         ops = AnalysisOperations(
             self.query_builder, self.analysis_engine, 
             self.clickhouse_ops, self.redis_manager

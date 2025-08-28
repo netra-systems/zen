@@ -45,12 +45,9 @@ export interface ProcessingState {
   currentRunId: string | null;
 }
 
-export interface ThreadState {
-  activeThreadId: string | null;
-  threads: Map<string, unknown>;
-  isThreadLoading: boolean;
-  messages: ChatMessage[];
-}
+// ThreadState moved to shared/types/frontend_types.ts for SSOT compliance
+// Use StoreThreadState for store-specific thread state with actions
+export { StoreThreadState as ThreadState } from '../../../shared/types/frontend_types';
 
 export interface ConnectionState {
   isConnected: boolean;

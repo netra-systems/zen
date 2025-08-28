@@ -47,6 +47,13 @@ export * from './mock-factories';
 export * from './custom-matchers';
 
 // ============================================================================
+// HELPER UTILITIES - Specialized testing helpers
+// ============================================================================
+
+// Test helpers from helpers directory (WebSocket, components, etc.)
+export * from '../helpers';
+
+// ============================================================================
 // CONVENIENCE RE-EXPORTS - Common patterns
 // ============================================================================
 

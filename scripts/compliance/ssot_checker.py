@@ -6,6 +6,7 @@ Enforces CLAUDE.md SSOT principles - no duplicate implementations.
 
 import ast
 import glob
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set
@@ -28,6 +29,9 @@ class SSOTChecker:
         
         # Check for similar handler patterns
         violations.extend(self._check_duplicate_handlers())
+        
+        # Check for ClickHouse SSOT violations specifically
+        violations.extend(self._check_clickhouse_ssot())
         
         return violations
     
@@ -172,3 +176,177 @@ class SSOTChecker:
                 return True
         
         return False
+    
+    def _check_clickhouse_ssot(self) -> List[Violation]:
+        """
+        Check for ClickHouse client SSOT violations.
+        References: SPEC/clickhouse_client_architecture.xml
+        """
+        violations = []
+        
+        # Check for duplicate ClickHouse client implementations
+        violations.extend(self._check_duplicate_clickhouse_clients())
+        
+        # Check for test logic in production ClickHouse code
+        violations.extend(self._check_clickhouse_test_logic())
+        
+        # Check for forbidden ClickHouse imports
+        violations.extend(self._check_forbidden_clickhouse_imports())
+        
+        return violations
+    
+    def _check_duplicate_clickhouse_clients(self) -> List[Violation]:
+        """Check for multiple ClickHouse client implementations"""
+        violations = []
+        clickhouse_clients = []
+        
+        # Files that should NOT exist (violate SSOT)
+        forbidden_files = [
+            'netra_backend/app/db/clickhouse_client.py',
+            'netra_backend/app/db/client_clickhouse.py',
+            'netra_backend/app/agents/data_sub_agent/clickhouse_client.py',
+        ]
+        
+        for forbidden_file in forbidden_files:
+            full_path = self.config.root_path / forbidden_file
+            if full_path.exists():
+                violations.append(Violation(
+                    file_path=forbidden_file,
+                    violation_type="clickhouse_ssot_violation",
+                    severity="critical",
+                    description=f"Duplicate ClickHouse client file exists: {forbidden_file}",
+                    fix_suggestion="Remove this file and use get_clickhouse_client() from netra_backend/app/db/clickhouse.py",
+                    actual_value="duplicate client file",
+                    expected_value="file should not exist"
+                ))
+        
+        # Check for ClickHouse client class definitions in wrong places
+        patterns = ['netra_backend/**/*.py']
+        for pattern in patterns:
+            filepaths = glob.glob(str(self.config.root_path / pattern), recursive=True)
+            for filepath in filepaths:
+                if self.config.should_skip_file(filepath):
+                    continue
+                
+                # Skip the canonical implementation
+                if filepath.endswith('netra_backend/app/db/clickhouse.py'):
+                    continue
+                
+                # Skip test files for this check
+                if 'test' in filepath.lower():
+                    continue
+                
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # Check for ClickHouse client class definitions
+                    client_patterns = [
+                        r'class\s+\w*ClickHouse\w*Client',
+                        r'class\s+\w*ClickHouse\w*Database\w*Client'
+                    ]
+                    
+                    for pattern in client_patterns:
+                        if re.search(pattern, content):
+                            rel_path = str(Path(filepath).relative_to(self.config.root_path))
+                            violations.append(Violation(
+                                file_path=rel_path,
+                                violation_type="clickhouse_ssot_violation",
+                                severity="critical",
+                                description=f"ClickHouse client class defined outside canonical location",
+                                fix_suggestion="Move functionality to netra_backend/app/db/clickhouse.py",
+                                actual_value="duplicate client class",
+                                expected_value="single canonical implementation"
+                            ))
+                            break
+                
+                except Exception:
+                    continue
+        
+        return violations
+    
+    def _check_clickhouse_test_logic(self) -> List[Violation]:
+        """Check for test logic in production ClickHouse code"""
+        violations = []
+        
+        canonical_file = self.config.root_path / 'netra_backend' / 'app' / 'db' / 'clickhouse.py'
+        if not canonical_file.exists():
+            return violations
+        
+        try:
+            with open(canonical_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                lines = content.split('\n')
+            
+            # Patterns that indicate test logic in production
+            test_patterns = [
+                (r'_simulate_\w+', "Test simulation methods"),
+                (r'class\s+Mock\w*ClickHouse', "Mock classes"),
+                (r'# This is what gets mocked', "Test-related comments"),
+            ]
+            
+            for pattern, description in test_patterns:
+                matches = re.finditer(pattern, content, re.IGNORECASE)
+                for match in matches:
+                    # Find line number
+                    line_num = content[:match.start()].count('\n') + 1
+                    violations.append(Violation(
+                        file_path='netra_backend/app/db/clickhouse.py',
+                        violation_type="test_logic_in_production",
+                        severity="high",
+                        description=f"{description} found in production ClickHouse code at line {line_num}",
+                        fix_suggestion="Move test logic to test fixtures in netra_backend/tests/",
+                        actual_value=f"test logic at line {line_num}",
+                        expected_value="no test logic in production"
+                    ))
+        
+        except Exception:
+            pass
+        
+        return violations
+    
+    def _check_forbidden_clickhouse_imports(self) -> List[Violation]:
+        """Check for imports of non-canonical ClickHouse clients"""
+        violations = []
+        
+        forbidden_imports = [
+            'from netra_backend.app.db.clickhouse_client import',
+            'from netra_backend.app.db.client_clickhouse import',
+            'from netra_backend.app.db.clickhouse import',
+            'import netra_backend.app.db.clickhouse_client',
+            'import netra_backend.app.db.client_clickhouse',
+        ]
+        
+        patterns = ['netra_backend/**/*.py']
+        for pattern in patterns:
+            filepaths = glob.glob(str(self.config.root_path / pattern), recursive=True)
+            for filepath in filepaths:
+                if self.config.should_skip_file(filepath):
+                    continue
+                
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        lines = content.split('\n')
+                    
+                    for forbidden in forbidden_imports:
+                        if forbidden in content:
+                            # Find line number
+                            for i, line in enumerate(lines, 1):
+                                if forbidden in line:
+                                    rel_path = str(Path(filepath).relative_to(self.config.root_path))
+                                    violations.append(Violation(
+                                        file_path=rel_path,
+                                        violation_type="forbidden_import",
+                                        severity="high",
+                                        description=f"Import of non-canonical ClickHouse client at line {i}",
+                                        fix_suggestion="Use: from netra_backend.app.db.clickhouse import get_clickhouse_client",
+                                        actual_value=forbidden.strip(),
+                                        expected_value="canonical import only"
+                                    ))
+                                    break
+                
+                except Exception:
+                    continue
+        
+        return violations

@@ -3,7 +3,9 @@
 
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+// Import icons with fallbacks to avoid undefined issues
+import * as LucideIcons from 'lucide-react';
+const { 
   Server, 
   Wifi, 
   WifiOff, 
@@ -13,7 +15,7 @@ import {
   Clock,
   Zap,
   Database
-} from 'lucide-react';
+} = LucideIcons;
 import type { MCPServerStatusProps } from '@/types/mcp-types';
 
 // ============================================
@@ -21,12 +23,13 @@ import type { MCPServerStatusProps } from '@/types/mcp-types';
 // ============================================
 
 const getStatusIcon = (status: string) => {
+  const defaultIcon = <div className="w-4 h-4 bg-gray-400 rounded" />;
   switch (status) {
-    case 'CONNECTED': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-    case 'CONNECTING': return <Activity className="w-4 h-4 text-blue-500 animate-pulse" />;
-    case 'DISCONNECTED': return <WifiOff className="w-4 h-4 text-gray-500" />;
-    case 'ERROR': return <AlertTriangle className="w-4 h-4 text-red-500" />;
-    default: return <Server className="w-4 h-4 text-gray-400" />;
+    case 'CONNECTED': return CheckCircle2 ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <div className="w-4 h-4 bg-green-500 rounded-full" />;
+    case 'CONNECTING': return Activity ? <Activity className="w-4 h-4 text-blue-500 animate-pulse" /> : <div className="w-4 h-4 bg-blue-500 rounded animate-pulse" />;
+    case 'DISCONNECTED': return WifiOff ? <WifiOff className="w-4 h-4 text-gray-500" /> : <div className="w-4 h-4 bg-gray-500 rounded" />;
+    case 'ERROR': return AlertTriangle ? <AlertTriangle className="w-4 h-4 text-red-500" /> : <div className="w-4 h-4 bg-red-500 rounded" />;
+    default: return Server ? <Server className="w-4 h-4 text-gray-400" /> : defaultIcon;
   }
 };
 
@@ -41,10 +44,11 @@ const getStatusColor = (status: string) => {
 };
 
 const getTransportIcon = (transport: string) => {
+  const defaultIcon = <div className="w-3 h-3 bg-gray-400 rounded" />;
   switch (transport) {
-    case 'WEBSOCKET': return <Wifi className="w-3 h-3" />;
-    case 'HTTP': return <Zap className="w-3 h-3" />;
-    default: return <Database className="w-3 h-3" />;
+    case 'WEBSOCKET': return Wifi ? <Wifi className="w-3 h-3" /> : <div className="w-3 h-3 bg-blue-500 rounded" />;
+    case 'HTTP': return Zap ? <Zap className="w-3 h-3" /> : <div className="w-3 h-3 bg-yellow-500 rounded" />;
+    default: return Database ? <Database className="w-3 h-3" /> : defaultIcon;
   }
 };
 
@@ -75,7 +79,7 @@ const ServerCard: React.FC<{ server: any; compact?: boolean }> = ({ server, comp
       </div>
       {!compact && (
         <div className="text-xs opacity-75">
-          <Clock className="w-3 h-3 inline mr-1" />
+          {Clock ? <Clock className="w-3 h-3 inline mr-1" /> : <div className="w-3 h-3 bg-gray-400 rounded inline mr-1" />}
           {formatLastCheck(server.last_health_check)}
         </div>
       )}
@@ -99,12 +103,12 @@ const StatusSummary: React.FC<{ servers: any[] }> = ({ servers }) => {
 
   return (
     <div className="flex items-center space-x-2 text-sm">
-      <Server className="w-4 h-4 text-gray-500" />
+      {Server ? <Server className="w-4 h-4 text-gray-500" /> : <div className="w-4 h-4 bg-gray-500 rounded" />}
       <span className="font-medium">
         {summary.connected}/{summary.total} Connected
       </span>
       {summary.hasErrors && (
-        <AlertTriangle className="w-4 h-4 text-red-500" />
+        AlertTriangle ? <AlertTriangle className="w-4 h-4 text-red-500" /> : <div className="w-4 h-4 bg-red-500 rounded" />
       )}
     </div>
   );
@@ -144,7 +148,7 @@ export const MCPServerStatus: React.FC<MCPServerStatusProps> = ({
     return (
       <div className={`mcp-server-status ${className}`}>
         <div className="flex items-center space-x-2 text-gray-500 text-sm">
-          <Server className="w-4 h-4" />
+          {Server ? <Server className="w-4 h-4" /> : <div className="w-4 h-4 bg-gray-400 rounded" />}
           <span>No MCP servers</span>
         </div>
       </div>

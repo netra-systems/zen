@@ -5,6 +5,7 @@ Now enhanced with resilience patterns for pragmatic rigor and degraded operation
 Focused module adhering to 25-line function limit and modular architecture.
 """
 
+import asyncio
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 
@@ -90,7 +91,14 @@ def _validate_async_session(session):
 
 async def _handle_async_transaction_error(session: AsyncSession, e: Exception):
     """Handle async transaction error with rollback and resilience tracking."""
-    await session.rollback()
+    # Only rollback if session is in valid state with active transaction
+    if (hasattr(session, 'is_active') and session.is_active and
+        hasattr(session, 'in_transaction') and session.in_transaction()):
+        try:
+            await session.rollback()
+        except Exception:
+            # If rollback fails, let context manager handle cleanup
+            pass
     
     # Track connection health for resilience manager
     if isinstance(e, (OperationalError, DatabaseError, DisconnectionError)):

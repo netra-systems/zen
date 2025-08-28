@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import (
     AgentExecutionMixin,
     BaseExecutionInterface,
@@ -57,7 +57,7 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
         circuit_config = self._create_circuit_breaker_config()
         retry_config = self._create_retry_config()
         self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
-        self.error_handler = ExecutionErrorHandler
+        self.error_handler = ExecutionErrorHandler()
         self.monitor = ExecutionMonitor()
     
     def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:

@@ -101,18 +101,8 @@ class SystemStats:
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-@dataclass
-class PerformanceMetrics:
-    """Application performance metrics."""
-    request_count: int = 0
-    response_time_avg: float = 0.0
-    response_time_p95: float = 0.0
-    response_time_p99: float = 0.0
-    error_rate: float = 0.0
-    success_rate: float = 100.0
-    throughput_rps: float = 0.0
-    active_connections: int = 0
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+# PerformanceMetrics moved to shared.types.performance_metrics for SSOT compliance
+from shared.types.performance_metrics import PerformanceMetrics
 
 
 class MonitoringConfig(BaseModel):

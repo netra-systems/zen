@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <timestamp>2025-08-28T12:40:47.122048</timestamp>
+        <session_id>docker_remediation_1756410047</session_id>
+        <type>docker_remediation_session</type>
+        <iteration_count>4</iteration_count>
+    </metadata>
+    
+    <environment>
+        <docker_available>True</docker_available>
+        <daemon_running>True</daemon_running>
+        <containers_discovered>6</containers_discovered>
+    </environment>
+    
+    <results>
+        <issues_discovered>48</issues_discovered>
+        <issues_resolved>0</issues_resolved>
+        <resolution_rate>0.0%</resolution_rate>
+    </results>
+    
+    <critical_patterns>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-postgres</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-redis</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-clickhouse</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-backend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-auth</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+        <pattern>
+            <category>startup_failure</category>
+            <severity>critical</severity>
+            <container>netra-frontend</container>
+            <description>Container is in 'exited' state</description>
+            <resolved>False</resolved>
+            <remediation_attempted>False</remediation_attempted>
+        </pattern>
+    </critical_patterns>
+    
+    <successful_remediations>
+    </successful_remediations>
+    
+    <key_insights>
+        <insight>Found 48 startup failures - containers may have dependency ordering issues</insight>
+        <insight>Safe mode prevented potentially destructive operations - review logs before disabling</insight>
+    </key_insights>
+</learning>

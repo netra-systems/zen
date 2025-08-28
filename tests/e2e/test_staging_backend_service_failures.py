@@ -382,7 +382,7 @@ class TestStagingBackendServiceFailures:
         """
         # Test that ClickHouse client can be imported and instantiated
         try:
-            from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+            from netra_backend.app.db.clickhouse import ClickHouseService as ClickHouseClient
         except ImportError as e:
             assert False, f"ClickHouseClient not available for testing: {e}"
         

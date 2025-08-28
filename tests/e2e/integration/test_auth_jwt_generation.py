@@ -45,7 +45,7 @@ class TokenSet:
 @dataclass
 class ServiceEndpoints:
     """Service endpoint configuration."""
-    auth_service_url: str = "http://localhost:8001"
+    auth_service_url: str = "http://localhost:8081"  # Docker default port
     backend_service_url: str = "http://localhost:8000"
     frontend_service_url: str = "http://localhost:3000"
 

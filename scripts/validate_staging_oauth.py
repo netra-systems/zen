@@ -129,8 +129,8 @@ class OAuthStagingValidator:
         print("\n🔍 Checking GCP Secret Manager...")
         
         secrets_to_check = [
-            "google-client-id-staging",
-            "google-client-secret-staging"
+            "google-oauth-client-id-staging",
+            "google-oauth-client-secret-staging"
         ]
         
         all_exist = True
@@ -210,9 +210,9 @@ class OAuthStagingValidator:
         with open(env_file, 'r') as f:
             for line in f:
                 if line.startswith("GOOGLE_CLIENT_ID="):
-                    credentials["google-client-id-staging"] = line.split("=", 1)[1].strip()
+                    credentials["google-oauth-client-id-staging"] = line.split("=", 1)[1].strip()
                 elif line.startswith("GOOGLE_CLIENT_SECRET="):
-                    credentials["google-client-secret-staging"] = line.split("=", 1)[1].strip()
+                    credentials["google-oauth-client-secret-staging"] = line.split("=", 1)[1].strip()
                     
         # Check for placeholders
         if any("your-" in v for v in credentials.values()):

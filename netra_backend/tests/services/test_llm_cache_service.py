@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+import asyncio
 import json
 import time
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
@@ -58,7 +59,7 @@ async def test_cache_expiration():
     
     await cache_service.cache_response("test_prompt", value["response"], "test_llm", {})
     # Wait for expiration
-    time.sleep(2)
+    await asyncio.sleep(2)
     
     retrieved_value = await cache_service.get_cached_response("test_prompt", "test_llm", {})
     # May be None if Redis clears it

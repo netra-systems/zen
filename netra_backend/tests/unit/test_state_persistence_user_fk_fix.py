@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.db.models_postgres import User
+from netra_backend.app.db.models_user import User
 from netra_backend.app.schemas.agent_state import CheckpointType, StatePersistenceRequest
 from netra_backend.app.services.state_persistence import state_persistence_service
 

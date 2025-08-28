@@ -1,7 +1,7 @@
-# Cross-System Master Index
+# Cross-System Master Index (IMPORTANT)
 ## Netra Apex AI Optimization Platform - Complete System Navigation
 
-> **Version**: 2.0.0 | **Last Updated**: 2025-08-25
+> **Version**: 2.1.0 | **Last Updated**: 2025-08-28
 > **Purpose**: Comprehensive cross-system index for navigation, dependencies, and integration points
 
 ---
@@ -51,7 +51,7 @@
 | Backend | Auth Service | Validation | HTTP POST | ⚠️ 75% |
 | Backend | PostgreSQL | Database | TCP/Unix Socket | ❌ Shared |
 | Backend | Redis | Cache | TCP | ⚠️ Namespaced |
-| Backend | ClickHouse | Analytics | HTTP | ✅ Independent |
+| Backend | ClickHouse | Analytics | HTTP | ✅ Independent (CANONICAL: get_clickhouse_client()) |
 | Auth Service | PostgreSQL | Database | TCP/Unix Socket | ❌ Shared |
 | All Services | Shared | Schemas | Import | ✅ Acceptable |
 
@@ -187,9 +187,16 @@ interface WebSocketMessage {
 |-----------|----------|---------|------|
 | **Core Manager** | `/shared/database/core_database_manager.py` | SSL resolution | Shared |
 | **PostgreSQL** | `/netra_backend/app/db/postgres.py` | PostgreSQL ops | Service |
-| **ClickHouse** | `/netra_backend/app/db/clickhouse.py` | Analytics DB | Service |
+| **ClickHouse (CANONICAL)** | `/netra_backend/app/db/clickhouse.py` | Analytics DB - SSOT Implementation | Service |
 | **Models Auth** | `/netra_backend/app/db/models_auth.py` | Auth models | Service |
 | **Models Corpus** | `/netra_backend/app/db/models_corpus.py` | Corpus models | Service |
+
+**⚠️ ClickHouse SSOT Compliance (2025-08-28):**
+- **ONLY** use `/netra_backend/app/db/clickhouse.py` and `get_clickhouse_client()` for ALL ClickHouse operations
+- **DELETED** files (SSOT violations): `clickhouse_client.py`, `client_clickhouse.py`, `data_sub_agent/clickhouse_client.py`
+- **IMPORT PATTERN**: `from netra_backend.app.db.clickhouse import get_clickhouse_client`
+- **USAGE PATTERN**: `async with get_clickhouse_client() as client: ...`
+- **COMPLIANCE**: Run `python netra_backend/tests/test_clickhouse_ssot_compliance.py` to verify
 
 ### WebSocket System
 | Component | Location | Purpose | Coverage |
@@ -238,21 +245,17 @@ python unified_test_runner.py --level integration --fast-fail
 
 ## 📈 System Health Metrics
 
-### Current Status (2025-08-25)
+### Current Status (2025-08-28)
 | Metric | Status | Target | Priority |
 |--------|--------|--------|----------|
 | **Test Coverage** | 51.4% | 97% | 🔴 Critical |
 | **Config Compliance** | 89% | 100% | 🟡 High |
 | **Import Compliance** | 48.21% | 100% | 🔴 Critical |
 | **Service Independence** | 85% | 100% | 🟡 High |
-| **Security Coverage** | 0% | 100% | 🔴 Critical |
+| **Security Coverage** | ? | 100% | 🔴 Critical |
 | **WebSocket Coverage** | 12.8% | 85% | 🔴 Critical |
+| **ClickHouse SSOT Compliance** | ✅ 100% | 100% | ✅ **RESOLVED (2025-08-28)** |
 
-### Critical Issues
-1. **Zero Coverage Files**: 368 security validators, 366 agent systems
-2. **Import Violations**: 193 cross-service imports, widespread relative imports
-3. **Type Duplications**: 93 duplicate type definitions
-4. **Test Discovery**: Only 2 tests collectible by pytest
 
 ---
 
@@ -292,7 +295,7 @@ python scripts/query_string_literals.py validate "your_string"
 ### Development Workflow
 ```bash
 # Start Development Environment
-python scripts/dev_launcher.py
+# See docker compose
 
 # Run Quick Tests
 python unified_test_runner.py --level integration --no-coverage --fast-fail
@@ -355,26 +358,5 @@ python scripts/validate_configuration.py --env staging
 - [`docs/reports/DEPLOYMENT_INDEX.md`](../docs/reports/DEPLOYMENT_INDEX.md) - Deployment guide
 - [`docs/reports/TOOLING_INDEX.md`](../docs/reports/TOOLING_INDEX.md) - Tool reference
 - [`docs/reports/MASTER_TEST_INDEX.md`](../docs/reports/MASTER_TEST_INDEX.md) - Testing guide
-
----
-
-## 🎯 Action Items Summary
-
-### Immediate (Week 1)
-1. Fix import violations - Target: 100% compliance
-2. Address zero-coverage security files - Target: 25% coverage
-3. Stabilize test runner - Target: Full test discovery
-
-### Short-term (Month 1)
-1. Consolidate 93 duplicate type definitions
-2. Improve test coverage to 75% overall
-3. Complete auth service migration
-
-### Long-term (Quarter 1)
-1. Achieve 97% test coverage target
-2. Implement contract testing between services
-3. Deploy production monitoring dashboards
-
----
 
 **END OF CROSS-SYSTEM MASTER INDEX**

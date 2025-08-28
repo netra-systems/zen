@@ -13,87 +13,10 @@ import pytest
 import redis.asyncio as redis
 
 from netra_backend.app.redis_manager import RedisManager
+from test_framework.mocks import MockRedisClient
 
-class MockRedisClient:
-    """Mock Redis client for testing"""
-    
-    def __init__(self):
-        self.data = {}  # In-memory storage
-        self.ttls = {}  # TTL tracking
-        self.connection_count = 0
-        self.operation_count = 0
-        self.should_fail = False
-        self.failure_type = "connection"
-        self.command_history = []
-        
-    async def ping(self):
-        """Mock ping operation"""
-        if self.should_fail and self.failure_type == "connection":
-            raise redis.ConnectionError("Mock connection failed")
-        return True
-    
-    async def get(self, key: str):
-        """Mock get operation"""
-        self.command_history.append(('get', key))
-        self.operation_count += 1
-        
-        if self.should_fail and self.failure_type == "operation":
-            raise redis.RedisError("Mock operation failed")
-        
-        # Check TTL
-        if key in self.ttls and datetime.now(UTC) > self.ttls[key]:
-            del self.data[key]
-            del self.ttls[key]
-            return None
-        
-        return self.data.get(key)
-    
-    async def set(self, key: str, value: str, ex: int = None):
-        """Mock set operation"""
-        self.command_history.append(('set', key, value, ex))
-        self.operation_count += 1
-        
-        if self.should_fail and self.failure_type == "operation":
-            raise redis.RedisError("Mock set operation failed")
-        
-        self.data[key] = value
-        
-        # Set TTL if provided
-        if ex:
-            self.ttls[key] = datetime.now(UTC) + timedelta(seconds=ex)
-        
-        return True
-    
-    async def delete(self, key: str):
-        """Mock delete operation"""
-        self.command_history.append(('delete', key))
-        self.operation_count += 1
-        
-        if self.should_fail and self.failure_type == "operation":
-            raise redis.RedisError("Mock delete operation failed")
-        
-        if key in self.data:
-            del self.data[key]
-            if key in self.ttls:
-                del self.ttls[key]
-            return 1
-        return 0
-    
-    async def close(self):
-        """Mock close operation"""
-        self.connection_count = 0
-    
-    def clear_data(self):
-        """Clear all mock data"""
-        self.data.clear()
-        self.ttls.clear()
-        self.command_history.clear()
-        self.operation_count = 0
-    
-    def set_failure_mode(self, should_fail: bool, failure_type: str = "connection"):
-        """Set failure mode for testing"""
-        self.should_fail = should_fail
-        self.failure_type = failure_type
+# MockRedisClient now imported from canonical test_framework location
+# Eliminates SSOT violation as per CLAUDE.md Section 2.1
 
 class RedisConnectionPool:
     """Mock Redis connection pool for testing"""

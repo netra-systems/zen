@@ -15,13 +15,17 @@ Business Value Justification (BVJ):
 - Strategic Impact: Enables confident DEV MODE deployments
 """
 
+# ENFORCED: E2E tests use real services only
+from tests.e2e.enforce_real_services import E2EServiceValidator
+E2EServiceValidator.enforce_real_services()
+
+
 from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
 import asyncio
 import json
 import pytest
@@ -45,13 +49,13 @@ class TestAgentMessageFlowImplementation:
     # session = AsyncMock(spec=AsyncSession)
 
     # Mock: Session isolation for controlled testing without external state
-    # session.commit = AsyncMock()
+    # session.commit = None  # Real async service required
 
     # Mock: Session isolation for controlled testing without external state
-    # session.rollback = AsyncMock()
+    # session.rollback = None  # Real async service required
 
     # Mock: Session isolation for controlled testing without external state
-    # session.close = AsyncMock()
+    # session.close = None  # Real async service required
 
     # return session
     
@@ -63,7 +67,7 @@ class TestAgentMessageFlowImplementation:
     # """Mock WebSocket connection."""
 
     # Mock: Generic component isolation for controlled unit testing
-    # websocket = AsyncMock()
+    # websocket = None  # Real async service required
 
     # websocket.headers = {
 
@@ -76,10 +80,10 @@ class TestAgentMessageFlowImplementation:
     # websocket.application_state = "CONNECTED"
 
     # Mock: Generic component isolation for controlled unit testing
-    # websocket.send_json = AsyncMock()
+    # websocket.send_json = None  # Real async service required
 
     # Mock: Generic component isolation for controlled unit testing
-    # websocket.close = AsyncMock()
+    # websocket.close = None  # Real async service required
 
     # return websocket
     
@@ -120,7 +124,7 @@ class TestAgentMessageFlowImplementation:
 
     # @pytest.fixture
 
-    # async def mock_agent_service(self, mock_supervisor):
+    # async def real_agent_service(self, mock_supervisor):
 
     # """Mock agent service with supervisor."""
 
@@ -130,7 +134,7 @@ class TestAgentMessageFlowImplementation:
     # service.supervisor = mock_supervisor
 
     # Mock: Generic component isolation for controlled unit testing
-    # service.handle_websocket_message = AsyncMock()
+    # service.handle_websocket_message = None  # Real async service required
 
     # return service
 
@@ -160,20 +164,20 @@ class TestAgentMessageFlowImplementation:
     # # Setup LLMManager mock
 
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    # mock_llm = AsyncMock()
+    # mock_llm = None  # Real async service required
 
-    # mock_llm_cls.return_value = mock_llm
+    # REMOVED MOCK: # mock_llm_cls.return_value = mock_llm
             
 
-    # mock_create.return_value = mock_supervisor
+    # REMOVED MOCK: # mock_create.return_value = mock_supervisor
 
     # Mock: Generic component isolation for controlled unit testing
-    # mock_service = AsyncMock()
+    # mock_service = None  # Real async service required
 
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    # mock_service.handle_websocket_message = AsyncMock()
+    # mock_service.handle_websocket_message = None  # Real async service required
 
-    # mock_service_cls.return_value = mock_service
+    # REMOVED MOCK: # mock_service_cls.return_value = mock_service
             
     # # Process the message
 
@@ -205,7 +209,7 @@ class TestAgentMessageFlowImplementation:
 
     # expected_response = "Agent processed your message successfully"
 
-    # mock_supervisor.run.return_value = expected_response
+    # REMOVED MOCK: # mock_supervisor.run.return_value = expected_response
         
     # # Call supervisor directly
 
@@ -240,9 +244,9 @@ class TestAgentMessageFlowImplementation:
     # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    # mock_llm = AsyncMock()
+    # mock_llm = None  # Real async service required
 
-    # mock_llm_cls.return_value = mock_llm
+    # REMOVED MOCK: # mock_llm_cls.return_value = mock_llm
             
     # # Add connection to manager
 
@@ -276,9 +280,9 @@ class TestAgentMessageFlowImplementation:
     # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    # mock_llm = AsyncMock()
+    # mock_llm = None  # Real async service required
 
-    # mock_llm_cls.return_value = mock_llm
+    # REMOVED MOCK: # mock_llm_cls.return_value = mock_llm
             
     # # Add connection to manager
 
@@ -338,17 +342,17 @@ class TestAgentMessageFlowImplementation:
     # # Setup LLMManager mock
 
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    # mock_llm = AsyncMock()
+    # mock_llm = None  # Real async service required
 
-    # mock_llm_cls.return_value = mock_llm
+    # REMOVED MOCK: # mock_llm_cls.return_value = mock_llm
             
 
     # Mock: Generic component isolation for controlled unit testing
-    # mock_service = AsyncMock()
+    # mock_service = None  # Real async service required
 
-    # mock_service.handle_websocket_message.side_effect = Exception("Agent processing failed")
+    # REMOVED MOCK: # mock_service.handle_websocket_message.side_effect = Exception("Agent processing failed")
 
-    # mock_service_cls.return_value = mock_service
+    # REMOVED MOCK: # mock_service_cls.return_value = mock_service
             
     # # Add connection for error response
 
@@ -418,12 +422,12 @@ class TestAgentMessageFlowImplementation:
     # # Create separate websockets for each user
 
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    # mock_websocket2 = AsyncMock()
+    # mock_websocket2 = None  # Real async service required
 
     # mock_websocket2.application_state = "CONNECTED"
 
     # Mock: WebSocket infrastructure isolation for unit tests without real connections
-    # mock_websocket2.send_json = AsyncMock()
+    # mock_websocket2.send_json = None  # Real async service required
         
     # # Add connections for both users
 
@@ -490,17 +494,17 @@ class TestAgentMessageFlowImplementation:
     # # Set up mocks
 
     # Mock: Generic component isolation for controlled unit testing
-    # mock_supervisor = AsyncMock()
+    # mock_supervisor = None  # Real async service required
 
-    # mock_supervisor.run.return_value = "Agent response to hello"
+    # REMOVED MOCK: # mock_supervisor.run.return_value = "Agent response to hello"
 
-    # mock_create.return_value = mock_supervisor
+    # REMOVED MOCK: # mock_create.return_value = mock_supervisor
             
 
     # Mock: Generic component isolation for controlled unit testing
-    # mock_service = AsyncMock()
+    # mock_service = None  # Real async service required
 
-    # mock_service_cls.return_value = mock_service
+    # REMOVED MOCK: # mock_service_cls.return_value = mock_service
             
     # # Add connection
 
@@ -546,9 +550,9 @@ class TestAgentMessageFlowImplementation:
     # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
     # Mock: LLM service isolation for fast testing without API calls or rate limits
-    # mock_llm = AsyncMock()
+    # mock_llm = None  # Real async service required
 
-    # mock_llm_cls.return_value = mock_llm
+    # REMOVED MOCK: # mock_llm_cls.return_value = mock_llm
             
     # # Create multiple websockets
 
@@ -557,15 +561,15 @@ class TestAgentMessageFlowImplementation:
     # for i in range(max_connections + 2):
 
     # Mock: Generic component isolation for controlled unit testing
-    # ws = AsyncMock()
+    # ws = None  # Real async service required
 
     # ws.application_state = "CONNECTED"
 
     # Mock: Generic component isolation for controlled unit testing
-    # ws.send_json = AsyncMock()
+    # ws.send_json = None  # Real async service required
 
     # Mock: Generic component isolation for controlled unit testing
-    # ws.close = AsyncMock()
+    # ws.close = None  # Real async service required
 
     # websockets.append(ws)
             

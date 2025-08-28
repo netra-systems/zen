@@ -15,48 +15,8 @@ import statistics
 import gc
 
 
-@dataclass
-class PerformanceMetrics:
-    """Performance metrics container."""
-    duration_seconds: float = 0.0
-    cpu_usage_percent: float = 0.0
-    memory_usage_mb: float = 0.0
-    peak_memory_mb: float = 0.0
-    throughput_ops_per_second: float = 0.0
-    success_count: int = 0
-    failure_count: int = 0
-    min_response_time: float = float('inf')
-    max_response_time: float = 0.0
-    avg_response_time: float = 0.0
-    percentile_95_response_time: float = 0.0
-    percentile_99_response_time: float = 0.0
-    total_requests: int = 0
-    concurrent_users: int = 1
-    error_rate_percent: float = 0.0
-    
-    def __post_init__(self):
-        if self.total_requests > 0:
-            self.error_rate_percent = (self.failure_count / self.total_requests) * 100
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
-        return {
-            "duration_seconds": self.duration_seconds,
-            "cpu_usage_percent": self.cpu_usage_percent,
-            "memory_usage_mb": self.memory_usage_mb,
-            "peak_memory_mb": self.peak_memory_mb,
-            "throughput_ops_per_second": self.throughput_ops_per_second,
-            "success_count": self.success_count,
-            "failure_count": self.failure_count,
-            "min_response_time": self.min_response_time if self.min_response_time != float('inf') else 0.0,
-            "max_response_time": self.max_response_time,
-            "avg_response_time": self.avg_response_time,
-            "percentile_95_response_time": self.percentile_95_response_time,
-            "percentile_99_response_time": self.percentile_99_response_time,
-            "total_requests": self.total_requests,
-            "concurrent_users": self.concurrent_users,
-            "error_rate_percent": self.error_rate_percent
-        }
+# PerformanceMetrics moved to shared.types.performance_metrics for SSOT compliance
+from shared.types.performance_metrics import PerformanceMetrics
 
 
 class PerformanceMonitor:

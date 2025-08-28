@@ -62,7 +62,7 @@ class TestCrossServiceAuthentication:
         """Define service endpoints for testing."""
         return {
             "backend": ServiceEndpoint("backend", "http://localhost:8000"),
-            "auth": ServiceEndpoint("auth_service", "http://localhost:8001"),
+            "auth": ServiceEndpoint("auth_service", "http://localhost:8081"),  # Docker default port
             "frontend": ServiceEndpoint("frontend", "http://localhost:3000", "/api/health")
         }
     
@@ -377,7 +377,7 @@ class TestServiceDiscovery:
                     
                     # Simulate backend calling auth service
                     response = await client.post(
-                        "http://localhost:8001/validate",
+                        "http://localhost:8081/validate",  # Docker default port
                         json={"token": "test_token"}
                     )
                     

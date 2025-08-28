@@ -1,0 +1,299 @@
+{
+  "apiVersion": "serving.knative.dev/v1",
+  "kind": "Service",
+  "metadata": {
+    "annotations": {
+      "run.googleapis.com/client-name": "gcloud",
+      "run.googleapis.com/client-version": "534.0.0",
+      "run.googleapis.com/ingress": "all",
+      "run.googleapis.com/ingress-status": "all",
+      "run.googleapis.com/invoker-iam-disabled": "true",
+      "run.googleapis.com/operation-id": "96198b18-e5ad-4a57-a64f-61d1c7cda2c4",
+      "run.googleapis.com/urls": "[\"https://netra-auth-service-701982941522.us-central1.run.app\",\"https://netra-auth-service-pnovr5vsba-uc.a.run.app\"]",
+      "serving.knative.dev/creator": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com",
+      "serving.knative.dev/lastModifier": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com"
+    },
+    "creationTimestamp": "2025-08-26T19:34:07.344176Z",
+    "generation": 22,
+    "labels": {
+      "cloud.googleapis.com/location": "us-central1"
+    },
+    "name": "netra-auth-service",
+    "namespace": "701982941522",
+    "resourceVersion": "AAY9bsYSXlY",
+    "selfLink": "/apis/serving.knative.dev/v1/namespaces/701982941522/services/netra-auth-service",
+    "uid": "a11dfe8f-ffde-4e26-b0f0-4572e9083b71"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "10",
+          "autoscaling.knative.dev/minScale": "1",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "534.0.0",
+          "run.googleapis.com/cloudsql-instances": "netra-staging:us-central1:staging-shared-postgres,netra-staging:us-central1:netra-postgres",
+          "run.googleapis.com/cpu-throttling": "false",
+          "run.googleapis.com/execution-environment": "gen2",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        },
+        "labels": {
+          "client.knative.dev/nonce": "omdtsnoxzi",
+          "run.googleapis.com/startupProbeType": "Default"
+        }
+      },
+      "spec": {
+        "containerConcurrency": 80,
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "ENVIRONMENT",
+                "value": "staging"
+              },
+              {
+                "name": "PYTHONUNBUFFERED",
+                "value": "1"
+              },
+              {
+                "name": "FRONTEND_URL",
+                "value": "https://app.staging.netrasystems.ai"
+              },
+              {
+                "name": "AUTH_SERVICE_URL",
+                "value": "https://auth.staging.netrasystems.ai"
+              },
+              {
+                "name": "JWT_ALGORITHM",
+                "value": "HS256"
+              },
+              {
+                "name": "JWT_ACCESS_EXPIRY_MINUTES",
+                "value": "15"
+              },
+              {
+                "name": "JWT_REFRESH_EXPIRY_DAYS",
+                "value": "7"
+              },
+              {
+                "name": "JWT_SERVICE_EXPIRY_MINUTES",
+                "value": "60"
+              },
+              {
+                "name": "SESSION_TTL_HOURS",
+                "value": "24"
+              },
+              {
+                "name": "REDIS_DISABLED",
+                "value": "false"
+              },
+              {
+                "name": "SHUTDOWN_TIMEOUT_SECONDS",
+                "value": "10"
+              },
+              {
+                "name": "SECURE_HEADERS_ENABLED",
+                "value": "true"
+              },
+              {
+                "name": "LOG_ASYNC_CHECKOUT",
+                "value": "false"
+              },
+              {
+                "name": "AUTH_FAST_TEST_MODE",
+                "value": "false"
+              },
+              {
+                "name": "USE_MEMORY_DB",
+                "value": "false"
+              },
+              {
+                "name": "FORCE_HTTPS",
+                "value": "true"
+              },
+              {
+                "name": "POSTGRES_HOST",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "postgres-host-staging"
+                  }
+                }
+              },
+              {
+                "name": "POSTGRES_PORT",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "postgres-port-staging"
+                  }
+                }
+              },
+              {
+                "name": "POSTGRES_DB",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "postgres-db-staging"
+                  }
+                }
+              },
+              {
+                "name": "POSTGRES_USER",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "postgres-user-staging"
+                  }
+                }
+              },
+              {
+                "name": "POSTGRES_PASSWORD",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "postgres-password-staging"
+                  }
+                }
+              },
+              {
+                "name": "JWT_SECRET_KEY",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "jwt-secret-key-staging"
+                  }
+                }
+              },
+              {
+                "name": "JWT_SECRET",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "jwt-secret-staging"
+                  }
+                }
+              },
+              {
+                "name": "GOOGLE_OAUTH_CLIENT_ID_STAGING",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "google-client-id-staging"
+                  }
+                }
+              },
+              {
+                "name": "GOOGLE_OAUTH_CLIENT_SECRET_STAGING",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "google-client-secret-staging"
+                  }
+                }
+              },
+              {
+                "name": "SERVICE_SECRET",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "service-secret-staging"
+                  }
+                }
+              },
+              {
+                "name": "SERVICE_ID",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "service-id-staging"
+                  }
+                }
+              },
+              {
+                "name": "OAUTH_HMAC_SECRET",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "oauth-hmac-secret-staging"
+                  }
+                }
+              },
+              {
+                "name": "REDIS_URL",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "latest",
+                    "name": "redis-url-staging"
+                  }
+                }
+              }
+            ],
+            "image": "gcr.io/netra-staging/netra-auth-service:latest",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http1"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "memory": "512Mi"
+              }
+            },
+            "startupProbe": {
+              "failureThreshold": 1,
+              "periodSeconds": 240,
+              "tcpSocket": {
+                "port": 8080
+              },
+              "timeoutSeconds": 240
+            }
+          }
+        ],
+        "serviceAccountName": "701982941522-compute@developer.gserviceaccount.com",
+        "timeoutSeconds": 300
+      }
+    },
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100
+      }
+    ]
+  },
+  "status": {
+    "address": {
+      "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+    },
+    "conditions": [
+      {
+        "lastTransitionTime": "2025-08-28T15:43:59.053398Z",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2025-08-28T15:43:57.804163Z",
+        "status": "True",
+        "type": "ConfigurationsReady"
+      },
+      {
+        "lastTransitionTime": "2025-08-28T15:43:59.024747Z",
+        "status": "True",
+        "type": "RoutesReady"
+      }
+    ],
+    "latestCreatedRevisionName": "netra-auth-service-00018-m8k",
+    "latestReadyRevisionName": "netra-auth-service-00018-m8k",
+    "observedGeneration": 22,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "netra-auth-service-00018-m8k"
+      }
+    ],
+    "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+  }
+}

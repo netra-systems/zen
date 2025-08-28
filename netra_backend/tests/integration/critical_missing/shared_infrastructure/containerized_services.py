@@ -1,4 +1,5 @@
 from netra_backend.app.core.isolated_environment import get_env
+from test_framework.mocks import MockRedisClient
 """
 Containerized services for L3 realism level integration testing.
 Simplified version that uses existing database connections for testing.
@@ -199,16 +200,7 @@ class RedisContainer:
         """Flush all data for test isolation."""
         await self.client.flushall()
 
-class MockRedisClient:
-    """Mock Redis client for testing"""
-    def __init__(self):
-        pass
-    
-    async def close(self):
-        pass
-    
-    async def flushall(self):
-        pass
+# MockRedisClient imported from test_framework.mocks - SSOT compliant
 
 class ServiceOrchestrator:
     """Orchestrate multiple containerized services for L3 testing."""

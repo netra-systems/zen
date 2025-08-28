@@ -32,12 +32,22 @@ class SessionManager:
     @staticmethod
     async def commit_session(session: AsyncSession) -> None:
         """Commit session transaction."""
-        await session.commit()
+        # Only commit if session is active and has a transaction
+        if hasattr(session, 'is_active') and session.is_active:
+            if hasattr(session, 'in_transaction') and session.in_transaction():
+                await session.commit()
 
     @staticmethod
     async def rollback_session(session: AsyncSession, error: Exception) -> None:
         """Rollback session on error."""
-        await session.rollback()
+        # Only rollback if session is in valid state with active transaction
+        if (hasattr(session, 'is_active') and session.is_active and
+            hasattr(session, 'in_transaction') and session.in_transaction()):
+            try:
+                await session.rollback()
+            except Exception:
+                # If rollback fails, let context manager handle cleanup
+                pass
         logger.error(f"Database session error: {error}")
         raise
 

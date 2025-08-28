@@ -1,10 +1,13 @@
 """
 E2E test fixtures and configuration.
-Uses consolidated test framework infrastructure.
+ENFORCES REAL SERVICES ONLY - NO MOCKS ALLOWED.
 """
 
-# Import all common fixtures from the consolidated base
-from test_framework.conftest_base import *
+# CRITICAL: Enforce real services for all E2E tests
+from tests.e2e.enforce_real_services import *
+
+# Import only non-mock fixtures from the consolidated base
+# DO NOT import mock fixtures for E2E tests
 
 # Import specific utilities we need
 from test_framework.websocket_helpers import WebSocketTestHelpers
@@ -15,7 +18,19 @@ import asyncio
 import os
 import sys
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
+# ENFORCED: NO MOCKS in E2E tests - use real services only
+from tests.e2e.enforce_real_services import (
+    E2EServiceValidator,
+    E2ERealServiceFactory,
+    e2e_services,
+    real_redis_client,
+    real_agent_service as e2e_agent_service,
+    real_websocket as e2e_websocket,
+    real_llm_provider
+)
+
+# Validate services on import
+E2EServiceValidator.enforce_real_services()
 
 
 def pytest_configure(config):
@@ -70,35 +85,40 @@ class E2EEnvironmentValidator:
 
 # Basic test setup fixtures
 @pytest.fixture
-async def mock_agent_service():
-    """Mock agent service for E2E tests."""
-    # Mock: Generic component isolation for controlled unit testing
-    mock_service = AsyncMock()
-    mock_service.process_message.return_value = {
-        "response": "Test response",
-        "metadata": {"test": True}
-    }
-    return mock_service
+async def real_agent_service():
+    """Real agent service for E2E tests."""
+    from netra_backend.app.services.agent_service import AgentService
+    from netra_backend.app.services.agent_factory import AgentFactory
+    
+    # Create real service for E2E testing
+    factory = AgentFactory()
+    service = await factory.create_agent_service()
+    return service
 
 @pytest.fixture
-def mock_websocket_manager():
-    """Mock WebSocket manager for E2E tests."""
-    # Mock: Generic component isolation for controlled unit testing
-    mock_manager = MagicMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_manager.send_message = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_manager.broadcast = AsyncMock()
-    return mock_manager
+async def real_websocket_manager():
+    """Real WebSocket manager for E2E tests."""
+    from netra_backend.app.services.websocket_manager import WebSocketManager
+    
+    # Create real WebSocket manager for E2E testing
+    manager = WebSocketManager()
+    await manager.initialize()
+    return manager
 
 @pytest.fixture
-def model_selection_setup():
-    """Basic setup for model selection tests."""
+async def model_selection_setup():
+    """Real setup for E2E model selection tests."""
+    from netra_backend.app.services.llm_service import LLMService
+    from netra_backend.app.services.database_service import DatabaseService
+    
+    # Use real services for E2E testing
+    llm_service = LLMService()
+    database_service = DatabaseService()
+    await database_service.initialize()
+    
     return {
-        # Mock: LLM service isolation for fast testing without API calls or rate limits
-        "mock_llm_service": AsyncMock(),
-        # Mock: Database isolation for unit testing without external database connections
-        "mock_database": AsyncMock(),
+        "llm_service": llm_service,
+        "database": database_service,
         "test_config": {"environment": "test"}
     }
 
@@ -124,29 +144,32 @@ def sync_validator():
 # Concurrent test fixtures
 @pytest.fixture
 async def concurrent_test_environment():
-    """Mock concurrent test environment."""
-    from unittest.mock import AsyncMock
+    """Real concurrent test environment for E2E."""
+    from netra_backend.app.services.test_environment import TestEnvironment
+    import redis.asyncio as redis
+    import asyncpg
     
-    # Create a mock environment with required methods
-    # Mock: Generic component isolation for controlled unit testing
-    mock_env = AsyncMock()
-    # Mock: Redis external service isolation for fast, reliable tests without network dependency
-    mock_env.redis_client = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_env.db_pool = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_env.initialize = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_env.cleanup = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_env.seed_user_data = AsyncMock()
-    # Mock: Generic component isolation for controlled unit testing
-    mock_env.cleanup_user_data = AsyncMock()
+    # Create real environment with actual services
+    env = TestEnvironment()
     
-    # Initialize and return
-    await mock_env.initialize()
-    yield mock_env
-    await mock_env.cleanup()
+    # Initialize real Redis connection
+    env.redis_client = await redis.from_url(
+        os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    )
+    
+    # Initialize real database pool (SQLite for tests)
+    # E2E tests use SQLite in-memory as configured earlier
+    await env.initialize()
+    
+    # Seed test data if needed
+    await env.seed_user_data()
+    
+    yield env
+    
+    # Cleanup
+    await env.cleanup_user_data()
+    await env.cleanup()
+    await env.redis_client.close()
 
 @pytest.fixture
 def isolated_test_users():

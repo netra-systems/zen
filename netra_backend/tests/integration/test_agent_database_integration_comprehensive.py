@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.core.health_types import HealthCheckResult
 
@@ -139,7 +139,7 @@ class TestAgentDataSubAgentIntegration:
             status="healthy"
         )
         
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.ClickHouseClient', 
+        with patch('netra_backend.app.db.clickhouse.ClickHouseService', 
                   return_value=mock_clickhouse_client):
             
             # Create supervisor agent with data sub-agent task
@@ -184,7 +184,7 @@ class TestAgentDataSubAgentIntegration:
         mock_postgres_session = AsyncMock()
         mock_postgres_manager.get_async_session.return_value.__aenter__.return_value = mock_postgres_session
         
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.ClickHouseClient', 
+        with patch('netra_backend.app.db.clickhouse.ClickHouseService', 
                   return_value=mock_clickhouse_client):
             with patch('netra_backend.app.core.unified.db_connection_manager.db_manager', 
                       mock_postgres_manager):

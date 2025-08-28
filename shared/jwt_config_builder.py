@@ -16,9 +16,10 @@ failing validation in another service.
 """
 
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass
 from shared.secret_manager_builder import SecretManagerBuilder
+from shared.config_builder_base import ConfigBuilderBase
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class JWTConfiguration:
     environment: str
 
 
-class JWTConfigBuilder:
+class JWTConfigBuilder(ConfigBuilderBase):
     """
     JWT Configuration Builder - Unified JWT settings across services.
     
@@ -50,6 +51,9 @@ class JWTConfigBuilder:
     
     def __init__(self, service: str = "shared", env_vars: Optional[Dict[str, Any]] = None):
         """Initialize JWT configuration builder."""
+        # Call parent constructor which handles environment detection
+        super().__init__(env_vars)
+        
         self.service = service
         self.secret_builder = SecretManagerBuilder(env_vars=env_vars, service=service)
         
@@ -57,7 +61,7 @@ class JWTConfigBuilder:
         self.secrets = self.SecretsBuilder(self)
         self.timing = self.TimingBuilder(self)
         self.validation = self.ValidationBuilder(self)
-        self.environment = self.EnvironmentBuilder(self)
+        self.env_settings = self.EnvironmentBuilder(self)  # Renamed to avoid conflict with base class
         self.standardization = self.StandardizationBuilder(self)
     
     class SecretsBuilder:
@@ -130,10 +134,10 @@ class JWTConfigBuilder:
                 except ValueError:
                     logger.warning(f"Invalid JWT_ACCESS_EXPIRY_MINUTES: {legacy_value}, using default")
             
-            # Environment-specific defaults
-            if self.parent.secret_builder.environment == "development":
+            # Environment-specific defaults using base class helpers
+            if self.parent.is_development():
                 return 60  # 1 hour for development convenience
-            elif self.parent.secret_builder.environment == "staging":
+            elif self.parent.is_staging():
                 return 30  # 30 minutes for staging
             else:
                 return 15  # 15 minutes for production security
@@ -157,8 +161,8 @@ class JWTConfigBuilder:
                 except ValueError:
                     logger.warning(f"Invalid JWT_REFRESH_EXPIRY_DAYS: {legacy_value}, using default")
             
-            # Environment-specific defaults
-            if self.parent.secret_builder.environment == "development":
+            # Environment-specific defaults using base class helpers
+            if self.parent.is_development():
                 return 30  # 30 days for development convenience
             else:
                 return 7   # 7 days for staging and production
@@ -202,8 +206,8 @@ class JWTConfigBuilder:
                 return env_value.lower() in ["true", "1", "yes"]
             
             # Always verify signatures except in development with explicit override
-            if (self.parent.secret_builder.environment == "development" and
-                self.parent.secret_builder.env.get("JWT_SKIP_SIGNATURE_VERIFICATION", "false").lower() == "true"):
+            if (self.parent.is_development() and
+                self.parent.get_env_bool("JWT_SKIP_SIGNATURE_VERIFICATION", False)):
                 logger.warning("JWT signature verification DISABLED for development")
                 return False
             
@@ -216,8 +220,8 @@ class JWTConfigBuilder:
                 return env_value.lower() in ["true", "1", "yes"]
             
             # Always verify expiry except in development with explicit override
-            if (self.parent.secret_builder.environment == "development" and
-                self.parent.secret_builder.env.get("JWT_SKIP_EXPIRY_VERIFICATION", "false").lower() == "true"):
+            if (self.parent.is_development() and
+                self.parent.get_env_bool("JWT_SKIP_EXPIRY_VERIFICATION", False)):
                 logger.warning("JWT expiry verification DISABLED for development")
                 return False
             
@@ -237,10 +241,7 @@ class JWTConfigBuilder:
                 return env_issuer
             
             # Generate environment and service-specific issuer
-            env = self.parent.secret_builder.environment
-            service = self.parent.service
-            
-            return f"netra-{service}-{env}"
+            return f"netra-{self.parent.service}-{self.parent.environment}"
         
         def get_audience(self) -> str:
             """Get JWT audience - standardized across services."""
@@ -250,8 +251,7 @@ class JWTConfigBuilder:
                 return env_audience
             
             # Standard audience for all Netra services
-            env = self.parent.secret_builder.environment
-            return f"netra-platform-{env}"
+            return f"netra-platform-{self.parent.environment}"
         
         def get_subject_prefix(self) -> str:
             """Get subject prefix for JWT tokens."""
@@ -271,7 +271,7 @@ class JWTConfigBuilder:
             # Validate secret strength
             is_valid, error = self.parent.secrets.validate_jwt_secret_strength(secret_key)
             if not is_valid:
-                if self.parent.secret_builder.environment in ["staging", "production"]:
+                if self.parent.is_staging() or self.parent.is_production():
                     raise ValueError(f"JWT secret validation failed: {error}")
                 else:
                     logger.warning(f"JWT secret validation warning: {error}")
@@ -282,9 +282,9 @@ class JWTConfigBuilder:
                 access_token_expire_minutes=self.parent.timing.get_access_token_expire_minutes(),
                 refresh_token_expire_days=self.parent.timing.get_refresh_token_expire_days(),
                 service_token_expire_minutes=self.parent.timing.get_service_token_expire_minutes(),
-                issuer=self.parent.environment.get_issuer(),
-                audience=self.parent.environment.get_audience(),
-                environment=self.parent.secret_builder.environment
+                issuer=self.parent.env_settings.get_issuer(),
+                audience=self.parent.env_settings.get_audience(),
+                environment=self.parent.environment
             )
         
         def get_config_dict(self) -> Dict[str, Any]:
@@ -346,6 +346,20 @@ class JWTConfigBuilder:
                 "JWT_AUDIENCE": config.audience
             }
     
+    # Abstract method implementations required by ConfigBuilderBase
+    
+    def validate(self) -> Tuple[bool, str]:
+        """
+        Validate JWT configuration (required by ConfigBuilderBase).
+        
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        is_valid, issues = self.validate_configuration()
+        if not is_valid and issues:
+            return False, "; ".join(issues)
+        return is_valid, ""
+    
     # Main interface methods
     
     def get_unified_jwt_config(self) -> Dict[str, Any]:
@@ -380,9 +394,12 @@ class JWTConfigBuilder:
             config = self.standardization.get_unified_config()
             is_valid, issues = self.validate_configuration()
             
-            return {
+            # Get common debug info from base class
+            debug_info = self.get_common_debug_info()
+            
+            # Add JWT-specific debug information
+            debug_info.update({
                 "service": self.service,
-                "environment": config.environment,
                 "configuration": {
                     "algorithm": config.algorithm,
                     "access_token_expire_minutes": config.access_token_expire_minutes,
@@ -401,17 +418,21 @@ class JWTConfigBuilder:
                 "environment_variables": {
                     "standardized": self.standardization.get_standardized_environment_variables()
                 }
-            }
+            })
+            
+            return debug_info
         except Exception as e:
-            return {
+            # Get common debug info even on error
+            debug_info = self.get_common_debug_info()
+            debug_info.update({
                 "service": self.service,
-                "environment": "unknown",
                 "error": str(e),
                 "validation": {
                     "is_valid": False,
                     "issues": [str(e)]
                 }
-            }
+            })
+            return debug_info
 
 
 # ===== BACKWARD COMPATIBILITY AND CONVENIENCE FUNCTIONS =====

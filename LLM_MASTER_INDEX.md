@@ -24,6 +24,8 @@
 | **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
 | **Deployment System** | `/scripts/deploy_to_gcp.py` | Official deployment script | [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) |
 | **Root Folder Organization** | `/` root directory | Clean root structure enforcement | [`SPEC/root_folder_organization.xml`](SPEC/root_folder_organization.xml) |
+| **Intelligent Remediation** | `/scripts/intelligent_remediation_orchestrator.py` | Multi-agent Docker remediation | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
+| **Claude Log Analyzer** | `/scripts/claude_log_analyzer.py` | Get logs to Claude for analysis | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
@@ -40,14 +42,14 @@
 | File | Location | Purpose | Key Functions |
 |------|----------|---------|---------------|
 | **🔴 CANONICAL MANAGER** | `/netra_backend/app/db/database_manager.py` | **Single database manager (SSOT)** | DatabaseManager.get_connection_manager() |
-| `clickhouse_client.py` | `/netra_backend/app/db/clickhouse_client.py` | ClickHouse client with async support | connect_async(), execute_async(), health_check_async() |
-| `clickhouse.py` | `/netra_backend/app/db/clickhouse.py` | ClickHouse connection | get_clickhouse_client() |
+| **🔴 CANONICAL CLICKHOUSE** | `/netra_backend/app/db/clickhouse.py` | **Single ClickHouse implementation (SSOT)** | get_clickhouse_client(), ClickHouseService |
 | `postgres.py` | `/netra_backend/app/db/postgres.py` | PostgreSQL connection | get_postgres_db() |
-| `clickhouse_operations.py` | `/netra_backend/app/agents/` | ClickHouse data operations | Agent-specific queries |
+| **⚠️ DELETED (SSOT)** | ~~clickhouse_client.py, client_clickhouse.py~~ | **Removed - SSOT violations** | Use canonical clickhouse.py |
 | `models_auth.py` | `/netra_backend/app/db/models_auth.py` | Auth database models | User, Team, Session |
 | `models_corpus.py` | `/netra_backend/app/db/models_corpus.py` | Corpus database models | CorpusData, CorpusEntry |
 | `models_metrics.py` | `/netra_backend/app/db/models_metrics.py` | Metrics database models | MetricsData |
 | **🔴 REMOVED (SSOT)** | Multiple locations | **Deleted duplicate managers** | See [`SPEC/learnings/database_manager_ssot_consolidation.xml`](SPEC/learnings/database_manager_ssot_consolidation.xml) |
+| **🔴 CLICKHOUSE SSOT** | Remediation complete | **Fixed ClickHouse duplication** | See [`SPEC/learnings/clickhouse_ssot_violation_remediation.xml`](SPEC/learnings/clickhouse_ssot_violation_remediation.xml) |
 
 ### Authentication & Security (MANDATORY Shared Auth Integration)
 | File | Location | Purpose | Key Components |

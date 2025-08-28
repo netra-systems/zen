@@ -93,4 +93,15 @@
       as they're only needed for local development
     </insight>
   </key_insights>
+  
+  <related_issues>
+    <issue date="2025-08-28">
+      <title>Service Independence Violation Causing Logout</title>
+      <description>
+        Auth service was importing from netra_backend, causing complete
+        authentication failure in staging. See oauth_service_independence_violation.xml
+      </description>
+      <cross_ref>SPEC/learnings/oauth_service_independence_violation.xml</cross_ref>
+    </issue>
+  </related_issues>
 </learnings>

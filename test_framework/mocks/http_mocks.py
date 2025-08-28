@@ -302,7 +302,7 @@ class MockDatabaseConnections:
     def __init__(self):
         """Initialize mock database connections."""
         self.postgres_pool = MockPostgresPool()
-        self.redis_client = MockRedisClient() 
+        self.redis_client = MockRedisClient()  # Uses the comprehensive canonical MockRedisClient
         self.clickhouse_client = MockClickHouseClient()
         self.connection_status = {}
     
@@ -334,15 +334,259 @@ class MockPostgresPool:
 
 
 class MockRedisClient:
-    """Mock Redis client."""
+    """
+    Comprehensive Mock Redis client that consolidates all MockRedisClient implementations.
+    
+    This is the canonical MockRedisClient for all test infrastructure.
+    Provides all Redis operations needed across the codebase with:
+    - Complete Redis API compatibility (get, set, delete, incr, etc.)
+    - TTL/expiration support with automatic cleanup
+    - Failure simulation for error testing
+    - Operation tracking for verification
+    - Pattern matching for keys() method
+    - Counter support for rate limiting tests
+    """
     
     def __init__(self):
-        """Initialize mock redis client."""
+        """Initialize comprehensive mock redis client."""
+        # Core storage
+        self.data = {}  # Main key-value store
+        self.ttls = {}  # TTL tracking (uses datetime objects)
+        self.expires = {}  # Alternative expiration tracking for compatibility
+        self.counters = {}  # Counter tracking for rate limiting
+        
+        # Connection state
         self.closed = False
+        self.connection_count = 0
+        
+        # Operation tracking
+        self.operation_count = 0
+        self.command_history = []  # List of tuples: (command, *args)
+        
+        # Failure simulation
+        self.should_fail = False
+        self.failure_type = "connection"  # "connection" or "operation"
+    
+    async def ping(self):
+        """Mock ping operation."""
+        if self.should_fail and self.failure_type == "connection":
+            import redis.asyncio as redis
+            raise redis.ConnectionError("Mock connection failed")
+        return True
+    
+    async def get(self, key: str):
+        """Mock get operation with TTL support."""
+        self.command_history.append(('get', key))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock get operation failed")
+        
+        # Check TTL expiration (supports both datetime and timestamp formats)
+        if key in self.ttls:
+            from datetime import datetime, UTC
+            import time
+            
+            ttl_value = self.ttls[key]
+            is_expired = False
+            
+            if isinstance(ttl_value, datetime):
+                is_expired = datetime.now(UTC) > ttl_value
+            else:
+                # Assume timestamp
+                is_expired = time.time() > ttl_value
+            
+            if is_expired:
+                # Key has expired, remove it
+                if key in self.data:
+                    del self.data[key]
+                del self.ttls[key]
+                if key in self.counters:
+                    del self.counters[key]
+                return None
+        
+        # Check alternative expires format
+        if key in self.expires:
+            from datetime import datetime, UTC
+            if datetime.now(UTC) > self.expires[key]:
+                if key in self.data:
+                    del self.data[key]
+                del self.expires[key]
+                if key in self.counters:
+                    del self.counters[key]
+                return None
+        
+        return self.data.get(key)
+    
+    async def set(self, key: str, value: str, ex: int = None):
+        """Mock set operation with optional TTL."""
+        self.command_history.append(('set', key, value, ex))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock set operation failed")
+        
+        self.data[key] = str(value)
+        
+        # Set TTL if provided
+        if ex:
+            from datetime import datetime, UTC, timedelta
+            import time
+            
+            # Support both datetime and timestamp formats
+            self.ttls[key] = datetime.now(UTC) + timedelta(seconds=ex)
+            self.expires[key] = datetime.now(UTC) + timedelta(seconds=ex)
+        
+        return True
+    
+    async def delete(self, *keys):
+        """Mock delete operation supporting multiple keys."""
+        self.command_history.append(('delete', *keys))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock delete operation failed")
+        
+        deleted_count = 0
+        for key in keys:
+            if key in self.data:
+                del self.data[key]
+                deleted_count += 1
+            if key in self.ttls:
+                del self.ttls[key]
+            if key in self.expires:
+                del self.expires[key]
+            if key in self.counters:
+                del self.counters[key]
+        
+        # For single key deletion, return count; for multiple keys, return total count
+        return deleted_count
+    
+    async def incr(self, key: str):
+        """Mock increment operation."""
+        self.command_history.append(('incr', key))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock incr operation failed")
+        
+        current = int(self.data.get(key, "0"))
+        new_value = current + 1
+        self.data[key] = str(new_value)
+        
+        # Track in counters for rate limiting
+        self.counters[key] = new_value
+        
+        return new_value
+    
+    async def expire(self, key: str, seconds: int):
+        """Mock expire operation to set TTL on existing key."""
+        self.command_history.append(('expire', key, seconds))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock expire operation failed")
+        
+        if key in self.data:
+            from datetime import datetime, UTC, timedelta
+            import time
+            
+            self.ttls[key] = datetime.now(UTC) + timedelta(seconds=seconds)
+            self.expires[key] = datetime.now(UTC) + timedelta(seconds=seconds)
+            return True
+        
+        return False
+    
+    async def ttl(self, key: str):
+        """Mock TTL operation to get remaining time to live."""
+        self.command_history.append(('ttl', key))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock ttl operation failed")
+        
+        if key not in self.data:
+            return -2  # Key doesn't exist
+        
+        if key not in self.ttls:
+            return -1  # Key exists but no TTL set
+        
+        from datetime import datetime, UTC
+        import time
+        
+        ttl_value = self.ttls[key]
+        
+        if isinstance(ttl_value, datetime):
+            remaining = (ttl_value - datetime.now(UTC)).total_seconds()
+        else:
+            # Assume timestamp
+            remaining = ttl_value - time.time()
+        
+        return max(int(remaining), -2) if remaining > 0 else -2
+    
+    async def keys(self, pattern: str):
+        """Mock keys operation with pattern matching."""
+        self.command_history.append(('keys', pattern))
+        self.operation_count += 1
+        
+        if self.should_fail and self.failure_type == "operation":
+            import redis.asyncio as redis
+            raise redis.RedisError("Mock keys operation failed")
+        
+        # Simple pattern matching
+        if pattern.endswith("*"):
+            prefix = pattern[:-1]
+            return [k for k in self.data.keys() if k.startswith(prefix)]
+        elif pattern.startswith("*"):
+            suffix = pattern[1:]
+            return [k for k in self.data.keys() if k.endswith(suffix)]
+        else:
+            # Exact match
+            return [pattern] if pattern in self.data else []
     
     async def close(self):
         """Mock closing redis client."""
         self.closed = True
+        self.connection_count = 0
+    
+    async def aclose(self):
+        """Mock async closing redis client (alternative method name)."""
+        await self.close()
+    
+    def clear_data(self):
+        """Clear all mock data (useful for test cleanup)."""
+        self.data.clear()
+        self.ttls.clear()
+        self.expires.clear()
+        self.counters.clear()
+        self.command_history.clear()
+        self.operation_count = 0
+    
+    def set_failure_mode(self, should_fail: bool, failure_type: str = "connection"):
+        """
+        Set failure mode for testing error conditions.
+        
+        Args:
+            should_fail: Whether operations should fail
+            failure_type: Type of failure - "connection" or "operation"
+        """
+        self.should_fail = should_fail
+        self.failure_type = failure_type
+    
+    def get_operation_history(self):
+        """Get history of all operations performed."""
+        return self.command_history.copy()
+    
+    def reset_operation_tracking(self):
+        """Reset operation tracking counters and history."""
+        self.operation_count = 0
+        self.command_history.clear()
 
 
 class MockClickHouseClient:

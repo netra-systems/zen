@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Docker Container Naming in Remediation Scripts</title>
+        <category>infrastructure</category>
+        <tags>docker, containers, remediation, naming, auth, database</tags>
+        <created>2025-08-28</created>
+        <importance>critical</importance>
+    </metadata>
+    
+    <context>
+        The intelligent Docker remediation system was attempting to restart containers using incorrect names,
+        causing failures in the security_specialist agent's auth service restart commands.
+    </context>
+    
+    <issue_description>
+        The scripts/intelligent_docker_remediation.py script was using incorrect container names:
+        - Used "auth_service" instead of actual container name "netra-auth"
+        - Used "postgres" instead of actual container name "netra-postgres"
+        - Used "clickhouse" instead of actual container name "netra-clickhouse"
+        
+        This caused Docker commands to fail with "container not found" errors.
+    </issue_description>
+    
+    <root_cause>
+        Hardcoded container names in remediation commands that didn't match the actual container names
+        defined in docker-compose.dev.yml.
+    </root_cause>
+    
+    <solution>
+        Updated all container name references in intelligent_docker_remediation.py to use correct names:
+        - auth_service → netra-auth
+        - postgres → netra-postgres  
+        - clickhouse → netra-clickhouse
+        
+        Changed commands in security_specialist and database_specialist agent remediation strategies.
+    </solution>
+    
+    <critical_takeaways>
+        <takeaway>ALWAYS verify actual container names from docker-compose.dev.yml before hardcoding in scripts</takeaway>
+        <takeaway>Container names in Netra use "netra-" prefix consistently: netra-auth, netra-postgres, netra-clickhouse, netra-backend, netra-frontend, netra-redis</takeaway>
+        <takeaway>Docker remediation scripts must use exact container names - Docker doesn't accept partial matches for specific container operations</takeaway>
+        <takeaway>Test remediation commands manually before deploying intelligent remediation to avoid cascading failures</takeaway>
+        <takeaway>When using docker ps filters, "name=auth" works for finding "netra-auth" but "docker restart auth_service" fails - be specific</takeaway>
+    </critical_takeaways>
+    
+    <commands_fixed>
+        <before>
+            <cmd>docker logs --tail 30 auth_service 2>&amp;1 | grep -i "error\|fail"</cmd>
+            <cmd>docker restart auth_service</cmd>
+            <cmd>docker exec postgres pg_isready || echo "PostgreSQL not ready"</cmd>
+        </before>
+        <after>
+            <cmd>docker logs --tail 30 netra-auth 2>&amp;1 | grep -i "error\|fail"</cmd>
+            <cmd>docker restart netra-auth</cmd>
+            <cmd>docker exec netra-postgres pg_isready || echo "PostgreSQL not ready"</cmd>
+        </after>
+    </commands_fixed>
+    
+    <validation>
+        The fix ensures that Docker remediation commands will successfully target the correct containers,
+        allowing the security_specialist agent to properly restart the auth service when needed.
+    </validation>
+    
+    <prevention>
+        Future remediation scripts should:
+        1. Read container names from docker-compose configuration files
+        2. Use dynamic container name resolution instead of hardcoding
+        3. Include container name validation in pre-deployment checks
+        4. Test all Docker commands against actual running containers
+    </prevention>
+</learning>

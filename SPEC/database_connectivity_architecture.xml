@@ -148,6 +148,72 @@ def resolve_ssl_parameter_conflicts(url: str) -> str:
         </implementation>
     </ssl_parameter_resolution>
 
+    <async_session_management>
+        <problem>
+            SQLAlchemy async sessions can raise IllegalStateChangeError when trying to close
+            a session that is in the middle of another operation like '_connection_for_bind()'.
+            This occurs due to race conditions in concurrent database operations, particularly
+            when tasks are cancelled or generators are cleaned up.
+        </problem>
+        
+        <solution>
+            <method>State-aware session lifecycle management</method>
+            <description>
+                Check session state before performing any operations to prevent
+                IllegalStateChangeError. Handle task cancellation and generator
+                cleanup gracefully without forcing session operations.
+            </description>
+        </solution>
+
+        <implementation>
+            <code>
+# CRITICAL FIX: State-aware session management
+async with async_session_factory() as session:
+    session_yielded = False
+    try:
+        session_yielded = True
+        yield session
+        # Only commit if session is active and has a transaction
+        if hasattr(session, 'is_active') and session.is_active:
+            if hasattr(session, 'in_transaction') and session.in_transaction():
+                await session.commit()
+    except asyncio.CancelledError:
+        # Handle task cancellation - let context manager handle cleanup
+        raise
+    except GeneratorExit:
+        # Handle generator cleanup - session context manager handles this
+        pass
+    except Exception:
+        # Only rollback if session is in valid state with active transaction
+        if (session_yielded and 
+            hasattr(session, 'is_active') and session.is_active and
+            hasattr(session, 'in_transaction') and session.in_transaction()):
+            try:
+                await session.rollback()
+            except Exception:
+                # If rollback fails, let context manager handle cleanup
+                pass
+        raise
+            </code>
+        </implementation>
+
+        <best_practices>
+            <practice>Always check session state with hasattr() before accessing properties</practice>
+            <practice>Verify is_active before attempting commits or rollbacks</practice>
+            <practice>Check in_transaction() before attempting transaction operations</practice>
+            <practice>Handle asyncio.CancelledError and GeneratorExit separately</practice>
+            <practice>Let SQLAlchemy's context manager handle cleanup on failures</practice>
+            <practice>Use session_yielded flag to track session lifecycle in generators</practice>
+            <practice>Wrap rollback operations in try-except to handle cleanup failures gracefully</practice>
+        </best_practices>
+
+        <affected_files>
+            <file>netra_backend/app/database/__init__.py</file>
+            <file>netra_backend/app/db/database_manager.py</file>
+            <file>All files using async session management</file>
+        </affected_files>
+    </async_session_management>
+
     <url_normalization>
         <principle>Simplified URLs with automatic driver addition</principle>
         <approach>

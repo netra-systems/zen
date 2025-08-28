@@ -227,18 +227,29 @@ async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logge
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
     """Run database index optimization in background."""
     try:
-        # Delay optimization to avoid startup bottleneck
-        await asyncio.sleep(30)  # Wait 30 seconds after startup
+        # Extended delay to minimize startup performance impact
+        await asyncio.sleep(60)  # Wait 60 seconds after startup for better performance
         logger.info("Starting background database index optimization...")
         
-        # Add timeout to prevent hanging indefinitely
+        # Reduced timeout for faster failure detection
         optimization_results = await asyncio.wait_for(
             index_manager.optimize_all_databases(), 
-            timeout=120.0  # 2 minute timeout
+            timeout=90.0  # 90 second timeout for better performance
         )
         logger.info(f"Background database optimization completed successfully: {optimization_results}")
     except asyncio.TimeoutError:
-        logger.error("Background index optimization timed out after 2 minutes - continuing without optimization")
+        logger.warning("Background index optimization timed out after 90 seconds - will retry later")
+        # Schedule retry after additional delay
+        await asyncio.sleep(300)  # Wait 5 minutes before potential retry
+        try:
+            logger.info("Retrying background database optimization...")
+            optimization_results = await asyncio.wait_for(
+                index_manager.optimize_all_databases(),
+                timeout=60.0  # Shorter timeout for retry
+            )
+            logger.info(f"Background database optimization retry succeeded: {optimization_results}")
+        except Exception as retry_error:
+            logger.error(f"Background index optimization retry failed: {retry_error}")
     except Exception as e:
         logger.error(f"Background index optimization failed: {e}")
         # Continue running - don't let this crash the application

@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+    <metadata>
+        <name>Intelligent Remediation Architecture</name>
+        <category>architecture</category>
+        <version>1.0.0</version>
+        <created>2025-01-28</created>
+        <description>
+            Comprehensive specification for the Intelligent Remediation System,
+            clearly defining Classical vs LLM components and operational modes
+        </description>
+        <purpose>
+            Define a clear architecture for automated system remediation that leverages
+            both classical programming patterns and LLM agent orchestration
+        </purpose>
+    </metadata>
+
+    <architecture_overview>
+        <principle>Hybrid Classical-LLM System</principle>
+        <description>
+            The Intelligent Remediation System combines deterministic classical programming
+            for system introspection and execution with LLM agents for intelligent analysis,
+            decision making, and complex remediation planning.
+        </description>
+        <key_separation>
+            Classical Components: Data collection, monitoring, execution, reporting
+            LLM Components: Analysis, decision making, strategy planning, complex fixes
+        </key_separation>
+    </architecture_overview>
+
+    <classical_components>
+        <component name="Introspection Layer">
+            <type>CLASSICAL</type>
+            <location>scripts/docker_log_introspection.py</location>
+            <responsibilities>
+                <item>Parse Docker logs using regex patterns</item>
+                <item>Collect system metrics (CPU, memory, disk)</item>
+                <item>Query container states and health checks</item>
+                <item>Aggregate raw data into structured reports</item>
+            </responsibilities>
+            <characteristics>
+                <item>Deterministic pattern matching</item>
+                <item>Fast, repeatable execution</item>
+                <item>No inference or interpretation</item>
+                <item>Pure data collection and transformation</item>
+            </characteristics>
+        </component>
+
+        <component name="Execution Layer">
+            <type>CLASSICAL</type>
+            <location>IntelligentDockerRemediator.execute_remediation()</location>
+            <responsibilities>
+                <item>Execute shell commands (docker restart, etc.)</item>
+                <item>Apply configuration changes</item>
+                <item>Restart services</item>
+                <item>Monitor command execution results</item>
+            </responsibilities>
+            <characteristics>
+                <item>Direct system interaction</item>
+                <item>Command execution with timeout</item>
+                <item>Error handling and retry logic</item>
+                <item>No decision making, only execution</item>
+            </characteristics>
+        </component>
+
+        <component name="Reporting Layer">
+            <type>CLASSICAL</type>
+            <location>generate_final_report(), save_agent_learning()</location>
+            <responsibilities>
+                <item>Format data into markdown reports</item>
+                <item>Generate JSON summaries</item>
+                <item>Create XML learning documents</item>
+                <item>Track metrics and statistics</item>
+            </responsibilities>
+            <characteristics>
+                <item>Template-based report generation</item>
+                <item>Structured data serialization</item>
+                <item>File system operations</item>
+                <item>No analysis, only formatting</item>
+            </characteristics>
+        </component>
+
+        <component name="Orchestration Control">
+            <type>CLASSICAL</type>
+            <location>run_intelligent_remediation() main loop</location>
+            <responsibilities>
+                <item>Manage iteration count and timing</item>
+                <item>Check for issue resolution</item>
+                <item>Control workflow state</item>
+                <item>Handle success/failure conditions</item>
+            </responsibilities>
+            <characteristics>
+                <item>State machine logic</item>
+                <item>Loop control and timing</item>
+                <item>Threshold-based decisions</item>
+                <item>Deterministic flow control</item>
+            </characteristics>
+        </component>
+    </classical_components>
+
+    <llm_components>
+        <component name="Issue Analysis Agent">
+            <type>LLM</type>
+            <trigger>When introspection detects anomalies</trigger>
+            <responsibilities>
+                <item>Interpret complex error patterns</item>
+                <item>Understand cascading failures</item>
+                <item>Identify root causes from symptoms</item>
+                <item>Correlate multiple issues</item>
+            </responsibilities>
+            <characteristics>
+                <item>Pattern recognition beyond regex</item>
+                <item>Contextual understanding</item>
+                <item>Inference and deduction</item>
+                <item>Handles ambiguous scenarios</item>
+            </characteristics>
+        </component>
+
+        <component name="Strategy Planning Agent">
+            <type>LLM</type>
+            <trigger>After issue analysis</trigger>
+            <responsibilities>
+                <item>Design multi-step remediation plans</item>
+                <item>Consider system dependencies</item>
+                <item>Prioritize actions by impact</item>
+                <item>Adapt strategy based on context</item>
+            </responsibilities>
+            <characteristics>
+                <item>Complex planning capabilities</item>
+                <item>Risk assessment</item>
+                <item>Trade-off evaluation</item>
+                <item>Dynamic strategy adjustment</item>
+            </characteristics>
+        </component>
+
+        <component name="Specialized Domain Agents">
+            <type>LLM</type>
+            <variants>
+                <agent>database_specialist - SQL optimization, connection pooling</agent>
+                <agent>security_specialist - Auth flows, certificate management</agent>
+                <agent>network_specialist - Service mesh, load balancing</agent>
+                <agent>performance_specialist - Memory optimization, GC tuning</agent>
+                <agent>configuration_specialist - Environment variables, configs</agent>
+                <agent>critical_response_specialist - Emergency triage</agent>
+            </variants>
+            <responsibilities>
+                <item>Apply domain expertise to specific problems</item>
+                <item>Generate specialized remediation commands</item>
+                <item>Understand domain-specific patterns</item>
+                <item>Recommend long-term improvements</item>
+            </responsibilities>
+        </component>
+
+        <component name="Learning Synthesis Agent">
+            <type>LLM</type>
+            <trigger>After remediation attempts</trigger>
+            <responsibilities>
+                <item>Extract insights from remediation outcomes</item>
+                <item>Identify patterns across multiple incidents</item>
+                <item>Generate actionable recommendations</item>
+                <item>Update knowledge base</item>
+            </responsibilities>
+        </component>
+    </llm_components>
+
+    <operational_modes>
+        <mode name="Tool Mode">
+            <description>
+                LLM agents operate as information providers that return analysis
+                and recommendations to Claude, which then decides on actions
+            </description>
+            <flow>
+                1. Classical introspection collects data
+                2. Data passed to Claude via function calls
+                3. Claude spawns Task agents for analysis
+                4. Agents return insights/recommendations
+                5. Claude decides on remediation actions
+                6. Classical execution layer runs commands
+                7. Results reported back to Claude
+            </flow>
+            <use_cases>
+                <case>Interactive debugging with human oversight</case>
+                <case>Complex issues requiring nuanced decisions</case>
+                <case>Learning and exploration scenarios</case>
+                <case>When Claude needs to coordinate multiple systems</case>
+            </use_cases>
+            <implementation>
+                <code_example>
+                # Claude uses Task tool to spawn analysis agent
+                result = Task(
+                    subagent_type="general-purpose",
+                    description="Analyze Docker issues",
+                    prompt=analysis_prompt_with_logs
+                )
+                # Claude receives analysis and decides next steps
+                if result.suggests_restart:
+                    Bash("docker restart service")
+                </code_example>
+            </implementation>
+        </mode>
+
+        <mode name="Orchestrator Mode">
+            <description>
+                System spawns autonomous Claude instances in new terminals
+                that operate independently with full permissions
+            </description>
+            <flow>
+                1. Classical introspection detects issues
+                2. System categorizes issues (classical logic)
+                3. For each issue, spawn new terminal with Claude
+                4. Pass focused prompt to autonomous Claude instance
+                5. Claude instance operates with --dangerously-skip-permissions
+                6. Instance performs complete remediation autonomously
+                7. Results collected by classical reporting layer
+            </flow>
+            <use_cases>
+                <case>Fully automated production remediation</case>
+                <case>Parallel remediation of multiple issues</case>
+                <case>24/7 unattended operations</case>
+                <case>Emergency response scenarios</case>
+            </use_cases>
+            <implementation>
+                <code_example>
+                # Python spawns new Claude instance
+                import subprocess
+                
+                # Prepare focused prompt for specific issue
+                prompt = create_agent_prompt(issue, agent_type='database_specialist')
+                
+                # Spawn autonomous Claude in new terminal
+                subprocess.Popen([
+                    'cmd', '/c', 'start', 'cmd', '/k',
+                    'claude', '--dangerously-skip-permissions',
+                    '--prompt', prompt
+                ])
+                
+                # OR on Unix/Mac:
+                subprocess.Popen([
+                    'gnome-terminal', '--',
+                    'claude', '--dangerously-skip-permissions',
+                    '--prompt', prompt
+                ])
+                </code_example>
+            </implementation>
+            <safety_considerations>
+                <item>Each Claude instance has full system access</item>
+                <item>Prompts must be carefully scoped to specific tasks</item>
+                <item>Monitor spawned instances for runaway behavior</item>
+                <item>Implement kill switches for emergency stops</item>
+            </safety_considerations>
+        </mode>
+    </operational_modes>
+
+    <decision_matrix>
+        <title>When to use Classical vs LLM components</title>
+        
+        <use_classical_when>
+            <condition>Task is deterministic and rule-based</condition>
+            <condition>Speed is critical (sub-second response needed)</condition>
+            <condition>Executing system commands</condition>
+            <condition>Parsing structured data formats</condition>
+            <condition>Generating templated reports</condition>
+            <condition>Managing iteration loops and state</condition>
+        </use_classical_when>
+
+        <use_llm_when>
+            <condition>Pattern is complex or ambiguous</condition>
+            <condition>Context and interpretation required</condition>
+            <condition>Multiple valid solutions exist</condition>
+            <condition>Learning from past incidents needed</condition>
+            <condition>Domain expertise required</condition>
+            <condition>Strategic planning needed</condition>
+        </use_llm_when>
+    </decision_matrix>
+
+    <integration_patterns>
+        <pattern name="Classical-First">
+            <description>
+                Classical components handle all deterministic tasks,
+                only escalating to LLM when interpretation needed
+            </description>
+            <example>
+                1. Regex detects "connection refused" error
+                2. Classical checks if service is running
+                3. If running, escalate to LLM for analysis
+                4. LLM determines root cause (firewall, network, etc.)
+                5. Classical executes LLM's remediation plan
+            </example>
+        </pattern>
+
+        <pattern name="LLM-Supervised">
+            <description>
+                LLM agents supervise and direct classical execution
+            </description>
+            <example>
+                1. LLM analyzes overall system state
+                2. LLM creates detailed execution plan
+                3. Classical components execute each step
+                4. Results fed back to LLM for adjustment
+                5. LLM decides when remediation complete
+            </example>
+        </pattern>
+
+        <pattern name="Hybrid-Pipeline">
+            <description>
+                Classical and LLM components alternate in pipeline
+            </description>
+            <example>
+                Classical(collect) -> LLM(analyze) -> Classical(execute) -> 
+                LLM(verify) -> Classical(report)
+            </example>
+        </pattern>
+    </integration_patterns>
+
+    <implementation_guidelines>
+        <guideline>
+            <title>Clear Separation of Concerns</title>
+            <description>
+                Never mix classical logic with LLM prompts in the same function.
+                Classical functions should prepare data, LLM agents should analyze it.
+            </description>
+        </guideline>
+
+        <guideline>
+            <title>Explicit Mode Selection</title>
+            <description>
+                System should explicitly declare which mode it's operating in.
+                Tool mode vs Orchestrator mode should be a configuration choice.
+            </description>
+        </guideline>
+
+        <guideline>
+            <title>Prompt Scoping</title>
+            <description>
+                In Orchestrator mode, each spawned Claude must have a narrowly
+                scoped prompt focused on a single remediation task.
+            </description>
+        </guideline>
+
+        <guideline>
+            <title>Failure Boundaries</title>
+            <description>
+                Classical components must handle LLM failures gracefully.
+                System should continue operating even if LLM agents fail.
+            </description>
+        </guideline>
+
+        <guideline>
+            <title>Audit Trail</title>
+            <description>
+                All LLM decisions and actions must be logged for audit.
+                Classical components maintain immutable audit logs.
+            </description>
+        </guideline>
+    </implementation_guidelines>
+
+    <future_enhancements>
+        <enhancement>
+            <name>Agent Memory System</name>
+            <description>
+                Persistent memory for LLM agents to learn from past remediations
+                and improve over time
+            </description>
+        </enhancement>
+
+        <enhancement>
+            <name>Predictive Remediation</name>
+            <description>
+                LLM agents predict issues before they occur based on patterns
+            </description>
+        </enhancement>
+
+        <enhancement>
+            <name>Multi-Agent Collaboration</name>
+            <description>
+                Multiple specialized agents work together on complex issues
+            </description>
+        </enhancement>
+
+        <enhancement>
+            <name>Custom Agent Training</name>
+            <description>
+                Train specialized agents on organization-specific patterns
+            </description>
+        </enhancement>
+    </future_enhancements>
+
+    <references>
+        <ref>scripts/intelligent_docker_remediation.py - Current implementation</ref>
+        <ref>scripts/docker_log_introspection.py - Classical introspection</ref>
+        <ref>SPEC/ai_factory_patterns.xml - Agent collaboration patterns</ref>
+        <ref>CLAUDE.md - Principal engineer agent guidelines</ref>
+    </references>
+</spec>

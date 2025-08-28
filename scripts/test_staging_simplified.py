@@ -71,7 +71,7 @@ def test_deployment_script_configuration():
         '--set-secrets',
         'POSTGRES_PASSWORD=postgres-password-staging',
         'JWT_SECRET_KEY=jwt-secret-key-staging',
-        'GOOGLE_CLIENT_ID=google-client-id-staging',
+        'GOOGLE_CLIENT_ID=google-oauth-client-id-staging',
     ]
     
     missing = []

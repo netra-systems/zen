@@ -13,8 +13,8 @@ from typing import Dict, List, Optional, Tuple
 # Required secrets for staging environment
 REQUIRED_SECRETS = [
     "gemini-api-key-staging",
-    "google-client-id-staging", 
-    "google-client-secret-staging",
+    "google-oauth-client-id-staging", 
+    "google-oauth-client-secret-staging",
     "jwt-secret-key-staging",
     "fernet-key-staging",
     "langfuse-secret-key-staging",

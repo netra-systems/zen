@@ -1,7 +1,9 @@
 import React from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useMCPTools } from '@/hooks/useMCPTools';
-import { Bot, Zap, Activity, Shield, Database, Cpu, Brain } from 'lucide-react';
+// Import icons with fallbacks to avoid undefined issues
+import * as LucideIcons from 'lucide-react';
+const { Bot, Zap, Activity, Shield, Database, Cpu, Brain } = LucideIcons;
 import { motion, AnimatePresence } from 'framer-motion';
 import ConnectionStatusIndicator from './ConnectionStatusIndicator';
 import { MCPServerStatus } from './MCPServerStatus';
@@ -27,28 +29,30 @@ export const ChatHeader: React.FC = () => {
   };
 
   const getStatusIcon = (status: string) => {
+    const defaultIcon = <div className="w-4 h-4 bg-gray-400 rounded" />;
     switch (status?.toLowerCase()) {
       case 'running':
       case 'active':
-        return <Activity className="w-4 h-4" />;
+        return Activity ? <Activity className="w-4 h-4" /> : defaultIcon;
       case 'analyzing':
-        return <Brain className="w-4 h-4" />;
+        return Brain ? <Brain className="w-4 h-4" /> : defaultIcon;
       case 'processing':
-        return <Cpu className="w-4 h-4" />;
+        return Cpu ? <Cpu className="w-4 h-4" /> : defaultIcon;
       default:
-        return <Zap className="w-4 h-4" />;
+        return Zap ? <Zap className="w-4 h-4" /> : defaultIcon;
     }
   };
 
   const getAgentIcon = () => {
+    const defaultIcon = <div className="w-6 h-6 bg-purple-500 rounded" />;
     if (subAgentName?.toLowerCase().includes('security')) {
-      return <Shield className="w-6 h-6 text-purple-500" />;
+      return Shield ? <Shield className="w-6 h-6 text-purple-500" /> : defaultIcon;
     } else if (subAgentName?.toLowerCase().includes('data')) {
-      return <Database className="w-6 h-6 text-indigo-500" />;
+      return Database ? <Database className="w-6 h-6 text-indigo-500" /> : defaultIcon;
     } else if (subAgentName?.toLowerCase().includes('optimization')) {
-      return <Cpu className="w-6 h-6 text-green-500" />;
+      return Cpu ? <Cpu className="w-6 h-6 text-green-500" /> : defaultIcon;
     }
-    return <Bot className="w-6 h-6 text-purple-500" />;
+    return Bot ? <Bot className="w-6 h-6 text-purple-500" /> : defaultIcon;
   };
 
   return (
@@ -125,7 +129,7 @@ export const ChatHeader: React.FC = () => {
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                         className="w-3 h-3"
                       >
-                        <Activity className="w-3 h-3 text-blue-500" />
+                        {Activity ? <Activity className="w-3 h-3 text-blue-500" /> : <div className="w-3 h-3 bg-blue-500 rounded animate-pulse" />}
                       </motion.div>
                     )}
                   </div>

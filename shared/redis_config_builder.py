@@ -25,6 +25,8 @@ from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
+from shared.config_builder_base import ConfigBuilderBase, ConfigLoggingMixin
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +57,7 @@ class RedisConnectionInfo:
     health_check_interval: int = 30
 
 
-class RedisConfigurationBuilder:
+class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
     """
     Main Redis configuration builder following DatabaseURLBuilder pattern.
     
@@ -71,19 +73,8 @@ class RedisConfigurationBuilder:
     
     def __init__(self, env_vars: Optional[Dict[str, Any]] = None):
         """Initialize with environment variables."""
-        if env_vars is None:
-            self.env = dict(os.environ)
-        else:
-            # Filter out None values from env_vars and merge with os.environ as fallback
-            self.env = {}
-            # Start with os.environ as base
-            self.env.update(os.environ)
-            # Overlay with non-None values from env_vars
-            for key, value in env_vars.items():
-                if value is not None:
-                    self.env[key] = value
-        self.environment = self._detect_environment()
-        
+        # Call parent constructor which handles environment detection
+        super().__init__(env_vars)
         # Initialize sub-builders
         self.connection = self.ConnectionBuilder(self)
         self.pool = self.PoolBuilder(self)
@@ -98,39 +89,6 @@ class RedisConfigurationBuilder:
         self.staging = self.StagingBuilder(self)
         self.production = self.ProductionBuilder(self)
         
-    def _detect_environment(self) -> str:
-        """
-        Detect current environment from various environment variables.
-        
-        Returns:
-            Environment name: 'development', 'staging', or 'production'
-        """
-        # Check various environment variable formats
-        env_vars = [
-            (self.env.get("ENVIRONMENT") or "").lower(),
-            (self.env.get("ENV") or "").lower(),
-            (self.env.get("NETRA_ENVIRONMENT") or "").lower(),
-            (self.env.get("K_SERVICE") or "").lower(),
-            (self.env.get("GCP_PROJECT_ID") or "").lower()
-        ]
-        
-        for env in env_vars:
-            if any(prod in env for prod in ["production", "prod"]):
-                return "production"
-            elif any(stage in env for stage in ["staging", "stage", "stg"]):
-                return "staging"
-            elif any(dev in env for dev in ["development", "dev", "local"]):
-                return "development"
-        
-        # Check for Cloud Run environment
-        k_service = self.env.get("K_SERVICE")
-        if k_service and "staging" not in str(k_service).lower():
-            return "production"
-        elif k_service:
-            return "staging"
-        
-        # Default to development if no environment is explicitly set
-        return "development"
     
     class ConnectionBuilder:
         """Manages Redis connection configuration."""
@@ -358,19 +316,8 @@ class RedisConfigurationBuilder:
         @staticmethod
         def _mask_url_for_logging(url: str) -> str:
             """Mask sensitive information in Redis URL for safe logging."""
-            if not url:
-                return "NOT SET"
-            
-            try:
-                parsed = urlparse(url)
-                if parsed.password:
-                    # Replace password with asterisks
-                    masked_netloc = parsed.netloc.replace(f":{parsed.password}@", ":***@")
-                    masked_parsed = parsed._replace(netloc=masked_netloc)
-                    return urlunparse(masked_parsed)
-                return url
-            except Exception:
-                return "INVALID_URL"
+            # Use the mixin method for consistent URL credential masking
+            return ConfigLoggingMixin.mask_url_credentials(url)
     
     class PoolBuilder:
         """Manages Redis connection pool configuration."""
@@ -754,10 +701,10 @@ class RedisConfigurationBuilder:
         if not password_valid[0]:
             return password_valid
         
-        # Environment-specific validation
-        if self.environment == "production":
+        # Environment-specific validation using base class helpers
+        if self.is_production():
             return self.production.validate_production_requirements()
-        elif self.environment == "staging":
+        elif self.is_staging():
             return self.staging.validate_staging_requirements()
         
         return True, ""
@@ -786,8 +733,11 @@ class RedisConfigurationBuilder:
         connection_info = self.connection.connection_info
         validation_result = self.validate()
         
-        return {
-            "environment": self.environment,
+        # Get common debug info from base class
+        debug_info = self.get_common_debug_info()
+        
+        # Add Redis-specific debug information
+        debug_info.update({
             "connection": {
                 "host": connection_info.host,
                 "port": connection_info.port,
@@ -808,7 +758,9 @@ class RedisConfigurationBuilder:
                 "fallback_allowed": getattr(self.development, 'should_allow_fallback', lambda: False)()
             },
             "masked_url": self.connection._mask_url_for_logging(self.connection.get_redis_url())
-        }
+        })
+        
+        return debug_info
 
 
 # ===== BACKWARD COMPATIBILITY FUNCTIONS =====

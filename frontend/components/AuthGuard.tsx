@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, ReactNode } from 'react';
+import { useEffect, ReactNode, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/auth/context';
 import { Loader2 } from 'lucide-react';
@@ -36,18 +36,32 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const router = useRouter();
   const { user, loading } = useAuth();
   const { trackError, trackPageView } = useGTMEvent();
+  
+  // Track if we've already reported auth failure for this mount
+  const hasReportedAuthFailure = useRef(false);
+  const hasReportedPageView = useRef(false);
+  const lastPathname = useRef<string>();
 
   useEffect(() => {
     if (!loading) {
       const isAuthenticated = !!user;
+      const currentPath = window.location.pathname;
       
       if (!isAuthenticated) {
-        // Track authentication failure
-        trackError('auth_required', 'User not authenticated', window.location.pathname, false);
+        // Only track auth failure once per mount and path
+        if (!hasReportedAuthFailure.current || lastPathname.current !== currentPath) {
+          trackError('auth_required', 'User not authenticated', currentPath, false);
+          hasReportedAuthFailure.current = true;
+          lastPathname.current = currentPath;
+        }
         router.push(redirectTo);
       } else {
-        // Track successful authentication check
-        trackPageView(window.location.pathname, 'Protected Page Access');
+        // Only track page view once per mount and path
+        if (!hasReportedPageView.current || lastPathname.current !== currentPath) {
+          trackPageView(currentPath, 'Protected Page Access');
+          hasReportedPageView.current = true;
+          lastPathname.current = currentPath;
+        }
       }
       
       onAuthCheckComplete?.(isAuthenticated);

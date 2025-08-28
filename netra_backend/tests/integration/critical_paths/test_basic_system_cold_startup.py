@@ -34,7 +34,7 @@ from netra_backend.app.main import app
 
 from netra_backend.app.config import get_config
 from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.clickhouse import ClickHouseClient
 from netra_backend.app.db.postgres import async_engine as pg_engine
 
 class TestBasicSystemColdStartup:

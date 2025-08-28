@@ -84,7 +84,17 @@ class MigrationRunner:
         try:
             await self.session.begin()
             await migration.up(self.session)
-            await self.session.commit()
+            # Only commit if session is active and has a transaction
+            if hasattr(self.session, 'is_active') and self.session.is_active:
+                if hasattr(self.session, 'in_transaction') and self.session.in_transaction():
+                    await self.session.commit()
         except Exception as e:
-            await self.session.rollback()
+            # Only rollback if session is in valid state with active transaction
+            if (hasattr(self.session, 'is_active') and self.session.is_active and
+                hasattr(self.session, 'in_transaction') and self.session.in_transaction()):
+                try:
+                    await self.session.rollback()
+                except Exception:
+                    # If rollback fails, let context manager handle cleanup
+                    pass
             raise e

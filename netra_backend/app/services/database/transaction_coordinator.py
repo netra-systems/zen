@@ -241,15 +241,14 @@ class TransactionCoordinator:
         
         try:
             # ClickHouse doesn't have traditional transactions, so we validate operations
-            from netra_backend.app.agents.data_sub_agent.clickhouse_client import get_clickhouse_client
-            client = await get_clickhouse_client()
-            
-            # Validate all operations without executing
-            for operation in transaction.clickhouse_operations:
-                if not await self._validate_clickhouse_operation(client, operation):
-                    return False
-            
-            return True
+            from netra_backend.app.db.clickhouse import get_clickhouse_client
+            async with get_clickhouse_client() as client:
+                # Validate all operations without executing
+                for operation in transaction.clickhouse_operations:
+                    if not await self._validate_clickhouse_operation(client, operation):
+                        return False
+                
+                return True
             
         except Exception as e:
             logger.error(f"Failed to prepare ClickHouse operations: {e}")
@@ -279,14 +278,13 @@ class TransactionCoordinator:
             return True
         
         try:
-            from netra_backend.app.agents.data_sub_agent.clickhouse_client import get_clickhouse_client
-            client = await get_clickhouse_client()
-            
-            # Execute all ClickHouse operations
-            for operation in transaction.clickhouse_operations:
-                await self._execute_clickhouse_operation(client, operation)
-            
-            return True
+            from netra_backend.app.db.clickhouse import get_clickhouse_client
+            async with get_clickhouse_client() as client:
+                # Execute all ClickHouse operations
+                for operation in transaction.clickhouse_operations:
+                    await self._execute_clickhouse_operation(client, operation)
+                
+                return True
             
         except Exception as e:
             logger.error(f"Failed to commit ClickHouse operations: {e}")
@@ -415,14 +413,13 @@ class TransactionCoordinator:
     
     async def _execute_clickhouse_compensation(self, action: CompensationAction) -> None:
         """Execute ClickHouse compensation action."""
-        from netra_backend.app.agents.data_sub_agent.clickhouse_client import get_clickhouse_client
-        client = await get_clickhouse_client()
-        
-        if action.action_type == "delete":
-            # ClickHouse delete using ALTER TABLE
-            conditions = " AND ".join([f"{k} = '{v}'" for k, v in action.conditions.items()])
-            query = f"ALTER TABLE {action.table} DELETE WHERE {conditions}"
-            await client.execute(query)
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        async with get_clickhouse_client() as client:
+            if action.action_type == "delete":
+                # ClickHouse delete using ALTER TABLE
+                conditions = " AND ".join([f"{k} = '{v}'" for k, v in action.conditions.items()])
+                query = f"ALTER TABLE {action.table} DELETE WHERE {conditions}"
+                await client.execute(query)
     
     async def _cleanup_expired_transactions(self) -> None:
         """Background task to clean up expired transactions."""

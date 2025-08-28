@@ -18,7 +18,7 @@ from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
     ValidationError,
 )
-from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
@@ -30,7 +30,8 @@ from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.input_validation import validate_agent_input
 from netra_backend.app.agents.prompts import actions_to_meet_goals_prompt_template
-from netra_backend.app.agents.state import ActionPlanResult, DeepAgentState, PlanStep
+from netra_backend.app.agents.state import ActionPlanResult, DeepAgentState, PlanStep, OptimizationsResult
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.utils import (
     extract_json_from_response,
@@ -77,7 +78,7 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         self.execution_engine = BaseExecutionEngine(
             self.reliability_manager, self.monitor
         )
-        self.error_handler = ExecutionErrorHandler
+        self.error_handler = ExecutionErrorHandler()
 
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create configured reliability manager."""
@@ -100,13 +101,28 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         self.fallback_strategy = create_agent_fallback_strategy(agent_name)
 
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
-        """Validate execution preconditions."""
+        """Validate execution preconditions with graceful degradation."""
         state = context.state
-        if not state.optimizations_result or not state.data_result:
-            raise ValidationError(
-                "Missing required state: optimizations_result and data_result required"
-            )
-        return True
+        missing_deps = []
+        
+        # Check dependencies individually
+        if not state.optimizations_result:
+            missing_deps.append("optimizations_result")
+        if not state.data_result:
+            missing_deps.append("data_result")
+        
+        # Handle missing dependencies gracefully
+        if missing_deps:
+            if len(missing_deps) == 2:
+                # Both missing - apply full defaults
+                logger.warning(f"Missing all dependencies: {missing_deps}. Using defaults.")
+                self._apply_default_state(state)
+            else:
+                # Partial missing - apply partial defaults
+                logger.warning(f"Missing partial dependencies: {missing_deps}. Degrading gracefully.")
+                self._apply_partial_defaults(state, missing_deps)
+        
+        return True  # Continue execution with available/default data
 
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute core action plan generation logic."""
@@ -133,9 +149,15 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     async def _update_state_and_notify(self, context: ExecutionContext, action_plan_result: ActionPlanResult) -> None:
         """Update state with result and send completion notification."""
         context.state.action_plan_result = action_plan_result
+        
+        # Adjust message based on whether defaults were used
+        message = "Action plan created successfully"
+        if action_plan_result.partial_extraction:
+            message = "Action plan created with partial data"
+        
         await self.send_status_update(
             context, "completed",
-            "Action plan created successfully"
+            message
         )
 
     async def send_status_update(
@@ -243,6 +265,42 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         )
         await self._apply_reliability_protection(result)
 
+    def _apply_default_state(self, state: DeepAgentState) -> None:
+        """Apply default values for completely missing state."""
+        if not state.optimizations_result:
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="default",
+                recommendations=["Manual review required - no optimization data available"],
+                confidence_score=0.1
+            )
+        
+        if not state.data_result:
+            state.data_result = DataAnalysisResponse(
+                query="Default query - no data available",
+                results=[],
+                insights={"status": "No data analysis available"},
+                metadata={"source": "default"},
+                recommendations=["Collect data for analysis"]
+            )
+    
+    def _apply_partial_defaults(self, state: DeepAgentState, missing_deps: list) -> None:
+        """Apply defaults only for missing dependencies."""
+        if "optimizations_result" in missing_deps and not state.optimizations_result:
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="partial",
+                recommendations=["Limited optimization - data analysis available but no optimization analysis"],
+                confidence_score=0.3
+            )
+        
+        if "data_result" in missing_deps and not state.data_result:
+            state.data_result = DataAnalysisResponse(
+                query="Partial query - using optimization data only",
+                results=[],
+                insights={"status": "Using optimization data only - no direct data analysis"},
+                metadata={"source": "partial_default"},
+                recommendations=state.optimizations_result.recommendations if state.optimizations_result else []
+            )
+    
     def _build_action_plan_prompt(self, state: DeepAgentState) -> str:
         """Build prompt for action plan generation."""
         return actions_to_meet_goals_prompt_template.format(
@@ -294,7 +352,19 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         self, llm_response: str, run_id: str
     ) -> ActionPlanResult:
         """Process LLM response to ActionPlanResult."""
-        return await ActionPlanBuilder.process_llm_response(llm_response, run_id)
+        result = await ActionPlanBuilder.process_llm_response(llm_response, run_id)
+        
+        # Mark as partial if we used default state
+        if hasattr(self, '_used_defaults'):
+            self._mark_partial_result(result)
+        
+        return result
+    
+    def _mark_partial_result(self, result: ActionPlanResult) -> None:
+        """Mark result as partial with metadata."""
+        result.partial_extraction = True
+        if not result.error:
+            result.error = "Generated with partial data - some dependencies were missing"
 
     def _get_default_action_plan(self) -> ActionPlanResult:
         """Get default action plan for failures."""
@@ -366,5 +436,19 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     async def check_entry_conditions(
         self, state: DeepAgentState, run_id: str
     ) -> bool:
-        """Legacy entry condition check."""
-        return state.optimizations_result is not None and state.data_result is not None
+        """Legacy entry condition check - always return True for graceful degradation."""
+        # Apply defaults if needed for backward compatibility
+        if not state.optimizations_result or not state.data_result:
+            missing = []
+            if not state.optimizations_result:
+                missing.append("optimizations_result")
+            if not state.data_result:
+                missing.append("data_result")
+            
+            logger.warning(f"Legacy check_entry_conditions: missing {missing}, applying defaults")
+            if len(missing) == 2:
+                self._apply_default_state(state)
+            else:
+                self._apply_partial_defaults(state, missing)
+        
+        return True  # Always allow execution with defaults

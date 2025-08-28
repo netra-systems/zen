@@ -1,0 +1,50 @@
+# Intelligent Docker Remediation - Security Specialist Agent Tasks
+
+## Overview
+This document consolidates all security specialist agent tasks deployed during intelligent Docker remediation for authentication issues.
+
+## Auth Service Tasks (4 deployments)
+- **Container**: netra-auth
+- **Issue Pattern**: Authentication failures (401/403 errors)
+- **Agent Type**: security_specialist
+- **Average Success Rate**: 58% (7/12 commands successful)
+
+### Common Task Sequence:
+1. Verify auth_service status
+2. Check JWT configuration  
+3. Validate certificates
+4. Update security middleware
+5. Test authentication flow
+
+## Backend Service Tasks (14 deployments)
+- **Container**: netra-backend
+- **Issue Pattern**: Authentication failures in API endpoints
+- **Agent Type**: security_specialist
+- **Average Success Rate**: 67% (28/42 commands successful)
+
+### Common Task Sequence:
+1. Check backend auth middleware
+2. Verify JWT validation
+3. Check auth service connectivity
+4. Validate API authentication flow
+5. Restart backend service if needed
+
+## Performance Task
+- **Container**: Multiple
+- **Issue Type**: Performance optimization
+- **Agent Type**: performance_specialist
+- **Focus**: Response time and throughput optimization
+
+## Key Learnings:
+1. Container names must match docker-compose.dev.yml exactly
+2. Service restart commands frequently fail without proper container naming
+3. Log analysis commands have highest success rate
+4. Backend auth issues more frequent than auth service issues
+5. Security specialists deployed automatically on 401/403 detection
+
+## Recommendations:
+- Implement proper container name resolution
+- Add health check validation before restart
+- Create rollback mechanism for failed remediations
+- Add JWT token refresh to prevent auth failures
+- Implement circuit breaker for auth service

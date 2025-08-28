@@ -7,10 +7,9 @@ This module has been refactored into focused sub-modules for maintainability.
 """
 
 # Import all components from the refactored modules
-from netra_backend.app.db.client_clickhouse import (
-    ClickHouseDatabaseClient,
-    ClickHouseHealthChecker,
-    ClickHouseQueryExecutor,
+from netra_backend.app.db.clickhouse import (
+    ClickHouseService as ClickHouseDatabaseClient,
+    get_clickhouse_service,
 )
 from netra_backend.app.db.client_config import (
     CircuitBreakerManager,

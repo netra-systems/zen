@@ -86,12 +86,12 @@ def audit_oauth_secrets(project_id: str) -> Dict[str, Dict]:
     logger.info(f"{'='*60}\n")
     
     secrets_to_check = {
-        "google-client-id-staging": {
+        "google-oauth-client-id-staging": {
             "env_var": "GOOGLE_OAUTH_CLIENT_ID_STAGING",
             "validator": validate_oauth_client_id,
             "description": "Google OAuth Client ID for staging"
         },
-        "google-client-secret-staging": {
+        "google-oauth-client-secret-staging": {
             "env_var": "GOOGLE_OAUTH_CLIENT_SECRET_STAGING", 
             "validator": validate_oauth_client_secret,
             "description": "Google OAuth Client Secret for staging"
@@ -240,20 +240,20 @@ def main():
         
         # Determine what to update
         if args.client_id:
-            updates["google-client-id-staging"] = args.client_id
+            updates["google-oauth-client-id-staging"] = args.client_id
         elif os.environ.get("GOOGLE_OAUTH_CLIENT_ID_STAGING"):
-            updates["google-client-id-staging"] = os.environ["GOOGLE_OAUTH_CLIENT_ID_STAGING"]
+            updates["google-oauth-client-id-staging"] = os.environ["GOOGLE_OAUTH_CLIENT_ID_STAGING"]
         
         if args.client_secret:
-            updates["google-client-secret-staging"] = args.client_secret
+            updates["google-oauth-client-secret-staging"] = args.client_secret
         elif os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING"):
-            updates["google-client-secret-staging"] = os.environ["GOOGLE_OAUTH_CLIENT_SECRET_STAGING"]
+            updates["google-oauth-client-secret-staging"] = os.environ["GOOGLE_OAUTH_CLIENT_SECRET_STAGING"]
         
         # Validate before updating
         for secret_name, value in updates.items():
             config = {
-                "google-client-id-staging": validate_oauth_client_id,
-                "google-client-secret-staging": validate_oauth_client_secret
+                "google-oauth-client-id-staging": validate_oauth_client_id,
+                "google-oauth-client-secret-staging": validate_oauth_client_secret
             }.get(secret_name)
             
             if config:

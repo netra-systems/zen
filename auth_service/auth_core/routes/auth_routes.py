@@ -566,21 +566,54 @@ async def check_token_blacklist(request: TokenRequest):
         return {"blacklisted": False, "token_blacklisted": False, "user_blacklisted": False}
 
 @router.post("/refresh")
-async def refresh_tokens(request: RefreshRequest):
+async def refresh_tokens(request: Request):
     """Refresh access and refresh tokens"""
-    result = await auth_service.refresh_tokens(request.refresh_token)
-    
-    if not result:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
-    
-    access_token, refresh_token = result
-    
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "Bearer",
-        "expires_in": 900  # 15 minutes
-    }
+    try:
+        # Get the raw body to handle multiple formats
+        body = await request.body()
+        logger.info(f"Refresh endpoint - raw body: {body[:200] if body else 'empty'}")
+        
+        # Try to parse JSON
+        try:
+            import json
+            data = json.loads(body) if body else {}
+            
+            # Check for different field names the frontend might send
+            # The frontend might send refreshToken (camelCase) or refresh_token (snake_case)
+            refresh_token = data.get('refresh_token') or data.get('refreshToken') or data.get('token')
+            
+            if not refresh_token:
+                logger.error(f"Refresh token not found in request. Keys received: {list(data.keys())}")
+                raise HTTPException(
+                    status_code=422, 
+                    detail={"message": "refresh_token field is required", "received_keys": list(data.keys())}
+                )
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON body: {e}")
+            raise HTTPException(
+                status_code=422,
+                detail="Invalid JSON body"
+            )
+        
+        # Now call the auth service to refresh the tokens
+        result = await auth_service.refresh_tokens(refresh_token)
+        
+        if not result:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        
+        access_token, new_refresh_token = result
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "Bearer",
+            "expires_in": 900  # 15 minutes
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Refresh token error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.post("/service-token", response_model=ServiceTokenResponse)
 async def create_service_token(request: ServiceTokenRequest):

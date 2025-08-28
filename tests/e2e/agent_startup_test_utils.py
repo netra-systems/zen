@@ -113,7 +113,7 @@ class ServiceOrchestrator:
 
 def create_startup_test_suite(
 
-    auth_url: str = "http://localhost:8001",
+    auth_url: str = "http://localhost:8081",  # Docker default port
 
     backend_url: str = "http://localhost:8000", 
 

@@ -19,7 +19,7 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
@@ -38,6 +38,10 @@
             <critical-takeaway>OAuth client ID must end with .apps.googleusercontent.com and be at least 50 characters - validate format not just presence (oauth_validation_requirements.xml).</critical-takeaway>
             <critical-takeaway>OAuth providers must implement self_check() and validate_configuration() methods for comprehensive health monitoring (oauth_provider_health.xml).</critical-takeaway>
             <critical-takeaway>/oauth/status endpoint provides runtime OAuth health monitoring - returns 503 if unhealthy in staging/production (oauth_monitoring.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: OAuth secrets MUST use standardized naming: google-oauth-client-id-staging, NOT google-client-id-staging (oauth_secret_naming_fix.xml).</critical-takeaway>
+            <critical-takeaway>ALWAYS use echo -n when creating secrets to avoid line endings that break validation (oauth_secret_naming_fix.xml).</critical-takeaway>
+            <critical-takeaway>CATASTROPHIC: Auth service MUST NEVER import from netra_backend - causes complete auth failure in staging/production (oauth_service_independence_violation.xml).</critical-takeaway>
+            <critical-takeaway>Service independence violations cause immediate logout after OAuth - auth service cannot access database/sessions (oauth_service_independence_violation.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
@@ -58,6 +62,20 @@
             <critical-takeaway>.dict() method calls should be updated to .model_dump() with fallback patterns for backward compatibility</critical-takeaway>
             <critical-takeaway>Core Web Framework upgrades address critical CVE-2024-24762 and CVE-2024-53981 DoS vulnerabilities</critical-takeaway>
             <critical-takeaway>Existing codebase was already largely Pydantic v2 compatible due to modern patterns (@field_validator, @model_validator)</critical-takeaway>
+        </category>
+        
+        <category name="ClickHouse SSOT Violation - Critical Remediation [RESOLVED 2025-08-28]" path="SPEC/learnings/clickhouse_ssot_violation_remediation.xml" keywords="ClickHouse, SSOT, Single Source of Truth, Database Client, Duplicate Implementation, Architecture Violation, Canonical Implementation, Code Consolidation">
+            <critical-takeaway>CATASTROPHIC: FOUR duplicate ClickHouse client implementations violated SSOT principle - 834+ lines of duplicate code, 4x maintenance burden</critical-takeaway>
+            <critical-takeaway>CANONICAL IMPLEMENTATION: /netra_backend/app/db/clickhouse.py with get_clickhouse_client() is the ONLY authorized ClickHouse interface</critical-takeaway>
+            <critical-takeaway>DELETED SSOT VIOLATIONS: clickhouse_client.py, client_clickhouse.py, data_sub_agent/clickhouse_client.py - all removed 2025-08-28</critical-takeaway>
+            <critical-takeaway>MANDATORY PATTERN: from netra_backend.app.db.clickhouse import get_clickhouse_client; async with get_clickhouse_client() as client: ...</critical-takeaway>
+            <critical-takeaway>ANTI-PATTERN: Never create new ClickHouse client classes - extend canonical implementation instead</critical-takeaway>
+            <critical-takeaway>ANTI-PATTERN: Never embed test logic in production (_simulate_* methods) - use proper test fixtures</critical-takeaway>
+            <critical-takeaway>ANTI-PATTERN: Never use direct instantiation (ClickHouseClient()) - always use factory function</critical-takeaway>
+            <critical-takeaway>PREVENTION: Run python netra_backend/tests/test_clickhouse_ssot_compliance.py to prevent regressions</critical-takeaway>
+            <critical-takeaway>ENFORCEMENT: Pre-commit hooks prevent new ClickHouse client class creation</critical-takeaway>
+            <critical-takeaway>ARCHITECTURE: See SPEC/clickhouse_client_architecture.xml for complete specification</critical-takeaway>
+            <critical-takeaway>SEARCH FIRST: Always check existing implementations before creating new ones - "Search First, Create Second" principle</critical-takeaway>
         </category>
         
         <category name="Package Upgrade Migration 2025" path="SPEC/learnings/migrations/package_upgrade_2025.xml" keywords="Package Upgrade, Dependency Modernization, Security, SQLAlchemy, Pydantic, python-jose, AI SDK, Migration">
@@ -155,6 +173,14 @@
             <critical-takeaway>Auth service MUST use unified configuration via lazy loading pattern while maintaining service independence (unified_config_auth_service.xml).</critical-takeaway>
         </category>
 
+        <category name="Auth Refresh Endpoint Field Naming" path="SPEC/learnings/auth_refresh_endpoint_field_naming.xml" keywords="API Compatibility, Field Naming, CamelCase, Snake_Case, 422 Error, Refresh Token">
+            <critical-takeaway>Auth refresh endpoint must accept both camelCase (refreshToken) and snake_case (refresh_token) field names for frontend compatibility.</critical-takeaway>
+            <critical-takeaway>FastAPI's strict Pydantic validation causes 422 errors when field names don't match exactly - use raw request body for flexible parsing.</critical-takeaway>
+            <critical-takeaway>Frontend frameworks use camelCase while Python backends use snake_case - API endpoints must bridge this naming convention gap.</critical-takeaway>
+            <critical-takeaway>Debug 422 errors by logging raw request bodies and received field names to identify naming mismatches quickly.</critical-takeaway>
+            <critical-takeaway>Critical auth endpoints should support multiple field naming conventions to prevent integration failures.</critical-takeaway>
+        </category>
+
         <category name="Staging Authentication Failures [CRITICAL]" path="SPEC/learnings/staging_authentication_failures_2025.xml" keywords="Staging, Authentication, 403 Forbidden, Service-to-Service, Token Refresh, JWT Secret, OAuth">
             <critical-takeaway>CRITICAL: Authentication failures in staging indicate imminent production failures that will cause complete platform unavailability and 100% revenue loss.</critical-takeaway>
             <critical-takeaway>MANDATORY: All authentication tests must run in staging environment (@pytest.mark.env("staging")) to catch environment-specific configuration issues.</critical-takeaway>
@@ -222,6 +248,15 @@
             <critical-takeaway>Container startup probes require comprehensive success/failure/recovery testing.</critical-takeaway>
         </category>
         
+        <category name="Async Event Loop Blocking" path="SPEC/learnings/async_sleep_blocking_issue.xml" keywords="Performance, Async, Await, Event Loop, time.sleep, asyncio.sleep, Blocking, WebSocket, Retry, Delay">
+            <critical-takeaway>CRITICAL: NEVER use time.sleep() in async functions - blocks entire event loop causing service freezes</critical-takeaway>
+            <critical-takeaway>ALWAYS use await asyncio.sleep() in async functions for non-blocking delays</critical-takeaway>
+            <critical-takeaway>Blocking sleep in async code freezes ALL concurrent requests, timeouts WebSockets, and queues database queries</critical-takeaway>
+            <critical-takeaway>Separate retry handlers needed: async functions use await asyncio.sleep(), sync functions use time.sleep()</critical-takeaway>
+            <critical-takeaway>Event loop blocking can cause 50-80% of performance issues during retry operations under load</critical-takeaway>
+            <critical-takeaway>Search pattern: Find async functions with grep "async def" then check for time.sleep usage</critical-takeaway>
+        </category>
+        
         <category name="Deployment and Docker Configuration" path="SPEC/learnings/deployment.xml" keywords="Deployment, Docker, Dockerfile, Container, Frontend, Backend, Auth, Cloud Run, GCP, Staging">
             <critical-takeaway>CRITICAL: Frontend Dockerfile MUST use deployment/docker/frontend.gcp.Dockerfile - NEVER create new ones</critical-takeaway>
             <critical-takeaway>All service Dockerfiles follow pattern: deployment/docker/{service}.gcp.Dockerfile</critical-takeaway>
@@ -261,6 +296,14 @@
             <critical-takeaway>Use profiles only for truly optional services that not all developers need.</critical-takeaway>
             <critical-takeaway>Backend services must handle missing optional services gracefully with fallbacks.</critical-takeaway>
             <critical-takeaway>Environment variables for optional services should be configured even if service is not running.</critical-takeaway>
+        </category>
+        
+        <category name="Docker Container Naming in Remediation Scripts" path="SPEC/learnings/docker_container_naming_remediation.xml" keywords="Docker, Container Names, Remediation, Auth Service, Database, Postgres, ClickHouse">
+            <critical-takeaway>CRITICAL: Container names in Netra use "netra-" prefix consistently: netra-auth, netra-postgres, netra-clickhouse, netra-backend, netra-frontend, netra-redis</critical-takeaway>
+            <critical-takeaway>Docker remediation scripts must use exact container names from docker-compose.dev.yml - Docker doesn't accept partial matches for specific container operations</critical-takeaway>
+            <critical-takeaway>ALWAYS verify actual container names from docker-compose.dev.yml before hardcoding in scripts to prevent "container not found" errors</critical-takeaway>
+            <critical-takeaway>Test remediation commands manually before deploying intelligent remediation to avoid cascading failures</critical-takeaway>
+            <critical-takeaway>When using docker ps filters, "name=auth" works for finding "netra-auth" but "docker restart auth_service" fails - be specific</critical-takeaway>
         </category>
         
         <category name="CORS Configuration" path="SPEC/learnings/cors_development_wildcard.xml" keywords="CORS, localhost, 127.0.0.1, Origin, Development, Wildcard, Cross-Origin">
@@ -338,6 +381,17 @@
             <critical-takeaway>Always include noscript iframe fallback for accessibility compliance.</critical-takeaway>
             <critical-takeaway>Test GTM loading with automated script (scripts/test_gtm_loading.py) before deployment.</critical-takeaway>
             <critical-takeaway>Environment variables must be prefixed with NEXT_PUBLIC_ for browser availability.</critical-takeaway>
+        </category>
+        
+        <category name="GTM Infinite Loop Prevention" path="SPEC/learnings/gtm_infinite_loop_prevention.xml" keywords="GTM, Circuit Breaker, Infinite Loop, AuthGuard, Event Deduplication, Rate Limiting, Performance, Memory Leak">
+            <critical-takeaway>CRITICAL: AuthGuard component can cause infinite GTM event loops - use refs to track if events already fired.</critical-takeaway>
+            <critical-takeaway>Implement circuit breaker pattern for ALL analytics integrations to prevent event storms.</critical-takeaway>
+            <critical-takeaway>Event deduplication window (2 seconds) prevents duplicate events from rapid re-renders.</critical-takeaway>
+            <critical-takeaway>Rate limiting (100 events per type/minute) protects against legitimate event spam.</critical-takeaway>
+            <critical-takeaway>Circuit breaker trips after 50 failures in 10 seconds, auto-recovers after 30 seconds.</critical-takeaway>
+            <critical-takeaway>Memory management critical - cleanup old tracking data every minute to prevent leaks.</critical-takeaway>
+            <critical-takeaway>GTMProvider must integrate circuit breaker checks BEFORE pushing to dataLayer.</critical-takeaway>
+            <critical-takeaway>Test suites must verify: no infinite loops, deduplication works, rate limits enforced, circuit breaker trips/recovers.</critical-takeaway>
         </category>
         
         <category name="WebSocket Connection Lifecycle" path="SPEC/learnings/websocket.xml" keywords="WebSocket, Accept, Connection, Lifecycle, Authentication, Context Manager, State Management">
@@ -769,6 +823,25 @@
             <critical-takeaway>Layer multiple timeout protections: connection, operation, initialization, and wrapper timeouts</critical-takeaway>
             <critical-takeaway>HTTPSConnectionPool timeout errors indicate infrastructure unavailability - use fast failure patterns</critical-takeaway>
             <critical-takeaway>Backend startup time reduced from 60s+ to &lt;30s by preventing ClickHouse connection blocking</critical-takeaway>
+        </category>
+        
+        <category name="ClickHouse SSOT Violation Remediation [CRITICAL FIXED 2025-08-28]" path="SPEC/learnings/clickhouse_ssot_violation_remediation.xml" keywords="ClickHouse, SSOT, Single Source of Truth, Duplicate Clients, Code Duplication, Client Architecture, get_clickhouse_client, canonical implementation, technical debt, maintenance burden">
+            <critical-takeaway>CATASTROPHIC: Had 4 different ClickHouse client implementations violating SSOT principle - consolidated to 1 canonical implementation at netra_backend/app/db/clickhouse.py</critical-takeaway>
+            <critical-takeaway>ALWAYS use get_clickhouse_client() context manager - NEVER create new ClickHouse client classes or direct instantiation</critical-takeaway>
+            <critical-takeaway>Test logic in production (MockClickHouseDatabase, _simulate_* methods) violates clean architecture - use test_framework/fixtures/clickhouse_fixtures.py</critical-takeaway>
+            <critical-takeaway>Search First, Create Second - ALWAYS check for existing ClickHouse implementation before creating parallel ones</critical-takeaway>
+            <critical-takeaway>Agent-specific client implementations violate service architecture - use dependency injection with canonical client</critical-takeaway>
+            <critical-takeaway>SSOT violations compound quickly - 4 implementations created 834+ lines of duplicate code requiring synchronized updates</critical-takeaway>
+            <critical-takeaway>Direct class instantiation (ClickHouseClient()) bypasses configuration management and connection pooling</critical-takeaway>
+            <critical-takeaway>Run python -m pytest netra_backend/tests/test_clickhouse_ssot_compliance.py to prevent SSOT regressions</critical-takeaway>
+            <critical-takeaway>Migration pattern: Replace import/instantiation with async with get_clickhouse_client() as client context manager</critical-takeaway>
+            <critical-takeaway>Deleted files: clickhouse_client.py, client_clickhouse.py, agents/data_sub_agent/clickhouse_client.py - imports will fail</critical-takeaway>
+            <critical-takeaway>Automated compliance checks in scripts/compliance/ssot_checker.py prevent new duplicate client implementations</critical-takeaway>
+            <critical-takeaway>SSOT compliance tests must pass: test_no_duplicate_clickhouse_clients, test_no_test_logic_in_production, test_all_imports_use_canonical_client</critical-takeaway>
+            <critical-takeaway>MockClickHouseDatabase in production violates clean architecture - move to test_framework/fixtures/clickhouse_fixtures.py</critical-takeaway>
+            <critical-takeaway>Integration tests importing deleted clients fail with ModuleNotFoundError - update to canonical imports</critical-takeaway>
+            <critical-takeaway>Canonical client must include ALL features from deleted implementations: SSL/TLS support, circuit breakers, retry logic</critical-takeaway>
+            <critical-takeaway>Post-remediation verification: grep -r "from.*clickhouse_client\|from.*client_clickhouse" should return NO results</critical-takeaway>
         </category>
         
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
@@ -1462,4 +1535,35 @@
             <critical-takeaway>Pipeline executor batching integration offers additional 20-30% performance gains once base optimization is stable</critical-takeaway>
         </category>
     </performance_optimization>
+    
+    <ssot_compliance>
+        <category name="WebSocket Manager SSOT Compliance" path="SPEC/learnings/websocket_manager_ssot_compliance.xml" keywords="WebSocket, SSOT, Single Source of Truth, Audit, Manager Count, Aliases, Mocks, False Positives">
+            <critical-takeaway>WebSocket implementation is SSOT COMPLIANT - only ONE canonical WebSocketManager at websocket_core/manager.py.</critical-takeaway>
+            <critical-takeaway>Audit tools must distinguish between implementations vs aliases vs mocks - 30+ count includes 28 test mocks and 6+ aliases.</critical-takeaway>
+            <critical-takeaway>Specialized managers (HeartbeatManager, QualityManager) are NOT duplicates - they handle different single responsibilities.</critical-takeaway>
+            <critical-takeaway>SSOT means one implementation per CONCEPT, not one class with "Manager" in the name.</critical-takeaway>
+            <critical-takeaway>Test mock proliferation is expected and healthy for proper test isolation - not an SSOT violation.</critical-takeaway>
+        </category>
+    </ssot_compliance>
+    
+    <intelligent_remediation>
+        <category name="Intelligent Docker Authentication Remediation" path="SPEC/learnings/intelligent_remediation_auth_consolidated.xml" keywords="Docker, Remediation, Authentication, Security, Agent Deployment, Container Management, Auth Service, Backend, netra-auth, netra-backend">
+            <critical-takeaway>Docker container names MUST match docker-compose.dev.yml exactly: netra-auth, netra-backend, netra-postgres, netra-clickhouse, netra-frontend, netra-redis</critical-takeaway>
+            <critical-takeaway>Security specialist agents automatically deployed for authentication issues (401/403 errors) across containers</critical-takeaway>
+            <critical-takeaway>Service restart commands frequently fail without correct container naming - docker restart requires exact names</critical-takeaway>
+            <critical-takeaway>Backend authentication issues outnumber auth service issues 7:4 - focus remediation on backend middleware</critical-takeaway>
+            <critical-takeaway>Log analysis commands have highest success rate (>80%), service restarts lowest (<30%) due to container naming</critical-takeaway>
+            <critical-takeaway>Intelligent remediation saves learnings with meaningful names: intelligent_remediation_{category}_{timestamp}.xml</critical-takeaway>
+            <critical-takeaway>Implement health check endpoints for authentication validation before attempting service restarts</critical-takeaway>
+            <critical-takeaway>Add JWT token refresh mechanism to prevent authentication failures that trigger remediation cycles</critical-takeaway>
+        </category>
+        
+        <category name="Docker Container Naming Standards" path="SPEC/learnings/docker_container_naming_remediation.xml" keywords="Docker, Container Names, docker-compose, Remediation Scripts, netra-prefix">
+            <critical-takeaway>ALL Netra containers use consistent "netra-" prefix: netra-auth, netra-postgres, netra-clickhouse, netra-backend, netra-frontend, netra-redis</critical-takeaway>
+            <critical-takeaway>Docker commands require EXACT container names - partial matches work for filters but NOT for specific operations</critical-takeaway>
+            <critical-takeaway>ALWAYS verify container names from docker-compose.dev.yml before hardcoding in remediation scripts</critical-takeaway>
+            <critical-takeaway>Test all Docker remediation commands against actual running containers before deployment</critical-takeaway>
+            <critical-takeaway>Container name validation should be included in pre-deployment checks for remediation scripts</critical-takeaway>
+        </category>
+    </intelligent_remediation>
 </specification>

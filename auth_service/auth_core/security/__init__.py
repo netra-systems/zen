@@ -3,7 +3,7 @@ Security utilities for OAuth authentication and middleware
 """
 
 # Canonical security middleware - SSOT for auth service security functionality
-from .middleware import (
+from auth_service.auth_core.security.middleware import (
     validate_request_size,
     add_service_headers,
     add_security_headers,

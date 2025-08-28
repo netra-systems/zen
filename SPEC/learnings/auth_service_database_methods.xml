@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Auth Service Database Manager Missing Methods</title>
+    <category>database</category>
+    <service>auth_service</service>
+    <date>2025-08-28</date>
+    <impact>CRITICAL</impact>
+  </metadata>
+
+  <problem>
+    <description>Auth service database connection failed with "No module named 'netra_backend'" error</description>
+    <root_cause>
+      AuthDatabaseManager class was missing critical methods that connection.py was trying to call:
+      - get_auth_database_url()
+      - get_auth_database_url_sync()
+      - _normalize_database_url()
+    </root_cause>
+    <symptoms>
+      - 28 CRITICAL database connectivity failures in Docker logs
+      - Auth service unable to initialize database
+      - Service startup failures
+    </symptoms>
+  </problem>
+
+  <solution>
+    <approach>Add missing methods to AuthDatabaseManager class</approach>
+    <implementation>
+      <step>Added get_auth_database_url() method to return sync format database URL</step>
+      <step>Added get_auth_database_url_sync() as compatibility alias</step>
+      <step>Added _normalize_database_url() for URL normalization using DatabaseURLBuilder</step>
+    </implementation>
+    <verification>
+      - All imports work without errors
+      - Database connection successful
+      - Auth service starts properly
+      - Service independence maintained
+    </verification>
+  </solution>
+
+  <prevention>
+    <recommendation>When creating database manager classes, ensure all required interface methods are implemented</recommendation>
+    <recommendation>Use interface contracts to define required methods upfront</recommendation>
+    <recommendation>Add unit tests to verify all expected methods exist</recommendation>
+  </prevention>
+
+  <compliance>
+    <spec>SPEC/independent_services.xml - Auth service maintains complete independence</spec>
+    <spec>SPEC/database_connectivity_architecture.xml - Proper database URL handling</spec>
+    <spec>SPEC/import_management_architecture.xml - Absolute imports only</spec>
+  </compliance>
+</learning>
