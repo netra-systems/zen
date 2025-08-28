@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>LoggingDepthConfiguration</name>
+        <type>Learning</type>
+        <version>1.0</version>
+        <created>2025-08-28</created>
+        <description>Critical learning about loguru depth parameter for proper source location reporting in unified logging system</description>
+    </metadata>
+
+    <problem>
+        <description>
+            Log messages were showing the wrong source location (unified_logging.py:202) instead of the actual 
+            caller's file and line number. This made debugging difficult as developers couldn't identify where 
+            errors actually originated.
+        </description>
+        <example>
+            <!-- Instead of showing the actual source -->
+            2025-08-28 05:33:41.864 | ERROR | netra_backend.app.core.unified_logging:_emit_log:202 | Core logic failed: No module named 'langchain_google_genai'
+            <!-- Should show -->
+            2025-08-28 05:33:41.864 | ERROR | netra_backend.app.agents.optimizations_core_sub_agent:_execute_with_modern_patterns:153 | Core logic failed: No module named 'langchain_google_genai'
+        </example>
+    </problem>
+
+    <root_cause>
+        <description>
+            The UnifiedLogger wrapper class was not using loguru's `opt(depth=n)` parameter correctly. 
+            When loguru logs a message, it determines the source location by inspecting the call stack. 
+            Without the proper depth parameter, it reports the location of the wrapper method instead 
+            of the actual caller.
+        </description>
+        <call_chain>
+            <step>1. User code calls logger.error("message")</step>
+            <step>2. UnifiedLogger.error() is invoked</step>
+            <step>3. UnifiedLogger._log() is called internally</step>
+            <step>4. UnifiedLogger._emit_log() is called</step>
+            <step>5. loguru's logger.log() is finally called</step>
+        </call_chain>
+    </root_cause>
+
+    <solution>
+        <description>
+            Use loguru's `opt(depth=3)` parameter to skip through the wrapper chain and report the 
+            actual source location. The depth of 3 accounts for the three wrapper methods between 
+            the user's code and loguru.
+        </description>
+        <implementation>
+            <file>netra_backend/app/core/unified_logging.py</file>
+            <method>_emit_log</method>
+            <code><![CDATA[
+def _emit_log(self, level: str, message: str, exc_info: bool, context: Dict[str, Any]):
+    """Emit log message with proper exception handling."""
+    # Use depth=3 to skip the call chain:
+    # 1. _emit_log (this method)
+    # 2. _log (the general log method)
+    # 3. error/warning/info (the specific log level method)
+    # This ensures the actual caller location is shown in logs
+    if exc_info and self._has_exception_info():
+        logger.opt(depth=3, exception=True).log(level.upper(), message, **context)
+    else:
+        logger.opt(depth=3).log(level.upper(), message, **context)
+            ]]></code>
+        </implementation>
+    </solution>
+
+    <testing>
+        <description>
+            A regression test must verify that log messages show the correct source location, 
+            not the wrapper's location.
+        </description>
+        <test_file>netra_backend/tests/core/test_unified_logging_depth.py</test_file>
+    </testing>
+
+    <prevention>
+        <guideline>When wrapping loguru or any logging library, always use the depth parameter to ensure proper source location reporting</guideline>
+        <guideline>The depth value should equal the number of wrapper methods between the user's code and the actual logging call</guideline>
+        <guideline>Test logging output to verify source locations are correctly reported</guideline>
+        <guideline>If adding new wrapper methods, adjust the depth parameter accordingly</guideline>
+    </prevention>
+
+    <impact>
+        <item>Developers can now quickly identify the exact source of errors and warnings</item>
+        <item>Debugging is significantly faster with accurate file and line number information</item>
+        <item>Production logs are more useful for diagnosing issues</item>
+    </impact>
+</specification>
