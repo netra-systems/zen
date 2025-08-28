@@ -53,10 +53,12 @@ from netra_backend.app.schemas.auth_types import (
     TokenData,
     UserPermission,
 )
+from test_framework.mocks import MockRedisClient
 
 logger = logging.getLogger(__name__)
 
-class MockRedisClient:
+# MockRedisClient imported from canonical test_framework location
+# OLD class MockRedisClient:
     """In-memory mock Redis client for testing when TEST_DISABLE_REDIS=true."""
     
     def __init__(self):

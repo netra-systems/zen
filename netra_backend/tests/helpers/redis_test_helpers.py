@@ -239,79 +239,9 @@ async def create_test_redis_client(host="localhost", port=6379, db=1):
         return client
     except Exception:
         # Return mock client if Redis not available
-        from unittest.mock import AsyncMock
+        from test_framework.mocks import MockRedisClient
         
-        class MockRedisClient:
-            """Mock Redis client with stateful behavior for testing"""
-            
-            def __init__(self):
-                self.data = {}  # Key-value store
-                self.ttls = {}  # TTL tracking
-                self.counters = {}  # Counter tracking
-                
-            async def ping(self):
-                return True
-                
-            async def get(self, key):
-                # Check if key has expired
-                if key in self.ttls:
-                    import time
-                    if time.time() > self.ttls[key]:
-                        # Key has expired, remove it
-                        if key in self.data:
-                            del self.data[key]
-                        del self.ttls[key]
-                        return None
-                return self.data.get(key)
-                
-            async def set(self, key, value, ex=None):
-                self.data[key] = value
-                if ex:
-                    import time
-                    self.ttls[key] = time.time() + ex
-                return True
-                
-            async def delete(self, *keys):
-                count = 0
-                for key in keys:
-                    if key in self.data:
-                        del self.data[key]
-                        count += 1
-                    if key in self.ttls:
-                        del self.ttls[key]
-                    if key in self.counters:
-                        del self.counters[key]
-                return count
-                
-            async def keys(self, pattern):
-                # Simple pattern matching for test cleanup
-                if pattern == "rate_limit:*":
-                    return [k for k in self.data.keys() if k.startswith("rate_limit:")]
-                return []
-                
-            async def ttl(self, key):
-                if key not in self.ttls:
-                    return -1
-                import time
-                remaining = self.ttls[key] - time.time()
-                return max(int(remaining), -1) if remaining > 0 else -2
-                
-            async def incr(self, key):
-                current = int(self.data.get(key, 0))
-                self.data[key] = str(current + 1)
-                return current + 1
-                
-            async def expire(self, key, seconds):
-                import time
-                self.ttls[key] = time.time() + seconds
-                return True
-                
-            async def close(self):
-                pass
-                
-            async def aclose(self):
-                pass
-        
+        # Use canonical MockRedisClient from test_framework
         return MockRedisClient()
 
 async def clear_redis_test_data(client, pattern="test:*"):

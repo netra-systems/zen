@@ -38,59 +38,12 @@ from netra_backend.app.db.database_manager import DatabaseManager as ConnectionM
 
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
+from test_framework.mocks import MockRedisClient
 
 logger = logging.getLogger(__name__)
 
-
-class MockRedisClient:
-    """In-memory mock Redis client for testing when TEST_DISABLE_REDIS=true."""
-    
-    def __init__(self):
-        self._data = {}
-        self._expiry = {}
-    
-    async def ping(self):
-        """Mock ping - always succeeds."""
-        return True
-    
-    async def get(self, key: str):
-        """Get value by key."""
-        if key in self._data:
-            # Check expiry
-            if key in self._expiry:
-                if time.time() > self._expiry[key]:
-                    del self._data[key]
-                    del self._expiry[key]
-                    return None
-            return self._data[key]
-        return None
-    
-    async def set(self, key: str, value: str, ex: Optional[int] = None):
-        """Set key-value pair with optional expiry."""
-        self._data[key] = value
-        if ex:
-            self._expiry[key] = time.time() + ex
-        return True
-    
-    async def setex(self, key: str, time_seconds: int, value: str):
-        """Set key-value pair with expiry (Redis setex format)."""
-        self._data[key] = value
-        self._expiry[key] = time.time() + time_seconds
-        return True
-    
-    async def delete(self, key: str):
-        """Delete key."""
-        deleted = 0
-        if key in self._data:
-            del self._data[key]
-            deleted = 1
-        if key in self._expiry:
-            del self._expiry[key]
-        return deleted
-    
-    async def close(self):
-        """Close connection (no-op for mock)."""
-        pass
+# MockRedisClient now imported from canonical test_framework location
+# Removed duplicate MockRedisClient - using canonical version from test_framework.mocks
 
 
 class MockRedisService:
