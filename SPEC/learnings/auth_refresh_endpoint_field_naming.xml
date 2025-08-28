@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Auth Refresh Endpoint Field Naming Compatibility</title>
+  <date>2025-08-28</date>
+  <category>API_COMPATIBILITY</category>
+  <severity>HIGH</severity>
+  
+  <issue>
+    <description>
+      The auth service refresh endpoint was returning 422 Unprocessable Entity errors when the frontend 
+      sent refresh tokens using camelCase field naming (refreshToken) instead of snake_case (refresh_token).
+    </description>
+    
+    <symptoms>
+      - 422 status code on POST /auth/refresh
+      - Frontend unable to refresh authentication tokens
+      - Validation error: "Field required" for refresh_token
+      - Frontend sending "refreshToken" in camelCase
+      - Backend expecting "refresh_token" in snake_case
+    </symptoms>
+    
+    <root_cause>
+      FastAPI's automatic request validation with Pydantic models enforces exact field naming.
+      The RefreshRequest model expected "refresh_token" (snake_case) but the frontend was sending 
+      "refreshToken" (camelCase), causing validation to fail before the handler could process the request.
+    </root_cause>
+  </issue>
+  
+  <solution>
+    <approach>
+      Modified the refresh endpoint to handle raw request body and manually parse JSON to support 
+      multiple field naming conventions.
+    </approach>
+    
+    <implementation>
+      <file>auth_service/auth_core/routes/auth_routes.py</file>
+      <changes>
+        - Removed RefreshRequest model from function signature
+        - Added Request parameter to access raw body
+        - Manually parse JSON and check multiple field names:
+          * refresh_token (snake_case - original)
+          * refreshToken (camelCase - frontend convention)  
+          * token (simple format - fallback)
+        - Provide detailed error messages showing received keys for debugging
+      </changes>
+    </implementation>
+  </solution>
+  
+  <lessons_learned>
+    <lesson>
+      <title>Frontend-Backend Naming Convention Mismatches</title>
+      <description>
+        Frontend frameworks often use camelCase (JavaScript convention) while Python backends 
+        use snake_case. API endpoints should be flexible enough to handle both conventions
+        to prevent integration issues.
+      </description>
+      <recommendation>
+        For critical authentication endpoints, consider:
+        1. Supporting multiple field naming conventions
+        2. Using middleware to transform field names
+        3. Documenting expected formats clearly
+        4. Adding integration tests with actual frontend payloads
+      </recommendation>
+    </lesson>
+    
+    <lesson>
+      <title>Raw Request Body Handling in FastAPI</title>
+      <description>
+        When Pydantic model validation is too strict, accessing the raw request body allows
+        more flexible parsing while maintaining type safety after validation.
+      </description>
+      <pattern>
+        ```python
+        @router.post("/endpoint")
+        async def handler(request: Request):
+            body = await request.body()
+            data = json.loads(body)
+            # Custom field extraction logic
+        ```
+      </pattern>
+    </lesson>
+    
+    <lesson>
+      <title>Debugging 422 Errors</title>
+      <description>
+        422 Unprocessable Entity errors in FastAPI usually indicate request validation failures.
+        Adding logging of raw request bodies and received keys helps identify naming mismatches quickly.
+      </description>
+      <debugging_tips>
+        - Log raw request body
+        - Log extracted field names
+        - Include received keys in error responses
+        - Test with actual frontend payloads, not just unit tests
+      </debugging_tips>
+    </lesson>
+  </lessons_learned>
+  
+  <prevention>
+    <measure>
+      Add integration tests that use actual frontend request formats
+    </measure>
+    <measure>
+      Implement request/response transformation middleware for naming conventions
+    </measure>
+    <measure>
+      Document API contracts with examples in both camelCase and snake_case
+    </measure>
+    <measure>
+      Use API testing tools like Postman/Insomnia with saved frontend request examples
+    </measure>
+  </prevention>
+  
+  <testing_requirements>
+    <requirement>
+      Test refresh endpoint with multiple field naming formats
+    </requirement>
+    <requirement>
+      Test with actual frontend-generated tokens
+    </requirement>
+    <requirement>
+      Test error handling for missing/invalid fields
+    </requirement>
+    <requirement>
+      Verify backwards compatibility with existing clients
+    </requirement>
+  </testing_requirements>
+  
+  <references>
+    <reference>https://fastapi.tiangolo.com/tutorial/body/#request-body-raw-body</reference>
+    <reference>Frontend auth service integration at frontend/src/services/auth.js</reference>
+  </references>
+</learning>
