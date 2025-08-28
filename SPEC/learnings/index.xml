@@ -19,7 +19,7 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
@@ -34,6 +34,10 @@
             <critical-takeaway>JWT validation must validate token structure before decoding to prevent malformed token errors (auth_service_endpoint_fixes.xml).</critical-takeaway>
             <critical-takeaway>CORS wildcard (*) cannot be used with credentials: 'include' - use specific origin list in dev (cors_development_wildcard.xml).</critical-takeaway>
             <critical-takeaway>OAuth environment variables use _ENV suffix for runtime (OAUTH_GOOGLE_CLIENT_ID_ENV) and _{ENVIRONMENT} for deployment (OAUTH_GOOGLE_CLIENT_ID_STAGING) - see oauth_environment_naming_convention.xml</critical-takeaway>
+            <critical-takeaway>CRITICAL: Auth service MUST validate OAuth client configuration at startup and FAIL FAST in staging/production if misconfigured (oauth_startup_validation.xml).</critical-takeaway>
+            <critical-takeaway>OAuth client ID must end with .apps.googleusercontent.com and be at least 50 characters - validate format not just presence (oauth_validation_requirements.xml).</critical-takeaway>
+            <critical-takeaway>OAuth providers must implement self_check() and validate_configuration() methods for comprehensive health monitoring (oauth_provider_health.xml).</critical-takeaway>
+            <critical-takeaway>/oauth/status endpoint provides runtime OAuth health monitoring - returns 503 if unhealthy in staging/production (oauth_monitoring.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
@@ -413,6 +417,15 @@
             <critical-takeaway>Monitor security policy logs to identify false positives: preconfiguredExprIds shows which rule triggered the block.</critical-takeaway>
             <critical-takeaway>OAuth exemption rule should validate: request.method == 'GET' and request.query.contains('code=') and request.query.contains('state=').</critical-takeaway>
             <critical-takeaway>Test OAuth flows immediately after implementing Cloud Armor to catch WAF false positives before they impact users.</critical-takeaway>
+        </category>
+        
+        <category name="Cloud Armor WAF Removal Decision" path="SPEC/learnings/cloud_armor_waf_removal.xml" keywords="Cloud Armor, OWASP, WAF, False Positives, 403 Forbidden, Security Architecture, Production Incident">
+            <critical-takeaway>CRITICAL: OWASP WAF rules are fundamentally incompatible with modern SPAs and cause excessive false positives - DO NOT RE-ADD without extensive testing.</critical-takeaway>
+            <critical-takeaway>Rules like owasp-crs-v030001-id942421-sqli block normal homepage access, health checks, and login pages.</critical-takeaway>
+            <critical-takeaway>Application-level security (input validation, parameterized queries, JWT auth) is more effective than generic WAF rules.</critical-takeaway>
+            <critical-takeaway>If WAF rules keep returning via Terraform, update cloud-armor.tf, commit changes, and use direct gcloud commands if needed.</critical-takeaway>
+            <critical-takeaway>Retain DDoS protection, rate limiting, and geographic throttling - these don't cause false positives.</critical-takeaway>
+            <critical-takeaway>Monitor 403 error rates as key health indicator after security policy changes.</critical-takeaway>
         </category>
         
         <category name="ClickHouse Development Configuration" path="SPEC/learnings/clickhouse_dev_configuration.xml" keywords="ClickHouse, Port Configuration, Development Environment, Container, Testing, 8123, 8443">
