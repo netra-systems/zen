@@ -133,6 +133,9 @@ async def lifespan(app: FastAPI):
         elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
             oauth_validation_errors.append(f"Google OAuth client ID appears invalid: {google_client_id[:20]}...")
             logger.error(f"❌ CRITICAL: Google OAuth client ID looks like a placeholder: {google_client_id[:20]}...")
+        elif not google_client_id.endswith(".apps.googleusercontent.com"):
+            oauth_validation_errors.append(f"Google OAuth client ID has invalid format (should end with .apps.googleusercontent.com): {google_client_id[:20]}...")
+            logger.error(f"❌ CRITICAL: Google OAuth client ID has invalid format: {google_client_id[:20]}...")
         else:
             logger.info(f"✅ Google OAuth client ID configured: {google_client_id[:20]}...")
         
@@ -196,6 +199,43 @@ Auth Service startup ABORTED.
             raise RuntimeError(f"OAuth configuration validation failed in {env}: {', '.join(oauth_validation_errors)}")
         
         logger.info("✅ OAuth configuration validation PASSED")
+        
+        # ADDITIONAL VALIDATION: Verify OAuth provider can initialize
+        logger.info("🔍 Verifying OAuth provider initialization...")
+        try:
+            from auth_service.auth_core.oauth_manager import OAuthManager
+            oauth_manager = OAuthManager()
+            
+            # Check if Google provider is available and configured
+            available_providers = oauth_manager.get_available_providers()
+            if "google" not in available_providers:
+                raise RuntimeError("Google OAuth provider not available after configuration validation")
+            
+            # Verify Google provider is properly configured
+            if not oauth_manager.is_provider_configured("google"):
+                raise RuntimeError("Google OAuth provider not properly configured")
+            
+            # Try to get the Google provider instance
+            google_provider = oauth_manager.get_provider("google")
+            if not google_provider:
+                raise RuntimeError("Failed to get Google OAuth provider instance")
+            
+            # Verify provider can generate authorization URL (without actually making a request)
+            try:
+                test_url = google_provider.get_authorization_url("test-state-validation")
+                if not test_url or "accounts.google.com" not in test_url:
+                    raise RuntimeError(f"Invalid authorization URL generated: {test_url[:50] if test_url else 'None'}")
+                logger.info("✅ OAuth provider can generate valid authorization URLs")
+            except Exception as url_error:
+                raise RuntimeError(f"OAuth provider cannot generate authorization URLs: {url_error}")
+            
+            logger.info(f"✅ OAuth provider initialization verified - {len(available_providers)} provider(s) available")
+            
+        except Exception as provider_error:
+            error_msg = f"OAuth provider validation failed: {provider_error}"
+            logger.error(f"❌ CRITICAL: {error_msg}")
+            raise RuntimeError(f"OAuth provider initialization failed in {env}: {error_msg}")
+            
     else:
         logger.info(f"Skipping OAuth validation in {env} environment")
     
@@ -553,6 +593,77 @@ async def cors_test() -> Dict[str, Any]:
         "timestamp": datetime.now(UTC).isoformat(),
         **cors_info
     }
+
+# OAuth status endpoint for monitoring and validation
+@app.get("/oauth/status")
+@app.head("/oauth/status")
+async def oauth_status() -> Dict[str, Any]:
+    """OAuth provider status endpoint for health monitoring and validation"""
+    from auth_service.auth_core.oauth_manager import OAuthManager
+    
+    env = AuthConfig.get_environment()
+    status_response = {
+        "service": "auth-service",
+        "version": "1.0.0",
+        "environment": env,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "oauth_providers": {}
+    }
+    
+    try:
+        # Initialize OAuth manager to check provider status
+        oauth_manager = OAuthManager()
+        
+        # Get available providers
+        available_providers = oauth_manager.get_available_providers()
+        status_response["available_providers"] = available_providers
+        
+        # Check Google provider specifically
+        if "google" in available_providers:
+            google_provider = oauth_manager.get_provider("google")
+            if google_provider:
+                # Perform self-check
+                self_check_results = google_provider.self_check()
+                status_response["oauth_providers"]["google"] = self_check_results
+                
+                # Add configuration status
+                config_status = google_provider.get_configuration_status()
+                status_response["oauth_providers"]["google"]["config"] = config_status
+        else:
+            status_response["oauth_providers"]["google"] = {
+                "is_healthy": False,
+                "error": "Google OAuth provider not available"
+            }
+        
+        # Overall OAuth health
+        all_healthy = all(
+            provider_info.get("is_healthy", False) 
+            for provider_info in status_response["oauth_providers"].values()
+        )
+        status_response["oauth_healthy"] = all_healthy
+        
+        # Return 503 if OAuth is unhealthy in staging/production
+        if not all_healthy and env in ["staging", "production"]:
+            return JSONResponse(
+                status_code=503,
+                content=status_response
+            )
+        
+        return status_response
+        
+    except Exception as e:
+        logger.error(f"Failed to get OAuth status: {e}")
+        status_response["error"] = str(e)
+        status_response["oauth_healthy"] = False
+        
+        # Return 503 in staging/production if OAuth status check fails
+        if env in ["staging", "production"]:
+            return JSONResponse(
+                status_code=503,
+                content=status_response
+            )
+        
+        return status_response
 
 if __name__ == "__main__":
     import uvicorn
