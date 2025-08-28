@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <title>WebSocket Interface Mismatches and Protocol Compliance</title>
+    <last_updated>2025-08-27</last_updated>
+    
+    <critical_fixes>
+        <fix date="2025-08-27" severity="critical">
+            <issue>WebSocketManager missing send_to_thread method</issue>
+            <error_message>'WebSocketManager' object has no attribute 'send_to_thread'</error_message>
+            <context>
+                <file>netra_backend/app/agents/supervisor/pipeline_executor.py:202</file>
+                <usage>await self.websocket_manager.send_to_thread(thread_id, message.model_dump())</usage>
+            </context>
+            <root_cause>
+                The WebSocketManager class was missing the send_to_thread method that was 
+                being called by pipeline_executor. This indicates a protocol mismatch where
+                the interface expected by consumers didn't match the actual implementation.
+            </root_cause>
+            <solution>
+                Added send_to_thread method to WebSocketManager that:
+                - Sends messages to all connections associated with a thread_id
+                - Handles iteration safely by copying connection keys
+                - Properly serializes different message types
+                - Returns success/failure status
+            </solution>
+            <implementation>
+                <location>netra_backend/app/websocket_core/manager.py:268-301</location>
+                <code><![CDATA[
+async def send_to_thread(self, thread_id: str, 
+                        message: Union[WebSocketMessage, Dict[str, Any]]) -> bool:
+    """Send message to all users in a thread."""
+    connections_sent = 0
+    conn_ids = list(self.connections.keys())
+    
+    for conn_id in conn_ids:
+        if conn_id in self.connections:
+            conn_info = self.connections[conn_id]
+            if conn_info.get("thread_id") == thread_id:
+                try:
+                    websocket = conn_info["websocket"]
+                    if hasattr(message, 'model_dump'):
+                        message_dict = message.model_dump()
+                    elif hasattr(message, 'dict'):
+                        message_dict = message.dict()
+                    else:
+                        message_dict = message
+                    
+                    await websocket.send_json(message_dict)
+                    connections_sent += 1
+                    conn_info["message_count"] = conn_info.get("message_count", 0) + 1
+                except Exception as e:
+                    logger.debug(f"Failed to send to connection {conn_id}: {e}")
+    
+    if connections_sent > 0:
+        logger.debug(f"Sent message to {connections_sent} connections in thread {thread_id}")
+        return True
+    
+    logger.warning(f"No active connections found for thread {thread_id}")
+    return False
+                ]]></code>
+            </implementation>
+        </fix>
+    </critical_fixes>
+    
+    <patterns>
+        <pattern>
+            <name>Protocol-Implementation Mismatch</name>
+            <description>
+                When Protocol definitions or interface expectations don't match actual implementations,
+                runtime AttributeErrors occur. This is especially common with WebSocketManager and
+                other singleton/shared services.
+            </description>
+            <prevention>
+                - Always check Protocol definitions when implementing methods
+                - Ensure WebSocketProtocol in interfaces.py matches WebSocketManager implementation
+                - Run integration tests that exercise all protocol methods
+            </prevention>
+        </pattern>
+        
+        <pattern>
+            <name>Dictionary Iteration During Modification</name>
+            <description>
+                Iterating over dictionaries while modifying them causes RuntimeError.
+                Common in connection management where cleanup happens during iteration.
+            </description>
+            <solution>
+                Always copy keys before iteration: conn_ids = list(self.connections.keys())
+            </solution>
+        </pattern>
+    </patterns>
+    
+    <checklist>
+        <item>Verify all methods defined in WebSocketProtocol exist in WebSocketManager</item>
+        <item>Check that method signatures match between Protocol and implementation</item>
+        <item>Ensure dictionary iterations use list(dict.keys()) when modifications are possible</item>
+        <item>Test all WebSocket methods used by pipeline_executor and other consumers</item>
+        <item>Validate message serialization handles all message types (model_dump, dict, raw dict)</item>
+    </checklist>
+    
+    <related_issues>
+        <issue>Check if other managers have similar protocol mismatches</issue>
+        <issue>Verify DatabaseProtocol matches database manager implementation</issue>
+        <issue>Ensure all agent interfaces match their concrete implementations</issue>
+    </related_issues>
+</learnings>

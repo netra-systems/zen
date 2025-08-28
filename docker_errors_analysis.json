@@ -1,0 +1,32 @@
+================================================================================
+DOCKER COMPOSE LOG INTROSPECTION REPORT
+================================================================================
+Generated: 2025-08-27T20:23:31.519694
+
+SUMMARY
+----------------------------------------
+Services Analyzed: 8
+Total Log Lines: 120
+Total Errors: 0
+Total Warnings: 3
+
+ERRORS BY CATEGORY
+----------------------------------------
+  Unknown: 23
+
+ERRORS BY SEVERITY
+----------------------------------------
+  critical: 20
+  warning: 3
+
+DETAILED ERRORS BY SERVICE
+================================================================================
+
+POSTGRES-TEST
+----------------------------------------
+
+  [Unknown] (23 occurrences)
+    Line 2: netra-test-postgres  | 2025-08-28T03:21:48.250075174Z WARNING: POSTGRES_HOST_AUTH_METHOD has been se...
+    Line 32: netra-test-postgres  | 2025-08-28T03:21:48.689236281Z 2025-08-28 03:21:48.689 UTC [36] WARNING:  no ...
+    Line 34: netra-test-postgres  | 2025-08-28T03:21:49.254222109Z initdb: warning: enabling "trust" authenticati...
+    ... and 20 more

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>DeepAgentState JSON Serialization Fix</title>
+    <category>websocket</category>
+    <subcategory>serialization</subcategory>
+    <date>2025-08-27</date>
+    <severity>critical</severity>
+    <tags>
+      <tag>websocket</tag>
+      <tag>json</tag>
+      <tag>serialization</tag>
+      <tag>datetime</tag>
+      <tag>pydantic</tag>
+    </tags>
+  </metadata>
+  
+  <problem_statement>
+    WebSocket connections were failing with the error:
+    "Object of type DeepAgentState is not JSON serializable"
+    
+    This occurred when the pipeline executor tried to send completion messages
+    containing DeepAgentState objects through the WebSocket manager.
+  </problem_statement>
+  
+  <root_cause>
+    The DeepAgentState.to_dict() method was using model_dump(exclude_none=True)
+    which returned Python datetime objects from the AgentMetadata fields
+    (created_at, last_updated). These datetime objects are not JSON serializable
+    by default, causing the error when json.dumps() was called during WebSocket
+    message transmission.
+  </root_cause>
+  
+  <solution>
+    Updated the to_dict() method in both locations where DeepAgentState is defined:
+    1. netra_backend/app/agents/state.py
+    2. netra_backend/app/schemas/agent_models.py
+    
+    Changed from:
+    ```python
+    def to_dict(self) -> Dict[str, Any]:
+        return self.model_dump(exclude_none=True)
+    ```
+    
+    To:
+    ```python
+    def to_dict(self) -> Dict[str, Any]:
+        return self.model_dump(exclude_none=True, mode='json')
+    ```
+    
+    The mode='json' parameter ensures Pydantic converts all non-JSON-serializable
+    types (like datetime) to their JSON-compatible representations (ISO format strings).
+  </solution>
+  
+  <prevention>
+    1. Always use mode='json' when calling model_dump() on Pydantic models that
+       will be serialized to JSON, especially if they contain datetime fields
+    2. Create comprehensive serialization tests for all models that are sent
+       through WebSocket connections
+    3. Test the complete flow from model creation to WebSocket transmission
+  </prevention>
+  
+  <related_files>
+    <file>netra_backend/app/agents/state.py</file>
+    <file>netra_backend/app/schemas/agent_models.py</file>
+    <file>netra_backend/app/agents/supervisor/pipeline_executor.py</file>
+    <file>netra_backend/app/websocket_core/manager.py</file>
+  </related_files>
+  
+  <test_coverage>
+    Test file created: netra_backend/tests/critical/test_deep_agent_state_serialization.py
+    Covers:
+    - Basic serialization of DeepAgentState with datetime fields
+    - WebSocket transmission flow simulation
+    - Edge cases with nested models containing datetime
+    - Regression prevention for future changes
+  </test_coverage>
+</learning>

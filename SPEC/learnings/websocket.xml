@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <metadata>
+        <category>WebSocket</category>
+        <criticality>HIGH</criticality>
+        <last_updated>2025-08-27</last_updated>
+    </metadata>
+
+    <learning id="websocket-accept-before-operations">
+        <title>WebSocket Accept Must Precede All Operations</title>
+        <issue>
+            WebSocket operations (send, receive, auth checks) fail with "WebSocket is not connected. Need to call 'accept' first" 
+            if accept() is not called before attempting any WebSocket operations.
+        </issue>
+        <root_cause>
+            Authentication or other initialization logic was being executed before websocket.accept(), 
+            causing operations to fail when they tried to interact with an unaccepted connection.
+        </root_cause>
+        <solution>
+            Always call websocket.accept() as the FIRST operation after receiving a WebSocket connection request.
+            Authentication and other setup should happen AFTER accept().
+        </solution>
+        <pattern>
+            <!-- CORRECT -->
+            @router.websocket("/ws")
+            async def websocket_endpoint(websocket: WebSocket):
+                # 1. FIRST: Accept the connection
+                await websocket.accept()
+                
+                # 2. THEN: Perform authentication and setup
+                try:
+                    auth_info = await authenticate(websocket)
+                    # ... rest of logic
+                except AuthError:
+                    await websocket.close(code=1008, reason="Auth failed")
+        </pattern>
+        <anti_pattern>
+            <!-- INCORRECT - Will cause "not connected" errors -->
+            @router.websocket("/ws")
+            async def websocket_endpoint(websocket: WebSocket):
+                # WRONG: Trying to authenticate before accept
+                auth_info = await authenticate(websocket)  # This may try to send/receive
+                await websocket.accept()  # Too late!
+        </anti_pattern>
+        <impact>
+            Critical - Prevents WebSocket connections from being established, 
+            causing complete connection failures for all clients.
+        </impact>
+        <prevention>
+            1. Always structure WebSocket handlers with accept() first
+            2. Use try/finally blocks to ensure cleanup even if accept fails
+            3. Test WebSocket connection flow with authentication failures
+        </prevention>
+    </learning>
+
+    <learning id="websocket-context-manager-ordering">
+        <title>Context Managers and WebSocket Lifecycle</title>
+        <issue>
+            Using context managers that perform WebSocket operations before accept() causes connection failures.
+        </issue>
+        <solution>
+            If using context managers for WebSocket setup (like secure_websocket_context), ensure they 
+            don't perform WebSocket operations, or call accept() before entering the context.
+        </solution>
+        <pattern>
+            <!-- CORRECT -->
+            await websocket.accept()
+            async with secure_context(websocket) as context:
+                # Now safe to use WebSocket
+                
+            <!-- OR design context to not perform operations -->
+            async with auth_only_context(websocket) as auth:
+                await websocket.accept()
+                # Continue with authenticated connection
+        </pattern>
+    </learning>
+
+    <learning id="websocket-state-checking">
+        <title>Proper WebSocket State Validation</title>
+        <issue>
+            Checking WebSocket connection state incorrectly can lead to operations on disconnected sockets.
+        </issue>
+        <solution>
+            Use proper state checking with client_state and application_state attributes.
+            Check WebSocketState.CONNECTED before operations.
+        </solution>
+        <pattern>
+            from starlette.websockets import WebSocketState
+            
+            def is_websocket_connected(websocket: WebSocket) -> bool:
+                if hasattr(websocket, 'client_state'):
+                    return websocket.client_state == WebSocketState.CONNECTED
+                if hasattr(websocket, 'application_state'):
+                    return websocket.application_state == WebSocketState.CONNECTED
+                return True  # Assume connected if no state available
+        </pattern>
+    </learning>
+
+    <learning id="websocket-error-handling-order">
+        <title>Error Handling After Accept</title>
+        <issue>
+            Attempting to send error messages or close WebSocket before accept() causes cascading failures.
+        </issue>
+        <solution>
+            Only send error messages or call close() after accept() has been successfully called.
+            Use is_websocket_connected() before attempting error responses.
+        </solution>
+        <pattern>
+            try:
+                await websocket.accept()
+                # ... do work
+            except Exception as e:
+                # Only try to send error if connected
+                if is_websocket_connected(websocket):
+                    try:
+                        await websocket.send_json({"error": str(e)})
+                    except:
+                        pass  # Best effort
+                    await websocket.close(code=1011)
+        </pattern>
+    </learning>
+
+    <learning id="websocket-testing-mocks">
+        <title>Testing WebSocket Connection Flow</title>
+        <issue>
+            WebSocket tests must properly mock the connection lifecycle to avoid false positives.
+        </issue>
+        <solution>
+            Mock WebSocket tests should track call order to ensure accept() happens first.
+            Set proper client_state values in mocks.
+        </solution>
+        <pattern>
+            # In tests, track call order
+            call_order = []
+            
+            async def track_accept(*args, **kwargs):
+                call_order.append('accept')
+                return await original_accept(*args, **kwargs)
+            
+            websocket.accept = track_accept
+            websocket.client_state = WebSocketState.CONNECTED  # Set proper state
+            
+            # After test
+            assert call_order[0] == 'accept', "Accept must be called first"
+        </pattern>
+    </learning>
+</learnings>

@@ -258,6 +258,70 @@ Ensure you have permissions to:
 - **Documentation**: Auto-generate error documentation
 - **Dashboards**: Create error trend visualizations
 
+## Latest Analysis Results (2025-08-28)
+
+### Docker Services Health Status
+- **auth**: Healthy ✓
+- **backend**: Healthy ✓ (previously unhealthy, now recovered)
+- **clickhouse**: Unhealthy ✗
+- **frontend**: Healthy ✓
+- **postgres**: Healthy ✓
+- **redis**: Healthy ✓
+
+### Key Issues Identified
+
+#### 1. ClickHouse Service Issues
+- **Status**: Unhealthy
+- **Error**: Missing tables - `workload_events` table not found
+- **Impact**: Backend startup checks report warnings for ClickHouse connectivity
+- **Severity**: WARNING (non-critical for basic operations)
+
+#### 2. Database Schema Mismatches
+- **Missing Columns**: `research_sessions` table missing `error_message` and `completed_at` columns
+- **Extra Tables**: Several auth-related tables exist but not defined in models
+- **Impact**: Schema validation fails during backend startup
+- **Severity**: ERROR (may affect specific features)
+
+#### 3. Backend Configuration Issues
+- **Missing Secrets**: Initially missing JWT_SECRET_KEY, FERNET_KEY, SERVICE_SECRET (auto-populated for dev)
+- **Google Cloud Secret Manager**: Not available (expected in dev environment)
+- **Impact**: Development environment uses fallback configuration
+- **Severity**: INFO (expected in development)
+
+### E2E Test Results
+- **Total Tests Run**: 42 (before maxfail limit)
+- **Passed**: 6
+- **Failed**: 4 (billing flow tests)
+- **Skipped**: 32 (mostly isolation tests requiring specific conditions)
+- **Errors**: 1 (multi-tenant isolation setup)
+
+#### Failed Test Categories:
+1. **Agent Billing Flow**: All billing-related tests failing
+2. **Multi-tenant Isolation**: Setup errors preventing test execution
+3. **Connection Issues**: Many tests skipped due to inability to establish minimum WebSocket connections
+
+### Recommendations
+
+1. **ClickHouse Recovery**:
+   - Run database migrations: `python scripts/reset_clickhouse.py`
+   - Create missing `workload_events` table
+   - Verify ClickHouse health check endpoint
+
+2. **Schema Synchronization**:
+   - Run alembic migrations: `alembic upgrade head`
+   - Add missing columns to `research_sessions` table
+   - Review and align model definitions with database schema
+
+3. **Test Environment Stabilization**:
+   - Ensure all services are fully initialized before running tests
+   - Implement retry logic for WebSocket connection establishment
+   - Review billing service dependencies and configuration
+
+4. **Monitoring Improvements**:
+   - Add health check endpoints for all critical services
+   - Implement automated recovery for unhealthy containers
+   - Add metrics collection for service availability
+
 ## Future Enhancements
 
 Potential improvements:

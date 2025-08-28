@@ -1,0 +1,191 @@
+# Google Tag Manager Integration - Implementation Complete
+
+## Overview
+Successfully implemented Google Tag Manager (GTM) integration for the Netra Apex platform according to SPEC/google_tag_manager.xml.
+
+## Files Created
+
+### 1. TypeScript Types (`frontend/types/gtm.types.ts`)
+- Complete type definitions for GTM integration
+- Event taxonomy interfaces (Auth, Engagement, Conversion)
+- Provider and hook interfaces
+- Error handling types
+- Global window extensions for GTM
+
+### 2. GTM Provider (`frontend/providers/GTMProvider.tsx`)
+- React context provider for GTM functionality
+- Next.js Script component integration with `afterInteractive` strategy
+- DataLayer initialization and management
+- Event tracking with error handling and validation
+- Debug state management
+- Performance monitoring
+- Environment-aware configuration
+
+### 3. Core Hook (`frontend/hooks/useGTM.ts`)
+- Main hook providing access to all GTM functionality
+- Event tracking methods (trackAuth, trackEngagement, trackConversion)
+- Debug utilities integration
+- Statistics and performance metrics
+
+### 4. Event Tracking Hook (`frontend/hooks/useGTMEvent.ts`)
+- Simplified event tracking interface
+- Pre-configured methods for common business events:
+  - Authentication: login, signup, logout, OAuth completion
+  - Engagement: chat started, messages sent, agent activation, feature usage
+  - Conversion: trial started, plan upgrades, payments, demo requests
+- Custom event tracking
+- Page view tracking for SPA navigation
+- Error tracking utilities
+
+### 5. Debug Hook (`frontend/hooks/useGTMDebug.ts`)
+- Development and monitoring utilities
+- Console log interception for GTM-related messages
+- Performance metrics calculation
+- Event validation and testing
+- Debug data export functionality
+- Real-time monitoring and statistics
+
+## Configuration
+
+### Environment Variables Added
+```bash
+# Development (.env.local)
+NEXT_PUBLIC_GTM_CONTAINER_ID=GTM-WKP28PNQ
+NEXT_PUBLIC_GTM_ENABLED=true
+NEXT_PUBLIC_GTM_DEBUG=true
+NEXT_PUBLIC_ENVIRONMENT=development
+
+# Staging (.env.staging)
+NEXT_PUBLIC_GTM_CONTAINER_ID=GTM-WKP28PNQ
+NEXT_PUBLIC_GTM_ENABLED=true
+NEXT_PUBLIC_GTM_DEBUG=false
+```
+
+### Layout Integration
+- GTMProvider added to root layout (`frontend/app/layout.tsx`)
+- Disabled during tests to prevent interference
+- Proper provider hierarchy maintained
+
+### Content Security Policy Updates
+Updated CSP headers in `next.config.ts` to allow GTM domains:
+- `https://www.googletagmanager.com`
+- `https://tagmanager.google.com`
+- `https://www.google-analytics.com`
+- `https://analytics.google.com`
+
+## Usage Examples
+
+### Basic Event Tracking
+```typescript
+import { useGTMEvent } from '@/hooks/useGTMEvent';
+
+const { trackLogin, trackChatStarted, trackPlanUpgraded } = useGTMEvent();
+
+// Track user login
+trackLogin('google', false);
+
+// Track chat interaction
+trackChatStarted('thread-123');
+
+// Track conversion
+trackPlanUpgraded('enterprise', 299.99, 'tx-456', 'organic');
+```
+
+### Advanced Usage with Core Hook
+```typescript
+import { useGTM } from '@/hooks/useGTM';
+
+const { events, debug, isLoaded, config } = useGTM();
+
+// Custom event with full control
+events.trackCustom({
+  event: 'custom_feature_usage',
+  event_category: 'engagement',
+  event_action: 'advanced_search',
+  value: 1,
+  custom_parameters: { search_type: 'semantic' }
+});
+```
+
+### Debug Mode
+```typescript
+import { useGTMDebug } from '@/hooks/useGTMDebug';
+
+const { enableDebug, inspectDataLayer, validateEvent, exportDebugData } = useGTMDebug();
+
+// Enable debug mode
+enableDebug();
+
+// Validate an event before sending
+const validation = validateEvent(eventData);
+if (!validation.isValid) {
+  console.warn('Event validation failed:', validation.errors);
+}
+
+// Export debug data for analysis
+exportDebugData();
+```
+
+## Features Implemented
+
+### ✅ Core Functionality
+- GTM script loading with Next.js Script component
+- DataLayer initialization and management
+- Event tracking with type safety
+- Error handling and validation
+- Environment configuration
+
+### ✅ Performance Optimization
+- `afterInteractive` loading strategy
+- Event deduplication
+- Memory management (last 100 messages)
+- Performance metrics tracking
+
+### ✅ Development Experience
+- TypeScript type safety throughout
+- Debug mode with console interception
+- Event validation and testing utilities
+- Comprehensive error reporting
+
+### ✅ Security & Privacy
+- CSP compliance
+- Environment-aware configuration
+- Feature flag support for easy disable
+- No PII in tracking events by default
+
+### ✅ Business Event Taxonomy
+- Authentication events (login, signup, logout, OAuth)
+- Engagement events (chat, messages, agent activation)
+- Conversion events (trials, upgrades, payments, demos)
+- Custom event support
+
+## Testing & Validation
+
+### During Development
+1. Set `NEXT_PUBLIC_GTM_DEBUG=true`
+2. Open browser console to see GTM logs
+3. Use GTM Preview Mode in Google Tag Manager
+4. Validate events with `useGTMDebug` hook
+
+### Production Verification
+1. Disable debug mode in production
+2. Monitor GTM container in Google Tag Manager
+3. Verify events in Google Analytics (if connected)
+4. Use browser network tab to confirm GTM script loading
+
+## Rollback Plan
+
+To disable GTM integration:
+1. Set `NEXT_PUBLIC_GTM_ENABLED=false`
+2. Or remove GTMProvider from layout.tsx
+3. No code changes required - feature flag controlled
+
+## Next Steps
+
+1. **GTM Container Setup**: Configure tags, triggers, and variables in Google Tag Manager
+2. **Google Analytics**: Connect GTM to Google Analytics property
+3. **Event Testing**: Test all business events in staging environment
+4. **A/B Testing Setup**: Configure experiment tags in GTM
+5. **Marketing Integrations**: Add marketing platform pixels (Facebook, LinkedIn, etc.)
+
+The implementation is production-ready and follows all architectural principles from the specification. The integration is type-safe, performant, and provides comprehensive debugging capabilities for development and monitoring.

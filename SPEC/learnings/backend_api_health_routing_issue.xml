@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_entry>
+    <title>Backend API Health Endpoint Routing Issue - Dual Path Support</title>
+    <description>Health endpoints needed dual routing to support both /health and /api/health paths for monitoring systems</description>
+    <category>routing</category>
+    <issue>
+        Health endpoints were only available at /health/* paths but monitoring systems expected /api/health/* paths to also work.
+        This caused 404 errors that were converted to 401 by security middleware, creating false authentication failures in monitoring systems.
+    </issue>
+    <root_cause>
+        Health router was mounted with only one prefix "/health" in app_factory_route_configs.py.
+        The route configuration in _get_health_business_configs() only included:
+        "health": (modules["health"].router, "/health", ["health"])
+    </root_cause>
+    <solution>
+        Added dual routing configuration to support both paths:
+        "health": (modules["health"].router, "/health", ["health"]),
+        "health_api": (modules["health"].router, "/api/health", ["health"]),
+        
+        This allows the same health router to be accessible at both paths without duplicating implementation.
+    </solution>
+    <file_changes>
+        - Modified: netra_backend/app/core/app_factory_route_configs.py
+        - Added line: "health_api": (modules["health"].router, "/api/health", ["health"]),
+    </file_changes>
+    <verification>
+        - Both /health and /api/health endpoints now return 200 status with identical health responses
+        - Tests in test_api_health_endpoint_cycle_56.py now pass for core routing functionality
+        - Backward compatibility maintained for existing /health usage
+    </verification>
+    <lessons_learned>
+        1. Health endpoints should support both /health and /api/health paths for monitoring system compatibility
+        2. Router mounting allows the same implementation to serve multiple paths efficiently
+        3. Security middleware can convert 404 errors to 401, masking routing issues as authentication problems
+        4. Minimal changes (single line addition) can resolve complex-seeming monitoring issues
+    </lessons_learned>
+</learning_entry>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Agent Reliability Patterns</name>
+        <type>Learnings</type>
+        <version>1.0</version>
+        <description>Critical learnings from OptimizationsCoreSubAgent reliability issues and their fixes</description>
+        <created>2025-01-27</created>
+    </metadata>
+    
+    <learnings>
+        <learning id="async-wrapper-requirement">
+            <title>Async Wrapper Functions for Reliability Manager</title>
+            <problem>
+                Passing lambda functions that return coroutines to reliability_manager.execute_with_reliability 
+                causes "coroutine was never awaited" warnings because the reliability manager expects an async 
+                callable, not a lambda that returns a coroutine.
+            </problem>
+            <solution>
+                Use proper async wrapper functions instead of lambdas:
+                ```python
+                # WRONG: Lambda that returns coroutine
+                lambda: self._execute_with_modern_patterns(context)
+                
+                # CORRECT: Async wrapper function
+                async def execute_wrapper():
+                    return await self._execute_with_modern_patterns(context)
+                ```
+            </solution>
+            <impact>Prevents runtime warnings and ensures proper coroutine execution</impact>
+        </learning>
+        
+        <learning id="datetime-type-compatibility">
+            <title>Handle Both datetime and float Timestamps</title>
+            <problem>
+                ExecutionContext.start_time is typed as Optional[datetime], but some code paths set it to 
+                time.time() (float), causing "unsupported operand type(s) for -: 'float' and 'datetime'" errors.
+            </problem>
+            <solution>
+                Make time calculation functions handle both types:
+                ```python
+                def _calculate_execution_time(self, context: ExecutionContext) -> float:
+                    if not context.start_time:
+                        return 0.0
+                    # Handle both datetime and float timestamps
+                    from datetime import datetime
+                    if isinstance(context.start_time, datetime):
+                        now = datetime.now(context.start_time.tzinfo) if context.start_time.tzinfo else datetime.now()
+                        delta = now - context.start_time
+                        return delta.total_seconds() * 1000
+                    else:
+                        # Assume it's a float from time.time()
+                        return (time.time() - context.start_time) * 1000
+                ```
+            </solution>
+            <impact>Prevents type errors in time calculations across different code paths</impact>
+        </learning>
+        
+        <learning id="execution-result-consistency">
+            <title>Consistent ExecutionResult Return Types</title>
+            <problem>
+                Methods expected to return ExecutionResult were returning Dict[str, Any], causing type 
+                mismatches in the reliability manager flow.
+            </problem>
+            <solution>
+                Always return proper ExecutionResult objects from execution methods:
+                ```python
+                # Convert dict results to ExecutionResult
+                return ExecutionResult(
+                    success=True,
+                    status=ExecutionStatus.COMPLETED,
+                    result=result_dict,
+                    fallback_used=fallback_was_used
+                )
+                ```
+            </solution>
+            <impact>Ensures type safety and prevents runtime errors in reliability flows</impact>
+        </learning>
+        
+        <learning id="circuit-breaker-compatibility">
+            <title>Circuit Breaker Async Function Compatibility</title>
+            <problem>
+                The circuit breaker's execute method expects a callable that returns an awaitable, but the 
+                exact signature requirements weren't clear, leading to improper function wrapping.
+            </problem>
+            <solution>
+                Circuit breaker protected functions must be async functions, not lambdas:
+                ```python
+                # Create async protected function
+                async def protected():
+                    return await self.circuit_breaker.execute(execute_func)
+                return protected
+                ```
+            </solution>
+            <impact>Ensures proper circuit breaker protection without coroutine warnings</impact>
+        </learning>
+        
+        <learning id="reliability-manager-signature">
+            <title>ReliabilityManager Execute Function Signature</title>
+            <problem>
+                The execute_with_reliability method expects Callable[[], Awaitable[ExecutionResult]], but this 
+                wasn't clearly documented, leading to signature mismatches.
+            </problem>
+            <solution>
+                The function passed to execute_with_reliability must:
+                1. Take no arguments (use closure to capture context)
+                2. Be async (return an awaitable)
+                3. Return ExecutionResult, not Dict or other types
+            </solution>
+            <impact>Prevents signature mismatches and ensures proper reliability handling</impact>
+        </learning>
+    </learnings>
+    
+    <prevention-strategies>
+        <strategy>
+            <title>Type Checking for Agent Patterns</title>
+            <description>
+                All agent implementations should use proper type hints and be validated with mypy 
+                to catch return type mismatches early.
+            </description>
+        </strategy>
+        
+        <strategy>
+            <title>Standardized Time Handling</title>
+            <description>
+                Establish a single pattern for time tracking - either always use datetime objects 
+                or always use float timestamps, not both.
+            </description>
+        </strategy>
+        
+        <strategy>
+            <title>Async Pattern Documentation</title>
+            <description>
+                Document the exact async patterns required for reliability manager integration 
+                to prevent coroutine handling issues.
+            </description>
+        </strategy>
+    </prevention-strategies>
+    
+    <related-files>
+        <file>netra_backend/app/agents/optimizations_core_sub_agent.py</file>
+        <file>netra_backend/app/agents/base/reliability_manager.py</file>
+        <file>netra_backend/app/agents/base/circuit_breaker.py</file>
+        <file>netra_backend/app/agents/base/retry_manager.py</file>
+        <file>netra_backend/app/agents/base/interface.py</file>
+    </related-files>
+</specification>
