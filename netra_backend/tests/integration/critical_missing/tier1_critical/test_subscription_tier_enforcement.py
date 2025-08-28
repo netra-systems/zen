@@ -22,11 +22,11 @@ import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.db.models_user import User
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     PermissionCheckResult,
     ToolExecutionContext,
 )
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier, UserPlan
 from netra_backend.app.services.tool_permissions.tool_permission_service_main import (
     ToolPermissionService,
 )

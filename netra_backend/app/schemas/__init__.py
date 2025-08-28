@@ -43,7 +43,7 @@ from netra_backend.app.schemas.admin_tool_types import (
     UserAdminOperation,
     UserAdminResponse,
 )
-from netra_backend.app.schemas.Agent import (
+from netra_backend.app.schemas.agent import (
     AgentCompleted,
     AgentErrorMessage,
     AgentStarted,
@@ -77,7 +77,7 @@ from netra_backend.app.schemas.agent_state import (
     StateTransactionStatus,
     StateValidationResult,
 )
-from netra_backend.app.schemas.Analysis import AnalysisResult
+from netra_backend.app.schemas.analysis import AnalysisResult
 from netra_backend.app.schemas.audit_models import (
     CorpusAuditMetadata,
     CorpusAuditRecord,
@@ -111,7 +111,7 @@ from netra_backend.app.schemas.auth_types import (
     UserInfo,
     UserPermission,
 )
-from netra_backend.app.schemas.Config import (
+from netra_backend.app.schemas.config import (
     AppConfig,
     ClickHouseCredentials,
     ClickHouseHTTPSConfig,
@@ -185,7 +185,7 @@ from netra_backend.app.schemas.core_models import (
     UserCreate,
     UserCreateOAuth,
 )
-from netra_backend.app.schemas.Corpus import (
+from netra_backend.app.schemas.corpus import (
     ContentCorpus,
     Corpus,
     CorpusBase,
@@ -247,9 +247,9 @@ from netra_backend.app.schemas.diagnostic_types import (
     StartupPhase,
     SystemState,
 )
-from netra_backend.app.schemas.Event import EventMetadata, TraceContext
-from netra_backend.app.schemas.FinOps import CostComparison, DataGenerationType, FinOps, WorkloadProfile
-from netra_backend.app.schemas.Generation import (
+from netra_backend.app.schemas.event import EventMetadata, TraceContext
+from netra_backend.app.schemas.finops import CostComparison, DataGenerationType, FinOps, WorkloadProfile
+from netra_backend.app.schemas.generation import (
     ContentCorpusGenParams,
     ContentGenParams,
     DataIngestionParams,
@@ -354,7 +354,7 @@ from netra_backend.app.schemas.llm_types import (
     RollbackAnalysisContext,
     ToolMigrationContext,
 )
-from netra_backend.app.schemas.Log import UnifiedLogEntry
+from netra_backend.app.schemas.log import UnifiedLogEntry
 from netra_backend.app.schemas.mcp_client import (
     ClearCacheRequest,
     ClearCacheResponse,
@@ -378,7 +378,7 @@ from netra_backend.app.schemas.mcp_client import (
     RegisterServerRequest,
     RegisterServerResponse,
 )
-from netra_backend.app.schemas.Metrics import (
+from netra_backend.app.schemas.metrics import (
     BaselineMetrics,
     CorpusMetric,
     EnrichedMetrics,
@@ -449,9 +449,9 @@ from netra_backend.app.schemas.monitoring_types import (
     QualityMetrics,
     SystemStats,
 )
-from netra_backend.app.schemas.Pattern import DiscoveredPattern
-from netra_backend.app.schemas.Performance import Performance
-from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
+from netra_backend.app.schemas.pattern import DiscoveredPattern
+from netra_backend.app.schemas.performance import Performance
+from netra_backend.app.schemas.policy import LearnedPolicy, PredictedOutcome
 from netra_backend.app.schemas.quality_types import (
     AgentQualityProfile,
     AlertAcknowledgement,
@@ -490,7 +490,7 @@ from netra_backend.app.schemas.rate_limit_types import (
     SlidingWindowCounter,
     TokenBucket,
 )
-from netra_backend.app.schemas.Reference import (
+from netra_backend.app.schemas.reference import (
     ReferenceCreateRequest,
     ReferenceGetResponse,
     ReferenceItem,
@@ -512,7 +512,7 @@ from netra_backend.app.schemas.reliability_types import (
     RetryConfig,
     TokenBucket,
 )
-from netra_backend.app.schemas.Request import (
+from netra_backend.app.schemas.request import (
     DataSource,
     RequestModel,
     Response,
@@ -522,7 +522,7 @@ from netra_backend.app.schemas.Request import (
     TimeRange,
     Workload,
 )
-from netra_backend.app.schemas.Run import RunComplete
+from netra_backend.app.schemas.run import RunComplete
 from netra_backend.app.schemas.service_types import (
     BatchOperationResult,
     CRUDServiceInterface,
@@ -602,7 +602,7 @@ from netra_backend.app.schemas.strict_types import (
     SupervisorAgentProtocol,
     TriageAgentProtocol,
 )
-from netra_backend.app.schemas.Supply import (
+from netra_backend.app.schemas.supply import (
     ModelIdentifier,
     SupplyOption,
     SupplyOptionBase,
@@ -611,7 +611,7 @@ from netra_backend.app.schemas.Supply import (
     SupplyOptionInDBBase,
     SupplyOptionUpdate,
 )
-from netra_backend.app.schemas.Tool import (
+from netra_backend.app.schemas.tool import (
     BaseTool,
     SimpleToolPayload,
     ToolArguments,
@@ -629,7 +629,7 @@ from netra_backend.app.schemas.Tool import (
     ToolStarted,
     ToolStatus,
 )
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     BusinessRequirement,
     PermissionCheckResult,
     PermissionGrant,
@@ -647,7 +647,7 @@ from netra_backend.app.schemas.unified_tools import (
     UserPlanResponse,
 )
 from netra_backend.app.schemas.user import UserUpdate
-from netra_backend.app.schemas.UserPlan import (
+from netra_backend.app.schemas.user_plan import (
     AutoUpgradeRule,
     PlanDefinition,
     PlanFeatures,

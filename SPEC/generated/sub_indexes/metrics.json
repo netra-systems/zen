@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-27T15:57:40.208391",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 176
+    "generated_at": "2025-08-28T14:37:52.979360",
+    "root_directory": "/Users/rindhujajohnson/Netra/GitHub/netra-apex",
+    "total_literals": 178
   },
   "literals": {
     "(timestamp) as time_bucket, count() as event_count": {
@@ -27,6 +27,7 @@
       "locations": [
         "netra_backend/app/agents/data_sub_agent/agent_execution.py:242",
         "netra_backend/app/agents/data_sub_agent/agent_execution.py:245",
+        "scripts/docker_log_introspection.py:204",
         "scripts/scan_string_literals.py:143"
       ]
     },
@@ -57,7 +58,7 @@
       "value": "active_sessions_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/example_messages.py:125"
+        "netra_backend/app/routes/example_messages.py:129"
       ]
     },
     "activity_count": {
@@ -307,6 +308,8 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/routes/factory_compliance_reports.py:91",
+        "scripts/docker_log_introspection.py:187",
+        "scripts/docker_log_introspection.py:293",
         "scripts/generate_wip_report.py:57",
         "scripts/generate_wip_report.py:78",
         "scripts/generate_wip_report.py:216",
@@ -559,6 +562,8 @@
       "value": "high_count",
       "category": "metrics",
       "locations": [
+        "scripts/docker_log_introspection.py:188",
+        "scripts/docker_log_introspection.py:294",
         "scripts/generate_wip_report.py:58",
         "scripts/generate_wip_report.py:79",
         "scripts/generate_wip_report.py:217",
@@ -610,6 +615,13 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/services/resource_management/tenant_isolator.py:287"
+      ]
+    },
+    "issue_count": {
+      "value": "issue_count",
+      "category": "metrics",
+      "locations": [
+        "scripts/docker_log_introspection.py:366"
       ]
     },
     "leaky_bucket": {
@@ -665,6 +677,8 @@
       "value": "low_count",
       "category": "metrics",
       "locations": [
+        "scripts/docker_log_introspection.py:190",
+        "scripts/docker_log_introspection.py:296",
         "scripts/generate_wip_report.py:60",
         "scripts/generate_wip_report.py:81",
         "scripts/generate_wip_report.py:310"
@@ -681,6 +695,8 @@
       "value": "medium_count",
       "category": "metrics",
       "locations": [
+        "scripts/docker_log_introspection.py:189",
+        "scripts/docker_log_introspection.py:295",
         "scripts/generate_wip_report.py:59",
         "scripts/generate_wip_report.py:80",
         "scripts/generate_wip_report.py:218",
@@ -915,6 +931,13 @@
       "category": "metrics",
       "locations": [
         "scripts/ci/analyze_failures.py:77"
+      ]
+    },
+    "occurrence_count": {
+      "value": "occurrence_count",
+      "category": "metrics",
+      "locations": [
+        "netra_backend/app/agents/base/timing_aggregator.py:334"
       ]
     },
     "operation_count": {

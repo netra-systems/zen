@@ -25,7 +25,7 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
     AgentConversationTestUtils,

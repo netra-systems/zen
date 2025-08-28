@@ -29,7 +29,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from netra_backend.app.core.configuration.secrets import SecretManager as ConfigSecretsManager
 
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 class TestConfigSecretsManager:
     """Core secrets manager functionality tests"""

@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
+from netra_backend.app.schemas.tool_permission import ToolExecutionContext
 
 logger = central_logger
 

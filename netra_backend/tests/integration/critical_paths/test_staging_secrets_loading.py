@@ -38,7 +38,7 @@ from netra_backend.app.core.configuration.base import (
 from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 # Note: UserAuthService is now deprecated, using config integration tests instead
-from netra_backend.app.schemas.Config import AppConfig, StagingConfig, ProductionConfig
+from netra_backend.app.schemas.config import AppConfig, StagingConfig, ProductionConfig
 from netra_backend.app.core.exceptions_config import ConfigurationError
 
 

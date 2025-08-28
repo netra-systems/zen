@@ -82,7 +82,7 @@ class TestThirdPartyAPIQuotaCascadeFailure:
     @pytest.fixture
     def llm_provider_manager(self):
         """Create LLM provider manager for testing."""
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
         
         # Create mock settings for testing
         mock_settings = MagicMock(spec=AppConfig)

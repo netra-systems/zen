@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 
 from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Generation import DataIngestionParams
+from netra_backend.app.schemas.generation import DataIngestionParams
 from netra_backend.app.services.generation_job_manager import (
     update_job_status,
     validate_job_params,

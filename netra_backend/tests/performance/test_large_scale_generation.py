@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import psutil
 import pytest
 
-from netra_backend.app.schemas.Generation import (
+from netra_backend.app.schemas.generation import (
     ContentCorpusGenParams,
     ContentGenParams,
 )

@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     BusinessRequirement,
     PermissionCheckResult,
     PermissionLevel,
@@ -23,7 +23,7 @@ from netra_backend.app.schemas.ToolPermission import (
     ToolExecutionContext,
     ToolPermission,
 )
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 

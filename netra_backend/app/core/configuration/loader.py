@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional
 
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 
 class ConfigurationLoader:

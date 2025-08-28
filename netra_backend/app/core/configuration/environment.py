@@ -325,7 +325,7 @@ class ConfigEnvironment:
         Returns:
             AppConfig: The configuration object for the environment
         """
-        from netra_backend.app.schemas.Config import (
+        from netra_backend.app.schemas.config import (
             AppConfig,
             DevelopmentConfig,
             NetraTestingConfig,
@@ -347,7 +347,7 @@ class ConfigEnvironment:
         Returns:
             Dict mapping environment names to config classes
         """
-        from netra_backend.app.schemas.Config import (
+        from netra_backend.app.schemas.config import (
             DevelopmentConfig,
             NetraTestingConfig,
             ProductionConfig,
@@ -371,7 +371,7 @@ class ConfigEnvironment:
         Returns:
             AppConfig: The initialized configuration object
         """
-        from netra_backend.app.schemas.Config import DevelopmentConfig
+        from netra_backend.app.schemas.config import DevelopmentConfig
         
         # Get the appropriate config class, fallback to DevelopmentConfig
         config_class = config_classes.get(environment, DevelopmentConfig)

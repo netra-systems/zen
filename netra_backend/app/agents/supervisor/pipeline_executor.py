@@ -219,7 +219,7 @@ class PipelineExecutor:
     
     def _create_completion_content(self, state: DeepAgentState, run_id: str):
         """Create agent completion content."""
-        from netra_backend.app.schemas.Agent import AgentCompleted
+        from netra_backend.app.schemas.agent import AgentCompleted
         from netra_backend.app.schemas.agent_models import AgentResult
         result = AgentResult(success=True, output=state.to_dict())
         return AgentCompleted(run_id=run_id, result=result, execution_time_ms=0.0)

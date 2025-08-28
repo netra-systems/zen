@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, AsyncGenerator, Dict, List, Optional, Uni
 
 if TYPE_CHECKING:
     from netra_backend.app.schemas.data_ingestion_types import IngestionConfig
-    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+    from netra_backend.app.schemas.generation import SyntheticDataGenParams
 
 from netra_backend.app import schemas
 from netra_backend.app.logging_config import central_logger

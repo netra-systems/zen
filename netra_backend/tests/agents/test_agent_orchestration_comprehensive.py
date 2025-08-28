@@ -18,7 +18,7 @@ import pytest
 
 from netra_backend.app.agents.agent_state import AgentStateMixin
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-from netra_backend.app.schemas.Agent import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.schemas.strict_types import AgentExecutionMetrics
 from netra_backend.app.agents.interfaces import AgentStateProtocol, BaseAgentProtocol

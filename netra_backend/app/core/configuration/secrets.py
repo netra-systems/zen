@@ -21,7 +21,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 
 class SecretManager:

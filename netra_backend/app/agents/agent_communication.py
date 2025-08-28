@@ -26,7 +26,7 @@ class ErrorContext:
         self.agent_id = agent_id
         self.additional_info = kwargs
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Agent import SubAgentState, SubAgentUpdate
+from netra_backend.app.schemas.agent import SubAgentState, SubAgentUpdate
 from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
 
 logger = central_logger.get_logger(__name__)

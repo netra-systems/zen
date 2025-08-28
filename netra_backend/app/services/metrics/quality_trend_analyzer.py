@@ -8,7 +8,7 @@ from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List
 
-from netra_backend.app.schemas.Metrics import QualityMetrics
+from netra_backend.app.schemas.metrics import QualityMetrics
 
 
 class QualityTrendAnalyzer:

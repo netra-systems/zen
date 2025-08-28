@@ -7,7 +7,7 @@ following the pattern of other generation services.
 from typing import Dict
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+from netra_backend.app.schemas.generation import SyntheticDataGenParams
 from netra_backend.app.services.generation_job_manager import (
     update_job_status,
     validate_job_params,

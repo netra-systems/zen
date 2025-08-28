@@ -15,13 +15,13 @@ from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
     from netra_backend.app.db.models_postgres import User
-    from netra_backend.app.schemas.Tool import (
+    from netra_backend.app.schemas.tool import (
         SimpleToolPayload,
         ToolInput,
         ToolResult,
         ToolStatus,
     )
-    from netra_backend.app.schemas.ToolPermission import (
+    from netra_backend.app.schemas.tool_permission import (
         PermissionCheckResult,
         ToolExecutionContext,
     )
@@ -119,7 +119,7 @@ class ToolExecutionEngine:
     
     def _create_execution_context(self, tool: UnifiedTool, user: 'User') -> 'ToolExecutionContext':
         """Create execution context for tool validation."""
-        from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
+        from netra_backend.app.schemas.tool_permission import ToolExecutionContext
         
         return ToolExecutionContext(
             user_id=str(user.id), tool_name=tool.name, requested_action="execute",
@@ -216,7 +216,7 @@ class ToolExecutionEngine:
     
     def _create_success_result(self, tool_input: 'ToolInput', result: Any) -> 'ToolResult':
         """Create successful tool result for simple interface."""
-        from netra_backend.app.schemas.Tool import (
+        from netra_backend.app.schemas.tool import (
             SimpleToolPayload,
             ToolResult,
             ToolStatus,
@@ -227,7 +227,7 @@ class ToolExecutionEngine:
     
     def _create_error_result(self, tool_input: 'ToolInput', message: str) -> 'ToolResult':
         """Create error result for simple interface."""
-        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        from netra_backend.app.schemas.tool import ToolResult, ToolStatus
         
         return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=message)
     

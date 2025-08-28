@@ -17,7 +17,7 @@ import pytest
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 from netra_backend.app.core.configuration.base import ActualSecretManager as SecretManager
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 class TestJWTSecretConsistency:
     """Test JWT secret consistency across services."""

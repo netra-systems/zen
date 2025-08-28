@@ -208,7 +208,7 @@ class TestDeepAgentStateSerialization:
         )
         
         # Create completion message as in pipeline_executor
-        from netra_backend.app.schemas.Agent import AgentCompleted
+        from netra_backend.app.schemas.agent import AgentCompleted
         
         result = AgentResult(success=True, output=state.to_dict())
         content = AgentCompleted(

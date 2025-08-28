@@ -32,7 +32,7 @@ import pytest
 from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
-from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord
+from netra_backend.app.schemas.user_plan import PlanTier, PlanUsageSummary, UsageRecord
 from netra_backend.app.services.cost_calculator import (
     BudgetManager,
     CostCalculatorService,

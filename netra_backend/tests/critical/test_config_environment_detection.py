@@ -24,7 +24,7 @@ from netra_backend.app.core.configuration.environment import EnvironmentDetector
 from netra_backend.app.core.environment_constants import Environment, EnvironmentDetector as EnvConstants
 from netra_backend.app.cloud_environment_detector import detect_cloud_run_environment
 
-from netra_backend.app.schemas.Config import (
+from netra_backend.app.schemas.config import (
     AppConfig,
     DevelopmentConfig,
     NetraTestingConfig,

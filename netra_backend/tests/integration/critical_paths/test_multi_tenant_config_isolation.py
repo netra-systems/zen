@@ -32,7 +32,7 @@ import pytest
 from netra_backend.app.core.cache.cache_manager import CacheManager
 from netra_backend.app.core.security.encryption_service import EncryptionService
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from netra_backend.app.services.audit_service import AuditService
 
 from netra_backend.app.services.config_service import ConfigService

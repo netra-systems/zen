@@ -40,8 +40,8 @@ except ImportError:
     AnomalyDetectionResponse = None  # type: ignore
 
 try:
-    from netra_backend.app.schemas.FinOps import WorkloadProfile
-    from netra_backend.app.schemas.Generation import SyntheticDataResult
+    from netra_backend.app.schemas.finops import WorkloadProfile
+    from netra_backend.app.schemas.generation import SyntheticDataResult
 except ImportError:
     WorkloadProfile = None  # type: ignore
     SyntheticDataResult = None  # type: ignore

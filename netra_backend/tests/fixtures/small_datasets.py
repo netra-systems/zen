@@ -11,23 +11,23 @@ from typing import Any, Dict, List
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
-from netra_backend.app.schemas.Agent import AgentStatus, SubAgentLifecycle, TodoStatus
-from netra_backend.app.schemas.FinOps import CostComparison, FinOps
+from netra_backend.app.schemas.agent import AgentStatus, SubAgentLifecycle, TodoStatus
+from netra_backend.app.schemas.finops import CostComparison, FinOps
 from netra_backend.app.schemas.llm_request_types import (
     LLMFunction,
     LLMRequest,
     StructuredOutputSchema,
 )
-from netra_backend.app.schemas.Metrics import (
+from netra_backend.app.schemas.metrics import (
     CorpusMetric,
     MetricType,
     QualityMetrics,
     ResourceType,
     ResourceUsage,
 )
-from netra_backend.app.schemas.Performance import Performance
-from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
-from netra_backend.app.schemas.Supply import ModelIdentifier, SupplyOption
+from netra_backend.app.schemas.performance import Performance
+from netra_backend.app.schemas.policy import LearnedPolicy, PredictedOutcome
+from netra_backend.app.schemas.supply import ModelIdentifier, SupplyOption
 
 class SmallTestDatasets:
     """Generator for small, fast-loading test datasets"""

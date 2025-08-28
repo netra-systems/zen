@@ -18,7 +18,7 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 from dataclasses import dataclass
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from typing import Dict, Any, List, Optional
 from unittest.mock import patch, AsyncMock
 import asyncio

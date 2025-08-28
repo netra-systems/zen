@@ -19,7 +19,7 @@ import uuid
 from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.schemas.UserPlan import (
+from netra_backend.app.schemas.user_plan import (
     PLAN_DEFINITIONS,
     PlanFeatures,
     PlanTier,

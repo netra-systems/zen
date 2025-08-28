@@ -2,7 +2,7 @@ from typing import Any, List
 
 from langchain_core.tools import tool
 
-from netra_backend.app.schemas.Policy import LearnedPolicy
+from netra_backend.app.schemas.policy import LearnedPolicy
 from netra_backend.app.services.context import ToolContext
 
 

@@ -12,7 +12,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.schemas.Metrics import MetricType, TimeSeriesPoint
+from netra_backend.app.schemas.metrics import MetricType, TimeSeriesPoint
 from netra_backend.app.services.metrics.time_series_aggregation import (
     aggregate_series_data,
     apply_aggregation_function,

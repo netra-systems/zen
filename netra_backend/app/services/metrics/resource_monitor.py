@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 import psutil
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Metrics import (
+from netra_backend.app.schemas.metrics import (
     ResourceType,
     ResourceUsage,
     TimeSeriesPoint,

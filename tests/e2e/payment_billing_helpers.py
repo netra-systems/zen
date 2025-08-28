@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from tests.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 

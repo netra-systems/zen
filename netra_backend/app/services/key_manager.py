@@ -1,7 +1,7 @@
 from cryptography.fernet import Fernet
 from pydantic import BaseModel, Field, ValidationError
 
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 
 class KeyManager(BaseModel):

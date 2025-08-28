@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.schemas.Metrics import (
+from netra_backend.app.schemas.metrics import (
     CorpusMetric,
     ExportFormat,
     MetricsSnapshot,

@@ -21,7 +21,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 import pytest_asyncio
-from netra_backend.app.schemas.Agent import SubAgentState
+from netra_backend.app.schemas.agent import SubAgentState
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.config import get_config

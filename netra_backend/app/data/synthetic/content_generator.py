@@ -13,7 +13,7 @@ from rich.console import Console
 from rich.progress import Progress
 
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.Config import LLMConfig
+from netra_backend.app.schemas.config import LLMConfig
 
 console = Console()
 

@@ -12,7 +12,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 import pytest
 from pydantic import BaseModel
 
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
 from netra_backend.tests.helpers.llm_manager_helpers import (
     LLMProvider,

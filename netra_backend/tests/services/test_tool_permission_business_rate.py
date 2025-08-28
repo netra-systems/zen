@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     BusinessRequirement,
     PermissionCheckResult,
     PermissionLevel,
@@ -23,7 +23,7 @@ from netra_backend.app.schemas.ToolPermission import (
     ToolExecutionContext,
     ToolPermission,
 )
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 
@@ -132,7 +132,7 @@ class TestBusinessRequirements:
         """Test business requirements check with valid feature flags"""
         requirements = BusinessRequirement(feature_flags=["data_operations"])
         
-        from netra_backend.app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.user_plan import PlanFeatures
         user_plan = UserPlan(
             user_id="test_user",
             tier=PlanTier.PRO,
@@ -147,7 +147,7 @@ class TestBusinessRequirements:
         """Test business requirements check with missing feature flags"""
         requirements = BusinessRequirement(feature_flags=["advanced_optimization"])
         
-        from netra_backend.app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.user_plan import PlanFeatures
         user_plan = UserPlan(
             user_id="test_user",
             tier=PlanTier.PRO,
@@ -212,7 +212,7 @@ class TestBusinessRequirements:
             environment=["development"]
         )
         
-        from netra_backend.app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.user_plan import PlanFeatures
         user_plan = UserPlan(
             user_id="dev_user",
             tier=PlanTier.ENTERPRISE,

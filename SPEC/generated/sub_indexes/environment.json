@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-08-27T15:57:39.878660",
-    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "generated_at": "2025-08-28T14:37:52.843936",
+    "root_directory": "/Users/rindhujajohnson/Netra/GitHub/netra-apex",
     "total_literals": 141
   },
   "literals": {
@@ -137,7 +137,7 @@
       "value": "AUTH_CONFIG_FAILURE",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:278"
+        "auth_service/auth_core/routes/auth_routes.py:284"
       ]
     },
     "AUTH_ENV": {
@@ -176,7 +176,7 @@
         "auth_service/auth_core/validation/pre_deployment_validator.py:594",
         "auth_service/auth_core/validation/pre_deployment_validator.py:709",
         "auth_service/main.py:210",
-        "scripts/deploy_to_gcp.py:118"
+        "scripts/deploy_to_gcp.py:122"
       ]
     },
     "AUTH_MODE": {
@@ -220,8 +220,8 @@
         "netra_backend/app/core/network_constants.py:224",
         "netra_backend/app/routes/auth_proxy.py:23",
         "auth_service/auth_core/config.py:187",
-        "scripts/deploy_to_gcp.py:89",
-        "scripts/deploy_to_gcp.py:108",
+        "scripts/deploy_to_gcp.py:93",
+        "scripts/deploy_to_gcp.py:112",
         "scripts/fetch_secrets_to_env.py:93",
         "scripts/fetch_secrets_to_env.py:170",
         "scripts/fix_authentication_system.py:160"
@@ -411,20 +411,6 @@
         "netra_backend/app/clients/auth_client_config.py:139"
       ]
     },
-    "GOOGLE_OAUTH_CLIENT_CLIENT_ID_STAGING": {
-      "value": "GOOGLE_OAUTH_CLIENT_CLIENT_ID_STAGING",
-      "category": "environment",
-      "locations": [
-        "scripts/fix_staging_secrets.py:132"
-      ]
-    },
-    "GOOGLE_OAUTH_CLIENT_CLIENT_SECRET_STAGING": {
-      "value": "GOOGLE_OAUTH_CLIENT_CLIENT_SECRET_STAGING",
-      "category": "environment",
-      "locations": [
-        "scripts/fix_staging_secrets.py:133"
-      ]
-    },
     "GOOGLE_OAUTH_CLIENT_ID": {
       "value": "GOOGLE_OAUTH_CLIENT_ID",
       "category": "environment",
@@ -443,7 +429,8 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/secret_loader.py:134",
+        "auth_service/auth_core/secret_loader.py:156",
+        "auth_service/health_config.py:49",
         "scripts/setup_dev_oauth.py:47",
         "scripts/verify_oauth_config.py:111",
         "shared/secret_manager_builder.py:811"
@@ -460,7 +447,8 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_PRODUCTION",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/secret_loader.py:145",
+        "auth_service/auth_core/secret_loader.py:167",
+        "auth_service/health_config.py:53",
         "scripts/validate_oauth_deployment.py:62",
         "scripts/validate_oauth_deployment.py:62",
         "scripts/validate_oauth_deployment.py:72",
@@ -472,16 +460,16 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_STAGING",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:365",
-        "auth_service/auth_core/routes/auth_routes.py:365",
-        "auth_service/auth_core/secret_loader.py:140",
+        "auth_service/auth_core/routes/auth_routes.py:371",
+        "auth_service/auth_core/routes/auth_routes.py:371",
+        "auth_service/auth_core/secret_loader.py:162",
+        "auth_service/health_config.py:51",
         "auth_service/main.py:155",
         "auth_service/main.py:155",
-        "scripts/deploy_to_gcp.py:785",
+        "scripts/deploy_to_gcp.py:794",
         "scripts/validate_oauth_deployment.py:60",
         "scripts/validate_oauth_deployment.py:60",
-        "scripts/validate_oauth_deployment.py:69",
-        "scripts/validate_oauth_deployment.py:161"
+        "scripts/validate_oauth_deployment.py:69"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_SECRET_DEV": {
@@ -495,7 +483,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/secret_loader.py:170",
+        "auth_service/auth_core/secret_loader.py:192",
         "scripts/setup_dev_oauth.py:48",
         "scripts/verify_oauth_config.py:112",
         "shared/secret_manager_builder.py:836"
@@ -512,7 +500,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/secret_loader.py:181",
+        "auth_service/auth_core/secret_loader.py:203",
         "scripts/validate_oauth_deployment.py:63",
         "scripts/validate_oauth_deployment.py:63",
         "scripts/validate_oauth_deployment.py:72",
@@ -524,12 +512,12 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_STAGING",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:366",
-        "auth_service/auth_core/routes/auth_routes.py:366",
-        "auth_service/auth_core/secret_loader.py:176",
+        "auth_service/auth_core/routes/auth_routes.py:372",
+        "auth_service/auth_core/routes/auth_routes.py:372",
+        "auth_service/auth_core/secret_loader.py:198",
         "auth_service/main.py:156",
         "auth_service/main.py:156",
-        "scripts/deploy_to_gcp.py:786",
+        "scripts/deploy_to_gcp.py:795",
         "scripts/validate_oauth_deployment.py:61",
         "scripts/validate_oauth_deployment.py:61",
         "scripts/validate_oauth_deployment.py:69",
@@ -672,7 +660,7 @@
       "value": "NEXT_PUBLIC_API_URL",
       "category": "environment",
       "locations": [
-        "scripts/deploy_to_gcp.py:135",
+        "scripts/deploy_to_gcp.py:139",
         "scripts/verify_cold_start.py:142"
       ]
     },
@@ -702,7 +690,7 @@
       "value": "OAUTH_CONFIGURATION_BROKEN",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:399"
+        "auth_service/auth_core/routes/auth_routes.py:405"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID_ENV": {
@@ -827,11 +815,11 @@
         "netra_backend/app/core/configuration/database.py:393",
         "netra_backend/app/core/configuration/database.py:393",
         "netra_backend/app/core/configuration/unified_secrets.py:252",
-        "netra_backend/app/redis_manager.py:81",
-        "netra_backend/app/redis_manager.py:81",
-        "scripts/fetch_secrets_to_env.py:124",
-        "scripts/fetch_secrets_to_env.py:168",
-        "scripts/validate_staging_config.py:208"
+        "netra_backend/app/core/redis_connection_handler.py:48",
+        "netra_backend/app/core/redis_connection_handler.py:186",
+        "netra_backend/app/core/redis_connection_handler.py:191",
+        "netra_backend/app/core/redis_connection_handler.py:197",
+        "netra_backend/app/redis_manager.py:81"
       ]
     },
     "REDIS_DECODE_RESPONSES": {
@@ -846,7 +834,7 @@
       "category": "environment",
       "locations": [
         "auth_service/auth_core/config.py:281",
-        "scripts/deploy_to_gcp.py:114"
+        "scripts/deploy_to_gcp.py:118"
       ]
     },
     "REDIS_DSN": {
@@ -911,9 +899,9 @@
         "netra_backend/app/core/configuration/unified_secrets.py:250",
         "netra_backend/app/core/environment_constants.py:96",
         "netra_backend/app/core/network_constants.py:397",
-        "netra_backend/app/redis_manager.py:79",
-        "netra_backend/app/redis_manager.py:79",
-        "scripts/fetch_secrets_to_env.py:122"
+        "netra_backend/app/core/redis_connection_handler.py:46",
+        "netra_backend/app/core/redis_connection_handler.py:184",
+        "netra_backend/app/core/redis_connection_handler.py:189"
       ]
     },
     "REDIS_LOG_SLOW_QUERIES": {
@@ -949,7 +937,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/environment_constants.py:70",
-        "netra_backend/app/schemas/Config.py:558",
+        "netra_backend/app/schemas/config.py:558",
         "netra_backend/app/services/startup_fixes_integration.py:49",
         "netra_backend/app/services/startup_fixes_integration.py:52",
         "netra_backend/app/services/startup_fixes_integration.py:135"
@@ -991,10 +979,18 @@
         "netra_backend/app/core/configuration/database.py:392",
         "netra_backend/app/core/configuration/unified_secrets.py:251",
         "netra_backend/app/core/environment_constants.py:97",
-        "netra_backend/app/redis_manager.py:80",
-        "netra_backend/app/redis_manager.py:80",
-        "scripts/docker_dev_launcher.py:104",
-        "scripts/docker_dev_launcher.py:321"
+        "netra_backend/app/core/redis_connection_handler.py:47",
+        "netra_backend/app/core/redis_connection_handler.py:185",
+        "netra_backend/app/core/redis_connection_handler.py:190",
+        "netra_backend/app/core/redis_connection_handler.py:196"
+      ]
+    },
+    "REDIS_PRODUCTION_HOST": {
+      "value": "REDIS_PRODUCTION_HOST",
+      "category": "environment",
+      "locations": [
+        "netra_backend/app/core/redis_connection_handler.py:62",
+        "netra_backend/app/core/redis_connection_handler.py:198"
       ]
     },
     "REDIS_PRODUCTION_PASSWORD": {
@@ -1088,6 +1084,14 @@
         "shared/redis_config_builder.py:454"
       ]
     },
+    "REDIS_STAGING_HOST": {
+      "value": "REDIS_STAGING_HOST",
+      "category": "environment",
+      "locations": [
+        "netra_backend/app/core/redis_connection_handler.py:55",
+        "netra_backend/app/core/redis_connection_handler.py:192"
+      ]
+    },
     "REDIS_STAGING_PASSWORD": {
       "value": "REDIS_STAGING_PASSWORD",
       "category": "environment",
@@ -1129,21 +1133,21 @@
       "value": "REPLACE_WITH_REAL_OAUTH_CLIENT_ID",
       "category": "environment",
       "locations": [
-        "scripts/deploy_to_gcp.py:785"
+        "scripts/deploy_to_gcp.py:794"
       ]
     },
     "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET": {
       "value": "REPLACE_WITH_REAL_OAUTH_CLIENT_SECRET",
       "category": "environment",
       "locations": [
-        "scripts/deploy_to_gcp.py:786"
+        "scripts/deploy_to_gcp.py:795"
       ]
     },
     "REPLACE_WITH_REDIS_PASSWORD": {
       "value": "REPLACE_WITH_REDIS_PASSWORD",
       "category": "environment",
       "locations": [
-        "scripts/deploy_to_gcp.py:802",
+        "scripts/deploy_to_gcp.py:811",
         "scripts/fix_staging_secrets.py:91"
       ]
     },

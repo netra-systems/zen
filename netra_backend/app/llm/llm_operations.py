@@ -19,7 +19,7 @@ from netra_backend.app.llm.observability import (
     start_llm_heartbeat,
     stop_llm_heartbeat,
 )
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.schemas.llm_response_types import LLMResponse
 from netra_backend.app.services.llm_cache_service import llm_cache_service
 

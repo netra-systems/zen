@@ -35,7 +35,7 @@ from netra_backend.app.schemas import (
     WebSocketMessage,
     Workload,
 )
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 # Import test helpers - removed due to missing module
 

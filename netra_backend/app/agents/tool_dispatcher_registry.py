@@ -5,7 +5,7 @@ from langchain_core.tools import BaseTool
 
 from netra_backend.app.agents.production_tool import ProductionTool
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Tool import ToolRegistryInterface
+from netra_backend.app.schemas.tool import ToolRegistryInterface
 
 logger = central_logger.get_logger(__name__)
 

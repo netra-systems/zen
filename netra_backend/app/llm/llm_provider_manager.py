@@ -12,7 +12,7 @@ from netra_backend.app.llm.llm_provider_handlers import (
     validate_provider_key,
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.schemas.llm_base_types import LLMProvider
 from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from netra_backend.app.services.external_api_client import HTTPError

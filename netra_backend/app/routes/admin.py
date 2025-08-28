@@ -11,7 +11,7 @@ from netra_backend.app.auth_integration.auth import (
 )
 from netra_backend.app.config import get_config
 settings = get_config()
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.services.permission_service import PermissionService
 
 router = APIRouter()

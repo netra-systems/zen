@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from netra_backend.app.schemas.ToolPermission import PermissionCheckResult
+from netra_backend.app.schemas.tool_permission import PermissionCheckResult
 
 
 class UnifiedTool(BaseModel):

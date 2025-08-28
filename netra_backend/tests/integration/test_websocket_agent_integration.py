@@ -30,7 +30,7 @@ class TestWebSocketAgentIntegration:
     async def test_end_to_end_message_flow(self):
         """Test complete flow: WebSocket message → Agent → Response."""
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
         from netra_backend.app.services.agent_service_core import AgentService
         
         # Setup mocks

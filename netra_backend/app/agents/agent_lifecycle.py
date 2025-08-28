@@ -11,7 +11,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Agent import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.agents.base.timing_decorators import time_operation, TimingCategory
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingTree
 

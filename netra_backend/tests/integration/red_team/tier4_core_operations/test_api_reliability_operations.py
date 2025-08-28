@@ -25,7 +25,7 @@ import uuid
 import json
 import time
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 
 class TestApiRateLimitingPerSubscriptionTier:

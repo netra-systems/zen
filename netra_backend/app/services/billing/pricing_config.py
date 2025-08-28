@@ -16,7 +16,7 @@ from typing import Dict, Any
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 
 class ModelProvider(Enum):

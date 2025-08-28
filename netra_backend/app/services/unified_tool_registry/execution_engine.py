@@ -15,11 +15,11 @@ from netra_backend.app.core.interfaces_tools import (
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Tool import (
+from netra_backend.app.schemas.tool import (
     ToolExecuteResponse,
     ToolExecutionEngineInterface,
 )
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     PermissionCheckResult,
     ToolExecutionContext,
 )

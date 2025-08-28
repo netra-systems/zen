@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from netra_backend.app.schemas.UserPlan import (
+from netra_backend.app.schemas.user_plan import (
     PlanFeatures,
     PlanTier,
     ToolAllowance,
