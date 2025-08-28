@@ -15,6 +15,13 @@ Goals include:
 
 **Claude.md (this document) rules override most existing patterns in the codebase**
 
+### 0.1 Git Commit Standards
+**CRITICAL: When asked to "git commit" or create commits, follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml)**
+- **ATOMIC = Small, focused, complete units** - NOT everything in one massive commit
+- **Group by CONCEPT, not file count** - 300 files with one change = 1 commit; 1 file with 3 changes = 3 commits
+- **Each commit reviewable in under 1 minute** - Focus on conceptual simplicity
+- **See full specification:** [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml)
+
 ## 1. The Business Mandate: Value Capture and Growth
 
 Netra Apex succeeds by creating and capturing value relative to a customer's AI/LLM/Agent spend.
