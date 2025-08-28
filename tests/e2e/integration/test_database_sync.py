@@ -39,7 +39,7 @@ from tests.e2e.database_sync_helpers import (
     measure_performance_duration,
     sync_user_to_backend,
     verify_auth_backend_consistency,
-    test_verify_backend_user_exists,
+    verify_backend_user_exists,
     verify_sync_consistency,
 )
 from tests.e2e.database_test_connections import (
@@ -93,7 +93,7 @@ class TestDatabaseSyncE2E:
     async def _verify_complete_sync_integrity(self, validator, user_id, test_data):
         """Verify complete synchronization integrity."""
         await verify_auth_backend_consistency(validator, user_id)
-        await test_verify_backend_user_exists(validator, user_id, test_data)
+        await verify_backend_user_exists(validator, user_id, test_data)
     
     @pytest.mark.critical
     @pytest.mark.asyncio

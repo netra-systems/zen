@@ -97,7 +97,9 @@ class ReliabilityManager:
     def _create_circuit_protected_func(self, execute_func: Callable[[], Awaitable[ExecutionResult]]
                                       ) -> Callable[[], Awaitable[ExecutionResult]]:
         """Create circuit breaker protected function."""
-        return lambda: self.circuit_breaker.execute(execute_func)
+        async def protected():
+            return await self.circuit_breaker.execute(execute_func)
+        return protected
     
     async def _execute_with_retry_protection(self, protected_func: Callable[[], Awaitable[ExecutionResult]],
                                            context: ExecutionContext) -> ExecutionResult:
@@ -162,7 +164,16 @@ class ReliabilityManager:
         """Calculate execution time in milliseconds."""
         if not context.start_time:
             return 0.0
-        return (time.time() - context.start_time) * 1000
+        # Handle both datetime and float timestamps
+        from datetime import datetime
+        if isinstance(context.start_time, datetime):
+            import datetime as dt
+            now = datetime.now(context.start_time.tzinfo) if context.start_time.tzinfo else datetime.now()
+            delta = now - context.start_time
+            return delta.total_seconds() * 1000
+        else:
+            # Assume it's a float from time.time()
+            return (time.time() - context.start_time) * 1000
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive reliability health status."""

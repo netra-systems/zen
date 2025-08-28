@@ -56,6 +56,18 @@ def _create_mock_auth_response(endpoint: str, request_data: Dict[str, Any] = Non
                 "name": "Test User"
             }
         }
+    elif endpoint == "/dev/login":
+        return {
+            "access_token": f"dev_mock_access_token_{int(time.time())}",
+            "refresh_token": f"dev_mock_refresh_token_{int(time.time())}",
+            "token_type": "Bearer",
+            "expires_in": 900,
+            "user": {
+                "id": str(uuid.uuid4()),
+                "email": request_data.get("email") if request_data else "dev@example.com",
+                "name": "Development User"
+            }
+        }
     elif endpoint == "/logout":
         return {"success": True, "message": "Logged out successfully"}
     else:
@@ -139,6 +151,20 @@ async def login_user(request: Request):
         if isinstance(e, HTTPException):
             raise
         raise HTTPException(status_code=500, detail="Login failed")
+
+
+@router.post("/dev_login")
+async def dev_login_user(request: Request):
+    """Development login by proxying to auth service."""
+    try:
+        request_body = await request.json()
+        result = await _proxy_to_auth_service("/dev/login", "POST", request_body)
+        return result
+    except Exception as e:
+        logger.error(f"Dev login proxy failed: {e}")
+        if isinstance(e, HTTPException):
+            raise
+        raise HTTPException(status_code=500, detail="Dev login failed")
 
 
 @router.post("/logout")

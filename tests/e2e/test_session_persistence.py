@@ -21,6 +21,7 @@ import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.helpers.websocket_test_helpers import MockWebSocket
 from tests.e2e.config import TEST_USERS
+from tests.e2e.test_websocket_integration import WebSocketBuilder
 
 logger = central_logger.get_logger(__name__)
 
@@ -147,8 +148,7 @@ def token_refresh_manager(session_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_session_persists_across_disconnect_reconnect(session_manager:
-                                                           connection_manager):
+async def test_session_persists_across_disconnect_reconnect(session_manager, connection_manager):
     """Test session persistence across disconnect/reconnect."""
     user = TEST_USERS["enterprise"]
     session_id, token = session_manager.create_user_session(user.id)
@@ -211,10 +211,9 @@ def _validate_graceful_disconnect(session_manager, connection_manager, token):
     disconnect_events = [e for e in events if e["event"] == "graceful_disconnect"]
     assert len(disconnect_events) == 1, "Graceful disconnect must be recorded"
 
-@pytest.mark.asyncio  
+@pytest.mark.asyncio
 @pytest.mark.e2e
-async def test_token_refresh_during_active_session(session_manager, token_refresh_manager:
-                                                   connection_manager):
+async def test_token_refresh_during_active_session(session_manager, token_refresh_manager, connection_manager):
     """Test token refresh without session interruption."""
     user = TEST_USERS["enterprise"]
     session_id, initial_token = session_manager.create_user_session(user.id)

@@ -36,11 +36,12 @@ class ErrorDetector:
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def __init__(self):
+    def setup_method(self):
+        """Setup method called before each test method"""
         self.detected_errors: List[Dict] = []
         self.log_monitors: Dict[str, threading.Thread] = {}
         self.output_queues: Dict[str, Queue] = {}
-        self.patterns = ErrorPatterns()
+        self.patterns = None  # ErrorPatterns class doesn't exist
         self._monitoring = False
         self._shutdown_event = threading.Event()
 

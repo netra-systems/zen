@@ -2,6 +2,7 @@
 
 import asyncio
 import time
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Callable
 from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
@@ -52,6 +53,8 @@ class ExecutionContext:
         self._start_time = time.time()
         self._end_time: Optional[float] = None
         self._cancelled = False
+        # Add timestamp property for compatibility with error handling
+        self.timestamp = datetime.now(timezone.utc)
         
     @property
     def duration(self) -> float:
@@ -132,7 +135,8 @@ class ExecutionContext:
             "errors": [str(e) for e in self.errors],
             "duration": self.duration,
             "completed": self.is_completed,
-            "cancelled": self.is_cancelled
+            "cancelled": self.is_cancelled,
+            "timestamp": self.timestamp.isoformat() if isinstance(self.timestamp, datetime) else self.timestamp
         }
 
 

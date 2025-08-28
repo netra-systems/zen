@@ -10,6 +10,8 @@
     <cross_references>
       <ref>CLAUDE.md#project-overview</ref>
       <ref>LLM_MASTER_INDEX.md</ref>
+      <ref>SPEC/root_folder_organization.xml</ref>
+      <ref>SPEC/folder_structure_rules.md</ref>
     </cross_references>
   </meta>
   <directory_structure>

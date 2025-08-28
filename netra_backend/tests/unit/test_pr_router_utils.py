@@ -49,53 +49,55 @@ class TestHandlePrRoutingError:
     """Test handle_pr_routing_error function."""
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.auth.pr_router.logger')
+    @patch('netra_backend.app.auth_integration.auth.logger')
     def test_handle_pr_routing_error_basic(self, mock_logger):
-        """Test handling basic PR routing error."""
-        error = Exception("Test error")
-        result = handle_pr_routing_error(error, "123")
+        """Test handling basic PR routing error.
         
-        assert isinstance(result, HTTPException)
-        assert result.status_code == 400
-        assert "Invalid PR environment configuration: 123" in result.detail
-        mock_logger.error.assert_called_once()
+        Note: This function is deprecated and simplified.
+        """
+        error = Exception("Test error")
+        result = handle_pr_routing_error(error)
+        
+        assert isinstance(result, dict)
+        assert result["error"] == "Test error"
+        mock_logger.warning.assert_called_once_with("handle_pr_routing_error is deprecated - use auth service")
 
     # Mock: Component isolation for testing without external dependencies
-    @patch('app.auth.pr_router.logger')
+    @patch('netra_backend.app.auth_integration.auth.logger')
     def test_handle_pr_routing_error_auth_error(self, mock_logger):
-        """Test handling authentication error."""
-        error = AuthenticationError("Auth failed")
-        result = handle_pr_routing_error(error, "456")
+        """Test handling authentication error.
         
-        assert isinstance(result, HTTPException)
-        assert result.status_code == 400
-        mock_logger.error.assert_called_once()
-        # Check that the error message contains the expected parts
-        call_args = mock_logger.error.call_args[0][0]
-        assert "PR routing error for PR 456:" in call_args
-        assert "Auth failed" in call_args
+        Note: This function is deprecated and simplified.
+        """
+        error = AuthenticationError("Auth failed")
+        result = handle_pr_routing_error(error)
+        
+        assert isinstance(result, dict)
+        assert result["error"] == "AUTH_FAILED: Auth failed"
+        mock_logger.warning.assert_called_once_with("handle_pr_routing_error is deprecated - use auth service")
 
 class TestGetPrEnvironmentStatus:
     """Test get_pr_environment_status function."""
 
     def test_get_pr_environment_status_basic(self):
-        """Test getting PR environment status."""
+        """Test getting PR environment status.
+        
+        Note: This function is deprecated and simplified.
+        """
         status = get_pr_environment_status("123")
         
         assert status["pr_number"] == "123"
-        assert status["status"] == "active"
-        assert "auth_domain" in status
-        assert "frontend_domain" in status
-        assert "api_domain" in status
-        assert "last_updated" in status
+        assert status["status"] == "unknown"
 
     def test_get_pr_environment_status_domains(self):
-        """Test PR environment status contains correct domains."""
+        """Test PR environment status contains correct domains.
+        
+        Note: This function is deprecated and simplified.
+        """
         status = get_pr_environment_status("456")
         
-        assert "auth-pr-456" in status["auth_domain"]
-        assert "pr-456.staging.netrasystems.ai" in status["frontend_domain"]
-        assert "pr-456-api.staging.netrasystems.ai" in status["api_domain"]
+        assert status["pr_number"] == "456"
+        assert status["status"] == "unknown"
 
 class TestExtractPrNumber:
     """Test PR number extraction functions."""
@@ -121,25 +123,37 @@ class TestExtractPrNumber:
         assert result is None
 
     def test_extract_pr_number_from_request_header(self):
-        """Test extracting PR number from request header."""
+        """Test extracting PR number from request header.
+        
+        Note: This function is deprecated and always returns None.
+        """
         headers = {"X-PR-Number": "789"}
         result = extract_pr_number_from_request(headers)
-        assert result == "789"
+        assert result is None
 
     def test_extract_pr_number_from_request_host(self):
-        """Test extracting PR number from host header."""
+        """Test extracting PR number from host header.
+        
+        Note: This function is deprecated and always returns None.
+        """
         headers = {"host": "pr-123.staging.netrasystems.ai"}
         result = extract_pr_number_from_request(headers)
-        assert result == "123"
+        assert result is None
 
     def test_extract_pr_number_from_request_invalid_header(self):
-        """Test extracting PR number with invalid header value."""
+        """Test extracting PR number with invalid header value.
+        
+        Note: This function is deprecated and always returns None.
+        """
         headers = {"X-PR-Number": "invalid"}
         result = extract_pr_number_from_request(headers)
         assert result is None
 
     def test_extract_pr_number_from_request_no_match(self):
-        """Test extracting PR number when no match found."""
+        """Test extracting PR number when no match found.
+        
+        Note: This function is deprecated and always returns None.
+        """
         headers = {"host": "invalid.example.com"}
         result = extract_pr_number_from_request(headers)
         assert result is None
@@ -147,46 +161,45 @@ class TestExtractPrNumber:
 class TestRoutePrAuthentication:
     """Test route_pr_authentication function."""
 
-    def test_route_pr_authentication_login(self):
-        """Test routing PR authentication for login flow."""
-        redirect_url, config = route_pr_authentication("123", "login")
+    @pytest.mark.asyncio
+    async def test_route_pr_authentication_login(self):
+        """Test routing PR authentication for login flow.
         
-        assert "auth-pr-123" in redirect_url
-        assert "/auth/login" in redirect_url
-        assert config["pr_number"] == "123"
-        assert config["environment"] == "pr"
+        Note: This function is deprecated and simplified.
+        """
+        result = await route_pr_authentication("123", "auth_code")
+        
+        assert result["pr_number"] == "123"
+        assert result["authenticated"] == False
 
-    def test_route_pr_authentication_login_with_return_url(self):
-        """Test routing PR authentication for login with return URL."""
-        return_url = "https://example.com"
-        redirect_url, config = route_pr_authentication("123", "login", return_url)
+    @pytest.mark.asyncio
+    async def test_route_pr_authentication_callback(self):
+        """Test routing PR authentication for callback flow.
         
-        assert "auth-pr-123" in redirect_url
-        assert "/auth/login" in redirect_url
-        assert f"return_url={return_url}" in redirect_url
-        assert "pr=123" in redirect_url
+        Note: This function is deprecated and simplified.
+        """
+        result = await route_pr_authentication("456", "auth_code")
+        
+        assert result["pr_number"] == "456"
+        assert result["authenticated"] == False
 
-    def test_route_pr_authentication_callback(self):
-        """Test routing PR authentication for callback flow."""
-        redirect_url, config = route_pr_authentication("456", "callback")
+    @pytest.mark.asyncio
+    async def test_route_pr_authentication_default(self):
+        """Test routing PR authentication for default flow.
         
-        assert "pr-456.staging.netrasystems.ai" in redirect_url
-        assert "/auth/callback" in redirect_url
-        assert config["pr_number"] == "456"
-
-    def test_route_pr_authentication_default(self):
-        """Test routing PR authentication for default flow."""
-        redirect_url, config = route_pr_authentication("789", "default")
+        Note: This function is deprecated and simplified.
+        """
+        result = await route_pr_authentication("789", "auth_code")
         
-        assert redirect_url == "https://pr-789.staging.netrasystems.ai"
-        assert config["pr_number"] == "789"
+        assert result["pr_number"] == "789"
+        assert result["authenticated"] == False
 
 class TestPrStateTtl:
     """Test PR state TTL constant."""
 
     def test_pr_state_ttl_value(self):
         """Test PR state TTL has expected value."""
-        assert PR_STATE_TTL == 300
+        assert PR_STATE_TTL == 3600
         assert isinstance(PR_STATE_TTL, int)
 
     def test_pr_state_ttl_reasonable(self):

@@ -8,7 +8,7 @@ import logging
 import os
 import secrets
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Optional, Tuple
 
 import httpx
@@ -163,7 +163,7 @@ class AuthService:
             "email": email,
             "password": password,
             "name": "Test User",
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(UTC).isoformat()
         }
         
         return {

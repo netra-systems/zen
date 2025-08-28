@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -663,7 +663,6 @@ async def cache_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_basic_cache_operations(cache_manager):
     """Test basic cache set and get operations."""
     manager = cache_manager
@@ -693,7 +692,6 @@ async def test_basic_cache_operations(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_cache_key_generation(cache_manager):
     """Test cache key generation and uniqueness."""
     manager = cache_manager
@@ -727,7 +725,6 @@ async def test_cache_key_generation(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_cache_hit_miss_ratio(cache_manager):
     """Test cache hit/miss ratio tracking."""
     manager = cache_manager
@@ -772,7 +769,6 @@ async def test_cache_hit_miss_ratio(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_embedding_caching(cache_manager):
     """Test embedding caching functionality."""
     manager = cache_manager
@@ -797,7 +793,6 @@ async def test_embedding_caching(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_computation_caching(cache_manager):
     """Test computation result caching."""
     manager = cache_manager
@@ -828,7 +823,6 @@ async def test_computation_caching(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_cache_ttl_expiration(cache_manager):
     """Test cache TTL and expiration."""
     manager = cache_manager
@@ -863,7 +857,6 @@ async def test_cache_ttl_expiration(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_cache_invalidation_by_tags(cache_manager):
     """Test cache invalidation by tags."""
     manager = cache_manager
@@ -903,7 +896,6 @@ async def test_cache_invalidation_by_tags(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_cache_warming(cache_manager):
     """Test cache warming functionality."""
     manager = cache_manager
@@ -937,7 +929,6 @@ async def test_cache_warming(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_lru_eviction_policy(cache_manager):
     """Test LRU eviction policy."""
     manager = cache_manager
@@ -970,7 +961,6 @@ async def test_lru_eviction_policy(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_cache_access_tracking(cache_manager):
     """Test cache access count tracking."""
     manager = cache_manager
@@ -1008,7 +998,6 @@ async def test_cache_access_tracking(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_concurrent_cache_operations(cache_manager):
     """Test concurrent cache operations."""
     manager = cache_manager
@@ -1043,7 +1032,6 @@ async def test_concurrent_cache_operations(cache_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
-@pytest.mark.asyncio
 async def test_cache_performance_benchmarks(cache_manager):
     """Benchmark cache performance."""
     manager = cache_manager

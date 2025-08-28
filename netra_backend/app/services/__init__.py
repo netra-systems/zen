@@ -19,47 +19,15 @@ class ServiceConfigManager:
         """Get count of enabled services."""
         return 0
 
-# Core services will be imported on-demand to avoid circular import issues
+# Core services available for import
+# Services are imported by specific modules to avoid circular imports
+# Import services directly from their modules when needed:
+#   from netra_backend.app.services.cost_calculator import CostCalculatorService
+#   from netra_backend.app.services.thread_service import ThreadService
+#   etc.
 
-# Quality analytics service
-# Quality monitor service (test compatibility)
-# Supply chain services
-# Thread services
-# New service modules
-from netra_backend.app.services import (
-    api_gateway,
-    auth_service_client,
-    billing,
-    llm_manager,
-    quality_analytics,
-    quality_monitor,
-    redis,
-    supplier_comparison,
-    supply_catalog_service,
-    supply_contract_service,
-    supply_optimization,
-    supply_sustainability_service,
-    supply_tracking,
-    thread_analytics,
-)
-
-# Alias for backward compatibility
-supply_chain_service = supply_catalog_service
+# Service configuration manager remains here for backward compatibility
 
 __all__ = [
-    "auth_service_client",
-    "quality_analytics", 
-    "quality_monitor",
-    "supply_optimization",
-    "supply_tracking", 
-    "supply_contract_service",
-    "supply_sustainability_service",
-    "supply_catalog_service",
-    "supply_chain_service",
-    "supplier_comparison",
-    "thread_analytics",
-    "llm_manager",
-    "api_gateway",
-    "redis",
-    "billing"
+    "ServiceConfigManager",
 ]

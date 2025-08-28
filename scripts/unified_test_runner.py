@@ -95,6 +95,9 @@ class UnifiedTestRunner:
         # Initialize Cypress runner lazily to avoid Docker issues during init
         self.cypress_runner = None
         
+        # Test execution timeout fix for iterations 41-60
+        self.max_collection_size = int(os.getenv("MAX_TEST_COLLECTION_SIZE", "1000"))
+        
         # Test configurations - Use project root as working directory to fix import issues
         self.test_configs = {
             "backend": {
@@ -483,6 +486,12 @@ class UnifiedTestRunner:
         else:
             timeout_seconds = 600  # 10 minutes timeout for integration tests
         try:
+            # Fix stdout flush issue by using run with explicit flushing
+            import sys
+            sys.stdout.flush()
+            sys.stderr.flush()
+            
+            # Use subprocess.run with proper buffering for Windows
             result = subprocess.run(
                 cmd,
                 cwd=config["path"],
@@ -491,7 +500,9 @@ class UnifiedTestRunner:
                 shell=True,
                 encoding='utf-8',
                 errors='replace',
-                timeout=timeout_seconds
+                timeout=timeout_seconds,
+                # Force immediate output on Windows
+                env={**os.environ, 'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'}
             )
             # Handle unicode encoding issues by cleaning the output
             if result.stdout:
@@ -720,8 +731,9 @@ class UnifiedTestRunner:
             cmd_parts.append("-x")
         
         # Add timeout for unit tests to prevent hanging
-        if category_name == "unit":
-            cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])
+        # DISABLED: pytest-timeout conflicts with subprocess timeout causing hangs
+        # if category_name == "unit":
+        #     cmd_parts.extend(["--timeout=120", "--timeout-method=thread"])
         
         # Add specific test pattern
         if args.pattern:

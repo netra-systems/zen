@@ -14,7 +14,7 @@ Cycles Covered: 31, 32, 33, 34, 35
 import pytest
 import time
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import patch, MagicMock
 
 from auth_service.auth_core.core.token_validator import TokenValidator
@@ -63,7 +63,7 @@ class TestTokenValidationSecurity:
             "user_id": "test_user_31",
             "role": "user",
             "permissions": ["read"],
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         
         valid_token = token_validator.create_token(user_data)
@@ -113,7 +113,7 @@ class TestTokenValidationSecurity:
         user_data = {
             "user_id": "test_user_32",
             "role": "user",
-            "exp": datetime.utcnow() + timedelta(seconds=1)  # 1 second expiration
+            "exp": datetime.now(UTC) + timedelta(seconds=1)  # 1 second expiration
         }
         
         short_lived_token = token_validator.create_token(user_data)
@@ -145,7 +145,7 @@ class TestTokenValidationSecurity:
             "user_id": "test_user_33",
             "role": "user",
             "jti": "unique_token_id_33",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         
         token = token_validator.create_token(user_data)
@@ -181,7 +181,7 @@ class TestTokenValidationSecurity:
             "user_id": "test_user_34",
             "role": "user",
             "jti": "revocation_test_token_34",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         
         token = token_validator.create_token(user_data)
@@ -219,7 +219,7 @@ class TestTokenValidationSecurity:
             "user_id": "test_user_35",
             "role": "user",
             "jti": "concurrent_test_token_35",
-            "exp": datetime.utcnow() + timedelta(hours=1)
+            "exp": datetime.now(UTC) + timedelta(hours=1)
         }
         
         token = token_validator.create_token(user_data)

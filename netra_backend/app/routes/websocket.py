@@ -87,6 +87,23 @@ async def websocket_endpoint(websocket: WebSocket):
     heartbeat: Optional[WebSocketHeartbeat] = None
     
     try:
+        # CRITICAL FIX: Accept WebSocket FIRST before any authentication or operations
+        # This prevents "WebSocket is not connected" errors during authentication failures
+        subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
+        selected_protocol = None
+        
+        # Select jwt-auth if available (client supports authentication)
+        if "jwt-auth" in [p.strip() for p in subprotocols]:
+            selected_protocol = "jwt-auth"
+        
+        # Accept with selected subprotocol BEFORE authentication
+        if selected_protocol:
+            await websocket.accept(subprotocol=selected_protocol)
+            logger.info(f"WebSocket accepted with subprotocol: {selected_protocol}")
+        else:
+            await websocket.accept()
+            logger.info("WebSocket accepted without subprotocol")
+        
         # Get service instances
         ws_manager = get_websocket_manager()
         message_router = get_message_router()
@@ -110,29 +127,12 @@ async def websocket_endpoint(websocket: WebSocket):
         else:
             logger.warning("WebSocket dependencies not available - running in test mode without agent handlers")
         
-        # Authenticate and establish secure connection
+        # Authenticate and establish secure connection AFTER accepting
         async with secure_websocket_context(websocket) as (auth_info, security_manager):
             user_id = auth_info.user_id
             
-            # Accept WebSocket connection with appropriate subprotocol
-            # Check if client sent subprotocols
-            subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
-            selected_protocol = None
-            
-            # Select jwt-auth if available (client supports authentication)
-            if "jwt-auth" in [p.strip() for p in subprotocols]:
-                selected_protocol = "jwt-auth"
-            
-            # Accept with selected subprotocol
-            if selected_protocol:
-                await websocket.accept(subprotocol=selected_protocol)
-                logger.info(f"WebSocket accepted with subprotocol: {selected_protocol}")
-            else:
-                await websocket.accept()
-                logger.info("WebSocket accepted without subprotocol")
-            
             connection_start_time = time.time()
-            logger.info(f"WebSocket connection accepted for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
+            logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
             
             # Register connection with manager
             connection_id = await ws_manager.connect_user(user_id, websocket)
@@ -180,7 +180,18 @@ async def websocket_endpoint(websocket: WebSocket):
             
     except HTTPException as e:
         logger.error(f"WebSocket authentication failed: {e.detail}")
+        # WebSocket is already accepted, safe to close
         if is_websocket_connected(websocket):
+            try:
+                # Send authentication error message before closing
+                error_msg = create_error_message(
+                    "AUTH_ERROR",
+                    e.detail,
+                    {"code": e.status_code}
+                )
+                await safe_websocket_send(websocket, error_msg.model_dump())
+            except Exception:
+                pass  # Best effort to send error
             await safe_websocket_close(websocket, code=e.status_code, reason=e.detail[:50])
     
     except WebSocketDisconnect as e:

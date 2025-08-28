@@ -148,11 +148,11 @@ def assert_usage_key_format(key, user_id, tool_name, pattern):
 
 def setup_redis_usage_count(mock_redis, count):
     """Setup Redis to return specific usage count."""
-    mock_redis.get.return_value = str(count) if count else None
+    mock_redis.get = AsyncMock(return_value=str(count) if count else None)
 
 def setup_redis_error(mock_redis, error_message):
     """Setup Redis to raise error."""
-    mock_redis.get.side_effect = Exception(error_message)
+    mock_redis.get = AsyncMock(side_effect=Exception(error_message))
 
 # Core rate limiting functionality tests
 class TestRateLimitChecking:

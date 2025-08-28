@@ -47,11 +47,13 @@ class ToolPermissionRateLimiter:
         for perm_name in permissions:
             perm_def = permission_definitions.get(perm_name)
             if perm_def and perm_def.rate_limits:
-                rate_limits.update({
-                    "per_minute": perm_def.rate_limits.per_minute,
-                    "per_hour": perm_def.rate_limits.per_hour,
-                    "per_day": perm_def.rate_limits.per_day,
-                })
+                # Take the most restrictive (minimum) limit for each period
+                for period in ["per_minute", "per_hour", "per_day"]:
+                    limit = getattr(perm_def.rate_limits, period)
+                    if limit is not None:
+                        current_limit = rate_limits.get(period)
+                        if current_limit is None or limit < current_limit:
+                            rate_limits[period] = limit
         return rate_limits
 
     def _build_limit_exceeded_response(self, period: str, limit: int, current_usage: int, rate_limits: Dict) -> Dict:

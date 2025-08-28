@@ -6,7 +6,7 @@ Manages model lifecycle, requests, and integration with other services.
 import asyncio
 import logging
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
@@ -112,7 +112,7 @@ class LLMManager:
         if not self.initialized:
             raise RuntimeError("LLM Manager not initialized")
         
-        request_id = f"req_{datetime.utcnow().timestamp()}"
+        request_id = f"req_{datetime.now(timezone.utc).timestamp()}"
         model = model or self.default_model
         parameters = parameters or {}
         
@@ -122,7 +122,7 @@ class LLMManager:
             prompt=prompt,
             parameters=parameters,
             status=RequestStatus.PENDING,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
         
         self.active_requests[request_id] = request
@@ -162,14 +162,14 @@ class LLMManager:
                 if estimated_tokens > max_tokens_per_request:
                     request.status = RequestStatus.FAILED
                     request.error = f"Cost limit exceeded - request with {estimated_tokens} estimated tokens blocked to prevent unbounded API costs (max: {max_tokens_per_request})"
-                    request.completed_at = datetime.utcnow()
+                    request.completed_at = datetime.now(timezone.utc)
                     logger.warning(f"Request {request_id} blocked due to cost limit enforcement")
                     return request
                 
                 if not self._check_cost_limit(request.model, estimated_tokens):
                     request.status = RequestStatus.FAILED
                     request.error = "Cost limit exceeded - daily budget exhausted"
-                    request.completed_at = datetime.utcnow()
+                    request.completed_at = datetime.now(timezone.utc)
                     logger.warning(f"Request {request_id} blocked due to budget exhaustion")
                     return request
             
@@ -190,7 +190,7 @@ class LLMManager:
             
             # Update request
             request.status = RequestStatus.COMPLETED
-            request.completed_at = datetime.utcnow()
+            request.completed_at = datetime.now(timezone.utc)
             request.response = response
             request.token_usage = token_usage
             
@@ -204,7 +204,7 @@ class LLMManager:
             logger.error(f"Failed to process request {request_id}: {e}")
             request.status = RequestStatus.FAILED
             request.error = str(e)
-            request.completed_at = datetime.utcnow()
+            request.completed_at = datetime.now(timezone.utc)
             
             # Update metrics
             self._update_metrics(request)
@@ -255,7 +255,7 @@ class LLMManager:
         
         if request.status in [RequestStatus.PENDING, RequestStatus.PROCESSING]:
             request.status = RequestStatus.CANCELLED
-            request.completed_at = datetime.utcnow()
+            request.completed_at = datetime.now(timezone.utc)
             logger.info(f"Cancelled request {request_id}")
             return True
         
@@ -350,7 +350,7 @@ class LLMManager:
     
     async def cleanup_completed_requests(self, max_age_hours: int = 24) -> int:
         """Clean up old completed requests."""
-        cutoff_time = datetime.utcnow().timestamp() - (max_age_hours * 3600)
+        cutoff_time = datetime.now(timezone.utc).timestamp() - (max_age_hours * 3600)
         
         to_remove = []
         for request_id, request in self.active_requests.items():
@@ -363,6 +363,80 @@ class LLMManager:
         
         logger.info(f"Cleaned up {len(to_remove)} old requests")
         return len(to_remove)
+
+    async def generate_completion_with_timeout_resilience(
+        self, 
+        prompt: str, 
+        timeout: float = 30.0,
+        model: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """Generate completion with timeout resilience and graceful degradation.
+        
+        This method implements timeout handling and graceful degradation for LLM requests,
+        preventing cascade failures when external LLM services are unavailable.
+        
+        Args:
+            prompt: Input prompt for completion
+            timeout: Timeout in seconds for the request
+            model: Optional model to use
+            
+        Returns:
+            Response dict with completion or graceful degradation message
+        """
+        try:
+            # Import circuit breaker here to avoid circular imports
+            from netra_backend.app.core.resilience.unified_circuit_breaker import (
+                UnifiedServiceCircuitBreakers
+            )
+            
+            # Use circuit breaker for LLM service
+            circuit_breaker = UnifiedServiceCircuitBreakers.get_llm_service_circuit_breaker()
+            
+            async def llm_operation():
+                # Create request
+                request_id = await self.create_request(prompt, model)
+                
+                # Process with timeout
+                start_time = asyncio.get_event_loop().time()
+                try:
+                    request = await asyncio.wait_for(
+                        self.process_request(request_id),
+                        timeout=timeout
+                    )
+                    
+                    if request and request.status == RequestStatus.COMPLETED:
+                        return {
+                            "response": request.response,
+                            "token_usage": request.token_usage,
+                            "model": request.model,
+                            "latency": asyncio.get_event_loop().time() - start_time
+                        }
+                    else:
+                        # Request failed
+                        error_msg = request.error if request else "Request processing failed"
+                        raise Exception(f"LLM request failed: {error_msg}")
+                        
+                except asyncio.TimeoutError:
+                    # Timeout occurred - implement graceful degradation
+                    logger.warning(f"LLM request timed out after {timeout}s")
+                    raise asyncio.TimeoutError(f"LLM service timeout after {timeout}s")
+            
+            # Execute through circuit breaker
+            return await circuit_breaker.call(llm_operation)
+            
+        except Exception as e:
+            # Graceful degradation - return informative response
+            logger.warning(f"LLM service unavailable, providing graceful degradation: {e}")
+            
+            return {
+                "response": f"LLM service temporarily unavailable (timeout/error). "
+                           f"Your request for '{prompt[:50]}...' will be processed when service recovers.",
+                "token_usage": {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0},
+                "model": model or self.default_model,
+                "latency": 0.0,
+                "status": "graceful_degradation",
+                "error": str(e)
+            }
 
 
 # Global instance

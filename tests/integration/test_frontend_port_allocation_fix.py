@@ -24,7 +24,7 @@ from dev_launcher.utils import find_available_port, is_port_available
 from dev_launcher.port_manager import PortManager
 
 
-class TestPortServer:
+class PortServer:
     """Simple test server that occupies a port for testing."""
     
     def __init__(self, port: int):

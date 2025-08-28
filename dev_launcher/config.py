@@ -552,7 +552,7 @@ class LauncherConfig:
     def _get_important_env_vars(self) -> list:
         """Get list of important environment variables."""
         return [
-            "GOOGLE_CLIENT_ID", "GEMINI_API_KEY", "CLICKHOUSE_HOST",
+            "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT", "GEMINI_API_KEY", "CLICKHOUSE_HOST",
             "DATABASE_URL", "REDIS_HOST", "JWT_SECRET_KEY", "ENVIRONMENT"
         ]
     

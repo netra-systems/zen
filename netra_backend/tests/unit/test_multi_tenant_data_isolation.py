@@ -29,13 +29,12 @@ class TestMultiTenantDataIsolation:
         
         mock_db.execute = execute_query
         
-        # Simulate tenant-scoped query
-        with patch("netra_backend.app.core.tenant_context.get_current_tenant", return_value="tenant-123"):
-            result = mock_db.execute(
-                "SELECT * FROM threads WHERE tenant_id = %(tenant_id)s",
-                {"tenant_id": "tenant-123"}
-            )
-            assert result["results"][0]["tenant_id"] == "tenant-123"
+        # Simulate tenant-scoped query (no external patching needed)
+        result = mock_db.execute(
+            "SELECT * FROM threads WHERE tenant_id = %(tenant_id)s",
+            {"tenant_id": "tenant-123"}
+        )
+        assert result["results"][0]["tenant_id"] == "tenant-123"
     
     def test_cross_tenant_access_prevention(self, tenant_contexts):
         """Validates that tenant A cannot access tenant B's data."""

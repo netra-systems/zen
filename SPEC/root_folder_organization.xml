@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+    <name>Root Folder Organization</name>
+    <version>1.0.0</version>
+    <created>2025-08-27</created>
+    <description>
+        Canonical specification defining what files and directories are allowed in the project root folder.
+        This spec enforces clean root organization to maintain project clarity and discoverability.
+    </description>
+    
+    <principles>
+        <principle>The root folder should be minimal and focused on project entry points</principle>
+        <principle>Configuration files required by tools should remain in root</principle>
+        <principle>All other files should be organized into appropriate subdirectories</principle>
+        <principle>Reports and temporary files should be in dedicated directories</principle>
+    </principles>
+    
+    <allowed_in_root>
+        <!-- Essential Project Files -->
+        <category name="project_essentials">
+            <file>README.md</file>
+            <file>CLAUDE.md</file>
+            <file>LICENSE</file>
+            <file>LLM_MASTER_INDEX.md</file>
+            <file>MASTER_WIP_STATUS.md</file>
+            <file>requirements.txt</file>
+            <file>pytest.ini</file>
+            <file>unified_test_runner.py</file>
+            <file>dev_launcher.py</file>
+        </category>
+        
+        <!-- Configuration Files -->
+        <category name="configuration_files">
+            <pattern>docker-compose*.yml</pattern>
+            <pattern>.gitignore</pattern>
+            <pattern>.gitattributes</pattern>
+            <pattern>.dockerignore</pattern>
+            <pattern>.gcloudignore</pattern>
+            <pattern>.env*</pattern>
+            <pattern>.coveragerc</pattern>
+            <pattern>.pre-commit-config*.yaml</pattern>
+            <pattern>.actrc</pattern>
+            <pattern>.claude-hooks.json</pattern>
+        </category>
+        
+        <!-- Service Configuration -->
+        <category name="service_config">
+            <pattern>alembic.ini</pattern>
+            <pattern>pyproject.toml</pattern>
+            <pattern>setup.py</pattern>
+            <pattern>setup.cfg</pattern>
+        </category>
+    </allowed_in_root>
+    
+    <directory_structure>
+        <!-- Reports should go here -->
+        <directory path="reports/" purpose="All audit reports, test reports, and analysis documents">
+            <pattern>*_report.md</pattern>
+            <pattern>*_audit.md</pattern>
+            <pattern>*_analysis.md</pattern>
+            <pattern>*_summary.md</pattern>
+            <pattern>*_report_*.md</pattern>
+            <pattern>TEST_*.md</pattern>
+            <pattern>FINAL_*.md</pattern>
+        </directory>
+        
+        <!-- Logs should go here -->
+        <directory path="logs/" purpose="All log files and debug outputs">
+            <pattern>*.log</pattern>
+            <pattern>*_logs_*.txt</pattern>
+            <pattern>*_output.txt</pattern>
+        </directory>
+        
+        <!-- Scripts should go here -->
+        <directory path="scripts/" purpose="All Python scripts and utilities">
+            <pattern>debug_*.py</pattern>
+            <pattern>test_*.py</pattern>
+            <pattern>validate_*.py</pattern>
+            <pattern>fix_*.py</pattern>
+        </directory>
+        
+        <!-- Documentation should go here -->
+        <directory path="docs/" purpose="User-facing documentation">
+            <pattern>*_GUIDE.md</pattern>
+            <pattern>*_DOCUMENTATION.md</pattern>
+        </directory>
+        
+        <!-- Specifications should go here -->
+        <directory path="SPEC/" purpose="System specifications and architecture documents">
+            <pattern>*.xml</pattern>
+            <pattern>*_spec.md</pattern>
+        </directory>
+        
+        <!-- Test-specific files -->
+        <directory path="tests/" purpose="Test files and test data">
+            <pattern>test_*.py</pattern>
+            <pattern>*.db</pattern>
+        </directory>
+        
+        <!-- Configuration files -->
+        <directory path="config/" purpose="Configuration files not required in root">
+            <pattern>*.json</pattern>
+            <pattern>*.yaml</pattern>
+            <pattern>*.ini</pattern>
+        </directory>
+        
+        <!-- Temporary and work-in-progress files -->
+        <directory path="temp/" purpose="Temporary files and WIP documents">
+            <pattern>WIP_*.md</pattern>
+            <pattern>tmp_*</pattern>
+            <pattern>temp_*</pattern>
+        </directory>
+        
+        <!-- Archive for old/deprecated files -->
+        <directory path="archive/" purpose="Archived and deprecated files">
+            <pattern>*_old.*</pattern>
+            <pattern>*_deprecated.*</pattern>
+            <pattern>*_backup.*</pattern>
+        </directory>
+    </directory_structure>
+    
+    <file_placement_rules>
+        <!-- Rules for where new files should be created -->
+        <rule type="report">
+            <description>All reports, audits, and analysis documents</description>
+            <target_directory>reports/</target_directory>
+            <examples>
+                <example>database_audit_report.md → reports/database_audit_report.md</example>
+                <example>test_improvement_report.md → reports/test_improvement_report.md</example>
+            </examples>
+        </rule>
+        
+        <rule type="log">
+            <description>All log files and debug outputs</description>
+            <target_directory>logs/</target_directory>
+            <examples>
+                <example>dev_launcher.log → logs/dev_launcher.log</example>
+                <example>backend_restart.log → logs/backend_restart.log</example>
+            </examples>
+        </rule>
+        
+        <rule type="script">
+            <description>Python scripts for debugging, testing, or validation</description>
+            <target_directory>scripts/</target_directory>
+            <examples>
+                <example>debug_cors.py → scripts/debug_cors.py</example>
+                <example>validate_config.py → scripts/validate_config.py</example>
+            </examples>
+        </rule>
+        
+        <rule type="test">
+            <description>Test files not part of service-specific test directories</description>
+            <target_directory>tests/</target_directory>
+            <examples>
+                <example>test_integration.py → tests/test_integration.py</example>
+                <example>test.db → tests/test.db</example>
+            </examples>
+        </rule>
+        
+        <rule type="documentation">
+            <description>User-facing documentation and guides</description>
+            <target_directory>docs/</target_directory>
+            <examples>
+                <example>DEPLOYMENT_GUIDE.md → docs/DEPLOYMENT_GUIDE.md</example>
+                <example>API_DOCUMENTATION.md → docs/API_DOCUMENTATION.md</example>
+            </examples>
+        </rule>
+        
+        <rule type="specification">
+            <description>System specifications and architecture documents</description>
+            <target_directory>SPEC/</target_directory>
+            <examples>
+                <example>new_feature_spec.xml → SPEC/new_feature_spec.xml</example>
+                <example>architecture_decision.xml → SPEC/architecture_decision.xml</example>
+            </examples>
+        </rule>
+        
+        <rule type="config">
+            <description>Configuration files not required in root</description>
+            <target_directory>config/</target_directory>
+            <examples>
+                <example>staging_config.json → config/staging_config.json</example>
+                <example>test_settings.yaml → config/test_settings.yaml</example>
+            </examples>
+        </rule>
+    </file_placement_rules>
+    
+    <enforcement>
+        <script>scripts/enforce_root_organization.py</script>
+        <pre_commit_hook>enforce-root-organization</pre_commit_hook>
+        <validation_command>python scripts/validate_root_organization.py</validation_command>
+    </enforcement>
+    
+    <cross_references>
+        <reference>SPEC/folder_structure_rules.md</reference>
+        <reference>SPEC/directory_structure.xml</reference>
+        <reference>SPEC/documentation_organization.xml</reference>
+        <reference>SPEC/conventions.xml</reference>
+        <reference>LLM_MASTER_INDEX.md</reference>
+    </cross_references>
+</spec>

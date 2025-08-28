@@ -30,7 +30,7 @@ class UnifiedToolRegistry:
         self._tools: Dict[str, UnifiedTool] = {}
         self._tool_handlers: Dict[str, Callable] = {}
         self.permission_service = permission_service
-        logger.info("UnifiedToolRegistry initialized")
+        logger.debug("UnifiedToolRegistry initialized")
     
     def register_tool(
         self, 

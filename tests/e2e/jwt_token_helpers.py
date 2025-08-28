@@ -172,6 +172,11 @@ class JWTTestHelper:
         """Create JWT token with specified payload."""
         return self.create_token(payload, secret)
     
+    async def create_valid_jwt_token(self, secret: str = None) -> str:
+        """Create valid JWT token with default payload."""
+        payload = self.create_valid_payload()
+        return self.create_token(payload, secret)
+    
     async def create_tampered_token(self, payload: Dict) -> str:
         """Create token with invalid signature."""
         valid_token = await self.create_jwt_token(payload)

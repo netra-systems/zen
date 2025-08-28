@@ -4,7 +4,7 @@ Validates GDPR, SOC2, and audit requirements for enterprise compliance.
 """
 import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Any, Optional
 
 
@@ -33,8 +33,8 @@ class TestComplianceValidationComprehensive:
                 "preferences": {"marketing": True, "analytics": False}
             },
             "consent_records": [
-                {"type": "email", "granted": True, "timestamp": datetime.utcnow()},
-                {"type": "usage_analytics", "granted": False, "timestamp": datetime.utcnow()}
+                {"type": "email", "granted": True, "timestamp": datetime.now(timezone.utc)},
+                {"type": "usage_analytics", "granted": False, "timestamp": datetime.now(timezone.utc)}
             ]
         }
         
@@ -42,7 +42,7 @@ class TestComplianceValidationComprehensive:
             if request_type == "access":
                 return {"status": "completed", "data": user_data, "format": format_type}
             elif request_type == "erasure":
-                return {"status": "scheduled", "deletion_date": datetime.utcnow() + timedelta(days=gdpr_config["deletion_grace_period_days"])}
+                return {"status": "scheduled", "deletion_date": datetime.now(timezone.utc) + timedelta(days=gdpr_config["deletion_grace_period_days"])}
             elif request_type == "portability":
                 if format_type in gdpr_config["right_to_portability_formats"]:
                     return {"status": "completed", "export_url": f"https://exports.netra.ai/{user_id}.{format_type}"}
@@ -81,7 +81,7 @@ class TestComplianceValidationComprehensive:
             user_roles = {"admin_user": ["read", "write", "delete"], "regular_user": ["read"]}
             allowed_actions = user_roles.get(user_id, [])
             
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(timezone.utc)
             if action in allowed_actions:
                 log_access_attempt(user_id, resource, action, "granted", timestamp)
                 return {"access": "granted", "timestamp": timestamp}
@@ -132,8 +132,8 @@ class TestComplianceValidationComprehensive:
         audit_service.generate_report = generate_audit_report
         
         # Generate audit report for compliance review
-        start_date = datetime.utcnow() - timedelta(days=90)
-        end_date = datetime.utcnow()
+        start_date = datetime.now(timezone.utc) - timedelta(days=90)
+        end_date = datetime.now(timezone.utc)
         report = audit_service.generate_report(start_date, end_date)
         
         # Validate audit completeness

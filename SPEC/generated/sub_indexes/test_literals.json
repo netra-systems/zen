@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-08-27T11:48:03.804674",
+    "generated_at": "2025-08-27T15:57:40.220155",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 7124
+    "total_literals": 7166
   },
   "literals": {
     "\u001b[0m": {
@@ -264,14 +264,14 @@
       "value": "\"auth or security\"",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:683"
+        "scripts/unified_test_runner.py:686"
       ]
     },
     "\"database or db\"": {
       "value": "\"database or db\"",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:680"
+        "scripts/unified_test_runner.py:683"
       ]
     },
     "\"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9\\.frontend-token-payload\\.signature\"": {
@@ -313,7 +313,7 @@
       "value": "\"websocket or ws\"",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:681"
+        "scripts/unified_test_runner.py:684"
       ]
     },
     "#": {
@@ -1133,7 +1133,7 @@
         "scripts/comprehensive_test_fixer.py:404",
         "scripts/fix_test_batch.py:372",
         "scripts/test_staging_deployment.py:224",
-        "scripts/unified_test_runner.py:852"
+        "scripts/unified_test_runner.py:855"
       ]
     },
     "%Y-%m-%d %H:%M:%S": {
@@ -1237,21 +1237,21 @@
       "value": "' not configured",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:460"
+        "scripts/unified_test_runner.py:463"
       ]
     },
     "' not found": {
       "value": "' not found",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:399"
+        "scripts/unified_test_runner.py:402"
       ]
     },
     "' not in execution list": {
       "value": "' not in execution list",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:286"
+        "scripts/unified_test_runner.py:289"
       ]
     },
     "' spans": {
@@ -1518,7 +1518,7 @@
       "value": "(\\d+) failed",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:830"
+        "scripts/unified_test_runner.py:833"
       ]
     },
     "(\\d+) failed.*(\\d+) passed": {
@@ -1532,7 +1532,7 @@
       "value": "(\\d+) passed",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:824"
+        "scripts/unified_test_runner.py:827"
       ]
     },
     "(\\d+)\\s+passed.*?(\\d+)\\s+total": {
@@ -2482,7 +2482,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_auth_database_sessions.py:49",
-        "scripts/unified_test_runner.py:912"
+        "scripts/unified_test_runner.py:915"
       ]
     },
     "+ Cloud SQL SSL parameters handled correctly": {
@@ -2689,7 +2689,7 @@
       "value": ", ~",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:311"
+        "scripts/unified_test_runner.py:314"
       ]
     },
     ",\"": {
@@ -3679,7 +3679,7 @@
       "value": "--allow-prod",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:931"
+        "scripts/unified_test_runner.py:934"
       ]
     },
     "--api-port": {
@@ -3743,7 +3743,7 @@
       "value": "--bail",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:766"
+        "scripts/unified_test_runner.py:769"
       ]
     },
     "--base-url": {
@@ -3787,7 +3787,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/simple_test_fix_loop.py:18",
-        "scripts/unified_test_runner.py:911"
+        "scripts/unified_test_runner.py:914"
       ]
     },
     "--category": {
@@ -3798,7 +3798,7 @@
         "scripts/test_backend.py:481",
         "scripts/test_backend_optimized.py:368",
         "scripts/test_frontend.py:388",
-        "scripts/unified_test_runner.py:906"
+        "scripts/unified_test_runner.py:909"
       ]
     },
     "--check-deps": {
@@ -3865,14 +3865,15 @@
       "category": "test_literals",
       "locations": [
         "scripts/unified_test_config.py:360",
-        "scripts/unified_test_runner.py:706"
+        "scripts/unified_test_runner.py:709"
       ]
     },
     "--cov-report=html:reports/coverage/html": {
       "value": "--cov-report=html:reports/coverage/html",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend.py:261"
+        "scripts/test_backend.py:261",
+        "scripts/test_coverage_system.py:30"
       ]
     },
     "--cov-report=json": {
@@ -3886,7 +3887,8 @@
       "value": "--cov-report=json:reports/coverage/coverage.json",
       "category": "test_literals",
       "locations": [
-        "scripts/test_backend.py:262"
+        "scripts/test_backend.py:262",
+        "scripts/test_coverage_system.py:32"
       ]
     },
     "--cov-report=term-missing": {
@@ -3896,8 +3898,16 @@
         "scripts/startup_test_executor.py:73",
         "scripts/startup_test_executor.py:229",
         "scripts/test_backend.py:262",
+        "scripts/test_coverage_system.py:29",
         "scripts/unified_test_config.py:361",
-        "scripts/unified_test_runner.py:707"
+        "scripts/unified_test_runner.py:710"
+      ]
+    },
+    "--cov-report=xml:reports/coverage/coverage.xml": {
+      "value": "--cov-report=xml:reports/coverage/coverage.xml",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:31"
       ]
     },
     "--cov=": {
@@ -3911,7 +3921,7 @@
       "value": "--cov=.",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:705"
+        "scripts/unified_test_runner.py:708"
       ]
     },
     "--cov=app": {
@@ -3930,6 +3940,13 @@
         "scripts/test_backend.py:261"
       ]
     },
+    "--cov=netra_backend/app": {
+      "value": "--cov=netra_backend/app",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:28"
+      ]
+    },
     "--coverage": {
       "value": "--coverage",
       "category": "test_literals",
@@ -3945,7 +3962,7 @@
       "value": "--coverage=false",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:764"
+        "scripts/unified_test_runner.py:767"
       ]
     },
     "--coverageDirectory=": {
@@ -3966,14 +3983,14 @@
       "value": "--cypress-browser",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1061"
+        "scripts/unified_test_runner.py:1064"
       ]
     },
     "--cypress-headed": {
       "value": "--cypress-headed",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1055"
+        "scripts/unified_test_runner.py:1058"
       ]
     },
     "--cypress-open": {
@@ -4001,7 +4018,7 @@
       "value": "--disable-auto-split",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1021"
+        "scripts/unified_test_runner.py:1024"
       ]
     },
     "--disable-safe-mode": {
@@ -4019,6 +4036,7 @@
         "scripts/startup_test_executor.py:70",
         "scripts/startup_test_executor.py:223",
         "scripts/test_backend.py:287",
+        "scripts/test_coverage_system.py:35",
         "scripts/test_failure_scanner.py:102"
       ]
     },
@@ -4074,7 +4092,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging.py:56",
-        "scripts/unified_test_runner.py:918"
+        "scripts/unified_test_runner.py:921"
       ]
     },
     "--environment": {
@@ -4088,7 +4106,7 @@
       "value": "--exclude-env",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:925"
+        "scripts/unified_test_runner.py:928"
       ]
     },
     "--execute": {
@@ -4130,7 +4148,7 @@
       "value": "--fail-fast-mode",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1001"
+        "scripts/unified_test_runner.py:1004"
       ]
     },
     "--failed-first": {
@@ -4150,7 +4168,7 @@
         "scripts/iterative_test_fix_loop.py:35",
         "scripts/manage_test_services.py:139",
         "scripts/simple_test_fix_loop.py:18",
-        "scripts/unified_test_runner.py:976"
+        "scripts/unified_test_runner.py:979"
       ]
     },
     "--ff": {
@@ -4410,7 +4428,7 @@
       "value": "--list-categories",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1036"
+        "scripts/unified_test_runner.py:1039"
       ]
     },
     "--markers": {
@@ -4432,14 +4450,14 @@
       "value": "--max-workers",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:949"
+        "scripts/unified_test_runner.py:952"
       ]
     },
     "--maxWorkers=": {
       "value": "--maxWorkers=",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:770"
+        "scripts/unified_test_runner.py:773"
       ]
     },
     "--maxWorkers=1": {
@@ -4538,7 +4556,7 @@
         "scripts/iterative_test_fix_loop.py:34",
         "scripts/manage_test_services.py:139",
         "scripts/simple_test_fix_loop.py:18",
-        "scripts/unified_test_runner.py:956"
+        "scripts/unified_test_runner.py:959"
       ]
     },
     "--no-env-setup": {
@@ -4618,7 +4636,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:488",
-        "scripts/unified_test_runner.py:963"
+        "scripts/unified_test_runner.py:966"
       ]
     },
     "--passWithNoTests": {
@@ -4639,7 +4657,7 @@
       "locations": [
         "scripts/manage_test_services.py:137",
         "scripts/manage_test_services.py:184",
-        "scripts/unified_test_runner.py:988"
+        "scripts/unified_test_runner.py:991"
       ]
     },
     "--port": {
@@ -4667,7 +4685,7 @@
       "value": "--progress-mode",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1009"
+        "scripts/unified_test_runner.py:1012"
       ]
     },
     "--project-root": {
@@ -4708,14 +4726,14 @@
       "value": "--real-llm",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:937"
+        "scripts/unified_test_runner.py:940"
       ]
     },
     "--real-services": {
       "value": "--real-services",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:943"
+        "scripts/unified_test_runner.py:946"
       ]
     },
     "--reload": {
@@ -4762,7 +4780,7 @@
       "value": "--resume-from",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1016"
+        "scripts/unified_test_runner.py:1019"
       ]
     },
     "--root-dir": {
@@ -4830,7 +4848,7 @@
       "value": "--show-category-stats",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1042"
+        "scripts/unified_test_runner.py:1045"
       ]
     },
     "--show-warnings": {
@@ -4859,7 +4877,7 @@
       "value": "--splitting-strategy",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1027"
+        "scripts/unified_test_runner.py:1030"
       ]
     },
     "--strategy": {
@@ -4903,6 +4921,7 @@
         "scripts/startup_test_executor.py:70",
         "scripts/startup_test_executor.py:223",
         "scripts/test_backend.py:284",
+        "scripts/test_coverage_system.py:34",
         "scripts/test_example_message_flow.py:93"
       ]
     },
@@ -4959,7 +4978,7 @@
       "value": "--timeout-method=thread",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:724"
+        "scripts/unified_test_runner.py:727"
       ]
     },
     "--timeout=": {
@@ -4973,7 +4992,14 @@
       "value": "--timeout=120",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:724"
+        "scripts/unified_test_runner.py:727"
+      ]
+    },
+    "--timeout=30": {
+      "value": "--timeout=30",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:36"
       ]
     },
     "--timeout=5": {
@@ -5024,7 +5050,7 @@
       "value": "--validate",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1048"
+        "scripts/unified_test_runner.py:1051"
       ]
     },
     "--validate-tests": {
@@ -5047,7 +5073,7 @@
         "scripts/test_frontend.py:417",
         "scripts/test_imports.py:49",
         "scripts/test_staging_migrations.py:247",
-        "scripts/unified_test_runner.py:768"
+        "scripts/unified_test_runner.py:771"
       ]
     },
     "--version": {
@@ -5095,14 +5121,14 @@
       "value": "--window-size",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:994"
+        "scripts/unified_test_runner.py:997"
       ]
     },
     "--workers": {
       "value": "--workers",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:969"
+        "scripts/unified_test_runner.py:972"
       ]
     },
     "--workflow-name": {
@@ -5222,11 +5248,11 @@
         "scripts/test_backend.py:271",
         "scripts/test_backend.py:482",
         "scripts/test_frontend.py:389",
-        "scripts/unified_test_runner.py:676",
-        "scripts/unified_test_runner.py:680",
-        "scripts/unified_test_runner.py:681",
+        "scripts/unified_test_runner.py:679",
         "scripts/unified_test_runner.py:683",
-        "scripts/unified_test_runner.py:685"
+        "scripts/unified_test_runner.py:684",
+        "scripts/unified_test_runner.py:686",
+        "scripts/unified_test_runner.py:688"
       ]
     },
     "-l": {
@@ -5252,7 +5278,7 @@
         "scripts/startup_test_executor.py:221",
         "scripts/test_backend.py:269",
         "scripts/test_backend.py:483",
-        "scripts/test_example_message_flow.py:90"
+        "scripts/test_coverage_system.py:25"
       ]
     },
     "-n": {
@@ -5264,7 +5290,7 @@
         "scripts/test_backend.py:231",
         "scripts/test_workflows_with_act.py:156",
         "scripts/unified_test_config.py:354",
-        "scripts/unified_test_runner.py:712"
+        "scripts/unified_test_runner.py:715"
       ]
     },
     "-name": {
@@ -5376,7 +5402,7 @@
       "locations": [
         "scripts/test_backend.py:222",
         "scripts/unified_test_config.py:371",
-        "scripts/unified_test_runner.py:716"
+        "scripts/unified_test_runner.py:719"
       ]
     },
     "-w": {
@@ -5393,7 +5419,7 @@
         "scripts/test_backend.py:248",
         "scripts/test_backend.py:489",
         "scripts/unified_test_config.py:377",
-        "scripts/unified_test_runner.py:720"
+        "scripts/unified_test_runner.py:723"
       ]
     },
     "-xvs": {
@@ -5604,7 +5630,7 @@
       "value": ".2%",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1110"
+        "scripts/unified_test_runner.py:1113"
       ]
     },
     ".2f": {
@@ -5665,6 +5691,13 @@
         "scripts/generate_test_audit.py:26"
       ]
     },
+    ".coveragerc": {
+      "value": ".coveragerc",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:106"
+      ]
+    },
     ".eggs": {
       "value": ".eggs",
       "category": "test_literals",
@@ -5703,7 +5736,7 @@
         "scripts/unified_test_config.py:166",
         "scripts/unified_test_config.py:175",
         "scripts/unified_test_config.py:184",
-        "scripts/unified_test_runner.py:248"
+        "scripts/unified_test_runner.py:251"
       ]
     },
     ".env.test*": {
@@ -5768,7 +5801,7 @@
         "scripts/test_staging_deployment.py:225",
         "scripts/test_websocket_cors_comprehensive.py:335",
         "scripts/test_workflows_with_act.py:198",
-        "scripts/unified_test_runner.py:872"
+        "scripts/unified_test_runner.py:875"
       ]
     },
     ".jsx": {
@@ -6582,7 +6615,7 @@
         "auth_service/tests/test_oauth_security_vulnerabilities.py:200",
         "scripts/test_backend.py:78",
         "scripts/test_backend.py:106",
-        "scripts/unified_test_runner.py:232"
+        "scripts/unified_test_runner.py:235"
       ]
     },
     "1' OR '1'='1": {
@@ -6935,7 +6968,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_ssl_certificates_staging.py:185",
-        "scripts/unified_test_runner.py:1114"
+        "scripts/unified_test_runner.py:1117"
       ]
     },
     "10.0.0.50": {
@@ -6948,11 +6981,18 @@
         "auth_service/tests/test_session_security_cycles_36_40.py:252"
       ]
     },
+    "1000": {
+      "value": "1000",
+      "category": "test_literals",
+      "locations": [
+        "scripts/unified_test_runner.py:99"
+      ]
+    },
     "12": {
       "value": "12",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1118"
+        "scripts/unified_test_runner.py:1121"
       ]
     },
     "123": {
@@ -7017,9 +7057,9 @@
         "scripts/test_cors.py:409",
         "scripts/test_discovery_report.py:106",
         "scripts/test_discovery_report.py:108",
-        "scripts/unified_test_runner.py:889",
-        "scripts/unified_test_runner.py:889",
-        "scripts/unified_test_runner.py:1083"
+        "scripts/unified_test_runner.py:892",
+        "scripts/unified_test_runner.py:892",
+        "scripts/unified_test_runner.py:1086"
       ]
     },
     "192.168.1.": {
@@ -8954,8 +8994,8 @@
       "value": "ALLOW_PROD_TESTS",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:783",
-        "scripts/unified_test_runner.py:786"
+        "scripts/unified_test_runner.py:786",
+        "scripts/unified_test_runner.py:789"
       ]
     },
     "ANTHROPIC_API_KEY": {
@@ -9151,8 +9191,8 @@
         "scripts/start_test_services.py:154",
         "scripts/test_oauth_local.py:63",
         "scripts/test_oauth_local.py:63",
-        "scripts/unified_test_runner.py:205",
-        "scripts/unified_test_runner.py:205"
+        "scripts/unified_test_runner.py:208",
+        "scripts/unified_test_runner.py:208"
       ]
     },
     "AUTH_SERVICE_URL:": {
@@ -9180,7 +9220,7 @@
       "value": "AVAILABLE TEST CATEGORIES",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1075"
+        "scripts/unified_test_runner.py:1078"
       ]
     },
     "AVAILABLE TEST LEVELS": {
@@ -9509,7 +9549,7 @@
       "value": "Allow production tests to run (requires explicit flag)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:933"
+        "scripts/unified_test_runner.py:936"
       ]
     },
     "Allowed locations:": {
@@ -10507,7 +10547,7 @@
       "value": "Auto-split window size in minutes (default: 15)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:997"
+        "scripts/unified_test_runner.py:1000"
       ]
     },
     "Auto-splitting is experimental - manual review required": {
@@ -10626,14 +10666,14 @@
       "value": "Average Duration:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1108"
+        "scripts/unified_test_runner.py:1111"
       ]
     },
     "Average Success Rate:": {
       "value": "Average Success Rate:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1110"
+        "scripts/unified_test_runner.py:1113"
       ]
     },
     "BACKEND": {
@@ -10658,8 +10698,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:153",
-        "scripts/unified_test_runner.py:204",
-        "scripts/unified_test_runner.py:204"
+        "scripts/unified_test_runner.py:207",
+        "scripts/unified_test_runner.py:207"
       ]
     },
     "BASE_URL": {
@@ -11035,7 +11075,7 @@
       "value": "Browser to use for Cypress tests (default: chrome)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1064"
+        "scripts/unified_test_runner.py:1067"
       ]
     },
     "Build frontend for production": {
@@ -11077,21 +11117,21 @@
       "value": "By Priority:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1112"
+        "scripts/unified_test_runner.py:1115"
       ]
     },
     "By Type:": {
       "value": "By Type:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1116"
+        "scripts/unified_test_runner.py:1119"
       ]
     },
     "CATEGORY STATISTICS": {
       "value": "CATEGORY STATISTICS",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1099"
+        "scripts/unified_test_runner.py:1102"
       ]
     },
     "CI": {
@@ -11144,7 +11184,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_clickhouse.py:83",
-        "scripts/unified_test_runner.py:238"
+        "scripts/unified_test_runner.py:241"
       ]
     },
     "CLICKHOUSE_PORT": {
@@ -11368,14 +11408,14 @@
       "value": "COVERAGE_ENABLED",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:225"
+        "scripts/unified_test_runner.py:228"
       ]
     },
     "CPU Intensive:": {
       "value": "CPU Intensive:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1106"
+        "scripts/unified_test_runner.py:1109"
       ]
     },
     "CPU Utilization:": {
@@ -11546,14 +11586,14 @@
       "value": "Cannot run Cypress tests: Backend service not running on port 8000. Start the backend service first.",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:557"
+        "scripts/unified_test_runner.py:560"
       ]
     },
     "Cannot run Cypress tests: Docker Desktop not running and required local services not available. Either start Docker Desktop or run local PostgreSQL (port 5432) and Redis (port 6379) services.": {
       "value": "Cannot run Cypress tests: Docker Desktop not running and required local services not available. Either start Docker Desktop or run local PostgreSQL (port 5432) and Redis (port 6379) services.",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:549"
+        "scripts/unified_test_runner.py:552"
       ]
     },
     "Cascading failure detected": {
@@ -11567,14 +11607,14 @@
       "value": "Categories Executed:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:882"
+        "scripts/unified_test_runner.py:885"
       ]
     },
     "Categories with History:": {
       "value": "Categories with History:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1109"
+        "scripts/unified_test_runner.py:1112"
       ]
     },
     "Categories with very few tests:": {
@@ -11590,21 +11630,21 @@
       "locations": [
         "scripts/analyze_test_overlap.py:459",
         "scripts/analyze_test_overlap.py:465",
-        "scripts/unified_test_runner.py:399"
+        "scripts/unified_test_runner.py:402"
       ]
     },
     "Category Results:": {
       "value": "Category Results:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:884"
+        "scripts/unified_test_runner.py:887"
       ]
     },
     "Category failed": {
       "value": "Category failed",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:337"
+        "scripts/unified_test_runner.py:340"
       ]
     },
     "Category:": {
@@ -11621,7 +11661,7 @@
       "value": "CategoryFailure",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:338"
+        "scripts/unified_test_runner.py:341"
       ]
     },
     "Certificate expires:": {
@@ -12417,7 +12457,7 @@
       "value": "Conflicts:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1087"
+        "scripts/unified_test_runner.py:1090"
       ]
     },
     "Connected": {
@@ -12674,6 +12714,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_violations.py:746"
+      ]
+    },
+    "Coverage System Validation Script\nTests that coverage reporting system works properly with pytest": {
+      "value": "Coverage System Validation Script\nTests that coverage reporting system works properly with pytest",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:2"
       ]
     },
     "Coverage:": {
@@ -13002,14 +13049,14 @@
       "value": "Cypress integration completed successfully!",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1125"
+        "scripts/unified_test_runner.py:1128"
       ]
     },
     "Cypress test execution failed:": {
       "value": "Cypress test execution failed:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:651"
+        "scripts/unified_test_runner.py:654"
       ]
     },
     "DANGEROUS: Actually perform fixes (NOT RECOMMENDED)": {
@@ -13307,7 +13354,7 @@
       "value": "Database Dependent:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1107"
+        "scripts/unified_test_runner.py:1110"
       ]
     },
     "Database Migration Commands": {
@@ -13458,7 +13505,7 @@
       "value": "Dependencies:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1085"
+        "scripts/unified_test_runner.py:1088"
       ]
     },
     "Dependency Resolution": {
@@ -13710,7 +13757,7 @@
       "value": "Disable automatic test splitting",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1023"
+        "scripts/unified_test_runner.py:1026"
       ]
     },
     "Disable bad test detection": {
@@ -13724,7 +13771,7 @@
       "value": "Disable coverage reporting",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:958"
+        "scripts/unified_test_runner.py:961"
       ]
     },
     "Disable result caching": {
@@ -13752,7 +13799,7 @@
       "value": "Docker",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:655"
+        "scripts/unified_test_runner.py:658"
       ]
     },
     "Docker WebSocket test": {
@@ -13948,7 +13995,7 @@
         "scripts/comprehensive_test_fixer.py:383",
         "scripts/test_staging_db_direct.py:123",
         "scripts/test_staging_migrations.py:171",
-        "scripts/unified_test_runner.py:652"
+        "scripts/unified_test_runner.py:655"
       ]
     },
     "ERROR: .env.staging still exists - should be deleted!": {
@@ -13977,7 +14024,7 @@
       "value": "ERROR: Cypress tests failed due to missing services",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:644"
+        "scripts/unified_test_runner.py:647"
       ]
     },
     "ERROR: Engine creation failed": {
@@ -14083,7 +14130,7 @@
       "value": "EXECUTION PLAN",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:298"
+        "scripts/unified_test_runner.py:301"
       ]
     },
     "EXPECTED TO FAIL - CRITICAL CACHE LAYER ISSUE\n        Auth Service should continue operating when Redis cache layer is down\n        Root cause: Auth Service depends too heavily on Redis, fails when Redis is unavailable": {
@@ -14161,7 +14208,7 @@
       "value": "Either start Docker Desktop or ensure required services are running locally.",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:657"
+        "scripts/unified_test_runner.py:660"
       ]
     },
     "Emergency shutdown initiated": {
@@ -14352,7 +14399,7 @@
       "value": "Environment to test against (default: test)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:921"
+        "scripts/unified_test_runner.py:924"
       ]
     },
     "Environment variables set for real service testing": {
@@ -14378,7 +14425,7 @@
         "scripts/test_database_url_builder_comprehensive.py:272",
         "scripts/test_staging_config.py:98",
         "scripts/test_staging_db_direct.py:81",
-        "scripts/unified_test_runner.py:880"
+        "scripts/unified_test_runner.py:883"
       ]
     },
     "Environment: DATABASE_URL=": {
@@ -14799,14 +14846,14 @@
       "value": "Est. Duration:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1088"
+        "scripts/unified_test_runner.py:1091"
       ]
     },
     "Estimated Duration:": {
       "value": "Estimated Duration:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:302"
+        "scripts/unified_test_runner.py:305"
       ]
     },
     "Example Message Flow Test Runner": {
@@ -14929,7 +14976,7 @@
       "value": "Exclude tests for specific environment",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:927"
+        "scripts/unified_test_runner.py:930"
       ]
     },
     "Execute tests with full optimization pipeline": {
@@ -14943,14 +14990,14 @@
       "value": "Executing category:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:365"
+        "scripts/unified_test_runner.py:368"
       ]
     },
     "Execution Phases:": {
       "value": "Execution Phases:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:301"
+        "scripts/unified_test_runner.py:304"
       ]
     },
     "Execution failed": {
@@ -15411,7 +15458,7 @@
         "scripts/test_backend.py:83",
         "scripts/test_config_loading.py:34",
         "scripts/test_staging_config.py:55",
-        "scripts/unified_test_runner.py:237"
+        "scripts/unified_test_runner.py:240"
       ]
     },
     "FINAL RESULTS": {
@@ -15515,7 +15562,7 @@
       "value": "Fail-fast strategy mode (default: category_failure)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1005"
+        "scripts/unified_test_runner.py:1008"
       ]
     },
     "Failed": {
@@ -15817,7 +15864,7 @@
       "value": "Fast-fail triggered by category:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:386"
+        "scripts/unified_test_runner.py:389"
       ]
     },
     "Fatal error:": {
@@ -16797,7 +16844,7 @@
         "scripts/test_oauth_dev_config.py:54",
         "scripts/test_oauth_dev_config.py:72",
         "scripts/test_oauth_local.py:398",
-        "scripts/unified_test_runner.py:233"
+        "scripts/unified_test_runner.py:236"
       ]
     },
     "GOOGLE_CLIENT_ID=google-client-id-staging": {
@@ -16816,7 +16863,7 @@
         "scripts/test_oauth_dev_config.py:40",
         "scripts/test_oauth_dev_config.py:72",
         "scripts/test_oauth_local.py:400",
-        "scripts/unified_test_runner.py:234"
+        "scripts/unified_test_runner.py:237"
       ]
     },
     "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT": {
@@ -17118,14 +17165,14 @@
       "value": "HINT:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:645"
+        "scripts/unified_test_runner.py:648"
       ]
     },
     "HINT: This appears to be a Docker-related issue.": {
       "value": "HINT: This appears to be a Docker-related issue.",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:656"
+        "scripts/unified_test_runner.py:659"
       ]
     },
     "HS256": {
@@ -18293,7 +18340,7 @@
       "value": "List available categories and their configuration",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1038"
+        "scripts/unified_test_runner.py:1041"
       ]
     },
     "List processes only, don't kill": {
@@ -18463,6 +18510,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_violations.py:845"
+      ]
+    },
+    "MAX_TEST_COLLECTION_SIZE": {
+      "value": "MAX_TEST_COLLECTION_SIZE",
+      "category": "test_literals",
+      "locations": [
+        "scripts/unified_test_runner.py:99"
       ]
     },
     "MB": {
@@ -18689,7 +18743,7 @@
       "value": "Maximum number of worker processes for Jest (frontend tests)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:951"
+        "scripts/unified_test_runner.py:954"
       ]
     },
     "Maximum token limit exceeded": {
@@ -18717,7 +18771,7 @@
       "value": "Memory Intensive:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1105"
+        "scripts/unified_test_runner.py:1108"
       ]
     },
     "Memory allocation failed, retrying": {
@@ -19422,7 +19476,7 @@
       "value": "No categories to run based on selection criteria",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:151"
+        "scripts/unified_test_runner.py:154"
       ]
     },
     "No changes needed": {
@@ -19807,7 +19861,7 @@
       "value": "Number of parallel workers (default: 4)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:972"
+        "scripts/unified_test_runner.py:975"
       ]
     },
     "OAUTH_CALLBACK": {
@@ -20318,7 +20372,7 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/agents/test_agent_initialization.py:209",
-        "scripts/unified_test_runner.py:892"
+        "scripts/unified_test_runner.py:895"
       ]
     },
     "PASS": {
@@ -20471,7 +20525,7 @@
       "value": "PHASE",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:321"
+        "scripts/unified_test_runner.py:324"
       ]
     },
     "PHASE 1: Fixing syntax errors...": {
@@ -20661,7 +20715,7 @@
       "value": "Parallel Safe:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1102"
+        "scripts/unified_test_runner.py:1105"
       ]
     },
     "Parallel:": {
@@ -20852,7 +20906,7 @@
       "value": "Phase",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:305"
+        "scripts/unified_test_runner.py:308"
       ]
     },
     "Please check test configuration.": {
@@ -20866,7 +20920,7 @@
       "value": "Please ensure required services are running",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:645"
+        "scripts/unified_test_runner.py:648"
       ]
     },
     "Please install: pip install websockets aiohttp": {
@@ -21055,7 +21109,7 @@
       "value": "Priority:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1081"
+        "scripts/unified_test_runner.py:1084"
       ]
     },
     "Privilege escalation not detected": {
@@ -21187,7 +21241,7 @@
       "value": "Progress display mode (default: simple)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1012"
+        "scripts/unified_test_runner.py:1015"
       ]
     },
     "Progress:": {
@@ -21823,7 +21877,7 @@
       "value": "Report:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:893"
+        "scripts/unified_test_runner.py:896"
       ]
     },
     "Request processed in 45ms": {
@@ -21858,21 +21912,21 @@
       "value": "Require Real LLM:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1104"
+        "scripts/unified_test_runner.py:1107"
       ]
     },
     "Require Real Services:": {
       "value": "Require Real Services:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1103"
+        "scripts/unified_test_runner.py:1106"
       ]
     },
     "Required services: PostgreSQL (port 5432), Redis (port 6379)": {
       "value": "Required services: PostgreSQL (port 5432), Redis (port 6379)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:658"
+        "scripts/unified_test_runner.py:661"
       ]
     },
     "Resilience and recovery validation tests": {
@@ -21955,7 +22009,7 @@
       "value": "Resume execution from specific category",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1017"
+        "scripts/unified_test_runner.py:1020"
       ]
     },
     "Retry attempt 1 of 3": {
@@ -22011,7 +22065,7 @@
       "value": "Run Cypress tests in headed mode (show browser UI)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1057"
+        "scripts/unified_test_runner.py:1060"
       ]
     },
     "Run E2E tests with Cypress": {
@@ -22137,7 +22191,7 @@
       "value": "Run multiple categories (e.g., '--categories unit integration api')",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:913"
+        "scripts/unified_test_runner.py:916"
       ]
     },
     "Run multiple concurrent validations.": {
@@ -22172,7 +22226,7 @@
       "value": "Run specific category (e.g., 'unit', 'integration', 'api')",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:907"
+        "scripts/unified_test_runner.py:910"
       ]
     },
     "Run tests": {
@@ -22201,14 +22255,14 @@
       "value": "Run tests in parallel",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:965"
+        "scripts/unified_test_runner.py:968"
       ]
     },
     "Run tests matching pattern": {
       "value": "Run tests matching pattern",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:989"
+        "scripts/unified_test_runner.py:992"
       ]
     },
     "Run tests to validate they pass before suggesting fixes": {
@@ -22287,7 +22341,7 @@
       "value": "Running Cypress tests for category:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:571"
+        "scripts/unified_test_runner.py:574"
       ]
     },
     "Running ESLint...": {
@@ -22511,7 +22565,7 @@
       "locations": [
         "auth_service/test_actual_staging_credentials.py:42",
         "auth_service/test_url_construction.py:43",
-        "scripts/unified_test_runner.py:236"
+        "scripts/unified_test_runner.py:239"
       ]
     },
     "SESSION_CREATED": {
@@ -22561,7 +22615,7 @@
       "value": "SKIPPING Cypress tests:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:576"
+        "scripts/unified_test_runner.py:579"
       ]
     },
     "SLA compliance and incident prevention for": {
@@ -23239,7 +23293,7 @@
       "value": "Service '",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:460"
+        "scripts/unified_test_runner.py:463"
       ]
     },
     "Service Coordination Fix Validation": {
@@ -23352,7 +23406,7 @@
       "value": "Services available for Cypress tests",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:561"
+        "scripts/unified_test_runner.py:564"
       ]
     },
     "Services got same port - conflict not prevented": {
@@ -23707,7 +23761,7 @@
       "value": "Show historical category statistics",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1044"
+        "scripts/unified_test_runner.py:1047"
       ]
     },
     "Show service status": {
@@ -23840,7 +23894,7 @@
       "value": "Skipped:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:353"
+        "scripts/unified_test_runner.py:356"
       ]
     },
     "Skipping": {
@@ -24374,7 +24428,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:489",
-        "scripts/unified_test_runner.py:978"
+        "scripts/unified_test_runner.py:981"
       ]
     },
     "Stop services and clean all data": {
@@ -24409,7 +24463,7 @@
       "value": "Stopping execution:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:345"
+        "scripts/unified_test_runner.py:348"
       ]
     },
     "Strategies:": {
@@ -24731,7 +24785,7 @@
       "value": "TEST EXECUTION SUMMARY",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:878"
+        "scripts/unified_test_runner.py:881"
       ]
     },
     "TEST FILE SIZE VIOLATIONS (": {
@@ -24842,7 +24896,7 @@
       "locations": [
         "scripts/test_backend.py:78",
         "scripts/test_environment_detection.py:19",
-        "scripts/unified_test_runner.py:232"
+        "scripts/unified_test_runner.py:235"
       ]
     },
     "TESTING ALEMBIC CONFIGURATION": {
@@ -25032,8 +25086,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/unified_test_config.py:302",
-        "scripts/unified_test_runner.py:222",
-        "scripts/unified_test_runner.py:779"
+        "scripts/unified_test_runner.py:225",
+        "scripts/unified_test_runner.py:782"
       ]
     },
     "TEST_EXECUTION_GUIDE.md": {
@@ -25069,8 +25123,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:158",
-        "scripts/unified_test_runner.py:803",
-        "scripts/unified_test_runner.py:806"
+        "scripts/unified_test_runner.py:806",
+        "scripts/unified_test_runner.py:809"
       ]
     },
     "TEST_ORGANIZATION_AUDIT.md": {
@@ -26312,7 +26366,7 @@
       "value": "Test splitting strategy (default: hybrid)",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1031"
+        "scripts/unified_test_runner.py:1034"
       ]
     },
     "Test staging configuration after simplification.\nVerifies that staging will load secrets from Google Secret Manager only.": {
@@ -26347,7 +26401,7 @@
       "value": "Test structure validation not fully implemented yet.",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1124"
+        "scripts/unified_test_runner.py:1127"
       ]
     },
     "Test suite for verify_workflow_status.py\n\nTests various scenarios and documents the verification results.": {
@@ -26960,7 +27014,7 @@
       "value": "Tests timed out after",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:510"
+        "scripts/unified_test_runner.py:513"
       ]
     },
     "Tests using only mocks": {
@@ -27425,9 +27479,9 @@
       "value": "Total Categories:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:300",
-        "scripts/unified_test_runner.py:1090",
-        "scripts/unified_test_runner.py:1101"
+        "scripts/unified_test_runner.py:303",
+        "scripts/unified_test_runner.py:1093",
+        "scripts/unified_test_runner.py:1104"
       ]
     },
     "Total Duration:": {
@@ -27435,7 +27489,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend_optimized.py:329",
-        "scripts/unified_test_runner.py:881"
+        "scripts/unified_test_runner.py:884"
       ]
     },
     "Total Fake Tests Found:": {
@@ -27723,8 +27777,8 @@
       "value": "USE_DOCKER_SERVICES",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:744",
-        "scripts/unified_test_runner.py:750"
+        "scripts/unified_test_runner.py:747",
+        "scripts/unified_test_runner.py:753"
       ]
     },
     "USE_MOCKS": {
@@ -27738,8 +27792,8 @@
       "value": "USE_REAL_LLM",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:746",
-        "scripts/unified_test_runner.py:751"
+        "scripts/unified_test_runner.py:749",
+        "scripts/unified_test_runner.py:754"
       ]
     },
     "USE_REAL_SERVICES": {
@@ -27748,17 +27802,17 @@
       "locations": [
         "scripts/start_test_services.py:152",
         "scripts/test_staging.py:34",
-        "scripts/unified_test_runner.py:203",
-        "scripts/unified_test_runner.py:742",
-        "scripts/unified_test_runner.py:749"
+        "scripts/unified_test_runner.py:206",
+        "scripts/unified_test_runner.py:745",
+        "scripts/unified_test_runner.py:752"
       ]
     },
     "USE_TEST_DATABASE": {
       "value": "USE_TEST_DATABASE",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:804",
-        "scripts/unified_test_runner.py:807"
+        "scripts/unified_test_runner.py:807",
+        "scripts/unified_test_runner.py:810"
       ]
     },
     "UTF-8": {
@@ -27832,7 +27886,7 @@
       "value": "Unified Test Runner for Netra Apex Platform",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:899"
+        "scripts/unified_test_runner.py:902"
       ]
     },
     "Unit Tests": {
@@ -28049,14 +28103,14 @@
       "value": "Use real LLM instead of mocks",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:939"
+        "scripts/unified_test_runner.py:942"
       ]
     },
     "Use real backend services (Docker or local) for frontend tests": {
       "value": "Use real backend services (Docker or local) for frontend tests",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:945"
+        "scripts/unified_test_runner.py:948"
       ]
     },
     "Use real components or move mocks to shared test utilities": {
@@ -28380,7 +28434,7 @@
       "value": "Validate test structure and configuration",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1050"
+        "scripts/unified_test_runner.py:1053"
       ]
     },
     "Validating JWT Environment Configuration:": {
@@ -28484,7 +28538,7 @@
         "scripts/test_cors.py:443",
         "scripts/test_example_message_flow.py:434",
         "scripts/test_frontend.py:417",
-        "scripts/unified_test_runner.py:984"
+        "scripts/unified_test_runner.py:987"
       ]
     },
     "Verification summary saved to: workflow_verification_results.md": {
@@ -28669,8 +28723,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:155",
-        "scripts/unified_test_runner.py:206",
-        "scripts/unified_test_runner.py:206"
+        "scripts/unified_test_runner.py:209",
+        "scripts/unified_test_runner.py:209"
       ]
     },
     "WS_BASE_URL": {
@@ -28719,7 +28773,7 @@
       "value": "Warning: Categories not found:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:279"
+        "scripts/unified_test_runner.py:282"
       ]
     },
     "Warning: Could not find LLMTestModel enum definition": {
@@ -28733,7 +28787,7 @@
       "value": "Warning: Could not load .env.test file:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:257"
+        "scripts/unified_test_runner.py:260"
       ]
     },
     "Warning: Expected model": {
@@ -28768,7 +28822,7 @@
       "value": "Warning: Resume category '",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:286"
+        "scripts/unified_test_runner.py:289"
       ]
     },
     "Warning: python-dotenv not installed, using default test environment": {
@@ -29201,6 +29255,20 @@
         "scripts/compliance/test_violations_reporter.py:56"
       ]
     },
+    "[Complete] Coverage System Test Complete!": {
+      "value": "[Complete] Coverage System Test Complete!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:102"
+      ]
+    },
+    "[Coverage Test] Testing Coverage System...": {
+      "value": "[Coverage Test] Testing Coverage System...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:17"
+      ]
+    },
     "[Coverage] Coverage Report: reports/coverage/html/index.html": {
       "value": "[Coverage] Coverage Report: reports/coverage/html/index.html",
       "category": "test_literals",
@@ -29227,7 +29295,7 @@
       "value": "[DEBUG] Running command for",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:474"
+        "scripts/unified_test_runner.py:477"
       ]
     },
     "[DIR]": {
@@ -29259,7 +29327,7 @@
         "scripts/manage_test_services.py:216",
         "scripts/simple_test_fix_loop.py:78",
         "scripts/test_verify_workflow_status_corrected.py:55",
-        "scripts/unified_test_runner.py:503"
+        "scripts/unified_test_runner.py:506"
       ]
     },
     "[ERROR] Auth database connection failed": {
@@ -29308,7 +29376,7 @@
       "value": "[ERROR] Command:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:504"
+        "scripts/unified_test_runner.py:507"
       ]
     },
     "[ERROR] Configuration loading failed:": {
@@ -29360,7 +29428,7 @@
       "value": "[ERROR] Failed to run",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:513"
+        "scripts/unified_test_runner.py:516"
       ]
     },
     "[ERROR] Failed to run frontend tests:": {
@@ -29503,6 +29571,48 @@
       "category": "test_literals",
       "locations": [
         "scripts/apply_fast_test_decorators.py:179"
+      ]
+    },
+    "[Error] .coveragerc configuration not found": {
+      "value": "[Error] .coveragerc configuration not found",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:118"
+      ]
+    },
+    "[Error] Error running pytest:": {
+      "value": "[Error] Error running pytest:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:51"
+      ]
+    },
+    "[Error] HTML coverage report not found": {
+      "value": "[Error] HTML coverage report not found",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:70"
+      ]
+    },
+    "[Error] JSON coverage report not found": {
+      "value": "[Error] JSON coverage report not found",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:100"
+      ]
+    },
+    "[Error] Stderr:": {
+      "value": "[Error] Stderr:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:46"
+      ]
+    },
+    "[Error] XML coverage report not found": {
+      "value": "[Error] XML coverage report not found",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:85"
       ]
     },
     "[FAILED]": {
@@ -30298,6 +30408,20 @@
         "scripts/test_verify_workflow_status.py:58"
       ]
     },
+    "[Output] Coverage output preview:": {
+      "value": "[Output] Coverage output preview:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:41"
+      ]
+    },
+    "[Output] Output:": {
+      "value": "[Output] Output:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:44"
+      ]
+    },
     "[PASSED]": {
       "value": "[PASSED]",
       "category": "test_literals",
@@ -30316,7 +30440,7 @@
         "scripts/test_staging_deployment.py:139",
         "scripts/test_staging_startup.py:250",
         "scripts/test_verify_workflow_status.py:178",
-        "scripts/unified_test_runner.py:844"
+        "scripts/unified_test_runner.py:847"
       ]
     },
     "[PASS] ALL ENVIRONMENT DETECTION TESTS PASSED!": {
@@ -30579,6 +30703,13 @@
         "scripts/test_staging_deployment.py:177"
       ]
     },
+    "[Pytest] Running pytest with coverage...": {
+      "value": "[Pytest] Running pytest with coverage...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:20"
+      ]
+    },
     "[QUALITY] Assessing test quality...": {
       "value": "[QUALITY] Assessing test quality...",
       "category": "test_literals",
@@ -30744,7 +30875,7 @@
       "value": "[SKIP]",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:844"
+        "scripts/unified_test_runner.py:847"
       ]
     },
     "[SKIP] Cannot auto-fix:": {
@@ -30924,6 +31055,76 @@
         "scripts/test_staging_login_automated.py:174"
       ]
     },
+    "[Success] .coveragerc configuration file exists": {
+      "value": "[Success] .coveragerc configuration file exists",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:108"
+      ]
+    },
+    "[Success] .coveragerc configured for netra_backend/app": {
+      "value": "[Success] .coveragerc configured for netra_backend/app",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:112"
+      ]
+    },
+    "[Success] .coveragerc configured for reports/coverage output": {
+      "value": "[Success] .coveragerc configured for reports/coverage output",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:114"
+      ]
+    },
+    "[Success] HTML coverage report generated": {
+      "value": "[Success] HTML coverage report generated",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:61"
+      ]
+    },
+    "[Success] HTML report contains coverage percentage": {
+      "value": "[Success] HTML report contains coverage percentage",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:66"
+      ]
+    },
+    "[Success] JSON coverage report generated": {
+      "value": "[Success] JSON coverage report generated",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:90"
+      ]
+    },
+    "[Success] JSON coverage total:": {
+      "value": "[Success] JSON coverage total:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:96"
+      ]
+    },
+    "[Success] Pytest with coverage completed successfully": {
+      "value": "[Success] Pytest with coverage completed successfully",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:40"
+      ]
+    },
+    "[Success] XML coverage line-rate:": {
+      "value": "[Success] XML coverage line-rate:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:81"
+      ]
+    },
+    "[Success] XML coverage report generated": {
+      "value": "[Success] XML coverage report generated",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:75"
+      ]
+    },
     "[TEST SERVICE STATUS]": {
       "value": "[TEST SERVICE STATUS]",
       "category": "test_literals",
@@ -31044,11 +31245,25 @@
         "scripts/test_verify_workflow_status_corrected.py:70"
       ]
     },
+    "[Timeout] Pytest timed out - this is expected for complex tests": {
+      "value": "[Timeout] Pytest timed out - this is expected for complex tests",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:49"
+      ]
+    },
     "[ULTRA-THINK] Performing deep semantic analysis...": {
       "value": "[ULTRA-THINK] Performing deep semantic analysis...",
       "category": "test_literals",
       "locations": [
         "scripts/autonomous_review/test_reviewer.py:42"
+      ]
+    },
+    "[Verify] Verifying coverage reports...": {
+      "value": "[Verify] Verifying coverage reports...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:54"
       ]
     },
     "[WARNING]": {
@@ -31128,6 +31343,41 @@
       "category": "test_literals",
       "locations": [
         "scripts/comprehensive_test_fixer.py:331"
+      ]
+    },
+    "[Warning] Could not parse JSON report:": {
+      "value": "[Warning] Could not parse JSON report:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:98"
+      ]
+    },
+    "[Warning] Could not parse XML report:": {
+      "value": "[Warning] Could not parse XML report:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:83"
+      ]
+    },
+    "[Warning] Could not read .coveragerc:": {
+      "value": "[Warning] Could not read .coveragerc:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:116"
+      ]
+    },
+    "[Warning] Could not read HTML report:": {
+      "value": "[Warning] Could not read HTML report:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:68"
+      ]
+    },
+    "[Warning] Pytest completed with warnings (exit code:": {
+      "value": "[Warning] Pytest completed with warnings (exit code:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:43"
       ]
     },
     "[X]": {
@@ -31715,7 +31965,7 @@
         "scripts/remove_test_stubs.py:78",
         "scripts/standardize_l3_test_names.py:60",
         "scripts/unified_test_config.py:181",
-        "scripts/unified_test_runner.py:114"
+        "scripts/unified_test_runner.py:117"
       ]
     },
     "__tests__/auth": {
@@ -32039,7 +32289,7 @@
       "value": "_tests",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:335"
+        "scripts/unified_test_runner.py:338"
       ]
     },
     "_unit.py": {
@@ -32412,8 +32662,8 @@
         "scripts/auto_fix_test_violations.py:499",
         "scripts/auto_fix_test_violations.py:500",
         "scripts/test_backend.py:30",
-        "scripts/unified_test_runner.py:438",
-        "scripts/unified_test_runner.py:682"
+        "scripts/unified_test_runner.py:441",
+        "scripts/unified_test_runner.py:685"
       ]
     },
     "agent.test@staging.netrasystems.ai": {
@@ -32565,7 +32815,7 @@
       "value": "allow_prod",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:782"
+        "scripts/unified_test_runner.py:785"
       ]
     },
     "already exists in": {
@@ -33540,7 +33790,7 @@
       "value": "auth_service/pytest.ini",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:109"
+        "scripts/unified_test_runner.py:112"
       ]
     },
     "auth_service/tests": {
@@ -33551,8 +33801,8 @@
         "scripts/batch_fix_and_test.py:42",
         "scripts/compliance/project_test_validator.py:62",
         "scripts/fix_test_syntax_errors.py:227",
-        "scripts/unified_test_runner.py:108",
-        "scripts/unified_test_runner.py:684",
+        "scripts/unified_test_runner.py:111",
+        "scripts/unified_test_runner.py:687",
         "scripts/validate_llm_test_models.py:43"
       ]
     },
@@ -33651,7 +33901,7 @@
         "scripts/test_backend.py:359",
         "scripts/unified_test_config.py:194",
         "scripts/unified_test_config.py:351",
-        "scripts/unified_test_runner.py:215"
+        "scripts/unified_test_runner.py:218"
       ]
     },
     "automated": {
@@ -33714,7 +33964,7 @@
       "value": "average_estimated_duration",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1108"
+        "scripts/unified_test_runner.py:1111"
       ]
     },
     "average_rps": {
@@ -33728,7 +33978,7 @@
       "value": "average_success_rate",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1110"
+        "scripts/unified_test_runner.py:1113"
       ]
     },
     "average_value_score": {
@@ -34076,7 +34326,7 @@
       "value": "by_priority",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1113"
+        "scripts/unified_test_runner.py:1116"
       ]
     },
     "by_type": {
@@ -34086,7 +34336,7 @@
         "scripts/test_cors.py:281",
         "scripts/test_cors.py:464",
         "scripts/test_cors.py:466",
-        "scripts/unified_test_runner.py:1117"
+        "scripts/unified_test_runner.py:1120"
       ]
     },
     "bypass_should_work": {
@@ -34243,7 +34493,7 @@
       "value": "categories_with_history",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1109"
+        "scripts/unified_test_runner.py:1112"
       ]
     },
     "category": {
@@ -34280,22 +34530,22 @@
       "value": "category_based",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1028"
+        "scripts/unified_test_runner.py:1031"
       ]
     },
     "category_failure": {
       "value": "category_failure",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1002",
-        "scripts/unified_test_runner.py:1004"
+        "scripts/unified_test_runner.py:1005",
+        "scripts/unified_test_runner.py:1007"
       ]
     },
     "category_statistics": {
       "value": "category_statistics",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:862"
+        "scripts/unified_test_runner.py:865"
       ]
     },
     "center": {
@@ -34417,9 +34667,9 @@
       "value": "chrome",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:591",
-        "scripts/unified_test_runner.py:1062",
-        "scripts/unified_test_runner.py:1063"
+        "scripts/unified_test_runner.py:594",
+        "scripts/unified_test_runner.py:1065",
+        "scripts/unified_test_runner.py:1066"
       ]
     },
     "ci": {
@@ -34861,9 +35111,9 @@
       "locations": [
         "scripts/compliance/test_refactor_helper.py:669",
         "scripts/manage_test_services.py:154",
-        "scripts/unified_test_runner.py:104",
-        "scripts/unified_test_runner.py:110",
-        "scripts/unified_test_runner.py:116"
+        "scripts/unified_test_runner.py:107",
+        "scripts/unified_test_runner.py:113",
+        "scripts/unified_test_runner.py:119"
       ]
     },
     "commit_sha": {
@@ -34947,7 +35197,7 @@
       "value": "complexity_based",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1029"
+        "scripts/unified_test_runner.py:1032"
       ]
     },
     "compliance": {
@@ -35060,9 +35310,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:162",
-        "scripts/unified_test_runner.py:103",
-        "scripts/unified_test_runner.py:109",
-        "scripts/unified_test_runner.py:115"
+        "scripts/unified_test_runner.py:106",
+        "scripts/unified_test_runner.py:112",
+        "scripts/unified_test_runner.py:118"
       ]
     },
     "config/alembic.ini": {
@@ -35568,7 +35818,7 @@
       "value": "count_based",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1028"
+        "scripts/unified_test_runner.py:1031"
       ]
     },
     "coverage": {
@@ -35583,8 +35833,8 @@
         "scripts/team_updates_test_analyzer.py:76",
         "scripts/test_backend.py:322",
         "scripts/test_backend.py:402",
-        "scripts/unified_test_config.py:196",
-        "scripts/unified_test_config.py:203"
+        "scripts/test_coverage_system.py:56",
+        "scripts/test_coverage_system.py:79"
       ]
     },
     "coverage-final.json": {
@@ -35602,7 +35852,15 @@
         "scripts/autonomous_review/test_reviewer.py:121",
         "scripts/business_value_test_index.py:549",
         "scripts/business_value_test_index.py:551",
-        "scripts/test_backend.py:402"
+        "scripts/test_backend.py:402",
+        "scripts/test_coverage_system.py:88"
+      ]
+    },
+    "coverage.xml": {
+      "value": "coverage.xml",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:73"
       ]
     },
     "coverage_gaps": {
@@ -35663,7 +35921,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend_optimized.py:73",
-        "scripts/unified_test_runner.py:1106"
+        "scripts/unified_test_runner.py:1109"
       ]
     },
     "cpu_percent": {
@@ -35799,7 +36057,7 @@
       "value": "critical_failure",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1002"
+        "scripts/unified_test_runner.py:1005"
       ]
     },
     "critical_files": {
@@ -35982,11 +36240,11 @@
         "scripts/test_frontend.py:73",
         "scripts/test_frontend.py:101",
         "scripts/test_frontend.py:101",
-        "scripts/unified_test_runner.py:442",
-        "scripts/unified_test_runner.py:442",
-        "scripts/unified_test_runner.py:451",
-        "scripts/unified_test_runner.py:582",
-        "scripts/unified_test_runner.py:599"
+        "scripts/unified_test_runner.py:445",
+        "scripts/unified_test_runner.py:445",
+        "scripts/unified_test_runner.py:454",
+        "scripts/unified_test_runner.py:585",
+        "scripts/unified_test_runner.py:602"
       ]
     },
     "cypress/e2e": {
@@ -36007,7 +36265,7 @@
       "value": "cypress/e2e/critical-basic-flow.cy.ts,cypress/e2e/basic-ui-test.cy.ts",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:604"
+        "scripts/unified_test_runner.py:607"
       ]
     },
     "cypress:open": {
@@ -36021,14 +36279,14 @@
       "value": "cypress_browser",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:591"
+        "scripts/unified_test_runner.py:594"
       ]
     },
     "cypress_headed": {
       "value": "cypress_headed",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:590"
+        "scripts/unified_test_runner.py:593"
       ]
     },
     "dashboard.md": {
@@ -36104,7 +36362,7 @@
       "value": "database_dependent",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1107"
+        "scripts/unified_test_runner.py:1110"
       ]
     },
     "database_operations": {
@@ -36456,8 +36714,8 @@
       "value": "dependency_aware",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1003",
-        "scripts/unified_test_runner.py:1029"
+        "scripts/unified_test_runner.py:1006",
+        "scripts/unified_test_runner.py:1032"
       ]
     },
     "dependency_resolution": {
@@ -36573,12 +36831,12 @@
         "scripts/test_oauth_local.py:246",
         "scripts/unified_test_config.py:95",
         "scripts/unified_test_config.py:133",
-        "scripts/unified_test_runner.py:198",
-        "scripts/unified_test_runner.py:738",
-        "scripts/unified_test_runner.py:743",
-        "scripts/unified_test_runner.py:791",
-        "scripts/unified_test_runner.py:791",
-        "scripts/unified_test_runner.py:805"
+        "scripts/unified_test_runner.py:201",
+        "scripts/unified_test_runner.py:741",
+        "scripts/unified_test_runner.py:746",
+        "scripts/unified_test_runner.py:794",
+        "scripts/unified_test_runner.py:794",
+        "scripts/unified_test_runner.py:808"
       ]
     },
     "dev-client-id": {
@@ -36723,7 +36981,7 @@
         "scripts/test_backend.py:359",
         "scripts/test_backend.py:366",
         "scripts/test_backend.py:367",
-        "scripts/unified_test_runner.py:1002"
+        "scripts/unified_test_runner.py:1005"
       ]
     },
     "disconnected": {
@@ -36764,7 +37022,7 @@
         "scripts/setup_e2e_test_ports.py:49",
         "scripts/start_test_services.py:23",
         "scripts/test_workflows_with_act.py:56",
-        "scripts/unified_test_runner.py:655"
+        "scripts/unified_test_runner.py:658"
       ]
     },
     "docker run --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres": {
@@ -36800,22 +37058,22 @@
       "value": "docker_available",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:643"
+        "scripts/unified_test_runner.py:646"
       ]
     },
     "docker_error": {
       "value": "docker_error",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:646"
+        "scripts/unified_test_runner.py:649"
       ]
     },
     "docker_info": {
       "value": "docker_info",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:641",
-        "scripts/unified_test_runner.py:642"
+        "scripts/unified_test_runner.py:644",
+        "scripts/unified_test_runner.py:645"
       ]
     },
     "docs/testing": {
@@ -37004,7 +37262,7 @@
       "value": "edge",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1062"
+        "scripts/unified_test_runner.py:1065"
       ]
     },
     "efficiency": {
@@ -37018,7 +37276,7 @@
       "value": "electron",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1062"
+        "scripts/unified_test_runner.py:1065"
       ]
     },
     "element": {
@@ -37239,8 +37497,8 @@
         "scripts/test_oauth_dev_config.py:36",
         "scripts/test_oauth_dev_config.py:48",
         "scripts/test_oauth_dev_config.py:64",
-        "scripts/unified_test_runner.py:778",
-        "scripts/unified_test_runner.py:796"
+        "scripts/unified_test_runner.py:781",
+        "scripts/unified_test_runner.py:799"
       ]
     },
     "env vars": {
@@ -37613,7 +37871,7 @@
       "value": "execution_plan",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:861"
+        "scripts/unified_test_runner.py:864"
       ]
     },
     "execution_results": {
@@ -37628,7 +37886,7 @@
       "value": "execution_time_seconds",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:630"
+        "scripts/unified_test_runner.py:633"
       ]
     },
     "exists": {
@@ -38212,9 +38470,9 @@
         "scripts/test_async_postgres.py:19",
         "scripts/test_docker_websocket_fix.py:209",
         "scripts/test_docker_websocket_fix.py:210",
-        "scripts/unified_test_runner.py:225",
-        "scripts/unified_test_runner.py:786",
-        "scripts/unified_test_runner.py:807"
+        "scripts/unified_test_runner.py:228",
+        "scripts/unified_test_runner.py:789",
+        "scripts/unified_test_runner.py:810"
       ]
     },
     "fast": {
@@ -38650,14 +38908,14 @@
       "value": "firefox",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1062"
+        "scripts/unified_test_runner.py:1065"
       ]
     },
     "first_failure": {
       "value": "first_failure",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1002"
+        "scripts/unified_test_runner.py:1005"
       ]
     },
     "fix_applied": {
@@ -40023,7 +40281,7 @@
       "value": "gemini-2.5-flash",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:213"
+        "scripts/unified_test_runner.py:216"
       ]
     },
     "gemini-2.5-pro": {
@@ -40671,7 +40929,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:777",
-        "scripts/real_service_test_metrics.py:115"
+        "scripts/real_service_test_metrics.py:115",
+        "scripts/test_coverage_system.py:59"
       ]
     },
     "htmlcov": {
@@ -40910,7 +41169,7 @@
         "scripts/test_auth_integration.py:20",
         "scripts/test_auth_integration.py:170",
         "scripts/test_oauth_local.py:42",
-        "scripts/unified_test_runner.py:205"
+        "scripts/unified_test_runner.py:208"
       ]
     },
     "http://localhost:8081/health": {
@@ -41224,15 +41483,15 @@
       "value": "hybrid",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1029",
-        "scripts/unified_test_runner.py:1030"
+        "scripts/unified_test_runner.py:1032",
+        "scripts/unified_test_runner.py:1033"
       ]
     },
     "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=": {
       "value": "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:237"
+        "scripts/unified_test_runner.py:240"
       ]
     },
     "iat": {
@@ -41548,6 +41807,13 @@
         "auth_service/tests/test_auth_port_configuration.py:118",
         "auth_service/tests/test_auth_port_configuration.py:119",
         "auth_service/tests/test_auth_port_configuration.py:134"
+      ]
+    },
+    "index.html": {
+      "value": "index.html",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:59"
       ]
     },
     "indicators": {
@@ -42045,7 +42311,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/unified_test_config.py:182",
-        "scripts/unified_test_runner.py:115"
+        "scripts/unified_test_runner.py:118"
       ]
     },
     "jest.fn()": {
@@ -42066,14 +42332,14 @@
       "value": "jest.setup.js",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:748"
+        "scripts/unified_test_runner.py:751"
       ]
     },
     "jest.setup.real.js": {
       "value": "jest.setup.real.js",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:739"
+        "scripts/unified_test_runner.py:742"
       ]
     },
     "jest\\.fn\\(\\)": {
@@ -42440,6 +42706,13 @@
         "scripts/compliance/test_size_validator.py:461"
       ]
     },
+    "line-rate": {
+      "value": "line-rate",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:80"
+      ]
+    },
     "line_number": {
       "value": "line_number",
       "category": "test_literals",
@@ -42689,7 +42962,7 @@
         "scripts/setup_e2e_test_ports.py:49",
         "scripts/unified_test_config.py:125",
         "scripts/unified_test_config.py:278",
-        "scripts/unified_test_runner.py:790"
+        "scripts/unified_test_runner.py:793"
       ]
     },
     "local_storage": {
@@ -43031,7 +43304,7 @@
         "scripts/test_backend_optimized.py:177",
         "scripts/test_backend_optimized.py:184",
         "scripts/test_backend_optimized.py:191",
-        "scripts/unified_test_runner.py:769"
+        "scripts/unified_test_runner.py:772"
       ]
     },
     "may still exceed line limits": {
@@ -43078,7 +43351,7 @@
       "value": "memory_intensive",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1105"
+        "scripts/unified_test_runner.py:1108"
       ]
     },
     "memory_leak": {
@@ -43994,6 +44267,7 @@
       "value": "netra_backend/app",
       "category": "test_literals",
       "locations": [
+        "scripts/test_coverage_system.py:111",
         "scripts/unified_test_config.py:167"
       ]
     },
@@ -44015,7 +44289,7 @@
       "value": "netra_backend/pytest.ini",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:103"
+        "scripts/unified_test_runner.py:106"
       ]
     },
     "netra_backend/tests": {
@@ -44029,8 +44303,8 @@
         "scripts/fix_test_import_order.py:89",
         "scripts/optimize_test_performance.py:343",
         "scripts/test_backend.py:203",
-        "scripts/unified_test_runner.py:102",
-        "scripts/unified_test_runner.py:684",
+        "scripts/unified_test_runner.py:105",
+        "scripts/unified_test_runner.py:687",
         "scripts/validate_llm_test_models.py:42"
       ]
     },
@@ -44040,7 +44314,7 @@
       "locations": [
         "scripts/rapid_test_consolidation.py:28",
         "scripts/test_backend.py:30",
-        "scripts/unified_test_runner.py:682"
+        "scripts/unified_test_runner.py:685"
       ]
     },
     "netra_backend/tests/api": {
@@ -44063,7 +44337,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:28",
-        "scripts/unified_test_runner.py:677"
+        "scripts/unified_test_runner.py:680"
       ]
     },
     "netra_backend/tests/core/test_config_manager.py::TestSecretManager::test_initialization": {
@@ -44107,7 +44381,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:29",
-        "scripts/unified_test_runner.py:678"
+        "scripts/unified_test_runner.py:681"
       ]
     },
     "netra_backend/tests/integration/test_logging_audit_integration_core.py": {
@@ -44254,7 +44528,7 @@
       "value": "netra_backend/tests/startup",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:678"
+        "scripts/unified_test_runner.py:681"
       ]
     },
     "netra_backend/tests/test_agent_service_critical.py": {
@@ -44268,14 +44542,14 @@
       "value": "netra_backend/tests/test_api_agent_generation_critical.py",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:679"
+        "scripts/unified_test_runner.py:682"
       ]
     },
     "netra_backend/tests/test_api_core_critical.py": {
       "value": "netra_backend/tests/test_api_core_critical.py",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:679"
+        "scripts/unified_test_runner.py:682"
       ]
     },
     "netra_backend/tests/test_api_endpoints_critical.py": {
@@ -44283,21 +44557,21 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:34",
-        "scripts/unified_test_runner.py:679"
+        "scripts/unified_test_runner.py:682"
       ]
     },
     "netra_backend/tests/test_api_error_handling_critical.py": {
       "value": "netra_backend/tests/test_api_error_handling_critical.py",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:679"
+        "scripts/unified_test_runner.py:682"
       ]
     },
     "netra_backend/tests/test_api_threads_messages_critical.py": {
       "value": "netra_backend/tests/test_api_threads_messages_critical.py",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:679"
+        "scripts/unified_test_runner.py:682"
       ]
     },
     "netra_backend/tests/test_auth*.py": {
@@ -44325,7 +44599,15 @@
       "value": "netra_backend/tests/unit",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:677"
+        "scripts/unified_test_runner.py:680"
+      ]
+    },
+    "netra_backend/tests/unit/test_cors_architecture_compliance.py": {
+      "value": "netra_backend/tests/unit/test_cors_architecture_compliance.py",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:26",
+        "scripts/test_coverage_system.py:26"
       ]
     },
     "netra_backend/tests/websocket": {
@@ -44623,35 +44905,35 @@
       "value": "npm run test:critical -- --setupFilesAfterEnv='<rootDir>/",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:756"
+        "scripts/unified_test_runner.py:759"
       ]
     },
     "npm run test:fast": {
       "value": "npm run test:fast",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:757"
+        "scripts/unified_test_runner.py:760"
       ]
     },
     "npm run test:integration -- --setupFilesAfterEnv='<rootDir>/": {
       "value": "npm run test:integration -- --setupFilesAfterEnv='<rootDir>/",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:755"
+        "scripts/unified_test_runner.py:758"
       ]
     },
     "npm run test:unit -- --setupFilesAfterEnv='<rootDir>/": {
       "value": "npm run test:unit -- --setupFilesAfterEnv='<rootDir>/",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:754"
+        "scripts/unified_test_runner.py:757"
       ]
     },
     "npm test": {
       "value": "npm test",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:116"
+        "scripts/unified_test_runner.py:119"
       ]
     },
     "npm test -- --passWithNoTests --ci --silent": {
@@ -44665,7 +44947,7 @@
       "value": "npm test -- --setupFilesAfterEnv='<rootDir>/",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:760"
+        "scripts/unified_test_runner.py:763"
       ]
     },
     "npm.cmd": {
@@ -45078,8 +45360,8 @@
       "value": "overall_success",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:859",
-        "scripts/unified_test_runner.py:891"
+        "scripts/unified_test_runner.py:862",
+        "scripts/unified_test_runner.py:894"
       ]
     },
     "overload-test-token-": {
@@ -45198,7 +45480,7 @@
       "value": "parallel_safe",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1102"
+        "scripts/unified_test_runner.py:1105"
       ]
     },
     "parametrize": {
@@ -45432,6 +45714,13 @@
         "scripts/test_cold_start_e2e.py:415"
       ]
     },
+    "pc_cov": {
+      "value": "pc_cov",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:65"
+      ]
+    },
     "peak_hours": {
       "value": "peak_hours",
       "category": "test_literals",
@@ -45471,7 +45760,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/autonomous_review/test_reviewer.py:123",
-        "scripts/test_backend.py:411"
+        "scripts/test_backend.py:411",
+        "scripts/test_coverage_system.py:95"
       ]
     },
     "percentage": {
@@ -46082,11 +46372,11 @@
       "category": "test_literals",
       "locations": [
         "scripts/unified_test_config.py:149",
-        "scripts/unified_test_runner.py:793",
-        "scripts/unified_test_runner.py:793",
-        "scripts/unified_test_runner.py:805",
-        "scripts/unified_test_runner.py:919",
-        "scripts/unified_test_runner.py:926"
+        "scripts/unified_test_runner.py:796",
+        "scripts/unified_test_runner.py:796",
+        "scripts/unified_test_runner.py:808",
+        "scripts/unified_test_runner.py:922",
+        "scripts/unified_test_runner.py:929"
       ]
     },
     "production": {
@@ -46121,7 +46411,7 @@
       "value": "progress_tracking",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:869"
+        "scripts/unified_test_runner.py:872"
       ]
     },
     "progression_rate": {
@@ -46617,8 +46907,8 @@
       "value": "raw_output",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:631",
-        "scripts/unified_test_runner.py:632"
+        "scripts/unified_test_runner.py:634",
+        "scripts/unified_test_runner.py:635"
       ]
     },
     "read": {
@@ -46658,7 +46948,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/start_test_services.py:158",
-        "scripts/unified_test_runner.py:806"
+        "scripts/unified_test_runner.py:809"
       ]
     },
     "real e2e tests:": {
@@ -47034,7 +47324,15 @@
         "scripts/test_backend.py:313",
         "scripts/test_backend.py:313",
         "scripts/test_backend.py:314",
-        "scripts/test_backend.py:402"
+        "scripts/test_backend.py:402",
+        "scripts/test_coverage_system.py:56"
+      ]
+    },
+    "reports/coverage": {
+      "value": "reports/coverage",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:113"
       ]
     },
     "reports/test_health": {
@@ -47122,14 +47420,14 @@
       "value": "requires_real_llm",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1104"
+        "scripts/unified_test_runner.py:1107"
       ]
     },
     "requires_real_services": {
       "value": "requires_real_services",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1103"
+        "scripts/unified_test_runner.py:1106"
       ]
     },
     "research": {
@@ -47317,7 +47615,7 @@
       "value": "rich",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1010"
+        "scripts/unified_test_runner.py:1013"
       ]
     },
     "risk_assessment": {
@@ -47412,7 +47710,7 @@
       "value": "run_",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:166"
+        "scripts/unified_test_runner.py:169"
       ]
     },
     "run_server.py": {
@@ -47623,8 +47921,8 @@
       "locations": [
         "scripts/real_service_test_metrics.py:125",
         "scripts/test_backend_optimized.py:329",
-        "scripts/unified_test_runner.py:503",
-        "scripts/unified_test_runner.py:510"
+        "scripts/unified_test_runner.py:506",
+        "scripts/unified_test_runner.py:513"
       ]
     },
     "secrets_loading": {
@@ -47900,7 +48198,7 @@
       "value": "service_results",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:423"
+        "scripts/unified_test_runner.py:426"
       ]
     },
     "service_unavailable": {
@@ -47908,7 +48206,7 @@
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/models.py:124",
-        "scripts/unified_test_runner.py:584"
+        "scripts/unified_test_runner.py:587"
       ]
     },
     "services": {
@@ -48201,8 +48499,8 @@
       "locations": [
         "netra_backend/app/agents/test_agent_initialization.py:163",
         "netra_backend/app/agents/test_agent_initialization.py:167",
-        "scripts/unified_test_runner.py:1010",
-        "scripts/unified_test_runner.py:1011"
+        "scripts/unified_test_runner.py:1013",
+        "scripts/unified_test_runner.py:1014"
       ]
     },
     "site-packages": {
@@ -48242,19 +48540,19 @@
       "value": "skip_reason",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:584"
+        "scripts/unified_test_runner.py:587"
       ]
     },
     "skipped": {
       "value": "skipped",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:354",
-        "scripts/unified_test_runner.py:583",
-        "scripts/unified_test_runner.py:637",
-        "scripts/unified_test_runner.py:637",
-        "scripts/unified_test_runner.py:817",
-        "scripts/unified_test_runner.py:887"
+        "scripts/unified_test_runner.py:357",
+        "scripts/unified_test_runner.py:586",
+        "scripts/unified_test_runner.py:640",
+        "scripts/unified_test_runner.py:640",
+        "scripts/unified_test_runner.py:820",
+        "scripts/unified_test_runner.py:890"
       ]
     },
     "skipped tests": {
@@ -48333,7 +48631,7 @@
       "value": "smart_adaptive",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1003"
+        "scripts/unified_test_runner.py:1006"
       ]
     },
     "smoke": {
@@ -48765,14 +49063,14 @@
       "value": "stderr",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:632"
+        "scripts/unified_test_runner.py:635"
       ]
     },
     "stdout": {
       "value": "stdout",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:631"
+        "scripts/unified_test_runner.py:634"
       ]
     },
     "stop": {
@@ -48965,7 +49263,7 @@
       "value": "suggestion",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:645"
+        "scripts/unified_test_runner.py:648"
       ]
     },
     "suggestions": {
@@ -49411,7 +49709,7 @@
       "value": "test-clickhouse-password-for-integration-testing",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:238"
+        "scripts/unified_test_runner.py:241"
       ]
     },
     "test-client-id": {
@@ -49473,14 +49771,14 @@
       "value": "test-google-client-id-for-integration-testing",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:233"
+        "scripts/unified_test_runner.py:236"
       ]
     },
     "test-google-client-secret-for-integration-testing": {
       "value": "test-google-client-secret-for-integration-testing",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:234"
+        "scripts/unified_test_runner.py:237"
       ]
     },
     "test-google-id": {
@@ -49516,7 +49814,7 @@
       "value": "test-jwt-secret-key-for-integration-testing-must-be-32-chars-minimum",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:235"
+        "scripts/unified_test_runner.py:238"
       ]
     },
     "test-jwt-secret-key-that-is-long-enough-for-testing-purposes": {
@@ -49585,7 +49883,7 @@
       "value": "test-service-secret-for-cross-service-auth-32-chars-minimum-length",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:236"
+        "scripts/unified_test_runner.py:239"
       ]
     },
     "test-session": {
@@ -50026,7 +50324,7 @@
         "scripts/test_backend_optimized.py:234",
         "scripts/test_backend_optimized.py:267",
         "scripts/test_backend_optimized.py:334",
-        "scripts/unified_test_runner.py:634"
+        "scripts/unified_test_runner.py:637"
       ]
     },
     "test_deployment_edge_cases.py": {
@@ -50054,9 +50352,9 @@
         "scripts/unified_test_config.py:396",
         "scripts/unified_test_config.py:407",
         "scripts/unified_test_config.py:408",
-        "scripts/unified_test_runner.py:102",
-        "scripts/unified_test_runner.py:108",
-        "scripts/unified_test_runner.py:114"
+        "scripts/unified_test_runner.py:105",
+        "scripts/unified_test_runner.py:111",
+        "scripts/unified_test_runner.py:117"
       ]
     },
     "test_directories": {
@@ -50138,6 +50436,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging.py:54"
+      ]
+    },
+    "test_framework/test_config.py": {
+      "value": "test_framework/test_config.py",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coverage_system.py:27"
       ]
     },
     "test_framework_size": {
@@ -50300,7 +50605,7 @@
       "value": "test_report_",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:872"
+        "scripts/unified_test_runner.py:875"
       ]
     },
     "test_reports": {
@@ -50372,48 +50677,48 @@
       "locations": [
         "scripts/cleanup_test_processes.py:80",
         "scripts/unified_test_runner.py:49",
-        "scripts/unified_test_runner.py:203",
-        "scripts/unified_test_runner.py:204",
-        "scripts/unified_test_runner.py:205",
         "scripts/unified_test_runner.py:206",
-        "scripts/unified_test_runner.py:222",
-        "scripts/unified_test_runner.py:225"
+        "scripts/unified_test_runner.py:207",
+        "scripts/unified_test_runner.py:208",
+        "scripts/unified_test_runner.py:209",
+        "scripts/unified_test_runner.py:225",
+        "scripts/unified_test_runner.py:228"
       ]
     },
     "test_runner_frontend": {
       "value": "test_runner_frontend",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:742",
-        "scripts/unified_test_runner.py:744",
-        "scripts/unified_test_runner.py:746"
+        "scripts/unified_test_runner.py:745",
+        "scripts/unified_test_runner.py:747",
+        "scripts/unified_test_runner.py:749"
       ]
     },
     "test_runner_nodetest": {
       "value": "test_runner_nodetest",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:799",
-        "scripts/unified_test_runner.py:803",
-        "scripts/unified_test_runner.py:804",
+        "scripts/unified_test_runner.py:802",
         "scripts/unified_test_runner.py:806",
-        "scripts/unified_test_runner.py:807"
+        "scripts/unified_test_runner.py:807",
+        "scripts/unified_test_runner.py:809",
+        "scripts/unified_test_runner.py:810"
       ]
     },
     "test_runner_pytest": {
       "value": "test_runner_pytest",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:779",
-        "scripts/unified_test_runner.py:783",
-        "scripts/unified_test_runner.py:786"
+        "scripts/unified_test_runner.py:782",
+        "scripts/unified_test_runner.py:786",
+        "scripts/unified_test_runner.py:789"
       ]
     },
     "test_runner_secrets": {
       "value": "test_runner_secrets",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:245"
+        "scripts/unified_test_runner.py:248"
       ]
     },
     "test_runners": {
@@ -50657,7 +50962,7 @@
         "scripts/remove_test_stubs.py:78",
         "scripts/test_backend.py:78",
         "scripts/test_backend.py:368",
-        "scripts/unified_test_runner.py:231"
+        "scripts/unified_test_runner.py:234"
       ]
     },
     "tests": {
@@ -50723,7 +51028,7 @@
       "value": "tests timed out after",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:503"
+        "scripts/unified_test_runner.py:506"
       ]
     },
     "tests to test suite": {
@@ -50828,7 +51133,7 @@
         "scripts/batch_fix_and_test.py:43",
         "scripts/rapid_test_consolidation.py:33",
         "scripts/rapid_test_consolidation.py:33",
-        "scripts/unified_test_runner.py:684",
+        "scripts/unified_test_runner.py:687",
         "scripts/validate_llm_test_models.py:45"
       ]
     },
@@ -51104,7 +51409,7 @@
       "value": "tests:",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:513"
+        "scripts/unified_test_runner.py:516"
       ]
     },
     "tests\\.unified\\.e2e\\.": {
@@ -51186,7 +51491,7 @@
       "value": "threshold_based",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1003"
+        "scripts/unified_test_runner.py:1006"
       ]
     },
     "throughput": {
@@ -51301,7 +51606,7 @@
       "locations": [
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:31",
         "netra_backend/app/services/realistic_test_data/performance_simulator.py:165",
-        "scripts/unified_test_runner.py:1028"
+        "scripts/unified_test_runner.py:1031"
       ]
     },
     "time_utilities": {
@@ -51406,7 +51711,7 @@
       "value": "to_dict",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:861"
+        "scripts/unified_test_runner.py:864"
       ]
     },
     "todo": {
@@ -51606,7 +51911,7 @@
       "value": "total_categories",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:1101"
+        "scripts/unified_test_runner.py:1104"
       ]
     },
     "total_config_fixes": {
@@ -51640,8 +51945,8 @@
         "scripts/test_backend_optimized.py:231",
         "scripts/test_backend_optimized.py:266",
         "scripts/test_backend_optimized.py:329",
-        "scripts/unified_test_runner.py:860",
-        "scripts/unified_test_runner.py:881"
+        "scripts/unified_test_runner.py:863",
+        "scripts/unified_test_runner.py:884"
       ]
     },
     "total_failures": {
@@ -51835,7 +52140,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/autonomous_review/test_reviewer.py:123",
-        "scripts/test_backend.py:411"
+        "scripts/test_backend.py:411",
+        "scripts/test_coverage_system.py:94",
+        "scripts/test_coverage_system.py:95"
       ]
     },
     "trace_id": {
@@ -52034,6 +52341,8 @@
         "frontend/components/chat/ConnectionStatusIndicator.test.tsx:48",
         "scripts/setup_staging_test_account.py:295",
         "scripts/test_cors.py:88",
+        "scripts/test_coverage_system.py:80",
+        "scripts/test_coverage_system.py:95",
         "scripts/test_staging_login_automated.py:198",
         "scripts/test_staging_login_automated.py:344",
         "scripts/test_workflows_with_act.py:212"
@@ -53054,7 +53363,7 @@
         "scripts/start_test_services.py:155",
         "scripts/test_docker_websocket_fix.py:45",
         "scripts/test_websocket_cors_comprehensive.py:324",
-        "scripts/unified_test_runner.py:206"
+        "scripts/unified_test_runner.py:209"
       ]
     },
     "ws://localhost:8000/ws": {
@@ -53316,14 +53625,14 @@
       "value": "⏭️",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:844"
+        "scripts/unified_test_runner.py:847"
       ]
     },
     "⏭️ SKIPPED": {
       "value": "⏭️ SKIPPED",
       "category": "test_literals",
       "locations": [
-        "scripts/unified_test_runner.py:888"
+        "scripts/unified_test_runner.py:891"
       ]
     },
     "⏰": {
@@ -53614,7 +53923,7 @@
         "scripts/test_example_message_flow.py:112",
         "scripts/test_example_message_flow.py:321",
         "scripts/test_staging_env.py:189",
-        "scripts/unified_test_runner.py:844"
+        "scripts/unified_test_runner.py:847"
       ]
     },
     "✅  No fake tests detected - good job!": {
@@ -53864,8 +54173,8 @@
       "locations": [
         "scripts/test_auth_integration.py:148",
         "scripts/test_staging_env.py:170",
-        "scripts/unified_test_runner.py:886",
-        "scripts/unified_test_runner.py:891"
+        "scripts/unified_test_runner.py:889",
+        "scripts/unified_test_runner.py:894"
       ]
     },
     "✅ Passed:": {
@@ -54358,7 +54667,7 @@
         "scripts/test_example_message_flow.py:115",
         "scripts/test_example_message_flow.py:322",
         "scripts/test_staging_env.py:190",
-        "scripts/unified_test_runner.py:844"
+        "scripts/unified_test_runner.py:847"
       ]
     },
     "❌ (FAILING)": {
@@ -54467,8 +54776,8 @@
       "locations": [
         "scripts/test_auth_integration.py:148",
         "scripts/test_staging_env.py:173",
-        "scripts/unified_test_runner.py:886",
-        "scripts/unified_test_runner.py:891"
+        "scripts/unified_test_runner.py:889",
+        "scripts/unified_test_runner.py:894"
       ]
     },
     "❌ FAILED | Backend service failed to start": {

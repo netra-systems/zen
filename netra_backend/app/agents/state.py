@@ -197,7 +197,7 @@ class DeepAgentState(BaseModel):
     
     def to_dict(self) -> Dict[str, Union[str, int, float, bool, None]]:
         """Convert state to dictionary with typed values."""
-        return self.model_dump(exclude_none=True)
+        return self.model_dump(exclude_none=True, mode='json')
     
     def copy_with_updates(self, **updates: Union[str, int, float, bool, None]
                          ) -> 'DeepAgentState':

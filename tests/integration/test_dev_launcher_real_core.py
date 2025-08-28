@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def __init__(self):
+    def setup_method(self):
         self.launcher: Optional[DevLauncher] = None
         self.config: Optional[LauncherConfig] = None
         self.start_time: Optional[float] = None

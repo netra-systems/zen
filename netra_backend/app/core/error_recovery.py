@@ -169,6 +169,7 @@ class RetryStrategy:
 # Import CircuitBreaker from canonical location - CONSOLIDATED
 from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker as CoreCircuitBreaker,
+    UnifiedCircuitConfig,
 )
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig
 
@@ -184,9 +185,9 @@ class ErrorRecoveryCircuitBreaker(CoreCircuitBreaker):
         config = self._create_circuit_config(name, failure_threshold, timeout)
         super().__init__(config)
     
-    def _create_circuit_config(self, name: str, failure_threshold: int, timeout: int) -> CircuitConfig:
+    def _create_circuit_config(self, name: str, failure_threshold: int, timeout: int) -> UnifiedCircuitConfig:
         """Create circuit configuration with recovery defaults."""
-        return CircuitConfig(
+        return UnifiedCircuitConfig(
             name=name,
             failure_threshold=failure_threshold,
             recovery_timeout=float(timeout),

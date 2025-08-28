@@ -609,15 +609,38 @@ def _create_tool_dispatcher(tool_registry):
 
 def _create_agent_supervisor(app: FastAPI) -> None:
     """Create agent supervisor."""
-    supervisor = _build_supervisor_agent(app)
-    _setup_agent_state(app, supervisor)
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
+    try:
+        supervisor = _build_supervisor_agent(app)
+        _setup_agent_state(app, supervisor)
+        logger.info("Agent supervisor created successfully")
+    except Exception as e:
+        logger.error(f"Failed to create agent supervisor: {e}")
+        # Set a None supervisor so WebSocket doesn't crash
+        app.state.agent_supervisor = None
+        raise
 
 
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
     from netra_backend.app.websocket_core import get_websocket_manager
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
+    # Check required dependencies
+    required_attrs = ['db_session_factory', 'llm_manager', 'tool_dispatcher']
+    missing = [attr for attr in required_attrs if not hasattr(app.state, attr)]
+    
+    if missing:
+        logger.error(f"Missing required app state attributes for supervisor: {missing}")
+        raise RuntimeError(f"Cannot create supervisor - missing dependencies: {missing}")
+    
     websocket_manager = get_websocket_manager()
+    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}, tool_dispatcher={app.state.tool_dispatcher}")
+    
     return SupervisorAgent(
         app.state.db_session_factory, 
         app.state.llm_manager, 

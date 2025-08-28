@@ -182,6 +182,9 @@ class StatePersistenceService:
     async def _create_state_snapshot(self, request: StatePersistenceRequest,
                                     db_session: AsyncSession) -> str:
         """Create a new state snapshot in database."""
+        # Ensure user exists before creating snapshot
+        await self._ensure_user_exists_for_snapshot(request.user_id, db_session)
+        
         snapshot_id = str(uuid.uuid4())
         snapshot = await self._prepare_snapshot_for_database(snapshot_id, request)
         return await self._insert_snapshot_to_database(snapshot, db_session, snapshot_id)
@@ -385,6 +388,43 @@ class StatePersistenceService:
         """Handle load operation error."""
         logger.error(f"Failed to load state for run {run_id}: {error}")
         return None
+    
+    async def _ensure_user_exists_for_snapshot(self, user_id: str, db_session: AsyncSession) -> None:
+        """Ensure user exists before creating snapshot to prevent foreign key violations.
+        
+        This method checks if a user exists and creates a development user if needed.
+        This is critical for preventing foreign key constraint violations when saving state.
+        """
+        if not user_id:
+            return  # Skip if no user_id provided
+        
+        from netra_backend.app.services.user_service import user_service
+        from netra_backend.app.schemas.user import UserCreate
+        
+        # Check if user exists
+        existing_user = await user_service.get(db_session, id=user_id)
+        if existing_user:
+            return  # User exists, nothing to do
+        
+        # Handle dev/test users automatically
+        if 'dev-temp' in user_id or user_id.startswith('test-'):
+            logger.info(f"Auto-creating dev/test user for state persistence: {user_id}")
+            try:
+                # Create minimal dev user for state persistence
+                user_create = UserCreate(
+                    id=user_id,
+                    email=f"{user_id}@dev.local",
+                    full_name=f"Dev User {user_id}",
+                    password="DevPassword123!",  # Default password for auto-created dev users
+                    is_active=True,
+                    is_developer=True,
+                    role="developer"
+                )
+                await user_service.create(db_session, obj_in=user_create)
+                logger.info(f"Created dev user {user_id} for state persistence")
+            except Exception as e:
+                # Log but don't fail - the foreign key error will be more descriptive
+                logger.warning(f"Could not auto-create dev user {user_id}: {e}")
     
     def _log_recovery_result(self, recovery_id: str, success: bool) -> None:
         """Log recovery operation result."""

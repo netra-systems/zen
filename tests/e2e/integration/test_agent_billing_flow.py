@@ -203,7 +203,7 @@ class TestAgentBillingFlow:
         expected_tokens = request["expected_cost"]["tokens"]
         
         # Mock: LLM service isolation for fast testing without API calls or rate limits
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm_full') as mock_llm:
             mock_llm.return_value = AgentBillingTestUtils.create_mock_llm_response(expected_tokens)
             
             response = await AgentBillingTestUtils.send_agent_request(

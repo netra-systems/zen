@@ -42,7 +42,7 @@ class TestSyntaxFix:
             message = self.format(record)
             self.error_detector._check_line_for_errors(message, 'launcher', 'log')
 
-    def __init__(self):
+    def setup_method(self):
         self.launcher: Optional[DevLauncher] = None
         self.config: Optional[LauncherConfig] = None
         self.error_detector = ErrorDetector()

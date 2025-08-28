@@ -255,7 +255,7 @@ class OAuthConfigGenerator:
             client_id=client_id, client_secret=client_secret,
             redirect_uris=["http://test.local:8000/auth/callback"],
             javascript_origins=["http://test.local:3000"],
-            allow_dev_login=False, allow_mock_auth=True, use_proxy=False
+            allow_dev_login=True, allow_mock_auth=True, use_proxy=False
         )
     
     def _get_staging_credentials(self) -> tuple[str, str]:

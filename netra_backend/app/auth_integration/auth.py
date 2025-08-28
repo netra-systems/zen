@@ -277,7 +277,11 @@ def _decode_state_from_base64(state_string: str) -> Dict:
     logger.warning("_decode_state_from_base64 is deprecated - use auth service")
     import base64
     import json
-    return json.loads(base64.urlsafe_b64decode(state_string))
+    try:
+        return json.loads(base64.urlsafe_b64decode(state_string))
+    except (ValueError, json.JSONDecodeError, Exception) as e:
+        from netra_backend.app.core.exceptions_auth import NetraSecurityException
+        raise NetraSecurityException("Malformed state parameter") from e
 
 def _validate_state_timestamp(timestamp: float) -> None:
     """DEPRECATED: Compatibility stub for pr_router._validate_state_timestamp"""

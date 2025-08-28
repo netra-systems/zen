@@ -15,6 +15,7 @@ ATOMIC CONSOLIDATION: Uses DatabaseManager as the single source of truth
 from typing import AsyncGenerator, Any, Dict, List, Optional
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
+import asyncio
 
 # SINGLE SOURCE OF TRUTH: Use DatabaseManager exclusively
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -41,20 +42,28 @@ class UnifiedDatabaseManager:
         """Get PostgreSQL session via DatabaseManager - single source of truth.
         
         CRITICAL FIX: Improved session lifecycle management to prevent state errors.
-        Handles GeneratorExit gracefully without attempting operations on closed session.
+        Properly handles cancellation and ensures no operations on closing sessions.
         """
         # Use DatabaseManager's session factory directly
         async_session_factory = DatabaseManager.get_application_session()
         async with async_session_factory() as session:
             try:
                 yield session
-                await session.commit()
+                # Only commit if session is active and not in an error state
+                if session.is_active and not session.in_transaction():
+                    await session.commit()
+            except asyncio.CancelledError:
+                # Handle task cancellation - don't attempt any session operations
+                # The async context manager will handle cleanup
+                raise
             except GeneratorExit:
                 # Handle generator cleanup gracefully without operations
                 # Session is already closing, no need for rollback
                 pass
             except Exception:
-                await session.rollback()
+                # Only rollback if session is still active
+                if session.is_active:
+                    await session.rollback()
                 raise
     
     @staticmethod
