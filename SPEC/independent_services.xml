@@ -29,6 +29,12 @@
       See SPEC/shared_component_architecture.xml for strict criteria on what belongs in /shared.
       CRITICAL: The existence of /shared does NOT change independence requirements - services must remain independently deployable.
     </shared_component_exception>
+    <violation_example date="2025-08-28">
+      CATASTROPHIC FAILURE: Auth service importing from netra_backend caused complete authentication failure 
+      in staging. Auth service database manager was delegating to netra_backend's DatabaseManager, but in 
+      deployed environments the auth service container doesn't have netra_backend code, causing immediate 
+      logout after OAuth login. See SPEC/learnings/oauth_service_independence_violation.xml
+    </violation_example>
   </critical-principle>
   <scope-clarification id="MS-SCOPE-001">
     <title>Backend-Only Application</title>
