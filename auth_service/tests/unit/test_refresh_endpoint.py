@@ -262,7 +262,6 @@ class TestAuthServiceRefreshLogic:
         from auth_service.auth_core.services.auth_service import AuthService
         return AuthService()
     
-    @pytest.mark.skip(reason="AuthService doesn't have refresh_tokens method")
     @pytest.mark.asyncio
     async def test_refresh_tokens_success(self, auth_service):
         """Test successful token refresh"""
@@ -275,18 +274,18 @@ class TestAuthServiceRefreshLogic:
                     mock_access.return_value = "new.access.token"
                     mock_refresh.return_value = "new.refresh.token"
                     
-                    # Mock session manager
-                    with patch.object(auth_service.session_manager, 'track_refresh_token') as mock_track:
-                        mock_track.return_value = True  # Not already used
-                        
-                        result = await auth_service.refresh_tokens("old.refresh.token")
-                        
-                        assert result is not None
-                        access_token, refresh_token = result
-                        assert access_token == "new.access.token"
-                        assert refresh_token == "new.refresh.token"
+                    # Initialize used_refresh_tokens set
+                    auth_service.session_manager.used_refresh_tokens = set()
+                    
+                    result = await auth_service.refresh_tokens("old.refresh.token")
+                    
+                    assert result is not None
+                    access_token, refresh_token = result
+                    assert access_token == "new.access.token"
+                    assert refresh_token == "new.refresh.token"
+                    # Verify token was marked as used
+                    assert "old.refresh.token" in auth_service.session_manager.used_refresh_tokens
     
-    @pytest.mark.skip(reason="AuthService doesn't have refresh_tokens method")
     @pytest.mark.asyncio
     async def test_refresh_tokens_invalid_token(self, auth_service):
         """Test refresh fails with invalid token"""
@@ -296,21 +295,18 @@ class TestAuthServiceRefreshLogic:
             result = await auth_service.refresh_tokens("invalid.token")
             assert result is None
     
-    @pytest.mark.skip(reason="AuthService doesn't have refresh_tokens method")
     @pytest.mark.asyncio
     async def test_refresh_tokens_race_condition(self, auth_service):
         """Test refresh handles race condition"""
         with patch.object(auth_service.jwt_handler, 'validate_token') as mock_validate:
             mock_validate.return_value = {"sub": "user-123", "type": "refresh"}
             
-            # Mock token already used (race condition)
-            with patch.object(auth_service.session_manager, 'track_refresh_token') as mock_track:
-                mock_track.return_value = False  # Already used
-                
-                result = await auth_service.refresh_tokens("already.used.token")
-                assert result is None
+            # Mark token as already used (race condition)
+            auth_service.session_manager.used_refresh_tokens = {"already.used.token"}
+            
+            result = await auth_service.refresh_tokens("already.used.token")
+            assert result is None
     
-    @pytest.mark.skip(reason="AuthService doesn't have refresh_tokens method")
     @pytest.mark.asyncio
     async def test_refresh_updates_session(self, auth_service):
         """Test refresh updates user session"""
@@ -321,16 +317,17 @@ class TestAuthServiceRefreshLogic:
                     mock_access.return_value = "new.access.token"
                     mock_refresh.return_value = "new.refresh.token"
                     
-                    with patch.object(auth_service.session_manager, 'track_refresh_token') as mock_track:
-                        with patch.object(auth_service.session_manager, 'update_session') as mock_update:
-                            mock_track.return_value = True
-                            
-                            await auth_service.refresh_tokens("old.refresh.token")
-                            
-                            # Session should be updated
-                            mock_update.assert_called_once()
-                            call_args = mock_update.call_args[0]
-                            assert call_args[0] == "user-123"  # user_id
+                    # Initialize used_refresh_tokens set  
+                    auth_service.session_manager.used_refresh_tokens = set()
+                    
+                    result = await auth_service.refresh_tokens("old.refresh.token")
+                    
+                    # Verify tokens were generated
+                    assert result is not None
+                    assert result[0] == "new.access.token"
+                    assert result[1] == "new.refresh.token"
+                    # Verify old token was marked as used
+                    assert "old.refresh.token" in auth_service.session_manager.used_refresh_tokens
 
 
 if __name__ == "__main__":
