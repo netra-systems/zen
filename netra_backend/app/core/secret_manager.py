@@ -495,3 +495,87 @@ class SecretManager:
         secrets = self._process_environment_secrets(env_mapping, is_staging)
         self._log_environment_secrets_status(secrets)
         return secrets
+    
+    def get_secret(self, secret_name: str) -> Optional[str]:
+        """Get a specific secret by name.
+        
+        Loads secrets if not already cached and returns the requested secret.
+        Handles SECRET_KEY mapping to JWT_SECRET_KEY for compatibility.
+        Raises SecretManagerError for missing critical secrets in staging/production.
+        """
+        try:
+            # Load secrets if not already loaded
+            secrets = self.load_secrets()
+            
+            # Handle SECRET_KEY specially - it maps to JWT_SECRET_KEY
+            if secret_name == "SECRET_KEY":
+                # Check both JWT_SECRET_KEY and direct environment variable
+                jwt_secret = secrets.get("JWT_SECRET_KEY") or secrets.get("jwt-secret-key")
+                if jwt_secret:
+                    # Validate it's not a placeholder value
+                    if self._is_placeholder_value(jwt_secret):
+                        raise SecretManagerError(f"SECRET_KEY contains placeholder value: '{jwt_secret}'")
+                    return jwt_secret
+                # Fallback to direct environment check
+                env_secret = os.getenv("SECRET_KEY") or os.getenv("JWT_SECRET_KEY")
+                if env_secret and not self._is_placeholder_value(env_secret):
+                    return env_secret
+                
+                # If we're in staging/production, this is a critical error
+                environment = getattr(self._config, 'environment', 'development').lower()
+                if environment in ['staging', 'production']:
+                    raise SecretManagerError(f"SECRET_KEY is missing or invalid in {environment} environment")
+                
+                # Return None for development environments
+                return None
+            
+            # For other secrets, check both the secret name and its mapped version
+            secret_value = secrets.get(secret_name)
+            if secret_value and not self._is_placeholder_value(secret_value):
+                return secret_value
+                
+            # Also check environment directly as fallback
+            env_value = os.getenv(secret_name)
+            if env_value and not self._is_placeholder_value(env_value):
+                return env_value
+            
+            # Check if this is a critical secret in staging/production
+            environment = getattr(self._config, 'environment', 'development').lower()
+            critical_secrets = ['SECRET_KEY', 'JWT_SECRET_KEY', 'FERNET_KEY', 'POSTGRES_PASSWORD']
+            if environment in ['staging', 'production'] and secret_name in critical_secrets:
+                raise SecretManagerError(f"Critical secret {secret_name} is missing in {environment} environment")
+            
+            return None
+            
+        except SecretManagerError:
+            # Re-raise SecretManagerError as-is
+            raise
+        except Exception as e:
+            self._logger.error(f"Failed to get secret {secret_name}: {e}")
+            raise SecretManagerError(f"Failed to retrieve secret {secret_name}: {e}")
+    
+    def _is_placeholder_value(self, value: str) -> bool:
+        """Check if a value is a placeholder that should be replaced."""
+        if not value or value.strip() == "":
+            return True
+            
+        placeholder_patterns = [
+            "will-be-set-by-secrets",
+            "placeholder",
+            "staging-jwt-secret-key-should-be-replaced-in-deployment",
+            "staging-fernet-key-should-be-replaced-in-deployment",
+            "REPLACE",
+            "should-be-replaced",
+            "placeholder-value",
+            "default-value",
+            "change-me",
+            "update-in-production",
+            "change-in-production"
+        ]
+        
+        value_lower = value.lower().strip()
+        for pattern in placeholder_patterns:
+            if pattern.lower() in value_lower:
+                return True
+                
+        return False

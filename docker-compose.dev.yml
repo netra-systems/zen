@@ -86,6 +86,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_URL: redis://redis:6379/0
+      REDIS_STAGING_HOST: ${REDIS_STAGING_HOST:-redis-staging.internal}
+      REDIS_PRODUCTION_HOST: ${REDIS_PRODUCTION_HOST:-redis-production.internal}
       
       # ClickHouse
       CLICKHOUSE_HOST: clickhouse
@@ -100,6 +102,11 @@ services:
       PORT: 8000
       HOST: 0.0.0.0
       ENVIRONMENT: ${ENVIRONMENT:-development}
+      
+      # Security
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production-must-be-at-least-32-chars}
+      FERNET_KEY: ${FERNET_KEY:-dev-fernet-key-change-in-production}
       
       # API Keys (from host environment)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
@@ -162,6 +169,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_URL: redis://redis:6379/1
+      REDIS_STAGING_HOST: ${REDIS_STAGING_HOST:-redis-staging.internal}
+      REDIS_PRODUCTION_HOST: ${REDIS_PRODUCTION_HOST:-redis-production.internal}
       
       # Server Config
       PORT: 8081
@@ -172,6 +181,12 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-key-change-in-production}
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      
+      # OAuth Configuration
+      GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT:-dev-oauth-client-id}
+      GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT:-dev-oauth-client-secret}
+      GOOGLE_OAUTH_CLIENT_ID_STAGING: ${GOOGLE_OAUTH_CLIENT_ID_STAGING}
+      GOOGLE_OAUTH_CLIENT_SECRET_STAGING: ${GOOGLE_OAUTH_CLIENT_SECRET_STAGING}
     ports:
       - "${AUTH_PORT:-8081}:8081"
     volumes:

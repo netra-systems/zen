@@ -16,6 +16,28 @@ from auth_service.auth_core.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
+class SecretLoader:
+    """Legacy alias for AuthSecretLoader to maintain compatibility."""
+    
+    def load_google_oauth_client_id(self) -> Optional[str]:
+        """Load Google OAuth client ID for current environment."""
+        try:
+            client_id = AuthSecretLoader.get_google_client_id()
+            return client_id if client_id else None
+        except Exception as e:
+            logger.error(f"Failed to load Google OAuth client ID: {e}")
+            return None
+    
+    def load_google_oauth_client_secret(self) -> Optional[str]:
+        """Load Google OAuth client secret for current environment."""
+        try:
+            client_secret = AuthSecretLoader.get_google_client_secret()
+            return client_secret if client_secret else None
+        except Exception as e:
+            logger.error(f"Failed to load Google OAuth client secret: {e}")
+            return None
+
+
 class AuthSecretLoader:
     """Load secrets for auth service based on environment."""
     

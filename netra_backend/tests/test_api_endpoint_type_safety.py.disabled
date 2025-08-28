@@ -13,7 +13,8 @@ from pydantic import ValidationError
 from netra_backend.app.schemas.Request import RequestModel, StartAgentPayload
 from netra_backend.app.schemas.Generation import ContentGenParams, LogGenParams, SyntheticDataGenParams
 from netra_backend.app.schemas.Auth import LoginRequest, LoginResponse, TokenData
-from netra_backend.app.schemas.User import UserCreate, UserResponse, UserUpdate
+from netra_backend.app.schemas.user import UserCreate, UserUpdate
+from netra_backend.app.schemas.registry import User as UserResponse
 from netra_backend.app.schemas.Config import ConfigRequest, ConfigResponse
 from netra_backend.app.schemas.Corpus import CorpusCreate, CorpusResponse, CorpusUpdate
 from netra_backend.app.schemas.Reference import ReferenceCreate, ReferenceResponse

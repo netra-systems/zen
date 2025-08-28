@@ -500,7 +500,7 @@ async def authenticated_client(async_client, auth_token):
 ```python
 # tests/test_helpers.py
 from datetime import datetime
-from netra_backend.app.schemas.User import UserCreate
+from netra_backend.app.schemas.user import UserCreate
 from netra_backend.app.schemas.Thread import ThreadCreate
 from netra_backend.app.schemas.Message import MessageCreate
 

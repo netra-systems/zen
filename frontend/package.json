@@ -9,6 +9,7 @@
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "next lint",
+    "type-check": "tsc --noEmit",
     "test": "node run-test.js --config jest.config.unified.cjs",
     "test:unit": "node run-test.js TEST_SUITE=unit --config jest.config.unified.cjs",
     "test:integration": "node run-test.js TEST_SUITE=integration JEST_TIMEOUT=60000 --config jest.config.unified.cjs",

@@ -544,3 +544,17 @@ class SecretManager:
         """
         self._load_secrets_from_sources()
         return dict(self._secret_cache)
+    
+    def get_secret(self, secret_name: str) -> Optional[str]:
+        """Get a specific secret by name.
+        
+        Compatible interface with core SecretManager.
+        Loads secrets if not already loaded.
+        """
+        self._load_secrets_from_sources()
+        
+        # Handle SECRET_KEY specially - it maps to JWT_SECRET_KEY
+        if secret_name == "SECRET_KEY":
+            return self._secret_cache.get("JWT_SECRET_KEY")
+        
+        return self._secret_cache.get(secret_name)

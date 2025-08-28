@@ -884,13 +884,15 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     """Run complete startup sequence with improved initialization handling."""
     # Use the global startup manager instance
     
+    # Initialize logger FIRST - before any try block to ensure it's always available
+    logger = central_logger.get_logger(__name__)
+    
     # Check if we should use the new robust startup system
     config = get_config()
     use_robust_startup = getattr(config, 'use_robust_startup', 'true').lower() == 'true'
     
     if use_robust_startup:
         # Use the new robust startup system with dependency resolution
-        logger = central_logger.get_logger(__name__)
         logger.info("Using robust startup manager with dependency resolution...")
         
         try:
