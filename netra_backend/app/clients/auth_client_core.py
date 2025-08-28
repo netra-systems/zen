@@ -229,6 +229,10 @@ class AuthServiceClient:
         if not self.service_secret:
             logger.warning("SERVICE_SECRET not configured - auth service communication may fail in staging/production")
         
+        # Add detailed logging for staging debugging
+        logger.info(f"Validating token with auth service at: {self.settings.base_url}")
+        logger.debug(f"Request headers keys: {list(headers.keys())}")
+        
         response = await client.post(
             "/auth/validate", 
             json=request_data,
@@ -239,10 +243,18 @@ class AuthServiceClient:
         logger.debug(f"Auth validation request sent with service auth")
         
         if response.status_code == 200:
+            logger.info("Token validation successful")
             return await self._parse_validation_response(response.json())
         elif response.status_code == 401:
-            logger.warning("Auth service returned 401 - check service authentication")
+            logger.warning("Auth service returned 401 - token may be invalid or expired")
+            logger.warning(f"Auth service URL: {self.settings.base_url}")
             logger.warning(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
+            # Log response body for debugging
+            try:
+                error_detail = response.json()
+                logger.warning(f"Auth service error: {error_detail}")
+            except:
+                logger.warning(f"Auth service error response: {response.text}")
         elif response.status_code == 403:
             logger.warning("Auth service returned 403 - service not authorized")
             logger.warning(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")

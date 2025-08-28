@@ -31,16 +31,12 @@ from netra_backend.app.auth_integration.auth import (
     ActiveUserWsDep,
     AdminDep,
     DeveloperDep,
-    create_access_token,
     get_current_active_user,
     get_current_user,
     get_current_user_optional,
-    get_password_hash,
     require_admin,
     require_developer,
     require_permission,
-    validate_token_jwt,
-    verify_password,
 )
 
 # Type-safe interfaces
@@ -105,19 +101,15 @@ from netra_backend.app.schemas.auth_types import (
 __all__ = [
     # Auth dependencies
     'ActiveUserDep',
+    'ActiveUserWsDep',
     'DeveloperDep',
     'AdminDep',
-    'ActiveUserWsDep',
     'require_permission',
     'get_current_user',
     'get_current_active_user',
     'get_current_user_optional',
     'require_admin',
     'require_developer',
-    'get_password_hash',
-    'verify_password',
-    'create_access_token',
-    'validate_token_jwt',
     
     # 🔴 CONSOLIDATED MODELS - Use these instead of duplicates
     'LoginRequest',
