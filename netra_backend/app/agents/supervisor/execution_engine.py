@@ -91,7 +91,96 @@ class ExecutionEngine:
     async def _execute_pipeline_steps(self, steps: List[PipelineStep],
                                      context: AgentExecutionContext,
                                      state: DeepAgentState) -> List[AgentExecutionResult]:
-        """Execute pipeline steps sequentially."""
+        """Execute pipeline steps with optimal parallelization strategy."""
+        # Check if steps can be executed in parallel (no dependencies)
+        if self._can_execute_parallel(steps):
+            return await self._execute_steps_parallel(steps, context, state)
+        else:
+            # Fall back to sequential execution with early termination
+            results = []
+            await self._process_steps_with_early_termination(steps, context, state, results)
+            return results
+    
+    def _can_execute_parallel(self, steps: List[PipelineStep]) -> bool:
+        """Determine if steps can be executed in parallel."""
+        # Steps can be parallel if:
+        # 1. No step has dependencies on other steps
+        # 2. All steps have conditions that don't depend on state changes from other steps
+        # 3. None of the steps are marked as requiring sequential execution
+        
+        for step in steps:
+            # Check if step has sequential requirement
+            if hasattr(step, 'requires_sequential') and step.requires_sequential:
+                return False
+                
+            # Check if step has dependencies (simplified check)
+            if hasattr(step, 'dependencies') and step.dependencies:
+                return False
+                
+        # If we have more than 1 step and no blocking conditions, allow parallel
+        return len(steps) > 1
+    
+    async def _execute_steps_parallel(self, steps: List[PipelineStep],
+                                    context: AgentExecutionContext,
+                                    state: DeepAgentState) -> List[AgentExecutionResult]:
+        """Execute steps in parallel using asyncio.gather for improved performance."""
+        # Create tasks for all executable steps
+        tasks = []
+        executable_steps = []
+        
+        for step in steps:
+            if await self._should_execute_step(step, state):
+                step_context = self._create_step_context(context, step)
+                task = self._execute_step_parallel_safe(step, step_context, state)
+                tasks.append(task)
+                executable_steps.append(step)
+        
+        if not tasks:
+            return []
+            
+        # Execute all steps in parallel
+        try:
+            parallel_results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Process results and handle any exceptions
+            results = []
+            for i, result in enumerate(parallel_results):
+                if isinstance(result, Exception):
+                    # Create error result for failed step
+                    error_result = self._create_error_result(executable_steps[i], result)
+                    results.append(error_result)
+                else:
+                    results.append(result)
+                    
+            return results
+            
+        except Exception as e:
+            logger.error(f"Parallel execution failed: {e}")
+            # Fall back to sequential execution
+            return await self._execute_steps_sequential_fallback(steps, context, state)
+    
+    async def _execute_step_parallel_safe(self, step: PipelineStep,
+                                        context: AgentExecutionContext,
+                                        state: DeepAgentState) -> AgentExecutionResult:
+        """Execute a single step safely for parallel execution."""
+        return await self._execute_with_fallback(context, state)
+    
+    def _create_error_result(self, step: PipelineStep, error: Exception) -> AgentExecutionResult:
+        """Create an error result for a failed step."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+        return AgentExecutionResult(
+            success=False,
+            agent_name=getattr(step, 'agent_name', 'unknown'),
+            execution_time=0.0,
+            error=str(error),
+            state=None
+        )
+    
+    async def _execute_steps_sequential_fallback(self, steps: List[PipelineStep],
+                                               context: AgentExecutionContext,
+                                               state: DeepAgentState) -> List[AgentExecutionResult]:
+        """Fallback to sequential execution if parallel fails."""
+        logger.warning("Falling back to sequential execution")
         results = []
         await self._process_steps_with_early_termination(steps, context, state, results)
         return results
