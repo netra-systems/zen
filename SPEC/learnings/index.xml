@@ -736,6 +736,17 @@
             <critical-takeaway>Import ordering critical: module imports must always follow module docstrings to avoid circular dependency issues</critical-takeaway>
         </category>
         
+        <category name="ClickHouse Graceful Failure Handling [FIXED 2025-08-28]" path="SPEC/learnings/clickhouse_graceful_failure.xml" keywords="ClickHouse, Timeout, Graceful Failure, Optional Service, Startup Blocking, Connection Timeout, Staging, HTTPSConnectionPool">
+            <critical-takeaway>FIXED 2025-08-28: ClickHouse must be optional by default in staging/development to prevent backend startup blocking</critical-takeaway>
+            <critical-takeaway>Use environment-aware timeouts: 3-5s in staging/dev, 10-30s in production to fail fast when infrastructure unavailable</critical-takeaway>
+            <critical-takeaway>Implement graceful degradation with mock client fallback when real connections fail in optional environments</critical-takeaway>
+            <critical-takeaway>Skip ClickHouse initialization entirely in optional environments unless CLICKHOUSE_REQUIRED=true</critical-takeaway>
+            <critical-takeaway>Health checks must respect service optionality - skip or report "optional_unavailable" for optional services</critical-takeaway>
+            <critical-takeaway>Layer multiple timeout protections: connection, operation, initialization, and wrapper timeouts</critical-takeaway>
+            <critical-takeaway>HTTPSConnectionPool timeout errors indicate infrastructure unavailability - use fast failure patterns</critical-takeaway>
+            <critical-takeaway>Backend startup time reduced from 60s+ to &lt;30s by preventing ClickHouse connection blocking</critical-takeaway>
+        </category>
+        
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
             <critical-takeaway>Standard import tests miss indirect circular imports through 4+ modules.</critical-takeaway>
             <critical-takeaway>Use lazy imports (inside methods) for WebSocket manager in job/task managers.</critical-takeaway>
@@ -1402,4 +1413,16 @@
             <critical-takeaway>$1M+ revenue at risk from WebSocket middleware issues - security vulnerabilities block enterprise sales.</critical-takeaway>
         </category>
     </websocket_security>
+    
+    <windows_development>
+        <category name="Windows Socket Permission Errors" path="SPEC/learnings/windows_development.xml" keywords="Windows, Port 8000, Socket Permission, WinError 10013, Backend Binding, Process Cleanup">
+            <critical-takeaway>Windows port 8000 permission errors usually caused by processes holding the port, not actual permission issues.</critical-takeaway>
+            <critical-takeaway>Use scripts/fix_port_8000_windows.py to diagnose and fix Windows socket permission errors automatically.</critical-takeaway>
+            <critical-takeaway>Port 8000 is safe from Windows dynamic port range (49152-65535) but can be held by orphaned processes.</critical-takeaway>
+            <critical-takeaway>Windows dev launcher uses enhanced process tree management with taskkill /F /T for proper cleanup.</critical-takeaway>
+            <critical-takeaway>Test socket binding independently using scripts/test_backend_port_binding.py before full dev launcher startup.</critical-takeaway>
+            <critical-takeaway>Windows firewall rules rarely cause port 8000 issues but can be created with --create-firewall-rule flag.</critical-takeaway>
+            <critical-takeaway>Always use graceful shutdown (Ctrl+C) to prevent orphaned processes that hold ports on Windows.</critical-takeaway>
+        </category>
+    </windows_development>
 </specification>

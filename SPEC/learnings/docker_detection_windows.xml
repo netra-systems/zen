@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker Container Detection on Windows</title>
+    <category>Docker</category>
+    <severity>HIGH</severity>
+    <created>2025-08-28</created>
+    <tags>docker, windows, detection, containers</tags>
+  </metadata>
+
+  <problem>
+    <description>
+      Docker introspection script incorrectly reported "No running Docker containers found" 
+      when containers were actually running on Windows system.
+    </description>
+    
+    <evidence>
+      <item>User confirmed 6 containers running: netra-backend, netra-auth, netra-clickhouse, netra-redis, netra-frontend, netra-postgres</item>
+      <item>Script received error: "Command '['docker', 'ps', '--format', '{{json .}}']' returned non-zero exit status 1"</item>
+      <item>Docker Desktop on Windows uses named pipe: //./pipe/dockerDesktopLinuxEngine</item>
+    </evidence>
+    
+    <root_cause>
+      The Docker introspection script does not handle Windows Docker Desktop configurations properly.
+      Windows Docker Desktop may require:
+      1. Different command invocation (docker.exe vs docker)
+      2. Special handling of Docker Desktop service state
+      3. Named pipe availability checks
+      4. WSL2 integration considerations
+    </root_cause>
+  </problem>
+
+  <solution>
+    <description>
+      Enhanced Docker detection for Windows environments with multiple fallback strategies.
+    </description>
+    
+    <implementation>
+      1. Try multiple Docker command variants (docker, docker.exe)
+      2. Check Docker Desktop service status on Windows
+      3. Use platform-specific command handling
+      4. Implement graceful fallback for Docker API errors
+      5. Add Docker Desktop named pipe detection
+    </implementation>
+    
+    <code_example><![CDATA[
+import platform
+import subprocess
+import shutil
+
+def get_docker_command():
+    """Get appropriate Docker command for the platform"""
+    system = platform.system()
+    
+    # Try to find Docker in PATH
+    docker_cmd = shutil.which('docker')
+    if docker_cmd:
+        return docker_cmd
+    
+    # Windows-specific fallbacks
+    if system == 'Windows':
+        # Try docker.exe explicitly
+        docker_exe = shutil.which('docker.exe')
+        if docker_exe:
+            return docker_exe
+        
+        # Try common Docker Desktop locations
+        common_paths = [
+            r'C:\Program Files\Docker\Docker\resources\bin\docker.exe',
+            r'C:\Program Files\Docker\Docker\resources\docker.exe',
+        ]
+        for path in common_paths:
+            if os.path.exists(path):
+                return path
+    
+    # Default fallback
+    return 'docker'
+
+def check_docker_availability():
+    """Check if Docker is available and running"""
+    try:
+        docker_cmd = get_docker_command()
+        result = subprocess.run(
+            [docker_cmd, 'version'],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        return result.returncode == 0
+    except Exception as e:
+        return False
+
+def get_running_containers_windows_safe():
+    """Windows-safe method to get running containers"""
+    docker_cmd = get_docker_command()
+    
+    # Try different command formats
+    command_variants = [
+        [docker_cmd, 'ps', '--format', '{{json .}}'],
+        [docker_cmd, 'ps', '-a', '--format', 'json'],
+        [docker_cmd, 'container', 'ls', '--format', '{{json .}}'],
+    ]
+    
+    for cmd in command_variants:
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                shell=(platform.system() == 'Windows')  # Use shell on Windows
+            )
+            if result.returncode == 0:
+                return parse_docker_output(result.stdout)
+        except Exception:
+            continue
+    
+    # If all variants fail, try wsl command on Windows
+    if platform.system() == 'Windows':
+        try:
+            result = subprocess.run(
+                ['wsl', 'docker', 'ps', '--format', '{{json .}}'],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if result.returncode == 0:
+                return parse_docker_output(result.stdout)
+        except Exception:
+            pass
+    
+    return []
+    ]]></code_example>
+  </solution>
+
+  <prevention>
+    <item>Always test Docker scripts on Windows environments before deployment</item>
+    <item>Include platform detection in Docker-related scripts</item>
+    <item>Implement multiple fallback strategies for Docker commands</item>
+    <item>Add explicit Docker availability checks before attempting operations</item>
+    <item>Consider using Docker Python SDK as alternative to subprocess calls</item>
+  </prevention>
+
+  <impact>
+    <item>False negatives in container detection preventing proper introspection</item>
+    <item>Inability to diagnose actual Docker container issues</item>
+    <item>Wasted time troubleshooting non-existent problems</item>
+  </impact>
+
+  <validation>
+    <test>Run updated introspection script on Windows with Docker Desktop</test>
+    <test>Verify containers are detected when Docker Desktop is running</test>
+    <test>Ensure graceful handling when Docker Desktop is stopped</test>
+  </validation>
+</learning>

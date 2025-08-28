@@ -1064,18 +1064,47 @@ class DatabaseManager:
                 }
             }
             
-            # Add ClickHouse if available
+            # CRITICAL FIX: Add ClickHouse with graceful failure handling
             try:
                 from netra_backend.app.db.clickhouse import get_clickhouse_client
-                clickhouse_client = get_clickhouse_client()
-                results["clickhouse"] = {
-                    "status": "available",
-                    "client_available": True
-                }
+                from netra_backend.app.core.isolated_environment import get_env
+                import asyncio
+                
+                environment = get_env().get("ENVIRONMENT", "development").lower()
+                clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+                
+                # Skip ClickHouse health check in optional environments unless required
+                if environment in ["staging", "development"] and not clickhouse_required:
+                    results["clickhouse"] = {
+                        "status": "skipped_optional",
+                        "client_available": True,
+                        "environment": environment,
+                        "required": clickhouse_required
+                    }
+                else:
+                    # Try to test ClickHouse connection with timeout
+                    try:
+                        async with asyncio.timeout(3.0):  # Fast timeout
+                            async with get_clickhouse_client() as client:
+                                await client.execute("SELECT 1")
+                        
+                        results["clickhouse"] = {
+                            "status": "connected",
+                            "client_available": True
+                        }
+                    except (asyncio.TimeoutError, Exception) as e:
+                        results["clickhouse"] = {
+                            "status": "connection_failed",
+                            "client_available": True,
+                            "error": str(e),
+                            "graceful_degradation": not clickhouse_required
+                        }
+                        
             except ImportError:
                 results["clickhouse"] = {
                     "status": "unavailable", 
-                    "client_available": False
+                    "client_available": False,
+                    "error": "ClickHouse module not available"
                 }
             
             return results
@@ -1659,12 +1688,37 @@ async def get_db_client():
 
 @asynccontextmanager  
 async def get_clickhouse_client():
-    """Context manager for getting ClickHouse client."""
+    """Context manager for getting ClickHouse client with graceful failure."""
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    environment = get_env().get("ENVIRONMENT", "development").lower()
+    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+    
     try:
         from netra_backend.app.db.clickhouse import get_clickhouse_client as _get_clickhouse_client
-        yield _get_clickhouse_client()
-    except ImportError:
-        raise RuntimeError("ClickHouse client not available")
+        
+        # CRITICAL FIX: In optional environments, don't fail hard on ClickHouse issues
+        if environment in ["staging", "development"] and not clickhouse_required:
+            try:
+                async with _get_clickhouse_client() as client:
+                    yield client
+            except Exception as e:
+                logger.warning(f"ClickHouse client unavailable in {environment} (optional service): {e}")
+                # Yield a mock client that does nothing
+                from netra_backend.app.db.clickhouse import MockClickHouseDatabase
+                yield MockClickHouseDatabase()
+        else:
+            async with _get_clickhouse_client() as client:
+                yield client
+                
+    except ImportError as e:
+        if environment in ["staging", "development"] and not clickhouse_required:
+            logger.warning(f"ClickHouse client not available in {environment} (optional service): {e}")
+            # Yield a mock client for graceful degradation
+            from netra_backend.app.db.clickhouse import MockClickHouseDatabase
+            yield MockClickHouseDatabase()
+        else:
+            raise RuntimeError("ClickHouse client not available") from e
 
 # CONSOLIDATED SUPPLY DATABASE MANAGER
 class SupplyDatabaseManager:

@@ -122,3 +122,5 @@ terraform-gcp/staging.tfplan
 project_dump.txt
 config/netra-staging-7a1059b7cf26.json
 test_reports/
+.serena/cache/python/document_symbols_cache_v23-06-25.pkl
+.serena/project.yml

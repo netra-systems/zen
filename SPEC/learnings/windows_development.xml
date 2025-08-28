@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+  <metadata>
+    <title>Windows Development Environment Learnings</title>
+    <description>Solutions and troubleshooting for Windows-specific development issues</description>
+    <created>2025-08-28</created>
+    <updated>2025-08-28</updated>
+    <category>windows</category>
+  </metadata>
+
+  <learning id="windows_port_8000_permission_fix" severity="critical" status="resolved">
+    <title>Windows Socket Permission Error on Port 8000</title>
+    <problem>
+      Backend service fails to bind to port 8000 with error:
+      "ERROR: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions"
+    </problem>
+    
+    <root_causes>
+      <cause>Process already using port 8000 (most common)</cause>
+      <cause>Windows firewall blocking port access</cause>
+      <cause>Orphaned processes from previous dev launcher runs</cause>
+      <cause>System-reserved ports (Windows dynamic port range - but 8000 is safe)</cause>
+      <cause>Insufficient privileges (rare, but possible)</cause>
+      <cause>Antivirus software blocking socket operations</cause>
+    </root_causes>
+
+    <solution>
+      <step>Use the Windows port fix script: `python scripts/fix_port_8000_windows.py`</step>
+      <step>Kill processes if needed: `python scripts/fix_port_8000_windows.py --kill-processes`</step>
+      <step>Create firewall rule if needed: `python scripts/fix_port_8000_windows.py --create-firewall-rule`</step>
+      <step>For stubborn issues: `python scripts/fix_port_8000_windows.py --force`</step>
+      <step>Test the fix: `python scripts/test_backend_port_binding.py`</step>
+    </solution>
+
+    <prevention>
+      <step>Always use dev launcher's graceful shutdown (Ctrl+C)</step>
+      <step>Avoid force-killing dev launcher processes</step>
+      <step>Run port cleanup script periodically if developing frequently</step>
+      <step>Use dynamic ports if static port conflicts persist: `python scripts/dev_launcher.py --dynamic`</step>
+    </prevention>
+
+    <tools_created>
+      <tool path="scripts/fix_port_8000_windows.py">Windows port permission error fix script</tool>
+      <tool path="scripts/test_backend_port_binding.py">Backend port binding test script</tool>
+    </tools_created>
+
+    <verification_commands>
+      <command>netstat -ano | findstr :8000</command>
+      <command>python scripts/fix_port_8000_windows.py</command>
+      <command>python scripts/test_backend_port_binding.py</command>
+    </verification_commands>
+
+    <fallback_solutions>
+      <solution>Use different backend port: `python scripts/dev_launcher.py --backend-port 8001`</solution>
+      <solution>Run as Administrator (last resort)</solution>
+      <solution>Restart computer to clear all stuck processes</solution>
+      <solution>Check Windows Defender/antivirus exclusions</solution>
+    </fallback_solutions>
+  </learning>
+
+  <learning id="windows_process_cleanup" severity="high" status="resolved">
+    <title>Windows Process Tree Cleanup</title>
+    <problem>
+      Dev launcher processes not properly cleaned up on Windows, leaving orphaned processes
+      that hold onto ports and resources.
+    </problem>
+
+    <solution>
+      <step>Dev launcher now uses WindowsProcessManager for enhanced process tree management</step>
+      <step>Uses taskkill /F /T for proper process tree termination</step>
+      <step>Includes zombie process cleanup</step>
+      <step>Port cleanup verification with retry logic</step>
+    </solution>
+
+    <implementation>
+      <file>dev_launcher/windows_process_manager.py</file>
+      <file>dev_launcher/launcher.py</file>
+      <method>_force_free_port_windows</method>
+      <method>_legacy_force_free_port_windows</method>
+    </implementation>
+  </learning>
+
+  <learning id="windows_dev_launcher_enhancements" severity="medium" status="resolved">
+    <title>Windows-Specific Dev Launcher Enhancements</title>
+    <problem>
+      Dev launcher needed Windows-specific optimizations for better stability and user experience.
+    </problem>
+
+    <improvements>
+      <improvement>Enhanced signal handling for Windows console events</improvement>
+      <improvement>Windows-specific troubleshooting information</improvement>
+      <improvement>UTF-8 encoding setup for Windows compatibility</improvement>
+      <improvement>Process tree management with taskkill</improvement>
+      <improvement>Port cleanup verification using netstat</improvement>
+      <improvement>Clear error messages with Windows-specific steps</improvement>
+    </improvements>
+
+    <implementation>
+      <file>dev_launcher/__main__.py</file>
+      <file>dev_launcher/launcher.py</file>
+      <file>dev_launcher/windows_process_manager.py</file>
+    </implementation>
+  </learning>
+
+  <best_practices>
+    <practice>Always run comprehensive port checks before binding</practice>
+    <practice>Use graceful shutdown mechanisms (signal handlers)</practice>
+    <practice>Implement platform-specific process management</practice>
+    <practice>Provide clear error messages with actionable steps</practice>
+    <practice>Create diagnostic and fix scripts for common issues</practice>
+    <practice>Test socket binding independently from full application startup</practice>
+  </best_practices>
+
+  <monitoring_and_diagnostics>
+    <command purpose="Check port usage">netstat -ano | findstr :8000</command>
+    <command purpose="List processes">tasklist | findstr "python uvicorn node"</command>
+    <command purpose="Kill process by PID">taskkill /F /T /PID [pid]</command>
+    <command purpose="Check firewall">netsh advfirewall firewall show rule name=all | findstr 8000</command>
+    <command purpose="Test port binding">python scripts/test_backend_port_binding.py</command>
+  </monitoring_and_diagnostics>
+
+  <related_specs>
+    <spec>SPEC/learnings/startup.xml</spec>
+    <spec>SPEC/learnings/dev_launcher.xml</spec>
+    <spec>SPEC/port_management.xml</spec>
+  </related_specs>
+</learning_document>

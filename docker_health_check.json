@@ -1,50 +1,40 @@
 {
-  "timestamp": 1756362246.3367312,
+  "timestamp": 1756389233.3874102,
   "results": [
     {
       "service": "netra-backend",
-      "status": "healthy",
-      "http": 200
+      "status": "not_running",
+      "error": "Container not found"
     },
     {
       "service": "netra-auth",
-      "status": "healthy",
-      "http": 200,
-      "warnings": [
-        "2025-08-28 06:22:08,374 - netra-service - auth_service.auth_core.services.auth_service - ERROR - Login failed: Invalid credentials provided",
-        "2025-08-28 06:22:08,374 - netra-service - auth_service.auth_core.routes.auth_routes - ERROR - Login failed for email: test-enterprise@unified-test.com"
-      ]
+      "status": "not_running",
+      "error": "Container not found"
     },
     {
       "service": "netra-frontend",
-      "status": "healthy",
-      "http": 200
+      "status": "not_running",
+      "error": "Container not found"
     },
     {
       "service": "netra-redis",
-      "status": "healthy"
+      "status": "not_running",
+      "error": "Container not found"
     },
     {
       "service": "netra-postgres",
-      "status": "healthy",
-      "warnings": [
-        "2025-08-28 05:58:54.148 UTC [64] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user",
-        "2025-08-28 05:58:57.661 UTC [64] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user",
-        "2025-08-28 05:59:06.630 UTC [64] ERROR:  insert or update on table \"agent_state_snapshots\" violates foreign key constraint \"agent_state_snapshots_user"
-      ]
+      "status": "not_running",
+      "error": "Container not found"
     },
     {
       "service": "netra-clickhouse",
-      "status": "healthy",
-      "http": 200,
-      "warnings": [
-        "Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log"
-      ]
+      "status": "not_running",
+      "error": "Container not found"
     }
   ],
   "summary": {
-    "healthy": 6,
+    "healthy": 0,
     "unhealthy": 0,
-    "warnings": 3
+    "warnings": 0
   }
 }

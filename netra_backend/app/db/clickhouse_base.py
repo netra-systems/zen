@@ -59,21 +59,58 @@ class ClickHouseDatabase:
         self._initialize_client_state()
     
     def _create_client_connection(self):
-        """Create ClickHouse client connection with timeouts."""
+        """Create ClickHouse client connection with environment-aware timeouts."""
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
+        # CRITICAL FIX: Use faster timeouts for optional environments to fail quickly
+        if environment in ["staging", "development"]:
+            connect_timeout = 3  # Fast connection timeout
+            receive_timeout = 5  # Fast receive timeout
+        else:
+            connect_timeout = 10  # Standard timeout for production
+            receive_timeout = 30  # Standard timeout for production
+        
         return clickhouse_connect.get_client(
             host=self.host, port=self.port, database=self.database,
             user=self.user, password=self.password, secure=self.secure,
-            connect_timeout=10, send_receive_timeout=30
+            connect_timeout=connect_timeout, send_receive_timeout=receive_timeout
         )
     
     def _establish_connection(self):
-        """Establish and test ClickHouse connection."""
+        """Establish and test ClickHouse connection with timeout protection."""
+        import time
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        
         try:
+            # CRITICAL FIX: Track connection time for better error reporting
+            start_time = time.time()
             self.client = self._create_client_connection()
+            
+            # Test connection with ping
             self.client.ping()
+            
+            connection_time = time.time() - start_time
+            if connection_time > 5.0:  # Log slow connections
+                from netra_backend.app.logging_config import central_logger
+                logger = central_logger.get_logger(__name__)
+                logger.warning(f"[ClickHouse] Slow connection established in {connection_time:.2f}s")
+                
         except Exception as e:
             self.client = None
-            raise ConnectionError(f"Could not connect to ClickHouse: {e}") from e
+            
+            # CRITICAL FIX: Enhanced error message with environment context
+            error_msg = f"Could not connect to ClickHouse in {environment} environment: {e}"
+            
+            # Check for specific timeout/connection errors
+            if any(keyword in str(e).lower() for keyword in ['timeout', 'refused', 'unreachable', 'network']):
+                if environment in ["staging", "development"]:
+                    error_msg += " (ClickHouse infrastructure may not be available in this environment)"
+            
+            raise ConnectionError(error_msg) from e
     
     def __init__(self, host: str, port: int, database: str, user: str, password: str, secure: bool = False):
         self._initialize_connection_params(host, port, database, user, password, secure)

@@ -143,8 +143,9 @@ class ConfigValidator:
 class ConfigFileWatcher(FileSystemEventHandler):
     """Watches configuration files for changes."""
     
-    def __init__(self, config_manager):
+    def __init__(self, config_manager, loop):
         self.config_manager = config_manager
+        self.loop = loop  # Store reference to the main event loop
         self.last_modified = {}
         
     def on_modified(self, event):
@@ -162,8 +163,11 @@ class ConfigFileWatcher(FileSystemEventHandler):
         
         self.last_modified[file_path] = current_time
         
-        # Trigger config reload
-        asyncio.create_task(self.config_manager.handle_file_change(file_path))
+        # Trigger config reload using run_coroutine_threadsafe since we're in a thread
+        asyncio.run_coroutine_threadsafe(
+            self.config_manager.handle_file_change(file_path), 
+            self.loop
+        )
 
 class ConfigManager:
     """Manages agent configuration with hot reload capabilities."""
@@ -176,6 +180,7 @@ class ConfigManager:
         self.file_watchers = {}
         self.config_observers = {}
         self.reload_callbacks = {}
+        self.loop = None  # Will be set when async context is available
         
     async def load_config(self, config_path: str) -> Optional[AgentConfig]:
         """Load configuration from file."""
@@ -225,13 +230,14 @@ class ConfigManager:
             if not config:
                 return False
             
-            # Store in Redis for fast access
-            config_key = f"agent_config:{agent_id}"
-            await self.redis_service.client.setex(
-                config_key, 
-                3600,  # 1 hour TTL
-                json.dumps(config.to_dict())
-            )
+            # Store in Redis for fast access (if Redis is available)
+            if self.redis_service.client is not None:
+                config_key = f"agent_config:{agent_id}"
+                await self.redis_service.client.setex(
+                    config_key, 
+                    3600,  # 1 hour TTL
+                    json.dumps(config.to_dict())
+                )
             
             # Store active config
             self.active_configs[agent_id] = config
@@ -251,7 +257,16 @@ class ConfigManager:
             config_dir = os.path.dirname(config_path)
             
             if agent_id not in self.config_observers:
-                event_handler = ConfigFileWatcher(self)
+                # Get the current event loop if not already stored
+                if self.loop is None:
+                    try:
+                        self.loop = asyncio.get_running_loop()
+                    except RuntimeError:
+                        # No running loop, we'll handle this gracefully
+                        logger.warning("No running event loop found for file watcher")
+                        return
+                
+                event_handler = ConfigFileWatcher(self, self.loop)
                 observer = Observer()
                 observer.schedule(event_handler, config_dir, recursive=False)
                 observer.start()
@@ -306,13 +321,14 @@ class ConfigManager:
             # Update active config
             self.active_configs[agent_id] = new_config
             
-            # Update Redis cache
-            config_key = f"agent_config:{agent_id}"
-            await self.redis_service.client.setex(
-                config_key,
-                3600,
-                json.dumps(new_config.to_dict())
-            )
+            # Update Redis cache (if Redis is available)
+            if self.redis_service.client is not None:
+                config_key = f"agent_config:{agent_id}"
+                await self.redis_service.client.setex(
+                    config_key,
+                    3600,
+                    json.dumps(new_config.to_dict())
+                )
             
             # Trigger callbacks
             await self.notify_config_change(agent_id, old_config, new_config)
@@ -352,15 +368,16 @@ class ConfigManager:
             if agent_id in self.active_configs:
                 return self.active_configs[agent_id]
             
-            # Fallback to Redis
-            config_key = f"agent_config:{agent_id}"
-            cached_data = await self.redis_service.client.get(config_key)
-            
-            if cached_data:
-                data = json.loads(cached_data)
-                config = AgentConfig.from_dict(data)
-                self.active_configs[agent_id] = config
-                return config
+            # Fallback to Redis (if Redis is available)
+            if self.redis_service.client is not None:
+                config_key = f"agent_config:{agent_id}"
+                cached_data = await self.redis_service.client.get(config_key)
+                
+                if cached_data:
+                    data = json.loads(cached_data)
+                    config = AgentConfig.from_dict(data)
+                    self.active_configs[agent_id] = config
+                    return config
             
             return None
             
@@ -434,7 +451,8 @@ class ConfigHotReloadManager:
         
     async def initialize_services(self):
         """Initialize required services."""
-        self.redis_service = RedisService()
+        # Use test mode for RedisService to handle TEST_DISABLE_REDIS=true
+        self.redis_service = RedisService(test_mode=True)
         await self.redis_service.initialize()
         
         self.event_bus = EventBus()
