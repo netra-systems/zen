@@ -43,7 +43,7 @@ class TestCompleteAgentWorkflow:
         
         with patch('netra_backend.app.websocket_core.utils.get_connection_monitor', return_value=mock_websocket_manager):
             with patch('netra_backend.app.core.unified.db_connection_manager.db_manager', mock_db_manager):
-                with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.ClickHouseClient') as mock_clickhouse:
+                with patch('netra_backend.app.db.clickhouse.ClickHouseService') as mock_clickhouse:
                     
                     mock_clickhouse_instance = Mock()
                     mock_clickhouse_instance.execute_query = AsyncMock(return_value=mock_clickhouse_result)

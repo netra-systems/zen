@@ -35,7 +35,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.clickhouse import ClickHouseClient
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,

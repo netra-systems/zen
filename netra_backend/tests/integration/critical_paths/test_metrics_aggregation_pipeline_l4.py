@@ -37,7 +37,7 @@ import pytest
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.clickhouse import ClickHouseClient
 
 # Mock metrics aggregation components for L4 testing
 class MetricsCollector:

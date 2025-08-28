@@ -36,7 +36,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.clickhouse import ClickHouseClient
 from netra_backend.app.db.models_agent import Message, Thread
 from netra_backend.app.db.models_user import User
 from netra_backend.app.db.postgres import async_session_factory as AsyncSessionLocal, get_async_db as get_async_session

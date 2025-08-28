@@ -520,7 +520,7 @@ class TestClickHouseService:
         """Test ClickHouse connection establishment."""
         # Test connection with mock
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_clickhouse_client') as mock_get_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             # Create a mock client that succeeds on test_connection
             mock_client = AsyncMock()
             mock_client.test_connection = AsyncMock()
