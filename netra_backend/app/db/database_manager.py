@@ -1045,16 +1045,21 @@ class DatabaseManager:
     async def get_async_session(name: str = "default"):
         """Get async database session with automatic cleanup.
         
-        CRITICAL FIX: Improved session lifecycle to prevent state errors.
-        Handles cleanup gracefully without causing IllegalStateChangeError.
+        CRITICAL FIX: Improved session lifecycle to prevent IllegalStateChangeError.
+        Uses proper session state checking to avoid concurrent operations.
         """
         async_session_factory = DatabaseManager.get_application_session()
         async with async_session_factory() as session:
+            session_yielded = False
             try:
+                session_yielded = True
                 yield session
-                # Only commit if session is active and not in an error state
-                if session.is_active and not session.in_transaction():
-                    await session.commit()
+                # CRITICAL FIX: Only attempt commit if session is properly active
+                # and has an active transaction to commit
+                if hasattr(session, 'is_active') and session.is_active:
+                    # Check if there's an active transaction to commit
+                    if hasattr(session, 'in_transaction') and session.in_transaction():
+                        await session.commit()
             except asyncio.CancelledError:
                 # Handle task cancellation - don't attempt any session operations
                 # The async context manager will handle cleanup
@@ -1064,9 +1069,16 @@ class DatabaseManager:
                 # Session context manager will handle cleanup
                 pass
             except Exception:
-                # Only rollback if session is still active
-                if session.is_active:
-                    await session.rollback()
+                # CRITICAL FIX: Only rollback if session is still in a valid state
+                # and has an active transaction
+                if (session_yielded and 
+                    hasattr(session, 'is_active') and session.is_active and
+                    hasattr(session, 'in_transaction') and session.in_transaction()):
+                    try:
+                        await session.rollback()
+                    except Exception:
+                        # If rollback fails, let the context manager handle cleanup
+                        pass
                 raise
     
     @staticmethod
