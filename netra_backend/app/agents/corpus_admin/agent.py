@@ -126,8 +126,12 @@ class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
     
     async def _execute_with_reliability_manager(self, context: ExecutionContext):
         """Execute with modern pattern using reliability manager."""
+        # Create async wrapper to avoid coroutine warning
+        async def execute_wrapper():
+            return await self.execution_engine.execute(self, context)
+        
         return await self.reliability_manager.execute_with_reliability(
-            context, lambda: self.execution_engine.execute(self, context)
+            context, execute_wrapper
         )
     
     async def _handle_execution_result(self, result, context: ExecutionContext) -> None:

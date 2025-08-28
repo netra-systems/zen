@@ -589,40 +589,40 @@ class UnifiedCircuitBreaker:
     def _get_metrics_dict(self) -> Dict[str, Any]:
         """Get metrics as dictionary."""
         return {
-            'total_calls': self.metrics.total_calls,
-            'successful_calls': self.metrics.successful_calls,
-            'failed_calls': self.metrics.failed_calls,
-            'rejected_calls': self.metrics.rejected_calls,
-            'timeouts': self.metrics.timeouts,
-            'state_changes': self.metrics.state_changes,
-            'consecutive_failures': self.metrics.consecutive_failures,
-            'consecutive_successes': self.metrics.consecutive_successes,
-            'current_error_rate': self.metrics.current_error_rate,
-            'average_response_time': self.metrics.average_response_time,
-            'slow_requests': self.metrics.slow_requests,
-            'adaptive_failure_threshold': self.metrics.adaptive_failure_threshold,
+            'total_calls': getattr(self.metrics, 'total_calls', 0),
+            'successful_calls': getattr(self.metrics, 'successful_calls', 0),
+            'failed_calls': getattr(self.metrics, 'failed_calls', 0),
+            'rejected_calls': getattr(self.metrics, 'rejected_calls', 0),
+            'timeouts': getattr(self.metrics, 'timeouts', 0),
+            'state_changes': getattr(self.metrics, 'state_changes', 0),
+            'consecutive_failures': getattr(self.metrics, 'consecutive_failures', 0),
+            'consecutive_successes': getattr(self.metrics, 'consecutive_successes', 0),
+            'current_error_rate': getattr(self.metrics, 'current_error_rate', 0.0),
+            'average_response_time': getattr(self.metrics, 'average_response_time', 0.0),
+            'slow_requests': getattr(self.metrics, 'slow_requests', 0),
+            'adaptive_failure_threshold': getattr(self.metrics, 'adaptive_failure_threshold', 5),
             'success_rate': self._calculate_success_rate(),
-            'failure_types': dict(self.metrics.failure_types)
+            'failure_types': dict(getattr(self.metrics, 'failure_types', {}))
         }
         
     def _get_config_dict(self) -> Dict[str, Any]:
         """Get configuration as dictionary."""
         return {
-            'failure_threshold': self.config.failure_threshold,
-            'recovery_timeout': self.config.recovery_timeout,
-            'timeout_seconds': self.config.timeout_seconds,
-            'sliding_window_size': self.config.sliding_window_size,
-            'error_rate_threshold': self.config.error_rate_threshold,
-            'adaptive_threshold': self.config.adaptive_threshold,
-            'slow_call_threshold': self.config.slow_call_threshold
+            'failure_threshold': getattr(self.config, 'failure_threshold', 5),
+            'recovery_timeout': getattr(self.config, 'recovery_timeout', 60.0),
+            'timeout_seconds': getattr(self.config, 'timeout_seconds', 30.0),
+            'sliding_window_size': getattr(self.config, 'sliding_window_size', 10),
+            'error_rate_threshold': getattr(self.config, 'error_rate_threshold', 0.5),
+            'adaptive_threshold': getattr(self.config, 'adaptive_threshold', False),
+            'slow_call_threshold': getattr(self.config, 'slow_call_threshold', 5.0)
         }
         
     def _get_health_dict(self) -> Dict[str, Any]:
         """Get health information as dictionary."""
         return {
             'has_health_checker': self.health_checker is not None,
-            'last_health_status': self.metrics.last_health_status,
-            'health_check_interval': self.config.health_check_interval
+            'last_health_status': getattr(self.metrics, 'last_health_status', None),
+            'health_check_interval': getattr(self.config, 'health_check_interval', 30.0)
         }
         
     def _calculate_success_rate(self) -> float:

@@ -29,11 +29,15 @@ router = APIRouter(prefix="/api/example-messages", tags=["example-messages"])
 async def example_message_websocket(websocket: WebSocket, user_id: str):
     """WebSocket endpoint for example message processing"""
     
+    # CRITICAL FIX: Accept WebSocket connection BEFORE any operations
+    # This prevents "WebSocket is not connected. Need to call 'accept' first" errors
+    await websocket.accept()
+    
     ws_manager = get_manager()
     handler = get_example_message_handler()
     
     try:
-        # Connect user to WebSocket
+        # Connect user to WebSocket (now safe after accept)
         connection_info = await ws_manager.connect_user(user_id, websocket)
         logger.info(f"Example message WebSocket connected for user {user_id}")
         

@@ -26,14 +26,15 @@ from netra_backend.app.agents.base.interface import (
 # Note: Import executor separately to avoid circular import
 # from app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMetrics, ExecutionMonitor
-from netra_backend.app.agents.base_agent import BaseSubAgent
+# Note: BaseSubAgent import moved to avoid circular dependency
+# Import BaseSubAgent directly where needed instead of through this module
 
 # Note: Import reliability separately to avoid circular import  
 # from app.agents.base.reliability import ReliabilityManager
 
 __all__ = [
-    # Backward compatibility
-    'BaseSubAgent',
+    # Backward compatibility - BaseSubAgent removed to avoid circular import
+    # Import BaseSubAgent directly from netra_backend.app.agents.base_agent where needed
     # New base execution interface
     'BaseExecutionInterface',
     'ExecutionContext', 

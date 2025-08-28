@@ -21,6 +21,9 @@ from netra_backend.app.llm.observability import generate_llm_correlation_id
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Agent import SubAgentLifecycle
 
+# Import timing components
+from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector
+
 
 class BaseSubAgent(
     AgentLifecycleMixin, 
@@ -44,6 +47,9 @@ class BaseSubAgent(
         self.logger = central_logger.get_logger(name)
         self.correlation_id = generate_llm_correlation_id()  # Unique ID for tracing
         self._subagent_logging_enabled = self._get_subagent_logging_enabled()
+        
+        # Initialize timing collector
+        self.timing_collector = ExecutionTimingCollector(agent_name=name)
 
     def _get_subagent_logging_enabled(self) -> bool:
         """Get subagent logging configuration setting."""
