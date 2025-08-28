@@ -179,6 +179,10 @@ class ClickHouseBillingHelper:
                                                 user_data: Dict, 
                                                 tier: PlanTier) -> Dict[str, Any]:
         """Create billing record and validate its integrity."""
+        # Ensure ClickHouse is connected
+        if not self.client.connected:
+            await self.client.connect()
+            
         # Create billing record
         billing_record = {
             "id": str(uuid.uuid4()),
@@ -219,6 +223,10 @@ class ClickHouseBillingHelper:
     
     async def verify_billing_record_retrieval(self, user_id: str) -> Dict[str, Any]:
         """Verify billing records can be retrieved correctly."""
+        # Ensure ClickHouse is connected
+        if not self.client.connected:
+            await self.client.connect()
+            
         # Query billing records
         records = await self.client.query_user_billing(user_id)
         
@@ -246,6 +254,10 @@ class ClickHouseBillingHelper:
     async def create_usage_record_for_billing(self, user_id: str, 
                                             tier: PlanTier) -> Dict[str, Any]:
         """Create usage record for billing analytics."""
+        # Ensure ClickHouse is connected
+        if not self.client.connected:
+            await self.client.connect()
+            
         usage_record = {
             "user_id": user_id,
             "tool_name": "test_agent_execution",

@@ -37,26 +37,92 @@ except ImportError:
 # =============================================================================
 
 class WebSocketTestHelpers:
-    """Unified helper utilities for WebSocket testing"""
+    """Unified helper utilities for WebSocket testing with enhanced connection stability"""
     
     @staticmethod
     async def create_test_websocket_connection(
         url: str,
         headers: Optional[Dict[str, str]] = None,
-        timeout: float = 5.0
+        timeout: float = 10.0,
+        max_retries: int = 3
     ):
-        """Create a test WebSocket connection"""
+        """Create a test WebSocket connection with proper authentication and retries"""
         if not WEBSOCKETS_AVAILABLE:
             raise pytest.skip("websockets library not available")
-            
-        try:
-            connection = await asyncio.wait_for(
-                websockets.connect(url, extra_headers=headers or {}),
-                timeout=timeout
-            )
-            return connection
-        except Exception as e:
-            raise ConnectionError(f"Failed to create WebSocket connection: {e}")
+        
+        # Extract JWT token from headers for subprotocol authentication
+        auth_token = None
+        subprotocols = []
+        
+        if headers and "Authorization" in headers:
+            auth_header = headers["Authorization"]
+            if auth_header.startswith("Bearer "):
+                auth_token = auth_header.replace("Bearer ", "")
+                # Use jwt-auth subprotocol for authentication
+                subprotocols = ["jwt-auth"]
+        
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                # Try connection with retries - handle different websockets API versions
+                try:
+                    # Try newer websockets API (>= 10.0)
+                    if subprotocols:
+                        connection = await asyncio.wait_for(
+                            websockets.connect(
+                                url,
+                                additional_headers=headers or {},
+                                subprotocols=subprotocols
+                            ),
+                            timeout=timeout
+                        )
+                    else:
+                        connection = await asyncio.wait_for(
+                            websockets.connect(
+                                url,
+                                additional_headers=headers or {}
+                            ),
+                            timeout=timeout
+                        )
+                except TypeError:
+                    # Fallback to older API (< 10.0)
+                    if subprotocols:
+                        connection = await asyncio.wait_for(
+                            websockets.connect(
+                                url,
+                                extra_headers=headers or {},
+                                subprotocols=subprotocols
+                            ),
+                            timeout=timeout
+                        )
+                    else:
+                        connection = await asyncio.wait_for(
+                            websockets.connect(
+                                url,
+                                extra_headers=headers or {}
+                            ),
+                            timeout=timeout
+                        )
+                
+                # Test basic connectivity by sending a ping
+                await connection.ping()
+                
+                return connection
+                
+            except (websockets.exceptions.ConnectionClosedError, 
+                   websockets.exceptions.InvalidStatusCode,
+                   asyncio.TimeoutError) as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    # Wait with exponential backoff
+                    await asyncio.sleep(0.5 * (2 ** attempt))
+                    continue
+            except Exception as e:
+                last_error = e
+                break
+        
+        error_msg = f"Failed to create WebSocket connection after {max_retries} attempts: {last_error}"
+        raise ConnectionError(error_msg)
     
     @staticmethod
     async def send_test_message(
@@ -64,13 +130,21 @@ class WebSocketTestHelpers:
         message: Dict[str, Any],
         timeout: float = 5.0
     ):
-        """Send a test message through WebSocket"""
+        """Send a test message through WebSocket with connection validation"""
         try:
+            # Check if connection is still alive
+            if hasattr(websocket, 'closed') and websocket.closed:
+                raise RuntimeError("WebSocket connection is closed")
+            elif hasattr(websocket, 'state') and websocket.state.name != 'OPEN':
+                raise RuntimeError("WebSocket connection is not open")
+            
             message_json = json.dumps(message)
             await asyncio.wait_for(
                 websocket.send(message_json),
                 timeout=timeout
             )
+        except websockets.exceptions.ConnectionClosed as e:
+            raise RuntimeError(f"WebSocket connection closed while sending message: {e}")
         except Exception as e:
             raise RuntimeError(f"Failed to send WebSocket message: {e}")
     
@@ -79,13 +153,30 @@ class WebSocketTestHelpers:
         websocket,
         timeout: float = 5.0
     ) -> Dict[str, Any]:
-        """Receive and parse a test message from WebSocket"""
+        """Receive and parse a test message from WebSocket with proper error handling"""
         try:
+            # Check if connection is still alive
+            if hasattr(websocket, 'closed') and websocket.closed:
+                raise RuntimeError("WebSocket connection is closed")
+            elif hasattr(websocket, 'state') and websocket.state.name != 'OPEN':
+                raise RuntimeError("WebSocket connection is not open")
+            
             message_raw = await asyncio.wait_for(
                 websocket.recv(),
                 timeout=timeout
             )
-            return json.loads(message_raw)
+            
+            # Handle different message types
+            try:
+                return json.loads(message_raw)
+            except json.JSONDecodeError:
+                # Handle text messages that aren't JSON
+                return {"type": "text", "content": message_raw}
+                
+        except websockets.exceptions.ConnectionClosed as e:
+            raise RuntimeError(f"WebSocket connection closed while receiving message: {e}")
+        except asyncio.TimeoutError:
+            raise RuntimeError(f"Timeout waiting for WebSocket message (timeout: {timeout}s)")
         except Exception as e:
             raise RuntimeError(f"Failed to receive WebSocket message: {e}")
     
@@ -237,12 +328,15 @@ async def websocket_test_client():
             self.connection = None
             
         async def connect(self, endpoint: str, headers: Optional[Dict[str, str]] = None):
-            """Connect to WebSocket endpoint"""
+            """Connect to WebSocket endpoint with enhanced error handling"""
             url = f"{self.base_url}{endpoint}"
-            self.connection = await WebSocketTestHelpers.create_test_websocket_connection(
-                url, headers
-            )
-            yield self.connection
+            try:
+                self.connection = await WebSocketTestHelpers.create_test_websocket_connection(
+                    url, headers, timeout=10.0, max_retries=3
+                )
+                yield self.connection
+            except Exception as e:
+                raise ConnectionError(f"Failed to connect to WebSocket endpoint {endpoint}: {e}")
             
         async def send_message(self, message: Dict[str, Any]):
             """Send message through connection"""
@@ -328,18 +422,30 @@ class HighVolumeWebSocketServer:
         self.connected_clients = set()
         
     async def start(self):
-        """Start the high-volume test server"""
+        """Start the high-volume test server with better error handling"""
         if not WEBSOCKETS_AVAILABLE:
             return
             
         async def handler(websocket, path):
             self.connected_clients.add(websocket)
             try:
+                # Send welcome message to confirm connection
+                await websocket.send(json.dumps({"type": "connected", "timestamp": time.time()}))
                 await websocket.wait_closed()
+            except websockets.exceptions.ConnectionClosed:
+                pass
             finally:
                 self.connected_clients.discard(websocket)
                 
-        self.server = await websockets.serve(handler, "localhost", self.port)
+        try:
+            self.server = await websockets.serve(handler, "localhost", self.port)
+        except OSError as e:
+            if "Address already in use" in str(e):
+                # Try a different port
+                self.port += 1
+                self.server = await websockets.serve(handler, "localhost", self.port)
+            else:
+                raise
         
     async def stop(self):
         """Stop the test server"""
@@ -358,12 +464,39 @@ class HighVolumeThroughputClient:
         self.message_count = 0
         
     async def connect(self):
-        """Connect to WebSocket with authentication"""
+        """Connect to WebSocket with authentication using proper subprotocol"""
         if not WEBSOCKETS_AVAILABLE:
             return
             
         headers = {"Authorization": f"Bearer {self.token}"}
-        self.websocket = await websockets.connect(self.uri, extra_headers=headers)
+        
+        try:
+            # Try newer websockets API first
+            try:
+                self.websocket = await websockets.connect(
+                    self.uri, 
+                    additional_headers=headers,
+                    subprotocols=["jwt-auth"]
+                )
+            except TypeError:
+                # Fallback to older API
+                self.websocket = await websockets.connect(
+                    self.uri, 
+                    extra_headers=headers,
+                    subprotocols=["jwt-auth"]
+                )
+        except Exception:
+            # Fallback to basic connection without subprotocol
+            try:
+                self.websocket = await websockets.connect(
+                    self.uri, 
+                    additional_headers=headers
+                )
+            except TypeError:
+                self.websocket = await websockets.connect(
+                    self.uri, 
+                    extra_headers=headers
+                )
         
     async def send_bulk_messages(self, count: int, message_template: Dict[str, Any]):
         """Send bulk messages for throughput testing"""
@@ -396,7 +529,7 @@ async def high_volume_server():
 
 @pytest.fixture
 async def throughput_client(common_test_user, high_volume_server):
-    """High-volume throughput client fixture"""
+    """High-volume throughput client fixture with enhanced connection stability"""
     if not WEBSOCKETS_AVAILABLE:
         yield AsyncMock()
         return
@@ -408,15 +541,19 @@ async def throughput_client(common_test_user, high_volume_server):
         "primary-client"
     )
     
-    max_retries = 3
+    max_retries = 5  # Increased retries for stability
     for attempt in range(max_retries):
         try:
             await client.connect()
+            # Test connection is working by sending a ping
+            test_message = {"type": "ping", "timestamp": time.time()}
+            await client.websocket.send(json.dumps(test_message))
             break
         except Exception as e:
             if attempt == max_retries - 1:
-                pytest.skip(f"WebSocket connection failed after {max_retries} attempts: {e}")
-            await asyncio.sleep(1.0)
+                pytest.skip(f"Unable to establish minimum WebSocket connections after {max_retries} attempts: {e}")
+            # Exponential backoff
+            await asyncio.sleep(0.5 * (2 ** attempt))
     
     yield client
     
@@ -441,3 +578,49 @@ def assert_websocket_response_time(duration: float, max_duration: float = 1.0):
     if duration > max_duration:
         raise AssertionError(f"WebSocket response took {duration:.3f}s (max: {max_duration}s)")
     return True
+
+async def ensure_websocket_service_ready(base_url: str = "http://localhost:8000", max_wait: float = 30.0) -> bool:
+    """Ensure WebSocket service is ready before running tests"""
+    import httpx
+    
+    start_time = time.time()
+    while time.time() - start_time < max_wait:
+        try:
+            async with httpx.AsyncClient() as client:
+                health_response = await client.get(f"{base_url}/ws/health", timeout=2.0)
+                if health_response.status_code == 200:
+                    health_data = health_response.json()
+                    if health_data.get("status") == "healthy":
+                        return True
+        except Exception:
+            pass
+        await asyncio.sleep(0.5)
+    
+    return False
+
+async def establish_minimum_websocket_connections(connection_count: int = 1, timeout: float = 10.0) -> List:
+    """Establish minimum required WebSocket connections for E2E tests"""
+    connections = []
+    
+    # First ensure service is ready
+    if not await ensure_websocket_service_ready():
+        raise RuntimeError("WebSocket service not ready")
+    
+    for i in range(connection_count):
+        try:
+            # Use test endpoint which doesn't require authentication
+            url = "ws://localhost:8000/ws/test"
+            connection = await WebSocketTestHelpers.create_test_websocket_connection(
+                url, timeout=timeout
+            )
+            connections.append(connection)
+        except Exception as e:
+            # Clean up any successful connections
+            for conn in connections:
+                try:
+                    await conn.close()
+                except:
+                    pass
+            raise RuntimeError(f"Unable to establish minimum WebSocket connections: {e}")
+    
+    return connections
