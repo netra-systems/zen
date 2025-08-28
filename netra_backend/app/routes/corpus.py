@@ -1,10 +1,11 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas
+from netra_backend.app.auth_integration import auth_interface
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.dependencies import get_db_session
 from netra_backend.app.services.clickhouse_service import clickhouse_service
@@ -280,4 +281,120 @@ async def extract_document_metadata(request: ExtractMetadataRequest, db: AsyncSe
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Metadata extraction failed: {str(e)}")
+
+class SymbolSearchRequest(BaseModel):
+    query: str
+    symbol_type: Optional[str] = None
+    corpus_id: str = "default"
+    limit: int = 50
+
+@router.get("/symbols/search")
+async def search_symbols(
+    q: str = Query(..., description="Symbol name or partial name to search"),
+    symbol_type: Optional[str] = Query(None, description="Filter by symbol type (class, function, method, etc.)"),
+    corpus_id: str = Query("default", description="Corpus ID to search in"),
+    limit: int = Query(50, le=100, description="Maximum results to return"),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user)
+):
+    """Search for symbols (functions, classes, methods) in indexed code files - Go to Symbol functionality"""
+    # Validate user through service layer
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
+    try:
+        # Get the corpus
+        db_corpus = corpus_service.get_corpus(db, corpus_id)
+        if not db_corpus:
+            raise HTTPException(status_code=404, detail=f"Corpus {corpus_id} not found")
+        
+        # Perform symbol search
+        from netra_backend.app.services.corpus.search_operations import SearchOperations
+        search_ops = SearchOperations()
+        symbols = await search_ops.search_symbols(db_corpus, q, symbol_type, limit)
+        
+        return {
+            "query": q,
+            "symbol_type": symbol_type,
+            "corpus_id": corpus_id,
+            "total": len(symbols),
+            "symbols": symbols
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Symbol search failed: {str(e)}")
+
+@router.post("/symbols/search")
+async def search_symbols_post(
+    request: SymbolSearchRequest,
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user)
+):
+    """Search for symbols with POST request - Go to Symbol functionality"""
+    # Validate user through service layer
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
+    try:
+        # Get the corpus
+        db_corpus = corpus_service.get_corpus(db, request.corpus_id)
+        if not db_corpus:
+            raise HTTPException(status_code=404, detail=f"Corpus {request.corpus_id} not found")
+        
+        # Perform symbol search
+        from netra_backend.app.services.corpus.search_operations import SearchOperations
+        search_ops = SearchOperations()
+        symbols = await search_ops.search_symbols(
+            db_corpus, request.query, request.symbol_type, request.limit
+        )
+        
+        return {
+            "query": request.query,
+            "symbol_type": request.symbol_type,
+            "corpus_id": request.corpus_id,
+            "total": len(symbols),
+            "symbols": symbols
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Symbol search failed: {str(e)}")
+
+@router.get("/{corpus_id}/document/{document_id}/symbols")
+async def get_document_symbols(
+    corpus_id: str,
+    document_id: str,
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user)
+):
+    """Get all symbols from a specific document"""
+    # Validate user through service layer
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
+    try:
+        # Get the corpus
+        db_corpus = corpus_service.get_corpus(db, corpus_id)
+        if not db_corpus:
+            raise HTTPException(status_code=404, detail=f"Corpus {corpus_id} not found")
+        
+        # Get symbols from document
+        from netra_backend.app.services.corpus.search_operations import SearchOperations
+        search_ops = SearchOperations()
+        symbols = await search_ops.get_document_symbols(db_corpus, document_id)
+        
+        return {
+            "corpus_id": corpus_id,
+            "document_id": document_id,
+            "total": len(symbols),
+            "symbols": symbols
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get document symbols: {str(e)}")
 
