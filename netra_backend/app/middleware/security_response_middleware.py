@@ -37,29 +37,44 @@ class SecurityResponseMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request and secure responses."""
-        # Debug logging to see if middleware is being called
-        logger.info(f"SecurityResponseMiddleware processing: {request.url.path}")
-        
-        # Call the next middleware/handler
-        response = await call_next(request)
-        
-        # Debug logging for response
-        logger.info(f"Response for {request.url.path}: status={response.status_code}, is_api={self._is_api_endpoint(request.url.path)}, has_auth={self._has_valid_auth(request)}")
-        
-        # Security check: convert 404/405 to 401 for unauthenticated API requests
-        if (response.status_code in [404, 405] and 
-            self._is_api_endpoint(request.url.path) and 
-            not self._has_valid_auth(request)):
+        try:
+            # CRITICAL FIX: Skip middleware for health checks to prevent startup blocking
+            if request.url.path in ["/health", "/health/live", "/health/ready"]:
+                return await call_next(request)
+                
+            # Debug logging to see if middleware is being called
+            logger.debug(f"SecurityResponseMiddleware processing: {request.url.path}")
             
-            logger.warning(f"Converting HTTP {response.status_code} to 401 for protected endpoint: {request.url.path}")
+            # CRITICAL FIX: Wrap call_next in try-catch to prevent async generator corruption
+            response = await call_next(request)
             
+            # Debug logging for response
+            logger.debug(f"Response for {request.url.path}: status={response.status_code}, is_api={self._is_api_endpoint(request.url.path)}, has_auth={self._has_valid_auth(request)}")
+            
+            # Security check: convert 404/405 to 401 for unauthenticated API requests
+            if (response.status_code in [404, 405] and 
+                self._is_api_endpoint(request.url.path) and 
+                not self._has_valid_auth(request)):
+                
+                logger.warning(f"Converting HTTP {response.status_code} to 401 for protected endpoint: {request.url.path}")
+                
+                return JSONResponse(
+                    status_code=401,
+                    content={"error": "authentication_failed", "message": "Authentication required"},
+                    headers={"WWW-Authenticate": "Bearer"}
+                )
+            
+            return response
+            
+        except Exception as e:
+            # CRITICAL FIX: Handle middleware exceptions gracefully to prevent async generator issues
+            logger.error(f"SecurityResponseMiddleware error for {request.url.path}: {e}")
+            
+            # Return a basic error response instead of letting the exception propagate
             return JSONResponse(
-                status_code=401,
-                content={"error": "authentication_failed", "message": "Authentication required"},
-                headers={"WWW-Authenticate": "Bearer"}
+                status_code=500,
+                content={"error": "internal_error", "message": "Security middleware error"}
             )
-        
-        return response
     
     def _is_api_endpoint(self, path: str) -> bool:
         """Check if path is an API endpoint that should be protected."""
