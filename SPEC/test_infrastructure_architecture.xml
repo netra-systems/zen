@@ -48,6 +48,7 @@
                 <item>Common fixtures and mocks</item>
                 <item>Test database factories</item>
                 <item>WebSocket test clients</item>
+                <item>MockRedisClient - Canonical Redis mock implementation</item>
                 <item>Authentication helpers</item>
             </contents>
         </component>
@@ -241,6 +242,33 @@ def isolated_test_env():
     env.reset_to_original()
                 </code>
             </implementation>
+        </pattern>
+
+        <pattern name="Canonical MockRedisClient Usage">
+            <description>SSOT-compliant Redis mock usage across all tests</description>
+            <implementation>
+                <code>
+# CORRECT - Import from canonical location
+from test_framework.mocks import MockRedisClient
+
+@pytest.fixture
+def mock_redis_client():
+    """Canonical Redis mock with full Redis API support"""
+    client = MockRedisClient()
+    # Provides: get, set, delete, incr, expire, ttl, keys, ping
+    # Supports: TTL expiration, failure simulation, operation tracking
+    return client
+
+# INCORRECT - Creating local MockRedisClient (SSOT violation)
+# class MockRedisClient:  # DELETE - use canonical version only
+                </code>
+            </implementation>
+            <requirements>
+                <requirement>All Redis mocks MUST import from test_framework.mocks</requirement>
+                <requirement>NO local MockRedisClient classes allowed</requirement>
+                <requirement>Canonical MockRedisClient supports all Redis operations needed</requirement>
+                <requirement>Use set_failure_mode() for error testing scenarios</requirement>
+            </requirements>
         </pattern>
 
         <pattern name="WebSocket Testing">

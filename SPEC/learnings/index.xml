@@ -19,7 +19,7 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
@@ -38,6 +38,10 @@
             <critical-takeaway>OAuth client ID must end with .apps.googleusercontent.com and be at least 50 characters - validate format not just presence (oauth_validation_requirements.xml).</critical-takeaway>
             <critical-takeaway>OAuth providers must implement self_check() and validate_configuration() methods for comprehensive health monitoring (oauth_provider_health.xml).</critical-takeaway>
             <critical-takeaway>/oauth/status endpoint provides runtime OAuth health monitoring - returns 503 if unhealthy in staging/production (oauth_monitoring.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: OAuth secrets MUST use standardized naming: google-oauth-client-id-staging, NOT google-client-id-staging (oauth_secret_naming_fix.xml).</critical-takeaway>
+            <critical-takeaway>ALWAYS use echo -n when creating secrets to avoid line endings that break validation (oauth_secret_naming_fix.xml).</critical-takeaway>
+            <critical-takeaway>CATASTROPHIC: Auth service MUST NEVER import from netra_backend - causes complete auth failure in staging/production (oauth_service_independence_violation.xml).</critical-takeaway>
+            <critical-takeaway>Service independence violations cause immediate logout after OAuth - auth service cannot access database/sessions (oauth_service_independence_violation.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
