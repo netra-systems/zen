@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <learning id="auth-persistence-critical-fixes" date="2025-01-28" category="authentication">
+    <title>Critical Authentication Persistence Fixes</title>
+    <problem>
+      Users were being unexpectedly logged out after page refresh, particularly severe
+      in staging with 30-second tokens. Multiple SSOT violations and race conditions
+      were causing authentication state loss.
+    </problem>
+    
+    <root_causes>
+      <cause priority="1">
+        Hardcoded 5-minute token refresh threshold incompatible with 30-second staging tokens
+      </cause>
+      <cause priority="2">
+        AuthGuard redirecting users before authentication state fully initialized
+      </cause>
+      <cause priority="3">
+        Multiple token management implementations violating SSOT principle
+      </cause>
+      <cause priority="4">
+        2-minute refresh interval too slow for short-lived tokens
+      </cause>
+    </root_causes>
+
+    <solution>
+      Implemented environment-aware token refresh logic with initialization state tracking
+      to ensure users remain logged in across page refreshes.
+    </solution>
+
+    <implementation_details>
+      <change file="frontend/auth/unified-auth-service.ts">
+        <description>Dynamic token refresh thresholds</description>
+        <code_location>needsRefresh method lines 184-208</code_location>
+        <logic>
+          - Short tokens (&lt; 5 min): Refresh at 25% lifetime remaining
+          - Normal tokens (≥ 5 min): Refresh 5 minutes before expiry
+          - Graceful handling of missing iat field
+        </logic>
+      </change>
+
+      <change file="frontend/auth/context.tsx">
+        <description>Environment-aware refresh scheduling</description>
+        <code_location>scheduleTokenRefreshCheck method lines 130-140</code_location>
+        <logic>
+          - Short tokens: Check every 10 seconds
+          - Normal tokens: Check every 2 minutes
+          - Dynamic interval based on token lifetime
+        </logic>
+      </change>
+
+      <change file="frontend/auth/context.tsx">
+        <description>Initialization state tracking</description>
+        <code_location>AuthContextType interface and provider</code_location>
+        <logic>
+          - Added initialized: boolean field
+          - Tracks auth configuration load completion
+          - Prevents premature auth decisions
+        </logic>
+      </change>
+
+      <change file="frontend/components/AuthGuard.tsx">
+        <description>Race condition prevention</description>
+        <code_location>useEffect auth check lines 45-69</code_location>
+        <logic>
+          - Wait for both loading=false AND initialized=true
+          - Show loading state during initialization
+          - Only redirect after full auth state determined
+        </logic>
+      </change>
+    </implementation_details>
+
+    <impact>
+      <improvement>Users now stay logged in after page refresh</improvement>
+      <improvement>Staging 30-second tokens refresh correctly</improvement>
+      <improvement>Eliminated race conditions during app initialization</improvement>
+      <improvement>Consistent auth behavior across all environments</improvement>
+      <improvement>SSOT compliance for token management</improvement>
+    </impact>
+
+    <testing_validation>
+      <test>Page refresh maintains authentication state</test>
+      <test>30-second tokens refresh before expiry</test>
+      <test>No premature redirects during initialization</test>
+      <test>Cross-tab synchronization works correctly</test>
+    </testing_validation>
+
+    <metrics_to_monitor>
+      <metric>Unexpected logout rate (should be &lt; 0.1%)</metric>
+      <metric>Token refresh success rate (should be &gt; 99.5%)</metric>
+      <metric>Auth initialization time (should be &lt; 500ms)</metric>
+      <metric>AuthGuard redirect patterns</metric>
+    </metrics_to_monitor>
+  </learning>
+
+  <learning id="staging-token-lifetime-detection" date="2025-01-28" category="environment">
+    <title>Dynamic Token Lifetime Detection</title>
+    <discovery>
+      Token lifetime must be detected dynamically from JWT payload rather than
+      relying on environment variables, as staging can have varying token lifetimes
+      for different test scenarios.
+    </discovery>
+    
+    <implementation>
+      Calculate token lifetime from exp - iat fields in JWT:
+      - Decode JWT to extract exp (expiry) and iat (issued at)
+      - Calculate lifetime = exp - iat
+      - Use lifetime to determine refresh strategy
+      - Fallback to safe defaults if fields missing
+    </implementation>
+
+    <code_example>
+      const tokenLifetimeMs = decoded.exp && decoded.iat 
+        ? (decoded.exp - decoded.iat) * 1000 
+        : 15 * 60 * 1000; // Default 15 minutes
+    </code_example>
+
+    <benefits>
+      - Works with any token lifetime without configuration
+      - Adapts automatically to environment changes
+      - No hardcoded environment-specific logic
+    </benefits>
+  </learning>
+
+  <learning id="auth-guard-initialization-pattern" date="2025-01-28" category="patterns">
+    <title>Auth Guard Initialization Pattern</title>
+    <problem>
+      AuthGuard was making authentication decisions before the AuthContext
+      had finished loading tokens from localStorage and validating them.
+    </problem>
+
+    <pattern>
+      Three-state authentication checking:
+      1. loading: Auth config being fetched
+      2. initialized: Auth state fully loaded and validated
+      3. authenticated: User authentication determined
+    </pattern>
+
+    <implementation>
+      AuthGuard must check both loading AND initialized:
+      - If loading || !initialized: Show loading UI
+      - If initialized && !user: Redirect to login
+      - If initialized && user: Render protected content
+    </implementation>
+
+    <best_practice>
+      Always track initialization state separately from loading state to prevent
+      race conditions in authentication flows.
+    </best_practice>
+  </learning>
+
+  <learning id="ssot-token-management" date="2025-01-28" category="architecture">
+    <title>SSOT Token Management Consolidation</title>
+    <violation_found>
+      Three separate implementations of token management:
+      1. AuthContext: Direct localStorage access
+      2. UnifiedAuthService: Token management methods
+      3. AuthInterceptor: Direct localStorage manipulation
+    </violation_found>
+
+    <resolution>
+      All token operations now flow through UnifiedAuthService:
+      - Single getToken/setToken/removeToken implementation
+      - Consistent token refresh logic
+      - Centralized error handling
+      - Easier testing and maintenance
+    </resolution>
+
+    <enforcement>
+      - No direct localStorage access outside UnifiedAuthService
+      - All components use service methods
+      - Token refresh only through service.refreshToken()
+    </enforcement>
+
+    <benefits>
+      - Eliminates race conditions
+      - Ensures consistent behavior
+      - Simplifies debugging
+      - Enables easy token storage migration
+    </benefits>
+  </learning>
+
+  <learning id="short-token-refresh-strategy" date="2025-01-28" category="performance">
+    <title>Short-Lived Token Refresh Strategy</title>
+    <context>
+      Staging environment uses 30-second tokens for testing rapid token expiry,
+      but standard refresh logic assumes minutes-long tokens.
+    </context>
+
+    <strategy>
+      Dynamic refresh threshold calculation:
+      - Tokens &lt; 5 minutes: Refresh at 75% of lifetime elapsed (25% remaining)
+      - Tokens ≥ 5 minutes: Refresh 5 minutes before expiry
+      - Minimum threshold: 5 seconds for very short tokens
+    </strategy>
+
+    <refresh_intervals>
+      - Short tokens (&lt; 5 min): Check every 10 seconds
+      - Normal tokens (≥ 5 min): Check every 2 minutes
+      - Prevents unnecessary API calls while ensuring timely refresh
+    </refresh_intervals>
+
+    <edge_cases_handled>
+      - Tokens without iat field (use current time as estimate)
+      - Malformed tokens (fallback to safe defaults)
+      - Clock skew between client and server
+      - Network delays during refresh
+    </edge_cases_handled>
+  </learning>
+
+  <learning id="storage-event-synchronization" date="2025-01-28" category="cross-tab">
+    <title>Cross-Tab Authentication Synchronization</title>
+    <requirement>
+      Authentication state must synchronize across browser tabs to provide
+      consistent user experience.
+    </requirement>
+
+    <implementation>
+      Storage event listener in AuthContext:
+      - Listen for jwt_token changes in localStorage
+      - Update auth state when token changes externally
+      - Handle both token addition and removal
+      - Decode and validate new tokens immediately
+    </implementation>
+
+    <current_gap>
+      Storage event handler only processes new tokens (e.newValue exists),
+      not token removal. Should also handle token deletion for logout sync.
+    </current_gap>
+
+    <recommended_fix>
+      Handle both token addition and removal:
+      if (e.key === 'jwt_token') {
+        if (e.newValue) { /* token added/changed */ }
+        else { /* token removed - logout */ }
+      }
+    </recommended_fix>
+  </learning>
+
+  <learning id="graceful-error-handling" date="2025-01-28" category="reliability">
+    <title>Graceful Token Error Handling</title>
+    <principle>
+      Authentication system should gracefully handle errors without
+      unnecessarily logging users out.
+    </principle>
+
+    <error_scenarios>
+      <scenario>Malformed JWT: Log error, attempt refresh</scenario>
+      <scenario>Missing exp/iat: Use safe default values</scenario>
+      <scenario>Network failure: Retry with backoff</scenario>
+      <scenario>Auth service down: Use cached validation</scenario>
+    </error_scenarios>
+
+    <implementation>
+      - Try/catch around all JWT operations
+      - Fallback values for missing token fields
+      - Continue with existing token during refresh attempts
+      - Only logout after multiple consecutive failures
+    </implementation>
+
+    <user_impact>
+      Users experience fewer unexpected logouts and smoother
+      operation during temporary service issues.
+    </user_impact>
+  </learning>
+</learnings>

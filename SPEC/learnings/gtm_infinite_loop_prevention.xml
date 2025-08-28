@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>GTM Infinite Loop Prevention and Circuit Breaker Implementation</title>
+    <category>frontend</category>
+    <subcategory>analytics</subcategory>
+    <tags>
+      <tag>gtm</tag>
+      <tag>circuit-breaker</tag>
+      <tag>infinite-loop</tag>
+      <tag>performance</tag>
+      <tag>auth</tag>
+    </tags>
+    <severity>critical</severity>
+    <date>2025-08-28</date>
+  </metadata>
+
+  <problem>
+    <description>
+      GTM events were causing infinite loops, particularly with auth_required events in AuthGuard component.
+      The issue manifested as 20,000+ GTM events being pushed to dataLayer, causing performance degradation
+      and potential browser crashes.
+    </description>
+    <root_cause>
+      AuthGuard component's useEffect was firing trackError('auth_required', ...) on every render when 
+      authentication failed. Each GTM event push could trigger re-renders, creating a feedback loop:
+      Auth check fails → Fire GTM event → Re-render → Auth check fails → Fire GTM event (infinite loop)
+    </root_cause>
+    <symptoms>
+      <symptom>Browser console showing thousands of GTM events</symptom>
+      <symptom>Performance degradation and high CPU usage</symptom>
+      <symptom>DataLayer array growing unbounded</symptom>
+      <symptom>Potential browser crashes from memory exhaustion</symptom>
+    </symptoms>
+  </problem>
+
+  <solution>
+    <approach>
+      Implemented a multi-layered defense strategy using circuit breaker pattern, event deduplication,
+      and component-level tracking to prevent infinite loops and excessive event firing.
+    </approach>
+    
+    <implementation>
+      <component path="frontend/lib/gtm-circuit-breaker.ts">
+        <description>
+          Created GTM-specific circuit breaker with:
+          - Event deduplication (2-second window)
+          - Rate limiting (100 events per type per minute)
+          - Circuit breaker pattern (trips after 50 failures in 10 seconds)
+          - Automatic recovery (30-second cooldown)
+          - Memory management (cleanup every minute)
+        </description>
+      </component>
+      
+      <component path="frontend/components/AuthGuard.tsx">
+        <description>
+          Added refs to track event firing state:
+          - hasReportedAuthFailure ref prevents duplicate auth_required events
+          - hasReportedPageView ref prevents duplicate page view events
+          - lastPathname ref tracks path changes
+          - Events only fire once per mount and path combination
+        </description>
+      </component>
+      
+      <component path="frontend/providers/GTMProvider.tsx">
+        <description>
+          Integrated circuit breaker into GTM provider:
+          - All events checked against circuit breaker before pushing
+          - Success/failure tracking for circuit state management
+          - Debug logging for blocked events
+        </description>
+      </component>
+    </implementation>
+  </solution>
+
+  <best_practices>
+    <practice>
+      Always implement circuit breakers for external integrations that can cause feedback loops
+    </practice>
+    <practice>
+      Use refs in React components to track if side effects have already been executed
+    </practice>
+    <practice>
+      Implement event deduplication for analytics to prevent duplicate tracking
+    </practice>
+    <practice>
+      Add rate limiting to prevent event spam even from legitimate sources
+    </practice>
+    <practice>
+      Include automatic recovery mechanisms in circuit breakers
+    </practice>
+    <practice>
+      Implement proper cleanup to prevent memory leaks in long-running applications
+    </practice>
+  </best_practices>
+
+  <testing>
+    <test_file>frontend/__tests__/gtm/gtm-circuit-breaker.test.ts</test_file>
+    <test_file>frontend/__tests__/gtm/gtm-infinite-loop-prevention.test.tsx</test_file>
+    <key_scenarios>
+      <scenario>Rapid auth failures should not create infinite loops</scenario>
+      <scenario>Duplicate events within deduplication window should be blocked</scenario>
+      <scenario>Rate limits should be enforced per event type</scenario>
+      <scenario>Circuit should trip after threshold failures</scenario>
+      <scenario>Circuit should auto-recover after timeout</scenario>
+    </key_scenarios>
+  </testing>
+
+  <monitoring>
+    <metric>GTM event count per minute</metric>
+    <metric>Circuit breaker trip frequency</metric>
+    <metric>Event deduplication rate</metric>
+    <metric>DataLayer array size</metric>
+    <alert>Alert if GTM events exceed 1000 per minute</alert>
+    <alert>Alert if circuit breaker trips more than 5 times per hour</alert>
+  </monitoring>
+
+  <related_issues>
+    <issue>React useEffect dependency arrays causing unnecessary re-renders</issue>
+    <issue>Analytics events firing multiple times for single user actions</issue>
+    <issue>Memory leaks from unbounded event tracking</issue>
+  </related_issues>
+
+  <prevention>
+    <guideline>
+      Review all useEffect hooks that fire analytics events for proper dependency management
+    </guideline>
+    <guideline>
+      Implement circuit breakers for all third-party integrations
+    </guideline>
+    <guideline>
+      Use event deduplication for all analytics tracking
+    </guideline>
+    <guideline>
+      Add rate limiting to prevent event storms
+    </guideline>
+    <guideline>
+      Monitor dataLayer size and implement cleanup strategies
+    </guideline>
+  </prevention>
+</learning>

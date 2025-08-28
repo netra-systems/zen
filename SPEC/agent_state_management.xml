@@ -1,0 +1,193 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <title>Agent State Management Specification</title>
+    <version>1.0</version>
+    <created>2025-08-28</created>
+    <purpose>Defines state management patterns and dependency handling for agent workflows</purpose>
+    <business_impact>Critical for agent reliability and graceful degradation in production environments</business_impact>
+  </metadata>
+  
+  <overview>
+    <description>
+      This specification defines how agents handle state dependencies, manage missing data,
+      and provide graceful degradation when prerequisite steps fail or data is incomplete.
+      The goal is to maximize system resilience while maintaining data integrity.
+    </description>
+    <key_principles>
+      <principle>Fail-safe defaults over hard failures</principle>
+      <principle>Graceful degradation with partial data</principle>
+      <principle>Clear dependency declaration</principle>
+      <principle>Progressive enhancement of results</principle>
+      <principle>Explicit error handling and recovery</principle>
+    </key_principles>
+  </overview>
+  
+  <state_dependencies>
+    <dependency_pattern name="Required Dependencies">
+      <description>
+        Critical dependencies that must be present for agent execution.
+        These are core to the agent's primary function.
+      </description>
+      <handling>
+        <on_missing>Attempt graceful degradation or use defaults</on_missing>
+        <validation>Check in validate_preconditions method</validation>
+        <error_type>ValidationError with clear message</error_type>
+      </handling>
+      <example agent="ActionsToMeetGoalsSubAgent">
+        <required>optimizations_result</required>
+        <required>data_result</required>
+      </example>
+    </dependency_pattern>
+    
+    <dependency_pattern name="Optional Dependencies">
+      <description>
+        Nice-to-have dependencies that enhance results but aren't critical.
+        Agent can function without these.
+      </description>
+      <handling>
+        <on_missing>Continue with reduced functionality</on_missing>
+        <validation>Check and log warning if missing</validation>
+        <error_type>None - continue execution</error_type>
+      </handling>
+      <example agent="ReportingSubAgent">
+        <optional>synthetic_data_result</optional>
+        <optional>supply_research_result</optional>
+      </example>
+    </dependency_pattern>
+  </state_dependencies>
+  
+  <graceful_degradation>
+    <strategy name="Partial State Handling">
+      <description>
+        When some but not all dependencies are present, agents should:
+        1. Use available data to provide best-effort results
+        2. Mark results as partial with metadata
+        3. Document which fields were used
+      </description>
+      <implementation>
+        <step>Check each dependency individually</step>
+        <step>Build prompt/logic with available data</step>
+        <step>Set partial_extraction flag in result</step>
+        <step>List extracted_fields in result metadata</step>
+      </implementation>
+    </strategy>
+    
+    <strategy name="Default Fallbacks">
+      <description>
+        Agents must provide sensible defaults when dependencies are missing
+      </description>
+      <defaults>
+        <default type="data_result">
+          Empty DataAnalysisResponse with message indicating no data available
+        </default>
+        <default type="optimizations_result">
+          Basic OptimizationsResult with generic recommendations
+        </default>
+        <default type="action_plan">
+          Minimal ActionPlanResult with manual review required flag
+        </default>
+      </defaults>
+    </strategy>
+  </graceful_degradation>
+  
+  <implementation_patterns>
+    <pattern name="Flexible Validation">
+      <code_example language="python">
+async def validate_preconditions(self, context: ExecutionContext) -> bool:
+    """Validate with graceful handling of missing state."""
+    state = context.state
+    missing_deps = []
+    
+    # Check dependencies individually
+    if not state.optimizations_result:
+        missing_deps.append("optimizations_result")
+    if not state.data_result:
+        missing_deps.append("data_result")
+    
+    # Allow partial execution with warnings
+    if missing_deps:
+        if len(missing_deps) == 2:
+            # Both missing - use defaults
+            logger.warning(f"Missing all dependencies: {missing_deps}. Using defaults.")
+            self._apply_default_state(state)
+        else:
+            # Partial missing - degrade gracefully
+            logger.warning(f"Missing partial dependencies: {missing_deps}. Degrading gracefully.")
+            self._apply_partial_defaults(state, missing_deps)
+    
+    return True  # Continue execution with available/default data
+      </code_example>
+    </pattern>
+    
+    <pattern name="Default State Application">
+      <code_example language="python">
+def _apply_default_state(self, state: DeepAgentState) -> None:
+    """Apply default values for missing state."""
+    if not state.optimizations_result:
+        state.optimizations_result = OptimizationsResult(
+            optimization_type="default",
+            recommendations=["Manual review required - no optimization data available"],
+            confidence_score=0.1
+        )
+    
+    if not state.data_result:
+        state.data_result = DataAnalysisResponse(
+            insights=["No data analysis available"],
+            trends=[],
+            anomalies=[],
+            recommendations=["Collect data for analysis"]
+        )
+      </code_example>
+    </pattern>
+    
+    <pattern name="Result Metadata">
+      <code_example language="python">
+def _mark_partial_result(self, result: ActionPlanResult, used_fields: List[str]) -> None:
+    """Mark result as partial with metadata about what was used."""
+    result.partial_extraction = True
+    result.extracted_fields = used_fields
+    if not result.error:
+        result.error = "Generated with partial data - some dependencies were missing"
+      </code_example>
+    </pattern>
+  </implementation_patterns>
+  
+  <testing_requirements>
+    <requirement>Test with all dependencies present</requirement>
+    <requirement>Test with each dependency missing individually</requirement>
+    <requirement>Test with all dependencies missing</requirement>
+    <requirement>Verify partial_extraction flag is set correctly</requirement>
+    <requirement>Verify extracted_fields list is accurate</requirement>
+    <requirement>Ensure no data corruption with partial state</requirement>
+  </testing_requirements>
+  
+  <migration_strategy>
+    <phase number="1">
+      <description>Add graceful degradation to critical agents</description>
+      <agents>
+        <agent>ActionsToMeetGoalsSubAgent</agent>
+        <agent>ReportingSubAgent</agent>
+        <agent>OptimizationsSubAgent</agent>
+      </agents>
+    </phase>
+    <phase number="2">
+      <description>Update all agents to use flexible validation</description>
+    </phase>
+    <phase number="3">
+      <description>Add comprehensive monitoring for partial executions</description>
+    </phase>
+  </migration_strategy>
+  
+  <monitoring>
+    <metric name="partial_execution_rate">
+      Percentage of agent executions with missing dependencies
+    </metric>
+    <metric name="default_fallback_usage">
+      Count of times default values were used
+    </metric>
+    <metric name="dependency_failure_patterns">
+      Track which dependencies fail most often
+    </metric>
+  </monitoring>
+</specification>

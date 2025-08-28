@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<auth_persistence_requirements>
+  <metadata>
+    <title>Authentication Persistence Requirements</title>
+    <version>1.0.0</version>
+    <last_updated>2025-01-28</last_updated>
+    <purpose>
+      Define clear requirements for maintaining user authentication state across
+      page refreshes and browser sessions, with special consideration for different
+      token lifetimes in various environments.
+    </purpose>
+    <business_value_justification>
+      <segment>All tiers (Free, Early, Mid, Enterprise)</segment>
+      <business_goal>Ensure seamless user experience with persistent authentication</business_goal>
+      <value_impact>Eliminates user frustration from unexpected logouts, improves retention</value_impact>
+      <strategic_impact>Critical for user satisfaction and platform adoption</strategic_impact>
+    </business_value_justification>
+  </metadata>
+
+  <core_requirements>
+    <requirement id="REQ-001" priority="CRITICAL">
+      <title>Default Session Persistence</title>
+      <description>
+        Users MUST remain logged in by default after page refresh unless there
+        is a valid security reason to log them out.
+      </description>
+      <acceptance_criteria>
+        <criterion>Token restored from localStorage on app initialization</criterion>
+        <criterion>Auth state preserved across page refreshes</criterion>
+        <criterion>No automatic logout without valid reason</criterion>
+      </acceptance_criteria>
+    </requirement>
+
+    <requirement id="REQ-002" priority="CRITICAL">
+      <title>Valid Logout Reasons</title>
+      <description>
+        Users should ONLY be logged out for specific, valid security reasons.
+      </description>
+      <valid_reasons>
+        <reason>User explicitly clicks logout</reason>
+        <reason>Token is revoked by server (blacklisted)</reason>
+        <reason>Token cannot be refreshed after multiple attempts</reason>
+        <reason>Security violation detected (suspicious activity)</reason>
+        <reason>Account disabled or deleted</reason>
+      </valid_reasons>
+      <invalid_reasons>
+        <reason>Page refresh or navigation</reason>
+        <reason>Temporary network interruption</reason>
+        <reason>Brief auth service unavailability</reason>
+        <reason>Token approaching expiry (should auto-refresh)</reason>
+      </invalid_reasons>
+    </requirement>
+
+    <requirement id="REQ-003" priority="HIGH">
+      <title>Environment-Aware Token Refresh</title>
+      <description>
+        Token refresh logic MUST adapt to different token lifetimes across environments.
+      </description>
+      <environments>
+        <environment name="development">
+          <token_lifetime>15 minutes or longer</token_lifetime>
+          <refresh_threshold>5 minutes before expiry</refresh_threshold>
+          <refresh_interval>Check every 2 minutes</refresh_interval>
+        </environment>
+        <environment name="staging">
+          <token_lifetime>30 seconds (for testing)</token_lifetime>
+          <refresh_threshold>25% of token lifetime</refresh_threshold>
+          <refresh_interval>Check every 10 seconds</refresh_interval>
+        </environment>
+        <environment name="production">
+          <token_lifetime>15 minutes or longer</token_lifetime>
+          <refresh_threshold>5 minutes before expiry</refresh_threshold>
+          <refresh_interval>Check every 2 minutes</refresh_interval>
+        </environment>
+      </environments>
+    </requirement>
+
+    <requirement id="REQ-004" priority="HIGH">
+      <title>Initialization State Management</title>
+      <description>
+        Authentication system MUST track initialization state to prevent
+        premature auth decisions and race conditions.
+      </description>
+      <states>
+        <state name="initializing">Auth context loading, token validation pending</state>
+        <state name="initialized">Auth state fully loaded and validated</state>
+        <state name="authenticated">User successfully authenticated</state>
+        <state name="unauthenticated">No valid authentication present</state>
+      </states>
+      <rules>
+        <rule>AuthGuard must wait for initialized=true before redirecting</rule>
+        <rule>Show loading state during initialization</rule>
+        <rule>No auth decisions until initialization complete</rule>
+      </rules>
+    </requirement>
+
+    <requirement id="REQ-005" priority="HIGH">
+      <title>SSOT Token Management</title>
+      <description>
+        All token operations MUST go through a single source of truth to
+        prevent inconsistencies and race conditions.
+      </description>
+      <implementation>
+        <component>UnifiedAuthService</component>
+        <operations>
+          <operation>getToken() - Retrieve token from storage</operation>
+          <operation>setToken(token) - Store token in storage</operation>
+          <operation>removeToken() - Clear token from storage</operation>
+          <operation>needsRefresh(token) - Check if refresh needed</operation>
+          <operation>refreshToken() - Perform token refresh</operation>
+        </operations>
+      </implementation>
+      <violations_to_avoid>
+        <violation>Direct localStorage access from multiple components</violation>
+        <violation>Duplicate token refresh implementations</violation>
+        <violation>Inconsistent token validation logic</violation>
+      </violations_to_avoid>
+    </requirement>
+  </core_requirements>
+
+  <implementation_guidelines>
+    <guideline id="GUIDE-001">
+      <title>Token Storage</title>
+      <best_practices>
+        <practice>Use localStorage for token persistence across sessions</practice>
+        <practice>Clear token only on explicit logout or security issues</practice>
+        <practice>Handle storage events for cross-tab synchronization</practice>
+      </best_practices>
+    </guideline>
+
+    <guideline id="GUIDE-002">
+      <title>Token Refresh Strategy</title>
+      <best_practices>
+        <practice>Calculate refresh threshold dynamically based on token lifetime</practice>
+        <practice>Start refresh before token expires to prevent interruption</practice>
+        <practice>Implement exponential backoff for refresh failures</practice>
+        <practice>Continue using existing token during refresh attempts</practice>
+      </best_practices>
+    </guideline>
+
+    <guideline id="GUIDE-003">
+      <title>AuthGuard Implementation</title>
+      <best_practices>
+        <practice>Check both loading and initialized states</practice>
+        <practice>Show loading UI during initialization</practice>
+        <practice>Only redirect after auth state fully determined</practice>
+        <practice>Provide callbacks for auth state changes</practice>
+      </best_practices>
+    </guideline>
+
+    <guideline id="GUIDE-004">
+      <title>Error Handling</title>
+      <best_practices>
+        <practice>Gracefully handle malformed tokens</practice>
+        <practice>Fallback to safe defaults when token info unavailable</practice>
+        <practice>Log errors without exposing sensitive information</practice>
+        <practice>Retry failed operations with backoff</practice>
+      </best_practices>
+    </guideline>
+  </implementation_guidelines>
+
+  <testing_requirements>
+    <test_scenario id="TEST-001">
+      <title>Page Refresh Persistence</title>
+      <steps>
+        <step>User logs in successfully</step>
+        <step>Refresh the page</step>
+        <step>Verify user remains logged in</step>
+        <step>Verify no redirect to login page</step>
+      </steps>
+    </test_scenario>
+
+    <test_scenario id="TEST-002">
+      <title>Short Token Refresh (Staging)</title>
+      <steps>
+        <step>Configure 30-second token lifetime</step>
+        <step>User logs in</step>
+        <step>Wait 20 seconds</step>
+        <step>Verify token refreshes automatically</step>
+        <step>Verify user stays logged in</step>
+      </steps>
+    </test_scenario>
+
+    <test_scenario id="TEST-003">
+      <title>Initialization Race Condition</title>
+      <steps>
+        <step>Slow down auth config fetch (add delay)</step>
+        <step>Load protected page directly via URL</step>
+        <step>Verify loading state shown</step>
+        <step>Verify no premature redirect</step>
+        <step>Verify correct redirect only after initialization</step>
+      </steps>
+    </test_scenario>
+
+    <test_scenario id="TEST-004">
+      <title>Cross-Tab Synchronization</title>
+      <steps>
+        <step>User logs in on Tab 1</step>
+        <step>Open Tab 2 to same app</step>
+        <step>Verify Tab 2 recognizes authentication</step>
+        <step>User logs out on Tab 1</step>
+        <step>Verify Tab 2 logs out automatically</step>
+      </steps>
+    </test_scenario>
+
+    <test_scenario id="TEST-005">
+      <title>Token Expiry Handling</title>
+      <steps>
+        <step>Configure very short token (10 seconds)</step>
+        <step>Disable token refresh</step>
+        <step>User logs in</step>
+        <step>Wait for token to expire</step>
+        <step>Verify graceful redirect to login</step>
+        <step>Verify appropriate error message</step>
+      </steps>
+    </test_scenario>
+  </testing_requirements>
+
+  <monitoring_and_metrics>
+    <metric name="unexpected_logouts">
+      <description>Count of users logged out without explicit action</description>
+      <target>< 0.1% of sessions</target>
+      <alert_threshold>> 1% of sessions</alert_threshold>
+    </metric>
+
+    <metric name="token_refresh_success_rate">
+      <description>Percentage of successful token refreshes</description>
+      <target>> 99.5%</target>
+      <alert_threshold>< 95%</alert_threshold>
+    </metric>
+
+    <metric name="auth_initialization_time">
+      <description>Time to complete auth initialization on app load</description>
+      <target>< 500ms</target>
+      <alert_threshold>> 2000ms</alert_threshold>
+    </metric>
+
+    <metric name="auth_guard_redirects">
+      <description>Count of AuthGuard redirects to login</description>
+      <tracking>Track reason for each redirect</tracking>
+      <analysis>Identify patterns in unexpected redirects</analysis>
+    </metric>
+  </monitoring_and_metrics>
+
+  <security_considerations>
+    <consideration id="SEC-001">
+      <title>Token Storage Security</title>
+      <risk>Tokens in localStorage are accessible to JavaScript</risk>
+      <mitigation>Use httpOnly cookies for highly sensitive environments</mitigation>
+      <mitigation>Implement token rotation on security events</mitigation>
+    </consideration>
+
+    <consideration id="SEC-002">
+      <title>Token Refresh Security</title>
+      <risk>Refresh tokens could be intercepted or misused</risk>
+      <mitigation>Use secure refresh token rotation</mitigation>
+      <mitigation>Implement refresh token blacklisting</mitigation>
+      <mitigation>Monitor for suspicious refresh patterns</mitigation>
+    </consideration>
+
+    <consideration id="SEC-003">
+      <title>Cross-Tab Security</title>
+      <risk>Malicious tabs could access authentication state</risk>
+      <mitigation>Validate origin of storage events</mitigation>
+      <mitigation>Implement tab-specific session validation</mitigation>
+    </consideration>
+  </security_considerations>
+
+  <compliance>
+    <standard name="OAuth 2.0">
+      Follow OAuth 2.0 best practices for token handling and refresh
+    </standard>
+    <standard name="JWT">
+      Properly validate JWT signatures and claims
+    </standard>
+    <standard name="OWASP">
+      Follow OWASP guidelines for authentication and session management
+    </standard>
+  </compliance>
+
+  <references>
+    <reference>SPEC/learnings/authentication_ssot.xml</reference>
+    <reference>SPEC/authentication_resilience.xml</reference>
+    <reference>frontend/auth/context.tsx</reference>
+    <reference>frontend/auth/unified-auth-service.ts</reference>
+    <reference>frontend/components/AuthGuard.tsx</reference>
+  </references>
+</auth_persistence_requirements>
