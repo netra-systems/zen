@@ -344,7 +344,10 @@ class AsyncDatabase:
                         result = await session.execute(query, params)
                     else:
                         result = await session.execute(query)
-                    await session.commit()
+                    # Only commit if session is active and has a transaction
+                    if hasattr(session, 'is_active') and session.is_active:
+                        if hasattr(session, 'in_transaction') and session.in_transaction():
+                            await session.commit()
                     return result
                     
             except Exception as e:

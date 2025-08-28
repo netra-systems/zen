@@ -7,6 +7,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Faster development and deployment cycles
 """
 
+import asyncio
 import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
@@ -58,11 +59,30 @@ class UnifiedPostgresDB:
         """DEPRECATED: Get database session via DatabaseManager."""
         session_factory = self._database_manager.get_application_session()
         async with session_factory() as session:
+            session_yielded = False
             try:
+                session_yielded = True
                 yield session
-                await session.commit()
+                # Only commit if session is active and has a transaction
+                if hasattr(session, 'is_active') and session.is_active:
+                    if hasattr(session, 'in_transaction') and session.in_transaction():
+                        await session.commit()
+            except asyncio.CancelledError:
+                # Handle task cancellation - let context manager handle cleanup
+                raise
+            except GeneratorExit:
+                # Handle generator cleanup - session context manager handles this
+                pass
             except Exception:
-                await session.rollback()
+                # Only rollback if session is in valid state with active transaction
+                if (session_yielded and 
+                    hasattr(session, 'is_active') and session.is_active and
+                    hasattr(session, 'in_transaction') and session.in_transaction()):
+                    try:
+                        await session.rollback()
+                    except Exception:
+                        # If rollback fails, let context manager handle cleanup
+                        pass
                 raise
     
     async def test_connection(self) -> bool:

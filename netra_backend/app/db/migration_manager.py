@@ -256,7 +256,10 @@ class SchemaVersionTracker:
                 metadata JSONB DEFAULT '{}'::jsonb
             )
         """))
-        await session.commit()
+        # Only commit if session is active and has a transaction
+        if hasattr(session, 'is_active') and session.is_active:
+            if hasattr(session, 'in_transaction') and session.in_transaction():
+                await session.commit()
     
     async def get_schema_version(self, component: str = "netra_backend") -> Optional[str]:
         """Get current schema version for component.
@@ -332,7 +335,10 @@ class SchemaVersionTracker:
                         "metadata": metadata or {}
                     })
                     
-                    await session.commit()
+                    # Only commit if session is active and has a transaction
+                    if hasattr(session, 'is_active') and session.is_active:
+                        if hasattr(session, 'in_transaction') and session.in_transaction():
+                            await session.commit()
                     logger.info(f"Set schema version for {component}: {version}")
                     return True
                     
