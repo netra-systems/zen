@@ -28,7 +28,7 @@ import asyncpg
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import redis.asyncio as redis
-from clickhouse_driver import Client as ClickHouseClient
+# Using canonical ClickHouse client
 from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
@@ -621,82 +621,67 @@ class DatabaseInitializer:
             logger.warning(f"Could not add all table indexes: {e}")
     
     async def _initialize_clickhouse_schema(self, config: DatabaseConfig) -> bool:
-        """Initialize ClickHouse schema and tables"""
+        """Initialize ClickHouse schema and tables using canonical client"""
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        
         try:
-            client = ClickHouseClient(
-                host=config.host,
-                port=config.port,
-                database=config.database,
-                user=config.user,
-                password=config.password,
-                connect_timeout=config.connection_timeout
-            )
-            
-            # Create database if it doesn't exist
-            client.execute(f"CREATE DATABASE IF NOT EXISTS {config.database}")
-            
-            # Switch to target database
-            client = ClickHouseClient(
-                host=config.host,
-                port=config.port,
-                database=config.database,
-                user=config.user,
-                password=config.password
-            )
-            
-            # Create schema version table
-            client.execute("""
-                CREATE TABLE IF NOT EXISTS schema_version (
-                    version String,
-                    applied_at DateTime DEFAULT now(),
-                    description String
-                ) ENGINE = MergeTree()
-                ORDER BY applied_at
-            """)
-            
-            # Create default tables
-            default_tables = [
-                """
-                CREATE TABLE IF NOT EXISTS events (
-                    event_id UUID,
-                    event_type String,
-                    timestamp DateTime,
-                    user_id Nullable(UUID),
-                    data String,
-                    INDEX idx_event_type event_type TYPE minmax GRANULARITY 4,
-                    INDEX idx_timestamp timestamp TYPE minmax GRANULARITY 4
-                ) ENGINE = MergeTree()
-                PARTITION BY toYYYYMM(timestamp)
-                ORDER BY (timestamp, event_id)
-                """,
-                """
-                CREATE TABLE IF NOT EXISTS metrics (
-                    metric_name String,
-                    timestamp DateTime,
-                    value Float64,
-                    tags Nested(
-                        key String,
-                        value String
-                    )
-                ) ENGINE = MergeTree()
-                PARTITION BY toYYYYMM(timestamp)
-                ORDER BY (metric_name, timestamp)
-                """
-            ]
-            
-            for table_sql in default_tables:
-                client.execute(table_sql)
-            
-            self.schema_versions[DatabaseType.CLICKHOUSE] = SchemaVersion(
-                current_version="1.0.0",
-                required_version="1.0.0",
-                migrations_pending=[],
-                last_migration="1.0.0",
-                status=SchemaStatus.UP_TO_DATE
-            )
-            
-            client.disconnect()
-            return True
+            async with get_clickhouse_client() as client:
+                # Create database if it doesn't exist
+                await client.execute(f"CREATE DATABASE IF NOT EXISTS {config.database}")
+                
+                # Create schema version table
+                await client.execute("""
+                    CREATE TABLE IF NOT EXISTS schema_version (
+                        version String,
+                        applied_at DateTime DEFAULT now(),
+                        description String
+                    ) ENGINE = MergeTree()
+                    ORDER BY applied_at
+                """)
+                
+                # Create default tables
+                default_tables = [
+                    """
+                    CREATE TABLE IF NOT EXISTS events (
+                        event_id UUID,
+                        event_type String,
+                        timestamp DateTime,
+                        user_id Nullable(UUID),
+                        data String,
+                        INDEX idx_event_type event_type TYPE minmax GRANULARITY 4,
+                        INDEX idx_timestamp timestamp TYPE minmax GRANULARITY 4
+                    ) ENGINE = MergeTree()
+                    PARTITION BY toYYYYMM(timestamp)
+                    ORDER BY (timestamp, event_id)
+                    """,
+                    """
+                    CREATE TABLE IF NOT EXISTS metrics (
+                        metric_name String,
+                        timestamp DateTime,
+                        value Float64,
+                        tags Nested(
+                            key String,
+                            value String
+                        )
+                    ) ENGINE = MergeTree()
+                    PARTITION BY toYYYYMM(timestamp)
+                    ORDER BY (metric_name, timestamp)
+                    """
+                ]
+                
+                for table_sql in default_tables:
+                    await client.execute(table_sql)
+                
+                self.schema_versions[DatabaseType.CLICKHOUSE] = SchemaVersion(
+                    current_version="1.0.0",
+                    required_version="1.0.0",
+                    migrations_pending=[],
+                    last_migration="1.0.0",
+                    status=SchemaStatus.UP_TO_DATE
+                )
+                
+                # Connection cleanup handled by context manager
+                return True
             
         except Exception as e:
             logger.error(f"ClickHouse schema initialization failed: {e}")
@@ -991,15 +976,12 @@ class DatabaseInitializer:
                 return True, details
                 
             elif db_type == DatabaseType.CLICKHOUSE:
-                client = ClickHouseClient(
-                    host=config.host,
-                    port=config.port,
-                    connect_timeout=5.0
-                )
-                version = client.execute("SELECT version()")[0][0]
-                client.disconnect()
-                details["version"] = version
-                return True, details
+                from netra_backend.app.db.clickhouse import get_clickhouse_client
+                async with get_clickhouse_client() as client:
+                    version_result = await client.execute("SELECT version()")
+                    version = version_result[0][0] if version_result else "unknown"
+                    details["version"] = version
+                    return True, details
                 
         except Exception as e:
             details["error"] = str(e)

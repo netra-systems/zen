@@ -22,7 +22,7 @@ from netra_backend.app.agents.base.interface import (
 )
 
 # Import focused helper modules
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_service
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import (
     PerformanceAnalyzer,
@@ -66,7 +66,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     def _init_helper_modules(self) -> None:
         """Initialize focused helper modules."""
-        self.clickhouse_client = ClickHouseClient()
+        self.clickhouse_client = get_clickhouse_service()
         self.schema_cache = SchemaCache()
         self.performance_analyzer = PerformanceAnalyzer(self.clickhouse_client)
         self.cost_optimizer = LLMCostOptimizer(self.clickhouse_client)

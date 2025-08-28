@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <title>ClickHouse Client Architecture - SSOT Compliance</title>
+  <version>1.0</version>
+  <date>2025-08-28</date>
+  <priority>CRITICAL</priority>
+  
+  <summary>
+    Defines the SINGLE canonical ClickHouse client implementation to enforce SSOT principles
+    and eliminate the current 4x duplication violation. This specification is mandatory for
+    all ClickHouse interactions within the netra_backend service.
+  </summary>
+  
+  <business_value_justification>
+    <segment>Platform/Internal</segment>
+    <business_goal>Platform Stability and Development Velocity</business_goal>
+    <value_impact>
+      - Reduces maintenance burden by 75% (4 implementations to 1)
+      - Eliminates bug propagation across duplicate implementations
+      - Ensures consistent behavior across all ClickHouse operations
+      - Reduces cognitive load for developers
+    </value_impact>
+    <strategic_impact>
+      Directly impacts platform reliability and reduces operational costs.
+      Essential for maintaining SSOT principles per CLAUDE.md Section 2.1.
+    </strategic_impact>
+  </business_value_justification>
+  
+  <canonical_implementation>
+    <location>/netra_backend/app/db/clickhouse.py</location>
+    <entry_point>get_clickhouse_client()</entry_point>
+    <rationale>
+      - Already the most integrated implementation (85+ references)
+      - Provides context manager pattern for proper resource management
+      - Has established environment detection logic
+      - Used by critical paths (WebSocket, monitoring, data agents)
+    </rationale>
+    
+    <required_features>
+      <!-- Core functionality that must be present -->
+      <feature>Connection pooling and management</feature>
+      <feature>SSL/TLS support with proper certificate handling</feature>
+      <feature>Retry logic with exponential backoff</feature>
+      <feature>Circuit breaker pattern for fault tolerance</feature>
+      <feature>Async/await support for concurrent operations</feature>
+      <feature>Query timeout management</feature>
+      <feature>Structured logging and metrics</feature>
+      <feature>Environment-aware configuration (dev/staging/prod)</feature>
+    </required_features>
+    
+    <prohibited_patterns>
+      <!-- Patterns that violate SSOT and must be removed -->
+      <pattern>
+        <name>Embedded Test Logic</name>
+        <examples>
+          - _simulate_* methods in production code
+          - MockClickHouseDatabase classes in production files
+          - if is_testing() branches modifying production behavior
+        </examples>
+      </pattern>
+      <pattern>
+        <name>Direct Client Instantiation</name>
+        <examples>
+          - ClickHouseClient() constructor calls
+          - ClickHouseDatabaseClient() instantiation
+          - Custom client classes per agent
+        </examples>
+      </pattern>
+      <pattern>
+        <name>Duplicate Client Implementations</name>
+        <examples>
+          - Multiple ClickHouse*Client classes
+          - Agent-specific ClickHouse clients
+          - Service-specific database connectors
+        </examples>
+      </pattern>
+    </prohibited_patterns>
+  </canonical_implementation>
+  
+  <usage_patterns>
+    <pattern>
+      <name>Standard Query Execution</name>
+      <code><![CDATA[
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+
+async def execute_query(query: str):
+    async with get_clickhouse_client() as client:
+        result = await client.execute(query)
+        return result
+      ]]></code>
+    </pattern>
+    
+    <pattern>
+      <name>Batch Operations</name>
+      <code><![CDATA[
+async def insert_batch(table: str, data: List[dict]):
+    async with get_clickhouse_client() as client:
+        await client.insert(table, data)
+      ]]></code>
+    </pattern>
+    
+    <pattern>
+      <name>Health Checks</name>
+      <code><![CDATA[
+async def check_clickhouse_health():
+    async with get_clickhouse_client() as client:
+        return await client.ping()
+      ]]></code>
+    </pattern>
+  </usage_patterns>
+  
+  <migration_requirements>
+    <requirement>
+      <id>MIG-001</id>
+      <description>Remove /netra_backend/app/db/clickhouse_client.py completely</description>
+      <impact>5 direct imports need updating</impact>
+    </requirement>
+    
+    <requirement>
+      <id>MIG-002</id>
+      <description>Remove /netra_backend/app/db/client_clickhouse.py completely</description>
+      <impact>13 direct imports need updating</impact>
+    </requirement>
+    
+    <requirement>
+      <id>MIG-003</id>
+      <description>Remove /netra_backend/app/agents/data_sub_agent/clickhouse_client.py</description>
+      <impact>3 agent imports need updating</impact>
+    </requirement>
+    
+    <requirement>
+      <id>MIG-004</id>
+      <description>Move all async methods from duplicates to canonical implementation</description>
+      <impact>Preserves functionality while maintaining SSOT</impact>
+    </requirement>
+    
+    <requirement>
+      <id>MIG-005</id>
+      <description>Extract all test logic to proper test fixtures</description>
+      <impact>Separates concerns and removes 150+ lines of test code from production</impact>
+    </requirement>
+  </migration_requirements>
+  
+  <compliance_checks>
+    <check>
+      <name>Single Implementation Check</name>
+      <script>scripts/check_architecture_compliance.py</script>
+      <validation><![CDATA[
+def check_clickhouse_ssot():
+    """Ensure only one ClickHouse client implementation exists."""
+    import glob
+    import re
+    
+    # Find all potential ClickHouse client files
+    client_files = glob.glob("**/clickhouse*.py", recursive=True)
+    
+    # Exclude test files and the canonical implementation
+    production_clients = []
+    for file in client_files:
+        if 'test' not in file.lower() and file != 'netra_backend/app/db/clickhouse.py':
+            with open(file, 'r') as f:
+                content = f.read()
+                # Check for client class definitions
+                if re.search(r'class\s+\w*ClickHouse\w*Client', content):
+                    production_clients.append(file)
+    
+    if production_clients:
+        raise ValueError(f"SSOT Violation: Multiple ClickHouse clients found: {production_clients}")
+    
+    return True
+      ]]></validation>
+    </check>
+    
+    <check>
+      <name>No Test Logic in Production</name>
+      <validation><![CDATA[
+def check_no_test_logic():
+    """Ensure no test/mock logic in production ClickHouse code."""
+    import re
+    
+    with open('netra_backend/app/db/clickhouse.py', 'r') as f:
+        content = f.read()
+        
+    forbidden_patterns = [
+        r'_simulate_\w+',
+        r'Mock\w*ClickHouse',
+        r'class\s+\w*Mock\w*',
+        r'# This is what gets mocked'
+    ]
+    
+    for pattern in forbidden_patterns:
+        if re.search(pattern, content):
+            raise ValueError(f"Test logic found in production: {pattern}")
+    
+    return True
+      ]]></validation>
+    </check>
+  </compliance_checks>
+  
+  <testing_strategy>
+    <principle>Use dependency injection for mocking, not embedded test logic</principle>
+    <principle>Test fixtures should live in test directories only</principle>
+    <principle>Mock at the get_clickhouse_client() level, not internal methods</principle>
+    
+    <test_location>/netra_backend/tests/fixtures/clickhouse_fixtures.py</test_location>
+    <mock_location>/netra_backend/tests/mocks/clickhouse_mock.py</mock_location>
+  </testing_strategy>
+  
+  <references>
+    <reference>CLAUDE.md Section 2.1 - Single Source of Truth (SSOT)</reference>
+    <reference>SPEC/type_safety.xml - No duplication principle</reference>
+    <reference>SPEC/testing.xml - Test isolation principles</reference>
+    <reference>clickhouse_audit_report_20250828.md - Original violation report</reference>
+  </references>
+  
+  <enforcement>
+    <pre_commit_hook>
+      Prevent creation of new ClickHouse client classes via pre-commit validation
+    </pre_commit_hook>
+    <ci_check>
+      Run check_clickhouse_ssot() in CI pipeline to catch violations
+    </ci_check>
+    <code_review>
+      Flag any PR that creates new database client implementations
+    </code_review>
+  </enforcement>
+</specification>

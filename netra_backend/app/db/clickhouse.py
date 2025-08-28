@@ -9,13 +9,87 @@ Business Value Justification (BVJ):
 - Revenue Impact: Enables data-driven pricing optimization (+$15K MRR)
 """
 
+import asyncio
+import hashlib
+import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.configuration import get_configuration
+from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.logging_config import central_logger as logger
+
+
+class ClickHouseCache:
+    """Simple cache for ClickHouse query results with TTL support."""
+    
+    def __init__(self, max_size: int = 500):
+        self.cache: Dict[str, Dict[str, Any]] = {}
+        self.max_size = max_size
+        self._hits = 0
+        self._misses = 0
+    
+    def _generate_key(self, query: str, params: Optional[Dict[str, Any]] = None) -> str:
+        """Generate cache key from query and parameters."""
+        query_hash = hashlib.md5(query.encode()).hexdigest()[:16]
+        if params:
+            params_str = str(sorted(params.items()))
+            params_hash = hashlib.md5(params_str.encode()).hexdigest()[:8]
+            return f"ch:{query_hash}:p:{params_hash}"
+        return f"ch:{query_hash}"
+    
+    def get(self, query: str, params: Optional[Dict[str, Any]] = None) -> Optional[List[Dict[str, Any]]]:
+        """Get cached result if not expired."""
+        key = self._generate_key(query, params)
+        entry = self.cache.get(key)
+        
+        if entry and time.time() < entry["expires_at"]:
+            self._hits += 1
+            logger.debug(f"ClickHouse cache hit for query: {query[:50]}...")
+            return entry["result"]
+        elif entry:
+            del self.cache[key]
+        
+        self._misses += 1
+        return None
+    
+    def set(self, query: str, result: List[Dict[str, Any]], params: Optional[Dict[str, Any]] = None, ttl: float = 300) -> None:
+        """Cache query result with TTL."""
+        if len(self.cache) >= self.max_size:
+            oldest_keys = sorted(self.cache.keys(), key=lambda k: self.cache[k]["created_at"])[:10]
+            for k in oldest_keys:
+                del self.cache[k]
+        
+        key = self._generate_key(query, params)
+        self.cache[key] = {
+            "result": result,
+            "created_at": time.time(),
+            "expires_at": time.time() + ttl
+        }
+        logger.debug(f"Cached ClickHouse result for query: {query[:50]}... (TTL: {ttl}s)")
+    
+    def stats(self) -> Dict[str, Any]:
+        """Get cache statistics."""
+        total = self._hits + self._misses
+        hit_rate = (self._hits / total) if total > 0 else 0
+        return {
+            "size": len(self.cache),
+            "hits": self._hits,
+            "misses": self._misses,
+            "hit_rate": hit_rate,
+            "max_size": self.max_size
+        }
+    
+    def clear(self) -> None:
+        """Clear cache."""
+        self.cache.clear()
+        logger.info("ClickHouse cache cleared")
+
+
+# Global cache instance
+_clickhouse_cache = ClickHouseCache()
 
 
 class MockClickHouseDatabase:
@@ -159,12 +233,8 @@ async def get_clickhouse_client():
         client_timeout = 10.0 if environment in ["staging", "development"] else 30.0
         
         try:
-            # Wrap the entire client creation in a timeout to prevent hanging
-            async def create_client_with_timeout():
-                async for client in _create_real_client():
-                    yield client
-            
-            async for client in asyncio.wait_for(create_client_with_timeout(), timeout=client_timeout):
+            # Create real client with timeout protection handled at a lower level
+            async for client in _create_real_client():
                 yield client
                 
         except (asyncio.TimeoutError, ConnectionError) as e:
@@ -322,7 +392,8 @@ async def _create_real_client():
 class ClickHouseService:
     """Service class for ClickHouse operations.
     
-    Provides high-level methods with clear real/mock distinction.
+    Provides high-level methods with clear real/mock distinction,
+    circuit breaker protection, retry logic, and caching.
     """
     
     def __init__(self, force_mock: bool = False):
@@ -333,6 +404,12 @@ class ClickHouseService:
         """
         self.force_mock = force_mock
         self._client = None
+        self._circuit_breaker = UnifiedCircuitBreaker(
+            name="clickhouse",
+            failure_threshold=5,
+            recovery_timeout=30
+        )
+        self._metrics = {"queries": 0, "failures": 0, "timeouts": 0}
     
     def _initialize_mock_client(self):
         """Initialize mock ClickHouse client."""
@@ -441,10 +518,44 @@ class ClickHouseService:
                 raise ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s") from e
     
     async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute query on ClickHouse."""
-        if not self._client:
-            await self.initialize()
-        return await self._client.execute(query, params)
+        """Execute query with circuit breaker protection and caching."""
+        # Check cache first for read queries
+        if query.lower().strip().startswith("select"):
+            cached_result = _clickhouse_cache.get(query, params)
+            if cached_result is not None:
+                return cached_result
+        
+        try:
+            self._metrics["queries"] += 1
+            result = await self._execute_with_circuit_breaker(query, params)
+            
+            # Cache successful read results
+            if query.lower().strip().startswith("select") and result:
+                _clickhouse_cache.set(query, result, params, ttl=300)
+            
+            return result
+        except Exception as e:
+            self._metrics["failures"] += 1
+            logger.error(f"ClickHouse query failed: {e}")
+            raise
+    
+    async def _execute_with_circuit_breaker(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Execute query with circuit breaker protection."""
+        async def _execute():
+            if not self._client:
+                await self.initialize()
+            return await self._client.execute(query, params)
+        
+        try:
+            return await self._circuit_breaker.call(_execute)
+        except Exception as e:
+            # Try to return cached data as fallback
+            if query.lower().strip().startswith("select"):
+                cached_result = _clickhouse_cache.get(query, params)
+                if cached_result is not None:
+                    logger.info("Returning cached data due to circuit breaker failure")
+                    return cached_result
+            raise
     
     async def close(self):
         """Close ClickHouse connection."""
@@ -468,6 +579,32 @@ class ClickHouseService:
                           timeout: Optional[float] = None, max_memory_usage: Optional[str] = None) -> List[Dict[str, Any]]:
         """Execute query with optional timeout and memory limits (alias for execute)."""
         return await self.execute(query, params)
+    
+    async def execute_with_retry(self, query: str, params: Optional[Dict[str, Any]] = None, max_retries: int = 2) -> List[Dict[str, Any]]:
+        """Execute query with retry logic for critical operations."""
+        last_exception = None
+        
+        for attempt in range(max_retries + 1):
+            try:
+                if attempt > 0:
+                    delay = min(2.0 * (2 ** (attempt - 1)), 8.0)  # Exponential backoff, max 8s
+                    logger.info(f"Retrying ClickHouse query (attempt {attempt + 1}/{max_retries + 1}) after {delay}s")
+                    await asyncio.sleep(delay)
+                
+                result = await self.execute(query, params)
+                
+                if attempt > 0:
+                    logger.info(f"ClickHouse query succeeded on attempt {attempt + 1}")
+                
+                return result
+                
+            except Exception as e:
+                last_exception = e
+                if attempt == max_retries:
+                    logger.error(f"ClickHouse query failed after {max_retries + 1} attempts")
+                    break
+        
+        raise last_exception
     
     async def batch_insert(self, table_name: str, data: List[Dict[str, Any]]) -> None:
         """Insert batch of data into ClickHouse table."""
@@ -509,8 +646,67 @@ class ClickHouseService:
     def is_real(self) -> bool:
         """Check if using real client."""
         return not self.is_mock and self._client is not None
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics."""
+        return _clickhouse_cache.stats()
+    
+    def clear_cache(self) -> None:
+        """Clear query cache."""
+        _clickhouse_cache.clear()
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get connection and query metrics."""
+        try:
+            cb_state = getattr(self._circuit_breaker, 'state', 'unknown')
+            cb_state_name = cb_state.name if hasattr(cb_state, 'name') else str(cb_state)
+        except:
+            cb_state_name = 'unknown'
+            
+        return {
+            "queries_executed": self._metrics["queries"],
+            "query_failures": self._metrics["failures"], 
+            "timeout_errors": self._metrics["timeouts"],
+            "circuit_breaker_state": cb_state_name,
+            "cache_stats": _clickhouse_cache.stats()
+        }
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """Comprehensive health check with circuit breaker status."""
+        try:
+            # Test basic connectivity
+            result = await self.execute("SELECT 1")
+            
+            return {
+                "status": "healthy",
+                "connectivity": "ok" if result else "degraded", 
+                "metrics": self.get_metrics(),
+                "cache_stats": _clickhouse_cache.stats()
+            }
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "error": str(e),
+                "metrics": self.get_metrics(),
+                "cache_stats": _clickhouse_cache.stats()
+            }
+    
+    async def check_health(self) -> Dict[str, Any]:
+        """Alias for health_check for backward compatibility."""
+        return await self.health_check()
 
 
-# Backward compatibility exports
-DisabledClickHouseDatabase = MockClickHouseDatabase  # Alias for compatibility
+# Global service instance for easy access
+_global_service = None
+
+def get_clickhouse_service() -> ClickHouseService:
+    """Get global ClickHouse service instance."""
+    global _global_service
+    if _global_service is None:
+        _global_service = ClickHouseService()
+    return _global_service
+
+# Backward compatibility exports (import from test fixtures when needed)
 ClickHouseManager = ClickHouseService  # Alias for test imports
+ClickHouseClient = ClickHouseService  # Alias for consolidation
+ClickHouseDatabaseClient = ClickHouseService  # Alias for consolidation

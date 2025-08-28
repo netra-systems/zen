@@ -8,8 +8,8 @@ Business Value: Critical for identifying 15-30% cost savings opportunities.
 
 from typing import TYPE_CHECKING
 
-# Helper modules for consolidated implementation
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+# Helper modules for consolidated implementation  
+from netra_backend.app.db.clickhouse import get_clickhouse_service
 
 # CONSOLIDATED IMPLEMENTATION - Primary export
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
@@ -49,7 +49,7 @@ except ImportError:
 __all__ = [
     # PRIMARY CONSOLIDATED IMPLEMENTATION
     'DataSubAgent',
-    'ClickHouseClient', 
+    'get_clickhouse_service', 
     'SchemaCache',
     'PerformanceAnalyzer',
     'LLMCostOptimizer',

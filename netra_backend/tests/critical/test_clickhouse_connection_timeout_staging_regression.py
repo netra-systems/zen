@@ -24,7 +24,7 @@ import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Dict, Any
 
-from netra_backend.app.db.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_service
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 
 
@@ -53,7 +53,7 @@ class TestClickHouseConnectionTimeoutRegression:
         }, clear=False):
             
             # Act & Assert - Connection should timeout in staging
-            client = ClickHouseClient()
+            client = get_clickhouse_service()
             
             # The fix should now properly handle ClickHouse connections
             try:
@@ -98,7 +98,7 @@ class TestClickHouseConnectionTimeoutRegression:
             mock_client_class.return_value = mock_client
             
             # Act - Attempt connection with retry expectation
-            client = ClickHouseClient()
+            client = get_clickhouse_service()
             
             # Test that retry logic exists and works properly
             try:
@@ -206,7 +206,7 @@ class TestClickHouseConnectionTimeoutRegression:
             mock_client_class.return_value = mock_client
             
             # Act - Try multiple connections (should trigger circuit breaker)
-            client = ClickHouseClient()
+            client = get_clickhouse_service()
             
             failure_count = 0
             for i in range(10):  # Try 10 connections
@@ -237,7 +237,7 @@ class TestClickHouseConnectionTimeoutRegression:
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
             
             # Act & Assert - Check connection pool settings
-            client = ClickHouseClient()
+            client = get_clickhouse_service()
             
             # Check for connection pool attributes
             pool_attributes = [
@@ -300,7 +300,7 @@ class TestClickHouseServiceCommunicationRegression:
         Root cause: Services wait indefinitely for ClickHouse responses.
         """
         # Arrange - Mock async ClickHouse client with timeout
-        with patch('netra_backend.app.db.clickhouse_client.ClickHouseClient') as mock_client_class:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_service') as mock_client_class:
             mock_client = AsyncMock()
             
             # Simulate timeout in service communication
@@ -332,7 +332,7 @@ class TestClickHouseServiceCommunicationRegression:
             
             # Act & Assert - Service should have fallback behavior
             try:
-                client = ClickHouseClient()
+                client = get_clickhouse_service()
                 
                 # Try to get metrics (should fallback to cache or return empty)
                 result = client.get_metrics_with_fallback("user_activity")
@@ -368,7 +368,7 @@ class TestClickHouseServiceCommunicationRegression:
             mock_client_class.return_value = mock_client
             
             # Act & Assert - Health check should timeout gracefully
-            client = ClickHouseClient()
+            client = get_clickhouse_service()
             
             # This should FAIL if health check timeout handling is missing
             try:

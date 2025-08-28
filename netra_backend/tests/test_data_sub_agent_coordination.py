@@ -10,7 +10,7 @@ import asyncio
 from unittest.mock import AsyncMock, patch, Mock
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 
 class TestDataSubAgentCoordination:

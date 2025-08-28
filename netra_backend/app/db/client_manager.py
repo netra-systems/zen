@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator, Dict
 
 from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.db.client_clickhouse import ClickHouseDatabaseClient
+from netra_backend.app.db.clickhouse import ClickHouseService
 from netra_backend.app.db.client_postgres import ResilientDatabaseClient
 
 
@@ -52,6 +52,6 @@ async def get_db_client() -> AsyncGenerator[ResilientDatabaseClient, None]:
 
 
 @asynccontextmanager
-async def get_clickhouse_client() -> AsyncGenerator[ClickHouseDatabaseClient, None]:
+async def get_clickhouse_client() -> AsyncGenerator[ClickHouseService, None]:
     """Context manager for getting ClickHouse client."""
     yield db_client_manager.clickhouse_client

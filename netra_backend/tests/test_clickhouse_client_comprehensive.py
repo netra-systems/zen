@@ -10,7 +10,7 @@ import asyncio
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch, Mock
 
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhouse_service
 
 
 class TestClickHouseClientComprehensive:
@@ -19,7 +19,7 @@ class TestClickHouseClientComprehensive:
     @pytest.fixture
     def client(self):
         """Create ClickHouse client for testing."""
-        return ClickHouseClient()
+        return get_clickhouse_service()
 
     @pytest.fixture
     def mock_clickhouse_client(self):

@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.core.health_types import HealthCheckResult
 

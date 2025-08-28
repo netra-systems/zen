@@ -342,15 +342,8 @@ class AnomalyDetail(BaseModel):
     description: Optional[str] = None
 
 
-class PerformanceMetrics(BaseModel):
-    """Performance metrics data."""
-    latency_p50: float = Field(ge=0.0)
-    latency_p95: float = Field(ge=0.0)
-    latency_p99: float = Field(ge=0.0)
-    throughput_avg: float = Field(ge=0.0)
-    throughput_peak: float = Field(ge=0.0)
-    error_rate: float = Field(ge=0.0, le=100.0)
-    availability: float = Field(ge=0.0, le=100.0, default=99.9)
+# PerformanceMetrics moved to shared.types.performance_metrics for SSOT compliance
+from shared.types.performance_metrics import PerformanceMetrics
 
 
 class CorrelationAnalysis(BaseModel):

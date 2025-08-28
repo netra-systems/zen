@@ -17,7 +17,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_service
 from test_framework.decorators import mock_justified
 
 # Test markers for unified test runner
@@ -28,13 +28,13 @@ pytestmark = [
 ]
 
 
-class TestClickHouseClientConnection:
+class TestClickHouseServiceConnection:
     """Test ClickHouse connection management."""
     
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return ClickHouseClient()
+        return get_clickhouse_service()
     
     @mock_justified("L1 Unit Test: Mocking ClickHouse client to test connection logic without external dependencies.", "L1")
     @pytest.mark.asyncio
@@ -120,13 +120,13 @@ class TestClickHouseClientConnection:
         assert status["using_shared_client"] is True
 
 
-class TestClickHouseClientQueryExecution:
+class TestClickHouseServiceQueryExecution:
     """Test query execution functionality."""
     
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return ClickHouseClient()
+        return get_clickhouse_service()
     
     @mock_justified("L1 Unit Test: Mocking ClickHouse client to test query execution without external dependencies.", "L1")
     @pytest.mark.asyncio
@@ -208,13 +208,13 @@ class TestClickHouseClientQueryExecution:
                 await clickhouse_client.execute_query(query)
 
 
-class TestClickHouseClientWorkloadMetrics:
+class TestClickHouseServiceWorkloadMetrics:
     """Test workload metrics retrieval."""
     
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        client = ClickHouseClient()
+        client = get_clickhouse_service()
         # Mock healthy status
         client._health_status = {
             "healthy": True,
@@ -292,13 +292,13 @@ class TestClickHouseClientWorkloadMetrics:
             assert "timestamp >= now() - INTERVAL 2 HOURS" in query_call
 
 
-class TestClickHouseClientCostBreakdown:
+class TestClickHouseServiceCostBreakdown:
     """Test cost breakdown functionality."""
     
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        client = ClickHouseClient()
+        client = get_clickhouse_service()
         # Mock healthy status
         client._health_status = {
             "healthy": True,
@@ -343,13 +343,13 @@ class TestClickHouseClientCostBreakdown:
             assert parameters == {}  # No parameters passed
 
 
-class TestClickHouseClientMockData:
+class TestClickHouseServiceMockData:
     """Test mock data functionality."""
     
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return ClickHouseClient()
+        return get_clickhouse_service()
     
     def test_mock_query_result_structure(self, clickhouse_client):
         """Test mock data structure matches expected format."""
@@ -375,13 +375,13 @@ class TestClickHouseClientMockData:
         assert isinstance(sample_record["throughput"], float)
 
 
-class TestClickHouseClientConnectionManagement:
+class TestClickHouseServiceConnectionManagement:
     """Test connection management and cleanup."""
     
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return ClickHouseClient()
+        return get_clickhouse_service()
     
     @mock_justified("L1 Unit Test: Testing connection test functionality without external dependencies.", "L1")
     @pytest.mark.asyncio
@@ -410,13 +410,13 @@ class TestClickHouseClientConnectionManagement:
         # No assertions needed since this is a no-op for shared client
 
 
-class TestClickHouseClientErrorHandling:
+class TestClickHouseServiceErrorHandling:
     """Test error handling in various scenarios."""
     
     @pytest.fixture
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
-        return ClickHouseClient()
+        return get_clickhouse_service()
     
     @mock_justified("L1 Unit Test: Mocking ClickHouse client to test error handling scenarios.", "L1")
     @pytest.mark.asyncio

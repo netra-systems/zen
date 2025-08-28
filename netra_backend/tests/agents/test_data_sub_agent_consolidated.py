@@ -25,7 +25,7 @@ from netra_backend.app.agents.base.interface import (
     ExecutionResult,
     ExecutionStatus,
 )
-from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.db.clickhouse import get_clickhouse_service
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
@@ -132,7 +132,7 @@ class TestDataSubAgentConsolidated:
     async def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
         """Create DataSubAgent instance for testing."""
         # Mock: Component isolation for testing without external dependencies
-        with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
+        with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.get_clickhouse_service') as mock_ch, \
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
@@ -469,12 +469,12 @@ class TestDataSubAgentConsolidated:
         # Verify trend analyzer was called
         data_sub_agent.performance_analyzer.analyze_trends.assert_called_once()
 
-class TestClickHouseClient:
+class TestClickHouseService:
     """Test ClickHouse client functionality."""
     
     @pytest.fixture
     def clickhouse_client(self):
-        return ClickHouseClient()
+        return get_clickhouse_service()
     
     @pytest.fixture
     def sample_workload_data(self) -> List[Dict[str, Any]]:

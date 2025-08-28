@@ -22,7 +22,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker, with_retry
-from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+# Using canonical ClickHouse client via get_clickhouse_client context manager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -94,7 +94,7 @@ class ReliableClickHouseManager:
     def __init__(self, connection_config: Dict[str, Any]):
         """Initialize reliable ClickHouse manager."""
         self.config = connection_config
-        self.real_client: Optional[ClickHouseDatabase] = None
+        self.real_client: Optional[Any] = None  # Will hold canonical ClickHouse client
         self.mock_client = MockClickHouseClient()
         self.circuit_breaker = AsyncCircuitBreaker(
             failure_threshold=5, timeout=60.0
@@ -139,18 +139,23 @@ class ReliableClickHouseManager:
     
     @with_retry(max_attempts=3, delay=1.0, backoff_factor=2.0)
     async def _attempt_real_connection(self) -> bool:
-        """Attempt to establish real ClickHouse connection."""
+        """Attempt to establish real ClickHouse connection using canonical client."""
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        
         try:
             async with asyncio.timeout(10.0):  # 10 second timeout
-                self.real_client = ClickHouseDatabase(**self.config)
-                await self.real_client.test_connection()
-                
-                self.metrics.health_status = ClickHouseHealth.HEALTHY
-                self.metrics.last_successful_connection = time.time()
-                self.metrics.connection_count += 1
-                
-                logger.info("Real ClickHouse connection established")
-                return True
+                # Use canonical ClickHouse client instead of direct instantiation
+                async with get_clickhouse_client() as client:
+                    await client.test_connection()
+                    # Store a reference for use in queries (but don't keep the context manager open)
+                    self.real_client = client
+                    
+                    self.metrics.health_status = ClickHouseHealth.HEALTHY
+                    self.metrics.last_successful_connection = time.time()
+                    self.metrics.connection_count += 1
+                    
+                    logger.info("Real ClickHouse connection established using canonical client")
+                    return True
                 
         except Exception as e:
             logger.warning(f"Real ClickHouse connection failed: {e}")
