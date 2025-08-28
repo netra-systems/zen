@@ -41,13 +41,6 @@ pytestmark = [
     pytest.mark.alerting
 ]
 
-class AlertSeverity(Enum):
-    """Alert severity levels."""
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-    CRITICAL = "critical"
-
 class NotificationChannel(Enum):
     """Notification delivery channels."""
     EMAIL = "email"
