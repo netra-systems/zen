@@ -1,0 +1,365 @@
+{
+  "generated_at": "2025-08-27T22:38:21.946865",
+  "agent_assignments": [
+    {
+      "agent_type": "general_remediation_agent",
+      "issue_type": "Warning condition",
+      "severity": "MEDIUM",
+      "issue_count": 9,
+      "affected_containers": [
+        "netra-auth",
+        "buildx_buildkit_staging-builder0"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-auth",
+          "container_id": "b437859c4843",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T05:31:46.503264739Z",
+          "line_number": 15,
+          "log_excerpt": "2025-08-28 05:31:46,502 - netra-service - auth_service.auth_core.config - WARNING - SERVICE_SECRET not configured for development environment",
+          "full_line": "2025-08-28T05:31:46.503264739Z 2025-08-28 05:31:46,502 - netra-service - auth_service.auth_core.config - WARNING - SERVICE_SECRET not configured for development environment"
+        },
+        {
+          "container": "netra-auth",
+          "container_id": "b437859c4843",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T05:31:46.503270055Z",
+          "line_number": 17,
+          "log_excerpt": "2025-08-28 05:31:46,502 - netra-service - auth_service.auth_core.config - WARNING - SERVICE_ID not configured for development environment",
+          "full_line": "2025-08-28T05:31:46.503270055Z 2025-08-28 05:31:46,502 - netra-service - auth_service.auth_core.config - WARNING - SERVICE_ID not configured for development environment"
+        },
+        {
+          "container": "netra-auth",
+          "container_id": "b437859c4843",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T05:33:16.820163238Z",
+          "line_number": 136,
+          "log_excerpt": "/app/auth_service/auth_core/core/jwt_handler.py:626: RuntimeWarning: coroutine 'JWTHandler._check_token_in_redis' was never awaited",
+          "full_line": "2025-08-28T05:33:16.820163238Z /app/auth_service/auth_core/core/jwt_handler.py:626: RuntimeWarning: coroutine 'JWTHandler._check_token_in_redis' was never awaited"
+        }
+      ]
+    },
+    {
+      "agent_type": "general_remediation_agent",
+      "issue_type": "Timeout error",
+      "severity": "HIGH",
+      "issue_count": 1,
+      "affected_containers": [
+        "netra-auth"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-auth",
+          "container_id": "b437859c4843",
+          "severity": "HIGH",
+          "issue_type": "Timeout error",
+          "pattern_matched": "timeout|timed out",
+          "timestamp": "2025-08-28T05:31:46.504147459Z",
+          "line_number": 29,
+          "log_excerpt": "2025-08-28 05:31:46,503 - netra-service - auth_service.auth_core.database.database_manager - INFO - Creating async engine for auth service with config: {'pool_size': 5, 'max_overflow': 10, 'pool_timeout': 30, 'pool_recycle': 3600, 'echo': False, 'future': True, 'poolclass': <class 'sqlalchemy.pool.impl.AsyncAdaptedQueuePool'>, 'connect_args': {'command_timeout': 15, 'server_settings': {'application_name': 'netra_auth_development'}}, 'pool_pre_ping': True}",
+          "full_line": "2025-08-28T05:31:46.504147459Z 2025-08-28 05:31:46,503 - netra-service - auth_service.auth_core.database.database_manager - INFO - Creating async engine for auth service with config: {'pool_size': 5, 'max_overflow': 10, 'pool_timeout': 30, 'pool_recycle': 3600, 'echo': False, 'future': True, 'poolclass': <class 'sqlalchemy.pool.impl.AsyncAdaptedQueuePool'>, 'connect_args': {'command_timeout': 15, 'server_settings': {'application_name': 'netra_auth_development'}}, 'pool_pre_ping': True}"
+        }
+      ]
+    },
+    {
+      "agent_type": "error_remediation_agent",
+      "issue_type": "Application error",
+      "severity": "HIGH",
+      "issue_count": 249,
+      "affected_containers": [
+        "netra-postgres",
+        "netra-clickhouse",
+        "netra-frontend",
+        "buildx_buildkit_staging-builder0",
+        "netra-auth"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-auth",
+          "container_id": "b437859c4843",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T05:33:16.820203910Z",
+          "line_number": 138,
+          "log_excerpt": "RuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+          "full_line": "2025-08-28T05:33:16.820203910Z RuntimeWarning: Enable tracemalloc to get the object allocation traceback"
+        },
+        {
+          "container": "netra-auth",
+          "container_id": "b437859c4843",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T05:33:16.820379588Z",
+          "line_number": 141,
+          "log_excerpt": "RuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+          "full_line": "2025-08-28T05:33:16.820379588Z RuntimeWarning: Enable tracemalloc to get the object allocation traceback"
+        },
+        {
+          "container": "netra-clickhouse",
+          "container_id": "8d8a510af300",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T03:29:46.477035609Z",
+          "line_number": 6,
+          "log_excerpt": "Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log",
+          "full_line": "2025-08-28T03:29:46.477035609Z Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log"
+        }
+      ]
+    },
+    {
+      "agent_type": "auth_remediation_agent",
+      "issue_type": "Authentication issue",
+      "severity": "HIGH",
+      "issue_count": 37,
+      "affected_containers": [
+        "netra-redis",
+        "netra-frontend",
+        "netra-postgres"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-frontend",
+          "container_id": "9e1470a957ac",
+          "severity": "HIGH",
+          "issue_type": "Authentication issue",
+          "pattern_matched": "authentication.*failed|unauthorized|403|401",
+          "timestamp": "2025-08-27T19:37:21.866403305Z",
+          "line_number": 140,
+          "log_excerpt": "GET /api/health 200 in 10ms",
+          "full_line": "2025-08-27T19:37:21.866403305Z  GET /api/health 200 in 10ms"
+        },
+        {
+          "container": "netra-frontend",
+          "container_id": "9e1470a957ac",
+          "severity": "HIGH",
+          "issue_type": "Authentication issue",
+          "pattern_matched": "authentication.*failed|unauthorized|403|401",
+          "timestamp": "2025-08-27T19:47:53.303564403Z",
+          "line_number": 161,
+          "log_excerpt": "GET /api/health 200 in 12ms",
+          "full_line": "2025-08-27T19:47:53.303564403Z  GET /api/health 200 in 12ms"
+        },
+        {
+          "container": "netra-frontend",
+          "container_id": "9e1470a957ac",
+          "severity": "HIGH",
+          "issue_type": "Authentication issue",
+          "pattern_matched": "authentication.*failed|unauthorized|403|401",
+          "timestamp": "2025-08-27T19:52:20.540300429Z",
+          "line_number": 294,
+          "log_excerpt": "[2025-08-27T19:52:20.539Z] DEBUG: Automated cleanup started undefined",
+          "full_line": "2025-08-27T19:52:20.540300429Z [2025-08-27T19:52:20.539Z] DEBUG: Automated cleanup started undefined"
+        }
+      ]
+    },
+    {
+      "agent_type": "config_remediation_agent",
+      "issue_type": "Configuration error",
+      "severity": "HIGH",
+      "issue_count": 2,
+      "affected_containers": [
+        "netra-frontend"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-frontend",
+          "container_id": "9e1470a957ac",
+          "severity": "HIGH",
+          "issue_type": "Configuration error",
+          "pattern_matched": "invalid.*config|configuration.*error",
+          "timestamp": "2025-08-27T18:55:34.926869708Z",
+          "line_number": 1558,
+          "log_excerpt": "\u00e2\u0161\u00a0 Invalid next.config.ts options detected: ",
+          "full_line": "2025-08-27T18:55:34.926869708Z  \u00e2\u0161\u00a0 Invalid next.config.ts options detected: "
+        },
+        {
+          "container": "netra-frontend",
+          "container_id": "9e1470a957ac",
+          "severity": "HIGH",
+          "issue_type": "Configuration error",
+          "pattern_matched": "invalid.*config|configuration.*error",
+          "timestamp": "2025-08-27T18:55:34.927265533Z",
+          "line_number": 1560,
+          "log_excerpt": "\u00e2\u0161\u00a0 See more info here: https://nextjs.org/docs/messages/invalid-next-config",
+          "full_line": "2025-08-27T18:55:34.927265533Z  \u00e2\u0161\u00a0 See more info here: https://nextjs.org/docs/messages/invalid-next-config"
+        }
+      ]
+    },
+    {
+      "agent_type": "database_remediation_agent",
+      "issue_type": "Database connectivity issue",
+      "severity": "CRITICAL",
+      "issue_count": 1,
+      "affected_containers": [
+        "netra-postgres"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-postgres",
+          "container_id": "f8d1be5622f4",
+          "severity": "CRITICAL",
+          "issue_type": "Database connectivity issue",
+          "pattern_matched": "database.*down|database.*failed",
+          "timestamp": "2025-08-27T18:55:22.230368419Z",
+          "line_number": 9,
+          "log_excerpt": "2025-08-27 18:55:22.230 UTC [29] LOG:  database system was not properly shut down; automatic recovery in progress",
+          "full_line": "2025-08-27T18:55:22.230368419Z 2025-08-27 18:55:22.230 UTC [29] LOG:  database system was not properly shut down; automatic recovery in progress"
+        }
+      ]
+    }
+  ],
+  "immediate_actions": [
+    {
+      "action": "IMMEDIATE_REMEDIATION",
+      "container": "netra-postgres",
+      "issue": "Database connectivity issue",
+      "timestamp": "2025-08-27T18:55:22.230368419Z",
+      "assigned_agent": "database_remediation_agent"
+    }
+  ],
+  "scheduled_tasks": [
+    {
+      "priority": "HIGH",
+      "container": "netra-auth",
+      "issue": "Timeout error",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-auth",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-auth",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-clickhouse",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-frontend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-frontend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-frontend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-frontend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-frontend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-frontend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-27T22:43:21.946865",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-auth",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-auth",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-auth",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-auth",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-auth",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-auth",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "buildx_buildkit_staging-builder0",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "buildx_buildkit_staging-builder0",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "buildx_buildkit_staging-builder0",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-27T23:08:21.946865",
+      "assigned_agent": "general_remediation_agent"
+    }
+  ]
+}

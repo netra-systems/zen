@@ -18,6 +18,7 @@ import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { validateThreadId } from '@/services/urlSyncService';
 import { motion } from 'framer-motion';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { AuthGuard } from '@/components/AuthGuard';
 
 /**
  * Thread page props from Next.js dynamic routing
@@ -61,7 +62,11 @@ const ThreadPage: React.FC<ThreadPageProps> = ({ params }) => {
     return createErrorView(errorMessage, router);
   }
   
-  return <MainChat />;
+  return (
+    <AuthGuard>
+      <MainChat />
+    </AuthGuard>
+  );
 };
 
 /**

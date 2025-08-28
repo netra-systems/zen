@@ -8,6 +8,7 @@ import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
+import { useGTMEvent } from '@/hooks/useGTMEvent';
 export interface AuthContextType {
   user: User | null;
   login: () => Promise<void> | void;
@@ -32,6 +33,9 @@ export function useAuth(): AuthContextType {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // GTM event tracking
+  const { trackLogin, trackLogout, trackOAuthComplete, trackError } = useGTMEvent();
+  
   // Initialize token from localStorage immediately on mount
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -208,6 +212,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             syncAuthStore(decodedUser, devLoginResponse.access_token);
             // Start automatic token refresh cycle
             scheduleTokenRefreshCheck(devLoginResponse.access_token);
+            // Track successful auto-login
+            trackLogin('email', false);
           }
         } else {
           logger.info('Skipping auto dev login - user has logged out', {
@@ -303,18 +309,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Clear dev logout flag when user manually logs in
         unifiedAuthService.clearDevLogoutFlag();
         unifiedAuthService.handleLogin(authConfig);
+        // Track login attempt (OAuth flow will be tracked separately)
+        trackLogin('oauth', false);
       }
     } catch (error) {
       logger.error('Login error in AuthContext', error as Error, {
         component: 'AuthContext',
         action: 'login_error'
       });
+      // Track login error
+      trackError('auth_login_error', error instanceof Error ? error.message : 'Login failed', 'AuthContext', false);
       throw error; // Re-throw so components can catch it
     }
   };
 
   const logout = async () => {
     if (authConfig) {
+      // Track logout event
+      trackLogout();
       // Set dev logout flag in development mode
       if (authConfig.development_mode) {
         unifiedAuthService.setDevLogoutFlag();

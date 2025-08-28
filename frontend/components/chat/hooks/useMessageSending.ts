@@ -8,6 +8,7 @@ import { generateUniqueId } from '@/lib/utils';
 import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../types';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
 import { logger } from '@/utils/debug-logger';
+import { useGTMEvent } from '@/hooks/useGTMEvent';
 
 const { CHAR_LIMIT } = MESSAGE_INPUT_CONSTANTS;
 
@@ -23,6 +24,7 @@ export const useMessageSending = () => {
     messages 
   } = useUnifiedChatStore();
   const { setCurrentThread, addThread } = useThreadStore();
+  const { trackChatStarted, trackMessageSent, trackThreadCreated, trackError, trackAgentActivated } = useGTMEvent();
 
   const validateMessage = (params: MessageSendingParams): boolean => {
     const { message, isAuthenticated } = params;
@@ -43,6 +45,9 @@ export const useMessageSending = () => {
     addThread(newThread);
     setCurrentThread(newThread.id);
     setActiveThread(newThread.id);
+    // Track thread creation
+    trackThreadCreated(newThread.id);
+    trackChatStarted(newThread.id);
     return newThread.id;
   };
 
@@ -81,6 +86,8 @@ export const useMessageSending = () => {
     const isFirstMessage = !threadId || checkIfFirstMessage(threadId);
     
     if (isFirstMessage) {
+      // Track agent activation for first message
+      trackAgentActivated('supervisor_agent', threadId);
       // Use start_agent for initial message - properly initializes agent context
       sendMessage({ 
         type: 'start_agent', 
@@ -102,6 +109,9 @@ export const useMessageSending = () => {
         } 
       });
     }
+    
+    // Track message sent event
+    trackMessageSent(threadId, message.length);
   };
 
   const handleThreadRename = async (threadId: string, message: string): Promise<void> => {
@@ -130,6 +140,8 @@ export const useMessageSending = () => {
       setProcessing(true);
     } catch (error) {
       logger.error('Failed to send message:', error);
+      // Track send failure
+      trackError('message_send_failed', error instanceof Error ? error.message : 'Failed to send message', 'useMessageSending', false);
       await handleSendFailure(error);
     } finally {
       setIsSending(false);

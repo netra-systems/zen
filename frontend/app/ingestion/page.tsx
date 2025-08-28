@@ -6,7 +6,8 @@
 import { NextPage } from 'next';
 import { authService } from '@/auth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { AuthGuard } from '@/components/AuthGuard';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,7 +20,6 @@ import { HistoryTab } from './components/HistoryTab';
 import { SettingsTab } from './components/SettingsTab';
 
 const IngestionPage: NextPage = () => {
-  const { user, loading } = authService.useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('upload');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -33,16 +33,6 @@ const IngestionPage: NextPage = () => {
     enableCompression: false,
     processingMode: 'batch',
   });
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [loading, user, router]);
-
-  if (loading || !user) {
-    return <LoadingScreen />;
-  }
 
   const handleStartIngestion = () => {
     setIsProcessing(true);
@@ -64,18 +54,20 @@ const IngestionPage: NextPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <PageHeader onViewCorpus={() => router.push('/corpus')} />
-      <MainTabs 
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        config={ingestionConfig}
-        onConfigChange={setIngestionConfig}
-        isProcessing={isProcessing}
-        uploadProgress={uploadProgress}
-        onStartIngestion={handleStartIngestion}
-      />
-    </div>
+    <AuthGuard>
+      <div className="container mx-auto p-6 space-y-6">
+        <PageHeader onViewCorpus={() => router.push('/corpus')} />
+        <MainTabs 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          config={ingestionConfig}
+          onConfigChange={setIngestionConfig}
+          isProcessing={isProcessing}
+          uploadProgress={uploadProgress}
+          onStartIngestion={handleStartIngestion}
+        />
+      </div>
+    </AuthGuard>
   );
 };
 

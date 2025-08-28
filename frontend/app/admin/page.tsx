@@ -2,10 +2,7 @@
 
 import { NextPage } from 'next';
 import { authService } from '@/auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { User } from '@/types/unified';
-import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { AuthGuard } from '@/components/AuthGuard';
 import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon } from 'lucide-react';
 
 interface AdminStat {
@@ -24,30 +21,17 @@ interface AdminSection {
 import { motion } from 'framer-motion';
 
 const AdminPage: NextPage = () => {
-  const { user, loading } = authService.useAuth();
-  const router = useRouter();
-
-  useAuth(loading, user, router);
-
-  if (loading || !user) {
-    return <LoadingScreen />;
-  }
+  const { user } = authService.useAuth();
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <AdminHeader />
-      <AdminQuickStats />
-      <AdminDashboard />
-    </div>
+    <AuthGuard>
+      <div className="container mx-auto p-6 space-y-6">
+        <AdminHeader />
+        <AdminQuickStats />
+        <AdminDashboard />
+      </div>
+    </AuthGuard>
   );
-};
-
-const useAuth = (loading: boolean, user: User | null, router: AppRouterInstance) => {
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [loading, user, router]);
 };
 
 const LoadingScreen = () => {

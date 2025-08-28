@@ -28,6 +28,22 @@ export class ErrorBoundary extends Component<Props, State> {
     // Log the error using our structured logger
     logger.errorBoundary(error, errorInfo, this.constructor.name);
     
+    // Track error to GTM if available
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'exception',
+        event_category: 'error',
+        event_action: 'error_boundary_catch',
+        event_label: error.message,
+        custom_parameters: {
+          error_type: 'error_boundary',
+          error_message: error.message,
+          error_context: errorInfo.componentStack,
+          fatal: true
+        }
+      });
+    }
+    
     // Call optional custom error handler
     this.props.onError?.(error, errorInfo);
   }

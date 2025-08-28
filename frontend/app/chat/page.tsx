@@ -14,6 +14,7 @@
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MainChat from '@/components/chat/MainChat';
+import { AuthGuard } from '@/components/AuthGuard';
 
 /**
  * Chat home page component
@@ -27,8 +28,12 @@ const ChatPage: React.FC = () => {
     handleThreadParameterRedirect(searchParams, router);
   }, [searchParams, router]);
   
-  // Render MainChat directly - no landing screen
-  return <MainChat />;
+  // Render MainChat with authentication guard
+  return (
+    <AuthGuard>
+      <MainChat />
+    </AuthGuard>
+  );
 };
 
 /**

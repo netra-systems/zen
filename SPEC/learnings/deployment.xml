@@ -864,5 +864,61 @@ frontend/cypress
         <guideline>Use staging domain URLs, not Cloud Run URLs</guideline>
       </prevention>
     </learning>
+    <learning>
+      <id>frontend-dockerfile-canonical-location</id>
+      <category>deployment</category>
+      <date>2025-08-28</date>
+      <severity>critical</severity>
+      <title>Frontend Dockerfile Must Use deployment/docker/frontend.gcp.Dockerfile - No Random Creation</title>
+      <problem>
+        <description>Random creation of frontend Dockerfiles in different locations causes confusion and deployment failures</description>
+        <symptoms>
+          <symptom>Multiple Dockerfile versions in different locations</symptom>
+          <symptom>Deployment scripts using wrong Dockerfile path</symptom>
+          <symptom>Git showing deleted frontend/Dockerfile while deployment expects it</symptom>
+          <symptom>Build failures due to missing or incorrect Dockerfile references</symptom>
+          <symptom>Inconsistent build configurations across environments</symptom>
+        </symptoms>
+        <root_cause>Lack of awareness about canonical Dockerfile location and tendency to create new files</root_cause>
+      </problem>
+      <solution>
+        <description>ALWAYS use the existing Dockerfile at deployment/docker/frontend.gcp.Dockerfile</description>
+        <implementation>
+          <canonical_location>deployment/docker/frontend.gcp.Dockerfile</canonical_location>
+          <build_command>docker build -t frontend -f deployment/docker/frontend.gcp.Dockerfile .</build_command>
+          <cloudbuild_reference>
+            steps:
+            - name: gcr.io/cloud-builders/docker
+              args: ['build', '-t', 'gcr.io/$PROJECT_ID/netra-frontend-staging:latest', 
+                     '-f', 'deployment/docker/frontend.gcp.Dockerfile', '.']
+          </cloudbuild_reference>
+          <deployment_script_reference>
+            # In scripts/deploy_to_gcp.py
+            dockerfile="deployment/docker/frontend.gcp.Dockerfile"
+          </deployment_script_reference>
+        </implementation>
+        <verification>
+          <step>Verify only one frontend Dockerfile exists at deployment/docker/frontend.gcp.Dockerfile</step>
+          <step>Check no frontend/Dockerfile exists (should be deleted)</step>
+          <step>Confirm all deployment scripts reference correct path</step>
+          <step>Test Docker build works with canonical Dockerfile</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>NEVER create new Dockerfiles for frontend - use existing deployment/docker/frontend.gcp.Dockerfile</guideline>
+        <guideline>If frontend/Dockerfile is deleted in git, DO NOT recreate it</guideline>
+        <guideline>All services use deployment/docker/*.gcp.Dockerfile pattern</guideline>
+        <guideline>Update existing Dockerfile if changes needed, don't create new ones</guideline>
+        <guideline>Check deployment scripts for correct Dockerfile paths before creating files</guideline>
+      </prevention>
+      <dockerfile_structure>
+        <service>Frontend: deployment/docker/frontend.gcp.Dockerfile</service>
+        <service>Backend: deployment/docker/backend.gcp.Dockerfile</service>
+        <service>Auth: deployment/docker/auth.gcp.Dockerfile</service>
+        <note>All Dockerfiles follow the same naming pattern and location</note>
+      </dockerfile_structure>
+      <violation_severity>CRITICAL</violation_severity>
+      <violation_message>Creating random Dockerfiles instead of using canonical ones breaks deployment consistency</violation_message>
+    </learning>
   </critical_deployment_learnings>
 </specification>
