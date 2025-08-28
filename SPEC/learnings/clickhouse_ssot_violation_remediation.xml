@@ -359,9 +359,12 @@ result = client.execute(query)</before>
   
   <references>
     <reference>CLAUDE.md Section 2.1 - Single Source of Truth (SSOT)</reference>
-    <reference>SPEC/clickhouse_client_architecture.xml</reference>
-    <reference>clickhouse_audit_report_20250828.md</reference>
-    <reference>netra_backend/tests/test_clickhouse_ssot_compliance.py</reference>
+    <reference>SPEC/clickhouse_client_architecture.xml - Complete architectural specification</reference>
+    <reference>SPEC/clickhouse.xml - ClickHouse configuration and query patterns</reference>
+    <reference>SPEC/learnings/index.xml - Index entry for this remediation</reference>
+    <reference>SPEC/CROSS_SYSTEM_MASTER_INDEX.md - Cross-system navigation updated with canonical implementation</reference>
+    <reference>clickhouse_audit_report_20250828.md - Original violation audit report</reference>
+    <reference>netra_backend/tests/test_clickhouse_ssot_compliance.py - Compliance test suite</reference>
   </references>
   
   <metrics>

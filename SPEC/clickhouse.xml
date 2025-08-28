@@ -398,4 +398,17 @@
       <field name="updated_at">ISO timestamp of last update</field>
     </metadata_tracking>
   </corpus_management>
+
+  <cross_references>
+    <spec_references>
+      <reference>SPEC/clickhouse_client_architecture.xml - Complete SSOT architecture specification</reference>
+      <reference>SPEC/learnings/clickhouse_ssot_violation_remediation.xml - Detailed remediation process and patterns</reference>
+      <reference>SPEC/learnings/index.xml - Learnings index entry with critical takeaways</reference>
+      <reference>SPEC/CROSS_SYSTEM_MASTER_INDEX.md - Cross-system navigation with canonical implementation details</reference>
+    </spec_references>
+    <test_references>
+      <reference>netra_backend/tests/test_clickhouse_ssot_compliance.py - SSOT compliance validation</reference>
+      <reference>test_framework/fixtures/clickhouse_fixtures.py - Proper test fixtures location</reference>
+    </test_references>
+  </cross_references>
 </specification>
