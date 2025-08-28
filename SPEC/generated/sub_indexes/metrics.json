@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-28T10:43:48.693530",
+    "generated_at": "2025-08-28T14:13:41.411426",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 178
+    "total_literals": 179
   },
   "literals": {
     "(timestamp) as time_bucket, count() as event_count": {
@@ -628,6 +628,14 @@
         "scripts/docker_log_introspection.py:366"
       ]
     },
+    "iteration_count": {
+      "value": "iteration_count",
+      "category": "metrics",
+      "locations": [
+        "scripts/intelligent_docker_remediation.py:1093",
+        "scripts/intelligent_docker_remediation.py:1186"
+      ]
+    },
     "leaked_count": {
       "value": "leaked_count",
       "category": "metrics",
@@ -889,7 +897,7 @@
       "value": "monitors_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/agents/base/monitoring.py:384"
+        "netra_backend/app/agents/base/monitoring.py:403"
       ]
     },
     "monthly_total": {
@@ -1305,10 +1313,10 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/db/database_manager.py:454",
-        "netra_backend/app/db/postgres_async.py:74",
-        "netra_backend/app/db/postgres_cloud.py:102",
+        "netra_backend/app/db/postgres_async.py:75",
+        "netra_backend/app/db/postgres_cloud.py:103",
         "netra_backend/app/db/postgres_core.py:266",
-        "netra_backend/app/db/postgres_core.py:508"
+        "netra_backend/app/db/postgres_core.py:511"
       ]
     },
     "test_count": {

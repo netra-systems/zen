@@ -196,7 +196,7 @@ class TestAuthServiceAsyncioSafety:
     async def test_auth_integration_async_safety(self):
         """Test auth integration uses proper async patterns"""
         try:
-            from netra_backend.app.services.auth_service_client import AuthServiceClient
+            from netra_backend.app.clients.auth_client_core import AuthServiceClient
             client = AuthServiceClient()
             
             # Mock auth service URL

@@ -431,23 +431,7 @@ jest.mock('@/auth/unified-auth-service', () => ({
     refreshToken: jest.fn().mockResolvedValue({ access_token: mockJWTToken }),
     setToken: jest.fn(),
     getEnvironment: jest.fn().mockReturnValue('test'),
-    useAuth: jest.fn(() => {
-      // Allow tests to override auth state by checking for test-specific overrides
-      const mockState = global.mockAuthState || {
-        user: mockUser,
-        loading: false,
-        error: null,
-        authConfig: mockAuthConfig,
-        token: mockJWTToken,
-        isAuthenticated: true
-      };
-      
-      return {
-        ...mockState,
-        login: jest.fn(),
-        logout: jest.fn(),
-      };
-    })
+    useAuth: jest.fn(() => getMockAuthContextValue())
   }
 }));
 
@@ -499,56 +483,108 @@ jest.mock('@/auth/service', () => {
 
   return {
     authService: {
-    getAuthConfig: jest.fn().mockResolvedValue(mockAuthConfig),
-    handleDevLogin: jest.fn().mockResolvedValue({
-      access_token: mockJWTToken,
-      token_type: 'Bearer'
-    }),
-    getToken: jest.fn().mockReturnValue(mockJWTToken),
-    getAuthHeaders: jest.fn().mockReturnValue({ Authorization: `Bearer ${mockJWTToken}` }),
-    removeToken: jest.fn(() => {
-      // Reference the global localStorage mock directly
-      if (global.localStorage) {
-        global.localStorage.removeItem('token');
-        global.localStorage.removeItem('auth_token');
-      }
-    }),
-    getDevLogoutFlag: jest.fn().mockReturnValue(false),
-    setDevLogoutFlag: jest.fn(),
-    clearDevLogoutFlag: jest.fn(),
-    handleLogin: jest.fn((credentials) => {
-      if (global.localStorage) {
-        global.localStorage.setItem('token', mockJWTToken);
-        global.localStorage.setItem('auth_token', mockJWTToken);
-      }
-      return Promise.resolve({ token: mockJWTToken, user: mockUser });
-    }),
-    handleLogout: jest.fn(() => {
-      if (global.localStorage) {
-        global.localStorage.removeItem('token');
-        global.localStorage.removeItem('auth_token');
-      }
-      return Promise.resolve();
-    }),
-    useAuth: jest.fn(() => {
-      // Allow tests to override auth state by checking for test-specific overrides
-      const mockState = global.mockAuthState || {
-        user: mockUser,
-        loading: false,
-        error: null,
-        authConfig: mockAuthConfig,
-        token: mockJWTToken,
-        isAuthenticated: true
-      };
-      
-      return {
-        ...mockState,
-        login: jest.fn(),
-        logout: jest.fn(),
-      };
-    })
-  }
-}));
+      getAuthConfig: jest.fn().mockResolvedValue(mockAuthConfig),
+      handleDevLogin: jest.fn().mockResolvedValue({
+        access_token: mockJWTToken,
+        token_type: 'Bearer'
+      }),
+      getToken: jest.fn().mockReturnValue(mockJWTToken),
+      getAuthHeaders: jest.fn().mockReturnValue({ Authorization: `Bearer ${mockJWTToken}` }),
+      removeToken: jest.fn(() => {
+        if (global.localStorage) {
+          global.localStorage.removeItem('jwt_token');
+          global.localStorage.removeItem('token');
+          global.localStorage.removeItem('auth_token');
+        }
+      }),
+      getDevLogoutFlag: jest.fn().mockReturnValue(false),
+      setDevLogoutFlag: jest.fn(),
+      clearDevLogoutFlag: jest.fn(),
+      handleLogin: jest.fn((credentials) => {
+        if (global.localStorage) {
+          global.localStorage.setItem('jwt_token', mockJWTToken);
+          global.localStorage.setItem('token', mockJWTToken);
+          global.localStorage.setItem('auth_token', mockJWTToken);
+        }
+        return Promise.resolve({ token: mockJWTToken, user: mockUser });
+      }),
+      handleLogout: jest.fn(() => {
+        if (global.localStorage) {
+          global.localStorage.removeItem('jwt_token');
+          global.localStorage.removeItem('token');
+          global.localStorage.removeItem('auth_token');
+        }
+        return Promise.resolve();
+      }),
+      needsRefresh: jest.fn().mockReturnValue(false),
+      refreshToken: jest.fn().mockResolvedValue({ access_token: mockJWTToken }),
+      setToken: jest.fn(),
+      getEnvironment: jest.fn().mockReturnValue('test'),
+      useAuth: jest.fn(() => {
+        const currentState = global.mockAuthState || {
+          user: mockUser,
+          loading: false,
+          error: null,
+          authConfig: mockAuthConfig,
+          token: mockJWTToken,
+          isAuthenticated: true,
+          initialized: true
+        };
+        
+        return {
+          ...currentState,
+          login: jest.fn((credentials) => {
+            if (global.localStorage) {
+              global.localStorage.setItem('jwt_token', mockJWTToken);
+              global.localStorage.setItem('token', mockJWTToken);
+              global.localStorage.setItem('auth_token', mockJWTToken);
+            }
+            global.mockAuthState = {
+              ...global.mockAuthState,
+              user: mockUser,
+              token: mockJWTToken,
+              isAuthenticated: true
+            };
+            return Promise.resolve({ token: mockJWTToken, user: mockUser });
+          }),
+          logout: jest.fn(() => {
+            if (global.localStorage) {
+              global.localStorage.removeItem('jwt_token');
+              global.localStorage.removeItem('token');
+              global.localStorage.removeItem('auth_token');
+            }
+            global.mockAuthState = {
+              ...global.mockAuthState,
+              user: null,
+              token: null,
+              isAuthenticated: false
+            };
+            return Promise.resolve();
+          })
+        };
+      })
+    },
+    default: {
+      useAuth: jest.fn(() => {
+        const currentState = global.mockAuthState || {
+          user: mockUser,
+          loading: false,
+          error: null,
+          authConfig: mockAuthConfig,
+          token: mockJWTToken,
+          isAuthenticated: true,
+          initialized: true
+        };
+        
+        return {
+          ...currentState,
+          login: jest.fn(),
+          logout: jest.fn()
+        };
+      })
+    }
+  };
+});
 
 // Mock auth context
 jest.mock('@/auth/context', () => {
@@ -613,7 +649,55 @@ jest.mock('@/auth/context', () => {
       const contextValue = getMockAuthContextValue();
       return mockReact.createElement(MockAuthContext.Provider, { value: contextValue }, children);
     },
-    useAuth: () => getMockAuthContextValue()
+    useAuth: () => {
+      const currentState = global.mockAuthState || {
+        user: {
+          id: 'test-user',
+          email: 'test@example.com',
+          full_name: 'Test User'
+        },
+        loading: false,
+        error: null,
+        authConfig: mockAuthConfig,
+        token: mockJWTToken,
+        isAuthenticated: true,
+        initialized: true
+      };
+      
+      return {
+        ...currentState,
+        login: jest.fn((credentials) => {
+          if (global.localStorage) {
+            global.localStorage.setItem('jwt_token', mockJWTToken);
+            global.localStorage.setItem('token', mockJWTToken);
+            global.localStorage.setItem('auth_token', mockJWTToken);
+          }
+          // Update global state
+          global.mockAuthState = {
+            ...global.mockAuthState,
+            user: mockUser,
+            token: mockJWTToken,
+            isAuthenticated: true
+          };
+          return Promise.resolve({ token: mockJWTToken, user: mockUser });
+        }),
+        logout: jest.fn(() => {
+          if (global.localStorage) {
+            global.localStorage.removeItem('jwt_token');
+            global.localStorage.removeItem('token');
+            global.localStorage.removeItem('auth_token');
+          }
+          // Update global state
+          global.mockAuthState = {
+            ...global.mockAuthState,
+            user: null,
+            token: null,
+            isAuthenticated: false
+          };
+          return Promise.resolve();
+        })
+      };
+    }
   };
 });
 

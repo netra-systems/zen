@@ -90,7 +90,7 @@ class ServiceConfigManager:
         return {
             "llm_enabled": True,
             "redis_enabled": True,
-            "auth_service_url": "https://auth-staging.netrasystems.ai",
+            "auth_service_url": "https://auth.staging.netrasystems.ai",
             "frontend_url": URLConstants.STAGING_FRONTEND
         }
     
