@@ -197,11 +197,15 @@ class UnifiedLogger:
     
     def _emit_log(self, level: str, message: str, exc_info: bool, context: Dict[str, Any]):
         """Emit log message with proper exception handling."""
-        log_method = getattr(logger, level)
+        # Use depth=3 to skip the call chain:
+        # 1. _emit_log (this method)
+        # 2. _log (the general log method)
+        # 3. error/warning/info (the specific log level method)
+        # This ensures the actual caller location is shown in logs
         if exc_info and self._has_exception_info():
-            log_method(message, exc_info=True, **context)
+            logger.opt(depth=3, exception=True).log(level.upper(), message, **context)
         else:
-            log_method(message, **context)
+            logger.opt(depth=3).log(level.upper(), message, **context)
     
     def _has_exception_info(self) -> bool:
         """Check if current exception info is available."""
