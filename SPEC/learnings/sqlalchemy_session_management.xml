@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>SQLAlchemy Async Session Management</title>
+  <created>2025-08-28</created>
+  <updated>2025-08-28</updated>
+  
+  <summary>
+    Learnings from fixing critical SQLAlchemy IllegalStateChangeError in async session management.
+  </summary>
+  
+  <issues_encountered>
+    <issue>
+      <name>IllegalStateChangeError</name>
+      <description>
+        Method 'close()' can't be called when '_connection_for_bind()' is already in progress,
+        causing state change conflicts in async SQLAlchemy sessions.
+      </description>
+      <root_cause>
+        - Race conditions in concurrent database operations
+        - Attempting session operations without checking session state
+        - Improper handling of cancelled tasks and generator cleanup
+      </root_cause>
+    </issue>
+  </issues_encountered>
+  
+  <solutions>
+    <solution>
+      <name>State-Aware Session Management</name>
+      <implementation>
+        Always check session state before performing operations:
+        - Use hasattr() to safely check session properties
+        - Verify is_active before commits/rollbacks
+        - Check in_transaction() before attempting commits
+      </implementation>
+      <code_pattern>
+        <before>
+          if session.is_active and not session.in_transaction():
+              await session.commit()
+        </before>
+        <after>
+          if hasattr(session, 'is_active') and session.is_active:
+              if hasattr(session, 'in_transaction') and session.in_transaction():
+                  await session.commit()
+        </after>
+      </code_pattern>
+    </solution>
+    
+    <solution>
+      <name>Proper Exception Handling</name>
+      <implementation>
+        Handle task cancellation and generator cleanup gracefully:
+        - Catch asyncio.CancelledError separately
+        - Handle GeneratorExit without forcing operations
+        - Wrap rollback operations in try-except blocks
+      </implementation>
+    </solution>
+    
+    <solution>
+      <name>Simplified Session Provider</name>
+      <implementation>
+        Use direct async context managers instead of async generators when possible
+        to reduce complexity in session lifecycle management.
+      </implementation>
+    </solution>
+  </solutions>
+  
+  <best_practices>
+    <practice>
+      Always check session state before performing operations in async contexts
+    </practice>
+    <practice>
+      Use session_yielded flags to track session lifecycle in complex async generators
+    </practice>
+    <practice>
+      Let SQLAlchemy's context manager handle cleanup when operations fail
+    </practice>
+    <practice>
+      Test concurrent database operations explicitly to catch race conditions
+    </practice>
+  </best_practices>
+  
+  <prevention>
+    <measure>
+      Implement comprehensive session state checks in all database operation functions
+    </measure>
+    <measure>
+      Add concurrent operation tests to the test suite
+    </measure>
+    <measure>
+      Use typed session objects with proper state tracking
+    </measure>
+  </prevention>
+  
+  <files_affected>
+    <file>netra_backend/app/database/__init__.py</file>
+    <file>netra_backend/app/database/database_manager.py</file>
+  </files_affected>
+  
+  <related_specs>
+    <spec>database_connectivity_architecture.xml</spec>
+    <spec>postgres.xml</spec>
+  </related_specs>
+</learnings>
