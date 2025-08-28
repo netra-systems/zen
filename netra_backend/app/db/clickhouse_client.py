@@ -131,6 +131,32 @@ class ClickHouseClient:
         # If we get here, all retries failed
         raise ClickHouseConnectionError(f"Failed to connect after {max_retries} retries: {last_exception}")
     
+    async def connect_async(self, timeout: int = 10) -> None:
+        """Async version of connect to prevent event loop blocking."""
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self.connect, timeout)
+    
+    async def connect_with_retry_async(self, max_retries: int = 3, retry_delay: float = 1.0) -> None:
+        """Async version of connect_with_retry to prevent event loop blocking."""
+        last_exception = None
+        
+        for attempt in range(max_retries):
+            try:
+                await self.connect_async(timeout=10)
+                self._logger.info(f"ClickHouse connected on attempt {attempt + 1}")
+                return
+            except (ClickHouseConnectionError, ClickHouseTimeoutError) as e:
+                last_exception = e
+                if attempt < max_retries - 1:
+                    wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                    self._logger.warning(f"ClickHouse connection attempt {attempt + 1} failed, retrying in {wait_time}s: {e}")
+                    await asyncio.sleep(wait_time)  # Use async sleep instead of blocking time.sleep
+                else:
+                    self._logger.error(f"ClickHouse connection failed after {max_retries} attempts")
+        
+        # If we get here, all retries failed
+        raise ClickHouseConnectionError(f"Failed to connect after {max_retries} retries: {last_exception}")
+    
     def execute(self, query: str, timeout: int = 10) -> List[Dict[str, Any]]:
         """Execute ClickHouse query with circuit breaker protection and timeout.
         
@@ -187,6 +213,16 @@ class ClickHouseClient:
                 raise
             raise ClickHouseConnectionError(f"Query execution failed: {e}")
     
+    async def execute_async(self, query: str, timeout: int = 10) -> List[Dict[str, Any]]:
+        """Async version of execute to prevent event loop blocking.
+        
+        Execute ClickHouse query with circuit breaker protection and timeout.
+        Automatically handles connection failures and implements circuit breaker pattern.
+        """
+        # Run the synchronous execute in an executor to make it async
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.execute, query, timeout)
+    
     def _execute_with_circuit_breaker(self, operation):
         """Execute operation with circuit breaker in sync context."""
         try:
@@ -217,6 +253,26 @@ class ClickHouseClient:
         try:
             # Use a simple query for health check with timeout
             query_result = self.execute("SELECT 1", timeout=timeout)
+            return query_result is not None
+        except ClickHouseTimeoutError as e:
+            # Re-raise as standard TimeoutError for test compatibility
+            raise TimeoutError(f"ClickHouse health check timed out: {e}")
+        except ClickHouseConnectionError as e:
+            # Re-raise as standard ConnectionError for test compatibility
+            raise ConnectionError(f"ClickHouse health check connection failed: {e}")
+        except Exception as e:
+            self._logger.error(f"ClickHouse health check failed: {e}")
+            raise ConnectionError(f"ClickHouse health check failed: {e}")
+    
+    async def health_check_async(self, timeout: int = 5) -> bool:
+        """Async version of health check to prevent event loop blocking.
+        
+        Returns True if ClickHouse is healthy.
+        Raises TimeoutError or ConnectionError if timeout occurs or connection fails.
+        """
+        try:
+            # Use a simple query for health check with timeout
+            query_result = await self.execute_async("SELECT 1", timeout=timeout)
             return query_result is not None
         except ClickHouseTimeoutError as e:
             # Re-raise as standard TimeoutError for test compatibility

@@ -57,6 +57,9 @@ class IsolatedEnvironment:
             # Automatically load .env file if it exists
             self._auto_load_env_file()
             
+            # Set default optimized persistence configuration
+            self._set_optimized_persistence_defaults()
+            
             self._initialized = True
             logger.debug("IsolatedEnvironment (netra_backend) initialized")
     
@@ -70,6 +73,21 @@ class IsolatedEnvironment:
                     logger.debug(f"Auto-loaded {loaded_count} variables from .env")
         except Exception as e:
             logger.warning(f"Failed to auto-load .env file: {e}")
+    
+    def _set_optimized_persistence_defaults(self) -> None:
+        """Set default configuration for optimized persistence features."""
+        # Default configurations for optimized persistence
+        default_configs = {
+            'ENABLE_OPTIMIZED_PERSISTENCE': 'false',  # Disabled by default for safety
+            'OPTIMIZED_PERSISTENCE_CACHE_SIZE': '1000',
+            'OPTIMIZED_PERSISTENCE_DEDUPLICATION': 'true',
+            'OPTIMIZED_PERSISTENCE_COMPRESSION': 'true'
+        }
+        
+        for key, default_value in default_configs.items():
+            if not self.exists(key):
+                self.set(key, default_value, "optimized_persistence_defaults")
+                logger.debug(f"Set default optimized persistence config: {key}={default_value}")
     
     @classmethod
     def get_instance(cls) -> 'IsolatedEnvironment':
