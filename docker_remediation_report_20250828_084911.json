@@ -1,0 +1,10 @@
+{
+  "remediation_started": null,
+  "remediation_completed": "2025-08-28T08:49:11.600776",
+  "target_timestamp": "2025-08-28 15:42:48",
+  "total_iterations": 1,
+  "total_issues_found": 0,
+  "issues_by_severity": {},
+  "remediation_log": [],
+  "unresolved_issues": []
+}
