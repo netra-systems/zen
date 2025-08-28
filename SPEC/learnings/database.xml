@@ -729,6 +729,206 @@
     </problem_solved>
   </authentication_security_fixes>
 
+  <critical_database_recovery_remediation_2025_08_28>
+    <problem_solved>
+      <title>PostgreSQL Improper Shutdown and Recovery Detection</title>
+      <date>2025-08-28</date>
+      <description>
+        Database system was not properly shut down, triggering automatic recovery on container restart.
+        Log analysis revealed: "database system was not properly shut down; automatic recovery in progress"
+        followed by "checkpoint starting: end-of-recovery immediate wait". This indicates container
+        termination without proper PostgreSQL shutdown sequence, potentially causing data integrity risks.
+      </description>
+      <symptoms>
+        - PostgreSQL container showing "Up 11 hours (healthy)" but recovery logs present
+        - Database recovery completed successfully with all 32 tables intact
+        - Foreign key constraint violations occurring (dev-temp users not in userbase)
+        - Regular checkpoint operations functioning normally after recovery
+      </symptoms>
+    </problem_solved>
+
+    <root_cause_analysis>
+      <primary_cause>
+        <title>Improper Container Shutdown Sequence</title>
+        <description>
+          Docker container termination did not allow PostgreSQL sufficient time to perform graceful
+          shutdown procedures including final checkpoints and proper connection closure.
+        </description>
+      </primary_cause>
+      <contributing_factors>
+        <factor>Default Docker stop timeout may be insufficient for PostgreSQL graceful shutdown</factor>
+        <factor>No explicit SIGTERM handling configuration in docker-compose.yml</factor>
+        <factor>Missing graceful shutdown procedures for development environment</factor>
+        <factor>No health monitoring to detect recovery scenarios</factor>
+      </contributing_factors>
+    </root_cause_analysis>
+
+    <comprehensive_solution_implemented>
+      <fix>
+        <title>Enhanced Docker Compose Configuration for Graceful Shutdown</title>
+        <description>
+          Updated docker-compose.dev.yml with proper PostgreSQL shutdown configuration including
+          SIGTERM signal handling and extended grace period for clean shutdown.
+        </description>
+        <changes>
+          <change>Added stop_signal: SIGTERM for proper PostgreSQL shutdown signal</change>
+          <change>Added stop_grace_period: 30s to allow sufficient time for graceful shutdown</change>
+          <change>Enhanced healthcheck to include actual database connectivity validation</change>
+          <change>Added POSTGRES_INITDB_ARGS: "--data-checksums" for enhanced data integrity monitoring</change>
+          <change>Extended healthcheck start_period: 30s to account for potential recovery time</change>
+        </changes>
+        <file_modified>docker-compose.dev.yml</file_modified>
+      </fix>
+      
+      <fix>
+        <title>Graceful PostgreSQL Shutdown Script</title>
+        <description>
+          Created comprehensive shutdown script for proper PostgreSQL termination that waits for
+          connection closure, performs final checkpoints, and ensures clean database shutdown.
+        </description>
+        <features>
+          <feature>Active connection monitoring and graceful waiting</feature>
+          <feature>Final database checkpoint before shutdown</feature>
+          <feature>Proper PostgreSQL shutdown using pg_ctl stop with smart mode</feature>
+          <feature>Fallback to container stop with extended timeout if needed</feature>
+          <feature>Comprehensive error handling and status reporting</feature>
+        </features>
+        <file_created>scripts/graceful_postgres_shutdown.py</file_created>
+      </fix>
+      
+      <fix>
+        <title>PostgreSQL Health Monitoring and Recovery Detection</title>
+        <description>
+          Comprehensive health monitoring script that detects recovery scenarios, validates data
+          integrity, monitors performance metrics, and provides detailed health reporting.
+        </description>
+        <capabilities>
+          <capability>Recovery detection from container logs with timestamp tracking</capability>
+          <capability>Data integrity validation including table count verification</capability>
+          <capability>Active connection monitoring and threshold alerting</capability>
+          <capability>Critical error detection and pattern analysis</capability>
+          <capability>Performance metrics including checkpoint monitoring</capability>
+          <capability>Health score calculation and trend analysis</capability>
+        </capabilities>
+        <file_created>scripts/postgres_health_monitor.py</file_created>
+      </fix>
+    </comprehensive_solution_implemented>
+
+    <validation_results>
+      <result>
+        <test>Container Health Status</test>
+        <status>PASS</status>
+        <description>PostgreSQL container showing "Up 11 hours (healthy)" with proper health checks</description>
+      </result>
+      <result>
+        <test>Database Connectivity</test>
+        <status>PASS</status>
+        <description>Successfully connecting to netra_dev database with user 'netra'</description>
+      </result>
+      <result>
+        <test>Data Integrity Post-Recovery</test>
+        <status>PASS</status>
+        <description>All 32 tables present and accessible after recovery completion</description>
+      </result>
+      <result>
+        <test>Recovery Log Analysis</test>
+        <status>PASS</status>
+        <description>Recovery completed successfully at 2025-08-27 18:55:22.258 UTC with end-of-recovery checkpoint</description>
+      </result>
+      <result>
+        <test>Health Monitoring Script</test>
+        <status>PASS</status>
+        <description>Health monitor reports [HEALTHY] status with all systems operational</description>
+      </result>
+      <result>
+        <test>Graceful Shutdown Configuration</test>
+        <status>PASS</status>
+        <description>Docker compose updated with proper SIGTERM handling and 30s grace period</description>
+      </result>
+    </validation_results>
+
+    <prevention_measures>
+      <measure>
+        <title>Automated Shutdown Procedures</title>
+        <description>
+          Use scripts/graceful_postgres_shutdown.py for planned maintenance shutdowns to ensure
+          proper database termination sequence and prevent recovery scenarios.
+        </description>
+      </measure>
+      <measure>
+        <title>Continuous Health Monitoring</title>
+        <description>
+          Regular execution of scripts/postgres_health_monitor.py to detect recovery scenarios
+          and data integrity issues before they impact system operations.
+        </description>
+      </measure>
+      <measure>
+        <title>Enhanced Container Configuration</title>
+        <description>
+          Docker compose configuration now includes proper shutdown signals and extended grace
+          periods to prevent forceful container termination during database operations.
+        </description>
+      </measure>
+      <measure>
+        <title>Recovery Detection and Alerting</title>
+        <description>
+          Health monitoring automatically detects recovery scenarios from logs and provides
+          alerts for investigation and corrective action.
+        </description>
+      </measure>
+    </prevention_measures>
+
+    <business_impact>
+      <segment>Platform/Internal</segment>
+      <business_goal>Data Integrity and System Reliability</business_goal>
+      <value_impact>
+        Eliminates risk of data corruption from improper database shutdowns and ensures reliable
+        recovery detection with automated monitoring to prevent future occurrences.
+      </value_impact>
+      <strategic_impact>
+        - Prevents data integrity issues that could affect all customer segments
+        - Reduces operational overhead from manual database recovery scenarios
+        - Provides proactive monitoring capabilities for database health management
+        - Ensures reliable development environment operations for sustained productivity
+      </strategic_impact>
+    </business_impact>
+
+    <key_learnings_from_recovery>
+      <learning id="14">
+        <title>Recovery Detection Critical for Data Integrity Assurance</title>
+        <description>
+          PostgreSQL recovery scenarios must be actively monitored and documented to ensure data
+          integrity is maintained. Recovery logs provide critical information about system state
+          and should trigger comprehensive data validation procedures.
+        </description>
+        <impact>Critical - prevents undetected data integrity issues</impact>
+        <mitigation>Automated log monitoring and recovery detection with health reporting</mitigation>
+      </learning>
+      
+      <learning id="15">
+        <title>Container Shutdown Configuration Affects Database Integrity</title>
+        <description>
+          Docker container shutdown behavior directly impacts PostgreSQL data integrity. Default
+          container termination may not provide sufficient time for proper database shutdown,
+          requiring explicit configuration of stop signals and grace periods.
+        </description>
+        <impact>High - affects data consistency and system reliability</impact>
+        <mitigation>Configure stop_signal: SIGTERM and stop_grace_period appropriately</mitigation>
+      </learning>
+      
+      <learning id="16">
+        <title>Graceful Shutdown Procedures Essential for Production Operations</title>
+        <description>
+          Manual shutdown procedures should include database-aware shutdown sequences that wait
+          for connection closure and perform final checkpoints. This prevents automatic recovery
+          scenarios that can impact startup performance and data consistency.
+        </description>
+        <impact>Medium - improves operational procedures and prevents recovery scenarios</impact>
+        <mitigation>Use dedicated shutdown scripts for planned database maintenance</mitigation>
+      </learning>
+    </key_learnings_from_recovery>
+  </critical_database_recovery_remediation_2025_08_28>
+
   <maintenance_notes>
     <note>
       Monitor DatabaseManager performance metrics to ensure URL transformation doesn't 
@@ -745,6 +945,14 @@
     <note>
       Review authentication validation patterns when adding new environments or 
       credential sources to ensure proper validation coverage.
+    </note>
+    <note>
+      Execute scripts/postgres_health_monitor.py regularly to monitor for recovery
+      scenarios and data integrity issues, especially after system restarts or maintenance.
+    </note>
+    <note>
+      Use scripts/graceful_postgres_shutdown.py for planned PostgreSQL shutdowns to
+      prevent recovery scenarios and ensure clean database termination.
     </note>
   </maintenance_notes>
 </learnings_database>
