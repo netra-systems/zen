@@ -8,7 +8,7 @@ import json
 import time
 import uuid
 from typing import Any, Callable, Dict, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -121,7 +121,7 @@ def create_test_user(
         "username": username,
         "provider": provider,
         "provider_id": f"{provider}_{timestamp}_{test_id}",
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "is_test_user": True
     }
 
@@ -346,6 +346,6 @@ async def create_test_websocket_message(
     return {
         "type": message_type,
         "id": str(uuid.uuid4()),
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "payload": payload
     }

@@ -55,7 +55,7 @@ from netra_backend.app.schemas.shared_types import ErrorContext, ErrorContextMan
 # Import core modules being tested
 try:
     from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, UnifiedCircuitBreakerState
-    from netra_backend.app.core.resilience.unified_retry_handler_enhanced import UnifiedRetryHandler
+    from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler
     from netra_backend.app.core.environment.isolated_environment import IsolatedEnvironment
     from netra_backend.app.db.database_manager import DatabaseManager
 except ImportError as e:

@@ -10,13 +10,14 @@ from netra_backend.app.services.cost_calculator import CostCalculatorService, Co
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 
+@pytest.fixture
+def cost_calculator():
+    """Cost calculator for business logic testing."""
+    return CostCalculatorService()
+
+
 class TestBusinessRuleValidation:
     """Test enforcement of business rules."""
-
-    @pytest.fixture
-    def cost_calculator(self):
-        """Cost calculator for business logic testing."""
-        return CostCalculatorService()
 
     def test_cost_calculation_business_constraints(self, cost_calculator):
         """Test that cost calculations follow business constraints."""

@@ -164,12 +164,43 @@ class UnifiedCircuitBreaker:
     
     def __init__(
         self,
-        config: UnifiedCircuitConfig,
+        config: Optional[Union[UnifiedCircuitConfig, str]] = None,
+        name: Optional[str] = None,
+        failure_threshold: int = 5,
+        recovery_timeout: float = 60.0,
         health_checker: Optional[HealthChecker] = None,
         fallback_chain: Optional[Any] = None  # FallbackChain support for future extension
     ) -> None:
-        """Initialize unified circuit breaker with comprehensive configuration."""
-        self.config = config
+        """Initialize unified circuit breaker with comprehensive configuration.
+        
+        Args:
+            config: UnifiedCircuitConfig object OR string name (legacy support)
+            name: Circuit breaker name (used when config is string or None)
+            failure_threshold: Number of failures before opening circuit
+            recovery_timeout: Time to wait before attempting recovery
+            health_checker: Optional health checker for adaptive behavior
+            fallback_chain: Optional fallback chain for enhanced resilience
+        """
+        # Support both new config object and legacy simple parameters
+        if isinstance(config, str):
+            # Legacy: config is actually the name
+            self.config = UnifiedCircuitConfig(
+                name=config,
+                failure_threshold=failure_threshold,
+                recovery_timeout=recovery_timeout
+            )
+        elif isinstance(config, UnifiedCircuitConfig):
+            # New: config is a proper config object
+            self.config = config
+        else:
+            # Default: create config from parameters
+            circuit_name = name or config or "default_circuit"
+            self.config = UnifiedCircuitConfig(
+                name=circuit_name,
+                failure_threshold=failure_threshold,
+                recovery_timeout=recovery_timeout
+            )
+            
         self.health_checker = health_checker
         self.fallback_chain = fallback_chain
         self._initialize_state()
@@ -699,7 +730,7 @@ class UnifiedCircuitBreakerManager:
             
         circuit_breaker = UnifiedCircuitBreaker(config, health_checker, fallback_chain)
         self._circuit_breakers[name] = circuit_breaker
-        logger.info(f"Created unified circuit breaker: {name}")
+        logger.debug(f"Created unified circuit breaker: {name}")
         return circuit_breaker
         
     def get_circuit_breaker(self, name: str) -> Optional[UnifiedCircuitBreaker]:

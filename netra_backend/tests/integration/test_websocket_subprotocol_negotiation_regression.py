@@ -300,13 +300,26 @@ class TestWebSocketProtocolCompliance:
         with patch('netra_backend.app.routes.websocket.secure_websocket_context') as mock_context:
             mock_auth_info = Mock(user_id="test_user")
             mock_security_manager = Mock()
+            mock_security_manager.validate_connection_security = Mock(return_value=True)
             mock_context.return_value.__aenter__.return_value = (mock_auth_info, mock_security_manager)
             mock_context.return_value.__aexit__.return_value = None
             
-            with patch('netra_backend.app.routes.websocket.get_websocket_manager', return_value=manager):
-                with patch('netra_backend.app.routes.websocket.get_message_router'):
-                    with patch('netra_backend.app.routes.websocket.get_connection_monitor'):
-                        await websocket_endpoint(websocket)
+            # Mock WebSocketHeartbeat to prevent issues
+            with patch('netra_backend.app.routes.websocket.WebSocketHeartbeat') as mock_heartbeat:
+                mock_heartbeat_instance = Mock()
+                mock_heartbeat_instance.start = AsyncMock()
+                mock_heartbeat_instance.stop = AsyncMock()
+                mock_heartbeat_instance.on_pong_received = Mock()
+                mock_heartbeat.return_value = mock_heartbeat_instance
+                
+                # Mock message router with proper route_message behavior
+                mock_router = Mock()
+                mock_router.route_message = AsyncMock(return_value=True)
+                
+                with patch('netra_backend.app.routes.websocket.get_websocket_manager', return_value=manager):
+                    with patch('netra_backend.app.routes.websocket.get_message_router', return_value=mock_router):
+                        with patch('netra_backend.app.routes.websocket.get_connection_monitor'):
+                            await websocket_endpoint(websocket)
         
         # Verify connection stayed open for multiple iterations
         assert connection_duration > 1, \

@@ -9,6 +9,11 @@
             MANDATORY instruction set for all AI agents contributing code to the Netra AI platform.
         </description>
     <last_edited>2025-08-22T00:00:00.000000</last_edited>
+    <cross_references>
+      <ref>SPEC/root_folder_organization.xml</ref>
+      <ref>SPEC/folder_structure_rules.md</ref>
+      <ref>SPEC/directory_structure.xml</ref>
+    </cross_references>
   </metadata>
   <section title="Architectural Constraints (The 450/25 Rule)">
     <ai-directive>AI agents must proactively enforce these constraints during code generation, initiating refactoring protocols if limits are approached (e.g., 250 lines for files, 6 lines for functions).</ai-directive>

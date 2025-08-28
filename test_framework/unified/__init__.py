@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 from typing import Any, Dict, List, Optional, Protocol, TypedDict, Union
 
@@ -63,7 +63,7 @@ class TestReport(BaseModel):
     skipped: int = 0
     errors: int = 0
     duration: float = 0.0
-    timestamp: datetime = datetime.utcnow()
+    timestamp: datetime = datetime.now(UTC)
     results: List[TestResult] = []
     
     @property

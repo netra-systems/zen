@@ -38,7 +38,7 @@ class BackgroundTaskManager:
         self.failed_tasks: List[UUID] = []
         self._shutdown = False
         
-        logger.info(f"BackgroundTaskManager initialized with {default_timeout}s default timeout")
+        logger.debug(f"BackgroundTaskManager initialized with {default_timeout}s default timeout")
     
     async def create_task(
         self,

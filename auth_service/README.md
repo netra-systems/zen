@@ -106,9 +106,18 @@ REDIS_URL=redis://localhost:6379/0
 # CORS
 CORS_ORIGINS=http://localhost:3000,http://localhost:8000
 
-# OAuth (Optional)
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
+# OAuth (Optional) - Environment-specific variables
+# For development
+GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT=your-dev-client-id
+GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT=your-dev-client-secret
+
+# For staging
+GOOGLE_OAUTH_CLIENT_ID_STAGING=your-staging-client-id
+GOOGLE_OAUTH_CLIENT_SECRET_STAGING=your-staging-client-secret
+
+# For production
+GOOGLE_OAUTH_CLIENT_ID_PRODUCTION=your-prod-client-id
+GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION=your-prod-client-secret
 ```
 
 ## Deployment

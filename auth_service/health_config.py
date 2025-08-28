@@ -40,8 +40,18 @@ async def check_auth_postgres_health() -> Dict[str, Any]:
 async def check_oauth_providers_health() -> Dict[str, Any]:
     """Check OAuth provider connectivity and configuration."""
     try:
-        # Check that OAuth providers are configured
-        google_client_id = get_env().get("GOOGLE_CLIENT_ID")
+        # Check that OAuth providers are configured using environment-specific variables
+        env = get_env().get("ENVIRONMENT", "development").lower()
+        
+        # Check for environment-specific Google OAuth configuration
+        google_client_id = None
+        if env == "development":
+            google_client_id = get_env().get("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
+        elif env == "staging":
+            google_client_id = get_env().get("GOOGLE_OAUTH_CLIENT_ID_STAGING")
+        elif env == "production":
+            google_client_id = get_env().get("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
+            
         github_client_id = get_env().get("GITHUB_CLIENT_ID")
         
         configured_providers = []

@@ -188,9 +188,9 @@ services:
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
       
-      # Test OAuth Config
-      GOOGLE_CLIENT_ID: test-google-client-id-for-integration-testing
-      GOOGLE_CLIENT_SECRET: test-google-client-secret-for-integration-testing
+      # Test OAuth Config - using environment-specific variables
+      GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: test-google-client-id-for-integration-testing
+      GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: test-google-client-secret-for-integration-testing
     ports:
       - "${TEST_AUTH_PORT:-8082}:8082"
     volumes:

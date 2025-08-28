@@ -587,8 +587,10 @@ class IsolatedEnvironment:
             DatabaseConstants.CLICKHOUSE_URL: "ClickHouse connection string",
             "ANTHROPIC_API_KEY": "Anthropic API key for LLM services",
             "OPENAI_API_KEY": "OpenAI API key for LLM services",
-            "GOOGLE_CLIENT_ID": "Google OAuth client ID",
-            "GOOGLE_CLIENT_SECRET": "Google OAuth client secret"
+            "GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT": "Google OAuth client ID for development",
+            "GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT": "Google OAuth client secret for development",
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "Google OAuth client ID for staging",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "Google OAuth client secret for staging"
         }
     
     def _get_validation_rules(self) -> Dict[str, callable]:

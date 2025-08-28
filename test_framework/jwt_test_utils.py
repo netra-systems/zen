@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 
 import jwt
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any
 from netra_backend.app.core.isolated_environment import get_env
 
@@ -49,7 +49,7 @@ def generate_test_jwt_token(
         env = get_env()
         secret = env.get("JWT_SECRET_KEY", "test-jwt-secret-32-character-minimum-length-required")
     
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     payload = {
         "sub": user_id,
         "email": email,
@@ -84,7 +84,7 @@ def generate_service_token(
         env = get_env()
         secret = env.get("JWT_SECRET_KEY", "test-jwt-secret-32-character-minimum-length-required")
     
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     payload = {
         "sub": f"service:{service_name}",
         "service_name": service_name,
@@ -118,7 +118,7 @@ def generate_expired_token(
         env = get_env()
         secret = env.get("JWT_SECRET_KEY", "test-jwt-secret-32-character-minimum-length-required")
     
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     payload = {
         "sub": user_id,
         "iat": now - timedelta(hours=2),

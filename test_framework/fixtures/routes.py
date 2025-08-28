@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional, Callable
 from unittest.mock import Mock, AsyncMock
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 
 class MockRequest:
@@ -318,7 +318,7 @@ class MockWebSocketConnection:
             return message["data"]
         
         # Default heartbeat message
-        return {"type": "heartbeat", "timestamp": datetime.utcnow().isoformat()}
+        return {"type": "heartbeat", "timestamp": datetime.now(UTC).isoformat()}
     
     async def close(self, code: int = 1000):
         """Close WebSocket connection."""
@@ -402,7 +402,7 @@ def setup_health_routes(handler: MockRouteHandler):
     
     @handler.get("/health")
     async def health_check(request: MockRequest):
-        return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+        return {"status": "healthy", "timestamp": datetime.now(UTC).isoformat()}
     
     @handler.get("/health/ready")
     async def readiness_check(request: MockRequest):
@@ -615,15 +615,15 @@ def agent_test_client():
         "agent_id": "test_agent_123",
         "name": "Test Agent",
         "status": "created",
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.now(UTC).isoformat()
     }))
     
     client.set_mock_response("GET", "/agents/test_agent_123", MockResponse(200, {
         "agent_id": "test_agent_123",
         "name": "Test Agent",
         "status": "running",
-        "created_at": datetime.utcnow().isoformat(),
-        "last_activity": datetime.utcnow().isoformat()
+        "created_at": datetime.now(UTC).isoformat(),
+        "last_activity": datetime.now(UTC).isoformat()
     }))
     
     return client

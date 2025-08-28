@@ -4,6 +4,8 @@
 
 Every file has a designated location based on its purpose and scope. Violating these conventions breaks system coherence and creates maintenance debt.
 
+> **See Also:** [`SPEC/root_folder_organization.xml`](root_folder_organization.xml) for root folder-specific rules and enforcement.
+
 ## 1. Service Boundaries (NEVER VIOLATE)
 
 ### Microservice Isolation

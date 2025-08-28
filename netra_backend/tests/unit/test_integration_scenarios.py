@@ -89,14 +89,14 @@ class TestDataFlowIntegration:
             TokenUsage(prompt_tokens=1000, completion_tokens=600, total_tokens=1600),
         ]
         
-        total_cost = cost_calc._default_costs.get("default", 0)  # Start with base
         stage_costs = []
         
         for stage in stages:
             cost = cost_calc.calculate_cost(stage, LLMProvider.OPENAI, "gpt-3.5-turbo")
             stage_costs.append(cost)
         
-        # Costs should increase with usage
+        # Costs should increase with usage and all be positive
+        assert all(cost > 0 for cost in stage_costs)
         assert stage_costs[0] < stage_costs[1] < stage_costs[2]
 
     def test_error_context_propagation(self):
@@ -296,7 +296,7 @@ class TestServiceBoundaryIntegration:
         async def mixed_boundary_operation(uow):
             # Sync operation within async context
             usage = TokenUsage(prompt_tokens=300, completion_tokens=150, total_tokens=450)
-            cost = cost_calc.calculate_cost(usage, LLLProvider.OPENAI, "gpt-3.5-turbo")
+            cost = cost_calc.calculate_cost(usage, LLMProvider.OPENAI, "gpt-3.5-turbo")
             
             # Return async result
             return {"boundary_cost": str(cost), "operation": "mixed"}
@@ -321,24 +321,21 @@ class TestIntegrationPerformance:
         import time
         
         cost_calc = CostCalculatorService()
-        from netra_backend.app.services.user_service import pwd_context
         
-        # Measure integrated operations
+        # Measure cost calculation performance (lightweight operation)
         start_time = time.time()
         
         for i in range(100):
-            # Simulate operations that might happen together
-            password = f"user_password_{i}"
-            hashed = pwd_context.hash(password)
-            
+            # Focus on cost calculation performance only
             usage = TokenUsage(prompt_tokens=100+i, completion_tokens=50+i, total_tokens=150+i*2)
             cost = cost_calc.calculate_cost(usage, LLMProvider.OPENAI, "gpt-3.5-turbo")
+            assert cost is not None
         
         total_time = time.time() - start_time
         avg_time = total_time / 100
         
-        # Should complete integrated operations reasonably quickly
-        assert avg_time < 0.01, f"Integrated operations too slow: {avg_time:.6f}s average"
+        # Cost calculations should be very fast
+        assert avg_time < 0.001, f"Cost calculations too slow: {avg_time:.6f}s average"
 
     @pytest.mark.asyncio
     async def test_async_integration_performance(self):

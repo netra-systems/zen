@@ -3,7 +3,7 @@
 import asyncio
 import json
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, AsyncIterator, Dict, List, Optional
 
 from google.cloud import logging as gcp_logging
@@ -44,7 +44,7 @@ class LogEntry:
         if self.labels is None:
             self.labels = {}
         if self.end_time is None:
-            self.end_time = datetime.utcnow()
+            self.end_time = datetime.now(UTC)
         if self.start_time is None:
             self.start_time = self.end_time - timedelta(hours=1)
 

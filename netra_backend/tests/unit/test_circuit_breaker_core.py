@@ -57,7 +57,7 @@ def circuit_breaker(circuit_config):
 @pytest.fixture  
 async def circuit_with_health(circuit_config, mock_health_checker):
     """Circuit breaker with health monitoring."""
-    circuit = AdaptiveCircuitBreaker(circuit_config, mock_health_checker)
+    circuit = AdaptiveCircuitBreaker(circuit_config, health_checker=mock_health_checker)
     yield circuit
     circuit.cleanup()
 

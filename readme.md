@@ -81,13 +81,59 @@ python scripts/scan_string_literals.py
 ## 🏃 Quick Start
 
 ### Prerequisites
-- **Python:** 3.9+ (3.11+ recommended for performance)
-- **Node.js:** 18+ (for frontend)
-- **PostgreSQL:** 14+ (optional, SQLite for dev)
-- **Redis:** 7+ (optional, for caching)
-- **ClickHouse:** 23+ (optional, for analytics)
+- **Docker:** Docker Desktop with Docker Compose support
+- **Alternative (without Docker):**
+  - Python 3.9+ (3.11+ recommended for performance)
+  - Node.js 18+ (for frontend)
+  - PostgreSQL 14+ (optional, SQLite for dev)
+  - Redis 7+ (optional, for caching)
+  - ClickHouse 23+ (optional, for analytics)
 
-### Installation
+### 🐳 Recommended: Docker Compose Development
+
+Docker Compose provides the most reliable and consistent development environment with all services pre-configured:
+
+```bash
+# Clone repository
+git clone https://github.com/netra-systems/netra-apex.git
+cd netra-core-generation-1
+
+# Start all services with Docker Compose (development mode)
+docker-compose -f docker-compose.dev.yml up -d
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Stop services
+docker-compose -f docker-compose.dev.yml down
+
+# For testing environment
+docker-compose -f docker-compose.test.yml up -d
+```
+
+**Docker Compose Benefits:**
+- ✅ Zero configuration required
+- ✅ All dependencies included (PostgreSQL, Redis, ClickHouse)
+- ✅ Consistent environment across all developers
+- ✅ Automatic networking between services
+- ✅ Volume persistence for databases
+- ✅ Hot-reload for code changes
+- ✅ Production-like environment
+
+**Service Endpoints:**
+- Backend API: http://localhost:8000
+- Frontend UI: http://localhost:3000
+- WebSocket: ws://localhost:8000/ws
+- API Docs: http://localhost:8000/docs
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
+- ClickHouse: localhost:8123
+
+### Alternative: Local Development (Without Docker)
+
+If you prefer to run services locally without Docker:
+
+#### Installation
 
 ```bash
 # Clone repository
@@ -102,9 +148,9 @@ pip install -r requirements-dev.txt
 cd frontend && npm install && cd ..
 ```
 
-### 🚀 Development Launcher
+#### Development Launcher
 
-The dev launcher is the recommended way to start all services with proper configuration:
+The dev launcher manages local services with proper configuration:
 
 ```bash
 # Default start (all services with optimal settings)
@@ -126,14 +172,7 @@ python scripts/dev_launcher.py --help
 - ✅ Crash recovery
 - ✅ Performance optimization
 
-**Launches:**
-Ports may be dynamic.
-- Backend API: http://localhost:8000
-- Frontend UI: http://localhost:3000
-- WebSocket: ws://localhost:8000/ws
-- API Docs: http://localhost:8000/docs
-
-### Development Database Setup
+#### Local Database Setup
 
 ```bash
 # Option 1: Quick setup with Terraform (recommended)

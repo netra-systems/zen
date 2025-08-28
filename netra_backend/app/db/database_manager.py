@@ -1271,6 +1271,42 @@ class DatabaseManager:
                 # Still return the database manager components
                 await db_manager._ensure_initialized()
                 return db_manager._engine, db_manager._session_factory, migration_lock_manager
+    
+    @staticmethod
+    async def get_async_session_factory():
+        """Get async session factory for testing."""
+        try:
+            engine = DatabaseManager.create_application_engine()
+            return async_sessionmaker(
+                engine,
+                expire_on_commit=False,
+                autocommit=False,
+                autoflush=False
+            )
+        except Exception as e:
+            logger.error(f"Failed to create async session factory: {e}")
+            raise
+    
+    @staticmethod
+    def get_sync_session_factory():
+        """Get sync session factory for testing."""
+        try:
+            engine = DatabaseManager.create_migration_engine()
+            return sessionmaker(bind=engine)
+        except Exception as e:
+            logger.error(f"Failed to create sync session factory: {e}")
+            raise
+    
+    @staticmethod
+    def get_sync_session():
+        """Get sync session context manager for testing."""
+        try:
+            engine = DatabaseManager.create_migration_engine() 
+            Session = sessionmaker(bind=engine)
+            return Session()
+        except Exception as e:
+            logger.error(f"Failed to create sync session: {e}")
+            raise
 
 
 # CONSOLIDATED CLIENT MANAGER FUNCTIONALITY
