@@ -283,16 +283,40 @@ export class AuthServiceClient {
   async refreshToken(): Promise<{ access_token: string; refresh_token?: string }> {
     logger.debug('Refreshing access token', { environment: this.environment });
     
+    // Get refresh token from localStorage
+    const refreshToken = localStorage.getItem('refresh_token');
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+    
     const response = await fetch(this.endpoints.authRefresh, {
       method: 'POST',
-      credentials: 'include', // Needed for refresh token cookie
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Needed for cookies if any
+      body: JSON.stringify({ 
+        refresh_token: refreshToken 
+      }),
     });
     
     if (!response.ok) {
+      // If refresh fails, clear tokens
+      if (response.status === 401 || response.status === 422) {
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('jwt_token');
+      }
       throw new Error(`Token refresh failed: ${response.status}`);
     }
     
     const tokens = await response.json();
+    
+    // Update stored refresh token if a new one was provided
+    if (tokens.refresh_token) {
+      localStorage.setItem('refresh_token', tokens.refresh_token);
+    }
+    
     logger.info('Token refreshed successfully');
     return tokens;
   }
