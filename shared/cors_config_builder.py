@@ -19,6 +19,8 @@ from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from urllib.parse import urlparse
 
+from shared.config_builder_base import ConfigBuilderBase
+
 
 class CORSEnvironment(Enum):
     """Environment types for CORS configuration."""
@@ -39,7 +41,7 @@ class CORSSecurityEvent:
     request_id: Optional[str] = None
 
 
-class CORSConfigurationBuilder:
+class CORSConfigurationBuilder(ConfigBuilderBase):
     """
     Main CORS configuration builder following DatabaseURLBuilder pattern.
     
@@ -55,8 +57,8 @@ class CORSConfigurationBuilder:
     
     def __init__(self, env_vars: Optional[Dict[str, Any]] = None):
         """Initialize with environment variables."""
-        self.env = env_vars or os.environ
-        self.environment = self._detect_environment()
+        # Call parent constructor which handles environment detection
+        super().__init__(env_vars)
         
         # Initialize sub-builders
         self.origins = self.OriginsBuilder(self)
@@ -67,33 +69,6 @@ class CORSConfigurationBuilder:
         self.health = self.HealthBuilder(self)
         self.websocket = self.WebSocketBuilder(self)
         self.static = self.StaticAssetsBuilder(self)
-    
-    def _detect_environment(self) -> str:
-        """
-        Detect current environment from various environment variables.
-        
-        Returns:
-            Environment name: 'development', 'staging', or 'production'
-        """
-        # Check various environment variable formats
-        env_vars = [
-            self.env.get("ENVIRONMENT", "").lower(),
-            self.env.get("ENV", "").lower(),
-            self.env.get("NODE_ENV", "").lower(),
-            self.env.get("NETRA_ENV", "").lower(),
-            self.env.get("AUTH_ENV", "").lower()
-        ]
-        
-        for env in env_vars:
-            if env in ["production", "prod"]:
-                return "production"
-            elif env in ["staging", "stage", "stg"]:
-                return "staging"
-            elif env in ["development", "dev", "local"]:
-                return "development"
-        
-        # Default to development if no environment is explicitly set
-        return "development"
     
     class OriginsBuilder:
         """Manages allowed origins with environment-specific patterns."""
@@ -758,8 +733,11 @@ class CORSConfigurationBuilder:
             config = self.parent.fastapi.get_middleware_config()
             recent_events = self.parent.security.get_security_events(10)
             
-            return {
-                "environment": self.parent.environment,
+            # Get common debug info from base class
+            debug_info = self.parent.get_common_debug_info()
+            
+            # Add CORS-specific debug information
+            debug_info.update({
                 "configuration": {
                     "origins_count": len(self.parent.origins.allowed),
                     "allowed_methods": self.parent.headers.allowed_methods,
@@ -768,7 +746,7 @@ class CORSConfigurationBuilder:
                 },
                 "validation": {
                     "config_valid": self.validate_config(config),
-                    "has_custom_origins": bool(self.parent.env.get("CORS_ORIGINS", ""))
+                    "has_custom_origins": bool(self.parent.get_env_var("CORS_ORIGINS", ""))
                 },
                 "security": {
                     "recent_events_count": len(recent_events),
@@ -782,7 +760,9 @@ class CORSConfigurationBuilder:
                     ]
                 },
                 "sample_origins": self.parent.origins.allowed[:5] if self.parent.origins.allowed else []
-            }
+            })
+            
+            return debug_info
     
     def validate(self) -> Tuple[bool, str]:
         """
@@ -798,7 +778,7 @@ class CORSConfigurationBuilder:
             return False, "Invalid configuration structure"
         
         # Check for production security
-        if self.environment == "production":
+        if self.is_production():
             if "*" in self.origins.allowed:
                 return False, "Production environment should not allow all origins"
             if not config.get("allow_credentials", True):
@@ -809,6 +789,17 @@ class CORSConfigurationBuilder:
             return False, "No allowed origins configured"
         
         return True, ""
+    
+    def get_debug_info(self) -> Dict[str, Any]:
+        """
+        Get detailed debug information about current configuration.
+        Implementation of abstract method from ConfigBuilderBase.
+        
+        Returns:
+            Dictionary with comprehensive debug information
+        """
+        # Delegate to the health sub-builder for the detailed implementation
+        return self.health.get_debug_info()
     
     def get_safe_log_message(self) -> str:
         """
