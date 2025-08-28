@@ -93,7 +93,11 @@ class BaseExecutionEngine:
         except AgentExecutionError as e:
             return self._create_error_result(context, str(e))
         except Exception as e:
-            return await self.error_handler.handle_execution_error(e, context)
+            error = await self.error_handler.handle_execution_error(e, context)
+            # Wrap AgentError in ExecutionResult for compatibility
+            if hasattr(error, 'message'):
+                return self._create_error_result(context, error.message)
+            return self._create_error_result(context, str(error))
     
     async def _execute_agent_workflow(self, agent: 'BaseExecutionInterface',
                                     context: ExecutionContext) -> ExecutionResult:

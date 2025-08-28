@@ -35,6 +35,9 @@ class ExecutionContext:
         """Initialize metadata if not provided."""
         if self.metadata is None:
             self.metadata = {}
+        # Add timestamp property for compatibility with error handling
+        if not hasattr(self, 'timestamp'):
+            self.timestamp = self.start_time or datetime.now(timezone.utc)
     
     def __hash__(self):
         """Make ExecutionContext hashable using run_id and agent_name."""
