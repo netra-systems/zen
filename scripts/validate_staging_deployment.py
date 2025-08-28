@@ -62,8 +62,8 @@ class StagingValidator:
             "fernet-key-staging",
             "openai-api-key-staging",
             "jwt-secret-staging",
-            "google-client-id-staging",
-            "google-client-secret-staging"
+            "google-oauth-client-id-staging",
+            "google-oauth-client-secret-staging"
         ]
         self.required_apis = [
             "run.googleapis.com",
@@ -442,8 +442,8 @@ class StagingValidator:
     def check_oauth_configuration(self) -> Tuple[bool, str]:
         """Validate OAuth configuration for staging environment."""
         try:
-            client_id = self._get_secret_value("google-client-id-staging")
-            client_secret = self._get_secret_value("google-client-secret-staging")
+            client_id = self._get_secret_value("google-oauth-client-id-staging")
+            client_secret = self._get_secret_value("google-oauth-client-secret-staging")
             
             if not client_id:
                 return False, "Google Client ID not found in secrets"

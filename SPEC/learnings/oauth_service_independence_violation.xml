@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>OAuth Logout Due to Service Independence Violation</title>
+    <date>2025-08-28</date>
+    <category>authentication,service_independence,critical_bug</category>
+    <severity>CRITICAL</severity>
+    <impact>Complete authentication failure in staging/production</impact>
+  </metadata>
+  
+  <problem>
+    <symptom>Users immediately logged out after successful OAuth login in staging</symptom>
+    <symptom>422 Unprocessable Entity errors on /auth/refresh endpoint</symptom>
+    <symptom>Tokens generated but session not persisted</symptom>
+    <root_cause>
+      Auth service database manager was importing from netra_backend,
+      violating service independence. In deployed environments, auth 
+      service container doesn't have netra_backend code, causing import
+      failures and database/session management failures.
+    </root_cause>
+  </problem>
+  
+  <violation_details>
+    <file>auth_service/auth_core/database/database_manager.py</file>
+    <violations>
+      <method name="convert_database_url">from netra_backend.app.db.database_manager import DatabaseManager</method>
+      <method name="get_base_database_url">from netra_backend.app.db.database_manager import DatabaseManager</method>
+      <method name="get_migration_url_sync_format">from netra_backend.app.db.database_manager import DatabaseManager</method>
+      <method name="validate_base_url">from netra_backend.app.db.database_manager import DatabaseManager</method>
+      <method name="validate_migration_url_sync_format">from netra_backend.app.db.database_manager import DatabaseManager</method>
+      <method name="is_local_development">from netra_backend.app.db.database_manager import DatabaseManager</method>
+      <method name="is_remote_environment">from netra_backend.app.db.database_manager import DatabaseManager</method>
+      <method name="get_pool_status">from netra_backend.app.db.database_manager import DatabaseManager</method>
+    </violations>
+  </violation_details>
+  
+  <solution>
+    <principle>
+      MICROSERVICES MUST BE 100% INDEPENDENT
+      - NEVER import across service boundaries
+      - Each service must be deployable standalone
+      - Use shared modules for common functionality
+    </principle>
+    <implementation>
+      Replaced all cross-service imports with standalone implementations
+      that use only auth service's own code and shared modules.
+    </implementation>
+  </solution>
+  
+  <prevention>
+    <rule>Run grep check before deployment: grep -r "from netra_backend" auth_service/</rule>
+    <rule>Run grep check before deployment: grep -r "from auth_service" netra_backend/</rule>
+    <rule>Add CI/CD checks to prevent cross-service imports</rule>
+    <rule>Use import_management_architecture.xml rules strictly</rule>
+  </prevention>
+  
+  <testing>
+    <test>Deploy auth service independently and verify it starts</test>
+    <test>Test OAuth flow end-to-end in staging</test>
+    <test>Verify token refresh endpoint works</test>
+    <test>Check session persistence across page refreshes</test>
+  </testing>
+  
+  <cross_references>
+    <ref>SPEC/independent_services.xml</ref>
+    <ref>SPEC/learnings/oauth_staging_issues.xml</ref>
+    <ref>SPEC/learnings/oauth_token_persistence.xml</ref>
+    <ref>SPEC/import_management_architecture.xml</ref>
+    <ref>oauth_staging_logout_fix_20250828.md</ref>
+  </cross_references>
+  
+  <key_insight>
+    Service independence violations may not manifest in local development
+    where all code is available, but cause catastrophic failures in 
+    production where services run in isolated containers. ALWAYS maintain
+    strict service boundaries.
+  </key_insight>
+</learning>

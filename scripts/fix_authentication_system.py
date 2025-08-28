@@ -91,7 +91,6 @@ class AuthenticationSystemFixer:
             'AUTH_SERVICE_ENABLED': 'true',
             'AUTH_FAST_TEST_MODE': 'false',
             'AUTH_CACHE_TTL_SECONDS': '300',
-            'OAUTH_CLIENT_ID': '84056009371-k0p7b9imaeh1p7a0vioiosjvsfn6pfrl.apps.googleusercontent.com',
             'OAUTH_CLIENT_SECRET': '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',
         }
         

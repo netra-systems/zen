@@ -108,8 +108,8 @@ class OAuthDeploymentValidator:
         # Secrets to check based on environment
         if self.environment == "staging":
             secrets_to_check = [
-                "google-client-id-staging",
-                "google-client-secret-staging"
+                "google-oauth-client-id-staging",
+                "google-oauth-client-secret-staging"
             ]
         elif self.environment == "production":
             secrets_to_check = [
@@ -157,10 +157,10 @@ class OAuthDeploymentValidator:
         
         # Determine which credentials to use
         if self.environment == "staging":
-            client_id = (gsm_secrets.get("google-client-id-staging") or 
+            client_id = (gsm_secrets.get("google-oauth-client-id-staging") or 
                         env_vars.get("GOOGLE_OAUTH_CLIENT_ID_STAGING") or 
                         env_vars.get("GOOGLE_CLIENT_ID"))
-            client_secret = (gsm_secrets.get("google-client-secret-staging") or
+            client_secret = (gsm_secrets.get("google-oauth-client-secret-staging") or
                            env_vars.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING") or 
                            env_vars.get("GOOGLE_CLIENT_SECRET"))
         elif self.environment == "production":

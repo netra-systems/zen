@@ -242,8 +242,8 @@ class StagingSecretsCreator:
         print("   Input: sk-YOUR_REAL_OPENAI_API_KEY")
         print()
         print("3. Optional: Add Google OAuth credentials (if needed):")
-        print("   gcloud secrets create google-client-id-staging --data-file=- --project=netra-staging")
-        print("   gcloud secrets create google-client-secret-staging --data-file=- --project=netra-staging")
+        print("   gcloud secrets create google-oauth-client-id-staging --data-file=- --project=netra-staging")
+        print("   gcloud secrets create google-oauth-client-secret-staging --data-file=- --project=netra-staging")
 
 
 def main():
