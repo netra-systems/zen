@@ -348,7 +348,9 @@ class WebSocketManager:
         try:
             # Convert message to dict if needed
             if hasattr(message, 'model_dump'):
-                message_dict = message.model_dump()
+                message_dict = message.model_dump(mode='json')
+            elif hasattr(message, 'to_dict'):
+                message_dict = message.to_dict()
             elif hasattr(message, 'dict'):
                 message_dict = message.dict()
             else:

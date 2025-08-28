@@ -45,7 +45,7 @@ security = HTTPBearer()
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db)
 ) -> User:
     """
     Get current authenticated user from auth service

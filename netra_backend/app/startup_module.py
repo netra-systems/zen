@@ -933,13 +933,15 @@ async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
             return start_time, logger
             
         except Exception as e:
-            logger.error(f"Error in robust startup: {e}")
+            # Use central_logger directly in exception handler to avoid scope issues
+            error_logger = central_logger.get_logger(__name__)
+            error_logger.error(f"Error in robust startup: {e}")
             # Set startup failure flags
             app.state.startup_complete = False
             app.state.startup_in_progress = False
             app.state.startup_failed = True
             app.state.startup_error = f"Robust startup exception: {str(e)}"
-            logger.warning("Falling back to legacy startup sequence...")
+            error_logger.warning("Falling back to legacy startup sequence...")
             return await _run_legacy_startup(app)
     else:
         # Use the legacy startup sequence

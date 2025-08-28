@@ -182,6 +182,11 @@ class StatePersistenceService:
     async def _create_state_snapshot(self, request: StatePersistenceRequest,
                                     db_session: AsyncSession) -> str:
         """Create a new state snapshot in database."""
+        # Skip state persistence for run_ prefixed IDs (these are test/temporary IDs)
+        if request.user_id and request.user_id.startswith("run_"):
+            logger.debug(f"Skipping state persistence for temporary run ID: {request.user_id}")
+            return str(uuid.uuid4())  # Return a dummy snapshot ID
+        
         # Ensure user exists before creating snapshot
         await self._ensure_user_exists_for_snapshot(request.user_id, db_session)
         
