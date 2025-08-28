@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-08-28T12:12:40.143453",
+  "iterations": 5,
+  "agent_deployments": 5,
+  "issues_resolved": 5,
+  "issues_unresolved": 0,
+  "agent_types_used": [
+    "security_specialist"
+  ],
+  "agent_deployment_counts": {
+    "security_specialist": 5
+  }
+}

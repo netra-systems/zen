@@ -1,6 +1,435 @@
 {
-  "generated_at": "2025-08-28T12:00:54.720974",
-  "agent_assignments": [],
+  "generated_at": "2025-08-28T12:21:30.116308",
+  "agent_assignments": [
+    {
+      "agent_type": "general_remediation_agent",
+      "issue_type": "Warning condition",
+      "severity": "MEDIUM",
+      "issue_count": 46,
+      "affected_containers": [
+        "netra-backend",
+        "buildx_buildkit_staging-builder0"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:02:46.570835887Z",
+          "line_number": 11,
+          "log_excerpt": "WARNI [shared.secret_manager_builder] Google Cloud Secret Manager not available: cannot import name 'secretmanager' from 'google.cloud' (unknown location)",
+          "full_line": "2025-08-28T19:02:46.570835887Z WARNI [shared.secret_manager_builder] Google Cloud Secret Manager not available: cannot import name 'secretmanager' from 'google.cloud' (unknown location)"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:02:53.751787868Z",
+          "line_number": 20,
+          "log_excerpt": "\u001b[32m2025-08-28 19:02:53.750\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mGoogle Cloud Secret Manager not available: cannot import name 'secretmanager' from 'google.cloud' (unknown location)\u001b[0m",
+          "full_line": "2025-08-28T19:02:53.751787868Z \u001b[32m2025-08-28 19:02:53.750\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[33m\u001b[1mGoogle Cloud Secret Manager not available: cannot import name 'secretmanager' from 'google.cloud' (unknown location)\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Warning condition",
+          "pattern_matched": "WARNING|WARN",
+          "timestamp": "2025-08-28T19:03:22.895205100Z",
+          "line_number": 146,
+          "log_excerpt": "\u001b[32m2025-08-28 19:03:22.893\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.middleware.security_response_middleware\u001b[0m:\u001b[36mdispatch\u001b[0m:\u001b[36m59\u001b[0m | \u001b[33m\u001b[1mConverting HTTP 404 to 401 for protected endpoint: /api/unified/health\u001b[0m",
+          "full_line": "2025-08-28T19:03:22.895205100Z \u001b[32m2025-08-28 19:03:22.893\u001b[0m | \u001b[33m\u001b[1mWARNING \u001b[0m | \u001b[36mnetra_backend.app.middleware.security_response_middleware\u001b[0m:\u001b[36mdispatch\u001b[0m:\u001b[36m59\u001b[0m | \u001b[33m\u001b[1mConverting HTTP 404 to 401 for protected endpoint: /api/unified/health\u001b[0m"
+        }
+      ]
+    },
+    {
+      "agent_type": "performance_optimization_agent",
+      "issue_type": "Performance issue",
+      "severity": "MEDIUM",
+      "issue_count": 9,
+      "affected_containers": [
+        "netra-backend"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Performance issue",
+          "pattern_matched": "slow query|performance",
+          "timestamp": "2025-08-28T19:03:17.797450019Z",
+          "line_number": 123,
+          "log_excerpt": "\u001b[32m2025-08-28 19:03:17.790\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.core.performance_optimization_manager\u001b[0m:\u001b[36minitialize\u001b[0m:\u001b[36m43\u001b[0m | \u001b[1mPerformance optimization manager initialized\u001b[0m",
+          "full_line": "2025-08-28T19:03:17.797450019Z \u001b[32m2025-08-28 19:03:17.790\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.core.performance_optimization_manager\u001b[0m:\u001b[36minitialize\u001b[0m:\u001b[36m43\u001b[0m | \u001b[1mPerformance optimization manager initialized\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Performance issue",
+          "pattern_matched": "slow query|performance",
+          "timestamp": "2025-08-28T19:03:17.797593328Z",
+          "line_number": 126,
+          "log_excerpt": "\u001b[32m2025-08-28 19:03:17.790\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.startup_module\u001b[0m:\u001b[36m_initialize_performance_optimizations\u001b[0m:\u001b[36m194\u001b[0m | \u001b[1mPerformance optimizations initialized successfully\u001b[0m",
+          "full_line": "2025-08-28T19:03:17.797593328Z \u001b[32m2025-08-28 19:03:17.790\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.startup_module\u001b[0m:\u001b[36m_initialize_performance_optimizations\u001b[0m:\u001b[36m194\u001b[0m | \u001b[1mPerformance optimizations initialized successfully\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Performance issue",
+          "pattern_matched": "slow query|performance",
+          "timestamp": "2025-08-28T19:03:47.794649014Z",
+          "line_number": 156,
+          "log_excerpt": "\u001b[32m2025-08-28 19:03:47.794\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.startup_module\u001b[0m:\u001b[36m_run_index_optimization_background\u001b[0m:\u001b[36m239\u001b[0m | \u001b[1mBackground database optimization completed successfully: {'postgres': {'indexes_created': {}, 'recommendations': [{'table_name': 'userbase', 'columns': ['email'], 'index_type': 'btree', 'reason': 'Frequent user lookups by email', 'estimated_benefit': 0.0, 'priority': 1}, {'table_name': 'corpus_audit_logs', 'columns': ['timestamp'], 'index_",
+          "full_line": "2025-08-28T19:03:47.794649014Z \u001b[32m2025-08-28 19:03:47.794\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mnetra_backend.app.startup_module\u001b[0m:\u001b[36m_run_index_optimization_background\u001b[0m:\u001b[36m239\u001b[0m | \u001b[1mBackground database optimization completed successfully: {'postgres': {'indexes_created': {}, 'recommendations': [{'table_name': 'userbase', 'columns': ['email'], 'index_type': 'btree', 'reason': 'Frequent user lookups by email', 'estimated_benefit': 0.0, 'priority': 1}, {'table_name': 'corpus_audit_logs', 'columns': ['timestamp'], 'index_type': 'btree', 'reason': 'Time-based audit queries', 'estimated_benefit': 0.0, 'priority': 1}, {'table_name': 'corpus_audit_logs', 'columns': ['user_id', 'action'], 'index_type': 'btree', 'reason': 'User action filtering', 'estimated_benefit': 0.0, 'priority': 2}, {'table_name': 'secret', 'columns': ['user_id'], 'index_type': 'btree', 'reason': 'User secret lookups', 'estimated_benefit': 0.0, 'priority': 2}, {'table_name': 'agent_states', 'columns': ['session_id'], 'index_type': 'btree', 'reason': 'Session-based state lookups', 'estimated_benefit': 0.0, 'priority': 2}], 'usage_stats': {}}, 'clickhouse': {'table_optimizations': {'netra_content_corpus': False, 'netra_audit_events': False, 'netra_performance_metrics': False, 'netra_agent_logs': False}, 'materialized_views': {'user_daily_activity': False, 'hourly_performance_metrics': False}}, 'recommendations': []}\u001b[0m"
+        }
+      ]
+    },
+    {
+      "agent_type": "general_remediation_agent",
+      "issue_type": "Validation error",
+      "severity": "MEDIUM",
+      "issue_count": 2,
+      "affected_containers": [
+        "netra-backend"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Validation error",
+          "pattern_matched": "validation.*failed|invalid.*input",
+          "timestamp": "2025-08-28T19:04:42.082773888Z",
+          "line_number": 188,
+          "log_excerpt": "\u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36m_authenticate_jwt\u001b[0m:\u001b[36m203\u001b[0m | \u001b[31m\u001b[1mJWT validation failed: None\u001b[0m",
+          "full_line": "2025-08-28T19:04:42.082773888Z \u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36m_authenticate_jwt\u001b[0m:\u001b[36m203\u001b[0m | \u001b[31m\u001b[1mJWT validation failed: None\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Validation error",
+          "pattern_matched": "validation.*failed|invalid.*input",
+          "timestamp": "2025-08-28T19:04:46.453983700Z",
+          "line_number": 211,
+          "log_excerpt": "\u001b[32m2025-08-28 19:04:46.453\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36m_authenticate_jwt\u001b[0m:\u001b[36m203\u001b[0m | \u001b[31m\u001b[1mJWT validation failed: None\u001b[0m",
+          "full_line": "2025-08-28T19:04:46.453983700Z \u001b[32m2025-08-28 19:04:46.453\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36m_authenticate_jwt\u001b[0m:\u001b[36m203\u001b[0m | \u001b[31m\u001b[1mJWT validation failed: None\u001b[0m"
+        }
+      ]
+    },
+    {
+      "agent_type": "general_remediation_agent",
+      "issue_type": "Operation retry detected",
+      "severity": "MEDIUM",
+      "issue_count": 1,
+      "affected_containers": [
+        "netra-backend"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "MEDIUM",
+          "issue_type": "Operation retry detected",
+          "pattern_matched": "retry|retrying",
+          "timestamp": "2025-08-28T19:20:40.763496109Z",
+          "line_number": 899,
+          "log_excerpt": "[parameters: ('e4fe04e6-5fe2-464a-a3f1-6680f14f5590', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (420 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\":",
+          "full_line": "2025-08-28T19:20:40.763496109Z [parameters: ('e4fe04e6-5fe2-464a-a3f1-6680f14f5590', 'run_82832879-d18a-466e-b068-6501959c8428', 'thread_dev-temp-f2eec4b3', 'dev-temp-f2eec4b3', '1.0', '1.0', 'auto', '{\"user_request\": \"I need to optimize our customer support AI agent - it\\'s expensive but customers love the quality.\", \"chat_thread_id\": \"thread_dev- ... (420 characters truncated) ... 0:00\", \"execution_context\": {}, \"custom_fields\": {}, \"priority\": null, \"retry_count\": 0, \"parent_agent_id\": null, \"tags\": []}, \"quality_metrics\": {}}', 'json', None, 0, 'initialization', '{\"step_count\": 0}', datetime.datetime(2025, 9, 4, 19, 20, 40, 749374, tzinfo=datetime.timezone.utc), True, None, None)]"
+        }
+      ]
+    },
+    {
+      "agent_type": "general_remediation_agent",
+      "issue_type": "Informational error",
+      "severity": "LOW",
+      "issue_count": 3,
+      "affected_containers": [
+        "netra-backend"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "LOW",
+          "issue_type": "Informational error",
+          "pattern_matched": "INFO.*failed|INFO.*error",
+          "timestamp": "2025-08-28T19:03:17.797813781Z",
+          "line_number": 137,
+          "log_excerpt": "\u001b[32m2025-08-28 19:03:17.795\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 2.41s: 10/10 successful, 0 degraded, 0 failed\u001b[0m",
+          "full_line": "2025-08-28T19:03:17.797813781Z \u001b[32m2025-08-28 19:03:17.795\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 2.41s: 10/10 successful, 0 degraded, 0 failed\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "LOW",
+          "issue_type": "Informational error",
+          "pattern_matched": "INFO.*failed|INFO.*error",
+          "timestamp": "2025-08-28T19:09:18.926989867Z",
+          "line_number": 377,
+          "log_excerpt": "\u001b[32m2025-08-28 19:09:18.920\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.16s: 10/10 successful, 0 degraded, 0 failed\u001b[0m",
+          "full_line": "2025-08-28T19:09:18.926989867Z \u001b[32m2025-08-28 19:09:18.920\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.16s: 10/10 successful, 0 degraded, 0 failed\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "LOW",
+          "issue_type": "Informational error",
+          "pattern_matched": "INFO.*failed|INFO.*error",
+          "timestamp": "2025-08-28T19:10:37.256459839Z",
+          "line_number": 685,
+          "log_excerpt": "\u001b[32m2025-08-28 19:10:37.243\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.03s: 10/10 successful, 0 degraded, 0 failed\u001b[0m",
+          "full_line": "2025-08-28T19:10:37.256459839Z \u001b[32m2025-08-28 19:10:37.243\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mStartup completed in 3.03s: 10/10 successful, 0 degraded, 0 failed\u001b[0m"
+        }
+      ]
+    },
+    {
+      "agent_type": "auth_remediation_agent",
+      "issue_type": "Authentication issue",
+      "severity": "HIGH",
+      "issue_count": 2,
+      "affected_containers": [
+        "netra-backend"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Authentication issue",
+          "pattern_matched": "authentication.*failed|unauthorized|(?:status|response|error|HTTP)[:\\s]+(?:401|403)|(?:401|403)[:\\s]+(?:unauthorized|forbidden|auth)",
+          "timestamp": "2025-08-28T19:04:42.081653676Z",
+          "line_number": 186,
+          "log_excerpt": "\u001b[32m2025-08-28 19:04:42.081\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mHTTP Request: POST http://auth:8081/auth/validate \"HTTP/1.1 401 Unauthorized\"\u001b[0m",
+          "full_line": "2025-08-28T19:04:42.081653676Z \u001b[32m2025-08-28 19:04:42.081\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mHTTP Request: POST http://auth:8081/auth/validate \"HTTP/1.1 401 Unauthorized\"\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Authentication issue",
+          "pattern_matched": "authentication.*failed|unauthorized|(?:status|response|error|HTTP)[:\\s]+(?:401|403)|(?:401|403)[:\\s]+(?:unauthorized|forbidden|auth)",
+          "timestamp": "2025-08-28T19:04:46.452789921Z",
+          "line_number": 209,
+          "log_excerpt": "\u001b[32m2025-08-28 19:04:46.452\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mHTTP Request: POST http://auth:8081/auth/validate \"HTTP/1.1 401 Unauthorized\"\u001b[0m",
+          "full_line": "2025-08-28T19:04:46.452789921Z \u001b[32m2025-08-28 19:04:46.452\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mlogging\u001b[0m:\u001b[36mhandle\u001b[0m:\u001b[36m978\u001b[0m | \u001b[1mHTTP Request: POST http://auth:8081/auth/validate \"HTTP/1.1 401 Unauthorized\"\u001b[0m"
+        }
+      ]
+    },
+    {
+      "agent_type": "error_remediation_agent",
+      "issue_type": "Application error",
+      "severity": "HIGH",
+      "issue_count": 37,
+      "affected_containers": [
+        "netra-postgres",
+        "netra-backend"
+      ],
+      "sample_issues": [
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:04:42.082773888Z",
+          "line_number": 188,
+          "log_excerpt": "\u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36m_authenticate_jwt\u001b[0m:\u001b[36m203\u001b[0m | \u001b[31m\u001b[1mJWT validation failed: None\u001b[0m",
+          "full_line": "2025-08-28T19:04:42.082773888Z \u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36m_authenticate_jwt\u001b[0m:\u001b[36m203\u001b[0m | \u001b[31m\u001b[1mJWT validation failed: None\u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:04:42.082794706Z",
+          "line_number": 190,
+          "log_excerpt": "\u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36msecure_websocket_context\u001b[0m:\u001b[36m464\u001b[0m | \u001b[31m\u001b[1mSecure WebSocket context error: \u001b[0m",
+          "full_line": "2025-08-28T19:04:42.082794706Z \u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.websocket_core.auth\u001b[0m:\u001b[36msecure_websocket_context\u001b[0m:\u001b[36m464\u001b[0m | \u001b[31m\u001b[1mSecure WebSocket context error: \u001b[0m"
+        },
+        {
+          "container": "netra-backend",
+          "container_id": "52dfd9900297",
+          "severity": "HIGH",
+          "issue_type": "Application error",
+          "pattern_matched": "ERROR|Exception|Traceback",
+          "timestamp": "2025-08-28T19:04:42.083057161Z",
+          "line_number": 192,
+          "log_excerpt": "\u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36mwebsocket_endpoint\u001b[0m:\u001b[36m201\u001b[0m | \u001b[31m\u001b[1mWebSocket authentication failed: Authentication failed: Invalid or expired token\u001b[0m",
+          "full_line": "2025-08-28T19:04:42.083057161Z \u001b[32m2025-08-28 19:04:42.082\u001b[0m | \u001b[31m\u001b[1mERROR   \u001b[0m | \u001b[36mnetra_backend.app.routes.websocket\u001b[0m:\u001b[36mwebsocket_endpoint\u001b[0m:\u001b[36m201\u001b[0m | \u001b[31m\u001b[1mWebSocket authentication failed: Authentication failed: Invalid or expired token\u001b[0m"
+        }
+      ]
+    }
+  ],
   "immediate_actions": [],
-  "scheduled_tasks": []
+  "scheduled_tasks": [
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Authentication issue",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "auth_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "HIGH",
+      "container": "netra-backend",
+      "issue": "Application error",
+      "scheduled_for": "2025-08-28T12:26:30.116308",
+      "assigned_agent": "error_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-28T12:51:30.116308",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-28T12:51:30.116308",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Performance issue",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "performance_optimization_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Performance issue",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "performance_optimization_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Performance issue",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "performance_optimization_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "MEDIUM",
+      "container": "netra-backend",
+      "issue": "Warning condition",
+      "scheduled_for": "2025-08-28T12:51:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "LOW",
+      "container": "netra-backend",
+      "issue": "Informational error",
+      "scheduled_for": "2025-08-28T13:21:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "LOW",
+      "container": "netra-backend",
+      "issue": "Informational error",
+      "scheduled_for": "2025-08-28T13:21:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    },
+    {
+      "priority": "LOW",
+      "container": "netra-backend",
+      "issue": "Informational error",
+      "scheduled_for": "2025-08-28T13:21:30.117312",
+      "assigned_agent": "general_remediation_agent"
+    }
+  ]
 }
