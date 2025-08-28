@@ -33,7 +33,7 @@ class TestToolDispatcherCoreOperations:
         result = await dispatcher.dispatch("test_tool", param1="value1", param2="value2")
         
         # Fixed: Verify ToolResult directly instead of using helper
-        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        from netra_backend.app.schemas.tool import ToolResult, ToolStatus
         assert isinstance(result, ToolResult)
         assert result.status == ToolStatus.SUCCESS
         assert result.tool_input.tool_name == "test_tool"
@@ -112,7 +112,7 @@ class TestToolDispatcherCoreOperations:
     def _verify_successful_dispatch_result(self, result) -> None:
         """Verify successful dispatch result."""
         # Fixed: Direct verification without helper function
-        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        from netra_backend.app.schemas.tool import ToolResult, ToolStatus
         assert isinstance(result, ToolResult)
         assert result.status == ToolStatus.SUCCESS
         assert result.tool_input.tool_name == "test_tool"
@@ -176,7 +176,7 @@ class TestToolDispatcherCoreOperations:
         results = await asyncio.gather(*tasks)
         
         # Verify all results are successful and contain correct data
-        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        from netra_backend.app.schemas.tool import ToolResult, ToolStatus
         for i, result in enumerate(results):
             assert isinstance(result, ToolResult)
             assert result.status == ToolStatus.SUCCESS
@@ -194,7 +194,7 @@ class TestToolDispatcherCoreOperations:
         
         result = await dispatcher.dispatch("empty_tool")
         
-        from netra_backend.app.schemas.Tool import ToolResult, ToolStatus
+        from netra_backend.app.schemas.tool import ToolResult, ToolStatus
         assert isinstance(result, ToolResult)
         assert result.status == ToolStatus.SUCCESS
         assert result.tool_input.kwargs == {}

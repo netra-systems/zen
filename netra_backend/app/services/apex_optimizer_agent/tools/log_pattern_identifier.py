@@ -6,7 +6,7 @@ from sklearn.cluster import KMeans
 
 from netra_backend.app.config import get_config
 settings = get_config()
-from netra_backend.app.schemas.Pattern import DiscoveredPattern
+from netra_backend.app.schemas.pattern import DiscoveredPattern
 from netra_backend.app.services.apex_optimizer_agent.tools.base import (
     BaseTool,
     ToolMetadata,

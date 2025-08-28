@@ -16,7 +16,7 @@ import pytest
 from pydantic import BaseModel
 
 from netra_backend.app.core.isolated_environment import get_env
-from netra_backend.app.schemas.Config import AppConfig, LLMConfig
+from netra_backend.app.schemas.config import AppConfig, LLMConfig
 
 class LLMProvider(Enum):
     OPENAI = "openai"

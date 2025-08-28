@@ -65,7 +65,7 @@
             </pattern>
             
             <pattern>
-                <example>from netra_backend.app.schemas.user import UserSchema</example>
+                <example>from netra_backend.app.schemas.User import UserSchema</example>
                 <description>Direct import from schema module</description>
             </pattern>
             

@@ -22,7 +22,7 @@ from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.core.exceptions_config import ConfigurationError
 
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
-from netra_backend.app.schemas.Config import AppConfig, DevelopmentConfig
+from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig
 
 class TestSecretManager:
     """Test the SecretManager class."""

@@ -34,7 +34,7 @@ from netra_backend.app.schemas import (
     WebSocketMessage,
     Workload,
 )
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from netra_backend.app.services.agent_service import AgentService, get_agent_service
 from netra_backend.app.services.security_service import SecurityService
 

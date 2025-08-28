@@ -7,7 +7,7 @@ from netra_backend.app.core.interfaces_tools import (
     ToolExecutionEngine as CoreToolExecutionEngine,
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Tool import (
+from netra_backend.app.schemas.tool import (
     SimpleToolPayload,
     ToolExecuteResponse,
     ToolExecutionEngineInterface,

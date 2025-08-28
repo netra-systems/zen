@@ -19,7 +19,7 @@ import pytest
 from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.core.exceptions import NetraException
-from netra_backend.app.schemas.Request import StartAgentPayload
+from netra_backend.app.schemas.request import StartAgentPayload
 
 from netra_backend.app.services.agent_service import AgentService
 

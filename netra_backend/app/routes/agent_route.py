@@ -29,7 +29,7 @@ from netra_backend.app.routes.agent_route_validators import (
     validate_agent_state,
     validate_agent_state_exists,
 )
-from netra_backend.app.schemas.Request import RequestModel
+from netra_backend.app.schemas.request import RequestModel
 from netra_backend.app.services.agent_service import AgentService, get_agent_service
 from netra_backend.app.services.state_persistence import state_persistence_service
 

@@ -35,7 +35,7 @@ from tests.e2e.workspace_isolation_helpers import (
     RBACEnforcementTester, WorkspaceAuditTrailValidator,
     WorkspaceDeletionCleaner, WorkspaceSecurityTestUtils
 )
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 
 @pytest.mark.asyncio

@@ -32,7 +32,7 @@ from netra_backend.app.schemas.admin_tool_types import (
 )
 from netra_backend.app.schemas.admin_tool_types import ToolStatus as AdminToolStatus
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.schemas.Tool import ToolInput, ToolResult, ToolStatus
+from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 from netra_backend.app.services.permission_service import PermissionService
 
 logger = central_logger

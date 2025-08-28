@@ -3,13 +3,13 @@
 from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     PermissionCheckResult,
     RateLimit,
     ToolAvailability,
     ToolExecutionContext,
 )
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 logger = central_logger
 
@@ -32,7 +32,7 @@ class ToolAvailabilityProcessor:
 
     async def _get_user_plan(self, user_id: str) -> UserPlan:
         """Get user's current plan"""
-        from netra_backend.app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.user_plan import PlanFeatures
         return UserPlan(
             user_id=user_id,
             tier=PlanTier.FREE,

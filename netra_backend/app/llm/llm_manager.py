@@ -12,7 +12,7 @@ from netra_backend.app.llm.llm_management_utilities import LLMManagementUtilitie
 from netra_backend.app.llm.llm_response_processing import parse_nested_json_recursive
 from netra_backend.app.llm.llm_structured_operations import LLMStructuredOperations
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.schemas.llm_base_types import (
     LLMConfigInfo,
     LLMHealthCheck,

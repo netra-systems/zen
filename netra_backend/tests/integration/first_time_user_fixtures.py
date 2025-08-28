@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from fastapi import status
 from netra_backend.app.auth_integration.auth import get_current_user as AuthService
 from netra_backend.app.config import get_config
-from netra_backend.app.schemas.UserPlan import UserPlan
+from netra_backend.app.schemas.user_plan import UserPlan
 from netra_backend.app.schemas.registry import Message, Thread, User
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 from netra_backend.app.services.cost_calculator import (

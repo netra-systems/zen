@@ -30,7 +30,7 @@ from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.base import Base
 
 from netra_backend.app.db.models_user import ToolUsageLog, User
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 def mock_justified(reason):
     """Decorator for justified mocks per testing standards"""

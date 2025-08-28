@@ -5,7 +5,7 @@ from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 from fastapi import HTTPException, WebSocket
 from pydantic import BaseModel
 
-from netra_backend.app.schemas.Request import RequestModel
+from netra_backend.app.schemas.request import RequestModel
 from netra_backend.app.services.agent_service import AgentService
 
 

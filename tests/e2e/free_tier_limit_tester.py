@@ -19,7 +19,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from tests.e2e.free_tier_limit_managers import (
     LimitEnforcementManager,
     UpgradePromptManager,

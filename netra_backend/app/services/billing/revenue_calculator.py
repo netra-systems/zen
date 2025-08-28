@@ -16,7 +16,7 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.unified_logging import get_central_logger
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 logger = get_central_logger().get_logger(__name__)
 

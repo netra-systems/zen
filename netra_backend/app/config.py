@@ -30,7 +30,7 @@ from netra_backend.app.core.configuration.base import (
     reload_unified_config,
     validate_config_integrity,
 )
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 # DEPRECATED: Old config manager - kept for backward compatibility only
 try:

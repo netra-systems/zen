@@ -14,7 +14,7 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.postgres import get_db
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     PermissionCheckResult,
     ToolExecutionContext,
 )

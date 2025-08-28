@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.dependencies import get_db_session
-from netra_backend.app.schemas.Reference import (
+from netra_backend.app.schemas.reference import (
     ReferenceCreateRequest,
     ReferenceGetResponse,
     ReferenceItem,

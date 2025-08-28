@@ -10,7 +10,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.core.exceptions_service import ServiceUnavailableError
 from netra_backend.app.llm.observability import get_data_logger, get_heartbeat_logger
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 logger = central_logger.get_logger(__name__)
 

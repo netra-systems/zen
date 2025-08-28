@@ -25,7 +25,7 @@ import pytest
 
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager
-from netra_backend.app.schemas.Tool import BaseTool
+from netra_backend.app.schemas.tool import BaseTool
 
 # Real components for L2-L3 testing
 from netra_backend.app.services.redis_service import RedisService

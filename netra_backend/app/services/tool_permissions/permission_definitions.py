@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     BusinessRequirement,
     PermissionLevel,
     RateLimit,

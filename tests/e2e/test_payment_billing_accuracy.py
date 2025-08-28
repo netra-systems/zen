@@ -33,7 +33,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 import pytest
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.payment_billing_helpers import BillingAccuracyValidator
 

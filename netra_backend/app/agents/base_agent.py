@@ -19,7 +19,7 @@ from netra_backend.app.core.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.llm.observability import generate_llm_correlation_id
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Agent import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 # Import timing components
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector

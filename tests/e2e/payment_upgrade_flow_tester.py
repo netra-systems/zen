@@ -20,7 +20,7 @@ import time
 import uuid
 from typing import Any, Dict
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 from tests.e2e.payment_flow_manager import PaymentFlowManager
 
 

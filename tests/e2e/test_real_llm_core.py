@@ -28,7 +28,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 
 class RealLLMTestManager:

@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 import redis
 
-from netra_backend.app.schemas.ToolPermission import (
+from netra_backend.app.schemas.tool_permission import (
     BusinessRequirement,
     PermissionCheckResult,
     PermissionLevel,
@@ -19,7 +19,7 @@ from netra_backend.app.schemas.ToolPermission import (
     ToolExecutionContext,
     ToolPermission,
 )
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier, UserPlan
 from netra_backend.app.services.tool_permissions.permission_checker import (
     PermissionChecker,
 )

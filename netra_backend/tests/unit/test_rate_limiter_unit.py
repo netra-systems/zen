@@ -21,7 +21,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 import redis
 
-from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
+from netra_backend.app.schemas.tool_permission import ToolExecutionContext
 
 from netra_backend.app.services.tool_permissions.rate_limiter import (
     ToolPermissionRateLimiter,

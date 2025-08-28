@@ -54,7 +54,7 @@ class ComprehensiveE2EImportFixer:
                 imports = match.group(1).strip()
                 # Replace with proper import
                 content = re.sub(pattern, 
-                    'from netra_backend.app.schemas.Agent import SubAgentLifecycle, SubAgentState\n'
+                    'from netra_backend.app.schemas.agent import SubAgentLifecycle, SubAgentState\n'
                     'from netra_backend.app.schemas.websocket_server_messages import (\n    ' + 
                     imports.replace('SubAgentLifecycle,', '').replace('SubAgentState', '').strip() + '\n)',
                     content)
@@ -147,7 +147,7 @@ class ComprehensiveE2EImportFixer:
             # Fix ResearchType import
             content = content.replace(
                 'from netra_backend.app.services.apex_optimizer_agent.models import ResearchType',
-                'from netra_backend.app.schemas.Agent import ResearchType'
+                'from netra_backend.app.schemas.agent import ResearchType'
             )
             
             if content != original_content:

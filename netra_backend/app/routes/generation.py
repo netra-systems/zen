@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Generation import (
+from netra_backend.app.schemas.generation import (
     ContentCorpusGenParams,
     ContentGenParams,
     DataIngestionParams,

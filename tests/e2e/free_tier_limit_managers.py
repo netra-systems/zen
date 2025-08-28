@@ -15,7 +15,7 @@ REQUIREMENTS:
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
+from netra_backend.app.schemas.user_plan import PLAN_DEFINITIONS, PlanTier
 
 
 class LimitEnforcementManager:

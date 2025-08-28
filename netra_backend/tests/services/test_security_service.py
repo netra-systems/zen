@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from cryptography.fernet import Fernet
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 
 from netra_backend.app.services.security_service import KeyManager, SecurityService
 

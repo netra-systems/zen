@@ -404,7 +404,7 @@ class TestTimeoutConfigurationAndBehavior(BaseIntegrationTest):
         STAGING ISSUE: Timeouts may be too long or too short for staging environment.
         This test should FAIL if timeout values are not optimized for staging.
         """
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
         
         config = AppConfig()
         

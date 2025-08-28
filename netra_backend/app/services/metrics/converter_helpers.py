@@ -5,7 +5,7 @@ Used for JSON export functionality
 
 from typing import Any, Dict, List
 
-from netra_backend.app.schemas.Metrics import (
+from netra_backend.app.schemas.metrics import (
     CorpusMetric,
     QualityMetrics,
     ResourceUsage,

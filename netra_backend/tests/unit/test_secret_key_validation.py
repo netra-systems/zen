@@ -323,7 +323,7 @@ class TestSecretKeySecurityImplications:
         
         This test should FAIL with current staging config to demonstrate the validation issue.
         """
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
         
         # These are the exact patterns used in staging.env that should fail validation
         staging_patterns = [
@@ -360,7 +360,7 @@ class TestSecretKeySecurityImplications:
         This test checks if the current staging environment variables would pass or fail validation.
         This should FAIL if staging is using insecure patterns, demonstrating the issue.
         """
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
         from netra_backend.app.core.isolated_environment import get_env
         
         # Get actual environment
@@ -410,7 +410,7 @@ class TestSecretKeySecurityImplications:
         
         This test should FAIL with problematic configurations to demonstrate the issue.
         """
-        from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.config import AppConfig
         
         # Test bootstrap failure scenarios that occur in staging
         bootstrap_failure_scenarios = [

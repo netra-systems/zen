@@ -18,7 +18,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.interfaces import AgentStateProtocol, BaseAgentProtocol
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Agent import SubAgentLifecycle
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.websocket_core import get_websocket_manager as get_manager
 

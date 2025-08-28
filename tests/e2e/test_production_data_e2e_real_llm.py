@@ -38,8 +38,8 @@ from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestUtils,
     ConversationFlowValidator,
 )
-# from netra_backend.app.schemas.Agent import AgentRequest  # AgentRequest doesn't exist
-from netra_backend.app.schemas.UserPlan import PlanTier
+# from netra_backend.app.schemas.agent import AgentRequest  # AgentRequest doesn't exist
+from netra_backend.app.schemas.user_plan import PlanTier
 
 
 @dataclass

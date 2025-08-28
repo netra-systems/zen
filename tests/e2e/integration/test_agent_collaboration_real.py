@@ -29,7 +29,7 @@ from tests.e2e.agent_collaboration_helpers import (
     AgentCollaborationTestCore, MultiAgentFlowSimulator, CollaborationFlowValidator,
     AgentCollaborationTestUtils, RealTimeOrchestrationValidator, AgentCollaborationTurn
 )
-from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.user_plan import PlanTier
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

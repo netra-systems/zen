@@ -9,7 +9,7 @@ from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngi
 from netra_backend.app.agents.tool_dispatcher_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Tool import (
+from netra_backend.app.schemas.tool import (
     SimpleToolPayload,
     ToolInput,
     ToolResult,

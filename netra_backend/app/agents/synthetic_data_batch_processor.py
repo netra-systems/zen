@@ -13,7 +13,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Generation import GenerationStatus
+from netra_backend.app.schemas.generation import GenerationStatus
 
 logger = central_logger.get_logger(__name__)
 

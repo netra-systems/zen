@@ -30,7 +30,7 @@ from netra_backend.app.core.network_constants import (
     URLConstants,
 )
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config import AppConfig
 from netra_backend.app.schemas.llm_types import LLMProvider
 
 

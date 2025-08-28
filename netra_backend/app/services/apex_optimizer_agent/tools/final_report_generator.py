@@ -3,7 +3,7 @@ from typing import Any, List
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
+from netra_backend.app.schemas.policy import LearnedPolicy, PredictedOutcome
 from netra_backend.app.services.context import ToolContext
 
 

@@ -25,7 +25,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.database_recovery_core import ConnectionPoolRefreshStrategy
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.db.models_agent import Run, Step
-from netra_backend.app.schemas.Request import RequestModel
+from netra_backend.app.schemas.request import RequestModel
 from netra_backend.app.services.agent_service_core import AgentService
 
 # Import from shared infrastructure
@@ -186,7 +186,7 @@ class TestAgentToolExecutionPipeline:
 
     def _create_test_request(self, query: str, run_id: str, user_id: str = "test_user", table_suffix: str = "table") -> RequestModel:
         """Helper to create a valid RequestModel for testing"""
-        from netra_backend.app.schemas.Request import DataSource, TimeRange, Workload
+        from netra_backend.app.schemas.request import DataSource, TimeRange, Workload
         
         data_source = DataSource(source_table=f"test_{table_suffix}")
         time_range = TimeRange(start_time="2025-01-01T00:00:00Z", end_time="2025-01-01T01:00:00Z")
