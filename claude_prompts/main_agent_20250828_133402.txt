@@ -1,0 +1,202 @@
+You are analyzing Docker container logs to identify and fix issues.
+
+CURRENT TIMESTAMP: 2025-08-28T13:34:02.106207
+
+CONTAINER LOGS:
+
+=== CONTAINER: netra-clickhouse ===
+=== STDOUT ===
+/entrypoint.sh: create new user 'netra' instead 'default'
+ClickHouse Database directory appears to contain a database; Skipping initialization
+/entrypoint.sh: create new user 'netra' instead 'default'
+ClickHouse Database directory appears to contain a database; Skipping initialization
+/entrypoint.sh: create new user 'netra' instead 'default'
+ClickHouse Database directory appears to contain a database; Skipping initialization
+
+=== STDERR ===
+Processing configuration file '/etc/clickhouse-server/config.xml'.
+Merging configuration file '/etc/clickhouse-server/config.d/docker_related_config.xml'.
+Logging trace to /var/log/clickhouse-server/clickhouse-server.log
+Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log
+Processing configuration file '/etc/clickhouse-server/config.xml'.
+Merging configuration file '/etc/clickhouse-server/config.d/docker_related_config.xml'.
+Saved preprocessed configuration to '/var/lib/clickhouse/preprocessed_configs/config.xml'.
+Processing configuration file '/etc/clickhouse-server/users.xml'.
+Merging configuration file '/etc/clickhouse-server/users.d/default-user.xml'.
+Saved preprocessed configuration to '/var/lib/clickhouse/preprocessed_configs/users.xml'.
+Processing configuration file '/etc/clickhouse-server/config.xml'.
+Merging configuration file '/etc/clickhouse-server/config.d/docker_related_config.xml'.
+Logging trace to /var/log/clickhouse-server/clickhouse-server.log
+Logging errors to /var/log/clickhouse-server/clickhouse-server.err.log
+Processing configuration file '/etc/clickhouse-server/config.xml'.
+Merging configuration file '/etc/clickhouse-server/config.d/docker_related_config.xml'.
+Saved preprocessed configuration to '/var/lib/clickhouse/preprocessed_configs/config.xml'.
+Processing configuration file '/etc/clickhouse-server/users.xml'.
+Merging configuration file '/etc/clickhouse-server/users.d/default-user.xml'.
+Saved preprocessed configuration to '/var/lib/clickhouse/preprocessed_configs/users.xm
+
+=== CONTAINER: netra-frontend ===
+=== STDOUT ===
+ ○ Compiling /chat/[threadId] ...
+ GET /api/health 200 in 11360ms
+[2025-08-28T19:53:55.906Z] INFO: Environment detected from NEXT_PUBLIC_ENVIRONMENT: development undefined
+[2025-08-28T19:53:55.908Z] INFO: Unified API Configuration: {
+  environment: 'development',
+  urls: {
+    api: 'http://localhost:8000',
+    websocket: 'ws://localhost:8000',
+    auth: 'http://localhost:8081',
+    frontend: 'http://localhost:3000'
+  },
+  features: {
+    useHttps: false,
+    useWebSocketSecure: false,
+    corsEnabled: false,
+    dynamicDiscovery: true
+  }
+}
+[2025-08-28T19:53:55.909Z] INFO: Auth Service Client initialized for development { baseUrl: 'http://localhost:8081', environment: 'development' }
+[2025-08-28T19:53:55.909Z] INFO: Unified Auth Service initialized for development undefined
+[2025-08-28T19:53:55.939Z] INFO: Environment detected from NEXT_PUBLIC_ENVIRONMENT: development undefined
+[2025-08-28T19:53:55.940Z] INFO: Unified API Configuration: {
+  environment: 'development',
+  urls: {
+    api: 'http://localhost:8000',
+    websocket: 'ws://localhost:8000',
+    auth: 'http://localhost:8081',
+    frontend: 'http://localhost:3000'
+  },
+  features: {
+    useHttps: false,
+    useWebSocketSecure: false,
+    corsEnabled: false,
+    dynamicDiscovery: true
+  }
+}
+[2025-08-28T19:53:55.940Z] INFO: Auth Service Client initialized for development { baseUrl: 'http://localhost:8081', environment: 'development' }
+[2025-08-28T19:53:55.941Z] INFO: Unified Auth Service initialized for development undefined
+[2025-08-28T19:53:55.996Z] INFO: Environment detected from NEXT_PUBLIC_ENVIRONMENT: development undefined
+[2025-08-28T19:53:55.997Z] INFO: Unified API Configuration: {
+  environment: 'development',
+  urls: {
+    api: 'http://localhost:8000',
+    websocket: 'ws://localhost:8000',
+    auth: 'http://localhost:8081',
+    frontend: 'http://localhost:3000'
+  },
+  features: {
+    useHttps: false,
+    useWebSocketSecure: false,
+    corsEnabled: false,
+    dynamicDiscovery: true
+  }
+
+
+=== CONTAINER: netra-auth ===
+=== STDOUT ===
+Loaded environment from current directory or system
+2025-08-28 19:35:55,811 - netra-service - auth_service.main - INFO - Signal handlers configured for graceful shutdown
+2025-08-28 19:35:55,812 - netra-service - auth_service.main - INFO - CORS configured for development environment with 41 origins
+2025-08-28 19:35:55,828 - netra-service - auth_service.main - INFO - Starting Auth Service...
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.config - INFO - Auth Service Configuration:
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.config - INFO -   Environment: development
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.config - INFO -   Frontend URL: http://localhost:3000
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.config - INFO -   Auth Service URL: http://localhost:8081
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.secret_loader - INFO - Using GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT from environment for development
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.config - INFO -   Google Client ID: **********
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.secret_loader - INFO - Using GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT from environment for development
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.config - INFO -   Google Client Secret: **********
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.secret_loader - INFO - Using JWT_SECRET_KEY from environment (shared with backend)
+2025-08-28 19:35:55,828 - netra-service - auth_service.auth_core.config - INFO -   JWT Secret: **********
+2025-08-28 19:35:55,829 - netra-service - auth_service.auth_core.secret_loader - INFO - Using JWT_SECRET_KEY from environment (shared with backend)
+2025-08-28 19:35:55,829 - netra-service - auth_service.auth_core.config - INFO -   Service Secret: **********
+2025-08-28 19:35:55,829 - netra-service - auth_service.auth_core.
+
+=== CONTAINER: netra-backend ===
+=== STDOUT ===
+Critical environment variables already set - skipping .env loading
+Critical environment variables already set - skipping .env loading
+Critical environment variables already set - skipping .env loading
+
+=== STDERR ===
+/usr/local/lib/python3.11/site-packages/websockets/legacy/server.py:1178: DeprecationWarning: remove second argument of ws_handler
+  warnings.warn("remove second argument of ws_handler", DeprecationWarning)
+[32m2025-08-28 19:47:49.050[0m | [1mINFO    [0m | [36mnetra_backend.app.core.startup_manager[0m:[36m_initialize_metrics[0m:[36m684[0m | [1mMetrics initialization completed successfully[0m
+[32m2025-08-28 19:47:49.051[0m | [1mINFO    [0m | [36mnetra_backend.app.core.startup_manager[0m:[36m_initialize_tracing[0m:[36m696[0m | [1mTracing initialization completed successfully[0m
+[32m2025-08-28 19:47:49.051[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m978[0m | [1mSuccessfully initialized metrics in 0.00s[0m
+[32m2025-08-28 19:47:49.051[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m978[0m | [1mSuccessfully initialized tracing in 0.00s[0m
+[32m2025-08-28 19:47:49.051[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[0m:[36m978[0m | [1mStartup completed in 2.70s: 10/10 successful, 0 degraded, 0 failed[0m
+[32m2025-08-28 19:47:49.051[0m | [1mINFO    [0m | [36mnetra_backend.app.core.startup_manager[0m:[36minitialize_system[0m:[36m570[0m | [1mRobust system initialization completed successfully[0m
+[32m2025-08-28 19:47:49.051[0m | [1mINFO    [0m | [36mnetra_backend.app.startup_module[0m:[36mrun_complete_startup[0m:[36m986[0m | [1mStartup completion flags set - health endpoint will report healthy[0m
+[32m2025-08-28 19:47:49.052[0m | [1mINFO    [0m | [36mnetra_backend.app.startup_module[0m:[36mlog_startup_complete[0m:[36m880[0m | [1mSystem Ready (Took 2.75s).[0m
+[32m2025-08-28 19:47:49.052[0m | [1mINFO    [0m | [36mlogging[0m:[36mhandle[
+
+=== CONTAINER: netra-redis ===
+=== STDOUT ===
+1:C 28 Aug 2025 19:35:41.676 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 28 Aug 2025 19:35:41.676 * Redis version=7.4.5, bits=64, commit=00000000, modified=0, pid=1, just started
+1:C 28 Aug 2025 19:35:41.676 * Configuration loaded
+1:M 28 Aug 2025 19:35:41.676 * monotonic clock: POSIX clock_gettime
+1:M 28 Aug 2025 19:35:41.679 * Running mode=standalone, port=6379.
+1:M 28 Aug 2025 19:35:41.680 * Server initialized
+1:M 28 Aug 2025 19:35:41.683 * Reading RDB base file on AOF loading...
+1:M 28 Aug 2025 19:35:41.684 * Loading RDB produced by version 7.4.5
+1:M 28 Aug 2025 19:35:41.684 * RDB age 166568 seconds
+1:M 28 Aug 2025 19:35:41.684 * RDB memory usage when created 0.90 Mb
+1:M 28 Aug 2025 19:35:41.684 * RDB is base AOF
+1:M 28 Aug 2025 19:35:41.684 * Done loading RDB, keys loaded: 0, keys expired: 0.
+1:M 28 Aug 2025 19:35:41.685 * DB loaded from base file appendonly.aof.1.base.rdb: 0.004 seconds
+1:M 28 Aug 2025 19:35:41.876 * DB loaded from incr file appendonly.aof.1.incr.aof: 0.190 seconds
+1:M 28 Aug 2025 19:35:41.876 * DB loaded from append only file: 0.195 seconds
+1:M 28 Aug 2025 19:35:41.876 * Opening AOF incr file appendonly.aof.1.incr.aof on server start
+1:M 28 Aug 2025 19:35:41.876 * Ready to accept connections tcp
+1:C 28 Aug 2025 19:41:16.964 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1:C 28 Aug 2025 19:41:16.964 * Redis version=7.4.5, bits=64, commit=00000000, modified=0, pid=1, just started
+1:C 28 Aug 2025 19:41:16.964 * Configuration loaded
+1:M 28 Aug 2025 19:41:16.965 * monotonic clock: POSIX clock_gettime
+1:M 28 Aug 2025 19:41:16.967 * Running mode=standalone, port=6379.
+1:M 28 Aug 2025 19:41:16.968 * Server initialized
+1:M 28 Aug 2025 19:41:16.968 * Reading RDB base file on AOF loading...
+1:M 28 Aug 2025 19:41:16.968 * Loading RDB produced by version 7.4.5
+1:M 28 Aug 2025 19:41:16.968 * RDB age 166903 seconds
+1:M 28 Aug 2025 19:41:16.968 * RDB memory usage when created 0.90 Mb
+1:M 28 Aug 2025 19:41:16.968 * RDB is base AOF
+1:M 2
+
+=== CONTAINER: netra-postgres ===
+=== STDOUT ===
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+
+=== STDERR ===
+2025-08-28 19:35:07.317 UTC [1] LOG:  starting PostgreSQL 15.14 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-08-28 19:35:07.317 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-08-28 19:35:07.317 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-08-28 19:35:07.344 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-08-28 19:35:07.360 UTC [29] LOG:  database system was interrupted; last known up at 2025-08-28 19:25:08 UTC
+2025-08-28 19:35:08.124 UTC [29] LOG:  database system was not properly shut down; automatic recovery in progress
+2025-08-28 19:35:08.144 UTC [29] LOG:  redo starts at 0/1CD30B0
+2025-08-28 19:35:08.144 UTC [29] LOG:  invalid record length at 0/1CD3198: wanted 24, got 0
+2025-08-28 19:35:08.144 UTC [29] LOG:  redo done at 0/1CD3160 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2025-08-28 19:35:08.165 UTC [27] LOG:  checkpoint starting: end-of-recovery immediate wait
+2025-08-28 19:35:08.198 UTC [27] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.015 s, sync=0.003 s, total=0.038 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB
+2025-08-28 19:35:08.206 UTC [1] LOG:  database system is ready to accept connections
+2025-08-28 19:41:17.439 UTC [1] LOG:  starting PostgreSQL 15.14 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-08-28 19:41:17.440 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-08-28 19:41:17.440 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-08-28 19:41:17.445 UTC [1] LOG:  listening on Unix socket "/var/run
+
+TASK: Analyze these logs and:
+1. Identify any errors, failures, or issues
+2. Determine root causes
+3. Provide specific Docker commands to fix each issue
+4. Prioritize critical issues first
+
+Focus on actionable remediation steps using docker and docker-compose commands.

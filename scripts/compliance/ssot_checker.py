@@ -312,7 +312,7 @@ class SSOTChecker:
         forbidden_imports = [
             'from netra_backend.app.db.clickhouse_client import',
             'from netra_backend.app.db.client_clickhouse import',
-            'from netra_backend.app.agents.data_sub_agent.clickhouse_client import',
+            'from netra_backend.app.db.clickhouse import',
             'import netra_backend.app.db.clickhouse_client',
             'import netra_backend.app.db.client_clickhouse',
         ]
