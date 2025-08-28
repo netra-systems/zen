@@ -29,15 +29,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.auth_integration.auth import (
-    create_access_token,
     get_current_user,
     get_current_user_optional,
-    get_password_hash,
     require_admin,
     require_developer,
     require_permission,
-    validate_token_jwt,
-    verify_password,
 )
 from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.db.models_postgres import User
