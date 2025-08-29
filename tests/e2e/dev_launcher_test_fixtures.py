@@ -45,9 +45,9 @@ class TestEnvironmentManager:
     def __init__(self):
         self.orchestrator: Optional[TestEnvironmentOrchestrator] = None
         self.session_id: Optional[str] = None
-        self.test_db_url = "postgresql+asyncpg://test:test@localhost:5432/test_netra"
+        self.test_db_url = "postgresql+asyncpg://netra:netra123@localhost:5432/netra_dev"
         self.test_redis_url = "redis://localhost:6379/1"
-        self.test_clickhouse_url = "http://localhost:8123"
+        self.test_clickhouse_url = "http://netra:netra123@localhost:8123"
         self._temp_env_vars: Dict[str, str] = {}
     
     async def initialize(self) -> None:

@@ -1,13 +1,8 @@
-"""Database Manager Integration Tests with Testcontainers
+"""Database Manager Integration Tests with Docker Compose Services
 
-Tests real PostgreSQL integration using containerized databases to verify
+Tests real PostgreSQL integration using Docker Compose services to verify
 connection pooling, transaction management, and failover capabilities.
 """
-
-import sys
-from pathlib import Path
-
-# Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Dict, List, Optional
@@ -16,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import asyncpg
 import psycopg2
 import pytest
-from testcontainers.postgres import PostgresContainer
+from dev_launcher.isolated_environment import get_env
 
 # Import database management components
 try:
@@ -33,9 +28,9 @@ except ImportError:
             """Establish database connection."""
             # Parse PostgreSQL URL properly for asyncpg
             url = self.config.get('database_url', '')
-            if url.startswith('postgresql://testcontainers'):
-                # Convert testcontainers URL format to asyncpg format
-                # postgresql://testcontainers:testcontainers@localhost:PORT/test
+            if url.startswith('postgresql://postgres:postgres@localhost'):
+                # Convert Docker Compose PostgreSQL URL format to asyncpg format
+                # postgresql://postgres:postgres@localhost:5432/netra_dev
                 parts = url.replace('postgresql://', '').split('@')
                 if len(parts) == 2:
                     auth, location = parts
@@ -43,15 +38,17 @@ except ImportError:
                     host, port = host_port.split(':')
                     user, password = auth.split(':')
                     
-                    self.pool = await asyncpg.create_pool(
-                        host=host,
-                        port=int(port),
-                        user=user,
-                        password=password,
-                        database=db,
-                        min_size=2,
-                        max_size=10
-                    )
+                    # For Docker Compose services, use direct host connection
+                    if 'localhost' in host or '127.0.0.1' in host:
+                        self.pool = await asyncpg.create_pool(
+                            host=host,
+                            port=int(port),
+                            user=user,
+                            password=password,
+                            database=db,
+                            min_size=2,
+                            max_size=10
+                        )
             return self.pool is not None
             
         async def execute_query(self, query: str, *args):
@@ -70,26 +67,37 @@ except ImportError:
         def __init__(self, config):
             self.config = config
 
+@pytest.mark.integration
+@pytest.mark.real_services
 class TestDatabaseManagerIntegration:
-    """Test database manager with real PostgreSQL via Testcontainers."""
+    """Test database manager with real PostgreSQL via Docker Compose services."""
     
     @pytest.fixture
-    async def postgres_container(self):
-        """Create a PostgreSQL container for testing."""
-        with PostgresContainer("postgres:14-alpine") as postgres:
-            # Wait for container to be ready
-            postgres.get_connection_url()
-            yield postgres
-    
-    @pytest.fixture
-    async def database_manager(self, postgres_container):
-        """Create database manager connected to test container."""
-        # Get connection URL from container
-        url = postgres_container.get_connection_url()
+    async def database_manager(self):
+        """Create database manager connected to Docker Compose PostgreSQL service."""
+        # Use Docker Compose PostgreSQL service configuration
+        # The service is running on localhost:5432 with postgres/postgres credentials
+        # First, ensure we can connect to the Docker service
+        try:
+            # Connect to the existing netra_dev database (as configured in Docker Compose)
+            conn = await asyncpg.connect(
+                host='localhost',
+                port=5432,
+                user='postgres',
+                password='postgres',
+                database='netra_dev'
+            )
+            
+            # Test connection works
+            result = await conn.fetch("SELECT 1 as test")
+            assert result[0]['test'] == 1
+            
+            await conn.close()
+        except Exception as e:
+            pytest.skip(f"Cannot connect to Docker Compose PostgreSQL service: {e}")
         
-        # Create manager with test configuration
         config = {
-            'database_url': url,
+            'database_url': 'postgresql://postgres:postgres@localhost:5432/netra_dev',
             'pool_size': 5,
             'max_overflow': 10,
             'pool_timeout': 30
@@ -148,9 +156,9 @@ class TestDatabaseManagerIntegration:
         await database_manager.execute_query("DROP TABLE test_table")
     
     @pytest.mark.asyncio
-    async def test_connection_failure_recovery(self, postgres_container):
+    async def test_connection_failure_recovery(self):
         """Test recovery from connection failures."""
-        url = postgres_container.get_connection_url()
+        url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'
         
         manager = DatabaseManager({'database_url': url})
         await manager.connect()
