@@ -382,3 +382,6 @@ class RecoveryExecutor:
 # Global recovery manager instance
 recovery_manager = ErrorRecoveryManager()
 recovery_executor = RecoveryExecutor(recovery_manager)
+
+# Alias for backward compatibility
+ErrorRecoveryStrategy = ErrorRecoveryManager
