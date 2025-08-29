@@ -239,12 +239,14 @@ class SecretManager:
                 load_dotenv(env_dev_path, override=True)
                 self._logger.debug(f"Loaded .env.dev file from {env_dev_path}")
             
-            # Load .env.test if in testing environment (higher priority than .env.dev)
+            # Load .env.mock (or legacy .env.test) if in testing environment (higher priority than .env.dev)
             if self._environment == "testing":
-                env_test_path = project_root / "netra_backend" / ".env.test"
+                env_test_path = project_root / "netra_backend" / ".env.mock"
+                if not env_test_path.exists():
+                    env_test_path = project_root / "netra_backend" / ".env.test"  # Legacy fallback
                 if env_test_path.exists():
                     load_dotenv(env_test_path, override=True)
-                    self._logger.debug(f"Loaded .env.test file from {env_test_path}")
+                    self._logger.debug(f"Loaded {env_test_path.name} file from {env_test_path}")
             
             # Load .env.local if it exists (highest priority)
             env_local_path = project_root / ".env.local"

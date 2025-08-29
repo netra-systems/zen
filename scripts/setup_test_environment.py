@@ -47,7 +47,7 @@ class TestEnvironmentValidator:
     def __init__(self):
         self.project_root = Path(__file__).parent.parent
         self.env_file = self.project_root / ".env"
-        self.test_env_file = self.project_root / ".env.test"
+        self.test_env_file = self.project_root / ".env.mock"
         self.issues: List[ConfigurationIssue] = []
         self.env = IsolatedEnvironment()
         
@@ -103,14 +103,14 @@ class TestEnvironmentValidator:
                     severity="error",
                     category="environment",
                     message=f"Missing {var}: {description}",
-                    fix_suggestion=f"Add {var} to .env.test file"
+                    fix_suggestion=f"Add {var} to .env.mock file"
                 ))
             elif var in ["JWT_SECRET_KEY", "JWT_SECRET", "SERVICE_SECRET"] and len(value) < 32:
                 self.issues.append(ConfigurationIssue(
                     severity="error",
                     category="security",
                     message=f"{var} is too short (must be at least 32 characters)",
-                    fix_suggestion=f"Update {var} in .env.test with a longer value"
+                    fix_suggestion=f"Update {var} in .env.mock with a longer value"
                 ))
         
         # Check for real API keys when using real LLM testing
@@ -148,7 +148,7 @@ class TestEnvironmentValidator:
                     severity="error",
                     category="database",
                     message="DATABASE_URL not set",
-                    fix_suggestion="Set DATABASE_URL in .env.test"
+                    fix_suggestion="Set DATABASE_URL in .env.mock"
                 ))
                 return
             
@@ -329,7 +329,7 @@ class TestEnvironmentValidator:
         
         # Ensure test env file exists with proper values
         if not self.test_env_file.exists():
-            print("✓ Created .env.test file with default values")
+            print("✓ Created .env.mock file with default values")
         
         # Export test environment for child processes
         env_dict = self.env.get_subprocess_env()

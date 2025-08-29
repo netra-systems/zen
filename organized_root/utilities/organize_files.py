@@ -70,7 +70,7 @@ def organize_files():
     # Files to keep in root
     keep_in_root = {
         ".env", ".env.example", ".env.local", ".env.development", 
-        ".env.production", ".env.staging", ".env.test", ".env.testing",
+        ".env.production", ".env.staging", ".env.test", ".env.mock", ".env.testing",
         ".gitignore", ".gitattributes", ".gcloudignore",
         ".coveragerc", ".pre-commit-config.yaml",
         "requirements.txt", "requirements-dev.txt",

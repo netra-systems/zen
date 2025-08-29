@@ -38,7 +38,7 @@ class TestServiceCLI:
         print("[INFO] Starting test services...")
         
         # Configure environment
-        self.manager.configure_test_environment()
+        self.manager.configure_mock_environment()
         
         # Determine services and profiles
         services = ["postgres-test", "redis-test"]
