@@ -1160,6 +1160,15 @@
             <critical-takeaway>Thread-safe operations with RLock for concurrent access. Variable protection prevents accidental overrides.</critical-takeaway>
         </category>
         
+        <category name="Environment Access Regression Prevention" path="SPEC/learnings/environment_access_regression_prevention.xml" keywords="Environment, Regression, os.getenv, os.environ, IsolatedEnvironment, Compliance, Testing, Subprocess">
+            <critical-takeaway>ZERO TOLERANCE: Never use os.getenv() or os.environ directly - ALWAYS use IsolatedEnvironment via get_env().</critical-takeaway>
+            <critical-takeaway>TEST MARKERS: Environment-aware test markers must use IsolatedEnvironment, not os.getenv().</critical-takeaway>
+            <critical-takeaway>SUBPROCESS LAUNCHES: Always use get_subprocess_env() for subprocess.run() env parameter.</critical-takeaway>
+            <critical-takeaway>FALLBACK PATTERNS: Even BasicEnvManager fallbacks must avoid direct os.environ access after initialization.</critical-takeaway>
+            <critical-takeaway>ENFORCEMENT: Run scripts/check_environment_isolation.py before commits and in CI/CD.</critical-takeaway>
+            <critical-takeaway>COMMON VIOLATIONS: index_optimizer_core.py, secret_manager_builder.py, unified_test_runner.py, E2E test files.</critical-takeaway>
+        </category>
+        
         <category name="Port Binding Race Condition" path="SPEC/learnings/port_binding_race_condition.xml" keywords="Port Binding, Race Condition, Windows, Dev Launcher, Socket, Interface, localhost, 0.0.0.0, SO_REUSEADDR">
             <critical-takeaway>Always use same interface for both port checking and actual binding (0.0.0.0 vs localhost)</critical-takeaway>
             <critical-takeaway>Match socket options (SO_REUSEADDR) between availability check and actual binding</critical-takeaway>

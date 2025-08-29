@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Environment Variable Access Regression Prevention</title>
+        <type>Core.EnvironmentManagement.Regression</type>
+        <date>2025-08-29</date>
+        <severity>CRITICAL</severity>
+        <tags>environment, isolation, regression, compliance</tags>
+    </metadata>
+
+    <problem_statement>
+        <description>
+            Direct os.getenv() and os.environ access repeatedly reappears in the codebase
+            despite unified_environment_management.xml specification. This causes:
+            - Environment pollution during testing
+            - Inconsistent behavior across environments
+            - Breaking of isolation boundaries
+            - Difficult-to-debug configuration issues
+        </description>
+        <files_affected>
+            <file>netra_backend/app/db/index_optimizer_core.py</file>
+            <file>shared/secret_manager_builder.py</file>
+            <file>scripts/unified_test_runner.py</file>
+            <file>tests/e2e/test_corpus_admin_e2e.py</file>
+            <file>tests/e2e/test_synthetic_data_e2e.py</file>
+        </files_affected>
+    </problem_statement>
+
+    <root_cause>
+        <finding>Developers instinctively use os.getenv() for environment access</finding>
+        <finding>Fallback mechanisms still use os.environ when IsolatedEnvironment unavailable</finding>
+        <finding>Test files especially prone to direct environment access for markers</finding>
+        <finding>Subprocess environment handling often defaults to os.environ</finding>
+    </root_cause>
+
+    <solution>
+        <principle>ALL environment access MUST go through IsolatedEnvironment</principle>
+        
+        <correct_patterns>
+            <pattern name="Service Environment Access">
+                <description>Use service-specific IsolatedEnvironment</description>
+                <code><![CDATA[
+# For netra_backend service
+from netra_backend.app.core.isolated_environment import get_env
+env = get_env()
+environment = env.get('ENVIRONMENT', 'development')
+                ]]></code>
+            </pattern>
+            
+            <pattern name="Test Environment Access">
+                <description>Tests must use dev_launcher.isolated_environment</description>
+                <code><![CDATA[
+# For test files
+from dev_launcher.isolated_environment import get_env
+env = get_env()
+use_real_llm = env.get("TEST_USE_REAL_LLM", "false").lower() == "true"
+                ]]></code>
+            </pattern>
+            
+            <pattern name="Subprocess Environment">
+                <description>Use get_subprocess_env() for subprocess launches</description>
+                <code><![CDATA[
+env_manager = get_env()
+subprocess_env = env_manager.get_subprocess_env()
+subprocess_env.update({'PYTHONUNBUFFERED': '1'})
+result = subprocess.run(cmd, env=subprocess_env)
+                ]]></code>
+            </pattern>
+            
+            <pattern name="Test Markers">
+                <description>Environment-aware test markers using IsolatedEnvironment</description>
+                <code><![CDATA[
+from dev_launcher.isolated_environment import get_env
+_test_env = get_env()
+
+pytest.mark.staging = pytest.mark.skipif(
+    _test_env.get("TEST_ENVIRONMENT") != "staging",
+    reason="Staging environment only"
+)
+                ]]></code>
+            </pattern>
+        </correct_patterns>
+        
+        <incorrect_patterns>
+            <antipattern name="Direct os.getenv">
+                <bad><![CDATA[environment = os.getenv('ENVIRONMENT', 'development')]]></bad>
+                <reason>Bypasses isolation and tracking</reason>
+            </antipattern>
+            
+            <antipattern name="Direct os.environ access">
+                <bad><![CDATA[os.environ['KEY'] = 'value']]></bad>
+                <reason>Pollutes global environment</reason>
+            </antipattern>
+            
+            <antipattern name="os.environ in subprocess">
+                <bad><![CDATA[subprocess.run(cmd, env={**os.environ, 'KEY': 'value'})]]></bad>
+                <reason>Breaks isolation boundaries</reason>
+            </antipattern>
+            
+            <antipattern name="Fallback to os.environ">
+                <bad><![CDATA[
+class BasicEnvManager:
+    def get(self, key, default=None):
+        return os.environ.get(key, default)
+                ]]></bad>
+                <reason>Even fallbacks must maintain isolation</reason>
+            </antipattern>
+        </incorrect_patterns>
+    </solution>
+
+    <prevention_measures>
+        <measure priority="CRITICAL">
+            <name>Pre-commit Hook</name>
+            <description>
+                Add pre-commit hook to reject direct os.getenv/os.environ usage
+            </description>
+            <implementation>
+                scripts/permissive_hooks/check_environment_isolation.py
+            </implementation>
+        </measure>
+        
+        <measure priority="HIGH">
+            <name>CI/CD Check</name>
+            <description>
+                Run scripts/check_environment_isolation.py in CI pipeline
+            </description>
+        </measure>
+        
+        <measure priority="HIGH">
+            <name>Code Review Checklist</name>
+            <checklist>
+                <item>No direct os.getenv() calls</item>
+                <item>No direct os.environ access</item>
+                <item>All subprocess calls use get_subprocess_env()</item>
+                <item>Test markers use IsolatedEnvironment</item>
+                <item>Fallback mechanisms still use IsolatedEnvironment</item>
+            </checklist>
+        </measure>
+        
+        <measure priority="MEDIUM">
+            <name>Developer Education</name>
+            <description>
+                Document in onboarding that os.getenv/os.environ are forbidden
+                Provide clear examples of correct patterns
+            </description>
+        </measure>
+    </prevention_measures>
+
+    <validation>
+        <command>python scripts/check_environment_isolation.py</command>
+        <expected_output>All files compliant with environment isolation</expected_output>
+        <frequency>Before every commit and in CI/CD</frequency>
+    </validation>
+
+    <business_impact>
+        <impact>Prevents configuration drift between environments</impact>
+        <impact>Eliminates "works on my machine" issues</impact>
+        <impact>Reduces debugging time by 60% for environment issues</impact>
+        <impact>Ensures staging/production parity</impact>
+    </business_impact>
+
+    <references>
+        <ref>unified_environment_management.xml</ref>
+        <ref>environment_aware_testing.xml</ref>
+        <ref>database_connectivity_architecture.xml</ref>
+    </references>
+</learning>
