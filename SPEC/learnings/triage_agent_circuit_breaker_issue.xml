@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Triage Agent Circuit Breaker Cascade Failure</title>
+        <category>agent-llm-integration</category>
+        <severity>high</severity>
+        <date>2025-08-28</date>
+        <affects>
+            <component>TriageSubAgent</component>
+            <component>LLMFallbackHandler</component>
+            <component>CircuitBreaker</component>
+        </affects>
+    </metadata>
+    
+    <problem>
+        <description>
+            Triage agent consistently returns "Error" category instead of proper categorization
+            due to circuit breaker opening after initial failures and blocking all subsequent calls.
+        </description>
+        
+        <symptoms>
+            <symptom>All triage attempts return category: "Error"</symptom>
+            <symptom>Circuit breaker opens after 3 failures</symptom>
+            <symptom>Subsequent LLM calls blocked immediately</symptom>
+            <symptom>Fallback always creates error result</symptom>
+        </symptoms>
+        
+        <root_cause>
+            Circuit breaker state persists across multiple agent executions,
+            causing cascade failure where all requests after initial failures
+            are immediately rejected without attempting LLM calls.
+        </root_cause>
+    </problem>
+    
+    <solution>
+        <immediate_fixes>
+            <fix priority="1">
+                <description>Reset circuit breakers between test runs</description>
+                <code>
+                    agent.llm_fallback_handler.reset_circuit_breakers()
+                </code>
+            </fix>
+            
+            <fix priority="2">
+                <description>Increase circuit breaker thresholds</description>
+                <location>netra_backend/app/llm/client_config.py</location>
+                <change>
+                    failure_threshold: 10 (from 5)
+                    recovery_timeout: 10.0 (from 20.0)
+                </change>
+            </fix>
+            
+            <fix priority="3">
+                <description>Implement proper mock responses</description>
+                <note>Ensure mocks return valid Pydantic models on first call</note>
+            </fix>
+        </immediate_fixes>
+        
+        <long_term_improvements>
+            <improvement>Add circuit breaker health check endpoint</improvement>
+            <improvement>Implement periodic circuit reset for dev/test</improvement>
+            <improvement>Add specific error categories beyond generic "Error"</improvement>
+            <improvement>Track circuit breaker metrics in observability</improvement>
+        </long_term_improvements>
+    </solution>
+    
+    <technical_details>
+        <execution_flow>
+            TriageSubAgent.execute()
+            → llm_processor.execute_triage_with_llm()
+            → llm_fallback_handler.execute_structured_with_fallback()
+            → Circuit breaker check (if OPEN, returns None)
+            → _validate_or_create_fallback() creates Error result
+        </execution_flow>
+        
+        <key_methods>
+            <method>
+                <name>execute_structured_with_fallback</name>
+                <file>netra_backend/app/llm/fallback_handler.py</file>
+                <issue>Returns None when circuit open, triggers error fallback</issue>
+            </method>
+            
+            <method>
+                <name>create_error_result</name>
+                <file>netra_backend/app/agents/triage_sub_agent/execution_helpers.py</file>
+                <issue>Always returns category: "Error" for failures</issue>
+            </method>
+        </key_methods>
+    </technical_details>
+    
+    <gemini_support>
+        <status>Partially Implemented</status>
+        <completed>
+            <item>Config field for gemini_api_key</item>
+            <item>Provider enum support</item>
+            <item>Structured output via with_structured_output()</item>
+        </completed>
+        <missing>
+            <item>Circuit breaker tuning for Gemini latency</item>
+            <item>Gemini 2.0 Flash specific configuration</item>
+            <item>Testing with actual Gemini endpoints</item>
+        </missing>
+    </gemini_support>
+    
+    <business_impact>
+        <metric name="user_abandonment">80% estimated after triage failure</metric>
+        <metric name="conversion_impact">Direct negative impact on Free to Early conversion</metric>
+        <segments>Free, Early, Mid</segments>
+    </business_impact>
+    
+    <validation>
+        <test>Run test_triage_flow.py with circuit reset</test>
+        <test>Monitor circuit breaker state in logs</test>
+        <test>Verify proper categorization with real LLM</test>
+    </validation>
+</learning>
