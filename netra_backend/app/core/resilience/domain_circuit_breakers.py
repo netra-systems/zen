@@ -669,9 +669,9 @@ class DatabaseCircuitBreakerConfig:
 
 @dataclass
 class LLMCircuitBreakerConfig:
-    """Configuration for LLM circuit breakers."""
-    failure_threshold: int = 3
-    recovery_timeout_seconds: float = 120.0
+    """Configuration for LLM circuit breakers with Gemini 2.0 Flash tuning."""
+    failure_threshold: int = 10  # Increased from 3 to 10 for Gemini 2.0 Flash stability
+    recovery_timeout_seconds: float = 10.0  # Decreased from 120.0 to 10.0 for faster recovery
     success_threshold: int = 2
     request_timeout_seconds: float = 60.0
     sliding_window_size: int = 6

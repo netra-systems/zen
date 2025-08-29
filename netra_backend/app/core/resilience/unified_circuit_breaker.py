@@ -771,6 +771,22 @@ class UnifiedCircuitBreakerManager:
         await asyncio.gather(*reset_tasks, return_exceptions=True)
         logger.info(f"Reset {len(self._circuit_breakers)} circuit breakers")
         
+    async def reset_circuit_breakers(self) -> None:
+        """Reset all circuit breakers - alias for reset_all for compatibility."""
+        await self.reset_all()
+        
+    async def reset_circuit_breaker(self, name: str) -> None:
+        """Reset a specific circuit breaker by name."""
+        if name in self._circuit_breakers:
+            await self._circuit_breakers[name].reset()
+            logger.info(f"Reset circuit breaker: {name}")
+        else:
+            logger.warning(f"Circuit breaker not found: {name}")
+            
+    def get_circuit_breaker_names(self) -> list[str]:
+        """Get list of all circuit breaker names."""
+        return list(self._circuit_breakers.keys())
+        
     def cleanup_all(self) -> None:
         """Cleanup all circuit breakers."""
         for cb in self._circuit_breakers.values():
@@ -878,8 +894,8 @@ class UnifiedServiceCircuitBreakers:
         """Get unified circuit breaker for LLM service operations."""
         config = UnifiedCircuitConfig(
             name="llm_service",
-            failure_threshold=3,
-            recovery_timeout=120.0,  # Longer recovery for expensive LLM calls
+            failure_threshold=10,  # Increased from 3 to 10 for Gemini 2.0 Flash stability
+            recovery_timeout=10.0,  # Decreased from 120.0 to 10.0 for faster recovery
             success_threshold=2,
             timeout_seconds=60.0,  # Longer timeout for LLM processing
             sliding_window_size=6,

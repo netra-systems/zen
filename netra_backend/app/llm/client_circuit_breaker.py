@@ -4,8 +4,12 @@ Handles circuit breaker creation, configuration selection, and management
 for different LLM types and configurations.
 """
 
+import asyncio
 from typing import Dict
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, circuit_registry
@@ -49,7 +53,9 @@ class LLMCircuitBreakerManager:
     def _is_slow_llm(self, config_name: str) -> bool:
         """Check if LLM configuration is for slow models."""
         name_lower = config_name.lower()
-        return LLMModel.GEMINI_2_5_FLASH.value in name_lower or "claude" in name_lower
+        return (LLMModel.GEMINI_2_5_FLASH.value in name_lower or 
+                LLMModel.GEMINI_2_0_FLASH.value in name_lower or 
+                "claude" in name_lower)
     
     async def get_structured_circuit(self, config_name: str) -> CircuitBreaker:
         """Get circuit breaker for structured LLM requests."""
@@ -62,3 +68,36 @@ class LLMCircuitBreakerManager:
         """Get status of all LLM circuits."""
         return {name: circuit.get_metrics() 
                 for name, circuit in self._circuits.items()}
+                
+    async def reset_all_circuits(self) -> None:
+        """Reset all LLM circuit breakers."""
+        for name, circuit in self._circuits.items():
+            try:
+                if hasattr(circuit, 'reset'):
+                    if asyncio.iscoroutinefunction(circuit.reset):
+                        await circuit.reset()
+                    else:
+                        circuit.reset()
+                    logger.info(f"Reset LLM circuit breaker: {name}")
+                else:
+                    logger.warning(f"LLM circuit breaker {name} does not support reset")
+            except Exception as e:
+                logger.error(f"Failed to reset LLM circuit breaker {name}: {e}")
+                
+    async def reset_circuit(self, config_name: str) -> None:
+        """Reset specific LLM circuit breaker."""
+        if config_name in self._circuits:
+            circuit = self._circuits[config_name]
+            try:
+                if hasattr(circuit, 'reset'):
+                    if asyncio.iscoroutinefunction(circuit.reset):
+                        await circuit.reset()
+                    else:
+                        circuit.reset()
+                    logger.info(f"Reset LLM circuit breaker: {config_name}")
+                else:
+                    logger.warning(f"LLM circuit breaker {config_name} does not support reset")
+            except Exception as e:
+                logger.error(f"Failed to reset LLM circuit breaker {config_name}: {e}")
+        else:
+            logger.warning(f"LLM circuit breaker not found: {config_name}")

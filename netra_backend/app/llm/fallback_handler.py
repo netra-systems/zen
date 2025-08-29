@@ -222,8 +222,18 @@ class LLMFallbackHandler:
         self.retry_manager.add_attempt(attempt, failure_type, error_msg)
     
     def _create_fallback_response(self, fallback_type: str, error: Optional[Exception] = None) -> Any:
-        """Create appropriate fallback response"""
+        """Create appropriate fallback response with circuit breaker state awareness"""
+        # Distinguish between circuit breaker open vs actual LLM failure
+        if self._is_circuit_breaker_error(error):
+            return self.response_factory.create_circuit_breaker_response(fallback_type, error)
         return self.response_factory.create_response(fallback_type, error)
+        
+    def _is_circuit_breaker_error(self, error: Optional[Exception]) -> bool:
+        """Check if error is due to circuit breaker being open"""
+        if error is None:
+            return False
+        error_type = type(error).__name__
+        return error_type in ['CircuitBreakerOpenError', 'CircuitBreakerError']
     
     def _create_structured_fallback(self, schema: Type[T]) -> T:
         """Create fallback instance using Builder pattern."""
@@ -253,6 +263,26 @@ class LLMFallbackHandler:
     
     def reset_circuit_breakers(self) -> None:
         """Reset all circuit breakers"""
-        for cb in self.circuit_breakers.values():
-            cb.reset()
-        logger.info("All circuit breakers reset")
+        for provider, cb in self.circuit_breakers.items():
+            try:
+                if hasattr(cb, 'reset'):
+                    cb.reset()
+                    logger.info(f"Reset circuit breaker for provider: {provider}")
+                else:
+                    logger.warning(f"Circuit breaker for {provider} does not support reset")
+            except Exception as e:
+                logger.error(f"Failed to reset circuit breaker for {provider}: {e}")
+        logger.info("Circuit breaker reset completed")
+        
+    async def reset_circuit_breakers_async(self) -> None:
+        """Reset all circuit breakers asynchronously"""
+        for provider, cb in self.circuit_breakers.items():
+            try:
+                if hasattr(cb, 'reset') and asyncio.iscoroutinefunction(cb.reset):
+                    await cb.reset()
+                elif hasattr(cb, 'reset'):
+                    cb.reset()
+                logger.info(f"Reset circuit breaker for provider: {provider}")
+            except Exception as e:
+                logger.error(f"Failed to reset circuit breaker for {provider}: {e}")
+        logger.info("Async circuit breaker reset completed")
