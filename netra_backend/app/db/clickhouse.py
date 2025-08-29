@@ -100,14 +100,6 @@ def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
     from netra_backend.app.core.isolated_environment import get_env
     
-    # Check test framework ClickHouse disable settings
-    clickhouse_disabled_by_framework = (
-        get_env().get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
-        get_env().get("CLICKHOUSE_ENABLED", "").lower() == "false"
-    )
-    if clickhouse_disabled_by_framework:
-        return True
-    
     # Check TESTING environment variable directly for pytest compatibility
     if get_env().get("TESTING"):
         return True
@@ -115,14 +107,52 @@ def _is_testing_environment() -> bool:
     config = get_configuration()
     return config.environment == "testing"
 
+def _is_real_database_test() -> bool:
+    """Check if this is a test that explicitly requires real database connections."""
+    import sys
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    # Check if we're running under pytest
+    if 'pytest' not in sys.modules:
+        return False
+    
+    # Check for environment variable that indicates real database test
+    # This will be set by the pytest collection hook for real_database marked tests
+    if get_env().get("PYTEST_REAL_DATABASE_TEST", "").lower() == "true":
+        return True
+    
+    # Alternative approach: check the test name from PYTEST_CURRENT_TEST
+    current_test = get_env().get("PYTEST_CURRENT_TEST", "")
+    if "real_database" in current_test.lower():
+        return True
+    
+    return False
+
+def _should_disable_clickhouse_for_tests() -> bool:
+    """Check if ClickHouse should be disabled for the current test context."""
+    from netra_backend.app.core.isolated_environment import get_env
+    
+    # Always check if we're in a real database test first
+    if _is_real_database_test():
+        return False  # Allow real ClickHouse for @pytest.mark.real_database tests
+    
+    # Check test framework ClickHouse disable settings for regular tests
+    clickhouse_disabled_by_framework = (
+        get_env().get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
+        get_env().get("CLICKHOUSE_ENABLED", "").lower() == "false"
+    )
+    
+    return clickhouse_disabled_by_framework
+
 def use_mock_clickhouse() -> bool:
     """Determine if mock ClickHouse should be used.
     
     NO MOCKS IN DEV MODE - only in testing environment.
     Development MUST use real ClickHouse connections.
+    Tests marked with @pytest.mark.real_database should attempt real connections.
     """
-    # ONLY allow mocks in testing environment, NEVER in development
-    return _is_testing_environment()
+    # Check if we're in a testing environment AND ClickHouse is disabled for this context
+    return _is_testing_environment() and _should_disable_clickhouse_for_tests()
 
 
 def _get_unified_config():
@@ -149,14 +179,53 @@ def get_clickhouse_config():
     return _extract_clickhouse_config(config)
 
 
-# Mock client creation removed - NO MOCKS IN DEV MODE
+# No-op test client for testing environments where ClickHouse is disabled
+
+class NoOpClickHouseClient:
+    """No-op ClickHouse client for testing environments.
+    
+    This provides the same interface as a real ClickHouse client but performs no operations.
+    Allows unit tests to run without external dependencies while maintaining interface compatibility.
+    """
+    
+    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Execute no-op query - returns empty result for testing."""
+        logger.debug(f"[ClickHouse NoOp] Simulated query execution: {query[:50]}...")
+        return []
+    
+    async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Execute no-op query (alias for execute)."""
+        return await self.execute(query, params)
+    
+    async def test_connection(self) -> bool:
+        """Simulate successful connection test."""
+        return True
+    
+    async def disconnect(self) -> None:
+        """No-op disconnect."""
+        pass
+
+@asynccontextmanager
+async def _create_test_noop_client():
+    """Create a no-op ClickHouse client for testing environments.
+    
+    This client provides the same interface as real ClickHouse clients but performs no operations,
+    allowing unit tests to run without external dependencies.
+    """
+    client = NoOpClickHouseClient()
+    logger.debug("[ClickHouse] Using no-op client for testing environment")
+    try:
+        yield client
+    finally:
+        await client.disconnect()
 
 @asynccontextmanager
 async def get_clickhouse_client():
     """Get ClickHouse client - REAL connections only in dev/prod.
     
     NO MOCKS IN DEV MODE - development must use real ClickHouse.
-    Only testing environment may use mocks if explicitly configured.
+    Tests marked with @pytest.mark.real_database will attempt real connections
+    and raise connection errors that can be handled gracefully by the test.
     
     Usage:
         async with get_clickhouse_client() as client:
@@ -165,10 +234,13 @@ async def get_clickhouse_client():
     from netra_backend.app.core.isolated_environment import get_env
     
     if use_mock_clickhouse():
-        # Only for testing environment - NO MOCKS IN DEV
-        raise RuntimeError("Mock ClickHouse client removed - use real ClickHouse in development mode")
+        # Only for regular testing environment where ClickHouse is explicitly disabled
+        # Provide a no-op client that allows tests to run without external dependencies
+        async with _create_test_noop_client() as client:
+            yield client
+            return
     
-    # ALWAYS use real client in development and production
+    # Use real client in development, production, and real database tests
     environment = get_env().get("ENVIRONMENT", "development").lower()
     client_timeout = 10.0 if environment in ["staging", "development"] else 30.0
     
@@ -178,7 +250,12 @@ async def get_clickhouse_client():
             yield client
             
     except (asyncio.TimeoutError, ConnectionError) as e:
-        # NO MOCK FALLBACK - fail fast in dev mode
+        # In test environment with real_database mark, let the test handle the connection failure
+        if _is_testing_environment() and _is_real_database_test():
+            logger.debug(f"[ClickHouse] Real database test connection failed: {e}")
+            raise  # Let the test handle this gracefully
+        
+        # NO MOCK FALLBACK for dev/prod - fail fast
         logger.error(f"[ClickHouse] Connection failed in {environment}: {e}")
         raise RuntimeError(f"ClickHouse connection required in {environment} mode. Please ensure ClickHouse is running.") from e
 

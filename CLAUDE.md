@@ -25,6 +25,7 @@ Your primary mission is to get existing systems fully operational. **Maintain th
 ### 0.1. Git Commit Standards
 
 **All commits follow [`SPEC/git_commit_atomic_units.xml`](https://www.google.com/search?q=SPEC/git_commit_atomic_units.xml).**
+**Windows Unicode/emoji issues: See [`SPEC/windows_unicode_handling.xml`](https://www.google.com/search?q=SPEC/windows_unicode_handling.xml).**
 
   * **ATOMIC:** Commits must be small, focused, and complete units.
   * **CONCEPT-BASED:** Group changes by concept, not by file count (e.g., one conceptual change across 300 files is one commit; three conceptual changes in one file are three commits).

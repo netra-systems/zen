@@ -472,10 +472,11 @@ def pytest_collection_modifyitems(config, items):
             needs_clickhouse = True
             break
     
-    # Enable ClickHouse if needed
+    # Enable ClickHouse if needed and set marker for runtime detection
     if needs_clickhouse:
         env.set("CLICKHOUSE_ENABLED", "true", "test_framework_real_database")
         env.set("DEV_MODE_DISABLE_CLICKHOUSE", "false", "test_framework_real_database")
+        env.set("PYTEST_REAL_DATABASE_TEST", "true", "test_framework_real_database")
 
 # =============================================================================
 # ASYNC UTILITIES

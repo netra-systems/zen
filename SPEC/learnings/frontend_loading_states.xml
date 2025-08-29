@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Frontend Loading States and UX Considerations</title>
+    <category>Frontend</category>
+    <subcategory>UX</subcategory>
+    <priority>CRITICAL</priority>
+    <created>2025-01-29</created>
+    <last_updated>2025-01-29</last_updated>
+    <cross_references>
+      <ref critical="true">SPEC/learnings/frontend_dev_autologin.xml</ref>
+      <ref critical="true">SPEC/learnings/frontend_initialization_patterns.xml</ref>
+      <ref>auth/context.tsx</ref>
+      <ref>components/LoginButton.tsx</ref>
+    </cross_references>
+  </metadata>
+
+  <critical_warning>
+    ANY changes to loading states, initialization flows, or UX components that
+    interact with authentication MUST consider the dev auto-login subsystem.
+    Breaking this system severely impacts developer productivity.
+  </critical_warning>
+
+  <loading_state_hierarchy>
+    <state level="1">
+      <name>AuthProvider Loading</name>
+      <component>auth/context.tsx:402</component>
+      <description>Shows "Loading..." while fetching auth config</description>
+      <impact_on_autologin>
+        Blocks all child components until auth config is fetched.
+        Auto-login happens during this phase.
+      </impact_on_autologin>
+    </state>
+    <state level="2">
+      <name>Token Processing</name>
+      <component>auth/context.tsx:177-225</component>
+      <description>Processes existing tokens from localStorage</description>
+      <impact_on_autologin>
+        CRITICAL: Must process tokens whether storedToken === currentToken or not.
+        Regression here breaks token persistence across refreshes.
+      </impact_on_autologin>
+    </state>
+    <state level="3">
+      <name>Dev Auto-Login</name>
+      <component>auth/context.tsx:225-251</component>
+      <description>Attempts automatic login in development mode</description>
+      <impact_on_autologin>
+        Requires exponential backoff with 5+ retries for backend startup delays.
+        Must respect dev_logout_flag to prevent unwanted auto-login.
+      </impact_on_autologin>
+    </state>
+  </loading_state_hierarchy>
+
+  <ux_requirements>
+    <requirement priority="CRITICAL">
+      <description>
+        Loading states must NOT block UI rendering completely.
+        Users should see meaningful content while auth initializes.
+      </description>
+      <implementation>
+        Use skeleton screens or partial content instead of full-page loaders
+      </implementation>
+    </requirement>
+    <requirement priority="HIGH">
+      <description>
+        Auth initialization must complete within 3 seconds in normal conditions
+      </description>
+      <implementation>
+        Implement timeouts and fallbacks for slow backend responses
+      </implementation>
+    </requirement>
+    <requirement priority="HIGH">
+      <description>
+        Show clear feedback when auto-login is in progress
+      </description>
+      <implementation>
+        Consider subtle indicators like "Signing in..." instead of blocking spinners
+      </implementation>
+    </requirement>
+  </ux_requirements>
+
+  <common_regressions>
+    <regression>
+      <symptom>Dev auto-login stops working after auth context changes</symptom>
+      <cause>Token processing logic modified without considering existing tokens</cause>
+      <prevention>Always test with dev-auto-login.test.tsx</prevention>
+    </regression>
+    <regression>
+      <symptom>Loading spinner shows indefinitely in development</symptom>
+      <cause>Backend is starting up but retry logic insufficient</cause>
+      <prevention>Ensure 5+ retries with exponential backoff</prevention>
+    </regression>
+    <regression>
+      <symptom>User logged in briefly then logged out</symptom>
+      <cause>Token validation or refresh logic failing</cause>
+      <prevention>Check token expiry handling and refresh logic</prevention>
+    </regression>
+  </common_regressions>
+
+  <testing_checklist>
+    <test priority="CRITICAL">
+      Run __tests__/auth/dev-auto-login.test.tsx after any auth changes
+    </test>
+    <test priority="HIGH">
+      Test with backend offline to ensure graceful degradation
+    </test>
+    <test priority="HIGH">
+      Test with slow backend startup (10+ seconds)
+    </test>
+    <test priority="MEDIUM">
+      Test rapid navigation during initialization
+    </test>
+    <test priority="MEDIUM">
+      Test with expired tokens in localStorage
+    </test>
+  </testing_checklist>
+
+  <component_dependencies>
+    <component>
+      <path>auth/context.tsx</path>
+      <critical_functions>
+        <function>fetchAuthConfig (lines 172-290)</function>
+        <function>Token state initialization (lines 45-58)</function>
+        <function>handleTokenRefresh (lines 79-127)</function>
+      </critical_functions>
+    </component>
+    <component>
+      <path>auth/unified-auth-service.ts</path>
+      <critical_functions>
+        <function>handleDevLogin (lines 86-175)</function>
+        <function>getAuthConfig (lines 38-80)</function>
+      </critical_functions>
+    </component>
+    <component>
+      <path>components/LoginButton.tsx</path>
+      <impact>
+        Shows user state - changes here should preserve dev auto-login flow
+      </impact>
+    </component>
+  </component_dependencies>
+
+  <implementation_guidelines>
+    <guideline>
+      Never show blocking loading states for more than 3 seconds
+    </guideline>
+    <guideline>
+      Always provide escape hatches (skip, cancel) for long operations
+    </guideline>
+    <guideline>
+      Prefer optimistic UI updates where safe
+    </guideline>
+    <guideline>
+      Use progressive enhancement - show partial UI while loading completes
+    </guideline>
+    <guideline>
+      Log all initialization steps with timing for debugging
+    </guideline>
+  </implementation_guidelines>
+
+  <monitoring>
+    <metric>Time to auth initialization complete</metric>
+    <metric>Dev auto-login success rate</metric>
+    <metric>Number of retry attempts needed</metric>
+    <metric>Time spent in loading states</metric>
+  </monitoring>
+</learning>

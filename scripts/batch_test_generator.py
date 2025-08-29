@@ -232,7 +232,7 @@ Business Value: {business_value}
 import pytest
 import asyncio
 from netra_backend.{module_path} import {class_names}
-from netra_backend.app.core.database import get_db_session
+from netra_backend.app.database import get_db_session
 
 @pytest.mark.integration
 class Test{main_class}Integration:

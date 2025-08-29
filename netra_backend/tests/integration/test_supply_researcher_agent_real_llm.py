@@ -14,7 +14,6 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -108,15 +107,11 @@ class TestSupplyResearcherAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="SupplyResearcherAgent",
-            state=state,
-            user_id="procurement_team_001"
-        )
-        
         # Execute vendor assessment with real LLM
-        result = await real_supply_researcher_agent.execute(context)
+        await real_supply_researcher_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.supply_result if hasattr(state, 'supply_result') else state.data_result
         
         # Validate assessment structure
         assert result["status"] == "success"
@@ -210,15 +205,11 @@ class TestSupplyResearcherAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="SupplyResearcherAgent",
-            state=state,
-            user_id="operations_team_002"
-        )
+        # Execute supply chain optimization with real LLM
+        await real_supply_researcher_agent.execute(state, state.run_id, stream_updates=False)
         
-        # Execute supply chain optimization
-        result = await real_supply_researcher_agent.execute(context)
+        # Get result from state
+        result = state.supply_result if hasattr(state, 'supply_result') else state.data_result
         
         assert result["status"] == "success"
         assert "optimization_plan" in result
@@ -317,15 +308,11 @@ class TestSupplyResearcherAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="SupplyResearcherAgent",
-            state=state,
-            user_id="risk_team_003"
-        )
+        # Execute risk assessment with real LLM
+        await real_supply_researcher_agent.execute(state, state.run_id, stream_updates=False)
         
-        # Execute risk assessment
-        result = await real_supply_researcher_agent.execute(context)
+        # Get result from state
+        result = state.supply_result if hasattr(state, 'supply_result') else state.data_result
         
         assert result["status"] == "success"
         assert "risk_assessment" in result
@@ -447,15 +434,11 @@ class TestSupplyResearcherAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="SupplyResearcherAgent",
-            state=state,
-            user_id="strategy_team_004"
-        )
+        # Execute competitive benchmarking with real LLM
+        await real_supply_researcher_agent.execute(state, state.run_id, stream_updates=False)
         
-        # Execute competitive benchmarking
-        result = await real_supply_researcher_agent.execute(context)
+        # Get result from state
+        result = state.supply_result if hasattr(state, 'supply_result') else state.data_result
         
         assert result["status"] == "success"
         assert "benchmark_analysis" in result
@@ -590,15 +573,11 @@ class TestSupplyResearcherAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="SupplyResearcherAgent",
-            state=state,
-            user_id="procurement_team_005"
-        )
+        # Execute contract analysis with real LLM
+        await real_supply_researcher_agent.execute(state, state.run_id, stream_updates=False)
         
-        # Execute contract analysis
-        result = await real_supply_researcher_agent.execute(context)
+        # Get result from state
+        result = state.supply_result if hasattr(state, 'supply_result') else state.data_result
         
         assert result["status"] == "success"
         assert "contract_analysis" in result

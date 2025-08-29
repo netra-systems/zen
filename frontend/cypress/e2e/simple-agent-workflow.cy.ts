@@ -1,20 +1,31 @@
 describe('Simple Agent Workflow', () => {
   beforeEach(() => {
-    // Setup auth
+    // Clear any existing auth state to allow dev login to work
     cy.window().then((win) => {
-      win.localStorage.setItem('jwt_token', 'test-jwt-token');
+      win.localStorage.removeItem('jwt_token');
+      win.localStorage.removeItem('dev_logout_flag');
     });
+    
     cy.visit('/chat');
+    
+    // Wait for development mode auto-login to complete
+    // The system should automatically log in in dev mode
+    cy.wait(2000);
   });
 
   it('should send optimization request and receive agent response', () => {
-    // Wait for chat to load
-    cy.get('input[placeholder*="message"]', { timeout: 10000 }).should('be.visible');
+    // Debug: log all input and textarea elements
+    cy.get('body').then(() => {
+      cy.log('Looking for message input elements...');
+    });
+    
+    // Wait for chat to load - use textarea instead of input and data-testid
+    cy.get('textarea[data-testid="message-textarea"]', { timeout: 10000 }).should('be.visible');
     
     // Send optimization request
     const request = 'Optimize my LLM costs';
-    cy.get('input[placeholder*="message"]').type(request);
-    cy.get('button[aria-label="Send"]').click();
+    cy.get('textarea[data-testid="message-textarea"]').type(request);
+    cy.get('button[data-testid="send-button"]').click();
     
     // Verify request is displayed
     cy.contains(request).should('be.visible');
@@ -49,8 +60,8 @@ describe('Simple Agent Workflow', () => {
 
   it('should handle stop processing button', () => {
     // Send a message
-    cy.get('input[placeholder*="message"]', { timeout: 10000 }).type('Start processing');
-    cy.get('button[aria-label="Send"]').click();
+    cy.get('textarea[data-testid="message-textarea"]', { timeout: 10000 }).type('Start processing');
+    cy.get('button[data-testid="send-button"]').click();
     
     // Check if stop button appears
     cy.get('body').then(($body) => {

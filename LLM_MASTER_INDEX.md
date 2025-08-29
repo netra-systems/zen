@@ -24,6 +24,7 @@
 | **Test Runner Real Services** | `/test_framework/service_availability.py` | Real service validation | [`SPEC/test_runner_real_services.xml`](SPEC/test_runner_real_services.xml) |
 | **Test Execution Tracker** | `/scripts/test_execution_tracker.py` | Test history & metrics tracking | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
 | **Test Dashboard** | `/scripts/test_dashboard.py` | Interactive test health monitoring | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
+| **Test Collection Auditor** | `/scripts/test_collection_audit.py` | Test collection health analysis | [`SPEC/learnings/test_collection_optimization.xml`](SPEC/learnings/test_collection_optimization.xml) |
 | **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
 | **Deployment System** | `/scripts/deploy_to_gcp.py` | Official deployment script | [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) |
 | **Root Folder Organization** | `/` root directory | Clean root structure enforcement | [`SPEC/root_folder_organization.xml`](SPEC/root_folder_organization.xml) |
@@ -147,8 +148,11 @@
 | **Test Framework** | `/test_framework/` | Enhanced test framework | Core runner and configuration |
 | **Test Runner** | `/test_framework/runner.py` | Main test runner | Unified test execution |
 | **Test Config** | `/test_framework/test_config.py` | Test configuration | Test levels, environments |
+| **Test Discovery** | `/test_framework/test_discovery.py` | Test discovery and analysis | Coverage gaps, untested modules |
 | **Service Availability** | `/test_framework/service_availability.py` | Service availability checker | Hard failures when real services unavailable |
 | **LLM Config Manager** | `/test_framework/llm_config_manager.py` | Single source of truth for LLM config | Replaces multiple duplicate systems |
+| **PyTest Config** | `/pyproject.toml` | Optimized pytest configuration | Collection optimization, markers |
+| **Test Collection Report** | `/TEST_COLLECTION_IMPROVEMENTS.md` | Test collection improvements doc | Audit results and recommendations |
 
 #### Test Locations by Service
 | Test Type | Location | Pattern | Run Command |

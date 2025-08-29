@@ -14,7 +14,6 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -105,15 +104,11 @@ class TestOptimizationsCoreAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="OptimizationsCoreSubAgent",
-            state=state,
-            user_id="enterprise_customer_001"
-        )
-        
         # Execute real LLM analysis
-        result = await real_optimization_agent.execute(context)
+        await real_optimization_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.optimizations_result
         
         # Validate real optimization recommendations
         assert result["status"] == "success"
@@ -170,15 +165,11 @@ class TestOptimizationsCoreAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="OptimizationsCoreSubAgent",
-            state=state,
-            user_id="support_team_001"
-        )
-        
         # Execute real model optimization analysis
-        result = await real_optimization_agent.execute(context)
+        await real_optimization_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.optimizations_result
         
         assert result["status"] == "success"
         assert "model_recommendations" in result
@@ -224,15 +215,11 @@ class TestOptimizationsCoreAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="OptimizationsCoreSubAgent",
-            state=state,
-            user_id="content_team_001"
-        )
-        
         # Execute prompt optimization with real LLM
-        result = await real_optimization_agent.execute(context)
+        await real_optimization_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.optimizations_result
         
         assert result["status"] == "success"
         assert "prompt_optimizations" in result
@@ -287,15 +274,11 @@ class TestOptimizationsCoreAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="OptimizationsCoreSubAgent",
-            state=state,
-            user_id="translation_service_001"
-        )
-        
         # Execute batching optimization with real LLM
-        result = await real_optimization_agent.execute(context)
+        await real_optimization_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.optimizations_result
         
         assert result["status"] == "success"
         assert "batching_strategy" in result
@@ -350,15 +333,11 @@ class TestOptimizationsCoreAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="OptimizationsCoreSubAgent",
-            state=state,
-            user_id="global_platform_001"
-        )
-        
         # Execute regional optimization with real LLM
-        result = await real_optimization_agent.execute(context)
+        await real_optimization_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.optimizations_result
         
         assert result["status"] == "success"
         assert "regional_strategy" in result

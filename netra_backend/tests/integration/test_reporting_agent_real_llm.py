@@ -14,7 +14,6 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -101,15 +100,11 @@ class TestReportingSubAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="ReportingSubAgent",
-            state=state,
-            user_id="executive_team_001"
-        )
-        
         # Execute real LLM report generation
-        result = await real_reporting_agent.execute(context)
+        await real_reporting_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.report_result
         
         # Validate executive summary structure
         assert result["status"] == "success"
@@ -187,15 +182,11 @@ class TestReportingSubAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="ReportingSubAgent",
-            state=state,
-            user_id="analytics_team_002"
-        )
-        
         # Execute comparative analysis
-        result = await real_reporting_agent.execute(context)
+        await real_reporting_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.report_result
         
         assert result["status"] == "success"
         assert "comparative_analysis" in result
@@ -262,15 +253,11 @@ class TestReportingSubAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="ReportingSubAgent",
-            state=state,
-            user_id="ops_team_003"
-        )
-        
         # Execute anomaly detection reporting
-        result = await real_reporting_agent.execute(context)
+        await real_reporting_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.report_result
         
         assert result["status"] == "success"
         assert "anomalies_detected" in result
@@ -359,15 +346,11 @@ class TestReportingSubAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="ReportingSubAgent",
-            state=state,
-            user_id="finance_team_004"
-        )
-        
         # Execute cost reporting
-        result = await real_reporting_agent.execute(context)
+        await real_reporting_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.report_result
         
         assert result["status"] == "success"
         assert "cost_breakdown" in result
@@ -466,15 +449,11 @@ class TestReportingSubAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="ReportingSubAgent",
-            state=state,
-            user_id="product_team_005"
-        )
-        
         # Execute dashboard generation
-        result = await real_reporting_agent.execute(context)
+        await real_reporting_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.report_result
         
         assert result["status"] == "success"
         assert "dashboard_configuration" in result

@@ -179,9 +179,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const currentToken = token;
       const storedToken = currentToken || unifiedAuthService.getToken();
       
-      if (storedToken && storedToken !== currentToken) {
+      if (storedToken) {
+        // Process the token if we have one
         // Update token if different from state
-        setToken(storedToken);
+        if (storedToken !== currentToken) {
+          setToken(storedToken);
+        }
+        
         try {
           const decodedUser = jwtDecode(storedToken) as User;
           

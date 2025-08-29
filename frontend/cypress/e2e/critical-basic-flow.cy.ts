@@ -29,11 +29,11 @@ describe('Critical Basic Flow', () => {
 
   it('should allow authenticated access attempt', () => {
     cy.window().then((win) => {
-      win.localStorage.setItem('auth_token', 'mock-jwt-token-for-testing');
+      win.localStorage.setItem('jwt_token', 'mock-jwt-token-for-testing');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
-        name: 'Test User'
+        full_name: 'Test User'
       }));
     });
 
@@ -58,10 +58,11 @@ describe('Critical Basic Flow', () => {
 
   it('should handle logout route', () => {
     cy.window().then((win) => {
-      win.localStorage.setItem('auth_token', 'mock-jwt-token');
+      win.localStorage.setItem('jwt_token', 'mock-jwt-token');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
-        email: 'test@netrasystems.ai'
+        email: 'test@netrasystems.ai',
+        full_name: 'Test User'
       }));
     });
     
@@ -70,7 +71,7 @@ describe('Critical Basic Flow', () => {
     cy.wait(1000);
     
     cy.window().then((win) => {
-      const token = win.localStorage.getItem('auth_token');
+      const token = win.localStorage.getItem('jwt_token');
       if (!token) {
         expect(token).to.be.null;
       } else {

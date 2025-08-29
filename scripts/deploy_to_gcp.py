@@ -93,6 +93,7 @@ class GCPDeployer:
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
+                    "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                 }
             ),
             ServiceConfig(
@@ -122,6 +123,7 @@ class GCPDeployer:
                     "AUTH_FAST_TEST_MODE": "false",
                     "USE_MEMORY_DB": "false",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
+                    "GCP_PROJECT_ID": self.project_id,  # CRITICAL: Required for secret loading logic
                 }
             ),
             ServiceConfig(
@@ -764,6 +766,118 @@ CMD ["npm", "start"]
             
         return None
     
+    def validate_all_secrets_exist(self) -> bool:
+        """Validate ALL required secrets exist in Secret Manager.
+        
+        This MUST be called BEFORE any build operations to prevent
+        deployment failures due to missing secrets.
+        """
+        print("Checking all required secrets in Secret Manager...")
+        
+        # Define all required secrets for each environment
+        required_backend_secrets = [
+            "postgres-host-staging",
+            "postgres-port-staging", 
+            "postgres-db-staging",
+            "postgres-user-staging",
+            "postgres-password-staging",
+            "jwt-secret-key-staging",
+            "secret-key-staging",
+            "openai-api-key-staging",
+            "fernet-key-staging",
+            "gemini-api-key-staging",  # Required for AI operations
+            "google-oauth-client-id-staging",
+            "google-oauth-client-secret-staging",
+            "service-secret-staging",
+            "redis-url-staging",
+            "redis-password-staging"
+            # anthropic-api-key-staging is optional, not required
+        ]
+        
+        required_auth_secrets = [
+            "postgres-host-staging",
+            "postgres-port-staging",
+            "postgres-db-staging",
+            "postgres-user-staging",
+            "postgres-password-staging",
+            "jwt-secret-key-staging",
+            "jwt-secret-staging",
+            "google-oauth-client-id-staging",
+            "google-oauth-client-secret-staging",
+            "service-secret-staging",
+            "service-id-staging",
+            "oauth-hmac-secret-staging",
+            "redis-url-staging",
+            "redis-password-staging"
+        ]
+        
+        # Combine all unique secrets
+        all_required_secrets = set(required_backend_secrets + required_auth_secrets)
+        
+        missing_secrets = []
+        placeholder_secrets = []
+        
+        for secret_name in all_required_secrets:
+            # Check if secret exists
+            result = subprocess.run(
+                [self.gcloud_cmd, "secrets", "describe", secret_name, "--project", self.project_id],
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+            
+            if result.returncode != 0:
+                print(f"  ❌ Secret missing: {secret_name}")
+                missing_secrets.append(secret_name)
+            else:
+                # Check if secret has a real value (not placeholder)
+                version_result = subprocess.run(
+                    [self.gcloud_cmd, "secrets", "versions", "access", "latest",
+                     "--secret", secret_name, "--project", self.project_id],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if version_result.returncode == 0:
+                    value = version_result.stdout.strip()
+                    # Check for common placeholder patterns
+                    if any(placeholder in value.upper() for placeholder in 
+                           ["REPLACE", "PLACEHOLDER", "YOUR-", "TODO", "FIXME"]):
+                        print(f"  ⚠️  Secret has placeholder value: {secret_name}")
+                        placeholder_secrets.append(secret_name)
+                    else:
+                        print(f"  ✅ Secret configured: {secret_name}")
+                else:
+                    print(f"  ❌ Cannot access secret: {secret_name}")
+                    missing_secrets.append(secret_name)
+        
+        # Report results
+        if missing_secrets:
+            print(f"\n❌ Missing {len(missing_secrets)} required secrets:")
+            for secret in missing_secrets:
+                print(f"   - {secret}")
+            
+        if placeholder_secrets:
+            print(f"\n⚠️  {len(placeholder_secrets)} secrets have placeholder values:")
+            for secret in placeholder_secrets:
+                print(f"   - {secret}")
+            print("\n   These need to be updated with real values for production.")
+        
+        # Fail if any secrets are missing
+        if missing_secrets:
+            return False
+        
+        # For staging/production, also fail on placeholders
+        if self.project_id != "netra-dev" and placeholder_secrets:
+            print("\n❌ Cannot deploy to staging/production with placeholder secrets!")
+            return False
+        
+        print("\n✅ All required secrets are configured")
+        return True
+    
     def validate_secrets_before_deployment(self) -> bool:
         """Validate all required secrets exist and have proper values.
         
@@ -940,12 +1054,8 @@ CMD ["npm", "start"]
         print(f"   Build Mode: {'Local (Fast)' if use_local_build else 'Cloud Build'}")
         print(f"   Pre-checks: {'Enabled' if run_checks else 'Disabled'}")
         
-        # Run pre-deployment checks if requested
-        if run_checks:
-            if not self.run_pre_deployment_checks():
-                print("\n❌ Pre-deployment checks failed")
-                print("   Fix issues and try again, or use --no-checks to skip (not recommended)")
-                return False
+        # CRITICAL: Validate ALL prerequisites BEFORE any build operations
+        print("\n🔐 Phase 1: Validating Prerequisites...")
         
         # Check prerequisites
         if not self.check_gcloud():
@@ -953,19 +1063,29 @@ CMD ["npm", "start"]
             
         if not self.enable_apis():
             return False
-            
-        # Validate secrets before deployment (for staging/production)
-        # Temporarily skip validation for staging due to timeout issues on Windows
-        if self.project_id == "netra-staging":
-            print("⚠️ Skipping secret validation for staging deployment (Windows compatibility)")
-        elif self.project_id != "netra-dev" and not self.validate_secrets_before_deployment():
-            print("\n❌ Secret validation failed")
+        
+        # CRITICAL: Validate secrets FIRST before any build operations
+        print("\n🔐 Phase 2: Validating Secrets Configuration...")
+        if not self.validate_all_secrets_exist():
+            print("\n❌ CRITICAL: Secret validation failed!")
+            print("   Deployment aborted to prevent runtime failures.")
+            print("   Please ensure all required secrets are configured in Secret Manager.")
             print("   Run: python scripts/validate_secrets.py --environment staging --project " + self.project_id)
-            print("   Or use --skip-validation to bypass (NOT RECOMMENDED for production)")
             return False
             
-        if not self.setup_secrets():
-            print("⚠️ Failed to setup secrets, continuing anyway...")
+        # Setup any missing secrets with placeholders (development only)
+        if self.project_id == "netra-dev":
+            if not self.setup_secrets():
+                print("⚠️ Failed to setup development secrets")
+                return False
+        
+        # Run additional pre-deployment checks if requested
+        if run_checks:
+            print("\n🔍 Phase 3: Running Pre-deployment Checks...")
+            if not self.run_pre_deployment_checks():
+                print("\n❌ Pre-deployment checks failed")
+                print("   Fix issues and try again, or use --no-checks to skip (not recommended)")
+                return False
             
         # Filter services if specified
         services_to_deploy = self.services
@@ -979,14 +1099,20 @@ CMD ["npm", "start"]
         # Deploy services in order: backend, auth, frontend
         service_urls = {}
         
+        # Phase 4: Build and Deploy
+        print("\n🏗️ Phase 4: Building and Deploying Services...")
+        print("   All prerequisites validated - proceeding with deployment")
+        
         for service in services_to_deploy:
             # Build image
             if not skip_build:
+                print(f"\n   Building {service.name}...")
                 if not self.build_image(service, use_local=use_local_build):
                     print(f"❌ Failed to build {service.name}")
                     return False
                     
             # Deploy service
+            print(f"   Deploying {service.name}...")
             success, url = self.deploy_service(service)
             if not success:
                 print(f"❌ Failed to deploy {service.name}")

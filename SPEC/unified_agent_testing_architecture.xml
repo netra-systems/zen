@@ -1,0 +1,226 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <name>UnifiedAgentTestingArchitecture</name>
+    <version>1.0.0</version>
+    <priority>CRITICAL</priority>
+    <description>Unified testing architecture ensuring consistency across all agent integration tests while supporting both Pydantic and dictionary response patterns</description>
+    <last_edited>2025-08-29T00:00:00.000000</last_edited>
+  </metadata>
+
+  <core-principles>
+    <principle id="TEST-P1" priority="CRITICAL">
+      <title>Single Source of Truth for Test Patterns</title>
+      <instruction>All agent integration tests MUST use the unified testing framework to ensure consistency across response types and validation patterns</instruction>
+    </principle>
+    <principle id="TEST-P2" priority="CRITICAL">
+      <title>Real Services Over Mocks</title>
+      <instruction>Integration tests MUST use real services (LLM, database, etc.) and avoid mocks to validate actual system behavior</instruction>
+    </principle>
+    <principle id="TEST-P3" priority="HIGH">
+      <title>Type-Safe Response Handling</title>
+      <instruction>Tests MUST handle both Pydantic model responses and dictionary responses without type errors</instruction>
+    </principle>
+  </core-principles>
+
+  <section title="Agent Response Type Analysis">
+    <response-patterns>
+      <pattern type="pydantic-models">
+        <description>Agents returning typed Pydantic models directly in state fields</description>
+        <examples>
+          <example agent="OptimizationsCoreAgent" field="optimizations_result" type="OptimizationsResult"/>
+          <example agent="ActionsToMeetGoalsAgent" field="action_plan_result" type="ActionPlanResult"/>
+          <example agent="ReportingAgent" field="report_result" type="ReportResult"/>
+        </examples>
+        <access-pattern>state.{field_name} (Pydantic model)</access-pattern>
+      </pattern>
+      <pattern type="dictionary-with-status">
+        <description>Agents returning dictionaries with status fields (legacy pattern)</description>
+        <examples>
+          <example agent="TriageSubAgent" field="triage_result" structure="{'status': 'success', 'category': '...'}"/>
+        </examples>
+        <access-pattern>result["status"], result["field"]</access-pattern>
+      </pattern>
+      <pattern type="execution-mutations">
+        <description>Agents that mutate state in-place without explicit returns</description>
+        <examples>
+          <example agent="CorpusAdminAgent" pattern="state mutation"/>
+        </examples>
+        <access-pattern>Check state fields post-execution</access-pattern>
+      </pattern>
+    </response-patterns>
+  </section>
+
+  <section title="Unified Testing Framework">
+    <framework-location>test_framework/agent_test_helpers.py</framework-location>
+    
+    <helper-classes>
+      <class name="AgentResultValidator">
+        <purpose>Unified validation for all agent response types</purpose>
+        <methods>
+          <method name="validate_execution_success">Validates agent executed without errors</method>
+          <method name="validate_pydantic_result">Validates Pydantic model responses</method>
+          <method name="validate_dict_result">Validates dictionary responses</method>
+          <method name="validate_state_mutation">Validates state field changes</method>
+        </methods>
+      </class>
+      
+      <class name="AgentTestExecutor">
+        <purpose>Standardized agent execution for tests</purpose>
+        <methods>
+          <method name="execute_agent">Execute agent with error handling</method>
+          <method name="execute_with_timeout">Execute with timeout protection</method>
+          <method name="execute_with_metrics">Execute with performance tracking</method>
+        </methods>
+      </class>
+      
+      <class name="ResultAssertion">
+        <purpose>Type-safe assertion helpers</purpose>
+        <methods>
+          <method name="assert_success">Assert successful execution</method>
+          <method name="assert_field_exists">Assert field presence</method>
+          <method name="assert_field_value">Assert field value with type safety</method>
+          <method name="assert_business_logic">Assert domain-specific requirements</method>
+        </methods>
+      </class>
+    </helper-classes>
+  </section>
+
+  <section title="Test Pattern Templates">
+    <template name="pydantic-model-test">
+      <description>Template for agents returning Pydantic models</description>
+      <pattern>
+        <code>
+async def test_agent_execution(agent_validator: AgentResultValidator):
+    # Setup
+    state = DeepAgentState(...)
+    
+    # Execute
+    await agent.execute(state, run_id, stream_updates=False)
+    
+    # Validate using unified framework
+    result = agent_validator.validate_pydantic_result(
+        state.{result_field}, 
+        expected_type={ResultType},
+        required_fields=["field1", "field2"]
+    )
+    
+    # Business logic assertions
+    agent_validator.assert_business_logic(result, {
+        "confidence_score": lambda x: 0 <= x <= 1.0,
+        "recommendations": lambda x: len(x) > 0
+    })
+        </code>
+      </pattern>
+    </template>
+    
+    <template name="dictionary-result-test">
+      <description>Template for agents returning dictionaries</description>
+      <pattern>
+        <code>
+async def test_agent_execution(agent_validator: AgentResultValidator):
+    # Setup
+    state = DeepAgentState(...)
+    
+    # Execute
+    await agent.execute(state, run_id, stream_updates=False)
+    
+    # Validate using unified framework
+    result = agent_validator.validate_dict_result(
+        state.{result_field},
+        required_fields=["status", "category"],
+        status_field="status",
+        expected_status="success"
+    )
+    
+    # Field assertions
+    agent_validator.assert_field_value(result, "category", str, not_empty=True)
+        </code>
+      </pattern>
+    </template>
+  </section>
+
+  <section title="Error Handling Strategy">
+    <error-patterns>
+      <pattern type="no-status-field">
+        <description>Handle Pydantic models without status fields</description>
+        <strategy>Check for non-None result and validate required fields</strategy>
+        <validation>assert result is not None and hasattr(result, 'required_field')</validation>
+      </pattern>
+      
+      <pattern type="execution-exceptions">
+        <description>Handle agent execution exceptions</description>
+        <strategy>Catch exceptions and validate error states</strategy>
+        <validation>Check state for error fields or exception propagation</validation>
+      </pattern>
+      
+      <pattern type="partial-results">
+        <description>Handle partial execution results</description>
+        <strategy>Validate partial_extraction flag and extracted_fields</strategy>
+        <validation>Check extracted_fields list and error message</validation>
+      </pattern>
+    </error-patterns>
+  </section>
+
+  <section title="Field Assertion Guidelines">
+    <guidelines>
+      <guideline id="FIELD-G1">
+        <title>Required Field Validation</title>
+        <rule>Always validate presence of business-critical fields before accessing values</rule>
+        <example>assert "recommendations" in result or hasattr(result, "recommendations")</example>
+      </guideline>
+      
+      <guideline id="FIELD-G2">
+        <title>Type-Safe Access</title>
+        <rule>Use type-safe accessors that handle both dict and Pydantic patterns</rule>
+        <example>value = get_field_value(result, "confidence_score", float, default=0.0)</example>
+      </guideline>
+      
+      <guideline id="FIELD-G3">
+        <title>Business Logic Validation</title>
+        <rule>Validate business constraints (ranges, formats, relationships) after field presence</rule>
+        <example>assert 0.0 <= confidence_score <= 1.0</example>
+      </guideline>
+    </guidelines>
+  </section>
+
+  <section title="Implementation Locations">
+    <locations>
+      <location path="test_framework/agent_test_helpers.py">Core testing framework classes</location>
+      <location path="test_framework/fixtures/agent_fixtures.py">Pytest fixtures for agent testing</location>
+      <location path="test_framework/assertions/business_logic.py">Business logic assertion helpers</location>
+      <location path="SPEC/learnings/unified_agent_testing.xml">Testing pattern learnings</location>
+    </locations>
+  </section>
+
+  <section title="Migration Strategy">
+    <phases>
+      <phase number="1">
+        <title>Framework Implementation</title>
+        <tasks>
+          <task>Create AgentResultValidator class</task>
+          <task>Create AgentTestExecutor class</task>
+          <task>Create ResultAssertion helpers</task>
+        </tasks>
+      </phase>
+      
+      <phase number="2">
+        <title>Test Pattern Standardization</title>
+        <tasks>
+          <task>Update existing integration tests to use framework</task>
+          <task>Standardize result validation patterns</task>
+          <task>Remove duplicate validation logic</task>
+        </tasks>
+      </phase>
+      
+      <phase number="3">
+        <title>Documentation and Training</title>
+        <tasks>
+          <task>Document testing patterns</task>
+          <task>Create test templates</task>
+          <task>Update contribution guidelines</task>
+        </tasks>
+      </phase>
+    </phases>
+  </section>
+</specification>

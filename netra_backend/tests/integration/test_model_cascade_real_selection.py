@@ -21,7 +21,7 @@ from netra_backend.app.agents.chat_orchestrator.model_selector import ModelSelec
 from netra_backend.app.agents.chat_orchestrator.quality_evaluator import QualityEvaluator
 from netra_backend.app.agents.chat_orchestrator.cost_tracker import CostTracker
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.database import get_async_session
+from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.models.sql_models import (
     ModelUsage, ModelPerformance, CostOptimization,

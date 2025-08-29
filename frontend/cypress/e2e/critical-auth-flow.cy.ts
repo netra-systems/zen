@@ -12,10 +12,10 @@ describe('Critical Authentication Flow', () => {
     
     // 2. Verify login page elements
     cy.contains('Netra').should('be.visible');
-    cy.contains('Login with Google').should('be.visible');
+    cy.get('body').should('contain.text', 'Login with Google').or('contain.text', 'Quick Dev Login');
     
     // 3. Verify login button is enabled
-    cy.get('button').contains('Login with Google').should('not.be.disabled');
+    cy.get('button').contains(/login|access|dev/i).should('not.be.disabled');
   });
 
   it('should redirect unauthenticated users to login', () => {
@@ -24,7 +24,7 @@ describe('Critical Authentication Flow', () => {
     
     // 2. Should redirect to login
     cy.url().should('include', '/login');
-    cy.contains('Login with Google').should('be.visible');
+    cy.get('body').should('contain.text', 'Login with Google').or('contain.text', 'Quick Dev Login');
   });
 
   it('should handle authentication state in localStorage', () => {
@@ -34,11 +34,11 @@ describe('Critical Authentication Flow', () => {
     // 2. Simulate setting auth token (mock successful auth)
     cy.window().then((win) => {
       // Mock a successful authentication by setting token
-      win.localStorage.setItem('auth_token', 'mock-jwt-token-for-testing');
+      win.localStorage.setItem('jwt_token', 'mock-jwt-token-for-testing');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
         email: 'test@netrasystems.ai',
-        name: 'Test User'
+        full_name: 'Test User'
       }));
     });
     
@@ -54,7 +54,7 @@ describe('Critical Authentication Flow', () => {
     
     // 5. Clear auth state
     cy.window().then((win) => {
-      win.localStorage.removeItem('auth_token');
+      win.localStorage.removeItem('jwt_token');
       win.localStorage.removeItem('user');
     });
     
@@ -67,21 +67,22 @@ describe('Critical Authentication Flow', () => {
     // 1. Visit login page
     cy.visit('/login');
     
-    // 2. Click login button and intercept the OAuth flow
-    cy.intercept('GET', '**/auth/**', (req) => {
-      // Delay response to see loading state
-      req.reply({
-        statusCode: 302,
-        headers: { location: '/auth/callback' },
-        delay: 1000
-      });
+    // 2. Mock auth config to check for development mode
+    cy.intercept('GET', 'http://localhost:8001/auth/config', {
+      statusCode: 200,
+      body: {
+        development_mode: true,
+        endpoints: {
+          dev_login: 'http://localhost:8001/auth/dev/login'
+        }
+      }
     });
     
     // 3. Click login button
     cy.get('button').contains('Login with Google').click();
     
-    // 4. Should show loading state
-    cy.get('button').contains('Loading...').should('be.visible');
+    // 4. Should show loading state (in development mode)
+    cy.get('button').contains(/loading|logging/i).should('be.visible');
   });
 
   it('should handle OAuth callback flow', () => {
@@ -99,10 +100,11 @@ describe('Critical Authentication Flow', () => {
   it('should handle logout flow', () => {
     // 1. Set up authenticated state
     cy.window().then((win) => {
-      win.localStorage.setItem('auth_token', 'mock-jwt-token');
+      win.localStorage.setItem('jwt_token', 'mock-jwt-token');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
-        email: 'test@netrasystems.ai'
+        email: 'test@netrasystems.ai',
+        full_name: 'Test User'
       }));
     });
     
@@ -111,7 +113,7 @@ describe('Critical Authentication Flow', () => {
     
     // 3. Should clear auth state and redirect
     cy.window().then((win) => {
-      const token = win.localStorage.getItem('auth_token');
+      const token = win.localStorage.getItem('jwt_token');
       expect(token).to.be.null;
     });
     

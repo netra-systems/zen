@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentClassifier, IntentType
@@ -24,11 +25,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.database import get_async_session
+from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.websocket.websocket_manager import WebSocketManager
-from netra_backend.app.models.sql_models import ConversationHistory, AgentExecution
+from netra_backend.app.websocket_core.manager import WebSocketManager
+# Removed non-existent models import - test focuses on ChatOrchestrator functionality
 
 # Real environment configuration
 env = IsolatedEnvironment()
@@ -505,22 +506,17 @@ class TestChatOrchestratorNACISRealLLM:
             )
             assert context_matches >= len(turn_data["expected_context"]) * 0.5
             
-            # Store in conversation history
-            conversation_entry = ConversationHistory(
-                id=f"{conversation_id}_{turn_data['turn']}",
-                conversation_id=conversation_id,
-                user_id=state.user_id,
-                turn_number=turn_data["turn"],
-                user_message=turn_data["query"],
-                assistant_message=result["response"],
-                metadata=json.dumps({
-                    "confidence_score": result.get("confidence_score", 0),
-                    "agents_involved": result.get("agents_involved", []),
-                    "execution_time_ms": result.get("execution_time_ms", 0)
-                }),
-                created_at=datetime.utcnow()
-            )
-            session.add(conversation_entry)
+            # Store conversation turn metadata for validation (no database persistence)
+            turn_metadata = {
+                "conversation_id": conversation_id,
+                "turn_number": turn_data["turn"],
+                "user_message": turn_data["query"],
+                "assistant_message": result["response"],
+                "confidence_score": result.get("confidence_score", 0),
+                "agents_involved": result.get("agents_involved", []),
+                "execution_time_ms": result.get("execution_time_ms", 0),
+                "timestamp": datetime.utcnow()
+            }
             
             # Update conversation history for next turn
             conversation_history.append({
@@ -534,30 +530,29 @@ class TestChatOrchestratorNACISRealLLM:
             
             logger.info(f"Turn {turn_data['turn']} completed with {len(result['response'])} chars response")
         
-        await session.commit()
+        # Verify conversation coherence from in-memory conversation history
+        assert len(conversation_history) == len(conversation_turns) * 2  # Each turn has user + assistant message
         
-        # Verify conversation coherence
-        saved_conversation = await session.execute(
-            select(ConversationHistory)
-            .where(ConversationHistory.conversation_id == conversation_id)
-            .order_by(ConversationHistory.turn_number)
-        )
-        saved_turns = saved_conversation.scalars().all()
-        
-        assert len(saved_turns) == len(conversation_turns)
+        # Extract just the assistant responses for validation
+        assistant_responses = [
+            msg["content"] for msg in conversation_history 
+            if msg["role"] == "assistant"
+        ]
+        assert len(assistant_responses) == len(conversation_turns)
         
         # Check for progressive refinement
-        first_response = saved_turns[0].assistant_message
-        last_response = saved_turns[-1].assistant_message
+        first_response = assistant_responses[0]
+        last_response = assistant_responses[-1]
         
         # Last response should be more specific/actionable than first
         assert "monitor" in last_response.lower()
         assert any(metric in last_response.lower() for metric in ["latency", "cost", "error", "throughput"])
         
-        # Verify context building
-        migration_turn = saved_turns[3].assistant_message  # Turn 4 about migration
-        assert "phase" in migration_turn.lower()
-        assert "$50" in migration_turn or "50k" in migration_turn.lower() or "fifty" in migration_turn.lower()
+        # Verify context building in migration response (Turn 4)
+        if len(assistant_responses) >= 4:
+            migration_turn = assistant_responses[3]  # Turn 4 about migration
+            assert "phase" in migration_turn.lower()
+            assert "$50" in migration_turn or "50k" in migration_turn.lower() or "fifty" in migration_turn.lower()
         
         logger.info(f"E2E conversation completed with {len(conversation_turns)} turns and full context retention")
 

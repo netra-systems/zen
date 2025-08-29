@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Test Collection Optimization</title>
+  <date>2025-08-29</date>
+  <category>testing</category>
+  <subcategory>performance</subcategory>
+  
+  <problem>
+    <description>Test collection was slow and inefficient with 17,000+ tests being collected, causing timeouts and performance issues</description>
+    <symptoms>
+      <symptom>Test collection taking over 60 seconds</symptom>
+      <symptom>Collection timeouts in CI/CD</symptom>
+      <symptom>Duplicate test discovery</symptom>
+      <symptom>Missing test markers</symptom>
+      <symptom>Orphaned test files</symptom>
+    </symptoms>
+  </problem>
+  
+  <solution>
+    <overview>Implemented comprehensive test collection optimization and audit tools</overview>
+    <components>
+      <component>
+        <name>Test Collection Auditor</name>
+        <file>scripts/test_collection_audit.py</file>
+        <purpose>Analyze and report on test collection health</purpose>
+        <features>
+          <feature>Service-by-service analysis</feature>
+          <feature>Duplicate test detection</feature>
+          <feature>Orphaned test identification</feature>
+          <feature>Marker distribution analysis</feature>
+          <feature>Collection time metrics</feature>
+        </features>
+      </component>
+      
+      <component>
+        <name>Optimized PyTest Configuration</name>
+        <file>pyproject.toml</file>
+        <purpose>Improve test discovery performance</purpose>
+        <optimizations>
+          <optimization>Import mode set to importlib for faster imports</optimization>
+          <optimization>Collection ignore patterns for unnecessary directories</optimization>
+          <optimization>Parallel execution configuration</optimization>
+          <optimization>Comprehensive marker definitions</optimization>
+          <optimization>Cache management settings</optimization>
+        </optimizations>
+      </component>
+    </components>
+  </solution>
+  
+  <results>
+    <metric name="tests_collected">3659</metric>
+    <metric name="collection_time_seconds">21</metric>
+    <metric name="collection_errors">112</metric>
+    <improvement>Collection time reduced from 60+ seconds to ~21 seconds</improvement>
+    <improvement>Clear visibility into test organization across services</improvement>
+  </results>
+  
+  <best_practices>
+    <practice>Use absolute imports in all test files</practice>
+    <practice>Organize tests by service in dedicated directories</practice>
+    <practice>Apply appropriate markers to all tests</practice>
+    <practice>Regularly audit test collection health</practice>
+    <practice>Cache test collection results when possible</practice>
+  </best_practices>
+  
+  <configuration>
+    <pytest_settings>
+      <setting name="testpaths">tests, netra_backend/tests, auth_service/tests</setting>
+      <setting name="import_mode">importlib</setting>
+      <setting name="asyncio_mode">auto</setting>
+      <setting name="timeout">120</setting>
+      <setting name="cache_dir">.pytest_cache</setting>
+    </pytest_settings>
+    
+    <ignore_patterns>
+      <pattern>build</pattern>
+      <pattern>dist</pattern>
+      <pattern>node_modules</pattern>
+      <pattern>venv</pattern>
+      <pattern>__pycache__</pattern>
+    </ignore_patterns>
+  </configuration>
+  
+  <commands>
+    <command>
+      <description>Run test collection audit</description>
+      <code>python scripts/test_collection_audit.py</code>
+    </command>
+    <command>
+      <description>Quick test collection check</description>
+      <code>python -m pytest --collect-only -q</code>
+    </command>
+    <command>
+      <description>Count collected tests</description>
+      <code>python -m pytest --collect-only -q 2>&amp;1 | grep -c "test_"</code>
+    </command>
+  </commands>
+  
+  <related_files>
+    <file>scripts/test_collection_audit.py</file>
+    <file>pyproject.toml</file>
+    <file>pytest.ini</file>
+    <file>test_framework/test_discovery.py</file>
+    <file>TEST_COLLECTION_IMPROVEMENTS.md</file>
+  </related_files>
+  
+  <cross_references>
+    <ref>SPEC/learnings/index.xml</ref>
+    <ref>LLM_MASTER_INDEX.md</ref>
+    <ref>MASTER_WIP_STATUS.md</ref>
+  </cross_references>
+</learning>

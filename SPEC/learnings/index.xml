@@ -19,7 +19,13 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode">
+        <category name="Testing/Performance" path="SPEC/learnings/test_collection_optimization.xml" keywords="Test Collection, PyTest, Test Discovery, Test Performance, Test Audit, Test Markers, Test Organization, Collection Optimization">
+            <critical-takeaway>Test collection optimized from 60+ seconds to ~21 seconds using importlib mode and ignore patterns (test_collection_optimization.xml).</critical-takeaway>
+            <critical-takeaway>Use scripts/test_collection_audit.py to identify duplicate tests, orphaned files, and missing markers (test_collection_optimization.xml).</critical-takeaway>
+            <critical-takeaway>Configure pyproject.toml with optimized pytest settings for faster collection (test_collection_optimization.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode, Auto-Login, Dev Auto-Login, Token Persistence, Token Initialization">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>CRITICAL: Use JWT_SECRET_KEY exclusively - JWT_SECRET is deprecated (jwt_secret_standardization.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services - both auth and backend MUST use JWT_SECRET_KEY (jwt_secret_standardization.xml).</critical-takeaway>
@@ -45,6 +51,9 @@
             <critical-takeaway>Service independence violations cause immediate logout after OAuth - auth service cannot access database/sessions (oauth_service_independence_violation.xml).</critical-takeaway>
             <critical-takeaway>Frontend login must check development_mode flag from auth config and use dev login in Docker Compose environments (docker-compose-login-fix.xml).</critical-takeaway>
             <critical-takeaway>Dev login requires both email and password in request body - password field was missing causing login failures (docker-compose-login-fix.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: Dev auto-login MUST process tokens whether storedToken === currentToken or not - initialization flow depends on it (frontend_dev_autologin.xml).</critical-takeaway>
+            <critical-takeaway>Dev auto-login requires exponential backoff with 5+ retries to handle backend startup delays - simple retries insufficient (frontend_dev_autologin.xml).</critical-takeaway>
+            <critical-takeaway>ANY changes to auth/context.tsx initialization or token processing MUST be tested with dev-auto-login.test.tsx (frontend_dev_autologin.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">
@@ -728,8 +737,20 @@
             <critical-takeaway>Test logging output with real console, not just StringIO, to verify color rendering.</critical-takeaway>
         </category>
 
-        <category name="Frontend" path="SPEC/learnings/frontend.xml" keywords="Zustand, React, TypeScript">
+        <category name="Frontend" path="SPEC/learnings/frontend.xml" keywords="Zustand, React, TypeScript, Loading States, Initialization, UX, UI, Auth Context, Dev Auto-Login">
             <critical-takeaway context="Zustand">Use individual selectors to prevent infinite loops. See SPEC/conventions.xml#zustand-selectors.</critical-takeaway>
+            <critical-takeaway context="Initialization">CRITICAL: ANY changes to loading states, initialization flows, or auth context MUST be tested with dev-auto-login.test.tsx (frontend_loading_states.xml).</critical-takeaway>
+            <critical-takeaway context="UX">Loading states must NOT block UI rendering - use skeleton screens or partial content (frontend_loading_states.xml).</critical-takeaway>
+            <critical-takeaway context="Auth">Token processing MUST handle storedToken === currentToken case for dev auto-login to work (frontend_dev_autologin.xml).</critical-takeaway>
+            <critical-takeaway context="Initialization">Use hasMountedRef pattern to prevent multiple initialization calls in auth context (frontend_initialization_patterns.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Frontend Loading States & UX" path="SPEC/learnings/frontend_loading_states.xml" keywords="Loading, Spinner, Skeleton, UX, UI, User Experience, Initialization, Bootstrap, Auth Loading, Dev Experience">
+            <critical-takeaway>MANDATORY: Test ALL loading/init changes with __tests__/auth/dev-auto-login.test.tsx - breaking auto-login severely impacts dev productivity.</critical-takeaway>
+            <critical-takeaway>Loading states hierarchy: AuthProvider Loading → Token Processing → Dev Auto-Login - each phase has specific requirements.</critical-takeaway>
+            <critical-takeaway>Never block UI completely for >3 seconds - use progressive enhancement and skeleton screens.</critical-takeaway>
+            <critical-takeaway>Auth context token processing MUST handle existing tokens correctly or dev auto-login breaks on page refresh.</critical-takeaway>
+            <critical-takeaway>Dev auto-login requires 5+ retries with exponential backoff to handle backend startup delays.</critical-takeaway>
         </category>
 
         <category name="Microservice Independence" path="SPEC/independent_services.xml" keywords="Microservice, Docker, Service">

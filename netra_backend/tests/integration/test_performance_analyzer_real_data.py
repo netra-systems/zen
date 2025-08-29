@@ -21,7 +21,7 @@ from netra_backend.app.agents.data_sub_agent.performance_analyzer import Perform
 from netra_backend.app.agents.data_sub_agent.performance_data_processor import PerformanceDataProcessor
 from netra_backend.app.agents.data_sub_agent.insights_performance_analyzer import InsightsPerformanceAnalyzer
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.database import get_async_session
+from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.models.sql_models import (
     PerformanceMetric, ApiUsage, SystemMetric,

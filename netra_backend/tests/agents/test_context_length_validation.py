@@ -14,7 +14,7 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.synthetic_data_sub_agent_modern import SyntheticDataSubAgent
+from netra_backend.app.agents.synthetic_data_sub_agent_modern import ModernSyntheticDataSubAgent as SyntheticDataSubAgent
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 

@@ -6,38 +6,27 @@ Business Value: Revenue-critical component
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from netra_backend.app.agents.corpus_admin.corpus_creation_io import CorpusCreationIo
+from netra_backend.app.agents.corpus_admin import corpus_creation_io
 
 class TestCorpusCreationIo:
-    """Test suite for CorpusCreationIo"""
+    """Test suite for corpus_creation_io functions"""
     
-    @pytest.fixture
-    def instance(self):
-        """Create test instance"""
-        return CorpusCreationIo()
+    def test_parse_json_valid(self):
+        """Test parse_json with valid JSON"""
+        result = corpus_creation_io.parse_json('{"key": "value"}')
+        assert result == {"key": "value"}
     
-    def test_initialization(self, instance):
-        """Test proper initialization"""
-        assert instance is not None
-        # Add initialization assertions
+    def test_parse_json_invalid(self):
+        """Test parse_json with invalid JSON"""
+        result = corpus_creation_io.parse_json('invalid json')
+        assert result is None
     
-    def test_core_functionality(self, instance):
-        """Test core business logic"""
-        # Test happy path
-        result = instance.process()
-        assert result is not None
+    def test_validate_array_valid(self):
+        """Test validate_array with valid array"""
+        result = corpus_creation_io.validate_array([1, 2, 3])
+        assert result is True
     
-    def test_error_handling(self, instance):
-        """Test error scenarios"""
-        with pytest.raises(Exception):
-            instance.process_invalid()
-    
-    def test_edge_cases(self, instance):
-        """Test boundary conditions"""
-        # Test with None, empty, extreme values
-        pass
-    
-    def test_validation(self, instance):
-        """Test input validation"""
-        # Test validation logic
-        pass
+    def test_validate_array_invalid(self):
+        """Test validate_array with non-array"""
+        result = corpus_creation_io.validate_array({"key": "value"})
+        assert result is False

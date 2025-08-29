@@ -6,38 +6,35 @@ Business Value: Revenue-critical component
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from netra_backend.app.agents.corpus_admin.corpus_creation_helpers import CorpusCreationHelpers
+from netra_backend.app.agents.corpus_admin.corpus_creation_helpers import get_handlers
 
 class TestCorpusCreationHelpers:
-    """Test suite for CorpusCreationHelpers"""
+    """Test suite for corpus creation helpers"""
     
-    @pytest.fixture
-    def instance(self):
-        """Create test instance"""
-        return CorpusCreationHelpers()
+    def test_get_handlers_with_available_handlers(self):
+        """Test get_handlers when handlers are available"""
+        with patch('netra_backend.app.agents.corpus_admin.corpus_creation_helpers.HANDLERS_AVAILABLE', True):
+            with patch('netra_backend.app.agents.corpus_admin.corpus_creation_helpers.create_validation_handler') as mock_val:
+                with patch('netra_backend.app.agents.corpus_admin.corpus_creation_helpers.create_indexing_handler') as mock_idx:
+                    with patch('netra_backend.app.agents.corpus_admin.corpus_creation_helpers.create_upload_handler') as mock_upl:
+                        mock_val.return_value = Mock()
+                        mock_idx.return_value = Mock()
+                        mock_upl.return_value = Mock()
+                        
+                        v, i, u = get_handlers()
+                        
+                        assert v is not None
+                        assert i is not None
+                        assert u is not None
+                        mock_val.assert_called_once()
+                        mock_idx.assert_called_once()
+                        mock_upl.assert_called_once()
     
-    def test_initialization(self, instance):
-        """Test proper initialization"""
-        assert instance is not None
-        # Add initialization assertions
-    
-    def test_core_functionality(self, instance):
-        """Test core business logic"""
-        # Test happy path
-        result = instance.process()
-        assert result is not None
-    
-    def test_error_handling(self, instance):
-        """Test error scenarios"""
-        with pytest.raises(Exception):
-            instance.process_invalid()
-    
-    def test_edge_cases(self, instance):
-        """Test boundary conditions"""
-        # Test with None, empty, extreme values
-        pass
-    
-    def test_validation(self, instance):
-        """Test input validation"""
-        # Test validation logic
-        pass
+    def test_get_handlers_without_available_handlers(self):
+        """Test get_handlers when handlers are not available"""
+        with patch('netra_backend.app.agents.corpus_admin.corpus_creation_helpers.HANDLERS_AVAILABLE', False):
+            v, i, u = get_handlers()
+            
+            assert v is None
+            assert i is None
+            assert u is None

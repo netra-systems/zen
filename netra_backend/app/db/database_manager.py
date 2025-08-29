@@ -20,7 +20,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-from sqlalchemy.exc import OperationalError, DisconnectionError
+from sqlalchemy.exc import OperationalError, DisconnectionError, IllegalStateChangeError
 
 from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
@@ -1050,38 +1050,62 @@ class DatabaseManager:
     async def get_async_session(name: str = "default"):
         """Get async database session with automatic cleanup.
         
-        CRITICAL FIX: Uses async context manager instead of async generator
-        to prevent 'aclose(): asynchronous generator is already running' errors
-        during concurrent access.
+        CRITICAL FIX: Properly handles concurrent access and GeneratorExit
+        to prevent 'IllegalStateChangeError' during session cleanup.
         
         This implementation is thread-safe and prevents session state conflicts.
         """
         async_session_factory = DatabaseManager.get_application_session()
-        async with async_session_factory() as session:
+        session = None
+        session_closed = False
+        
+        try:
+            # Create session outside the context manager to control its lifecycle
+            session = async_session_factory()
+            
+            # Start the session context
+            await session.__aenter__()
+            
             try:
                 yield session
-                # CRITICAL FIX: Only attempt commit if session is properly active
-                # and has an active transaction to commit
-                if hasattr(session, 'is_active') and session.is_active:
-                    # Check if there's an active transaction to commit
-                    if hasattr(session, 'in_transaction') and session.in_transaction():
-                        await session.commit()
-            except asyncio.CancelledError:
-                # Handle task cancellation - let context manager handle cleanup
-                raise
+                
+                # Only commit if we have an active transaction
+                if not session_closed and hasattr(session, 'in_transaction'):
+                    try:
+                        if session.in_transaction():
+                            await session.commit()
+                    except (RuntimeError, AttributeError):
+                        # Session might be in an invalid state, skip commit
+                        pass
+                        
             except GeneratorExit:
-                # Handle generator cleanup gracefully
+                # Mark session as closed to prevent further operations
+                session_closed = True
+                # Don't attempt any cleanup operations here
+                # Let the finally block handle it
                 pass
+            except asyncio.CancelledError:
+                # Task cancellation - mark as closed and re-raise
+                session_closed = True
+                raise
             except Exception:
-                # CRITICAL FIX: Only rollback if session is still in a valid state
-                if (hasattr(session, 'is_active') and session.is_active and
-                    hasattr(session, 'in_transaction') and session.in_transaction()):
+                # For actual exceptions, attempt rollback if possible
+                if not session_closed and hasattr(session, 'rollback'):
                     try:
                         await session.rollback()
                     except Exception:
-                        # If rollback fails, let the context manager handle cleanup
+                        # Rollback failed, continue with cleanup
                         pass
                 raise
+                
+        finally:
+            # Clean up the session if it was created
+            if session is not None and not session_closed:
+                try:
+                    await session.__aexit__(None, None, None)
+                except (RuntimeError, IllegalStateChangeError, AttributeError):
+                    # Session cleanup failed, but we're exiting anyway
+                    pass
     
     @staticmethod
     async def health_check_all() -> Dict[str, Dict[str, Any]]:

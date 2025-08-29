@@ -78,7 +78,7 @@ class StateSnapshot(BaseModel):
     id: str
     run_id: str
     thread_id: str
-    user_id: str
+    user_id: Optional[str] = None
     metadata: AgentStateMetadata
     state_data: Dict[str, Any]
     serialization_format: SerializationFormat = SerializationFormat.JSON
@@ -142,7 +142,7 @@ class StatePersistenceRequest(BaseModel):
     
     run_id: str
     thread_id: str
-    user_id: str
+    user_id: Optional[str] = None
     state_data: Dict[str, Any]
     checkpoint_type: CheckpointType = CheckpointType.MANUAL
     agent_phase: Optional[AgentPhase] = None

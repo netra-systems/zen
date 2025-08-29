@@ -81,8 +81,9 @@ export class UnifiedAuthService {
 
   /**
    * Handle development login (only available in dev/test environments)
+   * Uses exponential backoff for retries to handle backend startup delays
    */
-  async handleDevLogin(authConfig: AuthConfigResponse): Promise<{ access_token: string; token_type: string } | null> {
+  async handleDevLogin(authConfig: AuthConfigResponse, retries = 5, initialDelay = 1000): Promise<{ access_token: string; token_type: string } | null> {
     if (this.environment !== 'development' && this.environment !== 'test') {
       logger.warn('Dev login attempted in non-development environment', {
         environment: this.environment
@@ -95,35 +96,82 @@ export class UnifiedAuthService {
       environment: this.environment 
     });
     
-    try {
-      const response = await fetch(authConfig.endpoints.dev_login, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email: 'dev@example.com',
-          password: 'dev'  // Add password for dev login
-        }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        logger.info('Dev login successful');
-        this.setToken(data.access_token);
-        this.clearDevLogoutFlag();
-        return data;
-      } else {
-        logger.error('Dev login failed', undefined, { 
-          status: response.status,
-          environment: this.environment
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout per attempt
+        
+        const response = await fetch(authConfig.endpoints.dev_login, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            email: 'dev@example.com',
+            password: 'dev'  // Add password for dev login
+          }),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          logger.info('Dev login successful', {
+            attempt: attempt + 1,
+            totalAttempts: retries + 1
+          });
+          this.setToken(data.access_token);
+          this.clearDevLogoutFlag();
+          return data;
+        } else {
+          logger.warn('Dev login failed', { 
+            status: response.status,
+            environment: this.environment,
+            attempt: attempt + 1,
+            willRetry: attempt < retries
+          });
+          if (attempt < retries) {
+            // Exponential backoff with jitter
+            const backoffDelay = initialDelay * Math.pow(2, attempt) + Math.random() * 1000;
+            logger.debug(`Retrying dev login in ${Math.round(backoffDelay)}ms`, {
+              attempt: attempt + 1,
+              nextDelay: backoffDelay
+            });
+            await new Promise(resolve => setTimeout(resolve, backoffDelay));
+            continue;
+          }
+          return null;
+        }
+      } catch (error) {
+        const isAborted = error instanceof Error && error.name === 'AbortError';
+        const isNetworkError = error instanceof Error && 
+          (error.message.includes('ECONNREFUSED') || 
+           error.message.includes('Failed to fetch') ||
+           error.message.includes('NetworkError'));
+        
+        logger.warn('Error during dev login', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          attempt: attempt + 1,
+          willRetry: attempt < retries,
+          isAborted,
+          isNetworkError
+        });
+        
+        if (attempt < retries) {
+          // Exponential backoff with jitter
+          const backoffDelay = initialDelay * Math.pow(2, attempt) + Math.random() * 1000;
+          logger.debug(`Retrying dev login after error in ${Math.round(backoffDelay)}ms`, {
+            attempt: attempt + 1,
+            nextDelay: backoffDelay
+          });
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+          continue;
+        }
         return null;
       }
-    } catch (error) {
-      logger.error('Error during dev login', error as Error);
-      return null;
     }
+    return null;
   }
 
   /**
