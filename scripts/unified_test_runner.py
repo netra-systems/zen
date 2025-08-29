@@ -47,7 +47,8 @@ except ImportError:
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
-from test_framework.test_config import configure_dev_environment, configure_test_environment, configure_real_llm
+from test_framework.test_config import configure_dev_environment, configure_test_environment
+from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 from test_framework.test_discovery import TestDiscovery
 from test_framework.test_validation import TestValidation
 
@@ -237,11 +238,11 @@ class UnifiedTestRunner:
             configure_test_environment()
         
         if args.real_llm:
-            configure_real_llm(
+            configure_llm_testing(
+                mode=LLMTestMode.REAL,
                 model="gemini-2.5-flash",
                 timeout=60,
                 parallel="auto",
-                test_level="category",
                 use_dedicated_env=True
             )
         
@@ -526,6 +527,11 @@ class UnifiedTestRunner:
             sys.stdout.flush()
             sys.stderr.flush()
             
+            # Prepare environment for subprocess with proper isolation
+            env_manager = get_env()
+            subprocess_env = env_manager.get_subprocess_env()
+            subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
+            
             # Use subprocess.run with proper buffering for Windows
             result = subprocess.run(
                 cmd,
@@ -536,10 +542,6 @@ class UnifiedTestRunner:
                 encoding='utf-8',
                 errors='replace',
                 timeout=timeout_seconds,
-                # Force immediate output on Windows
-                env_manager = get_env()
-                subprocess_env = env_manager.get_subprocess_env()
-                subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
                 env=subprocess_env
             )
             # Handle unicode encoding issues by cleaning the output
