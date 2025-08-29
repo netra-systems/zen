@@ -284,9 +284,10 @@ class SecretManagerBuilder:
         def get_redis_password(self) -> Optional[str]:
             """Get Redis password with environment-specific fallback."""
             if self.parent._environment == "staging":
-                return self.get_secret("redis-password-staging") or self.get_secret("redis-default")
+                # Use the Terraform-managed staging-redis-url secret
+                return self.get_secret("staging-redis-url")
             elif self.parent._environment == "production":
-                return self.get_secret("redis-password-production") or self.get_secret("redis-default")
+                return self.get_secret("production-redis-url") or self.get_secret("redis-password-production")
             return None
         
         def get_jwt_secret(self) -> Optional[str]:
@@ -474,17 +475,43 @@ class SecretManagerBuilder:
         
         def _get_secret_names_to_fetch(self) -> List[str]:
             """Get list of secret names to fetch from GCP."""
-            base_secrets = [
-                "jwt-secret-key",
-                "fernet-key", 
-                "postgres-password",
-                "redis-default",
-                "clickhouse-password",
-                "gemini-api-key",
-                "google-client-id",
-                "google-client-secret"
-            ]
-            return base_secrets
+            env = self.parent._environment
+            
+            if env == "staging":
+                # Use Terraform-managed secret names for staging
+                return [
+                    "jwt-secret-key-staging",
+                    "fernet-key-staging", 
+                    "postgres-password-staging",
+                    "staging-redis-url",  # Terraform-managed Redis URL
+                    "clickhouse-password-staging",
+                    "gemini-api-key-staging",
+                    "google-oauth-client-id-staging",
+                    "google-oauth-client-secret-staging"
+                ]
+            elif env == "production":
+                return [
+                    "jwt-secret-key-production",
+                    "fernet-key-production", 
+                    "postgres-password-production",
+                    "production-redis-url",  # Terraform-managed Redis URL
+                    "clickhouse-password-production",
+                    "gemini-api-key-production",
+                    "google-client-id-production",
+                    "google-client-secret-production"
+                ]
+            else:
+                # Development/default secrets
+                return [
+                    "jwt-secret-key",
+                    "fernet-key", 
+                    "postgres-password",
+                    "redis-url",
+                    "clickhouse-password",
+                    "gemini-api-key",
+                    "google-client-id",
+                    "google-client-secret"
+                ]
         
         def _merge_with_gcp_secrets(self, env_secrets: Dict[str, str], gcp_secrets: Dict[str, str]) -> Dict[str, str]:
             """Merge GCP secrets with environment secrets."""

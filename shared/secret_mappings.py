@@ -16,7 +16,7 @@ STAGING_SECRET_MAPPINGS = {
     "postgres-password-staging": "POSTGRES_PASSWORD",
     
     # Redis Secrets
-    "redis-password-staging": "REDIS_PASSWORD",
+    "staging-redis-url": "REDIS_URL",  # Terraform-managed Redis URL
     "redis-host-staging": "REDIS_HOST",
     "redis-port-staging": "REDIS_PORT",
     
@@ -56,7 +56,7 @@ PRODUCTION_SECRET_MAPPINGS = {
     "postgres-password-prod": "POSTGRES_PASSWORD",
     
     # Redis Secrets  
-    "redis-password-prod": "REDIS_PASSWORD",
+    "production-redis-url": "REDIS_URL",  # Terraform-managed Redis URL
     "redis-host-prod": "REDIS_HOST",
     "redis-port-prod": "REDIS_PORT",
     
