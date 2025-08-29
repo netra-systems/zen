@@ -34,11 +34,17 @@ class AgentRegistry:
         self.tool_dispatcher = tool_dispatcher
         self.agents: Dict[str, BaseSubAgent] = {}
         self.websocket_manager = None
+        self._agents_registered = False
         
     def register_default_agents(self) -> None:
         """Register default sub-agents"""
+        if self._agents_registered:
+            logger.debug("Agents already registered, skipping re-registration")
+            return
+        
         self._register_core_agents()
         self._register_auxiliary_agents()
+        self._agents_registered = True
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
@@ -74,6 +80,10 @@ class AgentRegistry:
     
     def register(self, name: str, agent: BaseSubAgent) -> None:
         """Register a sub-agent"""
+        if name in self.agents:
+            logger.debug(f"Agent {name} already registered, skipping")
+            return
+            
         if self.websocket_manager:
             agent.websocket_manager = self.websocket_manager
         self.agents[name] = agent

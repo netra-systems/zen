@@ -13,6 +13,7 @@ class CircuitBreakerMetrics:
         self.success_counts: Dict[str, int] = defaultdict(int)
         self.state_changes: Dict[str, List[Dict]] = defaultdict(list)
         self.response_times: Dict[str, List[float]] = defaultdict(list)
+        self.slow_requests: int = 0  # Track slow requests for compatibility
         
     def record_failure(self, circuit_name: str, error_type: Optional[str] = None):
         """Record a failure for the given circuit."""
@@ -28,6 +29,9 @@ class CircuitBreakerMetrics:
         self.success_counts[circuit_name] += 1
         if response_time is not None:
             self.response_times[circuit_name].append(response_time)
+            # Track slow requests (> 5 seconds)
+            if response_time > 5.0:
+                self.slow_requests += 1
         
         self.state_changes[circuit_name].append({
             "event": "success", 
@@ -75,6 +79,7 @@ class CircuitBreakerMetrics:
             self.success_counts.clear()
             self.state_changes.clear()
             self.response_times.clear()
+            self.slow_requests = 0
 
 
 class CircuitBreakerMetricsCollector:
