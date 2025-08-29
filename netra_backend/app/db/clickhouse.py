@@ -138,6 +138,10 @@ class MockClickHouseDatabase:
         """Mock batch insert - logs operation."""
         logger.debug(f"[MOCK ClickHouse] Batch insert to {table_name}: {len(data)} rows")
     
+    async def insert_data(self, table: str, data: List[List[Any]], column_names = '*') -> None:
+        """Mock insert_data method - logs operation."""
+        logger.debug(f"[MOCK ClickHouse] Insert data to {table}: {len(data)} rows with columns {column_names}")
+    
     async def cleanup(self) -> None:
         """Mock cleanup (alias for disconnect)."""
         await self.disconnect()
@@ -146,6 +150,15 @@ class MockClickHouseDatabase:
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
     from netra_backend.app.core.isolated_environment import get_env
+    
+    # Check test framework ClickHouse disable settings
+    clickhouse_disabled_by_framework = (
+        get_env().get("DEV_MODE_DISABLE_CLICKHOUSE", "").lower() == "true" or
+        get_env().get("CLICKHOUSE_ENABLED", "").lower() == "false"
+    )
+    if clickhouse_disabled_by_framework:
+        return True
+    
     # Check TESTING environment variable directly for pytest compatibility
     if get_env().get("TESTING"):
         return True
