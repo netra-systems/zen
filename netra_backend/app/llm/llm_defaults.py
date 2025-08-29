@@ -28,8 +28,8 @@ class LLMModel(Enum):
     All other code MUST reference these enum values.
     """
     # Primary models (Google - most cost effective)
-    GEMINI_2_5_FLASH = "gemini-2.5-flash"  # DEFAULT for all tests and dev
-    GEMINI_2_5_PRO = "gemini-2.5-pro"      # Advanced scenarios only
+    GEMINI_2_5_FLASH = "gemini-2.5-flash"  # For development and light workloads
+    GEMINI_2_5_PRO = "gemini-2.5-pro"      # DEFAULT for all tests and advanced scenarios
     
     # Legacy models (being phased out - DO NOT USE)
     GPT_4 = "gpt-4"                        # DEPRECATED - migrate to GEMINI
@@ -44,7 +44,7 @@ class LLMModel(Enum):
         """Get the default model for the current environment.
         
         Returns:
-            GEMINI_2_5_FLASH in all cases unless overridden by env var.
+            GEMINI_2_5_PRO for tests, GEMINI_2_5_FLASH otherwise.
         """
         # Allow environment override for special cases
         env_default = os.getenv('NETRA_DEFAULT_LLM_MODEL')
@@ -54,7 +54,11 @@ class LLMModel(Enum):
             except ValueError:
                 pass  # Fall through to default
         
-        # Always default to GEMINI_2_5_FLASH
+        # Use GEMINI_2_5_PRO for tests by default
+        if os.getenv('TESTING') == 'true' or os.getenv('TEST_ENV'):
+            return cls.GEMINI_2_5_PRO
+        
+        # Default to GEMINI_2_5_FLASH for non-test environments
         return cls.GEMINI_2_5_FLASH
     
     @classmethod
@@ -62,9 +66,9 @@ class LLMModel(Enum):
         """Get the default model for testing.
         
         Returns:
-            GEMINI_2_5_FLASH for all test scenarios.
+            GEMINI_2_5_PRO for all test scenarios.
         """
-        return cls.GEMINI_2_5_FLASH
+        return cls.GEMINI_2_5_PRO
     
     @classmethod
     def get_production_default(cls) -> 'LLMModel':

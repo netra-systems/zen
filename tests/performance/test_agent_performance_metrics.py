@@ -60,7 +60,7 @@ from netra_backend.tests.performance.performance_baseline_config import (
     PerformanceMetric as BasePerformanceMetric,
     SeverityLevel
 )
-from test_framework.environment_isolation import IsolatedEnvironment
+from test_framework.environment_isolation import TestEnvironmentManager
 
 logger = logging.getLogger(__name__)
 
@@ -367,7 +367,7 @@ class AgentPerformanceTestSuite:
     
     def __init__(self):
         """Initialize performance test suite."""
-        self.isolated_env = IsolatedEnvironment()
+        self.test_env_manager = TestEnvironmentManager()
         self.redis_manager: Optional[RedisManager] = None
         self.state_manager: Optional[StateManager] = None
         self.benchmark_runner = get_benchmark_runner()
@@ -393,7 +393,7 @@ class AgentPerformanceTestSuite:
         
     async def setup_test_environment(self):
         """Setup isolated test environment with real services."""
-        await self.isolated_env.setup()
+        self.test_env_manager.setup_test_environment()
         
         # Initialize Redis for metrics storage
         try:
@@ -420,7 +420,7 @@ class AgentPerformanceTestSuite:
             except Exception as e:
                 logger.warning(f"Redis cleanup error: {e}")
         
-        await self.isolated_env.cleanup()
+        self.test_env_manager.teardown_test_environment()
 
     async def execute_agent_performance_test(
         self, 

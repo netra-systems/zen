@@ -23,7 +23,7 @@ from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from test_framework.real_llm_config import configure_real_llm_testing
+from netra_backend.app.config import get_config
 from test_framework.environment_isolation import TestEnvironmentManager
 
 
@@ -46,9 +46,8 @@ class TestOptimizationRecommendationsBusiness:
     @pytest.fixture
     async def optimization_agent(self, business_test_environment):
         """Setup optimization agent with real LLM for business logic testing."""
-        config = configure_real_llm_testing()
+        config = get_config()
         llm_manager = LLMManager(config)
-        await llm_manager.initialize()
         
         tool_dispatcher = ToolDispatcher()
         
@@ -87,11 +86,11 @@ class TestOptimizationRecommendationsBusiness:
         }
         
         # Setup triage results
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult, ValidationStatus
         state.triage_result = TriageResult(
             category="performance_optimization",
             confidence_score=0.85,
-            validation_status=None
+            validation_status=ValidationStatus(is_valid=True)
         )
         
         run_id = "actionable_recommendations_test"
@@ -178,11 +177,11 @@ class TestOptimizationRecommendationsBusiness:
             }
         }
         
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult, ValidationStatus
         state.triage_result = TriageResult(
             category="cost_optimization",
             confidence_score=0.90,
-            validation_status=None
+            validation_status=ValidationStatus(is_valid=True)
         )
         
         run_id = "cost_savings_test"
@@ -310,9 +309,8 @@ class TestActionPlanExecutability:
     @pytest.fixture
     async def actions_agent(self, business_test_environment):
         """Setup actions agent for business testing."""
-        config = configure_real_llm_testing()
+        config = get_config()
         llm_manager = LLMManager(config)
-        await llm_manager.initialize()
         
         tool_dispatcher = ToolDispatcher()
         
@@ -627,9 +625,8 @@ class TestReportingBusinessValue:
     @pytest.fixture
     async def reporting_agent(self, business_test_environment):
         """Setup reporting agent for business testing."""
-        config = configure_real_llm_testing()
+        config = get_config()
         llm_manager = LLMManager(config)
-        await llm_manager.initialize()
         
         tool_dispatcher = ToolDispatcher()
         

@@ -137,6 +137,7 @@ class DeepAgentState(BaseModel):
     user_request: str = "default_request"  # Default for backward compatibility
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
+    run_id: Optional[str] = None  # Unique identifier for this execution run
     agent_input: Optional[Dict[str, Any]] = None  # Input parameters for agent execution
     
     # Strongly typed result fields with proper type unions
