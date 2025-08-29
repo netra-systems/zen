@@ -332,6 +332,15 @@
             <critical-takeaway>Dev users should be created with minimal permissions and default passwords for security.</critical-takeaway>
         </category>
         
+        <category name="3-Tier Persistence Architecture" path="SPEC/3tier_persistence_architecture.xml" keywords="3-Tier, Three-Tier, Persistence, Redis, PostgreSQL, ClickHouse, Failover, Enterprise, Disaster Recovery, State Management">
+            <critical-takeaway>CRITICAL: 3-tier persistence architecture provides enterprise-grade reliability with Redis → PostgreSQL → ClickHouse failover chain.</critical-takeaway>
+            <critical-takeaway>Redis PRIMARY tier must maintain sub-100ms performance for active agent states with version tracking and TTL management.</critical-takeaway>
+            <critical-takeaway>PostgreSQL checkpoints required for CRITICAL checkpoint types to ensure disaster recovery capability.</critical-takeaway>
+            <critical-takeaway>ClickHouse migration scheduled automatically for completed runs to enable cost optimization analytics.</critical-takeaway>
+            <critical-takeaway>Cross-database consistency validation must achieve 100% data integrity score for enterprise compliance.</critical-takeaway>
+            <critical-takeaway>Documentation: docs/3tier_persistence_architecture.md provides comprehensive operational procedures.</critical-takeaway>
+        </category>
+        
         <category name="State Persistence Performance Optimization" path="SPEC/learnings/state_persistence_optimization.xml" keywords="Performance Optimization, State Persistence, Async Database, Parallel Execution, Feature Flags, ClickHouse Async, Pipeline Optimization, Delegation Pattern">
             <critical-takeaway>CRITICAL: Parallel execution with asyncio.gather() achieves 25-40% performance gains for independent pipeline steps with automatic fallback to sequential.</critical-takeaway>
             <critical-takeaway>Async database operations prevent event loop blocking - use connect_async(), execute_async(), health_check_async() for ClickHouse.</critical-takeaway>

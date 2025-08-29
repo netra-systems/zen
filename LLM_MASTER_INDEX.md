@@ -121,10 +121,13 @@
 | **🔴 EXECUTION ENGINE** | `/netra_backend/app/agents/supervisor/execution_engine.py` | **Parallel pipeline execution** | asyncio.gather() parallelization, automatic fallback to sequential |
 | **🔴 CLICKHOUSE ASYNC** | `/netra_backend/app/db/clickhouse_client.py` | **Async-safe database operations** | connect_async(), execute_async(), health_check_async() |
 | **🔴 STATE PERSISTENCE** | `/netra_backend/app/services/state_persistence_optimized.py` | **Optimized state management** | Delegation pattern, feature flag controlled |
+| **🔴 3-TIER PERSISTENCE** | [`docs/3tier_persistence_architecture.md`](docs/3tier_persistence_architecture.md) | **Enterprise persistence architecture** | Redis → PostgreSQL → ClickHouse failover chain |
 | **🔴 PIPELINE EXECUTOR** | `/netra_backend/app/agents/supervisor/pipeline_executor.py` | **State batching and optimization** | Feature flag integration, optimized service selection |
 | **🔴 FEATURE FLAGS** | `/netra_backend/app/core/isolated_environment.py` | **Performance configuration** | ENABLE_OPTIMIZED_PERSISTENCE, cache size, compression settings |
 | **🔴 INTEGRATION TESTS** | `/netra_backend/tests/services/test_optimized_persistence_integration.py` | **Performance optimization testing** | Feature flag testing, delegation pattern validation |
+| **3-Tier Integration Tests** | `/tests/integration/test_3tier_persistence_integration.py` | **3-tier persistence validation** | Failover chain, consistency, 24-hour lifecycle |
 | **Performance Learnings** | [`SPEC/learnings/state_persistence_optimization.xml`](SPEC/learnings/state_persistence_optimization.xml) | **Optimization best practices** | 35-45% performance improvement, async safety patterns |
+| **Persistence Documentation** | [`docs/optimized_state_persistence.md`](docs/optimized_state_persistence.md) | **Optimization feature guide** | Configuration, monitoring, troubleshooting |
 
 ### Go to Symbol & Code Navigation (NEW - 2025-08-28)
 | Component | Location | Purpose | Key Features |
