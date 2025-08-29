@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas
-from netra_backend.app.auth_integration import auth_interface
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.dependencies import get_db_session
 from netra_backend.app.services.clickhouse_service import clickhouse_service
@@ -32,10 +31,7 @@ class ExtractMetadataRequest(BaseModel):
 
 @router.get("/tables", response_model=List[str])
 async def list_corpus_tables(db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)) -> List[str]:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     return await clickhouse_service.list_corpus_tables()
 
 def _create_corpus_record(db: AsyncSession, corpus: schemas.CorpusCreate, user_id: int) -> schemas.Corpus:
@@ -54,10 +50,7 @@ async def create_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     db_corpus = _create_corpus_record(db, corpus, current_user.id)
     _schedule_corpus_generation(request, db_corpus.id, db)
@@ -71,10 +64,7 @@ async def read_corpora(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> List[schemas.Corpus]:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     corpora = corpus_service.get_corpora(db, skip=skip, limit=limit)
     return corpora
@@ -96,10 +86,7 @@ async def read_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _get_corpus_by_id(db, corpus_id)
 
@@ -116,10 +103,7 @@ async def update_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _update_corpus_record(db, corpus_id, corpus)
 
@@ -135,10 +119,7 @@ async def delete_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _delete_corpus_record(db, corpus_id)
 
@@ -148,10 +129,7 @@ async def regenerate_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     db_corpus = _get_corpus_by_id(db, corpus_id)
     _schedule_corpus_generation(request, db_corpus.id, db)
@@ -170,10 +148,7 @@ async def get_corpus_status(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> Dict[str, Any]:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     status = _get_corpus_status_validated(db, corpus_id)
     return {"status": status}
@@ -191,10 +166,7 @@ async def get_corpus_content(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> Any:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _get_corpus_content_validated(db, corpus_id)
 
@@ -226,10 +198,7 @@ async def _search_corpus_safe(corpus_id: str, q: str):
 @router.get("/search")
 async def search_corpus(q: str = Query(...), corpus_id: str = Query(default="default"), db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Search corpus documents"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return await _search_corpus_safe(corpus_id, q)
 
@@ -242,10 +211,7 @@ class SearchRequest(BaseModel):
 @router.post("/search")
 async def search_corpus_advanced(request: SearchRequest, db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Advanced corpus search with filters"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Use the corpus service for advanced search
@@ -267,10 +233,7 @@ async def bulk_index_documents(request: BulkIndexRequest):
 @router.post("/extract")
 async def extract_document_metadata(request: ExtractMetadataRequest, db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Extract metadata from document using file URL"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         result = await corpus_service.batch_index_documents([{
@@ -298,10 +261,7 @@ async def search_symbols(
     current_user = Depends(get_current_user)
 ):
     """Search for symbols (functions, classes, methods) in indexed code files - Go to Symbol functionality"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Get the corpus
@@ -333,10 +293,7 @@ async def search_symbols_post(
     current_user = Depends(get_current_user)
 ):
     """Search for symbols with POST request - Go to Symbol functionality"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Get the corpus
@@ -371,10 +328,7 @@ async def get_document_symbols(
     current_user = Depends(get_current_user)
 ):
     """Get all symbols from a specific document"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Get the corpus
@@ -397,4 +351,233 @@ async def get_document_symbols(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get document symbols: {str(e)}")
+
+# ============= Advanced Symbol Navigation Endpoints =============
+
+@router.post("/symbols/go-to-definition")
+async def go_to_definition(
+    request: Dict,  # {"symbol_name": str, "context_file": Optional[str]}
+    current_user = Depends(get_current_user)
+):
+    """Go to Symbol Definition - Find where a symbol is defined"""
+    try:
+        from netra_backend.app.services.corpus.symbol_index import get_symbol_navigator
+        
+        navigator = await get_symbol_navigator()
+        symbol_name = request.get("symbol_name")
+        context_file = request.get("context_file")
+        
+        if not symbol_name:
+            raise HTTPException(status_code=400, detail="symbol_name is required")
+        
+        definition = navigator.go_to_definition(symbol_name, context_file)
+        
+        if not definition:
+            return {
+                "found": False,
+                "message": f"No definition found for '{symbol_name}'"
+            }
+        
+        return {
+            "found": True,
+            "definition": definition.to_dict()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Go to definition failed: {str(e)}")
+
+@router.post("/symbols/find-references")
+async def find_references(
+    request: Dict,  # {"symbol_name": str}
+    current_user = Depends(get_current_user)
+):
+    """Find all references to a symbol across the codebase"""
+    try:
+        from netra_backend.app.services.corpus.symbol_index import get_symbol_navigator
+        
+        navigator = await get_symbol_navigator()
+        symbol_name = request.get("symbol_name")
+        
+        if not symbol_name:
+            raise HTTPException(status_code=400, detail="symbol_name is required")
+        
+        references = navigator.find_references(symbol_name)
+        
+        return {
+            "symbol": symbol_name,
+            "total_references": len(references),
+            "references": references
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Find references failed: {str(e)}")
+
+@router.get("/symbols/hierarchy/{file_path:path}")
+async def get_symbol_hierarchy(
+    file_path: str,
+    current_user = Depends(get_current_user)
+):
+    """Get hierarchical view of symbols in a file"""
+    try:
+        from netra_backend.app.services.corpus.symbol_index import get_symbol_navigator
+        
+        navigator = await get_symbol_navigator()
+        hierarchy = navigator.get_symbol_hierarchy(file_path)
+        
+        return hierarchy
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Get hierarchy failed: {str(e)}")
+
+@router.post("/symbols/navigate")
+async def navigate_symbols(
+    request: Dict,  # {"query": str, "symbol_types": Optional[List[str]], "limit": int}
+    current_user = Depends(get_current_user)
+):
+    """Advanced symbol search with fuzzy matching and ranking"""
+    try:
+        from netra_backend.app.services.corpus.symbol_index import get_symbol_navigator, SymbolType
+        
+        navigator = await get_symbol_navigator()
+        query = request.get("query", "")
+        symbol_types_str = request.get("symbol_types", [])
+        limit = request.get("limit", 50)
+        
+        # Convert string types to SymbolType enums
+        symbol_types = []
+        for type_str in symbol_types_str:
+            try:
+                symbol_types.append(SymbolType[type_str.upper()])
+            except KeyError:
+                pass
+        
+        results = navigator.search_symbols(query, symbol_types or None, limit)
+        
+        return {
+            "query": query,
+            "total": len(results),
+            "results": results
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Symbol navigation failed: {str(e)}")
+
+@router.post("/symbols/index/rebuild")
+async def rebuild_symbol_index(
+    request: Dict,  # {"directory": Optional[str]}
+    current_user = Depends(get_current_user)
+):
+    """Rebuild the symbol index for a directory or entire codebase"""
+    try:
+        from netra_backend.app.services.corpus.symbol_index import SymbolIndexBuilder
+        from pathlib import Path
+        
+        directory = request.get("directory")
+        
+        if not directory:
+            # Default to netra_backend directory
+            directory = Path(__file__).parent.parent.parent
+        else:
+            directory = Path(directory)
+        
+        builder = SymbolIndexBuilder()
+        index = await builder.build_index_for_directory(directory)
+        
+        return {
+            "status": "success",
+            "directory": str(directory),
+            "total_files": index.total_files,
+            "total_symbols": index.total_symbols,
+            "symbol_types": {
+                str(k): len(v) for k, v in index.symbols_by_type.items()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Index rebuild failed: {str(e)}")
+
+@router.post("/symbols/index/update-file")
+async def update_file_in_index(
+    request: Dict,  # {"file_path": str}
+    current_user = Depends(get_current_user)
+):
+    """Update symbol index for a single file"""
+    try:
+        from netra_backend.app.services.corpus.symbol_index import get_symbol_index, SymbolIndexBuilder
+        from pathlib import Path
+        
+        file_path = request.get("file_path")
+        
+        if not file_path:
+            raise HTTPException(status_code=400, detail="file_path is required")
+        
+        # Get or create the index builder
+        builder = SymbolIndexBuilder()
+        builder.index = await get_symbol_index()
+        
+        await builder.update_file(file_path)
+        
+        # Get updated stats for the file
+        file_symbols = builder.index.symbols_by_file.get(file_path, [])
+        
+        return {
+            "status": "success",
+            "file": file_path,
+            "symbols_count": len(file_symbols),
+            "symbols": [s.to_dict() for s in file_symbols]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"File update failed: {str(e)}")
+
+@router.get("/symbols/index/stats")
+async def get_index_statistics(
+    current_user = Depends(get_current_user)
+):
+    """Get statistics about the current symbol index"""
+    try:
+        from netra_backend.app.services.corpus.symbol_index import get_symbol_index
+        
+        index = await get_symbol_index()
+        
+        # Calculate statistics
+        stats = {
+            "total_symbols": index.total_symbols,
+            "total_files": index.total_files,
+            "unique_symbol_names": len(index.symbols_by_name),
+            "symbol_types": {},
+            "top_symbols": [],
+            "files_with_most_symbols": []
+        }
+        
+        # Count by type
+        for symbol_type, symbols in index.symbols_by_type.items():
+            stats["symbol_types"][str(symbol_type)] = len(symbols)
+        
+        # Top 10 most common symbol names
+        top_symbols = sorted(
+            index.symbols_by_name.items(),
+            key=lambda x: len(x[1]),
+            reverse=True
+        )[:10]
+        stats["top_symbols"] = [
+            {"name": name, "count": len(symbols)}
+            for name, symbols in top_symbols
+        ]
+        
+        # Files with most symbols
+        top_files = sorted(
+            index.symbols_by_file.items(),
+            key=lambda x: len(x[1]),
+            reverse=True
+        )[:10]
+        stats["files_with_most_symbols"] = [
+            {"file": file, "count": len(symbols)}
+            for file, symbols in top_files
+        ]
+        
+        return stats
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get index statistics: {str(e)}")
 

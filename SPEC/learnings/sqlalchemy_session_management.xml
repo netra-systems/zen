@@ -94,6 +94,7 @@
   <files_affected>
     <file>netra_backend/app/database/__init__.py</file>
     <file>netra_backend/app/database/database_manager.py</file>
+    <file>auth_service/auth_core/database/connection.py</file>
   </files_affected>
   
   <related_specs>

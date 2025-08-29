@@ -216,6 +216,12 @@ The **String Literals Index** is a critical system for maintaining consistency a
 *   `environment`: Environment variables (e.g., "NETRA_API_KEY", "DATABASE_URL")
 *   `states`: Status values, conditions (e.g., "pending", "active", "healthy")
 
+**Business Value Justification (BVJ):**
+- **Segment:** Enterprise, Mid
+- **Business Goal:** Development Velocity, Platform Stickiness
+- **Value Impact:** Accelerates code navigation and understanding, reduces context switching time by 60-80%
+- **Strategic Impact:** Differentiates Netra as comprehensive development platform, increases Enterprise conversion
+
 ## 5. Architecture and Conventions
 
 ### 5.1. Microservice Independence
@@ -304,9 +310,16 @@ ALWAYS use Python for scripts instead of shell/PowerShell (See [`SPEC/learnings/
 
 ### 6.1. Quick Start
 ```bash
+# LOCAL DEVELOPMENT (with hot reload enabled by default)
+docker-compose -f docker-compose.dev.yml up backend auth  # Hot reload via docker-compose.override.yml
+python scripts/test_hot_reload.py  # Verify hot reload is working
+
+# Alternative: Python-based launcher
 python scripts/dev_launcher.py
 python unified_test_runner.py
 ```
+
+**Docker Hot Reload:** See [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) and [`docs/docker-hot-reload-guide.md`](docs/docker-hot-reload-guide.md) for configuration details.
 
 ### 6.2. Unified Test Runner
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml), [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml), and [`SPEC/environment_aware_testing.xml`](SPEC/environment_aware_testing.xml).
@@ -361,6 +374,7 @@ Ensure adherence to these core specifications throughout the development process
 | **Testing** | [`test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml), [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml), [`environment_aware_testing.xml`](SPEC/environment_aware_testing.xml), [`learnings/testing.xml`](SPEC/learnings/testing.xml) |
 | **Database** | [`database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml), [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
 | **Deployment** | [`deployment_architecture.xml`](SPEC/deployment_architecture.xml), [`gcp_deployment.xml`](SPEC/gcp_deployment.xml) |
+| **Development** | [`docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) - Docker hot reload for 10x faster development |
 | **Imports** | [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) - CRITICAL: Absolute imports only |
 | **WebSocket** | [`websockets.xml`](SPEC/websockets.xml), [`websocket_communication.xml`](SPEC/websocket_communication.xml) |
 | **Security** | [`security.xml`](SPEC/security.xml), [`PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml) |

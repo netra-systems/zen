@@ -104,7 +104,7 @@ class TriageSubAgent(BaseSubAgent, BaseExecutionInterface):
         monitor = ExecutionMonitor(max_history_size=1000)
         self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
         self.execution_monitor = monitor
-        self.execution_error_handler = ExecutionErrorHandler()
+        self.execution_error_handler = ExecutionErrorHandler
         self.modern_reliability = reliability_manager
         
     def _create_modern_reliability_manager(self) -> ReliabilityManager:

@@ -102,23 +102,41 @@ class ExecutionEngine:
             return results
     
     def _can_execute_parallel(self, steps: List[PipelineStep]) -> bool:
-        """Determine if steps can be executed in parallel."""
-        # Steps can be parallel if:
+        """Determine if steps can be executed in parallel.
+        
+        Returns False (sequential) by default for safety unless explicitly marked for parallel.
+        """
+        # Steps can be parallel ONLY if ALL conditions are met:
         # 1. No step has dependencies on other steps
-        # 2. All steps have conditions that don't depend on state changes from other steps
+        # 2. All steps explicitly allow parallel execution
         # 3. None of the steps are marked as requiring sequential execution
         
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionStrategy
+        
         for step in steps:
-            # Check if step has sequential requirement
+            # Check if step explicitly requires sequential execution
+            if hasattr(step, 'strategy') and step.strategy == AgentExecutionStrategy.SEQUENTIAL:
+                return False
+            
+            # Check metadata for sequential requirement
+            if hasattr(step, 'metadata') and step.metadata.get('requires_sequential', False):
+                return False
+                
+            # Check if step has sequential requirement attribute
             if hasattr(step, 'requires_sequential') and step.requires_sequential:
                 return False
                 
-            # Check if step has dependencies (simplified check)
+            # Check if step has dependencies
             if hasattr(step, 'dependencies') and step.dependencies:
                 return False
                 
-        # If we have more than 1 step and no blocking conditions, allow parallel
-        return len(steps) > 1
+        # Default to sequential for safety - parallel must be explicitly enabled
+        # Only allow parallel if explicitly marked and we have multiple steps
+        has_parallel_strategy = any(
+            hasattr(step, 'strategy') and step.strategy == AgentExecutionStrategy.PARALLEL 
+            for step in steps
+        )
+        return has_parallel_strategy and len(steps) > 1
     
     async def _execute_steps_parallel(self, steps: List[PipelineStep],
                                     context: AgentExecutionContext,

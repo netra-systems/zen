@@ -11,8 +11,8 @@ import '@/styles/glassmorphism.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Netra',
-  description: 'Autonomous AI agents for business process optimization',
+  title: 'Netra Beta',
+  description: 'Autonomous AI agents for business process optimization - Beta Program',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

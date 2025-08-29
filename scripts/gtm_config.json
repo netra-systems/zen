@@ -1,0 +1,105 @@
+{
+  "account_id": "6310197060",
+  "container_id": "GTM-WKP28PNQ",
+  "workspace_name": "API Configuration - Netra Platform",
+  "service_account_email": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com",
+  "credentials_path": "netra-staging-sa-key.json",
+  "ga4_measurement_id": "G-522Q06C6M5",
+  "environment": "production",
+  "variables": {
+    "data_layer": [
+      "event_category",
+      "event_action",
+      "event_label",
+      "value",
+      "user_id",
+      "session_id",
+      "user_tier",
+      "auth_method",
+      "feature_type",
+      "agent_type",
+      "thread_id",
+      "transaction_id",
+      "transaction_value",
+      "plan_type",
+      "currency",
+      "is_new_user",
+      "message_length",
+      "session_duration",
+      "conversion_source",
+      "custom_parameters",
+      "page_path",
+      "timestamp"
+    ],
+    "constants": {
+      "gtm_container_id": "GTM-WKP28PNQ",
+      "environment": "production",
+      "platform": "netra_apex"
+    }
+  },
+  "events": {
+    "authentication": [
+      "user_login",
+      "user_signup",
+      "user_logout",
+      "oauth_complete"
+    ],
+    "engagement": [
+      "chat_started",
+      "message_sent",
+      "agent_activated",
+      "thread_created",
+      "feature_used"
+    ],
+    "conversion": [
+      "trial_started",
+      "plan_upgraded",
+      "payment_completed",
+      "demo_requested"
+    ]
+  },
+  "google_analytics": {
+    "enable_enhanced_ecommerce": true,
+    "enable_user_properties": true,
+    "enable_debug_mode": false,
+    "custom_dimensions": [
+      {
+        "index": 1,
+        "name": "user_tier",
+        "scope": "user"
+      },
+      {
+        "index": 2,
+        "name": "agent_type",
+        "scope": "event"
+      },
+      {
+        "index": 3,
+        "name": "feature_type",
+        "scope": "event"
+      },
+      {
+        "index": 4,
+        "name": "thread_id",
+        "scope": "session"
+      }
+    ],
+    "custom_metrics": [
+      {
+        "index": 1,
+        "name": "session_duration",
+        "scope": "hit",
+        "format": "time"
+      },
+      {
+        "index": 2,
+        "name": "message_count",
+        "scope": "hit",
+        "format": "integer"
+      }
+    ]
+  },
+  "auto_publish": false,
+  "create_backup": true,
+  "numeric_container_id": "228405904"
+}

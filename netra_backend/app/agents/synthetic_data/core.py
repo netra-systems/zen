@@ -80,7 +80,7 @@ class SyntheticDataAgentCore(BaseExecutionInterface):
     
     def _setup_reliability_systems(self) -> None:
         """Setup monitoring and error handling systems."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         self.monitor = ExecutionMonitor()
     
     async def validate_preconditions(self, context: ExecutionContext) -> bool:

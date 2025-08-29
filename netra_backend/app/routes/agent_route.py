@@ -17,7 +17,6 @@ from netra_backend.app.routes.agent_route_processors import (
 )
 from netra_backend.app.routes.agent_route_streaming import (
     create_streaming_response,
-    get_agent_service_for_streaming,
     stream_agent_response,
 )
 from netra_backend.app.routes.agent_route_validators import (
@@ -114,11 +113,9 @@ async def process_agent_message(request: MessageRequest, agent_service: AgentSer
 @router.post("/stream")
 async def stream_response(
     request_model: RequestModel,
-    db_session: DbDep,
-    llm_manager: LLMManager = Depends(get_llm_manager)
+    agent_service: AgentService = Depends(get_agent_service)
 ):
     """Stream agent response with proper SSE format."""
-    agent_service = get_agent_service_for_streaming(db_session, llm_manager)
     return create_streaming_response(request_model, agent_service)
 
 

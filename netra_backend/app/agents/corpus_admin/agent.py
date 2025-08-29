@@ -69,7 +69,7 @@ class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
         self.monitor = ExecutionMonitor()
         self.reliability_manager = self._create_reliability_manager()
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager with corpus admin configuration."""

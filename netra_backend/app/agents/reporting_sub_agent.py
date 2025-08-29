@@ -76,7 +76,7 @@ class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     def _init_error_handler(self) -> None:
         """Initialize modern error handling."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     def _create_legacy_circuit_breaker_config(self) -> LegacyCircuitConfig:
         """Create legacy circuit breaker configuration."""

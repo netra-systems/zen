@@ -183,9 +183,21 @@ export class AuthServiceClient {
   async logout(): Promise<void> {
     logger.info(`Logging out user`, { environment: this.environment });
     
+    // Get token from localStorage to send in Authorization header
+    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const response = await fetch(this.endpoints.authLogout, {
       method: 'POST',
       credentials: 'include', // Needed for session cookie
+      headers,
     });
     
     if (!response.ok) {

@@ -131,10 +131,10 @@ services:
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
-      - ./netra_backend:/app/netra_backend:ro
-      - ./shared:/app/shared:ro
-      - ./SPEC:/app/SPEC:ro
-      - ./scripts:/app/scripts:ro
+      - ./netra_backend:/app/netra_backend
+      - ./shared:/app/shared
+      - ./SPEC:/app/SPEC
+      - ./scripts:/app/scripts
       - ./logs:/app/logs
     depends_on:
       postgres:
@@ -156,7 +156,7 @@ services:
         echo 'Running migrations...' &&
         alembic -c netra_backend/alembic.ini upgrade head &&
         echo 'Starting backend...' &&
-        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/netra_backend
+        uvicorn netra_backend.app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/netra_backend --reload-dir /app/shared --reload-include '*.py'
       "
 
   # Auth Service
@@ -199,8 +199,8 @@ services:
     ports:
       - "${AUTH_PORT:-8081}:8081"
     volumes:
-      - ./auth_service:/app/auth_service:ro
-      - ./shared:/app/shared:ro
+      - ./auth_service:/app/auth_service
+      - ./shared:/app/shared
       - ./logs:/app/logs
     depends_on:
       postgres:
@@ -215,6 +215,11 @@ services:
       start_period: 40s
     networks:
       - netra-network
+    command: >
+      sh -c "
+        echo 'Starting auth service...' &&
+        uvicorn auth_service.main:app --host 0.0.0.0 --port 8081 --reload --reload-dir /app/auth_service --reload-dir /app/shared --reload-include '*.py'
+      "
 
   # Frontend Service
   frontend:

@@ -3,7 +3,7 @@
     <metadata>
         <category>WebSocket</category>
         <criticality>HIGH</criticality>
-        <last_updated>2025-08-27</last_updated>
+        <last_updated>2025-08-28</last_updated>
     </metadata>
 
     <learning id="websocket-accept-before-operations">
@@ -143,5 +143,157 @@
             # After test
             assert call_order[0] == 'accept', "Accept must be called first"
         </pattern>
+    </learning>
+
+    <learning id="websocket-message-validation-flexibility">
+        <title>WebSocket Message Validation Must Be Flexible</title>
+        <issue>
+            WebSocket parse errors (code 1003) occurred when validation logic was too strict, 
+            requiring all messages to have both 'type' and 'payload' fields. This rejected 
+            legitimate messages like system ping/pong that don't need payloads.
+        </issue>
+        <root_cause>
+            The isBasicWebSocketMessage validation required:
+            1. Object to have a 'type' field (string)
+            2. Object to have a 'payload' field (object)
+            This was overly restrictive for different message categories.
+        </root_cause>
+        <solution>
+            Implement flexible validation based on message category:
+            - Only require 'type' field for basic validation
+            - Apply category-specific rules after basic validation
+            - Handle unknown message types gracefully
+        </solution>
+        <pattern>
+            // CORRECT - Flexible validation
+            private validateWebSocketMessage(obj: any): WebSocketMessage | null {
+                // Basic validation - only require type
+                if (!obj || typeof obj !== 'object') return null;
+                if (!obj.type || typeof obj.type !== 'string') return null;
+                
+                // Category-specific validation
+                if (isAgentMessage(obj.type)) {
+                    // Agent messages require payload
+                    if (!obj.payload) return null;
+                } else if (isSystemMessage(obj.type)) {
+                    // System messages (ping/pong) don't require payload
+                    // Payload is optional
+                }
+                
+                // Unknown types get default empty payload
+                if (!obj.payload) obj.payload = {};
+                return obj;
+            }
+        </pattern>
+        <anti_pattern>
+            // INCORRECT - Too restrictive
+            private isBasicWebSocketMessage(obj: any): boolean {
+                return obj && 
+                       typeof obj === 'object' && 
+                       typeof obj.type === 'string' && 
+                       typeof obj.payload === 'object'; // Too strict!
+            }
+        </anti_pattern>
+        <categories>
+            Agent Messages: type required, payload required
+            Thread Messages: type required, payload required
+            System Messages: type required, payload optional
+            Report Messages: type required, payload optional
+            Large Messages: special structure handling
+            Unknown Types: type required, payload auto-added if missing
+        </categories>
+        <impact>
+            High - Prevents legitimate WebSocket messages from being processed,
+            causing connection failures and data loss.
+        </impact>
+        <prevention>
+            1. Design validation to be permissive by default
+            2. Only enforce strict rules where absolutely necessary
+            3. Provide detailed error messages for debugging
+            4. Test with various message formats and edge cases
+        </prevention>
+    </learning>
+
+    <learning id="websocket-error-reporting-details">
+        <title>WebSocket Errors Need Detailed Context</title>
+        <issue>
+            Generic "Invalid message structure" errors make debugging difficult.
+            Need specific information about what validation failed.
+        </issue>
+        <solution>
+            Add detailed error reporting that explains exactly why validation failed:
+            - Check for null/undefined
+            - Check object type
+            - Check missing fields
+            - Check field types
+        </solution>
+        <pattern>
+            private getInvalidMessageDetails(rawMessage: any): string {
+                if (rawMessage === null || rawMessage === undefined) {
+                    return 'message is null or undefined';
+                }
+                if (typeof rawMessage !== 'object') {
+                    return `message is not an object (type: ${typeof rawMessage})`;
+                }
+                if (!rawMessage.type) {
+                    return 'missing required type field';
+                }
+                if (typeof rawMessage.type !== 'string') {
+                    return `type field is not a string (type: ${typeof rawMessage.type})`;
+                }
+                return 'unknown validation failure';
+            }
+            
+            // Use in error handling
+            options.onError?.({
+                code: 1003,
+                message: `Invalid message structure: ${errorDetails}`,
+                timestamp: Date.now(),
+                type: 'parse',
+                recoverable: true
+            });
+        </pattern>
+        <impact>
+            Medium - Significantly improves debugging and reduces time to fix issues.
+        </impact>
+    </learning>
+
+    <learning id="websocket-large-message-handling">
+        <title>Large WebSocket Messages Have Different Structure</title>
+        <issue>
+            Large/chunked messages have different structure than standard messages.
+            They use message_type instead of type and have special handling.
+        </issue>
+        <solution>
+            Check for large message types BEFORE standard validation:
+            - Check message_type field for chunked_start, chunked_data, chunked_end
+            - Handle binary and compressed messages separately
+            - Don't apply standard validation to large messages
+        </solution>
+        <pattern>
+            private validateWebSocketMessage(obj: any): WebSocketMessage | null {
+                // Check large messages FIRST (different structure)
+                if (this.isLargeMessage(obj)) {
+                    return obj as WebSocketMessage;
+                }
+                
+                // Then apply standard validation
+                if (!obj.type || typeof obj.type !== 'string') {
+                    return null;
+                }
+                // ... rest of validation
+            }
+            
+            private isLargeMessage(message: any): boolean {
+                const messageType = message?.message_type;
+                return messageType && [
+                    'chunked_start', 'chunked_data', 'chunked_end',
+                    'binary', 'compressed', 'upload_progress'
+                ].includes(messageType);
+            }
+        </pattern>
+        <impact>
+            Medium - Enables proper handling of large file uploads and data transfers.
+        </impact>
     </learning>
 </learnings>

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Fix ExecutionErrorHandler() instantiation calls across the codebase.
+Fix ExecutionErrorHandler instantiation calls across the codebase.
 
 The ExecutionErrorHandler is an instance, not a class, so it should not be called.
-This script replaces all instances of ExecutionErrorHandler() with ExecutionErrorHandler.
+This script replaces all instances of ExecutionErrorHandler with ExecutionErrorHandler.
 """
 
 import os
@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 def fix_execution_error_handler_calls():
-    """Fix all ExecutionErrorHandler() calls in the codebase."""
+    """Fix all ExecutionErrorHandler calls in the codebase."""
     
     # Get the project root
     project_root = Path(__file__).parent.parent
@@ -40,7 +40,7 @@ def fix_execution_error_handler_calls():
         "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py"
     ]
     
-    # Pattern to match ExecutionErrorHandler() calls (with optional whitespace)
+    # Pattern to match ExecutionErrorHandler calls (with optional whitespace)
     pattern = r'ExecutionErrorHandler\s*\(\s*\)'
     replacement = 'ExecutionErrorHandler'
     

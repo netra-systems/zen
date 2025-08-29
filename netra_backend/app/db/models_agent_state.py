@@ -21,15 +21,112 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from netra_backend.app.db.base import Base
 
 
+class AgentStateMetadata(Base):
+    """Agent state metadata for run tracking and recovery checkpoints.
+    
+    This table now stores ONLY critical metadata and recovery checkpoints,
+    not the full state data which is now in Redis (active) and ClickHouse (historical).
+    """
+    __tablename__ = "agent_state_metadata"
+    
+    # Primary identifiers
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(String, index=True, unique=True)  # One record per run
+    thread_id: Mapped[str] = mapped_column(String, index=True)
+    user_id: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)
+    
+    # Run configuration and status
+    run_status: Mapped[str] = mapped_column(String, default="active")  # active, completed, failed, abandoned
+    agent_type: Mapped[Optional[str]] = mapped_column(String)  # supervisor, analysis, etc.
+    initial_phase: Mapped[Optional[str]] = mapped_column(String)  # Starting phase
+    current_phase: Mapped[Optional[str]] = mapped_column(String)  # Current/final phase
+    
+    # Timestamps for run lifecycle
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), index=True)
+    last_updated: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Recovery and persistence strategy
+    redis_key: Mapped[Optional[str]] = mapped_column(String)  # Current Redis key for active state
+    last_checkpoint_id: Mapped[Optional[str]] = mapped_column(String)  # Last recovery checkpoint
+    checkpoint_frequency: Mapped[int] = mapped_column(Integer, default=10)  # Steps between checkpoints
+    
+    # Performance and resource tracking
+    total_steps: Mapped[int] = mapped_column(Integer, default=0)
+    peak_memory_mb: Mapped[Optional[int]] = mapped_column(Integer)
+    total_execution_time_ms: Mapped[Optional[int]] = mapped_column(Integer)
+    
+    # Indexes for performance
+    __table_args__ = (
+        Index('idx_agent_metadata_status_updated', 'run_status', 'last_updated'),
+        Index('idx_agent_metadata_thread_created', 'thread_id', 'created_at'),
+        Index('idx_agent_metadata_user_status', 'user_id', 'run_status'),
+    )
+
+
+class AgentStateCheckpoint(Base):
+    """Critical recovery checkpoints stored in PostgreSQL.
+    
+    Only stores essential recovery points, not frequent state snapshots.
+    Full state data is in Redis (active) and ClickHouse (historical).
+    """
+    __tablename__ = "agent_state_checkpoints"
+    
+    # Primary identifiers
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    run_id: Mapped[str] = mapped_column(String, ForeignKey("agent_state_metadata.run_id"), index=True)
+    checkpoint_sequence: Mapped[int] = mapped_column(Integer)  # Sequential checkpoint number
+    
+    # Checkpoint metadata
+    checkpoint_type: Mapped[str] = mapped_column(String, default="recovery")  # recovery, milestone, final
+    agent_phase: Mapped[str] = mapped_column(String)  # Phase when checkpoint was created
+    step_count: Mapped[int] = mapped_column(Integer, default=0)
+    
+    # Essential state for recovery (minimal data)
+    essential_state: Mapped[Optional[dict]] = mapped_column(JSON)  # Only critical recovery data
+    state_size_kb: Mapped[Optional[int]] = mapped_column(Integer)
+    
+    # Redis and ClickHouse references
+    redis_key: Mapped[Optional[str]] = mapped_column(String)  # Redis key at time of checkpoint
+    clickhouse_ref: Mapped[Optional[str]] = mapped_column(String)  # Reference to ClickHouse record
+    
+    # Recovery metadata
+    recovery_priority: Mapped[str] = mapped_column(String, default="normal")  # critical, high, normal, low
+    recovery_tested: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), index=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Relationships
+    run_metadata: Mapped["AgentStateMetadata"] = relationship("AgentStateMetadata")
+    
+    # Indexes for recovery performance
+    __table_args__ = (
+        Index('idx_checkpoint_run_sequence', 'run_id', 'checkpoint_sequence'),
+        Index('idx_checkpoint_priority_created', 'recovery_priority', 'created_at'),
+        Index('idx_checkpoint_expires', 'expires_at'),
+        UniqueConstraint('run_id', 'checkpoint_sequence', name='uq_run_checkpoint_seq'),
+    )
+
+
 class AgentStateSnapshot(Base):
-    """Agent state snapshots for persistence and recovery."""
+    """DEPRECATED: Legacy agent state snapshots - kept for backward compatibility.
+    
+    This table is being phased out in favor of the new 3-tier architecture:
+    - Redis: Primary active state storage
+    - ClickHouse: Historical analytics and time-series data  
+    - PostgreSQL: Metadata and critical recovery checkpoints only
+    
+    New code should use AgentStateMetadata and AgentStateCheckpoint instead.
+    """
     __tablename__ = "agent_state_snapshots"
     
     # Primary identifiers
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     run_id: Mapped[str] = mapped_column(String, index=True)
     thread_id: Mapped[str] = mapped_column(String, index=True)
-    user_id: Mapped[str] = mapped_column(String, index=True)  # Removed FK for test compatibility
+    user_id: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)  # Removed FK for test compatibility
     
     # State versioning
     version: Mapped[str] = mapped_column(String, default="1.0")

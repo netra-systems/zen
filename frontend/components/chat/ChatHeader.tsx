@@ -7,6 +7,7 @@ const { Bot, Zap, Activity, Shield, Database, Cpu, Brain } = LucideIcons;
 import { motion, AnimatePresence } from 'framer-motion';
 import ConnectionStatusIndicator from './ConnectionStatusIndicator';
 import { MCPServerStatus } from './MCPServerStatus';
+import { Badge } from '@/components/ui/badge';
 
 export const ChatHeader: React.FC = () => {
   const { subAgentName, subAgentStatus, isProcessing } = useUnifiedChatStore();
@@ -77,9 +78,12 @@ export const ChatHeader: React.FC = () => {
             </motion.div>
             
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                {subAgentName || 'Netra AI Agent'}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-gray-900">
+                  {subAgentName || 'Netra AI Agent Beta'}
+                </h1>
+                <Badge variant="beta">BETA</Badge>
+              </div>
               {subAgentStatus && (
                 <motion.p
                   initial={{ opacity: 0, y: -5 }}

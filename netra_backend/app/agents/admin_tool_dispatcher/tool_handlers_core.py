@@ -46,7 +46,7 @@ class ModernToolHandler(BaseExecutionInterface, AgentExecutionMixin):
         self.tool_name = tool_name
         self.reliability_manager = self._create_reliability_manager()
         self.monitor = ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager for tool execution."""

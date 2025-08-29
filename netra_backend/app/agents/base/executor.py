@@ -48,7 +48,7 @@ class BaseExecutionEngine:
                  monitor: Optional[ExecutionMonitor] = None):
         self.reliability_manager = reliability_manager
         self.monitor = monitor or ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         
     async def execute(self, agent: 'BaseExecutionInterface', 
                      context: ExecutionContext) -> ExecutionResult:

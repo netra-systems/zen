@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getMetrics } from './demoConfig';
@@ -43,11 +44,14 @@ const WelcomeScreen = ({ onStartDemo }: WelcomeScreenProps) => {
         transition={{ delay: 0.2 }}
         className="space-y-6"
       >
-        <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
-          Experience AI Optimization in Action
-        </h1>
+        <div className="flex items-center justify-center gap-4">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
+            Experience AI Optimization in Action
+          </h1>
+          <Badge variant="beta" className="text-lg px-4 py-1.5">BETA</Badge>
+        </div>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          See how Netra can reduce your AI costs by 40-60% while improving performance by 2-3x.
+          See how Netra Beta can reduce your AI costs by 40-60% while improving performance by 2-3x.
           Start with your industry-specific workload profile.
         </p>
         

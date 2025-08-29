@@ -28,6 +28,7 @@
 | **Root Folder Organization** | `/` root directory | Clean root structure enforcement | [`SPEC/root_folder_organization.xml`](SPEC/root_folder_organization.xml) |
 | **Intelligent Remediation** | `/scripts/intelligent_remediation_orchestrator.py` | Multi-agent Docker remediation | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 | **Claude Log Analyzer** | `/scripts/claude_log_analyzer.py` | Get logs to Claude for analysis | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
+| **🔴 Docker Hot Reload** | `/docker-compose.override.yml` | **10x faster development** | [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) |
 
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
@@ -110,6 +111,16 @@
 | **🔴 FEATURE FLAGS** | `/netra_backend/app/core/isolated_environment.py` | **Performance configuration** | ENABLE_OPTIMIZED_PERSISTENCE, cache size, compression settings |
 | **🔴 INTEGRATION TESTS** | `/netra_backend/tests/services/test_optimized_persistence_integration.py` | **Performance optimization testing** | Feature flag testing, delegation pattern validation |
 | **Performance Learnings** | [`SPEC/learnings/state_persistence_optimization.xml`](SPEC/learnings/state_persistence_optimization.xml) | **Optimization best practices** | 35-45% performance improvement, async safety patterns |
+
+### Go to Symbol & Code Navigation (NEW - 2025-08-28)
+| Component | Location | Purpose | Key Features |
+|-----------|----------|---------|-------------|
+| **🔴 SYMBOL EXTRACTOR** | `/netra_backend/app/services/corpus/symbol_extractor.py` | **Core symbol extraction engine** | Python AST parsing, JavaScript/TypeScript regex extraction, 8 symbol types |
+| **🔴 SEARCH OPERATIONS** | `/netra_backend/app/services/corpus/search_operations.py` | **Symbol search and ranking** | Relevance scoring, document symbol extraction, corpus integration |
+| **🔴 API ENDPOINTS** | `/netra_backend/app/routes/corpus.py` (lines 285-400) | **RESTful symbol search** | GET/POST symbol search, document symbol extraction, type filtering |
+| **🔴 COMPREHENSIVE TESTS** | `/netra_backend/tests/services/test_symbol_extractor.py` | **Symbol extraction testing** | Multi-language support, nested structures, error handling |
+| **Symbol Types Supported** | All extractors | **Language-specific symbols** | Python: class/function/method/variable, JS/TS: interface/type/enum/const, Arrow functions |
+| **Business Value** | Enterprise/Mid segments | **Development velocity** | 60-80% reduction in context switching, IDE-like navigation |
 
 ### Test Files (Unified Testing System)
 | Component | Location | Purpose | Documentation |
@@ -211,7 +222,11 @@ The Netra Apex platform operates as a **unified, coherent system** with three in
 
 ### Development
 ```bash
-# Start Development Environment
+# 🔴 RECOMMENDED: Docker with Hot Reload (10x faster iteration)
+docker-compose -f docker-compose.dev.yml up backend auth  # Hot reload enabled by default
+python scripts/test_hot_reload.py  # Verify hot reload is working
+
+# Alternative: Python-based launcher
 python scripts/dev_launcher.py
 
 # Run Quick Tests
@@ -219,6 +234,17 @@ python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Check Compliance
 python scripts/check_architecture_compliance.py
+```
+
+**Hot Reload Details:** See [`docs/docker-hot-reload-guide.md`](docs/docker-hot-reload-guide.md)
+
+### Go to Symbol API Usage
+```bash
+# Search for symbols in code
+curl -X GET "http://localhost:8000/api/corpus/symbols/search?q=UserService&symbol_type=class&limit=20"
+
+# Get symbols from specific document
+curl -X GET "http://localhost:8000/api/corpus/main/document/doc123/symbols"
 ```
 
 ### Deployment

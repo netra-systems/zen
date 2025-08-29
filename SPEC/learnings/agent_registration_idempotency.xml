@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Agent Registration Idempotency and Dependency Injection</title>
+  <date>2025-08-29</date>
+  <category>architecture</category>
+  <subcategory>agent-lifecycle</subcategory>
+  <priority>critical</priority>
+  
+  <problem>
+    <description>
+      Agent registration was occurring in a loop, with all 7 sub-agents being 
+      re-registered on every streaming request, causing performance degradation 
+      and potential memory issues.
+    </description>
+    <symptoms>
+      <symptom>Repeated log entries: "Registered agent: triage/data/optimization/etc"</symptom>
+      <symptom>Performance degradation on streaming endpoints</symptom>
+      <symptom>Potential memory leaks from duplicate agent instances</symptom>
+    </symptoms>
+    <root_cause>
+      The /stream endpoint was creating new AgentService instances on every request
+      by directly calling get_agent_service() instead of using FastAPI dependency injection.
+      Each new AgentService created a new SupervisorAgent, which triggered register_default_agents().
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <primary_fix>
+      <location>netra_backend/app/routes/agent_route.py:114-120</location>
+      <description>
+        Changed streaming endpoint to use dependency injection:
+        From: agent_service = get_agent_service_for_streaming(db_session, llm_manager)
+        To: agent_service: AgentService = Depends(get_agent_service)
+      </description>
+      <rationale>
+        FastAPI's dependency injection ensures singleton-like behavior within
+        the request scope, preventing duplicate service instantiation.
+      </rationale>
+    </primary_fix>
+    
+    <defensive_measures>
+      <measure>
+        <location>netra_backend/app/agents/supervisor/agent_registry.py:37,39-47</location>
+        <description>
+          Added _agents_registered flag to AgentRegistry to prevent duplicate
+          registration at the registry level. register_default_agents() now
+          checks this flag and returns early if agents are already registered.
+        </description>
+      </measure>
+      <measure>
+        <location>netra_backend/app/agents/supervisor/agent_registry.py:81-85</location>
+        <description>
+          Added duplicate checking in register() method to prevent individual
+          agents from being registered twice if they already exist.
+        </description>
+      </measure>
+    </defensive_measures>
+  </solution>
+  
+  <patterns>
+    <pattern type="best_practice">
+      Always use FastAPI dependency injection (Depends()) for service instances
+      in route handlers to ensure proper lifecycle management.
+    </pattern>
+    <pattern type="anti_pattern">
+      Never manually instantiate services within route handlers - this breaks
+      the singleton pattern and can cause resource duplication.
+    </pattern>
+    <pattern type="defensive_programming">
+      Implement idempotency at multiple levels (registry and individual registration)
+      to prevent issues even if called incorrectly.
+    </pattern>
+  </patterns>
+  
+  <testing_requirements>
+    <requirement>Unit tests for AgentRegistry idempotency</requirement>
+    <requirement>Integration tests for service dependency injection</requirement>
+    <requirement>E2E tests for streaming endpoint singleton behavior</requirement>
+    <requirement>Performance tests to verify no registration loops</requirement>
+  </testing_requirements>
+  
+  <impact>
+    <performance>Eliminates unnecessary object creation and registration overhead</performance>
+    <memory>Prevents memory leaks from duplicate agent instances</memory>
+    <stability>Ensures consistent agent state across requests</stability>
+  </impact>
+  
+  <related_files>
+    <file>netra_backend/app/routes/agent_route.py</file>
+    <file>netra_backend/app/routes/agent_route_streaming.py</file>
+    <file>netra_backend/app/services/agent_service_factory.py</file>
+    <file>netra_backend/app/agents/supervisor/agent_registry.py</file>
+    <file>netra_backend/app/agents/supervisor_agent_modern.py</file>
+    <file>netra_backend/app/agents/supervisor_consolidated.py</file>
+  </related_files>
+  
+  <keywords>
+    <keyword>agent-registration</keyword>
+    <keyword>dependency-injection</keyword>
+    <keyword>idempotency</keyword>
+    <keyword>singleton-pattern</keyword>
+    <keyword>fastapi-depends</keyword>
+    <keyword>memory-leak</keyword>
+    <keyword>performance</keyword>
+  </keywords>
+</learning>

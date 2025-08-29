@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>DevLauncher.ZombieProcesses</name>
+        <type>OperationalLearning</type>
+        <version>1.0</version>
+        <created>2025-01-29</created>
+        <description>Critical learning about zombie Node.js processes from frontend dev launcher on Windows</description>
+        <business-value>
+            <segment>Platform/Internal</segment>
+            <goal>Development Velocity</goal>
+            <impact>Reduces developer friction and system resource consumption</impact>
+        </business-value>
+    </metadata>
+    
+    <issue-description>
+        <title>Multiple zombie Node.js processes accumulating from frontend dev launcher</title>
+        <discovery-date>2025-01-29</discovery-date>
+        <impact>High memory consumption (250-290MB per process), system slowdown</impact>
+        <affected-systems>
+            <system>dev_launcher</system>
+            <system>frontend</system>
+            <system>Windows process management</system>
+        </affected-systems>
+    </issue-description>
+    
+    <root-cause-analysis>
+        <finding>
+            <description>Each npm run dev command creates deeply nested process tree</description>
+            <details>
+                - npm process (parent)
+                - cross-env process (child)
+                - next dev process (grandchild)
+                - Multiple Next.js server processes (great-grandchildren)
+            </details>
+        </finding>
+        <finding>
+            <description>Incomplete process tree termination on Windows</description>
+            <details>
+                - Individual PID termination doesn't kill child processes
+                - /T flag (terminate tree) not consistently used
+                - Frontend processes create 3-4 layers of child processes
+            </details>
+        </finding>
+        <finding>
+            <description>Multiple dev launcher instances spawning duplicate frontends</description>
+            <details>
+                - 4-5 separate npm run dev instances observed
+                - Each instance spawns complete process tree
+                - No detection of existing frontend processes
+            </details>
+        </finding>
+    </root-cause-analysis>
+    
+    <learnings>
+        <learning>
+            <principle>Always use taskkill /F /T for Windows process termination</principle>
+            <rationale>The /T flag ensures entire process tree is terminated, preventing orphans</rationale>
+        </learning>
+        <learning>
+            <principle>Frontend processes require special handling due to deep nesting</principle>
+            <rationale>npm -> cross-env -> next -> server creates 4+ layer process tree</rationale>
+        </learning>
+        <learning>
+            <principle>Implement process tree tracking for complex Node.js applications</principle>
+            <rationale>Need to track all child PIDs to ensure complete cleanup</rationale>
+        </learning>
+        <learning>
+            <principle>Check for existing processes before spawning new ones</principle>
+            <rationale>Prevents duplicate frontend instances consuming resources</rationale>
+        </learning>
+    </learnings>
+    
+    <immediate-fixes>
+        <fix>
+            <location>dev_launcher/process_manager.py:246</location>
+            <current>Only kills node.exe for frontend if name matches</current>
+            <required>Always use taskkill /F /T /PID for frontend processes</required>
+        </fix>
+        <fix>
+            <location>dev_launcher/utils.py:596-616</location>
+            <current>terminate_process uses /T flag correctly</current>
+            <required>Ensure this function is used consistently for all frontend termination</required>
+        </fix>
+        <fix>
+            <location>dev_launcher/windows_process_manager.py:102-122</location>
+            <current>Has proper tree termination but may not be called</current>
+            <required>Ensure emergency_cleanup uses WindowsProcessManager.terminate_process_tree</required>
+        </fix>
+    </immediate-fixes>
+    
+    <long-term-recommendations>
+        <recommendation>
+            <title>Implement process tree visualization</title>
+            <description>Add --show-processes flag to display active process tree</description>
+            <benefit>Helps developers understand process hierarchy and detect zombies</benefit>
+        </recommendation>
+        <recommendation>
+            <title>Add zombie detection on startup</title>
+            <description>Check for orphaned node.exe processes and offer to clean them</description>
+            <benefit>Prevents resource accumulation over time</benefit>
+        </recommendation>
+        <recommendation>
+            <title>Implement proper signal handling for Windows</title>
+            <description>Use SetConsoleCtrlHandler for better Ctrl+C handling</description>
+            <benefit>Ensures graceful shutdown even with Ctrl+C</benefit>
+        </recommendation>
+    </long-term-recommendations>
+    
+    <validation>
+        <test>Run dev launcher and force kill with Ctrl+C, verify no zombie processes</test>
+        <test>Start multiple dev launchers, verify detection of existing processes</test>
+        <test>Use Process Explorer to verify complete tree termination</test>
+    </validation>
+</specification>

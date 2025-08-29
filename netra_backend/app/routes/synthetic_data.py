@@ -14,8 +14,9 @@ from sqlalchemy.orm import Session
 
 from netra_backend.app import schemas
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.dependencies import DbDep, get_db_dependency, get_db_session
+from netra_backend.app.dependencies import DbDep, get_db_dependency, get_db_session, get_security_service
 from netra_backend.app.routes.utils.error_handlers import handle_service_error
+from netra_backend.app.routes.utils.validators import validate_user_active
 from netra_backend.app.routes.utils.synthetic_data_helpers import (
     build_cancel_response,
     build_generation_config,
@@ -29,6 +30,7 @@ from netra_backend.app.routes.utils.synthetic_data_helpers import (
     get_preview_samples_safely,
 )
 from netra_backend.app.schemas.shared_types import BaseAgentConfig
+from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.synthetic_data_service import (
     SyntheticDataService,
     synthetic_data_service,
@@ -115,10 +117,7 @@ async def generate_synthetic_data(
     current_user = Depends(get_current_user),
 ):
     """Initiate synthetic data generation job"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return await _process_generation_request(request, db, current_user.id)
 
@@ -145,10 +144,7 @@ async def get_generation_status(
     current_user = Depends(get_current_user),
 ):
     """Get generation job status"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     job_status = await fetch_and_validate_job_status(job_id, current_user.id)
     return _build_status_response(job_id, job_status)
@@ -178,10 +174,7 @@ async def cancel_generation(
     current_user = Depends(get_current_user),
 ):
     """Cancel running generation job"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return await _execute_job_cancellation(job_id, current_user.id)
 
@@ -211,10 +204,7 @@ async def preview_synthetic_data(
     current_user = Depends(get_current_user),
 ):
     """Preview sample generated data"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return await _generate_preview_data(corpus_id, workload_type, sample_size)
 
@@ -255,10 +245,7 @@ async def export_synthetic_data(
     current_user = Depends(get_current_user),
 ):
     """Export synthetic data"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         result = await synthetic_data_service.export_data(export_request)
@@ -275,10 +262,7 @@ async def analyze_synthetic_data_quality(
     current_user = Depends(get_current_user),
 ):
     """Analyze synthetic data quality"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         result = await synthetic_data_service.analyze_quality(analysis_request)
@@ -293,11 +277,12 @@ async def cleanup_synthetic_data(
     cleanup_request: dict,
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user),
+    security_service: SecurityService = Depends(get_security_service),
 ):
     """Clean up synthetic data jobs"""
     # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
+    user = await security_service.get_user_by_id(db, str(current_user.id))
+    if not user or not validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -313,11 +298,12 @@ async def convert_synthetic_data_format(
     conversion_request: dict,
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user),
+    security_service: SecurityService = Depends(get_security_service),
 ):
     """Convert synthetic data format"""
     # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
+    user = await security_service.get_user_by_id(db, str(current_user.id))
+    if not user or not validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -333,11 +319,12 @@ async def compare_synthetic_with_real_data(
     comparison_request: dict,
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user),
+    security_service: SecurityService = Depends(get_security_service),
 ):
     """Compare synthetic with real data"""
     # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
+    user = await security_service.get_user_by_id(db, str(current_user.id))
+    if not user or not validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -353,11 +340,12 @@ async def create_synthetic_data_version(
     versioning_request: dict,
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user),
+    security_service: SecurityService = Depends(get_security_service),
 ):
     """Create synthetic data version"""
     # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
+    user = await security_service.get_user_by_id(db, str(current_user.id))
+    if not user or not validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -373,11 +361,12 @@ async def setup_auto_refresh(
     refresh_config: dict,
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user),
+    security_service: SecurityService = Depends(get_security_service),
 ):
     """Setup automated synthetic data refresh"""
     # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
+    user = await security_service.get_user_by_id(db, str(current_user.id))
+    if not user or not validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:

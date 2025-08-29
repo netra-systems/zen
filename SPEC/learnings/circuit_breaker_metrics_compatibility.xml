@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Circuit Breaker Metrics Compatibility Issue</title>
+        <date>2025-08-29</date>
+        <severity>HIGH</severity>
+        <category>reliability</category>
+        <tags>
+            <tag>circuit-breaker</tag>
+            <tag>metrics</tag>
+            <tag>agent-execution</tag>
+            <tag>compatibility</tag>
+        </tags>
+    </metadata>
+
+    <problem>
+        <description>
+            The triage agent and other agents were getting stuck in processing state due to an AttributeError 
+            when accessing the 'slow_requests' attribute on CircuitBreakerMetrics objects. This caused agent 
+            execution to fail silently with continuous heartbeat logs but no actual progress.
+        </description>
+        <symptoms>
+            <symptom>Continuous "processing" heartbeat logs without completion</symptom>
+            <symptom>AttributeError: 'CircuitBreakerMetrics' object has no attribute 'slow_requests'</symptom>
+            <symptom>Circuit breaker transitioning to OPEN state repeatedly</symptom>
+            <symptom>Agent retry attempts failing with same error</symptom>
+        </symptoms>
+        <root_cause>
+            Multiple CircuitBreakerMetrics implementations existed in the codebase with inconsistent 
+            interfaces. The unified circuit breaker expected a 'slow_requests' attribute that wasn't 
+            present in the service-level metrics class.
+        </root_cause>
+    </problem>
+
+    <solution>
+        <fix>
+            Added missing 'slow_requests' attribute to CircuitBreakerMetrics class in 
+            /netra_backend/app/services/metrics/circuit_breaker_metrics.py to ensure compatibility 
+            with all consumers of the metrics interface.
+        </fix>
+        <implementation>
+            <step>Added slow_requests: int = 0 to __init__ method</step>
+            <step>Updated record_success() to track slow requests (>5 seconds)</step>
+            <step>Updated reset() method to reset slow_requests counter</step>
+        </implementation>
+    </solution>
+
+    <prevention>
+        <practice>
+            Always ensure metric classes have consistent interfaces across the codebase. 
+            Use interface contracts or base classes to enforce consistency.
+        </practice>
+        <practice>
+            Add defensive programming with getattr() for optional attributes to prevent 
+            AttributeErrors from breaking execution flow.
+        </practice>
+        <practice>
+            Implement comprehensive testing for all metric collection classes to verify 
+            interface compatibility.
+        </practice>
+    </prevention>
+
+    <patterns>
+        <pattern name="Defensive Attribute Access">
+            <description>Use getattr with defaults when accessing potentially missing attributes</description>
+            <example>
+                # Instead of: metrics.slow_requests
+                # Use: getattr(metrics, 'slow_requests', 0)
+            </example>
+        </pattern>
+        <pattern name="Interface Consistency">
+            <description>Define base classes or protocols for metric interfaces</description>
+            <example>
+                from typing import Protocol
+
+                class MetricsProtocol(Protocol):
+                    slow_requests: int
+                    failure_counts: dict
+                    success_counts: dict
+                    
+                    def record_success(self, circuit_name: str, response_time: float = None) -> None: ...
+                    def record_failure(self, circuit_name: str, error_type: str = None) -> None: ...
+            </example>
+        </pattern>
+    </patterns>
+
+    <related_files>
+        <file>/netra_backend/app/services/metrics/circuit_breaker_metrics.py</file>
+        <file>/netra_backend/app/core/resilience/unified_circuit_breaker.py</file>
+        <file>/netra_backend/app/agents/triage_sub_agent/agent.py</file>
+        <file>/netra_backend/app/agents/base/retry_manager.py</file>
+    </related_files>
+
+    <testing_requirements>
+        <requirement>Unit tests for all metric attribute access</requirement>
+        <requirement>Integration tests for circuit breaker with agent execution</requirement>
+        <requirement>E2E tests for complete agent flow with circuit breakers</requirement>
+        <requirement>Compatibility tests between different metric implementations</requirement>
+    </testing_requirements>
+
+    <monitoring>
+        <metric>Track AttributeError occurrences in agent execution logs</metric>
+        <metric>Monitor circuit breaker state transitions</metric>
+        <metric>Alert on agents stuck in processing state > 30 seconds</metric>
+    </monitoring>
+</learning>

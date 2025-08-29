@@ -52,6 +52,7 @@ from netra_backend.app.agents.data_sub_agent.execution_fallbacks import (
 from netra_backend.app.agents.data_sub_agent.execution_parameters import (
     ParameterProcessor,
 )
+from netra_backend.app.agents.data_sub_agent.data_operations import DataOperations
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
@@ -96,7 +97,7 @@ class DataSubAgentExecutionEngine(BaseExecutionInterface):
         monitor = ExecutionMonitor(max_history_size=1000)
         self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
         self.execution_monitor = monitor
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager with circuit breaker and retry."""
@@ -112,6 +113,13 @@ class DataSubAgentExecutionEngine(BaseExecutionInterface):
         self.parameter_processor = ParameterProcessor(self)
         self.analysis_router = AnalysisRouter(self)
         self.fallback_handler = ExecutionFallbackHandler(self)
+        # Initialize DataOperations instance with correct signature expectations
+        self.data_ops = DataOperations(
+            self.query_builder, 
+            self.analysis_engine, 
+            self.clickhouse_ops, 
+            self.redis_manager
+        )
 
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute data analysis core logic with modern patterns."""
@@ -155,7 +163,7 @@ class DataSubAgentExecutionEngine(BaseExecutionInterface):
         
     def _get_data_operations(self) -> Any:
         """Get data operations instance for analysis."""
-        return getattr(self, 'data_ops', self.clickhouse_ops)
+        return self.data_ops
         
     def _create_update_sender(self, context: ExecutionContext) -> Callable:
         """Create update sender function for legacy components."""
@@ -197,6 +205,7 @@ class ExecutionEngine:
         self.parameter_processor = self.modern_engine.parameter_processor
         self.analysis_router = self.modern_engine.analysis_router
         self.fallback_handler = self.modern_engine.fallback_handler
+        self.data_ops = self.modern_engine.data_ops
         
     async def execute_analysis(self, state: "DeepAgentState", run_id: str, 
                              stream_updates: bool, send_update_fn: Callable, 

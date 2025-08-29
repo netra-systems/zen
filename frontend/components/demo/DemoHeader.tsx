@@ -34,9 +34,12 @@ export default function DemoHeader({ selectedIndustry }: DemoHeaderProps) {
   ]
 
   const renderTitle = () => (
-    <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
-      Enterprise AI Optimization Platform
-    </h1>
+    <div className="flex items-center gap-3">
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-purple-600 bg-clip-text text-transparent">
+        Enterprise AI Optimization Platform Beta
+      </h1>
+      <Badge variant="beta" className="text-sm px-3 py-1">BETA</Badge>
+    </div>
   )
 
   const renderSubtitle = () => (

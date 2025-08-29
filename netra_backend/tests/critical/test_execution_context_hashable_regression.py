@@ -72,7 +72,7 @@ class TestExecutionContextHashableRegression:
     @pytest.fixture
     def error_handler(self):
         """Create test error handler."""
-        return ExecutionErrorHandler()
+        return ExecutionErrorHandler
     
     def test_error_handler_cache_fallback_no_hashable_context(self, execution_context, error_handler):
         """Test that cache_fallback_data doesn't use ExecutionContext as hashable."""
@@ -303,7 +303,7 @@ class TestErrorHandlerRegressionFixes:
     
     def test_fixed_cache_fallback_data_method(self):
         """Test the fixed cache_fallback_data method."""
-        handler = ExecutionErrorHandler()
+        handler = ExecutionErrorHandler
         
         state = DeepAgentState(user_request="fallback test")
         context = ExecutionContext(
@@ -332,7 +332,7 @@ class TestErrorHandlerRegressionFixes:
     @pytest.mark.asyncio
     async def test_error_handler_full_flow_no_hashable_errors(self):
         """Test full error handling flow doesn't produce hashable errors."""
-        handler = ExecutionErrorHandler()
+        handler = ExecutionErrorHandler
         
         state = DeepAgentState(user_request="error flow test")
         context = ExecutionContext(

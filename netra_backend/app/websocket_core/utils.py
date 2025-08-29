@@ -60,29 +60,61 @@ def get_current_iso_timestamp() -> str:
 
 
 def is_websocket_connected(websocket: WebSocket) -> bool:
-    """Check if WebSocket is connected."""
-    # Check multiple conditions to determine if WebSocket is connected
-    # 1. Check if WebSocket has client_state (Starlette WebSocket attribute)
-    if hasattr(websocket, 'client_state'):
-        is_connected = websocket.client_state == WebSocketState.CONNECTED
-        logger.debug(f"WebSocket state check: client_state={websocket.client_state}, connected={is_connected}")
-        return is_connected
+    """
+    Check if WebSocket is connected.
     
-    # 2. Fallback to application_state if available
-    if hasattr(websocket, 'application_state'):
-        is_connected = websocket.application_state == WebSocketState.CONNECTED
-        logger.debug(f"WebSocket state check: application_state={websocket.application_state}, connected={is_connected}")
-        return is_connected
-    
-    # 3. Default to True if we can't determine state (let the receive() call handle disconnection)
-    logger.debug("WebSocket state check: No state attributes found, defaulting to connected=True")
-    return True
+    CRITICAL FIX: Enhanced state checking to prevent "Need to call accept first" errors.
+    """
+    try:
+        # Check multiple conditions to determine if WebSocket is connected
+        # 1. Check if WebSocket has client_state (Starlette WebSocket attribute)
+        if hasattr(websocket, 'client_state'):
+            client_state = websocket.client_state
+            is_connected = client_state == WebSocketState.CONNECTED
+            logger.debug(f"WebSocket state check: client_state={client_state}, connected={is_connected}")
+            
+            # CRITICAL FIX: If client state indicates disconnected or not yet connected, return False
+            if client_state in [WebSocketState.DISCONNECTED, WebSocketState.CONNECTING]:
+                return False
+            
+            return is_connected
+        
+        # 2. Fallback to application_state if available
+        if hasattr(websocket, 'application_state'):
+            app_state = websocket.application_state
+            is_connected = app_state == WebSocketState.CONNECTED
+            logger.debug(f"WebSocket state check: application_state={app_state}, connected={is_connected}")
+            
+            # CRITICAL FIX: If application state indicates disconnected or not yet connected, return False
+            if app_state in [WebSocketState.DISCONNECTED, WebSocketState.CONNECTING]:
+                return False
+                
+            return is_connected
+        
+        # 3. Check if the websocket has been properly initialized
+        if not hasattr(websocket, '_receive') and not hasattr(websocket, 'receive'):
+            logger.debug("WebSocket state check: WebSocket not properly initialized")
+            return False
+        
+        # 4. Default to True if we can't determine state (let the receive() call handle disconnection)
+        logger.debug("WebSocket state check: No state attributes found, defaulting to connected=True")
+        return True
+        
+    except Exception as e:
+        # CRITICAL FIX: If we can't check the state due to an error, assume disconnected
+        logger.warning(f"WebSocket state check error: {e}, assuming disconnected")
+        return False
 
 
 async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], str],
                             retry_count: int = 2) -> bool:
-    """Safely send data to WebSocket with retry logic."""
+    """
+    Safely send data to WebSocket with retry logic.
+    
+    CRITICAL FIX: Enhanced error handling for connection state issues.
+    """
     if not is_websocket_connected(websocket):
+        logger.debug("WebSocket not connected, skipping send")
         return False
     
     for attempt in range(retry_count + 1):
@@ -96,6 +128,19 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
         except WebSocketDisconnect:
             logger.info("WebSocket disconnected during send")
             return False
+        except RuntimeError as e:
+            # CRITICAL FIX: Handle "WebSocket is not connected" and "Need to call accept first" errors
+            error_message = str(e)
+            if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
+                logger.error(f"WebSocket connection state error during send: {error_message}")
+                return False
+            else:
+                logger.warning(f"WebSocket send runtime error attempt {attempt + 1}: {e}")
+                if attempt < retry_count:
+                    await asyncio.sleep(0.1 * (attempt + 1))  # Exponential backoff
+                else:
+                    logger.error(f"WebSocket send failed after {retry_count + 1} attempts")
+                    return False
         except Exception as e:
             logger.warning(f"WebSocket send attempt {attempt + 1} failed: {e}")
             if attempt < retry_count:
@@ -109,12 +154,22 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
 
 async def safe_websocket_close(websocket: WebSocket, code: int = 1000, 
                              reason: str = "Normal closure") -> None:
-    """Safely close WebSocket connection."""
-    if not is_websocket_connected(websocket):
-        return
+    """
+    Safely close WebSocket connection.
     
+    CRITICAL FIX: Enhanced error handling for connection state issues during close.
+    """
+    # Try to close even if connection check fails - websocket might be in transitional state
     try:
         await websocket.close(code=code, reason=reason)
+        logger.debug(f"WebSocket closed successfully with code {code}")
+    except RuntimeError as e:
+        # CRITICAL FIX: Handle connection state errors during close
+        error_message = str(e)
+        if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
+            logger.debug(f"WebSocket already disconnected or not accepted during close: {error_message}")
+        else:
+            logger.warning(f"Runtime error closing WebSocket: {e}")
     except Exception as e:
         logger.warning(f"Error closing WebSocket: {e}")
 

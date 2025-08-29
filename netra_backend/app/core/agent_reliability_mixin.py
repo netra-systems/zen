@@ -41,7 +41,7 @@ class AgentReliabilityMixin:
 
     def _initialize_components(self) -> None:
         """Initialize reliability components."""
-        self.error_handler = AgentErrorHandler()
+        self.error_handler = AgentErrorHandler
         self.health_monitor = AgentHealthMonitor()
         self.recovery_manager = AgentRecoveryManager()
         
@@ -145,11 +145,23 @@ class AgentReliabilityMixin:
         self, operation_name: str, error: Exception, start_time: float, context: Optional[Dict[str, Any]]
     ) -> None:
         """Record the failed operation for monitoring."""
+        from netra_backend.app.schemas.shared_types import ErrorContext
+        from datetime import datetime, timezone
+        
         execution_time = time.time() - start_time
         agent_name = self._get_agent_name()
-        await self.error_handler.record_failed_operation(
-            operation_name, error, execution_time, context, agent_name
+        
+        # Create error context for the unified error handler
+        error_context = ErrorContext(
+            trace_id=str(id(error)),  # Simple trace ID
+            operation=operation_name,
+            agent_name=agent_name,
+            timestamp=datetime.now(timezone.utc),
+            details=context or {}
         )
+        
+        # Handle the error through the unified error handler
+        await self.error_handler.handle_error(error, error_context)
 
     async def _attempt_recovery_or_reraise(
         self, operation_name: str, error: Exception, context: Optional[Dict[str, Any]]

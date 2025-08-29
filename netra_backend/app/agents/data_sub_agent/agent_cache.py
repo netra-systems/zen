@@ -115,7 +115,7 @@ class DataSubAgentCacheManager(BaseExecutionInterface):
         
     def _init_error_handler(self) -> None:
         """Initialize error handling."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         
     def _ensure_cache_initialized(self) -> None:
         """Initialize cache dictionaries if they don't exist."""

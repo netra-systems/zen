@@ -306,6 +306,15 @@
             <critical-takeaway>When using docker ps filters, "name=auth" works for finding "netra-auth" but "docker restart auth_service" fails - be specific</critical-takeaway>
         </category>
         
+        <category name="Docker Container Startup Critical Fixes" path="SPEC/learnings/docker_container_startup.xml" keywords="Docker, Container Startup, Import Errors, ModuleNotFoundError, Singleton, Error Handler, netra-backend, Application Initialization">
+            <critical-takeaway>CRITICAL: Always verify import paths exist after refactoring - stale imports from moved/deleted modules can break container startup completely</critical-takeaway>
+            <critical-takeaway>ModuleNotFoundError during container startup often indicates import paths referencing non-existent modules (e.g., 'netra_backend.app.llm.error_classification')</critical-takeaway>
+            <critical-takeaway>ImportError for specific classes/interfaces indicates the target class doesn't exist in the module - verify interface names and module contents</critical-takeaway>
+            <critical-takeaway>Singleton instantiation errors ("object is not callable") occur when treating already-instantiated singletons as constructors - use instance directly without parentheses</critical-takeaway>
+            <critical-takeaway>Test container startup after any significant refactoring or import changes to catch import/instantiation issues before deployment</critical-takeaway>
+            <critical-takeaway>Use absolute imports as per SPEC/import_management_architecture.xml to prevent path resolution issues in containerized environments</critical-takeaway>
+        </category>
+        
         <category name="CORS Configuration" path="SPEC/learnings/cors_development_wildcard.xml" keywords="CORS, localhost, 127.0.0.1, Origin, Development, Wildcard, Cross-Origin">
             <critical-takeaway>CRITICAL: Development CORS MUST use wildcard ("*") to handle localhost vs 127.0.0.1 mismatches.</critical-takeaway>
             <critical-takeaway>NEVER change development CORS back to explicit origin lists - wildcard is required for proper local development.</critical-takeaway>
@@ -340,6 +349,8 @@
             <critical-takeaway>Error handlers MUST provide get_health_status() method for monitoring integration.</critical-takeaway>
             <critical-takeaway>Always verify error handler methods exist before runtime to catch missing methods early.</critical-takeaway>
             <critical-takeaway>Unified error handlers must maintain ALL methods from original implementations for backward compatibility.</critical-takeaway>
+            <critical-takeaway>CRITICAL: agent_error_handler is an INSTANCE not a class - use agent_error_handler directly, NOT agent_error_handler().</critical-takeaway>
+            <critical-takeaway>ExecutionErrorHandler() constructor calls cause 'AgentErrorHandler object is not callable' - use the instance directly.</critical-takeaway>
         </category>
         
         <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
@@ -386,6 +397,14 @@
         <category name="GTM Infinite Loop Prevention" path="SPEC/learnings/gtm_infinite_loop_prevention.xml" keywords="GTM, Circuit Breaker, Infinite Loop, AuthGuard, Event Deduplication, Rate Limiting, Performance, Memory Leak">
             <critical-takeaway>CRITICAL: AuthGuard component can cause infinite GTM event loops - use refs to track if events already fired.</critical-takeaway>
             <critical-takeaway>Implement circuit breaker pattern for ALL analytics integrations to prevent event storms.</critical-takeaway>
+        </category>
+        
+        <category name="Dev Launcher Zombie Processes" path="SPEC/learnings/dev_launcher_zombie_processes.xml" keywords="Dev Launcher, Zombie Process, Node.js, Frontend, Windows, Process Tree, npm, next, taskkill, Process Termination">
+            <critical-takeaway>CRITICAL: Frontend npm run dev creates 4+ layer deep process tree (npm->cross-env->next->server) requiring /T flag for complete termination on Windows.</critical-takeaway>
+            <critical-takeaway>Always use taskkill /F /T /PID for Windows process termination to kill entire process tree and prevent orphaned Node.js processes.</critical-takeaway>
+            <critical-takeaway>Multiple dev launcher instances spawn duplicate frontend processes consuming 250-290MB each - implement process detection before spawning.</critical-takeaway>
+            <critical-takeaway>Frontend process termination requires special handling due to deep nesting - individual PID termination leaves child processes running.</critical-takeaway>
+            <critical-takeaway>Emergency cleanup must use WindowsProcessManager.terminate_process_tree for complete cleanup on Windows.</critical-takeaway>
             <critical-takeaway>Event deduplication window (2 seconds) prevents duplicate events from rapid re-renders.</critical-takeaway>
             <critical-takeaway>Rate limiting (100 events per type/minute) protects against legitimate event spam.</critical-takeaway>
             <critical-takeaway>Circuit breaker trips after 50 failures in 10 seconds, auto-recovers after 30 seconds.</critical-takeaway>
@@ -414,10 +433,15 @@
             <critical-takeaway>Configuration alignment critical: Update Python imports, Docker paths, CI/CD, env vars atomically.</critical-takeaway>
         </category>
 
-        <category name="WebSocket" path="SPEC/learnings/websocket_message_paradox.xml" keywords="Realtime, Coroutine, Async">
+        <category name="WebSocket" path="SPEC/learnings/websocket.xml" keywords="Realtime, Coroutine, Async, WebSocket Accept, Connection Lifecycle, Message Validation, Parse Errors, Large Messages">
             <critical-takeaway context="Error Handling">All failures MUST raise exceptions. Silent failures (e.g., auth hanging) are forbidden.</critical-takeaway>
             <critical-takeaway context="Async">Always await async operations. Verify objects are not coroutines before access.</critical-takeaway>
             <critical-takeaway context="Schema">Ensure strict alignment of message fields (e.g., 'content' vs 'text') between FE/BE.</critical-takeaway>
+            <critical-takeaway context="Connection">WebSocket accept() MUST be called FIRST before any operations - auth and setup happen AFTER accept().</critical-takeaway>
+            <critical-takeaway context="Message Validation">WebSocket validation must be flexible - only require 'type' field, make 'payload' optional for system messages (ping/pong).</critical-takeaway>
+            <critical-takeaway context="Parse Errors">Parse error 1003 usually means overly strict validation - check if legitimate messages are being rejected.</critical-takeaway>
+            <critical-takeaway context="Large Messages">Large/chunked messages use 'message_type' field instead of 'type' - check for these BEFORE standard validation.</critical-takeaway>
+            <critical-takeaway context="Error Details">Provide specific error details (missing field, wrong type, etc.) not generic "Invalid message structure".</critical-takeaway>
         </category>
         
         <category name="WebSocket State Management Critical Fix [RESOLVED]" path="SPEC/learnings/websocket_state_management.xml" keywords="WebSocket, State Management, Subprotocol, Client State, Application State, Immediate Disconnect, ABNORMAL_CLOSURE">
@@ -1568,7 +1592,7 @@
             <critical-takeaway>Security specialist agents automatically deployed for authentication issues (401/403 errors) across containers</critical-takeaway>
             <critical-takeaway>Service restart commands frequently fail without correct container naming - docker restart requires exact names</critical-takeaway>
             <critical-takeaway>Backend authentication issues outnumber auth service issues 7:4 - focus remediation on backend middleware</critical-takeaway>
-            <critical-takeaway>Log analysis commands have highest success rate (>80%), service restarts lowest (<30%) due to container naming</critical-takeaway>
+            <critical-takeaway>Log analysis commands have highest success rate (&gt;80%), service restarts lowest (&lt;30%) due to container naming</critical-takeaway>
             <critical-takeaway>Intelligent remediation saves learnings with meaningful names: intelligent_remediation_{category}_{timestamp}.xml</critical-takeaway>
             <critical-takeaway>Implement health check endpoints for authentication validation before attempting service restarts</critical-takeaway>
             <critical-takeaway>Add JWT token refresh mechanism to prevent authentication failures that trigger remediation cycles</critical-takeaway>
@@ -1581,5 +1605,40 @@
             <critical-takeaway>Test all Docker remediation commands against actual running containers before deployment</critical-takeaway>
             <critical-takeaway>Container name validation should be included in pre-deployment checks for remediation scripts</critical-takeaway>
         </category>
+        
+        <category name="Docker Container Refresh" path="SPEC/learnings/docker_container_refresh.xml" keywords="Docker, Container Refresh, Rebuild, Volume Mounts, Image Layers, Stale Code, docker-compose build, no-cache">
+            <critical-takeaway>Volume mounts update immediately, COPY commands in Dockerfile require rebuild - understand the difference</critical-takeaway>
+            <critical-takeaway>Container code reflects image build time, NOT current repository state - always rebuild after code changes</critical-takeaway>
+            <critical-takeaway>Use docker-compose build --no-cache when suspicious of cache issues or stale code</critical-takeaway>
+            <critical-takeaway>ALWAYS verify fixes are present in container after rebuild: docker exec [container] grep [expected_change] [file]</critical-takeaway>
+            <critical-takeaway>Compare commit timestamps with image build times to identify stale container issues</critical-takeaway>
+            <critical-takeaway>Four rebuild levels: restart (config only), build (code changes), --no-cache (cache issues), system prune (nuclear)</critical-takeaway>
+            <critical-takeaway>Tag images with commit hashes for production to track exactly what code is running</critical-takeaway>
+            <critical-takeaway>Development uses volume mounts for immediate updates, production uses COPY for immutable images</critical-takeaway>
+        </category>
+        
+        <category name="Docker Hot Reload Development" path="SPEC/docker_hot_reload.xml" keywords="Docker, Hot Reload, Development, Uvicorn, FastAPI, docker-compose.override.yml, Volume Mounts, Mac, Windows, Polling">
+            <critical-takeaway>CRITICAL: Use docker-compose -f docker-compose.dev.yml up backend auth for 10x faster development with hot reload</critical-takeaway>
+            <critical-takeaway>Read-only volume mounts (:ro) prevent hot reload - remove for development volumes</critical-takeaway>
+            <critical-takeaway>Mac/Windows require polling mode (WATCHDOG_USE_POLLING=true) due to Docker Desktop file system limitations</critical-takeaway>
+            <critical-takeaway>docker-compose.override.yml automatically loaded for developer-specific settings without modifying main config</critical-takeaway>
+            <critical-takeaway>Volume mount performance flags (:cached, :delegated) significantly improve I/O on Mac, ignored on Linux</critical-takeaway>
+            <critical-takeaway>Test hot reload with python scripts/test_hot_reload.py after Docker setup changes</critical-takeaway>
+            <critical-takeaway>Auth service requires explicit reload command - not configured by default in older setups</critical-takeaway>
+            <critical-takeaway>Monitor patterns: *.py, *.json, *.yaml, *.yml - excludes __pycache__, *.pyc, .pytest_cache</critical-takeaway>
+        </category>
     </intelligent_remediation>
+    
+    <agent_orchestration>
+        <category name="Workflow Sequential Execution" path="SPEC/learnings/workflow_sequential_execution.xml" keywords="Workflow, Sequential Execution, Parallel Execution, Agent Dependencies, Supervisor Agent, Pipeline Steps, Execution Strategy, Race Conditions">
+            <critical-takeaway>Agent workflow steps MUST explicitly define dependencies to prevent incorrect parallel execution</critical-takeaway>
+            <critical-takeaway>Pipeline steps default to SEQUENTIAL strategy unless explicitly marked for PARALLEL execution</critical-takeaway>
+            <critical-takeaway>Execution engine requires explicit PARALLEL strategy on at least one step to enable parallel execution</critical-takeaway>
+            <critical-takeaway>Standard workflow has strict dependencies: triage → data → optimization → actions → reporting</critical-takeaway>
+            <critical-takeaway>Use multiple redundant checks (strategy, dependencies, metadata.requires_sequential) for critical execution paths</critical-takeaway>
+            <critical-takeaway>Test workflow execution patterns with dedicated unit tests to prevent regression</critical-takeaway>
+            <critical-takeaway>Log entries showing "Supervisor parallel execution" with all agents indicate dependency violation bug</critical-takeaway>
+            <critical-takeaway>Race conditions from parallel execution can cause data corruption and unpredictable AI recommendations</critical-takeaway>
+        </category>
+    </agent_orchestration>
 </specification>
