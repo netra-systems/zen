@@ -30,6 +30,15 @@ except ImportError:
     _get_clickhouse_client = None
     get_clickhouse_config = None
 
+# Compatibility function for legacy imports
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    """Legacy compatibility function for get_async_session imports.
+    
+    Uses UnifiedDatabaseManager as the single source of truth.
+    """
+    async for session in UnifiedDatabaseManager.postgres_session():
+        yield session
+
 class UnifiedDatabaseManager:
     """Unified database connection manager using DatabaseManager as single source of truth.
     

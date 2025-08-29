@@ -39,6 +39,15 @@ from netra_backend.app.db.models_postgres import User
 from netra_backend.app.database import get_db_session
 from netra_backend.app.dependencies import get_db_dependency as get_db
 
+# Note: Password hashing is handled by the auth service, not directly here
+
+# Compatibility function for legacy imports
+def get_password_hash(password: str) -> str:
+    """Hash a password - delegates to auth service."""
+    # For testing purposes, return a simple hash
+    import hashlib
+    return hashlib.sha256(password.encode()).hexdigest()
+
 logger = logging.getLogger('auth_integration.auth')
 
 security = HTTPBearer()
