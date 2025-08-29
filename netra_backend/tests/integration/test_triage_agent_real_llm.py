@@ -14,7 +14,6 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -73,15 +72,11 @@ class TestTriageSubAgentRealLLM:
             data_result={}
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="TriageSubAgent",
-            state=state,
-            user_id="enterprise_user_001"
-        )
-        
         # Execute real LLM triage
-        result = await real_triage_agent.execute(context)
+        await real_triage_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.triage_result
         
         # Validate multi-intent detection
         assert result["status"] == "success"
@@ -126,15 +121,11 @@ class TestTriageSubAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="TriageSubAgent",
-            state=state,
-            user_id="dev_user_002"
-        )
-        
         # Execute triage with ambiguous input
-        result = await real_triage_agent.execute(context)
+        await real_triage_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.triage_result
         
         assert result["status"] == "success"
         assert "needs_clarification" in result
@@ -175,15 +166,11 @@ class TestTriageSubAgentRealLLM:
             data_result={}
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="TriageSubAgent",
-            state=state,
-            user_id="ml_engineer_003"
-        )
-        
         # Execute triage with technical query
-        result = await real_triage_agent.execute(context)
+        await real_triage_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.triage_result
         
         assert result["status"] == "success"
         assert "intents" in result
@@ -242,15 +229,11 @@ class TestTriageSubAgentRealLLM:
                 data_result={}
             )
             
-            context = ExecutionContext(
-                run_id=state.run_id,
-                agent_name="TriageSubAgent",
-                state=state,
-                user_id="ops_team_004"
-            )
-            
             # Execute urgency detection
-            result = await real_triage_agent.execute(context)
+            await real_triage_agent.execute(state, state.run_id, stream_updates=False)
+            
+            # Get result from state
+            result = state.triage_result
             
             assert result["status"] == "success"
             assert "urgency_level" in result
@@ -302,15 +285,11 @@ class TestTriageSubAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="TriageSubAgent",
-            state=state,
-            user_id="analyst_005"
-        )
-        
         # Execute context-aware triage
-        result = await real_triage_agent.execute(context)
+        await real_triage_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.triage_result
         
         assert result["status"] == "success"
         assert "routing_decision" in result

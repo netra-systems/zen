@@ -192,6 +192,32 @@ class UnifiedCircuitBreaker:
         elif isinstance(config, UnifiedCircuitConfig):
             # New: config is a proper config object
             self.config = config
+        elif hasattr(config, 'name'):
+            # Legacy CircuitConfig - convert to UnifiedCircuitConfig
+            from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+            if isinstance(config, CircuitConfig):
+                self.config = UnifiedCircuitConfig(
+                    name=config.name,
+                    failure_threshold=config.failure_threshold,
+                    recovery_timeout=config.recovery_timeout,
+                    half_open_max_calls=config.half_open_max_calls,
+                    timeout_seconds=config.timeout_seconds,
+                    adaptive_threshold=config.adaptive_threshold,
+                    slow_call_threshold=config.slow_call_threshold,
+                    sliding_window_size=config.sliding_window_size,
+                    # Legacy compatibility: disable exponential backoff for simple timing
+                    exponential_backoff=False,
+                    jitter=False,
+                )
+            else:
+                # Generic config object with attributes
+                self.config = UnifiedCircuitConfig(
+                    name=getattr(config, 'name', 'unknown'),
+                    failure_threshold=getattr(config, 'failure_threshold', failure_threshold),
+                    recovery_timeout=getattr(config, 'recovery_timeout', recovery_timeout),
+                    half_open_max_calls=getattr(config, 'half_open_max_calls', 3),
+                    timeout_seconds=getattr(config, 'timeout_seconds', 30.0),
+                )
         else:
             # Default: create config from parameters
             circuit_name = name or config or "default_circuit"
@@ -216,36 +242,35 @@ class UnifiedCircuitBreaker:
         self._half_open_calls = 0
         
     @property  
-    def state(self) -> UnifiedCircuitBreakerState:
+    def state(self):
         """Get current circuit breaker state with dynamic timeout evaluation."""
+        # Import here to avoid circular imports
+        from netra_backend.app.core.circuit_breaker_types import CircuitState
+        
         # If circuit is OPEN, check if it should transition to HALF_OPEN
         if self._state == UnifiedCircuitBreakerState.OPEN:
             timeout_elapsed = self._is_recovery_timeout_elapsed()
+            # If timeout has elapsed, transition to HALF_OPEN
             if timeout_elapsed:
                 # Transition to HALF_OPEN if recovery timeout has elapsed
-                try:
-                    # Try to get the current event loop for async transition
-                    loop = asyncio.get_running_loop()
-                    # Schedule the transition as a task
-                    asyncio.create_task(self._transition_to_half_open())
-                except RuntimeError:
-                    # No event loop running, do synchronous state change
-                    self._state = UnifiedCircuitBreakerState.HALF_OPEN
-                    self.metrics.state_changes += 1
-                    self.last_state_change = time.time()
-                    self._half_open_calls = 0
-        return self._state
+                # For synchronous calls, do immediate transition
+                self._state = UnifiedCircuitBreakerState.HALF_OPEN
+                self.metrics.state_changes += 1
+                self.last_state_change = time.time()
+                self._half_open_calls = 0
         
-    @property
-    def legacy_state(self):
-        """Get state as legacy CircuitState enum for compatibility."""
-        from netra_backend.app.core.circuit_breaker_types import CircuitState
+        # Convert internal state to legacy CircuitState for compatibility
         state_mapping = {
             UnifiedCircuitBreakerState.CLOSED: CircuitState.CLOSED,
             UnifiedCircuitBreakerState.OPEN: CircuitState.OPEN,
             UnifiedCircuitBreakerState.HALF_OPEN: CircuitState.HALF_OPEN,
         }
-        return state_mapping.get(self.state, CircuitState.CLOSED)
+        return state_mapping.get(self._state, CircuitState.CLOSED)
+        
+    @property
+    def internal_state(self) -> UnifiedCircuitBreakerState:
+        """Get internal unified state without conversion."""
+        return self._state
         
     @state.setter
     def state(self, value: UnifiedCircuitBreakerState) -> None:
@@ -307,9 +332,9 @@ class UnifiedCircuitBreaker:
             
     async def _evaluate_execution_permission(self) -> bool:
         """Evaluate whether execution should be permitted."""
-        if self.state == UnifiedCircuitBreakerState.CLOSED:
+        if self._state == UnifiedCircuitBreakerState.CLOSED:
             return True
-        elif self.state == UnifiedCircuitBreakerState.OPEN:
+        elif self._state == UnifiedCircuitBreakerState.OPEN:
             return await self._handle_open_state()
         else:  # HALF_OPEN
             return self._half_open_calls < self.config.half_open_max_calls
@@ -414,10 +439,10 @@ class UnifiedCircuitBreaker:
         
     async def _handle_success_state_transitions(self) -> None:
         """Handle state transitions after successful execution."""
-        if self.state == UnifiedCircuitBreakerState.HALF_OPEN:
+        if self._state == UnifiedCircuitBreakerState.HALF_OPEN:
             if self.metrics.consecutive_successes >= self.config.success_threshold:
                 await self._transition_to_closed()
-        elif self.state == UnifiedCircuitBreakerState.CLOSED:
+        elif self._state == UnifiedCircuitBreakerState.CLOSED:
             # Reset failure tracking on success
             self.metrics.consecutive_failures = 0
             
@@ -615,7 +640,7 @@ class UnifiedCircuitBreaker:
         return {
             'name': self.config.name,
             'state': self.state.value,
-            'is_healthy': self.state == UnifiedCircuitBreakerState.CLOSED,
+            'is_healthy': self._state == UnifiedCircuitBreakerState.CLOSED,
             'metrics': self._get_metrics_dict(),
             'config': self._get_config_dict(),
             'health': self._get_health_dict(),
@@ -716,9 +741,9 @@ class UnifiedCircuitBreaker:
         
     def can_execute(self) -> bool:
         """Synchronous execution check for compatibility."""
-        if self.state == UnifiedCircuitBreakerState.CLOSED:
+        if self._state == UnifiedCircuitBreakerState.CLOSED:
             return True
-        elif self.state == UnifiedCircuitBreakerState.OPEN:
+        elif self._state == UnifiedCircuitBreakerState.OPEN:
             return self._is_recovery_timeout_elapsed()
         else:  # HALF_OPEN
             return self._half_open_calls < self.config.half_open_max_calls
@@ -730,17 +755,17 @@ class UnifiedCircuitBreaker:
     @property
     def is_open(self) -> bool:
         """Check if circuit is open."""
-        return self.state == UnifiedCircuitBreakerState.OPEN
+        return self._state == UnifiedCircuitBreakerState.OPEN
         
     @property  
     def is_closed(self) -> bool:
         """Check if circuit is closed."""
-        return self.state == UnifiedCircuitBreakerState.CLOSED
+        return self._state == UnifiedCircuitBreakerState.CLOSED
         
     @property
     def is_half_open(self) -> bool:
         """Check if circuit is half-open."""
-        return self.state == UnifiedCircuitBreakerState.HALF_OPEN
+        return self._state == UnifiedCircuitBreakerState.HALF_OPEN
 
 
 class UnifiedCircuitBreakerManager:

@@ -14,7 +14,6 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -117,15 +116,11 @@ class TestCorpusAdminAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="CorpusAdminSubAgent",
-            state=state,
-            user_id="knowledge_team_001"
-        )
-        
         # Execute knowledge base organization with real LLM
-        result = await real_corpus_admin_agent.execute(context)
+        await real_corpus_admin_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.corpus_result if hasattr(state, 'corpus_result') else state.data_result
         
         # Validate indexing structure
         assert result["status"] == "success"
@@ -228,15 +223,11 @@ class TestCorpusAdminAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="CorpusAdminSubAgent",
-            state=state,
-            user_id="content_team_002"
-        )
-        
         # Execute deduplication analysis
-        result = await real_corpus_admin_agent.execute(context)
+        await real_corpus_admin_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.corpus_result if hasattr(state, 'corpus_result') else state.data_result
         
         assert result["status"] == "success"
         assert "duplication_analysis" in result
@@ -338,15 +329,11 @@ class TestCorpusAdminAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="CorpusAdminSubAgent",
-            state=state,
-            user_id="search_team_003"
-        )
-        
         # Execute semantic optimization
-        result = await real_corpus_admin_agent.execute(context)
+        await real_corpus_admin_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.corpus_result if hasattr(state, 'corpus_result') else state.data_result
         
         assert result["status"] == "success"
         assert "optimization_strategy" in result
@@ -464,15 +451,11 @@ class TestCorpusAdminAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="CorpusAdminSubAgent",
-            state=state,
-            user_id="documentation_team_004"
-        )
-        
         # Execute gap analysis
-        result = await real_corpus_admin_agent.execute(context)
+        await real_corpus_admin_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.corpus_result if hasattr(state, 'corpus_result') else state.data_result
         
         assert result["status"] == "success"
         assert "gap_analysis" in result
@@ -585,15 +568,11 @@ class TestCorpusAdminAgentRealLLM:
             }
         )
         
-        context = ExecutionContext(
-            run_id=state.run_id,
-            agent_name="CorpusAdminSubAgent",
-            state=state,
-            user_id="globalization_team_005"
-        )
-        
         # Execute multilingual management
-        result = await real_corpus_admin_agent.execute(context)
+        await real_corpus_admin_agent.execute(state, state.run_id, stream_updates=False)
+        
+        # Get result from state
+        result = state.corpus_result if hasattr(state, 'corpus_result') else state.data_result
         
         assert result["status"] == "success"
         assert "multilingual_strategy" in result
