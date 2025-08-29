@@ -55,7 +55,7 @@ class AdminToolValidator(BaseExecutionInterface):
     def __init__(self, monitor: Optional[ExecutionMonitor] = None):
         super().__init__("admin_tool_validator")
         self.monitor = monitor or ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         self.validation_helpers = ValidationHelpers()
         self.permission_helpers = PermissionHelpers()
     

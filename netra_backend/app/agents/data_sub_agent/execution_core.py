@@ -70,7 +70,7 @@ class ExecutionCore(BaseExecutionInterface):
         
     def _init_error_handler(self) -> None:
         """Initialize error handling."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     async def execute_analysis(
         self,

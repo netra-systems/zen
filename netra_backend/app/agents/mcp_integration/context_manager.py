@@ -165,7 +165,7 @@ class MCPContextManager(BaseExecutionInterface):
         self.permission_checker = MCPPermissionChecker()
         self.active_contexts: Dict[str, MCPAgentContext] = {}
         self.execution_monitor = ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     async def create_agent_context(self, agent_name: str, user_id: str,
                                   run_id: str, thread_id: str) -> MCPAgentContext:

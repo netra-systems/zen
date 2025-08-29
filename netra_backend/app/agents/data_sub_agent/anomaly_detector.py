@@ -47,7 +47,7 @@ class AnomalyDetector(BaseExecutionInterface):
         self.execution_engine = BaseExecutionEngine(
             self.reliability_manager, self.monitor
         )
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate anomaly detection preconditions."""

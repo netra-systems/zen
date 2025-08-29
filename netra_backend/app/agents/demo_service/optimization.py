@@ -85,7 +85,7 @@ class DemoOptimizationService(BaseExecutionInterface):
     
     def _initialize_reliability_components(self) -> None:
         """Initialize reliability monitoring components."""
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         self.monitor = ExecutionMonitor()
         
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:

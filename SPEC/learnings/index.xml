@@ -340,6 +340,8 @@
             <critical-takeaway>Error handlers MUST provide get_health_status() method for monitoring integration.</critical-takeaway>
             <critical-takeaway>Always verify error handler methods exist before runtime to catch missing methods early.</critical-takeaway>
             <critical-takeaway>Unified error handlers must maintain ALL methods from original implementations for backward compatibility.</critical-takeaway>
+            <critical-takeaway>CRITICAL: agent_error_handler is an INSTANCE not a class - use agent_error_handler directly, NOT agent_error_handler().</critical-takeaway>
+            <critical-takeaway>ExecutionErrorHandler() constructor calls cause 'AgentErrorHandler object is not callable' - use the instance directly.</critical-takeaway>
         </category>
         
         <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
@@ -414,10 +416,15 @@
             <critical-takeaway>Configuration alignment critical: Update Python imports, Docker paths, CI/CD, env vars atomically.</critical-takeaway>
         </category>
 
-        <category name="WebSocket" path="SPEC/learnings/websocket_message_paradox.xml" keywords="Realtime, Coroutine, Async">
+        <category name="WebSocket" path="SPEC/learnings/websocket.xml" keywords="Realtime, Coroutine, Async, WebSocket Accept, Connection Lifecycle, Message Validation, Parse Errors, Large Messages">
             <critical-takeaway context="Error Handling">All failures MUST raise exceptions. Silent failures (e.g., auth hanging) are forbidden.</critical-takeaway>
             <critical-takeaway context="Async">Always await async operations. Verify objects are not coroutines before access.</critical-takeaway>
             <critical-takeaway context="Schema">Ensure strict alignment of message fields (e.g., 'content' vs 'text') between FE/BE.</critical-takeaway>
+            <critical-takeaway context="Connection">WebSocket accept() MUST be called FIRST before any operations - auth and setup happen AFTER accept().</critical-takeaway>
+            <critical-takeaway context="Message Validation">WebSocket validation must be flexible - only require 'type' field, make 'payload' optional for system messages (ping/pong).</critical-takeaway>
+            <critical-takeaway context="Parse Errors">Parse error 1003 usually means overly strict validation - check if legitimate messages are being rejected.</critical-takeaway>
+            <critical-takeaway context="Large Messages">Large/chunked messages use 'message_type' field instead of 'type' - check for these BEFORE standard validation.</critical-takeaway>
+            <critical-takeaway context="Error Details">Provide specific error details (missing field, wrong type, etc.) not generic "Invalid message structure".</critical-takeaway>
         </category>
         
         <category name="WebSocket State Management Critical Fix [RESOLVED]" path="SPEC/learnings/websocket_state_management.xml" keywords="WebSocket, State Management, Subprotocol, Client State, Application State, Immediate Disconnect, ABNORMAL_CLOSURE">

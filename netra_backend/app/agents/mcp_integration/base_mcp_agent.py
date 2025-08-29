@@ -140,7 +140,7 @@ class BaseMCPAgent(BaseExecutionInterface):
         """Initialize MCP execution components."""
         self.mcp_context_manager = MCPContextManager(self.mcp_service)
         self.intent_detector = MCPIntentDetector()
-        self.error_handler = MCPExecutionErrorHandler()
+        self.error_handler = MCPExecutionErrorHandler
         self._setup_reliability_patterns()
         self._setup_execution_engine()
     

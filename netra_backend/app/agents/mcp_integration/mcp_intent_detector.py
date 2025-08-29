@@ -163,7 +163,7 @@ class MCPIntentDetector(AgentExecutionMixin):
         self.server_matcher = MCPServerMatcher()
         self.parameter_extractor = MCPParameterExtractor()
         self.execution_monitor = ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
     
     def detect_intent(self, request: str) -> MCPIntent:
         """Detect MCP intent from user request."""

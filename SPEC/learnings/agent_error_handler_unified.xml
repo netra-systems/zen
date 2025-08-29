@@ -93,8 +93,25 @@
         <recommendation>Run integration tests that exercise all error handling paths</recommendation>
     </prevention>
 
+    <additional-issues>
+        <issue>
+            <date>2025-08-28</date>
+            <problem>AgentErrorHandler callable TypeError during agent supervisor initialization</problem>
+            <error-message>'AgentErrorHandler' object is not callable</error-message>
+            <root-cause>Code was calling agent_error_handler() as constructor when it's already an instance</root-cause>
+            <solution>Removed parentheses - use agent_error_handler directly instead of agent_error_handler()</solution>
+            <affected-files>
+                <file>netra_backend/app/agents/supervisor_consolidated.py:131</file>
+                <file>netra_backend/app/agents/base/executor.py:51</file>
+                <file>22+ other agent files with ExecutionErrorHandler() calls</file>
+            </affected-files>
+            <fix-script>scripts/fix_execution_error_handler_calls.py</fix-script>
+        </issue>
+    </additional-issues>
+
     <keywords>
         AgentErrorHandler, handle_execution_error, unified_error_handler, backward compatibility,
-        error handling, agent execution, reliability failure, missing attribute, convenience class
+        error handling, agent execution, reliability failure, missing attribute, convenience class,
+        callable error, instance vs constructor, TypeError
     </keywords>
 </specification>
