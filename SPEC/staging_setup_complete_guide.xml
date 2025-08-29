@@ -99,14 +99,14 @@
         <command>gcloud secrets list --project=netra-staging</command>
       </commands>
       <expected_secrets>
-        <secret>database-url-staging - PostgreSQL connection string</secret>
+        <secret>staging-database-url - PostgreSQL connection string</secret>
         <secret>jwt-secret-key-staging - JWT signing key for backend</secret>
         <secret>jwt-secret-staging - JWT signing key for auth service</secret>
         <secret>session-secret-key-staging - Session encryption key</secret>
         <secret>fernet-key-staging - Data encryption key</secret>
         <secret>openai-api-key-staging - OpenAI API key</secret>
-        <secret>google-client-id-staging - Google OAuth client ID (optional)</secret>
-        <secret>google-client-secret-staging - Google OAuth secret (optional)</secret>
+        <secret>google-oauth-client-id-staging - Google OAuth client ID (optional)</secret>
+        <secret>google-oauth-client-secret-staging - Google OAuth secret (optional)</secret>
       </expected_secrets>
     </step>
 
@@ -116,12 +116,12 @@
       <get_current_info>
         <command>
           # Get current database IP
-          gcloud sql instances describe netra-postgres-staging \
+          gcloud sql instances describe staging-shared-postgres \
             --format="value(ipAddresses[0].ipAddress)"
         </command>
         <command>
           # View current database URL (if you have access)
-          gcloud secrets versions access latest --secret=database-url-staging
+          gcloud secrets versions access latest --secret=staging-database-url
         </command>
       </get_current_info>
       <update_if_needed>
@@ -129,13 +129,13 @@
         <command>
           # Format: postgresql://netra_user:PASSWORD@IP:5432/netra?sslmode=require
           echo -n "postgresql://netra_user:YOUR_DB_PASSWORD@34.132.142.103:5432/netra?sslmode=require" | \
-          gcloud secrets versions add database-url-staging --data-file=-
+          gcloud secrets versions add staging-database-url --data-file=-
         </command>
       </update_if_needed>
       <credentials_location>
         Ask your team lead for:
         - Database password
-        - Correct database IP address (should be 34.132.142.103 for current staging)
+        - Correct database IP address (should be 34.171.226.17 for current staging)
       </credentials_location>
     </step>
 
@@ -228,7 +228,7 @@ import subprocess
 import json
 
 required_secrets = [
-    'database-url-staging',
+    'staging-database-url',
     'jwt-secret-key-staging',
     'jwt-secret-staging',
     'session-secret-key-staging',
@@ -237,8 +237,8 @@ required_secrets = [
 ]
 
 optional_secrets = [
-    'google-client-id-staging',
-    'google-client-secret-staging',
+    'google-oauth-client-id-staging',
+    'google-oauth-client-secret-staging',
     'anthropic-api-key-staging'
 ]
 
@@ -289,7 +289,7 @@ EOF
           # Run pre-deployment check
           python scripts/deploy_to_gcp.py \
             --project netra-staging \
-            --check-only
+            --run-checks
         </command>
       </commands>
       <expected_output>
