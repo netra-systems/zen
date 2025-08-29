@@ -112,7 +112,10 @@ class PreDeploymentAuditor:
             cmd = f"git log --oneline -n {self.commit_count}"
         
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding='utf-8', errors='replace')
-        commits = result.stdout.strip().split('\n')
+        commits = result.stdout.strip().split('\n') if result.stdout.strip() else []
+        
+        # Filter out empty strings and ensure we have valid commits
+        commits = [c for c in commits if c.strip()]
         
         if commits:
             first = commits[-1].split()[0]
