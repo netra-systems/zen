@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas
-from netra_backend.app.auth_integration import auth_interface
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.dependencies import get_db_session
 from netra_backend.app.services.clickhouse_service import clickhouse_service
@@ -32,10 +31,7 @@ class ExtractMetadataRequest(BaseModel):
 
 @router.get("/tables", response_model=List[str])
 async def list_corpus_tables(db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)) -> List[str]:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     return await clickhouse_service.list_corpus_tables()
 
 def _create_corpus_record(db: AsyncSession, corpus: schemas.CorpusCreate, user_id: int) -> schemas.Corpus:
@@ -54,10 +50,7 @@ async def create_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     db_corpus = _create_corpus_record(db, corpus, current_user.id)
     _schedule_corpus_generation(request, db_corpus.id, db)
@@ -71,10 +64,7 @@ async def read_corpora(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> List[schemas.Corpus]:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     corpora = corpus_service.get_corpora(db, skip=skip, limit=limit)
     return corpora
@@ -96,10 +86,7 @@ async def read_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _get_corpus_by_id(db, corpus_id)
 
@@ -116,10 +103,7 @@ async def update_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _update_corpus_record(db, corpus_id, corpus)
 
@@ -135,10 +119,7 @@ async def delete_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _delete_corpus_record(db, corpus_id)
 
@@ -148,10 +129,7 @@ async def regenerate_corpus(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     db_corpus = _get_corpus_by_id(db, corpus_id)
     _schedule_corpus_generation(request, db_corpus.id, db)
@@ -170,10 +148,7 @@ async def get_corpus_status(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> Dict[str, Any]:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     status = _get_corpus_status_validated(db, corpus_id)
     return {"status": status}
@@ -191,10 +166,7 @@ async def get_corpus_content(
     db: AsyncSession = Depends(get_db_session),
     current_user = Depends(get_current_user)
 ) -> Any:
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return _get_corpus_content_validated(db, corpus_id)
 
@@ -226,10 +198,7 @@ async def _search_corpus_safe(corpus_id: str, q: str):
 @router.get("/search")
 async def search_corpus(q: str = Query(...), corpus_id: str = Query(default="default"), db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Search corpus documents"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     return await _search_corpus_safe(corpus_id, q)
 
@@ -242,10 +211,7 @@ class SearchRequest(BaseModel):
 @router.post("/search")
 async def search_corpus_advanced(request: SearchRequest, db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Advanced corpus search with filters"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Use the corpus service for advanced search
@@ -267,10 +233,7 @@ async def bulk_index_documents(request: BulkIndexRequest):
 @router.post("/extract")
 async def extract_document_metadata(request: ExtractMetadataRequest, db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Extract metadata from document using file URL"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         result = await corpus_service.batch_index_documents([{
@@ -298,10 +261,7 @@ async def search_symbols(
     current_user = Depends(get_current_user)
 ):
     """Search for symbols (functions, classes, methods) in indexed code files - Go to Symbol functionality"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Get the corpus
@@ -333,10 +293,7 @@ async def search_symbols_post(
     current_user = Depends(get_current_user)
 ):
     """Search for symbols with POST request - Go to Symbol functionality"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Get the corpus
@@ -371,10 +328,7 @@ async def get_document_symbols(
     current_user = Depends(get_current_user)
 ):
     """Get all symbols from a specific document"""
-    # Validate user through service layer
-    user = await auth_interface.get_user_by_id(db, str(current_user.id))
-    if not user or not auth_interface.validate_user_active(user):
-        raise HTTPException(status_code=401, detail="User not authorized")
+    # User already validated by get_current_user dependency
     
     try:
         # Get the corpus
