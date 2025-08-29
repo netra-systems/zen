@@ -11,6 +11,7 @@ from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
 )
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
+from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 
 # DataSubAgent is imported later to avoid circular dependency
 from netra_backend.app.agents.optimizations_core_sub_agent import (
@@ -75,6 +76,7 @@ class AgentRegistry:
     def _register_auxiliary_agents(self) -> None:
         """Register auxiliary agents."""
         self._register_reporting_agent()
+        self._register_data_helper_agent()
         self._register_synthetic_data_agent()
         self._register_corpus_admin_agent()
     
@@ -110,6 +112,10 @@ class AgentRegistry:
         """Register synthetic data agent."""
         self.register("synthetic_data", SyntheticDataSubAgent(
             self.llm_manager, self.tool_dispatcher))
+    
+    def _register_data_helper_agent(self) -> None:
+        """Register data helper agent."""
+        self.register("data_helper", DataHelperAgent(self.llm_manager))
     
     def _register_corpus_admin_agent(self) -> None:
         """Register corpus admin agent."""

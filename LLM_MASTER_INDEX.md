@@ -30,6 +30,7 @@
 | **Intelligent Remediation** | `/scripts/intelligent_remediation_orchestrator.py` | Multi-agent Docker remediation | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 | **Claude Log Analyzer** | `/scripts/claude_log_analyzer.py` | Get logs to Claude for analysis | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 | **🔴 Docker Hot Reload** | `/docker-compose.override.yml` | **10x faster development** | [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) |
+| **🔴 Adaptive Workflow** | `/netra_backend/app/agents/supervisor/workflow_orchestrator.py` | **Dynamic workflow based on data sufficiency** | [`SPEC/supervisor_adaptive_workflow.xml`](SPEC/supervisor_adaptive_workflow.xml) |
 
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
@@ -99,9 +100,15 @@
 | `scan_string_literals.py` | `/scripts/scan_string_literals.py` | Scanner to generate index | Run to update index |
 | `query_string_literals.py` | `/scripts/query_string_literals.py` | Query tool for string validation | Use to validate/search literals |
 
-### Agent Files (Multi-Agent System)
+### Agent Files (Multi-Agent System) - UPDATED 2025-08-29
 | Agent Type | Location | Main File | Purpose |
 |------------|----------|-----------|---------|
+| **🔴 Supervisor Agent** | `/netra_backend/app/agents/` | `supervisor_agent_modern.py` | **Central orchestrator with adaptive workflow based on data sufficiency** |
+| **🔴 Data Helper Agent** | `/netra_backend/app/agents/` | `data_helper_agent.py` | **NEW: Data requirement analysis for insufficient data scenarios** |
+| **Agent System Prompts** | `/netra_backend/app/agents/prompts/` | `supervisor_prompts.py`, `*_prompts.py` | **System prompts integrated into all agent templates** |
+| **Workflow Orchestrator** | `/netra_backend/app/agents/supervisor/` | `workflow_orchestrator.py` | **Adaptive workflow: sufficient → full, partial → with data_helper, insufficient → data_helper only** |
+| **Data Helper Tool** | `/netra_backend/app/tools/` | `data_helper.py` | **Generates comprehensive data request prompts** |
+| **Triage Agent** | `/netra_backend/app/agents/` | `triage_agent.py` | **Enhanced with data_sufficiency assessment** |
 | **APEX Optimizer Agent** | `/netra_backend/app/services/apex_optimizer_agent/` | Multiple tool files | AI optimization agent system |
 | - Cost Analysis Tools | `/netra_backend/app/services/apex_optimizer_agent/tools/` | `cost_*.py` | Cost analysis and optimization |
 | - Performance Tools | `/netra_backend/app/services/apex_optimizer_agent/tools/` | `performance_*.py`, `latency_*.py` | Performance optimization |
