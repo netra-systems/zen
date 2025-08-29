@@ -122,28 +122,37 @@ class TestDatabaseManagerIntegration:
     @pytest.mark.asyncio
     async def test_transaction_isolation(self, database_manager):
         """Test transaction isolation levels."""
-        # Create test table
-        await database_manager.execute_query(
-            "CREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY, value TEXT)"
-        )
+        # Clean up any existing test data first to ensure test isolation
+        await database_manager.execute_query("DROP TABLE IF EXISTS test_table")
         
-        # Insert test data
-        await database_manager.execute_query(
-            "INSERT INTO test_table (value) VALUES ($1)",
-            "test_value"
-        )
-        
-        # Query data
-        result = await database_manager.execute_query(
-            "SELECT value FROM test_table WHERE value = $1",
-            "test_value"
-        )
-        
-        assert len(result) == 1
-        assert result[0]['value'] == "test_value"
-        
-        # Cleanup
-        await database_manager.execute_query("DROP TABLE test_table")
+        try:
+            # Create test table
+            await database_manager.execute_query(
+                "CREATE TABLE test_table (id SERIAL PRIMARY KEY, value TEXT)"
+            )
+            
+            # Insert test data
+            await database_manager.execute_query(
+                "INSERT INTO test_table (value) VALUES ($1)",
+                "test_value"
+            )
+            
+            # Query data
+            result = await database_manager.execute_query(
+                "SELECT value FROM test_table WHERE value = $1",
+                "test_value"
+            )
+            
+            assert len(result) == 1
+            assert result[0]['value'] == "test_value"
+            
+        finally:
+            # Ensure cleanup happens even if test fails
+            try:
+                await database_manager.execute_query("DROP TABLE IF EXISTS test_table")
+            except Exception:
+                # Ignore cleanup errors to prevent masking the original test failure
+                pass
     
     @pytest.mark.asyncio
     async def test_connection_failure_recovery(self):
