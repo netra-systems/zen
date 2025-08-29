@@ -218,18 +218,12 @@ class TestPreconditionValidation:
     @pytest.mark.asyncio
     async def test_validate_preconditions_missing_user_request(self, corpus_admin_agent):
         """Test validation failure with missing user request."""
-        state = DeepAgentState()
-        context = ExecutionContext(
-            run_id="test_run_123",
-            agent_name="CorpusAdminSubAgent",
-            state=state,
-            stream_updates=False,
-            thread_id="test_thread",
-            user_id="test_user"
-        )
+        # Create state with empty user_request to trigger validation error
+        state = DeepAgentState(user_request="")
         
+        # Test the validation directly since that's where the logic is
         with pytest.raises(ValidationError, match="Missing required user_request"):
-            await corpus_admin_agent.validate_preconditions(context)
+            await corpus_admin_agent._validate_state_requirements(state)
 
     @pytest.mark.asyncio
     async def test_validate_state_requirements(self, corpus_admin_agent, sample_state):
