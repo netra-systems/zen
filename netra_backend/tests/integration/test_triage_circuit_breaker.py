@@ -37,10 +37,14 @@ def mock_agent():
     agent = MagicMock()
     agent.llm_manager = MagicMock()
     agent.llm_fallback_handler = MagicMock()
+    agent.llm_fallback_handler.execute_structured_with_fallback = AsyncMock()  # Async mock for fallback
     agent.triage_core = MagicMock()
     agent.triage_core.max_retries = 2
+    agent.triage_core.get_cached_result = AsyncMock(return_value=None)  # Async mock for cache check
     agent.prompt_builder = MagicMock()
+    agent.prompt_builder.build_triage_prompt = MagicMock(return_value="Test prompt")
     agent.result_processor = MagicMock()
+    agent.result_processor.process_llm_response = MagicMock()
     agent._send_update = AsyncMock()
     
     # Mock circuit breaker
