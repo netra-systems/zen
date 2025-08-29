@@ -309,17 +309,35 @@ ALWAYS use Python for scripts instead of shell/PowerShell (See [`SPEC/learnings/
 **Netra Apex AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
 
 ### 6.1. Quick Start
-```bash
-# LOCAL DEVELOPMENT (with hot reload enabled by default)
-docker-compose -f docker-compose.dev.yml up backend auth  # Hot reload via docker-compose.override.yml
-python scripts/test_hot_reload.py  # Verify hot reload is working
 
-# Alternative: Python-based launcher
-python scripts/dev_launcher.py
-python unified_test_runner.py
+**Dual Docker Environment System:** We maintain separate TEST and DEV environments that can run simultaneously.
+- **TEST Environment (Port 8001):** Automated testing with real services
+- **DEV Environment (Port 8000):** Local development with hot reload
+
+```bash
+# QUICK STATUS CHECK
+python scripts/docker_env_manager.py status
+
+# START BOTH ENVIRONMENTS
+python scripts/docker_env_manager.py start both
+
+# LOCAL DEVELOPMENT (DEV Environment with hot reload)
+python scripts/launch_dev_env.py -d --open  # Opens browser when ready
+# OR traditional way:
+docker-compose -f docker-compose.dev.yml --env-file .env.dev up
+
+# AUTOMATED TESTING (TEST Environment)
+python scripts/launch_test_env.py  # Start TEST environment
+python unified_test_runner.py      # Run tests
+
+# STOP ALL ENVIRONMENTS
+python scripts/docker_env_manager.py stop all
 ```
 
-**Docker Hot Reload:** See [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) and [`docs/docker-hot-reload-guide.md`](docs/docker-hot-reload-guide.md) for configuration details.
+**Documentation:**
+- **Quick Reference:** [`DOCKER_ENVIRONMENTS.md`](DOCKER_ENVIRONMENTS.md)
+- **Complete Guide:** [`docs/docker-dual-environment-setup.md`](docs/docker-dual-environment-setup.md)
+- **Hot Reload:** [`docs/docker-hot-reload-guide.md`](docs/docker-hot-reload-guide.md)
 
 ### 6.2. Unified Test Runner
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml), [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml), and [`SPEC/environment_aware_testing.xml`](SPEC/environment_aware_testing.xml).

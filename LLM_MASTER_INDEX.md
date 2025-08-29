@@ -273,24 +273,47 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 ```
 
 ### Docker Configuration & Service Management
-**IMPORTANT: Two distinct Docker configuration sets exist**
-- **Development:** `/docker/*.development.Dockerfile` - Local dev with hot-reload
-- **Production/GCP:** `/deployment/docker/*.gcp.Dockerfile` - Optimized for Cloud Run
-- **Index:** [`docs/DOCKER_CONFIGURATION_INDEX.md`](docs/DOCKER_CONFIGURATION_INDEX.md) - Complete Docker configuration mapping
 
-#### 🐳 Docker Service Management (Selective Service Control)
-- **Service Guide:** [`docs/docker-services-guide.md`](docs/docker-services-guide.md) - Complete guide for selective service management
-- **Service Manager:** `/scripts/docker_services.py` - CLI tool for selective service control
-- **Docker Launcher:** `/scripts/docker_dev_launcher.py` - Full development environment launcher
-- **Docker Compose:** `/docker-compose.dev.yml` - Development compose with profile support
+#### 🔴 DUAL ENVIRONMENT SYSTEM (NEW - 2025-08-29)
+**We now maintain TWO separate Docker environments that run simultaneously:**
+- **TEST Environment (Port 8001):** Automated testing with real services (no mocks)
+- **DEV Environment (Port 8000):** Local development with hot reload
+
+**Quick Reference:**
+- **Master Control:** `python scripts/docker_env_manager.py status` - Check both environments
+- **Quick Start:** `python scripts/docker_env_manager.py start both` - Launch both environments
+- **Documentation:** [`DOCKER_ENVIRONMENTS.md`](DOCKER_ENVIRONMENTS.md) - Quick reference guide
+- **Complete Guide:** [`docs/docker-dual-environment-setup.md`](docs/docker-dual-environment-setup.md) - Full documentation
+
+#### 🐳 Environment-Specific Launchers
+- **TEST Launcher:** `/scripts/launch_test_env.py` - TEST environment for automated testing
+- **DEV Launcher:** `/scripts/launch_dev_env.py` - DEV environment with hot reload
+- **Master Manager:** `/scripts/docker_env_manager.py` - Control both environments
+
+#### Docker Files & Configuration
+- **TEST Compose:** `/docker-compose.test.yml` - TEST environment stack
+- **DEV Compose:** `/docker-compose.dev.yml` - DEV environment stack  
+- **Hot Reload:** `/docker-compose.override.yml` - DEV hot reload configuration
+- **TEST Config:** `/.env.test` - TEST environment variables (ports 5433, 6380, 8124, 8001, 8082, 3001)
+- **DEV Config:** `/.env.dev` - DEV environment variables (ports 5432, 6379, 8123, 8000, 8081, 3000)
+- **Dockerfiles:** `/docker/*.test.Dockerfile` (TEST), `/docker/*.development.Dockerfile` (DEV)
 
 #### Quick Docker Commands
 ```bash
-# Refresh/Restart Netra backend only
-python scripts/docker_services.py restart netra
+# Check status of both environments
+python scripts/docker_env_manager.py status
 
-# Start just Netra backend (with dependencies)
-python scripts/docker_services.py start netra
+# Start both TEST and DEV environments
+python scripts/docker_env_manager.py start both
+
+# Start DEV only with hot reload
+python scripts/launch_dev_env.py -d --open
+
+# Start TEST only for automated testing  
+python scripts/launch_test_env.py
+
+# Stop all environments
+python scripts/docker_env_manager.py stop all
 
 # Start everything
 python scripts/docker_services.py start full
