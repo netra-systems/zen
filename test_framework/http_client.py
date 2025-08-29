@@ -201,16 +201,39 @@ class UnifiedHTTPClient:
             try:
                 self._websocket = await self._establish_websocket_connection(ws_url, headers)
                 
-                # CRITICAL FIX: Verify the connection is actually open before marking as connected
+                # CRITICAL FIX: Check WebSocket connection state properly for different WebSocket libraries
+                # The websockets library uses different state attributes depending on version
+                is_connected = False
+                
+                # Check for different possible connection state attributes
                 if hasattr(self._websocket, 'closed') and not self._websocket.closed:
+                    is_connected = True
+                elif hasattr(self._websocket, 'state') and str(self._websocket.state) == 'State.OPEN':
+                    is_connected = True
+                elif hasattr(self._websocket, 'open') and self._websocket.open:
+                    is_connected = True
+                elif not hasattr(self._websocket, 'closed') and not hasattr(self._websocket, 'state') and not hasattr(self._websocket, 'open'):
+                    # If none of the expected attributes exist, assume connection succeeded if no exception
+                    # This is common with some WebSocket implementations
+                    is_connected = True
+                
+                if is_connected:
                     self._websocket_state = ConnectionState.CONNECTED
                     return True
                 else:
+                    # Debug logging for connection verification failure
+                    attrs = {
+                        'closed': getattr(self._websocket, 'closed', 'no_attr'),
+                        'state': getattr(self._websocket, 'state', 'no_attr'),
+                        'open': getattr(self._websocket, 'open', 'no_attr')
+                    }
+                    print(f"DEBUG: WebSocket connection verification failed. attrs={attrs}")
                     self._websocket_state = ConnectionState.FAILED
                     if attempt == self.config.max_retries:
                         return False
                     
             except Exception as e:
+                print(f"DEBUG: WebSocket connection attempt {attempt + 1} failed: {e}")
                 if attempt == self.config.max_retries:
                     self._handle_websocket_error(str(e))
                     return False
@@ -245,16 +268,23 @@ class UnifiedHTTPClient:
         if not self._websocket:
             return False
         
-        # CRITICAL FIX: Check actual WebSocket connection state instead of just internal state
-        # The internal state might not be synchronized with the actual WebSocket state
+        # CRITICAL FIX: Check actual WebSocket connection state with proper library compatibility
         try:
-            # Test if the WebSocket is actually open by checking its state
+            # Check if WebSocket is closed using various possible attributes
+            is_closed = False
             if hasattr(self._websocket, 'closed') and self._websocket.closed:
+                is_closed = True
+            elif hasattr(self._websocket, 'state') and str(self._websocket.state) != 'State.OPEN':
+                is_closed = True
+            elif hasattr(self._websocket, 'open') and not self._websocket.open:
+                is_closed = True
+            
+            if is_closed:
                 self._websocket_state = ConnectionState.FAILED
                 return False
         except Exception:
-            # If we can't check the state, assume it's bad
-            return False
+            # If we can't check the state, try to send anyway
+            pass
         
         try:
             message_str = self._prepare_websocket_message(message)
@@ -291,13 +321,23 @@ class UnifiedHTTPClient:
         if not self._websocket:
             return None
         
-        # CRITICAL FIX: Check actual WebSocket connection state before trying to receive
+        # CRITICAL FIX: Check actual WebSocket connection state with proper library compatibility
         try:
+            # Check if WebSocket is closed using various possible attributes
+            is_closed = False
             if hasattr(self._websocket, 'closed') and self._websocket.closed:
+                is_closed = True
+            elif hasattr(self._websocket, 'state') and str(self._websocket.state) != 'State.OPEN':
+                is_closed = True
+            elif hasattr(self._websocket, 'open') and not self._websocket.open:
+                is_closed = True
+            
+            if is_closed:
                 self._websocket_state = ConnectionState.FAILED
                 return None
         except Exception:
-            return None
+            # If we can't check the state, try to receive anyway
+            pass
         
         try:
             timeout_value = timeout or self.config.timeout
