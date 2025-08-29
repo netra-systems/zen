@@ -212,8 +212,8 @@ class TestSufficientDataFlow:
         """Validate triage agent correctly identifies data sufficiency."""
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         
-        with patch.object(TriageSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_triage_output
+        with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_triage_output
             
             agent = TriageSubAgent()
             context = ExecutionContext(
@@ -234,12 +234,21 @@ class TestSufficientDataFlow:
         """Validate optimization agent generates high-value recommendations."""
         from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
         
-        with patch.object(OptimizationsCoreSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_optimization_output
+        with patch.object(OptimizationsCoreSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_optimization_output
             
             agent = OptimizationsCoreSubAgent()
             state = DeepAgentState()
-            state.set_agent_output("triage", {"data_sufficiency": "sufficient"})
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            state.triage_result = TriageResult(
+                category="cost_optimization",
+                confidence_score=0.95,
+                data_sufficiency="sufficient",
+                identified_metrics=["monthly_spend", "model", "token_usage", "latency_metrics"],
+                missing_data=[],
+                workflow_recommendation="full_optimization",
+                data_request_priority="none"
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -266,12 +275,17 @@ class TestSufficientDataFlow:
         """Validate data analysis provides deep insights."""
         from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         
-        with patch.object(DataSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_data_analysis_output
+        with patch.object(DataSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_data_analysis_output
             
             agent = DataSubAgent()
             state = DeepAgentState()
-            state.set_agent_output("optimization", {"recommendations": []})
+            from netra_backend.app.agents.state import OptimizationsResult
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="cost_optimization",
+                recommendations=[],
+                confidence_score=0.95
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -295,13 +309,22 @@ class TestSufficientDataFlow:
         """Validate actions agent creates concrete implementation steps."""
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         
-        with patch.object(ActionsToMeetGoalsSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_actions_output
+        with patch.object(ActionsToMeetGoalsSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_actions_output
             
             agent = ActionsToMeetGoalsSubAgent()
             state = DeepAgentState()
-            state.set_agent_output("optimization", {"recommendations": []})
-            state.set_agent_output("data", {"insights": {}})
+            from netra_backend.app.agents.state import OptimizationsResult
+            from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="cost_optimization",
+                recommendations=[],
+                confidence_score=0.95
+            )
+            state.data_result = DataAnalysisResponse(
+                analysis_type="optimization_insights",
+                insights={}
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -330,13 +353,21 @@ class TestSufficientDataFlow:
         """Validate final report clearly demonstrates ROI."""
         from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
         
-        with patch.object(ReportingSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_report_output
+        with patch.object(ReportingSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_report_output
             
             agent = ReportingSubAgent()
             state = DeepAgentState()
-            state.set_agent_output("optimization", {"total_estimated_savings": 3300})
-            state.set_agent_output("actions", {"implementation_plan": []})
+            from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="cost_optimization",
+                cost_savings=3300,
+                confidence_score=0.95
+            )
+            state.action_plan_result = ActionPlanResult(
+                action_plan_summary="Implementation plan",
+                actions=[]
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -362,18 +393,43 @@ class TestSufficientDataFlow:
         state.user_request = json.dumps(complete_user_request)
         
         # Simulate state updates through flow
-        state.set_agent_output("triage", {"data_sufficiency": "sufficient"})
-        state.set_agent_output("optimization", {"total_estimated_savings": 3300})
-        state.set_agent_output("data", {"optimization_potential": {"immediate": 0.30}})
-        state.set_agent_output("actions", {"implementation_plan": ["step1", "step2"]})
-        state.set_agent_output("reporting", {"executive_summary": "Complete"})
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult, ReportResult
+        from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+        
+        state.triage_result = TriageResult(
+            category="cost_optimization",
+            confidence_score=0.95,
+            data_sufficiency="sufficient",
+            identified_metrics=[],
+            missing_data=[],
+            workflow_recommendation="full_optimization",
+            data_request_priority="none"
+        )
+        state.optimizations_result = OptimizationsResult(
+            optimization_type="cost_optimization",
+            cost_savings=3300,
+            confidence_score=0.95
+        )
+        state.data_result = DataAnalysisResponse(
+            analysis_type="optimization_insights",
+            optimization_potential={"immediate": 0.30}
+        )
+        state.action_plan_result = ActionPlanResult(
+            action_plan_summary="Implementation plan",
+            actions=[{"step": "step1"}, {"step": "step2"}]
+        )
+        state.report_result = ReportResult(
+            report_type="executive_summary",
+            content="Complete"
+        )
         
         # Validate all outputs are accessible
-        assert state.get_agent_output("triage")["data_sufficiency"] == "sufficient"
-        assert state.get_agent_output("optimization")["total_estimated_savings"] == 3300
-        assert state.get_agent_output("data")["optimization_potential"]["immediate"] == 0.30
-        assert len(state.get_agent_output("actions")["implementation_plan"]) == 2
-        assert state.get_agent_output("reporting")["executive_summary"] == "Complete"
+        assert state.triage_result.data_sufficiency == "sufficient"
+        assert state.optimizations_result.cost_savings == 3300
+        assert state.data_result.optimization_potential["immediate"] == 0.30
+        assert len(state.action_plan_result.actions) == 2
+        assert state.report_result.content == "Complete"
     
     @pytest.mark.asyncio
     async def test_flow_handles_real_world_complexity(self):

@@ -208,8 +208,8 @@ class TestPartialDataFlow:
         """Validate triage correctly identifies partial data scenario."""
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         
-        with patch.object(TriageSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_triage_output_partial
+        with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_triage_output_partial
             
             agent = TriageSubAgent()
             context = ExecutionContext(
@@ -231,12 +231,21 @@ class TestPartialDataFlow:
         """Validate optimization provides recommendations with appropriate caveats."""
         from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
         
-        with patch.object(OptimizationsCoreSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_optimization_with_caveats
+        with patch.object(OptimizationsCoreSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_optimization_with_caveats
             
             agent = OptimizationsCoreSubAgent()
             state = DeepAgentState()
-            state.set_agent_output("triage", {"data_sufficiency": "partial"})
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            state.triage_result = TriageResult(
+                category="cost_optimization",
+                confidence_score=0.70,
+                data_sufficiency="partial",
+                identified_metrics=["spend_estimate", "model", "use_cases"],
+                missing_data=["exact_token_usage", "latency_metrics", "peak_patterns"],
+                workflow_recommendation="modified_pipeline",
+                data_request_priority="medium"
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -262,14 +271,21 @@ class TestPartialDataFlow:
         """Validate data helper creates clear, actionable data requests."""
         from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         
-        with patch.object(DataHelperAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_data_helper_request
+        with patch.object(DataHelperAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_data_helper_request
             
             agent = DataHelperAgent()
             state = DeepAgentState()
-            state.set_agent_output("triage", {
-                "missing_data": ["exact_token_usage", "latency_metrics", "peak_patterns"]
-            })
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            state.triage_result = TriageResult(
+                category="cost_optimization",
+                confidence_score=0.70,
+                data_sufficiency="partial",
+                identified_metrics=["spend_estimate", "model", "use_cases"],
+                missing_data=["exact_token_usage", "latency_metrics", "peak_patterns"],
+                workflow_recommendation="modified_pipeline",
+                data_request_priority="medium"
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -298,13 +314,26 @@ class TestPartialDataFlow:
         """Validate actions create a phased implementation plan."""
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         
-        with patch.object(ActionsToMeetGoalsSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_actions_with_phases
+        with patch.object(ActionsToMeetGoalsSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_actions_with_phases
             
             agent = ActionsToMeetGoalsSubAgent()
             state = DeepAgentState()
-            state.set_agent_output("triage", {"data_sufficiency": "partial"})
-            state.set_agent_output("optimization", {"confidence_level": "medium"})
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            from netra_backend.app.agents.state import OptimizationsResult
+            state.triage_result = TriageResult(
+                category="cost_optimization",
+                confidence_score=0.70,
+                data_sufficiency="partial",
+                identified_metrics=[],
+                missing_data=[],
+                workflow_recommendation="modified_pipeline",
+                data_request_priority="medium"
+            )
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="cost_optimization",
+                confidence_score=0.70
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -335,13 +364,17 @@ class TestPartialDataFlow:
         """Validate report clearly shows confidence levels and potential value."""
         from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
         
-        with patch.object(ReportingSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_report_with_confidence
+        with patch.object(ReportingSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_report_with_confidence
             
             agent = ReportingSubAgent()
             state = DeepAgentState()
-            state.set_agent_output("optimization", {"confidence_level": "medium"})
-            state.set_agent_output("data_helper", {"data_request": {}})
+            from netra_backend.app.agents.state import OptimizationsResult
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="cost_optimization",
+                confidence_score=0.70
+            )
+            # Note: data_helper results would typically be in a separate field, but keeping minimal for test
             
             context = ExecutionContext(
                 run_id="test-run",

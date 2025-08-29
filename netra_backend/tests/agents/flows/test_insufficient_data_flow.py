@@ -204,8 +204,8 @@ class TestInsufficientDataFlow:
         """Validate triage identifies insufficient data scenario."""
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         
-        with patch.object(TriageSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_triage_insufficient
+        with patch.object(TriageSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_triage_insufficient
             
             agent = TriageSubAgent()
             context = ExecutionContext(
@@ -227,15 +227,21 @@ class TestInsufficientDataFlow:
         """Validate data helper provides comprehensive data collection guidance."""
         from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         
-        with patch.object(DataHelperAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_comprehensive_data_request
+        with patch.object(DataHelperAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_comprehensive_data_request
             
             agent = DataHelperAgent()
             state = DeepAgentState()
-            state.set_agent_output("triage", {
-                "data_sufficiency": "insufficient",
-                "missing_data": ["current_spend", "models_used", "token_usage"]
-            })
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            state.triage_result = TriageResult(
+                category="unknown_optimization",
+                confidence_score=0.20,
+                data_sufficiency="insufficient",
+                identified_metrics=[],
+                missing_data=["current_spend", "models_used", "token_usage"],
+                workflow_recommendation="data_collection_only",
+                data_request_priority="critical"
+            )
             
             context = ExecutionContext(
                 run_id="test-run",
@@ -267,12 +273,21 @@ class TestInsufficientDataFlow:
         """Validate data helper educates users on why data is needed."""
         from netra_backend.app.agents.data_helper_agent import DataHelperAgent
         
-        with patch.object(DataHelperAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = expected_educational_response
+        with patch.object(DataHelperAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = expected_educational_response
             
             agent = DataHelperAgent()
             state = DeepAgentState()
-            state.set_agent_output("triage", {"data_sufficiency": "insufficient"})
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+            state.triage_result = TriageResult(
+                category="unknown_optimization",
+                confidence_score=0.20,
+                data_sufficiency="insufficient",
+                identified_metrics=[],
+                missing_data=[],
+                workflow_recommendation="data_collection_only",
+                data_request_priority="critical"
+            )
             
             context = ExecutionContext(
                 run_id="test-run",

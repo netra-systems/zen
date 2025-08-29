@@ -16,21 +16,16 @@ from netra_backend.app.agents.models import (
     DataPriority,
     UserExperience
 )
-from netra_backend.tests.agents.fixtures.llm_agent_fixtures import create_mock_llm_client
+from netra_backend.tests.agents.fixtures.llm_agent_fixtures import mock_llm_manager
 
 
 class TestDataHelperClarity:
     """Validate DataHelper produces clear, actionable data requests."""
 
     @pytest.fixture
-    async def data_helper_agent(self):
+    async def data_helper_agent(self, mock_llm_manager):
         """Create a DataHelperAgent with mocked dependencies."""
-        mock_llm_client = create_mock_llm_client()
-        agent = DataHelperAgent(
-            llm_client=mock_llm_client,
-            thread_id="test-thread-001",
-            turn_id="test-turn-001"
-        )
+        agent = DataHelperAgent(llm_manager=mock_llm_manager)
         return agent
 
     @pytest.fixture

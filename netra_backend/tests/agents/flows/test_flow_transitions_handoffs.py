@@ -82,13 +82,22 @@ class TestFlowTransitionsAndHandoffs:
     async def test_triage_to_optimization_handoff(self, initial_state, mock_agent_outputs):
         """Test state handoff from triage to optimization agent."""
         # Setup state after triage
-        initial_state.set_agent_output("triage", mock_agent_outputs["triage"])
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        initial_state.triage_result = TriageResult(
+            category="cost_optimization",
+            confidence_score=0.75,
+            data_sufficiency="partial",
+            identified_metrics=["spend", "model"],
+            missing_data=["usage_patterns", "latency"],
+            workflow_recommendation="modified_pipeline",
+            data_request_priority="medium"
+        )
         
         # Verify optimization agent receives triage output
         from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
         
-        with patch.object(OptimizationsCoreSubAgent, '_call_llm') as mock_llm:
-            mock_llm.return_value = mock_agent_outputs["optimization"]
+        with patch.object(OptimizationsCoreSubAgent, 'llm_manager') as mock_llm_manager:
+            mock_llm_manager.ask_structured_llm.return_value = mock_agent_outputs["optimization"]
             
             agent = OptimizationsCoreSubAgent()
             context = ExecutionContext(
@@ -118,12 +127,31 @@ class TestFlowTransitionsAndHandoffs:
         async def execute_and_track(agent_name, state, output):
             """Execute agent and track state changes."""
             agents_executed.append(agent_name)
-            state.set_agent_output(agent_name, output)
+            # Set appropriate state field based on agent_name
+            if agent_name == "triage":
+                from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+                state.triage_result = TriageResult(**output) if isinstance(output, dict) else output
+            elif agent_name == "optimization":
+                from netra_backend.app.agents.state import OptimizationsResult
+                state.optimizations_result = OptimizationsResult(**output) if isinstance(output, dict) else output
+            # Add other agent types as needed
             # Take a deep copy snapshot of the state
+            outputs_available = []
+            if state.triage_result:
+                outputs_available.append("triage")
+            if state.optimizations_result:
+                outputs_available.append("optimization")
+            if state.data_result:
+                outputs_available.append("data")
+            if state.action_plan_result:
+                outputs_available.append("action_plan")
+            if state.report_result:
+                outputs_available.append("report")
+            
             state_snapshots.append({
                 "agent": agent_name,
-                "outputs_available": list(state.agent_outputs.keys()),
-                "output_count": len(state.agent_outputs)
+                "outputs_available": outputs_available,
+                "output_count": len(outputs_available)
             })
             return ExecutionResult(success=True, status="completed", result=output)
         
@@ -217,10 +245,9 @@ class TestFlowTransitionsAndHandoffs:
             optimization_result = await orchestrator.execute_agent("optimization", context)
             if not optimization_result.success:
                 # Attempt recovery with simplified optimization
-                context.state.set_agent_output("optimization_error", {
-                    "error": optimization_result.error,
-                    "fallback_mode": True
-                })
+                # Store error information in metadata
+                context.state = context.state.add_metadata("optimization_error", optimization_result.error)
+                context.state = context.state.add_metadata("fallback_mode", "true")
                 results.append(await orchestrator.execute_agent("optimization", context))
             
             # Verify error was handled
@@ -275,63 +302,84 @@ class TestFlowTransitionsAndHandoffs:
         state = DeepAgentState()
         
         # Simulate triage identifying high-priority issue
-        state.set_agent_output("triage", {
-            "data_sufficiency": "sufficient",
-            "priority": "critical",
-            "issue_type": "cost_explosion"
-        })
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        state.triage_result = TriageResult(
+            category="cost_explosion",
+            confidence_score=0.95,
+            data_sufficiency="sufficient",
+            identified_metrics=[],
+            missing_data=[],
+            workflow_recommendation="emergency_optimization",
+            data_request_priority="critical"
+        )
         
         # Conditional branch logic
         def determine_next_agent(state):
-            triage = state.get_agent_output("triage")
-            if triage.get("priority") == "critical":
-                if triage.get("issue_type") == "cost_explosion":
+            if state.triage_result and state.triage_result.data_request_priority == "critical":
+                if state.triage_result.category == "cost_explosion":
                     return "emergency_cost_optimization"
-                elif triage.get("issue_type") == "performance_degradation":
+                elif state.triage_result.category == "performance_degradation":
                     return "emergency_performance_optimization"
             return "standard_optimization"
         
         next_agent = determine_next_agent(state)
         assert next_agent == "emergency_cost_optimization"
         
-        # Execute emergency optimization
-        state.set_agent_output("emergency_cost_optimization", {
-            "immediate_actions": ["Switch to cheaper model", "Implement rate limiting"],
-            "estimated_immediate_savings": 2000
-        })
+        # Execute emergency optimization - store in action plan result
+        from netra_backend.app.agents.state import ActionPlanResult
+        state.action_plan_result = ActionPlanResult(
+            action_plan_summary="Emergency cost optimization",
+            actions=[
+                {"action": "Switch to cheaper model", "priority": "immediate"},
+                {"action": "Implement rate limiting", "priority": "immediate"}
+            ]
+        )
+        state = state.add_metadata("estimated_immediate_savings", "2000")
         
         # Verify critical path was taken
-        assert "emergency_cost_optimization" in state.agent_outputs
-        assert "immediate_actions" in state.agent_outputs["emergency_cost_optimization"]
+        assert state.action_plan_result is not None
+        assert len(state.action_plan_result.actions) == 2
+        assert "estimated_immediate_savings" in state.metadata.custom_fields
     
     @pytest.mark.asyncio
     async def test_state_rollback_on_failure(self):
         """Test state rollback when critical agent fails."""
         initial_state = DeepAgentState()
-        initial_state.set_agent_output("triage", {"data_sufficiency": "sufficient"})
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        initial_state.triage_result = TriageResult(
+            category="cost_optimization",
+            confidence_score=0.85,
+            data_sufficiency="sufficient",
+            identified_metrics=[],
+            missing_data=[],
+            workflow_recommendation="standard_optimization",
+            data_request_priority="none"
+        )
         
         # Create checkpoint before risky operation
-        state_checkpoint = copy.deepcopy(initial_state.agent_outputs)
+        state_checkpoint = initial_state.model_dump()
         
         try:
-            # Attempt optimization that fails
-            initial_state.set_agent_output("optimization", {"status": "processing"})
+            # Attempt optimization that fails  
+            from netra_backend.app.agents.state import OptimizationsResult
+            initial_state.optimizations_result = OptimizationsResult(
+                optimization_type="cost_optimization",
+                confidence_score=0.0
+            )
             # Simulate failure
             raise Exception("Optimization failed due to invalid model response")
         except Exception:
             # Rollback to checkpoint
-            initial_state.agent_outputs = state_checkpoint
-            # Add error context
-            initial_state.set_agent_output("optimization_error", {
-                "error": "Invalid model response",
-                "rollback": True,
-                "retry_with": "simplified_optimization"
-            })
+            initial_state = DeepAgentState(**state_checkpoint)
+            # Add error context to metadata
+            initial_state = initial_state.add_metadata("optimization_error", "Invalid model response")
+            initial_state = initial_state.add_metadata("rollback", "true")
+            initial_state = initial_state.add_metadata("retry_with", "simplified_optimization")
         
         # Verify rollback succeeded
-        assert "optimization" not in initial_state.agent_outputs  # Failed output removed
-        assert "optimization_error" in initial_state.agent_outputs  # Error context added
-        assert initial_state.agent_outputs["triage"] == {"data_sufficiency": "sufficient"}  # Original preserved
+        assert initial_state.optimizations_result is None  # Failed output removed
+        assert "optimization_error" in initial_state.metadata.custom_fields  # Error context added
+        assert initial_state.triage_result is not None  # Original preserved
     
     @pytest.mark.asyncio
     async def test_dynamic_workflow_reordering(self):
@@ -374,11 +422,12 @@ class TestFlowTransitionsAndHandoffs:
             "parameters": {"temperature": 0.7}
         }
         
-        state.set_agent_output("optimization_attempt_1", {
+        # Store optimization attempt 1 in metadata
+        state = state.add_metadata("optimization_attempt_1", json.dumps({
             "context": first_context,
             "status": "failed",
             "error": "Timeout"
-        })
+        }))
         
         # Retry with adjusted parameters
         retry_context = {
