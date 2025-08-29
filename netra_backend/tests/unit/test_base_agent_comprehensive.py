@@ -255,8 +255,17 @@ class TestBaseAgentComprehensive:
         agent.websocket_manager = Mock()
         agent.set_state(SubAgentLifecycle.RUNNING)
         
-        # Perform shutdown
-        await agent.shutdown()
+        # Test initial state
+        assert agent.state == SubAgentLifecycle.RUNNING
+        assert len(agent.context) == 2
+        assert agent.user_id == "test_user"
+        assert agent.websocket_manager is not None
+        
+        # Perform shutdown with proper exception handling
+        try:
+            await agent.shutdown()
+        except Exception as e:
+            pytest.fail(f"Shutdown failed with exception: {e}")
         
         # Verify state changes
         assert agent.state == SubAgentLifecycle.SHUTDOWN
@@ -265,3 +274,19 @@ class TestBaseAgentComprehensive:
         # User ID and websocket_manager should remain (for cleanup by supervisor)
         assert agent.user_id == "test_user"
         assert agent.websocket_manager is not None
+        
+        # Test multiple shutdowns are idempotent
+        try:
+            await agent.shutdown()
+            await agent.shutdown()
+        except Exception as e:
+            pytest.fail(f"Multiple shutdowns failed with exception: {e}")
+        
+        # State should remain SHUTDOWN
+        assert agent.state == SubAgentLifecycle.SHUTDOWN
+        assert agent.context == {}
+        
+        # Test shutdown on already shutdown agent doesn't cause issues
+        final_state = agent.state
+        await agent.shutdown()
+        assert agent.state == final_state

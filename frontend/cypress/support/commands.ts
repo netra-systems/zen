@@ -107,8 +107,9 @@ Cypress.Commands.add('login', (email?: string, password?: string) => {
   
   // Check if we're in development mode by looking for auth config
   cy.request({
-    url: 'http://localhost:8001/auth/config',
-    failOnStatusCode: false
+    url: 'http://localhost:8081/auth/config',
+    failOnStatusCode: false,
+    timeout: 3000
   }).then((response) => {
     if (response.status === 200 && response.body?.development_mode) {
       // Development mode login
@@ -139,7 +140,17 @@ Cypress.Commands.add('login', (email?: string, password?: string) => {
       cy.log('OAuth mode detected - mocking authentication for security tests');
       
       // Mock a valid JWT token in localStorage for testing purposes
-      const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTUxNjIzOTAyMn0.mock-jwt-token-for-security-testing';
+      // This creates a token that expires in the far future for testing stability
+      const futureTimestamp = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours from now
+      const mockPayload = btoa(JSON.stringify({
+        sub: 'test-user-id',
+        email: 'test@example.com',
+        full_name: 'Test User',
+        role: 'user',
+        iat: Math.floor(Date.now() / 1000),
+        exp: futureTimestamp
+      }));
+      const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${mockPayload}.mock-signature-for-testing`;
       cy.window().then((win) => {
         win.localStorage.setItem('jwt_token', mockToken);
       });

@@ -14,9 +14,10 @@ export const ChatNavigation = {
   },
 
   selectIndustry(industry: string): void {
+    // Wait for the page to load and industry options to be available
+    cy.contains(industry, { timeout: 10000 }).should('be.visible')
     cy.contains(industry).click()
-    cy.contains('AI Chat').click()
-    cy.wait(500)
+    cy.wait(1000) // Wait for the industry selection to process
   },
 
   setupTechnology(): void {

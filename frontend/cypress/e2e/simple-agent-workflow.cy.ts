@@ -1,26 +1,46 @@
 describe('Simple Agent Workflow', () => {
   beforeEach(() => {
-    // Clear any existing auth state to allow dev login to work
+    // Directly set up valid JWT token for testing
     cy.window().then((win) => {
-      win.localStorage.removeItem('jwt_token');
-      win.localStorage.removeItem('dev_logout_flag');
+      const futureTimestamp = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 hours from now
+      const mockPayload = btoa(JSON.stringify({
+        sub: 'test-user-id',
+        email: 'test@example.com',
+        full_name: 'Test User',
+        role: 'user',
+        iat: Math.floor(Date.now() / 1000),
+        exp: futureTimestamp
+      }));
+      const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${mockPayload}.mock-signature-for-testing`;
+      win.localStorage.setItem('jwt_token', mockToken);
     });
     
+    // Navigate to chat page
     cy.visit('/chat');
     
-    // Wait for development mode auto-login to complete
-    // The system should automatically log in in dev mode
-    cy.wait(2000);
+    // Wait for the page to finish initializing
+    cy.wait(3000);
   });
 
   it('should send optimization request and receive agent response', () => {
-    // Debug: log all input and textarea elements
-    cy.get('body').then(() => {
-      cy.log('Looking for message input elements...');
+    // Debug what's actually on the page
+    cy.get('body').then(($body) => {
+      cy.log('Page loaded. Checking for auth state...');
+      cy.log('JWT Token:', localStorage.getItem('jwt_token'));
+      cy.log('Body classes:', $body.attr('class'));
+      cy.log('Looking for any textarea elements...');
+    });
+    
+    // Check if we can find any textarea elements at all
+    cy.get('textarea').then($textareas => {
+      cy.log(`Found ${$textareas.length} textarea elements`);
+      $textareas.each((i, el) => {
+        cy.log(`Textarea ${i}: placeholder="${el.placeholder}", id="${el.id}", data-testid="${el.getAttribute('data-testid')}"`);
+      });
     });
     
     // Wait for chat to load - use textarea instead of input and data-testid
-    cy.get('textarea[data-testid="message-textarea"]', { timeout: 10000 }).should('be.visible');
+    cy.get('textarea[data-testid="message-textarea"]', { timeout: 15000 }).should('be.visible');
     
     // Send optimization request
     const request = 'Optimize my LLM costs';

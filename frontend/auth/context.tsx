@@ -186,6 +186,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setToken(storedToken);
         }
         
+        // CRITICAL FIX: Always process the token to restore user state
+        // This ensures user is set on page refresh when token exists in localStorage
         try {
           const decodedUser = jwtDecode(storedToken) as User;
           
@@ -208,6 +210,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               syncAuthStore(null, null);
             }
           } else {
+            // CRITICAL: Always set user even if token was already in state
+            // This fixes the page refresh logout issue
             setUser(decodedUser);
             // Sync with Zustand store
             syncAuthStore(decodedUser, storedToken);

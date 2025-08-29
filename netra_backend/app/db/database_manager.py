@@ -1056,56 +1056,43 @@ class DatabaseManager:
         This implementation is thread-safe and prevents session state conflicts.
         """
         async_session_factory = DatabaseManager.get_application_session()
-        session = None
-        session_closed = False
-        
-        try:
-            # Create session outside the context manager to control its lifecycle
-            session = async_session_factory()
-            
-            # Start the session context
-            await session.__aenter__()
-            
+        async with async_session_factory() as session:
             try:
                 yield session
-                
-                # Only commit if we have an active transaction
-                if not session_closed and hasattr(session, 'in_transaction'):
+                # CRITICAL FIX: Only attempt commit if session is properly active
+                # Check for transaction state without causing state conflicts
+                if hasattr(session, 'in_transaction') and callable(session.in_transaction):
                     try:
                         if session.in_transaction():
                             await session.commit()
-                    except (RuntimeError, AttributeError):
+                    except (RuntimeError, AttributeError, IllegalStateChangeError):
                         # Session might be in an invalid state, skip commit
                         pass
-                        
             except GeneratorExit:
-                # Mark session as closed to prevent further operations
-                session_closed = True
-                # Don't attempt any cleanup operations here
-                # Let the finally block handle it
+                # Handle generator cleanup gracefully
+                # Don't attempt any session operations - let context manager handle cleanup
                 pass
             except asyncio.CancelledError:
-                # Task cancellation - mark as closed and re-raise
-                session_closed = True
-                raise
-            except Exception:
-                # For actual exceptions, attempt rollback if possible
-                if not session_closed and hasattr(session, 'rollback'):
+                # Handle task cancellation - shield rollback operation
+                if hasattr(session, 'in_transaction') and callable(session.in_transaction):
                     try:
-                        await session.rollback()
-                    except Exception:
-                        # Rollback failed, continue with cleanup
+                        if session.in_transaction():
+                            # Use shield to protect rollback from cancellation
+                            await asyncio.shield(session.rollback())
+                    except (RuntimeError, AttributeError, IllegalStateChangeError):
+                        # Rollback failed, let context manager handle cleanup
                         pass
                 raise
-                
-        finally:
-            # Clean up the session if it was created
-            if session is not None and not session_closed:
-                try:
-                    await session.__aexit__(None, None, None)
-                except (RuntimeError, IllegalStateChangeError, AttributeError):
-                    # Session cleanup failed, but we're exiting anyway
-                    pass
+            except Exception:
+                # CRITICAL FIX: Only rollback if session is still in a valid state
+                if hasattr(session, 'in_transaction') and callable(session.in_transaction):
+                    try:
+                        if session.in_transaction():
+                            await session.rollback()
+                    except (RuntimeError, AttributeError, IllegalStateChangeError):
+                        # If rollback fails, let the context manager handle cleanup
+                        pass
+                raise
     
     @staticmethod
     async def health_check_all() -> Dict[str, Dict[str, Any]]:

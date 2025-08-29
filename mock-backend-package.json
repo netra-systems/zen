@@ -1,0 +1,13 @@
+{
+  "name": "mock-backend-server",
+  "version": "1.0.0",
+  "description": "Mock backend server for security testing",
+  "main": "mock-backend-server.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "scripts": {
+    "start": "node mock-backend-server.js"
+  }
+}

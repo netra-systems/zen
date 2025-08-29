@@ -65,8 +65,26 @@ class BaseSubAgent(
 
     async def shutdown(self) -> None:
         """Graceful shutdown of the agent."""
+        # Make shutdown idempotent - avoid multiple shutdowns
+        if self.state == SubAgentLifecycle.SHUTDOWN:
+            return
+            
         self.logger.info(f"Shutting down {self.name}")
         self.set_state(SubAgentLifecycle.SHUTDOWN)
-        # Clear any remaining context
-        self.context.clear()
+        
+        # Clear any remaining context safely
+        try:
+            self.context.clear()
+        except Exception as e:
+            self.logger.warning(f"Error clearing context during shutdown: {e}")
+        
+        # Cleanup timing collector if it has pending operations
+        try:
+            if hasattr(self, 'timing_collector') and self.timing_collector:
+                # Complete any pending timing tree to avoid resource leaks
+                if hasattr(self.timing_collector, 'current_tree') and self.timing_collector.current_tree:
+                    self.timing_collector.complete_execution()
+        except Exception as e:
+            self.logger.warning(f"Error cleaning up timing collector during shutdown: {e}")
+        
         # Subclasses can override to add specific shutdown logic
