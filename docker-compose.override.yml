@@ -94,6 +94,15 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: 1000
 
+  # ClickHouse performance optimizations
+  clickhouse:
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse:delegated
+      - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:cached
+    environment:
+      # ClickHouse specific optimizations
+      CLICKHOUSE_LOG_LEVEL: warning  # Reduce log verbosity in dev
+
 # Mac-specific notes:
 # - :delegated = container's view is authoritative (best for app code that changes frequently)
 # - :cached = host's view is authoritative (best for read-heavy operations like configs)
