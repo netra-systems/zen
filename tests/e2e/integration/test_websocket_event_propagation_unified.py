@@ -121,7 +121,7 @@ class WebSocketEventValidator:
             self.validation_results.append(result)
 
 
-class EventPropagationTester:
+class TestEventPropagationer:
     """Tests WebSocket event propagation to frontend UI layers"""
     
     def __init__(self, websocket_client: RealWebSocketClient):

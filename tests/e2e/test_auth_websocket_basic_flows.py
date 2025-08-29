@@ -15,7 +15,6 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 import jwt
@@ -156,7 +155,7 @@ class TestBasicWebSocketConnection:
             # Verify connection rejected
             with pytest.raises(ValueError, match="Invalid token"):
                 # Mock: Authentication service isolation for testing without real auth flows
-                await mock_auth(websocket, websocket.auth_token, Mock())
+                await mock_auth(websocket, websocket.auth_token, None  # TODO: Use real service instead of Mock)
     
     @pytest.mark.e2e
     async def test_6_websocket_message_round_trip(self):

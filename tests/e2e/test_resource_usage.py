@@ -24,7 +24,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -103,7 +102,7 @@ class ResourceMonitor:
         )
 
 
-class DatabaseConnectionTester:
+class TestDatabaseConnectioner:
     """Tests database connection pool efficiency"""
     
     def __init__(self, max_connections: int = 20):
@@ -129,7 +128,7 @@ class DatabaseConnectionTester:
         try:
             for _ in range(min(5, self.max_connections)):
                 # Mock connection for test isolation
-                mock_conn = AsyncMock()
+                mock_conn = AsyncNone  # TODO: Use real service instead of Mock
                 connections.append(mock_conn)
         except Exception:
             pass

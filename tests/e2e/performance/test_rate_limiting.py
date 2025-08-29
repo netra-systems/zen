@@ -57,7 +57,7 @@ from tests.e2e.service_manager import ServiceManager
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete, create_test_harness
 
 
-class RateLimitFlowTester:
+class TestRateLimitFlower:
     """Executes real rate limiting flow with quota enforcement."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -200,7 +200,7 @@ class UpgradeFlowManager:
 
 
 # Implementation of main tester methods
-class RateLimitFlowTester(RateLimitFlowTester):  # Extend original class
+class TestRateLimitFlower(RateLimitFlowTester):  # Extend original class
     
     async def _prepare_test_environment(self) -> None:
         """Prepare test environment with services."""

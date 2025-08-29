@@ -26,7 +26,6 @@ import asyncio
 import statistics
 import time
 from typing import Any, Dict, List, Tuple
-from unittest.mock import AsyncMock
 
 import pytest
 
@@ -133,7 +132,7 @@ def test_config():
 def mock_http_client():
     """Create mock HTTP client for API latency tests."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_client = AsyncMock()
+    mock_client = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Async component isolation for testing without real async operations
     mock_client.get = AsyncMock(return_value={"status": 200, "data": "response"})
     # Mock: Async component isolation for testing without real async operations

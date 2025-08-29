@@ -25,13 +25,12 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
 
 
-class ErrorScenarioTester:
+class TestErrorScenarioer:
     """Helper class for testing error scenarios and edge cases."""
     
     def __init__(self):

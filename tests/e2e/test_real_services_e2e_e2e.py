@@ -12,7 +12,6 @@ import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock
 
 import asyncpg
 import httpx
@@ -34,7 +33,7 @@ class ServiceEndpoints:
     clickhouse_url: str = "clickhouse://localhost:8123/netra_test"
 
 
-class E2ETestMetrics:
+class TestE2EMetrics:
     """Metrics collection for E2E test performance tracking."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -55,7 +54,7 @@ class E2ETestMetrics:
         """Add sub-operation timing."""
         self.sub_metrics[name] = duration
 
-class RealServiceE2ETestSuite:
+class TestRealServiceE2ESuite:
     """
     Comprehensive E2E test suite using real services.
     

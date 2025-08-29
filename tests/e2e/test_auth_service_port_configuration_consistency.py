@@ -21,6 +21,7 @@ from typing import Dict, List, Set
 class TestAuthServicePortConfigurationConsistency:
     """Test suite for auth service port configuration consistency."""
     
+    @pytest.mark.auth
     def test_port_configuration_consistency_across_files(self):
         """
         Test that auth service port is consistent across all configuration files.
@@ -102,6 +103,7 @@ class TestAuthServicePortConfigurationConsistency:
             assert consistent_port in file_auth_ports, \
                 f"File {file_path} does not use consistent port {consistent_port}, uses: {ports}"
 
+    @pytest.mark.auth
     def test_development_launcher_port_consistency(self):
         """
         Test that development launcher uses consistent port configuration.
@@ -153,6 +155,7 @@ class TestAuthServicePortConfigurationConsistency:
                         f"Dev launcher file {launcher_file} uses port {port_int}, " \
                         f"expected {expected_port} from environment template"
 
+    @pytest.mark.auth
     def test_docker_compose_port_consistency(self):
         """
         Test that Docker Compose files use consistent auth service ports.
@@ -227,6 +230,7 @@ class TestAuthServicePortConfigurationConsistency:
                 # Skip invalid YAML files
                 continue
 
+    @pytest.mark.auth
     def test_github_actions_port_consistency(self):
         """
         Test that GitHub Actions workflows use consistent auth service ports.
@@ -299,6 +303,7 @@ class TestAuthServicePortConfigurationConsistency:
                 f"GitHub Actions uses port {workflow_port}, " \
                 f"but environment template expects {expected_port}"
 
+    @pytest.mark.auth
     def test_service_discovery_port_consistency(self):
         """
         Test that service discovery mechanisms use consistent ports.

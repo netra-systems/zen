@@ -35,7 +35,6 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -298,16 +297,15 @@ class AgentPipelineInfrastructure:
     
     async def create_supervisor_agent(self) -> SupervisorAgent:
         """Create supervisor agent with real dependencies."""
-        from unittest.mock import MagicMock, AsyncMock
-        from netra_backend.app.llm.llm_manager import LLMManager
+                from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
         # Create required dependencies
-        db_session = AsyncMock()
+        db_session = AsyncNone  # TODO: Use real service instead of Mock
         config = get_config()
         llm_manager = LLMManager(config)
-        websocket_manager = AsyncMock()
-        tool_dispatcher = MagicMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
         
         return SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
     

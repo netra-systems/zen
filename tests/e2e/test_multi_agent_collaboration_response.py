@@ -18,7 +18,6 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -103,11 +102,11 @@ class TestMultiAgentCollaborationResponse:
     async def websocket_manager(self):
         """Create mocked WebSocket manager for testing"""
         # Mock: Generic component isolation for controlled unit testing
-        ws_mock = AsyncMock()
+        ws_mock = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Agent service isolation for testing without LLM agent execution
-        ws_mock.send_agent_update = AsyncMock()
+        ws_mock.send_agent_update = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        ws_mock.send_status_update = AsyncMock()
+        ws_mock.send_status_update = AsyncNone  # TODO: Use real service instead of Mock
         return ws_mock
 
     @pytest.fixture

@@ -14,7 +14,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -70,7 +69,7 @@ class NetworkInterfaceSimulator:
         self.message_log.append(log_entry)
 
 
-class NetworkSwitchingTestClient:
+class TestNetworkSwitchingClient:
     """WebSocket client that simulates network interface switching."""
     
     def __init__(self, uri: str, session_token: str, simulator: NetworkInterfaceSimulator):
@@ -89,7 +88,7 @@ class NetworkSwitchingTestClient:
             
             # Mock connection with current network interface
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = AsyncMock()
+            self.websocket = AsyncNone  # TODO: Use real service instead of Mock
             self.websocket.local_address = (current_interface['ip'], 12345)
             self.websocket.remote_address = ("server.example.com", 8000)
             self.is_connected = True

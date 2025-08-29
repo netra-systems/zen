@@ -47,7 +47,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set, Union
-from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
@@ -66,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class ResilienceTestMetrics:
+class TestResilienceMetrics:
     """Comprehensive metrics for system resilience and recovery testing."""
     test_name: str
     start_time: float = field(default_factory=time.time)
@@ -172,7 +171,7 @@ class ResilienceTestMetrics:
 
 
 @dataclass
-class ResilienceTestConfig:
+class TestResilienceConfig:
     """Configuration for comprehensive resilience testing."""
     # Failure simulation
     test_service_failures: bool = True
@@ -216,7 +215,7 @@ class ResilienceTestConfig:
     preserve_data_integrity: bool = True
 
 
-class SystemResilienceRecoveryTester:
+class TestSystemResilienceRecoveryer:
     """Comprehensive system resilience and recovery tester."""
     
     def __init__(self, config: ResilienceTestConfig):
@@ -1511,6 +1510,7 @@ class TestComprehensiveSystemResilienceRecovery:
             preserve_data_integrity=True
         )
     
+    @pytest.mark.resilience
     async def test_comprehensive_system_resilience_and_recovery(self, resilience_config):
         """Test comprehensive system resilience and recovery capabilities."""
         logger.info("=== COMPREHENSIVE SYSTEM RESILIENCE AND RECOVERY TEST ===")

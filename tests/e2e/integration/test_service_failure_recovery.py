@@ -77,6 +77,7 @@ class TestServiceFailureRecovery:
         """Initialize recovery time validator."""
         return create_recovery_time_validator(30.0)
     
+    @pytest.mark.resilience
     async def test_auth_service_failure_isolation(self, orchestrator, failure_simulator, degradation_tester):
         """Test Auth service failure doesn't crash backend."""
         # Verify initial health
@@ -91,6 +92,7 @@ class TestServiceFailureRecovery:
         degradation = await degradation_tester.test_backend_degradation(orchestrator)
         assert degradation["degraded_properly"], "Backend did not degrade gracefully"
     
+    @pytest.mark.resilience
     async def test_frontend_error_handling_during_failure(self, orchestrator, failure_simulator:
                                                         degradation_tester):
         """Test frontend handles Auth failure gracefully."""
@@ -118,6 +120,7 @@ class TestServiceFailureRecovery:
         connected = await ws_client.connect()
         return ws_client if connected else None
     
+    @pytest.mark.resilience
     async def test_state_preservation_during_recovery(self, orchestrator, failure_simulator:
                                                     state_validator):
         """Test system preserves state during failure and recovery."""
@@ -149,6 +152,7 @@ class TestServiceFailureRecovery:
         recovery_success = await failure_simulator.restore_auth_service()
         assert recovery_success, "Service recovery failed"
     
+    @pytest.mark.resilience
     async def test_recovery_time_validation(self, orchestrator, failure_simulator, recovery_timer):
         """Test recovery completes within 30 second limit."""
         ws_client = await self._create_test_websocket(orchestrator)
@@ -172,6 +176,7 @@ class TestServiceFailureRecovery:
         finally:
             await ws_client.close()
     
+    @pytest.mark.resilience
     async def test_cascading_failure_prevention(self, orchestrator, failure_simulator, degradation_tester):
         """Test Auth failure doesn't cascade to other services."""
         # Simulate Auth failure
@@ -185,6 +190,7 @@ class TestServiceFailureRecovery:
         # Verify service isolation maintained
         assert backend_status.get("graceful", False), "Service isolation not maintained"
     
+    @pytest.mark.resilience
     async def test_complete_service_failure_recovery_flow(self, orchestrator, failure_simulator:
                                                         degradation_tester, state_validator, recovery_timer):
         """Complete service failure recovery test within time limit."""

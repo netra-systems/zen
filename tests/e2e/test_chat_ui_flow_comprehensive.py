@@ -40,7 +40,7 @@ import time
 from datetime import datetime, timedelta
 
 
-class ChatUITestError(Exception):
+class TestChatUIError(Exception):
     """Custom exception for chat UI test failures"""
     pass
 
@@ -63,7 +63,7 @@ class PerformanceMetrics:
         return duration
 
 
-class ChatUIFlowTester:
+class TestChatUIFlower:
     """Main test class for comprehensive chat UI flow testing"""
     
     def __init__(self):

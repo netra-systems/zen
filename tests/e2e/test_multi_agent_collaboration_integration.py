@@ -12,7 +12,6 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
 import asyncio
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -38,13 +37,12 @@ class TestMultiAgentCollaboration:
         config = get_config()
         llm_manager = LLMManager(config)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
         
-        from unittest.mock import MagicMock
-        
+                
         # Create required dependencies
-        db_session = AsyncMock()
-        tool_dispatcher = MagicMock()
+        db_session = AsyncNone  # TODO: Use real service instead of Mock
+        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
@@ -264,12 +262,11 @@ async def test_supervisor_delegation_performance():
     config = get_config()
     llm_manager = LLMManager(config)
     
-    from unittest.mock import MagicMock, AsyncMock
-    
+        
     # Create required dependencies
-    db_session = AsyncMock()
-    websocket_manager = AsyncMock()
-    tool_dispatcher = MagicMock()
+    db_session = AsyncNone  # TODO: Use real service instead of Mock
+    websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+    tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
     
     supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
     sub_agent = BaseSubAgent(llm_manager=llm_manager, name="PerfTestAgent")

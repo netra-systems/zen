@@ -55,7 +55,7 @@ from tests.e2e.service_manager import RealServicesManager
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
-class CorruptedStateTestManager:
+class TestCorruptedStateManager:
 
     """Manages corrupted state recovery testing."""
     
@@ -182,7 +182,7 @@ async def cleanup_resources(self) -> None:
             await self.http_client.aclose()
 
 
-class LoadTestManager:
+class TestLoadManager:
 
     """Manages 100 concurrent users load testing."""
     

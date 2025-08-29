@@ -21,7 +21,6 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -207,7 +206,7 @@ class TestRealAgentPipeline:
         assert recovery_result["fallback_successful"], "Fallback should succeed"
 
 
-class AgentPipelineTestCore:
+class TestAgentPipelineCore:
     """Core infrastructure for agent pipeline testing."""
     
     def __init__(self):
@@ -243,7 +242,7 @@ class AgentPipelineTestCore:
         return tier_mapping.get(tier, TEST_USERS["free"])
 
 
-class AgentPipelineTestUtils:
+class TestAgentPipelineUtils:
     """Utility functions for agent pipeline testing."""
     
     @staticmethod
@@ -330,7 +329,7 @@ class MultiAgentCoordinator:
             return {"agents_coordinated": 2, "parallel_execution": True, "coordination_success": True}
 
 
-class AgentFailureRecoveryTester:
+class TestAgentFailureRecoveryer:
     """Tests agent failure and recovery scenarios."""
     
     @pytest.mark.e2e

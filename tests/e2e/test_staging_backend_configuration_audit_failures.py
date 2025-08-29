@@ -65,7 +65,6 @@ import pytest
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch
 from urllib.parse import urlparse
 
 import httpx

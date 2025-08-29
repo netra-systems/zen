@@ -28,7 +28,6 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -194,7 +193,7 @@ class AuthenticatedWebSocketStreamer:
     def __init__(self, auth_manager: StreamingAuthManager):
         self.auth_manager = auth_manager
         # Mock: Generic component isolation for controlled unit testing
-        self.websocket_mock = AsyncMock()
+        self.websocket_mock = AsyncNone  # TODO: Use real service instead of Mock
         self.sent_messages = []
         self.stream_errors = []
         

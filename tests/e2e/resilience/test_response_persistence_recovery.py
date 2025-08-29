@@ -19,7 +19,6 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 
@@ -66,13 +65,13 @@ class TestResponsePersistenceRecovery:
     async def clickhouse_client(self):
         """Create mocked ClickHouse client for testing"""
         # Mock: Generic component isolation for controlled unit testing
-        client_mock = AsyncMock()
+        client_mock = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        client_mock.execute = AsyncMock()
+        client_mock.execute = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Async component isolation for testing without real async operations
         client_mock.fetch = AsyncMock(return_value=[])
         # Mock: Generic component isolation for controlled unit testing
-        client_mock.close = AsyncMock()
+        client_mock.close = AsyncNone  # TODO: Use real service instead of Mock
         return client_mock
 
     @pytest.fixture

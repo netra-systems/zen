@@ -22,7 +22,6 @@ import tempfile
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Any, Optional
-from unittest.mock import patch, MagicMock
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 

@@ -221,7 +221,7 @@ class ChatExportVerifier:
         return True
 
 
-class DataExportE2ETester:
+class TestDataExportE2Eer:
     """Executes complete data export E2E test flow."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -321,7 +321,7 @@ class DataExportE2ETester:
         return await self.verifier.verify_data_removal(file_path, self.test_user_id)
 
 
-class FastDataExportTester:
+class TestFastDataExporter:
     """Optimized tester for performance testing with minimal network calls."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -363,7 +363,7 @@ class FastDataExportTester:
         }
 
 
-class DataExportTestManager:
+class TestDataExportManager:
     """Manages data export E2E test execution and cleanup."""
     
     def __init__(self):

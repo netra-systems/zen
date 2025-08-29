@@ -25,7 +25,6 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -41,7 +40,7 @@ from tests.e2e.real_services_manager import create_real_services_manager
 logger = central_logger.get_logger(__name__)
 
 
-class OAuthFlowTestRunner:
+class TestOAuthFlowRunner:
     """OAuth flow test execution manager for testing complete OAuth integration"""
     
     def __init__(self):
@@ -214,14 +213,14 @@ class OAuthFlowTestRunner:
             
             # Mock token exchange response
             # Mock: Generic component isolation for controlled unit testing
-            mock_token_response = AsyncMock()
+            mock_token_response = AsyncNone  # TODO: Use real service instead of Mock
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = mock_provider_response
             mock_post.return_value = mock_token_response
             
             # Mock user info response
             # Mock: Generic component isolation for controlled unit testing
-            mock_user_response = AsyncMock()
+            mock_user_response = AsyncNone  # TODO: Use real service instead of Mock
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = mock_user_info
             mock_get.return_value = mock_user_response
@@ -342,7 +341,7 @@ class OAuthFlowTestRunner:
             await self.services_manager.stop_all_services()
 
 
-class OAuthIntegrationTestValidator:
+class TestOAuthIntegrationValidator:
     """Validator for OAuth integration test results"""
     
     @staticmethod

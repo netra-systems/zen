@@ -42,7 +42,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-class WebSocketJWTAuthTester:
+class TestWebSocketJWTAuther:
     """Comprehensive WebSocket JWT authentication tester with real services."""
     
     def __init__(self, real_services):
@@ -186,7 +186,7 @@ class WebSocketJWTAuthTester:
             }
 
 
-class TokenSecurityTester:
+class TestTokenSecurityer:
     """Tests various token security scenarios."""
     
     def __init__(self, auth_tester: WebSocketJWTAuthTester):

@@ -20,7 +20,6 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import Mock, patch
 
 import pytest
 
@@ -110,7 +109,7 @@ class MessageSimulator:
         }
 
 
-class WebSocketAuthTester:
+class TestWebSocketAuther:
     """Real WebSocket connection tester with auth validation."""
     
     def __init__(self):
@@ -202,7 +201,7 @@ class TestWebSocketAuthHandshake:
             try:
                 await websocket.accept()
                 # Mock: Authentication service isolation for testing without real auth flows
-                await mock_auth(websocket, token, Mock())
+                await mock_auth(websocket, token, None  # TODO: Use real service instead of Mock)
                 return {"authenticated": True}
             except ValueError as e:
                 return {"authenticated": False, "error": str(e)}

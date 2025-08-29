@@ -28,7 +28,7 @@ from netra_backend.app.core.config import get_config
 from test_framework.environment_isolation import get_test_env_manager
 
 
-class ComprehensiveAuthFlowTester:
+class TestComprehensiveAuthFlower:
     """Comprehensive auth flow testing with real auth service"""
     
     def __init__(self):

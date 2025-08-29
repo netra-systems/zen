@@ -52,7 +52,7 @@ async def disaster_recovery_suite():
     await suite.cleanup()
 
 
-class DisasterRecoveryTestSuite:
+class TestDisasterRecoverySuite:
     """Comprehensive disaster recovery test suite."""
     
     def __init__(self):

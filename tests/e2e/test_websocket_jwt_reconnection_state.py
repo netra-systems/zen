@@ -63,7 +63,7 @@ class ReconnectionMetrics:
     auth_validation_time: float
 
 
-class WebSocketJWTReconnectionTester:
+class TestWebSocketJWTReconnectioner:
     """Core tester for WebSocket JWT reconnection state management."""
     
     def __init__(self):

@@ -25,7 +25,7 @@ class OAuthToken(BaseModel):
     id_token: Optional[str] = None
 
 
-class OAuthFlowTester:
+class TestOAuthFlower:
     """Complete OAuth flow tester for staging environment"""
     
     def __init__(self):

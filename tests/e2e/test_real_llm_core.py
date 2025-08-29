@@ -20,7 +20,6 @@ import asyncio
 import os
 import time
 from typing import Any, Dict
-from unittest.mock import patch
 
 import pytest
 
@@ -31,7 +30,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.user_plan import PlanTier
 
 
-class RealLLMTestManager:
+class TestRealLLMManager:
     """Manages real LLM testing with cost controls."""
     
     def __init__(self):

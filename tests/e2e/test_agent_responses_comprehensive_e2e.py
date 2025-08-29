@@ -25,11 +25,10 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-class AgentResponseTester:
+class TestAgentResponseer:
     """Helper class for agent response testing."""
     
     def __init__(self):

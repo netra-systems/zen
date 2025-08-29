@@ -25,7 +25,6 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -202,17 +201,17 @@ class OAuthRealServiceFlowRunner:
     def _setup_oauth_provider_mocks(self, mock_client, provider: str) -> None:
         """Setup mocks for external OAuth provider API calls only"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_instance = AsyncMock()
+        mock_instance = AsyncNone  # TODO: Use real service instead of Mock
         mock_client.return_value.__aenter__.return_value = mock_instance
         
         if provider == "google":
             # Mock: Generic component isolation for controlled unit testing
-            token_response = AsyncMock()
+            token_response = AsyncNone  # TODO: Use real service instead of Mock
             token_response.json.return_value = GoogleOAuthProvider.get_oauth_response()
             token_response.raise_for_status.return_value = None
             
             # Mock: Generic component isolation for controlled unit testing
-            user_response = AsyncMock()
+            user_response = AsyncNone  # TODO: Use real service instead of Mock
             user_response.json.return_value = GoogleOAuthProvider.get_user_info()
             user_response.raise_for_status.return_value = None
             
@@ -393,7 +392,7 @@ class TestOAuthRealServiceFlow:
         # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
             # Mock: Generic component isolation for controlled unit testing
-            mock_instance = AsyncMock()
+            mock_instance = AsyncNone  # TODO: Use real service instead of Mock
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate OAuth provider error

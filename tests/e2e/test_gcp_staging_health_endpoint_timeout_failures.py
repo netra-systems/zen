@@ -31,7 +31,6 @@ Root Causes to Investigate:
 import asyncio
 import time
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient

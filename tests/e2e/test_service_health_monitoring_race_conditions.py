@@ -6,7 +6,6 @@ preventing service disruptions that lead to customer churn and revenue loss.
 """
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, patch
 
 from tests.e2e.helpers.core.service_independence_helpers import ServiceHealthChecker
 from tests.e2e.config import get_test_config

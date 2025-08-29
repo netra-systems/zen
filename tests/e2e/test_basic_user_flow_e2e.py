@@ -62,7 +62,7 @@ BACKEND_SERVICE_URL = "http://localhost:8000"
 WEBSOCKET_URL = "ws://localhost:8000/ws"
 
 
-class BasicUserFlowE2ETester:
+class TestBasicUserFlowE2Eer:
     """Tests the complete basic user flow with REAL services."""
     
     def __init__(self, harness):

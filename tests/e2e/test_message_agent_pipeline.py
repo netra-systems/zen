@@ -11,7 +11,6 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -31,7 +30,7 @@ from tests.e2e.message_flow_validators import MessageFlowValidator
 logger = central_logger.get_logger(__name__)
 
 
-class MessagePipelineTester:
+class TestMessagePipelineer:
     """Complete message pipeline test coordinator."""
     
     def __init__(self):
@@ -151,7 +150,7 @@ class TestMessagePipelineCore:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             # Mock: Agent service isolation for testing without LLM agent execution
-            mock_agent = AsyncMock()
+            mock_agent = AsyncNone  # TODO: Use real service instead of Mock
             mock_agent.process_message.return_value = {
                 "response": f"Processed: {message['content']}",
                 "agent_type": "MockAgent",
@@ -204,7 +203,7 @@ class TestMessagePipelineTypes:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             # Mock: Agent service isolation for testing without LLM agent execution
-            mock_agent = AsyncMock()
+            mock_agent = AsyncNone  # TODO: Use real service instead of Mock
             mock_response = f"Mock {message_type} response for: {message['content']}"
             mock_agent.process_message.return_value = {"response": mock_response}
             mock_service.return_value = mock_agent
@@ -264,7 +263,7 @@ class TestPipelinePerformance:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             # Mock: Agent service isolation for testing without LLM agent execution
-            mock_agent = AsyncMock()
+            mock_agent = AsyncNone  # TODO: Use real service instead of Mock
             mock_agent.process_message.return_value = {
                 "response": f"Processed concurrent message {index}"
             }
@@ -298,7 +297,7 @@ class TestPipelineErrorHandling:
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             # Mock: Agent service isolation for testing without LLM agent execution
-            mock_agent = AsyncMock()
+            mock_agent = AsyncNone  # TODO: Use real service instead of Mock
             mock_agent.process_message.side_effect = Exception("Mock agent error")
             mock_service.return_value = mock_agent
             

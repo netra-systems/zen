@@ -20,7 +20,6 @@ import pytest
 import asyncio
 import logging
 import time
-from unittest.mock import patch, MagicMock, AsyncMock
 import requests
 from fastapi.testclient import TestClient
 

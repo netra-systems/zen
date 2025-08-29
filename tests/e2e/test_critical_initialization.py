@@ -18,7 +18,6 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch
 
 import httpx
 import psutil
@@ -39,7 +38,7 @@ from test_framework.test_helpers import (
 )
 
 
-class SystemInitializationTestBase:
+class TestSystemInitializationBase:
     """Base class for system initialization tests with comprehensive helpers."""
     
     @classmethod

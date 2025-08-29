@@ -31,7 +31,6 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional, List
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import httpx
@@ -433,7 +432,7 @@ class CrossServiceValidationHelper:
         return validation_results
 
 
-class ColdStartFirstTimeUserJourneyTester:
+class TestColdStartFirstTimeUserJourneyer:
     """Complete cold start first-time user journey tester."""
     
     def __init__(self):

@@ -19,7 +19,7 @@ import pytest
 logger = logging.getLogger(__name__)
 
 
-class HealthEndpointTester:
+class TestHealthEndpointer:
     """Tests health endpoints directly for degraded mode behavior."""
     
     def __init__(self, base_url: str = "http://localhost:8000"):

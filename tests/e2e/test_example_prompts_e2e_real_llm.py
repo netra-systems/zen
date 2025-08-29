@@ -29,7 +29,6 @@ import os
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -43,7 +42,7 @@ from netra_backend.app.schemas.user_plan import PlanTier
 
 
 @dataclass
-class ExamplePromptTestCase:
+class TestExamplePromptCase:
     """Test case structure for example prompts."""
     prompt_id: str
     category: str
@@ -55,7 +54,7 @@ class ExamplePromptTestCase:
     timeout_seconds: int = 30
 
 
-class ExamplePromptsTestData:
+class TestExamplePromptsData:
     """Test data for all 9 example prompts."""
     
     @staticmethod

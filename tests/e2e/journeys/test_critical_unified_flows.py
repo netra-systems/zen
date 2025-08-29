@@ -33,7 +33,7 @@ class TestUser:
     user_id: Optional[str] = None
     jwt_token: Optional[str] = None
     
-class UnifiedE2ETestHarness:
+class TestUnifiedE2EHarness:
     """Manages real service connections for unified testing"""
     
     def __init__(self):

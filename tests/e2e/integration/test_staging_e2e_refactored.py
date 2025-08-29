@@ -48,7 +48,7 @@ from tests.e2e.test_environment_config import (
 )
 
 
-class StagingE2ETestSuite:
+class TestStagingE2ESuite:
     """Refactored staging E2E test suite with modular architecture."""
     
     def __init__(self):

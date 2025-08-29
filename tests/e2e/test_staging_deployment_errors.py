@@ -11,7 +11,6 @@ import pytest
 import os
 import re
 import sys
-from unittest.mock import Mock, patch, AsyncMock
 from pathlib import Path
 
 # Setup test path
@@ -92,7 +91,7 @@ class TestStagingDeploymentErrors:
         """
         # Mock the auth service database manager
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = Mock()
+        mock_manager = None  # TODO: Use real service instead of Mock
         
         # Test various URL formats
         test_cases = [

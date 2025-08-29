@@ -32,7 +32,7 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
-class BackupRecoveryTester:
+class TestBackupRecoveryer:
     """Tests backup and recovery pipeline functionality."""
     
     def __init__(self):

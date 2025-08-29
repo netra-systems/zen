@@ -16,7 +16,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -151,7 +150,7 @@ class HeartbeatTracker:
         }
 
 
-class HeartbeatTestClient:
+class TestHeartbeatClient:
     """WebSocket client with configurable heartbeat response behavior."""
     
     def __init__(self, uri: str, session_token: str, tracker: HeartbeatTracker, 
@@ -171,7 +170,7 @@ class HeartbeatTestClient:
         try:
             # Mock connection for testing
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = AsyncMock()
+            self.websocket = AsyncNone  # TODO: Use real service instead of Mock
             self.is_connected = True
             
             # Start ping handling if configured to respond

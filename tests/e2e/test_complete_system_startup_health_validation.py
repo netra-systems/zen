@@ -132,7 +132,7 @@ class SystemHealthMetrics:
 
 
 @dataclass
-class SystemTestConfig:
+class TestSystemConfig:
     """Configuration for comprehensive system testing."""
     timeout_seconds: int = 60
     enable_websocket_tests: bool = True
@@ -152,7 +152,7 @@ class SystemTestConfig:
     log_level: str = "INFO"
 
 
-class ComprehensiveSystemTester:
+class TestComprehensiveSystemer:
     """Comprehensive end-to-end system tester with full validation."""
     
     def __init__(self, config: SystemTestConfig):
@@ -816,6 +816,7 @@ class TestCompleteSystemStartupHealthValidation:
             enable_secrets_loading=False
         )
     
+    @pytest.mark.startup
     async def test_comprehensive_system_startup_and_health(self, system_config):
         """Test comprehensive system startup and health validation."""
         logger.info("=== COMPREHENSIVE SYSTEM STARTUP AND HEALTH TEST ===")

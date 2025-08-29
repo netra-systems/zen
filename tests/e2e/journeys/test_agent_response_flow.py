@@ -21,7 +21,6 @@ import asyncio
 import pytest
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.agents.base_agent import BaseSubAgent
@@ -53,7 +52,7 @@ class TestResponseAgent(BaseSubAgent):
         self.state = SubAgentLifecycle.COMPLETED
 
 
-class AgentResponseFlowTester:
+class TestAgentResponseFlower:
     """Tests complete agent response generation flow."""
     
     def __init__(self, use_mock_llm: bool = True):

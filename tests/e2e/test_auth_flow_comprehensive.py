@@ -79,7 +79,7 @@ TEST_HEADERS = {
     "Cache-Control": "no-cache",
 }
 
-class AuthFlowTester:
+class TestAuthFlower:
     """Comprehensive authentication flow testing class"""
     
     def __init__(self):
@@ -189,6 +189,7 @@ class TestDevLoginFlow:
         not os.environ.get("USE_REAL_SERVICES", "").lower() == "true", 
         reason="Test requires real auth service - set USE_REAL_SERVICES=true"
     )
+    @pytest.mark.auth
     async def test_dev_login_cors_preflight(self, auth_tester):
         """Test CORS preflight for dev login - Expected to fail with CORS errors"""
         

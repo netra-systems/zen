@@ -12,7 +12,6 @@ import gc
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, patch
 
 import asyncpg
 import httpx
@@ -40,7 +39,7 @@ from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetri
 logger = central_logger.get_logger(__name__)
 
 
-class PoolExhaustionTestHarness:
+class TestPoolExhaustionHarness:
     """Test harness for database connection pool exhaustion scenarios."""
     
     def __init__(self):

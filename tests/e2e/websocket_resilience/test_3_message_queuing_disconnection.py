@@ -16,7 +16,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -42,7 +41,7 @@ class MessageQueueState(Enum):
 
 
 @dataclass
-class QueueTestMessage:
+class TestQueueMessage:
     """Test message with metadata for queue validation"""
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     content: str = ""
@@ -198,7 +197,7 @@ class MockMessageQueueManager:
             return MessageQueueState.OVERFLOWING
 
 
-class WebSocketQueueTestClient:
+class TestWebSocketQueueClient:
     """WebSocket test client with queue-aware functionality"""
     
     def __init__(self, uri: str, user_id: str, queue_manager: MockMessageQueueManager):
@@ -214,7 +213,7 @@ class WebSocketQueueTestClient:
         try:
             # Mock WebSocket connection for testing
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = AsyncMock()
+            self.websocket = AsyncNone  # TODO: Use real service instead of Mock
             self.is_connected = True
             
             # Notify queue manager of connection and receive delivered messages

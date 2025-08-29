@@ -73,6 +73,16 @@ class Test3TierPersistenceIntegration:
 
     async def _ensure_database_connections(self):
         """Ensure all database connections are available."""
+        # Import dev_launcher environment to override test framework defaults
+        from dev_launcher.isolated_environment import get_env
+        
+        # Override TEST_DISABLE_REDIS for this persistence test (we need real Redis)
+        env = get_env()
+        env.set("TEST_DISABLE_REDIS", "false", "3tier_persistence_test")
+        
+        # Reinitialize Redis configuration to pick up test environment changes
+        redis_manager.reinitialize_configuration()
+        
         # Verify Redis connection
         redis_client = await redis_manager.get_client()
         assert redis_client is not None, "Redis connection required for persistence tests"

@@ -33,7 +33,6 @@ import asyncio
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -47,7 +46,7 @@ from test_framework.http_client import ClientConfig
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
-class TokenExpiryReconnectionTester:
+class TestTokenExpiryReconnectioner:
     """Core tester for WebSocket token expiry and automatic reconnection."""
     
     def __init__(self):

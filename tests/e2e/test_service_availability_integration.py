@@ -7,7 +7,6 @@ in E2E tests to properly handle real vs. mock services.
 import pytest
 import asyncio
 import os
-from unittest.mock import patch
 
 from tests.e2e.service_availability import get_service_availability, ServiceAvailabilityChecker
 from tests.e2e.real_service_config import get_real_service_config, ServiceConfigHelper

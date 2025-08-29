@@ -28,7 +28,6 @@ import sys
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 import requests
@@ -53,7 +52,7 @@ class TestProcessSupervisionGaps(unittest.TestCase):
         backend/auth/frontend processes should continue running independently.
         """
         # Mock launcher process and child processes
-        mock_launcher = Mock()
+        mock_launcher = None  # TODO: Use real service instead of Mock
         mock_backend = Mock(pid=1001)
         mock_auth = Mock(pid=1002) 
         mock_frontend = Mock(pid=1003)
@@ -83,7 +82,7 @@ class TestProcessSupervisionGaps(unittest.TestCase):
         """
         # Mock process spawning
         with patch('subprocess.Popen') as mock_popen:
-            mock_process = Mock()
+            mock_process = None  # TODO: Use real service instead of Mock
             mock_popen.return_value = mock_process
             
             # Simulate launcher starting a backend process
@@ -273,7 +272,7 @@ class TestErrorDiagnosticsGaps(unittest.TestCase):
         mock_process = Mock(pid=1001, returncode=1)
         
         with patch('psutil.Process') as mock_psutil:
-            mock_proc = Mock()
+            mock_proc = None  # TODO: Use real service instead of Mock
             mock_proc.memory_info.return_value = Mock(rss=100*1024*1024)  # 100MB
             mock_proc.num_fds.return_value = 50
             mock_proc.connections.return_value = []

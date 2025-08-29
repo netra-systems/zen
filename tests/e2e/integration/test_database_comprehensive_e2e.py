@@ -31,7 +31,7 @@ from tests.e2e.database_test_operations import DatabaseOperations
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete as TestHarness
 
 
-class DatabaseE2ETester:
+class TestDatabaseE2Eer:
     """Helper class for database E2E testing."""
     
     def __init__(self):

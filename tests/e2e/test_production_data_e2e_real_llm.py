@@ -28,7 +28,6 @@ import random
 import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
@@ -624,7 +623,7 @@ Format your response professionally for enterprise decision-makers."""
             assert result["avg_request_time"] <= 8.0, f"Enterprise request time too slow: {result['avg_request_time']:.2f}s"
 
 
-class ProductionTestExecutor:
+class TestProductionExecutor:
     """Executes production test scenarios."""
     
     def __init__(self, test_core: AgentConversationTestCore, monitor: 'ProductionPerformanceMonitor'):

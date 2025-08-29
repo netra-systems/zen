@@ -27,6 +27,7 @@ from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 class TestWebSocketStability:
     """Test WebSocket connection stability during message bursts."""
     
+    @pytest.mark.websocket
     async def test_connection_stability_during_burst(self, user_token, message_validator, test_config):
         """Test that WebSocket connection remains stable during rapid messages."""
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -55,6 +56,7 @@ class TestWebSocketStability:
         finally:
             await sender.disconnect()
     
+    @pytest.mark.websocket
     async def test_concurrent_connection_stability(self, user_token, message_validator, test_config):
         """Test stability with multiple concurrent connections."""
         user_base = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -88,6 +90,7 @@ class TestWebSocketStability:
             for sender in senders:
                 await sender.disconnect()
     
+    @pytest.mark.websocket
     async def test_error_handling_during_bursts(self, user_token, message_validator, test_config):
         """Test error handling doesn't destabilize connection."""
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -121,6 +124,7 @@ class TestWebSocketStability:
         finally:
             await sender.disconnect()
     
+    @pytest.mark.websocket
     async def test_prolonged_burst_endurance(self, user_token, message_validator, test_config):
         """Test connection endurance during prolonged message activity."""
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"

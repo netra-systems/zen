@@ -18,7 +18,6 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -48,7 +47,7 @@ class ServiceFailureType(Enum):
 
 
 @dataclass 
-class FallbackTestResult:
+class TestFallbackResult:
     """Result of fallback mechanism test"""
     service_name: str
     failure_type: ServiceFailureType
@@ -258,7 +257,7 @@ class TestDegradedModeActivation:
         
         policy = DegradationPolicy(tier=ServiceTier.OPTIONAL, max_degradation=DegradationLevel.EMERGENCY)
         # Mock: Generic component isolation for controlled unit testing
-        mock_strategy = AsyncMock()
+        mock_strategy = AsyncNone  # TODO: Use real service instead of Mock
         degradation_manager.register_service("test_service", mock_strategy, policy)
         
         await degradation_manager.degrade_service("test_service", DegradationLevel.REDUCED)
@@ -271,7 +270,7 @@ class TestDegradedModeActivation:
         
         policy = DegradationPolicy(tier=ServiceTier.STANDARD, max_degradation=DegradationLevel.MINIMAL)
         # Mock: Generic component isolation for controlled unit testing
-        mock_strategy = AsyncMock()
+        mock_strategy = AsyncNone  # TODO: Use real service instead of Mock
         mock_strategy.can_restore_service.return_value = True
         degradation_manager.register_service("recovery_service", mock_strategy, policy)
         

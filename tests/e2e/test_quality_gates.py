@@ -10,7 +10,6 @@ Business Value Justification (BVJ):
 import os
 from datetime import UTC, datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -194,7 +193,7 @@ class TestQualityThresholds:
         """Create quality service with feedback capabilities"""
         service = create_quality_service()
         # Mock: Generic component isolation for controlled unit testing
-        service.feedback_processor = Mock()
+        service.feedback_processor = None  # TODO: Use real service instead of Mock
         return service
 
     @pytest.mark.asyncio

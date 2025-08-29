@@ -15,7 +15,6 @@ prevents connection failures during deployment changes and multi-environment sup
 import asyncio
 import json
 from typing import Any, Dict, Optional
-from unittest.mock import patch
 
 import pytest
 

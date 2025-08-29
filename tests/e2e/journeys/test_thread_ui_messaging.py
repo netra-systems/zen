@@ -12,7 +12,6 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -141,7 +140,7 @@ class ThreadMessagingExecutor:
         """Create thread and update UI state."""
         thread_id = f"thread_{self.user_id}_{int(time.time())}_{len(self.created_threads)}"
         # Mock: Generic component isolation for controlled unit testing
-        mock_thread = MagicMock()
+        mock_thread = MagicNone  # TODO: Use real service instead of Mock
         mock_thread.id = thread_id
         mock_thread.created_at = datetime.now(timezone.utc)
         
@@ -186,7 +185,7 @@ class ThreadMessagingExecutor:
         
         # Mock message creation
         # Mock: Generic component isolation for controlled unit testing
-        mock_message = MagicMock()
+        mock_message = MagicNone  # TODO: Use real service instead of Mock
         mock_message.id = f"msg_{int(time.time() * 1000)}_{len(self.ui_manager.message_events)}"
         mock_message.created_at = datetime.now(timezone.utc)
         

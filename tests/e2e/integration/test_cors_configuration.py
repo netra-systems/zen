@@ -38,7 +38,7 @@ os.environ["ENVIRONMENT"] = "development"
 
 
 @dataclass
-class CORSTestConfig:
+class TestCORSConfig:
     """CORS test configuration for various environments."""
     backend_url: str = "http://localhost:8000"
     auth_url: str = "http://localhost:8081"

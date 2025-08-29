@@ -16,7 +16,6 @@ import asyncio
 import os
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -57,11 +56,11 @@ class TestQualityGateResponseValidation:
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_mock = AsyncMock(spec=RedisManager)
         # Mock: Redis caching isolation to prevent test interference and external dependencies
-        redis_mock.set = AsyncMock()
+        redis_mock.set = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.get = AsyncMock(return_value=None)
         # Mock: Redis caching isolation to prevent test interference and external dependencies
-        redis_mock.delete = AsyncMock()
+        redis_mock.delete = AsyncNone  # TODO: Use real service instead of Mock
         return redis_mock
 
     @pytest.fixture

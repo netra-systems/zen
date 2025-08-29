@@ -27,7 +27,7 @@ from test_framework.http_client import ClientConfig, ConnectionState
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
-class AuthWebSocketTester:
+class TestAuthWebSocketer:
     """Simple auth WebSocket tester for integration testing."""
     
     def __init__(self):

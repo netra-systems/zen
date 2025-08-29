@@ -42,7 +42,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set, Union
-from unittest.mock import AsyncMock, patch
 from urllib.parse import urljoin
 
 import httpx
@@ -129,7 +128,7 @@ class ServiceCommunicationMetrics:
 
 
 @dataclass
-class ServiceTestConfig:
+class TestServiceConfig:
     """Configuration for inter-service communication testing."""
     # Services to test
     test_auth_service: bool = True
@@ -160,7 +159,7 @@ class ServiceTestConfig:
     enable_detailed_logging: bool = True
 
 
-class InterServiceCommunicationTester:
+class TestInterServiceCommunicationer:
     """Comprehensive inter-service communication and dependency tester."""
     
     def __init__(self, config: ServiceTestConfig):

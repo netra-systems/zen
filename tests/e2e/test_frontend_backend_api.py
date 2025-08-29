@@ -17,7 +17,6 @@ import json
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch
 
 import aiohttp
 import pytest
@@ -56,7 +55,7 @@ class RetryConfig:
     timeout: float = 30.0
 
 
-class FrontendBackendAPITester:
+class TestFrontendBackendAPIer:
     """
     Comprehensive Frontend-Backend API communication tester.
     Tests real HTTP communication with authentication, CORS, error handling, and retries.

@@ -12,7 +12,6 @@ import json
 import time
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
 
 import pytest
 
@@ -26,7 +25,7 @@ from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from tests.e2e.test_environment_config import TestEnvironmentType
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
-class StagingWebSocketTester:
+class TestStagingWebSocketer:
     # """Staging WebSocket test coordinator with comprehensive validation."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):

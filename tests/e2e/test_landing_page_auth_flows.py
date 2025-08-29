@@ -6,7 +6,6 @@ Tests OAuth, JWT validation, and complete user journey from landing to dashboard
 import asyncio
 import json
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta, timezone
 import jwt
 import os
@@ -20,58 +19,58 @@ class TestLandingPageAuthFlows:
     async def auth_service(self):
         """Create mock auth service instance for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        service = Mock()
+        service = None  # TODO: Use real service instead of Mock
         # Mock: OAuth external provider isolation for network-independent testing
         service.get_google_oauth_url = Mock(return_value="https://accounts.google.com/o/oauth2/v2/auth?client_id=test&redirect_uri=test&response_type=code")
         # Mock: Generic component isolation for controlled unit testing
-        service.exchange_code_for_token = AsyncMock()
+        service.exchange_code_for_token = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.handle_oauth_callback = AsyncMock()
+        service.handle_oauth_callback = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.create_jwt_token = Mock()
+        service.create_jwt_token = None  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.validate_jwt_token = Mock()
+        service.validate_jwt_token = None  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.check_authentication = AsyncMock()
+        service.check_authentication = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Session isolation for controlled testing without external state
-        service.validate_session_token = AsyncMock()
+        service.validate_session_token = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.get_oauth_url = Mock()
+        service.get_oauth_url = None  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.create_refresh_token = Mock()
+        service.create_refresh_token = None  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.refresh_access_token = Mock()
+        service.refresh_access_token = None  # TODO: Use real service instead of Mock
         # Mock: Session isolation for controlled testing without external state
-        service.create_session = AsyncMock()
+        service.create_session = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.handle_new_user_oauth = AsyncMock()
+        service.handle_new_user_oauth = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.authenticate_user = AsyncMock()
+        service.authenticate_user = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.validate_jwt_token_safe = Mock()
+        service.validate_jwt_token_safe = None  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.create_jwt_token_async = AsyncMock()
+        service.create_jwt_token_async = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Session isolation for controlled testing without external state
-        service.validate_session_with_context = AsyncMock()
+        service.validate_session_with_context = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.get_user_by_email_safe = AsyncMock()
+        service.get_user_by_email_safe = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.get_user_by_email = AsyncMock()
+        service.get_user_by_email = AsyncNone  # TODO: Use real service instead of Mock
         return service
     
     @pytest.fixture
     async def user_service(self):
         """Create mock user service instance for testing."""
         # Mock: Generic component isolation for controlled unit testing
-        service = Mock()
+        service = None  # TODO: Use real service instead of Mock
         # Mock: Session isolation for controlled testing without external state
-        service.create_user_session = AsyncMock()
+        service.create_user_session = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.logout_user = AsyncMock()
+        service.logout_user = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.get_user_by_email = AsyncMock()
+        service.get_user_by_email = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        service.create_user = AsyncMock()
+        service.create_user = AsyncNone  # TODO: Use real service instead of Mock
         return service
     
     @pytest.fixture

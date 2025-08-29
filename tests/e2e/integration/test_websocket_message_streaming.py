@@ -17,7 +17,6 @@ from netra_backend.app.schemas.websocket_models import BroadcastResult, WebSocke
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 import asyncio
 import json
 import pytest
@@ -30,7 +29,7 @@ from netra_backend.app.websocket_core.manager import (
 
 # Note: ResponseStreamingVerifier import removed - not needed for this test
 
-class WebSocketStreamingTester:
+class TestWebSocketStreaminger:
     """Tests WebSocket message streaming integration."""
     
     def __init__(self):
@@ -45,9 +44,9 @@ class WebSocketStreamingTester:
         # Mock: Service component isolation for predictable testing behavior
         mock_connection_manager = MagicMock(spec=ConnectionManager)
         # Mock: Generic component isolation for controlled unit testing
-        mock_connection_manager.add_connection = AsyncMock()
+        mock_connection_manager.add_connection = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        mock_connection_manager.remove_connection = AsyncMock()
+        mock_connection_manager.remove_connection = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Async component isolation for testing without real async operations
         mock_connection_manager.get_user_connections = AsyncMock(return_value=[])
         
@@ -104,7 +103,7 @@ class WebSocketStreamingTester:
         # Simulate connection creation
         connection_info = ConnectionInfo(
             # Mock: Generic component isolation for controlled unit testing
-            websocket=MagicMock(),
+            websocket=MagicNone  # TODO: Use real service instead of Mock,
             user_id=user_id,
             connection_time=time.time()
         )

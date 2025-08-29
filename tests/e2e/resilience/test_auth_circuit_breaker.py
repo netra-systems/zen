@@ -25,7 +25,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
@@ -53,7 +52,7 @@ CIRCUIT_RECOVERY_TIMEOUT = 60
 CACHE_TTL_SECONDS = 300
 
 
-class AuthCircuitBreakerTester:
+class TestAuthCircuitBreakerer:
     """Comprehensive auth circuit breaker test orchestrator."""
     
     def __init__(self):

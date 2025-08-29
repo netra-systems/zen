@@ -13,7 +13,6 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -38,13 +37,12 @@ class TestAgentContextIsolation:
         config = get_config()
         llm_manager = LLMManager(config)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = AsyncMock()
+        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
         
-        from unittest.mock import MagicMock, AsyncMock
-        
+                
         # Create required dependencies
-        db_session = AsyncMock()
-        tool_dispatcher = MagicMock()
+        db_session = AsyncNone  # TODO: Use real service instead of Mock
+        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager

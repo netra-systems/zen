@@ -41,7 +41,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-class AgentPipelineExecutionTester:
+class TestAgentPipelineExecutioner:
     """Comprehensive agent pipeline execution tester with real services."""
     
     def __init__(self, real_services):
@@ -243,7 +243,7 @@ class AgentPipelineExecutionTester:
             }
 
 
-class AgentPipelinePerformanceTester:
+class TestAgentPipelinePerformanceer:
     """Tests agent pipeline performance characteristics."""
     
     def __init__(self, pipeline_tester: AgentPipelineExecutionTester):

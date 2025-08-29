@@ -26,7 +26,6 @@ import time
 from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 from typing import Any, Dict, Optional
-from unittest.mock import patch, MagicMock
 
 import pytest
 import psycopg2
@@ -276,6 +275,7 @@ def limit_resource(resource_type: str, limit: int):
     not os.environ.get("USE_REAL_SERVICES", "").lower() == "true", 
     reason="Test requires real PostgreSQL service - set USE_REAL_SERVICES=true"
 )
+@pytest.mark.startup
 async def test_missing_postgresql_tables_on_first_boot(test_env):
     """Test 1: Application should handle missing database tables gracefully"""
     # Drop all tables to simulate fresh installation
@@ -369,6 +369,7 @@ async def test_connection_pool_exhaustion_during_startup(test_env):
     not os.environ.get("USE_REAL_SERVICES", "").lower() == "true", 
     reason="Test requires real database services - set USE_REAL_SERVICES=true"
 )
+@pytest.mark.startup
 async def test_schema_version_mismatch_between_services(test_env):
     """Test 3: Detect and handle schema version mismatches"""
     # Set different schema versions for different services

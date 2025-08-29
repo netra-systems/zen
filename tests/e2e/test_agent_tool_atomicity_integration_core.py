@@ -36,7 +36,7 @@ class ToolAtomicityLevel(Enum):
 
 
 @dataclass
-class ToolTestResult:
+class TestToolResult:
     """Result of tool atomicity testing."""
     tool_name: str
     atomicity_level: ToolAtomicityLevel
@@ -52,7 +52,7 @@ class ToolTestResult:
                 self.error_count == 0)
 
 
-class ToolAtomicityTester:
+class TestToolAtomicityer:
     """Tester for agent tool atomicity."""
 
     def __init__(self):

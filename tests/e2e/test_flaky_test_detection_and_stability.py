@@ -133,7 +133,7 @@ class FlakinessAnalysis:
         return min(100.0, max(0.0, base_score))
 
 
-class FlakyTestDetector:
+class TestFlakyDetector:
     """Advanced flaky test detection and analysis system."""
     
     def __init__(self):

@@ -29,6 +29,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 class TestUserFriendlyMessages:
     """Test user-friendly error message generation."""
     
+    @pytest.mark.resilience
     async def test_authentication_error_messages(self, service_orchestrator, real_websocket_client:
                                                 error_correlation_context):
         """Test user-friendly authentication error messages."""
@@ -50,6 +51,7 @@ class TestUserFriendlyMessages:
             assert "token" not in error_message or "invalid token" in error_message
             assert "500" not in error_message
             
+    @pytest.mark.resilience
     async def test_permission_error_messages(self, service_orchestrator, real_http_client:
                                            error_correlation_context):
         """Test user-friendly permission error messages."""
@@ -72,6 +74,7 @@ class TestUserFriendlyMessages:
             assert "contact administrator" in error_message or \
                    "insufficient privileges" in error_message
                    
+    @pytest.mark.resilience
     async def test_validation_error_messages(self, service_orchestrator, real_http_client:
                                            error_correlation_context):
         """Test user-friendly validation error messages."""
@@ -97,6 +100,7 @@ class TestUserFriendlyMessages:
             assert "regex" not in error_message
             assert "schema" not in error_message
             
+    @pytest.mark.resilience
     async def test_rate_limit_error_messages(self, service_orchestrator, real_http_client:
                                            error_correlation_context):
         """Test user-friendly rate limit error messages."""
@@ -127,6 +131,7 @@ class TestUserFriendlyMessages:
                 assert "try again" in error_message or \
                        "wait" in error_message
                        
+    @pytest.mark.resilience
     async def test_service_unavailable_messages(self, service_orchestrator, real_http_client:
                                               error_correlation_context):
         """Test user-friendly service unavailable messages."""
@@ -152,6 +157,7 @@ class TestUserFriendlyMessages:
         finally:
             await unavailable_client.close()
             
+    @pytest.mark.resilience
     async def test_timeout_error_messages(self, service_orchestrator, real_http_client:
                                         error_correlation_context):
         """Test user-friendly timeout error messages."""

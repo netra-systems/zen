@@ -67,7 +67,7 @@ E2E_TEST_CONFIG = {
 
 
 @dataclass
-class LoadTestResults:
+class TestLoadResults:
     """Results from load testing."""
     test_name: str
     start_time: float
@@ -234,6 +234,7 @@ async def unified_test_harness():
 
 
 @pytest.fixture
+@pytest.mark.performance
 async def test_user_token():
     """Test user authentication token"""
     return "mock-test-token-" + str(int(time.time()))

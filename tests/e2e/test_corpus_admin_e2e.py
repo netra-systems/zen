@@ -32,7 +32,6 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch, AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
@@ -1249,8 +1248,7 @@ class TestCorpusAdminE2E:
         
         # Reconnect and verify operation completed
         # Mock websocket client for now
-        from unittest.mock import AsyncMock
-        ws_client = AsyncMock()
+                ws_client = AsyncNone  # TODO: Use real service instead of Mock
         
         # Verify corpus was created despite network interruption
         corpus_id = response["corpus_id"]

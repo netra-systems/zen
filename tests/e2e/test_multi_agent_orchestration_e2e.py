@@ -26,7 +26,6 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -77,15 +76,15 @@ class MultiAgentOrchestrationSuite:
             self.websocket_manager = AsyncMock(spec=UnifiedWebSocketManager)
         
         # Configure WebSocket mock behavior
-        self.websocket_manager.send_message = AsyncMock()
-        self.websocket_manager.send_agent_update = AsyncMock()
-        self.websocket_manager.send_agent_log = AsyncMock()
-        self.websocket_manager.send_error = AsyncMock()
+        self.websocket_manager.send_message = AsyncNone  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_agent_update = AsyncNone  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_agent_log = AsyncNone  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_error = AsyncNone  # TODO: Use real service instead of Mock
     
     async def _initialize_agents(self) -> None:
         """Initialize all sub-agents with proper dependencies."""
-        mock_tool_dispatcher = AsyncMock()
-        mock_db_session = AsyncMock()
+        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instead of Mock
+        mock_db_session = AsyncNone  # TODO: Use real service instead of Mock
         
         self.agents = {
             'triage': TriageSubAgent(
@@ -126,8 +125,8 @@ class MultiAgentOrchestrationSuite:
     
     async def _initialize_supervisor(self) -> None:
         """Initialize supervisor agent with all sub-agents."""
-        mock_db_session = AsyncMock()
-        mock_tool_dispatcher = AsyncMock()
+        mock_db_session = AsyncNone  # TODO: Use real service instead of Mock
+        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instead of Mock
         
         self.supervisor = SupervisorAgent(
             db_session=mock_db_session,

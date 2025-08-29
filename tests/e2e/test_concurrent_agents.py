@@ -17,7 +17,6 @@ import uuid
 from concurrent.futures import as_completed
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -43,7 +42,7 @@ class TestConcurrentAgentStartup:
         """Test 10 concurrent user sessions with complete isolation"""
         # Setup mock execute method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
-        mock_supervisor_agent.execute = AsyncMock()
+        mock_supervisor_agent.execute = AsyncNone  # TODO: Use real service instead of Mock
         
         concurrent_sessions = 10
         session_results = await self._execute_concurrent_sessions(
@@ -154,7 +153,7 @@ class TestAgentStateIsolation:
         """Test no state contamination between concurrent users"""
         # Setup mock execute method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
-        mock_supervisor_agent.execute = AsyncMock()
+        mock_supervisor_agent.execute = AsyncNone  # TODO: Use real service instead of Mock
         
         user_states = await self._create_distinct_user_states()
         contamination_results = await self._test_state_contamination(user_states, mock_supervisor_agent)
@@ -223,7 +222,7 @@ class TestConcurrentMessageRouting:
         """Test messages route correctly under concurrent load"""
         # Setup mock route_request method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
-        mock_supervisor_agent.route_request = AsyncMock()
+        mock_supervisor_agent.route_request = AsyncNone  # TODO: Use real service instead of Mock
         
         routing_scenarios = await self._create_routing_scenarios()
         routing_results = await self._execute_concurrent_routing(routing_scenarios, mock_supervisor_agent)
@@ -286,7 +285,7 @@ class TestPerformanceUnderConcurrentLoad:
         """Test system performance under concurrent agent load"""
         # Setup mock execute method properly before test
         # Mock: Agent service isolation for testing without LLM agent execution
-        mock_supervisor_agent.execute = AsyncMock()
+        mock_supervisor_agent.execute = AsyncNone  # TODO: Use real service instead of Mock
         
         load_scenarios = self._create_load_test_scenarios()
         performance_results = await self._execute_load_tests(load_scenarios, mock_supervisor_agent)

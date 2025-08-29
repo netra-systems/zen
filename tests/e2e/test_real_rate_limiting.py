@@ -35,7 +35,7 @@ from tests.e2e.rate_limiting_advanced import (
 )
 
 
-class RedisRateLimitTester:
+class TestRedisRateLimiter:
     """Tests real Redis-backed rate limiting."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):

@@ -46,7 +46,7 @@ from tests.e2e.service_manager import ServiceManager
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
-class RealOAuthFlowTester:
+class TestRealOAuthFlower:
     """Executes real OAuth Google flow with provider simulation."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -164,14 +164,14 @@ class RealOAuthFlowTester:
             
             async def mock_google_token_exchange(*args, **kwargs):
                 # Mock: Generic component isolation for controlled unit testing
-                mock_response = unittest.mock.MagicMock()
+                mock_response = unittest.mock.MagicNone  # TODO: Use real service instead of Mock
                 mock_response.status_code = 200
                 mock_response.json.return_value = google_token_response
                 return mock_response
             
             async def mock_google_user_info(*args, **kwargs):
                 # Mock: Generic component isolation for controlled unit testing
-                mock_response = unittest.mock.MagicMock()
+                mock_response = unittest.mock.MagicNone  # TODO: Use real service instead of Mock
                 mock_response.status_code = 200
                 mock_response.json.return_value = google_user_info
                 return mock_response
@@ -315,7 +315,7 @@ class RealOAuthFlowTester:
             return {"success": False, "error": str(e), "websocket_connected": False}
 
 
-class OAuthE2ETestManager:
+class TestOAuthE2EManager:
     """Manages OAuth E2E test execution and cleanup."""
     
     def __init__(self):

@@ -287,7 +287,7 @@ class MessageOrderingValidator:
         return contamination
 
 
-class BurstMessageTester:
+class TestBurstMessageer:
     """Tests burst messaging: 1000 messages in 1 second."""
     
     def __init__(self, manager: ConcurrentWebSocketManager):

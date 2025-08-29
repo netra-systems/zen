@@ -24,7 +24,7 @@ from tests.e2e.onboarding_flow_executor import OnboardingFlowExecutor
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
-class OnboardingTestManager:
+class TestOnboardingManager:
     """Manager for complete onboarding E2E test execution."""
     
     def __init__(self):

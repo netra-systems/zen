@@ -5,7 +5,6 @@ Business Value: Validates end-to-end AI optimization value creation.
 """
 
 import asyncio
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -37,12 +36,12 @@ class TestSupervisorE2EWithRealLLM:
         """Mock dependencies for supervisor."""
         return {
             # Mock: Session isolation for controlled testing without external state
-            "db_session": AsyncMock(),
+            "db_session": AsyncNone  # TODO: Use real service instead of Mock,
             "llm_manager": llm_manager,
             # Mock: WebSocket connection isolation for testing without network overhead
-            "websocket_manager": AsyncMock(),
+            "websocket_manager": AsyncNone  # TODO: Use real service instead of Mock,
             # Mock: Tool execution isolation for predictable agent testing
-            "tool_dispatcher": Mock()
+            "tool_dispatcher": None  # TODO: Use real service instead of Mock
         }
     
     @pytest.fixture

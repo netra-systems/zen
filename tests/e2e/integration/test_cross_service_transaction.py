@@ -94,7 +94,7 @@ except ImportError:
         async def rollback_operation(self, operation): return True
 
 
-class CrossServiceTransactionTester:
+class TestCrossServiceTransactioner:
     """E2E tester for atomic cross-service transactions."""
     
     def __init__(self):

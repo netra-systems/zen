@@ -6,7 +6,6 @@ import pytest
 import json
 import time
 import httpx
-from unittest.mock import patch, AsyncMock
 from datetime import datetime, timedelta
 import logging
 
@@ -18,6 +17,7 @@ logger = logging.getLogger(__name__)
 class TestAuthRefreshFlow:
     """Test suite for auth token refresh flow end-to-end"""
     
+    @pytest.mark.auth
     async def test_refresh_token_success(self, auth_test_client):
         """Test successful token refresh flow"""
         # Step 1: Login to get initial tokens
@@ -57,6 +57,7 @@ class TestAuthRefreshFlow:
         )
         assert verify_response.status_code == 200
         
+    @pytest.mark.auth
     async def test_refresh_token_missing_body(self, auth_test_client):
         """Test refresh endpoint with missing request body"""
         # Call refresh without body
@@ -68,6 +69,7 @@ class TestAuthRefreshFlow:
         error_data = refresh_response.json()
         assert "refresh_token field is required" in str(error_data)
         
+    @pytest.mark.auth
     async def test_refresh_token_invalid(self, auth_test_client):
         """Test refresh with invalid token"""
         refresh_response = await auth_test_client.post(
@@ -76,6 +78,7 @@ class TestAuthRefreshFlow:
         )
         assert refresh_response.status_code == 401
         
+    @pytest.mark.auth
     async def test_refresh_token_expired(self, auth_test_client, mock_time):
         """Test refresh with expired token"""
         # Get valid tokens first
@@ -95,6 +98,7 @@ class TestAuthRefreshFlow:
         )
         assert refresh_response.status_code == 401
         
+    @pytest.mark.auth
     async def test_refresh_token_race_condition(self, auth_test_client):
         """Test refresh token race condition protection"""
         # Get valid tokens
@@ -125,6 +129,7 @@ class TestAuthRefreshFlow:
         success_count = sum(1 for r in results if not isinstance(r, Exception) and r.status_code == 200)
         assert success_count == 1, "Only one refresh should succeed with the same token"
         
+    @pytest.mark.auth
     async def test_refresh_token_with_different_field_names(self, auth_test_client):
         """Test refresh endpoint accepts different field name formats"""
         # Get valid tokens
@@ -152,6 +157,7 @@ class TestAuthRefreshFlow:
         )
         assert refresh_response2.status_code == 200
         
+    @pytest.mark.auth
     async def test_refresh_clears_blacklisted_token(self, auth_test_client):
         """Test that refresh properly handles blacklisted tokens"""
         # Get valid tokens
@@ -177,6 +183,7 @@ class TestAuthRefreshFlow:
         )
         assert refresh_response.status_code == 401
         
+    @pytest.mark.auth
     async def test_full_frontend_backend_refresh_flow(self, auth_test_client, frontend_test_client):
         """Test complete refresh flow from frontend through to backend"""
         # This would require a frontend test client setup
@@ -211,6 +218,7 @@ class TestAuthRefreshFlow:
 class TestAuthServiceIntegration:
     """Integration tests for auth service refresh functionality"""
     
+    @pytest.mark.auth
     async def test_refresh_token_validation(self, auth_service):
         """Test auth service refresh token validation"""
         from auth_service.auth_core.services.auth_service import AuthService
@@ -230,6 +238,7 @@ class TestAuthServiceIntegration:
         assert access_token is not None
         assert new_refresh is not None
         
+    @pytest.mark.auth
     async def test_refresh_token_expiry_check(self, auth_service):
         """Test refresh token expiry validation"""
         from auth_service.auth_core.core.jwt_handler import JWTHandler
@@ -260,6 +269,7 @@ class TestAuthServiceIntegration:
 class TestFrontendAuthRefresh:
     """Frontend-specific auth refresh tests"""
     
+    @pytest.mark.auth
     async def test_frontend_stores_refresh_token(self):
         """Test that frontend properly stores refresh token from OAuth callback"""
         # Simulate OAuth callback with tokens
@@ -274,6 +284,7 @@ class TestFrontendAuthRefresh:
             mock_set.assert_any_call('jwt_token', mock_params["token"])
             mock_set.assert_any_call('refresh_token', mock_params["refresh"])
             
+    @pytest.mark.auth
     async def test_frontend_sends_refresh_token_in_body(self):
         """Test that frontend sends refresh token in request body"""
         with patch('fetch') as mock_fetch:
@@ -290,6 +301,7 @@ class TestFrontendAuthRefresh:
                 body = json.loads(call_args[1].get('body', '{}'))
                 assert 'refresh_token' in body
                 
+    @pytest.mark.auth
     async def test_frontend_handles_missing_refresh_token(self):
         """Test frontend behavior when refresh token is missing"""
         with patch('localStorage.getItem') as mock_get:
@@ -301,6 +313,7 @@ class TestFrontendAuthRefresh:
             with pytest.raises(Exception, match="No refresh token available"):
                 await authServiceClient.refreshToken()
                 
+    @pytest.mark.auth
     async def test_frontend_clears_tokens_on_refresh_failure(self):
         """Test that frontend clears tokens when refresh fails"""
         with patch('localStorage.removeItem') as mock_remove:
@@ -334,7 +347,7 @@ def mock_time():
         def advance(self, delta):
             self.current_time += delta
             
-    return TimeMock()
+    return TimeNone  # TODO: Use real service instead of Mock
 
 
 if __name__ == "__main__":

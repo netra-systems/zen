@@ -19,6 +19,21 @@ class RedisManager:
         self.test_locks: Dict[str, str] = {}  # For test mode leader locks
         self._redis_builder = self._create_redis_builder()
 
+    def reinitialize_configuration(self):
+        """Reinitialize Redis configuration for environment changes (test support)."""
+        # Clear existing client connection
+        if self.redis_client:
+            # Don't await here since this is not async - client will be recreated on next use
+            self.redis_client = None
+        
+        # Recreate configuration builder with current environment
+        self._redis_builder = self._create_redis_builder()
+        
+        # Re-check if Redis should be enabled
+        self.enabled = self._check_if_enabled()
+        
+        logger.debug("Redis configuration reinitialized for environment changes")
+
     def _is_redis_disabled_by_flag(self) -> bool:
         """Check if Redis is disabled by operational flag."""
         config = get_unified_config()
@@ -190,6 +205,14 @@ class RedisManager:
 
     async def get_client(self):
         """Get the Redis client instance. Returns None if not connected or disabled."""
+        # Try to connect if not connected yet and Redis is enabled
+        if self.redis_client is None and self.enabled:
+            try:
+                await self.connect()
+            except Exception as e:
+                logger.debug(f"Failed to connect to Redis: {e}")
+                return None
+        
         # Ensure we never return self, only the actual redis client or None
         if self.redis_client and hasattr(self.redis_client, 'get'):
             return self.redis_client

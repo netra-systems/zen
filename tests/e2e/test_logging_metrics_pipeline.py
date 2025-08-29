@@ -25,7 +25,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -33,7 +32,7 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 
-class LoggingMetricsTester:
+class TestLoggingMetricser:
     """Tests logging and metrics pipeline functionality."""
     
     def __init__(self):

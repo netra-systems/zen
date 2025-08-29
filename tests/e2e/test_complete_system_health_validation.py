@@ -39,6 +39,7 @@ class TestCompleteSystemHealthValidation:
         }
     
     @pytest.fixture
+    @pytest.mark.e2e
     async def test_user(self):
         """Create a test user for health validation."""
         return {
@@ -48,6 +49,7 @@ class TestCompleteSystemHealthValidation:
         }
     
     @env_requires()
+    @pytest.mark.e2e
     async def test_complete_system_startup_health(self, system_config):
         """Test that all system components start up and are healthy."""
         logger.info("Starting complete system health validation")
@@ -126,6 +128,7 @@ class TestCompleteSystemHealthValidation:
         logger.info(f"✓ Complete system health validation passed ({len(health_checks)} checks)")
     
     @env_requires()
+    @pytest.mark.e2e
     async def test_critical_endpoints_availability(self, system_config):
         """Test that critical API endpoints are available and responding correctly."""
         logger.info("Testing critical endpoints availability")
@@ -169,6 +172,7 @@ class TestCompleteSystemHealthValidation:
         logger.info(f"✓ All {len(critical_endpoints)} critical endpoints are available")
     
     @env_requires()
+    @pytest.mark.e2e
     async def test_system_configuration_consistency(self, system_config):
         """Test that system configuration is consistent across components."""
         logger.info("Testing system configuration consistency")
@@ -229,6 +233,7 @@ class TestCompleteSystemHealthValidation:
         logger.info(f"✓ Configuration consistency validated ({len(consistency_checks)} checks)")
     
     @env_requires()
+    @pytest.mark.e2e
     async def test_test_framework_integration(self):
         """Test that the test framework itself is working correctly."""
         logger.info("Testing test framework integration")
@@ -284,6 +289,7 @@ class TestCompleteSystemHealthValidation:
         logger.info(f"✓ Test framework integration validated ({len(framework_checks)} checks)")
     
     @env_requires()
+    @pytest.mark.e2e
     async def test_system_resource_availability(self):
         """Test that system resources are available and within reasonable limits."""
         logger.info("Testing system resource availability")
@@ -352,6 +358,7 @@ class TestCompleteSystemHealthValidation:
         logger.info(f"✓ Resource availability validated ({passed_checks}/{total_checks} checks passed)")
     
     @env_requires()
+    @pytest.mark.e2e
     async def test_component_integration_smoke(self):
         """Smoke test to ensure all major components can work together."""
         logger.info("Testing component integration smoke test")
@@ -406,6 +413,7 @@ class TestCompleteSystemHealthValidation:
         
         logger.info(f"✓ Component integration smoke test passed ({len(integration_results)} integrations)")
     
+    @pytest.mark.e2e
     def test_import_system_health(self):
         """Test that critical system imports work correctly (synchronous test)."""
         logger.info("Testing import system health")

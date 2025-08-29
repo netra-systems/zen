@@ -37,7 +37,7 @@ from netra_backend.app.core.network_constants import ServicePorts, URLConstants
 
 
 @dataclass
-class DevModeTestResult:
+class TestDevModeResult:
     """Result of a dev mode test"""
     test_name: str
     success: bool
@@ -46,7 +46,7 @@ class DevModeTestResult:
     details: Dict[str, Any] = None
 
 
-class DevModeTester:
+class TestDevModeer:
     """Comprehensive dev mode testing utility"""
     
     def __init__(self):

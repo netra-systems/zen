@@ -8,7 +8,6 @@ import os
 import time
 import uuid
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -52,7 +51,7 @@ class AuthAgentFlowHarness:
     async def setup_mock_agent(self):
         """Setup mock agent for testing."""
         # Mock: Agent service isolation for testing without LLM agent execution
-        self.mock_agent = MagicMock()
+        self.mock_agent = MagicNone  # TODO: Use real service instead of Mock
         self.mock_agent.name = "TestAgent"
 
 

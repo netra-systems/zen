@@ -29,7 +29,7 @@ from websocket import WebSocketApp
 pytestmark = pytest.mark.dev
 
 
-class WebSocketConnectionTest:
+class TestWebSocketConnection:
     """Test harness for WebSocket connection issues."""
     
     def setup_method(self):
@@ -70,6 +70,7 @@ class WebSocketConnectionTest:
         """Handle WebSocket open."""
         print("WebSocket connection opened")
         
+    @pytest.mark.websocket
     def test_basic_connection(self) -> Dict[str, Any]:
         """Test basic WebSocket connection without authentication."""
         print(f"\nTesting WebSocket connection to: {self.ws_url}")
@@ -118,6 +119,7 @@ class WebSocketConnectionTest:
             "ws_url": self.ws_url
         }
         
+    @pytest.mark.websocket
     def test_cors_headers(self) -> Dict[str, Any]:
         """Test WebSocket CORS configuration."""
         print("\nTesting WebSocket CORS headers...")
@@ -170,6 +172,7 @@ class WebSocketConnectionTest:
             "tested_cases": [desc for desc, _ in test_cases] if 'test_cases' in locals() else []
         }
         
+    @pytest.mark.websocket
     def test_backend_availability(self) -> Dict[str, Any]:
         """Check if backend services are running."""
         print("\nChecking backend service availability...")
@@ -220,6 +223,7 @@ class WebSocketConnectionTest:
 class TestWebSocketDevDockerConnection:
     """E2E test suite for WebSocket connection issues in dev docker."""
     
+    @pytest.mark.websocket
     def test_websocket_connection_failure(self):
         """
         Test that reproduces the WebSocket connection failure in dev docker.
@@ -297,6 +301,7 @@ class TestWebSocketDevDockerConnection:
 class TestWebSocketCORSValidation:
     """Specific tests for WebSocket CORS validation issues."""
     
+    @pytest.mark.websocket
     def test_localhost_origin_validation(self):
         """Test that localhost origins are properly validated in dev environment."""
         

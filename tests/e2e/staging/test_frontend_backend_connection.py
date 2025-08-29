@@ -15,7 +15,6 @@ import asyncio
 import aiohttp
 import requests
 from typing import Dict, List, Optional
-from unittest.mock import patch
 from test_framework.environment_markers import staging_only, env_requires
 
 
@@ -27,6 +26,7 @@ class TestFrontendBackendConnection:
         services=["backend_service", "frontend"],
         features=["api_proxy_configured"]
     )
+    @pytest.mark.e2e
     async def test_frontend_cannot_connect_to_backend_api_proxy_failure(self):
         """Test that reproduces the ECONNREFUSED error from frontend API proxy.
         
@@ -101,6 +101,7 @@ class TestFrontendBackendConnection:
 
     @staging_only  
     @env_requires(services=["frontend"])
+    @pytest.mark.e2e
     def test_frontend_proxy_configuration_mismatch(self):
         """Test frontend proxy configuration pointing to wrong backend URL.
         
@@ -147,6 +148,7 @@ class TestFrontendBackendConnection:
             )
 
     @staging_only
+    @pytest.mark.e2e
     async def test_backend_service_not_listening_on_expected_ports(self):
         """Test that backend service is not listening on the expected ports.
         
@@ -200,6 +202,7 @@ class TestFrontendBackendConnection:
 
     @staging_only
     @env_requires(services=["frontend"])
+    @pytest.mark.e2e
     def test_docker_container_network_isolation_issue(self):
         """Test Docker container network isolation causing connection failures.
         
@@ -271,6 +274,7 @@ class TestFrontendBackendConnection:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_next_js_api_rewrites_configuration_broken(self):
         """Test Next.js API rewrites configuration causing proxy failures.
         
@@ -342,6 +346,7 @@ class TestFrontendBackendConnection:
         )
 
     @staging_only
+    @pytest.mark.e2e
     async def test_multiple_backend_connection_attempts_all_fail(self):
         """Test that multiple rapid backend connections all fail with ECONNREFUSED.
         

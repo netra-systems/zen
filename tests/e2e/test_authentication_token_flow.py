@@ -18,7 +18,6 @@ from netra_backend.app.services.user_service import user_service
 from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock
 import asyncio
 import jwt
 import pytest
@@ -175,7 +174,7 @@ class MessagePipelineAuthValidator:
         # Mock user for testing
 
         # Mock: Generic component isolation for controlled unit testing
-        mock_user = MagicMock()
+        mock_user = MagicNone  # TODO: Use real service instead of Mock
 
         mock_user.id = self.user_id
 

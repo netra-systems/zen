@@ -275,7 +275,7 @@ class AgentLifecycleEventValidator:
         }
 
 
-class AgentLifecycleEventTestCore:
+class TestAgentLifecycleEventCore:
     """Core infrastructure for agent lifecycle event testing."""
     
     def __init__(self):

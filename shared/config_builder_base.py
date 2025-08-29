@@ -123,8 +123,8 @@ class ConfigBuilderBase(ABC):
             elif any(pattern in env_value for pattern in ["staging", "stage", "stg"]):
                 return ConfigEnvironment.STAGING.value
                 
-            # Development patterns
-            elif any(pattern in env_value for pattern in ["development", "dev", "local"]):
+            # Development patterns (including test patterns for test environments)
+            elif any(pattern in env_value for pattern in ["development", "dev", "local", "test", "testing"]):
                 return ConfigEnvironment.DEVELOPMENT.value
         
         # Special Cloud Run detection logic

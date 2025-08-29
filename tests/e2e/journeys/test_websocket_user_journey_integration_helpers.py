@@ -22,7 +22,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -39,7 +38,7 @@ from tests.e2e.integration.websocket_dev_utilities import (
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
-class WebSocketUserJourneyTester:
+class TestWebSocketUserJourneyer:
     """Test manager for WebSocket user journey testing."""
 
     def __init__(self):

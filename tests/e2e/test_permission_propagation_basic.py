@@ -7,7 +7,6 @@ Performance target: < 500ms propagation. File < 300 lines, functions < 25 lines.
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -17,7 +16,7 @@ from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.config import UnifiedTestConfig
 
 
-class PermissionPropagationTester:
+class TestPermissionPropagationer:
     """Tests permission changes propagating across all services."""
     
     def __init__(self):

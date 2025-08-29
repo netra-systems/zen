@@ -141,6 +141,12 @@ class ServiceConfigManager:
     def _populate_service_flags(self, config: AppConfig) -> None:
         """Populate service enabled flags based on modes."""
         defaults = self._service_defaults.get(self._environment, {})
+        
+        # Override testing defaults if USE_REAL_SERVICES is true
+        if self._environment == Environment.TESTING.value and get_env().get("USE_REAL_SERVICES", "false").lower() == "true":
+            # Use development defaults instead of testing defaults for real service tests
+            defaults = self._service_defaults.get(Environment.DEVELOPMENT.value, defaults)
+        
         config.dev_mode_llm_enabled = self._get_service_enabled_status("llm", defaults)
         config.dev_mode_redis_enabled = self._get_service_enabled_status("redis", defaults)
         config.dev_mode_clickhouse_enabled = self._get_service_enabled_status("clickhouse", defaults)

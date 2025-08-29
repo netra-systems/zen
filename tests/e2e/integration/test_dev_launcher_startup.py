@@ -16,7 +16,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
@@ -27,7 +26,7 @@ from dev_launcher import DevLauncher, LauncherConfig
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
-class DevLauncherTestFixture:
+class TestDevLauncherFixture:
     """Manages dev launcher lifecycle for testing."""
     
     def __init__(self):

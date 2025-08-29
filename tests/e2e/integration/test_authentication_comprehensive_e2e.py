@@ -31,7 +31,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
-class AuthenticationE2ETester:
+class TestAuthenticationE2Eer:
     """Helper class for authentication E2E testing."""
     
     def __init__(self):

@@ -38,8 +38,7 @@ class TestPlaceholder:
 # import socket
 # from contextlib import contextmanager
 # from dataclasses import dataclass
-# from unittest.mock import MagicMock, patch
-# 
+# # 
 # import httpx
 # import pytest
 # 
@@ -83,7 +82,7 @@ class TestPlaceholder:
 #     def mock_service_discovery(config):
 #         """Mock service discovery with dynamic port configuration."""
 # Mock: Generic component isolation for controlled unit testing
-#         mock_discovery = MagicMock()
+#         mock_discovery = MagicNone  # TODO: Use real service instead of Mock
 #         mock_discovery.read_backend_info.return_value = {
 #             "port": config.backend_port,
 #             "api_url": config.backend_url,
@@ -229,9 +228,9 @@ class TestPlaceholder:
 # 
 #                 # Mock FastAPI app and service discovery
 # Mock: Generic component isolation for controlled unit testing
-#                 mock_app = MagicMock()
+#                 mock_app = MagicNone  # TODO: Use real service instead of Mock
 # Mock: Generic component isolation for controlled unit testing
-#                 mock_service_discovery_instance = MagicMock()
+#                 mock_service_discovery_instance = MagicNone  # TODO: Use real service instead of Mock
 #                 mock_service_discovery_instance.read_frontend_info.return_value = {
 #                     "port": config.frontend_port,
 #                     "url": config.frontend_url,
@@ -347,7 +346,7 @@ class TestPlaceholder:
 # 
 #                 # But CORS integration will fail
 # Mock: Generic component isolation for controlled unit testing
-#                 mock_app = MagicMock()
+#                 mock_app = MagicNone  # TODO: Use real service instead of Mock
 #                 middleware = CustomCORSMiddleware(
 #                     app=mock_app, service_discovery=discovery
 # 
@@ -521,7 +520,7 @@ class TestPlaceholder:
 # 
 #                 # Test CORS integration
 # Mock: Generic component isolation for controlled unit testing
-#                 mock_app = MagicMock()
+#                 mock_app = MagicNone  # TODO: Use real service instead of Mock
 #                 middleware = CustomCORSMiddleware(
 #                     app=mock_app, service_discovery=discovery
 # 

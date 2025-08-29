@@ -30,6 +30,7 @@ from tests.e2e.fixtures.error_propagation_fixtures import (
 class TestErrorCorrelation:
     """Test error correlation and tracking across services."""
     
+    @pytest.mark.resilience
     async def test_correlation_id_propagation(self, service_orchestrator, real_http_client:
                                             error_correlation_context):
         """Test correlation ID propagates across service calls."""
@@ -46,6 +47,7 @@ class TestErrorCorrelation:
         if response.success and response.headers:
             assert correlation_id in str(response.headers.get("X-Correlation-ID", ""))
             
+    @pytest.mark.resilience
     async def test_error_context_preservation(self, service_orchestrator, real_http_client:
                                             error_correlation_context):
         """Test error context is preserved across service boundaries."""
@@ -67,6 +69,7 @@ class TestErrorCorrelation:
             assert error_correlation_context.user_id in str(error_data) or \
                    error_correlation_context.correlation_id in str(error_data)
                    
+    @pytest.mark.resilience
     async def test_cross_service_error_tracking(self, service_orchestrator, real_websocket_client:
                                                error_correlation_context):
         """Test error tracking across WebSocket and HTTP services."""
@@ -90,6 +93,7 @@ class TestErrorCorrelation:
             if not message_result.success:
                 assert message_result.error is not None
                 
+    @pytest.mark.resilience
     async def test_error_aggregation(self, service_orchestrator, real_http_client:
                                    error_correlation_context):
         """Test error aggregation from multiple sources."""
@@ -112,6 +116,7 @@ class TestErrorCorrelation:
         error_count = sum(1 for r in results if hasattr(r, 'success') and not r.success)
         # Some errors are expected in this test
         
+    @pytest.mark.resilience
     async def test_error_severity_classification(self, service_orchestrator, real_http_client:
                                                 error_correlation_context):
         """Test error severity classification."""
@@ -136,6 +141,7 @@ class TestErrorCorrelation:
                 assert test["expected_severity"] in str(response.error).lower() or \
                        response.status_code in [400, 500, 503]  # Different codes for different severities
                        
+    @pytest.mark.resilience
     async def test_distributed_tracing(self, service_orchestrator, real_websocket_client:
                                      error_correlation_context):
         """Test distributed tracing through error scenarios."""

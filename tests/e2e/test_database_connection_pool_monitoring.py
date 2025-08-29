@@ -12,7 +12,6 @@ Business Value Justification (BVJ):
 import pytest
 import asyncio
 import time
-from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, List, Optional
 
 
@@ -36,8 +35,8 @@ class TestDatabaseConnectionPoolMonitoring:
         Business Impact: Cannot detect pool exhaustion or performance issues
         """
         # Mock a database engine with pool
-        mock_engine = MagicMock()
-        mock_pool = MagicMock()
+        mock_engine = MagicNone  # TODO: Use real service instead of Mock
+        mock_pool = MagicNone  # TODO: Use real service instead of Mock
         
         # Configure mock pool with realistic metrics
         mock_pool.size.return_value = 10

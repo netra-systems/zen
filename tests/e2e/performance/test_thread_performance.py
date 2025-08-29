@@ -18,7 +18,6 @@ import asyncio
 import statistics
 import time
 from typing import Any, Callable, Dict, List
-from unittest.mock import AsyncMock, Mock
 from dataclasses import dataclass
 
 import pytest
@@ -31,14 +30,14 @@ except ImportError:
     class ThreadService:
         async def get_or_create_thread(self, user_id: str, db: AsyncSession):
             # Mock: Generic component isolation for controlled unit testing
-            mock_thread = Mock()
+            mock_thread = None  # TODO: Use real service instead of Mock
             mock_thread.id = f"thread-{user_id}"
             mock_thread.user_id = user_id
             return mock_thread
         
         async def create_message(self, thread_id: str, role: str, content: str, db: AsyncSession):
             # Mock: Generic component isolation for controlled unit testing
-            mock_message = Mock()
+            mock_message = None  # TODO: Use real service instead of Mock
             mock_message.id = f"msg-{thread_id}-{int(time.time())}"
             mock_message.thread_id = thread_id
             mock_message.role = role
@@ -77,7 +76,7 @@ class PerformanceMetrics:
         )
 
 
-class ThreadPerformanceTester:
+class TestThreadPerformanceer:
     """Manages thread performance testing."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -96,12 +95,13 @@ class ThreadPerformanceTester:
             await self.service_manager.stop_all_services()
 
 
-class ThreadLoadTests:
+class TestThreadLoads:
     """Tests for thread operations under load."""
     
     def __init__(self, tester: ThreadPerformanceTester):
         self.tester = tester
         
+    @pytest.mark.performance
     async def test_concurrent_thread_creation_load(self, mock_db_session: AsyncSession) -> PerformanceMetrics:
         """Test concurrent thread creation under load."""
         user_count = 50
@@ -147,6 +147,7 @@ class ThreadLoadTests:
         # Validate success count
         assert performance_data.success_count >= expected_count * 0.95, f"Success count {performance_data.success_count} below 95% of expected"
     
+    @pytest.mark.performance
     async def test_message_creation_throughput(self, mock_db_session: AsyncSession) -> PerformanceMetrics:
         """Test message creation throughput."""
         thread = await self.tester.thread_service.get_or_create_thread("throughput_user", mock_db_session)
@@ -195,12 +196,13 @@ class ThreadLoadTests:
         assert performance_data.success_count >= expected_count * 0.98, f"Success count {performance_data.success_count} below 98% of expected"
 
 
-class ThreadStressTests:
+class TestThreadStresss:
     """Stress tests for thread operations."""
     
     def __init__(self, tester: ThreadPerformanceTester):
         self.tester = tester
     
+    @pytest.mark.performance
     async def test_thread_memory_usage_stress(self, mock_db_session: AsyncSession) -> Dict[str, Any]:
         """Test thread operations under memory stress."""
         thread_count = 200
@@ -271,6 +273,7 @@ class ThreadStressTests:
         assert results["thread_throughput"] > 5.0, f"Thread throughput {results['thread_throughput']:.1f} below 5 threads/sec"
         assert results["message_throughput"] > 50.0, f"Message throughput {results['message_throughput']:.1f} below 50 messages/sec"
     
+    @pytest.mark.performance
     async def test_concurrent_read_write_stress(self, mock_db_session: AsyncSession) -> Dict[str, Any]:
         """Test concurrent read/write operations stress."""
         thread = await self.tester.thread_service.get_or_create_thread("rw_stress_user", mock_db_session)
@@ -337,12 +340,13 @@ class ThreadStressTests:
         assert results["operations_per_second"] >= 30.0, f"Operations per second {results['operations_per_second']:.1f} below 30"
 
 
-class ThreadScalabilityTests:
+class TestThreadScalabilitys:
     """Tests for thread operation scalability."""
     
     def __init__(self, tester: ThreadPerformanceTester):
         self.tester = tester
     
+    @pytest.mark.performance
     async def test_thread_count_scalability(self, mock_db_session: AsyncSession) -> Dict[int, Dict[str, Any]]:
         """Test scalability with increasing thread counts."""
         thread_counts = [10, 50, 100, 200]
@@ -413,12 +417,13 @@ class ThreadScalabilityTests:
             assert data["average_time_per_operation"] <= 1.0, f"Avg time {data['average_time_per_operation']:.2f}s above 1s for {count} threads"
 
 
-class ThreadLatencyTests:
+class TestThreadLatencys:
     """Tests for thread operation latency characteristics."""
     
     def __init__(self, tester: ThreadPerformanceTester):
         self.tester = tester
     
+    @pytest.mark.performance
     async def test_thread_operation_latency_distribution(self, mock_db_session: AsyncSession) -> Dict[str, Any]:
         """Test latency distribution of thread operations."""
         operation_count = 100
@@ -523,11 +528,11 @@ async def mock_db_session():
     # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     # Mock: Session isolation for controlled testing without external state
-    session.begin = AsyncMock()
+    session.begin = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-    session.commit = AsyncMock()
+    session.commit = AsyncNone  # TODO: Use real service instead of Mock
     # Mock: Session isolation for controlled testing without external state
-    session.rollback = AsyncMock()
+    session.rollback = AsyncNone  # TODO: Use real service instead of Mock
     return session
 
 
@@ -537,6 +542,7 @@ async def mock_db_session():
 class TestThreadPerformance:
     """Thread performance E2E tests."""
     
+    @pytest.mark.performance
     async def test_thread_load_performance(self, unified_test_harness, mock_db_session):
         """Test thread operations under load."""
         tester = ThreadPerformanceTester(unified_test_harness)
@@ -562,6 +568,7 @@ class TestThreadPerformance:
         finally:
             await tester.teardown_services()
     
+    @pytest.mark.performance
     async def test_thread_stress_performance(self, unified_test_harness, mock_db_session):
         """Test thread operations under stress conditions."""
         tester = ThreadPerformanceTester(unified_test_harness)
@@ -587,6 +594,7 @@ class TestThreadPerformance:
         finally:
             await tester.teardown_services()
     
+    @pytest.mark.performance
     async def test_thread_scalability_performance(self, unified_test_harness, mock_db_session):
         """Test thread operation scalability."""
         tester = ThreadPerformanceTester(unified_test_harness)
@@ -607,6 +615,7 @@ class TestThreadPerformance:
         finally:
             await tester.teardown_services()
     
+    @pytest.mark.performance
     async def test_thread_latency_characteristics(self, unified_test_harness, mock_db_session):
         """Test thread operation latency characteristics."""
         tester = ThreadPerformanceTester(unified_test_harness)

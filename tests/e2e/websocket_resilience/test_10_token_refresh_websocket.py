@@ -14,7 +14,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -84,7 +83,7 @@ class TokenManager:
         return expires_at <= threshold_time
 
 
-class TokenRefreshTestClient:
+class TestTokenRefreshClient:
     """WebSocket client with token refresh capabilities."""
     
     def __init__(self, uri: str, token_manager: TokenManager, user_id: str):
@@ -109,7 +108,7 @@ class TokenRefreshTestClient:
             
             # Mock WebSocket connection with token authentication
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = AsyncMock()
+            self.websocket = AsyncNone  # TODO: Use real service instead of Mock
             self.websocket.token = self.current_token
             self.is_connected = True
             

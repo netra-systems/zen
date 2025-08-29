@@ -33,12 +33,10 @@ class TestActionFeasibilityLogic:
         """Create actions agent with mocked dependencies."""
         llm_manager = AsyncMock()
         tool_dispatcher = AsyncMock()
-        websocket_manager = AsyncMock()
         
         agent = ActionsToMeetGoalsSubAgent(
             llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher,
-            websocket_manager=websocket_manager
+            tool_dispatcher=tool_dispatcher
         )
         return agent
     

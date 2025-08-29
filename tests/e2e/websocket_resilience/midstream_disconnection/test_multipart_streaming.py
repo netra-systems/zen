@@ -34,6 +34,8 @@ from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
 class TestMultipartStreamingDisconnection:
     """Test multipart streaming disconnection and recovery."""
     
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_multipart_stream_interruption(self, network_condition, stream_buffer:
                                                test_user_id, response_configs):
         """Test multipart streaming interruption and recovery."""
@@ -69,6 +71,8 @@ class TestMultipartStreamingDisconnection:
         assert "Content-Type: multipart/mixed" in full_data
         assert "boundary" in full_data
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_multipart_boundary_preservation(self, network_condition, stream_buffer:
                                                  test_user_id, response_configs):
         """Test multipart boundary preservation across disconnections."""
@@ -103,6 +107,8 @@ class TestMultipartStreamingDisconnection:
         # Should have opening and closing boundaries
         assert "--boundary" in full_data
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_large_multipart_streaming(self, network_condition, stream_buffer:
                                            test_user_id, response_configs):
         """Test large multipart streaming with disconnections."""
@@ -141,6 +147,8 @@ class TestMultipartStreamingDisconnection:
         assert stream_buffer.total_size > 2000
         assert parts_received > 0
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_multipart_header_integrity(self, network_condition, stream_buffer:
                                             test_user_id, response_configs):
         """Test multipart header integrity during disconnections."""
@@ -173,6 +181,8 @@ class TestMultipartStreamingDisconnection:
         assert "Content-Type: multipart/mixed" in full_data
         assert len(headers_found) > 0
         
+    @pytest.mark.resilience
+    @pytest.mark.websocket
     async def test_concurrent_multipart_streams(self, network_condition, test_user_id:
                                               response_configs):
         """Test concurrent multipart streams with disconnections."""

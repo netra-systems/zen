@@ -36,7 +36,7 @@ from tests.e2e.integration.test_auth_jwt_generation import (
 logger = logging.getLogger(__name__)
 
 
-class JWTRefreshTestManager(JWTGenerationTestManager):
+class TestJWTRefreshManager(JWTGenerationTestManager):
 
     """
 

@@ -23,14 +23,13 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from tests.e2e.test_data_factory import create_test_message_data, create_test_user_data
 
 
-class AgentRateLimitTester:
+class TestAgentRateLimiter:
 
     """Tests agent behavior under rate limiting conditions."""
     
@@ -342,7 +341,7 @@ async def test_agent_startup_database_connectivity_failure_recovery():
     # Mock database manager for focused testing
 
     # Mock: Generic component isolation for controlled unit testing
-    db_manager = MagicMock()
+    db_manager = MagicNone  # TODO: Use real service instead of Mock
 
     db_failure_simulator = DatabaseFailureSimulator(db_manager)
 

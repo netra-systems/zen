@@ -20,7 +20,6 @@ import os
 import pytest
 import asyncio
 import logging
-from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.exc import OperationalError
 
 from test_framework.environment_markers import env, env_requires

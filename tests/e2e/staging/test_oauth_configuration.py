@@ -15,7 +15,6 @@ import asyncio
 import aiohttp
 import requests
 from typing import Dict, List, Optional
-from unittest.mock import patch
 from test_framework.environment_markers import staging_only, env_requires
 
 
@@ -24,6 +23,8 @@ class TestOAuthConfiguration:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     def test_google_oauth_client_id_missing_from_environment(self):
         """Test that GOOGLE_CLIENT_ID is missing from staging environment.
         
@@ -76,6 +77,8 @@ class TestOAuthConfiguration:
 
     @staging_only 
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     def test_google_oauth_client_secret_missing_from_environment(self):
         """Test that GOOGLE_CLIENT_SECRET is missing from staging environment.
         
@@ -126,6 +129,8 @@ class TestOAuthConfiguration:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     def test_oauth_configuration_incomplete_for_staging_deployment(self):
         """Test that OAuth configuration is incomplete for staging deployment.
         
@@ -178,6 +183,8 @@ class TestOAuthConfiguration:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_oauth_google_authorization_url_construction_fails(self):
         """Test that OAuth Google authorization URL construction fails.
         
@@ -256,6 +263,8 @@ class TestOAuthConfiguration:
         )
 
     @staging_only
+    @pytest.mark.auth
+    @pytest.mark.e2e
     async def test_oauth_token_exchange_endpoint_unreachable(self):
         """Test that OAuth token exchange fails due to configuration issues.
         
@@ -355,6 +364,8 @@ class TestOAuthConfiguration:
 
     @staging_only
     @env_requires(services=["auth_service"])
+    @pytest.mark.auth
+    @pytest.mark.e2e
     def test_oauth_redirect_uri_misconfiguration(self):
         """Test OAuth redirect URI configuration issues in staging.
         
@@ -431,6 +442,8 @@ class TestOAuthConfiguration:
         )
 
     @staging_only
+    @pytest.mark.auth
+    @pytest.mark.e2e
     def test_oauth_scopes_configuration_incomplete(self):
         """Test that OAuth scopes are not properly configured for staging.
         

@@ -14,7 +14,6 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from tests.e2e.config import (
     TestEnvironmentConfig,
@@ -90,7 +89,7 @@ class TestState:
         self.project_root = Path.cwd()
 
 
-class UnifiedE2ETestHarness:
+class TestUnifiedE2EHarness:
     """
     Unified test harness for comprehensive system testing.
     Supports authentication, WebSocket, and service integration testing.
@@ -201,7 +200,7 @@ class UnifiedE2ETestHarness:
     def setup_auth_service_mock(self) -> MagicMock:
         """Setup comprehensive auth service mock"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_service = MagicMock()
+        mock_service = MagicNone  # TODO: Use real service instead of Mock
         self._configure_auth_methods(mock_service)
         self.mock_services["auth"] = mock_service
         return mock_service
@@ -211,16 +210,16 @@ class UnifiedE2ETestHarness:
         # Mock: Async component isolation for testing without real async operations
         mock_service.validate_token = AsyncMock(return_value=True)
         # Mock: Generic component isolation for controlled unit testing
-        mock_service.refresh_tokens = AsyncMock()
+        mock_service.refresh_tokens = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Async component isolation for testing without real async operations
         mock_service.logout = AsyncMock(return_value=True)
         # Mock: Generic component isolation for controlled unit testing
-        mock_service.get_user = AsyncMock()
+        mock_service.get_user = AsyncNone  # TODO: Use real service instead of Mock
     
     def setup_websocket_manager_mock(self) -> MagicMock:
         """Setup WebSocket manager mock"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager = MagicMock()
+        mock_manager = MagicNone  # TODO: Use real service instead of Mock
         self._configure_websocket_methods(mock_manager)
         self.mock_services["websocket"] = mock_manager
         return mock_manager
@@ -228,11 +227,11 @@ class UnifiedE2ETestHarness:
     def _configure_websocket_methods(self, mock_manager):
         """Configure WebSocket manager methods"""
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.connect_user = AsyncMock()
+        mock_manager.connect_user = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        mock_manager.disconnect_user = AsyncMock()
-        mock_manager.send_message = AsyncMock()
-        mock_manager.broadcast = AsyncMock()
+        mock_manager.disconnect_user = AsyncNone  # TODO: Use real service instead of Mock
+        mock_manager.send_message = AsyncNone  # TODO: Use real service instead of Mock
+        mock_manager.broadcast = AsyncNone  # TODO: Use real service instead of Mock
     
     # Performance Testing Support
     @asynccontextmanager
@@ -314,7 +313,7 @@ class UnifiedE2ETestHarness:
         return await create_minimal_harness(test_name)
 
 
-class AuthFlowTestHelper:
+class TestAuthFlowHelper:
     """Specialized helper for authentication flow testing"""
     
     def __init__(self, harness: UnifiedE2ETestHarness):
@@ -355,7 +354,7 @@ class AuthFlowTestHelper:
         return scenarios
 
 
-class WebSocketTestHelper:
+class TestWebSocketHelper:
     """Specialized helper for WebSocket testing"""
     
     def __init__(self, harness: UnifiedE2ETestHarness):

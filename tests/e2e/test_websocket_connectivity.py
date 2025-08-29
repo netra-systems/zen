@@ -124,16 +124,15 @@ class TestWebSocketConnectivity:
         Expected Failure: No reconnection logic implemented
         Business Impact: Poor user experience, connection drops
         """
-        from unittest.mock import AsyncMock, Mock
-        
+                
         # Use test endpoint which doesn't require authentication
         ws_url = "ws://localhost:8000/ws/test"
         client_id = str(uuid.uuid4())
         
         # Mock WebSocket connections to simulate the reconnection test
         # without requiring a running server
-        websocket = AsyncMock()
-        reconnect_websocket = AsyncMock()
+        websocket = AsyncNone  # TODO: Use real service instead of Mock
+        reconnect_websocket = AsyncNone  # TODO: Use real service instead of Mock
         
         # Mock websockets.connect to return our mocked connections
         original_connect = websockets.connect

@@ -31,6 +31,7 @@ class TestFrontendStagingURLConfiguration:
             'production': project_root / 'deployment' / 'docker' / 'frontend.prod.Dockerfile',
         }
     
+    @pytest.mark.e2e
     def test_staging_dockerfile_has_next_public_environment_variables(
         self, 
         dockerfile_paths: Dict[str, Path]
@@ -69,6 +70,7 @@ class TestFrontendStagingURLConfiguration:
             assert env_pos < build_pos, \
                 f"ENV {var_name} must be set BEFORE npm run build"
     
+    @pytest.mark.e2e
     def test_production_dockerfile_has_next_public_environment_variables(
         self, 
         dockerfile_paths: Dict[str, Path]
@@ -92,6 +94,7 @@ class TestFrontendStagingURLConfiguration:
             assert re.search(pattern, content), \
                 f"Production Dockerfile must set {var_name}={expected_value}"
     
+    @pytest.mark.e2e
     def test_no_localhost_urls_in_staging_dockerfile(
         self, 
         dockerfile_paths: Dict[str, Path]
@@ -117,6 +120,7 @@ class TestFrontendStagingURLConfiguration:
             assert not matches, \
                 f"Staging Dockerfile must not contain localhost URLs. Found: {matches}"
     
+    @pytest.mark.e2e
     def test_unified_api_config_environment_detection(self, project_root: Path):
         """Test that unified-api-config.ts properly detects environment."""
         config_file = project_root / 'frontend' / 'lib' / 'unified-api-config.ts'
@@ -142,6 +146,7 @@ class TestFrontendStagingURLConfiguration:
         assert 'https://api.staging.netrasystems.ai' in content, \
             "Staging config must use api.staging.netrasystems.ai"
     
+    @pytest.mark.e2e
     def test_auth_service_client_uses_unified_config(self, project_root: Path):
         """Test that auth-service-client.ts uses unified configuration."""
         client_file = project_root / 'frontend' / 'lib' / 'auth-service-client.ts'
@@ -165,6 +170,7 @@ class TestFrontendStagingURLConfiguration:
         not os.environ.get('RUN_DOCKER_BUILD_TEST'),
         reason="Docker build test is slow, set RUN_DOCKER_BUILD_TEST=1 to enable"
     )
+    @pytest.mark.e2e
     def test_docker_build_contains_correct_urls(self, project_root: Path):
         """
         Test that actual Docker build produces image with correct URLs.
@@ -247,6 +253,7 @@ class TestFrontendStagingURLConfiguration:
                     capture_output=True
                 )
     
+    @pytest.mark.e2e
     def test_deployment_script_configuration(self, project_root: Path):
         """Test that deploy_to_gcp.py has correct frontend configuration."""
         deploy_script = project_root / 'scripts' / 'deploy_to_gcp.py'
@@ -271,6 +278,7 @@ class TestFrontendStagingURLConfiguration:
             # This is acceptable as it might be for documentation
             pass
     
+    @pytest.mark.e2e
     def test_cloudbuild_uses_correct_dockerfile(self, project_root: Path):
         """Test that cloudbuild configuration uses correct Dockerfile."""
         cloudbuild_file = project_root / 'organized_root' / 'deployment' / 'cloudbuild-frontend.yaml'
@@ -280,6 +288,7 @@ class TestFrontendStagingURLConfiguration:
             assert 'frontend.gcp.Dockerfile' in content, \
                 "CloudBuild must use frontend.gcp.Dockerfile"
     
+    @pytest.mark.e2e
     def test_no_runtime_environment_override_attempt(self, project_root: Path):
         """
         Test that we're not trying to override NEXT_PUBLIC_* at runtime.
@@ -314,6 +323,7 @@ class TestFrontendStagingURLConfiguration:
 class TestFrontendURLRegression:
     """Quick regression tests for the specific localhost URL issue."""
     
+    @pytest.mark.e2e
     def test_auth_config_url_not_localhost(self):
         """
         Test that auth config URL is not pointing to localhost.
@@ -325,6 +335,7 @@ class TestFrontendURLRegression:
         # It's here as documentation of the specific issue
         pass
     
+    @pytest.mark.e2e
     def test_frontend_dockerfile_exists_and_is_not_empty(self):
         """Test that frontend Dockerfiles exist and have content."""
         project_root = Path(__file__).parent.parent.parent

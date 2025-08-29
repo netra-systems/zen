@@ -6,7 +6,6 @@ Business Value: Ensures supervisor reliability and value creation foundation.
 
 import asyncio
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -116,7 +115,7 @@ class TestSupervisorLifecycleManager:
     def test_register_lifecycle_hook(self, lifecycle_manager):
         """Test lifecycle hook registration."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_handler = Mock()
+        mock_handler = None  # TODO: Use real service instead of Mock
         lifecycle_manager.register_lifecycle_hook("pre_execution", mock_handler)
         
         assert mock_handler in lifecycle_manager._lifecycle_hooks["pre_execution"]
@@ -126,7 +125,7 @@ class TestSupervisorLifecycleManager:
     async def test_execute_lifecycle_hooks(self, lifecycle_manager, valid_context):
         """Test lifecycle hook execution."""
         # Mock: Generic component isolation for controlled unit testing
-        mock_handler = AsyncMock()
+        mock_handler = AsyncNone  # TODO: Use real service instead of Mock
         lifecycle_manager.register_lifecycle_hook("pre_execution", mock_handler)
         
         await lifecycle_manager.execute_lifecycle_hooks("pre_execution", valid_context)
@@ -142,11 +141,11 @@ class TestWorkflowOrchestrator:
     def mock_dependencies(self):
         return {
             # Mock: Generic component isolation for controlled unit testing
-            "agent_registry": Mock(),
+            "agent_registry": None  # TODO: Use real service instead of Mock,
             # Mock: Generic component isolation for controlled unit testing
-            "execution_engine": AsyncMock(),
+            "execution_engine": AsyncNone  # TODO: Use real service instead of Mock,
             # Mock: WebSocket connection isolation for testing without network overhead
-            "websocket_manager": AsyncMock()
+            "websocket_manager": AsyncNone  # TODO: Use real service instead of Mock
         }
     
     @pytest.fixture
@@ -353,13 +352,13 @@ class TestSupervisorAgent:
     def mock_dependencies(self):
         return {
             # Mock: Session isolation for controlled testing without external state
-            "db_session": AsyncMock(),
+            "db_session": AsyncNone  # TODO: Use real service instead of Mock,
             # Mock: LLM provider isolation to prevent external API usage and costs
-            "llm_manager": Mock(),
+            "llm_manager": None  # TODO: Use real service instead of Mock,
             # Mock: WebSocket connection isolation for testing without network overhead
-            "websocket_manager": AsyncMock(),
+            "websocket_manager": AsyncNone  # TODO: Use real service instead of Mock,
             # Mock: Tool execution isolation for predictable agent testing
-            "tool_dispatcher": Mock()
+            "tool_dispatcher": None  # TODO: Use real service instead of Mock
         }
     
     @pytest.fixture

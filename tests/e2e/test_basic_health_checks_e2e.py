@@ -44,7 +44,7 @@ def health_check_config():
     }
 
 
-class BasicHealthCheckTester:
+class TestBasicHealthChecker:
     """Simple, reliable health check tester for E2E validation."""
     
     def __init__(self, config: Dict[str, Any]):

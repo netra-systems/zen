@@ -41,7 +41,7 @@ class TabSession:
 
 
 @dataclass
-class MultiTabTestResult:
+class TestMultiTabResult:
     """Results from multi-tab isolation testing."""
     tabs_connected: int
     message_isolation_verified: bool

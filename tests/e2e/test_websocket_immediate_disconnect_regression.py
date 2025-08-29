@@ -36,6 +36,8 @@ class TestWebSocketImmediateDisconnectRegression:
         return "ws://localhost:8000/ws"
     
     @pytest.fixture
+    @pytest.mark.websocket
+    @pytest.mark.e2e
     def test_token(self):
         """Get a test JWT token."""
         # This is a dev token that should work in development mode

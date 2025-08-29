@@ -22,6 +22,7 @@ class TestEnvironmentConfiguration:
     """Test comprehensive environment configuration issues in staging."""
 
     @staging_only
+    @pytest.mark.e2e
     def test_critical_environment_variables_missing(self):
         """Test that critical environment variables are missing from staging.
         
@@ -144,6 +145,7 @@ class TestEnvironmentConfiguration:
 
     @staging_only
     @env_requires(services=["backend_service", "auth_service"])
+    @pytest.mark.e2e
     def test_service_url_configuration_mismatch(self):
         """Test service URL configuration mismatches between services.
         
@@ -251,6 +253,7 @@ class TestEnvironmentConfiguration:
         )
 
     @staging_only
+    @pytest.mark.e2e
     def test_database_configuration_inconsistent_across_services(self):
         """Test database configuration inconsistencies across services.
         
@@ -354,6 +357,7 @@ class TestEnvironmentConfiguration:
             )
 
     @staging_only
+    @pytest.mark.e2e
     def test_environment_variable_type_validation_failures(self):
         """Test environment variable type validation failures.
         
@@ -498,6 +502,7 @@ class TestEnvironmentConfiguration:
         return None
 
     @staging_only
+    @pytest.mark.e2e
     def test_staging_specific_configuration_missing(self):
         """Test staging-specific configuration that should exist but is missing.
         

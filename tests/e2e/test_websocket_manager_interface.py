@@ -7,7 +7,6 @@ consistency across different scenarios.
 import pytest
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
@@ -31,12 +30,12 @@ class TestWebSocketManagerInterface:
     def mock_websocket(self):
         """Create mock WebSocket connection."""
         from fastapi.websockets import WebSocketState
-        websocket = AsyncMock()
-        websocket.accept = AsyncMock()
-        websocket.send_text = AsyncMock()
-        websocket.send_json = AsyncMock()
-        websocket.receive_json = AsyncMock()
-        websocket.close = AsyncMock()
+        websocket = AsyncNone  # TODO: Use real service instead of Mock
+        websocket.accept = AsyncNone  # TODO: Use real service instead of Mock
+        websocket.send_text = AsyncNone  # TODO: Use real service instead of Mock
+        websocket.send_json = AsyncNone  # TODO: Use real service instead of Mock
+        websocket.receive_json = AsyncNone  # TODO: Use real service instead of Mock
+        websocket.close = AsyncNone  # TODO: Use real service instead of Mock
         websocket.application_state = WebSocketState.CONNECTED  # Ensure WebSocket appears connected
         return websocket
 
@@ -71,10 +70,10 @@ class TestWebSocketManagerInterface:
         user_ids = []
         
         for i in range(5):  # Test with 5 concurrent connections
-            mock_ws = AsyncMock()
-            mock_ws.send_json = AsyncMock()
-            mock_ws.send_text = AsyncMock()
-            mock_ws.close = AsyncMock()
+            mock_ws = AsyncNone  # TODO: Use real service instead of Mock
+            mock_ws.send_json = AsyncNone  # TODO: Use real service instead of Mock
+            mock_ws.send_text = AsyncNone  # TODO: Use real service instead of Mock
+            mock_ws.close = AsyncNone  # TODO: Use real service instead of Mock
             mock_ws.application_state = "CONNECTED"
             mock_websockets.append(mock_ws)
             
@@ -128,9 +127,9 @@ class TestWebSocketManagerInterface:
     async def test_websocket_state_persistence(self, websocket_manager):
         """Test WebSocket connection state persistence - Iteration 72."""
         user_id = "persistent_user_123"
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instead of Mock
         mock_websocket.application_state = "CONNECTED"
-        mock_websocket.send_json = AsyncMock()
+        mock_websocket.send_json = AsyncNone  # TODO: Use real service instead of Mock
         
         # Connect user and store some state
         await websocket_manager.connect_user(user_id, mock_websocket)
@@ -166,7 +165,7 @@ class TestWebSocketManagerInterface:
         for i in range(5):
             session_id = f"session_{i}"
             user_id = f"user_{i}"
-            websocket = AsyncMock()
+            websocket = AsyncNone  # TODO: Use real service instead of Mock
             websocket.application_state = WebSocketState.CONNECTED
             clients[session_id] = websocket
             await websocket_manager.connect_user(user_id, websocket)
@@ -209,7 +208,7 @@ class TestWebSocketManagerInterface:
         """Test WebSocket manager basic auth integration."""
         from fastapi.websockets import WebSocketState
         user_id = "test_user"
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instead of Mock
         mock_websocket.application_state = WebSocketState.CONNECTED
 
         # Connect user (basic connection without session validation)
@@ -225,7 +224,7 @@ class TestWebSocketManagerInterface:
             from fastapi.websockets import WebSocketState
             session_id = f"session_{client_id}"
             user_id = f"user_{client_id}"
-            websocket = AsyncMock()
+            websocket = AsyncNone  # TODO: Use real service instead of Mock
             websocket.application_state = WebSocketState.CONNECTED
             
             await websocket_manager.connect_user(user_id, websocket)
@@ -247,7 +246,7 @@ class TestWebSocketManagerInterface:
         from fastapi.websockets import WebSocketState
         session_id = "temp_disconnect_session"
         user_id = "temp_user"
-        mock_websocket = AsyncMock()
+        mock_websocket = AsyncNone  # TODO: Use real service instead of Mock
         mock_websocket.application_state = WebSocketState.CONNECTED
 
         # Connect client
@@ -265,7 +264,7 @@ class TestWebSocketManagerInterface:
         assert result is False
 
         # Reconnect client
-        new_mock_websocket = AsyncMock()
+        new_mock_websocket = AsyncNone  # TODO: Use real service instead of Mock
         new_mock_websocket.application_state = WebSocketState.CONNECTED
         await websocket_manager.connect_user(user_id, new_mock_websocket)
 
@@ -313,7 +312,7 @@ class TestWebSocketManagerInterface:
             from fastapi.websockets import WebSocketState
             session_id = f"cleanup_session_{i}"
             user_id = f"cleanup_user_{i}"
-            mock_websocket = AsyncMock()
+            mock_websocket = AsyncNone  # TODO: Use real service instead of Mock
             mock_websocket.application_state = WebSocketState.CONNECTED
             
             await websocket_manager.connect_user(user_id, mock_websocket)

@@ -20,7 +20,6 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import time
 from typing import Dict, Any
-from unittest.mock import patch
 import pytest
 import pytest_asyncio
 

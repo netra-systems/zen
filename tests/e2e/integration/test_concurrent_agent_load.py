@@ -32,7 +32,7 @@ class ConcurrentUserSession:
         self.received_responses: List[Dict[str, Any]] = []
 
 
-class ConcurrentAgentLoadTester:
+class TestConcurrentAgentLoader:
     """Real concurrent agent load tester with no mocking"""
     def __init__(self, orchestrator: E2EServiceOrchestrator):
         self.orchestrator = orchestrator

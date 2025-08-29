@@ -7,7 +7,6 @@ ARCHITECTURE: 450-line limit, ≤8 lines per function
 import time
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -49,7 +48,7 @@ class TestFirstUserJourney:
     async def _mock_email_verification_service(self) -> MagicMock:
         """Mock email verification service."""
         # Mock: Generic component isolation for controlled unit testing
-        mock = MagicMock()
+        mock = MagicNone  # TODO: Use real service instead of Mock
         # Mock: Async component isolation for testing without real async operations
         mock.send_verification = AsyncMock(return_value=True)
         # Mock: Async component isolation for testing without real async operations
@@ -59,15 +58,15 @@ class TestFirstUserJourney:
     async def _mock_user_service_complete(self) -> MagicMock:
         """Mock complete user service with all required methods."""
         # Mock: Generic component isolation for controlled unit testing
-        mock = MagicMock()
+        mock = MagicNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        mock.create_user = AsyncMock()
+        mock.create_user = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        mock.get_by_email = AsyncMock()
+        mock.get_by_email = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        mock.update_verification_status = AsyncMock()
+        mock.update_verification_status = AsyncNone  # TODO: Use real service instead of Mock
         # Mock: Generic component isolation for controlled unit testing
-        mock.get_user_plan = AsyncMock()
+        mock.get_user_plan = AsyncNone  # TODO: Use real service instead of Mock
         return mock
 
     async def _simulate_websocket_message(self, user_id: str) -> Dict[str, Any]:
@@ -193,7 +192,7 @@ class TestFirstUserJourney:
         user_id = str(uuid.uuid4())
         auth_token = create_test_token(user_id)
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-        mock_websocket = MagicMock()
+        mock_websocket = MagicNone  # TODO: Use real service instead of Mock
         mock_websocket.headers = {"authorization": f"Bearer {auth_token}"}
         
         # Mock: Component isolation for testing without external dependencies

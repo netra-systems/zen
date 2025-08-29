@@ -23,6 +23,7 @@ import uuid
 class TestWebSocketDevConnectivity:
     """Test suite for WebSocket connectivity in development environment."""
 
+    @pytest.mark.websocket
     async def test_dev_websocket_basic_connectivity(self):
         """
         Test basic WebSocket connectivity to the test endpoint.
@@ -70,6 +71,7 @@ class TestWebSocketDevConnectivity:
         except Exception as e:
             raise AssertionError(f"Unexpected WebSocket error: {str(e)}")
 
+    @pytest.mark.websocket
     async def test_dev_websocket_message_echo(self):
         """
         Test WebSocket message echo functionality.
@@ -125,6 +127,7 @@ class TestWebSocketDevConnectivity:
             
             print(f"Echo test passed - payload preserved, server timestamp added")
 
+    @pytest.mark.websocket
     async def test_dev_websocket_ping_pong(self):
         """
         Test WebSocket ping/pong heartbeat functionality.
@@ -171,6 +174,7 @@ class TestWebSocketDevConnectivity:
             
             print(f"Ping/pong successful - RTT: {round_trip_time:.3f}s")
 
+    @pytest.mark.websocket
     async def test_dev_websocket_error_handling(self):
         """
         Test WebSocket error handling for malformed messages.
@@ -217,6 +221,7 @@ class TestWebSocketDevConnectivity:
             
             print("Error handling works - connection stable after invalid JSON")
 
+    @pytest.mark.websocket
     async def test_dev_websocket_multiple_messages(self):
         """
         Test WebSocket handling of multiple rapid messages.
@@ -272,6 +277,7 @@ class TestWebSocketDevConnectivity:
             
             print(f"Multiple messages handled correctly - {message_count} messages processed in order")
 
+    @pytest.mark.websocket
     async def test_dev_websocket_connection_info(self):
         """
         Test WebSocket provides useful connection information for debugging.

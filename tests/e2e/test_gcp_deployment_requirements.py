@@ -43,7 +43,7 @@ from test_framework.environment_markers import env
 from test_framework.base_e2e_test import BaseE2ETest
 
 
-class GCPDeploymentRequirementsTestBase(BaseE2ETest):
+class TestGCPDeploymentRequirementsBase(BaseE2ETest):
     """Base class for GCP deployment requirement tests."""
     
     @classmethod
@@ -73,6 +73,7 @@ class GCPDeploymentRequirementsTestBase(BaseE2ETest):
 class TestBackendProtocolHTTPS(GCPDeploymentRequirementsTestBase):
     """Test Requirement 1: Load Balancer Backend Protocol must be HTTPS."""
     
+    @pytest.mark.e2e
     async def test_all_endpoints_use_https(self):
         """Test that all service endpoints use HTTPS protocol."""
         async with aiohttp.ClientSession(
@@ -112,6 +113,7 @@ class TestBackendProtocolHTTPS(GCPDeploymentRequirementsTestBase):
                 assert result["ssl_valid"], f"{service_name} must have valid SSL certificate"
                 print(f"[OK] {service_name}: HTTPS verified (status: {result['status']})")
     
+    @pytest.mark.e2e
     async def test_http_to_https_redirect(self):
         """Test that HTTP requests are redirected to HTTPS."""
         async with aiohttp.ClientSession(
@@ -154,6 +156,7 @@ class TestBackendProtocolHTTPS(GCPDeploymentRequirementsTestBase):
 class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
     """Test Requirement 2: WebSocket Support with 3600s timeout and session affinity."""
     
+    @pytest.mark.e2e
     async def test_websocket_connection_establishment(self):
         """Test that WebSocket connections can be established."""
         uri = self.staging_urls["websocket"]
@@ -180,6 +183,7 @@ class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
         except Exception as e:
             pytest.fail(f"WebSocket connection failed: {e}")
     
+    @pytest.mark.e2e
     async def test_websocket_long_duration_connection(self):
         """Test WebSocket connection can be maintained for extended periods."""
         uri = self.staging_urls["websocket"]
@@ -210,6 +214,7 @@ class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
         except Exception as e:
             pytest.fail(f"WebSocket long-duration test failed: {e}")
     
+    @pytest.mark.e2e
     async def test_websocket_session_affinity(self):
         """Test session affinity by making multiple WebSocket connections."""
         uri = self.staging_urls["websocket"]
@@ -247,6 +252,7 @@ class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
                 if not conn.closed:
                     await conn.close()
     
+    @pytest.mark.e2e
     async def test_websocket_upgrade_headers(self):
         """Test that WebSocket upgrade headers are properly handled."""
         # Test WebSocket upgrade via HTTP first
@@ -290,6 +296,7 @@ class TestWebSocketSupport(GCPDeploymentRequirementsTestBase):
 class TestProtocolHeaders(GCPDeploymentRequirementsTestBase):
     """Test Requirement 3: Protocol Headers - X-Forwarded-Proto preservation."""
     
+    @pytest.mark.e2e
     async def test_x_forwarded_proto_header_preservation(self):
         """Test that X-Forwarded-Proto header is properly set to https."""
         async with aiohttp.ClientSession(
@@ -338,6 +345,7 @@ class TestProtocolHeaders(GCPDeploymentRequirementsTestBase):
                 except aiohttp.ClientError as e:
                     pytest.fail(f"Protocol header test failed for {service_name}: {e}")
     
+    @pytest.mark.e2e
     async def test_secure_cookie_handling(self):
         """Test that cookies are set with secure flags over HTTPS."""
         async with aiohttp.ClientSession(
@@ -370,6 +378,7 @@ class TestProtocolHeaders(GCPDeploymentRequirementsTestBase):
 class TestHTTPSHealthChecks(GCPDeploymentRequirementsTestBase):
     """Test Requirement 4: Health Checks use HTTPS protocol with port 443."""
     
+    @pytest.mark.e2e
     async def test_health_endpoints_over_https(self):
         """Test that health check endpoints work over HTTPS on port 443."""
         async with aiohttp.ClientSession(
@@ -403,6 +412,7 @@ class TestHTTPSHealthChecks(GCPDeploymentRequirementsTestBase):
                 except aiohttp.ClientError as e:
                     pytest.fail(f"HTTPS health check failed for {service_name}: {e}")
     
+    @pytest.mark.e2e
     async def test_health_check_response_times(self):
         """Test that health checks respond within reasonable time limits."""
         async with aiohttp.ClientSession(
@@ -438,6 +448,7 @@ class TestHTTPSHealthChecks(GCPDeploymentRequirementsTestBase):
 class TestCORSConfiguration(GCPDeploymentRequirementsTestBase):
     """Test Requirement 5: CORS - HTTPS-only origins."""
     
+    @pytest.mark.e2e
     async def test_cors_preflight_requests(self):
         """Test CORS preflight requests for cross-origin access."""
         async with aiohttp.ClientSession(
@@ -488,6 +499,7 @@ class TestCORSConfiguration(GCPDeploymentRequirementsTestBase):
             except aiohttp.ClientError as e:
                 print(f"[WARN] CORS preflight test inconclusive: {e}")
     
+    @pytest.mark.e2e
     async def test_cors_actual_requests(self):
         """Test actual CORS requests from different origins."""
         async with aiohttp.ClientSession(
@@ -518,6 +530,7 @@ class TestCORSConfiguration(GCPDeploymentRequirementsTestBase):
 class TestCloudRunIngress(GCPDeploymentRequirementsTestBase):
     """Test Requirement 6: Cloud Run Ingress 'all' with FORCE_HTTPS=true."""
     
+    @pytest.mark.e2e
     async def test_https_enforcement(self):
         """Test that HTTPS is enforced across all services."""
         # This test is covered by other HTTPS tests but we verify the overall behavior
@@ -548,6 +561,7 @@ class TestCloudRunIngress(GCPDeploymentRequirementsTestBase):
                 except aiohttp.ClientError as e:
                     pytest.fail(f"HTTPS enforcement test failed for {service_name}: {e}")
     
+    @pytest.mark.e2e
     async def test_service_accessibility(self):
         """Test that services are accessible from external traffic (ingress 'all')."""
         # This test verifies that the services can be reached from external clients
@@ -596,6 +610,7 @@ class TestCloudRunIngress(GCPDeploymentRequirementsTestBase):
             
             print(f"[OK] All {accessible_count} services accessible via external ingress")
     
+    @pytest.mark.e2e
     async def test_websocket_external_access(self):
         """Test that WebSocket service is accessible externally."""
         uri = self.staging_urls["websocket"]
@@ -622,6 +637,7 @@ class TestCloudRunIngress(GCPDeploymentRequirementsTestBase):
 class TestOverallDeploymentRequirements(GCPDeploymentRequirementsTestBase):
     """Integration test for all deployment requirements working together."""
     
+    @pytest.mark.e2e
     async def test_end_to_end_https_workflow(self):
         """Test a complete workflow using all services over HTTPS."""
         async with aiohttp.ClientSession(

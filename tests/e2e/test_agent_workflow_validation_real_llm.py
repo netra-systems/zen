@@ -20,7 +20,6 @@ ARCHITECTURAL COMPLIANCE:
 from dataclasses import dataclass
 from netra_backend.app.schemas.user_plan import PlanTier
 from typing import Dict, Any, List, Optional
-from unittest.mock import patch, AsyncMock
 import asyncio
 import os
 import pytest
@@ -44,7 +43,7 @@ class WorkflowStage:
 
 
 @dataclass
-class AgentWorkflowTestCase:
+class TestAgentWorkflowCase:
     """Test case for agent workflow validation."""
     workflow_id: str
     description: str
@@ -55,7 +54,7 @@ class AgentWorkflowTestCase:
     complexity_level: str  # "simple", "medium", "complex"
 
 
-class AgentWorkflowTestData:
+class TestAgentWorkflowData:
     """Test data for agent workflow validation."""
     
     @staticmethod

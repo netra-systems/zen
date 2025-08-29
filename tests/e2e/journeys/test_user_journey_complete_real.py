@@ -68,7 +68,7 @@ except ImportError:
             pass
 
 
-class CompleteUserJourneyRealTester:
+class TestCompleteUserJourneyRealer:
     """Tests complete user journey with REAL services only."""
     
     def __init__(self):

@@ -33,7 +33,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -338,7 +337,7 @@ class DashboardDataValidator:
         return True
 
 
-class MetricsCollectionTestHarness:
+class TestMetricsCollectionHarness:
     """Orchestrates comprehensive metrics collection testing"""
     
     def __init__(self, config: UnifiedTestConfig):

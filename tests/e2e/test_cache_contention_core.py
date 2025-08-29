@@ -20,7 +20,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -137,7 +136,7 @@ class CacheContentionMetrics:
             "cache_stats": dict(self.cache_stats),
         }
 
-class RedisTestClient:
+class TestRedisClient:
     """Redis client wrapper for cache contention testing."""
     
     def __init__(self, redis_url: str = REDIS_URL):
@@ -184,7 +183,7 @@ class RedisTestClient:
         info = await self.client.info("clients")
         return info.get("connected_clients", 0)
 
-class CacheContentionTestSuite:
+class TestCacheContentionSuite:
     """Main test suite for cache contention scenarios."""
     
     def __init__(self):

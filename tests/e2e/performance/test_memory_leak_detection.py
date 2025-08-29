@@ -21,7 +21,7 @@ from tests.e2e.integration.memory_leak_utilities import (
 logger = logging.getLogger(__name__)
 
 
-class MemoryLeakTestOrchestrator:
+class TestMemoryLeakOrchestrator:
     """Orchestrates complete memory leak detection test"""
     
     def __init__(self, test_duration_minutes: float = 5.0, use_mock: bool = False):

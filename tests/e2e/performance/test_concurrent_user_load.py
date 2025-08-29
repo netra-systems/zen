@@ -28,7 +28,7 @@ from test_framework.http_client import ClientConfig
 
 
 @dataclass
-class LoadTestMetrics:
+class TestLoadMetrics:
     """Metrics for concurrent load testing."""
     concurrent_users: int = 0
     successful_connections: int = 0
@@ -41,7 +41,7 @@ class LoadTestMetrics:
     error_rate: float = 0.0
 
 
-class ConcurrentUserLoadTester:
+class TestConcurrentUserLoader:
     """Manages concurrent user load testing."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
@@ -127,6 +127,7 @@ class ConcurrentUserLoadTester:
         except Exception:
             return False
     
+    @pytest.mark.performance
     async def test_concurrent_messaging(self, message_count: int = 10) -> LoadTestMetrics:
         """Test concurrent messaging from all connected users."""
         start_time = time.time()
@@ -232,6 +233,7 @@ class ConcurrentUserLoadTester:
 class TestConcurrentUserLoad:
     """Concurrent user load testing."""
     
+    @pytest.mark.performance
     async def test_concurrent_user_connections(self, unified_test_harness):
         """Test 100 concurrent user connections."""
         tester = ConcurrentUserLoadTester(unified_test_harness)
@@ -265,6 +267,7 @@ class TestConcurrentUserLoad:
         finally:
             await tester.teardown_services()
     
+    @pytest.mark.performance
     async def test_resource_usage_under_load(self, unified_test_harness):
         """Test resource usage under concurrent load."""
         tester = ConcurrentUserLoadTester(unified_test_harness)

@@ -19,7 +19,6 @@ COMPLIANCE:
 import asyncio
 import time
 from typing import Any, Dict, Optional
-from unittest.mock import patch
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 

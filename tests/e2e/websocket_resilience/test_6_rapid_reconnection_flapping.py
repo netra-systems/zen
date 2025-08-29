@@ -15,7 +15,6 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -155,7 +154,7 @@ class RapidReconnectionClient:
             
             # Mock connection for testing
             # Mock: Generic component isolation for controlled unit testing
-            self.websocket = AsyncMock()
+            self.websocket = AsyncNone  # TODO: Use real service instead of Mock
             self.is_connected = True
             
             # Simulate agent instance creation

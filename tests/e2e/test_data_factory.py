@@ -232,7 +232,7 @@ class DatabaseSeeder:
         return stats
 
 
-class ConcurrentTestSupport:
+class TestConcurrentSupport:
     """Provides support for concurrent test execution"""
     
     @staticmethod

@@ -50,7 +50,7 @@ class ServiceEndpoints:
     frontend_service_url: str = "http://localhost:3000"
 
 
-class JWTGenerationTestManager:
+class TestJWTGenerationManager:
     """
     Manages JWT token generation testing across all services.
     Provides real token operations with comprehensive validation.

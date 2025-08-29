@@ -31,7 +31,6 @@ import os
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import MagicMock
 
 import httpx
 import pytest
@@ -55,7 +54,7 @@ from tests.e2e.database_test_connections import DatabaseConnectionManager
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
-class RealUnifiedFlowTester:
+class TestRealUnifiedFlower:
     """Tests complete user journey with hybrid real/controlled services."""
     
     def __init__(self):

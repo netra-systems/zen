@@ -35,7 +35,7 @@ from tests.e2e.rate_limiting_core import (
 from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
-class ComprehensiveRateLimitTester:
+class TestComprehensiveRateLimiter:
     """Tests comprehensive rate limiting across all API endpoints and services."""
     
     def __init__(self, harness: UnifiedTestHarnessComplete):

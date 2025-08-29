@@ -118,7 +118,7 @@ class BusinessValueValidator:
         return 0.20 <= reduction <= 0.50
 
 
-class PerformanceTestExecutor:
+class TestPerformanceExecutor:
 
     """Executes performance tests with real measurements."""
     

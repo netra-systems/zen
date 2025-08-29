@@ -60,7 +60,7 @@ class ErrorRecoveryResult:
     data_integrity_preserved: bool
     within_sla: bool
 
-class RealCircuitBreakerTester:
+class TestRealCircuitBreakerer:
     """Tests real circuit breaker behavior with actual service calls."""
     
     def __init__(self):
@@ -82,6 +82,7 @@ class RealCircuitBreakerTester:
         self.failure_counts[service_name] = 0
         return circuit
     
+    @pytest.mark.resilience
     async def test_circuit_activation(self, service_name: str,
                                     failing_operation: callable) -> Dict[str, Any]:
         """Test circuit breaker activation with real failing operations."""
@@ -121,6 +122,7 @@ class RealCircuitBreakerTester:
             "circuit_state": circuit.state.value
         }
     
+    @pytest.mark.resilience
     async def test_circuit_recovery(self, service_name: str,
                                   working_operation: callable) -> Dict[str, Any]:
         """Test circuit breaker recovery with working operation."""
@@ -348,6 +350,7 @@ class TestCompleteErrorRecovery:
         """Initialize data integrity tracker."""
         return DataIntegrityTracker()
     
+    @pytest.mark.resilience
     async def test_error_recovery(self, orchestrator, circuit_breaker_tester, isolation_validator, data_tracker):
         """Main test: Complete error recovery with circuit breaker activation."""
         # Skip if services not available
@@ -508,6 +511,7 @@ class TestSyntaxFix:
         logger.info("✅ Data integrity preserved with no loss")
         logger.info("✅ All SLA requirements met")
     
+    @pytest.mark.resilience
     async def test_circuit_breaker_unit_behavior(self, circuit_breaker_tester):
         """Unit test for circuit breaker state transitions."""
 #         # Create circuit breaker with low threshold for testing # Possibly broken comprehension
@@ -529,6 +533,7 @@ class TestSyntaxFix:
         
         logger.info("✅ Circuit breaker unit behavior validated")
     
+    @pytest.mark.resilience
     async def test_service_health_endpoint_during_failure(self, orchestrator):
         """Test health endpoint accessibility during service failures."""
         if not orchestrator.is_environment_ready():
@@ -547,6 +552,7 @@ class TestSyntaxFix:
         except Exception as e:
             pytest.skip(f"Health endpoint test skipped: {e}")
     
+    @pytest.mark.resilience
     async def test_no_cascading_failures(self, orchestrator):
         """Test that failures do not cascade across service boundaries."""
         if not orchestrator.is_environment_ready():

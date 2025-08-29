@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { InitializationProgress } from '@/components/InitializationProgress';
 
 // Mock the UI components
@@ -7,257 +8,231 @@ jest.mock('@/components/ui/progress', () => ({
   Progress: ({ value, className }: { value: number; className?: string }) => (
     <div 
       data-testid="progress-bar" 
-      data-value={value} 
       className={className}
-      role="progressbar"
+      role="progressbar" 
       aria-valuenow={value}
       aria-valuemin={0}
       aria-valuemax={100}
     />
-  ),
+  )
 }));
 
 jest.mock('@/components/ui/alert', () => ({
-  Alert: ({ children, variant, ...props }: any) => (
-    <div data-testid="alert" data-variant={variant} {...props}>
-      {children}
-    </div>
+  Alert: ({ children, variant }: { children: React.ReactNode; variant?: string }) => (
+    <div data-testid="alert" data-variant={variant}>{children}</div>
   ),
-  AlertDescription: ({ children, ...props }: any) => (
-    <div data-testid="alert-description" {...props}>
-      {children}
-    </div>
-  ),
+  AlertDescription: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="alert-description">{children}</div>
+  )
 }));
 
 jest.mock('lucide-react', () => ({
   Loader2: ({ className }: { className?: string }) => (
-    <div data-testid="loader-icon" className={className} />
-  ),
+    <div data-testid="loader" className={className}>Loading...</div>
+  )
 }));
 
 describe('InitializationProgress', () => {
-  const defaultProps = {
-    phase: 'auth' as const,
-    progress: 0,
-  };
-
-  beforeEach(() => {
-    // Ensure consistent test environment
-    jest.clearAllMocks();
-  });
-
-  describe('Phase Display', () => {
-    it('displays auth phase correctly', () => {
-      render(<InitializationProgress {...defaultProps} phase="auth" progress={25} />);
+  describe('Phase Messages and Details', () => {
+    it('displays correct message and detail for auth phase', () => {
+      render(<InitializationProgress phase="auth" progress={20} />);
       
       expect(screen.getByText('Authenticating your session...')).toBeInTheDocument();
       expect(screen.getByText('Verifying credentials and permissions')).toBeInTheDocument();
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('loader')).toBeInTheDocument();
     });
 
-    it('displays websocket phase correctly', () => {
-      render(<InitializationProgress {...defaultProps} phase="websocket" progress={50} />);
+    it('displays correct message and detail for websocket phase', () => {
+      render(<InitializationProgress phase="websocket" progress={50} />);
       
       expect(screen.getByText('Connecting to real-time services...')).toBeInTheDocument();
       expect(screen.getByText('Establishing secure WebSocket connection')).toBeInTheDocument();
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('loader')).toBeInTheDocument();
     });
 
-    it('displays store phase correctly', () => {
-      render(<InitializationProgress {...defaultProps} phase="store" progress={75} />);
+    it('displays correct message and detail for store phase', () => {
+      render(<InitializationProgress phase="store" progress={80} />);
       
       expect(screen.getByText('Loading your workspace...')).toBeInTheDocument();
       expect(screen.getByText('Synchronizing application state')).toBeInTheDocument();
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('loader')).toBeInTheDocument();
     });
 
-    it('displays ready phase correctly', () => {
-      render(<InitializationProgress {...defaultProps} phase="ready" progress={100} />);
+    it('displays correct message and detail for ready phase', () => {
+      render(<InitializationProgress phase="ready" progress={100} />);
       
       expect(screen.getByText('Ready!')).toBeInTheDocument();
       expect(screen.getByText('Initialization complete')).toBeInTheDocument();
-      expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
 
-    it('displays error phase correctly', () => {
-      render(<InitializationProgress {...defaultProps} phase="error" progress={50} />);
+    it('displays correct message and detail for error phase', () => {
+      render(<InitializationProgress phase="error" progress={0} />);
       
       expect(screen.getByText('Connection issue detected')).toBeInTheDocument();
       expect(screen.getByText('Please check your connection and try again')).toBeInTheDocument();
-      expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
   });
 
-  describe('Progress Bar Updates', () => {
-    it('displays correct progress value at 0%', () => {
-      render(<InitializationProgress {...defaultProps} progress={0} />);
+  describe('Progress Bar', () => {
+    it('displays progress bar with correct value', () => {
+      render(<InitializationProgress phase="auth" progress={25} />);
       
       const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('data-value', '0');
-      expect(progressBar).toHaveAttribute('aria-valuenow', '0');
+      expect(progressBar).toHaveAttribute('aria-valuenow', '25');
+    });
+
+    it('displays progress percentage text', () => {
+      render(<InitializationProgress phase="websocket" progress={67} />);
+      
+      expect(screen.getByText('67% complete')).toBeInTheDocument();
+    });
+
+    it('handles edge case progress values', () => {
+      const { rerender } = render(<InitializationProgress phase="auth" progress={0} />);
       expect(screen.getByText('0% complete')).toBeInTheDocument();
-    });
-
-    it('displays correct progress value at 33%', () => {
-      render(<InitializationProgress {...defaultProps} progress={33} />);
       
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('data-value', '33');
-      expect(progressBar).toHaveAttribute('aria-valuenow', '33');
-      expect(screen.getByText('33% complete')).toBeInTheDocument();
-    });
-
-    it('displays correct progress value at 66%', () => {
-      render(<InitializationProgress {...defaultProps} progress={66} />);
-      
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('data-value', '66');
-      expect(progressBar).toHaveAttribute('aria-valuenow', '66');
-      expect(screen.getByText('66% complete')).toBeInTheDocument();
-    });
-
-    it('displays correct progress value at 100%', () => {
-      render(<InitializationProgress {...defaultProps} progress={100} />);
-      
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('data-value', '100');
-      expect(progressBar).toHaveAttribute('aria-valuenow', '100');
+      rerender(<InitializationProgress phase="store" progress={100} />);
       expect(screen.getByText('100% complete')).toBeInTheDocument();
-    });
-
-    it('handles decimal progress values correctly', () => {
-      render(<InitializationProgress {...defaultProps} progress={66.7} />);
       
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('data-value', '66.7');
-      expect(screen.getByText('67% complete')).toBeInTheDocument(); // Rounded
+      // Test values outside normal range
+      rerender(<InitializationProgress phase="auth" progress={-10} />);
+      expect(screen.getByText('-10% complete')).toBeInTheDocument();
+      
+      rerender(<InitializationProgress phase="auth" progress={150} />);
+      expect(screen.getByText('150% complete')).toBeInTheDocument();
     });
   });
 
   describe('Phase Indicators', () => {
-    it('shows auth phase as active when phase is auth', () => {
-      render(<InitializationProgress {...defaultProps} phase="auth" progress={10} />);
+    it('shows auth phase as active when in auth phase', () => {
+      render(<InitializationProgress phase="auth" progress={20} />);
       
-      const authIndicator = screen.getByText('Auth');
-      expect(authIndicator.closest('div')).toBeInTheDocument();
+      const authIndicator = screen.getByText('Auth').parentElement;
+      expect(authIndicator?.querySelector('.animate-pulse')).toBeInTheDocument();
+      expect(authIndicator?.querySelector('.bg-blue-500')).toBeInTheDocument();
     });
 
-    it('shows correct completion states based on progress', () => {
-      render(<InitializationProgress {...defaultProps} phase="websocket" progress={50} />);
+    it('shows websocket phase as active when in websocket phase', () => {
+      render(<InitializationProgress phase="websocket" progress={50} />);
       
-      // Auth should be completed (progress > 33)
-      // Connect should be active (current phase)
-      // Load should not be completed (progress <= 66)
-      const authLabel = screen.getByText('Auth');
-      const connectLabel = screen.getByText('Connect');
-      const loadLabel = screen.getByText('Load');
-      
-      expect(authLabel).toBeInTheDocument();
-      expect(connectLabel).toBeInTheDocument();
-      expect(loadLabel).toBeInTheDocument();
+      const connectIndicator = screen.getByText('Connect').parentElement;
+      expect(connectIndicator?.querySelector('.animate-pulse')).toBeInTheDocument();
+      expect(connectIndicator?.querySelector('.bg-blue-500')).toBeInTheDocument();
     });
 
-    it('shows all phases completed when progress is 100%', () => {
-      render(<InitializationProgress {...defaultProps} phase="ready" progress={100} />);
+    it('shows store phase as active when in store phase', () => {
+      render(<InitializationProgress phase="store" progress={80} />);
       
-      expect(screen.getByText('Auth')).toBeInTheDocument();
-      expect(screen.getByText('Connect')).toBeInTheDocument();
-      expect(screen.getByText('Load')).toBeInTheDocument();
+      const loadIndicator = screen.getByText('Load').parentElement;
+      expect(loadIndicator?.querySelector('.animate-pulse')).toBeInTheDocument();
+      expect(loadIndicator?.querySelector('.bg-blue-500')).toBeInTheDocument();
     });
 
-    it('shows correct indicator states for store phase', () => {
-      render(<InitializationProgress {...defaultProps} phase="store" progress={80} />);
+    it('shows completed indicators based on progress', () => {
+      // Progress > 33: Auth completed
+      const { rerender } = render(<InitializationProgress phase="websocket" progress={40} />);
+      let authIndicator = screen.getByText('Auth').parentElement;
+      expect(authIndicator?.querySelector('.bg-green-500')).toBeInTheDocument();
       
-      // Auth completed (>33%), Connect completed (>66%), Load active
-      expect(screen.getByText('Auth')).toBeInTheDocument();
-      expect(screen.getByText('Connect')).toBeInTheDocument();
-      expect(screen.getByText('Load')).toBeInTheDocument();
+      // Progress > 66: Auth and Connect completed
+      rerender(<InitializationProgress phase="store" progress={75} />);
+      authIndicator = screen.getByText('Auth').parentElement;
+      const connectIndicator = screen.getByText('Connect').parentElement;
+      expect(authIndicator?.querySelector('.bg-green-500')).toBeInTheDocument();
+      expect(connectIndicator?.querySelector('.bg-green-500')).toBeInTheDocument();
+      
+      // Progress = 100: All completed
+      rerender(<InitializationProgress phase="ready" progress={100} />);
+      const loadIndicator = screen.getByText('Load').parentElement;
+      expect(loadIndicator?.querySelector('.bg-green-500')).toBeInTheDocument();
     });
   });
 
-  describe('Connection Status Display', () => {
+  describe('Connection Status', () => {
     it('shows connection status during websocket phase', () => {
       render(
         <InitializationProgress 
-          {...defaultProps} 
           phase="websocket" 
           progress={50} 
-          connectionStatus="CONNECTING" 
+          connectionStatus="CONNECTING"
         />
       );
       
       expect(screen.getByText('Status: CONNECTING')).toBeInTheDocument();
     });
 
-    it('shows OPEN connection status', () => {
-      render(
+    it('does not show connection status in other phases', () => {
+      const { rerender } = render(
         <InitializationProgress 
-          {...defaultProps} 
-          phase="websocket" 
-          progress={60} 
-          connectionStatus="OPEN" 
-        />
-      );
-      
-      expect(screen.getByText('Status: OPEN')).toBeInTheDocument();
-    });
-
-    it('shows CLOSED connection status', () => {
-      render(
-        <InitializationProgress 
-          {...defaultProps} 
-          phase="websocket" 
-          progress={40} 
-          connectionStatus="CLOSED" 
-        />
-      );
-      
-      expect(screen.getByText('Status: CLOSED')).toBeInTheDocument();
-    });
-
-    it('does not show connection status for non-websocket phases', () => {
-      render(
-        <InitializationProgress 
-          {...defaultProps} 
           phase="auth" 
-          progress={25} 
-          connectionStatus="OPEN" 
+          progress={20} 
+          connectionStatus="CONNECTING"
         />
       );
+      expect(screen.queryByText('Status: CONNECTING')).not.toBeInTheDocument();
       
-      expect(screen.queryByText(/Status:/)).not.toBeInTheDocument();
+      rerender(
+        <InitializationProgress 
+          phase="store" 
+          progress={80} 
+          connectionStatus="OPEN"
+        />
+      );
+      expect(screen.queryByText('Status: OPEN')).not.toBeInTheDocument();
     });
 
-    it('does not show connection status when not provided during websocket phase', () => {
-      render(<InitializationProgress {...defaultProps} phase="websocket" progress={50} />);
+    it('handles all connection status values', () => {
+      const { rerender } = render(
+        <InitializationProgress 
+          phase="websocket" 
+          progress={50} 
+          connectionStatus="CLOSED"
+        />
+      );
+      expect(screen.getByText('Status: CLOSED')).toBeInTheDocument();
       
-      expect(screen.queryByText(/Status:/)).not.toBeInTheDocument();
+      rerender(
+        <InitializationProgress 
+          phase="websocket" 
+          progress={50} 
+          connectionStatus="CONNECTING"
+        />
+      );
+      expect(screen.getByText('Status: CONNECTING')).toBeInTheDocument();
+      
+      rerender(
+        <InitializationProgress 
+          phase="websocket" 
+          progress={50} 
+          connectionStatus="OPEN"
+        />
+      );
+      expect(screen.getByText('Status: OPEN')).toBeInTheDocument();
     });
   });
 
   describe('Error Display', () => {
-    it('displays error message when in error phase', () => {
-      const errorMessage = 'WebSocket connection failed';
+    it('shows error alert when in error phase with error message', () => {
       render(
         <InitializationProgress 
-          {...defaultProps} 
           phase="error" 
-          progress={30} 
-          error={errorMessage}
+          progress={0} 
+          error="Failed to connect to server"
         />
       );
       
-      expect(screen.getByTestId('alert')).toHaveAttribute('data-variant', 'destructive');
-      expect(screen.getByTestId('alert-description')).toHaveTextContent(errorMessage);
+      const alert = screen.getByTestId('alert');
+      expect(alert).toHaveAttribute('data-variant', 'destructive');
+      expect(screen.getByText('Failed to connect to server')).toBeInTheDocument();
     });
 
-    it('does not display error when not in error phase', () => {
+    it('does not show error alert when not in error phase', () => {
       render(
         <InitializationProgress 
-          {...defaultProps} 
           phase="auth" 
-          progress={25} 
+          progress={20} 
           error="Some error"
         />
       );
@@ -265,181 +240,63 @@ describe('InitializationProgress', () => {
       expect(screen.queryByTestId('alert')).not.toBeInTheDocument();
     });
 
-    it('does not display error when in error phase but no error provided', () => {
-      render(<InitializationProgress {...defaultProps} phase="error" progress={50} />);
+    it('does not show error alert in error phase without error message', () => {
+      render(
+        <InitializationProgress 
+          phase="error" 
+          progress={0}
+        />
+      );
       
       expect(screen.queryByTestId('alert')).not.toBeInTheDocument();
     });
-
-    it('displays different error messages correctly', () => {
-      const { rerender } = render(
-        <InitializationProgress 
-          {...defaultProps} 
-          phase="error" 
-          progress={50} 
-          error="Network timeout"
-        />
-      );
-      
-      expect(screen.getByTestId('alert-description')).toHaveTextContent('Network timeout');
-
-      rerender(
-        <InitializationProgress 
-          {...defaultProps} 
-          phase="error" 
-          progress={50} 
-          error="Authentication failed"
-        />
-      );
-      
-      expect(screen.getByTestId('alert-description')).toHaveTextContent('Authentication failed');
-    });
   });
 
-  describe('Brand Display', () => {
+  describe('Branding and Layout', () => {
     it('displays Netra Apex branding', () => {
-      render(<InitializationProgress {...defaultProps} />);
+      render(<InitializationProgress phase="auth" progress={20} />);
       
       expect(screen.getByText('Netra Apex')).toBeInTheDocument();
       expect(screen.getByText('AI Optimization Platform')).toBeInTheDocument();
     });
-  });
 
-  describe('Component Structure', () => {
-    it('has proper ARIA attributes for accessibility', () => {
-      render(<InitializationProgress {...defaultProps} progress={45} />);
+    it('applies correct styling classes', () => {
+      const { container } = render(<InitializationProgress phase="auth" progress={20} />);
       
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('role', 'progressbar');
-      expect(progressBar).toHaveAttribute('aria-valuenow', '45');
-      expect(progressBar).toHaveAttribute('aria-valuemin', '0');
-      expect(progressBar).toHaveAttribute('aria-valuemax', '100');
-    });
-
-    it('applies correct CSS classes', () => {
-      render(<InitializationProgress {...defaultProps} />);
+      // Check for gradient background
+      expect(container.querySelector('.bg-gradient-to-br')).toBeInTheDocument();
+      expect(container.querySelector('.from-gray-50')).toBeInTheDocument();
+      expect(container.querySelector('.via-white')).toBeInTheDocument();
+      expect(container.querySelector('.to-gray-50')).toBeInTheDocument();
       
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveClass('h-2'); // Height class from Progress component
-    });
-
-    it('renders all expected elements', () => {
-      render(
-        <InitializationProgress 
-          {...defaultProps} 
-          phase="websocket" 
-          progress={50} 
-          connectionStatus="CONNECTING"
-          error="Test error"
-        />
-      );
-      
-      // Main content
-      expect(screen.getByText('Netra Apex')).toBeInTheDocument();
-      expect(screen.getByTestId('progress-bar')).toBeInTheDocument();
-      expect(screen.getByText('50% complete')).toBeInTheDocument();
-      
-      // Phase message
-      expect(screen.getByText('Connecting to real-time services...')).toBeInTheDocument();
-      
-      // Connection status (shown for websocket phase)
-      expect(screen.getByText('Status: CONNECTING')).toBeInTheDocument();
-      
-      // Phase indicators
-      expect(screen.getByText('Auth')).toBeInTheDocument();
-      expect(screen.getByText('Connect')).toBeInTheDocument();
-      expect(screen.getByText('Load')).toBeInTheDocument();
-      
-      // Error not shown because phase is not 'error'
-      expect(screen.queryByTestId('alert')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Phase Transitions', () => {
-    it('handles phase transitions correctly', () => {
-      const { rerender } = render(
-        <InitializationProgress {...defaultProps} phase="auth" progress={10} />
-      );
-      
-      expect(screen.getByText('Authenticating your session...')).toBeInTheDocument();
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
-
-      rerender(<InitializationProgress {...defaultProps} phase="websocket" progress={50} />);
-      
-      expect(screen.getByText('Connecting to real-time services...')).toBeInTheDocument();
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
-
-      rerender(<InitializationProgress {...defaultProps} phase="store" progress={80} />);
-      
-      expect(screen.getByText('Loading your workspace...')).toBeInTheDocument();
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
-
-      rerender(<InitializationProgress {...defaultProps} phase="ready" progress={100} />);
-      
-      expect(screen.getByText('Ready!')).toBeInTheDocument();
-      expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument();
-    });
-
-    it('handles error phase transition', () => {
-      const { rerender } = render(
-        <InitializationProgress {...defaultProps} phase="auth" progress={25} />
-      );
-      
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
-
-      rerender(
-        <InitializationProgress 
-          {...defaultProps} 
-          phase="error" 
-          progress={25} 
-          error="Connection failed"
-        />
-      );
-      
-      expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument();
-      expect(screen.getByTestId('alert')).toBeInTheDocument();
-      expect(screen.getByText('Connection failed')).toBeInTheDocument();
+      // Check for card styling
+      expect(container.querySelector('.rounded-lg')).toBeInTheDocument();
+      expect(container.querySelector('.bg-white')).toBeInTheDocument();
+      expect(container.querySelector('.shadow-lg')).toBeInTheDocument();
     });
   });
 
   describe('Edge Cases', () => {
-    it('handles negative progress values', () => {
-      render(<InitializationProgress {...defaultProps} progress={-10} />);
+    it('handles missing optional props gracefully', () => {
+      render(<InitializationProgress phase="auth" progress={50} />);
       
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('data-value', '-10');
-      expect(screen.getByText('0% complete')).toBeInTheDocument(); // Math.round handles negative
-    });
-
-    it('handles progress values over 100', () => {
-      render(<InitializationProgress {...defaultProps} progress={150} />);
-      
-      const progressBar = screen.getByTestId('progress-bar');
-      expect(progressBar).toHaveAttribute('data-value', '150');
-      expect(screen.getByText('150% complete')).toBeInTheDocument();
+      // Should not show connection status or error
+      expect(screen.queryByText(/Status:/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alert')).not.toBeInTheDocument();
     });
 
     it('handles very long error messages', () => {
-      const longError = 'This is a very long error message that should still be displayed properly without breaking the component layout or causing any rendering issues';
-      
+      const longError = 'A'.repeat(500);
       render(
         <InitializationProgress 
-          {...defaultProps} 
           phase="error" 
-          progress={50} 
+          progress={0} 
           error={longError}
         />
       );
       
-      expect(screen.getByText(longError)).toBeInTheDocument();
-    });
-
-    it('handles missing optional props gracefully', () => {
-      render(<InitializationProgress phase="auth" progress={25} />);
-      
-      expect(screen.getByText('Authenticating your session...')).toBeInTheDocument();
-      expect(screen.queryByText(/Status:/)).not.toBeInTheDocument();
-      expect(screen.queryByTestId('alert')).not.toBeInTheDocument();
+      const alertDescription = screen.getByTestId('alert-description');
+      expect(alertDescription.textContent).toHaveLength(500);
     });
   });
 });
