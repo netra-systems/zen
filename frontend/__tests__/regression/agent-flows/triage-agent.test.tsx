@@ -12,7 +12,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
-import { useUnifiedStore } from '@/store/unified-chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { WebSocketMessage, SubAgentState } from '@/types/unified';
 
 // Mock WebSocket
@@ -26,9 +26,40 @@ const mockWebSocket = {
 
 global.WebSocket = jest.fn(() => mockWebSocket) as any;
 
+// Mock stores with getState
+const mockUnifiedStoreState = {
+  isAuthenticated: true,
+  activeThreadId: 'test-thread-123',
+  isProcessing: false,
+  isThreadLoading: false,
+  messages: [],
+  currentRunId: null,
+  fastLayerData: null,
+  mediumLayerData: null,
+  slowLayerData: null,
+  resetState: jest.fn(() => {
+    mockUnifiedStoreState.isProcessing = false;
+    mockUnifiedStoreState.isThreadLoading = false;
+    mockUnifiedStoreState.messages = [];
+    mockUnifiedStoreState.currentRunId = null;
+    mockUnifiedStoreState.fastLayerData = null;
+    mockUnifiedStoreState.mediumLayerData = null;
+    mockUnifiedStoreState.slowLayerData = null;
+  })
+};
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: Object.assign(
+    jest.fn(() => mockUnifiedStoreState),
+    {
+      getState: jest.fn(() => mockUnifiedStoreState)
+    }
+  )
+}));
+
 describe('Triage Agent Flow Tests', () => {
   let wsEventHandlers: { [key: string]: Function[] } = {};
-  let unifiedStore: ReturnType<typeof useUnifiedStore>;
+  let unifiedStore: ReturnType<typeof useUnifiedChatStore>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,7 +72,7 @@ describe('Triage Agent Flow Tests', () => {
       wsEventHandlers[event].push(handler);
     });
 
-    unifiedStore = useUnifiedStore.getState();
+    unifiedStore = useUnifiedChatStore.getState();
     unifiedStore.resetState();
   });
 
@@ -94,7 +125,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.classification).toBe('cost_optimization');
         expect(state?.metadata?.confidence).toBeGreaterThan(0.9);
       });
@@ -124,7 +155,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.classification).toBe('performance_optimization');
       });
     });
@@ -154,7 +185,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.classification).toBe('troubleshooting');
         expect(state?.metadata?.error_type_detected).toBe('timeout');
       });
@@ -192,7 +223,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.data_sufficiency).toBe('sufficient');
         expect(state?.metadata?.workflow_recommendation).toBe('full_analysis');
       });
@@ -233,7 +264,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.data_sufficiency).toBe('insufficient');
         expect(state?.metadata?.missing_critical_data).toHaveLength(2);
         expect(state?.metadata?.workflow_recommendation).toBe('data_collection_first');
@@ -269,7 +300,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.data_sufficiency).toBe('partial');
         expect(state?.metadata?.analysis_limitations).toBeTruthy();
       });
@@ -306,7 +337,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.priority).toBe('critical');
         expect(state?.metadata?.priority_score).toBe(10);
       });
@@ -353,7 +384,7 @@ describe('Triage Agent Flow Tests', () => {
         });
 
         await waitFor(() => {
-          const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+          const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
           expect(state?.metadata?.priority).toBe(testCase.expectedPriority);
         });
       }
@@ -386,7 +417,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.workflow_path).toBe('skip_optimization');
         expect(state?.metadata?.skip_agents).toContain('OptimizationAgent');
       });
@@ -417,7 +448,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.workflow_path).toBe('full_workflow');
         expect(state?.metadata?.required_agents).toHaveLength(4);
       });
@@ -458,7 +489,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.context_for_optimization).toBeTruthy();
         expect(state?.metadata?.context_for_optimization?.focus_area).toBe('gpu_workloads');
       });
@@ -493,7 +524,7 @@ describe('Triage Agent Flow Tests', () => {
       });
 
       await waitFor(() => {
-        const state = unifiedStore.getState().fastLayerData?.subAgentStatus;
+        const state = mockUnifiedStoreState.fastLayerData?.subAgentStatus;
         expect(state?.metadata?.classification).toBe('unclear');
         expect(state?.metadata?.confidence).toBeLessThan(0.3);
         expect(state?.metadata?.fallback_action).toBe('request_clarification');

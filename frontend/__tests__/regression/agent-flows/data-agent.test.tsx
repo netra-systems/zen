@@ -13,7 +13,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AgentProvider, useAgentContext } from '@/providers/AgentProvider';
 import { useChatStore } from '@/store/chatStore';
-import { useUnifiedStore } from '@/store/unified-chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { WebSocketMessage } from '@/types/unified';
 
 // Mock WebSocket
@@ -27,10 +27,61 @@ const mockWebSocket = {
 
 global.WebSocket = jest.fn(() => mockWebSocket) as any;
 
+// Mock stores with getState
+const mockChatStoreState = {
+  messages: [],
+  currentRunId: null,
+  clearMessages: jest.fn(() => {
+    mockChatStoreState.messages = [];
+  }),
+  addMessage: jest.fn((message) => {
+    mockChatStoreState.messages.push(message);
+  })
+};
+
+const mockUnifiedStoreState = {
+  isAuthenticated: true,
+  activeThreadId: 'test-thread-123',
+  isProcessing: false,
+  isThreadLoading: false,
+  messages: [],
+  currentRunId: null,
+  fastLayerData: null,
+  mediumLayerData: null,
+  slowLayerData: null,
+  resetState: jest.fn(() => {
+    mockUnifiedStoreState.isProcessing = false;
+    mockUnifiedStoreState.isThreadLoading = false;
+    mockUnifiedStoreState.messages = [];
+    mockUnifiedStoreState.currentRunId = null;
+    mockUnifiedStoreState.fastLayerData = null;
+    mockUnifiedStoreState.mediumLayerData = null;
+    mockUnifiedStoreState.slowLayerData = null;
+  })
+};
+
+jest.mock('@/store/chatStore', () => ({
+  useChatStore: Object.assign(
+    jest.fn(() => mockChatStoreState),
+    {
+      getState: jest.fn(() => mockChatStoreState)
+    }
+  )
+}));
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: Object.assign(
+    jest.fn(() => mockUnifiedStoreState),
+    {
+      getState: jest.fn(() => mockUnifiedStoreState)
+    }
+  )
+}));
+
 describe('Data Agent Flow Tests', () => {
   let wsEventHandlers: { [key: string]: Function[] } = {};
   let chatStore: ReturnType<typeof useChatStore>;
-  let unifiedStore: ReturnType<typeof useUnifiedStore>;
+  let unifiedStore: ReturnType<typeof useUnifiedChatStore>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,7 +95,7 @@ describe('Data Agent Flow Tests', () => {
     });
 
     chatStore = useChatStore.getState();
-    unifiedStore = useUnifiedStore.getState();
+    unifiedStore = useUnifiedChatStore.getState();
     chatStore.clearMessages();
     unifiedStore.resetState();
   });

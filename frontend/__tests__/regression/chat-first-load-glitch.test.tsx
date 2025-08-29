@@ -37,7 +37,27 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/chat',
 }));
 
-jest.mock('@/hooks/useWebSocket');
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn(() => ({
+    status: 'CONNECTING',
+    messages: [],
+    send: jest.fn(),
+    disconnect: jest.fn(),
+    isConnected: false
+  }))
+}));
+jest.mock('@/hooks/useInitializationCoordinator', () => ({
+  useInitializationCoordinator: () => ({
+    state: {
+      phase: 'ready',
+      isReady: true,
+      error: null,
+      progress: 100
+    },
+    reset: jest.fn(),
+    isInitialized: true
+  })
+}));
 jest.mock('@/hooks/useGTMEvent', () => ({
   useGTMEvent: () => ({
     trackLogin: jest.fn(),
@@ -46,6 +66,26 @@ jest.mock('@/hooks/useGTMEvent', () => ({
     trackError: jest.fn(),
     trackPageView: jest.fn(),
   }),
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: () => ({
+    currentThreadId: null,
+    isNavigating: false,
+  }),
+}));
+
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: jest.fn(),
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: () => ({
+    shouldShowLoading: false,
+    shouldShowEmptyState: true,
+    shouldShowExamplePrompts: false,
+    loadingMessage: 'Loading...'
+  })
 }));
 
 // Track component lifecycle events
@@ -86,8 +126,11 @@ describe('Chat First-Time Page Load Glitch Detection', () => {
       messages: [],
       send: jest.fn(),
       disconnect: jest.fn(),
+      isConnected: false
     };
-    (useWebSocket as jest.Mock).mockReturnValue(mockWebSocket);
+    // Update the mock implementation
+    const useWebSocketMock = require('@/hooks/useWebSocket').useWebSocket;
+    useWebSocketMock.mockImplementation(() => mockWebSocket);
     
     // Reset stores
     useUnifiedChatStore.setState({
