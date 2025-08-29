@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>ClickHouse analyze_performance_metrics Method Signature Fix</title>
+  <date>2025-08-29</date>
+  <category>method-signature</category>
+  <priority>high</priority>
+  
+  <problem>
+    <description>
+      Data analysis failed due to method signature mismatch when calling analyze_performance_metrics.
+      The system was calling the wrong class's method due to incorrect fallback logic.
+    </description>
+    <error_message>Data analysis failed: ModernClickHouseOperations.analyze_performance_metrics() takes from 1 to 3 positional arguments but 4 were given</error_message>
+    <location>netra_backend/app/agents/data_sub_agent/execution_engine.py:210</location>
+  </problem>
+  
+  <root_cause>
+    <finding>
+      The _get_data_operations() method was falling back to clickhouse_ops instead of returning
+      a proper DataOperations instance. This caused calls intended for DataOperations to be
+      incorrectly routed to ModernClickHouseOperations, which has a different method signature.
+    </finding>
+    <specific_issues>
+      <issue>Missing DataOperations instance initialization</issue>
+      <issue>Incorrect fallback: getattr(self, 'data_ops', self.clickhouse_ops)</issue>
+      <issue>Method signature mismatch: DataOperations expects (user_id, workload_id, time_range)</issue>
+      <issue>ModernClickHouseOperations expects (run_id=None, stream_updates=False)</issue>
+    </specific_issues>
+  </root_cause>
+  
+  <solution>
+    <change>
+      <file>netra_backend/app/agents/data_sub_agent/modern_execution_engine.py</file>
+      <method>_init_legacy_components</method>
+      <description>
+        Added proper DataOperations instance initialization with all required dependencies
+      </description>
+      <code>
+        self.data_ops = DataOperations(
+            self.query_builder, 
+            self.analysis_engine, 
+            self.clickhouse_ops, 
+            self.redis_manager
+        )
+      </code>
+    </change>
+    <change>
+      <file>netra_backend/app/agents/data_sub_agent/modern_execution_engine.py</file>
+      <method>_get_data_operations</method>
+      <description>Fixed to always return proper DataOperations instance</description>
+      <before>return getattr(self, 'data_ops', self.clickhouse_ops)</before>
+      <after>return self.data_ops</after>
+    </change>
+    <change>
+      <file>netra_backend/app/agents/data_sub_agent/execution_engine.py</file>
+      <description>Exposed data_ops in legacy ExecutionEngine wrapper</description>
+      <code>self.data_ops = self.modern_engine.data_ops</code>
+    </change>
+  </solution>
+  
+  <pattern>
+    <title>Proper Class Delegation Pattern</title>
+    <description>
+      Always ensure the correct class instance is used for method calls.
+      Don't use fallback objects with different interfaces.
+    </description>
+    <correct_usage>
+      # Initialize proper instance
+      self.data_ops = DataOperations(dependencies)
+      # Always return the correct instance
+      return self.data_ops
+    </correct_usage>
+    <incorrect_usage>
+      # Don't fallback to incompatible classes
+      return getattr(self, 'data_ops', self.clickhouse_ops)  # Different interfaces!
+    </incorrect_usage>
+  </pattern>
+  
+  <verification>
+    <test>DataOperations.analyze_performance_metrics accepts 3 arguments</test>
+    <test>ModernClickHouseOperations.analyze_performance_metrics keeps its 2-argument signature</test>
+    <test>Calls to data_ops route to DataOperations correctly</test>
+    <test>Legacy ExecutionEngine properly exposes data_ops</test>
+  </verification>
+  
+  <impact>
+    <fixed>Data analysis operations work correctly</fixed>
+    <fixed>Method signature mismatches eliminated</fixed>
+    <improved>Clear separation between DataOperations and ClickHouseOperations</improved>
+    <improved>Proper dependency injection and initialization</improved>
+  </impact>
+  
+  <best_practices>
+    <practice>Always verify method signatures when delegating calls</practice>
+    <practice>Don't use fallback objects with incompatible interfaces</practice>
+    <practice>Initialize all required components explicitly</practice>
+    <practice>Maintain clear separation between different operation classes</practice>
+  </best_practices>
+  
+  <related_specs>
+    <spec>SPEC/clickhouse.xml</spec>
+    <spec>SPEC/data_operations_architecture.xml</spec>
+  </related_specs>
+</learning>

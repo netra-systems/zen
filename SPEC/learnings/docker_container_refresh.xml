@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker Container Refresh and Rebuild Patterns</title>
+    <category>Infrastructure</category>
+    <subcategory>Docker</subcategory>
+    <importance>CRITICAL</importance>
+    <last_updated>2025-01-08</last_updated>
+  </metadata>
+
+  <problem>
+    <description>
+      Docker containers running stale code despite fixes being committed. Image built at 12:01 PM was running code from before 08:59 AM fix, causing already-fixed bugs to persist.
+    </description>
+    <symptoms>
+      <symptom>Fixed SQLAlchemy session management bug still occurring in container</symptom>
+      <symptom>Container code doesn't match repository code</symptom>
+      <symptom>Debugging shows old code running despite recent commits</symptom>
+    </symptoms>
+    <root_cause>
+      Docker image was built from an outdated commit. Containers run the code that was present when the image was built, not the current repository state.
+    </root_cause>
+  </problem>
+
+  <solution>
+    <immediate_fix>
+      <step>Stop containers: docker-compose down</step>
+      <step>Rebuild with latest code: docker-compose build --no-cache backend</step>
+      <step>Start fresh containers: docker-compose up -d</step>
+      <step>Verify fix is present: docker exec netra-backend grep "CRITICAL FIX" /app/netra_backend/app/db/database_manager.py</step>
+    </immediate_fix>
+    
+    <permanent_solution>
+      Establish clear understanding of what updates automatically (volume mounts) vs what requires rebuild (COPY commands in Dockerfile).
+    </permanent_solution>
+  </solution>
+
+  <key_insights>
+    <insight category="file_updates">
+      <title>Volume Mounts vs Image Layers</title>
+      <description>
+        Files mounted as volumes update immediately without rebuild. Files copied during image build (via COPY in Dockerfile) require container rebuild to update.
+      </description>
+      <examples>
+        <volume_mount>./frontend:/app/frontend - Updates immediately</volume_mount>
+        <image_layer>COPY netra_backend /app/netra_backend - Requires rebuild</image_layer>
+      </examples>
+    </insight>
+
+    <insight category="verification">
+      <title>Always Verify After Rebuild</title>
+      <description>
+        After rebuilding, always verify the expected changes are present inside the container using docker exec commands.
+      </description>
+      <command>docker exec [container] cat [file] | grep [expected_change]</command>
+    </insight>
+
+    <insight category="debugging">
+      <title>Timeline Comparison</title>
+      <description>
+        Compare commit timestamps with docker image build times to identify stale container issues.
+      </description>
+      <commands>
+        <check_image>docker images | grep netra-backend</check_image>
+        <check_commit>git log -1 --format="%ci" [file]</check_commit>
+      </commands>
+    </insight>
+  </key_insights>
+
+  <best_practices>
+    <practice priority="HIGH">
+      <title>Rebuild Levels</title>
+      <levels>
+        <level name="quick_restart">docker-compose restart - For config changes only</level>
+        <level name="standard_rebuild">docker-compose build && docker-compose up -d - For code changes</level>
+        <level name="clean_rebuild">docker-compose build --no-cache - For cache issues</level>
+        <level name="nuclear_option">docker system prune -a && rebuild - For system issues</level>
+      </levels>
+    </practice>
+
+    <practice priority="HIGH">
+      <title>Development vs Production</title>
+      <description>
+        Use volume mounts for development (immediate updates) but COPY for production (immutable images).
+      </description>
+    </practice>
+
+    <practice priority="MEDIUM">
+      <title>Image Tagging</title>
+      <description>
+        Tag images with version numbers or commit hashes to track what code is running.
+      </description>
+      <example>docker build -t netra-backend:$(git rev-parse --short HEAD) .</example>
+    </practice>
+  </best_practices>
+
+  <common_pitfalls>
+    <pitfall>
+      <name>Assuming Automatic Updates</name>
+      <description>Expecting backend code changes to apply without rebuild</description>
+      <prevention>Understand Dockerfile COPY vs docker-compose volumes</prevention>
+    </pitfall>
+    
+    <pitfall>
+      <name>Docker Build Cache</name>
+      <description>Docker reusing cached layers even with code changes</description>
+      <prevention>Use --no-cache flag when suspicious: docker-compose build --no-cache</prevention>
+    </pitfall>
+
+    <pitfall>
+      <name>Wrong Compose File</name>
+      <description>Using production compose file in development or vice versa</description>
+      <prevention>Explicitly specify: docker-compose -f docker-compose.dev.yml up</prevention>
+    </pitfall>
+  </common_pitfalls>
+
+  <decision_tree>
+    <question>Did you change code?</question>
+    <no>docker-compose restart</no>
+    <yes>
+      <question>Is it in a volume-mounted directory?</question>
+      <yes>Changes apply immediately (maybe restart for safety)</yes>
+      <no>
+        <question>Is it backend/image code?</question>
+        <yes>docker-compose build && docker-compose up -d</yes>
+        <cache_issues>docker-compose build --no-cache</cache_issues>
+      </no>
+    </yes>
+  </decision_tree>
+
+  <related_specs>
+    <spec>deployment_architecture.xml</spec>
+    <spec>gcp_deployment.xml</spec>
+    <spec>dev_launcher.xml</spec>
+  </related_specs>
+
+  <tags>
+    <tag>docker</tag>
+    <tag>containers</tag>
+    <tag>deployment</tag>
+    <tag>debugging</tag>
+    <tag>infrastructure</tag>
+  </tags>
+</learning>

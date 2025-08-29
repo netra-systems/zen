@@ -1605,5 +1605,29 @@
             <critical-takeaway>Test all Docker remediation commands against actual running containers before deployment</critical-takeaway>
             <critical-takeaway>Container name validation should be included in pre-deployment checks for remediation scripts</critical-takeaway>
         </category>
+        
+        <category name="Docker Container Refresh" path="SPEC/learnings/docker_container_refresh.xml" keywords="Docker, Container Refresh, Rebuild, Volume Mounts, Image Layers, Stale Code, docker-compose build, no-cache">
+            <critical-takeaway>Volume mounts update immediately, COPY commands in Dockerfile require rebuild - understand the difference</critical-takeaway>
+            <critical-takeaway>Container code reflects image build time, NOT current repository state - always rebuild after code changes</critical-takeaway>
+            <critical-takeaway>Use docker-compose build --no-cache when suspicious of cache issues or stale code</critical-takeaway>
+            <critical-takeaway>ALWAYS verify fixes are present in container after rebuild: docker exec [container] grep [expected_change] [file]</critical-takeaway>
+            <critical-takeaway>Compare commit timestamps with image build times to identify stale container issues</critical-takeaway>
+            <critical-takeaway>Four rebuild levels: restart (config only), build (code changes), --no-cache (cache issues), system prune (nuclear)</critical-takeaway>
+            <critical-takeaway>Tag images with commit hashes for production to track exactly what code is running</critical-takeaway>
+            <critical-takeaway>Development uses volume mounts for immediate updates, production uses COPY for immutable images</critical-takeaway>
+        </category>
     </intelligent_remediation>
+    
+    <agent_orchestration>
+        <category name="Workflow Sequential Execution" path="SPEC/learnings/workflow_sequential_execution.xml" keywords="Workflow, Sequential Execution, Parallel Execution, Agent Dependencies, Supervisor Agent, Pipeline Steps, Execution Strategy, Race Conditions">
+            <critical-takeaway>Agent workflow steps MUST explicitly define dependencies to prevent incorrect parallel execution</critical-takeaway>
+            <critical-takeaway>Pipeline steps default to SEQUENTIAL strategy unless explicitly marked for PARALLEL execution</critical-takeaway>
+            <critical-takeaway>Execution engine requires explicit PARALLEL strategy on at least one step to enable parallel execution</critical-takeaway>
+            <critical-takeaway>Standard workflow has strict dependencies: triage → data → optimization → actions → reporting</critical-takeaway>
+            <critical-takeaway>Use multiple redundant checks (strategy, dependencies, metadata.requires_sequential) for critical execution paths</critical-takeaway>
+            <critical-takeaway>Test workflow execution patterns with dedicated unit tests to prevent regression</critical-takeaway>
+            <critical-takeaway>Log entries showing "Supervisor parallel execution" with all agents indicate dependency violation bug</critical-takeaway>
+            <critical-takeaway>Race conditions from parallel execution can cause data corruption and unpredictable AI recommendations</critical-takeaway>
+        </category>
+    </agent_orchestration>
 </specification>

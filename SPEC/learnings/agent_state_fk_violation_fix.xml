@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>Agent State Snapshots Foreign Key Violation Resolution</title>
+  <date>2025-08-29</date>
+  <category>database-integrity</category>
+  <priority>critical</priority>
+  
+  <problem>
+    <description>
+      Foreign key constraint violation when saving agent state snapshots, preventing state persistence.
+      This occurred when the system tried to save states with invalid or missing user_ids.
+    </description>
+    <error_message>insert or update on table "agent_state_snapshots" violates foreign key constraint "agent_state_snapshots_user_id_fkey"</error_message>
+    <location>netra_backend/app/services/state_persistence.py:402</location>
+  </problem>
+  
+  <root_cause>
+    <finding>
+      The system was attempting to create users with invalid email addresses (ending in @dev.local)
+      which were rejected by Pydantic's EmailStr validator. This prevented user creation and left
+      invalid user_ids that violated the foreign key constraint.
+    </finding>
+    <specific_issues>
+      <issue>Email validation rejected @dev.local domain as invalid</issue>
+      <issue>UserCreate schema required valid email addresses</issue>
+      <issue>No fallback for when user creation failed</issue>
+      <issue>user_id field was not nullable, forcing FK violations</issue>
+    </specific_issues>
+  </root_cause>
+  
+  <solution>
+    <change>
+      <file>netra_backend/app/services/state_persistence.py</file>
+      <method>_ensure_user_exists_for_snapshot</method>
+      <description>
+        Enhanced to use get_or_create_dev_user() for dev/test/run_ prefixed users,
+        which bypasses email validation and uses valid example.com emails
+      </description>
+    </change>
+    <change>
+      <file>netra_backend/app/services/state_persistence.py</file>
+      <method>_create_state_snapshot</method>
+      <description>
+        Added graceful fallback handling when user creation fails,
+        setting user_id to None to avoid FK violations
+      </description>
+    </change>
+    <change>
+      <file>netra_backend/app/db/models_agent_state.py</file>
+      <field>user_id</field>
+      <description>Made user_id nullable to support cases where no valid user exists</description>
+    </change>
+  </solution>
+  
+  <pattern>
+    <title>Dev User Creation Pattern</title>
+    <description>
+      For dev/test environments, use specialized user creation methods that bypass
+      strict validation and use valid placeholder emails.
+    </description>
+    <correct_usage>
+      # For dev/test/run_ prefixed users
+      if user_id.startswith(('dev', 'test', 'run_')):
+          user = await get_or_create_dev_user(db, f"{user_id}@example.com")
+    </correct_usage>
+    <incorrect_usage>
+      # Don't use invalid domains
+      user = UserCreate(email=f"{user_id}@dev.local")  # Fails validation
+    </incorrect_usage>
+  </pattern>
+  
+  <verification>
+    <test>State snapshots save successfully with dev users</test>
+    <test>No FK violations with run_ prefixed user IDs</test>
+    <test>System handles missing users gracefully</test>
+    <test>Invalid user IDs don't crash the application</test>
+  </verification>
+  
+  <impact>
+    <fixed>State persistence works reliably in dev environments</fixed>
+    <fixed>Foreign key violations eliminated</fixed>
+    <improved>Better error handling and diagnostics</improved>
+    <improved>Graceful fallback for user creation failures</improved>
+  </impact>
+  
+  <best_practices>
+    <practice>Always validate email addresses before user creation</practice>
+    <practice>Use nullable foreign keys when relationships are optional</practice>
+    <practice>Implement graceful fallbacks for non-critical operations</practice>
+    <practice>Provide clear error messages for FK violations</practice>
+  </best_practices>
+  
+  <related_specs>
+    <spec>SPEC/database_connectivity_architecture.xml</spec>
+    <spec>SPEC/learnings/auth_persistence_ssot.xml</spec>
+  </related_specs>
+</learning>

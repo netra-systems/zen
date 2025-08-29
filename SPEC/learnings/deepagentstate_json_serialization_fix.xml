@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>DeepAgentState JSON Serialization Fix for WebSocket</title>
+  <date>2025-08-29</date>
+  <category>serialization</category>
+  <priority>high</priority>
+  
+  <problem>
+    <description>
+      WebSocket manager failed to send DeepAgentState objects due to JSON serialization errors.
+      This prevented real-time state updates from being sent to frontend clients.
+    </description>
+    <error_message>Error sending to connection conn_dev-temp-d092cbd4_fc7c8fa7: Object of type DeepAgentState is not JSON serializable</error_message>
+    <location>netra_backend/app/websocket_core/manager.py:374</location>
+  </problem>
+  
+  <root_cause>
+    <finding>
+      DeepAgentState Pydantic models were being passed directly to json.dumps() without proper serialization.
+      The existing model_dump() call didn't use mode='json', causing datetime objects to fail serialization.
+    </finding>
+    <specific_issues>
+      <issue>Direct json.dumps(DeepAgentState) fails on Pydantic models</issue>
+      <issue>model_dump() without mode='json' doesn't convert datetime to strings</issue>
+      <issue>No fallback serialization strategy for complex objects</issue>
+      <issue>Missing type-specific serialization handlers</issue>
+    </specific_issues>
+  </root_cause>
+  
+  <solution>
+    <change>
+      <file>netra_backend/app/websocket_core/manager.py</file>
+      <method>_serialize_message_safely</method>
+      <description>
+        Added comprehensive serialization method with multiple fallback strategies:
+        1. Try direct JSON serialization
+        2. Handle DeepAgentState with to_dict() method
+        3. Handle Pydantic models with model_dump(mode='json')
+        4. Fallback to string representation for non-serializable objects
+      </description>
+    </change>
+    <change>
+      <file>netra_backend/app/websocket_core/manager.py</file>
+      <method>_send_to_connection</method>
+      <description>Updated to use _serialize_message_safely for all messages</description>
+    </change>
+    <change>
+      <file>netra_backend/app/websocket_core/manager.py</file>
+      <method>send_to_thread</method>
+      <description>Updated to use safe serialization before sending</description>
+    </change>
+  </solution>
+  
+  <pattern>
+    <title>Safe WebSocket Message Serialization Pattern</title>
+    <description>
+      Always serialize complex objects to JSON-safe dictionaries before WebSocket transmission.
+      Use progressive fallback strategies to handle various object types.
+    </description>
+    <correct_usage>
+      # Safe serialization with fallbacks
+      def _serialize_message_safely(self, message):
+          if hasattr(message, 'to_dict'):
+              return message.to_dict()
+          if hasattr(message, 'model_dump'):
+              return message.model_dump(mode='json')
+          # Test JSON serializability
+          try:
+              json.dumps(message)
+              return message
+          except:
+              return self._convert_to_safe_dict(message)
+    </correct_usage>
+    <incorrect_usage>
+      # Direct serialization without safety
+      json.dumps(pydantic_model)  # Fails
+      websocket.send_json(deep_agent_state)  # Fails
+    </incorrect_usage>
+  </pattern>
+  
+  <verification>
+    <test>DeepAgentState objects serialize successfully</test>
+    <test>Complex nested objects with datetime serialize</test>
+    <test>All existing WebSocket message types work</test>
+    <test>WebSocket connections receive properly formatted JSON</test>
+  </verification>
+  
+  <impact>
+    <fixed>WebSocket state updates work reliably</fixed>
+    <fixed>Real-time agent state transmission to frontend</fixed>
+    <improved>Robust serialization with multiple fallbacks</improved>
+    <improved>Better error handling for future object types</improved>
+  </impact>
+  
+  <best_practices>
+    <practice>Always test JSON serializability before WebSocket send</practice>
+    <practice>Use Pydantic's model_dump(mode='json') for datetime handling</practice>
+    <practice>Implement multiple fallback strategies for serialization</practice>
+    <practice>Convert complex objects to dicts at WebSocket boundary</practice>
+  </best_practices>
+  
+  <related_specs>
+    <spec>SPEC/websocket_communication.xml</spec>
+    <spec>SPEC/websockets.xml</spec>
+    <spec>SPEC/serialization_patterns.xml</spec>
+  </related_specs>
+</learning>

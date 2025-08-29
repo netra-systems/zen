@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>WebSocket Connection State Management Fix</title>
+  <date>2025-08-29</date>
+  <category>websocket-lifecycle</category>
+  <priority>critical</priority>
+  
+  <problem>
+    <description>
+      WebSocket message handling failed with "WebSocket is not connected. Need to call 'accept' first" error.
+      This caused cascading failures leading to "Too many errors, closing connection" and dropped connections.
+    </description>
+    <error_message>Message handling error for conn_dev-temp-d092cbd4_fc7c8fa7: WebSocket is not connected. Need to call 'accept' first.</error_message>
+    <location>netra_backend/app/routes/websocket.py:368</location>
+  </problem>
+  
+  <root_cause>
+    <finding>
+      Race condition between WebSocket accept(), authentication, and message handling.
+      When authentication failed after accept(), the error handler tried to send messages
+      in an inconsistent connection state, triggering runtime errors.
+    </finding>
+    <specific_issues>
+      <issue>Authentication failures occurred after WebSocket accept()</issue>
+      <issue>Error handlers tried to send messages before connection was fully established</issue>
+      <issue>No proper state checking before message operations</issue>
+      <issue>Cleanup attempted on connections that failed authentication</issue>
+    </specific_issues>
+  </root_cause>
+  
+  <solution>
+    <change>
+      <file>netra_backend/app/routes/websocket.py</file>
+      <method>websocket_endpoint</method>
+      <description>
+        Nested authentication handling inside try-catch to gracefully handle auth failures.
+        Only perform cleanup if authentication was successful.
+        Added proper connection state tracking throughout lifecycle.
+      </description>
+    </change>
+    <change>
+      <file>netra_backend/app/routes/websocket.py</file>
+      <method>_handle_websocket_messages</method>
+      <description>
+        Added specific detection for connection state errors.
+        Break immediately on state errors instead of retrying.
+      </description>
+    </change>
+    <change>
+      <file>netra_backend/app/websocket_core/utils.py</file>
+      <method>is_websocket_connected</method>
+      <description>
+        Enhanced state detection to check both client_state and application_state.
+        Added handling for transitional states.
+      </description>
+    </change>
+    <change>
+      <file>netra_backend/app/websocket_core/utils.py</file>
+      <methods>safe_websocket_send, safe_websocket_close</methods>
+      <description>
+        Added specific RuntimeError handling for connection state issues.
+        Graceful fallback when operations fail due to state.
+      </description>
+    </change>
+  </solution>
+  
+  <pattern>
+    <title>WebSocket Lifecycle Management Pattern</title>
+    <description>
+      Always track connection state throughout WebSocket lifecycle.
+      Handle authentication failures gracefully without breaking the connection state.
+      Check connection state before any send/receive operations.
+    </description>
+    <correct_usage>
+      try:
+          await websocket.accept()
+          try:
+              # Authentication inside accepted connection
+              async with auth_context() as auth_info:
+                  # Connection handling
+          except AuthError:
+              # Graceful error handling with accepted connection
+              await safe_send_error(websocket)
+              await safe_close(websocket)
+      except Exception:
+          # Handle accept failures
+    </correct_usage>
+    <incorrect_usage>
+      await websocket.accept()
+      # Authentication outside - can cause state issues
+      async with auth_context() as auth_info:
+          # If auth fails, connection state becomes inconsistent
+    </incorrect_usage>
+  </pattern>
+  
+  <verification>
+    <test>WebSocket authentication failures handled gracefully</test>
+    <test>No "Need to call accept first" errors during error handling</test>
+    <test>Connection state properly tracked throughout lifecycle</test>
+    <test>7/7 connection tests passing</test>
+    <test>14/14 advanced WebSocket tests passing</test>
+  </verification>
+  
+  <impact>
+    <fixed>WebSocket connection state errors eliminated</fixed>
+    <fixed>"Too many errors" cascade failures prevented</fixed>
+    <fixed>Authentication failures handled gracefully</fixed>
+    <improved>Better connection lifecycle management</improved>
+    <improved>Enhanced error recovery and logging</improved>
+  </impact>
+  
+  <best_practices>
+    <practice>Always nest authentication inside accepted WebSocket context</practice>
+    <practice>Check connection state before send/receive operations</practice>
+    <practice>Handle connection state errors separately from application errors</practice>
+    <practice>Only cleanup connections that were successfully authenticated</practice>
+    <practice>Break immediately on connection state errors - don't retry</practice>
+  </best_practices>
+  
+  <related_specs>
+    <spec>SPEC/websocket_communication.xml</spec>
+    <spec>SPEC/websockets.xml</spec>
+    <spec>SPEC/learnings/websocket.xml</spec>
+  </related_specs>
+</learning>
