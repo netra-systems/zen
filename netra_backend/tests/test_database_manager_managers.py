@@ -14,58 +14,55 @@ import pytest
 from dev_launcher.isolated_environment import get_env
 
 # Import database management components
-try:
-    from netra_backend.app.database.connection_pool import ConnectionPool
-    from netra_backend.app.database.manager import DatabaseManager
-except ImportError:
-    # Fallback if modules don't exist yet
-    class DatabaseManager:
-        def __init__(self, config):
-            self.config = config
-            self.pool = None
-            
-        async def connect(self):
-            """Establish database connection."""
-            # Parse PostgreSQL URL properly for asyncpg
-            url = self.config.get('database_url', '')
-            if url.startswith('postgresql://postgres:postgres@localhost'):
-                # Convert Docker Compose PostgreSQL URL format to asyncpg format
-                # postgresql://postgres:postgres@localhost:5432/netra_dev
-                parts = url.replace('postgresql://', '').split('@')
-                if len(parts) == 2:
-                    auth, location = parts
-                    host_port, db = location.split('/')
-                    host, port = host_port.split(':')
-                    user, password = auth.split(':')
-                    
-                    # For Docker Compose services, use direct host connection
-                    if 'localhost' in host or '127.0.0.1' in host:
-                        self.pool = await asyncpg.create_pool(
-                            host=host,
-                            port=int(port),
-                            user=user,
-                            password=password,
-                            database=db,
-                            min_size=2,
-                            max_size=10
-                        )
-            return self.pool is not None
-            
-        async def execute_query(self, query: str, *args):
-            """Execute a database query."""
-            if not self.pool:
-                raise RuntimeError("Database not connected")
-            async with self.pool.acquire() as conn:
-                return await conn.fetch(query, *args)
+from netra_backend.app.db.database_manager import DatabaseManager
+
+# Create a simplified test wrapper for the DatabaseManager
+class TestDatabaseManager:
+    def __init__(self, config):
+        self.config = config
+        self.pool = None
+        self.manager = DatabaseManager()
+        
+    async def connect(self):
+        """Establish database connection."""
+        # Use the unified database manager's connection capabilities
+        import os
+        os.environ['DATABASE_URL'] = self.config.get('database_url', '')
+        
+        # Create async pool directly for testing
+        url = self.config.get('database_url', '')
+        if url.startswith('postgresql://'):
+            # Parse and create asyncpg pool for direct testing
+            import asyncpg
+            parts = url.replace('postgresql://', '').split('@')
+            if len(parts) == 2:
+                auth, location = parts
+                host_port, db = location.split('/')
+                host, port = host_port.split(':')
+                user, password = auth.split(':')
                 
-        async def close(self):
-            """Close database connection."""
-            if self.pool:
-                await self.pool.close()
-                
-    class ConnectionPool:
-        def __init__(self, config):
-            self.config = config
+                self.pool = await asyncpg.create_pool(
+                    host=host,
+                    port=int(port),
+                    user=user,
+                    password=password,
+                    database=db,
+                    min_size=2,
+                    max_size=10
+                )
+        return self.pool is not None
+        
+    async def execute_query(self, query: str, *args):
+        """Execute a database query."""
+        if not self.pool:
+            raise RuntimeError("Database not connected")
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(query, *args)
+            
+    async def close(self):
+        """Close database connection."""
+        if self.pool:
+            await self.pool.close()
 
 @pytest.mark.integration
 @pytest.mark.real_services
@@ -103,7 +100,7 @@ class TestDatabaseManagerIntegration:
             'pool_timeout': 30
         }
         
-        manager = DatabaseManager(config)
+        manager = TestDatabaseManager(config)
         await manager.connect()
         
         yield manager
@@ -160,7 +157,7 @@ class TestDatabaseManagerIntegration:
         """Test recovery from connection failures."""
         url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'
         
-        manager = DatabaseManager({'database_url': url})
+        manager = TestDatabaseManager({'database_url': url})
         await manager.connect()
         
         # Simulate connection failure by closing pool

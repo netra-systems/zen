@@ -200,8 +200,16 @@ class UnifiedHTTPClient:
         for attempt in range(self.config.max_retries + 1):
             try:
                 self._websocket = await self._establish_websocket_connection(ws_url, headers)
-                self._websocket_state = ConnectionState.CONNECTED
-                return True
+                
+                # CRITICAL FIX: Verify the connection is actually open before marking as connected
+                if hasattr(self._websocket, 'closed') and not self._websocket.closed:
+                    self._websocket_state = ConnectionState.CONNECTED
+                    return True
+                else:
+                    self._websocket_state = ConnectionState.FAILED
+                    if attempt == self.config.max_retries:
+                        return False
+                    
             except Exception as e:
                 if attempt == self.config.max_retries:
                     self._handle_websocket_error(str(e))
@@ -234,12 +242,28 @@ class UnifiedHTTPClient:
     
     async def send(self, message: Union[Dict[str, Any], str]) -> bool:
         """Send message through WebSocket."""
-        if not self._websocket or self._websocket_state != ConnectionState.CONNECTED:
+        if not self._websocket:
+            return False
+        
+        # CRITICAL FIX: Check actual WebSocket connection state instead of just internal state
+        # The internal state might not be synchronized with the actual WebSocket state
+        try:
+            # Test if the WebSocket is actually open by checking its state
+            if hasattr(self._websocket, 'closed') and self._websocket.closed:
+                self._websocket_state = ConnectionState.FAILED
+                return False
+        except Exception:
+            # If we can't check the state, assume it's bad
             return False
         
         try:
             message_str = self._prepare_websocket_message(message)
             await self._websocket.send(message_str)
+            
+            # Update internal state on successful send
+            if self._websocket_state != ConnectionState.CONNECTED:
+                self._websocket_state = ConnectionState.CONNECTED
+            
             self.metrics.requests_sent += 1
             return True
         except (ConnectionClosedError, Exception) as e:
@@ -267,11 +291,24 @@ class UnifiedHTTPClient:
         if not self._websocket:
             return None
         
+        # CRITICAL FIX: Check actual WebSocket connection state before trying to receive
+        try:
+            if hasattr(self._websocket, 'closed') and self._websocket.closed:
+                self._websocket_state = ConnectionState.FAILED
+                return None
+        except Exception:
+            return None
+        
         try:
             timeout_value = timeout or self.config.timeout
             message = await asyncio.wait_for(
                 self._websocket.recv(), timeout=timeout_value
             )
+            
+            # Update internal state on successful receive
+            if self._websocket_state != ConnectionState.CONNECTED:
+                self._websocket_state = ConnectionState.CONNECTED
+            
             self.metrics.responses_received += 1
             return json.loads(message)
         except (asyncio.TimeoutError, ConnectionClosedError) as e:

@@ -137,7 +137,6 @@ class WebSocketRealConnectionTester:
             permissions=["read", "write"]
         )
     
-    @pytest.mark.e2e
     async def test_bidirectional_message_flow(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test bidirectional message flow through agent pipeline."""
         test_messages = [
@@ -191,11 +190,17 @@ class WebSocketRealConnectionTester:
         
         while time.time() - start_time < timeout:
             try:
+                # CRITICAL FIX: Use shorter receive timeout but don't break on first timeout
+                # Allow multiple receive attempts within the overall timeout window
                 response = await client.receive(timeout=0.5)
                 if response:
                     responses.append(response)
+                    # Small delay to allow more responses to arrive
+                    await asyncio.sleep(0.1)
             except asyncio.TimeoutError:
-                break
+                # Don't break immediately, continue trying until overall timeout
+                await asyncio.sleep(0.1)
+                continue
         
         return responses
     

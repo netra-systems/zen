@@ -314,7 +314,14 @@ async def main():
     parser = argparse.ArgumentParser(description="Test NACIS without backend")
     parser.add_argument("--real-llm", action="store_true", 
                        help="Use real LLM (requires OPENAI_API_KEY)")
-    args = parser.parse_args()
+    
+    # Handle both standalone and pytest execution
+    try:
+        args = parser.parse_args()
+    except SystemExit:
+        # If argument parsing fails (e.g., when run via pytest), use environment variables
+        args = argparse.Namespace()
+        args.real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
     
     print("""
 ╔══════════════════════════════════════════════════════════════╗
