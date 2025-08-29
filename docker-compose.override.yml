@@ -1,0 +1,101 @@
+# Docker Compose Override for Development
+# This file is automatically loaded by docker-compose and overrides settings in docker-compose.dev.yml
+# Perfect for developer-specific settings and Mac/Windows performance optimizations
+
+version: '3.8'
+
+services:
+  backend:
+    # Performance optimizations for Mac/Windows
+    # Using delegated for better write performance on Mac
+    volumes:
+      - ./netra_backend:/app/netra_backend:delegated
+      - ./shared:/app/shared:delegated
+      - ./SPEC:/app/SPEC:cached
+      - ./scripts:/app/scripts:cached
+      - ./logs:/app/logs:delegated
+    
+    # Additional environment variables for development
+    environment:
+      # Enable Python development mode
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      # Watchdog settings for better file system monitoring on Mac
+      WATCHDOG_ENABLE: "true"
+      WATCHDOG_USE_POLLING: "true"  # Required for Mac due to Docker Desktop limitations
+      WATCHDOG_POLL_INTERVAL: "1"   # Poll every 1 second
+    
+    # Override command with more aggressive reload settings
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        python scripts/wait_for_db.py &&
+        echo 'Running migrations...' &&
+        alembic -c netra_backend/alembic.ini upgrade head &&
+        echo 'Starting backend with hot reload...' &&
+        uvicorn netra_backend.app.main:app \
+          --host 0.0.0.0 \
+          --port 8000 \
+          --reload \
+          --reload-dir /app/netra_backend \
+          --reload-dir /app/shared \
+          --reload-include '*.py' \
+          --reload-include '*.json' \
+          --reload-include '*.yaml' \
+          --reload-include '*.yml' \
+          --reload-delay 0.25 \
+          --log-level debug
+      "
+
+  auth:
+    # Performance optimizations for Mac/Windows
+    volumes:
+      - ./auth_service:/app/auth_service:delegated
+      - ./shared:/app/shared:delegated
+      - ./logs:/app/logs:delegated
+    
+    environment:
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      WATCHDOG_ENABLE: "true"
+      WATCHDOG_USE_POLLING: "true"
+      WATCHDOG_POLL_INTERVAL: "1"
+    
+    command: >
+      sh -c "
+        echo 'Starting auth service with hot reload...' &&
+        uvicorn auth_service.main:app \
+          --host 0.0.0.0 \
+          --port 8081 \
+          --reload \
+          --reload-dir /app/auth_service \
+          --reload-dir /app/shared \
+          --reload-include '*.py' \
+          --reload-include '*.json' \
+          --reload-delay 0.25 \
+          --log-level debug
+      "
+
+  # Frontend already has hot reload via Next.js
+  frontend:
+    volumes:
+      - ./frontend/src:/app/src:delegated
+      - ./frontend/public:/app/public:delegated
+      - ./frontend/next.config.ts:/app/next.config.ts:cached
+      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts:cached
+      - ./frontend/tsconfig.json:/app/tsconfig.json:cached
+      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts:cached
+      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs:cached
+      - /app/node_modules
+      - /app/.next
+    environment:
+      # Next.js hot reload optimization
+      WATCHPACK_POLLING: "true"  # Required for file watching on Mac/Windows
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: 1000
+
+# Mac-specific notes:
+# - :delegated = container's view is authoritative (best for app code that changes frequently)
+# - :cached = host's view is authoritative (best for read-heavy operations like configs)
+# - Polling is required on Mac due to Docker Desktop's file system event limitations
+# - Consider using docker-sync or Mutagen for even better performance on large codebases
