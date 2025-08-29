@@ -743,6 +743,159 @@ def get_clickhouse_service() -> ClickHouseService:
         _global_service = ClickHouseService()
     return _global_service
 
+async def create_agent_state_history_table():
+    """Create ClickHouse agent_state_history table for time-series analytics.
+    
+    This table stores completed agent runs for historical analysis and performance metrics.
+    Optimized for time-series queries and analytics dashboards.
+    """
+    # Use canonical SSOT implementation
+    async with get_clickhouse_client() as client:
+        # Create the agent state history table with optimal partitioning
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS agent_state_history (
+        -- Primary identifiers
+        run_id String,
+        thread_id String,
+        user_id Nullable(String),
+        snapshot_id String,
+        
+        -- Time series data (partitioned by date)
+        created_at DateTime64(3) DEFAULT now64(3),
+        completed_at Nullable(DateTime64(3)),
+        
+        -- Agent execution metadata
+        agent_phase String DEFAULT 'unknown',
+        checkpoint_type String DEFAULT 'final',
+        execution_status String DEFAULT 'completed',
+        
+        -- State and performance data
+        state_size_kb UInt32,
+        step_count UInt16 DEFAULT 0,
+        execution_time_ms Nullable(UInt32),
+        memory_usage_mb Nullable(UInt16),
+        
+        -- State classification for analytics
+        state_complexity Enum8('simple'=1, 'moderate'=2, 'complex'=3, 'very_complex'=4),
+        recovery_point Bool DEFAULT false,
+        
+        -- Compressed state data for recovery (if needed)
+        state_data_compressed Nullable(String),
+        compression_ratio Nullable(Float32),
+        
+        -- Analytics dimensions
+        date Date MATERIALIZED toDate(created_at),
+        hour UInt8 MATERIALIZED toHour(created_at)
+    )
+    ENGINE = MergeTree()
+    PARTITION BY date
+    ORDER BY (run_id, created_at)
+    TTL created_at + INTERVAL 90 DAY
+    SETTINGS index_granularity = 8192
+    """
+    
+        try:
+            await client.execute(create_table_query)
+            logger.info("[ClickHouse] agent_state_history table created successfully")
+            
+            # Create indexes for common query patterns
+            await _create_agent_state_indexes(client)
+            
+            return True
+        except Exception as e:
+            logger.error(f"[ClickHouse] Failed to create agent_state_history table: {e}")
+            return False
+
+async def _create_agent_state_indexes(client):
+    """Create optimized indexes for agent state queries."""
+    indexes = [
+        # Index for user analytics
+        "ALTER TABLE agent_state_history ADD INDEX idx_user_date (user_id, date) TYPE minmax GRANULARITY 1",
+        # Index for performance analysis
+        "ALTER TABLE agent_state_history ADD INDEX idx_execution_time (execution_time_ms) TYPE minmax GRANULARITY 1",
+        # Index for thread-based queries
+        "ALTER TABLE agent_state_history ADD INDEX idx_thread_phase (thread_id, agent_phase) TYPE set(100) GRANULARITY 1"
+    ]
+    
+    for index_query in indexes:
+        try:
+            await client.execute(index_query)
+        except Exception as e:
+            # Indexes might already exist, which is fine
+            logger.debug(f"[ClickHouse] Index creation info: {e}")
+
+async def insert_agent_state_history(run_id: str, state_data: dict, metadata: dict = None):
+    """Insert completed agent state into ClickHouse for analytics.
+    
+    Args:
+        run_id: Agent run identifier
+        state_data: Final state data from agent execution
+        metadata: Additional execution metadata
+    """
+    # Use canonical SSOT implementation
+    async with get_clickhouse_client() as client:
+        # Prepare analytics record
+        record = _prepare_state_history_record(run_id, state_data, metadata or {})
+        
+        insert_query = """
+        INSERT INTO agent_state_history (
+            run_id, thread_id, user_id, snapshot_id,
+            created_at, completed_at, agent_phase, checkpoint_type,
+            execution_status, state_size_kb, step_count, execution_time_ms,
+            memory_usage_mb, state_complexity, recovery_point,
+            state_data_compressed, compression_ratio
+        ) VALUES
+        """
+        
+        try:
+            await client.execute(insert_query, record)
+            logger.debug(f"[ClickHouse] Inserted state history for run {run_id}")
+            return True
+        except Exception as e:
+            logger.error(f"[ClickHouse] Failed to insert state history for {run_id}: {e}")
+            return False
+
+def _prepare_state_history_record(run_id: str, state_data: dict, metadata: dict) -> dict:
+    """Prepare state history record for ClickHouse insertion."""
+    import json
+    from datetime import datetime
+    
+    # Calculate state metrics
+    state_json = json.dumps(state_data)
+    state_size_kb = len(state_json.encode('utf-8')) // 1024
+    
+    # Determine state complexity based on size and structure
+    if state_size_kb < 10:
+        complexity = 'simple'
+    elif state_size_kb < 50:
+        complexity = 'moderate'
+    elif state_size_kb < 200:
+        complexity = 'complex'
+    else:
+        complexity = 'very_complex'
+    
+    now = datetime.utcnow()
+    
+    return {
+        'run_id': run_id,
+        'thread_id': metadata.get('thread_id', 'unknown'),
+        'user_id': metadata.get('user_id'),
+        'snapshot_id': metadata.get('snapshot_id', run_id),
+        'created_at': metadata.get('created_at', now),
+        'completed_at': metadata.get('completed_at', now),
+        'agent_phase': metadata.get('agent_phase', 'completed'),
+        'checkpoint_type': metadata.get('checkpoint_type', 'final'),
+        'execution_status': metadata.get('execution_status', 'completed'),
+        'state_size_kb': state_size_kb,
+        'step_count': metadata.get('step_count', 0),
+        'execution_time_ms': metadata.get('execution_time_ms'),
+        'memory_usage_mb': metadata.get('memory_usage_mb'),
+        'state_complexity': complexity,
+        'recovery_point': metadata.get('is_recovery_point', False),
+        'state_data_compressed': None,  # TODO: Add compression if needed
+        'compression_ratio': None
+    }
+
 # Backward compatibility exports (import from test fixtures when needed)
 ClickHouseManager = ClickHouseService  # Alias for test imports
 ClickHouseClient = ClickHouseService  # Alias for consolidation
