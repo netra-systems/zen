@@ -92,6 +92,13 @@ class LLMTestConfig:
     def _get_default_models(self) -> Dict[str, ModelConfig]:
         """Get default model configurations optimized for testing."""
         return {
+            "gemini-2.5-pro": ModelConfig(
+                name="gemini-2.5-pro",
+                provider=LLMProvider.GOOGLE,
+                max_tokens=2000,
+                timeout_seconds=25,
+                cost_per_1k_tokens=0.002
+            ),
             "gemini-2.5-flash": ModelConfig(
                 name="gemini-2.5-flash",
                 provider=LLMProvider.GOOGLE,
@@ -169,7 +176,8 @@ class LLMConfigManager:
         
         # Check legacy environment variables for backward compatibility
         if (os.getenv(self.ENABLE_REAL_LLM_VAR, "false").lower() == "true" or 
-            os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"):
+            os.getenv("USE_REAL_LLM", "false").lower() == "true" or
+            os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"):  # Legacy support
             return LLMTestMode.REAL
         
         return LLMTestMode.MOCK
@@ -209,7 +217,7 @@ class LLMConfigManager:
     
     def configure_environment(self, 
                             mode: Optional[LLMTestMode] = None,
-                            model: str = "gemini-2.5-flash",
+                            model: str = "gemini-2.5-pro",
                             timeout: int = 60,
                             parallel: Union[str, int] = "auto",
                             use_dedicated_env: bool = True) -> Dict[str, Any]:
@@ -250,11 +258,13 @@ class LLMConfigManager:
         os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
         os.environ["TEST_LLM_PARALLEL"] = str(parallel_value)
         
-        # Set legacy environment variables for backward compatibility
+        # Set environment variables
         if actual_mode == LLMTestMode.REAL:
-            os.environ["TEST_USE_REAL_LLM"] = "true"
+            os.environ["USE_REAL_LLM"] = "true"
+            os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
         else:
-            os.environ["TEST_USE_REAL_LLM"] = "false"
+            os.environ["USE_REAL_LLM"] = "false"
+            os.environ["TEST_USE_REAL_LLM"] = "false"  # Legacy compatibility
         
         # Configure dedicated test environment if requested
         if use_dedicated_env:
@@ -313,7 +323,8 @@ class LLMConfigManager:
         env_vars = [
             self.ENABLE_REAL_LLM_VAR,
             self.TEST_LLM_MODE_VAR,
-            "TEST_USE_REAL_LLM",
+            "USE_REAL_LLM",
+            "TEST_USE_REAL_LLM",  # Legacy compatibility
             "TEST_LLM_MODEL",
             "TEST_LLM_TIMEOUT",
             "TEST_LLM_PARALLEL"
@@ -356,8 +367,8 @@ class LLMConfigManager:
     def get_model_config(self, model_key: str) -> ModelConfig:
         """Get configuration for a specific model."""
         if model_key not in self.config.models:
-            logger.warning(f"Model {model_key} not found, using gemini-2.5-flash default")
-            model_key = "gemini-2.5-flash"
+            logger.warning(f"Model {model_key} not found, using gemini-2.5-pro default")
+            model_key = "gemini-2.5-pro"
         
         return self.config.models[model_key]
     
@@ -384,7 +395,7 @@ def get_llm_config_manager() -> LLMConfigManager:
 
 
 def configure_llm_testing(mode: Optional[LLMTestMode] = None,
-                         model: str = "gemini-2.5-flash",
+                         model: str = "gemini-2.5-pro",
                          timeout: int = 60,
                          parallel: Union[str, int] = "auto",
                          use_dedicated_env: bool = True) -> Dict[str, Any]:
@@ -432,7 +443,7 @@ def restore_llm_environment():
 
 
 # Backward compatibility functions (DEPRECATED - use configure_llm_testing instead)
-def configure_real_llm(model: str = "gemini-2.5-flash", 
+def configure_real_llm(model: str = "gemini-2.5-pro", 
                        timeout: int = 60, 
                        parallel: Union[str, int] = "auto", 
                        test_level: Optional[str] = None, 
