@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-08-28T22:39:27.348998",
+    "generated_at": "2025-08-29T10:19:42.043921",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 29
   },
@@ -26,7 +26,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/services/api_gateway/gateway_manager.py:228",
-        "scripts/deploy_to_gcp.py:896"
+        "scripts/deploy_to_gcp.py:897"
       ]
     },
     "Enabled": {
@@ -34,7 +34,7 @@
       "category": "states",
       "locations": [
         "netra_backend/app/services/api_gateway/gateway_manager.py:228",
-        "scripts/deploy_to_gcp.py:896"
+        "scripts/deploy_to_gcp.py:897"
       ]
     },
     "Error": {
@@ -66,15 +66,15 @@
       "category": "states",
       "locations": [
         "netra_backend/app/agents/corpus_admin/value_based_corpus/create_value_corpus.py:194",
-        "netra_backend/app/core/configuration/secrets.py:271",
-        "netra_backend/app/core/configuration/secrets.py:280",
+        "netra_backend/app/core/configuration/secrets.py:251",
+        "netra_backend/app/core/configuration/secrets.py:275",
+        "netra_backend/app/core/configuration/secrets.py:284",
         "netra_backend/app/core/configuration/unified_secrets.py:69",
         "netra_backend/app/core/isolated_environment.py:259",
         "netra_backend/app/core/secret_manager.py:485",
         "netra_backend/app/db/postgres_index_loader.py:33",
         "netra_backend/app/db/postgres_table_checker.py:34",
-        "netra_backend/app/middleware/api_gateway_coordinator.py:142",
-        "netra_backend/app/routes/discovery.py:126"
+        "netra_backend/app/middleware/api_gateway_coordinator.py:142"
       ]
     },
     "Pending": {
@@ -234,6 +234,7 @@
       "value": "idle",
       "category": "states",
       "locations": [
+        "netra_backend/app/agents/models.py:139",
         "netra_backend/app/agents/supervisor/agent_manager.py:27",
         "netra_backend/app/db/health_checks.py:98",
         "netra_backend/app/schemas/core_enums.py:33",
@@ -242,8 +243,7 @@
         "frontend/components/chat/agent-status/constants.ts:37",
         "frontend/components/chat/agent-status/utils.tsx:46",
         "frontend/components/chat/agent-status-panel/AgentStatusPanel.tsx:33",
-        "frontend/components/chat/agent-status-panel/status-zone-generator.ts:119",
-        "frontend/components/chat/agent-status-panel/types.ts:34"
+        "frontend/components/chat/agent-status-panel/status-zone-generator.ts:119"
       ]
     },
     "inactive": {
@@ -291,7 +291,7 @@
       "value": "loading",
       "category": "states",
       "locations": [
-        "frontend/components/AuthGuard.tsx:78",
+        "frontend/components/AuthGuard.tsx:76",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:64",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:82",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:102",
