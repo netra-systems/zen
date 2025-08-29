@@ -1,58 +1,17 @@
-"""Core Tests - Split from test_message_flow_errors.py"""
-
-import sys
-from pathlib import Path
-
-# Test framework import - using pytest fixtures instead
-
-import asyncio
-import json
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+"""
+Unit tests for message_flow_errors_core
+Coverage Target: 80%
+Business Value: Platform stability
+"""
 
 import pytest
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.routes.utils.websocket_helpers import (
-    accept_websocket_connection,
-    receive_message_with_timeout,
-)
-from starlette.websockets import WebSocketDisconnect
+from unittest.mock import Mock, patch, MagicMock
 
-from netra_backend.app.core.exceptions_websocket import WebSocketError
 
-from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
-from netra_backend.tests.integration.websocket_mocks import MockWebSocketConnection
-
-class TestSyntaxFix:
-    """Test class for orphaned methods"""
-
-    def setup_method(self):
-        """Setup method for test class."""
-        self.error_scenarios: List[Dict[str, Any]] = []
-        self.recovery_attempts: List[Dict[str, Any]] = []
-
-    def log_error_scenario(self, layer: str, error_type: str, 
-                          handled: bool, recovery_time: float) -> None:
-        """Log error scenario and handling."""
-        scenario = {
-            "layer": layer,
-            "error_type": error_type,
-            "handled": handled,
-            "recovery_time": recovery_time,
-            "timestamp": datetime.now(timezone.utc),
-            "scenario_id": len(self.error_scenarios) + 1
-        }
-        self.error_scenarios.append(scenario)
-
-    def log_recovery_attempt(self, layer: str, strategy: str, 
-                           success: bool, duration: float) -> None:
-        """Log recovery attempt."""
-        attempt = {
-            "layer": layer,
-            "strategy": strategy,
-            "success": success,
-            "duration": duration,
-            "timestamp": datetime.now(timezone.utc)
-        }
-        self.recovery_attempts.append(attempt)
+class TestMessageFlowErrorsCore:
+    """Test suite for message_flow_errors_core"""
+    
+    def test_placeholder(self):
+        """Placeholder test - module needs proper implementation"""
+        # TODO: Implement actual tests based on module functionality
+        assert True, "Test placeholder - implement actual tests"

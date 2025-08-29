@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker 12-Service Setup Requirements</title>
+    <date>2025-08-29</date>
+    <category>Infrastructure</category>
+    <priority>CRITICAL</priority>
+    <tags>
+      <tag>docker</tag>
+      <tag>docker-compose</tag>
+      <tag>environment-setup</tag>
+      <tag>test-dev-separation</tag>
+    </tags>
+  </metadata>
+
+  <problem>
+    <description>
+      The Netra platform requires 12 services (6 test + 6 dev) to run simultaneously.
+      Previous setup attempts resulted in:
+      1. Inconsistent container naming (e.g., "-2" suffixes)
+      2. Port conflicts between environments
+      3. Authentication failures (ClickHouse password mismatches)
+      4. Complex manual startup procedures
+      5. Missing or incomplete service dependencies
+    </description>
+    <impact>
+      - Developers unable to run complete environment
+      - Test and dev environments interfering with each other
+      - Services failing to connect due to wrong credentials
+      - Time wasted on manual container management
+    </impact>
+  </problem>
+
+  <root_cause>
+    <analysis>
+      1. Multiple docker-compose files without unified configuration
+      2. Environment variables not properly separated for test/dev
+      3. No standardized naming convention for containers
+      4. Missing startup automation scripts
+      5. Credentials hardcoded in different places
+    </analysis>
+  </root_cause>
+
+  <solution>
+    <approach>
+      Created unified docker-compose.all.yml with:
+      1. Standardized container naming (netra-test-* and netra-dev-*)
+      2. Separate port mappings to avoid conflicts
+      3. Consistent credentials across services
+      4. Proper service dependencies
+      5. Health checks for all services
+    </approach>
+    
+    <implementation>
+      <file>docker-compose.all.yml</file>
+      <file>scripts/start_all_services.sh</file>
+      <file>scripts/start_all_services.bat</file>
+      <file>STARTUP_GUIDE.md</file>
+    </implementation>
+  </solution>
+
+  <key_learnings>
+    <learning>
+      <title>Container Naming Convention</title>
+      <description>
+        ALWAYS use consistent naming:
+        - Test: netra-test-[service]
+        - Dev: netra-dev-[service]
+        NEVER use numbered suffixes like "-2"
+      </description>
+    </learning>
+    
+    <learning>
+      <title>Port Allocation Strategy</title>
+      <description>
+        Test environment uses default ports:
+        - PostgreSQL: 5432
+        - Redis: 6379
+        - ClickHouse: 8123
+        - Backend: 8000
+        - Auth: 8081
+        - Frontend: 3000
+        
+        Dev environment uses +1 or alternative ports:
+        - PostgreSQL: 5433
+        - Redis: 6380
+        - ClickHouse: 8124
+        - Backend: 8001
+        - Auth: 8082
+        - Frontend: 3001
+      </description>
+    </learning>
+    
+    <learning>
+      <title>Credential Management</title>
+      <description>
+        Standardized credentials per environment:
+        - Test: netra_test/netra_test
+        - Dev: netra_dev/netra_dev
+        - ClickHouse (both): netra/netra123
+        Keep credentials consistent across all services in same environment
+      </description>
+    </learning>
+    
+    <learning>
+      <title>Health Checks Required</title>
+      <description>
+        All database services MUST have health checks:
+        - PostgreSQL: pg_isready
+        - Redis: redis-cli ping
+        - ClickHouse: wget http://localhost:8123/ping
+        Services need 30+ seconds to be fully ready
+      </description>
+    </learning>
+    
+    <learning>
+      <title>Single Command Startup</title>
+      <description>
+        All 12 services MUST start with single command:
+        - Windows: scripts\start_all_services.bat
+        - Linux/Mac: ./scripts/start_all_services.sh
+        - Docker: docker-compose -f docker-compose.all.yml up -d
+      </description>
+    </learning>
+  </key_learnings>
+
+  <best_practices>
+    <practice>Always clean up existing containers before starting new ones</practice>
+    <practice>Use docker-compose for orchestration, not individual docker run commands</practice>
+    <practice>Include health checks and proper startup dependencies</practice>
+    <practice>Document all ports and access URLs clearly</practice>
+    <practice>Provide both shell and batch scripts for cross-platform support</practice>
+    <practice>Keep test and dev environments completely isolated</practice>
+  </best_practices>
+
+  <troubleshooting>
+    <issue>
+      <symptom>Services not starting</symptom>
+      <solution>Check Docker Desktop is running, verify no port conflicts</solution>
+    </issue>
+    <issue>
+      <symptom>Authentication failures</symptom>
+      <solution>Verify credentials match in docker-compose.all.yml and .env files</solution>
+    </issue>
+    <issue>
+      <symptom>Port already in use</symptom>
+      <solution>Stop conflicting services or modify ports in compose file</solution>
+    </issue>
+  </troubleshooting>
+
+  <testing>
+    <verification_steps>
+      1. Run: docker-compose -f docker-compose.all.yml up -d
+      2. Wait 30 seconds for health checks
+      3. Verify all 12 containers running: docker ps | grep netra
+      4. Check health status: docker ps --format "table {{.Names}}\t{{.State.Health.Status}}"
+      5. Test connectivity to each service port
+    </verification_steps>
+  </testing>
+</learning>

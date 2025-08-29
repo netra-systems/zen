@@ -35,13 +35,58 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 - **KV Cache Optimization:** Advanced key-value cache management for 30% memory reduction
 - **Supply Catalog Search:** Find optimal model/provider combinations for workloads
 
+## 🚀 Quick Start
+
+### 1. Start Infrastructure Services (Docker)
+```bash
+# Start all infrastructure services (PostgreSQL, Redis, ClickHouse for test & dev)
+docker-compose -f docker-compose.all.yml up -d
+
+# Verify services are running
+docker ps
+
+# Or use our status check script for detailed health info
+python scripts/check_docker_services.py
+
+# Services running:
+# - Test Environment: PostgreSQL (5432), Redis (6379), ClickHouse (8123/9000)
+# - Dev Environment: PostgreSQL (5433), Redis (6380), ClickHouse (8124/9001)
+```
+
+### 2. Run Application Services Locally
+```bash
+# Terminal 1: Backend
+cd netra_backend
+uvicorn app.main:app --reload --port 8000
+
+# Terminal 2: Auth Service
+cd auth_service
+uvicorn main:app --reload --port 8081
+
+# Terminal 3: Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+### 3. Run Tests
+```bash
+# Quick test
+python unified_test_runner.py --fast-fail
+
+# Full test suite
+python unified_test_runner.py --categories smoke unit integration api
+```
+
+📝 **[Startup Guide](STARTUP_GUIDE.md)** - Detailed startup instructions
+🐳 **[Docker Setup](docker-compose.all.yml)** - Unified Docker configuration for all services
+
 ## 🚀 Developer Guidelines
 
 📚 **[LLM Master Index](LLM_MASTER_INDEX.md)** - Master navigation hub for all documentation and specifications
 📖 **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy and AI factory patterns
 🧪 **[Test Runner Guide](SPEC/test_runner_guide.xml)** - Comprehensive testing guide and unified test runner
 🔧 **[Scripts](scripts/)** - Development and operation tools
-📚 **[LLM Master Index](LLM_MASTER_INDEX.md)** - Complete file navigation index
 🔍 **[SPEC/](SPEC/)** - Living source of truth (XML specifications)
 🏭 **[AI Native Meta Process](SPEC/ai_native_meta_process.md)** - AI factory methodology for 99.99% correctness
 

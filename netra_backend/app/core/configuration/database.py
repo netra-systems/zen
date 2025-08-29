@@ -297,9 +297,13 @@ class DatabaseConfigManager:
                 "ClickHouse configuration must be explicitly provided."
             )
         elif not host:
-            # Only warn in development/test
-            logger.warning("CLICKHOUSE_HOST not configured for development/test")
-            host = ""  # No fallback - empty host
+            # Use localhost only for development/test
+            if self._environment in ["development", "testing"]:
+                logger.info("CLICKHOUSE_HOST not configured, using localhost for development/test")
+                host = "localhost"  # Safe default for development
+            else:
+                logger.warning("CLICKHOUSE_HOST not configured")
+                host = ""  # No fallback for other environments
         
         user = self._env.get("CLICKHOUSE_USER") or self._env.get("CLICKHOUSE_USERNAME")
         if not user and self._environment in ["staging", "production"]:

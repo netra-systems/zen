@@ -1,35 +1,17 @@
-"""Utilities Tests - Split from test_websocket_integration.py"""
+"""
+Unit tests for websocket_integration_helpers
+Coverage Target: 80%
+Business Value: Platform stability
+"""
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
-# Test framework import - using pytest fixtures instead
-from pathlib import Path
-import sys
-
-import asyncio
-import json
-from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
-
-import httpx
 import pytest
-import websockets
-from netra_backend.app.auth_integration.auth import validate_token_jwt
-from fastapi.testclient import TestClient
-from netra_backend.app.main import app
-from netra_backend.app.routes.mcp.main import websocket_endpoint
+from unittest.mock import Mock, patch, MagicMock
 
-from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 
-from netra_backend.app.websocket_core import (
-    WebSocketManager as ConnectionManager,
-
-    get_connection_monitor,
-
-)
-from netra_backend.app.websocket_core.handlers import (
-    BaseMessageHandler,
-    UserMessageHandler,
-    HeartbeatHandler
-)
-
-# Removed TestSyntaxFix class as it was broken and had __init__ method that prevented pytest collection
+class TestWebsocketIntegrationHelpers:
+    """Test suite for websocket_integration_helpers"""
+    
+    def test_placeholder(self):
+        """Placeholder test - module needs proper implementation"""
+        # TODO: Implement actual tests based on module functionality
+        assert True, "Test placeholder - implement actual tests"

@@ -174,12 +174,26 @@ class LogFormatter:
     
     def get_console_format(self) -> str:
         """Get human-readable format string for console output."""
-        return (
-            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-            "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-            "<level>{message}</level>"
-        )
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        # Check if we're in production/staging where colors should be disabled
+        environment = get_env().get('ENVIRONMENT', 'development').lower()
+        if environment in ['staging', 'production', 'prod']:
+            # Plain format without color tags for Cloud Run
+            return (
+                "{time:YYYY-MM-DD HH:mm:ss.SSS} | "
+                "{level: <8} | "
+                "{name}:{function}:{line} | "
+                "{message}"
+            )
+        else:
+            # Colored format for development
+            return (
+                "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+                "<level>{level: <8}</level> | "
+                "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+                "<level>{message}</level>"
+            )
     
     def _has_context(self) -> bool:
         """Check if context variables are available."""
@@ -233,12 +247,18 @@ class LogHandlerConfig:
     
     def _add_readable_console_handler(self, should_log_func):
         """Add human-readable console handler with proper color mapping."""
+        from netra_backend.app.core.isolated_environment import get_env
+        
+        # Disable colors in staging/production environments to prevent ANSI codes in Cloud Run logs
+        environment = get_env().get('ENVIRONMENT', 'development').lower()
+        should_colorize = environment not in ['staging', 'production', 'prod']
+        
         logger.add(
             sys.stderr,
             format=self.formatter.get_console_format(),
             level=self.level,
             filter=should_log_func,
-            colorize=True,  # Enable color processing
+            colorize=should_colorize,  # Disable colors in production/staging
             enqueue=True,
             backtrace=True,
             diagnose=False,
