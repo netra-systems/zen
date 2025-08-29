@@ -26,8 +26,11 @@ from netra_backend.app.agents.corpus_admin.models import (
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-# from test_framework.fixtures import create_test_deep_state  # Not available
-# from test_framework.real_llm_config import RealLLMConfig  # Using mock instead
+from test_framework.fixtures.corpus_admin import (
+    create_test_deep_state,
+    create_test_corpus_admin_agent,
+    create_test_execution_context,
+)
 
 
 class TestCorpusAdminOrchestrationFlows:
@@ -36,29 +39,19 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.fixture
     async def setup_orchestration_environment(self):
         """Set up complete multi-agent orchestration environment."""
-        # Create mock LLM manager for testing
-        llm_manager = AsyncMock()
-        llm_manager.ask_llm = AsyncMock(return_value="Mock LLM response for corpus admin")
+        # Create corpus admin agent with mocked components
+        corpus_admin_agent = await create_test_corpus_admin_agent(with_real_llm=False)
         
-        # Create tool dispatcher
-        tool_dispatcher = ToolDispatcher()
-        
-        # Create corpus admin agent with real interface
-        corpus_admin_agent = CorpusAdminSubAgent(
-            llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher,
-        )
-        
-        # Create deep state directly
-        deep_state = DeepAgentState(
+        # Create deep state using fixture
+        deep_state = create_test_deep_state(
             user_request="test_request",
             chat_thread_id="test_thread",
             user_id="test_user"
         )
         
         return {
-            "llm_manager": llm_manager,
-            "tool_dispatcher": tool_dispatcher,
+            "llm_manager": corpus_admin_agent.llm_manager,
+            "tool_dispatcher": corpus_admin_agent.tool_dispatcher,
             "corpus_admin": corpus_admin_agent,
             "deep_state": deep_state,
         }
@@ -70,7 +63,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test that the CorpusAdminSubAgent initializes properly with real components."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         # Validate agent is properly initialized
         assert env["corpus_admin"] is not None
@@ -91,7 +84,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test that corpus admin correctly identifies when it should handle requests."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         # Test corpus-related request
         env["deep_state"].user_request = "Create a new knowledge corpus for our AI optimization guidelines"
@@ -117,7 +110,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test the complete execution workflow of the corpus admin agent."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         # Set corpus-related request
         env["deep_state"].user_request = "Please create a knowledge base for our cost optimization strategies"
@@ -148,7 +141,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test corpus admin handling of explicit admin mode requests."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         # Set triage result to indicate admin mode
         env["deep_state"].triage_result = {
@@ -184,7 +177,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test that corpus admin properly manages and updates state."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         # Set initial state
         initial_request = "Create documentation corpus for API guidelines"
@@ -217,7 +210,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test performance characteristics of corpus admin operations."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         # Benchmark execution time
         start_time = datetime.now()
@@ -245,7 +238,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test corpus admin cleanup functionality."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         # Execute first
         env["deep_state"].user_request = "Test cleanup functionality"
@@ -272,7 +265,7 @@ class TestCorpusAdminOrchestrationFlows:
         self, setup_orchestration_environment
     ):
         """Test handling multiple corpus requests in sequence."""
-        env = await setup_orchestration_environment
+        env = setup_orchestration_environment
         
         requests = [
             "Create knowledge base for cost optimization",

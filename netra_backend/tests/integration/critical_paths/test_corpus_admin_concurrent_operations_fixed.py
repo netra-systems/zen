@@ -31,8 +31,11 @@ from netra_backend.app.agents.corpus_admin.models import (
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-# from test_framework.fixtures import create_test_deep_state  # Not available
-# from test_framework.real_llm_config import RealLLMConfig  # Using mock instead
+from test_framework.fixtures.corpus_admin import (
+    create_test_deep_state,
+    create_test_corpus_admin_agent,
+    create_test_execution_context,
+)
 
 
 class TestCorpusAdminConcurrentOperations:
@@ -41,25 +44,15 @@ class TestCorpusAdminConcurrentOperations:
     @pytest.fixture
     async def setup_concurrent_environment(self):
         """Set up environment for concurrent operation testing."""
-        # Create mock LLM manager for testing
-        llm_manager = AsyncMock()
-        llm_manager.ask_llm = AsyncMock(return_value="Mock LLM response for corpus admin")
-        
-        # Create tool dispatcher
-        tool_dispatcher = ToolDispatcher()
-        
         # Create multiple agents to simulate concurrent access
         agents = []
         for i in range(3):  # Reduced from 5 for simpler testing
-            agent = CorpusAdminSubAgent(
-                llm_manager=llm_manager,
-                tool_dispatcher=tool_dispatcher,
-            )
+            agent = await create_test_corpus_admin_agent(with_real_llm=False)
             agents.append(agent)
         
         return {
-            "llm_manager": llm_manager,
-            "tool_dispatcher": tool_dispatcher,
+            "llm_manager": agents[0].llm_manager if agents else None,
+            "tool_dispatcher": agents[0].tool_dispatcher if agents else None,
             "agents": agents,
         }
 

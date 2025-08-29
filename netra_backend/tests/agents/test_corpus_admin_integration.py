@@ -57,6 +57,11 @@ class TestCorpusAdminIntegration:
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         tool_dispatcher.has_tool = Mock(return_value=True)
         tool_dispatcher.execute_tool = AsyncMock()
+        tool_dispatcher.dispatch_tool = AsyncMock(return_value={
+            "success": True,
+            "corpus_id": "default_corpus_id",
+            "documents_indexed": 0
+        })
         return tool_dispatcher
 
     @pytest.fixture
@@ -124,11 +129,11 @@ class TestCorpusAdminIntegration:
         )
         
         # Mock tool dispatcher response for corpus creation
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "corpus_test_123",
             "documents_indexed": 0
-        }
+        })
         
         # Execute create operation
         result = await corpus_admin_agent.operations.execute_operation(
@@ -174,12 +179,12 @@ class TestCorpusAdminIntegration:
         )
         
         # Mock tool response with documents
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "corpus_with_docs_456",
             "documents_indexed": 2,
             "index_status": "completed"
-        }
+        })
         
         # Execute operation
         result = await corpus_admin_agent.operations.execute_operation(
@@ -234,12 +239,12 @@ class TestCorpusAdminIntegration:
             }
         ]
         
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "results": search_results,
             "total_count": 2,
             "search_time_ms": 45
-        }
+        })
         
         # Execute search operation
         result = await corpus_admin_agent.operations.execute_operation(
@@ -282,7 +287,7 @@ class TestCorpusAdminIntegration:
         )
         
         # Mock filtered results
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "results": [
                 {
@@ -298,7 +303,7 @@ class TestCorpusAdminIntegration:
             ],
             "total_count": 1,
             "filters_applied": search_request.filters
-        }
+        })
         
         # Execute filtered search
         result = await corpus_admin_agent.operations.execute_operation(
@@ -348,12 +353,12 @@ class TestCorpusAdminIntegration:
         )
         
         # Mock update response
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "updated_documents": 10,
             "reindex_completed": True,
             "validation_passed": True
-        }
+        })
         
         # Execute update operation
         result = await corpus_admin_agent.operations.execute_operation(
@@ -419,7 +424,7 @@ class TestCorpusAdminIntegration:
         assert entry_allowed is True
         
         # Mock parser response
-        with patch.object(corpus_admin_agent.parser, 'parse_operation_request') as mock_parser:
+        with patch.object(corpus_admin_agent.parser, 'parse_operation_request', new_callable=AsyncMock) as mock_parser:
             mock_request = CorpusOperationRequest(
                 operation=CorpusOperation.CREATE,
                 corpus_metadata=CorpusMetadata(
@@ -430,10 +435,10 @@ class TestCorpusAdminIntegration:
             mock_parser.return_value = mock_request
             
             # Mock tool dispatcher for execution
-            corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+            corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
                 "success": True,
                 "corpus_id": "full_flow_corpus_404"
-            }
+            })
             
             # Execute full agent workflow
             await corpus_admin_agent.execute(
@@ -462,10 +467,10 @@ class TestCorpusAdminIntegration:
         )
         
         # Mock successful creation
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "websocket_test_505"
-        }
+        })
         
         # Execute with WebSocket updates
         await corpus_admin_agent.operations.execute_operation(
@@ -536,10 +541,10 @@ class TestCorpusAdminIntegration:
             requests.append(request)
         
         # Mock successful responses
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "concurrent_test"
-        }
+        })
         
         # Execute operations concurrently
         tasks = [
@@ -571,7 +576,7 @@ class TestCorpusAdminIntegration:
         initial_state = sample_agent_state.model_copy()
         
         # Mock operation result
-        with patch.object(corpus_admin_agent.parser, 'parse_operation_request') as mock_parser:
+        with patch.object(corpus_admin_agent.parser, 'parse_operation_request', new_callable=AsyncMock) as mock_parser:
             mock_request = CorpusOperationRequest(
                 operation=CorpusOperation.SEARCH,
                 corpus_metadata=CorpusMetadata(
@@ -581,10 +586,10 @@ class TestCorpusAdminIntegration:
             )
             mock_parser.return_value = mock_request
             
-            corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+            corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
                 "success": True,
                 "results": [{"id": "doc_1", "content": "test"}]
-            }
+            })
             
             # Execute operation
             await corpus_admin_agent.execute(
@@ -700,11 +705,11 @@ class TestCorpusAdminIntegration:
         )
         
         # Mock tool response
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "tool_integration_606",
             "tool_used": "create_corpus"
-        }
+        })
         
         # Execute via tool dispatcher
         result = await corpus_admin_agent.operations.execute_operation(
@@ -734,7 +739,7 @@ class TestCorpusAdminIntegration:
         )
         
         # Mock validator response requiring approval
-        with patch.object(corpus_admin_agent.validator, 'check_approval_requirements') as mock_validator:
+        with patch.object(corpus_admin_agent.validator, 'check_approval_requirements', new_callable=AsyncMock) as mock_validator:
             mock_validator.return_value = True  # Approval required
             
             # Execute operation
@@ -777,10 +782,10 @@ class TestCorpusAdminPerformance:
             requests.append(request)
         
         # Mock fast responses
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "corpus_id": "perf_test"
-        }
+        })
         
         # Time bulk operations
         start_time = time.time()
@@ -831,11 +836,11 @@ class TestCorpusAdminPerformance:
             for i in range(100)
         ]
         
-        corpus_admin_agent.tool_dispatcher.execute_tool.return_value = {
+        corpus_admin_agent.tool_dispatcher.execute_tool = AsyncMock(return_value={
             "success": True,
             "results": large_results,
             "total_count": 100
-        }
+        })
         
         # Execute search and measure performance
         start_time = time.time()
