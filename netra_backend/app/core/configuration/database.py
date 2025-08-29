@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
 from netra_backend.app.core.isolated_environment import get_env
-from netra_backend.app.core.environment_constants import get_current_environment
+from netra_backend.app.core.environment_constants import EnvironmentDetector
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.config import AppConfig
@@ -49,8 +49,11 @@ class DatabaseConfigManager:
         self._logged_urls = set()  # Track what we've already logged
     
     def _get_environment(self) -> str:
-        """Get current environment for database configuration."""
-        return get_current_environment()
+        """Get current environment for database configuration.
+        
+        Uses bootstrap method to avoid circular dependency during initialization.
+        """
+        return EnvironmentDetector.get_environment()
     
     def refresh_environment(self) -> None:
         """Refresh environment detection for testing scenarios."""
@@ -237,6 +240,28 @@ class DatabaseConfigManager:
             if parsed_url.hostname and parsed_url.hostname in ["localhost", "127.0.0.1"]:
                 raise ConfigurationError(f"Localhost not allowed in {self._environment}")
     
+    def _get_clickhouse_password(self) -> str:
+        """Get ClickHouse password from environment or GCP Secret Manager.
+        
+        For staging/production, attempts to load from GCP Secret Manager first.
+        Falls back to environment variable if GCP is not available.
+        """
+        # First try environment variable
+        password = self._env.get("CLICKHOUSE_PASSWORD", "")
+        
+        # If no password from env and in staging/production, try GCP Secret Manager
+        if not password and self._environment in ["staging", "production"]:
+            try:
+                from netra_backend.app.core.configuration.secrets import SecretManager
+                secret_manager = SecretManager()
+                password = secret_manager.get_secret("CLICKHOUSE_PASSWORD") or ""
+                if password:
+                    self._logger.info("Loaded CLICKHOUSE_PASSWORD from GCP Secret Manager")
+            except Exception as e:
+                self._logger.warning(f"Failed to load CLICKHOUSE_PASSWORD from GCP: {e}")
+        
+        return password
+    
     def _get_clickhouse_configuration(self) -> Dict[str, str]:
         """Get ClickHouse configuration from environment.
         
@@ -254,8 +279,8 @@ class DatabaseConfigManager:
         else:
             default_port = "8123"  # HTTP port for development
         
-        # Get ClickHouse password from environment
-        password = self._env.get("CLICKHOUSE_PASSWORD", "")
+        # Get ClickHouse password - try GCP Secret Manager first for staging/production
+        password = self._get_clickhouse_password()
         
         # Log warning if no password is set in non-dev environments
         if not password and self._environment not in ["development", "testing"]:

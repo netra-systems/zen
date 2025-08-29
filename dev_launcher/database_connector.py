@@ -214,9 +214,16 @@ class DatabaseConnector:
     
     def _print_connection_discovered(self, name: str, db_type: DatabaseType) -> None:
         """Print connection discovery message."""
-        emoji = "🔍" if self.use_emoji else ""
         masked_url = self._mask_url_credentials(self.connections[name].url)
-        print(f"{emoji} DISCOVER | {db_type.value.upper()}: {masked_url}")
+        if self.use_emoji:
+            try:
+                # Try to print with emoji
+                print(f"🔍 DISCOVER | {db_type.value.upper()}: {masked_url}")
+            except UnicodeEncodeError:
+                # Fall back to non-emoji version on Windows
+                print(f"[DISCOVER] | {db_type.value.upper()}: {masked_url}")
+        else:
+            print(f"DISCOVER | {db_type.value.upper()}: {masked_url}")
     
     def _mask_url_credentials(self, url: str) -> str:
         """Mask credentials in URL for logging."""
