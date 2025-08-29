@@ -880,7 +880,8 @@ CMD ["npm", "start"]
         return all_healthy
     
     def deploy_all(self, skip_build: bool = False, use_local_build: bool = False, 
-                   run_checks: bool = False, service_filter: Optional[str] = None) -> bool:
+                   run_checks: bool = False, service_filter: Optional[str] = None,
+                   skip_post_tests: bool = False) -> bool:
         """Deploy all services to GCP.
         
         Args:
@@ -888,6 +889,7 @@ CMD ["npm", "start"]
             use_local_build: Build images locally (faster) instead of Cloud Build
             run_checks: Run pre-deployment checks
             service_filter: Deploy only specific service (e.g., 'frontend', 'backend', 'auth')
+            skip_post_tests: Skip post-deployment authentication tests
         """
         print(f"🚀 Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
@@ -958,6 +960,19 @@ CMD ["npm", "start"]
             if url:
                 print(f"{service_name:10} : {url}")
                 
+        # Run post-deployment authentication tests
+        if not skip_post_tests:
+            print("\n" + "="*50)
+            print("🔐 Running Post-Deployment Authentication Tests")
+            print("="*50)
+            if self.run_post_deployment_tests(service_urls):
+                print("✅ Post-deployment tests passed!")
+            else:
+                print("⚠️ Post-deployment tests failed - authentication may not be working correctly")
+                print("   Check that JWT_SECRET_KEY is set to the same value in both services")
+        else:
+            print("\n⚠️ Skipping post-deployment tests (--skip-post-tests flag used)")
+                
         print("\n🔑 Next Steps:")
         print("1. Update secrets in Secret Manager with real values")
         print("2. Configure Cloud SQL and Redis instances")
@@ -966,6 +981,59 @@ CMD ["npm", "start"]
         print("5. Set up monitoring and alerting")
         
         return True
+    
+    def run_post_deployment_tests(self, service_urls: Dict[str, str]) -> bool:
+        """Run post-deployment authentication tests to verify services are working correctly.
+        
+        Args:
+            service_urls: Dictionary mapping service names to their deployed URLs
+            
+        Returns:
+            True if all tests pass, False otherwise
+        """
+        try:
+            # Import the test module
+            sys.path.insert(0, str(self.project_root))
+            from tests.post_deployment.test_auth_integration import PostDeploymentAuthTest
+            
+            # Determine environment based on project ID
+            if self.project_id == "netra-production":
+                environment = "production"
+            elif self.project_id == "netra-staging":
+                environment = "staging"
+            else:
+                environment = "development"
+            
+            print(f"\nTesting {environment} environment...")
+            
+            # Set environment variables for the test
+            import os
+            os.environ["AUTH_SERVICE_URL"] = service_urls.get("auth", "")
+            os.environ["BACKEND_URL"] = service_urls.get("backend", "")
+            
+            # Run the tests asynchronously
+            import asyncio
+            tester = PostDeploymentAuthTest(environment)
+            
+            # Run tests
+            if sys.platform == "win32":
+                # Windows requires special event loop policy
+                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            
+            results = asyncio.run(tester.run_all_tests())
+            
+            # Return True if all tests passed
+            return all(results.values())
+            
+        except ImportError as e:
+            print(f"⚠️ Could not import post-deployment tests: {e}")
+            print("   Tests will be skipped. Run manually with:")
+            print(f"   python tests/post_deployment/test_auth_integration.py --environment {environment}")
+            return True  # Don't fail deployment if tests can't be imported
+            
+        except Exception as e:
+            print(f"⚠️ Post-deployment tests failed with error: {e}")
+            return False
     
     def cleanup(self) -> bool:
         """Clean up deployed services."""
@@ -1100,6 +1168,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)")
     parser.add_argument("--service", 
                        help="Deploy only specific service (frontend, backend, auth)")
+    parser.add_argument("--skip-post-tests", action="store_true",
+                       help="Skip post-deployment authentication tests")
     
     args = parser.parse_args()
     
@@ -1119,7 +1189,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                 skip_build=args.skip_build,
                 use_local_build=args.build_local,
                 run_checks=args.run_checks,
-                service_filter=args.service
+                service_filter=args.service,
+                skip_post_tests=args.skip_post_tests
             )
             
         sys.exit(0 if success else 1)
