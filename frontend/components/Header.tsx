@@ -3,6 +3,7 @@
 import React from 'react';
 ;
 import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 import { Icons } from './Icons';
 import LoginButton from './LoginButton';
 
@@ -18,8 +19,9 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
         <Icons.logo className="h-5 w-5" />
         <span className="sr-only">Toggle navigation menu</span>
       </Button>
-      <div className="w-full flex-1">
-        {/* Add search bar here if needed */}
+      <div className="w-full flex-1 flex items-center gap-2">
+        <h1 className="text-lg font-semibold">Netra Beta</h1>
+        <Badge variant="beta">BETA</Badge>
       </div>
       <LoginButton />
     </header>

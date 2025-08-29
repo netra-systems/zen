@@ -9,6 +9,7 @@ import {
   Check,
   Loader2
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import type { Thread, getThreadTitle } from '@/types/unified';
 
 interface ThreadSidebarHeaderProps {
@@ -50,6 +51,10 @@ export const ThreadSidebarHeader: React.FC<ThreadSidebarHeaderProps> = ({
 
   return (
     <div className="p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold">Conversations</h2>
+        <Badge variant="beta" className="text-xs">BETA</Badge>
+      </div>
       <button
         type="button"
         onClick={handleCreateThread}
