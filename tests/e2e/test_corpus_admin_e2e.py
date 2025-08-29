@@ -56,7 +56,7 @@ from netra_backend.app.agents.corpus_admin.models import (
 )
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.schemas.user_plan import PlanTier
