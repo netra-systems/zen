@@ -42,15 +42,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 try:
     from dev_launcher.isolated_environment import get_env
 except ImportError:
-    # Fallback for standalone execution
-    class FallbackEnv:
-        def get(self, key, default=None):
-            return os.getenv(key, default)
-        def set(self, key, value, source="test_runner"):
-            os.environ[key] = value
-    
-    def get_env():
-        return FallbackEnv()
+    # Hard failure - IsolatedEnvironment is required for test runner
+    raise RuntimeError("IsolatedEnvironment required for test runner. Cannot import from dev_launcher.isolated_environment")
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
@@ -106,7 +99,8 @@ class UnifiedTestRunner:
         self.cypress_runner = None
         
         # Test execution timeout fix for iterations 41-60
-        self.max_collection_size = int(os.getenv("MAX_TEST_COLLECTION_SIZE", "1000"))
+        env = get_env()
+        self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
         # Test configurations - Use project root as working directory to fix import issues
         self.test_configs = {
@@ -543,7 +537,10 @@ class UnifiedTestRunner:
                 errors='replace',
                 timeout=timeout_seconds,
                 # Force immediate output on Windows
-                env={**os.environ, 'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'}
+                env_manager = get_env()
+                subprocess_env = env_manager.get_subprocess_env()
+                subprocess_env.update({'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1'})
+                env=subprocess_env
             )
             # Handle unicode encoding issues by cleaning the output
             if result.stdout:
@@ -597,7 +594,7 @@ class UnifiedTestRunner:
         local_backend = quick_service_check("localhost", 8000)
         
         if not docker_available and not (local_postgres and local_redis):
-            return False, (
+            raise RuntimeError(
                 "Cannot run Cypress tests: Docker Desktop not running and "
                 "required local services not available. "
                 "Either start Docker Desktop or run local PostgreSQL (port 5432) "
@@ -605,7 +602,7 @@ class UnifiedTestRunner:
             )
         
         if not local_backend:
-            return False, (
+            raise RuntimeError(
                 "Cannot run Cypress tests: Backend service not running on port 8000. "
                 "Start the backend service first."
             )
@@ -622,19 +619,12 @@ class UnifiedTestRunner:
         """Run Cypress E2E tests using the CypressTestRunner."""
         print(f"Running Cypress tests for category: {category_name}")
         
-        # Early check for service availability
-        can_run, message = self._can_run_cypress_tests()
-        if not can_run:
-            print(f"SKIPPING Cypress tests: {message}")
-            return {
-                "success": False,
-                "duration": 0,
-                "output": "",
-                "errors": message,
-                "category": "cypress",
-                "skipped": True,
-                "skip_reason": "service_unavailable"
-            }
+        # Early check for service availability - will raise exception if services unavailable
+        try:
+            can_run, message = self._can_run_cypress_tests()
+        except RuntimeError as e:
+            # Hard failure - let the exception propagate
+            raise RuntimeError(f"Cypress test prerequisites not met: {str(e)}")
         
         try:
             # Create Cypress execution options
@@ -802,9 +792,11 @@ class UnifiedTestRunner:
                 env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
         else:
             setup_file = "jest.setup.js"
-            os.environ.pop('USE_REAL_SERVICES', None)
-            os.environ.pop('USE_DOCKER_SERVICES', None)
-            os.environ.pop('USE_REAL_LLM', None)
+            # Note: Cannot unset in IsolatedEnvironment, set to false instead
+            env = get_env()
+            env.set('USE_REAL_SERVICES', 'false', 'test_runner_frontend')
+            env.set('USE_DOCKER_SERVICES', 'false', 'test_runner_frontend')
+            env.set('USE_REAL_LLM', 'false', 'test_runner_frontend')
         
         category_commands = {
             "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",

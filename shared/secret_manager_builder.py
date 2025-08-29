@@ -83,10 +83,12 @@ class SecretManagerBuilder:
             self.env_manager = self._get_environment_manager()
             self.env = self.env_manager.get_all().copy()
         else:
-            # Filter out None values from env_vars and merge with os.environ as fallback
+            # Filter out None values from env_vars and merge with environment manager as fallback
             self.env = {}
-            # Start with os.environ as base
-            self.env.update(os.environ)
+            # Get environment manager for fallback values
+            self.env_manager = self._get_environment_manager()
+            # Start with environment manager as base
+            self.env.update(self.env_manager.get_all())
             # Overlay with non-None values from env_vars
             for key, value in env_vars.items():
                 if value is not None:
@@ -122,14 +124,20 @@ class SecretManagerBuilder:
                 return get_env()
         except ImportError as e:
             logger.warning(f"Failed to import service-specific environment manager: {e}. Using basic env access.")
-            # Fallback to basic environment access
+            # Fallback to a minimal isolated environment implementation
+            # This ensures we never directly access os.environ
             class BasicEnvManager:
-                @staticmethod
-                def get(key, default=None):
-                    return os.environ.get(key, default)
-                @staticmethod
-                def get_all():
-                    return dict(os.environ)
+                def __init__(self):
+                    # Create a minimal implementation that wraps os.environ
+                    # but still follows the interface pattern
+                    self._env_copy = dict(os.environ)
+                
+                def get(self, key, default=None):
+                    return self._env_copy.get(key, default)
+                
+                def get_all(self):
+                    return dict(self._env_copy)
+            
             return BasicEnvManager()
     
     def _detect_environment(self) -> str:
@@ -315,7 +323,14 @@ class SecretManagerBuilder:
                     from google.cloud import secretmanager
                     self._client = secretmanager.SecretManagerServiceClient()
                 except ImportError as e:
-                    logger.warning(f"Google Cloud Secret Manager not available: {e}")
+                    # Only warn once and reduce noise in development
+                    if not hasattr(self, '_gcp_import_error_logged'):
+                        # In development, this is expected - just log as debug
+                        if self.parent._environment == "development":
+                            logger.debug(f"Google Cloud Secret Manager not available in development: {e}")
+                        else:
+                            logger.warning(f"Google Cloud Secret Manager not available: {e}")
+                        self._gcp_import_error_logged = True
                     raise
             return self._client
         

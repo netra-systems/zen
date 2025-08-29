@@ -35,9 +35,10 @@ import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.state import DeepAgentState, GenerationStatus
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.generation import GenerationStatus
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile, DataGenerationType
-from netra_backend.app.schemas.generation import SyntheticDataResult, GenerationStatus as GenStatus
+from netra_backend.app.schemas.generation import SyntheticDataResult
 from netra_backend.app.schemas.user_plan import PlanTier
 from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService
 from tests.e2e.agent_conversation_helpers import (
@@ -45,7 +46,6 @@ from tests.e2e.agent_conversation_helpers import (
     ConversationFlowSimulator,
     ConversationFlowValidator,
 )
-from tests.e2e.real_client_factory import create_authenticated_client
 from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.websocket_message_guarantee_helpers import (
     MessageDeliveryGuaranteeCore,
@@ -164,7 +164,9 @@ class TestSyntheticDataE2E:
     @pytest.fixture
     def performance_timeout(self):
         """Get performance timeout for E2E tests."""
-        return int(os.getenv("E2E_PERFORMANCE_TIMEOUT", "120"))
+        from dev_launcher.isolated_environment import get_env
+        env = get_env()
+        return int(env.get("E2E_PERFORMANCE_TIMEOUT", "120"))
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
