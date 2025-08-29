@@ -1,0 +1,404 @@
+{
+  "ga4_property": {
+    "measurement_id": "G-522Q06C6M5",
+    "property_name": "Netra Apex Platform",
+    "property_id": "",
+    "account_id": "",
+    "industry_category": "TECHNOLOGY",
+    "time_zone": "America/Los_Angeles",
+    "currency": "USD"
+  },
+  "service_account": {
+    "email": "netra-staging-deploy@netra-staging.iam.gserviceaccount.com",
+    "key_file": "../gcp-staging-sa-key.json",
+    "project_id": "netra-staging"
+  },
+  "gtm_integration": {
+    "container_id": "GTM-WKP28PNQ",
+    "numeric_container_id": "228405904",
+    "account_id": "6310197060"
+  },
+  "custom_dimensions": {
+    "user_scoped": [
+      {
+        "parameter_name": "user_tier",
+        "display_name": "User Tier",
+        "description": "Subscription level (free/early/mid/enterprise)",
+        "scope": "USER"
+      },
+      {
+        "parameter_name": "user_id",
+        "display_name": "User ID",
+        "description": "Unique identifier for cross-device tracking",
+        "scope": "USER"
+      },
+      {
+        "parameter_name": "first_touch_source",
+        "display_name": "First Touch Source",
+        "description": "Original acquisition source",
+        "scope": "USER"
+      },
+      {
+        "parameter_name": "account_created_date",
+        "display_name": "Account Created Date",
+        "description": "Timestamp of account creation",
+        "scope": "USER"
+      }
+    ],
+    "event_scoped": [
+      {
+        "parameter_name": "agent_type",
+        "display_name": "Agent Type",
+        "description": "AI agent being used",
+        "scope": "EVENT"
+      },
+      {
+        "parameter_name": "feature_type",
+        "display_name": "Feature Type",
+        "description": "Platform feature being used",
+        "scope": "EVENT"
+      },
+      {
+        "parameter_name": "auth_method",
+        "display_name": "Auth Method",
+        "description": "Authentication method (email/google/oauth)",
+        "scope": "EVENT"
+      },
+      {
+        "parameter_name": "thread_id",
+        "display_name": "Thread ID",
+        "description": "Chat conversation identifier",
+        "scope": "EVENT"
+      },
+      {
+        "parameter_name": "session_duration",
+        "display_name": "Session Duration",
+        "description": "Length of user session in seconds",
+        "scope": "EVENT"
+      },
+      {
+        "parameter_name": "message_length",
+        "display_name": "Message Length",
+        "description": "Character count of messages",
+        "scope": "EVENT"
+      },
+      {
+        "parameter_name": "plan_type",
+        "display_name": "Plan Type",
+        "description": "Target plan for upgrades",
+        "scope": "EVENT"
+      },
+      {
+        "parameter_name": "conversion_source",
+        "display_name": "Conversion Source",
+        "description": "Campaign or source of conversion",
+        "scope": "EVENT"
+      }
+    ]
+  },
+  "custom_metrics": [
+    {
+      "parameter_name": "session_duration_seconds",
+      "display_name": "Session Duration",
+      "description": "Time spent in session",
+      "measurement_unit": "SECONDS",
+      "scope": "EVENT",
+      "value_type": "INT"
+    },
+    {
+      "parameter_name": "message_count",
+      "display_name": "Message Count",
+      "description": "Messages sent per session",
+      "measurement_unit": "STANDARD",
+      "scope": "EVENT",
+      "value_type": "INT"
+    },
+    {
+      "parameter_name": "agent_activation_count",
+      "display_name": "Agent Activations",
+      "description": "Number of AI agents used",
+      "measurement_unit": "STANDARD",
+      "scope": "EVENT",
+      "value_type": "INT"
+    },
+    {
+      "parameter_name": "feature_usage_score",
+      "display_name": "Feature Usage Score",
+      "description": "Weighted feature engagement score",
+      "measurement_unit": "STANDARD",
+      "scope": "EVENT",
+      "value_type": "FLOAT"
+    },
+    {
+      "parameter_name": "api_call_count",
+      "display_name": "API Calls",
+      "description": "API requests per session",
+      "measurement_unit": "STANDARD",
+      "scope": "EVENT",
+      "value_type": "INT"
+    },
+    {
+      "parameter_name": "thread_message_count",
+      "display_name": "Thread Length",
+      "description": "Messages per conversation thread",
+      "measurement_unit": "STANDARD",
+      "scope": "EVENT",
+      "value_type": "INT"
+    }
+  ],
+  "conversion_events": [
+    "sign_up",
+    "trial_start",
+    "purchase",
+    "plan_upgraded",
+    "demo_requested",
+    "first_agent_activation"
+  ],
+  "audiences": [
+    {
+      "display_name": "Active Free Users",
+      "description": "Free tier users active in last 7 days",
+      "filter_clauses": [
+        {
+          "simple_filter": {
+            "filter_expression": {
+              "and_group": {
+                "expressions": [
+                  {
+                    "dimension_filter": {
+                      "dimension_name": "customUser:user_tier",
+                      "string_filter": {
+                        "match_type": "EXACT",
+                        "value": "free"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "membership_duration_days": 30
+    },
+    {
+      "display_name": "Trial Ready to Convert",
+      "description": "Trial users with high engagement",
+      "filter_clauses": [
+        {
+          "simple_filter": {
+            "filter_expression": {
+              "and_group": {
+                "expressions": [
+                  {
+                    "dimension_filter": {
+                      "dimension_name": "customUser:user_tier",
+                      "string_filter": {
+                        "match_type": "EXACT",
+                        "value": "free"
+                      }
+                    }
+                  },
+                  {
+                    "metric_filter": {
+                      "metric_name": "eventCount",
+                      "numeric_filter": {
+                        "operation": "GREATER_THAN",
+                        "value": {
+                          "int64_value": 10
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "membership_duration_days": 30
+    },
+    {
+      "display_name": "Paid Users",
+      "description": "All paying customers",
+      "filter_clauses": [
+        {
+          "simple_filter": {
+            "filter_expression": {
+              "or_group": {
+                "expressions": [
+                  {
+                    "dimension_filter": {
+                      "dimension_name": "customUser:user_tier",
+                      "string_filter": {
+                        "match_type": "IN_LIST",
+                        "value": "early,mid,enterprise"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "membership_duration_days": 540
+    },
+    {
+      "display_name": "High Value Prospects",
+      "description": "Users showing enterprise behaviors",
+      "filter_clauses": [
+        {
+          "simple_filter": {
+            "filter_expression": {
+              "and_group": {
+                "expressions": [
+                  {
+                    "metric_filter": {
+                      "metric_name": "customEvent:agent_activation_count",
+                      "numeric_filter": {
+                        "operation": "GREATER_THAN_OR_EQUAL",
+                        "value": {
+                          "int64_value": 5
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "metric_filter": {
+                      "metric_name": "customEvent:session_duration_seconds",
+                      "numeric_filter": {
+                        "operation": "GREATER_THAN_OR_EQUAL",
+                        "value": {
+                          "int64_value": 300
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "membership_duration_days": 60
+    },
+    {
+      "display_name": "Churn Risk",
+      "description": "Paid users with declining usage",
+      "filter_clauses": [
+        {
+          "sequence_filter": {
+            "sequence_steps": [
+              {
+                "constraint_filter": {
+                  "dimension_filter": {
+                    "dimension_name": "customUser:user_tier",
+                    "string_filter": {
+                      "match_type": "IN_LIST",
+                      "value": "early,mid"
+                    }
+                  }
+                }
+              },
+              {
+                "constraint_filter": {
+                  "metric_filter": {
+                    "metric_name": "daysInactive",
+                    "numeric_filter": {
+                      "operation": "GREATER_THAN_OR_EQUAL",
+                      "value": {
+                        "int64_value": 14
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "membership_duration_days": 30
+    },
+    {
+      "display_name": "Power Users",
+      "description": "Highly engaged users",
+      "filter_clauses": [
+        {
+          "simple_filter": {
+            "filter_expression": {
+              "and_group": {
+                "expressions": [
+                  {
+                    "metric_filter": {
+                      "metric_name": "customEvent:message_count",
+                      "numeric_filter": {
+                        "operation": "GREATER_THAN_OR_EQUAL",
+                        "value": {
+                          "int64_value": 50
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "metric_filter": {
+                      "metric_name": "customEvent:agent_activation_count",
+                      "numeric_filter": {
+                        "operation": "GREATER_THAN_OR_EQUAL",
+                        "value": {
+                          "int64_value": 20
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "membership_duration_days": 90
+    }
+  ],
+  "event_parameters": {
+    "authentication": {
+      "user_login": ["auth_method", "user_tier", "is_new_user", "user_id", "session_id"],
+      "user_signup": ["auth_method", "referral_source", "user_id"],
+      "user_logout": ["session_duration", "user_id", "session_id"],
+      "oauth_complete": ["provider", "is_new_user", "user_id"]
+    },
+    "engagement": {
+      "chat_started": ["thread_id", "session_id", "user_tier", "user_id"],
+      "message_sent": ["thread_id", "message_length", "message_count", "user_id"],
+      "agent_activated": ["agent_type", "thread_id", "activation_count", "user_id"],
+      "thread_created": ["thread_id", "initial_prompt_length", "user_id"],
+      "feature_used": ["feature_type", "feature_category", "usage_count", "user_id"]
+    },
+    "conversion": {
+      "trial_started": ["plan_type", "trial_length", "user_id"],
+      "plan_upgraded": ["plan_type", "previous_plan", "value", "user_id"],
+      "payment_completed": ["transaction_id", "value", "currency", "plan_type", "user_id"],
+      "demo_requested": ["company_size", "industry", "contact_email"]
+    }
+  },
+  "enhanced_measurement": {
+    "page_views": true,
+    "scrolls": true,
+    "outbound_clicks": true,
+    "site_search": true,
+    "video_engagement": true,
+    "file_downloads": true,
+    "form_interactions": true,
+    "page_changes_based_on_browser_history": true
+  },
+  "data_retention": {
+    "event_data_retention": "14_MONTHS",
+    "reset_user_data_on_new_activity": true
+  },
+  "bigquery_export": {
+    "enabled": false,
+    "dataset_id": "netra_analytics",
+    "frequency": "DAILY",
+    "include_advertising_id": false
+  }
+}
