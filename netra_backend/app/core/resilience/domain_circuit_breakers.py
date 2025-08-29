@@ -19,6 +19,11 @@ import time
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
+from netra_backend.app.llm.gemini_config import (
+    create_gemini_circuit_config, 
+    is_gemini_model,
+    get_gemini_fallback_chain
+)
 
 
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
@@ -206,7 +211,40 @@ class LLMCircuitBreaker:
         
     def _create_circuit_breaker(self) -> UnifiedCircuitBreaker:
         """Create unified circuit breaker with LLM optimizations."""
-        unified_config = UnifiedCircuitConfig(
+        # Use Gemini-specific configuration if model is Gemini
+        if self.model and is_gemini_model(self.model):
+            try:
+                llm_model = LLMModel(self.model)
+                gemini_config = create_gemini_circuit_config(llm_model)
+                
+                # Apply Gemini-specific optimizations
+                unified_config = UnifiedCircuitConfig(
+                    name=self.name,
+                    failure_threshold=gemini_config.get("failure_threshold", self.config.failure_threshold),
+                    recovery_timeout=gemini_config.get("recovery_timeout", self.config.recovery_timeout_seconds),
+                    success_threshold=gemini_config.get("success_threshold", self.config.success_threshold),
+                    timeout_seconds=gemini_config.get("timeout_seconds", self.config.request_timeout_seconds),
+                    sliding_window_size=gemini_config.get("sliding_window_size", self.config.sliding_window_size),
+                    error_rate_threshold=gemini_config.get("error_rate_threshold", self.config.error_rate_threshold),
+                    adaptive_threshold=True,
+                    slow_call_threshold=gemini_config.get("slow_call_threshold", self.config.slow_call_threshold_seconds),
+                    exponential_backoff=gemini_config.get("exponential_backoff", True),
+                    max_backoff_seconds=gemini_config.get("max_backoff_seconds", self.config.max_backoff_seconds),
+                    expected_exception_types=gemini_config.get("expected_exception_types", self.config.expected_llm_exceptions)
+                )
+                logger.info(f"Using Gemini-optimized circuit breaker config for {self.model}")
+            except ValueError as e:
+                logger.warning(f"Failed to load Gemini config for {self.model}: {e}, using default")
+                unified_config = self._get_default_unified_config()
+        else:
+            unified_config = self._get_default_unified_config()
+            
+        manager = get_unified_circuit_breaker_manager()
+        return manager.create_circuit_breaker(self.name, unified_config)
+    
+    def _get_default_unified_config(self) -> UnifiedCircuitConfig:
+        """Get default unified circuit configuration."""
+        return UnifiedCircuitConfig(
             name=self.name,
             failure_threshold=self.config.failure_threshold,
             recovery_timeout=self.config.recovery_timeout_seconds,
@@ -220,8 +258,6 @@ class LLMCircuitBreaker:
             max_backoff_seconds=self.config.max_backoff_seconds,
             expected_exception_types=self.config.expected_llm_exceptions
         )
-        manager = get_unified_circuit_breaker_manager()
-        return manager.create_circuit_breaker(self.name, unified_config)
         
     async def call_llm(
         self, 
@@ -669,9 +705,9 @@ class DatabaseCircuitBreakerConfig:
 
 @dataclass
 class LLMCircuitBreakerConfig:
-    """Configuration for LLM circuit breakers."""
-    failure_threshold: int = 3
-    recovery_timeout_seconds: float = 120.0
+    """Configuration for LLM circuit breakers with Gemini 2.0 Flash tuning."""
+    failure_threshold: int = 10  # Increased from 3 to 10 for Gemini 2.0 Flash stability
+    recovery_timeout_seconds: float = 10.0  # Decreased from 120.0 to 10.0 for faster recovery
     success_threshold: int = 2
     request_timeout_seconds: float = 60.0
     sliding_window_size: int = 6

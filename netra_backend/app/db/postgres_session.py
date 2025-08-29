@@ -124,9 +124,14 @@ async def _commit_session_transaction(session: AsyncSession):
 
 
 def _setup_session_for_transaction():
-    """Setup and validate session for transaction."""
+    """Setup and validate session for transaction.
+    
+    DEPRECATED: This function creates sessions without proper lifecycle management.
+    Should not be used directly - use get_async_db() or DatabaseManager.get_async_session().
+    """
     from netra_backend.app.db.postgres_core import async_session_factory
     _validate_async_session_factory()
+    # WARNING: Direct factory call without context management - will leak connections
     return async_session_factory()
 
 async def _yield_session_with_validation(session: AsyncSession):

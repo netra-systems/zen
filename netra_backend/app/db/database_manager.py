@@ -19,7 +19,7 @@ from typing import Optional
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.exc import OperationalError, DisconnectionError
 
 from netra_backend.app.core.isolated_environment import get_env
@@ -471,6 +471,7 @@ class DatabaseManager:
             "pool_pre_ping": True,
             "pool_recycle": 3600,
             "pool_reset_on_return": 'rollback',  # Reset connections properly
+            "pool_use_lifo": True,  # Use LIFO to keep connections warm
         }
         
         # Add pool sizing only for non-NullPool configurations
@@ -523,6 +524,9 @@ class DatabaseManager:
     def get_application_session():
         """Return async session factory for app runtime.
         
+        CRITICAL: The returned factory creates sessions that MUST be managed
+        through async context managers to prevent connection leaks.
+        
         Returns:
             Async session factory for FastAPI operations
         """
@@ -531,7 +535,8 @@ class DatabaseManager:
             engine,
             expire_on_commit=False,
             autocommit=False,
-            autoflush=False
+            autoflush=False,
+            class_=AsyncSession  # Explicitly set class for better error messages
         )
     
     @staticmethod
@@ -1045,14 +1050,15 @@ class DatabaseManager:
     async def get_async_session(name: str = "default"):
         """Get async database session with automatic cleanup.
         
-        CRITICAL FIX: Improved session lifecycle to prevent IllegalStateChangeError.
-        Uses proper session state checking to avoid concurrent operations.
+        CRITICAL FIX: Uses async context manager instead of async generator
+        to prevent 'aclose(): asynchronous generator is already running' errors
+        during concurrent access.
+        
+        This implementation is thread-safe and prevents session state conflicts.
         """
         async_session_factory = DatabaseManager.get_application_session()
         async with async_session_factory() as session:
-            session_yielded = False
             try:
-                session_yielded = True
                 yield session
                 # CRITICAL FIX: Only attempt commit if session is properly active
                 # and has an active transaction to commit
@@ -1061,18 +1067,14 @@ class DatabaseManager:
                     if hasattr(session, 'in_transaction') and session.in_transaction():
                         await session.commit()
             except asyncio.CancelledError:
-                # Handle task cancellation - don't attempt any session operations
-                # The async context manager will handle cleanup
+                # Handle task cancellation - let context manager handle cleanup
                 raise
             except GeneratorExit:
                 # Handle generator cleanup gracefully
-                # Session context manager will handle cleanup
                 pass
             except Exception:
                 # CRITICAL FIX: Only rollback if session is still in a valid state
-                # and has an active transaction
-                if (session_yielded and 
-                    hasattr(session, 'is_active') and session.is_active and
+                if (hasattr(session, 'is_active') and session.is_active and
                     hasattr(session, 'in_transaction') and session.in_transaction()):
                     try:
                         await session.rollback()

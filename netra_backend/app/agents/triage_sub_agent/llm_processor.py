@@ -2,6 +2,8 @@
 
 Handles all LLM interactions, structured calls, and fallback processing.
 Keeps functions under 8 lines and module under 300 lines.
+
+UPDATED: Enhanced with Gemini 2.5 Pro configuration verification and logging.
 """
 
 import time
@@ -10,6 +12,7 @@ from typing import Any, Dict, Optional
 from pydantic import ValidationError
 
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.triage_sub_agent.config import TriageConfig
 from netra_backend.app.llm.observability import (
     generate_llm_correlation_id,
     log_agent_input,
@@ -29,6 +32,7 @@ class TriageLLMProcessor:
         """Initialize with reference to main agent."""
         self.agent = agent
         self.logger = logger
+        self._log_model_configuration_on_init()
     
     async def execute_triage_with_llm(
         self, state: DeepAgentState, run_id: str, stream_updates: bool
@@ -195,6 +199,10 @@ class TriageLLMProcessor:
     async def _call_structured_llm(self, enhanced_prompt: str):
         """Call structured LLM with triage schema."""
         from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+        
+        # Log model selection verification
+        self._log_model_selection("structured_call")
+        
         return await self.agent.llm_manager.ask_structured_llm(
             enhanced_prompt, llm_config_name='triage', schema=TriageResult, use_cache=False
         )
@@ -247,6 +255,10 @@ class TriageLLMProcessor:
         """Execute LLM call with JSON formatting instruction."""
         prompt = enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object."
         log_agent_input("TriageSubAgent-Fallback", "LLM", len(prompt), correlation_id)
+        
+        # Log model selection for fallback call
+        self._log_model_selection("fallback_call")
+        
         response = await self.agent.llm_manager.ask_llm(prompt, llm_config_name='triage')
         log_agent_output("LLM", "TriageSubAgent-Fallback", len(response), "success", correlation_id)
         return response
@@ -355,3 +367,28 @@ class TriageLLMProcessor:
             "triage_duration_ms": int((time.time() - start_time) * 1000),
             "fallback_used": False
         }
+    
+    def _log_model_configuration_on_init(self) -> None:
+        """Log triage model configuration on initialization."""
+        if TriageConfig.should_log_performance_metric("model_selection"):
+            model_name = TriageConfig.get_model_display_name()
+            timeout = TriageConfig.get_timeout_for_model()
+            fallback_model = TriageConfig.FALLBACK_MODEL.value
+            
+            self.logger.info(
+                f"TriageAgent initialized with model: {model_name}, "
+                f"timeout: {timeout}s, fallback: {fallback_model}"
+            )
+    
+    def _log_model_selection(self, call_type: str) -> None:
+        """Log model selection for LLM calls."""
+        if TriageConfig.should_log_performance_metric("model_selection"):
+            config = TriageConfig.get_llm_config()
+            model_name = config["model_name"]
+            provider = config["provider"]
+            timeout = config["timeout_seconds"]
+            
+            self.logger.info(
+                f"Triage {call_type}: using {provider} {model_name} "
+                f"(timeout: {timeout}s) via 'triage' config"
+            )

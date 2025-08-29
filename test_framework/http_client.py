@@ -200,9 +200,49 @@ class UnifiedHTTPClient:
         for attempt in range(self.config.max_retries + 1):
             try:
                 self._websocket = await self._establish_websocket_connection(ws_url, headers)
-                self._websocket_state = ConnectionState.CONNECTED
-                return True
+                
+                # CRITICAL FIX: Check WebSocket connection state properly for different WebSocket libraries
+                # The websockets library uses different state attributes depending on version
+                is_connected = False
+                
+                # Check for different possible connection state attributes
+                if hasattr(self._websocket, 'closed') and not self._websocket.closed:
+                    is_connected = True
+                elif hasattr(self._websocket, 'state'):
+                    # CRITICAL FIX: Check for WebSocket state properly - handle enum values
+                    state_value = self._websocket.state
+                    if hasattr(state_value, 'value') and state_value.value == 1:  # State.OPEN = 1
+                        is_connected = True
+                    elif str(state_value) in ['State.OPEN', '1']:
+                        is_connected = True
+                elif hasattr(self._websocket, 'open') and self._websocket.open:
+                    is_connected = True
+                elif not hasattr(self._websocket, 'closed') and not hasattr(self._websocket, 'state') and not hasattr(self._websocket, 'open'):
+                    # If none of the expected attributes exist, assume connection succeeded if no exception
+                    # This is common with some WebSocket implementations
+                    is_connected = True
+                
+                if is_connected:
+                    self._websocket_state = ConnectionState.CONNECTED
+                    return True
+                else:
+                    # Debug logging for connection verification failure
+                    attrs = {
+                        'closed': getattr(self._websocket, 'closed', 'no_attr'),
+                        'state': getattr(self._websocket, 'state', 'no_attr'),
+                        'open': getattr(self._websocket, 'open', 'no_attr')
+                    }
+                    print(f"DEBUG: WebSocket connection verification failed. attrs={attrs}")
+                    self._websocket_state = ConnectionState.FAILED
+                    if attempt == self.config.max_retries:
+                        return False
+                    
             except Exception as e:
+                # CRITICAL FIX: Improve timeout handling for WebSocket connections
+                if "timeout" in str(e).lower() or "timed out" in str(e).lower():
+                    print(f"DEBUG: WebSocket connection timeout on attempt {attempt + 1}: {e}")
+                else:
+                    print(f"DEBUG: WebSocket connection attempt {attempt + 1} failed: {e}")
                 if attempt == self.config.max_retries:
                     self._handle_websocket_error(str(e))
                     return False
@@ -223,8 +263,13 @@ class UnifiedHTTPClient:
         if token:
             ws_url = f"{ws_url}?token={token}"
         
-        # Connection kwargs with timeout
-        connection_kwargs = {"ping_timeout": self.config.timeout}
+        # Connection kwargs with timeout - CRITICAL FIX: Use proper timeout settings
+        connection_kwargs = {
+            "ping_timeout": 20.0,  # Timeout for ping/pong
+            "ping_interval": 30.0,  # How often to ping
+            "close_timeout": 10.0  # Timeout for closing
+            # Note: 'timeout' parameter is not supported in this version
+        }
         
         # Only use SSL context for wss:// URLs
         if ws_url.startswith("wss://"):
@@ -234,12 +279,40 @@ class UnifiedHTTPClient:
     
     async def send(self, message: Union[Dict[str, Any], str]) -> bool:
         """Send message through WebSocket."""
-        if not self._websocket or self._websocket_state != ConnectionState.CONNECTED:
+        if not self._websocket:
             return False
+        
+        # CRITICAL FIX: Check actual WebSocket connection state with proper library compatibility
+        try:
+            # Check if WebSocket is closed using various possible attributes
+            is_closed = False
+            if hasattr(self._websocket, 'closed') and self._websocket.closed:
+                is_closed = True
+            elif hasattr(self._websocket, 'state'):
+                # CRITICAL FIX: Check for WebSocket state properly - handle enum values
+                state_value = self._websocket.state
+                if hasattr(state_value, 'value') and state_value.value != 1:  # State.OPEN = 1
+                    is_closed = True
+                elif str(state_value) not in ['State.OPEN', '1']:
+                    is_closed = True
+            elif hasattr(self._websocket, 'open') and not self._websocket.open:
+                is_closed = True
+            
+            if is_closed:
+                self._websocket_state = ConnectionState.FAILED
+                return False
+        except Exception:
+            # If we can't check the state, try to send anyway
+            pass
         
         try:
             message_str = self._prepare_websocket_message(message)
             await self._websocket.send(message_str)
+            
+            # Update internal state on successful send
+            if self._websocket_state != ConnectionState.CONNECTED:
+                self._websocket_state = ConnectionState.CONNECTED
+            
             self.metrics.requests_sent += 1
             return True
         except (ConnectionClosedError, Exception) as e:
@@ -267,11 +340,39 @@ class UnifiedHTTPClient:
         if not self._websocket:
             return None
         
+        # CRITICAL FIX: Check actual WebSocket connection state with proper library compatibility
+        try:
+            # Check if WebSocket is closed using various possible attributes
+            is_closed = False
+            if hasattr(self._websocket, 'closed') and self._websocket.closed:
+                is_closed = True
+            elif hasattr(self._websocket, 'state'):
+                # CRITICAL FIX: Check for WebSocket state properly - handle enum values
+                state_value = self._websocket.state
+                if hasattr(state_value, 'value') and state_value.value != 1:  # State.OPEN = 1
+                    is_closed = True
+                elif str(state_value) not in ['State.OPEN', '1']:
+                    is_closed = True
+            elif hasattr(self._websocket, 'open') and not self._websocket.open:
+                is_closed = True
+            
+            if is_closed:
+                self._websocket_state = ConnectionState.FAILED
+                return None
+        except Exception:
+            # If we can't check the state, try to receive anyway
+            pass
+        
         try:
             timeout_value = timeout or self.config.timeout
             message = await asyncio.wait_for(
                 self._websocket.recv(), timeout=timeout_value
             )
+            
+            # Update internal state on successful receive
+            if self._websocket_state != ConnectionState.CONNECTED:
+                self._websocket_state = ConnectionState.CONNECTED
+            
             self.metrics.responses_received += 1
             return json.loads(message)
         except (asyncio.TimeoutError, ConnectionClosedError) as e:

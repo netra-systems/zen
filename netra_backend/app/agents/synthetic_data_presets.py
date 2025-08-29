@@ -32,6 +32,9 @@ class DataGenerationType(str, Enum):
     COST_DATA = "cost_data"
     CUSTOM = "custom"
 
+# Alias for backward compatibility
+WorkloadType = DataGenerationType
+
 class WorkloadProfile(BaseModel):
     """Profile for synthetic workload generation"""
     workload_type: DataGenerationType

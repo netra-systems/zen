@@ -1670,4 +1670,17 @@
             <critical-takeaway>Race conditions from parallel execution can cause data corruption and unpredictable AI recommendations</critical-takeaway>
         </category>
     </agent_orchestration>
+    
+    <frontend_defensive_programming>
+        <category name="WebSocket Debugger Defensive Programming" path="SPEC/learnings/websocket_debugger_defensive.xml" keywords="WebSocket, Debugger, Defensive Programming, GTM, Undefined Access, Production Error, Type Safety, Optional Chaining">
+            <critical-takeaway>WebSocket debugger methods MUST handle undefined/malformed events as GTM minified scripts can access them unexpectedly</critical-takeaway>
+            <critical-takeaway>Use optional chaining (?.) and nullish coalescing (??) for ALL nested property access in exported services</critical-takeaway>
+            <critical-takeaway>generateEventId() must check multiple property locations (message_id, messageId, id) with safe fallbacks</critical-takeaway>
+            <critical-takeaway>traceEvent() must validate event existence before processing and return error results for undefined inputs</critical-takeaway>
+            <critical-takeaway>All validation rules must check event existence before accessing properties to prevent runtime errors</critical-takeaway>
+            <critical-takeaway>Production error "Cannot read properties of undefined" from GTM scripts indicates missing defensive programming</critical-takeaway>
+            <critical-takeaway>Exported services accessed by third-party scripts require extra defensive programming layers</critical-takeaway>
+            <critical-takeaway>Test all public methods with undefined, null, and malformed inputs to ensure graceful handling</critical-takeaway>
+        </category>
+    </frontend_defensive_programming>
 </specification>

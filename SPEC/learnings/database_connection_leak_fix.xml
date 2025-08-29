@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>SQLAlchemy Connection Pool Leak Prevention</title>
+  <created>2025-08-29</created>
+  
+  <problem>
+    <description>
+      SQLAlchemy reports garbage collector warnings about non-checked-in connections:
+      "The garbage collector is trying to clean up non-checked-in connection 
+      &lt;AdaptedConnection &lt;asyncpg.connection.Connection object&gt;&gt;, which will be terminated"
+    </description>
+    <root_cause>
+      Sessions created directly via async_session_factory() without proper context 
+      management are not returned to the connection pool. When Python's garbage 
+      collector tries to clean these up, connections are forcibly terminated instead 
+      of being properly returned to the pool.
+    </root_cause>
+    <locations_found>
+      <location>netra_backend/app/db/client_postgres_session.py:30 - create_session_factory()</location>
+      <location>netra_backend/app/db/postgres_session.py:130 - _setup_session_for_transaction()</location>
+      <location>netra_backend/app/services/database/unit_of_work.py:42,121 - Session context storage</location>
+    </locations_found>
+  </problem>
+  
+  <solution>
+    <approach>Ensure all database sessions are managed through async context managers</approach>
+    <key_fixes>
+      <fix>
+        Added warnings to methods that return raw sessions without context management
+      </fix>
+      <fix>
+        Enhanced UnitOfWork cleanup to always exit session context even on errors
+      </fix>
+      <fix>
+        Added pool_use_lifo=True to keep connections warm and reduce churn
+      </fix>
+      <fix>
+        Improved error handling in __aexit__ methods with try/finally blocks
+      </fix>
+    </key_fixes>
+    <implementation>
+      <code>
+# CORRECT: Always use async context manager
+async with DatabaseManager.get_async_session() as session:
+    await session.execute(query)
+    # Session automatically returned to pool on exit
+
+# INCORRECT: Direct factory call leaks connections
+session = async_session_factory()  # DON'T DO THIS
+await session.execute(query)
+# Connection leaked - not returned to pool!
+      </code>
+    </implementation>
+  </solution>
+  
+  <prevention>
+    <guideline>NEVER call async_session_factory() directly - always use context managers</guideline>
+    <guideline>Use DatabaseManager.get_async_session() or get_db() for all session access</guideline>
+    <guideline>Ensure __aexit__ methods have try/finally blocks for cleanup</guideline>
+    <guideline>Always close session before exiting session context in cleanup code</guideline>
+    <guideline>Add warnings to any methods that return raw sessions</guideline>
+  </prevention>
+  
+  <testing>
+    <test_case>Run test_database_connection_leak_fix.py to verify no GC warnings</test_case>
+    <test_case>Monitor connection pool metrics during high load</test_case>
+    <test_case>Force garbage collection and verify no warnings appear</test_case>
+    <test_case>Test concurrent session usage for pool exhaustion</test_case>
+  </testing>
+  
+  <monitoring>
+    <metric>Watch for "garbage collector" warnings in logs</metric>
+    <metric>Monitor pool.checkedout() vs pool.size() ratio</metric>
+    <metric>Track connection pool exhaustion events</metric>
+    <metric>Monitor asyncpg connection lifecycle events</metric>
+  </monitoring>
+  
+  <references>
+    <file>netra_backend/app/db/database_manager.py</file>
+    <file>netra_backend/app/database/__init__.py</file>
+    <file>netra_backend/app/services/database/unit_of_work.py</file>
+    <file>netra_backend/tests/critical/test_database_connection_leak_fix.py</file>
+    <spec>SPEC/learnings/sqlalchemy_session_lifecycle.xml</spec>
+  </references>
+</learning>

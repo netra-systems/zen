@@ -150,6 +150,7 @@
     "subscription_count",
     "success_count",
     "suppression_rules_count",
+    "symbols_count",
     "table_count",
     "tables_count",
     "target_count",

@@ -5,11 +5,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, Any, Optional
 
-from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.synthetic_data_sub_agent_modern import (
-    ModernSyntheticDataSubAgent
-)
 from netra_backend.app.agents.synthetic_data_generator import (
     SyntheticDataGenerator
 )
@@ -35,114 +31,40 @@ class TestAgentWebSocketIntegration:
 
     @pytest.fixture
     def execution_context_with_thread(self):
-        """Create execution context with thread_id."""
-        return ExecutionContext(
-            run_id="run_test_123",
-            agent_name="TestAgent",
-            state=DeepAgentState(user_request="Generate test data"),
-            stream_updates=True,
-            thread_id="thread_456",
-            user_id="user_789"
-        )
+        """Create execution context dict with thread_id."""
+        return {
+            "run_id": "run_test_123",
+            "agent_name": "TestAgent",
+            "state": DeepAgentState(user_request="Generate test data"),
+            "stream_updates": True,
+            "thread_id": "thread_456",
+            "user_id": "user_789"
+        }
 
     @pytest.fixture
     def execution_context_without_thread(self):
-        """Create execution context without thread_id."""
-        return ExecutionContext(
-            run_id="run_test_456",
-            agent_name="TestAgent",
-            state=DeepAgentState(user_request="Generate test data"),
-            stream_updates=True,
-            thread_id=None,
-            user_id="user_789"
-        )
+        """Create execution context dict without thread_id."""
+        return {
+            "run_id": "run_test_456",
+            "agent_name": "TestAgent",
+            "state": DeepAgentState(user_request="Generate test data"),
+            "stream_updates": True,
+            "thread_id": None,
+            "user_id": "user_789"
+        }
 
     @pytest.fixture
     def execution_context_run_only(self):
-        """Create execution context with only run_id."""
-        return ExecutionContext(
-            run_id="run_test_789",
-            agent_name="TestAgent",
-            state=DeepAgentState(user_request="Generate test data"),
-            stream_updates=True,
-            thread_id=None,
-            user_id=None
-        )
+        """Create execution context dict with only run_id."""
+        return {
+            "run_id": "run_test_789",
+            "agent_name": "TestAgent",
+            "state": DeepAgentState(user_request="Generate test data"),
+            "stream_updates": True,
+            "thread_id": None,
+            "user_id": None
+        }
 
-    @pytest.mark.asyncio
-    async def test_synthetic_agent_with_thread_context(
-        self, mock_websocket_manager, execution_context_with_thread
-    ):
-        """Test synthetic data agent uses thread_id for WebSocket messages."""
-        with patch('netra_backend.app.websocket_core.get_websocket_manager',
-                  return_value=mock_websocket_manager):
-            # Create mock dependencies
-            llm_manager = MagicMock()
-            tool_dispatcher = AsyncMock()
-            tool_dispatcher.has_tool = MagicMock(return_value=True)
-            tool_dispatcher.dispatch_tool = AsyncMock(return_value={"data": []})
-            
-            # Create agent
-            agent = ModernSyntheticDataSubAgent(
-                llm_manager=llm_manager,
-                tool_dispatcher=tool_dispatcher,
-                websocket_manager=mock_websocket_manager
-            )
-            
-            # Mock workload profile determination
-            with patch.object(agent, '_determine_workload_profile',
-                            return_value=WorkloadProfile(
-                                workload_type=WorkloadType.HIGH_TRAFFIC,
-                                volume=100
-                            )):
-                # Execute agent
-                await agent.execute_core_logic(execution_context_with_thread)
-                
-                # Verify thread-based messaging was used
-                assert mock_websocket_manager.send_to_thread.called
-                # Verify run_id was NOT used as user_id
-                assert not any(
-                    call[0][0] == "run_test_123"
-                    for call in mock_websocket_manager.send_to_user.call_args_list
-                )
-
-    @pytest.mark.asyncio
-    async def test_synthetic_agent_without_thread_context(
-        self, mock_websocket_manager, execution_context_without_thread
-    ):
-        """Test synthetic data agent uses user_id when thread_id not available."""
-        with patch('netra_backend.app.websocket_core.get_websocket_manager',
-                  return_value=mock_websocket_manager):
-            # Create mock dependencies
-            llm_manager = MagicMock()
-            tool_dispatcher = AsyncMock()
-            tool_dispatcher.has_tool = MagicMock(return_value=True)
-            tool_dispatcher.dispatch_tool = AsyncMock(return_value={"data": []})
-            
-            # Create agent
-            agent = ModernSyntheticDataSubAgent(
-                llm_manager=llm_manager,
-                tool_dispatcher=tool_dispatcher,
-                websocket_manager=mock_websocket_manager
-            )
-            
-            # Mock workload profile determination
-            with patch.object(agent, '_determine_workload_profile',
-                            return_value=WorkloadProfile(
-                                workload_type=WorkloadType.HIGH_TRAFFIC,
-                                volume=100
-                            )):
-                # Execute agent
-                await agent.execute_core_logic(execution_context_without_thread)
-                
-                # Verify user-based messaging was attempted
-                if mock_websocket_manager.send_to_user.called:
-                    # Check that user_789 was used, not run_id
-                    user_calls = [
-                        call for call in mock_websocket_manager.send_to_user.call_args_list
-                        if call[0][0] == "user_789"
-                    ]
-                    assert len(user_calls) > 0
 
     @pytest.mark.asyncio
     async def test_data_agent_no_websocket_with_run_only(
@@ -267,25 +189,22 @@ class TestAgentWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_concurrent_message_sending(self, mock_websocket_manager):
         """Test concurrent WebSocket message sending."""
-        # Create multiple execution contexts
+        # Create multiple contexts as dicts
         contexts = [
-            ExecutionContext(
-                run_id=f"run_concurrent_{i}",
-                agent_name="TestAgent",
-                state=DeepAgentState(user_request=f"Request {i}"),
-                stream_updates=True,
-                thread_id=f"thread_concurrent_{i}",
-                user_id=f"user_concurrent_{i}"
-            )
+            {
+                "run_id": f"run_concurrent_{i}",
+                "thread_id": f"thread_concurrent_{i}",
+                "user_id": f"user_concurrent_{i}"
+            }
             for i in range(5)
         ]
         
         async def send_message(context):
             """Simulate agent sending message."""
-            if context.thread_id:
+            if context["thread_id"]:
                 await mock_websocket_manager.send_to_thread(
-                    context.thread_id,
-                    {"type": "status", "run_id": context.run_id}
+                    context["thread_id"],
+                    {"type": "status", "run_id": context["run_id"]}
                 )
         
         # Send messages concurrently

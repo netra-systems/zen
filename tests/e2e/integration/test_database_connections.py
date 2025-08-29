@@ -43,9 +43,9 @@ class DatabaseConnectionTester:
     def _setup_connection_urls(self) -> None:
         """Setup database connection URLs for testing."""
         self.postgres_url = os.getenv("TEST_DATABASE_URL") or \
-            "postgresql+asyncpg://test:test@localhost:5432/test_db"
+            "postgresql+asyncpg://netra:netra123@localhost:5432/netra_dev"
         self.clickhouse_url = os.getenv("TEST_CLICKHOUSE_URL") or \
-            "http://localhost:8123"
+            "http://netra:netra123@localhost:8123"
         self.redis_url = os.getenv("TEST_REDIS_URL") or \
             "redis://localhost:6379/1"
     

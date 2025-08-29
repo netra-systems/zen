@@ -3,6 +3,64 @@ Backend-specific test configuration.
 Uses consolidated test framework infrastructure with backend-specific customizations.
 """
 
+import pytest
+
+def pytest_addoption(parser):
+    """Add command line options for backend tests."""
+    # Add real LLM testing support
+    llm_group = parser.getgroup("llm testing", "LLM testing options")
+    llm_group.addoption(
+        "--real-llm",
+        action="store_true",
+        default=False,
+        help="Use real LLM APIs instead of mocks"
+    )
+    llm_group.addoption(
+        "--llm-model",
+        action="store",
+        default="gemini-2.5-flash",
+        help="LLM model to use for testing"
+    )
+    llm_group.addoption(
+        "--llm-timeout",
+        type=int,
+        default=60,
+        help="Timeout for LLM API calls in seconds"
+    )
+
+def pytest_configure(config):
+    """Configure the test session."""
+    # Configure real LLM testing if --real-llm flag is provided
+    if hasattr(config.option, 'real_llm') and config.option.real_llm:
+        import os
+        
+        # Set environment variables for real LLM testing
+        os.environ["TEST_USE_REAL_LLM"] = "true"
+        os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
+        
+        # Set model if provided
+        if hasattr(config.option, 'llm_model') and config.option.llm_model:
+            os.environ["TEST_LLM_MODEL"] = config.option.llm_model
+        
+        # Set timeout if provided
+        if hasattr(config.option, 'llm_timeout') and config.option.llm_timeout:
+            os.environ["TEST_LLM_TIMEOUT"] = str(config.option.llm_timeout)
+        
+        # Configure real services (override the in-memory database setting)
+        os.environ["USE_REAL_SERVICES"] = "true"
+        os.environ["DATABASE_URL"] = "postgresql://netra:netra123@localhost:5432/netra_dev"
+        os.environ["REDIS_URL"] = "redis://localhost:6379/0"
+        os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
+        
+        # Disable test-only database isolation for real service testing
+        os.environ.pop("TEST_DISABLE_REDIS", None)
+        os.environ["CLICKHOUSE_ENABLED"] = "true"
+        os.environ.pop("DEV_MODE_DISABLE_CLICKHOUSE", None)
+        
+        print(f"Real LLM testing enabled with model: {config.option.llm_model if hasattr(config.option, 'llm_model') else 'default'}")
+        print(f"LLM timeout: {config.option.llm_timeout if hasattr(config.option, 'llm_timeout') else 60} seconds")
+        print("Real services enabled: PostgreSQL, Redis, ClickHouse")
+
 # Import all common fixtures from the consolidated base FIRST
 from test_framework.conftest_base import *
 

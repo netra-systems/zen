@@ -93,6 +93,15 @@ class FallbackResponseFactory:
         if fallback_type in self.default_responses:
             return self._enhance_response_with_error(fallback_type, error)
         return self.default_responses["general"]
+        
+    def create_circuit_breaker_response(self, fallback_type: str, error: Optional[Exception] = None) -> Any:
+        """Create fallback response specifically for circuit breaker open scenarios."""
+        if fallback_type == "triage":
+            return self._create_circuit_breaker_triage_response()
+        elif fallback_type == "data_analysis":
+            return self._create_circuit_breaker_data_analysis_response()
+        else:
+            return "Service temporarily unavailable due to circuit breaker protection. Please try again in a few moments."
     
     def _enhance_response_with_error(self, fallback_type: str, error: Optional[Exception]) -> Any:
         """Enhance response with error information."""
@@ -108,6 +117,34 @@ class FallbackResponseFactory:
         """Add error metadata to response."""
         response["metadata"]["error"] = str(error) if error else "Unknown error"
         response["metadata"]["timestamp"] = time.time()
+        
+    def _create_circuit_breaker_triage_response(self) -> Dict[str, Any]:
+        """Create triage response for circuit breaker scenarios."""
+        response = TriageResponseBuilder.create_base_response()
+        response["category"] = "System_Unavailable"
+        response["confidence_score"] = 0.1
+        response["priority"] = "low"
+        response["metadata"] = {
+            "triage_duration_ms": 0,
+            "fallback_used": True,
+            "circuit_breaker_triggered": True,
+            "llm_tokens_used": 0,
+            "cache_hit": False,
+            "retry_count": 0
+        }
+        return response
+        
+    def _create_circuit_breaker_data_analysis_response(self) -> Dict[str, Any]:
+        """Create data analysis response for circuit breaker scenarios."""
+        response = DataAnalysisResponseBuilder.create_base_response()
+        response["insights"] = ["Analysis service temporarily unavailable due to system protection"]
+        response["recommendations"] = ["Please try again in a few moments", "Check system status for updates"]
+        response["confidence"] = 0.1
+        response["metadata"] = {
+            "fallback_used": True,
+            "circuit_breaker_triggered": True
+        }
+        return response
 
 
 class StructuredFallbackBuilder:

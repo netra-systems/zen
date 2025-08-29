@@ -1,7 +1,7 @@
-"""L3 Integration Tests for Database Connectivity with Real Containerized Services.
+"""L3 Integration Tests for Database Connectivity with Docker Compose Services.
 
 These tests validate database connectivity, transactions, and management using 
-real PostgreSQL and ClickHouse containers via Testcontainers, providing L3-level 
+real PostgreSQL and ClickHouse services via Docker Compose, providing L3-level 
 realism as required by testing.xml Mock-Real Spectrum.
 
 Business Value: Ensures database connectivity patterns work in production-like
@@ -11,8 +11,7 @@ could impact customer operations and data reliability.
 
 import pytest
 import asyncio
-from testcontainers.postgres import PostgresContainer
-from testcontainers.clickhouse import ClickHouseContainer
+import asyncpg
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
@@ -24,33 +23,46 @@ from netra_backend.app.db.postgres_core import AsyncDatabase
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestDatabaseConnectivityL3:
-    """L3 Integration tests for database connectivity with real containers."""
+    """L3 Integration tests for database connectivity with Docker Compose services."""
     
     @pytest.fixture(scope="class")
-    def postgres_container(self):
-        """Start real PostgreSQL container for testing."""
+    async def postgres_connection(self):
+        """Connect to Docker Compose PostgreSQL service."""
         try:
-            with PostgresContainer("postgres:15") as postgres:
-                yield postgres
+            conn = await asyncpg.connect(
+                host='localhost',
+                port=5432,
+                user='postgres',
+                password='postgres',
+                database='netra_dev'
+            )
+            yield conn
+            await conn.close()
         except Exception as e:
-            pytest.skip(f"PostgreSQL container not available: {e}")
+            pytest.skip(f"Cannot connect to Docker Compose PostgreSQL service: {e}")
     
     @pytest.fixture(scope="class")
-    def clickhouse_container(self):
-        """Start real ClickHouse container for testing."""
+    def clickhouse_connection(self):
+        """Connect to Docker Compose ClickHouse service."""
         try:
-            with ClickHouseContainer("clickhouse/clickhouse-server:latest") as clickhouse:
-                yield clickhouse
+            # ClickHouse connection - for now just return connection info
+            yield {
+                'host': 'localhost',
+                'port': 8124,
+                'user': 'netra',
+                'password': 'netra123',
+                'database': 'netra_dev'
+            }
         except Exception as e:
-            pytest.skip(f"ClickHouse container not available: {e}")
+            pytest.skip(f"Cannot connect to Docker Compose ClickHouse service: {e}")
     
     @pytest.mark.asyncio
-    async def test_postgres_connection_lifecycle(self, postgres_container):
+    async def test_postgres_connection_lifecycle(self, postgres_connection):
         """Test complete PostgreSQL connection lifecycle with real database."""
-        # Get real connection URL from container
-        db_url = postgres_container.get_connection_url()
-        async_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
+        # Use Docker Compose PostgreSQL service
+        async_url = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev"
         
         # Test engine creation
         engine = create_async_engine(async_url, echo=False, pool_size=2, max_overflow=5)
@@ -86,18 +98,18 @@ class TestDatabaseConnectivityL3:
             await engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_database_manager_real_url_processing(self, postgres_container):
-        """Test DatabaseManager URL processing with real container URL."""
-        real_url = postgres_container.get_connection_url()
+    async def test_database_manager_real_url_processing(self, postgres_connection):
+        """Test DatabaseManager URL processing with Docker Compose service URL."""
+        real_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'
         
-        # Override environment with real container URL
+        # Override environment with Docker Compose service URL
         import os
         with pytest.mock.patch.dict(os.environ, {'DATABASE_URL': real_url}):
             
             # Test base URL processing
             base_url = DatabaseManager.get_base_database_url()
             assert "postgresql://" in base_url
-            assert postgres_container.get_container_host_ip() in base_url
+            assert "localhost" in base_url
             
             # Test migration URL (sync format)
             migration_url = DatabaseManager.get_migration_url_sync_format()
@@ -119,9 +131,9 @@ class TestDatabaseConnectivityL3:
             sync_engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_async_database_class_with_real_postgres(self, postgres_container):
+    async def test_async_database_class_with_real_postgres(self, postgres_connection):
         """Test AsyncDatabase class with real PostgreSQL container."""
-        real_url = postgres_container.get_connection_url().replace("postgresql://", "postgresql+asyncpg://")
+        real_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'.replace("postgresql://", "postgresql+asyncpg://")
         
         # Create AsyncDatabase instance with real URL
         db = AsyncDatabase(real_url)
@@ -156,9 +168,9 @@ class TestDatabaseConnectivityL3:
             await db.disconnect()
     
     @pytest.mark.asyncio
-    async def test_connection_pooling_with_real_postgres(self, postgres_container):
+    async def test_connection_pooling_with_real_postgres(self, postgres_connection):
         """Test connection pooling behavior with real PostgreSQL."""
-        real_url = postgres_container.get_connection_url().replace("postgresql://", "postgresql+asyncpg://")
+        real_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'.replace("postgresql://", "postgresql+asyncpg://")
         
         # Create engine with specific pool settings
         engine = create_async_engine(
@@ -197,9 +209,9 @@ class TestDatabaseConnectivityL3:
             await engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_database_error_handling_with_real_failures(self, postgres_container):
+    async def test_database_error_handling_with_real_failures(self, postgres_connection):
         """Test database error handling with real connection failures."""
-        valid_url = postgres_container.get_connection_url().replace("postgresql://", "postgresql+asyncpg://")
+        valid_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'.replace("postgresql://", "postgresql+asyncpg://")
         
         # Test with valid connection first
         engine = create_async_engine(valid_url, echo=False)
@@ -236,9 +248,9 @@ class TestDatabaseConnectivityL3:
         await invalid_engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_concurrent_transactions_real_database(self, postgres_container):
+    async def test_concurrent_transactions_real_database(self, postgres_connection):
         """Test concurrent transaction handling with real PostgreSQL."""
-        real_url = postgres_container.get_connection_url().replace("postgresql://", "postgresql+asyncpg://")
+        real_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'.replace("postgresql://", "postgresql+asyncpg://")
         engine = create_async_engine(real_url, echo=False, pool_size=5)
         async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         
@@ -280,9 +292,9 @@ class TestDatabaseConnectivityL3:
             await engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_db_connection_manager_integration(self, postgres_container):
+    async def test_db_connection_manager_integration(self, postgres_connection):
         """Test database connection manager with real PostgreSQL."""
-        real_url = postgres_container.get_connection_url()
+        real_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'
         
         # Override environment for connection manager
         import os
@@ -295,7 +307,7 @@ class TestDatabaseConnectivityL3:
             async with DatabaseManager.get_async_session() as session:
                 result = await session.execute(text("SELECT current_database()"))
                 db_name = result.fetchone()[0]
-                assert db_name == postgres_container.database_name
+                assert db_name == 'netra_dev'
             
             # Test multiple concurrent sessions
             async def test_session(session_id):
@@ -316,9 +328,9 @@ class TestDatabaseConnectivityL3:
         pass
     
     @pytest.mark.asyncio
-    async def test_database_migration_patterns(self, postgres_container):
+    async def test_database_migration_patterns(self, postgres_connection):
         """Test database migration patterns with real PostgreSQL."""
-        real_url = postgres_container.get_connection_url()
+        real_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'
         
         # Test sync engine for migrations (alembic-style)
         sync_engine = DatabaseManager.create_migration_engine()
@@ -348,9 +360,9 @@ class TestDatabaseConnectivityL3:
                 sync_engine.dispose()
     
     @pytest.mark.asyncio
-    async def test_ssl_connection_handling(self, postgres_container):
+    async def test_ssl_connection_handling(self, postgres_connection):
         """Test SSL connection parameter handling."""
-        base_url = postgres_container.get_connection_url()
+        base_url = 'postgresql://postgres:postgres@localhost:5432/netra_dev'
         
         # Test various SSL parameter combinations
         ssl_variants = [

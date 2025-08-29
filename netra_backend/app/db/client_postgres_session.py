@@ -24,9 +24,15 @@ class SessionManager:
     
     @staticmethod
     async def create_session_factory() -> AsyncSession:
-        """Create database session via factory."""
+        """Create database session via factory.
+        
+        CRITICAL: This method should NOT be called directly!
+        Sessions must be managed through proper context managers.
+        Use TransactionHandler.get_session() instead.
+        """
         if async_session_factory is None:
             raise RuntimeError("Database not configured")
+        # WARNING: Direct factory call - caller MUST manage session lifecycle
         return async_session_factory()
 
     @staticmethod

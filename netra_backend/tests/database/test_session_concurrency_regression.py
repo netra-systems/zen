@@ -62,23 +62,23 @@ class TestSessionConcurrencyRegression:
         """Test proper rollback when exception occurs during transaction."""
         rollback_called = False
         
-        async for session in get_db():
-            # Mock the rollback to track if it's called
-            original_rollback = session.rollback
-            async def tracked_rollback():
-                nonlocal rollback_called
-                rollback_called = True
-                await original_rollback()
-            session.rollback = tracked_rollback
-            
-            # Simulate operation that fails
-            await session.execute(text("SELECT 1"))
-            
-            # Force an exception
-            with pytest.raises(ValueError):
+        with pytest.raises(ValueError):
+            async for session in get_db():
+                # Mock the rollback to track if it's called
+                original_rollback = session.rollback
+                async def tracked_rollback():
+                    nonlocal rollback_called
+                    rollback_called = True
+                    await original_rollback()
+                session.rollback = tracked_rollback
+                
+                # Simulate operation that fails
+                await session.execute(text("SELECT 1"))
+                
+                # Force an exception within the session context
                 raise ValueError("Simulated error")
         
-        # Rollback should have been called
+        # Rollback should have been called due to exception in context
         assert rollback_called
     
     @pytest.mark.asyncio
