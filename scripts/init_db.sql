@@ -2,14 +2,17 @@
 -- This script runs in the context of the POSTGRES_DB database (netra_dev)
 CREATE SCHEMA IF NOT EXISTS public;
 
--- Create the netra user if it doesn't exist
+-- Create postgres role if it doesn't exist (for compatibility)
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'netra') THEN
-        CREATE ROLE netra WITH LOGIN PASSWORD 'netra123';
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres') THEN
+        CREATE ROLE postgres WITH LOGIN SUPERUSER PASSWORD 'netra123';
     END IF;
 END
 $$;
+
+-- Ensure netra user has proper permissions (it already exists as POSTGRES_USER)
+-- No need to create it again since it's the primary user
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
