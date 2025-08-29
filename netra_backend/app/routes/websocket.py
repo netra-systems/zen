@@ -104,6 +104,8 @@ async def websocket_endpoint(websocket: WebSocket):
     """
     connection_id: Optional[str] = None
     heartbeat: Optional[WebSocketHeartbeat] = None
+    user_id: Optional[str] = None
+    authenticated = False
     
     try:
         # CRITICAL FIX: Accept WebSocket FIRST before any authentication or operations
@@ -147,72 +149,80 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.warning("WebSocket dependencies not available - running in test mode without agent handlers")
         
         # Authenticate and establish secure connection AFTER accepting
-        async with secure_websocket_context(websocket) as (auth_info, security_manager):
-            user_id = auth_info.user_id
-            
-            connection_start_time = time.time()
-            logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
-            
-            # Register connection with manager
-            connection_id = await ws_manager.connect_user(user_id, websocket)
-            
-            # Register with security manager
-            security_manager.register_connection(connection_id, auth_info, websocket)
-            
-            # Register with connection monitor
-            connection_monitor.register_connection(connection_id, user_id, websocket)
-            
-            # Start heartbeat monitoring
-            heartbeat = WebSocketHeartbeat(
-                interval=WEBSOCKET_CONFIG.heartbeat_interval_seconds,
-                timeout=10.0
-            )
-            await heartbeat.start(websocket)
-            
-            # Send welcome message
-            welcome_msg = create_server_message(
-                MessageType.SYSTEM_MESSAGE,
-                {
-                    "event": "connection_established",
-                    "connection_id": connection_id,
-                    "user_id": user_id,
-                    "server_time": datetime.now(timezone.utc).isoformat(),
-                    "config": {
-                        "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds,
-                        "max_message_size": WEBSOCKET_CONFIG.max_message_size_bytes
+        # CRITICAL FIX: Handle authentication errors gracefully without breaking message loop
+        try:
+            async with secure_websocket_context(websocket) as (auth_info, security_manager):
+                user_id = auth_info.user_id
+                authenticated = True
+                
+                connection_start_time = time.time()
+                logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
+                
+                # Register connection with manager
+                connection_id = await ws_manager.connect_user(user_id, websocket)
+                
+                # Register with security manager
+                security_manager.register_connection(connection_id, auth_info, websocket)
+                
+                # Register with connection monitor
+                connection_monitor.register_connection(connection_id, user_id, websocket)
+                
+                # Start heartbeat monitoring
+                heartbeat = WebSocketHeartbeat(
+                    interval=WEBSOCKET_CONFIG.heartbeat_interval_seconds,
+                    timeout=10.0
+                )
+                await heartbeat.start(websocket)
+                
+                # Send welcome message
+                welcome_msg = create_server_message(
+                    MessageType.SYSTEM_MESSAGE,
+                    {
+                        "event": "connection_established",
+                        "connection_id": connection_id,
+                        "user_id": user_id,
+                        "server_time": datetime.now(timezone.utc).isoformat(),
+                        "config": {
+                            "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds,
+                            "max_message_size": WEBSOCKET_CONFIG.max_message_size_bytes
+                        }
                     }
-                }
-            )
-            await safe_websocket_send(websocket, welcome_msg.model_dump())
+                )
+                await safe_websocket_send(websocket, welcome_msg.model_dump())
+                
+                logger.info(f"WebSocket ready: {connection_id}")
+                
+                # Main message handling loop
+                logger.info(f"Starting message handling loop for connection: {connection_id}")
+                # Debug: Check WebSocket state before entering loop
+                logger.info(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
+                await _handle_websocket_messages(
+                    websocket, user_id, connection_id, ws_manager, 
+                    message_router, connection_monitor, security_manager, heartbeat
+                )
+                logger.info(f"Message handling loop ended for connection: {connection_id}")
+                
+        except HTTPException as auth_error:
+            # CRITICAL FIX: Authentication failed after WebSocket was accepted
+            # Handle this gracefully without triggering "Need to call accept first" errors
+            logger.error(f"WebSocket authentication failed: {auth_error.detail}")
             
-            logger.info(f"WebSocket ready: {connection_id}")
-            
-            # Main message handling loop
-            logger.info(f"Starting message handling loop for connection: {connection_id}")
-            # Debug: Check WebSocket state before entering loop
-            logger.info(f"WebSocket state before loop - client_state: {getattr(websocket, 'client_state', 'N/A')}, application_state: {getattr(websocket, 'application_state', 'N/A')}")
-            await _handle_websocket_messages(
-                websocket, user_id, connection_id, ws_manager, 
-                message_router, connection_monitor, security_manager, heartbeat
-            )
-            logger.info(f"Message handling loop ended for connection: {connection_id}")
-            
-    except HTTPException as e:
-        logger.error(f"WebSocket authentication failed: {e.detail}")
-        # WebSocket is already accepted, safe to close
-        if is_websocket_connected(websocket):
+            # WebSocket is already accepted, so we can safely send error and close
             try:
-                # Send authentication error message before closing
                 error_msg = create_error_message(
                     "AUTH_ERROR",
-                    e.detail,
-                    {"code": e.status_code}
+                    auth_error.detail,
+                    {"code": auth_error.status_code}
                 )
                 await safe_websocket_send(websocket, error_msg.model_dump())
-            except Exception:
-                pass  # Best effort to send error
-            await safe_websocket_close(websocket, code=e.status_code, reason=e.detail[:50])
-    
+                await asyncio.sleep(0.1)  # Brief delay to ensure message is sent
+                await safe_websocket_close(websocket, code=auth_error.status_code, reason=auth_error.detail[:50])
+            except Exception as send_error:
+                logger.warning(f"Could not send authentication error message: {send_error}")
+                # Force close without message
+                await safe_websocket_close(websocket, code=1008, reason="Auth failed")
+            return
+            
     except WebSocketDisconnect as e:
         logger.info(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
     
@@ -230,29 +240,33 @@ async def websocket_endpoint(websocket: WebSocket):
                     }
                 )
                 await safe_websocket_send(websocket, error_msg.model_dump())
+                await asyncio.sleep(0.1)  # Brief delay to ensure message is sent
             except Exception:
                 pass  # Best effort to send error message
             
             await safe_websocket_close(websocket, code=1011, reason="Internal error")
     
     finally:
-        # Cleanup resources
+        # Cleanup resources - only if authentication was successful
         if heartbeat:
             await heartbeat.stop()
         
-        if connection_id:
-            ws_manager = get_websocket_manager()
-            connection_monitor = get_connection_monitor()
-            security_manager = get_connection_security_manager()
-            
-            # Disconnect from manager
-            await ws_manager.disconnect_user(user_id, websocket, 1000, "Normal closure")
-            
-            # Unregister from monitoring
-            connection_monitor.unregister_connection(connection_id)
-            security_manager.unregister_connection(connection_id)
-            
-            logger.info(f"WebSocket cleanup completed: {connection_id}")
+        if connection_id and user_id and authenticated:
+            try:
+                ws_manager = get_websocket_manager()
+                connection_monitor = get_connection_monitor()
+                security_manager = get_connection_security_manager()
+                
+                # Disconnect from manager
+                await ws_manager.disconnect_user(user_id, websocket, 1000, "Normal closure")
+                
+                # Unregister from monitoring
+                connection_monitor.unregister_connection(connection_id)
+                security_manager.unregister_connection(connection_id)
+                
+                logger.info(f"WebSocket cleanup completed: {connection_id}")
+            except Exception as cleanup_error:
+                logger.warning(f"Error during WebSocket cleanup: {cleanup_error}")
 
 
 async def _handle_websocket_messages(
@@ -365,7 +379,16 @@ async def _handle_websocket_messages(
             except Exception as e:
                 error_count += 1
                 connection_monitor.update_activity(connection_id, "error")
-                logger.error(f"Message handling error for {connection_id}: {e}", exc_info=True)
+                
+                # CRITICAL FIX: Check if the error is related to WebSocket connection state
+                error_message = str(e)
+                if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
+                    logger.error(f"WebSocket connection state error for {connection_id}: {error_message}")
+                    logger.error("This indicates a race condition between accept() and message handling")
+                    # Break immediately - don't retry connection state errors
+                    break
+                else:
+                    logger.error(f"Message handling error for {connection_id}: {e}", exc_info=True)
                 
                 if error_count >= max_errors:
                     logger.error(f"Too many errors, closing connection {connection_id}")

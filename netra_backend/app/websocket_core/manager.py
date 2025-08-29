@@ -79,6 +79,85 @@ class WebSocketManager:
         self._cleanup_lock = asyncio.Lock()
         self._initialized = True
     
+    def _serialize_message_safely(self, message: Any) -> Dict[str, Any]:
+        """
+        Safely serialize any message type to a JSON-serializable dictionary.
+        
+        Handles Pydantic models, DeepAgentState, and other complex objects with
+        fallback serialization strategies.
+        """
+        import json
+        from netra_backend.app.agents.state import DeepAgentState
+        
+        # Handle None case
+        if message is None:
+            return {}
+        
+        # Handle already-dict case
+        if isinstance(message, dict):
+            return message
+        
+        # Handle DeepAgentState specifically 
+        if isinstance(message, DeepAgentState):
+            try:
+                # Use the to_dict method which calls model_dump with exclude_none and mode='json'
+                return message.to_dict()
+            except Exception as e:
+                logger.warning(f"DeepAgentState.to_dict() failed: {e}, falling back to model_dump")
+                try:
+                    # Fallback to basic model_dump
+                    return message.model_dump(mode='json', exclude_none=True)
+                except Exception as e2:
+                    logger.error(f"DeepAgentState model_dump failed: {e2}, using basic serialization")
+                    # Final fallback - serialize basic fields only
+                    return {
+                        "user_request": getattr(message, 'user_request', 'unknown'),
+                        "chat_thread_id": getattr(message, 'chat_thread_id', None),
+                        "user_id": getattr(message, 'user_id', None),
+                        "step_count": getattr(message, 'step_count', 0),
+                        "final_report": getattr(message, 'final_report', None),
+                        "serialization_error": f"DeepAgentState serialization failed: {e2}"
+                    }
+        
+        # Handle other Pydantic models
+        if hasattr(message, 'model_dump'):
+            try:
+                return message.model_dump(mode='json', exclude_none=True)
+            except Exception as e:
+                logger.warning(f"model_dump(mode='json') failed: {e}, trying basic model_dump")
+                try:
+                    return message.model_dump(exclude_none=True)
+                except Exception as e2:
+                    logger.warning(f"Basic model_dump failed: {e2}, trying dict()")
+        
+        # Handle objects with to_dict method
+        if hasattr(message, 'to_dict'):
+            try:
+                return message.to_dict()
+            except Exception as e:
+                logger.warning(f"to_dict() failed: {e}, trying dict() method")
+        
+        # Handle objects with dict method (older Pydantic)
+        if hasattr(message, 'dict'):
+            try:
+                return message.dict()
+            except Exception as e:
+                logger.warning(f"dict() method failed: {e}, using fallback")
+        
+        # Test JSON serializability directly
+        try:
+            # Test if it's already JSON-serializable
+            json.dumps(message)
+            return message
+        except TypeError:
+            # Not JSON-serializable, convert to string representation
+            logger.warning(f"Object {type(message).__name__} not JSON-serializable, converting to string")
+            return {
+                "data": str(message),
+                "type": type(message).__name__,
+                "serialization_error": "Object not JSON-serializable, converted to string"
+            }
+    
     async def connect_user(self, user_id: str, websocket: WebSocket, 
                           thread_id: Optional[str] = None, client_ip: Optional[str] = None) -> str:
         """Connect user with WebSocket."""
@@ -280,12 +359,8 @@ class WebSocketManager:
                     # Try to send without cleanup in iteration
                     try:
                         websocket = conn_info["websocket"]
-                        if hasattr(message, 'model_dump'):
-                            message_dict = message.model_dump()
-                        elif hasattr(message, 'dict'):
-                            message_dict = message.dict()
-                        else:
-                            message_dict = message
+                        # Use safe serialization for all message types
+                        message_dict = self._serialize_message_safely(message)
                         
                         await websocket.send_json(message_dict)
                         connections_sent += 1
@@ -346,15 +421,8 @@ class WebSocketManager:
             return False
         
         try:
-            # Convert message to dict if needed
-            if hasattr(message, 'model_dump'):
-                message_dict = message.model_dump(mode='json')
-            elif hasattr(message, 'to_dict'):
-                message_dict = message.to_dict()
-            elif hasattr(message, 'dict'):
-                message_dict = message.dict()
-            else:
-                message_dict = message
+            # Convert message to dict if needed with robust serialization
+            message_dict = self._serialize_message_safely(message)
                 
             await websocket.send_json(message_dict)
             
