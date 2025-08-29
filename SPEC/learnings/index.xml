@@ -1616,6 +1616,17 @@
             <critical-takeaway>Tag images with commit hashes for production to track exactly what code is running</critical-takeaway>
             <critical-takeaway>Development uses volume mounts for immediate updates, production uses COPY for immutable images</critical-takeaway>
         </category>
+        
+        <category name="Docker Hot Reload Development" path="SPEC/docker_hot_reload.xml" keywords="Docker, Hot Reload, Development, Uvicorn, FastAPI, docker-compose.override.yml, Volume Mounts, Mac, Windows, Polling">
+            <critical-takeaway>CRITICAL: Use docker-compose -f docker-compose.dev.yml up backend auth for 10x faster development with hot reload</critical-takeaway>
+            <critical-takeaway>Read-only volume mounts (:ro) prevent hot reload - remove for development volumes</critical-takeaway>
+            <critical-takeaway>Mac/Windows require polling mode (WATCHDOG_USE_POLLING=true) due to Docker Desktop file system limitations</critical-takeaway>
+            <critical-takeaway>docker-compose.override.yml automatically loaded for developer-specific settings without modifying main config</critical-takeaway>
+            <critical-takeaway>Volume mount performance flags (:cached, :delegated) significantly improve I/O on Mac, ignored on Linux</critical-takeaway>
+            <critical-takeaway>Test hot reload with python scripts/test_hot_reload.py after Docker setup changes</critical-takeaway>
+            <critical-takeaway>Auth service requires explicit reload command - not configured by default in older setups</critical-takeaway>
+            <critical-takeaway>Monitor patterns: *.py, *.json, *.yaml, *.yml - excludes __pycache__, *.pyc, .pytest_cache</critical-takeaway>
+        </category>
     </intelligent_remediation>
     
     <agent_orchestration>

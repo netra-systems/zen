@@ -28,6 +28,7 @@
 | **Root Folder Organization** | `/` root directory | Clean root structure enforcement | [`SPEC/root_folder_organization.xml`](SPEC/root_folder_organization.xml) |
 | **Intelligent Remediation** | `/scripts/intelligent_remediation_orchestrator.py` | Multi-agent Docker remediation | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
 | **Claude Log Analyzer** | `/scripts/claude_log_analyzer.py` | Get logs to Claude for analysis | [`SPEC/intelligent_remediation_architecture.xml`](SPEC/intelligent_remediation_architecture.xml) |
+| **🔴 Docker Hot Reload** | `/docker-compose.override.yml` | **10x faster development** | [`SPEC/docker_hot_reload.xml`](SPEC/docker_hot_reload.xml) |
 
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
@@ -221,7 +222,11 @@ The Netra Apex platform operates as a **unified, coherent system** with three in
 
 ### Development
 ```bash
-# Start Development Environment
+# 🔴 RECOMMENDED: Docker with Hot Reload (10x faster iteration)
+docker-compose -f docker-compose.dev.yml up backend auth  # Hot reload enabled by default
+python scripts/test_hot_reload.py  # Verify hot reload is working
+
+# Alternative: Python-based launcher
 python scripts/dev_launcher.py
 
 # Run Quick Tests
@@ -230,6 +235,8 @@ python unified_test_runner.py --level integration --no-coverage --fast-fail
 # Check Compliance
 python scripts/check_architecture_compliance.py
 ```
+
+**Hot Reload Details:** See [`docs/docker-hot-reload-guide.md`](docs/docker-hot-reload-guide.md)
 
 ### Go to Symbol API Usage
 ```bash
