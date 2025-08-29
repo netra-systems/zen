@@ -27,6 +27,7 @@ class TestClickHousePerformance:
     """Test ClickHouse performance and optimization"""
     
     @pytest.mark.asyncio
+    @pytest.mark.timeout(30)  # Add timeout to prevent hanging
     async def test_batch_insert_performance(self):
         """Test batch insert performance"""
         async with get_clickhouse_client() as client:
