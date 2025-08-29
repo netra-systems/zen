@@ -74,10 +74,20 @@ class WebSocketDebugger {
    * Validate and trace incoming WebSocket event
    */
   traceEvent(event: WebSocketMessage): EventValidationResult {
+    // Defensive programming: handle undefined or malformed events
+    if (!event) {
+      return {
+        isValid: false,
+        issues: ['Event is undefined or null'],
+        severity: 'critical',
+        suggestions: ['Ensure event is properly passed to traceEvent']
+      };
+    }
+    
     const eventId = this.generateEventId(event);
     const now = Date.now();
     
-    // Update stats
+    // Update stats with safe event
     this.updateStats(event, now);
     
     // Validate event
@@ -86,7 +96,7 @@ class WebSocketDebugger {
     // Create trace
     const trace: EventFlowTrace = {
       eventId,
-      eventType: event.type,
+      eventType: event?.type || 'unknown',
       receivedAt: now,
       layerUpdates: {},
       errors: validation.isValid ? [] : validation.issues,
@@ -327,14 +337,25 @@ ${this.generateRecommendations(stats)}
   }
 
   private generateEventId(event: WebSocketMessage): string {
-    const payload = event.payload as any;
-    return payload.message_id || 
-           `${event.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Defensive programming: safely access nested properties
+    const payload = event?.payload as any;
+    
+    // Check for message_id in various possible locations
+    const messageId = payload?.message_id || 
+                     payload?.messageId ||
+                     payload?.id ||
+                     null;
+    
+    // Generate fallback ID if no message_id found
+    return messageId || 
+           `${event?.type || 'unknown'}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   private updateStats(event: WebSocketMessage, now: number): void {
     this.stats.totalEvents++;
-    this.stats.eventsByType[event.type] = (this.stats.eventsByType[event.type] || 0) + 1;
+    // Defensive programming: safely access event.type
+    const eventType = event?.type || 'unknown';
+    this.stats.eventsByType[eventType] = (this.stats.eventsByType[eventType] || 0) + 1;
     this.stats.lastEventTime = now;
   }
 
@@ -342,6 +363,16 @@ ${this.generateRecommendations(stats)}
     const issues: string[] = [];
     const suggestions: string[] = [];
     let maxSeverity: 'low' | 'medium' | 'high' = 'low';
+
+    // Defensive programming: handle undefined event
+    if (!event) {
+      return {
+        isValid: false,
+        issues: ['Event is undefined or null'],
+        severity: 'high',
+        suggestions: ['Ensure event object is properly initialized']
+      };
+    }
 
     for (const rule of this.validationRules) {
       const result = rule(event);
