@@ -478,12 +478,14 @@ Users will see 'OAuth Configuration Broken' errors.
 
 @router.post("/register", status_code=201)
 async def register_user(
-    request: dict
+    request: dict,
+    db: AsyncSession = Depends(get_db)
 ):
-    """Register a new user"""
+    """Register a new user with database persistence"""
     email = request.get("email")
     password = request.get("password")
     confirm_password = request.get("confirm_password")
+    full_name = request.get("full_name")
     
     if not email or not password:
         raise HTTPException(status_code=400, detail="Email and password required")
@@ -491,13 +493,18 @@ async def register_user(
     if password != confirm_password:
         raise HTTPException(status_code=400, detail="Passwords do not match")
     
-    # Register user using auth service
+    # Register user using auth service with database
     try:
-        result = auth_service.register_test_user(email, password)
+        # Set database session for the service
+        auth_service.db_session = db
+        result = await auth_service.register_user(email, password, full_name)
         return result
+    except ValueError as e:
+        # User-facing validation errors
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Registration failed: {e}")
-        raise HTTPException(status_code=500, detail="Registration failed")
+        raise HTTPException(status_code=500, detail="Registration failed. Please try again.")
 
 @router.post("/login", response_model=LoginResponse)
 async def login(
