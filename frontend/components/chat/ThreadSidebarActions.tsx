@@ -85,7 +85,10 @@ export const useThreadSidebarActions = (): ThreadSidebarActionsResult => {
   };
 
   const formatDate = (timestamp: number | string) => {
-    const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp);
+    // Unix timestamps from backend are in seconds, need to convert to milliseconds
+    const date = typeof timestamp === 'string' 
+      ? new Date(timestamp) 
+      : new Date(timestamp * 1000);
     const timestampMs = date.getTime();
     const days = calculateDateDifference(timestampMs / 1000);
     return formatDateDisplay(days, date);
