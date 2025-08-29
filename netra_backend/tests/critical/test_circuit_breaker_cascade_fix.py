@@ -238,7 +238,7 @@ class TestCircuitBreakerCascadeFix:
     async def test_llm_circuit_manager_reset(self, llm_circuit_manager):
         """Test LLM circuit manager reset functionality."""
         # Create some circuits
-        circuit1 = await llm_circuit_manager.get_circuit("gemini_2_0_flash")
+        circuit1 = await llm_circuit_manager.get_circuit("gemini_2_5_flash")
         circuit2 = await llm_circuit_manager.get_circuit("claude")
         
         # Mock reset methods
@@ -356,7 +356,7 @@ class TestCircuitBreakerIntegration:
                 await fallback_handler.execute_with_fallback(
                     failing_llm_operation,
                     f"triage_operation_{i}",
-                    "gemini_2_0_flash"
+                    "gemini_2_5_flash"
                 )
             except Exception:
                 pass  # Expected to fail
@@ -371,7 +371,7 @@ class TestCircuitBreakerIntegration:
         result = await fallback_handler.execute_with_fallback(
             successful_llm_operation,
             "triage_operation_success",
-            "gemini_2_0_flash"
+            "gemini_2_5_flash"
         )
         
         # Verify the operation succeeded

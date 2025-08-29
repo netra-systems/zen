@@ -15,11 +15,8 @@ import aiohttp
 from datetime import datetime
 
 from test_framework.base_e2e_test import BaseE2ETest
-from test_framework.test_utils import (
-    wait_for_condition,
-    retry_on_failure,
-    create_test_context
-)
+from test_framework.test_utils import wait_for_condition, create_test_user
+from test_framework.performance_helpers import retry_on_failure
 
 
 class TestAgentCircuitBreakerE2E(BaseE2ETest):
