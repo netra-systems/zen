@@ -122,8 +122,8 @@ class AuthInterceptor {
       const refreshResponse = await authServiceClient.refreshToken();
       
       if (refreshResponse?.access_token) {
-        // Store new token
-        localStorage.setItem('jwt_token', refreshResponse.access_token);
+        // Store new token using UnifiedAuthService (SSOT)
+        authService.setToken(refreshResponse.access_token);
         
         logger.info('Token refreshed successfully');
         return refreshResponse.access_token;

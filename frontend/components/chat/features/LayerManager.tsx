@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FastLayer } from '@/components/chat/layers/FastLayer';
 import { MediumLayer } from '@/components/chat/layers/MediumLayer';
@@ -8,7 +8,6 @@ import { SlowLayer } from '@/components/chat/layers/SlowLayer';
 import type { LayerManagerProps } from '@/types/component-props';
 import { 
   calculateEnhancedLayerVisibility,
-  debugLayerVisibility,
   type LayerVisibilityResult
 } from '@/utils/layer-visibility-manager';
 
@@ -20,7 +19,6 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
   transitions
 }) => {
   const previousVisibility = useRef<LayerVisibilityResult | undefined>();
-  const [debugMode] = useState(process.env.NODE_ENV === 'development');
   
   const layerVisibility = calculateEnhancedLayerVisibility({
     fastLayerData,
@@ -33,16 +31,6 @@ export const LayerManager: React.FC<LayerManagerProps> = ({
   useEffect(() => {
     previousVisibility.current = layerVisibility;
   }, [layerVisibility]);
-  
-  if (debugMode) {
-    debugLayerVisibility({
-      fastLayerData,
-      mediumLayerData,
-      slowLayerData,
-      isProcessing,
-      previousVisibility: previousVisibility.current
-    });
-  }
 
   return (
     <>

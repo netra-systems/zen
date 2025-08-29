@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { User } from '@/types/unified';
+import { unifiedAuthService } from '@/auth/unified-auth-service';
 
 interface ExtendedUser extends User {
   role?: 'standard_user' | 'power_user' | 'developer' | 'admin' | 'super_admin';
@@ -44,13 +45,15 @@ export const useAuthStore = create<AuthState>()(
     login: (user, token) =>
       set((state) => {
         setUserLoginState(state, user, token);
-        storeTokenInLocalStorage(token);
+        // Use UnifiedAuthService as SSOT for token storage
+        unifiedAuthService.setToken(token);
       }),
 
     logout: () =>
       set((state) => {
         clearUserAuthState(state);
-        removeTokenFromLocalStorage();
+        // Use UnifiedAuthService as SSOT for token removal
+        unifiedAuthService.removeToken();
       }),
 
     setLoading: (loading) =>
@@ -73,13 +76,15 @@ export const useAuthStore = create<AuthState>()(
     updateToken: (token) =>
       set((state) => {
         state.token = token;
-        storeTokenInLocalStorage(token);
+        // Use UnifiedAuthService as SSOT for token storage
+        unifiedAuthService.setToken(token);
       }),
 
     reset: () =>
       set((state) => {
         resetAuthState(state);
-        removeTokenFromLocalStorage();
+        // Use UnifiedAuthService as SSOT for token removal
+        unifiedAuthService.removeToken();
       }),
 
     initializeFromStorage: () =>
@@ -153,21 +158,20 @@ const resetAuthState = (state: any): void => {
   state.error = null;
 };
 
+// DEPRECATED: Token storage now handled by UnifiedAuthService (SSOT)
+// Keep functions for backward compatibility but delegate to UnifiedAuthService
 const storeTokenInLocalStorage = (token: string): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('jwt_token', token);
-  }
+  unifiedAuthService.setToken(token);
 };
 
 const removeTokenFromLocalStorage = (): void => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('jwt_token');
-  }
+  unifiedAuthService.removeToken();
 };
 
 const initializeAuthFromStorage = (state: any): void => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('jwt_token');
+    // Use UnifiedAuthService as SSOT for token retrieval
+    const token = unifiedAuthService.getToken();
     const userData = localStorage.getItem('user_data');
     
     if (token && userData) {
@@ -178,8 +182,8 @@ const initializeAuthFromStorage = (state: any): void => {
         state.token = token;
         state.error = null;
       } catch (error) {
-        // Clear corrupted data
-        localStorage.removeItem('jwt_token');
+        // Clear corrupted data through UnifiedAuthService
+        unifiedAuthService.removeToken();
         localStorage.removeItem('user_data');
         clearUserAuthState(state);
       }
