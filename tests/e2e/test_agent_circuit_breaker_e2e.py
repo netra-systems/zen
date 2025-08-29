@@ -14,7 +14,7 @@ from unittest.mock import patch, Mock
 import aiohttp
 from datetime import datetime
 
-from test_framework.test_base import E2ETestBase
+from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.test_utils import (
     wait_for_condition,
     retry_on_failure,
@@ -22,7 +22,7 @@ from test_framework.test_utils import (
 )
 
 
-class TestAgentCircuitBreakerE2E(E2ETestBase):
+class TestAgentCircuitBreakerE2E(BaseE2ETest):
     """E2E tests for agent execution with circuit breaker protection."""
     
     @pytest.fixture(autouse=True)
