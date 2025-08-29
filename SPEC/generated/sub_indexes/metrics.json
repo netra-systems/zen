@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-28T14:13:41.411426",
+    "generated_at": "2025-08-28T22:39:27.338502",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 179
+    "total_literals": 180
   },
   "literals": {
     "(timestamp) as time_bucket, count() as event_count": {
@@ -25,8 +25,8 @@
       "value": "_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/agents/data_sub_agent/agent_execution.py:242",
-        "netra_backend/app/agents/data_sub_agent/agent_execution.py:245",
+        "netra_backend/app/agents/data_sub_agent/agent_execution.py:241",
+        "netra_backend/app/agents/data_sub_agent/agent_execution.py:244",
         "scripts/docker_log_introspection.py:204",
         "scripts/docker_log_introspection_windows.py:318",
         "scripts/scan_string_literals.py:143"
@@ -123,7 +123,7 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/agents/data_sub_agent/agent_anomaly_processing.py:115",
-        "netra_backend/app/agents/data_sub_agent/agent_execution.py:158",
+        "netra_backend/app/agents/data_sub_agent/agent_execution.py:157",
         "netra_backend/app/agents/data_sub_agent/anomaly_detection.py:158",
         "netra_backend/app/agents/data_sub_agent/anomaly_detector.py:251",
         "netra_backend/app/agents/data_sub_agent/execution_analysis.py:180"
@@ -389,10 +389,10 @@
         "netra_backend/app/agents/synthetic_data_metrics_handler.py:226",
         "netra_backend/app/core/alert_manager.py:201",
         "netra_backend/app/core/degradation_manager.py:364",
-        "netra_backend/app/core/error_handlers/processors.py:145",
-        "netra_backend/app/core/error_handlers/processors.py:300",
         "netra_backend/app/core/system_health_monitor.py:248",
-        "netra_backend/app/routes/database_monitoring/transaction_routes.py:49"
+        "netra_backend/app/routes/database_monitoring/transaction_routes.py:49",
+        "netra_backend/app/services/unified_tool_registry/system_handlers.py:164",
+        "netra_backend/app/services/unified_tool_registry/system_handlers.py:164"
       ]
     },
     "event_count": {
@@ -438,8 +438,8 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/core/async_retry_logic.py:177",
-        "netra_backend/app/db/database_manager.py:1637",
-        "netra_backend/app/db/database_manager.py:1644",
+        "netra_backend/app/db/database_manager.py:1639",
+        "netra_backend/app/db/database_manager.py:1646",
         "netra_backend/app/routes/utils/service_delegates.py:83",
         "netra_backend/app/services/api_gateway/circuit_breaker.py:156",
         "netra_backend/app/services/circuit_breaker/circuit_breaker_manager.py:130",
@@ -640,8 +640,8 @@
       "value": "leaked_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/db/database_manager.py:1598",
-        "netra_backend/app/db/database_manager.py:1604"
+        "netra_backend/app/db/database_manager.py:1600",
+        "netra_backend/app/db/database_manager.py:1606"
       ]
     },
     "leaky_bucket": {
@@ -752,13 +752,13 @@
         "netra_backend/app/routes/agent_route_processors.py:49",
         "netra_backend/app/routes/utils/thread_builders.py:25",
         "netra_backend/app/services/demo/session_manager.py:81",
-        "netra_backend/app/websocket_core/manager.py:102",
-        "netra_backend/app/websocket_core/manager.py:292",
-        "netra_backend/app/websocket_core/manager.py:292",
-        "netra_backend/app/websocket_core/manager.py:370",
-        "netra_backend/app/websocket_core/manager.py:629",
-        "netra_backend/app/websocket_core/manager.py:629",
-        "netra_backend/app/websocket_core/manager.py:656"
+        "netra_backend/app/websocket_core/manager.py:181",
+        "netra_backend/app/websocket_core/manager.py:371",
+        "netra_backend/app/websocket_core/manager.py:371",
+        "netra_backend/app/websocket_core/manager.py:442",
+        "netra_backend/app/websocket_core/manager.py:701",
+        "netra_backend/app/websocket_core/manager.py:701",
+        "netra_backend/app/websocket_core/manager.py:728"
       ]
     },
     "metric_name": {
@@ -1020,7 +1020,7 @@
       "value": "queued_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/routes/websocket.py:663"
+        "netra_backend/app/routes/websocket.py:686"
       ]
     },
     "recent_count": {
@@ -1181,6 +1181,7 @@
       "value": "sample_count",
       "category": "metrics",
       "locations": [
+        "netra_backend/app/core/health/gemini_health.py:309",
         "netra_backend/app/routes/utils/synthetic_data_helpers.py:132",
         "netra_backend/app/routes/utils/synthetic_data_helpers.py:139",
         "netra_backend/app/services/metrics/resource_monitor.py:490"
@@ -1243,8 +1244,8 @@
         "netra_backend/app/agents/triage_sub_agent/agent.py:196",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:214",
         "netra_backend/app/core/interfaces_observability.py:194",
-        "netra_backend/app/schemas/agent_models.py:307",
-        "netra_backend/app/services/state_compatibility_checker.py:72"
+        "netra_backend/app/db/clickhouse.py:890",
+        "netra_backend/app/db/clickhouse.py:890"
       ]
     },
     "subscription_count": {
@@ -1278,6 +1279,13 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/services/monitoring/alerting_service.py:220"
+      ]
+    },
+    "symbols_count": {
+      "value": "symbols_count",
+      "category": "metrics",
+      "locations": [
+        "netra_backend/app/routes/corpus.py:526"
       ]
     },
     "table_count": {
@@ -1465,7 +1473,7 @@
       "locations": [
         "netra_backend/app/agents/supply_researcher/agent.py:251",
         "netra_backend/app/agents/supply_researcher/agent.py:284",
-        "netra_backend/app/db/database_manager.py:1229",
+        "netra_backend/app/db/database_manager.py:1231",
         "netra_backend/app/services/supply_research/research_executor.py:140"
       ]
     },

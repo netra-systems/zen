@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "configuration",
-    "generated_at": "2025-08-28T14:13:40.953605",
+    "generated_at": "2025-08-28T22:39:26.944654",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 601
+    "total_literals": 628
   },
   "literals": {
     "ACCESS_TOKEN_EXPIRE_MINUTES": {
@@ -381,6 +381,13 @@
         "scripts/emergency_boundary_actions.py:287"
       ]
     },
+    "BOOLEAN": {
+      "value": "BOOLEAN",
+      "category": "configuration",
+      "locations": [
+        "scripts/gtm_api_setup.py:778"
+      ]
+    },
     "BUILD_TARGET": {
       "value": "BUILD_TARGET",
       "category": "configuration",
@@ -516,6 +523,13 @@
         "shared/secret_mappings.py:68"
       ]
     },
+    "CLICKHOUSE_ENABLED": {
+      "value": "CLICKHOUSE_ENABLED",
+      "category": "configuration",
+      "locations": [
+        "scripts/verify_clickhouse_connection.py:46"
+      ]
+    },
     "CLICKHOUSE_HOST": {
       "value": "CLICKHOUSE_HOST",
       "category": "configuration",
@@ -600,8 +614,8 @@
         "netra_backend/app/db/clickhouse.py:418",
         "netra_backend/app/db/clickhouse.py:522",
         "netra_backend/app/db/clickhouse.py:549",
-        "netra_backend/app/db/database_manager.py:1107",
-        "netra_backend/app/db/database_manager.py:1728",
+        "netra_backend/app/db/database_manager.py:1109",
+        "netra_backend/app/db/database_manager.py:1730",
         "netra_backend/app/routes/health.py:261",
         "netra_backend/app/routes/health.py:325",
         "netra_backend/app/startup_module.py:535"
@@ -696,7 +710,7 @@
       "locations": [
         "netra_backend/app/core/async_retry_logic.py:116",
         "netra_backend/app/core/async_retry_logic.py:150",
-        "netra_backend/app/db/database_manager.py:1644",
+        "netra_backend/app/db/database_manager.py:1646",
         "frontend/providers/AgentProvider.tsx:57",
         "frontend/providers/WebSocketProvider.tsx:26"
       ]
@@ -936,6 +950,15 @@
         "netra_backend/app/security/context_isolation.py:98"
       ]
     },
+    "CURRENCY": {
+      "value": "CURRENCY",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:45",
+        "scripts/ga4_automation.py:71",
+        "scripts/ga4_automation.py:300"
+      ]
+    },
     "DATABASE": {
       "value": "DATABASE",
       "category": "configuration",
@@ -987,8 +1010,6 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/core/error_codes.py:25",
-        "netra_backend/app/core/error_handlers/api/api_error_handler.py:110",
-        "netra_backend/app/core/error_handlers/handler.py:77",
         "netra_backend/app/core/unified_error_handler.py:176"
       ]
     },
@@ -1011,7 +1032,6 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/core/error_codes.py:26",
-        "netra_backend/app/core/error_handlers/api/api_error_handler.py:127",
         "netra_backend/app/core/unified_error_handler.py:175"
       ]
     },
@@ -1067,13 +1087,13 @@
         "netra_backend/app/core/cross_service_validators/contract_validators.py:175",
         "netra_backend/app/core/error_logging_helpers.py:73",
         "netra_backend/app/core/network_handler.py:70",
-        "netra_backend/app/middleware/error_recovery_helpers.py:23",
         "netra_backend/app/routes/users.py:379",
         "netra_backend/app/services/database/rollback_manager_clickhouse.py:48",
         "netra_backend/app/services/database/rollback_manager_postgres.py:56",
         "netra_backend/app/services/database/rollback_manager_recovery.py:295",
         "netra_backend/app/services/database/rollback_manager_recovery.py:299",
-        "netra_backend/app/services/external_api_client.py:213"
+        "netra_backend/app/services/external_api_client.py:213",
+        "scripts/cleanup_workflow_runs.py:85"
       ]
     },
     "DELETED": {
@@ -1111,7 +1131,7 @@
       "value": "DESC",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/services/corpus/search_operations.py:143"
+        "netra_backend/app/services/corpus/search_operations.py:144"
       ]
     },
     "DEVELOPMENT": {
@@ -1126,6 +1146,13 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/main.py:68"
+      ]
+    },
+    "DEV_MODE_DISABLE_CLICKHOUSE": {
+      "value": "DEV_MODE_DISABLE_CLICKHOUSE",
+      "category": "configuration",
+      "locations": [
+        "scripts/verify_clickhouse_connection.py:47"
       ]
     },
     "DEV_MODE_DISABLE_LLM": {
@@ -1323,7 +1350,7 @@
       "locations": [
         "netra_backend/app/agents/supervisor/pipeline_executor.py:50",
         "netra_backend/app/core/isolated_environment.py:81",
-        "netra_backend/app/db/database_manager.py:495",
+        "netra_backend/app/db/database_manager.py:496",
         "scripts/demo_optimized_persistence.py:204",
         "scripts/demo_optimized_persistence.py:212"
       ]
@@ -1364,6 +1391,22 @@
         "netra_backend/app/core/configuration/database.py:389",
         "netra_backend/app/core/configuration/environment_detector.py:152",
         "netra_backend/app/core/configuration/environment_detector.py:283"
+      ]
+    },
+    "EQUALS": {
+      "value": "EQUALS",
+      "category": "configuration",
+      "locations": [
+        "scripts/gtm_api_setup.py:575",
+        "scripts/gtm_api_setup.py:589",
+        "scripts/gtm_api_setup.py:603",
+        "scripts/gtm_api_setup.py:619",
+        "scripts/gtm_api_setup.py:633",
+        "scripts/gtm_api_setup.py:647",
+        "scripts/gtm_api_setup.py:661",
+        "scripts/gtm_api_setup.py:677",
+        "scripts/gtm_api_setup.py:691",
+        "scripts/gtm_api_setup.py:705"
       ]
     },
     "ERR001": {
@@ -1415,6 +1458,16 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/monitoring/resource_monitor.py:331"
+      ]
+    },
+    "EVENT": {
+      "value": "EVENT",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:35",
+        "scripts/ga4_api_setup_template.py:40",
+        "scripts/ga4_automation.py:61",
+        "scripts/ga4_automation.py:66"
       ]
     },
     "EXAMPLE": {
@@ -1518,6 +1571,13 @@
         "scripts/comprehensive_error_hunter.py:64"
       ]
     },
+    "FEET": {
+      "value": "FEET",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:46"
+      ]
+    },
     "FERNET_KEY": {
       "value": "FERNET_KEY",
       "category": "configuration",
@@ -1532,6 +1592,13 @@
         "netra_backend/app/core/secret_manager.py:440",
         "netra_backend/app/core/secret_manager.py:544",
         "scripts/environment_validator.py:363"
+      ]
+    },
+    "FIFTY_MONTHS": {
+      "value": "FIFTY_MONTHS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_automation.py:528"
       ]
     },
     "FILE": {
@@ -1611,6 +1678,14 @@
         "netra_backend/app/services/quality_gate/quality_gate_patterns.py:65"
       ]
     },
+    "FORCE_COLOR": {
+      "value": "FORCE_COLOR",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/logging_config.py:21",
+        "scripts/verify_cloud_run_logging_fix.py:126"
+      ]
+    },
     "FORCE_HTTPS": {
       "value": "FORCE_HTTPS",
       "category": "configuration",
@@ -1624,7 +1699,15 @@
       "value": "FORMAT_ERROR",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/routes/websocket.py:392"
+        "netra_backend/app/routes/websocket.py:415"
+      ]
+    },
+    "FOURTEEN_MONTHS": {
+      "value": "FOURTEEN_MONTHS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_automation.py:524",
+        "scripts/ga4_automation.py:531"
       ]
     },
     "FREQUENCY_PENALTY": {
@@ -1803,7 +1886,7 @@
       "value": "GENERAL_ERROR",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/websocket_core/manager.py:585"
+        "netra_backend/app/websocket_core/manager.py:657"
       ]
     },
     "GENERATED_COOKIE": {
@@ -1835,7 +1918,7 @@
         "netra_backend/app/core/network_handler.py:70",
         "netra_backend/app/core/websocket_cors.py:289",
         "netra_backend/app/mcp_client/transports/http_client.py:229",
-        "netra_backend/app/middleware/error_recovery_helpers.py:25"
+        "netra_backend/app/middleware/transaction_middleware.py:48"
       ]
     },
     "GITHUB_": {
@@ -1922,11 +2005,13 @@
         "scripts/audit_oauth_gcp_logs.py:547",
         "scripts/audit_oauth_gcp_logs.py:550",
         "scripts/deploy_staging_with_sa.py:24",
+        "scripts/find_gtm_account_id.py:34",
         "scripts/gcp_auth_config.py:53",
         "scripts/gcp_auth_config.py:119",
         "scripts/gcp_auth_config.py:201",
         "scripts/gcp_auth_config.py:202",
-        "scripts/gcp_auth_config.py:235"
+        "scripts/gcp_auth_config.py:235",
+        "scripts/run_gtm_setup.py:57"
       ]
     },
     "GOOGLE_CLIENT_ID": {
@@ -2125,7 +2210,8 @@
       "value": "HOST",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/core/configuration_validator.py:620"
+        "netra_backend/app/core/configuration_validator.py:620",
+        "scripts/gtm_api_setup.py:460"
       ]
     },
     "HOTFIX": {
@@ -2135,13 +2221,22 @@
         "scripts/audit_config.py:78"
       ]
     },
+    "HOURS": {
+      "value": "HOURS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:53",
+        "scripts/ga4_automation.py:75",
+        "scripts/ga4_automation.py:299"
+      ]
+    },
     "HS256": {
       "value": "HS256",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:633",
-        "netra_backend/app/clients/auth_client_core.py:672",
-        "netra_backend/app/clients/auth_client_core.py:1032",
+        "netra_backend/app/clients/auth_client_core.py:645",
+        "netra_backend/app/clients/auth_client_core.py:684",
+        "netra_backend/app/clients/auth_client_core.py:1044",
         "netra_backend/app/core/auth_constants.py:85",
         "netra_backend/app/core/cross_service_auth.py:86",
         "netra_backend/app/core/cross_service_validators/security_validators.py:43",
@@ -2194,8 +2289,7 @@
       "value": "HTTP_ERROR",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/core/error_codes.py:33",
-        "netra_backend/app/core/error_handlers/api/api_error_handler.py:127"
+        "netra_backend/app/core/error_codes.py:33"
       ]
     },
     "HUGGINGFACE": {
@@ -2216,8 +2310,8 @@
       "value": "IDLE",
       "category": "configuration",
       "locations": [
-        "frontend/components/chat/ChatHeader.tsx:120",
-        "frontend/components/chat/ChatHeader.tsx:121"
+        "frontend/components/chat/ChatHeader.tsx:124",
+        "frontend/components/chat/ChatHeader.tsx:125"
       ]
     },
     "IMMEDIATE_REMEDIATION": {
@@ -2295,9 +2389,8 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/core/error_codes.py:10",
-        "netra_backend/app/core/error_handlers/api/api_error_handler.py:146",
         "netra_backend/app/core/unified_error_handler.py:177",
-        "netra_backend/app/routes/websocket.py:229"
+        "netra_backend/app/routes/websocket.py:239"
       ]
     },
     "INVALID": {
@@ -2344,6 +2437,14 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/routes/supply.py:69"
+      ]
+    },
+    "ITEM": {
+      "value": "ITEM",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:36",
+        "scripts/ga4_automation.py:62"
       ]
     },
     "ITERATION": {
@@ -2600,6 +2701,13 @@
         "netra_backend/app/core/configuration/environment_detector.py:218"
       ]
     },
+    "KILOMETERS": {
+      "value": "KILOMETERS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:48"
+      ]
+    },
     "KUBERNETES_SERVICE_HOST": {
       "value": "KUBERNETES_SERVICE_HOST",
       "category": "configuration",
@@ -2678,8 +2786,23 @@
       "locations": [
         "netra_backend/app/agents/data_sub_agent/query_builder.py:151",
         "netra_backend/app/services/corpus/document_manager.py:269",
-        "netra_backend/app/services/corpus/search_operations.py:150",
+        "netra_backend/app/services/corpus/search_operations.py:151",
+        "netra_backend/app/services/corpus/search_operations.py:373",
         "scripts/boundary_enforcer_system_checks.py:182"
+      ]
+    },
+    "LIST": {
+      "value": "LIST",
+      "category": "configuration",
+      "locations": [
+        "scripts/gtm_api_setup.py:781",
+        "scripts/gtm_api_setup.py:813",
+        "scripts/gtm_api_setup.py:844",
+        "scripts/gtm_api_setup.py:869",
+        "scripts/gtm_api_setup.py:900",
+        "scripts/gtm_api_setup.py:932",
+        "scripts/gtm_api_setup.py:956",
+        "scripts/gtm_api_setup.py:995"
       ]
     },
     "LIVE": {
@@ -2807,6 +2930,13 @@
         "netra_backend/app/db/alembic_state_recovery.py:181"
       ]
     },
+    "MATCHES_REGEX": {
+      "value": "MATCHES_REGEX",
+      "category": "configuration",
+      "locations": [
+        "scripts/gtm_api_setup.py:735"
+      ]
+    },
     "MAX_LENGTH": {
       "value": "MAX_LENGTH",
       "category": "configuration",
@@ -2872,6 +3002,13 @@
         "netra_backend/app/agents/github_analyzer/config_parser.py:66"
       ]
     },
+    "METERS": {
+      "value": "METERS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:47"
+      ]
+    },
     "METRICS_ENABLED": {
       "value": "METRICS_ENABLED",
       "category": "configuration",
@@ -2884,6 +3021,31 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/startup/migration_tracker.py:174"
+      ]
+    },
+    "MILES": {
+      "value": "MILES",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:49"
+      ]
+    },
+    "MILLISECONDS": {
+      "value": "MILLISECONDS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:50",
+        "scripts/ga4_automation.py:73",
+        "scripts/ga4_automation.py:297"
+      ]
+    },
+    "MINUTES": {
+      "value": "MINUTES",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:52",
+        "scripts/ga4_automation.py:74",
+        "scripts/ga4_automation.py:298"
       ]
     },
     "MIN_LENGTH": {
@@ -3105,6 +3267,14 @@
         "scripts/consolidate_types.py:215"
       ]
     },
+    "NO_COLOR": {
+      "value": "NO_COLOR",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/logging_config.py:20",
+        "scripts/verify_cloud_run_logging_fix.py:122"
+      ]
+    },
     "NO_DUPLICATE_TYPES": {
       "value": "NO_DUPLICATE_TYPES",
       "category": "configuration",
@@ -3145,7 +3315,7 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/services/corpus/document_manager.py:269",
-        "netra_backend/app/services/corpus/search_operations.py:150"
+        "netra_backend/app/services/corpus/search_operations.py:151"
       ]
     },
     "OPEN": {
@@ -3371,7 +3541,7 @@
       "value": "PASSWORD",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/db/database_manager.py:918",
+        "netra_backend/app/db/database_manager.py:923",
         "scripts/code_review_analysis.py:192",
         "scripts/review/security_checker.py:38",
         "scripts/validate_staging_config.py:327",
@@ -3384,7 +3554,6 @@
       "locations": [
         "netra_backend/app/core/cross_service_validators/contract_validators.py:175",
         "netra_backend/app/middleware/api_gateway_coordinator.py:211",
-        "netra_backend/app/middleware/error_recovery_helpers.py:23",
         "netra_backend/app/middleware/security_middleware.py:211",
         "scripts/scan_string_literals.py:160",
         "shared/cors_config_builder.py:361"
@@ -3394,7 +3563,8 @@
       "value": "PATH",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/core/isolated_environment.py:288"
+        "netra_backend/app/core/isolated_environment.py:288",
+        "scripts/gtm_api_setup.py:452"
       ]
     },
     "PENDING": {
@@ -3467,8 +3637,8 @@
         "netra_backend/app/core/cross_service_validators/performance_validators.py:89",
         "netra_backend/app/core/network_handler.py:70",
         "netra_backend/app/middleware/api_gateway_coordinator.py:211",
-        "netra_backend/app/middleware/error_recovery_helpers.py:23",
-        "netra_backend/app/middleware/security_middleware.py:211"
+        "netra_backend/app/middleware/security_middleware.py:211",
+        "netra_backend/app/middleware/tool_permission_middleware.py:341"
       ]
     },
     "POSTGRES_DB": {
@@ -3624,12 +3794,12 @@
         "netra_backend/app/core/cross_service_validators/contract_validators.py:179",
         "netra_backend/app/core/network_handler.py:70",
         "netra_backend/app/middleware/api_gateway_coordinator.py:211",
-        "netra_backend/app/middleware/error_recovery_helpers.py:23",
         "netra_backend/app/middleware/security_middleware.py:211",
         "netra_backend/app/services/external_api_client.py:206",
         "scripts/scan_string_literals.py:160",
         "scripts/staging_validation_part2_user_flows.py:567",
-        "scripts/validate_gcp_deployment.py:405"
+        "scripts/validate_gcp_deployment.py:405",
+        "shared/cors_config_builder.py:361"
       ]
     },
     "PYTEST_CURRENT_TEST": {
@@ -3676,6 +3846,13 @@
         "scripts/fetch_secrets_to_env.py:162"
       ]
     },
+    "PY_COLORS": {
+      "value": "PY_COLORS",
+      "category": "configuration",
+      "locations": [
+        "netra_backend/app/core/logging_config.py:22"
+      ]
+    },
     "QUICK_FIX": {
       "value": "QUICK_FIX",
       "category": "configuration",
@@ -3719,7 +3896,7 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/core/logging_formatters.py:111",
-        "netra_backend/app/db/database_manager.py:918"
+        "netra_backend/app/db/database_manager.py:923"
       ]
     },
     "REFRESH_TOKEN_EXPIRE_DAYS": {
@@ -3990,11 +4167,20 @@
         "scripts/emergency_boundary_actions.py:299"
       ]
     },
+    "SECONDS": {
+      "value": "SECONDS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:51",
+        "scripts/ga4_automation.py:72",
+        "scripts/ga4_automation.py:296"
+      ]
+    },
     "SECRET": {
       "value": "SECRET",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/db/database_manager.py:918",
+        "netra_backend/app/db/database_manager.py:923",
         "auth_service/auth_core/secret_loader.py:215",
         "auth_service/main.py:166",
         "scripts/code_review_analysis.py:191",
@@ -4170,8 +4356,7 @@
       "category": "configuration",
       "locations": [
         "netra_backend/app/core/error_codes.py:30",
-        "netra_backend/app/core/unified_error_handler.py:178",
-        "netra_backend/app/middleware/error_response_builder.py:25"
+        "netra_backend/app/core/unified_error_handler.py:178"
       ]
     },
     "SERVICE_VERSION": {
@@ -4393,6 +4578,15 @@
         "scripts/validate_staging_config_partial.py:49"
       ]
     },
+    "STANDARD": {
+      "value": "STANDARD",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_api_setup_template.py:44",
+        "scripts/ga4_automation.py:70",
+        "scripts/ga4_automation.py:295"
+      ]
+    },
     "STARTUP_ENDPOINT_PATH": {
       "value": "STARTUP_ENDPOINT_PATH",
       "category": "configuration",
@@ -4529,6 +4723,22 @@
         "netra_backend/app/agents/github_analyzer/config_parser.py:50"
       ]
     },
+    "TEMPLATE": {
+      "value": "TEMPLATE",
+      "category": "configuration",
+      "locations": [
+        "scripts/gtm_api_setup.py:307",
+        "scripts/gtm_api_setup.py:308",
+        "scripts/gtm_api_setup.py:316",
+        "scripts/gtm_api_setup.py:317",
+        "scripts/gtm_api_setup.py:325",
+        "scripts/gtm_api_setup.py:326",
+        "scripts/gtm_api_setup.py:334",
+        "scripts/gtm_api_setup.py:335",
+        "scripts/gtm_api_setup.py:343",
+        "scripts/gtm_api_setup.py:344"
+      ]
+    },
     "TEST": {
       "value": "TEST",
       "category": "configuration",
@@ -4614,6 +4824,13 @@
         "scripts/run_e2e_tests_with_docker.py:78"
       ]
     },
+    "THIRTY_EIGHT_MONTHS": {
+      "value": "THIRTY_EIGHT_MONTHS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_automation.py:527"
+      ]
+    },
     "TODO": {
       "value": "TODO",
       "category": "configuration",
@@ -4683,12 +4900,26 @@
         "netra_backend/app/services/database/migration_service.py:233"
       ]
     },
+    "TWENTY_SIX_MONTHS": {
+      "value": "TWENTY_SIX_MONTHS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_automation.py:526"
+      ]
+    },
     "TWILIO_ACCOUNT_SID": {
       "value": "TWILIO_ACCOUNT_SID",
       "category": "configuration",
       "locations": [
         "scripts/fetch_secrets_to_env.py:102",
         "scripts/fetch_secrets_to_env.py:172"
+      ]
+    },
+    "TWO_MONTHS": {
+      "value": "TWO_MONTHS",
+      "category": "configuration",
+      "locations": [
+        "scripts/ga4_automation.py:525"
       ]
     },
     "UNHEALTHY": {
@@ -4702,7 +4933,7 @@
       "value": "UNKNOWN",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/db/database_manager.py:1647",
+        "netra_backend/app/db/database_manager.py:1649",
         "netra_backend/app/websocket_core/handlers.py:303",
         "auth_service/auth_core/database/staging_validation.py:375",
         "auth_service/auth_core/database/staging_validation.py:376",
@@ -4736,6 +4967,8 @@
       "value": "USER",
       "category": "configuration",
       "locations": [
+        "scripts/ga4_api_setup_template.py:34",
+        "scripts/ga4_automation.py:60",
         "scripts/manage_precommit.py:67"
       ]
     },
@@ -4796,8 +5029,6 @@
         "netra_backend/app/auth_integration/validators.py:270",
         "netra_backend/app/auth_integration/validators.py:278",
         "netra_backend/app/core/error_codes.py:12",
-        "netra_backend/app/core/error_handlers/api/api_error_handler.py:93",
-        "netra_backend/app/core/error_handlers/handler.py:60",
         "netra_backend/app/core/unified_error_handler.py:172"
       ]
     },
@@ -4875,7 +5106,8 @@
       "locations": [
         "netra_backend/app/agents/data_sub_agent/clickhouse_recovery.py:144",
         "netra_backend/app/core/schema_sync/utils.py:90",
-        "netra_backend/app/services/corpus/search_operations.py:193",
+        "netra_backend/app/services/corpus/search_operations.py:194",
+        "netra_backend/app/services/corpus/search_operations.py:368",
         "netra_backend/app/services/database/rollback_manager_postgres.py:92",
         "netra_backend/app/services/database/rollback_manager_postgres.py:136",
         "netra_backend/app/services/database/transaction_coordinator.py:391",

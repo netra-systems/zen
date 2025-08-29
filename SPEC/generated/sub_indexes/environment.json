@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-08-28T14:13:40.963948",
+    "generated_at": "2025-08-28T22:39:26.954584",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 140
   },
@@ -151,7 +151,7 @@
       "value": "AUTH_ERROR",
       "category": "environment",
       "locations": [
-        "netra_backend/app/routes/websocket.py:207",
+        "netra_backend/app/routes/websocket.py:213",
         "frontend/providers/EnhancedWebSocketProvider.tsx:556"
       ]
     },
