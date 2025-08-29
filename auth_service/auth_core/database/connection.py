@@ -258,20 +258,36 @@ class AuthDatabaseConnection:
             await self.initialize()
         
         async with self.async_session_maker() as session:
+            session_yielded = False
             try:
+                session_yielded = True
                 yield session
-                # Only commit if session is active and not in an error state
-                if session.is_active and not session.in_transaction():
-                    await session.commit()
+                # CRITICAL FIX: Only attempt commit if session is properly active
+                # and has an active transaction to commit
+                if hasattr(session, 'is_active') and session.is_active:
+                    # Check if there's an active transaction to commit
+                    if hasattr(session, 'in_transaction') and session.in_transaction():
+                        await session.commit()
             except asyncio.CancelledError:
                 # Handle task cancellation - don't attempt any session operations
                 # The async context manager will handle cleanup
                 raise
+            except GeneratorExit:
+                # Handle generator cleanup gracefully
+                # Session context manager will handle cleanup
+                pass
             except Exception as e:
-                # Only rollback if session is still active
-                if session.is_active:
-                    await session.rollback()
-                    logger.error(f"Auth database transaction rolled back: {e}")
+                # CRITICAL FIX: Only rollback if session is still in a valid state
+                # and has an active transaction
+                if (session_yielded and 
+                    hasattr(session, 'is_active') and session.is_active and
+                    hasattr(session, 'in_transaction') and session.in_transaction()):
+                    try:
+                        await session.rollback()
+                        logger.error(f"Auth database transaction rolled back: {e}")
+                    except Exception:
+                        # If rollback fails, let the context manager handle cleanup
+                        pass
                 raise
             # Note: removed finally block with session.close() - the context manager handles this
     

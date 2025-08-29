@@ -323,6 +323,23 @@ def get_migration_url(base_url: str) -> str:
             <cause>Missing SSL parameters for staging/production TCP connections</cause>
             <solution>Add sslmode=require to DATABASE_URL for TCP connections</solution>
         </pattern>
+        
+        <pattern name="IllegalStateChangeError">
+            <error>Method 'close()' can't be called here; method '_connection_for_bind()' is already running</error>
+            <cause>Concurrent session operations without proper state checking</cause>
+            <solution>
+                Always use hasattr() to check session state before operations:
+                if hasattr(session, 'is_active') and session.is_active:
+                    if hasattr(session, 'in_transaction') and session.in_transaction():
+                        await session.commit()
+            </solution>
+            <prevention>
+                - Use session_yielded flag to track lifecycle
+                - Handle asyncio.CancelledError separately
+                - Handle GeneratorExit gracefully
+                - Wrap rollback operations in try-except
+            </prevention>
+        </pattern>
     </error_handling>
 
     <business_value>
@@ -344,5 +361,8 @@ def get_migration_url(base_url: str) -> str:
         <check>Health checks handle lazy initialization</check>
         <check>Pre-deployment validation implemented</check>
         <check>Environment detection working correctly</check>
+        <check>Session state checked with hasattr() before operations to prevent IllegalStateChangeError</check>
+        <check>AsyncSession lifecycle properly managed with session_yielded flag</check>
+        <check>Exception handling includes asyncio.CancelledError and GeneratorExit</check>
     </compliance_checklist>
 </specification>
