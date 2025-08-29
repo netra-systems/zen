@@ -18,10 +18,10 @@ from netra_backend.app.agents.triage_sub_agent.llm_processor import TriageLLMPro
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerState
 from netra_backend.app.core.exceptions_service import (
-    LLMError, 
-    RateLimitError, 
+    LLMRequestError as LLMError, 
+    LLMRateLimitError as RateLimitError, 
     ServiceUnavailableError,
-    TimeoutError
+    ServiceTimeoutError as TimeoutError
 )
 
 
