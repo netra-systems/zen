@@ -16,6 +16,10 @@ from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
 )
+from netra_backend.app.agents.prompts.supervisor_prompts import (
+    supervisor_orchestration_prompt,
+    supervisor_system_prompt,
+)
 from netra_backend.app.agents.state import DeepAgentState
 
 # Import modular components
@@ -65,6 +69,10 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.websocket_manager = websocket_manager
         self.tool_dispatcher = tool_dispatcher
         
+        # System prompt and orchestration template
+        self.system_prompt = supervisor_system_prompt
+        self.orchestration_prompt_template = supervisor_orchestration_prompt
+        
         # Initialize modular components
         self._init_core_components()
         self._init_monitoring_components()
@@ -94,11 +102,17 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         return await self.lifecycle_manager.validate_entry_conditions(context)
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute core supervisor orchestration logic."""
+        """Execute core supervisor orchestration logic with system prompt context."""
         # Start observability tracking
         self.observability.start_workflow_trace(context)
         
         try:
+            # Store system prompt in context for workflow orchestration
+            if hasattr(context, 'metadata') and context.metadata:
+                context.metadata['system_prompt'] = self.system_prompt
+            else:
+                context.metadata = {'system_prompt': self.system_prompt}
+            
             # Execute workflow with circuit breaker protection
             results = await self._execute_protected_workflow(context)
             
@@ -229,3 +243,38 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     def register_lifecycle_hook(self, event: str, handler) -> None:
         """Register lifecycle event hook."""
         self.lifecycle_manager.register_lifecycle_hook(event, handler)
+    
+    async def generate_orchestration_decision(self, user_request: str, triage_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate orchestration decision using the system prompt and LLM.
+        
+        Args:
+            user_request: The user's request
+            triage_result: Results from triage agent
+            
+        Returns:
+            Orchestration decision with workflow steps
+        """
+        # Format the prompt with context
+        prompt = self.orchestration_prompt_template.format(
+            system_prompt=self.system_prompt,
+            user_request=user_request,
+            triage_result=str(triage_result)
+        )
+        
+        # Generate orchestration decision using LLM
+        response = await self.llm_manager.agenerate(
+            prompts=[prompt],
+            temperature=0.1,  # Low temperature for consistent orchestration
+            max_tokens=2000
+        )
+        
+        # Parse the response (in production, would parse JSON)
+        if hasattr(response, 'generations') and response.generations:
+            decision_text = response.generations[0][0].text
+            # Here you would parse the JSON response
+            # For now, we'll use the adaptive workflow logic from workflow_orchestrator
+            
+        return {
+            "orchestration_decision": "adaptive",
+            "based_on_triage": triage_result
+        }

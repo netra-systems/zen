@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>Supervisor Adaptive Workflow Specification</title>
+    <version>1.0.0</version>
+    <created>2025-01-29</created>
+    <updated>2025-01-29</updated>
+    <category>Core Architecture</category>
+    <business_value>
+      Enables dynamic workflow optimization based on data sufficiency, reducing unnecessary processing
+      and improving user experience by requesting only essential data when needed.
+    </business_value>
+  </metadata>
+
+  <overview>
+    <description>
+      The Supervisor Agent now implements an adaptive workflow that dynamically adjusts the agent
+      execution sequence based on the Triage Agent's assessment of data sufficiency. This ensures
+      optimal resource utilization and better user experience.
+    </description>
+    <key_features>
+      <feature>Dynamic workflow selection based on data sufficiency levels</feature>
+      <feature>Integration of data_helper agent for data collection</feature>
+      <feature>System prompts for all agents ensuring consistent behavior</feature>
+      <feature>Conditional execution paths to optimize processing</feature>
+    </key_features>
+  </overview>
+
+  <architecture>
+    <components>
+      <component name="SupervisorAgent">
+        <description>Central orchestrator with adaptive workflow logic</description>
+        <location>netra_backend/app/agents/supervisor_agent_modern.py</location>
+        <responsibilities>
+          <responsibility>Coordinate agent execution based on triage assessment</responsibility>
+          <responsibility>Manage system prompts and context</responsibility>
+          <responsibility>Generate orchestration decisions using LLM</responsibility>
+        </responsibilities>
+      </component>
+      
+      <component name="WorkflowOrchestrator">
+        <description>Manages adaptive workflow execution</description>
+        <location>netra_backend/app/agents/supervisor/workflow_orchestrator.py</location>
+        <responsibilities>
+          <responsibility>Define workflow based on data sufficiency</responsibility>
+          <responsibility>Execute agents in appropriate sequence</responsibility>
+          <responsibility>Handle workflow state and transitions</responsibility>
+        </responsibilities>
+      </component>
+      
+      <component name="DataHelperAgent">
+        <description>Specialized agent for data requirement analysis</description>
+        <location>netra_backend/app/agents/data_helper_agent.py</location>
+        <responsibilities>
+          <responsibility>Analyze data gaps in user requests</responsibility>
+          <responsibility>Generate structured data requests</responsibility>
+          <responsibility>Provide user-friendly data collection guidance</responsibility>
+        </responsibilities>
+      </component>
+    </components>
+
+    <workflow_configurations>
+      <configuration name="sufficient_data">
+        <description>Full workflow when data is sufficient</description>
+        <sequence>
+          <step order="1">triage</step>
+          <step order="2">optimization</step>
+          <step order="3">data</step>
+          <step order="4">actions</step>
+          <step order="5">reporting</step>
+        </sequence>
+      </configuration>
+      
+      <configuration name="partial_data">
+        <description>Modified workflow when additional data would help</description>
+        <sequence>
+          <step order="1">triage</step>
+          <step order="2">optimization</step>
+          <step order="3">actions</step>
+          <step order="4">data_helper</step>
+          <step order="5">reporting (with data request)</step>
+        </sequence>
+      </configuration>
+      
+      <configuration name="insufficient_data">
+        <description>Minimal workflow when critical data is missing</description>
+        <sequence>
+          <step order="1">triage</step>
+          <step order="2">data_helper</step>
+        </sequence>
+      </configuration>
+    </workflow_configurations>
+  </architecture>
+
+  <prompts>
+    <system_prompts>
+      <prompt agent="supervisor">
+        <location>netra_backend/app/agents/prompts/supervisor_prompts.py</location>
+        <purpose>Define supervisor's role as central orchestrator</purpose>
+      </prompt>
+      <prompt agent="triage">
+        <location>netra_backend/app/agents/prompts/triage_prompts.py</location>
+        <purpose>Assess data sufficiency and categorize requests</purpose>
+      </prompt>
+      <prompt agent="data">
+        <location>netra_backend/app/agents/prompts/data_prompts.py</location>
+        <purpose>Gather and analyze optimization data</purpose>
+      </prompt>
+      <prompt agent="optimization">
+        <location>netra_backend/app/agents/prompts/optimization_prompts.py</location>
+        <purpose>Generate optimization strategies</purpose>
+      </prompt>
+      <prompt agent="actions">
+        <location>netra_backend/app/agents/prompts/action_prompts.py</location>
+        <purpose>Create implementation plans</purpose>
+      </prompt>
+      <prompt agent="reporting">
+        <location>netra_backend/app/agents/prompts/reporting_prompts.py</location>
+        <purpose>Synthesize results into reports</purpose>
+      </prompt>
+      <prompt agent="data_helper">
+        <location>netra_backend/app/agents/prompts/supervisor_prompts.py</location>
+        <purpose>Generate data collection requests</purpose>
+      </prompt>
+    </system_prompts>
+  </prompts>
+
+  <data_sufficiency>
+    <levels>
+      <level name="sufficient">
+        <description>User has provided enough data for comprehensive optimization</description>
+        <indicators>
+          <indicator>Current metrics and usage patterns available</indicator>
+          <indicator>Performance requirements specified</indicator>
+          <indicator>Budget or constraints defined</indicator>
+        </indicators>
+      </level>
+      
+      <level name="partial">
+        <description>Some data available but more would enhance optimization</description>
+        <indicators>
+          <indicator>Basic problem statement provided</indicator>
+          <indicator>Some metrics available but incomplete</indicator>
+          <indicator>Missing detailed requirements</indicator>
+        </indicators>
+      </level>
+      
+      <level name="insufficient">
+        <description>Critical data missing for meaningful optimization</description>
+        <indicators>
+          <indicator>Only high-level request provided</indicator>
+          <indicator>No metrics or current state information</indicator>
+          <indicator>Unclear objectives or constraints</indicator>
+        </indicators>
+      </level>
+    </levels>
+  </data_sufficiency>
+
+  <implementation>
+    <files_modified>
+      <file>netra_backend/app/agents/supervisor_agent_modern.py</file>
+      <file>netra_backend/app/agents/supervisor/workflow_orchestrator.py</file>
+      <file>netra_backend/app/agents/supervisor/agent_registry.py</file>
+      <file>netra_backend/app/agents/data_helper_agent.py</file>
+      <file>netra_backend/app/tools/data_helper.py</file>
+      <file>netra_backend/app/agents/prompts/*.py</file>
+    </files_modified>
+    
+    <dependencies>
+      <dependency>langchain_core for prompt templates</dependency>
+      <dependency>LLMManager for decision generation</dependency>
+      <dependency>BaseSubAgent for agent interface</dependency>
+    </dependencies>
+  </implementation>
+
+  <testing>
+    <test_categories>
+      <category name="unit">
+        <description>Test individual components</description>
+        <coverage>
+          <test>DataHelper tool functionality</test>
+          <test>Workflow configuration selection</test>
+          <test>System prompt integration</test>
+        </coverage>
+      </category>
+      
+      <category name="integration">
+        <description>Test workflow transitions</description>
+        <coverage>
+          <test>Adaptive workflow execution</test>
+          <test>Agent communication</test>
+          <test>Data sufficiency assessment</test>
+        </coverage>
+      </category>
+      
+      <category name="e2e">
+        <description>Test complete workflows</description>
+        <coverage>
+          <test>Sufficient data scenario</test>
+          <test>Partial data scenario</test>
+          <test>Insufficient data scenario</test>
+        </coverage>
+      </category>
+    </test_categories>
+  </testing>
+
+  <monitoring>
+    <metrics>
+      <metric name="workflow_selection_distribution">
+        <description>Distribution of workflow types selected</description>
+      </metric>
+      <metric name="data_helper_invocation_rate">
+        <description>Frequency of data_helper usage</description>
+      </metric>
+      <metric name="workflow_completion_time">
+        <description>Time to complete different workflow types</description>
+      </metric>
+    </metrics>
+  </monitoring>
+
+  <learnings>
+    <learning>
+      Adaptive workflows reduce unnecessary processing when data is insufficient,
+      improving both system efficiency and user experience.
+    </learning>
+    <learning>
+      System prompts provide consistent agent behavior and clear role definition,
+      essential for multi-agent coordination.
+    </learning>
+    <learning>
+      The data_helper agent bridges the gap between user intent and actionable
+      optimization by clearly communicating data requirements.
+    </learning>
+  </learnings>
+</spec>

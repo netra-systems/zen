@@ -95,7 +95,8 @@ def _import_core_routers() -> dict:
 def _import_extended_routers() -> dict:
     """Import extended functionality routers"""
     extended_imports = _import_extended_router_modules()
-    return _create_extended_router_dict(extended_imports)
+    test_routers = _import_test_routers()
+    return {**_create_extended_router_dict(extended_imports), **test_routers}
 
 
 def _import_extended_router_modules() -> tuple:
@@ -117,6 +118,19 @@ def _create_extended_router_dict(router_imports: tuple) -> dict:
     return {"health_extended_router": health_extended_router,
         "monitoring_router": monitoring_router, "gcp_monitoring_router": gcp_monitoring_router,
         "websocket_router": websocket_router}
+
+
+def _import_test_routers() -> dict:
+    """Import test routers for development environment."""
+    import os
+    # Only import in development environment
+    if os.getenv("ENVIRONMENT", "development").lower() == "development":
+        try:
+            from netra_backend.app.api.test_endpoints import router as test_router
+            return {"test_router": test_router}
+        except ImportError:
+            pass
+    return {}
 
 
 def import_factory_routers() -> dict:
