@@ -210,10 +210,47 @@ class UnifiedCircuitBreaker:
         
     def _initialize_state(self) -> None:
         """Initialize circuit breaker state variables."""
-        self.state = UnifiedCircuitBreakerState.CLOSED
+        self._state = UnifiedCircuitBreakerState.CLOSED
         self.last_state_change = time.time()
         self._state_lock = asyncio.Lock()
         self._half_open_calls = 0
+        
+    @property  
+    def state(self) -> UnifiedCircuitBreakerState:
+        """Get current circuit breaker state with dynamic timeout evaluation."""
+        # If circuit is OPEN, check if it should transition to HALF_OPEN
+        if self._state == UnifiedCircuitBreakerState.OPEN:
+            timeout_elapsed = self._is_recovery_timeout_elapsed()
+            if timeout_elapsed:
+                # Transition to HALF_OPEN if recovery timeout has elapsed
+                try:
+                    # Try to get the current event loop for async transition
+                    loop = asyncio.get_running_loop()
+                    # Schedule the transition as a task
+                    asyncio.create_task(self._transition_to_half_open())
+                except RuntimeError:
+                    # No event loop running, do synchronous state change
+                    self._state = UnifiedCircuitBreakerState.HALF_OPEN
+                    self.metrics.state_changes += 1
+                    self.last_state_change = time.time()
+                    self._half_open_calls = 0
+        return self._state
+        
+    @property
+    def legacy_state(self):
+        """Get state as legacy CircuitState enum for compatibility."""
+        from netra_backend.app.core.circuit_breaker_types import CircuitState
+        state_mapping = {
+            UnifiedCircuitBreakerState.CLOSED: CircuitState.CLOSED,
+            UnifiedCircuitBreakerState.OPEN: CircuitState.OPEN,
+            UnifiedCircuitBreakerState.HALF_OPEN: CircuitState.HALF_OPEN,
+        }
+        return state_mapping.get(self.state, CircuitState.CLOSED)
+        
+    @state.setter
+    def state(self, value: UnifiedCircuitBreakerState) -> None:
+        """Set circuit breaker state."""
+        self._state = value
         
     def _initialize_metrics(self) -> None:
         """Initialize comprehensive metrics tracking."""
@@ -471,7 +508,7 @@ class UnifiedCircuitBreaker:
         if self.metrics.last_failure_time is None:
             # If the state is OPEN but no failure time is recorded, it means
             # the state was manually set for testing - don't allow execution immediately
-            if self.state == UnifiedCircuitBreakerState.OPEN:
+            if self._state == UnifiedCircuitBreakerState.OPEN:
                 # In testing scenarios where state is manually set to OPEN,
                 # we should still respect some form of timeout to avoid immediate execution
                 return False
@@ -503,7 +540,7 @@ class UnifiedCircuitBreaker:
     async def _transition_to_closed(self) -> None:
         """Transition circuit to closed state."""
         logger.info(f"Circuit breaker '{self.config.name}' -> CLOSED")
-        self.state = UnifiedCircuitBreakerState.CLOSED
+        self._state = UnifiedCircuitBreakerState.CLOSED
         self.metrics.circuit_closed_count += 1
         self.metrics.state_changes += 1
         self._reset_failure_tracking()
@@ -511,7 +548,7 @@ class UnifiedCircuitBreaker:
     async def _transition_to_open(self) -> None:
         """Transition circuit to open state."""
         logger.warning(f"Circuit breaker '{self.config.name}' -> OPEN")
-        self.state = UnifiedCircuitBreakerState.OPEN
+        self._state = UnifiedCircuitBreakerState.OPEN
         self.metrics.circuit_opened_count += 1
         self.metrics.state_changes += 1
         self.last_state_change = time.time()
@@ -523,7 +560,7 @@ class UnifiedCircuitBreaker:
     async def _transition_to_half_open(self) -> None:
         """Transition circuit to half-open state."""
         logger.info(f"Circuit breaker '{self.config.name}' -> HALF_OPEN")
-        self.state = UnifiedCircuitBreakerState.HALF_OPEN
+        self._state = UnifiedCircuitBreakerState.HALF_OPEN
         self.metrics.state_changes += 1
         self.last_state_change = time.time()
         self._half_open_calls = 0
@@ -635,7 +672,7 @@ class UnifiedCircuitBreaker:
         """Manually reset circuit breaker to closed state."""
         async with self._state_lock:
             logger.info(f"Manually resetting circuit breaker '{self.config.name}'")
-            self.state = UnifiedCircuitBreakerState.CLOSED
+            self._state = UnifiedCircuitBreakerState.CLOSED
             self.metrics = UnifiedCircuitMetrics()
             self.metrics.adaptive_failure_threshold = self.config.failure_threshold
             self._sliding_window.clear()

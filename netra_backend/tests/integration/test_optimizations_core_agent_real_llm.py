@@ -29,18 +29,25 @@ env = IsolatedEnvironment()
 
 
 @pytest.fixture
+async def db_session():
+    """Get real database session."""
+    async for session in get_async_session():
+        yield session
+        await session.rollback()
+
+@pytest.fixture
 async def real_llm_manager():
     """Get real LLM manager instance with actual API credentials."""
-    llm_manager = LLMManager()
-    await llm_manager.initialize()
+    from netra_backend.app.core.config import get_settings
+    settings = get_settings()
+    llm_manager = LLMManager(settings)
     yield llm_manager
-    await llm_manager.cleanup()
 
 
 @pytest.fixture
-async def real_tool_dispatcher(real_llm_manager):
+async def real_tool_dispatcher():
     """Get real tool dispatcher with actual tools loaded."""
-    dispatcher = ToolDispatcher(llm_manager=real_llm_manager)
+    dispatcher = ToolDispatcher()
     return dispatcher
 
 
@@ -53,7 +60,7 @@ async def real_optimization_agent(real_llm_manager, real_tool_dispatcher):
         websocket_manager=None  # Real websocket in production
     )
     yield agent
-    await agent.cleanup()
+    # Cleanup not needed for tests
 
 
 class TestOptimizationsCoreAgentRealLLM:
@@ -99,8 +106,9 @@ class TestOptimizationsCoreAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="OptimizationsCoreSubAgent",
             state=state,
-            request_id="req_001",
             user_id="enterprise_customer_001"
         )
         
@@ -163,8 +171,9 @@ class TestOptimizationsCoreAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="OptimizationsCoreSubAgent",
             state=state,
-            request_id="req_002",
             user_id="support_team_001"
         )
         
@@ -216,8 +225,9 @@ class TestOptimizationsCoreAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="OptimizationsCoreSubAgent",
             state=state,
-            request_id="req_003",
             user_id="content_team_001"
         )
         
@@ -278,8 +288,9 @@ class TestOptimizationsCoreAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="OptimizationsCoreSubAgent",
             state=state,
-            request_id="req_004",
             user_id="translation_service_001"
         )
         
@@ -340,8 +351,9 @@ class TestOptimizationsCoreAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="OptimizationsCoreSubAgent",
             state=state,
-            request_id="req_005",
             user_id="global_platform_001"
         )
         

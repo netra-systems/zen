@@ -13,7 +13,7 @@ from typing import Dict, Any, List
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherSubAgent
+from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -31,34 +31,33 @@ env = IsolatedEnvironment()
 @pytest.fixture
 async def real_llm_manager():
     """Get real LLM manager instance with actual API credentials."""
-    llm_manager = LLMManager()
-    await llm_manager.initialize()
+    from netra_backend.app.core.config import get_settings
+    settings = get_settings()
+    llm_manager = LLMManager(settings)
     yield llm_manager
-    await llm_manager.cleanup()
 
 
 @pytest.fixture
-async def real_tool_dispatcher(db_session: AsyncSession):
+async def real_tool_dispatcher():
     """Get real tool dispatcher with actual tools loaded."""
     dispatcher = ToolDispatcher()
-    await dispatcher.initialize_tools(db_session)
     return dispatcher
 
 
 @pytest.fixture
 async def real_supply_researcher_agent(real_llm_manager, real_tool_dispatcher):
-    """Create real SupplyResearcherSubAgent instance."""
-    agent = SupplyResearcherSubAgent(
+    """Create real SupplyResearcherAgent instance."""
+    agent = SupplyResearcherAgent(
         llm_manager=real_llm_manager,
         tool_dispatcher=real_tool_dispatcher,
         websocket_manager=None  # Real websocket in production
     )
     yield agent
-    await agent.cleanup()
+    # Cleanup not needed for tests
 
 
 class TestSupplyResearcherAgentRealLLM:
-    """Test suite for SupplyResearcherSubAgent with real LLM interactions."""
+    """Test suite for SupplyResearcherAgent with real LLM interactions."""
     
     @pytest.mark.integration
     @pytest.mark.real_llm
@@ -110,8 +109,9 @@ class TestSupplyResearcherAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="SupplyResearcherAgent",
             state=state,
-            request_id="req_supply_001",
             user_id="procurement_team_001"
         )
         
@@ -211,8 +211,9 @@ class TestSupplyResearcherAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="SupplyResearcherAgent",
             state=state,
-            request_id="req_supply_002",
             user_id="operations_team_002"
         )
         
@@ -317,8 +318,9 @@ class TestSupplyResearcherAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="SupplyResearcherAgent",
             state=state,
-            request_id="req_supply_003",
             user_id="risk_team_003"
         )
         
@@ -446,8 +448,9 @@ class TestSupplyResearcherAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="SupplyResearcherAgent",
             state=state,
-            request_id="req_supply_004",
             user_id="strategy_team_004"
         )
         
@@ -588,8 +591,9 @@ class TestSupplyResearcherAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="SupplyResearcherAgent",
             state=state,
-            request_id="req_supply_005",
             user_id="procurement_team_005"
         )
         

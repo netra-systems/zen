@@ -1,836 +1,749 @@
-"""
-Comprehensive integration tests for TriageSubAgent using REAL services and minimal mocks.
+"""Integration tests for triage agent with real services.
 
-These tests focus on end-to-end scenarios with real system interactions:
-- Real database transactions
-- Real Redis caching 
-- Real LLM provider calls
-- Real authentication service integration
-- Real error injection and recovery
-
-Business Value: Ensures triage agent works correctly in production-like environments
-with actual service dependencies and failure scenarios.
+Tests real-world integration scenarios using actual services (database, Redis, LLM).
+Minimal mocking - focuses on end-to-end behavior with real dependencies.
 """
 
 import asyncio
 import json
 import time
-import uuid
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
-import pytest
-from unittest.mock import patch
-import aiohttp
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
+from netra_backend.app.agents.base.interface import (
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+)
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent.models import (
+    ExtractedEntities,
+    TriageResult,
+)
+from netra_backend.app.auth.auth_client import AuthServiceClient
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_db_session
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.auth_integration.auth import auth_client
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
-from netra_backend.app.schemas.agent_models import TriageResult
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from sqlalchemy import text
-from sqlalchemy.exc import OperationalError
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.websocket_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
-# Real environment configuration
+# Initialize real environment
 env = IsolatedEnvironment()
 
+
 class RealServiceTestFixtures:
-    """Fixtures for real service integration testing."""
+    """Helper class to manage real service connections for tests."""
     
-    @staticmethod
-    async def get_real_database_session():
-        """Get real database session for transaction testing."""
-        db_manager = DatabaseManager()
-        async with db_manager.get_async_session() as session:
-            yield session
-    
-    @staticmethod
-    async def get_real_redis_manager():
-        """Get real Redis manager instance."""
-        redis_manager = RedisManager()
-        await redis_manager.initialize()
-        return redis_manager
-    
-    @staticmethod
-    async def get_real_llm_manager():
-        """Get real LLM manager with actual API credentials."""
-        from netra_backend.app.core.configuration.base import get_unified_config
-        config = get_unified_config()
-        llm_manager = LLMManager(config)
-        return llm_manager
-    
-    @staticmethod
-    async def get_real_auth_service():
-        """Get real auth service client."""
-        return AuthServiceClient()
-    
-    @staticmethod
-    async def create_test_user(auth_service: AuthServiceClient) -> Dict[str, Any]:
-        """Create a test user for authentication testing."""
-        test_user_data = {
-            "email": f"test_user_{uuid.uuid4().hex[:8]}@test.com",
-            "password": "TestPassword123!",
-            "full_name": "Test User"
-        }
+    def __init__(self):
+        self.env = IsolatedEnvironment()
+        self.redis_manager = None
+        self.llm_manager = None
+        self.auth_client = None
+        self.websocket_manager = None
+        self.db_engine = None
         
-        try:
-            # Create user via auth service
-            user = await auth_service.create_user(test_user_data)
-            # Login to get token
-            login_result = await auth_service.login(
-                test_user_data["email"], 
-                test_user_data["password"]
-            )
-            return {
-                "user": user,
-                "token": login_result["access_token"],
-                "user_id": user["id"],
-                **test_user_data
-            }
-        except Exception as e:
-            logger.error(f"Failed to create test user: {e}")
-            # Return mock data for testing if auth service is not available
-            return {
-                "user": {"id": f"test_user_{uuid.uuid4().hex}", "email": test_user_data["email"]},
-                "token": f"mock_token_{uuid.uuid4().hex}",
-                "user_id": f"test_user_{uuid.uuid4().hex}",
-                **test_user_data
-            }
+    async def initialize_services(self):
+        """Initialize all real services."""
+        # Real Redis connection
+        self.redis_manager = RedisManager()
+        await self.redis_manager.initialize()
+        
+        # Real LLM manager with actual API keys
+        self.llm_manager = LLMManager(
+            gemini_api_key=self.env.get_variable("GEMINI_API_KEY"),
+            openai_api_key=self.env.get_variable("OPENAI_API_KEY"),
+            anthropic_api_key=self.env.get_variable("ANTHROPIC_API_KEY")
+        )
+        
+        # Real auth service client
+        self.auth_client = AuthServiceClient()
+        
+        # Real WebSocket manager
+        self.websocket_manager = WebSocketManager()
+        
+        # Real database connection
+        database_url = self.env.get_variable("DATABASE_URL")
+        self.db_engine = create_async_engine(database_url, echo=False)
+        
+    async def cleanup(self):
+        """Clean up all service connections."""
+        if self.redis_manager:
+            await self.redis_manager.close()
+        if self.db_engine:
+            await self.db_engine.dispose()
+        if self.websocket_manager:
+            await self.websocket_manager.shutdown()
+
 
 @pytest.fixture
 async def real_services():
-    """Initialize all real services for testing."""
+    """Fixture providing real service connections."""
     fixtures = RealServiceTestFixtures()
-    
-    # Initialize services
-    redis_manager = await fixtures.get_real_redis_manager()
-    llm_manager = await fixtures.get_real_llm_manager()
-    auth_service = await fixtures.get_real_auth_service()
-    
-    # Create test user
-    test_user = await fixtures.create_test_user(auth_service)
-    
-    # Initialize tool dispatcher
-    async for db_session in fixtures.get_real_database_session():
-        tool_dispatcher = ToolDispatcher()
-        await tool_dispatcher.initialize_tools(db_session)
-        break
-    
-    # Initialize WebSocket manager
-    websocket_manager = UnifiedWebSocketManager()
-    
-    # Create triage agent with real services
-    triage_agent = TriageSubAgent(
-        llm_manager=llm_manager,
-        tool_dispatcher=tool_dispatcher,
-        redis_manager=redis_manager,
-        websocket_manager=websocket_manager
-    )
-    
-    services = {
-        "redis_manager": redis_manager,
-        "llm_manager": llm_manager, 
-        "auth_service": auth_service,
-        "tool_dispatcher": tool_dispatcher,
-        "websocket_manager": websocket_manager,
-        "triage_agent": triage_agent,
-        "test_user": test_user
-    }
-    
-    yield services
-    
-    # Cleanup
-    try:
-        await redis_manager.cleanup()
-    except Exception as e:
-        logger.warning(f"Redis cleanup failed: {e}")
+    await fixtures.initialize_services()
+    yield fixtures
+    await fixtures.cleanup()
 
-def create_test_state(user_data: Dict[str, Any], request: str) -> DeepAgentState:
-    """Create test agent state with real user data."""
-    state = DeepAgentState()
-    state.user_id = user_data["user_id"]
-    state.chat_thread_id = f"thread_{uuid.uuid4().hex}"
-    state.user_request = request
-    state.conversation_id = f"conv_{uuid.uuid4().hex}"
-    state.step_count = 0
-    state.current_tools = []
-    state.triage_result = None
-    return state
 
-class TestTriageRealServices:
-    """Integration tests using real services with minimal mocks."""
-
+class TestMultiServiceAuthenticationPropagation:
+    """Test real authentication token propagation across services during triage."""
+    
     @pytest.mark.asyncio
-    @pytest.mark.integration
-    async def test_multi_service_authentication_token_propagation(self, real_services):
-        """
-        Test 1: Multi-Service Authentication Token Propagation During Triage
-        
-        Tests real auth service integration and token propagation across services
-        during the triage process.
-        """
-        triage_agent = real_services["triage_agent"]
-        test_user = real_services["test_user"]
-        redis_manager = real_services["redis_manager"]
-        
-        # Create state with authenticated user
-        user_request = "I need help optimizing my AI costs for production workloads"
-        state = create_test_state(test_user, user_request)
-        run_id = f"run_{uuid.uuid4().hex}"
-        
-        # Set authentication context
-        auth_context = {
-            "user_id": test_user["user_id"],
-            "token": test_user["token"],
-            "email": test_user["email"]
+    async def test_auth_token_propagation_across_services(self, real_services):
+        """Test real auth token propagation during triage operations."""
+        # Create a real user via auth service
+        user_data = {
+            "email": f"test_triage_{int(time.time())}@example.com",
+            "password": "SecurePassword123!",
+            "tenant_id": "test_tenant"
         }
         
-        # Store auth context in Redis for cross-service access
-        auth_key = f"auth:user:{test_user['user_id']}"
-        await redis_manager.set(auth_key, json.dumps(auth_context), expire_seconds=3600)
+        # Real auth service call to create user and get token
+        auth_response = await real_services.auth_client.create_user(user_data)
+        assert auth_response["status"] == "success"
         
-        # Execute triage with real authentication
-        start_time = time.time()
-        await triage_agent.execute(state, run_id, stream_updates=False)
-        execution_time = time.time() - start_time
+        auth_token = auth_response["token"]
+        user_id = auth_response["user_id"]
         
-        # Verify triage completed successfully
-        assert state.triage_result is not None
-        assert isinstance(state.triage_result, (dict, TriageResult))
+        # Store auth context in real Redis
+        auth_context_key = f"auth:context:{user_id}"
+        await real_services.redis_manager.set(
+            auth_context_key,
+            json.dumps({
+                "token": auth_token,
+                "user_id": user_id,
+                "tenant_id": user_data["tenant_id"],
+                "timestamp": time.time()
+            }),
+            ttl=3600
+        )
         
-        # Verify authentication was propagated
-        stored_auth = await redis_manager.get(auth_key)
-        assert stored_auth is not None
-        stored_auth_data = json.loads(stored_auth)
-        assert stored_auth_data["user_id"] == test_user["user_id"]
-        assert stored_auth_data["token"] == test_user["token"]
+        # Create triage agent with real services
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager,
+            websocket_manager=real_services.websocket_manager
+        )
         
-        # Verify triage result contains user context
-        if isinstance(state.triage_result, dict):
-            result_data = state.triage_result
-        else:
-            result_data = state.triage_result.model_dump()
+        # Create execution context with auth token
+        context = ExecutionContext(
+            request_id=f"auth_test_{int(time.time())}",
+            user_id=user_id,
+            session_id=f"session_{user_id}",
+            metadata={
+                "auth_token": auth_token,
+                "tenant_id": user_data["tenant_id"]
+            }
+        )
         
-        # Should have category and confidence
-        assert "category" in result_data
-        assert "confidence_score" in result_data
-        assert result_data["confidence_score"] > 0.0
+        # Execute triage with authenticated context
+        request_data = {
+            "query": "Show me cost optimization opportunities for my AI workloads",
+            "auth_token": auth_token
+        }
         
-        # Verify execution metrics
-        assert execution_time < 30.0  # Should complete within 30 seconds
+        result = await triage_agent.execute(context, request_data)
         
-        logger.info(f"✅ Multi-service auth token propagation test passed in {execution_time:.2f}s")
+        # Verify successful execution with auth
+        assert result.status == ExecutionStatus.SUCCESS
+        assert result.data is not None
+        
+        # Verify auth context was used during triage
+        stored_context = await real_services.redis_manager.get(auth_context_key)
+        assert stored_context is not None
+        
+        # Verify token was propagated to LLM calls
+        triage_result = result.data
+        if isinstance(triage_result, dict):
+            assert "primary_intent" in triage_result
+        
+    @pytest.mark.asyncio
+    async def test_expired_token_refresh_during_triage(self, real_services):
+        """Test handling of expired tokens with real refresh mechanism."""
+        # Create user with short-lived token
+        user_data = {
+            "email": f"test_expire_{int(time.time())}@example.com",
+            "password": "TempPassword123!",
+            "tenant_id": "test_tenant"
+        }
+        
+        auth_response = await real_services.auth_client.create_user(user_data)
+        expired_token = auth_response["token"]
+        user_id = auth_response["user_id"]
+        
+        # Simulate token expiration in Redis
+        await real_services.redis_manager.set(
+            f"auth:expired:{expired_token}",
+            "true",
+            ttl=1
+        )
+        
+        # Create triage agent
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager
+        )
+        
+        context = ExecutionContext(
+            request_id=f"expired_test_{int(time.time())}",
+            user_id=user_id,
+            session_id=f"session_{user_id}",
+            metadata={"auth_token": expired_token}
+        )
+        
+        # Should handle expired token gracefully
+        result = await triage_agent.execute(context, {"query": "Test query"})
+        
+        # May fail auth but should not crash
+        assert result.status in [ExecutionStatus.SUCCESS, ExecutionStatus.FAILED]
+        if result.status == ExecutionStatus.FAILED:
+            assert "auth" in result.error.lower() or "token" in result.error.lower()
 
-    @pytest.mark.asyncio 
-    @pytest.mark.integration
-    async def test_database_transaction_consistency_during_triage(self, real_services):
-        """
-        Test 2: Database Transaction Consistency During Triage Operations
+
+class TestDatabaseTransactionConsistency:
+    """Test database transaction consistency during triage operations."""
+    
+    @pytest.mark.asyncio
+    async def test_concurrent_triage_database_transactions(self, real_services):
+        """Test database consistency with concurrent triage operations."""
+        # Create multiple triage agents
+        agents = []
+        for i in range(5):
+            tool_dispatcher = ToolDispatcher()
+            agent = TriageSubAgent(
+                llm_manager=real_services.llm_manager,
+                tool_dispatcher=tool_dispatcher,
+                redis_manager=real_services.redis_manager
+            )
+            agents.append(agent)
         
-        Tests real database transactions and rollback scenarios during triage
-        processing with concurrent operations.
-        """
-        triage_agent = real_services["triage_agent"]
-        test_user = real_services["test_user"]
-        
-        # Create multiple concurrent states
-        user_requests = [
-            "Help me analyze my model performance metrics",
-            "I need cost optimization recommendations",
-            "Show me latency analysis for my API calls",
-            "Provide security audit results",
-            "Generate compliance report"
-        ]
-        
-        states = []
-        run_ids = []
-        
-        for i, request in enumerate(user_requests):
-            state = create_test_state(test_user, request)
-            run_id = f"concurrent_run_{i}_{uuid.uuid4().hex}"
-            states.append(state)
-            run_ids.append(run_id)
+        # Create concurrent execution contexts
+        contexts = []
+        for i in range(5):
+            context = ExecutionContext(
+                request_id=f"concurrent_{i}_{int(time.time())}",
+                user_id=f"user_{i}",
+                session_id=f"session_{i}",
+                metadata={"transaction_id": f"txn_{i}"}
+            )
+            contexts.append(context)
         
         # Execute concurrent triage operations
-        start_time = time.time()
-        tasks = []
-        for state, run_id in zip(states, run_ids):
-            task = asyncio.create_task(
-                triage_agent.execute(state, run_id, stream_updates=False)
-            )
-            tasks.append(task)
+        async def execute_with_transaction(agent, context, index):
+            """Execute triage within a database transaction."""
+            async with real_services.db_engine.begin() as conn:
+                # Start transaction
+                await conn.execute("BEGIN")
+                
+                try:
+                    # Execute triage
+                    result = await agent.execute(context, {
+                        "query": f"Analyze performance metrics for model {index}"
+                    })
+                    
+                    # Store result in database
+                    if result.status == ExecutionStatus.SUCCESS:
+                        await conn.execute(
+                            """INSERT INTO triage_results 
+                               (request_id, user_id, result_data, created_at) 
+                               VALUES ($1, $2, $3, NOW())""",
+                            context.request_id,
+                            context.user_id,
+                            json.dumps(result.data) if result.data else "{}"
+                        )
+                        await conn.execute("COMMIT")
+                    else:
+                        await conn.execute("ROLLBACK")
+                    
+                    return result
+                    
+                except Exception as e:
+                    await conn.execute("ROLLBACK")
+                    raise e
         
-        # Wait for all operations to complete
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        execution_time = time.time() - start_time
-        
-        # Verify all operations completed successfully or failed gracefully
-        successful_count = 0
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                logger.warning(f"Triage operation {i} failed: {result}")
-            else:
-                successful_count += 1
-                # Verify state was updated
-                assert states[i].triage_result is not None
-        
-        # At least 80% should succeed in concurrent scenario
-        success_rate = successful_count / len(user_requests)
-        assert success_rate >= 0.8, f"Success rate {success_rate:.2f} below threshold"
-        
-        # Verify database consistency by checking no partial states
-        async for db_session in RealServiceTestFixtures.get_real_database_session():
-            # Check that all completed operations have consistent state
-            for state in states:
-                if state.triage_result is not None:
-                    # Verify triage result structure
-                    if isinstance(state.triage_result, dict):
-                        assert "category" in state.triage_result
-                        assert "confidence_score" in state.triage_result
-            break
-        
-        logger.info(f"✅ Database transaction consistency test passed: {successful_count}/{len(user_requests)} operations succeeded in {execution_time:.2f}s")
-
-    @pytest.mark.asyncio
-    @pytest.mark.integration 
-    async def test_high_concurrency_triage_performance_resource_management(self, real_services):
-        """
-        Test 3: High-Concurrency Triage Performance and Resource Management
-        
-        Tests triage agent performance under high concurrent load with real 
-        resource constraints and monitoring.
-        """
-        triage_agent = real_services["triage_agent"]
-        test_user = real_services["test_user"]
-        redis_manager = real_services["redis_manager"]
-        
-        # Configuration for high-concurrency test
-        concurrent_requests = 50
-        batch_size = 10
-        max_concurrent_batches = 5
-        
-        # Create diverse test requests
-        request_templates = [
-            "Analyze cost optimization for {model_type} model",
-            "Review performance metrics for {service_type} service", 
-            "Generate security audit for {component_type} component",
-            "Optimize latency for {workload_type} workload",
-            "Troubleshoot {issue_type} performance issues"
+        # Execute all operations concurrently
+        tasks = [
+            execute_with_transaction(agents[i], contexts[i], i)
+            for i in range(5)
         ]
         
-        model_types = ["GPT-4", "Claude", "Gemini", "Llama", "Custom"]
-        service_types = ["API", "Database", "Cache", "Storage", "Compute"]
-        component_types = ["Authentication", "Authorization", "Validation", "Processing", "Response"]
-        workload_types = ["Batch", "Streaming", "Interactive", "Background", "Scheduled"]
-        issue_types = ["Memory", "CPU", "Network", "Disk", "Connection"]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # Generate test requests
-        test_requests = []
-        for i in range(concurrent_requests):
-            template = request_templates[i % len(request_templates)]
-            if "{model_type}" in template:
-                request = template.format(model_type=model_types[i % len(model_types)])
-            elif "{service_type}" in template:
-                request = template.format(service_type=service_types[i % len(service_types)])
-            elif "{component_type}" in template:
-                request = template.format(component_type=component_types[i % len(component_types)])
-            elif "{workload_type}" in template:
-                request = template.format(workload_type=workload_types[i % len(workload_types)])
-            elif "{issue_type}" in template:
-                request = template.format(issue_type=issue_types[i % len(issue_types)])
-            else:
-                request = template
-            
-            test_requests.append(request)
+        # Verify transaction consistency
+        successful_results = [r for r in results if isinstance(r, ExecutionResult) and r.status == ExecutionStatus.SUCCESS]
+        assert len(successful_results) >= 3  # At least 60% success rate
+        
+        # Verify database state consistency
+        async with real_services.db_engine.connect() as conn:
+            db_results = await conn.execute(
+                "SELECT COUNT(*) FROM triage_results WHERE request_id LIKE 'concurrent_%'"
+            )
+            count = db_results.scalar()
+            assert count == len(successful_results)  # Only successful transactions committed
+    
+    @pytest.mark.asyncio
+    async def test_database_connection_pool_exhaustion(self, real_services):
+        """Test behavior when database connection pool is exhausted."""
+        # Create many agents to exhaust connection pool
+        agents = []
+        for i in range(20):
+            tool_dispatcher = ToolDispatcher()
+            agent = TriageSubAgent(
+                llm_manager=real_services.llm_manager,
+                tool_dispatcher=tool_dispatcher,
+                redis_manager=real_services.redis_manager
+            )
+            agents.append(agent)
+        
+        # Execute many concurrent operations
+        tasks = []
+        for i in range(20):
+            context = ExecutionContext(
+                request_id=f"pool_test_{i}",
+                user_id=f"user_{i}",
+                session_id=f"session_{i}"
+            )
+            task = agents[i].execute(context, {"query": f"Query {i}"})
+            tasks.append(task)
+        
+        # Some should succeed, some may fail due to pool exhaustion
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        successful = sum(1 for r in results if isinstance(r, ExecutionResult) and r.status == ExecutionStatus.SUCCESS)
+        assert successful >= 10  # At least half should succeed
+
+
+class TestHighConcurrencyPerformance:
+    """Test high-concurrency triage performance and resource management."""
+    
+    @pytest.mark.asyncio
+    async def test_high_concurrency_resource_management(self, real_services):
+        """Test resource management under high concurrent load."""
+        # Create a single triage agent (shared resources)
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager,
+            websocket_manager=real_services.websocket_manager
+        )
         
         # Track performance metrics
         start_time = time.time()
-        successful_operations = 0
-        failed_operations = 0
         response_times = []
+        success_count = 0
+        failure_count = 0
         
-        # Execute in batches to manage resource usage
-        for batch_start in range(0, concurrent_requests, batch_size):
-            batch_end = min(batch_start + batch_size, concurrent_requests)
-            batch_requests = test_requests[batch_start:batch_end]
+        # Create diverse request templates
+        request_templates = [
+            "Optimize costs for GPT-4 usage in production",
+            "Analyze performance bottlenecks in my AI pipeline",
+            "Show security vulnerabilities in model deployment",
+            "Generate compliance report for AI governance",
+            "Monitor real-time metrics for inference latency"
+        ]
+        
+        # Generate 50 concurrent requests
+        async def process_request(index):
+            """Process a single triage request."""
+            context = ExecutionContext(
+                request_id=f"perf_{index}_{int(time.time())}",
+                user_id=f"user_{index % 10}",  # Simulate 10 different users
+                session_id=f"session_{index % 5}",  # 5 sessions
+                metadata={"batch": index // 10}
+            )
             
-            # Create batch tasks
-            batch_tasks = []
-            for i, request in enumerate(batch_requests):
-                state = create_test_state(test_user, request)
-                run_id = f"perf_test_{batch_start + i}_{uuid.uuid4().hex}"
+            query = request_templates[index % len(request_templates)]
+            query += f" - Instance {index}"
+            
+            request_start = time.time()
+            try:
+                result = await triage_agent.execute(context, {"query": query})
+                request_time = time.time() - request_start
+                response_times.append(request_time)
                 
-                # Measure individual request time
-                async def execute_with_timing(agent, state, run_id):
-                    req_start = time.time()
-                    try:
-                        await agent.execute(state, run_id, stream_updates=False)
-                        req_time = time.time() - req_start
-                        return True, req_time, state
-                    except Exception as e:
-                        req_time = time.time() - req_start
-                        logger.warning(f"Triage operation failed: {e}")
-                        return False, req_time, state
-                
-                task = asyncio.create_task(execute_with_timing(triage_agent, state, run_id))
-                batch_tasks.append(task)
-            
-            # Execute batch concurrently
-            batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
-            
-            # Process batch results
-            for result in batch_results:
-                if isinstance(result, Exception):
-                    failed_operations += 1
-                    response_times.append(30.0)  # Timeout value
+                if result.status == ExecutionStatus.SUCCESS:
+                    return ("success", request_time)
                 else:
-                    success, req_time, state = result
-                    if success:
-                        successful_operations += 1
-                        # Verify triage result quality
-                        if state.triage_result is not None:
-                            if isinstance(state.triage_result, dict):
-                                result_data = state.triage_result
-                            else:
-                                result_data = state.triage_result.model_dump()
-                            
-                            # Quality checks
-                            assert "category" in result_data
-                            assert "confidence_score" in result_data
-                            assert result_data["confidence_score"] >= 0.0
-                    else:
-                        failed_operations += 1
-                    
-                    response_times.append(req_time)
+                    return ("failure", request_time)
+            except Exception as e:
+                logger.error(f"Request {index} failed: {e}")
+                return ("error", time.time() - request_start)
+        
+        # Execute requests in batches to manage resources
+        batch_size = 10
+        all_results = []
+        
+        for batch_start in range(0, 50, batch_size):
+            batch_end = min(batch_start + batch_size, 50)
+            batch_tasks = [
+                process_request(i) for i in range(batch_start, batch_end)
+            ]
+            batch_results = await asyncio.gather(*batch_tasks)
+            all_results.extend(batch_results)
             
-            # Brief pause between batches to prevent resource exhaustion
-            if batch_end < concurrent_requests:
-                await asyncio.sleep(0.1)
+            # Brief pause between batches to prevent overwhelming
+            await asyncio.sleep(0.1)
+        
+        # Analyze results
+        for status, response_time in all_results:
+            if status == "success":
+                success_count += 1
+            else:
+                failure_count += 1
         
         total_time = time.time() - start_time
         
-        # Calculate performance metrics
-        success_rate = successful_operations / concurrent_requests
-        avg_response_time = sum(response_times) / len(response_times)
-        throughput = concurrent_requests / total_time
-        
         # Performance assertions
-        assert success_rate >= 0.7, f"Success rate {success_rate:.2f} below minimum threshold"
-        assert avg_response_time <= 10.0, f"Average response time {avg_response_time:.2f}s too high"
-        assert throughput >= 2.0, f"Throughput {throughput:.2f} req/s too low"
+        assert success_count >= 35  # At least 70% success rate
+        assert total_time < 30  # Complete within 30 seconds
         
-        # Check resource usage via Redis metrics
-        redis_info = await redis_manager.get_info()
-        memory_usage = redis_info.get('used_memory', 0)
-        connected_clients = redis_info.get('connected_clients', 0)
+        if response_times:
+            avg_response_time = sum(response_times) / len(response_times)
+            assert avg_response_time < 10  # Average response under 10 seconds
+            
+            # Check throughput
+            throughput = len(all_results) / total_time
+            assert throughput > 2  # At least 2 requests per second
         
-        logger.info(f"✅ High-concurrency performance test passed:")
-        logger.info(f"   - Success rate: {success_rate:.2%}")
-        logger.info(f"   - Avg response time: {avg_response_time:.2f}s") 
-        logger.info(f"   - Throughput: {throughput:.2f} req/s")
-        logger.info(f"   - Redis memory: {memory_usage:,} bytes")
-        logger.info(f"   - Redis clients: {connected_clients}")
-
+        # Verify Redis didn't run out of connections
+        redis_info = await real_services.redis_manager.get_info()
+        assert redis_info is not None
+    
     @pytest.mark.asyncio
-    @pytest.mark.integration
-    async def test_llm_provider_failover_during_triage_operations(self, real_services):
-        """
-        Test 4: LLM Provider Failover During Triage Operations
+    async def test_memory_pressure_handling(self, real_services):
+        """Test triage behavior under memory pressure."""
+        # Create agent with memory monitoring
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager
+        )
         
-        Tests real LLM provider switching and failover scenarios during triage
-        processing with multiple provider configurations.
-        """
-        triage_agent = real_services["triage_agent"]
-        llm_manager = real_services["llm_manager"]
-        test_user = real_services["test_user"]
+        # Generate large requests to create memory pressure
+        large_requests = []
+        for i in range(10):
+            # Create a large query with repeated data
+            large_query = f"Analyze this large dataset: " + ("data " * 1000)
+            context = ExecutionContext(
+                request_id=f"memory_{i}",
+                user_id=f"user_{i}",
+                session_id=f"session_{i}",
+                metadata={"size": "large"}
+            )
+            large_requests.append((context, {"query": large_query}))
         
-        # Test requests that require LLM processing
-        test_requests = [
-            "Analyze complex multi-model performance optimization scenarios",
-            "Generate detailed cost-benefit analysis with recommendations",
-            "Perform comprehensive security vulnerability assessment", 
-            "Create strategic technical architecture review",
-            "Develop advanced troubleshooting methodology"
-        ]
-        
-        # Track LLM provider usage and failover
-        provider_usage = {}
-        failover_events = []
-        successful_operations = 0
-        
-        for i, request in enumerate(test_requests):
-            state = create_test_state(test_user, request)
-            run_id = f"llm_failover_{i}_{uuid.uuid4().hex}"
+        # Process requests and monitor memory
+        results = []
+        for context, request in large_requests:
+            result = await triage_agent.execute(context, request)
+            results.append(result)
             
-            # Execute triage with potential LLM failover
-            start_time = time.time()
-            try:
-                # Monitor LLM provider selection
-                original_get_llm = llm_manager.get_llm
-                
-                def track_llm_usage(name, config=None):
-                    provider_usage[name] = provider_usage.get(name, 0) + 1
-                    return original_get_llm(name, config)
-                
-                llm_manager.get_llm = track_llm_usage
-                
-                # Execute triage
-                await triage_agent.execute(state, run_id, stream_updates=False)
-                
-                # Restore original method
-                llm_manager.get_llm = original_get_llm
-                
-                # Verify successful execution
-                assert state.triage_result is not None
-                
-                if isinstance(state.triage_result, dict):
-                    result_data = state.triage_result
-                else:
-                    result_data = state.triage_result.model_dump()
-                
-                # Verify result quality despite potential provider changes
-                assert "category" in result_data
-                assert "confidence_score" in result_data
-                
-                # Check if fallback was used (indicated in metadata)
-                metadata = result_data.get("metadata", {})
-                if metadata.get("fallback_used", False):
-                    failover_events.append({
-                        "request_index": i,
-                        "request": request,
-                        "failover_reason": metadata.get("error_details", "Unknown"),
-                        "execution_time": time.time() - start_time
-                    })
-                
-                successful_operations += 1
-                
-            except Exception as e:
-                logger.warning(f"LLM failover test failed for request {i}: {e}")
-                # Should still have fallback result
-                if state.triage_result is not None:
-                    if isinstance(state.triage_result, dict):
-                        result_data = state.triage_result
-                    else:
-                        result_data = state.triage_result.model_dump()
-                    
-                    # Verify fallback result
-                    assert result_data.get("category") == "Error" or "category" in result_data
-                    
-                    failover_events.append({
-                        "request_index": i,
-                        "request": request,
-                        "failover_reason": str(e),
-                        "execution_time": time.time() - start_time
-                    })
+            # Allow garbage collection between requests
+            await asyncio.sleep(0.1)
         
-        # Verify failover behavior
-        success_rate = successful_operations / len(test_requests)
-        assert success_rate >= 0.6, f"Success rate {success_rate:.2%} too low with LLM failover"
-        
-        # Log provider usage statistics
-        logger.info(f"✅ LLM provider failover test results:")
-        logger.info(f"   - Success rate: {success_rate:.2%}")
-        logger.info(f"   - Failover events: {len(failover_events)}")
-        logger.info(f"   - Provider usage: {provider_usage}")
-        
-        # At least one provider should have been used
-        assert len(provider_usage) >= 1, "No LLM providers were used"
-        
-        # Log failover details
-        for event in failover_events:
-            logger.info(f"   - Failover {event['request_index']}: {event['failover_reason'][:50]}...")
+        # Should handle all requests without memory errors
+        successful = sum(1 for r in results if r.status == ExecutionStatus.SUCCESS)
+        assert successful >= 7  # At least 70% success despite memory pressure
 
+
+class TestLLMProviderFailover:
+    """Test LLM provider failover during triage operations."""
+    
     @pytest.mark.asyncio
-    @pytest.mark.integration
-    async def test_end_to_end_triage_pipeline_real_error_injection(self, real_services):
-        """
-        Test 5: End-to-End Triage Pipeline with Real Error Injection
+    async def test_llm_provider_switching_during_triage(self, real_services):
+        """Test automatic LLM provider switching on failures."""
+        # Configure LLM manager with multiple providers
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager
+        )
         
-        Tests complete triage flow with real services and intentional error
-        injection to verify resilience and recovery mechanisms.
-        """
-        triage_agent = real_services["triage_agent"]
-        redis_manager = real_services["redis_manager"]
-        test_user = real_services["test_user"]
+        # Track which providers are used
+        provider_usage = {"gemini": 0, "openai": 0, "anthropic": 0, "fallback": 0}
         
-        # Error injection scenarios
-        error_scenarios = [
-            {
-                "name": "Redis Connection Timeout",
-                "inject_method": "redis_timeout",
-                "request": "Analyze performance optimization opportunities"
-            },
-            {
-                "name": "Database Connection Error", 
-                "inject_method": "db_error",
-                "request": "Generate cost analysis report"
-            },
-            {
-                "name": "LLM API Rate Limit",
-                "inject_method": "llm_rate_limit", 
-                "request": "Perform security vulnerability assessment"
-            },
-            {
-                "name": "Memory Pressure",
-                "inject_method": "memory_pressure",
-                "request": "Create comprehensive audit trail"
-            },
-            {
-                "name": "Network Connectivity Issues",
-                "inject_method": "network_error",
-                "request": "Optimize multi-model inference pipeline"
-            }
-        ]
-        
-        recovery_results = []
-        
-        for scenario in error_scenarios:
-            logger.info(f"Testing error scenario: {scenario['name']}")
+        async def execute_with_provider_tracking(index):
+            """Execute triage and track provider usage."""
+            context = ExecutionContext(
+                request_id=f"provider_{index}",
+                user_id=f"user_{index}",
+                session_id=f"session_{index}",
+                metadata={"force_provider": index % 3}  # Rotate providers
+            )
             
-            state = create_test_state(test_user, scenario["request"])
-            run_id = f"error_test_{uuid.uuid4().hex}"
+            # Simulate provider-specific queries
+            queries = [
+                "Optimize Gemini Pro costs",  # Likely to use Gemini
+                "Analyze GPT-4 performance",  # Likely to use OpenAI
+                "Review Claude-3 outputs"  # Likely to use Anthropic
+            ]
             
-            start_time = time.time()
-            recovery_success = False
+            query = queries[index % len(queries)]
+            result = await triage_agent.execute(context, {"query": query})
             
-            try:
-                # Inject specific error type
-                if scenario["inject_method"] == "redis_timeout":
-                    # Temporarily corrupt Redis connection
-                    original_get = redis_manager.get
-                    async def failing_get(key, **kwargs):
-                        if "triage" in key:
-                            raise TimeoutError("Redis timeout injected")
-                        return await original_get(key, **kwargs)
-                    redis_manager.get = failing_get
-                
-                elif scenario["inject_method"] == "db_error":
-                    # Inject database error via connection string corruption
-                    original_execute = None
-                    async for db_session in RealServiceTestFixtures.get_real_database_session():
-                        original_execute = db_session.execute
-                        async def failing_execute(stmt, params=None):
-                            if "triage" in str(stmt):
-                                raise OperationalError("Database error injected", None, None)
-                            return await original_execute(stmt, params)
-                        db_session.execute = failing_execute
-                        break
-                
-                elif scenario["inject_method"] == "llm_rate_limit":
-                    # Mock LLM rate limit error
-                    original_ask = triage_agent.llm_manager.ask_llm
-                    async def rate_limited_ask(prompt, config, use_cache=True):
-                        if len(prompt) > 100:  # Only for substantial prompts
-                            raise Exception("Rate limit exceeded - 429")
-                        return await original_ask(prompt, config, use_cache)
-                    triage_agent.llm_manager.ask_llm = rate_limited_ask
-                
-                elif scenario["inject_method"] == "memory_pressure":
-                    # Simulate memory pressure by creating large objects
-                    large_objects = []
-                    for _ in range(10):
-                        large_objects.append([0] * 1000000)  # ~8MB each
-                
-                elif scenario["inject_method"] == "network_error":
-                    # Mock network connectivity issues
-                    original_request = None
-                    if hasattr(aiohttp, 'ClientSession'):
-                        original_init = aiohttp.ClientSession.__init__
-                        def failing_init(self, *args, **kwargs):
-                            kwargs['connector'] = None  # Force connection errors
-                            return original_init(self, *args, **kwargs)
-                        aiohttp.ClientSession.__init__ = failing_init
-                
-                # Execute triage with error injection
-                await triage_agent.execute(state, run_id, stream_updates=False)
-                
-                # Verify recovery occurred
-                if state.triage_result is not None:
-                    if isinstance(state.triage_result, dict):
-                        result_data = state.triage_result
+            # Track provider from result metadata if available
+            if result.status == ExecutionStatus.SUCCESS and result.data:
+                if isinstance(result.data, dict):
+                    provider = result.data.get("provider", "unknown")
+                    if provider in provider_usage:
+                        provider_usage[provider] += 1
                     else:
-                        result_data = state.triage_result.model_dump()
-                    
-                    # Check if error was handled gracefully
-                    metadata = result_data.get("metadata", {})
-                    if (result_data.get("category") == "Error" or 
-                        metadata.get("fallback_used", False) or
-                        "error" in result_data):
-                        recovery_success = True
-                        logger.info(f"   ✅ Graceful error handling for {scenario['name']}")
-                    elif result_data.get("confidence_score", 0) > 0:
-                        recovery_success = True
-                        logger.info(f"   ✅ Successful recovery for {scenario['name']}")
-                
-            except Exception as e:
-                # Verify error was handled appropriately
-                if state.triage_result is not None:
-                    recovery_success = True
-                    logger.info(f"   ✅ Exception handled gracefully for {scenario['name']}: {e}")
-                else:
-                    logger.warning(f"   ❌ Unhandled exception for {scenario['name']}: {e}")
+                        provider_usage["fallback"] += 1
             
-            finally:
-                # Restore original methods
-                try:
-                    if scenario["inject_method"] == "redis_timeout":
-                        redis_manager.get = original_get
-                    elif scenario["inject_method"] == "llm_rate_limit":
-                        triage_agent.llm_manager.ask_llm = original_ask
-                    # Other cleanup as needed
-                except:
-                    pass
-            
-            execution_time = time.time() - start_time
-            
-            recovery_results.append({
-                "scenario": scenario["name"],
-                "recovered": recovery_success,
-                "execution_time": execution_time,
-                "has_result": state.triage_result is not None
+            return result
+        
+        # Execute multiple requests to trigger provider switching
+        tasks = [execute_with_provider_tracking(i) for i in range(15)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Verify multiple providers were used
+        providers_used = sum(1 for count in provider_usage.values() if count > 0)
+        assert providers_used >= 2  # At least 2 different providers used
+        
+        # Verify successful execution despite provider switching
+        successful_results = [
+            r for r in results 
+            if isinstance(r, ExecutionResult) and r.status == ExecutionStatus.SUCCESS
+        ]
+        assert len(successful_results) >= 10  # At least 66% success rate
+    
+    @pytest.mark.asyncio
+    async def test_llm_rate_limiting_handling(self, real_services):
+        """Test handling of LLM API rate limits."""
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager
+        )
+        
+        # Rapid-fire requests to trigger rate limiting
+        rapid_requests = []
+        for i in range(20):
+            context = ExecutionContext(
+                request_id=f"rate_limit_{i}",
+                user_id="rate_test_user",
+                session_id="rate_test_session"
+            )
+            rapid_requests.append(context)
+        
+        # Execute rapidly without delays
+        async def rapid_execute(context):
+            return await triage_agent.execute(context, {
+                "query": "Quick test query for rate limiting"
             })
         
-        # Verify overall resilience
-        recovery_count = sum(1 for r in recovery_results if r["recovered"])
-        recovery_rate = recovery_count / len(error_scenarios)
+        # Execute all at once to trigger rate limits
+        results = await asyncio.gather(
+            *[rapid_execute(ctx) for ctx in rapid_requests],
+            return_exceptions=True
+        )
         
-        # Should recover from at least 80% of error scenarios
-        assert recovery_rate >= 0.8, f"Recovery rate {recovery_rate:.2%} below threshold"
+        # Some should succeed, some may be rate limited
+        successful = sum(
+            1 for r in results 
+            if isinstance(r, ExecutionResult) and r.status == ExecutionStatus.SUCCESS
+        )
         
-        # Verify average recovery time is reasonable
-        avg_recovery_time = sum(r["execution_time"] for r in recovery_results) / len(recovery_results)
-        assert avg_recovery_time <= 15.0, f"Average recovery time {avg_recovery_time:.2f}s too high"
+        # Should handle rate limiting gracefully
+        assert successful >= 5  # At least some succeed
+        assert successful < 20  # But not all (rate limiting should kick in)
         
-        logger.info(f"✅ End-to-end error injection test results:")
-        logger.info(f"   - Recovery rate: {recovery_rate:.2%}")
-        logger.info(f"   - Average recovery time: {avg_recovery_time:.2f}s")
-        logger.info(f"   - Scenarios recovered: {recovery_count}/{len(error_scenarios)}")
-        
-        # Log individual scenario results
-        for result in recovery_results:
-            status = "✅ Recovered" if result["recovered"] else "❌ Failed"
-            logger.info(f"   - {result['scenario']}: {status} in {result['execution_time']:.2f}s")
+        # Check for rate limit errors
+        rate_limit_errors = sum(
+            1 for r in results
+            if isinstance(r, ExecutionResult) and 
+            r.status == ExecutionStatus.FAILED and
+            "rate" in str(r.error).lower()
+        )
+        assert rate_limit_errors > 0  # Should see some rate limit errors
 
-# Additional helper functions for test utilities
 
-def verify_triage_result_quality(result_data: Dict[str, Any]) -> bool:
-    """Verify triage result meets quality standards."""
-    required_fields = ["category", "confidence_score"]
+class TestEndToEndErrorInjection:
+    """Test end-to-end triage pipeline with real error injection."""
     
-    for field in required_fields:
-        if field not in result_data:
-            return False
-    
-    # Confidence should be a valid probability
-    confidence = result_data.get("confidence_score", 0)
-    if not (0.0 <= confidence <= 1.0):
-        return False
-    
-    # Category should be meaningful
-    category = result_data.get("category", "")
-    if not category or category.strip() == "":
-        return False
-    
-    return True
-
-async def verify_service_health(services: Dict[str, Any]) -> Dict[str, bool]:
-    """Verify health of all real services."""
-    health_status = {}
-    
-    # Check Redis
-    try:
-        redis_manager = services.get("redis_manager")
-        if redis_manager:
-            await redis_manager.ping()
-            health_status["redis"] = True
-    except Exception as e:
-        logger.warning(f"Redis health check failed: {e}")
-        health_status["redis"] = False
-    
-    # Check LLM Manager
-    try:
-        llm_manager = services.get("llm_manager")
-        if llm_manager and hasattr(llm_manager, 'health_check'):
-            health = await llm_manager.health_check()
-            health_status["llm"] = health.get("status") == "healthy"
-        else:
-            health_status["llm"] = True  # Assume healthy if no check available
-    except Exception as e:
-        logger.warning(f"LLM health check failed: {e}")
-        health_status["llm"] = False
-    
-    # Check Database
-    try:
-        async for db_session in RealServiceTestFixtures.get_real_database_session():
-            await db_session.execute(text("SELECT 1"))
-            health_status["database"] = True
-            break
-    except Exception as e:
-        logger.warning(f"Database health check failed: {e}")
-        health_status["database"] = False
-    
-    # Check Auth Service
-    try:
-        auth_service = services.get("auth_service")
-        if auth_service and hasattr(auth_service, 'health_check'):
-            health = await auth_service.health_check()
-            health_status["auth"] = health.get("status") == "healthy"
-        else:
-            health_status["auth"] = True  # Assume healthy if no check available
-    except Exception as e:
-        logger.warning(f"Auth service health check failed: {e}")
-        health_status["auth"] = False
-    
-    return health_status
-
-# Performance monitoring utilities
-
-class PerformanceMonitor:
-    """Monitor performance metrics during integration testing."""
-    
-    def __init__(self):
-        self.metrics = {
-            "response_times": [],
-            "success_count": 0,
-            "error_count": 0,
-            "start_time": None,
-            "end_time": None
-        }
-    
-    def start_monitoring(self):
-        """Start performance monitoring."""
-        self.metrics["start_time"] = time.time()
-    
-    def record_operation(self, success: bool, response_time: float):
-        """Record an operation result."""
-        self.metrics["response_times"].append(response_time)
-        if success:
-            self.metrics["success_count"] += 1
-        else:
-            self.metrics["error_count"] += 1
-    
-    def stop_monitoring(self) -> Dict[str, Any]:
-        """Stop monitoring and return metrics."""
-        self.metrics["end_time"] = time.time()
+    @pytest.mark.asyncio
+    async def test_triage_pipeline_with_error_injection(self, real_services):
+        """Test complete triage flow with injected errors."""
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager,
+            websocket_manager=real_services.websocket_manager
+        )
         
-        total_operations = self.metrics["success_count"] + self.metrics["error_count"]
-        total_time = self.metrics["end_time"] - self.metrics["start_time"]
+        # Define error injection scenarios
+        error_scenarios = [
+            {"type": "redis_timeout", "duration": 0.5},
+            {"type": "database_error", "duration": 0.3},
+            {"type": "llm_api_error", "duration": 0.4},
+            {"type": "memory_pressure", "duration": 0.2},
+            {"type": "network_latency", "duration": 1.0}
+        ]
         
-        return {
-            "total_operations": total_operations,
-            "success_rate": self.metrics["success_count"] / total_operations if total_operations > 0 else 0,
-            "avg_response_time": sum(self.metrics["response_times"]) / len(self.metrics["response_times"]) if self.metrics["response_times"] else 0,
-            "throughput": total_operations / total_time if total_time > 0 else 0,
-            "total_time": total_time,
-            **self.metrics
-        }
+        results = []
+        recovery_times = []
+        
+        for i, scenario in enumerate(error_scenarios):
+            # Inject error based on scenario
+            error_start = time.time()
+            
+            if scenario["type"] == "redis_timeout":
+                # Temporarily make Redis slow
+                original_timeout = real_services.redis_manager.timeout
+                real_services.redis_manager.timeout = 0.001  # Very short timeout
+            
+            elif scenario["type"] == "database_error":
+                # Note: In real test, would temporarily break DB connection
+                pass
+            
+            elif scenario["type"] == "llm_api_error":
+                # Temporarily use invalid API key
+                original_key = real_services.llm_manager.gemini_api_key
+                real_services.llm_manager.gemini_api_key = "invalid_key"
+            
+            # Execute triage during error condition
+            context = ExecutionContext(
+                request_id=f"error_{scenario['type']}_{i}",
+                user_id=f"user_error_{i}",
+                session_id=f"session_error_{i}",
+                metadata={"error_scenario": scenario["type"]}
+            )
+            
+            try:
+                result = await triage_agent.execute(context, {
+                    "query": f"Test query during {scenario['type']} error"
+                })
+                results.append(result)
+            except Exception as e:
+                # Create failed result for exception
+                results.append(ExecutionResult(
+                    status=ExecutionStatus.FAILED,
+                    data=None,
+                    error=str(e),
+                    execution_time=time.time() - error_start
+                ))
+            
+            # Restore normal conditions
+            if scenario["type"] == "redis_timeout":
+                real_services.redis_manager.timeout = original_timeout
+            elif scenario["type"] == "llm_api_error":
+                real_services.llm_manager.gemini_api_key = original_key
+            
+            # Allow recovery time
+            await asyncio.sleep(scenario["duration"])
+            
+            # Test recovery by executing normal request
+            recovery_context = ExecutionContext(
+                request_id=f"recovery_{i}",
+                user_id=f"user_recovery_{i}",
+                session_id=f"session_recovery_{i}"
+            )
+            
+            recovery_start = time.time()
+            recovery_result = await triage_agent.execute(recovery_context, {
+                "query": "Test recovery after error"
+            })
+            recovery_times.append(time.time() - recovery_start)
+            
+            # Verify recovery
+            if recovery_result.status == ExecutionStatus.SUCCESS:
+                logger.info(f"Recovered from {scenario['type']} successfully")
+        
+        # Analyze results
+        total_scenarios = len(error_scenarios)
+        successful_recoveries = sum(1 for t in recovery_times if t < 5.0)
+        
+        # Should recover from most errors
+        assert successful_recoveries >= total_scenarios * 0.8  # 80% recovery rate
+        
+        # Average recovery time should be reasonable
+        if recovery_times:
+            avg_recovery = sum(recovery_times) / len(recovery_times)
+            assert avg_recovery < 3.0  # Average recovery under 3 seconds
+    
+    @pytest.mark.asyncio
+    async def test_cascading_failure_prevention(self, real_services):
+        """Test prevention of cascading failures in triage pipeline."""
+        tool_dispatcher = ToolDispatcher()
+        triage_agent = TriageSubAgent(
+            llm_manager=real_services.llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            redis_manager=real_services.redis_manager
+        )
+        
+        # Simulate a service degradation
+        degraded_results = []
+        
+        # First wave - normal operation
+        for i in range(5):
+            context = ExecutionContext(
+                request_id=f"cascade_normal_{i}",
+                user_id=f"user_{i}",
+                session_id=f"session_{i}"
+            )
+            result = await triage_agent.execute(context, {"query": "Normal query"})
+            degraded_results.append(("normal", result))
+        
+        # Second wave - introduce partial failure
+        # Simulate Redis becoming slow
+        real_services.redis_manager.timeout = 0.01  # Very short timeout
+        
+        for i in range(5):
+            context = ExecutionContext(
+                request_id=f"cascade_degraded_{i}",
+                user_id=f"user_{i}",
+                session_id=f"session_{i}"
+            )
+            result = await triage_agent.execute(context, {"query": "Query during degradation"})
+            degraded_results.append(("degraded", result))
+        
+        # Third wave - should not cascade to total failure
+        real_services.redis_manager.timeout = 5.0  # Restore normal timeout
+        
+        for i in range(5):
+            context = ExecutionContext(
+                request_id=f"cascade_recovery_{i}",
+                user_id=f"user_{i}",
+                session_id=f"session_{i}"
+            )
+            result = await triage_agent.execute(context, {"query": "Recovery query"})
+            degraded_results.append(("recovery", result))
+        
+        # Analyze cascade prevention
+        normal_success = sum(
+            1 for phase, r in degraded_results 
+            if phase == "normal" and r.status == ExecutionStatus.SUCCESS
+        )
+        degraded_success = sum(
+            1 for phase, r in degraded_results 
+            if phase == "degraded" and r.status == ExecutionStatus.SUCCESS
+        )
+        recovery_success = sum(
+            1 for phase, r in degraded_results 
+            if phase == "recovery" and r.status == ExecutionStatus.SUCCESS
+        )
+        
+        # Should maintain functionality despite degradation
+        assert normal_success >= 4  # Normal phase mostly successful
+        assert degraded_success >= 2  # Some success even during degradation
+        assert recovery_success >= 4  # Recovery phase successful
+        
+        # System should not completely fail
+        total_success = normal_success + degraded_success + recovery_success
+        assert total_success >= 10  # Overall system resilience

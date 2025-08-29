@@ -31,17 +31,16 @@ env = IsolatedEnvironment()
 @pytest.fixture
 async def real_llm_manager():
     """Get real LLM manager instance with actual API credentials."""
-    llm_manager = LLMManager()
-    await llm_manager.initialize()
+    from netra_backend.app.core.config import get_settings
+    settings = get_settings()
+    llm_manager = LLMManager(settings)
     yield llm_manager
-    await llm_manager.cleanup()
 
 
 @pytest.fixture
-async def real_tool_dispatcher(db_session: AsyncSession):
+async def real_tool_dispatcher():
     """Get real tool dispatcher with actual tools loaded."""
     dispatcher = ToolDispatcher()
-    await dispatcher.initialize_tools(db_session)
     return dispatcher
 
 
@@ -54,7 +53,7 @@ async def real_actions_agent(real_llm_manager, real_tool_dispatcher):
         websocket_manager=None  # Real websocket in production
     )
     yield agent
-    await agent.cleanup()
+    # Cleanup not needed for tests
 
 
 class TestActionsToMeetGoalsAgentRealLLM:
@@ -106,8 +105,9 @@ class TestActionsToMeetGoalsAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ActionsToMeetGoalsSubAgent",
             state=state,
-            request_id="req_actions_001",
             user_id="strategy_team_001"
         )
         
@@ -207,8 +207,9 @@ class TestActionsToMeetGoalsAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ActionsToMeetGoalsSubAgent",
             state=state,
-            request_id="req_actions_002",
             user_id="platform_team_002"
         )
         
@@ -300,8 +301,9 @@ class TestActionsToMeetGoalsAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ActionsToMeetGoalsSubAgent",
             state=state,
-            request_id="req_actions_003",
             user_id="leadership_team_003"
         )
         
@@ -405,8 +407,9 @@ class TestActionsToMeetGoalsAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ActionsToMeetGoalsSubAgent",
             state=state,
-            request_id="req_actions_004",
             user_id="incident_commander_004"
         )
         
@@ -514,8 +517,9 @@ class TestActionsToMeetGoalsAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ActionsToMeetGoalsSubAgent",
             state=state,
-            request_id="req_actions_005",
             user_id="product_innovation_005"
         )
         

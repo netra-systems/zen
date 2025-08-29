@@ -116,9 +116,10 @@ def test_auth_service_independence():
         # Check for imports from netra_backend
         lines = content.split('\n')
         for i, line in enumerate(lines, 1):
-            if 'from netra_backend' in line or 'import netra_backend' in line:
-                if not line.strip().startswith('#'):  # Skip comments
-                    violations.append(f"{file_path}:{i} - {line.strip()}")
+            # Only check lines that start with 'from' or 'import' keywords
+            stripped_line = line.strip()
+            if stripped_line.startswith(('from netra_backend', 'import netra_backend')):
+                violations.append(f"{file_path}:{i} - {line.strip()}")
     
     assert len(violations) == 0, \
         f"Auth service must not import from netra_backend (service independence violation):\n" + \
@@ -182,9 +183,9 @@ if __name__ == "__main__":
             module = importlib.util.module_from_spec(spec)
             sys.modules[module_name] = module
             spec.loader.exec_module(module)
-            print(f"✓ {module_name}")
+            print(f"[OK] {module_name}")
         except Exception as e:
-            print(f"✗ {module_name}: {e}")
+            print(f"[FAIL] {module_name}: {e}")
             failures.append((module_name, str(e)))
         finally:
             if module_name in sys.modules:
@@ -193,12 +194,12 @@ if __name__ == "__main__":
     # Run independence check
     print("\nChecking service independence...")
     test_auth_service_independence()
-    print("✓ Auth service is independent")
+    print("[OK] Auth service is independent")
     
     # Run JWT secret check
     print("\nChecking JWT_SECRET_KEY usage...")
     test_jwt_secret_key_usage()
-    print("✓ Using correct JWT_SECRET_KEY")
+    print("[OK] Using correct JWT_SECRET_KEY")
     
     if failures:
         print(f"\n{len(failures)} modules failed to import:")

@@ -31,17 +31,16 @@ env = IsolatedEnvironment()
 @pytest.fixture
 async def real_llm_manager():
     """Get real LLM manager instance with actual API credentials."""
-    llm_manager = LLMManager()
-    await llm_manager.initialize()
+    from netra_backend.app.core.config import get_settings
+    settings = get_settings()
+    llm_manager = LLMManager(settings)
     yield llm_manager
-    await llm_manager.cleanup()
 
 
 @pytest.fixture
-async def real_tool_dispatcher(db_session: AsyncSession):
+async def real_tool_dispatcher():
     """Get real tool dispatcher with actual tools loaded."""
     dispatcher = ToolDispatcher()
-    await dispatcher.initialize_tools(db_session)
     return dispatcher
 
 
@@ -54,7 +53,7 @@ async def real_reporting_agent(real_llm_manager, real_tool_dispatcher):
         websocket_manager=None  # Real websocket in production
     )
     yield agent
-    await agent.cleanup()
+    # Cleanup not needed for tests
 
 
 class TestReportingSubAgentRealLLM:
@@ -103,8 +102,9 @@ class TestReportingSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ReportingSubAgent",
             state=state,
-            request_id="req_report_001",
             user_id="executive_team_001"
         )
         
@@ -188,8 +188,9 @@ class TestReportingSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ReportingSubAgent",
             state=state,
-            request_id="req_report_002",
             user_id="analytics_team_002"
         )
         
@@ -262,8 +263,9 @@ class TestReportingSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ReportingSubAgent",
             state=state,
-            request_id="req_report_003",
             user_id="ops_team_003"
         )
         
@@ -358,8 +360,9 @@ class TestReportingSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ReportingSubAgent",
             state=state,
-            request_id="req_report_004",
             user_id="finance_team_004"
         )
         
@@ -464,8 +467,9 @@ class TestReportingSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="ReportingSubAgent",
             state=state,
-            request_id="req_report_005",
             user_id="product_team_005"
         )
         

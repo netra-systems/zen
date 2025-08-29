@@ -12,17 +12,17 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base.circuit_breaker import (
+from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
-    CircuitBreakerConfig,
-    CircuitBreakerState,
+    CircuitConfig as CircuitBreakerConfig,
 )
+from netra_backend.app.core.circuit_breaker_types import CircuitState as CircuitBreakerState
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
     ExecutionStatus,
 )
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.triage_sub_agent.core import TriageCore
 from netra_backend.app.agents.triage_sub_agent.models import (
     ExtractedEntities,
@@ -40,9 +40,10 @@ class TestCircuitBreakerThresholdBehavior:
     def circuit_breaker(self):
         """Create a circuit breaker with known thresholds."""
         config = CircuitBreakerConfig(
+            name="test_circuit",
             failure_threshold=3,
             recovery_timeout=1.0,
-            name="test_circuit"
+            timeout_seconds=5.0
         )
         return CircuitBreaker(config)
 

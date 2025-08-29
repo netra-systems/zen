@@ -13,7 +13,7 @@ from typing import Dict, Any
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.triage_sub_agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -31,17 +31,16 @@ env = IsolatedEnvironment()
 @pytest.fixture
 async def real_llm_manager():
     """Get real LLM manager instance with actual API credentials."""
-    llm_manager = LLMManager()
-    await llm_manager.initialize()
+    from netra_backend.app.core.config import get_settings
+    settings = get_settings()
+    llm_manager = LLMManager(settings)
     yield llm_manager
-    await llm_manager.cleanup()
 
 
 @pytest.fixture
-async def real_tool_dispatcher(db_session: AsyncSession):
+async def real_tool_dispatcher():
     """Get real tool dispatcher with actual tools loaded."""
     dispatcher = ToolDispatcher()
-    await dispatcher.initialize_tools(db_session)
     return dispatcher
 
 
@@ -54,7 +53,7 @@ async def real_triage_agent(real_llm_manager, real_tool_dispatcher):
         websocket_manager=None  # Real websocket in production
     )
     yield agent
-    await agent.cleanup()
+    # Cleanup not needed for tests
 
 
 class TestTriageSubAgentRealLLM:
@@ -75,8 +74,9 @@ class TestTriageSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="TriageSubAgent",
             state=state,
-            request_id="req_triage_001",
             user_id="enterprise_user_001"
         )
         
@@ -127,8 +127,9 @@ class TestTriageSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="TriageSubAgent",
             state=state,
-            request_id="req_triage_002",
             user_id="dev_user_002"
         )
         
@@ -175,8 +176,9 @@ class TestTriageSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="TriageSubAgent",
             state=state,
-            request_id="req_triage_003",
             user_id="ml_engineer_003"
         )
         
@@ -241,8 +243,9 @@ class TestTriageSubAgentRealLLM:
             )
             
             context = ExecutionContext(
+                run_id=state.run_id,
+                agent_name="TriageSubAgent",
                 state=state,
-                request_id=f"req_triage_004_{i}",
                 user_id="ops_team_004"
             )
             
@@ -300,8 +303,9 @@ class TestTriageSubAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="TriageSubAgent",
             state=state,
-            request_id="req_triage_005",
             user_id="analyst_005"
         )
         

@@ -18,7 +18,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.core.database import get_db
+from netra_backend.app.database import get_db
 from netra_backend.app.core.config import get_config
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 

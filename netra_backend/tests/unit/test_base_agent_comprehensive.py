@@ -55,7 +55,7 @@ class TestBaseAgentComprehensive:
         
         # Test timing collector can track operations
         # Start a timing execution first
-        agent.timing_collector.start_execution()
+        agent.timing_collector.start_execution(agent.correlation_id)
         
         with agent.timing_collector.time_operation("test_operation"):
             # Simulate some work
@@ -70,7 +70,7 @@ class TestBaseAgentComprehensive:
         assert len(tree.entries) > 0
         
         # Test multiple timing entries
-        agent.timing_collector.start_execution()
+        agent.timing_collector.start_execution(agent.correlation_id)
         for i in range(3):
             with agent.timing_collector.time_operation(f"operation_{i}"):
                 time.sleep(0.001)
@@ -142,7 +142,7 @@ class TestBaseAgentComprehensive:
         
         # Test 2: TEST_COLLECTION_MODE handling
         mock_get_env.return_value = {'TEST_COLLECTION_MODE': '1'}
-        agent2 = ConcreteTestAgent(llm_manager=real_llm_manager, name="CollectionModeAgent")
+        agent2 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="CollectionModeAgent")
         assert agent2._subagent_logging_enabled is False
         
         # Test 3: Config returns None
@@ -150,7 +150,7 @@ class TestBaseAgentComprehensive:
         mock_get_config.side_effect = None
         mock_get_config.return_value = None
         
-        agent3 = ConcreteTestAgent(llm_manager=real_llm_manager, name="NoneConfigAgent")
+        agent3 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="NoneConfigAgent")
         assert agent3._subagent_logging_enabled is True
         
         # Test 4: Config missing subagent_logging_enabled attribute
@@ -158,7 +158,7 @@ class TestBaseAgentComprehensive:
         del mock_config.subagent_logging_enabled  # Remove attribute
         mock_get_config.return_value = mock_config
         
-        agent4 = ConcreteTestAgent(llm_manager=real_llm_manager, name="MissingAttrAgent")
+        agent4 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="MissingAttrAgent")
         assert agent4._subagent_logging_enabled is True
     
     @patch('netra_backend.app.agents.base_agent.get_config')
@@ -173,7 +173,7 @@ class TestBaseAgentComprehensive:
         mock_config.subagent_logging_enabled = True
         mock_get_config.return_value = mock_config
         
-        agent_enabled = ConcreteTestAgent(llm_manager=real_llm_manager, name="LogEnabledAgent")
+        agent_enabled = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="LogEnabledAgent")
         assert agent_enabled._subagent_logging_enabled is True
         
         # Verify logger is created with correct name
@@ -181,12 +181,12 @@ class TestBaseAgentComprehensive:
         
         # Test 2: Logging disabled
         mock_config.subagent_logging_enabled = False
-        agent_disabled = ConcreteTestAgent(llm_manager=real_llm_manager, name="LogDisabledAgent")
+        agent_disabled = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="LogDisabledAgent")
         assert agent_disabled._subagent_logging_enabled is False
         
         # Test 3: TEST_COLLECTION_MODE disables logging
         mock_get_env.return_value = {'TEST_COLLECTION_MODE': '1'}
-        agent_collection = ConcreteTestAgent(llm_manager=real_llm_manager, name="CollectionAgent")
+        agent_collection = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="CollectionAgent")
         assert agent_collection._subagent_logging_enabled is False
         
         # Test 4: Multiple agents have independent logging states
@@ -218,7 +218,7 @@ class TestBaseAgentComprehensive:
         assert agent.websocket_manager == mock_ws_manager
         
         # Test both working together
-        agent2 = ConcreteTestAgent(llm_manager=real_llm_manager, name="CompleteWSAgent")
+        agent2 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="CompleteWSAgent")
         agent2.user_id = "user_456"
         agent2.websocket_manager = mock_ws_manager
         
@@ -229,7 +229,7 @@ class TestBaseAgentComprehensive:
         assert can_send is True
         
         # Test None handling
-        agent3 = ConcreteTestAgent(llm_manager=real_llm_manager, name="NoneWSAgent")
+        agent3 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="NoneWSAgent")
         assert agent3.websocket_manager is None
         assert agent3.user_id is None
         

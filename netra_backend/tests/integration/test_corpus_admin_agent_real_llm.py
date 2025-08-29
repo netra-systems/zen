@@ -13,7 +13,7 @@ from typing import Dict, Any, List
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
+from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -31,17 +31,16 @@ env = IsolatedEnvironment()
 @pytest.fixture
 async def real_llm_manager():
     """Get real LLM manager instance with actual API credentials."""
-    llm_manager = LLMManager()
-    await llm_manager.initialize()
+    from netra_backend.app.core.config import get_settings
+    settings = get_settings()
+    llm_manager = LLMManager(settings)
     yield llm_manager
-    await llm_manager.cleanup()
 
 
 @pytest.fixture
-async def real_tool_dispatcher(db_session: AsyncSession):
+async def real_tool_dispatcher():
     """Get real tool dispatcher with actual tools loaded."""
     dispatcher = ToolDispatcher()
-    await dispatcher.initialize_tools(db_session)
     return dispatcher
 
 
@@ -54,7 +53,7 @@ async def real_corpus_admin_agent(real_llm_manager, real_tool_dispatcher):
         websocket_manager=None  # Real websocket in production
     )
     yield agent
-    await agent.cleanup()
+    # Cleanup not needed for tests
 
 
 class TestCorpusAdminAgentRealLLM:
@@ -119,8 +118,9 @@ class TestCorpusAdminAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="CorpusAdminSubAgent",
             state=state,
-            request_id="req_corpus_001",
             user_id="knowledge_team_001"
         )
         
@@ -229,8 +229,9 @@ class TestCorpusAdminAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="CorpusAdminSubAgent",
             state=state,
-            request_id="req_corpus_002",
             user_id="content_team_002"
         )
         
@@ -338,8 +339,9 @@ class TestCorpusAdminAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="CorpusAdminSubAgent",
             state=state,
-            request_id="req_corpus_003",
             user_id="search_team_003"
         )
         
@@ -463,8 +465,9 @@ class TestCorpusAdminAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="CorpusAdminSubAgent",
             state=state,
-            request_id="req_corpus_004",
             user_id="documentation_team_004"
         )
         
@@ -583,8 +586,9 @@ class TestCorpusAdminAgentRealLLM:
         )
         
         context = ExecutionContext(
+            run_id=state.run_id,
+            agent_name="CorpusAdminSubAgent",
             state=state,
-            request_id="req_corpus_005",
             user_id="globalization_team_005"
         )
         
