@@ -96,33 +96,11 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     This is the SINGLE source of truth for PostgreSQL sessions in netra_backend.
     All database access delegates to DatabaseManager implementation.
     
-    CRITICAL FIX: Proper session lifecycle management with GeneratorExit handling.
+    CRITICAL FIX: Delegates to DatabaseManager.get_async_session() for proper handling.
     """
-    # Get session factory directly from DatabaseManager
-    async_session_factory = DatabaseManager.get_application_session()
-    async with async_session_factory() as session:
-        try:
-            yield session
-            # Only commit if we have an active transaction
-            if hasattr(session, 'in_transaction') and session.in_transaction():
-                await asyncio.shield(session.commit())
-        except GeneratorExit:
-            # Don't attempt any session operations during generator cleanup
-            # The async context manager will handle proper cleanup
-            pass
-        except asyncio.CancelledError:
-            # For cancellation, attempt rollback if safe
-            if hasattr(session, 'in_transaction') and session.in_transaction():
-                try:
-                    await asyncio.shield(session.rollback())
-                except Exception:
-                    pass  # Suppress rollback errors during cancellation
-            raise
-        except Exception:
-            # For other exceptions, rollback if possible
-            if hasattr(session, 'in_transaction') and session.in_transaction():
-                await session.rollback()
-            raise
+    # Delegate to DatabaseManager's implementation which has proper error handling
+    async with DatabaseManager.get_async_session() as session:
+        yield session
 
 # SINGLE SOURCE OF TRUTH for ClickHouse connections
 def get_clickhouse_client():

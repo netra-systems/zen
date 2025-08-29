@@ -73,7 +73,7 @@ class SecretManager:
             "target_models": ["llm_configs.default", "llm_configs.triage", 
                             "llm_configs.data", "llm_configs.optimizations_core",
                             "llm_configs.actions_to_meet_goals", "llm_configs.reporting",
-                            "llm_configs.google", "llm_configs.analysis"],
+                            "llm_configs.analysis"],
             "target_field": "api_key", "required": False, "rotation_enabled": True
         }
     
