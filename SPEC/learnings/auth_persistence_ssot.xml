@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<auth_persistence_ssot_learnings>
+  <metadata>
+    <title>Auth Persistence SSOT Learnings</title>
+    <version>1.0.0</version>
+    <created>2025-01-28</created>
+    <purpose>
+      Document learnings from auth persistence investigation and SSOT compliance fixes
+    </purpose>
+  </metadata>
+
+  <key_findings>
+    <finding id="FIND-001" severity="CRITICAL">
+      <title>Dual Auth State Stores Cause Synchronization Issues</title>
+      <description>
+        Frontend had both React Context (AuthContext) and Zustand (AuthStore) managing
+        authentication state independently, both directly accessing localStorage.
+        This created race conditions and synchronization issues leading to unexpected logouts.
+      </description>
+      <impact>
+        Users experienced unexpected logouts on page refresh due to state inconsistencies
+        between the two stores.
+      </impact>
+      <resolution>
+        Modified AuthStore to use UnifiedAuthService as SSOT for all token operations,
+        eliminating direct localStorage access.
+      </resolution>
+    </finding>
+
+    <finding id="FIND-002" severity="HIGH">
+      <title>Multiple Token Refresh Implementations</title>
+      <description>
+        Three separate token refresh mechanisms existed:
+        1. AuthContext automatic refresh with dynamic scheduling
+        2. Auth interceptor refresh on 401 responses
+        3. WebSocket service token refresh for connections
+      </description>
+      <impact>
+        Competing refresh attempts could cause race conditions and duplicate API calls.
+      </impact>
+      <resolution>
+        All refresh mechanisms now delegate to UnifiedAuthService.refreshToken()
+        which implements singleton pattern to prevent concurrent refreshes.
+      </resolution>
+    </finding>
+
+    <finding id="FIND-003" severity="HIGH">
+      <title>Direct localStorage Access Violates SSOT</title>
+      <description>
+        Multiple components directly accessed localStorage for jwt_token:
+        - AuthStore: lines 158, 164
+        - Auth-interceptor: line 126
+        - Various other utility functions
+      </description>
+      <impact>
+        Inconsistent token handling and potential for token state divergence.
+      </impact>
+      <resolution>
+        All localStorage access now goes through UnifiedAuthService methods:
+        getToken(), setToken(), removeToken()
+      </resolution>
+    </finding>
+
+    <finding id="FIND-004" severity="MEDIUM">
+      <title>Environment-Aware Token Refresh Works Correctly</title>
+      <description>
+        UnifiedAuthService properly implements dynamic refresh thresholds:
+        - Short tokens (&lt;5 min): Refresh at 25% lifetime remaining
+        - Normal tokens (≥5 min): Refresh 5 minutes before expiry
+        This handles staging's 30-second tokens correctly.
+      </description>
+      <positive>true</positive>
+    </finding>
+
+    <finding id="FIND-005" severity="MEDIUM">
+      <title>AuthGuard Properly Checks Initialization State</title>
+      <description>
+        AuthGuard correctly waits for both !loading && initialized before making
+        auth decisions, preventing premature redirects to login page.
+      </description>
+      <positive>true</positive>
+    </finding>
+  </key_findings>
+
+  <implementation_patterns>
+    <pattern id="PAT-001">
+      <title>SSOT Token Management Pattern</title>
+      <description>
+        All token operations MUST go through UnifiedAuthService:
+        - getToken(): Retrieve token from storage
+        - setToken(token): Store token in storage
+        - removeToken(): Clear token from storage
+        - needsRefresh(token): Check if refresh needed
+        - refreshToken(): Perform token refresh with singleton pattern
+      </description>
+      <example>
+        // CORRECT - Using UnifiedAuthService
+        import { unifiedAuthService } from '@/auth/unified-auth-service';
+        const token = unifiedAuthService.getToken();
+        
+        // INCORRECT - Direct localStorage access
+        const token = localStorage.getItem('jwt_token'); // VIOLATION
+      </example>
+    </pattern>
+
+    <pattern id="PAT-002">
+      <title>Auth State Initialization Pattern</title>
+      <description>
+        Auth providers must track initialization state to prevent race conditions:
+        1. Start with loading=true, initialized=false
+        2. Fetch auth config and validate stored tokens
+        3. Set loading=false, initialized=true when complete
+        4. Components wait for initialized=true before auth decisions
+      </description>
+    </pattern>
+
+    <pattern id="PAT-003">
+      <title>Token Refresh Singleton Pattern</title>
+      <description>
+        Prevent concurrent token refresh attempts using singleton promise:
+        - Store refresh promise as class property
+        - Return existing promise if refresh in progress
+        - Clear promise after completion
+      </description>
+      <example>
+        private refreshTokenPromise: Promise&lt;string | null&gt; | null = null;
+        
+        async refreshToken(): Promise&lt;string | null&gt; {
+          if (this.refreshTokenPromise) {
+            return this.refreshTokenPromise;
+          }
+          this.refreshTokenPromise = this.performRefresh();
+          try {
+            return await this.refreshTokenPromise;
+          } finally {
+            this.refreshTokenPromise = null;
+          }
+        }
+      </example>
+    </pattern>
+  </implementation_patterns>
+
+  <testing_insights>
+    <insight id="TEST-001">
+      <title>Test Short-Lived Tokens Separately</title>
+      <description>
+        Staging environment uses 30-second tokens requiring different refresh logic.
+        Tests must validate both short (&lt;5 min) and normal (≥5 min) token lifetimes.
+      </description>
+    </insight>
+
+    <insight id="TEST-002">
+      <title>Simulate Page Refresh in Tests</title>
+      <description>
+        Create new service instances to simulate page refresh rather than
+        calling window.location.reload() which doesn't work in test environment.
+      </description>
+    </insight>
+
+    <insight id="TEST-003">
+      <title>Mock Storage Events for Cross-Tab Testing</title>
+      <description>
+        Use StorageEvent constructor to simulate cross-tab token synchronization
+        without needing actual multiple browser tabs.
+      </description>
+    </insight>
+  </testing_insights>
+
+  <compliance_checklist>
+    <item status="FIXED">AuthStore no longer directly accesses localStorage</item>
+    <item status="FIXED">Auth-interceptor uses UnifiedAuthService for token storage</item>
+    <item status="VERIFIED">AuthGuard checks initialized state before redirecting</item>
+    <item status="VERIFIED">Token refresh uses singleton pattern to prevent races</item>
+    <item status="VERIFIED">Environment-aware refresh thresholds working correctly</item>
+    <item status="PENDING">WebSocket service token refresh needs review</item>
+    <item status="PENDING">Consider consolidating AuthContext and AuthStore</item>
+  </compliance_checklist>
+
+  <recommendations>
+    <recommendation priority="HIGH">
+      <title>Consolidate Auth State Management</title>
+      <description>
+        Consider merging AuthContext and AuthStore into single state management
+        solution to eliminate dual-store complexity. AuthContext should handle
+        UI state while UnifiedAuthService handles token operations.
+      </description>
+    </recommendation>
+
+    <recommendation priority="MEDIUM">
+      <title>Implement Token Rotation</title>
+      <description>
+        Add token rotation on refresh for enhanced security. Each refresh
+        should invalidate the previous refresh token.
+      </description>
+    </recommendation>
+
+    <recommendation priority="MEDIUM">
+      <title>Add Auth Metrics</title>
+      <description>
+        Implement monitoring for:
+        - Unexpected logout rate
+        - Token refresh success rate
+        - Auth initialization time
+        - AuthGuard redirect reasons
+      </description>
+    </recommendation>
+
+    <recommendation priority="LOW">
+      <title>Consider httpOnly Cookies</title>
+      <description>
+        For production, consider migrating from localStorage to httpOnly
+        cookies for token storage to prevent XSS attacks.
+      </description>
+    </recommendation>
+  </recommendations>
+
+  <references>
+    <reference>SPEC/auth_persistence_requirements.xml</reference>
+    <reference>frontend/auth/unified-auth-service.ts</reference>
+    <reference>frontend/auth/context.tsx</reference>
+    <reference>frontend/store/authStore.ts</reference>
+    <reference>frontend/lib/auth-interceptor.ts</reference>
+    <reference>frontend/components/AuthGuard.tsx</reference>
+  </references>
+</auth_persistence_ssot_learnings>

@@ -306,6 +306,15 @@
             <critical-takeaway>When using docker ps filters, "name=auth" works for finding "netra-auth" but "docker restart auth_service" fails - be specific</critical-takeaway>
         </category>
         
+        <category name="Docker Container Startup Critical Fixes" path="SPEC/learnings/docker_container_startup.xml" keywords="Docker, Container Startup, Import Errors, ModuleNotFoundError, Singleton, Error Handler, netra-backend, Application Initialization">
+            <critical-takeaway>CRITICAL: Always verify import paths exist after refactoring - stale imports from moved/deleted modules can break container startup completely</critical-takeaway>
+            <critical-takeaway>ModuleNotFoundError during container startup often indicates import paths referencing non-existent modules (e.g., 'netra_backend.app.llm.error_classification')</critical-takeaway>
+            <critical-takeaway>ImportError for specific classes/interfaces indicates the target class doesn't exist in the module - verify interface names and module contents</critical-takeaway>
+            <critical-takeaway>Singleton instantiation errors ("object is not callable") occur when treating already-instantiated singletons as constructors - use instance directly without parentheses</critical-takeaway>
+            <critical-takeaway>Test container startup after any significant refactoring or import changes to catch import/instantiation issues before deployment</critical-takeaway>
+            <critical-takeaway>Use absolute imports as per SPEC/import_management_architecture.xml to prevent path resolution issues in containerized environments</critical-takeaway>
+        </category>
+        
         <category name="CORS Configuration" path="SPEC/learnings/cors_development_wildcard.xml" keywords="CORS, localhost, 127.0.0.1, Origin, Development, Wildcard, Cross-Origin">
             <critical-takeaway>CRITICAL: Development CORS MUST use wildcard ("*") to handle localhost vs 127.0.0.1 mismatches.</critical-takeaway>
             <critical-takeaway>NEVER change development CORS back to explicit origin lists - wildcard is required for proper local development.</critical-takeaway>
@@ -388,6 +397,14 @@
         <category name="GTM Infinite Loop Prevention" path="SPEC/learnings/gtm_infinite_loop_prevention.xml" keywords="GTM, Circuit Breaker, Infinite Loop, AuthGuard, Event Deduplication, Rate Limiting, Performance, Memory Leak">
             <critical-takeaway>CRITICAL: AuthGuard component can cause infinite GTM event loops - use refs to track if events already fired.</critical-takeaway>
             <critical-takeaway>Implement circuit breaker pattern for ALL analytics integrations to prevent event storms.</critical-takeaway>
+        </category>
+        
+        <category name="Dev Launcher Zombie Processes" path="SPEC/learnings/dev_launcher_zombie_processes.xml" keywords="Dev Launcher, Zombie Process, Node.js, Frontend, Windows, Process Tree, npm, next, taskkill, Process Termination">
+            <critical-takeaway>CRITICAL: Frontend npm run dev creates 4+ layer deep process tree (npm->cross-env->next->server) requiring /T flag for complete termination on Windows.</critical-takeaway>
+            <critical-takeaway>Always use taskkill /F /T /PID for Windows process termination to kill entire process tree and prevent orphaned Node.js processes.</critical-takeaway>
+            <critical-takeaway>Multiple dev launcher instances spawn duplicate frontend processes consuming 250-290MB each - implement process detection before spawning.</critical-takeaway>
+            <critical-takeaway>Frontend process termination requires special handling due to deep nesting - individual PID termination leaves child processes running.</critical-takeaway>
+            <critical-takeaway>Emergency cleanup must use WindowsProcessManager.terminate_process_tree for complete cleanup on Windows.</critical-takeaway>
             <critical-takeaway>Event deduplication window (2 seconds) prevents duplicate events from rapid re-renders.</critical-takeaway>
             <critical-takeaway>Rate limiting (100 events per type/minute) protects against legitimate event spam.</critical-takeaway>
             <critical-takeaway>Circuit breaker trips after 50 failures in 10 seconds, auto-recovers after 30 seconds.</critical-takeaway>
@@ -1575,7 +1592,7 @@
             <critical-takeaway>Security specialist agents automatically deployed for authentication issues (401/403 errors) across containers</critical-takeaway>
             <critical-takeaway>Service restart commands frequently fail without correct container naming - docker restart requires exact names</critical-takeaway>
             <critical-takeaway>Backend authentication issues outnumber auth service issues 7:4 - focus remediation on backend middleware</critical-takeaway>
-            <critical-takeaway>Log analysis commands have highest success rate (>80%), service restarts lowest (<30%) due to container naming</critical-takeaway>
+            <critical-takeaway>Log analysis commands have highest success rate (&gt;80%), service restarts lowest (&lt;30%) due to container naming</critical-takeaway>
             <critical-takeaway>Intelligent remediation saves learnings with meaningful names: intelligent_remediation_{category}_{timestamp}.xml</critical-takeaway>
             <critical-takeaway>Implement health check endpoints for authentication validation before attempting service restarts</critical-takeaway>
             <critical-takeaway>Add JWT token refresh mechanism to prevent authentication failures that trigger remediation cycles</critical-takeaway>

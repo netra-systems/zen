@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>AgentErrorHandler Callable TypeError Resolution</title>
+  <date>2025-08-29</date>
+  <category>error-handling</category>
+  <priority>critical</priority>
+  
+  <problem>
+    <description>
+      The backend failed to start with error: "'AgentErrorHandler' object is not callable" during agent supervisor creation.
+      This prevented the dev launcher and system initialization from working.
+    </description>
+    <error_message>Failed to create agent supervisor: 'AgentErrorHandler' object is not callable</error_message>
+    <location>netra_backend/app/startup_module.py:669</location>
+  </problem>
+  
+  <root_cause>
+    <finding>
+      In agent_reliability_mixin.py, the module imported an instance (agent_error_handler) but aliased it as AgentErrorHandler,
+      making it appear like a class. The code then tried to instantiate it with AgentErrorHandler(), treating the instance as a constructor.
+    </finding>
+    <specific_issues>
+      <issue>Line 10: from netra_backend.app.agents.base.error_handler import agent_error_handler as AgentErrorHandler</issue>
+      <issue>Line 44: self.error_handler = AgentErrorHandler() - attempting to call an instance</issue>
+      <issue>Line 150: Referenced non-existent method record_failed_operation</issue>
+    </specific_issues>
+  </root_cause>
+  
+  <solution>
+    <change>
+      <file>netra_backend/app/core/agent_reliability_mixin.py</file>
+      <line>44</line>
+      <before>self.error_handler = AgentErrorHandler()</before>
+      <after>self.error_handler = AgentErrorHandler</after>
+      <reason>AgentErrorHandler is already an instance, not a class</reason>
+    </change>
+    <change>
+      <file>netra_backend/app/core/agent_reliability_mixin.py</file>
+      <lines>144-164</lines>
+      <description>Replaced record_failed_operation with proper handle_error using ErrorContext</description>
+      <reason>The method doesn't exist in AgentErrorHandler; use the unified error handling pattern</reason>
+    </change>
+  </solution>
+  
+  <pattern>
+    <title>Instance vs Class Import Pattern</title>
+    <description>
+      When importing singleton instances, use them directly without instantiation.
+      The agent_error_handler is a module-level singleton instance, not a class.
+    </description>
+    <correct_usage>
+      from netra_backend.app.agents.base.error_handler import agent_error_handler
+      self.error_handler = agent_error_handler
+    </correct_usage>
+    <incorrect_usage>
+      from netra_backend.app.agents.base.error_handler import agent_error_handler as SomeClass
+      self.error_handler = SomeClass()  # ERROR: trying to call an instance
+    </incorrect_usage>
+  </pattern>
+  
+  <verification>
+    <test>Import and use SupervisorAgent successfully</test>
+    <test>AgentReliabilityMixin can be instantiated without errors</test>
+    <test>Error handler methods (handle_error, get_health_status) work correctly</test>
+    <test>Backend startup completes without AgentErrorHandler errors</test>
+  </verification>
+  
+  <impact>
+    <fixed>Backend startup failure resolved</fixed>
+    <fixed>Agent supervisor creation works correctly</fixed>
+    <fixed>Dev launcher can now initialize properly</fixed>
+    <improved>Error handling follows unified pattern consistently</improved>
+  </impact>
+  
+  <related_specs>
+    <spec>SPEC/learnings/agent_error_handler_unified.xml</spec>
+    <spec>SPEC/unified_error_handling.xml</spec>
+  </related_specs>
+</learning>
