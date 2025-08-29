@@ -64,9 +64,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         }
       });
       
-      // Add new message and limit to last 100 messages for memory cleanup
+      // Add new message and limit to last 500 messages for better data retention
       const updatedMessages = [...prevMessages, newMessage];
-      return updatedMessages.length > 100 ? updatedMessages.slice(-100) : updatedMessages;
+      return updatedMessages.length > 500 ? updatedMessages.slice(-500) : updatedMessages;
     });
   }, []);
 
@@ -169,7 +169,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
             onReconnect: () => {
               debugLogger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
             },
-            heartbeatInterval: 30000, // 30 second heartbeat
+            heartbeatInterval: 15000, // 15 second heartbeat for better responsiveness
             rateLimit: {
               messages: 60,
               window: 60000 // 60 messages per minute

@@ -83,6 +83,7 @@ const createKeyboardHandler = (
 };
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { InitializationProgress } from '@/components/InitializationProgress';
 
 const MainChat: React.FC = () => {
   const { 
@@ -168,17 +169,19 @@ const MainChat: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Get initialization state for progress display
+  const { phase, progress } = useInitializationCoordinator();
+  const { status: wsStatus } = useWebSocket();
+  
   // Show loading state while initializing
   if (!isInitialized || shouldShowLoading) {
     return (
-      <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <div className="text-sm text-gray-600">
-            {loadingMessage}
-          </div>
-        </div>
-      </div>
+      <InitializationProgress 
+        phase={phase}
+        progress={progress}
+        connectionStatus={wsStatus}
+        error={phase === 'error' ? loadingMessage : undefined}
+      />
     );
   }
 
