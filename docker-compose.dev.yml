@@ -1,6 +1,6 @@
 services:
   # PostgreSQL Database
-  netra-dev-postgres:
+  postgres:
     image: postgres:15-alpine
     container_name: netra-dev-postgres
     profiles: ["db", "backend", "full"]
@@ -29,7 +29,7 @@ services:
       - netra-dev-network
 
   # Redis Cache
-  netra-dev-redis:
+  redis:
     image: redis:7-alpine
     container_name: netra-dev-redis
     profiles: ["cache", "backend", "full"]
@@ -47,7 +47,7 @@ services:
       - netra-dev-network
 
   # ClickHouse Analytics (Required for real analytics)
-  netra-dev-clickhouse:
+  clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
     container_name: netra-dev-clickhouse
     profiles: ["backend", "analytics", "full"]
@@ -71,7 +71,7 @@ services:
       - netra-dev-network
 
   # Backend Service (Main Netra Application)
-  netra-dev-backend:
+  backend:
     build:
       context: .
       dockerfile: ./docker/backend.development.Dockerfile
@@ -81,28 +81,28 @@ services:
       - .env.development
     environment:
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@netra-dev-postgres:5432/${POSTGRES_DB:-netra_dev}
-      POSTGRES_HOST: netra-dev-postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@postgres:5432/${POSTGRES_DB:-netra_dev}
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER:-netra}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
       POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
       
       # Redis
-      REDIS_HOST: netra-dev-redis
+      REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_URL: redis://netra-dev-redis:6379/0
+      REDIS_URL: redis://redis:6379/0
       REDIS_STAGING_HOST: ${REDIS_STAGING_HOST:-redis-staging.internal}
       REDIS_PRODUCTION_HOST: ${REDIS_PRODUCTION_HOST:-redis-production.internal}
       
       # ClickHouse
-      CLICKHOUSE_HOST: netra-dev-clickhouse
+      CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
       
       # Auth Service
-      AUTH_SERVICE_URL: http://netra-dev-auth:8081
+      AUTH_SERVICE_URL: http://auth:8081
       
       # Server Config
       PORT: 8000
@@ -140,11 +140,11 @@ services:
       - ./scripts:/app/scripts
       - ./logs:/app/logs
     depends_on:
-      netra-dev-postgres:
+      postgres:
         condition: service_healthy
-      netra-dev-redis:
+      redis:
         condition: service_healthy
-      netra-dev-clickhouse:
+      clickhouse:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -165,7 +165,7 @@ services:
       "
 
   # Auth Service
-  netra-dev-auth:
+  auth:
     build:
       context: .
       dockerfile: ./docker/auth.development.Dockerfile
@@ -175,14 +175,14 @@ services:
       - .env.development
     environment:
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@netra-dev-postgres:5432/${POSTGRES_DB:-netra_dev}
-      POSTGRES_HOST: netra-dev-postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@postgres:5432/${POSTGRES_DB:-netra_dev}
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       
       # Redis
-      REDIS_HOST: netra-dev-redis
+      REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_URL: redis://netra-dev-redis:6379/1
+      REDIS_URL: redis://redis:6379/1
       REDIS_STAGING_HOST: ${REDIS_STAGING_HOST:-redis-staging.internal}
       REDIS_PRODUCTION_HOST: ${REDIS_PRODUCTION_HOST:-redis-production.internal}
       
@@ -240,7 +240,7 @@ services:
       "
 
   # Frontend Service
-  netra-dev-frontend:
+  frontend:
     build:
       context: .
       dockerfile: ./docker/frontend.development.Dockerfile
@@ -258,9 +258,9 @@ services:
       NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8000/ws
       
       # Internal API URLs (for SSR and Docker networking)
-      API_URL: http://netra-dev-backend:8000
-      AUTH_URL: http://netra-dev-auth:8081
-      WS_URL: ws://netra-dev-backend:8000
+      API_URL: http://backend:8000
+      AUTH_URL: http://auth:8081
+      WS_URL: ws://backend:8000
       
       # Next.js Config
       NODE_ENV: development
@@ -282,8 +282,8 @@ services:
       - /app/node_modules
       - /app/.next
     depends_on:
-      - netra-dev-backend
-      - netra-dev-auth
+      - backend
+      - auth
     networks:
       - netra-dev-network
     command: npm run dev

@@ -69,8 +69,8 @@ docker compose ps
 ## Service-Specific Notes
 
 ### Backend Service
-- Main requirements: `/netra_backend/requirements.txt`
-- Test requirements: `/netra_backend/requirements-test.txt`
+- Main requirements: `/requirements.txt`
+- Test requirements: `/test_framework/requirements.txt`
 - Container name: `netra-backend`
 
 ### Auth Service
@@ -118,7 +118,7 @@ docker compose logs postgres
 
 ### Missing Module: fastmcp
 **Issue:** Backend fails with `ModuleNotFoundError: No module named 'fastmcp'`
-**Solution:** Add `fastmcp` to `/netra_backend/requirements.txt` and rebuild
+**Solution:** Add `fastmcp` to `/requirements.txt` and rebuild
 
 ## Notes
 

@@ -13,11 +13,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY netra_backend/requirements.txt /app/netra_backend/
+COPY requirements.txt /app/
 COPY test_framework/requirements.txt /app/test_framework/
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r netra_backend/requirements.txt && \
+RUN pip install --no-cache-dir -r /app/requirements.txt && \
     pip install --no-cache-dir -r test_framework/requirements.txt && \
     pip install --no-cache-dir pytest pytest-asyncio pytest-cov
 
