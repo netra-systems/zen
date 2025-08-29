@@ -25,7 +25,6 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.tests.conftest_helpers import get_test_database_manager
 
 
 class ConcurrentTestAgent(BaseSubAgent):

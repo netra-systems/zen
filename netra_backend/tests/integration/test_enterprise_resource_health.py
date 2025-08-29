@@ -156,7 +156,7 @@ class TestEnterpriseResourceHealth:
                 "clickhouse": {"query": "SELECT version()", "timeout": 10, "interval": 60}
             },
             "external_dependency_checks": {
-                "gemini_api": {"endpoint": "https://generativelanguage.googleapis.com/v1beta/models", "timeout": 10, "interval": 300},
+                "gemini_api": {"endpoint": "https://generativelanguage.googleapis.com/models", "timeout": 10, "interval": 300},
                 "google_oauth": {"endpoint": "https://oauth2.googleapis.com/token", "timeout": 5, "interval": 600}
             }
         }

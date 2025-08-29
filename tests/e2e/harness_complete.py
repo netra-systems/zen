@@ -13,14 +13,10 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Import components - use absolute imports
-import sys
-from pathlib import Path
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+# Use absolute imports following CLAUDE.md standards - no path manipulation
 
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from test_framework.environment_isolation import get_test_env_manager
 
 logger = logging.getLogger(__name__)
 
@@ -82,17 +78,26 @@ class DatabaseManager:
     
     def _setup_sqlite_database(self) -> None:
         """Setup in-memory SQLite database for testing."""
-        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+        # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test_database_setup")
         self.logger.debug("SQLite in-memory database configured")
     
     def _setup_redis_connection(self) -> None:
         """Setup Redis connection for testing."""
-        os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use DB 1 for tests
+        # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        env.set("REDIS_URL", "redis://localhost:6379/1", "test_database_setup")  # Use DB 1 for tests
         self.logger.debug("Redis test database configured")
     
     def _setup_clickhouse_connection(self) -> None:
         """Setup ClickHouse connection for testing."""
-        os.environ["CLICKHOUSE_URL"] = "clickhouse://localhost:8123/test"
+        # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+        env_manager = get_test_env_manager()
+        env = env_manager.env
+        env.set("CLICKHOUSE_URL", "clickhouse://localhost:8123/test", "test_database_setup")
         self.logger.debug("ClickHouse test database configured")
     
     async def cleanup_databases(self) -> None:
@@ -194,6 +199,9 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
         self.state = TestState()
         self._initialize_service_configs()
         
+        # Initialize a simple orchestrator property for compatibility
+        self.orchestrator = self
+        
         # Initialize managers
         self.database_manager = DatabaseManager(self)
         self.service_manager = ServiceManager(self)
@@ -202,8 +210,8 @@ class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
     
     @property
     def project_root(self):
-        """Get project root from the orchestrator."""
-        return self.orchestrator.project_root
+        """Get project root path."""
+        return Path(__file__).parent.parent.parent
     
     async def _setup_databases(self) -> None:
         """Setup all test databases using database manager."""
@@ -422,12 +430,18 @@ async def create_minimal_harness(test_name: str = "minimal_test") -> UnifiedTest
 
 def get_test_database_url() -> str:
     """Get the test database URL."""
-    return os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///test.db")
+    # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+    env_manager = get_test_env_manager()
+    env = env_manager.env
+    return env.get("DATABASE_URL", "sqlite+aiosqlite:///test.db")
 
 
 def get_auth_service_url() -> str:
     """Get the auth service URL."""
-    return os.environ.get("AUTH_SERVICE_URL", "http://localhost:8081")
+    # Use IsolatedEnvironment for ALL environment access per CLAUDE.md
+    env_manager = get_test_env_manager()
+    env = env_manager.env
+    return env.get("AUTH_SERVICE_URL", "http://localhost:8081")
 
 
 def get_backend_service_url() -> str:

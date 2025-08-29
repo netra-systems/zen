@@ -85,7 +85,7 @@ anthropic>=0.64.0
 # The new, unified Google GenAI SDK, replacing the deprecated google-generativeai.
 google-genai
 # LangChain Google GenAI integration for structured output support
-langchain-google-genai>=2.0.0
+langchain-google-genai>=2.1.10
 # FastMCP enables Model Context Protocol (MCP) integration for tool use and context sharing
 fastmcp==2.11.3
 

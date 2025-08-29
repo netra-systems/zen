@@ -102,7 +102,7 @@ services:
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
     ports:
-      - "6380:6379"  # Use different port to avoid conflicts
+      - "${REDIS_PORT:-6382}:6379"  # Use environment variable for port
 
   # ClickHouse performance optimizations
   clickhouse:

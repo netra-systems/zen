@@ -119,34 +119,13 @@ class StagingClickHouseSecretsUpdater:
         print("\n📦 Updating ClickHouse secrets for staging...")
         
         # Define the correct ClickHouse configuration
+        # Using only the canonical staging secret names as defined in secret_mappings.py
         clickhouse_secrets = {
-            # Individual ClickHouse secrets
-            "clickhouse-host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
-            "clickhouse-port": "8443",
-            "clickhouse-user": "default",
-            "clickhouse-password": "6a_z1t0qQ1.ET",
-            "clickhouse-database": "default",
-            "clickhouse-secure": "true",
-            
-            # Native connection settings
-            "clickhouse-native-host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
-            "clickhouse-native-port": "9440",  # Native secure port
-            
-            # HTTPS connection settings
-            "clickhouse-https-url": "https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443",
-            "clickhouse-https-host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
-            "clickhouse-https-port": "8443",
-            
-            # Composite URL for convenience
-            "clickhouse-url": "clickhouse://default:6a_z1t0qQ1.ET@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=true",
-            
-            # Alternative name mappings (for backward compatibility)
-            "CLICKHOUSE_PASSWORD": "6a_z1t0qQ1.ET",
-            "CLICKHOUSE_HOST": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
-            "CLICKHOUSE_PORT": "8443",
-            "CLICKHOUSE_USER": "default",
-            "CLICKHOUSE_DB": "default",
-            "CLICKHOUSE_SECURE": "true"
+            "clickhouse-password-staging": "6a_z1t0qQ1.ET",
+            "clickhouse-host-staging": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+            "clickhouse-port-staging": "8443",
+            "clickhouse-user-staging": "default",
+            "clickhouse-db-staging": "default",
         }
         
         success = True
@@ -173,11 +152,11 @@ class StagingClickHouseSecretsUpdater:
         print("\n🔍 Verifying ClickHouse secrets...")
         
         expected_values = {
-            "clickhouse-host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
-            "clickhouse-password": "6a_z1t0qQ1.ET",
-            "clickhouse-port": "8443",
-            "clickhouse-user": "default",
-            "clickhouse-database": "default"
+            "clickhouse-host-staging": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+            "clickhouse-password-staging": "6a_z1t0qQ1.ET",
+            "clickhouse-port-staging": "8443",
+            "clickhouse-user-staging": "default",
+            "clickhouse-db-staging": "default"
         }
         
         all_correct = True

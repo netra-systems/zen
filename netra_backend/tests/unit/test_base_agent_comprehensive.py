@@ -147,15 +147,15 @@ class TestBaseAgentComprehensive:
         
         # Test 3: Config returns None
         mock_get_env.return_value = {}
-        mock_get_config.side_effect = None
+        mock_get_config.side_effect = None  # Clear side_effect first
         mock_get_config.return_value = None
         
         agent3 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="NoneConfigAgent")
         assert agent3._subagent_logging_enabled is True
         
         # Test 4: Config missing subagent_logging_enabled attribute
-        mock_config = Mock()
-        del mock_config.subagent_logging_enabled  # Remove attribute
+        mock_get_config.side_effect = None  # Clear side_effect first
+        mock_config = Mock(spec=[])  # Empty spec means no attributes
         mock_get_config.return_value = mock_config
         
         agent4 = ConcreteConcreteTestAgent(llm_manager=real_llm_manager, name="MissingAttrAgent")
@@ -223,6 +223,7 @@ class TestBaseAgentComprehensive:
         agent2.websocket_manager = mock_ws_manager
         
         # Verify they can be used together
+        can_send = False
         if agent2.websocket_manager and agent2.user_id:
             # This pattern is used in actual agent code
             can_send = True
@@ -243,6 +244,21 @@ class TestBaseAgentComprehensive:
         agent3.websocket_manager = None
         assert agent3.user_id is None
         assert agent3.websocket_manager is None
+        
+        # Test edge case: empty string user_id
+        agent3.user_id = ""
+        assert agent3.user_id == ""
+        
+        # Test edge case: websocket manager without send_message method
+        mock_incomplete_ws = Mock(spec=[])  # No methods defined
+        agent3.websocket_manager = mock_incomplete_ws
+        assert agent3.websocket_manager == mock_incomplete_ws
+        
+        # Test the condition logic handles falsy values correctly
+        can_send_empty_user = False
+        if agent3.websocket_manager and agent3.user_id:  # "" is falsy
+            can_send_empty_user = True
+        assert can_send_empty_user is False  # Should be False since empty string is falsy
     
     @pytest.mark.asyncio
     async def test_shutdown_comprehensive(self, real_llm_manager):

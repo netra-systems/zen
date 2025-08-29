@@ -12,7 +12,7 @@ services:
       # Enable proper shutdown handling
       POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
-      - "${POSTGRES_PORT:-5434}:5432"
+      - "${DEV_POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
@@ -35,7 +35,7 @@ services:
     profiles: ["cache", "backend", "full"]
     command: redis-server --appendonly yes
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${DEV_REDIS_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -57,8 +57,8 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ports:
-      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
-      - "${CLICKHOUSE_TCP_PORT:-9000}:9000"
+      - "${DEV_CLICKHOUSE_HTTP_PORT:-8124}:8123"
+      - "${DEV_CLICKHOUSE_TCP_PORT:-9001}:9000"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./scripts/init_clickhouse.sql:/docker-entrypoint-initdb.d/01-init.sql:ro

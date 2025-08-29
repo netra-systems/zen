@@ -61,7 +61,7 @@ async def test_service_startup_sequence_validation():
             depends_on = service_config["depends_on"]
             time_limit = service_config["startup_time_limit"]
             
-            print(f"🚀 Testing startup for {service_name}...")
+            print(f"Testing startup for {service_name}...")
             
             # Check dependencies are running first
             for dependency in depends_on:
@@ -90,7 +90,7 @@ async def test_service_startup_sequence_validation():
                                 "startup_time": startup_time,
                                 "status": "healthy"
                             })
-                            print(f"✅ {service_name} healthy after {startup_time:.2f}s")
+                            print(f"SUCCESS: {service_name} healthy after {startup_time:.2f}s")
                             break
                 except (aiohttp.ClientError, asyncio.TimeoutError):
                     await asyncio.sleep(1)
@@ -101,7 +101,7 @@ async def test_service_startup_sequence_validation():
                     "reason": f"Failed to start within {time_limit}s",
                     "startup_timeout": True
                 })
-                print(f"❌ {service_name} failed to start within {time_limit}s")
+                print(f"FAILED: {service_name} failed to start within {time_limit}s")
     
     # Validate startup sequence compliance
     sequence_violations = []
@@ -137,23 +137,23 @@ async def test_service_startup_sequence_validation():
         failure_report = []
         
         if failed_services:
-            failure_report.append("❌ Failed Services:")
+            failure_report.append("FAILED Services:")
             for failure in failed_services:
                 failure_report.append(f"  - {failure['service']}: {failure['reason']}")
         
         if sequence_violations:
-            failure_report.append("❌ Startup Sequence Violations:")
+            failure_report.append("Startup Sequence Violations:")
             for violation in sequence_violations:
                 failure_report.append(f"  - {violation}")
         
         if startup_issues:
-            failure_report.append("❌ Startup Issues:")
+            failure_report.append("Startup Issues:")
             for issue in startup_issues:
                 failure_report.append(f"  - {issue}")
         
         pytest.fail(f"Service startup sequence validation failed:\n" + "\n".join(failure_report))
     
-    print(f"✅ All {len(startup_results)} services started successfully in correct order")
+    print(f"SUCCESS: All {len(startup_results)} services started successfully in correct order")
 
 
 async def _check_service_health(session: aiohttp.ClientSession, service_name: str) -> bool:
@@ -185,21 +185,23 @@ async def _check_service_health(session: aiohttp.ClientSession, service_name: st
 
 
 def _is_startup_sequence_ordered(startup_times: List[float], startup_sequence: List[Dict]) -> bool:
-    """Check if services started in dependency order."""
-    for i in range(1, len(startup_times)):
-        current_service = startup_sequence[i]
-        dependencies = current_service["depends_on"]
+    """Check if services started in dependency order.
+    
+    Since this test runs sequentially (not concurrent startup), we validate that:
+    1. All dependencies were available when each service was tested
+    2. Services were tested in the correct dependency order
+    """
+    # For sequential testing, the order is inherently correct if we reach this point
+    # because the test already validates dependencies are healthy before testing each service
+    
+    # Verify that services with dependencies appear later in the sequence
+    for i, service_config in enumerate(startup_sequence):
+        dependencies = service_config["depends_on"]
         
-        if dependencies:
-            # Current service should start after its dependencies
-            current_time = startup_times[i]
-            
-            for dep in dependencies:
-                dep_index = next((j for j, s in enumerate(startup_sequence) if s["service"] == dep), -1)
-                if dep_index >= 0 and dep_index < len(startup_times):
-                    dep_time = startup_times[dep_index]
-                    if current_time <= dep_time:
-                        return False
+        for dep in dependencies:
+            dep_index = next((j for j, s in enumerate(startup_sequence) if s["service"] == dep), -1)
+            if dep_index >= i:  # Dependency should appear earlier in sequence
+                return False
     
     return True
 

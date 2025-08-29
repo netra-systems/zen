@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: netra_test
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "${TEST_POSTGRES_PORT:-5433}:5432"
+      - "${TEST_POSTGRES_PORT:-5434}:5432"
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
     healthcheck:
@@ -29,7 +29,7 @@ services:
     container_name: netra-test-redis
     command: redis-server --appendonly no --save ""
     ports:
-      - "${TEST_REDIS_PORT:-6380}:6379"
+      - "${TEST_REDIS_PORT:-6381}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -49,8 +49,8 @@ services:
       CLICKHOUSE_PASSWORD: test
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ports:
-      - "${TEST_CLICKHOUSE_HTTP_PORT:-8124}:8123"
-      - "${TEST_CLICKHOUSE_TCP_PORT:-9001}:9000"
+      - "${TEST_CLICKHOUSE_HTTP_PORT:-8123}:8123"
+      - "${TEST_CLICKHOUSE_TCP_PORT:-9000}:9000"
     volumes:
       - clickhouse_test_data:/var/lib/clickhouse
     healthcheck:

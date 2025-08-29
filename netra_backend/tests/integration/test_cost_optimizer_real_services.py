@@ -17,11 +17,12 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.data_sub_agent.cost_optimizer import CostOptimizer
-from netra_backend.app.agents.data_sub_agent.configuration_manager import ConfigurationManager
-from netra_backend.app.agents.data_sub_agent.data_fetching import DataFetcher
+from netra_backend.app.agents.data_sub_agent.configuration_manager import DataSubAgentConfigurationManager
+from netra_backend.app.agents.data_sub_agent.data_fetching import DataFetching
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 from netra_backend.app.database import get_async_session
 from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.core.config import get_config
 from netra_backend.app.models.sql_models import (
     ApiUsage, CostAnalysis, OptimizationRecommendation, 
     User, Organization, ModelPricing
@@ -50,11 +51,12 @@ class TestCostOptimizerRealServices:
         session = real_database_session
         
         # Real services
-        llm_manager = LLMManager()
+        config = get_config()
+        llm_manager = LLMManager(config)
         await llm_manager.initialize()
         
-        config_manager = ConfigurationManager(session)
-        data_fetcher = DataFetcher(session)
+        config_manager = DataSubAgentConfigurationManager()
+        data_fetcher = DataFetching(session)
         metrics_service = MetricsService(session)
         billing_service = BillingService(session)
         
