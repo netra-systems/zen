@@ -31,35 +31,82 @@ EXPECTED_TRIAGE_RESPONSE = {
     "category": "Cost Optimization",
     "secondary_categories": ["Performance Optimization"],
     "priority": "high",
+    "confidence_score": 0.9,
+    "complexity": "complex",
     "key_parameters": {
         "workload_type": "inference",
         "optimization_focus": "cost",
         "time_sensitivity": "short-term",
-        "scope": "specific-model"
+        "scope": "specific-model",
+        "constraints": ["maintain latency under 100ms"]
     },
     "extracted_entities": {
         "models_mentioned": ["GPT-4"],
         "metrics_mentioned": ["30% cost reduction", "100ms latency"],
-        "constraints_mentioned": ["maintain latency under 100ms"]
+        "time_ranges": [],
+        "thresholds": [{"metric": "latency", "value": 100, "unit": "ms"}],
+        "targets": [{"metric": "cost_reduction", "value": 30, "unit": "percent"}]
     },
-    "requires_data_gathering": True,
-    "suggested_tools": ["cost_analyzer", "performance_profiler"]
+    "user_intent": {
+        "primary_intent": "optimize_costs",
+        "secondary_intents": ["maintain_performance"],
+        "action_required": True
+    },
+    "suggested_workflow": {
+        "next_agent": "CostOptimizationAgent",
+        "required_data_sources": ["usage_metrics", "cost_data"],
+        "estimated_duration_ms": 5000
+    },
+    "tool_recommendations": [
+        {
+            "tool_name": "cost_analyzer",
+            "relevance_score": 0.95,
+            "parameters": {"model": "GPT-4", "period": "last_30_days"}
+        },
+        {
+            "tool_name": "performance_profiler",
+            "relevance_score": 0.85,
+            "parameters": {"metric": "latency", "threshold": 100}
+        }
+    ],
+    "validation_status": {
+        "is_valid": True,
+        "validation_errors": [],
+        "warnings": []
+    },
+    "metadata": {
+        "triage_duration_ms": 250,
+        "llm_tokens_used": 1500,
+        "cache_hit": False,
+        "fallback_used": False,
+        "retry_count": 0,
+        "error_details": None
+    },
+    "is_admin_mode": False,
+    "require_approval": False
 }
 
 def create_mock_llm_manager():
     """Create a mock LLM manager that simulates triage responses"""
     mock = Mock(spec=LLMManager)
     
+    # Import the actual TriageResult model
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+    
     # Simulate the LLM returning a proper JSON response
     async def mock_ask_llm(prompt, **kwargs):
         print(f"\n[LLM CALL] Prompt length: {len(prompt)} chars")
         print(f"[LLM CALL] First 200 chars: {prompt[:200]}...")
+        # Return the JSON string for unstructured fallback
         return json.dumps(EXPECTED_TRIAGE_RESPONSE)
     
-    mock.ask_llm = AsyncMock(side_effect=mock_ask_llm)
+    async def mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
+        print(f"\n[STRUCTURED LLM CALL] Using schema: {schema.__name__}")
+        # Create and return the actual Pydantic model instance
+        return TriageResult(**EXPECTED_TRIAGE_RESPONSE)
     
-    # Mock structured LLM to simulate fallback scenario
-    mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available"))
+    mock.ask_llm = AsyncMock(side_effect=mock_ask_llm)
+    mock.ask_structured_llm = AsyncMock(side_effect=mock_ask_structured_llm)
     
     return mock
 

@@ -64,18 +64,29 @@ class UnitOfWork:
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Exit async context"""
-        if exc_type:
-            await self.rollback()
-            logger.error(f"UnitOfWork rolled back due to exception: {exc_val}")
-        else:
-            await self.commit()
-            logger.debug("UnitOfWork committed successfully")
-        
-        if not self._external_session:
-            if self._session:
-                await self._session.close()
-            if hasattr(self, '_session_context'):
-                await self._session_context.__aexit__(exc_type, exc_val, exc_tb)
+        try:
+            if exc_type:
+                await self.rollback()
+                logger.error(f"UnitOfWork rolled back due to exception: {exc_val}")
+            else:
+                await self.commit()
+                logger.debug("UnitOfWork committed successfully")
+        finally:
+            # CRITICAL: Always clean up session resources
+            if not self._external_session:
+                try:
+                    # Close session first before exiting context
+                    if self._session:
+                        await self._session.close()
+                except Exception as e:
+                    logger.warning(f"Error closing session: {e}")
+                
+                # Then exit the session context to return connection to pool
+                if hasattr(self, '_session_context') and self._session_context:
+                    try:
+                        await self._session_context.__aexit__(exc_type, exc_val, exc_tb)
+                    except Exception as e:
+                        logger.warning(f"Error exiting session context: {e}")
     
     async def commit(self):
         """Commit the transaction"""
@@ -129,8 +140,21 @@ class UnitOfWork:
     
     async def close(self):
         """Close the UnitOfWork - for backward compatibility with tests"""
-        if not self._external_session and hasattr(self, '_session_context'):
-            await self._session_context.__aexit__(None, None, None)
+        if not self._external_session:
+            try:
+                # Close session first
+                if self._session:
+                    await self._session.close()
+            except Exception as e:
+                logger.warning(f"Error closing session in close(): {e}")
+            
+            # Then exit context to return connection to pool
+            if hasattr(self, '_session_context') and self._session_context:
+                try:
+                    await self._session_context.__aexit__(None, None, None)
+                except Exception as e:
+                    logger.warning(f"Error exiting session context in close(): {e}")
+            
             logger.debug("UnitOfWork closed")
     
     async def execute_in_transaction(self, func, *args, **kwargs):
