@@ -93,21 +93,24 @@ Focus on maximizing clarity and minimizing Cyclomatic Complexity.
 *   **Database Connectivity:** Use [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) for SSL parameter resolution.
 *   **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
 
-### 2.4. NO MOCKS IN DEV MODE - Real Services Only
+### 2.4. NO MOCKS IN DEV/STAGING/PRODUCTION - Real Services Only
 
-**CRITICAL: Mock clients are FORBIDDEN in development mode.** Development must use real services to ensure accurate behavior and early detection of integration issues.
+**CRITICAL: Mock clients are FORBIDDEN in development, staging, and production environments.** All non-test environments must use real services to ensure accurate behavior and early detection of integration issues.
 
 **Core Principles:**
-*   **Real Services in DEV:** The DEV environment (Port 8000) MUST connect to real ClickHouse, PostgreSQL, Redis, and Auth services
-*   **No Mock Fallbacks:** If a service connection fails in dev mode, the system must fail fast - NOT fall back to mocks
+*   **Real Services in ALL Runtime Environments:** DEV (Port 8000), STAGING, and PRODUCTION environments MUST connect to real ClickHouse, PostgreSQL, Redis, and Auth services
+*   **No Mock Fallbacks:** If a service connection fails in any runtime environment, the system must fail fast - NOT fall back to mocks
 *   **Test Environment Only:** Mock clients are ONLY acceptable in the TEST environment for unit/integration tests
-*   **Delete Mock Code:** When fixing service connections, remove ALL mock client code and fallback logic for dev mode
+*   **Delete Mock Code:** When fixing service connections, remove ALL mock client code and fallback logic for dev, staging, and production modes
+*   **Environment-Specific Enforcement:** Each environment (dev, staging, production) must explicitly prohibit mock usage in configuration and runtime checks
 
 **Rationale:**
 *   Mocks hide real integration issues until production
 *   Development with mocks creates false confidence in code that may fail with real services
+*   Staging must accurately mirror production behavior for meaningful validation
+*   Production must NEVER use mocks as this would violate data integrity and service contracts
 *   Early detection of connection/configuration issues saves debugging time
-*   Real services provide accurate performance characteristics
+*   Real services provide accurate performance characteristics across all environments
 
 ### 2.5. Strategic Trade-offs
 
