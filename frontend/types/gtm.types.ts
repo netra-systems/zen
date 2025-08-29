@@ -62,6 +62,8 @@ export interface EngagementEventData extends DataLayerEvent {
   feature_type?: string;
   /** Thread ID for chat events */
   thread_id?: string;
+  /** Message ID for message events - required by GTM */
+  message_id?: string;
   /** Agent type for agent events */
   agent_type?: string;
   /** Message length for message events */

@@ -23,6 +23,33 @@ const DEFAULT_GTM_CONFIG: GTMConfig = {
   environment: (process.env.NEXT_PUBLIC_ENVIRONMENT as GTMConfig['environment']) || 'development'
 };
 
+/**
+ * Sanitize data for GTM to prevent undefined access errors
+ * Ensures all nested properties are safe to access
+ */
+const sanitizeDataForGTM = (data: Record<string, any>): Record<string, any> => {
+  const sanitized: Record<string, any> = {};
+  
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined || value === null) {
+      // Convert undefined/null to safe defaults
+      sanitized[key] = '';
+    } else if (typeof value === 'object' && !Array.isArray(value)) {
+      // Recursively sanitize nested objects
+      sanitized[key] = sanitizeDataForGTM(value);
+    } else if (Array.isArray(value)) {
+      // Sanitize arrays
+      sanitized[key] = value.map(item => 
+        typeof item === 'object' && item !== null ? sanitizeDataForGTM(item) : item ?? ''
+      );
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  
+  return sanitized;
+};
+
 // GTM Context
 const GTMContext = createContext<GTMContextValue | null>(null);
 
@@ -135,17 +162,43 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
         return;
       }
 
+      // Safely process event data to prevent undefined access errors
+      const safeEventData = { ...eventData };
+      
+      // Add defensive defaults for common properties GTM might expect
+      // This prevents "Cannot read properties of undefined" errors in GTM scripts
+      if ('thread_id' in safeEventData && !safeEventData.thread_id) {
+        safeEventData.thread_id = 'no-thread';
+      }
+      if ('message_id' in safeEventData || safeEventData.event === 'message_sent') {
+        safeEventData.message_id = safeEventData.message_id || 'no-message-id';
+      }
+      if ('user_id' in safeEventData && !safeEventData.user_id) {
+        safeEventData.user_id = 'anonymous';
+      }
+      if ('session_id' in safeEventData && !safeEventData.session_id) {
+        safeEventData.session_id = 'no-session';
+      }
+      
+      // Ensure custom_parameters is an object if it exists
+      if (safeEventData.custom_parameters && typeof safeEventData.custom_parameters !== 'object') {
+        safeEventData.custom_parameters = {};
+      }
+
       // Add timestamp and environment context
       const enrichedEventData = {
-        ...eventData,
-        timestamp: eventData.timestamp || new Date().toISOString(),
+        ...safeEventData,
+        timestamp: safeEventData.timestamp || new Date().toISOString(),
         environment: config.environment,
         // Add page context
-        page_path: eventData.page_path || (typeof window !== 'undefined' ? window.location.pathname : undefined)
+        page_path: safeEventData.page_path || (typeof window !== 'undefined' ? window.location.pathname : undefined)
       };
 
+      // Final sanitization to ensure no undefined values
+      const finalEventData = sanitizeDataForGTM(enrichedEventData);
+
       // Push to dataLayer
-      window.dataLayer.push(enrichedEventData);
+      window.dataLayer.push(finalEventData);
 
       // Record successful event with circuit breaker
       circuitBreaker.recordEventSent(eventKey);
@@ -210,7 +263,9 @@ export const GTMProvider: React.FC<GTMProviderProps> = ({
     }
 
     try {
-      window.dataLayer.push(data);
+      // Sanitize data to prevent undefined access errors
+      const safeData = sanitizeDataForGTM(data);
+      window.dataLayer.push(safeData);
       
       if (config.debug) {
         console.log('[GTM] Data pushed to dataLayer:', data);
