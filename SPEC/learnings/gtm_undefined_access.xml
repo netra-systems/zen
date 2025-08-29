@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <learning id="gtm-undefined-property-access">
+    <title>GTM Undefined Property Access Prevention</title>
+    <date>2025-08-29</date>
+    <severity>HIGH</severity>
+    <category>frontend,gtm,error-handling</category>
+    
+    <problem>
+      <description>
+        Production error: "Cannot read properties of undefined (reading 'message_id')" 
+        occurring in GTM's internal generateEventId function when processing events.
+      </description>
+      <error_trace>
+        at a5.generateEventId (4044-ab0a784bf783bb20.js:1:130715)
+        at a5.traceEvent (4044-ab0a784bf783bb20.js:1:125961)
+      </error_trace>
+      <root_cause>
+        GTM's minified scripts expect certain properties (like message_id) to exist on event 
+        data objects. When these properties are undefined, the script fails trying to access 
+        nested properties.
+      </root_cause>
+    </problem>
+    
+    <solution>
+      <approach>Implement comprehensive data sanitization before pushing to dataLayer</approach>
+      <implementation>
+        <step>Add defensive defaults for expected GTM properties (message_id, thread_id, user_id, session_id)</step>
+        <step>Create recursive sanitization function to handle nested objects and arrays</step>
+        <step>Apply sanitization to all data before pushing to window.dataLayer</step>
+        <step>Update event tracking hooks to provide safe defaults</step>
+      </implementation>
+      <files_modified>
+        <file>frontend/providers/GTMProvider.tsx</file>
+        <file>frontend/hooks/useGTMEvent.ts</file>
+        <file>frontend/types/gtm.types.ts</file>
+      </files_modified>
+    </solution>
+    
+    <best_practices>
+      <practice>Always sanitize external data before passing to third-party scripts</practice>
+      <practice>Provide default values for optional properties that external scripts might access</practice>
+      <practice>Use recursive sanitization for nested data structures</practice>
+      <practice>Include message_id for all message-related events</practice>
+      <practice>Test with production GTM containers to catch integration issues</practice>
+    </best_practices>
+    
+    <prevention>
+      <rule>All GTM event data must pass through sanitizeDataForGTM function</rule>
+      <rule>Message events must always include a message_id (generate if not provided)</rule>
+      <rule>Use TypeScript interfaces to enforce required GTM properties</rule>
+      <rule>Monitor browser console for GTM-related errors in development</rule>
+    </prevention>
+    
+    <testing>
+      <test_scenario>Push events with undefined properties</test_scenario>
+      <test_scenario>Push events with deeply nested undefined values</test_scenario>
+      <test_scenario>Track messages without explicit message_id</test_scenario>
+      <test_scenario>Verify sanitization doesn't break valid data</test_scenario>
+    </testing>
+    
+    <related_specs>
+      <spec>frontend/docs/GTM_DEFENSIVE_PROGRAMMING.md</spec>
+      <spec>frontend/__tests__/gtm/gtm-sanitization.test.ts</spec>
+      <spec>SPEC/error_handling.xml</spec>
+    </related_specs>
+  </learning>
+</learnings>

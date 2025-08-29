@@ -5,7 +5,7 @@ Handles progress tracking and WebSocket communication for
 synthetic data generation operations.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core import get_websocket_manager
@@ -32,26 +32,44 @@ class SyntheticDataProgressTracker:
         status: GenerationStatus,
         stream_updates: bool,
         batch_start: int,
-        batch_size: int
+        batch_size: int,
+        thread_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ) -> None:
         """Handle progress update if needed"""
         if stream_updates and self.should_send_update(batch_start, batch_size):
-            await self.send_progress_update(run_id, status)
+            await self.send_progress_update(run_id, status, thread_id, user_id)
     
-    async def send_progress_update(self, run_id: str, status: GenerationStatus) -> None:
+    async def send_progress_update(self, run_id: str, status: GenerationStatus,
+                                  thread_id: Optional[str] = None,
+                                  user_id: Optional[str] = None) -> None:
         """Send progress update via WebSocket manager"""
         try:
             from netra_backend.app.websocket_core import get_websocket_manager
             websocket_manager = get_websocket_manager()
-            await self._send_websocket_update(websocket_manager, run_id, status)
+            await self._send_websocket_update(websocket_manager, run_id, status, thread_id, user_id)
         except ImportError:
             logger.debug("WebSocket manager not available, logging progress locally")
             self._log_progress_update(status)
+        except Exception as e:
+            logger.debug(f"Failed to send WebSocket update: {e}")
+            self._log_progress_update(status)
     
-    async def _send_websocket_update(self, websocket_manager, run_id: str, status: GenerationStatus) -> None:
-        """Send update via WebSocket manager"""
+    async def _send_websocket_update(self, websocket_manager, run_id: str, status: GenerationStatus,
+                                    thread_id: Optional[str] = None,
+                                    user_id: Optional[str] = None) -> None:
+        """Send update via WebSocket manager using appropriate method"""
         message = self.create_progress_message(status)
-        await websocket_manager.send_message(run_id, message)
+        
+        # Prefer thread-based messaging if thread_id is available
+        if thread_id:
+            await websocket_manager.send_to_thread(thread_id, message)
+        elif user_id and not user_id.startswith("run_"):
+            # Only send to user if we have a real user ID (not a run ID)
+            await websocket_manager.send_to_user(user_id, message)
+        else:
+            # Log but don't fail if no valid recipient
+            logger.debug(f"No valid recipient for WebSocket message (run_id: {run_id})")
     
     def _log_progress_update(self, status: GenerationStatus) -> None:
         """Log progress update locally"""

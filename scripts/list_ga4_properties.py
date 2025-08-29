@@ -37,8 +37,8 @@ def list_properties():
             print(f"\nAccount: {account.display_name}")
             print(f"  Account ID: {account.name}")
             
-            # List properties for this account
-            properties = client.list_properties(filter=f"parent:{account.name}")
+            # List all properties (filter by account doesn't work in this API version)
+            properties = client.list_properties()
             
             for prop in properties:
                 property_count += 1

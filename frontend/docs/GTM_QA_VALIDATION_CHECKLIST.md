@@ -3,6 +3,12 @@
 ## Overview
 This document provides a comprehensive checklist for validating the Google Tag Manager integration in the Netra Apex frontend application. Use this checklist to ensure all aspects of GTM functionality are properly tested and validated across different environments.
 
+## Related Documentation
+- [GTM Defensive Programming Guide](./GTM_DEFENSIVE_PROGRAMMING.md) - Essential patterns for preventing runtime errors
+- [GTM Testing Procedures](./GTM_TESTING_PROCEDURES.md) - Detailed testing methodologies
+- [GTM QA Strategy Summary](./GTM_QA_STRATEGY_SUMMARY.md) - High-level QA approach
+- [GTM Undefined Access Learnings](../../SPEC/learnings/gtm_undefined_access.xml) - Lessons from production issues
+
 ## Pre-Validation Setup
 
 ### Environment Configuration

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket Run ID Issue - Incorrect User ID Usage</title>
+    <date>2025-08-29</date>
+    <category>websocket</category>
+    <severity>medium</severity>
+    <impact>logging-noise, potential-message-loss</impact>
+  </metadata>
+
+  <problem>
+    <description>
+      Multiple agents were incorrectly using run_id (format: "run_[uuid]") as a user_id 
+      when sending WebSocket messages, causing WARNING logs about missing connections.
+    </description>
+    <symptoms>
+      <symptom>WARNING logs: "No connections found for user run_[uuid]"</symptom>
+      <symptom>WebSocket messages not delivered during agent execution</symptom>
+      <symptom>Unnecessary logging noise in production</symptom>
+    </symptoms>
+    <root_cause>
+      Agents were calling websocket_manager.send_message(run_id, message) or 
+      send_to_user(run_id, message) instead of using thread_id or actual user_id.
+    </root_cause>
+  </problem>
+
+  <solution>
+    <approach>
+      Modified WebSocket communication to use proper identifiers and added 
+      context-aware routing for messages.
+    </approach>
+    <changes>
+      <change file="synthetic_data_progress_tracker.py">
+        Added thread_id and user_id parameters to properly route messages.
+        Messages are sent to threads when available (preferred), then users.
+        Gracefully handles missing context without errors.
+      </change>
+      <change file="data_sub_agent/agent_execution.py">
+        Removed incorrect WebSocket calls using run_id as user_id.
+        Added debug logging when context is insufficient for messaging.
+      </change>
+      <change file="websocket_core/manager.py">
+        Changed logging level from WARNING to DEBUG for run_id patterns.
+        Maintains WARNING level for actual missing user connections.
+      </change>
+      <change file="synthetic_data_generator.py">
+        Updated to pass thread_id and user_id through call chain.
+      </change>
+      <change file="synthetic_data_batch_processor.py">
+        Updated to pass thread_id and user_id through to progress tracker.
+      </change>
+      <change file="synthetic_data_sub_agent_workflow.py">
+        Updated to pass context.thread_id and context.user_id to generator.
+      </change>
+    </changes>
+  </solution>
+
+  <patterns>
+    <pattern type="correct">
+      <!-- Correct: Use thread_id for WebSocket messages -->
+      <code><![CDATA[
+if thread_id:
+    await websocket_manager.send_to_thread(thread_id, message)
+elif user_id and not user_id.startswith("run_"):
+    await websocket_manager.send_to_user(user_id, message)
+else:
+    logger.debug(f"No valid recipient for WebSocket message")
+      ]]></code>
+    </pattern>
+    <pattern type="incorrect">
+      <!-- Incorrect: Using run_id as user_id -->
+      <code><![CDATA[
+# WRONG - run_id is not a user_id
+await websocket_manager.send_message(run_id, message)
+await websocket_manager.send_to_user(run_id, message)
+      ]]></code>
+    </pattern>
+  </patterns>
+
+  <best_practices>
+    <practice>Always pass ExecutionContext with thread_id and user_id to agents</practice>
+    <practice>Prefer thread-based messaging over user-based for agent communications</practice>
+    <practice>Check for valid recipient before attempting WebSocket send</practice>
+    <practice>Use debug logging for expected missing connections (e.g., run_ids)</practice>
+    <practice>Validate ID format before using as user_id (check for "run_" prefix)</practice>
+  </best_practices>
+
+  <testing>
+    <test_scenario>Verify run_ids don't trigger WARNING logs</test_scenario>
+    <test_scenario>Verify real user_ids still trigger WARNING when disconnected</test_scenario>
+    <test_scenario>Verify thread-based messaging works correctly</test_scenario>
+    <test_scenario>Verify progress updates use proper routing</test_scenario>
+  </testing>
+
+  <monitoring>
+    <metric>Count of "No connections found" warnings per ID type</metric>
+    <metric>WebSocket message delivery success rate by routing type</metric>
+    <alert>High rate of WebSocket delivery failures for real user_ids</alert>
+  </monitoring>
+
+  <references>
+    <reference>SPEC/websocket_communication.xml</reference>
+    <reference>SPEC/websockets.xml</reference>
+    <reference>docs/websocket-messaging-guide.md</reference>
+  </references>
+</learning>

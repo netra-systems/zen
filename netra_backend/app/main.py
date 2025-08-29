@@ -97,6 +97,11 @@ def _setup_environment_files() -> None:
 # Load environment files only if needed
 _setup_environment_files()
 
+# Configure logging for Cloud Run compatibility (prevents ANSI codes)
+from netra_backend.app.core.logging_config import configure_cloud_run_logging, setup_exception_handler
+configure_cloud_run_logging()
+setup_exception_handler()
+
 # Import unified logging first to ensure interceptor is set up
 from netra_backend.app.logging_config import central_logger
 

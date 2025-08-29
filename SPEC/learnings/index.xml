@@ -433,7 +433,7 @@
             <critical-takeaway>Configuration alignment critical: Update Python imports, Docker paths, CI/CD, env vars atomically.</critical-takeaway>
         </category>
 
-        <category name="WebSocket" path="SPEC/learnings/websocket.xml" keywords="Realtime, Coroutine, Async, WebSocket Accept, Connection Lifecycle, Message Validation, Parse Errors, Large Messages">
+        <category name="WebSocket" path="SPEC/learnings/websocket.xml" keywords="Realtime, Coroutine, Async, WebSocket Accept, Connection Lifecycle, Message Validation, Parse Errors, Large Messages, Run ID, User ID, Message Routing">
             <critical-takeaway context="Error Handling">All failures MUST raise exceptions. Silent failures (e.g., auth hanging) are forbidden.</critical-takeaway>
             <critical-takeaway context="Async">Always await async operations. Verify objects are not coroutines before access.</critical-takeaway>
             <critical-takeaway context="Schema">Ensure strict alignment of message fields (e.g., 'content' vs 'text') between FE/BE.</critical-takeaway>
@@ -442,6 +442,9 @@
             <critical-takeaway context="Parse Errors">Parse error 1003 usually means overly strict validation - check if legitimate messages are being rejected.</critical-takeaway>
             <critical-takeaway context="Large Messages">Large/chunked messages use 'message_type' field instead of 'type' - check for these BEFORE standard validation.</critical-takeaway>
             <critical-takeaway context="Error Details">Provide specific error details (missing field, wrong type, etc.) not generic "Invalid message structure".</critical-takeaway>
+            <critical-takeaway context="Message Routing">NEVER use run_id as user_id for WebSocket messages - use thread_id or actual user_id from ExecutionContext (websocket_run_id_issue.xml).</critical-takeaway>
+            <critical-takeaway context="ID Validation">Check for run_ prefix before using ID as user_id - run IDs are not valid WebSocket recipients.</critical-takeaway>
+            <critical-takeaway context="Logging">Use DEBUG level for expected missing connections (run_ids), WARNING only for real user disconnections.</critical-takeaway>
         </category>
         
         <category name="WebSocket State Management Critical Fix [RESOLVED]" path="SPEC/learnings/websocket_state_management.xml" keywords="WebSocket, State Management, Subprotocol, Client State, Application State, Immediate Disconnect, ABNORMAL_CLOSURE">
@@ -452,6 +455,14 @@
             <critical-takeaway>All WebSocket state checks MUST use centralized is_websocket_connected() function for SSOT - 16 locations updated.</critical-takeaway>
             <critical-takeaway>Test with real WebSocket connections not just mocks - state management differs between frameworks.</critical-takeaway>
             <critical-takeaway>Symptoms: "Loading chat..." forever, connection accepted then immediately closed, 0 messages processed.</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket Run ID Issue [RESOLVED]" path="SPEC/learnings/websocket_run_id_issue.xml" keywords="WebSocket, Run ID, User ID, Message Routing, Agent Communication, Progress Tracking, Logging">
+            <critical-takeaway>RESOLVED 2025-08-29: WebSocket run_id incorrectly used as user_id FIXED - agents now use proper thread_id/user_id routing.</critical-takeaway>
+            <critical-takeaway>CRITICAL: run_id (format: run_[uuid]) is NOT a valid WebSocket recipient - use thread_id or user_id from ExecutionContext.</critical-takeaway>
+            <critical-takeaway>Progress tracking and agent messages MUST use thread_id (preferred) or user_id, never run_id for WebSocket communication.</critical-takeaway>
+            <critical-takeaway>WebSocket manager uses DEBUG logging for run_ids (expected behavior), WARNING only for real missing user connections.</critical-takeaway>
+            <critical-takeaway>Always pass ExecutionContext with thread_id/user_id through agent call chains for proper message routing.</critical-takeaway>
         </category>
         
         <category name="WebSocket Docker Fixes [RESOLVED]" path="SPEC/learnings/websocket_docker_fixes.xml" keywords="WebSocket, Docker, Development, Authentication Bypass, CORS, Container Networking, Bridge Network, Development Environment">
@@ -1380,6 +1391,13 @@
             <critical-takeaway>Track events at the source of truth (auth context, message sending hook) not in UI components to prevent duplicate events</critical-takeaway>
             <critical-takeaway>Use useGTMEvent hook for all functional components, direct dataLayer.push for class components like ErrorBoundary</critical-takeaway>
             <critical-takeaway>Always include relevant context (threadId, message length, error details) with events for meaningful analysis</critical-takeaway>
+        </category>
+        
+        <category name="GTM Undefined Property Access" path="SPEC/learnings/gtm_undefined_access.xml" keywords="GTM, undefined, message_id, generateEventId, sanitization, defensive programming, dataLayer, runtime error">
+            <critical-takeaway>CRITICAL: All GTM event data MUST be sanitized before pushing to dataLayer to prevent "Cannot read properties of undefined" errors</critical-takeaway>
+            <critical-takeaway>Message events MUST always include message_id property - generate one if not provided (msg-{timestamp})</critical-takeaway>
+            <critical-takeaway>Use recursive sanitization for nested objects to replace undefined/null with safe defaults</critical-takeaway>
+            <critical-takeaway>GTM's internal scripts may access properties that don't exist - provide defensive defaults for message_id, thread_id, user_id, session_id</critical-takeaway>
             <critical-takeaway>Auth events tracked in auth/context.tsx, chat events in hooks/useMessageSending.ts for single source of truth</critical-takeaway>
             <critical-takeaway>Test GTM implementation with automated Selenium scripts (test_gtm_tracking.py) to verify dataLayer pushes</critical-takeaway>
             <critical-takeaway>Event categories: authentication (login/signup), engagement (chat/messages), conversion (trials/upgrades), errors</critical-takeaway>
@@ -1626,6 +1644,17 @@
             <critical-takeaway>Test hot reload with python scripts/test_hot_reload.py after Docker setup changes</critical-takeaway>
             <critical-takeaway>Auth service requires explicit reload command - not configured by default in older setups</critical-takeaway>
             <critical-takeaway>Monitor patterns: *.py, *.json, *.yaml, *.yml - excludes __pycache__, *.pyc, .pytest_cache</critical-takeaway>
+        </category>
+        
+        <category name="Cloud Run Logging ANSI Escape Codes" path="SPEC/learnings/cloud_run_logging.xml" keywords="Cloud Run, Logging, ANSI, Escape Codes, Python 3.11, Tracebacks, Color Output, Docker, Environment Variables">
+            <critical-takeaway>Python 3.11+ adds colored tracebacks by default which corrupt Cloud Run logs with ANSI escape codes</critical-takeaway>
+            <critical-takeaway>MUST set NO_COLOR=1, FORCE_COLOR=0, PY_COLORS=0 in Dockerfile for Cloud Run deployments</critical-takeaway>
+            <critical-takeaway>Configure logging early in main.py before any imports that might generate exceptions</critical-takeaway>
+            <critical-takeaway>Custom exception handler required to strip ANSI codes from tracebacks in production</critical-takeaway>
+            <critical-takeaway>Test with scripts/test_ansi_logging.py and scripts/verify_cloud_run_logging_fix.py before deployment</critical-takeaway>
+            <critical-takeaway>Environment variables must be set at Docker build time, not runtime, for full effect</critical-takeaway>
+            <critical-takeaway>Cloud Run uses structured logging - any formatting that interferes must be disabled</critical-takeaway>
+            <critical-takeaway>Third-party libraries (rich, colorama) may need explicit disabling in production environments</critical-takeaway>
         </category>
     </intelligent_remediation>
     

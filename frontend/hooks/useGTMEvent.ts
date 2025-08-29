@@ -73,16 +73,23 @@ export const useGTMEvent = () => {
     });
   }, [events, isEnabled]);
 
-  const trackMessageSent = useCallback((threadId?: string, messageLength?: number, agentType?: string) => {
+  const trackMessageSent = useCallback((threadId?: string, messageLength?: number, agentType?: string, messageId?: string) => {
     if (!isEnabled) return;
     
     events.trackEngagement('message_sent', {
-      thread_id: threadId,
-      message_length: messageLength,
+      thread_id: threadId || 'no-thread',
+      message_length: messageLength || 0,
       agent_type: agentType,
       event_label: 'user_message',
-      value: messageLength
-    });
+      value: messageLength,
+      // Add message_id to prevent GTM internal errors
+      message_id: messageId || `msg-${Date.now()}`,
+      custom_parameters: {
+        message_id: messageId || `msg-${Date.now()}`,
+        has_thread: !!threadId,
+        has_agent: !!agentType
+      }
+    } as EngagementEventData);
   }, [events, isEnabled]);
 
   const trackAgentActivated = useCallback((agentType: string, threadId?: string) => {

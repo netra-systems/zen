@@ -89,7 +89,8 @@ class SyntheticDataWorkflowOrchestrator:
         await self.agent.send_status_update(context, "generating", "Starting data generation...")
         
         result = await self.agent.generator.generate_data(
-            synthetic_context.workload_profile, context.run_id, context.stream_updates
+            synthetic_context.workload_profile, context.run_id, context.stream_updates,
+            context.thread_id, context.user_id
         )
         context.state.synthetic_data_result = result.model_dump()
         

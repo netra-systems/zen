@@ -9,7 +9,7 @@ import hashlib
 import json
 import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.synthetic_data_batch_processor import (
     SyntheticDataBatchProcessor,
@@ -39,13 +39,15 @@ class SyntheticDataGenerator:
         self, 
         profile: WorkloadProfile,
         run_id: str,
-        stream_updates: bool = True
+        stream_updates: bool = True,
+        thread_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ) -> SyntheticDataResult:
         """Generate synthetic data based on profile"""
         status, table_name = self._setup_generation(profile)
         try:
             data = await self._generate_batched_data(
-                profile, status, run_id, stream_updates
+                profile, status, run_id, stream_updates, thread_id, user_id
             )
             return self._create_success_result(
                 profile, status, data, table_name
@@ -77,12 +79,14 @@ class SyntheticDataGenerator:
         profile: WorkloadProfile,
         status: GenerationStatus,
         run_id: str,
-        stream_updates: bool
+        stream_updates: bool,
+        thread_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Generate data in batches with progress tracking"""
         batch_size = self.batch_processor.calculate_batch_size(profile.volume)
         generated_data = await self.batch_processor.process_all_batches(
-            profile, status, run_id, stream_updates, batch_size
+            profile, status, run_id, stream_updates, batch_size, thread_id, user_id
         )
         self.progress_tracker.finalize_generation(status)
         return generated_data

@@ -74,8 +74,14 @@
 | `websocket_docker_troubleshooting.md` | `/docs/websocket_docker_troubleshooting.md` | **Docker troubleshooting guide** | Diagnosis, solutions, prevention |
 | `test_docker_websocket_fix.py` | `/scripts/test_docker_websocket_fix.py` | **Docker WebSocket validation** | Environment, auth, CORS testing |
 | `test_websocket_dev_docker_connection.py` | `/tests/e2e/test_websocket_dev_docker_connection.py` | **E2E Docker WebSocket tests** | Connection, retry, CORS validation |
+| **🔴 RUN_ID HANDLING FIX (2025-08-29)** | | | |
+| `websocket_run_id_issue.xml` | `/SPEC/learnings/websocket_run_id_issue.xml` | **Run ID vs User ID fix** | Proper message routing, logging levels |
+| `websocket-messaging-guide.md` | `/docs/websocket-messaging-guide.md` | **WebSocket messaging best practices** | ID types, routing, troubleshooting |
+| `test_websocket_run_id_handling.py` | `/netra_backend/tests/unit/test_websocket_run_id_handling.py` | **Unit tests for run_id handling** | ID detection, logging verification |
+| `test_agent_websocket_communication.py` | `/netra_backend/tests/integration/test_agent_websocket_communication.py` | **Integration tests for agent WebSocket** | Context routing, error handling |
 | **🔴 CORE WEBSOCKET FILES** | | | |
 | `websocket.py` | `/netra_backend/app/routes/websocket.py` | **WebSocket endpoints (with subprotocol fix)** | websocket_endpoint() with subprotocol negotiation |
+| `manager.py` | `/netra_backend/app/websocket_core/manager.py` | **WebSocket manager (with run_id fix)** | send_to_user(), send_to_thread() with proper ID handling |
 | `websocket_core/auth.py` | `/netra_backend/app/websocket_core/auth.py` | **WebSocket authentication (Docker bypass)** | Development auth bypass, JWT validation |
 | `websocket_cors.py` | `/netra_backend/app/core/websocket_cors.py` | **CORS handling (Docker origins)** | Docker service names, bridge network IPs |
 | `connection.py` | `/netra_backend/app/websocket/connection.py` | Connection management | ConnectionManager class |

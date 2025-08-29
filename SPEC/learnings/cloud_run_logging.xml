@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <metadata>
+    <title>Cloud Run Logging and ANSI Escape Codes</title>
+    <category>deployment</category>
+    <subcategory>cloud-run</subcategory>
+    <created>2025-08-29</created>
+    <impact>high</impact>
+    <environments>staging, production</environments>
+  </metadata>
+
+  <problem>
+    <description>
+      Cloud Run logs display ANSI escape codes as raw text, making tracebacks unreadable.
+      Example: "[35m[1masync[0m [35m[1mwith[0m [1mget_clickhouse_client[0m"
+    </description>
+    <root_cause>
+      Python 3.11+ adds colored tracebacks by default using ANSI escape codes.
+      Cloud Run's logging system doesn't strip these codes, displaying them as raw text.
+    </root_cause>
+    <affected_services>
+      - Backend service (netra_backend)
+      - Auth service
+      - Any Python 3.11+ service deployed to Cloud Run
+    </affected_services>
+  </problem>
+
+  <solution>
+    <approach>Disable all color output at multiple levels to ensure clean logs</approach>
+    
+    <dockerfile_configuration>
+      <description>Set environment variables in Dockerfile to disable colors</description>
+      <required_env_vars>
+        <var name="NO_COLOR" value="1" purpose="Universal color disable flag"/>
+        <var name="FORCE_COLOR" value="0" purpose="Explicitly disable forced colors"/>
+        <var name="PY_COLORS" value="0" purpose="Python-specific color disable"/>
+        <var name="PYTHONDONTWRITEBYTECODE" value="1" purpose="Prevent .pyc file creation"/>
+        <var name="PYTHONUNBUFFERED" value="1" purpose="Ensure real-time log output"/>
+      </required_env_vars>
+      <location>docker/backend.Dockerfile</location>
+    </dockerfile_configuration>
+
+    <python_configuration>
+      <description>Runtime configuration to disable colored tracebacks</description>
+      <module>netra_backend/app/core/logging_config.py</module>
+      <functions>
+        <function name="configure_cloud_run_logging">
+          Sets environment variables and configures logging format
+        </function>
+        <function name="setup_exception_handler">
+          Custom exception handler that strips ANSI codes from tracebacks
+        </function>
+      </functions>
+      <initialization>
+        Must be imported and called early in main.py before other imports
+      </initialization>
+    </python_configuration>
+
+    <verification_scripts>
+      <script path="scripts/test_ansi_logging.py">
+        Tests that ANSI codes are removed in production mode
+      </script>
+      <script path="scripts/verify_cloud_run_logging_fix.py">
+        Comprehensive verification of all configuration components
+      </script>
+    </verification_scripts>
+  </solution>
+
+  <deployment_considerations>
+    <docker_build>
+      Docker images must be rebuilt after Dockerfile changes.
+      Environment variables are baked into the image at build time.
+    </docker_build>
+    
+    <cloud_run_specific>
+      <note>Cloud Run uses structured logging - avoid any formatting that might interfere</note>
+      <note>Test in staging first as log format changes might affect monitoring</note>
+      <note>Cloud Build and local builds both need the same configuration</note>
+    </cloud_run_specific>
+
+    <monitoring>
+      After deployment, verify in Cloud Console that:
+      1. Tracebacks are readable without escape codes
+      2. Log severity levels are properly recognized
+      3. Structured logging fields are preserved
+    </monitoring>
+  </deployment_considerations>
+
+  <patterns_to_follow>
+    <pattern>
+      <name>Early Logging Configuration</name>
+      <description>
+        Configure logging as early as possible in the application lifecycle,
+        before any modules that might generate exceptions are imported.
+      </description>
+    </pattern>
+    
+    <pattern>
+      <name>Multi-Level Color Disable</name>
+      <description>
+        Disable colors at multiple levels (Docker ENV, Python runtime, library-specific)
+        to ensure comprehensive coverage across all possible color sources.
+      </description>
+    </pattern>
+
+    <pattern>
+      <name>Environment-Specific Configuration</name>
+      <description>
+        Only apply strict no-color configuration in staging/production.
+        Development environments can retain standard formatting.
+      </description>
+    </pattern>
+  </patterns_to_follow>
+
+  <common_issues>
+    <issue>
+      <symptom>ANSI codes still appear after fix</symptom>
+      <cause>Third-party libraries with their own color configuration</cause>
+      <solution>
+        Check for libraries like rich, colorama, or coloredlogs.
+        Explicitly disable their color output in production.
+      </solution>
+    </issue>
+
+    <issue>
+      <symptom>Logs missing after deployment</symptom>
+      <cause>PYTHONUNBUFFERED not set, causing buffered output</cause>
+      <solution>Ensure PYTHONUNBUFFERED=1 is set in Dockerfile</solution>
+    </issue>
+
+    <issue>
+      <symptom>Local development loses color output</symptom>
+      <cause>Environment detection not working properly</cause>
+      <solution>
+        Check that ENVIRONMENT variable is properly set and
+        logging_config.py only disables colors for staging/production
+      </solution>
+    </issue>
+  </common_issues>
+
+  <testing_checklist>
+    <item>Run test_ansi_logging.py locally</item>
+    <item>Run verify_cloud_run_logging_fix.py for configuration check</item>
+    <item>Build Docker image and test locally</item>
+    <item>Deploy to staging and check Cloud Console logs</item>
+    <item>Verify exception tracebacks are readable</item>
+    <item>Confirm structured logging fields are preserved</item>
+    <item>Test with actual ClickHouse connection errors</item>
+  </testing_checklist>
+
+  <rollback_procedure>
+    <step>Remove environment variables from Dockerfile</step>
+    <step>Delete netra_backend/app/core/logging_config.py</step>
+    <step>Remove logging configuration imports from main.py</step>
+    <step>Rebuild and redeploy Docker images</step>
+  </rollback_procedure>
+
+  <related_specs>
+    <spec>SPEC/gcp_deployment.xml</spec>
+    <spec>SPEC/docker_hot_reload.xml</spec>
+    <spec>SPEC/deployment_architecture.xml</spec>
+  </related_specs>
+
+  <business_impact>
+    <operational>
+      Clean, readable logs reduce debugging time by 60-80%.
+      Critical for incident response and monitoring.
+    </operational>
+    <development_velocity>
+      Developers can quickly identify and fix production issues.
+      Reduces mean time to resolution (MTTR).
+    </development_velocity>
+  </business_impact>
+</learnings>

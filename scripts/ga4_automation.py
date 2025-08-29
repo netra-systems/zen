@@ -30,37 +30,30 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 try:
-    from google.analytics.admin import AnalyticsAdminServiceClient
+    # Use v1beta API
+    from google.analytics.admin_v1beta import AnalyticsAdminServiceClient
     from google.analytics.admin_v1beta.types import (
         CustomDimension,
         CustomMetric,
         ConversionEvent,
+        KeyEvent,
         Property,
         DataRetentionSettings,
-        IndustryCategory
+        IndustryCategory,
+        NumericValue,
+        AccountSummary,
+        PropertySummary
     )
     from google.oauth2 import service_account
     GOOGLE_ANALYTICS_AVAILABLE = True
-    
-    # Try to import Audience-related types (may not be available in all versions)
-    try:
-        from google.analytics.admin_v1beta.types import (
-            Audience,
-            AudienceFilterClause,
-            AudienceDimensionOrMetricFilter,
-            AudienceFilterExpression,
-            StringFilter,
-            NumericFilter
-        )
-        AUDIENCE_SUPPORT = True
-    except ImportError:
-        AUDIENCE_SUPPORT = False
-        logger.info("Audience API not available in this version")
+    # Note: Audiences are not available in v1beta API, must be created manually
+    AUDIENCE_SUPPORT = False
+    logger.info("Using Google Analytics Admin API v1beta")
         
 except ImportError as e:
     GOOGLE_ANALYTICS_AVAILABLE = False
     AUDIENCE_SUPPORT = False
-    logger.warning(f"Google Analytics Admin API not installed. Install with: pip install google-analytics-admin")
+    logger.warning(f"Google Analytics Admin API not installed or wrong version. Error: {e}")
 
 class DimensionScope(Enum):
     """GA4 Custom Dimension Scopes"""
@@ -169,25 +162,28 @@ class GA4Configurator:
             logger.info(f"Searching for property with measurement ID: {self.config.measurement_id}")
             
             # List all accessible accounts first
-            accounts = self.client.list_accounts()
+            accounts = list(self.client.list_account_summaries())
             
             for account in accounts:
-                # List properties for each account
-                properties = self.client.list_properties(filter=f"parent:{account.name}")
-                
-                for prop in properties:
+                # List properties for this account
+                for prop_summary in account.property_summaries:
+                    prop_name = prop_summary.property
+                    
+                    # Get full property details
+                    prop = self.client.get_property(name=prop_name)
+                    
                     # Get data streams to check measurement ID
-                    data_streams = self.client.list_data_streams(parent=prop.name)
+                    data_streams = self.client.list_data_streams(parent=prop_name)
                     
                     for stream in data_streams:
                         if hasattr(stream, 'web_stream_data') and stream.web_stream_data:
                             if stream.web_stream_data.measurement_id == self.config.measurement_id:
-                                self.property_path = prop.name
-                                logger.info(f"[OK] Found property: {prop.display_name} ({prop.name})")
+                                self.property_path = prop_name
+                                logger.info(f"[OK] Found property: {prop.display_name} ({prop_name})")
                                 
                                 # Update config with discovered IDs
-                                self.config.property_id = prop.name.split('/')[-1]
-                                self.config.account_id = account.name.split('/')[-1]
+                                self.config.property_id = prop_name.split('/')[-1]
+                                self.config.account_id = account.account.split('/')[-1]
                                 return True
             
             logger.error(f"Property with measurement ID {self.config.measurement_id} not found")
@@ -257,10 +253,14 @@ class GA4Configurator:
                     scope=CustomDimension.DimensionScope[dimension['scope']]
                 )
                 
-                result = self.client.create_custom_dimension(
+                # Use proper request format for v1beta
+                from google.analytics.admin_v1beta.types import CreateCustomDimensionRequest
+                request = CreateCustomDimensionRequest(
                     parent=self.property_path,
                     custom_dimension=custom_dimension
                 )
+                
+                result = self.client.create_custom_dimension(request=request)
                 
                 logger.info(f"  [OK] Created dimension: {dimension['display_name']}")
                 created += 1
@@ -300,7 +300,7 @@ class GA4Configurator:
                     "CURRENCY": CustomMetric.MeasurementUnit.CURRENCY
                 }
                 
-                # Create new metric
+                # Create new metric  
                 custom_metric = CustomMetric(
                     parameter_name=param_name,
                     display_name=metric['display_name'],
@@ -309,10 +309,14 @@ class GA4Configurator:
                     scope=CustomMetric.MetricScope.EVENT
                 )
                 
-                result = self.client.create_custom_metric(
+                # Use proper request format for v1beta
+                from google.analytics.admin_v1beta.types import CreateCustomMetricRequest
+                request = CreateCustomMetricRequest(
                     parent=self.property_path,
                     custom_metric=custom_metric
                 )
+                
+                result = self.client.create_custom_metric(request=request)
                 
                 logger.info(f"  [OK] Created metric: {metric['display_name']}")
                 created += 1
@@ -346,10 +350,14 @@ class GA4Configurator:
                     counting_method=ConversionEvent.ConversionCountingMethod.ONCE_PER_EVENT
                 )
                 
-                result = self.client.create_conversion_event(
+                # Use proper request format for v1beta
+                from google.analytics.admin_v1beta.types import CreateConversionEventRequest
+                request = CreateConversionEventRequest(
                     parent=self.property_path,
                     conversion_event=conversion_event
                 )
+                
+                result = self.client.create_conversion_event(request=request)
                 
                 logger.info(f"  [OK] Marked as conversion: {event_name}")
                 created += 1
@@ -401,21 +409,27 @@ class GA4Configurator:
         logger.info(f"Configuring data retention: {retention_period}")
         
         try:
-            # Get current property settings
-            property_obj = self.client.get_property(name=self.property_path)
+            # Get data retention settings
+            from google.analytics.admin_v1beta.types import GetDataRetentionSettingsRequest, UpdateDataRetentionSettingsRequest
+            from google.protobuf import field_mask_pb2
             
-            # Update data retention
-            property_obj.data_retention_settings.event_data_retention = (
-                DataRetentionSettings.RetentionDuration[retention_period]
+            # Get current settings
+            get_request = GetDataRetentionSettingsRequest(
+                name=f"{self.property_path}/dataRetentionSettings"
             )
-            property_obj.data_retention_settings.reset_user_data_on_new_activity = True
+            settings = self.client.get_data_retention_settings(request=get_request)
             
-            # Update property
-            update_mask = {"paths": ["data_retention_settings"]}
-            result = self.client.update_property(
-                property=property_obj,
-                update_mask=update_mask
+            # Update retention settings
+            settings.event_data_retention = DataRetentionSettings.RetentionDuration[retention_period]
+            settings.reset_user_data_on_new_activity = True
+            
+            # Create update request
+            update_request = UpdateDataRetentionSettingsRequest(
+                data_retention_settings=settings,
+                update_mask=field_mask_pb2.FieldMask(paths=["event_data_retention", "reset_user_data_on_new_activity"])
             )
+            
+            result = self.client.update_data_retention_settings(request=update_request)
             
             logger.info(f"[OK] Data retention configured: {retention_period}")
             return True
