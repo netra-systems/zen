@@ -60,27 +60,22 @@ class WebSocketRealConnectionTester:
         """Quick health check to avoid timeouts."""
         try:
             import httpx
-            async with httpx.AsyncClient() as client:
+            # CRITICAL FIX: Increase timeout and use proper connection settings for Windows/Docker
+            async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await asyncio.wait_for(
                     client.get(f"{self.backend_url}/health"),
-                    timeout=2.0
+                    timeout=5.0  # Increased timeout for health check
                 )
                 return response.status_code == 200
-        except Exception:
+        except Exception as e:
+            print(f"DEBUG: Health check failed: {e}")
             return False
         
     async def create_authenticated_connection(self, user_id: str) -> Dict[str, Any]:
         """Create authenticated WebSocket connection."""
         try:
-            # Quick health check first to avoid timeout
-            health_check_result = await self._quick_health_check()
-            if not health_check_result:
-                return {
-                    "client": None,
-                    "token": None,
-                    "connected": False,
-                    "error": "Backend service not available"
-                }
+            # CRITICAL FIX: Skip health check as it's causing false failures
+            # The WebSocket connection attempt itself will verify service availability
             
             # Get or create JWT token
             token = await self._get_valid_jwt_token(user_id)

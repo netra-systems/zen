@@ -46,8 +46,20 @@ def pytest_configure(config):
         if hasattr(config.option, 'llm_timeout') and config.option.llm_timeout:
             os.environ["TEST_LLM_TIMEOUT"] = str(config.option.llm_timeout)
         
+        # Configure real services (override the in-memory database setting)
+        os.environ["USE_REAL_SERVICES"] = "true"
+        os.environ["DATABASE_URL"] = "postgresql://netra:netra123@localhost:5432/netra_dev"
+        os.environ["REDIS_URL"] = "redis://localhost:6379/0"
+        os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
+        
+        # Disable test-only database isolation for real service testing
+        os.environ.pop("TEST_DISABLE_REDIS", None)
+        os.environ["CLICKHOUSE_ENABLED"] = "true"
+        os.environ.pop("DEV_MODE_DISABLE_CLICKHOUSE", None)
+        
         print(f"Real LLM testing enabled with model: {config.option.llm_model if hasattr(config.option, 'llm_model') else 'default'}")
         print(f"LLM timeout: {config.option.llm_timeout if hasattr(config.option, 'llm_timeout') else 60} seconds")
+        print("Real services enabled: PostgreSQL, Redis, ClickHouse")
 
 # Import all common fixtures from the consolidated base FIRST
 from test_framework.conftest_base import *

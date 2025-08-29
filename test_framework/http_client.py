@@ -208,8 +208,13 @@ class UnifiedHTTPClient:
                 # Check for different possible connection state attributes
                 if hasattr(self._websocket, 'closed') and not self._websocket.closed:
                     is_connected = True
-                elif hasattr(self._websocket, 'state') and str(self._websocket.state) == 'State.OPEN':
-                    is_connected = True
+                elif hasattr(self._websocket, 'state'):
+                    # CRITICAL FIX: Check for WebSocket state properly - handle enum values
+                    state_value = self._websocket.state
+                    if hasattr(state_value, 'value') and state_value.value == 1:  # State.OPEN = 1
+                        is_connected = True
+                    elif str(state_value) in ['State.OPEN', '1']:
+                        is_connected = True
                 elif hasattr(self._websocket, 'open') and self._websocket.open:
                     is_connected = True
                 elif not hasattr(self._websocket, 'closed') and not hasattr(self._websocket, 'state') and not hasattr(self._websocket, 'open'):
@@ -233,7 +238,11 @@ class UnifiedHTTPClient:
                         return False
                     
             except Exception as e:
-                print(f"DEBUG: WebSocket connection attempt {attempt + 1} failed: {e}")
+                # CRITICAL FIX: Improve timeout handling for WebSocket connections
+                if "timeout" in str(e).lower() or "timed out" in str(e).lower():
+                    print(f"DEBUG: WebSocket connection timeout on attempt {attempt + 1}: {e}")
+                else:
+                    print(f"DEBUG: WebSocket connection attempt {attempt + 1} failed: {e}")
                 if attempt == self.config.max_retries:
                     self._handle_websocket_error(str(e))
                     return False
@@ -254,8 +263,13 @@ class UnifiedHTTPClient:
         if token:
             ws_url = f"{ws_url}?token={token}"
         
-        # Connection kwargs with timeout
-        connection_kwargs = {"ping_timeout": self.config.timeout}
+        # Connection kwargs with timeout - CRITICAL FIX: Use proper timeout settings
+        connection_kwargs = {
+            "ping_timeout": 20.0,  # Timeout for ping/pong
+            "ping_interval": 30.0,  # How often to ping
+            "close_timeout": 10.0  # Timeout for closing
+            # Note: 'timeout' parameter is not supported in this version
+        }
         
         # Only use SSL context for wss:// URLs
         if ws_url.startswith("wss://"):
@@ -274,8 +288,13 @@ class UnifiedHTTPClient:
             is_closed = False
             if hasattr(self._websocket, 'closed') and self._websocket.closed:
                 is_closed = True
-            elif hasattr(self._websocket, 'state') and str(self._websocket.state) != 'State.OPEN':
-                is_closed = True
+            elif hasattr(self._websocket, 'state'):
+                # CRITICAL FIX: Check for WebSocket state properly - handle enum values
+                state_value = self._websocket.state
+                if hasattr(state_value, 'value') and state_value.value != 1:  # State.OPEN = 1
+                    is_closed = True
+                elif str(state_value) not in ['State.OPEN', '1']:
+                    is_closed = True
             elif hasattr(self._websocket, 'open') and not self._websocket.open:
                 is_closed = True
             
@@ -327,8 +346,13 @@ class UnifiedHTTPClient:
             is_closed = False
             if hasattr(self._websocket, 'closed') and self._websocket.closed:
                 is_closed = True
-            elif hasattr(self._websocket, 'state') and str(self._websocket.state) != 'State.OPEN':
-                is_closed = True
+            elif hasattr(self._websocket, 'state'):
+                # CRITICAL FIX: Check for WebSocket state properly - handle enum values
+                state_value = self._websocket.state
+                if hasattr(state_value, 'value') and state_value.value != 1:  # State.OPEN = 1
+                    is_closed = True
+                elif str(state_value) not in ['State.OPEN', '1']:
+                    is_closed = True
             elif hasattr(self._websocket, 'open') and not self._websocket.open:
                 is_closed = True
             

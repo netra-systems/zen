@@ -18,7 +18,7 @@ from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_defaults import LLMModel
 from netra_backend.app.schemas.llm_types import LLMProvider
-from netra_backend.tests.fixtures.llm_fixtures_core import mock_llm_manager
+from netra_backend.tests.fixtures.llm_fixtures_core import create_basic_llm_manager
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def triage_config():
 def mock_agent():
     """Mock triage agent for testing."""
     agent = MagicMock()
-    agent.llm_manager = MagicMock()
+    agent.llm_manager = create_basic_llm_manager()
     agent.llm_fallback_handler = MagicMock()
     agent.triage_core = MagicMock()
     agent.prompt_builder = MagicMock()
