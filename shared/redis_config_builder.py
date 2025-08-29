@@ -524,13 +524,14 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
             if password:
                 return password
             
-            # If not found, try environment-specific patterns
-            if self.parent.env.get("ENVIRONMENT") == "staging":
-                # Use the Terraform-managed staging-redis-url secret
-                return self.unified_secret_manager.gcp.get_secret("staging-redis-url")
-            elif self.parent.env.get("ENVIRONMENT") == "production":
-                # Use the Terraform-managed production-redis-url secret  
-                return self.unified_secret_manager.gcp.get_secret("production-redis-url")
+            # If not found, try environment-specific patterns only if GCP is enabled
+            if self.unified_secret_manager._is_gcp_enabled():
+                if self.parent.env.get("ENVIRONMENT") == "staging":
+                    # Use the Terraform-managed staging-redis-url secret
+                    return self.unified_secret_manager.gcp.get_secret("staging-redis-url")
+                elif self.parent.env.get("ENVIRONMENT") == "production":
+                    # Use the Terraform-managed production-redis-url secret  
+                    return self.unified_secret_manager.gcp.get_secret("production-redis-url")
             
             return None
         

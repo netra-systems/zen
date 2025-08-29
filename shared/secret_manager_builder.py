@@ -119,26 +119,32 @@ class SecretManagerBuilder:
                 from netra_backend.app.core.isolated_environment import get_env
                 return get_env()
             else:
-                # Shared/default environment management
-                from dev_launcher.isolated_environment import get_env
-                return get_env()
+                # Try dev_launcher for local development contexts
+                try:
+                    from dev_launcher.isolated_environment import get_env
+                    return get_env()
+                except ImportError:
+                    # Dev launcher not available (e.g., in Docker containers)
+                    # Fall through to basic environment manager
+                    pass
         except ImportError as e:
-            logger.warning(f"Failed to import service-specific environment manager: {e}. Using basic env access.")
-            # Fallback to a minimal isolated environment implementation
-            # This ensures we never directly access os.environ
-            class BasicEnvManager:
-                def __init__(self):
-                    # Create a minimal implementation that wraps os.environ
-                    # but still follows the interface pattern
-                    self._env_copy = dict(os.environ)
-                
-                def get(self, key, default=None):
-                    return self._env_copy.get(key, default)
-                
-                def get_all(self):
-                    return dict(self._env_copy)
+            logger.debug(f"Service-specific environment manager not available: {e}. Using fallback.")
+        
+        # Fallback to a minimal isolated environment implementation
+        # This ensures we never directly access os.environ
+        class BasicEnvManager:
+            def __init__(self):
+                # Create a minimal implementation that wraps os.environ
+                # but still follows the interface pattern
+                self._env_copy = dict(os.environ)
             
-            return BasicEnvManager()
+            def get(self, key, default=None):
+                return self._env_copy.get(key, default)
+            
+            def get_all(self):
+                return dict(self._env_copy)
+        
+        return BasicEnvManager()
     
     def _detect_environment(self) -> str:
         """
@@ -179,7 +185,10 @@ class SecretManagerBuilder:
     def gcp(self):
         """GCP Secret Manager integration."""
         if self._gcp is None:
-            self._gcp = self.GCPSecretBuilder(self)
+            if self._is_gcp_enabled():
+                self._gcp = self.GCPSecretBuilder(self)
+            else:
+                self._gcp = self.DisabledGCPBuilder(self)
         return self._gcp
     
     @property
@@ -239,6 +248,36 @@ class SecretManagerBuilder:
         return self._production
     
     # Main sub-builder classes
+    
+    class DisabledGCPBuilder:
+        """Dummy GCP builder that returns None for all secret requests when GCP is disabled."""
+        
+        def __init__(self, parent):
+            self.parent = parent
+        
+        def get_secret(self, secret_name: str, environment: str = None) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def get_database_password(self) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def get_redis_password(self) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def get_jwt_secret(self) -> Optional[str]:
+            """Return None since GCP is disabled."""
+            return None
+        
+        def validate_gcp_connectivity(self) -> Tuple[bool, str]:
+            """Return disabled status."""
+            return False, "GCP Secret Manager is disabled in this environment"
+        
+        def list_available_secrets(self) -> List[str]:
+            """Return empty list since GCP is disabled."""
+            return []
     
     class GCPSecretBuilder:
         """Manages Google Cloud Secret Manager integration."""
@@ -1029,6 +1068,19 @@ class SecretManagerBuilder:
         """Load all secrets for current environment with comprehensive fallback."""
         return self.environment.load_all_secrets()
     
+    def _is_gcp_enabled(self) -> bool:
+        """Check if GCP Secret Manager should be used based on environment and configuration."""
+        # Check if explicitly disabled in environment
+        if self.env.get("DISABLE_GCP_SECRET_MANAGER", "false").lower() == "true":
+            return False
+        
+        # Check if load secrets is disabled
+        if self.env.get("LOAD_SECRETS", "true").lower() == "false":
+            return False
+        
+        # Only enable for staging and production environments
+        return self._environment in ["staging", "production"]
+    
     def get_secret(self, secret_name: str, use_cache: bool = True) -> Optional[str]:
         """Get individual secret with caching and fallback chain."""
         # Try cache first if enabled
@@ -1037,12 +1089,13 @@ class SecretManagerBuilder:
             if cached:
                 return cached
         
-        # Try GCP Secret Manager
-        gcp_secret = self.gcp.get_secret(secret_name)
-        if gcp_secret:
-            if use_cache:
-                self.cache.cache_secret(secret_name, gcp_secret)
-            return gcp_secret
+        # Try GCP Secret Manager only if enabled
+        if self._is_gcp_enabled():
+            gcp_secret = self.gcp.get_secret(secret_name)
+            if gcp_secret:
+                if use_cache:
+                    self.cache.cache_secret(secret_name, gcp_secret)
+                return gcp_secret
         
         # Try environment variable
         env_secret = self.env.get(secret_name)
@@ -1055,7 +1108,7 @@ class SecretManagerBuilder:
         if self._environment == "development":
             dev_fallback = self.development.get_development_fallback(secret_name)
             if dev_fallback:
-                logger.warning(f"Using development fallback for {secret_name}")
+                logger.debug(f"Using development fallback for {secret_name}")
                 return dev_fallback
         
         return None
