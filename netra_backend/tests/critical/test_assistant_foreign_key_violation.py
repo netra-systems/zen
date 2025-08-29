@@ -4,6 +4,7 @@ Test to reproduce and fix the assistant foreign key violation error.
 Error: insert or update on table "runs" violates foreign key constraint "runs_assistant_id_fkey"
 DETAIL: Key (assistant_id)=(netra-assistant) is not present in table "assistants".
 """
+import os
 import pytest
 import asyncio
 from sqlalchemy import select
@@ -18,6 +19,10 @@ setup_test_path()
 
 @pytest.mark.asyncio
 @pytest.mark.env_test
+@pytest.mark.skipif(
+    "sqlite" in os.environ.get("DATABASE_URL", "sqlite"),
+    reason="SQLite doesn't support PostgreSQL-specific features like ARRAY types"
+)
 class TestAssistantForeignKeyViolation:
     """Test suite to reproduce and fix the assistant foreign key violation."""
     

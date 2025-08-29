@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Docker File Organization and Usage Guidelines</title>
+    <version>1.0.0</version>
+    <created>2025-08-29</created>
+    <purpose>Define the organization and usage of Docker files to prevent duplication and confusion</purpose>
+  </metadata>
+
+  <docker-file-structure>
+    <principle>Single Source of Truth per Environment</principle>
+    
+    <locations>
+      <location path="docker/">
+        <purpose>Development and test Docker files for local/CI environments</purpose>
+        <files>
+          <file name="backend.Dockerfile">Production-ready backend with multi-stage build</file>
+          <file name="backend.development.Dockerfile">Development backend with hot reload</file>
+          <file name="auth.Dockerfile">Production-ready auth service</file>
+          <file name="auth.development.Dockerfile">Development auth service with hot reload</file>
+          <file name="auth.test.Dockerfile">Test environment auth service</file>
+          <file name="frontend.Dockerfile">Production-ready frontend</file>
+          <file name="frontend.development.Dockerfile">Development frontend with hot reload</file>
+          <file name="frontend.test.Dockerfile">Test environment frontend</file>
+        </files>
+      </location>
+      
+      <location path="deployment/docker/">
+        <purpose>GCP/Cloud deployment specific Docker files</purpose>
+        <files>
+          <file name="backend.gcp.Dockerfile">GCP Cloud Run optimized backend</file>
+          <file name="auth.gcp.Dockerfile">GCP Cloud Run optimized auth service</file>
+          <file name="frontend.gcp.Dockerfile">GCP Cloud Run optimized frontend with staging config</file>
+          <file name="frontend.prod.Dockerfile">Production frontend build</file>
+        </files>
+      </location>
+    </locations>
+
+    <forbidden-locations>
+      <location path="netra_backend/">
+        <reason>Service root should not contain Docker files - use docker/ directory</reason>
+      </location>
+      <location path="auth_service/">
+        <reason>Service root should not contain Docker files - use docker/ directory</reason>
+      </location>
+      <location path="frontend/">
+        <reason>Service root should not contain Docker files - use docker/ directory</reason>
+      </location>
+    </forbidden-locations>
+  </docker-file-structure>
+
+  <usage-guidelines>
+    <guideline environment="local-development">
+      <description>For local development with hot reload</description>
+      <docker-files>
+        <backend>docker/backend.development.Dockerfile</backend>
+        <auth>docker/auth.development.Dockerfile</auth>
+        <frontend>docker/frontend.development.Dockerfile</frontend>
+      </docker-files>
+      <compose-file>docker-compose.dev.yml</compose-file>
+    </guideline>
+
+    <guideline environment="local-testing">
+      <description>For running tests locally</description>
+      <docker-files>
+        <backend>docker/backend.development.Dockerfile</backend>
+        <auth>docker/auth.test.Dockerfile</auth>
+        <frontend>docker/frontend.test.Dockerfile</frontend>
+      </docker-files>
+      <compose-file>docker-compose.test.yml or docker-compose.all.yml</compose-file>
+    </guideline>
+
+    <guideline environment="ci-testing">
+      <description>For CI/CD pipeline testing</description>
+      <docker-files>
+        <backend>docker/backend.Dockerfile</backend>
+        <auth>docker/auth.Dockerfile</auth>
+        <frontend>docker/frontend.Dockerfile</frontend>
+      </docker-files>
+    </guideline>
+
+    <guideline environment="gcp-staging">
+      <description>For GCP staging deployment</description>
+      <docker-files>
+        <backend>deployment/docker/backend.gcp.Dockerfile</backend>
+        <auth>deployment/docker/auth.gcp.Dockerfile</auth>
+        <frontend>deployment/docker/frontend.gcp.Dockerfile</frontend>
+      </docker-files>
+      <deployment-script>scripts/deploy_to_gcp.py --project netra-staging</deployment-script>
+    </guideline>
+
+    <guideline environment="gcp-production">
+      <description>For GCP production deployment</description>
+      <docker-files>
+        <backend>deployment/docker/backend.gcp.Dockerfile</backend>
+        <auth>deployment/docker/auth.gcp.Dockerfile</auth>
+        <frontend>deployment/docker/frontend.prod.Dockerfile</frontend>
+      </docker-files>
+      <deployment-script>scripts/deploy_to_gcp.py --project netra-prod</deployment-script>
+    </guideline>
+  </usage-guidelines>
+
+  <docker-compose-files>
+    <file name="docker-compose.yml">
+      <purpose>Base configuration for common services</purpose>
+    </file>
+    <file name="docker-compose.dev.yml">
+      <purpose>Development environment with hot reload</purpose>
+    </file>
+    <file name="docker-compose.test.yml">
+      <purpose>Test environment for running tests</purpose>
+    </file>
+    <file name="docker-compose.all.yml">
+      <purpose>All services for both test and dev environments</purpose>
+    </file>
+    <file name="docker-compose.override.yml">
+      <purpose>Local overrides (not committed to git)</purpose>
+    </file>
+  </docker-compose-files>
+
+  <best-practices>
+    <practice>
+      <rule>Always use multi-stage builds for production Docker files</rule>
+      <reason>Reduces image size and improves security</reason>
+    </practice>
+    <practice>
+      <rule>Use non-root users in production Docker files</rule>
+      <reason>Security best practice for container runtime</reason>
+    </practice>
+    <practice>
+      <rule>Include health checks in all Docker files</rule>
+      <reason>Enables proper container orchestration and monitoring</reason>
+    </practice>
+    <practice>
+      <rule>Never create Docker files in service root directories</rule>
+      <reason>Prevents confusion and maintains clear organization</reason>
+    </practice>
+    <practice>
+      <rule>Use specific Docker files for each environment</rule>
+      <reason>Optimizes for different requirements (dev vs prod)</reason>
+    </practice>
+  </best-practices>
+
+  <validation>
+    <script>scripts/check_docker_files.py</script>
+    <checks>
+      <check>No Docker files exist in service root directories</check>
+      <check>All docker-compose files reference existing Docker files</check>
+      <check>Production Docker files use multi-stage builds</check>
+      <check>Production Docker files run as non-root user</check>
+    </checks>
+  </validation>
+</specification>

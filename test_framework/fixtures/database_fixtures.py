@@ -63,6 +63,14 @@ async def test_db_session():
         pool_recycle=300
     )
     
+    # Create tables if model is available
+    try:
+        from netra_backend.app.db.models_postgres import Base
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except ImportError:
+        pass  # Models not available, skip table creation
+    
     # Create session with proper lifecycle management
     async_session_maker = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False

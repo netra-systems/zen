@@ -1,0 +1,284 @@
+# Netra Complete Environment - All 12 Services (Test and Dev)
+# This file runs all 12 services (6 test + 6 dev) simultaneously
+# Test: PostgreSQL, Redis, ClickHouse, Backend, Auth, Frontend
+# Dev: PostgreSQL, Redis, ClickHouse, Backend, Auth, Frontend
+# Usage: docker-compose -f docker-compose.all.yml up -d
+
+version: '3.8'
+
+services:
+  # ============================================
+  # TEST ENVIRONMENT (6 Services)
+  # ============================================
+  
+  # Test PostgreSQL
+  test-postgres:
+    image: postgres:15-alpine
+    container_name: netra-test-postgres
+    environment:
+      POSTGRES_USER: netra_test
+      POSTGRES_PASSWORD: netra_test
+      POSTGRES_DB: netra_test
+    ports:
+      - "5432:5432"
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netra_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+
+  # Test Redis
+  test-redis:
+    image: redis:7-alpine
+    container_name: netra-test-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - test_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+
+  # Test ClickHouse
+  test-clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: netra-test-clickhouse
+    environment:
+      CLICKHOUSE_DB: netra_analytics
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: netra123
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - test_clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+
+  # Test Backend
+  test-backend:
+    build:
+      context: .
+      dockerfile: docker/backend.development.Dockerfile
+    container_name: netra-test-backend
+    environment:
+      DATABASE_URL: postgresql://netra_test:netra_test@test-postgres:5432/netra_test
+      REDIS_URL: redis://test-redis:6379
+      CLICKHOUSE_HOST: test-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: netra123
+      ENVIRONMENT: test
+      JWT_SECRET_KEY: test-jwt-secret-key-change-in-production
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_MINUTES: 60
+    ports:
+      - "8000:8000"
+    depends_on:
+      - test-postgres
+      - test-redis
+      - test-clickhouse
+    networks:
+      - netra-network
+    restart: unless-stopped
+
+  # Test Auth Service
+  test-auth:
+    build:
+      context: .
+      dockerfile: docker/auth.test.Dockerfile
+    container_name: netra-test-auth
+    environment:
+      DATABASE_URL: postgresql://netra_test:netra_test@test-postgres:5432/netra_test
+      REDIS_URL: redis://test-redis:6379
+      ENVIRONMENT: test
+      JWT_SECRET_KEY: test-jwt-secret-key-change-in-production
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_MINUTES: 60
+    ports:
+      - "8081:8081"
+    depends_on:
+      - test-postgres
+      - test-redis
+    networks:
+      - netra-network
+    restart: unless-stopped
+
+  # Test Frontend
+  test-frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.test.Dockerfile
+    container_name: netra-test-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_AUTH_URL: http://localhost:8081
+      NEXT_PUBLIC_ENVIRONMENT: test
+    ports:
+      - "3000:3000"
+    depends_on:
+      - test-backend
+      - test-auth
+    networks:
+      - netra-network
+    restart: unless-stopped
+
+  # ============================================
+  # DEV ENVIRONMENT (6 Services)
+  # ============================================
+  
+  # Dev PostgreSQL
+  dev-postgres:
+    image: postgres:15-alpine
+    container_name: netra-dev-postgres
+    environment:
+      POSTGRES_USER: netra_dev
+      POSTGRES_PASSWORD: netra_dev
+      POSTGRES_DB: netra_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netra_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+
+  # Dev Redis
+  dev-redis:
+    image: redis:7-alpine
+    container_name: netra-dev-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - dev_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+
+  # Dev ClickHouse
+  dev-clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: netra-dev-clickhouse
+    environment:
+      CLICKHOUSE_DB: netra_analytics
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: netra123
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8124:8123"
+      - "9001:9000"
+    volumes:
+      - dev_clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netra-network
+
+  # Dev Backend
+  dev-backend:
+    build:
+      context: .
+      dockerfile: docker/backend.development.Dockerfile
+    container_name: netra-dev-backend
+    environment:
+      DATABASE_URL: postgresql://netra_dev:netra_dev@dev-postgres:5432/netra_dev
+      REDIS_URL: redis://dev-redis:6379
+      CLICKHOUSE_HOST: dev-clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: netra
+      CLICKHOUSE_PASSWORD: netra123
+      ENVIRONMENT: development
+      JWT_SECRET_KEY: dev-jwt-secret-key-change-in-production
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_MINUTES: 60
+    ports:
+      - "8001:8000"
+    depends_on:
+      - dev-postgres
+      - dev-redis
+      - dev-clickhouse
+    networks:
+      - netra-network
+    restart: unless-stopped
+
+  # Dev Auth Service
+  dev-auth:
+    build:
+      context: .
+      dockerfile: docker/auth.development.Dockerfile
+    container_name: netra-dev-auth
+    environment:
+      DATABASE_URL: postgresql://netra_dev:netra_dev@dev-postgres:5432/netra_dev
+      REDIS_URL: redis://dev-redis:6379
+      ENVIRONMENT: development
+      JWT_SECRET_KEY: dev-jwt-secret-key-change-in-production
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_MINUTES: 60
+    ports:
+      - "8082:8081"
+    depends_on:
+      - dev-postgres
+      - dev-redis
+    networks:
+      - netra-network
+    restart: unless-stopped
+
+  # Dev Frontend
+  dev-frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.development.Dockerfile
+    container_name: netra-dev-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8001
+      NEXT_PUBLIC_AUTH_URL: http://localhost:8082
+      NEXT_PUBLIC_ENVIRONMENT: development
+    ports:
+      - "3001:3000"
+    depends_on:
+      - dev-backend
+      - dev-auth
+    networks:
+      - netra-network
+    restart: unless-stopped
+
+# Networks
+networks:
+  netra-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  # Test volumes
+  test_postgres_data:
+  test_redis_data:
+  test_clickhouse_data:
+  # Dev volumes
+  dev_postgres_data:
+  dev_redis_data:
+  dev_clickhouse_data:

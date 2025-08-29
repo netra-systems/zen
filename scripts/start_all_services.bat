@@ -1,9 +1,10 @@
 @echo off
-REM Start all Netra infrastructure services (6 containers)
-REM PostgreSQL, Redis, ClickHouse for both test and dev environments
+REM Start all Netra services (12 containers total)
+REM Test: PostgreSQL, Redis, ClickHouse, Backend, Auth, Frontend
+REM Dev: PostgreSQL, Redis, ClickHouse, Backend, Auth, Frontend
 
 echo ========================================
-echo Starting Netra Infrastructure Services
+echo Starting All Netra Services (12 Total)
 echo ========================================
 echo.
 
@@ -11,9 +12,13 @@ echo Stopping any existing containers...
 docker-compose -f docker-compose.all.yml down 2>nul
 
 echo.
-echo Starting 6 infrastructure services:
-echo   - Test: PostgreSQL (5432), Redis (6379), ClickHouse (8123)
-echo   - Dev:  PostgreSQL (5433), Redis (6380), ClickHouse (8124)
+echo Starting 12 services (6 test + 6 dev):
+echo   TEST Environment:
+echo     - PostgreSQL (5432), Redis (6379), ClickHouse (8123)
+echo     - Backend (8000), Auth (8081), Frontend (3000)
+echo   DEV Environment:
+echo     - PostgreSQL (5433), Redis (6380), ClickHouse (8124)  
+echo     - Backend (8001), Auth (8082), Frontend (3001)
 echo.
 
 docker-compose -f docker-compose.all.yml up -d

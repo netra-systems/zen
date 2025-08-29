@@ -22,11 +22,17 @@ SERVICES = {
         "postgres": {"container": "netra-test-postgres", "port": 5432, "type": "PostgreSQL"},
         "redis": {"container": "netra-test-redis", "port": 6379, "type": "Redis"},
         "clickhouse": {"container": "netra-test-clickhouse", "port": 8123, "type": "ClickHouse"},
+        "backend": {"container": "netra-test-backend", "port": 8000, "type": "Backend"},
+        "auth": {"container": "netra-test-auth", "port": 8081, "type": "Auth"},
+        "frontend": {"container": "netra-test-frontend", "port": 3000, "type": "Frontend"},
     },
     "dev": {
         "postgres": {"container": "netra-dev-postgres", "port": 5433, "type": "PostgreSQL"},
         "redis": {"container": "netra-dev-redis", "port": 6380, "type": "Redis"},
         "clickhouse": {"container": "netra-dev-clickhouse", "port": 8124, "type": "ClickHouse"},
+        "backend": {"container": "netra-dev-backend", "port": 8001, "type": "Backend"},
+        "auth": {"container": "netra-dev-auth", "port": 8082, "type": "Auth"},
+        "frontend": {"container": "netra-dev-frontend", "port": 3001, "type": "Frontend"},
     }
 }
 
@@ -81,7 +87,7 @@ def check_port(port: int) -> bool:
 def print_status_table():
     """Print a formatted status table of all services."""
     print("\n" + "="*80)
-    print("NETRA DOCKER INFRASTRUCTURE STATUS (6 Services)")
+    print("NETRA DOCKER SERVICES STATUS (12 Services Total)")
     print("="*80)
     
     all_healthy = True
@@ -129,7 +135,7 @@ def print_status_table():
             print(f"{service_type:<15} {container_name:<25} {status_display} {port_display:<8} {available_display}")
     
     print("\n" + "="*80)
-    print(f"Total infrastructure services: {services_count}/6")
+    print(f"Total services running: {services_count}/12")
     
     # Quick start command
     if not all_healthy:
@@ -138,12 +144,7 @@ def print_status_table():
         print("\n>> TO VIEW LOGS:")
         print("   docker-compose -f docker-compose.all.yml logs -f")
     else:
-        print("\n[OK] All 6 infrastructure services are healthy and running!")
-    
-    print("\n>> TO RUN APPLICATION SERVICES LOCALLY:")
-    print("   Backend:  cd netra_backend && uvicorn app.main:app --reload --port 8000")
-    print("   Auth:     cd auth_service && uvicorn main:app --reload --port 8081")
-    print("   Frontend: cd frontend && npm run dev")
+        print("\n[OK] All 12 services are healthy and running!")
     
     print("\n>> DOCUMENTATION:")
     print("   - Quick Start: README.md#quick-start")
