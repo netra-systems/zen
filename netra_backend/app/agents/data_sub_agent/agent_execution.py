@@ -84,11 +84,10 @@ class ExecutionManager:
                         "timestamp": time.time()
                     }
                 }
-                # Try both send_message and send_to_thread methods as per test expectations
-                if hasattr(self.agent.websocket_manager, 'send_message'):
-                    await self.agent.websocket_manager.send_message(run_id, completion_message)
-                elif hasattr(self.agent.websocket_manager, 'send_to_thread'):
-                    await self.agent.websocket_manager.send_to_thread(run_id, completion_message)
+                # Note: Without thread_id or user_id, we cannot reliably send WebSocket messages
+                # run_id should not be used as a user_id for WebSocket communication
+                # This would need to be passed in via context if WebSocket messaging is required
+                logger.debug(f"WebSocket message not sent for run_id {run_id} - no thread/user context available")
         except Exception as e:
             logger.debug(f"Failed to send completion message: {e}")
     

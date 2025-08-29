@@ -7,7 +7,7 @@ including batch size calculation and progress tracking.
 
 import asyncio
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
@@ -34,14 +34,16 @@ class SyntheticDataBatchProcessor:
         status: GenerationStatus,
         run_id: str,
         stream_updates: bool,
-        batch_size: int
+        batch_size: int,
+        thread_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Process all batches for data generation"""
         generated_data = []
         for batch_start in range(0, profile.volume, batch_size):
             await self._process_single_batch(
                 profile, status, run_id, stream_updates, batch_start, 
-                batch_size, generated_data
+                batch_size, generated_data, thread_id, user_id
             )
         return generated_data
     
@@ -53,7 +55,9 @@ class SyntheticDataBatchProcessor:
         stream_updates: bool,
         batch_start: int,
         batch_size: int,
-        generated_data: List[Dict[str, Any]]
+        generated_data: List[Dict[str, Any]],
+        thread_id: Optional[str] = None,
+        user_id: Optional[str] = None
     ) -> None:
         """Process a single batch and update progress"""
         batch_data = await self._generate_batch(
@@ -62,7 +66,7 @@ class SyntheticDataBatchProcessor:
         generated_data.extend(batch_data)
         self.progress_tracker.update_progress(status, len(generated_data), profile.volume)
         await self.progress_tracker.handle_progress_update(
-            run_id, status, stream_updates, batch_start, batch_size
+            run_id, status, stream_updates, batch_start, batch_size, thread_id, user_id
         )
         await asyncio.sleep(0.01)  # Prevent overwhelming
     
