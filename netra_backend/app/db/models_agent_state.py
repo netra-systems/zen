@@ -29,7 +29,7 @@ class AgentStateSnapshot(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     run_id: Mapped[str] = mapped_column(String, index=True)
     thread_id: Mapped[str] = mapped_column(String, index=True)
-    user_id: Mapped[str] = mapped_column(String, index=True)  # Removed FK for test compatibility
+    user_id: Mapped[Optional[str]] = mapped_column(String, index=True, nullable=True)  # Removed FK for test compatibility
     
     # State versioning
     version: Mapped[str] = mapped_column(String, default="1.0")

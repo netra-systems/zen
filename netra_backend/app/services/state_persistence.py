@@ -187,8 +187,19 @@ class StatePersistenceService:
             logger.debug(f"Skipping state persistence for temporary run ID: {request.user_id}")
             return str(uuid.uuid4())  # Return a dummy snapshot ID
         
-        # Ensure user exists before creating snapshot
-        await self._ensure_user_exists_for_snapshot(request.user_id, db_session)
+        # Handle missing user_id by setting to None to avoid FK constraint
+        if not request.user_id:
+            logger.warning("No user_id provided for state snapshot, setting to None")
+            # Modify the request object directly
+            request.user_id = None
+        else:
+            # Ensure user exists before creating snapshot
+            try:
+                await self._ensure_user_exists_for_snapshot(request.user_id, db_session)
+            except Exception as e:
+                logger.warning(f"Failed to ensure user {request.user_id} exists, setting user_id to None: {e}")
+                # Modify the request object directly to avoid FK violation
+                request.user_id = None
         
         snapshot_id = str(uuid.uuid4())
         snapshot = await self._prepare_snapshot_for_database(snapshot_id, request)
@@ -398,8 +409,18 @@ class StatePersistenceService:
         logger.info(f"Saved state snapshot {snapshot_id} for run {run_id}")
     
     def _handle_save_error(self, request: StatePersistenceRequest, error: Exception) -> Tuple[bool, None]:
-        """Handle save operation error."""
-        logger.error(f"Failed to save state for run {request.run_id}: {error}")
+        """Handle save operation error with specific handling for FK violations."""
+        error_message = str(error)
+        
+        # Check if this is a foreign key violation related to user_id
+        if "agent_state_snapshots_user_id_fkey" in error_message:
+            logger.error(f"Foreign key violation for user_id '{request.user_id}' in run {request.run_id}. "
+                        f"User does not exist in userbase table. State persistence failed.")
+            logger.info(f"Consider creating user '{request.user_id}' in the userbase table or "
+                       f"setting user_id to None for development scenarios.")
+        else:
+            logger.error(f"Failed to save state for run {request.run_id}: {error}")
+        
         return False, None
     
     def _format_recovery_result(self, success: bool, recovery_id: str) -> Tuple[bool, Optional[str]]:
@@ -421,7 +442,6 @@ class StatePersistenceService:
             return  # Skip if no user_id provided
         
         from netra_backend.app.services.user_service import user_service
-        from netra_backend.app.schemas.user import UserCreate
         
         # Check if user exists
         existing_user = await user_service.get(db_session, id=user_id)
@@ -429,20 +449,13 @@ class StatePersistenceService:
             return  # User exists, nothing to do
         
         # Handle dev/test users automatically
-        if 'dev-temp' in user_id or user_id.startswith('test-'):
+        if 'dev-temp' in user_id or user_id.startswith('test-') or user_id.startswith('run_'):
             logger.info(f"Auto-creating dev/test user for state persistence: {user_id}")
             try:
-                # Create minimal dev user for state persistence
-                user_create = UserCreate(
-                    id=user_id,
-                    email=f"{user_id}@dev.local",
-                    full_name=f"Dev User {user_id}",
-                    password="DevPassword123!",  # Default password for auto-created dev users
-                    is_active=True,
-                    is_developer=True,
-                    role="developer"
-                )
-                await user_service.create(db_session, obj_in=user_create)
+                # Use the specialized dev user creation method that bypasses email validation
+                # Generate a valid email for dev users
+                dev_email = f"{user_id.replace('-', '_')}@example.com"
+                await user_service.get_or_create_dev_user(db_session, email=dev_email, user_id=user_id)
                 logger.info(f"Created dev user {user_id} for state persistence")
             except Exception as e:
                 # Log but don't fail - the foreign key error will be more descriptive

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List
 
-from netra_backend.app.llm.error_classification import FailureType
+from netra_backend.app.core.interfaces_validation import FailureType
 
 
 @dataclass

@@ -26,24 +26,38 @@ class WorkflowOrchestrator:
         self._workflow_steps = self._define_standard_workflow()
     
     def _define_standard_workflow(self) -> List[PipelineStep]:
-        """Define standard 12-step workflow from unified spec."""
+        """Define standard 12-step workflow from unified spec.
+        
+        These steps must execute sequentially as each depends on the previous:
+        1. Triage - Categorizes the request
+        2. Data - Gathers insights based on triage category
+        3. Optimization - Creates strategies based on data insights
+        4. Actions - Implements based on optimization strategies
+        5. Reporting - Summarizes all previous steps
+        """
         return [
-            self._create_pipeline_step("triage", "classification", 1),
-            self._create_pipeline_step("data", "insights", 2),
-            self._create_pipeline_step("optimization", "strategies", 3),
-            self._create_pipeline_step("actions", "implementation", 4),
-            self._create_pipeline_step("reporting", "summary", 5)
+            self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
+            self._create_pipeline_step("data", "insights", 2, dependencies=["triage"]),
+            self._create_pipeline_step("optimization", "strategies", 3, dependencies=["data"]),
+            self._create_pipeline_step("actions", "implementation", 4, dependencies=["optimization"]),
+            self._create_pipeline_step("reporting", "summary", 5, dependencies=["actions"])
         ]
     
     def _create_pipeline_step(self, agent_name: str, 
-                             step_type: str, order: int) -> PipelineStep:
-        """Create standardized pipeline step."""
+                             step_type: str, order: int,
+                             dependencies: List[str] = None) -> PipelineStep:
+        """Create standardized pipeline step with proper dependencies."""
+        from netra_backend.app.agents.supervisor.execution_context import AgentExecutionStrategy
+        
         return PipelineStep(
             agent_name=agent_name,
+            strategy=AgentExecutionStrategy.SEQUENTIAL,  # Explicitly set sequential
+            dependencies=dependencies or [],
             metadata={
                 "step_type": step_type,
                 "order": order,
-                "continue_on_error": False
+                "continue_on_error": False,
+                "requires_sequential": True  # Ensure sequential execution
             }
         )
     
