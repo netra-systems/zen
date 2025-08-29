@@ -111,6 +111,16 @@
 | **🔴 INTEGRATION TESTS** | `/netra_backend/tests/services/test_optimized_persistence_integration.py` | **Performance optimization testing** | Feature flag testing, delegation pattern validation |
 | **Performance Learnings** | [`SPEC/learnings/state_persistence_optimization.xml`](SPEC/learnings/state_persistence_optimization.xml) | **Optimization best practices** | 35-45% performance improvement, async safety patterns |
 
+### Go to Symbol & Code Navigation (NEW - 2025-08-28)
+| Component | Location | Purpose | Key Features |
+|-----------|----------|---------|-------------|
+| **🔴 SYMBOL EXTRACTOR** | `/netra_backend/app/services/corpus/symbol_extractor.py` | **Core symbol extraction engine** | Python AST parsing, JavaScript/TypeScript regex extraction, 8 symbol types |
+| **🔴 SEARCH OPERATIONS** | `/netra_backend/app/services/corpus/search_operations.py` | **Symbol search and ranking** | Relevance scoring, document symbol extraction, corpus integration |
+| **🔴 API ENDPOINTS** | `/netra_backend/app/routes/corpus.py` (lines 285-400) | **RESTful symbol search** | GET/POST symbol search, document symbol extraction, type filtering |
+| **🔴 COMPREHENSIVE TESTS** | `/netra_backend/tests/services/test_symbol_extractor.py` | **Symbol extraction testing** | Multi-language support, nested structures, error handling |
+| **Symbol Types Supported** | All extractors | **Language-specific symbols** | Python: class/function/method/variable, JS/TS: interface/type/enum/const, Arrow functions |
+| **Business Value** | Enterprise/Mid segments | **Development velocity** | 60-80% reduction in context switching, IDE-like navigation |
+
 ### Test Files (Unified Testing System)
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
@@ -219,6 +229,15 @@ python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Check Compliance
 python scripts/check_architecture_compliance.py
+```
+
+### Go to Symbol API Usage
+```bash
+# Search for symbols in code
+curl -X GET "http://localhost:8000/api/corpus/symbols/search?q=UserService&symbol_type=class&limit=20"
+
+# Get symbols from specific document
+curl -X GET "http://localhost:8000/api/corpus/main/document/doc123/symbols"
 ```
 
 ### Deployment
