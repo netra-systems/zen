@@ -23,22 +23,45 @@ from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecom
 from netra_backend.app.agents.triage_sub_agent.validator import RequestValidator
 
 # Note: TriageSubAgent is imported directly where needed to avoid circular imports
-# Use: from app.agents.triage_sub_agent.agent import TriageSubAgent
+# Preferred: from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
-__all__ = [
-    "Priority",
-    "Complexity",
-    "KeyParameters",
-    "ExtractedEntities",
-    "UserIntent",
-    "SuggestedWorkflow",
-    "ToolRecommendation",
-    "ValidationStatus",
-    "TriageMetadata",
-    "TriageResult",
-    "EntityExtractor",
-    "RequestValidator",
-    "IntentDetector",
-    "ToolRecommender",
-    "TriageCore"
-]
+# Import TriageSubAgent for convenience - avoid if circular imports occur
+try:
+    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+    __all__ = [
+        "Priority",
+        "Complexity",
+        "KeyParameters",
+        "ExtractedEntities",
+        "UserIntent",
+        "SuggestedWorkflow",
+        "ToolRecommendation",
+        "ValidationStatus",
+        "TriageMetadata",
+        "TriageResult",
+        "EntityExtractor",
+        "RequestValidator",
+        "IntentDetector",
+        "ToolRecommender",
+        "TriageCore",
+        "TriageSubAgent"
+    ]
+except ImportError:
+    # Fall back to original list if circular import occurs
+    __all__ = [
+        "Priority",
+        "Complexity",
+        "KeyParameters",
+        "ExtractedEntities",
+        "UserIntent",
+        "SuggestedWorkflow",
+        "ToolRecommendation",
+        "ValidationStatus",
+        "TriageMetadata",
+        "TriageResult",
+        "EntityExtractor",
+        "RequestValidator",
+        "IntentDetector",
+        "ToolRecommender",
+        "TriageCore"
+    ]
