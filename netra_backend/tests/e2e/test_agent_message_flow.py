@@ -417,7 +417,8 @@ class TestAgentMessageFlow:
         real_agent_service: AgentService,
         websocket_capture: WebSocketMessageCapture,
         message_tracker: MessageOrderTracker,
-        mock_db_session
+        mock_db_session,
+        real_websocket_manager
     ):
 
         """Test: User message → Backend → Agent → WebSocket → Response
@@ -439,8 +440,8 @@ class TestAgentMessageFlow:
         }
         
         # Patch WebSocket manager to capture messages
-        with patch.object(manager, 'send_message', websocket_capture.capture_message):
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+        with patch.object(real_websocket_manager, 'send_message', websocket_capture.capture_message):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
                 # Record message start
                 await message_tracker.record_message({
                     "stage": "input",
@@ -500,7 +501,9 @@ class TestAgentMessageFlow:
 
         message_tracker: MessageOrderTracker,
 
-        mock_db_session
+        mock_db_session,
+
+        real_websocket_manager
 
     ):
 
@@ -550,9 +553,9 @@ class TestAgentMessageFlow:
         
         # Process messages concurrently
 
-        with patch.object(manager, 'send_message', track_and_capture):
+        with patch.object(real_websocket_manager, 'send_message', track_and_capture):
 
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
                 # Submit all messages concurrently
 
                 tasks = [
@@ -604,7 +607,9 @@ class TestAgentMessageFlow:
 
         websocket_capture: WebSocketMessageCapture,
 
-        mock_db_session
+        mock_db_session,
+
+        real_websocket_manager
 
     ):
 
@@ -650,9 +655,9 @@ class TestAgentMessageFlow:
         
         # Process streaming message
 
-        with patch.object(manager, 'send_message', capture_streaming):
+        with patch.object(real_websocket_manager, 'send_message', capture_streaming):
 
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
 
                 await real_agent_service.handle_websocket_message(
 
@@ -707,7 +712,9 @@ class TestAgentMessageFlow:
 
         websocket_capture: WebSocketMessageCapture,
 
-        mock_db_session
+        mock_db_session,
+
+        real_websocket_manager
 
     ):
 
@@ -731,9 +738,9 @@ class TestAgentMessageFlow:
         
         # Process invalid message
 
-        with patch.object(manager, 'send_message', websocket_capture.capture_message):
+        with patch.object(real_websocket_manager, 'send_message', websocket_capture.capture_message):
 
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
 
                 await real_agent_service.handle_websocket_message(
 
@@ -767,7 +774,9 @@ class TestAgentMessageFlow:
 
         websocket_capture: WebSocketMessageCapture,
 
-        mock_db_session
+        mock_db_session,
+
+        real_websocket_manager
 
     ):
 
@@ -803,9 +812,9 @@ class TestAgentMessageFlow:
         
         # Process messages from different users concurrently
 
-        with patch.object(manager, 'send_message', websocket_capture.capture_message):
+        with patch.object(real_websocket_manager, 'send_message', websocket_capture.capture_message):
 
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
 
                 tasks = [
 
@@ -849,7 +858,9 @@ class TestAgentMessageFlow:
 
         websocket_capture: WebSocketMessageCapture,
 
-        mock_db_session
+        mock_db_session,
+
+        real_websocket_manager
 
     ):
 
@@ -901,9 +912,9 @@ class TestAgentMessageFlow:
         
         # Process message with simulated disconnection
 
-        with patch.object(manager, 'send_message', simulate_disconnect):
+        with patch.object(real_websocket_manager, 'send_message', simulate_disconnect):
 
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
                 # Should not raise exception despite WebSocket disconnect
 
                 await real_agent_service.handle_websocket_message(
@@ -946,7 +957,9 @@ class TestAgentMessageFlowPerformance:
 
         websocket_capture: WebSocketMessageCapture,
 
-        mock_db_session
+        mock_db_session,
+
+        real_websocket_manager
 
     ):
 
@@ -974,9 +987,9 @@ class TestAgentMessageFlowPerformance:
 
         start_time = datetime.now()
         
-        with patch.object(manager, 'send_message', websocket_capture.capture_message):
+        with patch.object(real_websocket_manager, 'send_message', websocket_capture.capture_message):
 
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
 
                 await real_agent_service.handle_websocket_message(
 
@@ -1014,7 +1027,9 @@ class TestAgentMessageFlowPerformance:
 
         websocket_capture: WebSocketMessageCapture,
 
-        mock_db_session
+        mock_db_session,
+
+        real_websocket_manager
 
     ):
 
@@ -1050,9 +1065,9 @@ class TestAgentMessageFlowPerformance:
 
         start_time = datetime.now()
         
-        with patch.object(manager, 'send_message', websocket_capture.capture_message):
+        with patch.object(real_websocket_manager, 'send_message', websocket_capture.capture_message):
 
-            with patch.object(manager, 'send_error', websocket_capture.capture_error):
+            with patch.object(real_websocket_manager, 'send_error', websocket_capture.capture_error):
 
                 tasks = [
 
