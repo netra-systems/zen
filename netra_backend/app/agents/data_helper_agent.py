@@ -35,6 +35,32 @@ class DataHelperAgent(BaseSubAgent):
         )
         self.data_helper_tool = DataHelper(llm_manager)
     
+    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
+        """Execute the agent - implements the abstract method from AgentLifecycleMixin.
+        
+        Args:
+            state: Current agent state
+            run_id: Run ID for tracking
+            stream_updates: Whether to stream updates (unused)
+        """
+        # Call the run method with extracted parameters from state
+        user_prompt = getattr(state, 'user_request', '')
+        thread_id = getattr(state, 'thread_id', '')
+        user_id = getattr(state, 'user_id', '')
+        
+        # Execute the run method and update state in place
+        updated_state = await self.run(
+            user_prompt=user_prompt,
+            thread_id=thread_id,
+            user_id=user_id,
+            run_id=run_id,
+            state=state
+        )
+        
+        # Copy updated attributes back to the original state
+        for key, value in updated_state.__dict__.items():
+            setattr(state, key, value)
+    
     async def run(
         self,
         user_prompt: str,
