@@ -116,6 +116,22 @@ async def get_current_user_optional(
 get_optional_current_user = get_current_user_optional
 get_current_active_user = get_current_user
 
+# Legacy function exports for backward compatibility
+async def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    """Create an access token through the auth service."""
+    from netra_backend.app.services.token_service import token_service
+    return await token_service.create_access_token(
+        user_id=data.get("sub", data.get("user_id")),
+        email=data.get("email"),
+        additional_claims=data,
+        expires_delta=expires_delta
+    )
+
+async def validate_token_jwt(token: str) -> Optional[Dict[str, Any]]:
+    """Validate a JWT token through the auth service."""
+    validation = await auth_client.validate_token(token)
+    return validation if validation else None
+
 # Type annotations for dependency injection
 ActiveUserDep = Annotated[User, Depends(get_current_user)]
 OptionalUserDep = Annotated[Optional[User], Depends(get_current_user_optional)]
