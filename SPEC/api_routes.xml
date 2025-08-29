@@ -20,6 +20,7 @@
         <requirement>API routes are organized by resource</requirement>
         <requirement>Routes are defined in app/routes</requirement>
         <requirement>Routes are versioned</requirement>
+        <requirement>Route prefixes are managed centrally in app_factory_route_configs.py - see learnings/router_double_prefix_pattern.xml</requirement>
       </requirements>
     </section>
     <section id="authentication" order="2">

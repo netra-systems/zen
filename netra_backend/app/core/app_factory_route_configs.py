@@ -1,4 +1,9 @@
-"""Route configuration utilities for FastAPI application factory."""
+"""Route configuration utilities for FastAPI application factory.
+
+CRITICAL: All route prefixes MUST be managed here centrally.
+Individual routers should NOT define their own prefixes in APIRouter() initialization.
+See SPEC/learnings/router_double_prefix_pattern.xml for details.
+"""
 
 
 def get_core_route_configs(modules: dict) -> dict:

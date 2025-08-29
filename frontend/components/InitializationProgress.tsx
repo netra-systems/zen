@@ -35,6 +35,9 @@ export function InitializationProgress({
   const message = phaseMessages[phase];
   const detail = phaseDetails[phase];
   
+  // Ensure progress is a valid number
+  const safeProgress = typeof progress === 'number' && !isNaN(progress) ? progress : 0;
+  
   // Show connection status for WebSocket phase
   const showConnectionStatus = phase === 'websocket' && connectionStatus;
   
@@ -50,7 +53,7 @@ export function InitializationProgress({
           
           {/* Progress Bar */}
           <div className="mb-4">
-            <Progress value={progress} className="h-2" />
+            <Progress value={safeProgress} className="h-2" />
           </div>
           
           {/* Status Message */}
@@ -75,17 +78,17 @@ export function InitializationProgress({
             <PhaseIndicator 
               label="Auth" 
               active={phase === 'auth'} 
-              completed={progress > 33} 
+              completed={safeProgress > 33} 
             />
             <PhaseIndicator 
               label="Connect" 
               active={phase === 'websocket'} 
-              completed={progress > 66} 
+              completed={safeProgress > 66} 
             />
             <PhaseIndicator 
               label="Load" 
               active={phase === 'store'} 
-              completed={progress >= 100} 
+              completed={safeProgress >= 100} 
             />
           </div>
           
@@ -98,7 +101,7 @@ export function InitializationProgress({
           
           {/* Progress Percentage */}
           <div className="mt-4 text-center">
-            <span className="text-xs text-gray-400">{Math.round(progress)}% complete</span>
+            <span className="text-xs text-gray-400">{Math.round(safeProgress)}% complete</span>
           </div>
         </div>
       </div>

@@ -39,18 +39,30 @@ class AuthDatabaseManager:
         
         try:
             # Create engine with auth-specific configuration
-            engine = create_async_engine(
-                database_url,
-                echo=False,
-                pool_size=kwargs.get('pool_size', 5),
-                max_overflow=kwargs.get('max_overflow', 10),
-                pool_timeout=kwargs.get('pool_timeout', 30),
-                pool_recycle=kwargs.get('pool_recycle', 1800),
-                connect_args=kwargs.get('connect_args', {
-                    "server_settings": {"jit": "off"},
-                    "command_timeout": 60,
-                })
-            )
+            # SQLite doesn't support pool parameters, so check if it's SQLite
+            if 'sqlite' in database_url.lower():
+                # SQLite configuration (no pool parameters)
+                engine = create_async_engine(
+                    database_url,
+                    echo=False,
+                    connect_args=kwargs.get('connect_args', {
+                        "check_same_thread": False
+                    })
+                )
+            else:
+                # PostgreSQL/other database configuration
+                engine = create_async_engine(
+                    database_url,
+                    echo=False,
+                    pool_size=kwargs.get('pool_size', 5),
+                    max_overflow=kwargs.get('max_overflow', 10),
+                    pool_timeout=kwargs.get('pool_timeout', 30),
+                    pool_recycle=kwargs.get('pool_recycle', 1800),
+                    connect_args=kwargs.get('connect_args', {
+                        "server_settings": {"jit": "off"},
+                        "command_timeout": 60,
+                    })
+                )
             logger.info("Successfully created async engine for auth service")
             return engine
         except Exception as e:

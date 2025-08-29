@@ -32,7 +32,9 @@ from netra_backend.app.services.service_locator import get_service
 logger = central_logger.get_logger(__name__)
 security = HTTPBearer()
 
-router = APIRouter(prefix="/api/mcp", tags=["MCP Client"])
+# IMPORTANT: Do NOT add prefix here - managed centrally in app_factory_route_configs.py
+# See SPEC/learnings/router_double_prefix_pattern.xml
+router = APIRouter(tags=["MCP Client"])
 
 
 def get_mcp_client_service() -> IMCPClientService:

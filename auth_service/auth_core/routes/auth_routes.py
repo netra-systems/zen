@@ -431,8 +431,9 @@ Users will see 'OAuth Configuration Broken' errors.
             logger.error("Failed to store OAuth state parameter")
             raise HTTPException(status_code=500, detail="Authentication state storage failed")
         
-        # Build OAuth URL
-        redirect_uri = _determine_urls()[0] + "/auth/callback"
+        # Build OAuth URL - OAuth provider redirects to auth service callback
+        auth_url, _ = _determine_urls()
+        redirect_uri = auth_url + "/auth/callback"
         
         if provider == "google":
             google_client_id = AuthConfig.get_google_client_id()

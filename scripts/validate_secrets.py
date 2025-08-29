@@ -17,6 +17,19 @@ from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 from enum import Enum
 
+# Fix Unicode encoding issues on Windows
+if sys.platform == "win32":
+    import io
+    try:
+        # Only wrap if not already wrapped
+        if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', line_buffering=True)
+        if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', line_buffering=True)
+    except:
+        # If wrapping fails, continue with default encoding
+        pass
+
 
 class Environment(Enum):
     """Deployment environments."""
@@ -134,9 +147,11 @@ class SecretsValidator:
     def get_secret_value(self, secret_name: str) -> Optional[str]:
         """Fetch a secret value from GCP Secret Manager."""
         try:
+            # Use gcloud.cmd on Windows
+            gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
             result = subprocess.run(
                 [
-                    "gcloud", "secrets", "versions", "access", "latest",
+                    gcloud_cmd, "secrets", "versions", "access", "latest",
                     f"--secret={secret_name}",
                     f"--project={self.project}"
                 ],
@@ -151,9 +166,11 @@ class SecretsValidator:
     def check_secret_exists(self, secret_name: str) -> bool:
         """Check if a secret exists in Secret Manager."""
         try:
+            # Use gcloud.cmd on Windows
+            gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
             subprocess.run(
                 [
-                    "gcloud", "secrets", "describe", secret_name,
+                    gcloud_cmd, "secrets", "describe", secret_name,
                     f"--project={self.project}"
                 ],
                 capture_output=True,
