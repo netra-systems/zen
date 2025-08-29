@@ -13,13 +13,16 @@ class TestConfigurationLoop(unittest.TestCase):
         """Set up test environment."""
         self.log_calls = []
         
-        # Mock the logger to capture log calls
+        # Store the original method properly
         self.original_log_info = logging.Logger.info
         
-        def mock_log_info(self, message, *args, **kwargs):
+        # Create a closure to capture log calls
+        test_instance = self
+        
+        def mock_log_info(logger_self, message, *args, **kwargs):
             if "All configuration caches cleared" in str(message):
-                self.log_calls.append(message)
-            return self.original_log_info(self, message, *args, **kwargs)
+                test_instance.log_calls.append(message)
+            return test_instance.original_log_info(logger_self, message, *args, **kwargs)
         
         logging.Logger.info = mock_log_info
         
