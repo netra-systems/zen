@@ -134,12 +134,31 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         # If authentication failed, return 401 immediately
         # This prevents leaking route information through 404/405 responses
         if auth_error:
-            logger.warning(f"Authentication failed for {request.url.path}: {str(auth_error)}")
-            raise HTTPException(
-                status_code=401,
-                detail={"error": "authentication_failed", "message": str(auth_error)},
-                headers={"WWW-Authenticate": "Bearer"}
-            )
+            # Determine if this is a service-to-service authentication failure
+            is_service_request = request.headers.get("X-Service-ID") is not None
+            
+            if is_service_request:
+                # Inter-service authentication failure - provide more specific error
+                logger.error(f"Inter-service authentication failed for {request.url.path}: {str(auth_error)}")
+                logger.error(f"Service ID: {request.headers.get('X-Service-ID', 'not provided')}")
+                raise HTTPException(
+                    status_code=401,
+                    detail={
+                        "error": "service_authentication_failed",
+                        "message": "Inter-service authentication failed. Verify SERVICE_SECRET and SERVICE_ID configuration.",
+                        "details": str(auth_error),
+                        "service_id": request.headers.get("X-Service-ID")
+                    },
+                    headers={"WWW-Authenticate": "Bearer"}
+                )
+            else:
+                # User authentication failure
+                logger.warning(f"User authentication failed for {request.url.path}: {str(auth_error)}")
+                raise HTTPException(
+                    status_code=401,
+                    detail={"error": "authentication_failed", "message": str(auth_error)},
+                    headers={"WWW-Authenticate": "Bearer"}
+                )
         
         # Add auth info to request state for downstream handlers
         request.state.authenticated = True

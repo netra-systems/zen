@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <learning>
   <metadata>
-    <title>Auth Refresh Token 422 Error Fix</title>
-    <date>2025-08-28</date>
+    <title>Auth Refresh Token Complete Fix - Frontend and Backend</title>
+    <date>2025-08-29</date>
     <category>authentication</category>
     <severity>critical</severity>
     <services>auth_service, frontend</services>
+    <version>2.0</version>
+    <update_reason>Added comprehensive backend fix with robust error handling</update_reason>
   </metadata>
   
   <problem>
@@ -38,6 +40,34 @@
           2. Send it in JSON request body with Content-Type header
           3. Handle new refresh tokens in response
           4. Clear tokens on 401/422 errors
+        </description>
+      </change>
+      
+      <change>
+        <file>auth_service/auth_core/routes/auth_routes.py</file>
+        <description>
+          Completely rewrote refresh_tokens endpoint with:
+          1. ROBUST error handling for all edge cases
+          2. Support for multiple field name formats (refresh_token, refreshToken, token)
+          3. Comprehensive validation (empty body, invalid JSON, missing fields)
+          4. Security-conscious logging (truncation of sensitive data)
+          5. Clear error messages with error codes and examples
+          6. Automatic stripping of accidental "Bearer " prefix
+          7. Detailed documentation in docstring
+        </description>
+      </change>
+      
+      <change>
+        <file>auth_service/tests/test_refresh_token_bug_regression.py</file>
+        <description>
+          Created comprehensive test suite covering:
+          1. Standard field name parsing
+          2. CamelCase and legacy field support
+          3. Edge cases (empty, null, whitespace tokens)
+          4. Error conditions (invalid JSON, wrong content type)
+          5. Concurrent request handling
+          6. Security tests (token reuse, expiration, tampering)
+          7. Backward compatibility tests
         </description>
       </change>
     </changes>
@@ -146,12 +176,65 @@ async refreshToken(): Promise<{ access_token: string; refresh_token?: string }> 
     <guideline>Add request/response logging for auth endpoints in staging</guideline>
     <guideline>Document expected request format in auth service OpenAPI spec</guideline>
     <guideline>Add health checks that validate auth refresh flow</guideline>
+    <guideline>Support multiple field name formats for client compatibility</guideline>
+    <guideline>Implement comprehensive error handling with clear error codes</guideline>
+    <guideline>Never log full tokens or sensitive data - always truncate</guideline>
+    <guideline>Test with different client implementations and edge cases</guideline>
+    <guideline>Remove ALL legacy code when fixing issues - maintain SSOT</guideline>
   </prevention>
+  
+  <backend_error_codes>
+    <error_code>
+      <code>EMPTY_REQUEST</code>
+      <status>400</status>
+      <description>Request body is empty</description>
+    </error_code>
+    <error_code>
+      <code>INVALID_JSON</code>
+      <status>422</status>
+      <description>Invalid JSON in request body</description>
+    </error_code>
+    <error_code>
+      <code>MISSING_REFRESH_TOKEN</code>
+      <status>422</status>
+      <description>refresh_token field is missing</description>
+    </error_code>
+    <error_code>
+      <code>INVALID_TOKEN_TYPE</code>
+      <status>422</status>
+      <description>refresh_token must be a string</description>
+    </error_code>
+    <error_code>
+      <code>EMPTY_REFRESH_TOKEN</code>
+      <status>422</status>
+      <description>refresh_token is empty or whitespace-only</description>
+    </error_code>
+    <error_code>
+      <code>INVALID_REFRESH_TOKEN</code>
+      <status>401</status>
+      <description>Token is invalid, expired, or already used</description>
+    </error_code>
+    <error_code>
+      <code>REFRESH_SERVICE_ERROR</code>
+      <status>500</status>
+      <description>Internal service error during refresh</description>
+    </error_code>
+  </backend_error_codes>
   
   <related_issues>
     <issue>Frontend OAuth callback stores refresh token in localStorage</issue>
     <issue>Auth service accepts multiple field name formats for compatibility</issue>
     <issue>Token storage and retrieval must be consistent across frontend</issue>
     <issue>Race condition protection needed for concurrent refresh requests</issue>
+    <issue>Previous similar issues were not fully fixed - need complete remediation</issue>
+    <issue>Tests must use real services, not mocks, for proper validation</issue>
   </related_issues>
+  
+  <cross_references>
+    <reference>SPEC/learnings/index.xml</reference>
+    <reference>SPEC/learnings/authentication_fixes_2025.xml</reference>
+    <reference>SPEC/learnings/auth_refresh_endpoint_field_naming.xml</reference>
+    <reference>SPEC/security.xml</reference>
+    <reference>SPEC/testing.xml</reference>
+  </cross_references>
 </learning>

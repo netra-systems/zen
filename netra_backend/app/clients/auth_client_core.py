@@ -144,14 +144,28 @@ class AuthServiceClient:
     
     async def _handle_validation_error(self, token: str, error: Exception) -> Optional[Dict]:
         """Handle validation error with detailed error information and fallback."""
-        logger.error(f"Token validation failed: {error}")
-        logger.error(f"Auth service URL: {self.settings.base_url}")
-        logger.error(f"Auth service enabled: {self.settings.enabled}")
-        logger.error(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
-        
-        # Provide specific error information for debugging
         error_type = type(error).__name__
         error_msg = str(error)
+        
+        # Check if this is likely an inter-service authentication issue
+        is_service_auth_issue = (
+            not self.service_secret or 
+            not self.service_id or
+            "403" in error_msg or
+            "forbidden" in error_msg.lower()
+        )
+        
+        if is_service_auth_issue:
+            logger.error("INTER-SERVICE AUTHENTICATION ERROR")
+            logger.error(f"Error: {error}")
+            logger.error(f"Auth service URL: {self.settings.base_url}")
+            logger.error(f"Service ID configured: {bool(self.service_id)} (value: {self.service_id or 'NOT SET'})")
+            logger.error(f"Service Secret configured: {bool(self.service_secret)}")
+            logger.error("ACTION REQUIRED: Configure SERVICE_ID and SERVICE_SECRET environment variables")
+        else:
+            logger.error(f"Token validation failed: {error}")
+            logger.error(f"Auth service URL: {self.settings.base_url}")
+            logger.error(f"Auth service enabled: {self.settings.enabled}")
         
         # Always try local fallback when validation fails
         fallback_result = await self._local_validate(token)
@@ -160,6 +174,8 @@ class AuthServiceClient:
         if fallback_result and fallback_result.get("valid", False):
             fallback_result["error_context"] = f"Primary validation failed: {error_msg}"
             fallback_result["error_type"] = error_type
+            if is_service_auth_issue:
+                fallback_result["warning"] = "Using fallback due to inter-service auth failure"
             logger.info(f"Using fallback validation: {fallback_result.get('source', 'unknown')}")
             return fallback_result
         
@@ -168,6 +184,15 @@ class AuthServiceClient:
         if any(conn_err in error_msg.lower() for conn_err in ['connection', 'timeout', 'network', 'unreachable', 'circuit breaker', 'service_unavailable']):
             logger.warning(f"Auth service appears unreachable: {error_msg}")
             return {"valid": False, "error": "auth_service_unreachable", "details": error_msg}
+        
+        # For inter-service auth issues, provide clearer error
+        if is_service_auth_issue:
+            return {
+                "valid": False, 
+                "error": "inter_service_auth_failed",
+                "details": "Service credentials not configured or invalid",
+                "fix": "Set SERVICE_ID and SERVICE_SECRET environment variables"
+            }
         
         # For other errors, return the fallback result with error details
         if fallback_result:
@@ -246,18 +271,30 @@ class AuthServiceClient:
             logger.info("Token validation successful")
             return await self._parse_validation_response(response.json())
         elif response.status_code == 401:
-            logger.warning("Auth service returned 401 - token may be invalid or expired")
-            logger.warning(f"Auth service URL: {self.settings.base_url}")
-            logger.warning(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
+            # Check if this is an inter-service authentication failure
+            is_service_auth_issue = not self.service_secret or not self.service_id
+            
+            if is_service_auth_issue:
+                logger.error("INTER-SERVICE AUTH FAILURE: Missing service credentials")
+                logger.error(f"Service ID configured: {bool(self.service_id)} (value: {self.service_id or 'NOT SET'})")
+                logger.error(f"Service Secret configured: {bool(self.service_secret)}")
+                logger.error("Fix: Set SERVICE_ID and SERVICE_SECRET environment variables")
+            else:
+                logger.warning("Auth service returned 401 - user token may be invalid or expired")
+            
+            logger.info(f"Auth service URL: {self.settings.base_url}")
+            
             # Log response body for debugging
             try:
                 error_detail = response.json()
-                logger.warning(f"Auth service error: {error_detail}")
+                logger.warning(f"Auth service error details: {error_detail}")
             except:
                 logger.warning(f"Auth service error response: {response.text}")
         elif response.status_code == 403:
-            logger.warning("Auth service returned 403 - service not authorized")
-            logger.warning(f"Service ID: {self.service_id}, Service Secret configured: {bool(self.service_secret)}")
+            logger.error("INTER-SERVICE AUTH FAILURE: Service not authorized (403)")
+            logger.error(f"Service ID: {self.service_id or 'NOT SET'}")
+            logger.error(f"Service Secret configured: {bool(self.service_secret)}")
+            logger.error("This typically means the service credentials are invalid or the service is not registered")
         return None
     
     async def _prepare_remote_validation(self, token: str):
