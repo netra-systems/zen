@@ -185,11 +185,51 @@ def pytest_addoption(parser):
         choices=["backend", "frontend", "e2e"],
         help="Component being tested"
     )
+    
+    # Add real LLM testing support
+    llm_group = parser.getgroup("llm testing")
+    llm_group.addoption(
+        "--real-llm",
+        action="store_true",
+        default=False,
+        help="Use real LLM APIs instead of mocks"
+    )
+    llm_group.addoption(
+        "--llm-model",
+        action="store",
+        default="gemini-2.5-flash",
+        help="LLM model to use for testing"
+    )
+    llm_group.addoption(
+        "--llm-timeout",
+        type=int,
+        default=60,
+        help="Timeout for LLM API calls in seconds"
+    )
 
 
 def pytest_configure(config):
     """Configure the plugin."""
     _plugin.initialize(config)
+    
+    # Configure real LLM testing if --real-llm flag is provided
+    if hasattr(config.option, 'real_llm') and config.option.real_llm:
+        import os
+        
+        # Set environment variables for real LLM testing
+        os.environ["TEST_USE_REAL_LLM"] = "true"
+        os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
+        
+        # Set model if provided
+        if hasattr(config.option, 'llm_model') and config.option.llm_model:
+            os.environ["TEST_LLM_MODEL"] = config.option.llm_model
+        
+        # Set timeout if provided
+        if hasattr(config.option, 'llm_timeout') and config.option.llm_timeout:
+            os.environ["TEST_LLM_TIMEOUT"] = str(config.option.llm_timeout)
+        
+        print(f"Real LLM testing enabled with model: {config.option.llm_model if hasattr(config.option, 'llm_model') else 'default'}")
+        print(f"LLM timeout: {config.option.llm_timeout if hasattr(config.option, 'llm_timeout') else 60} seconds")
 
 
 def pytest_runtest_logreport(report):
