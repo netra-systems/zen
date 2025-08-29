@@ -318,7 +318,11 @@ class WebSocketManager:
                 buffered = await buffer_user_message(user_id, message, priority)
                 if buffered:
                     logger.debug(f"Buffered message for offline user {user_id}")
-            logger.warning(f"No connections found for user {user_id}")
+            # Use debug level for run_ids, warning for real user_ids
+            if user_id.startswith("run_"):
+                logger.debug(f"No connections found for run ID {user_id} (expected behavior)")
+            else:
+                logger.warning(f"No connections found for user {user_id}")
             return False
         
         success_count = 0
