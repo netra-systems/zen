@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-08-29T09:18:28.664327",
+  "total_tasks": 2,
+  "tasks": [
+    {
+      "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_errors.py::TestClickHouseErrorHandling::test_invalid_query_handling",
+      "type": "FAILED",
+      "category": "database"
+    },
+    {
+      "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_performance.py::TestClickHousePerformance::test_batch_insert_performance",
+      "type": "FAILED",
+      "category": "database"
+    }
+  ]
+}

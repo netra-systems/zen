@@ -1,0 +1,69 @@
+{
+  "timestamp": "2025-08-29T09:17:42.279292",
+  "scan_duration": 88.79457,
+  "total_failures": 2,
+  "failures": [
+    {
+      "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_errors.py::TestClickHouseErrorHandling::test_invalid_query_handling",
+      "type": "FAILED",
+      "category": "database"
+    },
+    {
+      "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_performance.py::TestClickHousePerformance::test_batch_insert_performance",
+      "type": "FAILED",
+      "category": "database"
+    }
+  ],
+  "category_results": {
+    "database": {
+      "success": false,
+      "failures": [
+        {
+          "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_performance.py::TestClickHousePerformance::test_batch_insert_performance",
+          "type": "FAILED",
+          "category": "database"
+        }
+      ]
+    },
+    "clickhouse": {
+      "success": false,
+      "failures": [
+        {
+          "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_performance.py::TestClickHousePerformance::test_batch_insert_performance",
+          "type": "FAILED",
+          "category": "database"
+        }
+      ]
+    },
+    "integration": {
+      "success": false,
+      "failures": [
+        {
+          "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_performance.py::TestClickHousePerformance::test_batch_insert_performance",
+          "type": "FAILED",
+          "category": "database"
+        }
+      ]
+    },
+    "api": {
+      "success": false,
+      "failures": [
+        {
+          "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_performance.py::TestClickHousePerformance::test_batch_insert_performance",
+          "type": "FAILED",
+          "category": "database"
+        }
+      ]
+    },
+    "core": {
+      "success": false,
+      "failures": [
+        {
+          "test": "netra_backend\\tests\\clickhouse\\test_clickhouse_performance.py::TestClickHousePerformance::test_batch_insert_performance",
+          "type": "FAILED",
+          "category": "database"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-08-29T09:15:03.554415",
+  "categories_tested": 6,
+  "total_failures": 0,
+  "results": [
+    {
+      "category": "database",
+      "status": "FAILED",
+      "success": false,
+      "duration": 32.21684503555298,
+      "failures": [],
+      "timestamp": "2025-08-29T09:13:01.806261"
+    },
+    {
+      "category": "unit",
+      "status": "TIMEOUT",
+      "success": false,
+      "duration": 30.056331157684326,
+      "failures": [],
+      "timestamp": "2025-08-29T09:13:33.868142"
+    },
+    {
+      "category": "integration",
+      "status": "FAILED",
+      "success": false,
+      "duration": 33.36029100418091,
+      "failures": [],
+      "timestamp": "2025-08-29T09:14:09.229395"
+    },
+    {
+      "category": "api",
+      "status": "FAILED",
+      "success": false,
+      "duration": 29.816397428512573,
+      "failures": [],
+      "timestamp": "2025-08-29T09:14:41.046636"
+    },
+    {
+      "category": "smoke",
+      "status": "FAILED",
+      "success": false,
+      "duration": 13.27659821510315,
+      "failures": [],
+      "timestamp": "2025-08-29T09:14:56.323742"
+    },
+    {
+      "category": "core",
+      "status": "FAILED",
+      "success": false,
+      "duration": 3.2290914058685303,
+      "failures": [],
+      "timestamp": "2025-08-29T09:15:01.553394"
+    }
+  ],
+  "all_failures": []
+}
