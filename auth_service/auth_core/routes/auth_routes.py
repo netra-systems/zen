@@ -11,6 +11,7 @@ from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.isolated_environment import get_env
@@ -38,6 +39,7 @@ from auth_service.auth_core.models.auth_models import (
     TokenResponse,
 )
 from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.database.connection import get_db_session as get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
