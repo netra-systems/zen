@@ -282,7 +282,7 @@ class PreDeploymentValidator:
             
             # Validate secret sources
             secret_sources = []
-            env_vars_to_check = ["JWT_SECRET_KEY", "JWT_SECRET", "JWT_SECRET_STAGING", "JWT_SECRET_PRODUCTION"]
+            env_vars_to_check = ["JWT_SECRET_KEY", "JWT_SECRET_STAGING", "JWT_SECRET_PRODUCTION"]
             
             for env_var in env_vars_to_check:
                 if get_env().get(env_var):

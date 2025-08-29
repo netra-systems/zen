@@ -19,9 +19,10 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
-            <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
+            <critical-takeaway>CRITICAL: Use JWT_SECRET_KEY exclusively - JWT_SECRET is deprecated (jwt_secret_standardization.xml).</critical-takeaway>
+            <critical-takeaway>Ensure consistent JWT secret configuration across services - both auth and backend MUST use JWT_SECRET_KEY (jwt_secret_standardization.xml).</critical-takeaway>
             <critical-takeaway>CRITICAL: OAuth redirect URIs must use _determine_urls()[0] (auth service), NEVER _determine_urls()[1] (frontend) - causes "No token received" error.</critical-takeaway>
             <critical-takeaway>OAuth redirect URIs must point to auth service (auth.staging.netrasystems.ai), not frontend (oauth_redirect_configuration.xml).</critical-takeaway>
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
@@ -197,8 +198,16 @@
             <critical-takeaway>Database initialization must be idempotent - UniqueViolationError warnings indicate potential startup fragility.</critical-takeaway>
             <critical-takeaway>All monitoring endpoints (/health, /auth/health, /readiness, /docs) must support HEAD method for monitoring compatibility.</critical-takeaway>
             <critical-takeaway>HEAD responses must have same headers as GET but empty body per HTTP specification.</critical-takeaway>
-            <critical-takeaway>Database initialization should use IF NOT EXISTS patterns and handle concurrent initialization gracefully.</critical-takeaway>
-            <critical-takeaway>Test HTTP method compatibility with common monitoring system user agents (Kubernetes, GCP Load Balancer, AWS ALB, Datadog).</critical-takeaway>
+        </category>
+        
+        <category name="SQLAlchemy Session Management [CRITICAL]" path="SPEC/learnings/sqlalchemy_session_management.xml" keywords="SQLAlchemy, AsyncSession, WebSocket, IllegalStateChangeError, Session Management, Concurrent Access, Docker, Agent Hanging">
+            <critical-takeaway>NEVER pass database sessions by reference to async workers that outlive the session scope - causes IllegalStateChangeError.</critical-takeaway>
+            <critical-takeaway>Supervisor agents must have db_session=None, not a reference to handler's session which gets closed.</critical-takeaway>
+            <critical-takeaway>Session lifecycle must be managed at request/handler level, not passed to long-running async tasks.</critical-takeaway>
+            <critical-takeaway>Agents hanging for 20+ seconds in Docker often indicates session management issues - check for concurrent session access.</critical-takeaway>
+            <critical-takeaway>Each async worker should create its own database session using get_db() context manager when needed.</critical-takeaway>
+            <critical-takeaway>WebSocket handlers must close sessions in finally blocks but ensure no async tasks still reference them.</critical-takeaway>
+            <critical-takeaway>Test with real database sessions in Docker-like environments - mock tests won't catch these concurrency issues.</critical-takeaway>
         </category>
 
         <category name="GCP Staging Critical Issues [CURRENT]" path="SPEC/learnings/gcp_staging_critical_issues.xml" keywords="GCP Staging, Authentication 403, Health Endpoint Timeout, Static Assets 404, Service Availability, Load Balancer">

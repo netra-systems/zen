@@ -23,23 +23,6 @@ logger = logging.getLogger(__name__)
 class AuthDatabaseManager:
     """Auth service database manager - delegates core operations to canonical DatabaseManager"""
     
-    @staticmethod
-    def convert_database_url(url: str) -> str:
-        """Convert between database URL formats - auth service standalone implementation"""
-        # Auth service must be completely independent - NEVER import from netra_backend
-        if not url:
-            return url
-            
-        # Use DatabaseURLBuilder directly for URL conversion
-        from shared.database_url_builder import DatabaseURLBuilder
-        
-        # Create a temporary environment dict for URL builder
-        temp_env = get_env().get_all()
-        temp_env['DATABASE_URL'] = url
-        builder = DatabaseURLBuilder(temp_env)
-        
-        # Format for asyncpg driver
-        return builder.format_url_for_driver(url, 'asyncpg')
     
     @classmethod
     def create_async_engine(
@@ -49,23 +32,24 @@ class AuthDatabaseManager:
     ) -> AsyncEngine:
         """Create an async SQLAlchemy engine for auth service"""
         
-        # Auth service creates its own engine independently
+        # Always get URL from config - it will return the correct format
         if not database_url:
-            database_url = cls.get_auth_database_url_async()
+            from auth_service.auth_core.config import AuthConfig
+            database_url = AuthConfig.get_database_url()
         
         try:
             # Create engine with auth-specific configuration
             engine = create_async_engine(
                 database_url,
                 echo=False,
-                pool_size=5,
-                max_overflow=10,
-                pool_timeout=30,
-                pool_recycle=1800,
-                connect_args={
+                pool_size=kwargs.get('pool_size', 5),
+                max_overflow=kwargs.get('max_overflow', 10),
+                pool_timeout=kwargs.get('pool_timeout', 30),
+                pool_recycle=kwargs.get('pool_recycle', 1800),
+                connect_args=kwargs.get('connect_args', {
                     "server_settings": {"jit": "off"},
                     "command_timeout": 60,
-                }
+                })
             )
             logger.info("Successfully created async engine for auth service")
             return engine
@@ -75,45 +59,31 @@ class AuthDatabaseManager:
     
     @staticmethod
     def get_auth_database_url_async() -> str:
-        """Get async URL for auth service"""
-        # Get database URL from AuthSecretLoader
-        from auth_service.auth_core.secret_loader import AuthSecretLoader
-        database_url = AuthSecretLoader.get_database_url()
-        
-        if not database_url:
-            raise ValueError("Database URL not configured for auth service")
-        
-        # Ensure it's properly formatted for async
-        return AuthDatabaseManager._normalize_database_url(database_url)
+        """Get async URL for auth service - uses AuthConfig which uses DatabaseURLBuilder"""
+        from auth_service.auth_core.config import AuthConfig
+        # AuthConfig.get_database_url() now returns the correct async format from DatabaseURLBuilder
+        return AuthConfig.get_database_url()
     
     @staticmethod
     def get_auth_database_url() -> str:
         """Get sync database URL for auth service"""
-        # Get database URL from AuthSecretLoader in sync format
-        from auth_service.auth_core.secret_loader import AuthSecretLoader
-        database_url = AuthSecretLoader.get_database_url()
+        from auth_service.auth_core.config import AuthConfig
+        from shared.database_url_builder import DatabaseURLBuilder
         
+        # Get the URL from config and ensure sync format
+        database_url = AuthConfig.get_database_url()
         if not database_url:
             raise ValueError("Database URL not configured for auth service")
         
-        # Convert to sync format and normalize
-        sync_url = database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
-        return AuthDatabaseManager._normalize_database_url(sync_url)
+        # Convert to sync format if needed
+        if "postgresql+asyncpg://" in database_url:
+            return database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+        return database_url
     
     @staticmethod
     def get_auth_database_url_sync() -> str:
         """Get sync database URL for auth service (alias for compatibility)"""
         return AuthDatabaseManager.get_auth_database_url()
-    
-    @staticmethod
-    def _normalize_database_url(database_url: str) -> str:
-        """Normalize database URL format for auth service"""
-        if not database_url:
-            return database_url
-        
-        # Use DatabaseURLBuilder for consistent normalization
-        from shared.database_url_builder import DatabaseURLBuilder
-        return DatabaseURLBuilder.normalize_postgres_url(database_url)
     
     @staticmethod
     def validate_auth_url(url: str = None) -> bool:
@@ -140,8 +110,9 @@ class AuthDatabaseManager:
     
     @staticmethod
     def get_connection_url() -> str:
-        """Get normalized connection URL for auth service - delegates to canonical DatabaseManager"""
-        return AuthDatabaseManager.get_auth_database_url_async()
+        """Get connection URL for auth service"""
+        from auth_service.auth_core.config import AuthConfig
+        return AuthConfig.get_database_url()
     
     @staticmethod
     def validate_staging_readiness() -> bool:

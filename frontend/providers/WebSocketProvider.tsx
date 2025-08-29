@@ -198,12 +198,8 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       }
     };
     
-    // If we just received a token (OAuth callback scenario), wait a tick for auth to stabilize
-    if (token && !previousTokenRef.current) {
-      setTimeout(connectWithDelay, 100);
-    } else {
-      connectWithDelay();
-    }
+    // Connect immediately without delay to prevent initialization glitching
+    connectWithDelay();
 
     return () => {
       if (cleanupRef.current) {

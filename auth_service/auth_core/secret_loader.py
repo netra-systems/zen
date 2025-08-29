@@ -84,24 +84,17 @@ class AuthSecretLoader:
                 logger.info("Using prod-jwt-secret from Secret Manager")
                 return secret
         
-        # CRITICAL: Check JWT_SECRET_KEY as primary fallback for consistency with backend service
+        # CRITICAL: Check JWT_SECRET_KEY as primary secret for consistency with backend service
         # This ensures both services use the same secret when environment-specific secrets are not available
         secret = env_manager.get("JWT_SECRET_KEY")
         if secret:
             logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
             return secret
-            
-        # DEPRECATED: Check JWT_SECRET for backward compatibility only
-        # This should only be used when JWT_SECRET_KEY is not available
-        secret = env_manager.get("JWT_SECRET")
-        if secret:
-            logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY instead)")
-            return secret
         
         # No fallback in any environment - require explicit JWT secret configuration
         raise ValueError(
             f"JWT secret not configured for {env} environment. "
-            "Set JWT_SECRET_KEY (recommended) or JWT_SECRET environment variable."
+            "Set JWT_SECRET_KEY environment variable."
         )
     
     @staticmethod

@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-29T10:19:42.021918",
+    "generated_at": "2025-08-29T11:57:38.155753",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 180
   },
@@ -752,13 +752,13 @@
         "netra_backend/app/routes/agent_route_processors.py:49",
         "netra_backend/app/routes/utils/thread_builders.py:25",
         "netra_backend/app/services/demo/session_manager.py:81",
-        "netra_backend/app/websocket_core/manager.py:181",
-        "netra_backend/app/websocket_core/manager.py:371",
-        "netra_backend/app/websocket_core/manager.py:371",
-        "netra_backend/app/websocket_core/manager.py:442",
-        "netra_backend/app/websocket_core/manager.py:701",
-        "netra_backend/app/websocket_core/manager.py:701",
-        "netra_backend/app/websocket_core/manager.py:728"
+        "netra_backend/app/websocket_core/manager.py:201",
+        "netra_backend/app/websocket_core/manager.py:391",
+        "netra_backend/app/websocket_core/manager.py:391",
+        "netra_backend/app/websocket_core/manager.py:462",
+        "netra_backend/app/websocket_core/manager.py:721",
+        "netra_backend/app/websocket_core/manager.py:721",
+        "netra_backend/app/websocket_core/manager.py:748"
       ]
     },
     "metric_name": {

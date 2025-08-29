@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-08-29T10:19:41.371078",
+    "generated_at": "2025-08-29T11:57:37.831044",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 26
   },
@@ -207,7 +207,7 @@
         "netra_backend/app/routes/websocket.py:659",
         "netra_backend/app/schemas/core_enums.py:63",
         "netra_backend/app/schemas/core_enums.py:163",
-        "netra_backend/app/websocket_core/manager.py:578",
+        "netra_backend/app/websocket_core/manager.py:598",
         "netra_backend/app/websocket_core/types.py:47"
       ]
     },

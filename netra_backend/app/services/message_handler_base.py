@@ -82,7 +82,9 @@ class MessageHandlerBase:
         """Configure supervisor with context"""
         supervisor.thread_id = thread.id
         supervisor.user_id = user_id
-        supervisor.db_session = db_session
+        # CRITICAL FIX: Do not assign db_session to supervisor to prevent concurrent access
+        # The session is managed by the websocket handler and closed after processing
+        supervisor.db_session = None
     
     @staticmethod
     async def save_response(

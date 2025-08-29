@@ -245,6 +245,11 @@ QUICK SHORTCUTS:
     # Service mode configuration
     service_group = parser.add_argument_group('Service Mode Configuration')
     service_group.add_argument(
+        "--docker-compose",
+        action="store_true",
+        help="Start all 12 services via docker-compose (dev + test environments)"
+    )
+    service_group.add_argument(
         "--list-services",
         action="store_true",
         help="List current service configurations and exit"
@@ -425,6 +430,61 @@ def main():
     
     parser = create_parser()
     args = parser.parse_args()
+    
+    # Handle docker-compose mode
+    if args.docker_compose:
+        print("🐳 Starting all services via docker-compose...")
+        print("   → Starting 12 services (6 dev + 6 test)")
+        try:
+            import subprocess
+            
+            # First stop any existing containers
+            print("   → Cleaning up existing containers...")
+            subprocess.run(
+                ["docker-compose", "-f", "docker-compose.all.yml", "down"],
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                timeout=30
+            )
+            
+            # Now start all services
+            print("   → Starting services...")
+            result = subprocess.run(
+                ["docker-compose", "-f", "docker-compose.all.yml", "up", "-d"],
+                capture_output=True,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                timeout=120
+            )
+            if result.returncode == 0:
+                print("✅ All Docker services started successfully!")
+                print("\nDevelopment Services:")
+                print("  → Backend: http://localhost:8000")
+                print("  → Auth: http://localhost:8081")
+                print("  → Frontend: http://localhost:3000")
+                print("  → PostgreSQL: localhost:5432")
+                print("  → Redis: localhost:6379")
+                print("  → ClickHouse: localhost:8123")
+                print("\nTest Services (docker-compose.all.yml):")
+                print("  → Backend: http://localhost:8001")
+                print("  → Auth: http://localhost:8082")
+                print("  → Frontend: http://localhost:3001")
+                print("  → PostgreSQL: localhost:5433")
+                print("  → Redis: localhost:6380")
+                print("  → ClickHouse: localhost:8124")
+                sys.exit(0)
+            else:
+                print(f"❌ Failed to start Docker services: {result.stderr}")
+                sys.exit(1)
+        except subprocess.TimeoutExpired:
+            print("❌ Timeout starting Docker services")
+            sys.exit(1)
+        except Exception as e:
+            print(f"❌ Error starting Docker services: {e}")
+            sys.exit(1)
     
     # Handle service configuration commands first
     if args.list_services or args.reset_services or \

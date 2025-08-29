@@ -65,13 +65,19 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
     }
     
     onAuthCheckComplete?.(isAuthenticated);
-  }, [initialized]); // Minimal dependencies - only re-run if initialized changes
+  }, [initialized, user]); // Include user to properly react to auth changes
 
-  // Show loading state while checking auth or during initialization
-  if (loading || !initialized || !user) {
+  // Only show loading during initial auth check to reduce flicker
+  if (!initialized) {
     if (showLoading) {
       return <LoadingScreen />;
     }
+    return null;
+  }
+
+  // After initialization, check user authentication
+  if (!user) {
+    // User not authenticated, router.push will handle redirect
     return null;
   }
 

@@ -262,6 +262,15 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "broadcast": MessageType.BROADCAST
 }
 
+# Frontend compatibility mapping - maps backend types to frontend-expected types
+FRONTEND_MESSAGE_TYPE_MAP = {
+    MessageType.AGENT_RESPONSE: "agent_completed",
+    MessageType.AGENT_PROGRESS: "agent_update",
+    MessageType.THREAD_UPDATE: "thread_updated",
+    MessageType.ERROR_MESSAGE: "error",
+    # Keep others as-is
+}
+
 
 def normalize_message_type(message_type: Union[str, MessageType]) -> MessageType:
     """Normalize legacy message types to standard MessageType."""
@@ -278,6 +287,19 @@ def normalize_message_type(message_type: Union[str, MessageType]) -> MessageType
     except ValueError:
         # Default to user message for unknown types
         return MessageType.USER_MESSAGE
+
+
+def get_frontend_message_type(message_type: Union[str, MessageType]) -> str:
+    """Get frontend-compatible message type string."""
+    # First normalize to MessageType enum
+    normalized = normalize_message_type(message_type)
+    
+    # Check if we have a frontend mapping
+    if normalized in FRONTEND_MESSAGE_TYPE_MAP:
+        return FRONTEND_MESSAGE_TYPE_MAP[normalized]
+    
+    # Otherwise return the enum value as string
+    return normalized.value
 
 
 def create_standard_message(msg_type: Union[str, MessageType], 

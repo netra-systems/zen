@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-08-29T10:19:42.043921",
+    "generated_at": "2025-08-29T11:57:38.165468",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 29
   },
@@ -172,8 +172,8 @@
       "locations": [
         "netra_backend/app/agents/quality_supervisor.py:98",
         "netra_backend/app/clients/auth_client_core.py:1217",
-        "netra_backend/app/core/configuration/services.py:204",
-        "netra_backend/app/core/configuration/services.py:324",
+        "netra_backend/app/core/configuration/services.py:210",
+        "netra_backend/app/core/configuration/services.py:330",
         "netra_backend/app/core/degradation_strategies.py:257",
         "netra_backend/app/core/health_checkers.py:374",
         "netra_backend/app/core/health_checkers.py:383",
@@ -291,7 +291,7 @@
       "value": "loading",
       "category": "states",
       "locations": [
-        "frontend/components/AuthGuard.tsx:76",
+        "frontend/components/AuthGuard.tsx:82",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:64",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:82",
         "frontend/components/chat/ThreadLoadingIndicator.tsx:102",

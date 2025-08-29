@@ -12,13 +12,11 @@ interface AppWithLayoutProps {
 
 export function AppWithLayout({ children }: AppWithLayoutProps) {
   const { isSidebarCollapsed, toggleSidebar } = useAppStore();
-  const [isHydrated, setIsHydrated] = useState(false);
+  // Initialize hydration state immediately to prevent flicker
+  const [isHydrated, setIsHydrated] = useState(true);
 
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  const showSidebar = isHydrated ? !isSidebarCollapsed : true;
+  // Use the actual sidebar state without hydration check to prevent jumping
+  const showSidebar = !isSidebarCollapsed;
 
   return (
     <div

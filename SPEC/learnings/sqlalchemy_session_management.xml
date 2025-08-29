@@ -1,104 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<learnings>
-  <title>SQLAlchemy Async Session Management</title>
-  <created>2025-08-28</created>
-  <updated>2025-08-28</updated>
-  
-  <summary>
-    Learnings from fixing critical SQLAlchemy IllegalStateChangeError in async session management.
-  </summary>
-  
-  <issues_encountered>
-    <issue>
-      <name>IllegalStateChangeError</name>
-      <description>
-        Method 'close()' can't be called when '_connection_for_bind()' is already in progress,
-        causing state change conflicts in async SQLAlchemy sessions.
-      </description>
-      <root_cause>
-        - Race conditions in concurrent database operations
-        - Attempting session operations without checking session state
-        - Improper handling of cancelled tasks and generator cleanup
-      </root_cause>
-    </issue>
-  </issues_encountered>
-  
-  <solutions>
+<specification>
+    <metadata>
+        <name>SQLAlchemy.SessionManagement.ConcurrentAccess</name>
+        <type>CriticalLearning</type>
+        <version>1.0</version>
+        <description>Critical learning about SQLAlchemy async session management in WebSocket handlers and concurrent agent execution</description>
+        <date>2025-08-29</date>
+        <severity>CRITICAL</severity>
+    </metadata>
+
+    <problem-statement>
+        <title>SQLAlchemy IllegalStateChangeError in WebSocket Agent Handlers</title>
+        <symptoms>
+            <symptom>Agents hang indefinitely in Docker environments</symptom>
+            <symptom>Error: "Method 'close()' can't be called here; method '_connection_for_bind()' is already in progress"</symptom>
+            <symptom>SQLAlchemy.exc.IllegalStateChangeError causing agent execution failures</symptom>
+            <symptom>Agents take 20+ seconds and never complete in Docker but work in tests with mock LLMs</symptom>
+        </symptoms>
+        <root-cause>
+            Database session was being passed by reference to supervisor agent (supervisor.db_session = db_session)
+            while WebSocket handler closed the session immediately after starting the supervisor.
+            This caused concurrent access to the same session object leading to state conflicts.
+        </root-cause>
+    </problem-statement>
+
     <solution>
-      <name>State-Aware Session Management</name>
-      <implementation>
-        Always check session state before performing operations:
-        - Use hasattr() to safely check session properties
-        - Verify is_active before commits/rollbacks
-        - Check in_transaction() before attempting commits
-      </implementation>
-      <code_pattern>
-        <before>
-          if session.is_active and not session.in_transaction():
-              await session.commit()
-        </before>
-        <after>
-          if hasattr(session, 'is_active') and session.is_active:
-              if hasattr(session, 'in_transaction') and session.in_transaction():
-                  await session.commit()
-        </after>
-      </code_pattern>
+        <description>Never pass database sessions by reference to async workers that outlive the session scope</description>
+        <implementation>
+            <change file="netra_backend/app/services/message_handler_base.py" line="85-87">
+                <before>supervisor.db_session = db_session</before>
+                <after>supervisor.db_session = None  # Prevent concurrent access</after>
+            </change>
+        </implementation>
+        <principle>Database sessions should be managed at the request/handler level, not passed to long-running async tasks</principle>
     </solution>
-    
-    <solution>
-      <name>Proper Exception Handling</name>
-      <implementation>
-        Handle task cancellation and generator cleanup gracefully:
-        - Catch asyncio.CancelledError separately
-        - Handle GeneratorExit without forcing operations
-        - Wrap rollback operations in try-except blocks
-      </implementation>
-    </solution>
-    
-    <solution>
-      <name>Simplified Session Provider</name>
-      <implementation>
-        Use direct async context managers instead of async generators when possible
-        to reduce complexity in session lifecycle management.
-      </implementation>
-    </solution>
-  </solutions>
-  
-  <best_practices>
-    <practice>
-      Always check session state before performing operations in async contexts
-    </practice>
-    <practice>
-      Use session_yielded flags to track session lifecycle in complex async generators
-    </practice>
-    <practice>
-      Let SQLAlchemy's context manager handle cleanup when operations fail
-    </practice>
-    <practice>
-      Test concurrent database operations explicitly to catch race conditions
-    </practice>
-  </best_practices>
-  
-  <prevention>
-    <measure>
-      Implement comprehensive session state checks in all database operation functions
-    </measure>
-    <measure>
-      Add concurrent operation tests to the test suite
-    </measure>
-    <measure>
-      Use typed session objects with proper state tracking
-    </measure>
-  </prevention>
-  
-  <files_affected>
-    <file>netra_backend/app/database/__init__.py</file>
-    <file>netra_backend/app/database/database_manager.py</file>
-    <file>auth_service/auth_core/database/connection.py</file>
-  </files_affected>
-  
-  <related_specs>
-    <spec>database_connectivity_architecture.xml</spec>
-    <spec>postgres.xml</spec>
-  </related_specs>
-</learnings>
+
+    <patterns-to-avoid>
+        <pattern>
+            <description>Passing AsyncSession to objects that outlive the handler scope</description>
+            <example>
+                # WRONG: Session will be closed while agent is still running
+                async def handle_request(db_session: AsyncSession):
+                    agent.db_session = db_session  # DON'T DO THIS
+                    await agent.run_async()  # Runs beyond handler scope
+                    await db_session.close()  # Session closed while agent uses it
+            </example>
+        </pattern>
+        <pattern>
+            <description>Sharing sessions across concurrent async operations</description>
+            <example>
+                # WRONG: Multiple async operations on same session
+                async def process_agents(db_session: AsyncSession):
+                    tasks = [agent.process(db_session) for agent in agents]
+                    await asyncio.gather(*tasks)  # Concurrent access to same session
+            </example>
+        </pattern>
+    </patterns-to-avoid>
+
+    <correct-patterns>
+        <pattern>
+            <description>Create new sessions for async workers</description>
+            <example>
+                # CORRECT: Each async worker gets its own session
+                async def handle_request():
+                    async with get_db() as db_session:
+                        # Use session for immediate operations
+                        data = await fetch_data(db_session)
+                    
+                    # Start async worker without session reference
+                    agent.db_session = None
+                    await agent.run_async()  # Agent creates own session if needed
+            </example>
+        </pattern>
+        <pattern>
+            <description>Use session factories in long-running tasks</description>
+            <example>
+                # CORRECT: Agent creates sessions as needed
+                class Agent:
+                    async def run(self):
+                        async with get_db() as session:
+                            await self.do_work(session)
+            </example>
+        </pattern>
+    </correct-patterns>
+
+    <detection-methods>
+        <method>Look for "IllegalStateChangeError" in logs</method>
+        <method>Search for patterns where db_session is assigned to class attributes</method>
+        <method>Check for session.close() calls in finally blocks with async operations</method>
+        <method>Monitor agent heartbeat logs for unusually long elapsed_time_seconds</method>
+    </detection-methods>
+
+    <testing-requirements>
+        <requirement>Test WebSocket handlers with real database sessions, not mocks</requirement>
+        <requirement>Test concurrent agent execution with multiple WebSocket connections</requirement>
+        <requirement>Verify session lifecycle management in long-running operations</requirement>
+        <requirement>Monitor for session leaks in production-like environments</requirement>
+    </testing-requirements>
+
+    <related-issues>
+        <issue>WebSocket connection stability during long agent operations</issue>
+        <issue>Database connection pool exhaustion from unclosed sessions</issue>
+        <issue>Agent performance degradation in containerized environments</issue>
+    </related-issues>
+</specification>

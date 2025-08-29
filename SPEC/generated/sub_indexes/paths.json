@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-29T10:19:42.025795",
+    "generated_at": "2025-08-29T11:57:38.157734",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 1059
+    "total_literals": 1061
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -413,6 +413,13 @@
       "locations": [
         "scripts/fast_100_iterations.py:51",
         "scripts/fast_100_iterations.py:53"
+      ]
+    },
+    "/12": {
+      "value": "/12",
+      "category": "paths",
+      "locations": [
+        "scripts/check_docker_services.py:138"
       ]
     },
     "/1k tokens)": {
@@ -1562,9 +1569,9 @@
       "value": "/cloudsql/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/core/configuration/database.py:204",
-        "netra_backend/app/core/configuration/database.py:220",
-        "netra_backend/app/core/configuration/database.py:532",
+        "netra_backend/app/core/configuration/database.py:207",
+        "netra_backend/app/core/configuration/database.py:223",
+        "netra_backend/app/core/configuration/database.py:561",
         "netra_backend/app/core/configuration/validator_database.py:98",
         "netra_backend/app/core/network_constants.py:148",
         "netra_backend/app/core/network_constants.py:364",
@@ -4175,6 +4182,13 @@
       "category": "paths",
       "locations": [
         "scripts/manage_precommit.py:104"
+      ]
+    },
+    "Docker File Organization Compliance Checker\n\nValidates that Docker files are properly organized according to SPEC/docker_file_organization.xml": {
+      "value": "Docker File Organization Compliance Checker\n\nValidates that Docker files are properly organized according to SPEC/docker_file_organization.xml",
+      "category": "paths",
+      "locations": [
+        "scripts/check_docker_files.py:2"
       ]
     },
     "Duplicate Code Detection Script\nPrevents regression of duplicate code patterns identified in WebSocket consolidation\n\nUsage:\n    python scripts/detect_duplicate_code.py [--threshold 0.8] [--report-only]\n    \nThis script detects:\n- Duplicate class names across files\n- Similar function implementations\n- Multiple wrappers for same functionality\n- Parallel implementations of same feature": {

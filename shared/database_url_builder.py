@@ -289,12 +289,15 @@ class DatabaseURLBuilder:
         
         @property
         def auto_url(self) -> str:
-            """Auto-select best URL for development."""
+            """Auto-select best URL for development - always returns async format."""
             # Try TCP config first
             if self.parent.tcp.has_config:
                 return self.parent.tcp.async_url
-            # Try DATABASE_URL
+            # Try DATABASE_URL and ensure it's in async format
             if self.parent.database_url:
+                # Ensure async format for asyncpg
+                if not self.parent.database_url.startswith("postgresql+asyncpg://"):
+                    return self.parent.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
                 return self.parent.database_url
             # Fall back to default
             return self.default_url
@@ -305,11 +308,12 @@ class DatabaseURLBuilder:
             # Try TCP config first (should use sync version)
             if self.parent.tcp.has_config:
                 return self.parent.tcp.sync_url
-            # Try to convert DATABASE_URL to sync format if available
+            # Try DATABASE_URL and ensure it's in sync format
             if self.parent.database_url:
-                # Convert async URL to sync format
-                sync_url = self.parent.database_url.replace("postgresql+asyncpg://", "postgresql://")
-                return sync_url
+                # Ensure sync format
+                if "postgresql+asyncpg://" in self.parent.database_url:
+                    return self.parent.database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+                return self.parent.database_url
             # Fall back to default
             return self.default_sync_url
     

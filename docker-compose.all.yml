@@ -110,7 +110,7 @@ services:
       JWT_ALGORITHM: HS256
       JWT_EXPIRATION_MINUTES: 60
     ports:
-      - "8081:8081"
+      - "8082:8082"
     depends_on:
       - test-postgres
       - test-redis
@@ -126,7 +126,7 @@ services:
     container_name: netra-test-frontend
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
-      NEXT_PUBLIC_AUTH_URL: http://localhost:8081
+      NEXT_PUBLIC_AUTH_URL: http://localhost:8082
       NEXT_PUBLIC_ENVIRONMENT: test
     ports:
       - "3000:3000"
@@ -240,7 +240,7 @@ services:
       JWT_ALGORITHM: HS256
       JWT_EXPIRATION_MINUTES: 60
     ports:
-      - "8082:8081"
+      - "8081:8081"
     depends_on:
       - dev-postgres
       - dev-redis
@@ -256,7 +256,7 @@ services:
     container_name: netra-dev-frontend
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8001
-      NEXT_PUBLIC_AUTH_URL: http://localhost:8082
+      NEXT_PUBLIC_AUTH_URL: http://localhost:8081
       NEXT_PUBLIC_ENVIRONMENT: development
     ports:
       - "3001:3000"
