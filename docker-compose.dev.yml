@@ -1,8 +1,8 @@
 services:
   # PostgreSQL Database
-  postgres:
+  netra-dev-postgres:
     image: postgres:15-alpine
-    container_name: netra-postgres
+    container_name: netra-dev-postgres
     profiles: ["db", "backend", "full"]
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-netra}
@@ -12,7 +12,7 @@ services:
       # Enable proper shutdown handling
       POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5434}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
@@ -26,12 +26,12 @@ services:
     stop_signal: SIGTERM
     stop_grace_period: 30s
     networks:
-      - netra-network
+      - netra-dev-network
 
   # Redis Cache
-  redis:
+  netra-dev-redis:
     image: redis:7-alpine
-    container_name: netra-redis
+    container_name: netra-dev-redis
     profiles: ["cache", "backend", "full"]
     command: redis-server --appendonly yes
     ports:
@@ -44,12 +44,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - netra-network
+      - netra-dev-network
 
   # ClickHouse Analytics (Required for real analytics)
-  clickhouse:
+  netra-dev-clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
-    container_name: netra-clickhouse
+    container_name: netra-dev-clickhouse
     profiles: ["backend", "analytics", "full"]
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
@@ -68,41 +68,41 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - netra-network
+      - netra-dev-network
 
   # Backend Service (Main Netra Application)
-  backend:
+  netra-dev-backend:
     build:
       context: .
       dockerfile: ./docker/backend.development.Dockerfile
-    container_name: netra-backend
+    container_name: netra-dev-backend
     profiles: ["netra", "backend", "full"]
     env_file:
       - .env.development
     environment:
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@postgres:5432/${POSTGRES_DB:-netra_dev}
-      POSTGRES_HOST: postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@netra-dev-postgres:5432/${POSTGRES_DB:-netra_dev}
+      POSTGRES_HOST: netra-dev-postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER:-netra}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netra123}
       POSTGRES_DB: ${POSTGRES_DB:-netra_dev}
       
       # Redis
-      REDIS_HOST: redis
+      REDIS_HOST: netra-dev-redis
       REDIS_PORT: 6379
-      REDIS_URL: redis://redis:6379/0
+      REDIS_URL: redis://netra-dev-redis:6379/0
       REDIS_STAGING_HOST: ${REDIS_STAGING_HOST:-redis-staging.internal}
       REDIS_PRODUCTION_HOST: ${REDIS_PRODUCTION_HOST:-redis-production.internal}
       
       # ClickHouse
-      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_HOST: netra-dev-clickhouse
       CLICKHOUSE_PORT: 8123
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-netra123}
       
       # Auth Service
-      AUTH_SERVICE_URL: http://auth:8081
+      AUTH_SERVICE_URL: http://netra-dev-auth:8081
       
       # Server Config
       PORT: 8000
@@ -140,11 +140,11 @@ services:
       - ./scripts:/app/scripts
       - ./logs:/app/logs
     depends_on:
-      postgres:
+      netra-dev-postgres:
         condition: service_healthy
-      redis:
+      netra-dev-redis:
         condition: service_healthy
-      clickhouse:
+      netra-dev-clickhouse:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -153,7 +153,7 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - netra-network
+      - netra-dev-network
     command: >
       sh -c "
         echo 'Waiting for database...' &&
@@ -165,24 +165,24 @@ services:
       "
 
   # Auth Service
-  auth:
+  netra-dev-auth:
     build:
       context: .
       dockerfile: ./docker/auth.development.Dockerfile
-    container_name: netra-auth
+    container_name: netra-dev-auth
     profiles: ["auth", "backend", "full"]
     env_file:
       - .env.development
     environment:
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@postgres:5432/${POSTGRES_DB:-netra_dev}
-      POSTGRES_HOST: postgres
+      DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@netra-dev-postgres:5432/${POSTGRES_DB:-netra_dev}
+      POSTGRES_HOST: netra-dev-postgres
       POSTGRES_PORT: 5432
       
       # Redis
-      REDIS_HOST: redis
+      REDIS_HOST: netra-dev-redis
       REDIS_PORT: 6379
-      REDIS_URL: redis://redis:6379/1
+      REDIS_URL: redis://netra-dev-redis:6379/1
       REDIS_STAGING_HOST: ${REDIS_STAGING_HOST:-redis-staging.internal}
       REDIS_PRODUCTION_HOST: ${REDIS_PRODUCTION_HOST:-redis-production.internal}
       
@@ -232,7 +232,7 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - netra-network
+      - netra-dev-network
     command: >
       sh -c "
         echo 'Starting auth service...' &&
@@ -240,13 +240,13 @@ services:
       "
 
   # Frontend Service
-  frontend:
+  netra-dev-frontend:
     build:
       context: .
       dockerfile: ./docker/frontend.development.Dockerfile
       args:
         BUILD_MODE: development
-    container_name: netra-frontend
+    container_name: netra-dev-frontend
     profiles: ["frontend", "full"]
     env_file:
       - .env.development
@@ -258,9 +258,9 @@ services:
       NEXT_PUBLIC_WEBSOCKET_URL: ws://localhost:8000/ws
       
       # Internal API URLs (for SSR and Docker networking)
-      API_URL: http://backend:8000
-      AUTH_URL: http://auth:8081
-      WS_URL: ws://backend:8000
+      API_URL: http://netra-dev-backend:8000
+      AUTH_URL: http://netra-dev-auth:8081
+      WS_URL: ws://netra-dev-backend:8000
       
       # Next.js Config
       NODE_ENV: development
@@ -282,21 +282,21 @@ services:
       - /app/node_modules
       - /app/.next
     depends_on:
-      - backend
-      - auth
+      - netra-dev-backend
+      - netra-dev-auth
     networks:
-      - netra-network
+      - netra-dev-network
     command: npm run dev
 
 networks:
-  netra-network:
+  netra-dev-network:
     driver: bridge
-    name: netra-network
+    name: netra-dev-network
 
 volumes:
   postgres_data:
-    name: netra-postgres-data
+    name: netra-dev-postgres-data
   redis_data:
-    name: netra-redis-data
+    name: netra-dev-redis-data
   clickhouse_data:
-    name: netra-clickhouse-data
+    name: netra-dev-clickhouse-data

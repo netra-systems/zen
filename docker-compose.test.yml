@@ -146,8 +146,6 @@ services:
       start_period: 20s
     networks:
       - netra-test-network
-    profiles:
-      - e2e
     command: >
       sh -c "
         echo 'Test Backend: Waiting for database...' &&
@@ -214,8 +212,6 @@ services:
       start_period: 20s
     networks:
       - netra-test-network
-    profiles:
-      - e2e
 
   # Test Frontend Service (for E2E tests)
   frontend-test:
@@ -254,8 +250,6 @@ services:
       - auth-test
     networks:
       - netra-test-network
-    profiles:
-      - e2e
     command: npm run test:e2e
 
 networks:
