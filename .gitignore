@@ -39,7 +39,8 @@ out/
 .env
 .env.local
 .env.development.local
-.env.test.local
+.env.test
+.env.mock.local
 .env.production.local
 .env.staging.local
 .env.staging
@@ -118,6 +119,7 @@ terraform-gcp/staging.tfplan
 ...AAA launch CLAUDE WINDOWS.BAT
 .service_discovery/auth.json
 .env.test
+.env.mock
 .service_discovery/auth.json
 project_dump.txt
 config/netra-staging-7a1059b7cf26.json
