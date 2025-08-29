@@ -75,9 +75,9 @@ describe('useInitializationCoordinator', () => {
     test('should transition through auth → websocket → store → ready phases', async () => {
       const { result, rerender } = renderHook(() => useInitializationCoordinator());
       
-      // Phase 1: Auth initializing
+      // Phase 1: Auth initializing (starts at 0%)
       expect(result.current.state.phase).toBe('auth');
-      expect(result.current.state.progress).toBe(10);
+      expect(result.current.state.progress).toBe(0);
 
       // Complete auth
       mockUseAuth.mockReturnValue({
@@ -110,7 +110,7 @@ describe('useInitializationCoordinator', () => {
       
       await waitFor(() => {
         expect(result.current.state.phase).toBe('store');
-        expect(result.current.state.progress).toBe(75);
+        expect(result.current.state.progress).toBe(70);
       });
 
       // Complete store initialization
@@ -311,11 +311,39 @@ describe('useInitializationCoordinator', () => {
         expect(result.current.isInitialized).toBe(true);
       });
       
+      // Mock hooks to be uninitialized for reset
+      mockUseAuth.mockReturnValue({
+        initialized: false,
+        loading: true,
+        user: null,
+        login: jest.fn(),
+        logout: jest.fn(),
+        refreshToken: jest.fn(),
+        error: null
+      } as any);
+      
+      mockUseWebSocket.mockReturnValue({
+        isConnected: false,
+        status: 'CONNECTING',
+        messages: [],
+        send: jest.fn(),
+        disconnect: jest.fn()
+      } as any);
+      
+      mockUseUnifiedChatStore.mockReturnValue({
+        initialized: false,
+        isConnected: false,
+        activeThreadId: null,
+        messages: [],
+        handleWebSocketEvent: jest.fn()
+      } as any);
+      
       // Reset
       act(() => {
         result.current.reset();
       });
       
+      // After reset with uninitialized hooks, should be back at auth phase
       expect(result.current.state.phase).toBe('auth');
       expect(result.current.state.progress).toBe(0);
       expect(result.current.state.isReady).toBe(false);

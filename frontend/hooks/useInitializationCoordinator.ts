@@ -24,7 +24,8 @@ interface UseInitializationCoordinatorReturn {
  */
 export const useInitializationCoordinator = (): UseInitializationCoordinatorReturn => {
   const mounted = useRef(true);
-  const initStarted = useRef(false);
+  const wsTimeoutRef = useRef<NodeJS.Timeout>();
+  const storeTimeoutRef = useRef<NodeJS.Timeout>();
   
   const [state, setState] = useState<InitializationState>({
     phase: 'auth',
@@ -33,9 +34,46 @@ export const useInitializationCoordinator = (): UseInitializationCoordinatorRetu
     progress: 0
   });
 
-  const { initialized: authInitialized, loading: authLoading, user } = useAuth();
-  const { isConnected: wsConnected } = useWebSocket();
-  const { initialized: storeInitialized } = useUnifiedChatStore();
+  // Wrap hook calls in try-catch to handle errors
+  let authInitialized = false;
+  let authLoading = true;
+  let user = null;
+  let wsConnected = false;
+  let storeInitialized = false;
+  
+  try {
+    const authResult = useAuth();
+    authInitialized = authResult.initialized;
+    authLoading = authResult.loading;
+    user = authResult.user;
+  } catch (error) {
+    // Auth hook threw an error
+    if (mounted.current && state.phase !== 'error') {
+      console.error('Initialization error:', error);
+      setState({
+        phase: 'error',
+        isReady: false,
+        error: error as Error,
+        progress: 0
+      });
+    }
+  }
+  
+  try {
+    const wsResult = useWebSocket();
+    wsConnected = wsResult.isConnected;
+  } catch (error) {
+    // WebSocket hook error is less critical, log but continue
+    console.warn('WebSocket initialization warning:', error);
+  }
+  
+  try {
+    const storeResult = useUnifiedChatStore();
+    storeInitialized = storeResult.initialized;
+  } catch (error) {
+    // Store hook error is less critical, log but continue
+    console.warn('Store initialization warning:', error);
+  }
 
   const updatePhase = useCallback((phase: InitializationPhase, progress: number, error?: Error) => {
     if (!mounted.current) return;
@@ -49,7 +87,10 @@ export const useInitializationCoordinator = (): UseInitializationCoordinatorRetu
   }, []);
 
   const reset = useCallback(() => {
-    initStarted.current = false;
+    // Clear any pending timeouts
+    if (wsTimeoutRef.current) clearTimeout(wsTimeoutRef.current);
+    if (storeTimeoutRef.current) clearTimeout(storeTimeoutRef.current);
+    
     setState({
       phase: 'auth',
       isReady: false,
@@ -59,71 +100,81 @@ export const useInitializationCoordinator = (): UseInitializationCoordinatorRetu
   }, []);
 
   useEffect(() => {
-    // Prevent multiple initialization runs
-    if (!mounted.current || initStarted.current) return;
+    // Prevent multiple initialization runs  
+    if (!mounted.current) return;
     if (state.phase === 'ready' || state.phase === 'error') return;
     
     const runInitialization = async () => {
       try {
-        initStarted.current = true;
-        
         // Phase 1: Auth initialization (0-33%)
-        if (!authInitialized || authLoading) {
-          updatePhase('auth', 10);
-          return; // Wait for auth to complete
-        }
-        
-        if (!user) {
-          // No user means not authenticated, but initialization is complete
-          updatePhase('ready', 100);
+        if (state.phase === 'auth') {
+          if (!authInitialized || authLoading) {
+            // Keep initial progress at 0 until auth starts
+            return; // Wait for auth to complete
+          }
+          
+          if (!user) {
+            // No user means not authenticated, but initialization is complete
+            updatePhase('ready', 100);
+            return;
+          }
+          
+          // Auth completed, move to WebSocket phase
+          updatePhase('websocket', 40);
           return;
         }
         
-        updatePhase('auth', 33);
-        
         // Phase 2: WebSocket connection (33-66%)
-        if (state.phase === 'auth') {
-          updatePhase('websocket', 40);
-          
-          // Give WebSocket time to establish connection
-          const wsTimeout = setTimeout(() => {
-            if (mounted.current && !wsConnected) {
-              console.warn('WebSocket connection timeout, proceeding anyway');
-              updatePhase('store', 66);
+        if (state.phase === 'websocket') {
+          if (!wsConnected) {
+            // Set up timeout for WebSocket connection
+            if (!wsTimeoutRef.current) {
+              wsTimeoutRef.current = setTimeout(() => {
+                if (mounted.current && state.phase === 'websocket') {
+                  console.warn('WebSocket connection timeout, proceeding anyway');
+                  updatePhase('store', 70);
+                  wsTimeoutRef.current = undefined;
+                }
+              }, 3000);
             }
-          }, 3000);
-          
-          if (wsConnected) {
-            clearTimeout(wsTimeout);
-            updatePhase('websocket', 66);
-          } else {
-            return; // Wait for WebSocket
+            return;
           }
+          
+          // WebSocket connected, clear timeout and move to store phase
+          if (wsTimeoutRef.current) {
+            clearTimeout(wsTimeoutRef.current);
+            wsTimeoutRef.current = undefined;
+          }
+          updatePhase('store', 70);
+          return;
         }
         
         // Phase 3: Store initialization (66-100%)
-        if (state.phase === 'websocket' || wsConnected) {
-          updatePhase('store', 75);
-          
-          // Allow store to initialize with WebSocket data
-          const storeTimeout = setTimeout(() => {
-            if (mounted.current) {
-              updatePhase('ready', 100);
-              initStarted.current = false;
+        if (state.phase === 'store') {
+          if (!storeInitialized) {
+            // Give store time to initialize
+            if (!storeTimeoutRef.current) {
+              storeTimeoutRef.current = setTimeout(() => {
+                if (mounted.current && state.phase === 'store') {
+                  updatePhase('ready', 100);
+                  storeTimeoutRef.current = undefined;
+                }
+              }, 500);
             }
-          }, 500);
-          
-          if (storeInitialized) {
-            clearTimeout(storeTimeout);
-            updatePhase('ready', 100);
-            initStarted.current = false;
+            return;
           }
+          
+          // Everything ready, clear timeout
+          if (storeTimeoutRef.current) {
+            clearTimeout(storeTimeoutRef.current);
+            storeTimeoutRef.current = undefined;
+          }
+          updatePhase('ready', 100);
         }
         
       } catch (error) {
         console.error('Initialization error:', error);
         updatePhase('error', 0, error as Error);
-        initStarted.current = false;
       }
     };
     
@@ -141,6 +192,9 @@ export const useInitializationCoordinator = (): UseInitializationCoordinatorRetu
   useEffect(() => {
     return () => {
       mounted.current = false;
+      // Clear any pending timeouts on unmount
+      if (wsTimeoutRef.current) clearTimeout(wsTimeoutRef.current);
+      if (storeTimeoutRef.current) clearTimeout(storeTimeoutRef.current);
     };
   }, []);
 

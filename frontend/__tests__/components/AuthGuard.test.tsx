@@ -5,19 +5,19 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useAuth } from '@/auth/context';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
 
 // Mock dependencies
-jest.mock('next/navigation');
 jest.mock('@/auth/context');
 jest.mock('@/hooks/useGTMEvent');
 
+// Get the mocked useRouter from the global mock
+const mockUseRouter = jest.requireMock('next/navigation').useRouter;
+
 describe('AuthGuard Component', () => {
   const mockPush = jest.fn();
-  const mockRouter = { push: mockPush };
   const mockTrackError = jest.fn();
   const mockTrackPageView = jest.fn();
   const mockOnAuthCheckComplete = jest.fn();
@@ -25,7 +25,17 @@ describe('AuthGuard Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    // Configure the mocked router
+    mockUseRouter.mockReturnValue({
+      push: mockPush,
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      pathname: '/',
+      query: {}
+    });
     (useGTMEvent as jest.Mock).mockReturnValue({
       trackError: mockTrackError,
       trackPageView: mockTrackPageView,
