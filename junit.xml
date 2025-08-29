@@ -1,3 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.508" timestamp="2025-08-29T12:21:54.720575-07:00" hostname="Anthony"><testcase classname="tests.test_redis_staging_fixes" name="test_redis_no_localhost_fallback_in_staging" time="0.286" /><testcase classname="tests.test_redis_staging_fixes" name="test_redis_localhost_rejected_in_staging" time="0.010"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">auth_service\tests\test_redis_staging_fixes.py:46: in test_redis_localhost_rejected_in_staging
-    with pytest.raises(ValueError) as exc_info:
-E   Failed: DID NOT RAISE &lt;class 'ValueError'&gt;</failure></testcase></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="1.443" timestamp="2025-08-29T13:31:07.600716-07:00" hostname="Anthony"><testcase classname="tests.test_refresh_endpoint_simple" name="test_refresh_endpoint_accepts_multiple_formats" time="0.913"><failure message="fastapi.exceptions.HTTPException: 500: Internal server error: object bytes can't be used in 'await' expression">auth_service\auth_core\routes\auth_routes.py:582: in refresh_tokens
+    body = await request.body()
+           ^^^^^^^^^^^^^^^^^^^^
+E   TypeError: object bytes can't be used in 'await' expression
+
+During handling of the above exception, another exception occurred:
+auth_service\tests\test_refresh_endpoint_simple.py:30: in test_refresh_endpoint_accepts_multiple_formats
+    result = asyncio.run(refresh_tokens(mock_request))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\runners.py:194: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\miniconda3\Lib\asyncio\base_events.py:687: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+auth_service\auth_core\routes\auth_routes.py:625: in refresh_tokens
+    raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+E   fastapi.exceptions.HTTPException: 500: Internal server error: object bytes can't be used in 'await' expression</failure></testcase><testcase classname="tests.test_refresh_endpoint_simple" name="test_refresh_endpoint_error_handling" time="0.012"><failure message="assert 500 == 422&#10; +  where 500 = HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;).status_code&#10; +    where HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;) = &lt;ExceptionInfo HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;) tblen=5&gt;.value">auth_service\tests\test_refresh_endpoint_simple.py:61: in test_refresh_endpoint_error_handling
+    assert exc_info.value.status_code == 422
+E   assert 500 == 422
+E    +  where 500 = HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression").status_code
+E    +    where HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression") = &lt;ExceptionInfo HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression") tblen=5&gt;.value</failure></testcase><testcase classname="tests.test_refresh_endpoint_simple" name="test_refresh_endpoint_invalid_json" time="0.009"><failure message="assert 500 == 422&#10; +  where 500 = HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;).status_code&#10; +    where HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;) = &lt;ExceptionInfo HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;) tblen=5&gt;.value">auth_service\tests\test_refresh_endpoint_simple.py:78: in test_refresh_endpoint_invalid_json
+    assert exc_info.value.status_code == 422
+E   assert 500 == 422
+E    +  where 500 = HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression").status_code
+E    +    where HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression") = &lt;ExceptionInfo HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression") tblen=5&gt;.value</failure></testcase><testcase classname="tests.test_refresh_endpoint_simple" name="test_refresh_endpoint_invalid_token" time="0.015"><failure message="assert 500 == 401&#10; +  where 500 = HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;).status_code&#10; +    where HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;) = &lt;ExceptionInfo HTTPException(status_code=500, detail=&quot;Internal server error: object bytes can't be used in 'await' expression&quot;) tblen=5&gt;.value">auth_service\tests\test_refresh_endpoint_simple.py:97: in test_refresh_endpoint_invalid_token
+    assert exc_info.value.status_code == 401
+E   assert 500 == 401
+E    +  where 500 = HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression").status_code
+E    +    where HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression") = &lt;ExceptionInfo HTTPException(status_code=500, detail="Internal server error: object bytes can't be used in 'await' expression") tblen=5&gt;.value</failure></testcase></testsuite></testsuites>

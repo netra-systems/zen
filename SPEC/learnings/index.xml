@@ -99,6 +99,17 @@
             <critical-takeaway>HEAD method support is essential for authentication endpoints to support CORS preflight and health checks.</critical-takeaway>
         </category>
         
+        <category name="Test Coverage Import Gap" path="SPEC/learnings/test_coverage_import_gap.xml" keywords="Test Coverage, Import Errors, NameError, Runtime Errors, Mock Overuse, Integration Testing, CI/CD, Python Imports, Module Testing, Production Failures">
+            <critical-takeaway>CRITICAL: Import errors can pass all tests but fail in production if modules aren't directly tested</critical-takeaway>
+            <critical-takeaway>Python's import system allows broken code if the broken parts aren't executed during import</critical-takeaway>
+            <critical-takeaway>Every internal module MUST have at least one direct test that imports and exercises it</critical-takeaway>
+            <critical-takeaway>Mock scope must be minimized to external services only - mocking internal components hides runtime errors</critical-takeaway>
+            <critical-takeaway>Tests were testing the "idea" of code working, not actual execution paths</critical-takeaway>
+            <critical-takeaway>Import validation test suite must run as first test in CI/CD pipeline</critical-takeaway>
+            <critical-takeaway>E2E tests must use real services (docker-compose) not mocks</critical-takeaway>
+            <critical-takeaway>Type checking must be enforced in CI/CD to catch annotation issues before runtime</critical-takeaway>
+        </category>
+        
         <category name="API Dual-Channel Architecture" path="SPEC/api_dual_channel_architecture.xml" keywords="REST API, WebSocket, Agent Routes, Dual Channel, API Architecture, Streaming, Real-time">
             <critical-takeaway>REST API endpoints (/api/agent/*) and WebSocket (/ws) are BOTH production features, NOT legacy vs new.</critical-takeaway>
             <critical-takeaway>Both channels use the SAME backend services (SupervisorAgent, ThreadService, MessageHandlerService) ensuring functional parity.</critical-takeaway>
@@ -1721,4 +1732,16 @@
             <critical-takeaway>Test all public methods with undefined, null, and malformed inputs to ensure graceful handling</critical-takeaway>
         </category>
     </frontend_defensive_programming>
+    
+    <routing_architecture>
+        <category name="Router Double Prefix Pattern" path="SPEC/learnings/router_double_prefix_pattern.xml" keywords="Routing, APIRouter, Prefix, Double Prefix, 404, FastAPI, app_factory_route_configs, Centralized Routing">
+            <critical-takeaway>CRITICAL: Route prefixes MUST be managed centrally in app_factory_route_configs.py - individual routers should NOT define their own prefixes</critical-takeaway>
+            <critical-takeaway>Double prefix errors (e.g., /api/api/mcp-client) occur when routers define prefixes in APIRouter() AND app_factory adds prefixes</critical-takeaway>
+            <critical-takeaway>Always use empty prefix="" or no prefix parameter in router files - let app_factory_route_configs.py manage all prefixes</critical-takeaway>
+            <critical-takeaway>Check app_factory_route_configs.py before adding any prefix to a router to avoid duplication</critical-takeaway>
+            <critical-takeaway>Run route accessibility tests after any router modification to detect prefix conflicts early</critical-takeaway>
+            <critical-takeaway>Use scripts/check_architecture_compliance.py to detect prefix conflicts programmatically</critical-takeaway>
+            <critical-takeaway>Unregistered routers (example_messages.py, synthetic_data_corpus.py) should be reviewed and properly registered</critical-takeaway>
+        </category>
+    </routing_architecture>
 </specification>

@@ -103,6 +103,20 @@ describe('InitializationProgress', () => {
       rerender(<InitializationProgress phase="auth" progress={150} />);
       expect(screen.getByText('150% complete')).toBeInTheDocument();
     });
+    
+    it('handles NaN and undefined progress values', () => {
+      const { rerender } = render(<InitializationProgress phase="auth" progress={NaN} />);
+      expect(screen.getByText('0% complete')).toBeInTheDocument();
+      
+      rerender(<InitializationProgress phase="auth" progress={undefined as any} />);
+      expect(screen.getByText('0% complete')).toBeInTheDocument();
+      
+      rerender(<InitializationProgress phase="auth" progress={null as any} />);
+      expect(screen.getByText('0% complete')).toBeInTheDocument();
+      
+      rerender(<InitializationProgress phase="auth" progress={'not a number' as any} />);
+      expect(screen.getByText('0% complete')).toBeInTheDocument();
+    });
   });
 
   describe('Phase Indicators', () => {

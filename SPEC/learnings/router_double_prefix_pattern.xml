@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8'?>
+<learning>
+  <metadata>
+    <name>Router Double Prefix Pattern</name>
+    <type>architectural_pattern</type>
+    <category>routing</category>
+    <created>2025-08-29</created>
+    <severity>critical</severity>
+    <status>resolved</status>
+  </metadata>
+  
+  <problem>
+    <description>
+      Multiple routers were defining prefixes both in their APIRouter initialization 
+      AND in the centralized app_factory_route_configs.py, causing double prefixes 
+      like /api/api/mcp-client and resulting in 404 errors for valid endpoints.
+    </description>
+    <root_cause>
+      Inconsistent prefix management where some routers had hardcoded prefixes
+      while the app factory was also applying prefixes during registration.
+    </root_cause>
+    <affected_routers>
+      <router>mcp_client.py - Had prefix="/api/mcp-client"</router>
+      <router>monitoring.py - Had prefix="/monitoring"</router>
+      <router>gcp_monitoring.py - Had prefix="/monitoring"</router>
+    </affected_routers>
+  </problem>
+  
+  <solution>
+    <principle>
+      All route prefix management MUST be centralized in app_factory_route_configs.py.
+      Individual routers should NOT define their own prefixes in APIRouter initialization.
+    </principle>
+    <implementation>
+      <step order="1">Remove prefix parameter from APIRouter() initialization in all route files</step>
+      <step order="2">Ensure all prefixes are managed in app_factory_route_configs.py</step>
+      <step order="3">Use empty string prefix="" or no prefix parameter in routers</step>
+    </implementation>
+    <correct_pattern>
+      <![CDATA[
+      # In router file (e.g., mcp_client.py)
+      router = APIRouter(tags=["MCP Client"])  # NO prefix here
+      
+      # In app_factory_route_configs.py
+      "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"])  # Prefix managed here
+      ]]>
+    </correct_pattern>
+    <incorrect_pattern>
+      <![CDATA[
+      # WRONG: Double prefix definition
+      # In router file
+      router = APIRouter(prefix="/api/mcp", tags=["MCP Client"])
+      
+      # In app_factory_route_configs.py
+      "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"])  # Results in /api/api/mcp
+      ]]>
+    </incorrect_pattern>
+  </solution>
+  
+  <testing>
+    <test_file>netra_backend/tests/test_mcp_client_routes.py</test_file>
+    <description>
+      Comprehensive test to verify MCP endpoints are accessible without double prefixes
+      and to prevent regression of this pattern.
+    </description>
+  </testing>
+  
+  <prevention>
+    <guideline>Always check app_factory_route_configs.py before adding prefixes to routers</guideline>
+    <guideline>Run route accessibility tests after any router modification</guideline>
+    <guideline>Use scripts/check_architecture_compliance.py to detect prefix conflicts</guideline>
+  </prevention>
+  
+  <additional_issues_identified>
+    <issue>
+      <router>example_messages.py</router>
+      <problem>Not registered in app_factory_route_configs.py</problem>
+    </issue>
+    <issue>
+      <router>synthetic_data_corpus.py</router>
+      <problem>Not registered in app_factory_route_configs.py</problem>
+    </issue>
+  </additional_issues_identified>
+  
+  <cross_references>
+    <ref>SPEC/api_routes.xml - API routing specification</ref>
+    <ref>SPEC/learnings/api_versioning_antipattern.xml - Related routing pattern</ref>
+    <ref>netra_backend/app/core/app_factory_route_configs.py - Central routing configuration</ref>
+    <ref>netra_backend/app/core/app_factory.py - Application factory implementation</ref>
+  </cross_references>
+</learning>

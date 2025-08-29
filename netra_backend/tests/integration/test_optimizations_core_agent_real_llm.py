@@ -19,7 +19,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
-from netra_backend.app.database import get_session
+from netra_backend.app.database import get_async_session
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -38,10 +38,9 @@ async def real_llm_manager():
 
 
 @pytest.fixture
-async def real_tool_dispatcher(db_session: AsyncSession):
+async def real_tool_dispatcher(real_llm_manager):
     """Get real tool dispatcher with actual tools loaded."""
-    dispatcher = ToolDispatcher()
-    await dispatcher.initialize_tools(db_session)
+    dispatcher = ToolDispatcher(llm_manager=real_llm_manager)
     return dispatcher
 
 

@@ -78,6 +78,85 @@ Tests extensively mock LLMManager and other dependencies, preventing the actual 
 - [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml)
 - [`SPEC/learnings/test_coverage_import_gap.xml`](SPEC/learnings/test_coverage_import_gap.xml)
 
+## The Root Cause Chain
+
+### 1. The Import Was Accidentally Removed
+- Commit b4c312b5d ("imports and ordering") removed the ExecutionContext import from processing.py
+- This was likely an accidental deletion during import reorganization
+
+### 2. No Direct Test Coverage
+- **CRITICAL FINDING:** The TriageProcessor class in processing.py is NEVER directly imported in any test
+- Tests only import TriageSubAgent from agent.py
+- The TriageProcessor is instantiated inside TriageSubAgent.__init__() but this happens AFTER the module import
+
+### 3. Why Tests Still Pass
+- **Python's Import Mechanism:** When you import a class from a module, Python executes the entire module at import time
+- **The Hidden Dependency:** processing.py imports at module level succeed because:
+  - The class definition itself doesn't execute the problematic code
+  - The ExecutionContext type annotation in method signatures doesn't cause import errors until the method is CALLED
+- **Tests Use Mocks:** Tests mock the LLM manager and other dependencies, so the actual process_with_llm method that uses ExecutionContext is never executed
+
+### 4. The Production Failure
+- In production, when a real request comes in:
+  - The TriageSubAgent instantiates TriageProcessor
+  - A real request calls process_with_llm()
+  - Line 56 tries to create an ExecutionContext object
+  - **NameError: name 'ExecutionContext' is not defined**
+
+## Why CI/CD Didn't Catch It
+
+1. **No Import Tests:** There are no tests that verify all modules can be imported successfully
+2. **Mock-Heavy Testing:** Tests mock the actual execution paths that would trigger the error
+3. **No Integration Tests for Processor:** The TriageProcessor lacks dedicated integration tests that would execute its methods
+4. **Type Checking Not Enforced:** Python's type hints don't enforce imports at runtime unless code is executed
+
+## The Systemic Issues
+
+### 1. Test Coverage Gaps
+- processing.py has NO direct test coverage
+- No tests import or instantiate TriageProcessor directly
+- No tests execute the actual processing logic
+
+### 2. Mock Overuse
+- Tests mock at too high a level (mocking entire LLMManager)
+- Real execution paths are never tested
+- The "Mock: LLM service isolation" pattern prevents discovering runtime errors
+
+### 3. Missing Safety Nets
+- No import validation tests
+- No smoke tests that execute real agent flows
+- CI/CD runs tests but they're all mocked
+
+## Recommendations to Prevent This
+
+### Immediate Actions (Priority 1)
+
+1. **Import Validation Test Suite**
+   - Create tests that import ALL modules to catch import errors
+   - Must run as first test in CI/CD pipeline
+
+2. **Integration Tests for Each Module**
+   - Every significant class should have at least one integration test
+   - Tests must directly import and instantiate the class
+
+3. **Reduce Mock Scope**
+   - Mock external services but not internal components
+   - Use real implementations with test data
+
+### Medium-term Actions (Priority 2)
+
+4. **Real Flow Tests**
+   - Add E2E tests that execute actual agent flows with real (local) services
+   - Use docker-compose for local services (postgres, redis)
+
+5. **Type Checking in CI**
+   - Run mypy or similar to catch type annotation issues
+   - Make type checking a required CI check
+
+6. **Module Import Tests**
+   - Test that explicitly imports and instantiates each major class
+   - Verify all public methods can be called (even if with dummy data)
+
 ## Remediation Status
 
 See [`TEST_COVERAGE_REMEDIATION_PLAN.md`](TEST_COVERAGE_REMEDIATION_PLAN.md) for the comprehensive plan to address these systemic issues.

@@ -170,7 +170,7 @@ const MainChat: React.FC = () => {
   }, []);
 
   // Get initialization state for progress display
-  const { phase, progress } = useInitializationCoordinator();
+  const { phase, progress } = initState;
   const { status: wsStatus } = useWebSocket();
   
   // Show loading state while initializing
