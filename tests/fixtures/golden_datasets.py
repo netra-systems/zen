@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata, Priority, Complexity
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     StatePersistenceRequest,
@@ -55,17 +55,32 @@ class GoldenDatasets:
                 updated_at=datetime.now(timezone.utc)
             ),
             "triage_result": TriageResult(
-                task_type="data_analysis",
-                confidence=0.95,
-                reasoning="User requesting performance metrics analysis",
-                metadata={"domain": "performance", "complexity": "simple"}
+                category="data_analysis",
+                confidence_score=0.95,
+                priority=Priority.MEDIUM,
+                complexity=Complexity.SIMPLE,
+                metadata=TriageMetadata(
+                    triage_duration_ms=150,
+                    llm_tokens_used=450,
+                    cache_hit=False
+                )
             ),
             "data_result": DataAnalysisResponse(
-                summary="API response times analyzed",
-                insights=["Average response: 250ms", "P95: 450ms", "P99: 800ms"],
+                query="SELECT avg(response_time), p95(response_time), p99(response_time) FROM api_metrics",
+                results=[
+                    {"metric": "avg_response_time", "value": 250},
+                    {"metric": "p95_response_time", "value": 450},
+                    {"metric": "p99_response_time", "value": 800}
+                ],
+                insights={
+                    "performance_summary": "API response times analyzed", 
+                    "average_response": "250ms",
+                    "p95_response": "450ms", 
+                    "p99_response": "800ms"
+                },
                 recommendations=["Consider caching for slow endpoints"],
-                confidence_score=0.88,
-                data_points_analyzed=10000,
+                execution_time_ms=2500.0,
+                affected_rows=10000,
                 metadata={"analysis_duration": 2.5}
             ),
             "expected_metrics": {
@@ -106,11 +121,19 @@ class GoldenDatasets:
                     "agent_type": "data_analyst",
                     "run_id": f"{run_id}_data",
                     "result": DataAnalysisResponse(
-                        summary="Pipeline bottlenecks identified",
-                        insights=["ETL stage 3 using 60% resources", "Data skew detected"],
+                        query="SELECT stage, resource_usage, data_skew FROM pipeline_metrics WHERE pipeline_id = ?",
+                        results=[
+                            {"stage": "etl_stage_3", "resource_usage": 0.60, "data_skew": True},
+                            {"stage": "etl_stage_1", "resource_usage": 0.25, "data_skew": False}
+                        ],
+                        insights={
+                            "summary": "Pipeline bottlenecks identified",
+                            "main_issue": "ETL stage 3 using 60% resources",
+                            "secondary_issue": "Data skew detected"
+                        },
                         recommendations=["Partition rebalancing", "Add parallel processing"],
-                        confidence_score=0.92,
-                        data_points_analyzed=50000,
+                        execution_time_ms=15300.0,
+                        affected_rows=50000,
                         metadata={"processing_time": 15.3}
                     )
                 },
@@ -181,7 +204,7 @@ class GoldenDatasets:
                     "alerts_sent": max(0, (hour % 8) - 6)  # Spike every 8 hours
                 },
                 "state_size_kb": 50 + (hour * 2),  # Growing state
-                "checkpoint_type": CheckpointType.CRITICAL if hour % 6 == 0 else CheckpointType.STANDARD
+                "checkpoint_type": CheckpointType.FULL if hour % 6 == 0 else CheckpointType.AUTO
             })
         
         return {

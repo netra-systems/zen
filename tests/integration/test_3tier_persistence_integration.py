@@ -35,8 +35,8 @@ from uuid import uuid4
 import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.db.clickhouse import clickhouse_client
-from netra_backend.app.db.database_manager import database_manager
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,
@@ -78,13 +78,12 @@ class Test3TierPersistenceIntegration:
         assert redis_client is not None, "Redis connection required for persistence tests"
         
         # Verify PostgreSQL connection
-        db_session = await database_manager.get_session()
-        assert db_session is not None, "PostgreSQL connection required for checkpoint tests"
-        await db_session.close()
+        async with DatabaseManager.get_async_session() as db_session:
+            assert db_session is not None, "PostgreSQL connection required for checkpoint tests"
         
         # Verify ClickHouse connection (allow graceful degradation)
         try:
-            ch_client = await clickhouse_client.get_client()
+            ch_client = await get_clickhouse_client()
             self.clickhouse_available = ch_client is not None
         except Exception:
             self.clickhouse_available = False
@@ -104,7 +103,7 @@ class Test3TierPersistenceIntegration:
                 await redis_client.delete(f"thread_context:{thread_id}")
         
         # Cleanup PostgreSQL checkpoints
-        db_session = await database_manager.get_session()
+        db_session = await DatabaseManager.get_async_session()
         if db_session:
             try:
                 # Clean up any test checkpoints (would be implementation-specific)
@@ -116,7 +115,7 @@ class Test3TierPersistenceIntegration:
         
         # Cleanup ClickHouse (if available)
         if self.clickhouse_available:
-            ch_client = await clickhouse_client.get_client()
+            ch_client = await get_clickhouse_client()
             if ch_client:
                 for run_id in self.test_run_ids:
                     try:
@@ -196,7 +195,7 @@ class Test3TierPersistenceIntegration:
         print(f"✓ Redis PRIMARY storage validated for run {run_id}")
 
     @pytest.mark.integration
-    @pytest.mark.postgresql
+    @pytest.mark.database
     async def test_postgresql_checkpoint_creation(self):
         """Test PostgreSQL checkpoint creation for critical recovery points.
         
@@ -226,7 +225,7 @@ class Test3TierPersistenceIntegration:
         
         # Test PostgreSQL checkpoint creation
         # This would typically be triggered by the checkpoint manager
-        db_session = await database_manager.get_session()
+        db_session = await DatabaseManager.get_async_session()
         checkpoint_created = False
         
         try:
@@ -276,7 +275,7 @@ class Test3TierPersistenceIntegration:
         print(f"✓ PostgreSQL checkpoint created and validated for run {run_id}")
 
     @pytest.mark.integration
-    @pytest.mark.clickhouse
+    @pytest.mark.database
     async def test_clickhouse_migration_scheduling(self):
         """Test ClickHouse migration scheduling for completed runs.
         
@@ -316,7 +315,7 @@ class Test3TierPersistenceIntegration:
         assert 0 < ttl <= 3600, "Completed state TTL should be reduced to 1 hour"
         
         # Simulate migration to ClickHouse
-        ch_client = await clickhouse_client.get_client()
+        ch_client = await get_clickhouse_client()
         migration_success = False
         
         try:
@@ -349,7 +348,7 @@ class Test3TierPersistenceIntegration:
         print(f"✓ ClickHouse migration scheduled for completed run {run_id}")
 
     @pytest.mark.integration
-    @pytest.mark.failover
+    @pytest.mark.resilience
     async def test_failover_chain_recovery(self):
         """Test complete failover chain: Redis → PostgreSQL → ClickHouse → Legacy.
         
@@ -381,7 +380,7 @@ class Test3TierPersistenceIntegration:
         assert redis_state is not None, "State must exist in Redis before failure"
         
         # Step 2: Create PostgreSQL checkpoint (backup)
-        db_session = await database_manager.get_session()
+        db_session = await DatabaseManager.get_async_session()
         try:
             # Simulate checkpoint creation
             checkpoint_data = {
@@ -425,7 +424,6 @@ class Test3TierPersistenceIntegration:
         print(f"✓ Failover chain validated for run {run_id}")
 
     @pytest.mark.integration
-    @pytest.mark.consistency
     async def test_cross_database_consistency_validation(self):
         """Test cross-database consistency validation across all tiers.
         
@@ -454,7 +452,7 @@ class Test3TierPersistenceIntegration:
         await state_cache_manager.save_primary_state(request)
         
         # Create PostgreSQL checkpoint
-        db_session = await database_manager.get_session()
+        db_session = await DatabaseManager.get_async_session()
         postgres_consistent = False
         try:
             checkpoint_data = {
@@ -498,7 +496,7 @@ class Test3TierPersistenceIntegration:
         print(f"✓ Cross-database consistency validated for run {run_id}")
 
     @pytest.mark.integration
-    @pytest.mark.transactions
+    @pytest.mark.database
     async def test_atomic_transaction_guarantees(self):
         """Test atomic transaction guarantees across persistence operations.
         
@@ -551,7 +549,7 @@ class Test3TierPersistenceIntegration:
         assert int(updated_version) > int(initial_version), "Version must increment atomically"
         
         # Test transaction rollback scenario
-        db_session = await database_manager.get_session()
+        db_session = await DatabaseManager.get_async_session()
         transaction_test = False
         
         try:
@@ -574,7 +572,7 @@ class Test3TierPersistenceIntegration:
         print(f"✓ Atomic transaction guarantees validated for run {run_id}")
 
     @pytest.mark.integration
-    @pytest.mark.concurrency
+    @pytest.mark.performance
     async def test_concurrent_agent_persistence(self):
         """Test concurrent agent persistence under high load.
         
@@ -650,7 +648,6 @@ class Test3TierPersistenceIntegration:
               f"{ops_per_second:.2f} ops/sec")
 
     @pytest.mark.integration
-    @pytest.mark.lifecycle
     async def test_24hour_persistence_lifecycle(self):
         """Test complete 24-hour persistence lifecycle with real timing.
         
@@ -714,7 +711,7 @@ class Test3TierPersistenceIntegration:
                 
                 # Create PostgreSQL backup for critical checkpoints
                 if checkpoint["checkpoint_type"] == CheckpointType.CRITICAL:
-                    db_session = await database_manager.get_session()
+                    db_session = await DatabaseManager.get_async_session()
                     try:
                         # Simulate critical checkpoint backup
                         lifecycle_results["postgres_backups"] += 1
@@ -773,7 +770,7 @@ class Test3TierPersistenceIntegration:
               f"{len(lifecycle_results['errors'])} errors")
 
     @pytest.mark.integration
-    @pytest.mark.business_validation
+    @pytest.mark.comprehensive
     async def test_enterprise_workload_validation(self):
         """Test enterprise workload scenarios for business value validation.
         
