@@ -18,7 +18,6 @@ from decimal import Decimal
 
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.agents.base.execution_context import ExecutionContext, ExecutionMetadata
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
 
@@ -134,12 +133,10 @@ class TestOptimizationOutputQuality:
         """Create actions agent with mocked dependencies."""
         llm_manager = AsyncMock()
         tool_dispatcher = AsyncMock()
-        websocket_manager = AsyncMock()
         
         agent = ActionsToMeetGoalsSubAgent(
             llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher,
-            websocket_manager=websocket_manager
+            tool_dispatcher=tool_dispatcher
         )
         return agent
     
@@ -242,10 +239,7 @@ class TestOptimizationOutputQuality:
                 chat_thread_id=f"test_opt_{scenario['name']}",
                 metadata={"context": scenario["context"]}
             )
-            context = ExecutionContext(
-                context_id=f"test_opt_{scenario['name']}",
-                metadata=ExecutionMetadata(thread_id=f"test_opt_{scenario['name']}")
-            )
+            # Context not needed for direct execute call
             
             # Mock LLM response with optimization
             optimization_agent.llm_manager.generate_response = AsyncMock(
@@ -295,10 +289,7 @@ class TestOptimizationOutputQuality:
                 chat_thread_id=f"test_action_{scenario['name']}",
                 metadata={"context": {"optimization": scenario["expected_optimization"]}}
             )
-            context = ExecutionContext(
-                context_id=f"test_action_{scenario['name']}",
-                metadata=ExecutionMetadata(thread_id=f"test_action_{scenario['name']}")
-            )
+            # Context not needed for direct execute call
             
             # Mock action plan response
             action_plan = {
@@ -385,10 +376,7 @@ class TestOptimizationOutputQuality:
                 chat_thread_id="test_constraints",
                 metadata={"context": scenario}
             )
-            context = ExecutionContext(
-                context_id="test_constraints",
-                metadata=ExecutionMetadata(thread_id="test_constraints")
-            )
+            # Context not needed for direct execute call
             
             # Mock optimization that respects constraints
             optimization_agent.llm_manager.generate_response = AsyncMock(
@@ -436,10 +424,7 @@ class TestOptimizationOutputQuality:
             chat_thread_id="test_quality",
             metadata={"context": {"metrics": {"cost": 10000, "performance": 70}}}
         )
-        context = ExecutionContext(
-            context_id="test_quality",
-            metadata=ExecutionMetadata(thread_id="test_quality")
-        )
+        # Context not needed for direct execute call
         
         # Mock high-quality optimization response
         optimization_agent.llm_manager.generate_response = AsyncMock(
@@ -507,10 +492,7 @@ class TestOptimizationOutputQuality:
             chat_thread_id="test_explanation",
             metadata={"context": {"current_cost": 5000}}
         )
-        context = ExecutionContext(
-            context_id="test_explanation",
-            metadata=ExecutionMetadata(thread_id="test_explanation")
-        )
+        # Context not needed for direct execute call
         
         optimization_agent.llm_manager.generate_response = AsyncMock(
             return_value={

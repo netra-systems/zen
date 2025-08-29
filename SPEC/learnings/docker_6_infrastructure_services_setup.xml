@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <learning>
   <metadata>
-    <title>Docker 12-Service Setup Requirements</title>
+    <title>Docker 6-Service Infrastructure Setup</title>
     <date>2025-08-29</date>
     <category>Infrastructure</category>
     <priority>CRITICAL</priority>
@@ -15,7 +15,8 @@
 
   <problem>
     <description>
-      The Netra platform requires 12 services (6 test + 6 dev) to run simultaneously.
+      The Netra platform requires 6 infrastructure services (3 test + 3 dev) to run simultaneously.
+      Application services (Backend, Auth, Frontend) are run locally during development.
       Previous setup attempts resulted in:
       1. Inconsistent container naming (e.g., "-2" suffixes)
       2. Port conflicts between environments
@@ -77,17 +78,16 @@
         - PostgreSQL: 5432
         - Redis: 6379
         - ClickHouse: 8123
-        - Backend: 8000
-        - Auth: 8081
-        - Frontend: 3000
         
         Dev environment uses +1 or alternative ports:
         - PostgreSQL: 5433
         - Redis: 6380
         - ClickHouse: 8124
-        - Backend: 8001
-        - Auth: 8082
-        - Frontend: 3001
+        
+        Note: Backend, Auth, and Frontend services run locally on:
+        - Backend: 8000 (test) / 8001 (dev)
+        - Auth: 8081 (test) / 8082 (dev)
+        - Frontend: 3000 (test) / 3001 (dev)
       </description>
     </learning>
     
@@ -116,7 +116,7 @@
     <learning>
       <title>Single Command Startup</title>
       <description>
-        All 12 services MUST start with single command:
+        All 6 infrastructure services MUST start with single command:
         - Windows: scripts\start_all_services.bat
         - Linux/Mac: ./scripts/start_all_services.sh
         - Docker: docker-compose -f docker-compose.all.yml up -d
