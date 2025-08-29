@@ -39,8 +39,16 @@ class TestDatabaseManager:
         # Use DatabaseManager's async session context
         async with DatabaseManager.get_async_session() as session:
             if args:
-                # For parameterized queries - use positional parameters
-                result = await session.execute(text(query), args)
+                # CRITICAL FIX: Convert PostgreSQL-style ($1, $2) to SQLAlchemy named parameters
+                # Replace $1, $2, etc. with named parameters
+                processed_query = query
+                params = {}
+                for i, arg in enumerate(args, 1):
+                    param_name = f"param_{i}"
+                    processed_query = processed_query.replace(f"${i}", f":{param_name}")
+                    params[param_name] = arg
+                
+                result = await session.execute(text(processed_query), params)
             else:
                 # For simple queries
                 result = await session.execute(text(query))
@@ -48,7 +56,10 @@ class TestDatabaseManager:
             # CRITICAL FIX: Handle DDL operations that don't return rows
             try:
                 rows = result.fetchall()
-                return rows
+                # Convert Row objects to dictionaries for consistent access
+                if rows:
+                    return [row._asdict() if hasattr(row, '_asdict') else dict(row) for row in rows]
+                return []
             except Exception as e:
                 # For DDL operations (CREATE, INSERT, etc.) that don't return rows
                 if "does not return rows" in str(e) or "ResourceClosedError" in str(e):
