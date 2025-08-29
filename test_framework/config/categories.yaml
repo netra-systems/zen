@@ -93,6 +93,20 @@ categories:
     - agent
     - llm
     - ai
+  post_deployment:
+    description: Post-deployment authentication and integration tests
+    priority: CRITICAL
+    category_type: quality
+    timeout_seconds: 300
+    estimated_duration_minutes: 3.0
+    network_intensive: true
+    dependencies: []
+    tags:
+    - post-deployment
+    - authentication
+    - validation
+    - staging
+    - production
   frontend:
     description: React component and UI tests
     priority: LOW
