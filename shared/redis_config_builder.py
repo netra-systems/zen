@@ -136,7 +136,9 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
                 parsed = urlparse(redis_url)
                 
                 # Extract basic connection info
-                host = parsed.hostname or "localhost"
+                # No default for staging/production - must have explicit hostname
+                default_host = "localhost" if self.parent.environment in ["development", "testing"] else ""
+                host = parsed.hostname or default_host
                 port = parsed.port or 6379
                 username = parsed.username
                 password = parsed.password
@@ -174,7 +176,9 @@ class RedisConfigurationBuilder(ConfigBuilderBase, ConfigLoggingMixin):
             password = self.parent.secret_manager.get_redis_password()
             
             # Get other components
-            host = self.parent.env.get("REDIS_HOST", "localhost")
+            # No default for staging/production - must be explicitly configured
+            default_host = "localhost" if self.parent.environment in ["development", "testing"] else ""
+            host = self.parent.env.get("REDIS_HOST", default_host)
             port = int(self.parent.env.get("REDIS_PORT", "6379"))
             db = int(self.parent.env.get("REDIS_DB", "0"))
             username = self.parent.env.get("REDIS_USERNAME")
