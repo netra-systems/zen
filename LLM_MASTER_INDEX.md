@@ -21,6 +21,7 @@
 | **CORS Configuration** | `/shared/cors_config.py` | **Unified CORS configuration for all services** | [`SPEC/cors_configuration.xml`](SPEC/cors_configuration.xml) |
 | **Shared Component Library** | `/shared/` | Universal utilities & schemas | [`SPEC/shared_component_architecture.xml`](SPEC/shared_component_architecture.xml) |
 | **Test Infrastructure** | `/test_framework/` | Unified test utilities | [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) |
+| **Test Runner Real Services** | `/test_framework/service_availability.py` | Real service validation | [`SPEC/test_runner_real_services.xml`](SPEC/test_runner_real_services.xml) |
 | **Test Execution Tracker** | `/scripts/test_execution_tracker.py` | Test history & metrics tracking | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
 | **Test Dashboard** | `/scripts/test_dashboard.py` | Interactive test health monitoring | [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) |
 | **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
@@ -135,6 +136,8 @@
 | **Test Framework** | `/test_framework/` | Enhanced test framework | Core runner and configuration |
 | **Test Runner** | `/test_framework/runner.py` | Main test runner | Unified test execution |
 | **Test Config** | `/test_framework/test_config.py` | Test configuration | Test levels, environments |
+| **Service Availability** | `/test_framework/service_availability.py` | Service availability checker | Hard failures when real services unavailable |
+| **LLM Config Manager** | `/test_framework/llm_config_manager.py` | Single source of truth for LLM config | Replaces multiple duplicate systems |
 
 #### Test Locations by Service
 | Test Type | Location | Pattern | Run Command |
@@ -322,6 +325,8 @@ python scripts/docker_services.py stop
 - **🔴 TEST EXECUTION TRACKER** | `/scripts/test_execution_tracker.py` | Test history, flaky detection, prioritization
 - **🔴 TEST DASHBOARD** | `/scripts/test_dashboard.py` | Interactive metrics, HTML reports, recommendations  
 - **🔴 UNIFIED TEST RUNNER** | `/scripts/unified_test_runner.py` | **FIXED E2E categories**, integrated tracking
+- **🔴 PRE-DEPLOYMENT AUDIT** | `/scripts/pre_deployment_audit.py` | **Catch LLM coding errors before deploy**
+- [`SPEC/pre_deployment_audit.xml`](SPEC/pre_deployment_audit.xml) - **Pre-deployment audit specification**
 - [`SPEC/learnings/test_system_improvements.xml`](SPEC/learnings/test_system_improvements.xml) - **E2E fix & test tracking learnings**
 - [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) - Test architecture patterns
 - [`E2E_TEST_BLOCKING_AUDIT.md`](E2E_TEST_BLOCKING_AUDIT.md) - E2E test issues documentation
