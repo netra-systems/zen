@@ -1,21 +1,25 @@
 """
-MCP API Routes - Legacy Compatibility Module
+MCP API Routes - Compatibility Module
 
-This module maintains backward compatibility while delegating to the new
-modular MCP package. All functionality has been moved to focused
-modules under 300 lines each.
+This module provides MCP client functionality through the existing
+mcp_client router implementation.
 """
 
-# Import from modular implementation  
-from netra_backend.app.mcp.main import router
-from netra_backend.app.mcp.models import (
-    MCPClientCreateRequest,
-    MCPPromptGetRequest,
-    MCPResourceReadRequest,
-    MCPSessionCreateRequest,
-    MCPToolCallRequest,
+# Import from working implementation  
+from netra_backend.app.routes.mcp_client import router
+from netra_backend.app.schemas.mcp_client import (
+    ExecuteToolRequest as MCPToolCallRequest,
+    FetchResourceRequest as MCPResourceReadRequest,
+    ConnectServerRequest as MCPSessionCreateRequest,
+    RegisterServerRequest as MCPClientCreateRequest,
 )
-from netra_backend.app.mcp.service_factory import get_mcp_service
+
+# For backward compatibility, create a simple service getter
+def get_mcp_service():
+    """Get MCP service - delegates to service locator in mcp_client routes."""
+    from netra_backend.app.services.service_locator import get_service
+    from netra_backend.app.services.service_interfaces import IMCPClientService
+    return get_service(IMCPClientService)
 
 # Maintain backward compatibility
 __all__ = [
@@ -24,6 +28,5 @@ __all__ = [
     "MCPSessionCreateRequest",
     "MCPToolCallRequest", 
     "MCPResourceReadRequest",
-    "MCPPromptGetRequest",
     "get_mcp_service"
 ]

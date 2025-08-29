@@ -12,7 +12,7 @@
     <purpose>
       This guide helps new engineers set up and deploy the Netra Apex staging environment when all GCP 
       infrastructure (project, service accounts, databases) already exists. Focus is on configuration,
-      secrets setup, and deployment steps.
+      secrets setup, deployment steps, and load balancer configuration for custom domains.
     </purpose>
     <assumptions>
       <assumption>GCP project "netra-staging" already exists</assumption>
@@ -20,12 +20,19 @@
       <assumption>Cloud SQL PostgreSQL instance is running</assumption>
       <assumption>You have been granted access to the GCP project</assumption>
       <assumption>Redis instance exists (if required)</assumption>
+      <assumption>Load balancer with custom domains is configured</assumption>
     </assumptions>
     <architecture>
-      <service name="Backend">netra-backend-staging (Port 8888, Cloud Run)</service>
-      <service name="Auth">netra-auth-service (Port 8001, Cloud Run)</service>
-      <service name="Frontend">netra-frontend-staging (Port 3000, Cloud Run)</service>
+      <service name="Backend">netra-backend-staging (Port 8888, Cloud Run) → api.staging.netrasystems.ai</service>
+      <service name="Auth">netra-auth-service (Port 8001, Cloud Run) → auth.staging.netrasystems.ai</service>
+      <service name="Frontend">netra-frontend-staging (Port 3000, Cloud Run) → app.staging.netrasystems.ai</service>
     </architecture>
+    <custom_domains>
+      <note>All services are accessible via custom domains through Google Cloud Load Balancer</note>
+      <domain>api.staging.netrasystems.ai - Backend API</domain>
+      <domain>auth.staging.netrasystems.ai - Authentication Service</domain>
+      <domain>app.staging.netrasystems.ai - Frontend Application</domain>
+    </custom_domains>
   </overview>
 
   <phase_1_local_setup>
@@ -200,20 +207,29 @@
       <prerequisites>
         1. Go to Google Cloud Console: https://console.cloud.google.com
         2. Navigate to APIs & Services > Credentials
-        3. Create OAuth 2.0 Client ID (Web application)
-        4. Add authorized redirect URIs:
+        3. Create or update OAuth 2.0 Client ID (Web application)
+        4. Add authorized JavaScript origins:
+           - https://app.staging.netrasystems.ai
+           - http://localhost:3000 (for local testing)
+        5. Add authorized redirect URIs:
+           - https://auth.staging.netrasystems.ai/auth/google/callback
            - https://auth.staging.netrasystems.ai/oauth/callback
-           - http://localhost:8001/oauth/callback (for local testing)
+           - http://localhost:8001/auth/google/callback (for local testing)
       </prerequisites>
       <add_secrets>
         <command>
+          # IMPORTANT: Use environment-specific secret names
           echo -n "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com" | \
-          gcloud secrets create google-client-id-staging --data-file=-
+          gcloud secrets versions add google-oauth-client-id-staging --data-file=-
         </command>
         <command>
           echo -n "YOUR_GOOGLE_CLIENT_SECRET" | \
-          gcloud secrets create google-client-secret-staging --data-file=-
+          gcloud secrets versions add google-oauth-client-secret-staging --data-file=-
         </command>
+        <important>
+          The auth service expects GOOGLE_OAUTH_CLIENT_ID_STAGING and GOOGLE_OAUTH_CLIENT_SECRET_STAGING
+          as environment variables, which are mapped from these secrets.
+        </important>
       </add_secrets>
     </step>
 
@@ -228,18 +244,25 @@ import subprocess
 import json
 
 required_secrets = [
-    'staging-database-url',
+    'postgres-host-staging',
+    'postgres-port-staging',
+    'postgres-db-staging',
+    'postgres-user-staging',
+    'postgres-password-staging',
     'jwt-secret-key-staging',
-    'jwt-secret-staging',
-    'session-secret-key-staging',
-    'fernet-key-staging',
-    'openai-api-key-staging'
+    'jwt-secret-staging',  # Must match jwt-secret-key-staging value
+    'google-oauth-client-id-staging',
+    'google-oauth-client-secret-staging',
+    'service-secret-staging',
+    'service-id-staging'
 ]
 
 optional_secrets = [
-    'google-oauth-client-id-staging',
-    'google-oauth-client-secret-staging',
-    'anthropic-api-key-staging'
+    'openai-api-key-staging',
+    'anthropic-api-key-staging',
+    'gemini-api-key-staging',
+    'redis-url-staging',
+    'clickhouse-host-staging'
 ]
 
 print("Checking required secrets...")
@@ -321,6 +344,11 @@ EOF
         Backend URL: https://netra-backend-staging-xxxxx.run.app
         Auth URL: https://netra-auth-service-xxxxx.run.app  
         Frontend URL: https://netra-frontend-staging-xxxxx.run.app
+        
+        Note: These are the Cloud Run URLs. The services are also accessible via:
+        - https://api.staging.netrasystems.ai (Backend)
+        - https://auth.staging.netrasystems.ai (Auth)
+        - https://app.staging.netrasystems.ai (Frontend)
       </expected_output>
     </step>
 
