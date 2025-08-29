@@ -16,9 +16,10 @@ Business Value Justification (BVJ):
 
 import asyncio
 import pytest
+import time
 from datetime import datetime
-from typing import List
-from unittest.mock import AsyncMock
+from typing import List, Dict, Any
+from unittest.mock import AsyncMock, patch
 
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
 from netra_backend.app.agents.corpus_admin.models import (
@@ -41,8 +42,7 @@ from test_framework.fixtures.corpus_admin import (
 class TestCorpusAdminConcurrentOperations:
     """Tests for concurrent corpus operations and conflict resolution."""
 
-    @pytest.fixture
-    async def setup_concurrent_environment(self):
+    async def _setup_concurrent_environment(self):
         """Set up environment for concurrent operation testing."""
         # Create multiple agents to simulate concurrent access
         agents = []
@@ -59,12 +59,12 @@ class TestCorpusAdminConcurrentOperations:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_concurrent_agent_initialization(self, setup_concurrent_environment):
+    async def test_concurrent_agent_initialization(self):
         """
         Test that multiple corpus admin agents can be initialized concurrently
         without conflicts.
         """
-        env = await setup_concurrent_environment
+        env = await self._setup_concurrent_environment()
         
         # Validate all agents initialized properly
         assert len(env["agents"]) == 3
@@ -82,12 +82,12 @@ class TestCorpusAdminConcurrentOperations:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_concurrent_entry_condition_checks(self, setup_concurrent_environment):
+    async def test_concurrent_entry_condition_checks(self):
         """
         Test that multiple agents can check entry conditions concurrently
         without interference.
         """
-        env = await setup_concurrent_environment
+        env = await self._setup_concurrent_environment()
         
         # Create test requests
         test_requests = [
@@ -127,12 +127,12 @@ class TestCorpusAdminConcurrentOperations:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_concurrent_execution_isolation(self, setup_concurrent_environment):
+    async def test_concurrent_execution_isolation(self):
         """
         Test that concurrent executions are properly isolated and don't
         interfere with each other's state.
         """
-        env = await setup_concurrent_environment
+        env = await self._setup_concurrent_environment()
         
         # Define concurrent execution function
         async def execute_corpus_operation(agent_index: int):
@@ -201,11 +201,11 @@ class TestCorpusAdminConcurrentOperations:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_concurrent_cleanup_operations(self, setup_concurrent_environment):
+    async def test_concurrent_cleanup_operations(self):
         """
         Test that concurrent cleanup operations don't interfere with each other.
         """
-        env = await setup_concurrent_environment
+        env = await self._setup_concurrent_environment()
         
         # First, execute operations to have something to clean up
         states = []
@@ -250,12 +250,12 @@ class TestCorpusAdminConcurrentOperations:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.performance
-    async def test_concurrent_performance_benchmarks(self, setup_concurrent_environment):
+    async def test_concurrent_performance_benchmarks(self):
         """
         Test performance characteristics of concurrent corpus operations
         to ensure system scales properly.
         """
-        env = await setup_concurrent_environment
+        env = await self._setup_concurrent_environment()
         
         # Benchmark different concurrent operation patterns
         benchmarks = {}
@@ -336,11 +336,11 @@ class TestCorpusAdminConcurrentOperations:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_agent_health_under_concurrent_load(self, setup_concurrent_environment):
+    async def test_agent_health_under_concurrent_load(self):
         """
         Test that agent health status remains stable under concurrent load.
         """
-        env = await setup_concurrent_environment
+        env = await self._setup_concurrent_environment()
         
         # Check initial health
         initial_health = [agent.get_health_status() for agent in env["agents"]]
@@ -355,10 +355,10 @@ class TestCorpusAdminConcurrentOperations:
             
             for j in range(operation_count):
                 state = DeepAgentState(
-                user_request="test",
-                chat_thread_id="test_thread",
-                user_id="test_user"
-            )
+                    user_request="test",
+                    chat_thread_id="test_thread",
+                    user_id="test_user"
+                )
                 state.user_request = f"Load test operation {j} for agent {agent_index}"
                 
                 try:
@@ -392,5 +392,189 @@ class TestCorpusAdminConcurrentOperations:
         print(f"Load test: {total_operations}/{total_attempted} operations successful")
         
         # At least 50% of operations should succeed under load
-        success_rate = total_operations / total_attempted
+        success_rate = total_operations / total_attempted if total_attempted > 0 else 0
         assert success_rate >= 0.5, f"Success rate too low: {success_rate:.2%}"
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    @pytest.mark.critical_path
+    async def test_concurrent_resource_contention(self):
+        """
+        Test concurrent operations that compete for the same resources
+        to ensure proper synchronization and data integrity.
+        """
+        env = await self._setup_concurrent_environment()
+        
+        # Shared resource identifier that all agents will try to access
+        shared_resource_id = "shared_corpus_001"
+        
+        # Define concurrent operations that access the same resource
+        async def competing_operation(agent_index: int, operation_type: str):
+            agent = env["agents"][agent_index]
+            state = DeepAgentState(
+                user_request="test",
+                chat_thread_id=f"contention_thread_{agent_index}",
+                user_id=f"contention_user_{agent_index}"
+            )
+            
+            # Different operations on the same resource
+            operations = {
+                "read": f"Search corpus {shared_resource_id} for information",
+                "write": f"Update corpus {shared_resource_id} with new data",
+                "delete": f"Remove obsolete data from corpus {shared_resource_id}"
+            }
+            
+            state.user_request = operations[operation_type]
+            
+            start_time = time.time()
+            try:
+                await agent.execute(
+                    state=state,
+                    run_id=f"contention_{operation_type}_{agent_index}",
+                    stream_updates=False
+                )
+                execution_time = time.time() - start_time
+                return {
+                    "agent_index": agent_index,
+                    "operation_type": operation_type,
+                    "success": True,
+                    "execution_time": execution_time,
+                    "error": None
+                }
+            except Exception as e:
+                execution_time = time.time() - start_time
+                return {
+                    "agent_index": agent_index,
+                    "operation_type": operation_type,
+                    "success": False,
+                    "execution_time": execution_time,
+                    "error": str(e)
+                }
+        
+        # Launch competing operations
+        competing_tasks = [
+            competing_operation(0, "read"),
+            competing_operation(1, "write"),
+            competing_operation(2, "delete")
+        ]
+        
+        start_time = time.time()
+        results = await asyncio.gather(*competing_tasks)
+        total_time = time.time() - start_time
+        
+        # Validate results
+        successful_operations = [r for r in results if r["success"]]
+        failed_operations = [r for r in results if not r["success"]]
+        
+        print(f"Resource contention test completed in {total_time:.2f}s")
+        print(f"Successful operations: {len(successful_operations)}")
+        print(f"Failed operations: {len(failed_operations)}")
+        
+        # At least some operations should succeed even with contention
+        assert len(successful_operations) >= 1, "At least one operation should succeed despite resource contention"
+        
+        # Operations should complete within reasonable time
+        assert total_time < 45.0, f"Concurrent resource access took too long: {total_time}s"
+        
+        # Log detailed results for debugging
+        for result in results:
+            status = "SUCCESS" if result["success"] else "FAILED"
+            print(f"Agent {result['agent_index']} {result['operation_type']}: {status} ({result['execution_time']:.2f}s)")
+            if result["error"]:
+                print(f"  Error: {result['error']}")
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    @pytest.mark.critical_path
+    async def test_concurrent_state_isolation_validation(self):
+        """
+        Enhanced test for state isolation with more rigorous validation
+        of concurrent state modifications using run_id tracking.
+        """
+        env = await self._setup_concurrent_environment()
+        
+        # Track state modifications to detect cross-contamination
+        state_tracking: Dict[str, Dict[str, Any]] = {}
+        
+        async def isolated_state_operation(agent_index: int):
+            agent = env["agents"][agent_index]
+            unique_id = f"isolation_test_{agent_index}_{int(time.time() * 1000000)}"
+            
+            state = DeepAgentState(
+                user_request=f"Isolated operation for agent {agent_index}",
+                chat_thread_id=f"isolation_thread_{unique_id}",
+                user_id=f"isolation_user_{unique_id}",
+                run_id=unique_id  # Use run_id for tracking
+            )
+            
+            # Store initial state for validation
+            state_tracking[unique_id] = {
+                "initial_thread_id": state.chat_thread_id,
+                "initial_user_id": state.user_id,
+                "initial_request": state.user_request,
+                "initial_run_id": state.run_id,
+                "agent_index": agent_index
+            }
+            
+            # Execute operation
+            await agent.execute(
+                state=state,
+                run_id=unique_id,
+                stream_updates=False
+            )
+            
+            # Validate state integrity after execution
+            post_execution_data = {
+                "final_thread_id": state.chat_thread_id,
+                "final_user_id": state.user_id,
+                "final_request": state.user_request,
+                "final_run_id": state.run_id,
+                "has_result": hasattr(state, 'corpus_admin_result'),
+                "has_error": hasattr(state, 'corpus_admin_error')
+            }
+            
+            state_tracking[unique_id].update(post_execution_data)
+            
+            return (agent_index, unique_id, state)
+        
+        # Launch concurrent isolated operations
+        isolation_tasks = [isolated_state_operation(i) for i in range(3)]
+        isolation_results = await asyncio.gather(*isolation_tasks, return_exceptions=True)
+        
+        # Validate state isolation
+        successful_isolations = 0
+        for result in isolation_results:
+            if isinstance(result, Exception):
+                print(f"Isolation test failed with exception: {result}")
+                continue
+            
+            agent_index, unique_id, final_state = result
+            tracking_data = state_tracking[unique_id]
+            
+            # Validate that state remained isolated and unchanged
+            assert tracking_data["initial_thread_id"] == tracking_data["final_thread_id"], \
+                f"Thread ID modified for agent {agent_index}"
+            assert tracking_data["initial_user_id"] == tracking_data["final_user_id"], \
+                f"User ID modified for agent {agent_index}"
+            assert tracking_data["initial_run_id"] == tracking_data["final_run_id"], \
+                f"Run ID modified for agent {agent_index}"
+            
+            # Validate that each agent worked with its own state
+            assert tracking_data["initial_run_id"] == unique_id, \
+                f"Run ID doesn't match expected unique ID for agent {agent_index}"
+            
+            successful_isolations += 1
+            print(f"Agent {agent_index} state isolation: VERIFIED (run_id: {unique_id})")
+        
+        # All isolations should succeed
+        assert successful_isolations == 3, f"Only {successful_isolations}/3 state isolations verified"
+        
+        # Cross-validate that no states contaminated each other by checking run_ids are unique
+        run_ids = set()
+        for tracking_data in state_tracking.values():
+            run_id = tracking_data["initial_run_id"]
+            assert run_id not in run_ids, f"Duplicate run_id detected: {run_id}"
+            run_ids.add(run_id)
+        
+        assert len(run_ids) == 3, "Should have 3 unique run_ids"
+        print(f"State isolation validation: ALL {successful_isolations} agents maintained isolated state")

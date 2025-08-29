@@ -36,8 +36,7 @@ from test_framework.fixtures.corpus_admin import (
 class TestCorpusAdminOrchestrationFlows:
     """Tests for complete corpus admin orchestration flows with multi-agent coordination."""
 
-    @pytest.fixture
-    async def setup_orchestration_environment(self):
+    async def _setup_environment(self):
         """Set up complete multi-agent orchestration environment."""
         # Create corpus admin agent with mocked components
         corpus_admin_agent = await create_test_corpus_admin_agent(with_real_llm=False)
@@ -59,47 +58,33 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_corpus_admin_agent_initialization(
-        self, setup_orchestration_environment
-    ):
+    async def test_corpus_admin_agent_initialization(self):
         """Test that the CorpusAdminSubAgent initializes properly with real components."""
-        try:
-            env = await setup_orchestration_environment
-            
-            # Validate agent is properly initialized
-            assert env["corpus_admin"] is not None, "Corpus admin agent should be created"
-            assert hasattr(env["corpus_admin"], "name"), "Agent should have name attribute"
-            assert env["corpus_admin"].name == "CorpusAdminSubAgent", f"Expected 'CorpusAdminSubAgent', got '{env['corpus_admin'].name}'"
-            
-            # Test that basic attributes exist
-            assert hasattr(env["corpus_admin"], "description"), "Agent should have description"
-            
-            # Test health status if available
-            if hasattr(env["corpus_admin"], "get_health_status"):
-                try:
-                    health_status = env["corpus_admin"].get_health_status()
-                    assert isinstance(health_status, dict), "Health status should be a dictionary"
-                    print(f"Health status: {health_status}")
-                except Exception as e:
-                    print(f"Health status check failed (non-critical): {e}")
-            
-            print("Agent initialization test passed successfully")
-            
-        except Exception as e:
-            print(f"Test failed with error: {str(e)}")
-            print(f"Error type: {type(e).__name__}")
-            import traceback
-            print(f"Full traceback: {traceback.format_exc()}")
-            raise
+        env = await self._setup_environment()
+        
+        # Validate agent is properly initialized
+        assert env["corpus_admin"] is not None, "Corpus admin agent should be created"
+        assert hasattr(env["corpus_admin"], "name"), "Agent should have name attribute"
+        assert env["corpus_admin"].name == "CorpusAdminSubAgent", f"Expected 'CorpusAdminSubAgent', got '{env['corpus_admin'].name}'"
+        
+        # Test that basic attributes exist
+        assert hasattr(env["corpus_admin"], "description"), "Agent should have description"
+        
+        # Test health status if available
+        if hasattr(env["corpus_admin"], "get_health_status"):
+            health_status = env["corpus_admin"].get_health_status()
+            assert isinstance(health_status, dict), "Health status should be a dictionary"
+            assert health_status["agent_health"] == "healthy"
+            assert "monitor" in health_status
+            assert "error_handler" in health_status
+            assert "reliability" in health_status
 
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_corpus_admin_entry_conditions(
-        self, setup_orchestration_environment
-    ):
+    async def test_corpus_admin_entry_conditions(self):
         """Test that corpus admin correctly identifies when it should handle requests."""
-        env = await setup_orchestration_environment
+        env = await self._setup_environment()
         
         # Test corpus-related request
         env["deep_state"].user_request = "Create a new knowledge corpus for our AI optimization guidelines"
@@ -121,11 +106,9 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_corpus_admin_execution_workflow(
-        self, setup_orchestration_environment
-    ):
+    async def test_corpus_admin_execution_workflow(self):
         """Test the complete execution workflow of the corpus admin agent."""
-        env = await setup_orchestration_environment
+        env = await self._setup_environment()
         
         # Set corpus-related request
         env["deep_state"].user_request = "Please create a knowledge base for our cost optimization strategies"
@@ -154,11 +137,9 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_corpus_admin_with_admin_mode_request(
-        self, setup_orchestration_environment
-    ):
+    async def test_corpus_admin_with_admin_mode_request(self):
         """Test corpus admin handling of explicit admin mode requests."""
-        env = await setup_orchestration_environment
+        env = await self._setup_environment()
         
         # Set triage result to indicate admin mode
         env["deep_state"].triage_result = {
@@ -196,11 +177,9 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_corpus_admin_state_management(
-        self, setup_orchestration_environment
-    ):
+    async def test_corpus_admin_state_management(self):
         """Test that corpus admin properly manages and updates state."""
-        env = await setup_orchestration_environment
+        env = await self._setup_environment()
         
         # Set initial state
         initial_request = "Create documentation corpus for API guidelines"
@@ -235,11 +214,9 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.performance
-    async def test_corpus_admin_performance_benchmarks(
-        self, setup_orchestration_environment
-    ):
+    async def test_corpus_admin_performance_benchmarks(self):
         """Test performance characteristics of corpus admin operations."""
-        env = await setup_orchestration_environment
+        env = await self._setup_environment()
         
         # Benchmark execution time
         start_time = datetime.now()
@@ -263,11 +240,9 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_corpus_admin_cleanup(
-        self, setup_orchestration_environment
-    ):
+    async def test_corpus_admin_cleanup(self):
         """Test corpus admin cleanup functionality."""
-        env = await setup_orchestration_environment
+        env = await self._setup_environment()
         
         # Execute first
         env["deep_state"].user_request = "Test cleanup functionality"
@@ -290,11 +265,9 @@ class TestCorpusAdminOrchestrationFlows:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.critical_path
-    async def test_multiple_corpus_requests_in_sequence(
-        self, setup_orchestration_environment
-    ):
+    async def test_multiple_corpus_requests_in_sequence(self):
         """Test handling multiple corpus requests in sequence."""
-        env = await setup_orchestration_environment
+        env = await self._setup_environment()
         
         requests = [
             "Create knowledge base for cost optimization",
