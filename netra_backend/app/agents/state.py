@@ -147,6 +147,8 @@ class DeepAgentState(BaseModel):
     report_result: Optional[ReportResult] = None
     synthetic_data_result: Optional[SyntheticDataResult] = None
     supply_research_result: Optional[SupplyResearchResult] = None
+    corpus_admin_result: Optional[Dict[str, Any]] = None
+    corpus_admin_error: Optional[str] = None
     
     final_report: Optional[str] = None
     step_count: int = 0  # Added for agent tracking
@@ -229,6 +231,8 @@ class DeepAgentState(BaseModel):
             report_result=None,
             synthetic_data_result=None,
             supply_research_result=None,
+            corpus_admin_result=None,
+            corpus_admin_error=None,
             final_report=None,
             metadata=AgentMetadata()
         )
@@ -263,6 +267,8 @@ class DeepAgentState(BaseModel):
             'report_result': other_state.report_result or self.report_result,
             'synthetic_data_result': other_state.synthetic_data_result or self.synthetic_data_result,
             'supply_research_result': other_state.supply_research_result or self.supply_research_result,
+            'corpus_admin_result': other_state.corpus_admin_result or self.corpus_admin_result,
+            'corpus_admin_error': other_state.corpus_admin_error or self.corpus_admin_error,
             'final_report': other_state.final_report or self.final_report,
             'step_count': max(self.step_count, other_state.step_count)
         }
