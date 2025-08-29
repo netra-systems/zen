@@ -198,7 +198,8 @@ class AuthConfig:
             "POSTGRES_PORT": env_manager.get("POSTGRES_PORT"),
             "POSTGRES_DB": env_manager.get("POSTGRES_DB"),
             "POSTGRES_USER": env_manager.get("POSTGRES_USER"),
-            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD")
+            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD"),
+            "DATABASE_URL": env_manager.get("DATABASE_URL")
         }
         
         # Create builder
@@ -237,7 +238,8 @@ class AuthConfig:
             "POSTGRES_PORT": env_manager.get("POSTGRES_PORT"),
             "POSTGRES_DB": env_manager.get("POSTGRES_DB"),
             "POSTGRES_USER": env_manager.get("POSTGRES_USER"),
-            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD")
+            "POSTGRES_PASSWORD": env_manager.get("POSTGRES_PASSWORD"),
+            "DATABASE_URL": env_manager.get("DATABASE_URL")
         }
         
         # Create builder

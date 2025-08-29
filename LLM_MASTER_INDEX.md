@@ -41,6 +41,7 @@
 | `database.py` | `/netra_backend/app/core/configuration/database.py` | Database configs | All DB settings unified |
 | `services.py` | `/netra_backend/app/core/configuration/services.py` | External services | API endpoints, OAuth, etc |
 | `secrets.py` | `/netra_backend/app/core/configuration/secrets.py` | Secret management | GCP Secret Manager integration |
+| **🔴 JWT CONFIG STANDARD** | `/SPEC/jwt_configuration_standard.xml` | **JWT_SECRET_KEY configuration** | **CRITICAL: Use JWT_SECRET_KEY only - JWT_SECRET is deprecated** |
 | **🔴 CORS CONFIG** | `/shared/cors_config.py` | **UNIFIED CORS for ALL services** | **CRITICAL: Single source for CORS - consolidated from 5 implementations** |
 
 ### Database Files (SSOT Compliant - 2025-08-27)

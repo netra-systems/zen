@@ -275,9 +275,9 @@ class AuthSecretLoader:
             secret_url = AuthSecretLoader._load_from_secret_manager(secret_name)
             if secret_url:
                 logger.info(f"Using {secret_name} from Secret Manager")
-                # Import here to avoid circular imports
-                from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-                return AuthDatabaseManager._normalize_database_url(secret_url)
+                # Ensure async format for auth service
+                from shared.database_url_builder import DatabaseURLBuilder
+                return DatabaseURLBuilder.format_url_for_driver(secret_url, 'asyncpg')
         
         # Fall back to DATABASE_URL environment variable
         database_url = env_manager.get("DATABASE_URL", "")
@@ -285,6 +285,6 @@ class AuthSecretLoader:
             logger.warning("No database configuration found in secrets or environment")
             return ""
         
-        # Import here to avoid circular imports
-        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-        return AuthDatabaseManager._normalize_database_url(database_url)
+        # Ensure async format for auth service
+        from shared.database_url_builder import DatabaseURLBuilder
+        return DatabaseURLBuilder.format_url_for_driver(database_url, 'asyncpg')
