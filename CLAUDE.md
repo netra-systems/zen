@@ -93,18 +93,34 @@ Focus on maximizing clarity and minimizing Cyclomatic Complexity.
 *   **Database Connectivity:** Use [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) for SSL parameter resolution.
 *   **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
 
-### 2.4. Strategic Trade-offs
+### 2.4. NO MOCKS IN DEV MODE - Real Services Only
+
+**CRITICAL: Mock clients are FORBIDDEN in development mode.** Development must use real services to ensure accurate behavior and early detection of integration issues.
+
+**Core Principles:**
+*   **Real Services in DEV:** The DEV environment (Port 8000) MUST connect to real ClickHouse, PostgreSQL, Redis, and Auth services
+*   **No Mock Fallbacks:** If a service connection fails in dev mode, the system must fail fast - NOT fall back to mocks
+*   **Test Environment Only:** Mock clients are ONLY acceptable in the TEST environment for unit/integration tests
+*   **Delete Mock Code:** When fixing service connections, remove ALL mock client code and fallback logic for dev mode
+
+**Rationale:**
+*   Mocks hide real integration issues until production
+*   Development with mocks creates false confidence in code that may fail with real services
+*   Early detection of connection/configuration issues saves debugging time
+*   Real services provide accurate performance characteristics
+
+### 2.5. Strategic Trade-offs
 
 **Compare and contrast the fundamental differences between** engineering standards and business urgency; the latter may necessitate trade-offs. You are authorized to propose strategic trade-offs when mandates require harmonization (e.g., temporarily accepting higher complexity to ship a critical feature). When evaluating these trade-offs, **from a Devil's Advocate perspective, analyze** alignment using a PM Agent (See 3.1). The justification must be documented within the BVJ, including the associated risks and the plan to restore technical health. **Explicitly address potential counterarguments, limitations, and ambiguities.**
 
-### 2.5. Observability and Data-Driven Operations
+### 2.6. Observability and Data-Driven Operations
 We cannot optimize what we do not measure. The system must be observable by design.
 *   **The Three Pillars:** Implement comprehensive, structured logging, metrics (Prometheus/Grafana), and distributed tracing (OpenTelemetry) across all services.
 *   **SLIs/SLOs/SLAs:** Define Service Level Indicators (SLIs) and Objectives (SLOs) for all critical services, mapping directly to customer-facing SLAs.
 *   **Error Budgets:** Utilize error budgets to balance innovation velocity with stability. If an SLO is breached, development focus MUST shift to restoring stability before shipping new features. **Investigate the root causes and long-term implications of** any breach.
 *   **Actionable Alerting:** Alerts must be directly linked to SLO breaches, minimize noise, and have a corresponding runbook.
 
-### 2.6. Pragmatic Rigor and Resilience
+### 2.7. Pragmatic Rigor and Resilience
 
 We value high standards, but they must serve business velocity and system stability. Standards must be functional and resilient, not theoretical and brittle.
 
