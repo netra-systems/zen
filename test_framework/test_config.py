@@ -110,8 +110,12 @@ def configure_dev_environment():
     os.environ["REDIS_URL"] = "redis://localhost:6379"
     os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
 
-def configure_test_environment():
-    """Configure environment variables for testing mode."""
+def configure_mock_environment():
+    """Configure environment variables for mock/test services mode.
+    
+    This function configures mock/test services and sets TESTING=true.
+    Use this when you want to use mock services instead of real ones.
+    """
     # Set environment to testing  
     os.environ["ENVIRONMENT"] = "testing"
     os.environ["TESTING"] = "true"
@@ -133,6 +137,29 @@ def configure_test_environment():
     os.environ["DATABASE_URL"] = "postgresql://postgres:password@localhost:5432/netra_test"
     os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use DB 1 for tests
     os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
+
+def configure_test_environment():
+    """DEPRECATED: Use configure_mock_environment() instead.
+    
+    This function is maintained for backward compatibility only.
+    """
+    import warnings
+    warnings.warn(
+        "configure_test_environment() is deprecated. Use configure_mock_environment() instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return configure_mock_environment()
+
+# Helper function for checking real LLM usage with backward compatibility
+def should_use_real_llm() -> bool:
+    """Check if real LLM should be used, supporting both new and legacy variable names.
+    
+    Returns:
+        bool: True if real LLM should be used, False otherwise
+    """
+    return (os.getenv("USE_REAL_LLM", "false").lower() == "true" or
+            os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true")
 
 # LLM configuration functions moved to test_framework.llm_config_manager
 # Import the canonical function for backward compatibility

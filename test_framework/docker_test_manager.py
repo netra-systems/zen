@@ -369,8 +369,8 @@ class DockerTestManager:
         else:
             return f"http://localhost:{port}"
     
-    def configure_test_environment(self):
-        """Configure environment variables for testing."""
+    def configure_mock_environment(self):
+        """Configure environment variables for mock/test services."""
         effective_mode = self.get_effective_mode()
         
         # Set test mode indicator
@@ -391,6 +391,19 @@ class DockerTestManager:
         self.env.set("TESTING", "1", "docker_test_manager")
         self.env.set("ENVIRONMENT", "testing", "docker_test_manager")
         self.env.set("LOG_LEVEL", "ERROR", "docker_test_manager")
+    
+    def configure_test_environment(self):
+        """DEPRECATED: Use configure_mock_environment() instead.
+        
+        This method is maintained for backward compatibility only.
+        """
+        import warnings
+        warnings.warn(
+            "configure_test_environment() is deprecated. Use configure_mock_environment() instead",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.configure_mock_environment()
     
     async def cleanup(self):
         """Clean up all test resources."""
@@ -436,7 +449,7 @@ async def setup_test_services(
         DockerTestManager: Configured and started test manager
     """
     manager = get_test_manager(mode)
-    manager.configure_test_environment()
+    manager.configure_mock_environment()
     
     success = await manager.start_services(services, profiles)
     if not success:

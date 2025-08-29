@@ -536,7 +536,7 @@ async def docker_test_manager():
     Automatically starts and stops test services for the entire test session.
     """
     manager = get_test_manager()
-    manager.configure_test_environment()
+    manager.configure_mock_environment()
     
     # Start core services (postgres, redis) by default
     # Tests requiring additional services can start them separately

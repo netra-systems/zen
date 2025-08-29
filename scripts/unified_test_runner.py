@@ -47,7 +47,7 @@ except ImportError:
 
 # Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
-from test_framework.test_config import configure_dev_environment, configure_test_environment
+from test_framework.test_config import configure_dev_environment, configure_mock_environment, configure_test_environment
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 from test_framework.test_discovery import TestDiscovery
 from test_framework.test_validation import TestValidation
@@ -71,6 +71,9 @@ try:
 except ImportError:
     TestExecutionTracker = None
     TestRunRecord = None
+
+# Service availability checking
+from test_framework.service_availability import require_real_services, ServiceUnavailableError
 
 
 class UnifiedTestRunner:
@@ -152,6 +155,10 @@ class UnifiedTestRunner:
         
         # Configure environment
         self._configure_environment(args)
+        
+        # Check service availability if real services are requested
+        if args.real_services or args.real_llm or args.env in ['dev', 'staging']:
+            self._check_service_availability(args)
         
         # Start test tracking session
         if self.test_tracker:
@@ -235,12 +242,12 @@ class UnifiedTestRunner:
                 env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
         else:
             # Default: Configure testing environment for unit/integration tests
-            configure_test_environment()
+            configure_mock_environment()
         
         if args.real_llm:
             configure_llm_testing(
                 mode=LLMTestMode.REAL,
-                model="gemini-2.5-flash",
+                model="gemini-2.5-pro",
                 timeout=60,
                 parallel="auto",
                 use_dedicated_env=True
@@ -273,8 +280,10 @@ class UnifiedTestRunner:
             if not env.get(key):
                 env.set(key, value, "test_runner_secrets")
         
-        # Try to load .env.test file if it exists
-        test_env_file = self.project_root / ".env.test"
+        # Try to load .env.mock file (or legacy .env.test) if it exists
+        test_env_file = self.project_root / ".env.mock"
+        if not test_env_file.exists():
+            test_env_file = self.project_root / ".env.test"  # Legacy fallback
         if test_env_file.exists():
             try:
                 from dotenv import load_dotenv
@@ -283,7 +292,53 @@ class UnifiedTestRunner:
                 # dotenv not available, use manual loading
                 pass
             except Exception as e:
-                print(f"Warning: Could not load .env.test file: {e}")
+                print(f"Warning: Could not load {test_env_file.name} file: {e}")
+    
+    def _check_service_availability(self, args: argparse.Namespace):
+        """Check availability of required real services before running tests."""
+        print("Checking real service availability...")
+        
+        # Determine which services to check based on arguments and environment
+        required_services = []
+        
+        if args.real_services or args.env in ['dev', 'staging']:
+            required_services.extend(['postgresql', 'redis'])
+            
+        if args.real_llm:
+            required_services.append('llm')
+            
+        # Always check Docker for dev/staging environments as most tests use it
+        if args.env in ['dev', 'staging']:
+            required_services.append('docker')
+        
+        if not required_services:
+            return
+        
+        # Remove duplicates while preserving order
+        required_services = list(dict.fromkeys(required_services))
+        
+        try:
+            # Check services with appropriate timeout
+            timeout = 10.0 if args.env == 'staging' else 5.0
+            require_real_services(
+                services=required_services,
+                timeout=timeout
+            )
+            print(f"[OK] All required services are available: {', '.join(required_services)}")
+            
+        except ServiceUnavailableError as e:
+            print(f"\n[FAIL] SERVICE AVAILABILITY CHECK FAILED\n")
+            print(str(e))
+            print(f"\nTIP: For mock testing, remove --real-services or --real-llm flags")
+            print(f"TIP: For quick development setup, run: python scripts/dev_launcher.py\n")
+            
+            # Exit immediately - don't waste time on tests that will fail
+            import sys
+            sys.exit(1)
+        
+        except Exception as e:
+            print(f"⚠️  Unexpected error during service availability check: {e}")
+            print("Continuing with tests, but failures may occur if services are unavailable...")
     
     def _determine_categories_to_run(self, args: argparse.Namespace) -> List[str]:
         """Determine which categories to run based on arguments."""
