@@ -37,37 +37,35 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   const { user, loading, initialized } = useAuth();
   const { trackError, trackPageView } = useGTMEvent();
   
-  // Track if we've already reported auth failure for this mount
-  const hasReportedAuthFailure = useRef(false);
-  const hasReportedPageView = useRef(false);
-  const lastPathname = useRef<string>();
+  // Track if we've already performed auth check and navigation
+  const hasPerformedAuthCheck = useRef(false);
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    // Only proceed with auth checks after initialization is complete
-    if (!loading && initialized) {
-      const isAuthenticated = !!user;
-      const currentPath = window.location.pathname;
-      
-      if (!isAuthenticated) {
-        // Only track auth failure once per mount and path
-        if (!hasReportedAuthFailure.current || lastPathname.current !== currentPath) {
-          trackError('auth_required', 'User not authenticated', currentPath, false);
-          hasReportedAuthFailure.current = true;
-          lastPathname.current = currentPath;
-        }
-        router.push(redirectTo);
-      } else {
-        // Only track page view once per mount and path
-        if (!hasReportedPageView.current || lastPathname.current !== currentPath) {
-          trackPageView(currentPath, 'Protected Page Access');
-          hasReportedPageView.current = true;
-          lastPathname.current = currentPath;
-        }
-      }
-      
-      onAuthCheckComplete?.(isAuthenticated);
+    // Cleanup on unmount
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // Only check auth once when fully initialized with minimal dependencies
+    if (!isMounted.current || hasPerformedAuthCheck.current) return;
+    if (loading || !initialized) return;
+    
+    hasPerformedAuthCheck.current = true;
+    const isAuthenticated = !!user;
+    const currentPath = window.location.pathname;
+    
+    if (!isAuthenticated) {
+      trackError('auth_required', 'User not authenticated', currentPath, false);
+      router.push(redirectTo);
+    } else {
+      trackPageView(currentPath, 'Protected Page Access');
     }
-  }, [loading, initialized, user, router, redirectTo, onAuthCheckComplete, trackError, trackPageView]);
+    
+    onAuthCheckComplete?.(isAuthenticated);
+  }, [initialized]); // Minimal dependencies - only re-run if initialized changes
 
   // Show loading state while checking auth or during initialization
   if (loading || !initialized || !user) {

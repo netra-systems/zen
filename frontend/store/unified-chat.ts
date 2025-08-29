@@ -3,6 +3,7 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { unstable_batchedUpdates } from 'react-dom';
 import { WebSocketEventBuffer } from '@/lib/circular-buffer';
 import { handleWebSocketEvent } from './websocket-event-handlers';
 import { mergeMediumLayerContent, mergeSlowLayerAgents, createUpdatedFastLayerData } from './layer-merge-utils';
@@ -33,6 +34,9 @@ const createInitialState = () => ({
   // WebSocket connection
   isConnected: false,
   connectionError: null,
+  
+  // Initialization state
+  initialized: false,
   
   // Agent tracking
   executedAgents: new Map<string, AgentExecution>(),
@@ -75,22 +79,30 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
     (set, get) => ({
       ...createInitialState(),
       
-      // Layer update actions with modular merging
+      // Layer update actions with modular merging and batched updates
       updateFastLayer: (data) => {
-        updateFastLayerData(data, set, get);
+        unstable_batchedUpdates(() => {
+          updateFastLayerData(data, set, get);
+        });
       },
       
       updateMediumLayer: (data) => {
-        updateMediumLayerData(data, set, get);
+        unstable_batchedUpdates(() => {
+          updateMediumLayerData(data, set, get);
+        });
       },
       
       updateSlowLayer: (data) => {
-        updateSlowLayerData(data, set, get);
+        unstable_batchedUpdates(() => {
+          updateSlowLayerData(data, set, get);
+        });
       },
       
-      // Modular WebSocket event handling
+      // Modular WebSocket event handling with batched updates
       handleWebSocketEvent: (event: UnifiedWebSocketEvent) => {
-        handleWebSocketEvent(event, get(), set, get);
+        unstable_batchedUpdates(() => {
+          handleWebSocketEvent(event, get(), set, get);
+        });
       },
       
       // Additional actions

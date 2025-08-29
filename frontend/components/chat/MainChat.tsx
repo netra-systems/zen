@@ -13,6 +13,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
+import { useInitializationCoordinator } from '@/hooks/useInitializationCoordinator';
 import { logger } from '@/utils/debug-logger';
 
 // Helper Functions (8 lines max each)
@@ -99,6 +100,9 @@ const MainChat: React.FC = () => {
   // Thread navigation with URL sync
   const { currentThreadId, isNavigating } = useThreadNavigation();
   
+  // Coordinate initialization to prevent re-renders
+  const { state: initState, isInitialized } = useInitializationCoordinator();
+  
   const { messages: wsMessages } = useWebSocket();
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
@@ -165,7 +169,7 @@ const MainChat: React.FC = () => {
   }, []);
 
   // Show loading state while initializing
-  if (shouldShowLoading) {
+  if (!isInitialized || shouldShowLoading) {
     return (
       <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="flex flex-col items-center gap-4">
