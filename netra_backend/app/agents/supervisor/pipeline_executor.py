@@ -273,7 +273,7 @@ class PipelineExecutor:
         """Send message with error handling."""
         message = self._build_completion_message(state, run_id)
         await self.websocket_manager.send_to_thread(
-            thread_id, message.model_dump()
+            thread_id, message.model_dump(mode='json')
         )
     
     async def _handle_message_error(self, error: Exception, thread_id: str) -> None:
@@ -301,5 +301,5 @@ class PipelineExecutor:
         """Create WebSocket message wrapper."""
         from netra_backend.app.schemas.websocket_models import WebSocketMessage
         return WebSocketMessage(
-            type="agent_completed", payload=content.model_dump()
+            type="agent_completed", payload=content.model_dump(mode='json')
         )

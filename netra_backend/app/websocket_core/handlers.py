@@ -108,7 +108,7 @@ class HeartbeatHandler(BaseMessageHandler):
             # Check if websocket is connected or is a mock (for testing)
             if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
-                await websocket.send_json(response.model_dump())
+                await websocket.send_json(response.model_dump(mode='json'))
                 return True
             
         except Exception as e:
@@ -174,7 +174,7 @@ class UserMessageHandler(BaseMessageHandler):
             # Check if websocket is connected or is a mock (for testing)
             if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
-                await websocket.send_json(ack.model_dump())
+                await websocket.send_json(ack.model_dump(mode='json'))
                 
             return True
         except Exception as e:
@@ -324,7 +324,7 @@ class ErrorHandler(BaseMessageHandler):
             # Check if websocket is connected or is a mock (for testing)
             if (is_websocket_connected(websocket) or 
                 hasattr(websocket.application_state, '_mock_name')):
-                await websocket.send_json(ack.model_dump())
+                await websocket.send_json(ack.model_dump(mode='json'))
             
             return True
             
@@ -604,7 +604,7 @@ async def send_error_to_websocket(websocket: WebSocket, error_code: str,
             return False
             
         error_msg = create_error_message(error_code, error_message, details)
-        await websocket.send_json(error_msg.model_dump())
+        await websocket.send_json(error_msg.model_dump(mode='json'))
         return True
         
     except Exception as e:
@@ -626,7 +626,7 @@ async def send_system_message(websocket: WebSocket, content: str,
             data.update(additional_data)
             
         system_msg = create_server_message(MessageType.SYSTEM_MESSAGE, data)
-        await websocket.send_json(system_msg.model_dump())
+        await websocket.send_json(system_msg.model_dump(mode='json'))
         return True
         
     except Exception as e:
