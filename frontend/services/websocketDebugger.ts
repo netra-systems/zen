@@ -277,7 +277,7 @@ ${this.generateRecommendations(stats)}
   private initializeValidationRules(): void {
     // Rule: Event must have type
     this.validationRules.push((event) => {
-      if (!event.type || typeof event.type !== 'string') {
+      if (!event || !event.type || typeof event.type !== 'string') {
         return {
           isValid: false,
           issues: ['Missing or invalid event type'],
@@ -290,7 +290,7 @@ ${this.generateRecommendations(stats)}
 
     // Rule: Event must have payload
     this.validationRules.push((event) => {
-      if (!event.payload || typeof event.payload !== 'object') {
+      if (!event || !event.payload || typeof event.payload !== 'object') {
         return {
           isValid: false,
           issues: ['Missing or invalid payload'],
@@ -303,10 +303,11 @@ ${this.generateRecommendations(stats)}
 
     // Rule: Agent events should have agent identification
     this.validationRules.push((event) => {
+      if (!event || !event.type) return { isValid: true, issues: [], severity: 'low', suggestions: [] };
       const agentEventTypes = ['agent_started', 'agent_completed', 'agent_thinking', 'agent_error'];
       if (agentEventTypes.includes(event.type)) {
-        const payload = event.payload as any;
-        if (!payload.agent_id && !payload.agent_type) {
+        const payload = event?.payload as any;
+        if (!payload?.agent_id && !payload?.agent_type) {
           return {
             isValid: false,
             issues: ['Agent event missing agent identification'],
@@ -320,10 +321,11 @@ ${this.generateRecommendations(stats)}
 
     // Rule: Tool events should have tool name
     this.validationRules.push((event) => {
+      if (!event || !event.type) return { isValid: true, issues: [], severity: 'low', suggestions: [] };
       const toolEventTypes = ['tool_started', 'tool_completed', 'tool_executing', 'tool_call'];
       if (toolEventTypes.includes(event.type)) {
-        const payload = event.payload as any;
-        if (!payload.tool_name && !payload.name) {
+        const payload = event?.payload as any;
+        if (!payload?.tool_name && !payload?.name) {
           return {
             isValid: false,
             issues: ['Tool event missing tool name'],
