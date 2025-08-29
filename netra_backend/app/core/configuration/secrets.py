@@ -71,8 +71,10 @@ class SecretManager:
         """Get Gemini API key mapping configuration."""
         return {
             "target_models": ["llm_configs.default", "llm_configs.triage", 
-                            "llm_configs.data", "llm_configs.optimizations_core"],
-            "target_field": "gemini_api_key", "required": False, "rotation_enabled": True
+                            "llm_configs.data", "llm_configs.optimizations_core",
+                            "llm_configs.actions_to_meet_goals", "llm_configs.reporting",
+                            "llm_configs.google", "llm_configs.analysis"],
+            "target_field": "api_key", "required": False, "rotation_enabled": True
         }
     
     def _get_anthropic_api_key_mapping(self) -> Dict[str, Any]:
