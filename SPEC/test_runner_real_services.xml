@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Test Runner Real Services Architecture</title>
+    <category>testing</category>
+    <version>1.0.0</version>
+    <date>2025-08-29</date>
+    <status>implemented</status>
+    <business_value>
+      <segment>Enterprise, Mid</segment>
+      <goal>Platform Stability, Development Velocity</goal>
+      <impact>Ensures tests validate against real services, preventing production failures</impact>
+    </business_value>
+  </metadata>
+
+  <overview>
+    <summary>
+      Architecture for running tests with real services and real LLMs, ensuring explicit failures
+      when requested services are unavailable rather than silent fallbacks to mocks.
+    </summary>
+    <problem_statement>
+      The test runner had multiple issues preventing consistent execution with real services:
+      1. Fallback patterns that silently degraded to mocks
+      2. Multiple conflicting configuration systems (SSOT violations)
+      3. Ambiguous naming causing confusion between test/mock and real services
+      4. Service availability checks that didn't fail hard when services were missing
+    </problem_statement>
+  </overview>
+
+  <architecture>
+    <principle name="Fail Fast and Loud">
+      When real services are requested but unavailable, the system must fail immediately
+      with clear error messages rather than silently falling back to mocks.
+    </principle>
+    
+    <principle name="Single Source of Truth">
+      Each configuration concept must have exactly ONE canonical implementation per service.
+      No duplicate configuration systems allowed.
+    </principle>
+    
+    <principle name="Clear Naming">
+      Function and variable names must clearly indicate their purpose:
+      - Mock functions use "mock" in the name
+      - Real service functions use "real" in the name
+      - No ambiguous "test" naming that could mean either
+    </principle>
+  </architecture>
+
+  <components>
+    <component name="Service Availability Checker">
+      <location>test_framework/service_availability.py</location>
+      <purpose>
+        Perform real connection tests to verify services are available and functional
+        before running tests that require them.
+      </purpose>
+      <features>
+        <feature>PostgreSQL connection with actual query execution</feature>
+        <feature>Redis connection with ping test</feature>
+        <feature>Docker daemon connectivity check</feature>
+        <feature>LLM API key and endpoint validation</feature>
+        <feature>Hard failures with actionable error messages</feature>
+      </features>
+    </component>
+
+    <component name="LLM Configuration Manager">
+      <location>test_framework/llm_config_manager.py</location>
+      <purpose>
+        Single source of truth for all LLM testing configuration, replacing
+        multiple duplicate systems throughout the codebase.
+      </purpose>
+      <features>
+        <feature>Clear modes: MOCK, REAL, MIXED</feature>
+        <feature>Canonical environment variable set</feature>
+        <feature>API key validation and provider detection</feature>
+        <feature>Backward compatibility with deprecation warnings</feature>
+      </features>
+    </component>
+
+    <component name="Unified Test Runner Integration">
+      <location>scripts/unified_test_runner.py</location>
+      <modifications>
+        <modification>Hard failure when IsolatedEnvironment unavailable</modification>
+        <modification>Service availability checks before test execution</modification>
+        <modification>Clear error messages with remediation steps</modification>
+        <modification>No silent fallbacks to FallbackEnv</modification>
+      </modifications>
+    </component>
+  </components>
+
+  <configuration>
+    <environment_variables>
+      <variable name="USE_REAL_LLM" canonical="true">
+        Primary flag for enabling real LLM usage (replaces TEST_USE_REAL_LLM)
+      </variable>
+      <variable name="ENABLE_REAL_LLM_TESTING" canonical="true">
+        Alternative flag for real LLM testing
+      </variable>
+      <variable name="TEST_LLM_MODE" canonical="true">
+        Explicit mode setting: mock|real|mixed
+      </variable>
+      <variable name="TEST_USE_REAL_LLM" deprecated="true">
+        Legacy variable maintained for backward compatibility
+      </variable>
+    </environment_variables>
+
+    <renamed_elements>
+      <rename>
+        <old>configure_test_environment()</old>
+        <new>configure_mock_environment()</new>
+        <reason>Clarify that this sets up mock services, not real testing</reason>
+      </rename>
+      <rename>
+        <old>TEST_USE_REAL_LLM</old>
+        <new>USE_REAL_LLM</new>
+        <reason>Remove confusing "TEST" prefix from real service flag</reason>
+      </rename>
+      <rename>
+        <old>.env.test</old>
+        <new>.env.mock</new>
+        <reason>Clarify file contains mock configurations</reason>
+      </rename>
+    </renamed_elements>
+  </configuration>
+
+  <usage>
+    <example name="Check Service Availability">
+      <code><![CDATA[
+from test_framework import require_real_services, ServiceUnavailableError
+
+try:
+    # Will raise immediately if services not available
+    require_real_services(['postgresql', 'redis'])
+except ServiceUnavailableError as e:
+    print(f"Services unavailable: {e}")
+    # Exit or use mocks
+      ]]></code>
+    </example>
+
+    <example name="Configure Real LLM Testing">
+      <code><![CDATA[
+from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
+
+# Configure for real LLM usage
+config = configure_llm_testing(
+    mode=LLMTestMode.REAL,
+    model="gemini-2.5-flash",
+    timeout=60
+)
+      ]]></code>
+    </example>
+
+    <example name="Run Tests with Real Services">
+      <code><![CDATA[
+# Command line - will fail immediately if services unavailable
+python unified_test_runner.py --real-services --category integration
+
+# Will check PostgreSQL, Redis, Docker availability first
+# Hard failure with remediation steps if any are missing
+      ]]></code>
+    </example>
+  </usage>
+
+  <error_handling>
+    <error type="ServiceUnavailableError">
+      <description>
+        Raised when required services are not available. Includes detailed
+        remediation steps for each missing service.
+      </description>
+      <example><![CDATA[
+[FAIL] REQUIRED SERVICE UNAVAILABLE: PostgreSQL
+
+ISSUE: Cannot connect to PostgreSQL at localhost:5432 - Connection refused
+
+HOW TO FIX:
+  1. Start PostgreSQL: docker-compose -f docker-compose.dev.yml up postgres
+  2. Check if PostgreSQL is running on localhost:5432
+  3. Verify database exists and credentials are correct
+  4. Run full dev environment: python scripts/dev_launcher.py
+      ]]></example>
+    </error>
+
+    <error type="RuntimeError">
+      <description>
+        Raised when critical dependencies like IsolatedEnvironment are missing,
+        preventing the test runner from functioning correctly.
+      </description>
+    </error>
+  </error_handling>
+
+  <learnings>
+    <learning id="no-silent-fallbacks">
+      Silent fallbacks that hide failures are worse than hard failures. When a user
+      requests real services, they need to know immediately if those services aren't
+      available, not discover it later when tests mysteriously fail or pass incorrectly.
+    </learning>
+    
+    <learning id="ssot-enforcement">
+      Multiple configuration systems for the same concept lead to inconsistent behavior
+      and debugging nightmares. Enforce single source of truth rigorously.
+    </learning>
+    
+    <learning id="clear-naming-critical">
+      Ambiguous naming like "test" that could mean either mock or real causes confusion
+      and errors. Use explicit, unambiguous names that clearly indicate purpose.
+    </learning>
+    
+    <learning id="actionable-errors">
+      Error messages must include specific remediation steps. Don't just say "database
+      unavailable" - tell users exactly how to start the database.
+    </learning>
+  </learnings>
+
+  <validation>
+    <checklist>
+      <item>No silent fallbacks - all failures are explicit</item>
+      <item>Single configuration system for LLM testing</item>
+      <item>Clear function/variable naming without ambiguity</item>
+      <item>Service availability checks perform real connections</item>
+      <item>Error messages include remediation steps</item>
+      <item>Backward compatibility maintained with deprecation warnings</item>
+    </checklist>
+  </validation>
+</specification>

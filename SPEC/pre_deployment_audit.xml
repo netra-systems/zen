@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Pre-Deployment Audit Specification</title>
+    <version>1.0.0</version>
+    <purpose>Catch LLM coding errors and regressions before deployment by auditing recent changes</purpose>
+    <scope>Recent commits and changes only - NOT pre-existing code violations</scope>
+    <created>2025-08-29</created>
+  </metadata>
+
+  <core_principle>
+    Focus exclusively on NEW issues introduced by RECENT changes.
+    Pre-existing violations are out of scope unless they interact with recent changes.
+  </core_principle>
+
+  <audit_configuration>
+    <commit_window>
+      <default>10</default>
+      <max>30</max>
+      <description>Number of recent commits to audit</description>
+    </commit_window>
+    
+    <time_window>
+      <default>72_hours</default>
+      <max>7_days</max>
+      <description>Alternative to commit count - audit changes within time window</description>
+    </time_window>
+
+    <branch_comparison>
+      <base>main</base>
+      <description>Compare current branch against base to identify all changes</description>
+    </branch_comparison>
+  </audit_configuration>
+
+  <risk_categories>
+    <category priority="CRITICAL">
+      <name>Breaking Changes</name>
+      <indicators>
+        <indicator>API contract modifications</indicator>
+        <indicator>Database schema changes without migrations</indicator>
+        <indicator>Removed or renamed public functions/classes</indicator>
+        <indicator>Changed function signatures in public interfaces</indicator>
+        <indicator>Modified environment variable names</indicator>
+        <indicator>Changed configuration keys</indicator>
+      </indicators>
+      <detection_patterns>
+        <pattern>Removed lines containing "def ", "class ", "interface "</pattern>
+        <pattern>Changed function parameters in *.py, *.ts files</pattern>
+        <pattern>Modified DATABASE_* or *_URL environment variables</pattern>
+      </detection_patterns>
+    </category>
+
+    <category priority="CRITICAL">
+      <name>Incomplete Work</name>
+      <indicators>
+        <indicator>TODO/FIXME comments in committed code</indicator>
+        <indicator>Stub implementations (pass, NotImplementedError, ...)</indicator>
+        <indicator>Commented out test cases</indicator>
+        <indicator>Missing error handling in new code</indicator>
+        <indicator>Partial refactors (old and new implementations coexist)</indicator>
+        <indicator>Test files with skip decorators</indicator>
+      </indicators>
+      <detection_patterns>
+        <pattern>Added lines with "TODO", "FIXME", "HACK", "XXX"</pattern>
+        <pattern>New functions with only "pass" or "raise NotImplementedError"</pattern>
+        <pattern>@skip, @pytest.mark.skip in test files</pattern>
+        <pattern>try: blocks without except: handlers</pattern>
+      </detection_patterns>
+    </category>
+
+    <category priority="HIGH">
+      <name>Claude.md Violations</name>
+      <indicators>
+        <indicator>Multiple implementations of same concept (SSOT violation)</indicator>
+        <indicator>Relative imports in Python files</indicator>
+        <indicator>New features without Business Value Justification</indicator>
+        <indicator>Monolithic commits (should be atomic)</indicator>
+        <indicator>Legacy code not deleted during refactor</indicator>
+        <indicator>Missing test coverage for new code</indicator>
+        <indicator>New files with _v2, _new, _temp suffixes</indicator>
+      </indicators>
+      <detection_patterns>
+        <pattern>from . import or from .. import in Python files</pattern>
+        <pattern>Files ending with _v2.py, _new.py, _temp.py</pattern>
+        <pattern>Duplicate function/class definitions with similar names</pattern>
+        <pattern>Commits changing >20 files without clear atomic purpose</pattern>
+      </detection_patterns>
+    </category>
+
+    <category priority="HIGH">
+      <name>System-Wide Impact</name>
+      <indicators>
+        <indicator>Changes to shared configuration files</indicator>
+        <indicator>Modifications to authentication/authorization</indicator>
+        <indicator>Database connection string changes</indicator>
+        <indicator>Changes to CI/CD pipelines</indicator>
+        <indicator>Docker/deployment configuration changes</indicator>
+        <indicator>Changes to critical path modules</indicator>
+      </indicators>
+      <detection_patterns>
+        <pattern>Modified files: docker-compose*, .github/workflows/*</pattern>
+        <pattern>Changed files in /auth_service/</pattern>
+        <pattern>Modified database.py, secrets.py, config.py</pattern>
+      </detection_patterns>
+    </category>
+
+    <category priority="MEDIUM">
+      <name>Test Degradation</name>
+      <indicators>
+        <indicator>Decreased test coverage</indicator>
+        <indicator>Removed test cases</indicator>
+        <indicator>Tests changed from real to mock</indicator>
+        <indicator>Disabled test categories</indicator>
+        <indicator>Tests not updated after code changes</indicator>
+      </indicators>
+      <detection_patterns>
+        <pattern>Deleted lines starting with "def test_"</pattern>
+        <pattern>Changed Mock() to real service calls or vice versa</pattern>
+        <pattern>Removed assertions from test functions</pattern>
+      </detection_patterns>
+    </category>
+
+    <category priority="MEDIUM">
+      <name>Configuration Drift</name>
+      <indicators>
+        <indicator>Environment-specific code in main branch</indicator>
+        <indicator>Hardcoded URLs/credentials</indicator>
+        <indicator>Inconsistent config across services</indicator>
+        <indicator>Missing environment variables in .env files</indicator>
+      </indicators>
+      <detection_patterns>
+        <pattern>localhost:, 127.0.0.1, hardcoded ports in non-config files</pattern>
+        <pattern>API keys or passwords in code</pattern>
+        <pattern>Different values for same config key across services</pattern>
+      </detection_patterns>
+    </category>
+  </risk_categories>
+
+  <audit_process>
+    <step order="1">
+      <name>Collect Recent Changes</name>
+      <actions>
+        <action>Get list of commits in window: git log --oneline -n {commit_window}</action>
+        <action>Get full diff: git diff {base_branch}...HEAD</action>
+        <action>Identify modified files: git diff --name-status {base_branch}...HEAD</action>
+        <action>Group changes by service/module</action>
+      </actions>
+    </step>
+
+    <step order="2">
+      <name>Categorize Changes</name>
+      <actions>
+        <action>Classify each file by risk level (critical path, config, test, etc)</action>
+        <action>Identify cross-service changes</action>
+        <action>Flag large commits (>20 files or >500 lines)</action>
+        <action>Detect pattern violations from risk_categories</action>
+      </actions>
+    </step>
+
+    <step order="3">
+      <name>Deep Analysis</name>
+      <actions>
+        <action>For each CRITICAL/HIGH risk change:</action>
+        <action>- Verify completeness (no TODOs, stubs)</action>
+        <action>- Check for breaking changes</action>
+        <action>- Validate against Claude.md principles</action>
+        <action>- Verify test coverage exists</action>
+        <action>- Check for regression potential</action>
+      </actions>
+    </step>
+
+    <step order="4">
+      <name>Cross-Reference Validation</name>
+      <actions>
+        <action>Compare commit messages with actual changes</action>
+        <action>Verify claimed fixes actually address issues</action>
+        <action>Check if refactors are complete (old code removed)</action>
+        <action>Validate atomic commit principle</action>
+      </actions>
+    </step>
+
+    <step order="5">
+      <name>Generate Report</name>
+      <actions>
+        <action>Compile findings by severity</action>
+        <action>Include actionable remediation steps</action>
+        <action>Highlight blocking issues</action>
+        <action>Provide risk score</action>
+      </actions>
+    </step>
+  </audit_process>
+
+  <report_structure>
+    <section>
+      <name>Executive Summary</name>
+      <content>
+        <field>Audit Date</field>
+        <field>Commit Range</field>
+        <field>Overall Risk Score (1-100)</field>
+        <field>Deployment Recommendation (BLOCK/PROCEED_WITH_CAUTION/SAFE)</field>
+        <field>Critical Issues Count</field>
+        <field>High Priority Issues Count</field>
+      </content>
+    </section>
+
+    <section>
+      <name>Critical Blockers</name>
+      <content>
+        <field>Issue Type</field>
+        <field>Location (file:line)</field>
+        <field>Description</field>
+        <field>Impact Assessment</field>
+        <field>Required Remediation</field>
+        <field>Commit SHA</field>
+      </content>
+    </section>
+
+    <section>
+      <name>High Risk Changes</name>
+      <content>
+        <field>Change Category</field>
+        <field>Files Affected</field>
+        <field>Risk Assessment</field>
+        <field>Recommended Action</field>
+        <field>Verification Steps</field>
+      </content>
+    </section>
+
+    <section>
+      <name>Suspicious Patterns</name>
+      <content>
+        <field>Pattern Type</field>
+        <field>Occurrences</field>
+        <field>Examples</field>
+        <field>Potential Impact</field>
+      </content>
+    </section>
+
+    <section>
+      <name>Incomplete Work</name>
+      <content>
+        <field>Component</field>
+        <field>Incompleteness Type</field>
+        <field>Missing Elements</field>
+        <field>Completion Checklist</field>
+      </content>
+    </section>
+
+    <section>
+      <name>Test Coverage Impact</name>
+      <content>
+        <field>Changed Files Without Tests</field>
+        <field>Removed/Disabled Tests</field>
+        <field>Coverage Delta</field>
+        <field>Critical Paths Untested</field>
+      </content>
+    </section>
+
+    <section>
+      <name>Remediation Plan</name>
+      <content>
+        <field>Priority</field>
+        <field>Task</field>
+        <field>Estimated Effort</field>
+        <field>Blocking Deployment (Y/N)</field>
+      </content>
+    </section>
+  </report_structure>
+
+  <severity_levels>
+    <level value="BLOCK">
+      <description>Deployment must not proceed</description>
+      <criteria>
+        <criterion>Breaking changes without migration path</criterion>
+        <criterion>Critical security vulnerabilities introduced</criterion>
+        <criterion>System-wide configuration errors</criterion>
+        <criterion>Incomplete critical path implementations</criterion>
+      </criteria>
+    </level>
+
+    <level value="HIGH_RISK">
+      <description>Deployment possible but risky</description>
+      <criteria>
+        <criterion>Multiple Claude.md violations</criterion>
+        <criterion>Untested critical changes</criterion>
+        <criterion>Large refactors with legacy code remaining</criterion>
+      </criteria>
+    </level>
+
+    <level value="MEDIUM_RISK">
+      <description>Deployment acceptable with monitoring</description>
+      <criteria>
+        <criterion>Minor incomplete work</criterion>
+        <criterion>Non-critical test coverage gaps</criterion>
+        <criterion>Style/convention violations</criterion>
+      </criteria>
+    </level>
+
+    <level value="LOW_RISK">
+      <description>Safe to deploy</description>
+      <criteria>
+        <criterion>All changes tested</criterion>
+        <criterion>No breaking changes</criterion>
+        <criterion>Clean atomic commits</criterion>
+      </criteria>
+    </level>
+  </severity_levels>
+
+  <automation>
+    <script_location>scripts/pre_deployment_audit.py</script_location>
+    <usage>
+      <command>python scripts/pre_deployment_audit.py --commits 10</command>
+      <command>python scripts/pre_deployment_audit.py --since "3 days ago"</command>
+      <command>python scripts/pre_deployment_audit.py --branch feature-branch</command>
+    </usage>
+    <output_format>
+      <format type="markdown">PRE_DEPLOYMENT_AUDIT_REPORT.md</format>
+      <format type="json">audit_results.json</format>
+      <format type="console">Colored terminal output with severity indicators</format>
+    </output_format>
+  </automation>
+
+  <example_report>
+    <![CDATA[
+# Pre-Deployment Audit Report
+Generated: 2025-08-29 10:30:00
+
+## Executive Summary
+- **Commit Range**: 333443f14..HEAD (10 commits)
+- **Risk Score**: 78/100 (HIGH RISK)
+- **Recommendation**: BLOCK - Critical issues must be resolved
+- **Critical Issues**: 3
+- **High Priority Issues**: 7
+
+## 🔴 CRITICAL BLOCKERS
+
+### 1. Breaking API Change Without Migration
+- **Location**: netra_backend/app/api/threads.py:145
+- **Commit**: abc123def
+- **Description**: Renamed 'thread_id' parameter to 'threadId' breaking existing clients
+- **Impact**: All existing API clients will fail
+- **Required Fix**: Add backward compatibility or migration guide
+
+### 2. Incomplete Authentication Refactor
+- **Location**: auth_service/auth_core/validator.py
+- **Commit**: def456ghi
+- **Description**: New validation logic contains TODO and NotImplementedError
+- **Impact**: Authentication will fail for certain user types
+- **Required Fix**: Complete implementation before deployment
+
+### 3. Database Schema Mismatch
+- **Location**: netra_backend/app/models/thread.py
+- **Commit**: ghi789jkl
+- **Description**: Model changes without corresponding migration
+- **Impact**: Application will crash on startup
+- **Required Fix**: Create and test migration script
+
+## ⚠️ HIGH RISK CHANGES
+
+### System Configuration Changes (4 files)
+- Modified docker-compose.yml without updating staging
+- Changed Redis connection parameters
+- **Risk**: Deployment environment mismatch
+- **Action**: Verify all environments aligned
+
+### Test Coverage Degradation
+- 15 tests removed in commit mno012pqr
+- Coverage dropped from 72% to 64%
+- **Risk**: Undetected regressions
+- **Action**: Restore or replace removed tests
+
+## 📊 Suspicious Patterns Detected
+
+### Multiple Implementations (SSOT Violation)
+- Found 3 different Redis connection handlers
+- Files: redis_client.py, cache_manager.py, redis_handler_v2.py
+- **Recommendation**: Consolidate to single implementation
+
+### Large Monolithic Commit
+- Commit stu345vwx changes 47 files
+- Message: "fixes" (non-descriptive)
+- **Recommendation**: Review and potentially split
+
+## ✅ Remediation Plan
+
+| Priority | Task | Effort | Blocking |
+|----------|------|--------|----------|
+| CRITICAL | Fix API breaking change | 2h | YES |
+| CRITICAL | Complete auth implementation | 4h | YES |
+| CRITICAL | Add database migration | 1h | YES |
+| HIGH | Consolidate Redis handlers | 3h | NO |
+| HIGH | Restore test coverage | 2h | NO |
+| MEDIUM | Update staging config | 1h | NO |
+
+## Recommended Actions
+1. **DO NOT DEPLOY** until critical issues resolved
+2. Run full regression suite after fixes
+3. Verify staging environment matches production
+4. Consider splitting large commits for better tracking
+    ]]>
+  </example_report>
+
+  <integration_points>
+    <point>
+      <name>CI/CD Pipeline</name>
+      <description>Run automatically before deployment workflows</description>
+      <implementation>GitHub Action or GitLab CI job</implementation>
+    </point>
+
+    <point>
+      <name>Git Hooks</name>
+      <description>Pre-push hook to catch issues early</description>
+      <implementation>Optional local validation</implementation>
+    </point>
+
+    <point>
+      <name>Pull Request Checks</name>
+      <description>Automated comment on PRs with audit results</description>
+      <implementation>GitHub bot or webhook</implementation>
+    </point>
+  </integration_points>
+
+  <learnings>
+    <learning date="2025-08-29">
+      Focus on changes, not existing code, to avoid noise
+    </learning>
+    <learning date="2025-08-29">
+      LLMs often mark work complete when it contains TODOs
+    </learning>
+    <learning date="2025-08-29">
+      Large commits often hide breaking changes
+    </learning>
+    <learning date="2025-08-29">
+      Refactors frequently leave legacy code behind
+    </learning>
+  </learnings>
+</specification>
