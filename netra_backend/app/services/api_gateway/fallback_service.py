@@ -22,12 +22,9 @@ class ApiFallbackService:
         request: Optional[Request] = None,
         circuit_breaker_state: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Get appropriate fallback response for the given endpoint."""
-        return {
-            **self.default_fallback_response,
-            "endpoint": endpoint,
-            "circuit_breaker_state": circuit_breaker_state or "open"
-        }
+        """Raise exception instead of providing fallback response for circuit breaker."""
+        from netra_backend.app.services.external_api_client import HTTPError
+        raise HTTPError(503, f"Endpoint {endpoint} temporarily unavailable - circuit breaker {circuit_breaker_state or 'open'}")
     
     async def create_fallback_response(
         self,

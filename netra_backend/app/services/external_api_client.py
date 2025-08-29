@@ -305,14 +305,9 @@ class ResilientHTTPClient:
             return {"error": await response.text(), "status": response.status}
     
     def _get_fallback_response(self, method: str, url: str, api_name: str) -> Dict[str, Any]:
-        """Provide fallback response when circuit is open."""
-        return {
-            "error": "service_unavailable",
-            "message": f"{api_name} API temporarily unavailable",
-            "method": method,
-            "url": url,
-            "fallback": True
-        }
+        """Raise exception instead of providing fallback response when circuit is open."""
+        logger.error(f"External API circuit breaker is open for {api_name}")
+        raise HTTPError(503, f"External API {api_name} temporarily unavailable - circuit breaker open")
     
     async def health_check(self, api_name: str = "generic") -> Dict[str, Any]:
         """Health check for external API."""

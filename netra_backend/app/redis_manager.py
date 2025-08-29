@@ -556,6 +556,12 @@ class RedisManager:
         except Exception:
             return False
 
+    def pipeline(self):
+        """Create Redis pipeline for batch operations."""
+        if self.redis_client:
+            return self.redis_client.pipeline()
+        return None
+
 # Main instance for netra_backend service
 redis_manager = RedisManager()
 
