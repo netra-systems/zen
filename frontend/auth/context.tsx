@@ -339,9 +339,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authConfig) {
         // Clear dev logout flag when user manually logs in
         unifiedAuthService.clearDevLogoutFlag();
-        unifiedAuthService.handleLogin(authConfig);
-        // Track login attempt (OAuth flow will be tracked separately)
-        trackLogin('oauth', false);
+        
+        // In development mode, use dev login instead of OAuth
+        if (authConfig.development_mode) {
+          logger.info('Using dev login in development mode');
+          const result = await unifiedAuthService.handleDevLogin(authConfig);
+          if (result) {
+            // Dev login successful, token is already set by handleDevLogin
+            // Trigger a re-fetch of user data
+            const userResponse = await fetch(authConfig.endpoints.user, {
+              headers: {
+                'Authorization': `Bearer ${result.access_token}`,
+                'Accept': 'application/json',
+              },
+            });
+            
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              setUser(userData);
+              syncAuthStore(userData, result.access_token);
+              trackLogin('dev', true);
+              // Force a re-initialization to ensure all components get updated
+              setInitialized(true);
+            }
+          } else {
+            logger.error('Dev login failed');
+            trackError('auth_dev_login_error', 'Dev login failed', 'AuthContext', false);
+          }
+        } else {
+          // Production/staging mode - use OAuth
+          unifiedAuthService.handleLogin(authConfig);
+          // Track login attempt (OAuth flow will be tracked separately)
+          trackLogin('oauth', false);
+        }
       }
     } catch (error) {
       logger.error('Login error in AuthContext', error as Error, {

@@ -12,11 +12,13 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
 import asyncio
 import time
 from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.config import get_config
@@ -24,6 +26,20 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from tests.e2e.agent_response_test_utilities import (
     AgentResponseSimulator,
 )
+
+
+class MockCollaborationSubAgent(BaseSubAgent):
+    """Concrete test implementation for collaboration testing."""
+    
+    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = True) -> None:
+        """Test execute method for collaboration."""
+        self.state = SubAgentLifecycle.RUNNING
+        await asyncio.sleep(0.05)
+        state.messages.append({
+            "role": "assistant",
+            "content": f"Collaboration test from {self.name}: Task completed"
+        })
+        self.state = SubAgentLifecycle.COMPLETED
 
 
 @pytest.mark.integration
@@ -37,12 +53,12 @@ class TestMultiAgentCollaboration:
         config = get_config()
         llm_manager = LLMManager(config)
         # Mock: WebSocket connection isolation for testing without network overhead
-        websocket_manager = AsyncNone  # TODO: Use real service instead of Mock
+        websocket_manager = AsyncMock()  # TODO: Use real service instead of Mock
         
                 
         # Create required dependencies
-        db_session = AsyncNone  # TODO: Use real service instead of Mock
-        tool_dispatcher = MagicNone  # TODO: Use real service instead of Mock
+        db_session = AsyncMock()  # TODO: Use real service instead of Mock
+        tool_dispatcher = MagicMock()  # TODO: Use real service instead of Mock
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         supervisor.websocket_manager = websocket_manager
@@ -61,7 +77,7 @@ class TestMultiAgentCollaboration:
         supervisor = collaboration_setup["supervisor"]
         
         # Create mock sub-agent
-        sub_agent = BaseSubAgent(
+        sub_agent = MockCollaborationSubAgent(
             llm_manager=collaboration_setup["llm_manager"],
             name="TestSubAgent",
             description="Test collaboration sub-agent"

@@ -101,7 +101,10 @@ export class UnifiedAuthService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: 'dev@example.com' }),
+        body: JSON.stringify({ 
+          email: 'dev@example.com',
+          password: 'dev'  // Add password for dev login
+        }),
       });
       
       if (response.ok) {

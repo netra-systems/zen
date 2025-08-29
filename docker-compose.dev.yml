@@ -271,14 +271,28 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
-      - ./frontend/src:/app/src:ro
-      - ./frontend/public:/app/public:ro
-      - ./frontend/next.config.ts:/app/next.config.ts:ro
-      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts:ro
-      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
-      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts:ro
-      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs:ro
-      # Exclude node_modules from volume mount to use container's installed packages
+      # Mount all source code directories for hot reload
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/app:/app/app
+      - ./frontend/auth:/app/auth
+      - ./frontend/components:/app/components
+      - ./frontend/hooks:/app/hooks
+      - ./frontend/lib:/app/lib
+      - ./frontend/services:/app/services
+      - ./frontend/store:/app/store
+      - ./frontend/styles:/app/styles
+      - ./frontend/types:/app/types
+      - ./frontend/utils:/app/utils
+      - ./frontend/providers:/app/providers
+      # Mount configuration files
+      - ./frontend/next.config.ts:/app/next.config.ts
+      - ./frontend/next.config.turbopack.ts:/app/next.config.turbopack.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts
+      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs
+      - ./frontend/package.json:/app/package.json
+      # Exclude node_modules and build output from volume mount to use container's versions
       - /app/node_modules
       - /app/.next
     depends_on:

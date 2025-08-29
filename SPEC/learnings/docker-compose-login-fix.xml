@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Docker Compose Dev Login Fix</title>
+    <date>2025-08-29</date>
+    <category>Authentication</category>
+    <tags>docker-compose, auth, frontend, dev-login</tags>
+    <priority>HIGH</priority>
+  </metadata>
+
+  <problem>
+    <description>
+      Frontend login button in Docker Compose development environment was not working.
+      Clicking "Access Beta" would attempt OAuth login instead of using dev login.
+    </description>
+    <symptoms>
+      - Login button click did nothing visible to user
+      - Frontend tried to redirect to OAuth login URL
+      - OAuth not configured for localhost development
+      - Dev login endpoint was available but not being used
+    </symptoms>
+    <root_cause>
+      The auth context's login function was always calling OAuth login via 
+      unifiedAuthService.handleLogin(), even in development mode where dev 
+      login should be used instead.
+    </root_cause>
+  </problem>
+
+  <solution>
+    <changes>
+      <file path="frontend/auth/context.tsx">
+        <description>
+          Modified login function to check authConfig.development_mode flag.
+          When true, uses handleDevLogin() instead of handleLogin().
+          After successful dev login, fetches user data and updates auth state.
+        </description>
+        <code><![CDATA[
+const login = async () => {
+  if (authConfig) {
+    if (authConfig.development_mode) {
+      // Use dev login in development
+      const result = await unifiedAuthService.handleDevLogin(authConfig);
+      if (result) {
+        // Fetch user data with token
+        const userResponse = await fetch(authConfig.endpoints.user, {
+          headers: { 'Authorization': `Bearer ${result.access_token}` }
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUser(userData);
+          syncAuthStore(userData, result.access_token);
+        }
+      }
+    } else {
+      // Use OAuth in production/staging
+      unifiedAuthService.handleLogin(authConfig);
+    }
+  }
+};
+        ]]></code>
+      </file>
+      
+      <file path="frontend/auth/unified-auth-service.ts">
+        <description>
+          Added password field to dev login request body.
+          Dev login endpoint requires both email and password.
+        </description>
+        <code><![CDATA[
+body: JSON.stringify({ 
+  email: 'dev@example.com',
+  password: 'dev'  // Required for dev login
+})
+        ]]></code>
+      </file>
+    </changes>
+  </solution>
+
+  <verification>
+    <steps>
+      1. Restart frontend container: docker restart netra-dev-frontend
+      2. Test dev login endpoint: curl -X POST http://localhost:8081/auth/dev/login
+      3. Verify auth config shows development_mode: true
+      4. Click "Access Beta" button in browser at http://localhost:3001
+      5. Check browser console for "Using dev login in development mode" log
+    </steps>
+    <endpoints>
+      - GET /auth/config - Returns development_mode flag
+      - POST /auth/dev/login - Dev login endpoint (requires email and password)
+      - GET /auth/verify - Verify token endpoint
+    </endpoints>
+  </verification>
+
+  <key_insights>
+    <insight>
+      Development mode detection must happen at runtime based on auth service
+      config, not build-time environment variables, since the same frontend
+      build may connect to different backends.
+    </insight>
+    <insight>
+      Dev login flow is completely different from OAuth flow:
+      - OAuth: Redirect to external provider
+      - Dev: Direct API call with hardcoded credentials
+    </insight>
+    <insight>
+      Frontend must handle both flows gracefully and switch based on
+      authConfig.development_mode flag from the auth service.
+    </insight>
+  </key_insights>
+
+  <related_files>
+    - frontend/auth/context.tsx
+    - frontend/auth/unified-auth-service.ts
+    - frontend/lib/auth-service-client.ts
+    - auth_service/auth_core/routes/auth_routes.py
+    - docker-compose.dev.yml
+  </related_files>
+
+  <volume_mount_requirements>
+    <critical>
+      Frontend containers MUST have volume mounts for hot reload in development.
+      Without mounts, code changes require container rebuild and restart.
+    </critical>
+    <frontend_mounts>
+      - ./frontend/src:/app/src
+      - ./frontend/app:/app/app  
+      - ./frontend/auth:/app/auth
+      - ./frontend/components:/app/components
+      - ./frontend/hooks:/app/hooks
+      - ./frontend/lib:/app/lib
+      - ./frontend/services:/app/services
+      - ./frontend/store:/app/store
+      - ./frontend/providers:/app/providers
+      - ./frontend/types:/app/types
+      - ./frontend/utils:/app/utils
+      - ./frontend/styles:/app/styles
+    </frontend_mounts>
+    <backend_mounts>
+      - ./netra_backend:/app/netra_backend
+      - ./shared:/app/shared
+    </backend_mounts>
+    <auth_mounts>
+      - ./auth_service:/app/auth_service  
+      - ./shared:/app/shared
+    </auth_mounts>
+    <important_notes>
+      - Always exclude node_modules and build directories (.next)
+      - Use anonymous volumes: - /app/node_modules and - /app/.next
+      - After updating docker-compose.dev.yml, must rebuild containers
+      - Test with: python scripts/test_docker_hot_reload.py
+    </important_notes>
+  </volume_mount_requirements>
+
+  <future_considerations>
+    <item>
+      Consider adding a visual indicator (badge/banner) when using dev login
+      to make it clear the app is in development mode.
+    </item>
+    <item>
+      Could add support for custom dev credentials via environment variables
+      instead of hardcoding 'dev@example.com'.
+    </item>
+    <item>
+      May want to add automatic dev login option for faster development
+      (skip clicking button).
+    </item>
+  </future_considerations>
+</learning>

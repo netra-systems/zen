@@ -389,7 +389,7 @@ class TestProductionDataE2ERealLLM:
             
             try:
                 llm_response = await asyncio.wait_for(
-                    llm_manager.call_llm(
+                    llm_manager.ask_llm(
                         model="gpt-4-turbo-preview",
                         messages=[{"role": "user", "content": prompt}],
                         temperature=0.2

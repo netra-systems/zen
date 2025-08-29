@@ -19,7 +19,7 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token, CORS, OAUTH_ENV, OAuth Environment Variables, OAuth Validation, OAuth Startup, OAuth Secrets, Secret Naming, Service Independence, Logout, JWT_SECRET_KEY, Docker Compose, Dev Login, Development Mode">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>CRITICAL: Use JWT_SECRET_KEY exclusively - JWT_SECRET is deprecated (jwt_secret_standardization.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services - both auth and backend MUST use JWT_SECRET_KEY (jwt_secret_standardization.xml).</critical-takeaway>
@@ -43,6 +43,8 @@
             <critical-takeaway>ALWAYS use echo -n when creating secrets to avoid line endings that break validation (oauth_secret_naming_fix.xml).</critical-takeaway>
             <critical-takeaway>CATASTROPHIC: Auth service MUST NEVER import from netra_backend - causes complete auth failure in staging/production (oauth_service_independence_violation.xml).</critical-takeaway>
             <critical-takeaway>Service independence violations cause immediate logout after OAuth - auth service cannot access database/sessions (oauth_service_independence_violation.xml).</critical-takeaway>
+            <critical-takeaway>Frontend login must check development_mode flag from auth config and use dev login in Docker Compose environments (docker-compose-login-fix.xml).</critical-takeaway>
+            <critical-takeaway>Dev login requires both email and password in request body - password field was missing causing login failures (docker-compose-login-fix.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Backend Desynchronization Critical Testing" path="SPEC/learnings/auth_backend_desynchronization_critical_testing.xml" keywords="Auth Backend, Desynchronization, Cross-Service, Rollback, Vulnerability, Security Testing, State Consistency, Orphaned Records">

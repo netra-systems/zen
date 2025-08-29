@@ -85,14 +85,14 @@ class ExampleMessageHandler:
                 'user_id': validated_message.user_id,
                 'start_time': start_time,
                 'status': 'processing',
-                'metadata': validated_message.example_message_metadata.dict()
+                'metadata': validated_message.example_message_metadata.model_dump()
             }
             
             # Process through supervisor with integrated error handling
             agent_result = await self.supervisor.process_example_message(
                 validated_message.user_id,
                 validated_message.content,
-                validated_message.example_message_metadata.dict()
+                validated_message.example_message_metadata.model_dump()
             )
             
             # Calculate processing time

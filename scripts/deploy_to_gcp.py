@@ -619,14 +619,14 @@ CMD ["npm", "start"]
             # Backend needs connections to databases and all required secrets from GSM
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials from GSM only
             # CRITICAL FIX: Use correct OAuth environment variable names expected by auth service
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-oauth-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-oauth-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
             ])
         
         try:
@@ -763,6 +763,50 @@ CMD ["npm", "start"]
             pass
             
         return None
+    
+    def validate_secrets_before_deployment(self) -> bool:
+        """Validate all required secrets exist and have proper values.
+        
+        This prevents deployment failures due to missing or placeholder secrets.
+        Implements canonical secrets management from SPEC/canonical_secrets_management.xml
+        """
+        print("\n🔐 Validating secrets configuration...")
+        
+        try:
+            # Determine environment based on project
+            environment = "staging" if "staging" in self.project_id else "production"
+            
+            # Run validation script
+            result = subprocess.run(
+                [
+                    "python", "scripts/validate_secrets.py",
+                    "--environment", environment,
+                    "--project", self.project_id
+                ],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            
+            # Check if validation passed
+            if result.returncode == 0:
+                print("✅ Secret validation passed")
+                return True
+            else:
+                print("❌ Secret validation failed:")
+                print(result.stdout)
+                if result.stderr:
+                    print("Errors:", result.stderr)
+                return False
+                
+        except FileNotFoundError:
+            print("⚠️ Secret validation script not found (scripts/validate_secrets.py)")
+            print("   Skipping validation (risky for production)")
+            return True
+        except Exception as e:
+            print(f"⚠️ Secret validation error: {e}")
+            print("   Continuing anyway (risky for production)")
+            return True
     
     def setup_secrets(self) -> bool:
         """Create necessary secrets in Secret Manager."""
@@ -908,6 +952,13 @@ CMD ["npm", "start"]
             return False
             
         if not self.enable_apis():
+            return False
+            
+        # Validate secrets before deployment (for staging/production)
+        if self.project_id != "netra-dev" and not self.validate_secrets_before_deployment():
+            print("\n❌ Secret validation failed")
+            print("   Run: python scripts/validate_secrets.py --environment staging --project " + self.project_id)
+            print("   Or use --skip-validation to bypass (NOT RECOMMENDED for production)")
             return False
             
         if not self.setup_secrets():

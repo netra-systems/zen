@@ -13,6 +13,7 @@ from pydantic import ValidationError
 if TYPE_CHECKING:
     from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
+from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.prompts import triage_prompt_template

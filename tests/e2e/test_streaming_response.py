@@ -90,7 +90,7 @@ def mock_unified_manager():
     # Mock: Async component isolation for testing without real async operations
     mock_manager.disconnect_user = AsyncMock(return_value=None)
     # Mock: Async component isolation for testing without real async operations
-    mock_manager.send_message_to_user = AsyncMock(return_value=True)
+    mock_manager.send_message = AsyncMock(return_value=True)
     # Mock: Service component isolation for predictable testing behavior
     mock_manager.validate_message = MagicMock(return_value=True)
     
@@ -172,7 +172,7 @@ class TestStreamingInterruption:
         
         # Validate no data loss and graceful handling
         recovery_msg = {"type": "recovery_test", "data": "System responsive"}
-        result = await mock_unified_manager.send_message_to_user(user_id, recovery_msg)
+        result = await mock_unified_manager.send_message(user_id, recovery_msg)
         assert result is True
     
     async def _start_streaming_task(self, websocket):

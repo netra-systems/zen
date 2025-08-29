@@ -91,7 +91,7 @@ class MockMessageQueueManager:
         if user_id not in self.queues:
             self.queues[user_id] = []
     
-    async def send_message_to_user(self, user_id: str, message: QueueTestMessage) -> bool:
+    async def send_message(self, user_id: str, message: QueueTestMessage) -> bool:
         """Send message to user or queue if disconnected"""
         if user_id in self.disconnected_users:
             return await self._queue_message(user_id, message)
@@ -329,7 +329,7 @@ async def test_single_message_queuing_during_disconnection(queue_test_client, mo
     test_message = create_test_message("Hello, this message should be queued!")
     message_sent_time = time.time()
     
-    success = await mock_queue_manager.send_message_to_user(queue_test_client.user_id, test_message)
+    success = await mock_queue_manager.send_message(queue_test_client.user_id, test_message)
     assert success, "Message should be successfully queued"
     
     # Verify message is queued
@@ -403,7 +403,7 @@ async def test_multiple_messages_queuing_with_order_preservation(queue_test_clie
         message = create_test_message(content)
         test_messages.append(message)
         
-        success = await mock_queue_manager.send_message_to_user(queue_test_client.user_id, message)
+        success = await mock_queue_manager.send_message(queue_test_client.user_id, message)
         assert success, f"Message {i+1} should be queued successfully"
         
         # Brief interval between messages
@@ -475,7 +475,7 @@ async def test_queue_overflow_handling_and_limits(queue_test_client, mock_queue_
         message = create_test_message(f"Message {i+1} - testing overflow")
         test_messages.append(message)
         
-        success = await mock_queue_manager_small.send_message_to_user(queue_test_client.user_id, message)
+        success = await mock_queue_manager_small.send_message(queue_test_client.user_id, message)
         assert success, f"Message {i+1} should be handled (queued or overflow managed)"
     
     # Verify queue is at maximum size
@@ -507,11 +507,11 @@ async def test_queue_overflow_handling_and_limits(queue_test_client, mock_queue_
     # Fill queue again
     for i in range(3):
         message = create_test_message(f"Fill message {i+1}")
-        await mock_queue_manager_small.send_message_to_user(queue_test_client.user_id, message)
+        await mock_queue_manager_small.send_message(queue_test_client.user_id, message)
     
     # Try to add one more (should be rejected)
     overflow_message = create_test_message("This should be rejected")
-    success = await mock_queue_manager_small.send_message_to_user(queue_test_client.user_id, overflow_message)
+    success = await mock_queue_manager_small.send_message(queue_test_client.user_id, overflow_message)
     
     # Verify rejection behavior
     assert not success, "Message should be rejected when queue is full and policy is 'reject'"
@@ -548,7 +548,7 @@ async def test_priority_message_handling_during_queue(queue_test_client, mock_qu
     
     # Send all messages
     for message in messages_to_send:
-        success = await mock_queue_manager.send_message_to_user(queue_test_client.user_id, message)
+        success = await mock_queue_manager.send_message(queue_test_client.user_id, message)
         assert success, f"Message {message.content} should be queued successfully"
         await asyncio.sleep(0.05)  # Brief interval
     
@@ -625,7 +625,7 @@ async def test_queue_expiration_and_cleanup(queue_test_client, mock_queue_manage
     for i in range(3):
         message = create_test_message(f"Initial message {i+1} - will expire")
         initial_messages.append(message)
-        await mock_queue_manager_small.send_message_to_user(queue_test_client.user_id, message)
+        await mock_queue_manager_small.send_message(queue_test_client.user_id, message)
     
     # Verify messages are queued
     queue_size = mock_queue_manager_small.get_queue_size(queue_test_client.user_id)
@@ -639,7 +639,7 @@ async def test_queue_expiration_and_cleanup(queue_test_client, mock_queue_manage
     for i in range(2):
         message = create_test_message(f"Fresh message {i+1} - should be delivered")
         fresh_messages.append(message)
-        await mock_queue_manager_small.send_message_to_user(queue_test_client.user_id, message)
+        await mock_queue_manager_small.send_message(queue_test_client.user_id, message)
     
     # Verify queue contains all messages before cleanup (should be limited by max queue size of 3)
     queue_size_before_cleanup = mock_queue_manager_small.get_queue_size(queue_test_client.user_id)
@@ -677,7 +677,7 @@ async def test_queue_expiration_and_cleanup(queue_test_client, mock_queue_manage
     
     # Send message and let it expire
     expiring_message = create_test_message("This will expire before delivery")
-    await mock_queue_manager_small.send_message_to_user(queue_test_client.user_id, expiring_message)
+    await mock_queue_manager_small.send_message(queue_test_client.user_id, expiring_message)
     
     # Wait for expiration
     await asyncio.sleep(2.5)
@@ -716,7 +716,7 @@ async def test_rapid_disconnect_reconnect_cycles(queue_test_client, mock_queue_m
         for i in range(2):
             message = create_test_message(f"Cycle {cycle+1} Message {i+1}")
             cycle_messages.append(message)
-            await mock_queue_manager.send_message_to_user(queue_test_client.user_id, message)
+            await mock_queue_manager.send_message(queue_test_client.user_id, message)
             message_count += 1
         
         # Brief wait
@@ -770,7 +770,7 @@ async def test_concurrent_message_sending_during_disconnection(mock_queue_manage
         messages = []
         for i in range(message_count):
             message = create_test_message(f"Agent {agent_id} Message {i+1}", user_id=user_id)
-            await mock_queue_manager.send_message_to_user(user_id, message)
+            await mock_queue_manager.send_message(user_id, message)
             messages.append(message)
             await asyncio.sleep(0.01)  # Brief interval
         return messages
@@ -835,7 +835,7 @@ async def test_system_resource_constraints_simulation(mock_queue_manager):
         message = create_test_message(f"Resource test message {i+1}", user_id=user_id)
         messages_sent.append(message)
         
-        success = await mock_queue_manager.send_message_to_user(user_id, message)
+        success = await mock_queue_manager.send_message(user_id, message)
         if success:
             successful_queues += 1
     
@@ -888,7 +888,7 @@ async def test_queue_performance_metrics(queue_test_client, mock_queue_manager):
         for i in range(count):
             message = create_test_message(f"Performance test message {i+1}")
             messages.append(message)
-            await mock_queue_manager.send_message_to_user(queue_test_client.user_id, message)
+            await mock_queue_manager.send_message(queue_test_client.user_id, message)
         
         queue_time = time.time() - queue_start
         
