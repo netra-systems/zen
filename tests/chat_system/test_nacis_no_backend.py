@@ -321,7 +321,9 @@ async def main():
     except SystemExit:
         # If argument parsing fails (e.g., when run via pytest), use environment variables
         args = argparse.Namespace()
-        args.real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+        # Check both new and legacy variable names
+        args.real_llm = (os.getenv("USE_REAL_LLM", "false").lower() == "true" or
+                         os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true")
     
     print("""
 ╔══════════════════════════════════════════════════════════════╗

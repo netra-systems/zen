@@ -77,7 +77,8 @@ class AgentOrchestrationTestRunner:
                           timeout: int = 30, parallel: int = 2):
         """Configure real LLM testing environment."""
         if enable:
-            os.environ["TEST_USE_REAL_LLM"] = "true"
+            os.environ["USE_REAL_LLM"] = "true"
+            os.environ["TEST_USE_REAL_LLM"] = "true"  # Legacy compatibility
             os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
             os.environ["TEST_LLM_MODEL"] = model
             os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
@@ -85,7 +86,8 @@ class AgentOrchestrationTestRunner:
             self.results["real_llm_enabled"] = True
             print(f"[INFO] Real LLM testing enabled with model: {model}")
         else:
-            os.environ["TEST_USE_REAL_LLM"] = "false"
+            os.environ["USE_REAL_LLM"] = "false"
+            os.environ["TEST_USE_REAL_LLM"] = "false"  # Legacy compatibility
             os.environ["ENABLE_REAL_LLM_TESTING"] = "false"
             print("[INFO] Using mocked LLM responses")
     
@@ -277,7 +279,7 @@ class AgentOrchestrationTestRunner:
         }
         
         # Calculate coverage (simplified)
-        if os.getenv("TEST_USE_REAL_LLM") == "true":
+        if (os.getenv("USE_REAL_LLM") == "true" or os.getenv("TEST_USE_REAL_LLM") == "true"):
             report["real_llm_coverage"] = 85  # Target coverage when enabled
         
         report["recommendations"] = [

@@ -149,8 +149,9 @@ class MockAgentImplementation(BaseSubAgent):
         context = {"state": state}
         result = await self.execute_task(task_data, context)
         # Update the state with results if needed
-        if hasattr(state, 'agent_results'):
-            state.agent_results[self.agent_type] = result
+        if not hasattr(state, 'agent_results'):
+            state.agent_results = {}
+        state.agent_results[self.agent_type] = result
         
     async def execute_task(self, task_data: Dict[str, Any], 
                           context: Dict[str, Any]) -> Dict[str, Any]:

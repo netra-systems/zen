@@ -210,7 +210,7 @@ class TestCriticalPath(SystemInitializationTestBase):
         self.clear_service_discovery()
         
         # Remove all environment-specific files
-        env_files = [".env.local", ".env.development", ".env.test"]
+        env_files = [".env.local", ".env.development", ".env.test", ".env.mock"]
         for env_file in env_files:
             file_path = self.project_root / env_file
             if file_path.exists():
@@ -977,7 +977,7 @@ class TestConfigurationEnvironment(SystemInitializationTestBase):
     def test_27_environment_variable_loading_priority(self):
         """Test 27: Environment variable precedence and validation."""
         # Create test environment files
-        env_test = self.project_root / ".env.test"
+        env_test = self.project_root / ".env.mock"
         env_local = self.project_root / ".env.local"
         
         try:
