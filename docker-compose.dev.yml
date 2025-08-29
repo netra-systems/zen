@@ -48,11 +48,11 @@ services:
     networks:
       - netra-network
 
-  # ClickHouse Analytics (Optional)
+  # ClickHouse Analytics (Required for real analytics)
   clickhouse:
     image: clickhouse/clickhouse-server:23-alpine
     container_name: netra-clickhouse
-    profiles: ["analytics", "full"]
+    profiles: ["backend", "analytics", "full"]
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-netra_analytics}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-netra}
@@ -140,6 +140,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      clickhouse:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
