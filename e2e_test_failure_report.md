@@ -16,9 +16,9 @@ Starting continuous e2e agent test execution with automatic failure fixing.
 Multiple test files are failing due to import errors:
 
 1. **TriageSubAgent Import Error**
-   - Files affected: test_adaptive_workflow_flows.py, test_triage_decisions.py
+   - Files affected: test_adaptive_workflow_flows.py, test_triage_decisions.py, test_corpus_admin_e2e.py, test_agent_pipeline_critical.py
    - Error: Cannot import name 'TriageSubAgent' from 'netra_backend.app.agents.triage_sub_agent'
-   - Status: Pending fix
+   - Status: **FIXED** - Updated import paths to use direct module imports
 
 2. **Missing agent.models Module**
    - Files affected: test_data_helper_clarity.py
@@ -45,6 +45,18 @@ Multiple test files are failing due to import errors:
    - **Solution**: Added `from netra_backend.app.core.exceptions_agent import AgentError` to imports
    - **File Modified**: `netra_backend/app/agents/corpus_admin/corpus_error_types.py`
    - **Verification**: Import test successful - class can now be imported without errors
+
+2. **TriageSubAgent Import Issue (2025-08-29 09:28)**
+   - **Problem**: `ImportError: cannot import name 'TriageSubAgent' from 'netra_backend.app.agents.triage_sub_agent'`
+   - **Root Cause**: TriageSubAgent class was not exported from the package __init__.py to avoid circular imports
+   - **Solution**: Updated import statements to use direct module imports and added conditional export to __init__.py
+   - **Files Modified**:
+     - `netra_backend/tests/agents/business_logic/test_triage_decisions.py` - Updated import to use `.agent import TriageSubAgent`
+     - `netra_backend/tests/agents/business_logic/test_adaptive_workflow_flows.py` - Updated import to use `.agent import TriageSubAgent`
+     - `tests/e2e/test_corpus_admin_e2e.py` - Updated import to use `.agent import TriageSubAgent`
+     - `tests/e2e/test_agent_pipeline_critical.py` - Fixed incorrect import that used `TriageCore as TriageSubAgent`
+     - `netra_backend/app/agents/triage_sub_agent/__init__.py` - Added conditional TriageSubAgent export with fallback
+   - **Verification**: Both import patterns now work - direct module import and package-level import
 
 ### 🔄 In Progress
 Updates will be added as Process B agents work on fixes...
