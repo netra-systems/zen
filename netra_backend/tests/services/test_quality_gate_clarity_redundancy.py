@@ -1,17 +1,77 @@
-"""
-Unit tests for quality_gate_clarity_redundancy
-Coverage Target: 80%
-Business Value: Platform stability
-"""
+"""Tests for Quality Gate Service clarity and redundancy calculations"""
+
+import sys
+from pathlib import Path
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
+    create_excessive_acronyms_content,
+    create_high_overlap_content,
+    create_nested_parentheses_content,
+    create_very_long_sentence,
+)
 
-class TestQualityGateClarityRedundancy:
-    """Test suite for quality_gate_clarity_redundancy"""
+class TestClarityCalculation:
+    """Test clarity calculation edge cases"""
     
-    def test_placeholder(self):
-        """Placeholder test - module needs proper implementation"""
-        # TODO: Implement actual tests based on module functionality
-        assert True, "Test placeholder - implement actual tests"
+    @pytest.fixture
+    def quality_service(self):
+        return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
+    async def test_clarity_very_long_sentences(self, quality_service):
+        """Test clarity with very long sentences"""
+        long_sentence = create_very_long_sentence()
+        
+        score = await quality_service.metrics_calculator.core_calculator.calculate_clarity(long_sentence)
+        assert score < 0.6  # Should be penalized for length
+    @pytest.mark.asyncio
+    async def test_clarity_excessive_acronyms(self, quality_service):
+        """Test clarity with many unexplained acronyms"""
+        content = create_excessive_acronyms_content()
+        
+        score = await quality_service.metrics_calculator.core_calculator.calculate_clarity(content)
+        assert score < 0.95  # Should be slightly penalized
+    @pytest.mark.asyncio
+    async def test_clarity_nested_parentheses(self, quality_service):
+        """Test clarity with nested parentheses"""
+        content = create_nested_parentheses_content()
+        
+        score = await quality_service.metrics_calculator.core_calculator.calculate_clarity(content)
+        assert score < 0.95  # Should be penalized
+    @pytest.mark.asyncio
+    async def test_clarity_no_sentences(self, quality_service):
+        """Test clarity calculation with no proper sentences"""
+        content = "optimization performance metrics"
+        
+        score = await quality_service.metrics_calculator.core_calculator.calculate_clarity(content)
+        assert score >= 0  # Should handle gracefully
+
+class TestRedundancyCalculation:
+    """Test redundancy calculation edge cases"""
+    
+    @pytest.fixture
+    def quality_service(self):
+        return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
+    async def test_redundancy_single_sentence(self, quality_service):
+        """Test redundancy with single sentence"""
+        content = "This is a single sentence."
+        
+        score = await quality_service.metrics_calculator.core_calculator.calculate_redundancy(content)
+        assert score == 0.0  # No redundancy possible
+    @pytest.mark.asyncio
+    async def test_redundancy_empty_sentences(self, quality_service):
+        """Test redundancy with empty sentence splits"""
+        content = "First. . . Last."
+        
+        score = await quality_service.metrics_calculator.core_calculator.calculate_redundancy(content)
+        assert score >= 0  # Should handle empty splits
+    @pytest.mark.asyncio
+    async def test_redundancy_high_overlap(self, quality_service):
+        """Test redundancy with high word overlap"""
+        content = create_high_overlap_content()
+        
+        score = await quality_service.metrics_calculator.core_calculator.calculate_redundancy(content)
+        assert score > 0.4  # Should detect high redundancy

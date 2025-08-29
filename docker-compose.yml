@@ -1,9 +1,5 @@
 version: '3.8'
 
-# Main Docker configuration for individual services
-# For unified test & dev environments, use: docker-compose -f docker-compose.all.yml up -d
-# See STARTUP_GUIDE.md for detailed instructions
-
 services:
   # PostgreSQL Database
   postgres:

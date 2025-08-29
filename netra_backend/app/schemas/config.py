@@ -95,7 +95,7 @@ class OAuthConfig(BaseModel):
     ]
 
 class ClickHouseNativeConfig(BaseModel):
-    host: str = ""  # No default - must be explicitly configured
+    host: str = ""  # No default - must be explicitly configured for staging/production
     port: int = 9440
     user: str = "default"
     password: str = ""
@@ -107,7 +107,7 @@ class ClickHouseNativeConfig(BaseModel):
     query_timeout: int = 30    # Query execution timeout in seconds
 
 class ClickHouseHTTPConfig(BaseModel):
-    host: str = ""  # No default - must be explicitly configured
+    host: str = ""  # No default - must be explicitly configured for staging/production
     port: int = 8123  # Standard ClickHouse HTTP port
     user: str = "default"
     password: str = ""
@@ -119,7 +119,7 @@ class ClickHouseHTTPConfig(BaseModel):
     query_timeout: int = 30    # Query execution timeout in seconds
 
 class ClickHouseHTTPSConfig(BaseModel):
-    host: str = ""  # No default - must be explicitly configured
+    host: str = ""  # No default - must be explicitly configured for staging/production
     port: int = 8443  # Standard ClickHouse HTTPS port
     user: str = "default"
     password: str = ""

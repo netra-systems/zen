@@ -252,11 +252,15 @@ class DatabaseConfigManager:
         # If no password from env and in staging/production, try GCP Secret Manager
         if not password and self._environment in ["staging", "production"]:
             try:
+                # Lazy import to prevent deployment failures when GCP SDK is not available
                 from netra_backend.app.core.configuration.secrets import SecretManager
                 secret_manager = SecretManager()
                 password = secret_manager.get_secret("CLICKHOUSE_PASSWORD") or ""
                 if password:
                     self._logger.info("Loaded CLICKHOUSE_PASSWORD from GCP Secret Manager")
+            except ImportError as e:
+                # GCP SDK not available, fall back to environment variable
+                self._logger.warning(f"GCP Secret Manager not available: {e}")
             except Exception as e:
                 self._logger.warning(f"Failed to load CLICKHOUSE_PASSWORD from GCP: {e}")
         
@@ -297,13 +301,9 @@ class DatabaseConfigManager:
                 "ClickHouse configuration must be explicitly provided."
             )
         elif not host:
-            # Use localhost only for development/test
-            if self._environment in ["development", "testing"]:
-                logger.info("CLICKHOUSE_HOST not configured, using localhost for development/test")
-                host = "localhost"  # Safe default for development
-            else:
-                logger.warning("CLICKHOUSE_HOST not configured")
-                host = ""  # No fallback for other environments
+            # Default to localhost for development/test environments
+            logger.warning("CLICKHOUSE_HOST not configured for development/test, defaulting to localhost")
+            host = "localhost"  # Default to localhost for development
         
         user = self._env.get("CLICKHOUSE_USER") or self._env.get("CLICKHOUSE_USERNAME")
         if not user and self._environment in ["staging", "production"]:

@@ -1,17 +1,43 @@
-"""
-Unit tests for external_api_integration
-Coverage Target: 80%
-Business Value: Platform stability
-"""
+"""Integration test scenarios combining multiple components."""
+
+import sys
+from pathlib import Path
+
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
+from netra_backend.app.services.external_api_client import (
+    HTTPError,
+    ResilientHTTPClient,
+)
 
-class TestExternalApiIntegration:
-    """Test suite for external_api_integration"""
+class TestIntegrationScenarios:
+    """Integration test scenarios combining multiple components."""
+    @pytest.mark.asyncio
+    async def test_full_request_flow_success(self):
+        """Test complete request flow from client creation to response."""
+        client = ResilientHTTPClient(base_url="https://api.test.com")
+        expected_result = {"result": "success"}
+        
+        with patch.object(client, '_request', return_value=expected_result) as mock_request:
+            result = await client.get("/endpoint", "test_api")
+            
+            assert result == expected_result
+            mock_request.assert_called_once_with("GET", "/endpoint", "test_api", params=None, headers=None)
     
-    def test_placeholder(self):
-        """Placeholder test - module needs proper implementation"""
-        # TODO: Implement actual tests based on module functionality
-        assert True, "Test placeholder - implement actual tests"
+    @pytest.mark.asyncio
+    async def test_error_handling_chain(self):
+        """Test error handling through the entire chain."""
+        client = ResilientHTTPClient(base_url="https://api.test.com")
+        
+        # Mock _request to raise HTTPError as if it came from the circuit breaker
+        with patch.object(client, '_request', side_effect=HTTPError(500, "test_api API error: 500", {"error": "Internal Server Error"})) as mock_request:
+            with pytest.raises(HTTPError) as exc_info:
+                await client.get("/endpoint", "test_api")
+            
+            # Verify the error has correct properties
+            assert exc_info.value.status_code == 500
+            assert exc_info.value.response_data == {"error": "Internal Server Error"}
+            mock_request.assert_called_once_with("GET", "/endpoint", "test_api", params=None, headers=None)
+    

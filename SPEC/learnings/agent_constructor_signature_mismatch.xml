@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Agent Constructor Signature Mismatch</title>
+    <date>2025-08-29</date>
+    <category>testing</category>
+    <tags>agents, testing, constructor, initialization</tags>
+    <severity>high</severity>
+    <business_impact>Test failures block deployment and development velocity</business_impact>
+  </metadata>
+
+  <problem>
+    <description>
+      Test failure in test_action_plan_feasibility due to constructor parameter mismatch.
+      ActionsToMeetGoalsSubAgent was being initialized with websocket_manager parameter 
+      that it doesn't accept.
+    </description>
+    <error_message>
+      ActionsToMeetGoalsSubAgent initialization error (unexpected 'websocket_manager' parameter)
+    </error_message>
+    <affected_files>
+      <file>netra_backend/tests/agents/business_logic/test_optimization_value.py</file>
+      <file>netra_backend/app/agents/actions_to_meet_goals_sub_agent.py</file>
+      <file>netra_backend/app/agents/optimizations_core_sub_agent.py</file>
+    </affected_files>
+  </problem>
+
+  <root_cause>
+    <analysis>
+      Inconsistent agent initialization signatures between agents despite both implementing
+      modern execution patterns. OptimizationsCoreSubAgent accepts optional websocket_manager
+      parameter while ActionsToMeetGoalsSubAgent does not.
+    </analysis>
+    <technical_details>
+      <detail>OptimizationsCoreSubAgent: __init__(llm_manager, tool_dispatcher, websocket_manager=None)</detail>
+      <detail>ActionsToMeetGoalsSubAgent: __init__(llm_manager, tool_dispatcher)</detail>
+      <detail>Test incorrectly assumed both agents had same constructor signature</detail>
+    </technical_details>
+  </root_cause>
+
+  <solution>
+    <approach>
+      Removed websocket_manager parameter from ActionsToMeetGoalsSubAgent initialization
+      in test fixtures. Also removed unused ExecutionContext objects from tests as agents
+      use execute(state, run_id, stream_updates) signature directly.
+    </approach>
+    <implementation>
+      <step>Removed websocket_manager from actions_agent fixture</step>
+      <step>Removed unused ExecutionContext imports</step>
+      <step>Removed ExecutionContext object creation in tests</step>
+      <step>Maintained correct execute() method signature calls</step>
+    </implementation>
+  </solution>
+
+  <lessons_learned>
+    <lesson>
+      Agent constructor signatures should be consistent across similar agents to avoid
+      test fixture mismatches. If agents implement similar patterns (BaseExecutionInterface),
+      they should have similar initialization signatures.
+    </lesson>
+    <lesson>
+      Test fixtures should be tailored to specific agent requirements rather than assuming
+      all agents have identical constructor signatures.
+    </lesson>
+    <lesson>
+      ExecutionContext is used internally by agents but the execute() method signature
+      remains execute(state, run_id, stream_updates) for backward compatibility.
+    </lesson>
+  </lessons_learned>
+
+  <prevention>
+    <recommendation>
+      Create a base test fixture factory that can generate agent-specific fixtures
+      based on their actual constructor signatures.
+    </recommendation>
+    <recommendation>
+      Consider standardizing agent constructors to all accept optional websocket_manager
+      for consistency, even if not all agents use it.
+    </recommendation>
+    <recommendation>
+      Add type hints and documentation to clearly specify each agent's constructor
+      requirements.
+    </recommendation>
+  </prevention>
+
+  <related_specs>
+    <spec>SPEC/type_safety.xml</spec>
+    <spec>SPEC/import_management_architecture.xml</spec>
+    <spec>SPEC/conventions.xml</spec>
+  </related_specs>
+</learning>

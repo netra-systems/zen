@@ -1,17 +1,86 @@
-"""
-Unit tests for unified_message_flow_core
-Coverage Target: 80%
-Business Value: Platform stability
-"""
+"""Core Tests - Split from test_unified_message_flow.py"""
+
+import sys
+from pathlib import Path
+
+# Test framework import - using pytest fixtures instead
+
+import asyncio
+import json
+import time
+import tracemalloc
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.routes.utils.websocket_helpers import decode_token_payload
 
+# Use central_logger as logger
+logger = central_logger
+from starlette.websockets import WebSocketDisconnect
 
-class TestUnifiedMessageFlowCore:
-    """Test suite for unified_message_flow_core"""
-    
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageType
+from netra_backend.tests.integration.test_ws_connection_mocks import MockWebSocket
+
+from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
+    def setup_method(self):
+        """Setup method for pytest (replaces __init__)"""
+        self.flow_log: List[Dict[str, Any]] = []
+        self.performance_metrics: Dict[str, float] = {}
+        self.error_count = 0
+
+    def log_step(self, step: str, data: Dict[str, Any]) -> None:
+        """Log flow step with timestamp."""
+        entry = {
+            "step": step,
+            "timestamp": time.time(),
+            "data": data,
+            "step_id": str(uuid.uuid4())
+        }
+        self.flow_log.append(entry)
+        logger.info(f"[FLOW TRACKER] {step}: {data}")
+
+    def start_timer(self, operation: str) -> str:
+        """Start performance timer."""
+        timer_id = f"{operation}_{uuid.uuid4().hex[:8]}"
+        self.performance_metrics[f"{timer_id}_start"] = time.time()
+        return timer_id
+
+    def end_timer(self, timer_id: str) -> float:
+        """End timer and return duration."""
+        end_time = time.time()
+        start_time = self.performance_metrics.get(f"{timer_id}_start", end_time)
+        duration = end_time - start_time
+        self.performance_metrics[timer_id] = duration
+        return duration
+
+    def _verify_complete_flow(self, tracker: 'TestSyntaxFix', duration: float) -> None:
+        """Verify complete message flow."""
+        assert len(tracker.flow_log) >= 5, "Missing flow steps"
+        assert duration < 5.0, f"Flow too slow: {duration}s"
+        assert tracker.error_count == 0, f"Flow had {tracker.error_count} errors"
+        
+        # Verify flow sequence
+        expected_steps = [
+            "frontend_message_created",
+            "websocket_auth_completed", 
+            "message_routed_to_agent_service",
+            "agent_processing_completed",
+            "response_delivered_to_frontend"
+        ]
+        
+        actual_steps = [entry["step"] for entry in tracker.flow_log]
+        for step in expected_steps:
+            assert step in actual_steps, f"Missing flow step: {step}"
+
     def test_placeholder(self):
-        """Placeholder test - module needs proper implementation"""
-        # TODO: Implement actual tests based on module functionality
-        assert True, "Test placeholder - implement actual tests"
+        """Placeholder test to make this a valid test class"""
+        assert True

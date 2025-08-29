@@ -1,17 +1,30 @@
-"""
-Unit tests for mcp_integration_services
-Coverage Target: 80%
-Business Value: Platform stability
-"""
+"""Services Tests - Split from test_mcp_integration.py"""
+
+import sys
+from pathlib import Path
+
+# Test framework import - using pytest fixtures instead
+
+import json
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from netra_backend.app.netra_mcp.netra_mcp_server import NetraMCPServer
 
+from netra_backend.app.services.mcp_service import (
+    MCPClient,
+    MCPService,
+    MCPToolExecution,
+)
 
-class TestMcpIntegrationServices:
-    """Test suite for mcp_integration_services"""
-    
-    def test_placeholder(self):
-        """Placeholder test - module needs proper implementation"""
-        # TODO: Implement actual tests based on module functionality
-        assert True, "Test placeholder - implement actual tests"
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
+    def test_service_initialization(self, mock_services):
+        """Test service initializes correctly"""
+        service = MCPService(**mock_services)
+        
+        assert service.agent_service == mock_services["agent_service"]
+        assert service.mcp_server is not None
+        assert isinstance(service.active_sessions, dict)

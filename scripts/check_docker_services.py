@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Check status of all Netra Docker services.
+Check status of all Netra Docker infrastructure services.
 Shows health status, port availability, and connectivity for both test and dev environments.
 """
 
@@ -12,17 +12,9 @@ import socket
 import time
 import os
 
-# Fix Windows console encoding for Unicode characters
+# Fix Windows console encoding for ANSI colors
 if sys.platform == "win32":
     os.system("")  # Enable ANSI escape sequences on Windows
-    import locale
-    if locale.getpreferredencoding().upper() != 'UTF-8':
-        try:
-            import codecs
-            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-            sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
-        except:
-            pass
 
 # Service configurations
 SERVICES = {
@@ -89,10 +81,11 @@ def check_port(port: int) -> bool:
 def print_status_table():
     """Print a formatted status table of all services."""
     print("\n" + "="*80)
-    print("NETRA DOCKER SERVICES STATUS")
+    print("NETRA DOCKER INFRASTRUCTURE STATUS (6 Services)")
     print("="*80)
     
     all_healthy = True
+    services_count = 0
     
     for env in ["test", "dev"]:
         print(f"\n{env.upper()} ENVIRONMENT:")
@@ -101,6 +94,7 @@ def print_status_table():
         print("-"*60)
         
         for service_name, config in SERVICES[env].items():
+            services_count += 1
             container_name = config["container"]
             port = config["port"]
             service_type = config["type"]
@@ -135,6 +129,7 @@ def print_status_table():
             print(f"{service_type:<15} {container_name:<25} {status_display} {port_display:<8} {available_display}")
     
     print("\n" + "="*80)
+    print(f"Total infrastructure services: {services_count}/6")
     
     # Quick start command
     if not all_healthy:
@@ -143,7 +138,12 @@ def print_status_table():
         print("\n>> TO VIEW LOGS:")
         print("   docker-compose -f docker-compose.all.yml logs -f")
     else:
-        print("\n[OK] All services are healthy and running!")
+        print("\n[OK] All 6 infrastructure services are healthy and running!")
+    
+    print("\n>> TO RUN APPLICATION SERVICES LOCALLY:")
+    print("   Backend:  cd netra_backend && uvicorn app.main:app --reload --port 8000")
+    print("   Auth:     cd auth_service && uvicorn main:app --reload --port 8081")
+    print("   Frontend: cd frontend && npm run dev")
     
     print("\n>> DOCUMENTATION:")
     print("   - Quick Start: README.md#quick-start")

@@ -1,17 +1,251 @@
 """
-Unit tests for clickhouse_client_comprehensive
-Coverage Target: 80%
-Business Value: Platform stability
+Comprehensive tests for ClickHouse client functionality.
+
+Tests connection management, error handling, and data operations.
+This ensures reliable data access for performance analysis features.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+import asyncio
+from datetime import datetime, timezone, timedelta
+from unittest.mock import AsyncMock, patch, Mock
+
+from netra_backend.app.db.clickhouse import (
+    get_clickhouse_client, 
+    get_clickhouse_service,
+    ClickHouseService,
+    MockClickHouseDatabase,
+    _clickhouse_cache
+)
 
 
-class TestClickhouseClientComprehensive:
-    """Test suite for clickhouse_client_comprehensive"""
-    
-    def test_placeholder(self):
-        """Placeholder test - module needs proper implementation"""
-        # TODO: Implement actual tests based on module functionality
-        assert True, "Test placeholder - implement actual tests"
+class TestClickHouseClientComprehensive:
+    """Comprehensive tests for ClickHouse client."""
+
+    @pytest.fixture
+    def client(self):
+        """Create ClickHouse client for testing."""
+        # Force mock for testing
+        return ClickHouseService(force_mock=True)
+
+    @pytest.fixture
+    def mock_clickhouse_database(self):
+        """Mock ClickHouse database for testing."""
+        mock_client = AsyncMock()
+        mock_client.test_connection = AsyncMock(return_value=True)
+        mock_client.execute = AsyncMock(return_value=[])
+        mock_client.disconnect = AsyncMock()
+        return mock_client
+
+    def test_client_initialization(self):
+        """Test that client initializes correctly."""
+        client = ClickHouseService(force_mock=True)
+        assert client is not None
+        assert hasattr(client, 'force_mock')
+        assert hasattr(client, '_client')
+        assert hasattr(client, '_circuit_breaker')
+        assert hasattr(client, '_metrics')
+        assert client._metrics['queries'] == 0
+        assert client._metrics['failures'] == 0
+        assert client._metrics['timeouts'] == 0
+        assert client.force_mock is True
+
+    @pytest.mark.asyncio
+    async def test_initialize_with_mock(self, client):
+        """Test initialization with mock client."""
+        await client.initialize()
+        assert client._client is not None
+        assert isinstance(client._client, MockClickHouseDatabase)
+
+    @pytest.mark.asyncio
+    async def test_ping_success(self, client):
+        """Test successful ping."""
+        await client.initialize()
+        result = await client.ping()
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_execute_query_success(self, client):
+        """Test successful query execution."""
+        await client.initialize()
+        # Mock client returns empty list
+        result = await client.execute_query("SELECT * FROM test", {"param": "value"})
+        assert result == []
+        assert client._metrics['queries'] >= 1
+
+    @pytest.mark.asyncio
+    async def test_execute_with_retry(self, client):
+        """Test query execution with retry logic."""
+        await client.initialize()
+        result = await client.execute_with_retry("SELECT * FROM test", max_retries=2)
+        assert result == []  # Mock returns empty list
+
+    @pytest.mark.asyncio
+    async def test_batch_insert(self, client):
+        """Test batch insert functionality."""
+        await client.initialize()
+        data = [
+            {"id": 1, "name": "test1", "timestamp": datetime.now(timezone.utc)},
+            {"id": 2, "name": "test2", "timestamp": datetime.now(timezone.utc)}
+        ]
+        
+        # Mock batch_insert should work without errors
+        await client.batch_insert("test_table", data)
+        # If we get here without exception, the test passes
+
+    @pytest.mark.asyncio
+    async def test_close_connection(self, client):
+        """Test closing connection."""
+        await client.initialize()
+        assert client._client is not None
+        await client.close()
+        assert client._client is None
+
+    @pytest.mark.asyncio
+    async def test_circuit_breaker_metrics(self, client):
+        """Test circuit breaker metrics."""
+        await client.initialize()
+        # Execute some queries to test metrics
+        await client.execute("SELECT 1")
+        await client.execute("SELECT 2")
+        
+        assert client._metrics['queries'] >= 2
+        assert client._metrics['failures'] == 0
+
+    def test_get_metrics(self):
+        """Test getting client metrics."""
+        client = ClickHouseService(force_mock=True)
+        assert client._metrics['queries'] == 0
+        assert client._metrics['failures'] == 0
+        assert client._metrics['timeouts'] == 0
+
+    @pytest.mark.asyncio
+    async def test_cache_operations(self):
+        """Test cache operations."""
+        # Clear cache first
+        _clickhouse_cache.clear()
+        
+        # Test set and get
+        query = "SELECT * FROM test"
+        result = [{"id": 1}]
+        _clickhouse_cache.set(query, result)
+        
+        cached = _clickhouse_cache.get(query)
+        assert cached == result
+        
+        # Test cache stats
+        stats = _clickhouse_cache.stats()
+        assert stats['hits'] >= 1
+        assert 'size' in stats
+        assert 'max_size' in stats
+
+    @pytest.mark.asyncio
+    async def test_execute_with_cache(self, client):
+        """Test query execution with caching."""
+        await client.initialize()
+        _clickhouse_cache.clear()
+        
+        # First execution should miss cache
+        query = "SELECT * FROM metrics"
+        result1 = await client.execute(query)
+        assert result1 == []
+        
+        # Second execution should hit cache
+        result2 = await client.execute(query)
+        assert result2 == []
+        
+        # Cache should have been used
+        stats = _clickhouse_cache.stats()
+        assert stats['hits'] >= 1
+
+    @pytest.mark.asyncio
+    async def test_concurrent_operations(self, client):
+        """Test that client handles concurrent operations correctly."""
+        await client.initialize()
+        
+        # Run multiple queries concurrently
+        tasks = [
+            client.execute_query(f"SELECT {i}") 
+            for i in range(5)
+        ]
+        
+        results = await asyncio.gather(*tasks)
+        
+        # All should succeed with empty results
+        assert len(results) == 5
+        assert all(result == [] for result in results)
+
+    @pytest.mark.asyncio
+    async def test_mock_clickhouse_database(self):
+        """Test MockClickHouseDatabase directly."""
+        mock_db = MockClickHouseDatabase()
+        
+        # Test execute
+        result = await mock_db.execute("SELECT 1")
+        assert result == []
+        
+        # Test execute_query
+        result = await mock_db.execute_query("SELECT * FROM test")
+        assert result == []
+        
+        # Test fetch
+        result = await mock_db.fetch("SELECT * FROM test")
+        assert result == []
+        
+        # Test test_connection
+        result = await mock_db.test_connection()
+        assert result is True
+        
+        # Test ping
+        result = mock_db.ping()
+        assert result is True
+        
+        # Test batch_insert
+        await mock_db.batch_insert("test_table", [{"id": 1}])
+        
+        # Test disconnect
+        await mock_db.disconnect()
+
+    @pytest.mark.asyncio
+    async def test_get_clickhouse_client_context_manager(self):
+        """Test get_clickhouse_client as context manager."""
+        # In test environment, should get mock client
+        async with get_clickhouse_client() as client:
+            assert client is not None
+            # Mock client should work - but may return different results depending on the mock type
+            result = await client.execute("SELECT 1")
+            assert isinstance(result, list)  # Just check it returns a list
+
+    @pytest.mark.asyncio
+    async def test_service_with_circuit_breaker_failure(self, client):
+        """Test service behavior when circuit breaker trips."""
+        await client.initialize()
+        
+        # Mock the circuit breaker to fail
+        with patch.object(client._circuit_breaker, 'call', side_effect=Exception("Circuit open")):
+            # Should still try to use cache for read queries
+            _clickhouse_cache.clear()
+            query = "SELECT * FROM test"
+            _clickhouse_cache.set(query, [{"cached": True}])
+            
+            result = await client.execute(query)
+            assert result == [{"cached": True}]
+
+    @pytest.mark.asyncio
+    async def test_initialization_timeout_handling(self):
+        """Test initialization timeout handling."""
+        client = ClickHouseService(force_mock=False)
+        
+        # Mock the real client initialization to timeout
+        with patch.object(client, '_initialize_real_client', side_effect=asyncio.TimeoutError()):
+            # In test environment, should fallback to mock
+            await client.initialize()
+            assert client._client is not None
+            assert isinstance(client._client, MockClickHouseDatabase)
+
+    @pytest.mark.asyncio
+    async def test_get_clickhouse_service_singleton(self):
+        """Test that get_clickhouse_service returns singleton."""
+        service1 = get_clickhouse_service()
+        service2 = get_clickhouse_service()
+        assert service1 is service2

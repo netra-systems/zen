@@ -1,17 +1,63 @@
-"""
-Unit tests for corpus_service
-Coverage Target: 80%
-Business Value: Platform stability
-"""
+"""Test corpus service for managing document and content collections."""
+
+import sys
+from pathlib import Path
+
+from datetime import datetime
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from netra_backend.app.schemas import Corpus, CorpusCreate
 
+from netra_backend.app.services.corpus_service import CorpusStatus
 
 class TestCorpusService:
-    """Test suite for corpus_service"""
-    
-    def test_placeholder(self):
-        """Placeholder test - module needs proper implementation"""
-        # TODO: Implement actual tests based on module functionality
-        assert True, "Test placeholder - implement actual tests"
+    """Test corpus service basic functionality."""
+
+    @pytest.mark.asyncio
+    async def test_corpus_status_enum(self):
+        """Test corpus status enumeration."""
+        assert CorpusStatus.CREATING.value == "creating"
+        assert CorpusStatus.AVAILABLE.value == "available"
+        assert CorpusStatus.FAILED.value == "failed"
+        assert CorpusStatus.UPDATING.value == "updating"
+        assert CorpusStatus.DELETING.value == "deleting"
+
+    @pytest.mark.asyncio
+    async def test_corpus_schema(self):
+        """Test corpus Pydantic schema."""
+        corpus_data = {
+            "id": "test-corpus-123",
+            "name": "Test Corpus",
+            "description": "A test corpus for validation",
+            "status": "available",
+            "created_by_id": "user123",
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
+        }
+        
+        corpus = Corpus(**corpus_data)
+        assert corpus.id == "test-corpus-123"
+        assert corpus.name == "Test Corpus"
+        assert corpus.description == "A test corpus for validation"
+        assert corpus.status == "available"
+        assert corpus.created_by_id == "user123"
+
+    @pytest.mark.asyncio
+    async def test_corpus_create_schema(self):
+        """Test corpus creation schema."""
+        create_data = {
+            "name": "New Corpus", 
+            "description": "Creating a new corpus"
+        }
+        
+        corpus_create = CorpusCreate(**create_data)
+        assert corpus_create.name == "New Corpus"
+        assert corpus_create.description == "Creating a new corpus"
+
+    @pytest.mark.asyncio
+    async def test_corpus_service_import(self):
+        """Test that corpus service can be imported."""
+        from netra_backend.app.services.corpus_service import CorpusStatus
+        assert CorpusStatus != None

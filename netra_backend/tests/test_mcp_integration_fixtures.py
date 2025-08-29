@@ -1,17 +1,48 @@
-"""
-Unit tests for mcp_integration_fixtures
-Coverage Target: 80%
-Business Value: Platform stability
-"""
+"""Fixtures Tests - Split from test_mcp_integration.py"""
+
+import sys
+from pathlib import Path
+
+# Test framework import - using pytest fixtures instead
+
+import json
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from netra_backend.app.netra_mcp.netra_mcp_server import NetraMCPServer
 
+from netra_backend.app.services.mcp_service import (
+    MCPClient,
+    MCPService,
+    MCPToolExecution,
+)
 
-class TestMcpIntegrationFixtures:
-    """Test suite for mcp_integration_fixtures"""
-    
-    def test_placeholder(self):
-        """Placeholder test - module needs proper implementation"""
-        # TODO: Implement actual tests based on module functionality
-        assert True, "Test placeholder - implement actual tests"
+def mock_services():
+    """Create mock services for testing"""
+    return {
+        # Mock: Generic component isolation for controlled unit testing
+        "agent_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
+        "thread_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
+        "corpus_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
+        "synthetic_data_service": AsyncMock(),
+        # Mock: Security component isolation for controlled auth testing
+        "security_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
+        "supply_catalog_service": AsyncMock(),
+        # Mock: LLM provider isolation to prevent external API usage and costs
+        "llm_manager": AsyncMock()
+    }
+
+def mcp_server(mock_services):
+    """Create MCP server with mock services"""
+    server = NetraMCPServer(name="test-server", version="1.0.0")
+    server.set_services(**mock_services)
+    return server
+
+def mcp_service(mock_services):
+    """Create MCP service with mock services"""
+    return MCPService(**mock_services)

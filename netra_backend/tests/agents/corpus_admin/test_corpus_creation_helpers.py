@@ -6,44 +6,38 @@ Business Value: Revenue-critical component
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from netra_backend.app.agents.corpus_admin.corpus_creation_helpers import get_handlers
+from netra_backend.app.agents.corpus_admin.corpus_creation_helpers import CorpusCreationHelpers
 
 class TestCorpusCreationHelpers:
-    """Test suite for corpus creation helpers"""
+    """Test suite for CorpusCreationHelpers"""
     
     @pytest.fixture
-    def handlers(self):
-        """Get test handlers"""
-        return get_handlers()
+    def instance(self):
+        """Create test instance"""
+        return CorpusCreationHelpers()
     
-    def test_get_handlers(self, handlers):
-        """Test handler initialization"""
-        v, i, u = handlers
-        # Handlers may be None if dependencies are not available
-        # This is expected in test environment
-        assert handlers is not None
+    def test_initialization(self, instance):
+        """Test proper initialization"""
+        assert instance is not None
         # Add initialization assertions
     
-    def test_core_functionality(self, handlers):
+    def test_core_functionality(self, instance):
         """Test core business logic"""
-        # Test that handlers are returned
-        assert handlers is not None
-        # All handlers may be None if dependencies unavailable
+        # Test happy path
+        result = instance.process()
+        assert result is not None
     
-    def test_error_handling(self, handlers):
+    def test_error_handling(self, instance):
         """Test error scenarios"""
-        # Test handler availability
-        v, i, u = handlers
-        # In test environment, handlers may be None
+        with pytest.raises(Exception):
+            instance.process_invalid()
     
-    def test_edge_cases(self, handlers):
+    def test_edge_cases(self, instance):
         """Test boundary conditions"""
-        # Test handler tuple structure
-        assert isinstance(handlers, tuple)
-        assert len(handlers) == 3
+        # Test with None, empty, extreme values
+        pass
     
-    def test_validation(self, handlers):
+    def test_validation(self, instance):
         """Test input validation"""
-        # Verify handler structure
-        v, i, u = handlers
-        # Handlers are expected to be None in test environment
+        # Test validation logic
+        pass
