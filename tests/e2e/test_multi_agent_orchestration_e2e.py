@@ -31,7 +31,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.agents.corpus_admin.agent import CorpusAdminAgent
+from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
@@ -98,7 +98,7 @@ class MultiAgentOrchestrationSuite:
                 llm_manager=self.llm_manager, 
                 dispatcher=mock_dispatcher
             ),
-            'corpus_admin': CorpusAdminAgent(
+            'corpus_admin': CorpusAdminSubAgent(
                 llm_manager=self.llm_manager,
                 dispatcher=mock_dispatcher
             ),

@@ -221,10 +221,10 @@ async def real_thread_service():
     # Mock session factory that returns the session directly
     async def mock_session_factory():
         try:
-            yield session
+            yield mock_session
         finally:
-            if hasattr(session, "close"):
-                await session.close()
+            if hasattr(mock_session, "close"):
+                await mock_session.close()
     
     # Patch the async_session_factory to use our mock
     with patch.object(postgres_module, 'async_session_factory', mock_session_factory):
@@ -256,22 +256,11 @@ async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mo
         websocket_manager=real_websocket_manager
     )
     
-    # Mock the supervisor run method to return a response and send WebSocket messages
+    # Mock the supervisor run method to return a response
     async def mock_supervisor_run(user_request, thread_id, user_id, run_id):
-        # Send agent response message via WebSocket with actual thread_id parameter
-        await real_websocket_manager.send_message(user_id, {
-            "type": "agent_response", 
-            "payload": {
-                "content": f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production.",
-                "thread_id": thread_id,
-                "run_id": run_id
-            }
-        })
-        
-        # NOTE: Don't send agent_completed here - the AgentService message handler will send it
-        # This prevents duplicate completion messages
-        
-        yield f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production."
+        # The message_processing module will send the agent_completed message
+        # We just need to return the response content
+        return f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production."
     
     supervisor.run = mock_supervisor_run
     yield supervisor
