@@ -43,7 +43,7 @@ class TestSession:
     test_level: str
     datasets_required: List[str] = field(default_factory=list)
     use_real_llm: bool = False
-    llm_model: str = "gemini-2.5-flash" 
+    llm_model: str = "gemini-2.5-pro" 
     llm_timeout: int = 30
     isolation_enabled: bool = True
     setup_time: Optional[str] = None
@@ -253,7 +253,7 @@ class TestEnvironmentOrchestrator:
         logger.info("Test environment orchestrator initialized")
     
     async def setup_test_session(self, test_level: str, use_real_llm: bool = False, 
-                                llm_model: str = "gemini-2.5-flash", 
+                                llm_model: str = "gemini-2.5-pro", 
                                 datasets: Optional[List[str]] = None) -> str:
         """Setup a complete test session with environment and data."""
         session_id = str(uuid.uuid4())[:8]
@@ -418,7 +418,7 @@ class TestEnvironmentOrchestrator:
 # Context manager for test sessions
 @asynccontextmanager
 async def test_session_context(test_level: str, use_real_llm: bool = False, 
-                              llm_model: str = "gemini-2.5-flash",
+                              llm_model: str = "gemini-2.5-pro",
                               datasets: Optional[List[str]] = None):
     """Context manager for managing test sessions."""
     orchestrator = TestEnvironmentOrchestrator()

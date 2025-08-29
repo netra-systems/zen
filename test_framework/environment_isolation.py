@@ -29,8 +29,14 @@ def get_env():
             def is_isolation_enabled(self):
                 # Always return True for test environment wrapper
                 return True
-            def enable_isolation(self):
+            def enable_isolation(self, backup_original=False):
                 # No-op for test environment wrapper since isolation is already enabled
+                pass
+            def reset_to_original(self):
+                # No-op for test environment wrapper
+                pass
+            def disable_isolation(self, restore_original=False):
+                # No-op for test environment wrapper
                 pass
         return TestEnvironmentWrapper()
     else:
