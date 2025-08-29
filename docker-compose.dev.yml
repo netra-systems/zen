@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -79,6 +77,8 @@ services:
       dockerfile: ./docker/backend.development.Dockerfile
     container_name: netra-backend
     profiles: ["netra", "backend", "full"]
+    env_file:
+      - .env.development
     environment:
       # Database
       DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@postgres:5432/${POSTGRES_DB:-netra_dev}
@@ -115,11 +115,14 @@ services:
       FERNET_KEY: ${FERNET_KEY:-dev-fernet-key-change-in-production}
       SERVICE_SECRET: ${SERVICE_SECRET}
       
-      # API Keys (from host environment)
+      # API Keys (from .env.development)
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       NETRA_API_KEY: ${NETRA_API_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # Grafana Admin Password
+      GRAFANA_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
       
       # Frontend URL
       FRONTEND_URL: http://localhost:3000
@@ -168,6 +171,8 @@ services:
       dockerfile: ./docker/auth.development.Dockerfile
     container_name: netra-auth
     profiles: ["auth", "backend", "full"]
+    env_file:
+      - .env.development
     environment:
       # Database
       DATABASE_URL: postgresql://${POSTGRES_USER:-netra}:${POSTGRES_PASSWORD:-netra123}@postgres:5432/${POSTGRES_DB:-netra_dev}
@@ -194,10 +199,21 @@ services:
       SERVICE_ID: auth
       
       # OAuth Configuration
-      GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT:-dev-oauth-client-id}
-      GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT:-dev-oauth-client-secret}
+      GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT}
+      GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GOOGLE_OAUTH_CLIENT_SECRET_DEVELOPMENT}
       GOOGLE_OAUTH_CLIENT_ID_STAGING: ${GOOGLE_OAUTH_CLIENT_ID_STAGING}
       GOOGLE_OAUTH_CLIENT_SECRET_STAGING: ${GOOGLE_OAUTH_CLIENT_SECRET_STAGING}
+      
+      # GitHub OAuth Configuration
+      GITHUB_OAUTH_CLIENT_ID_DEVELOPMENT: ${GITHUB_OAUTH_CLIENT_ID_DEVELOPMENT}
+      GITHUB_OAUTH_CLIENT_SECRET_DEVELOPMENT: ${GITHUB_OAUTH_CLIENT_SECRET_DEVELOPMENT}
+      
+      # Legacy OAuth Support
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI}
     ports:
       - "${AUTH_PORT:-8081}:8081"
     volumes:
@@ -232,6 +248,8 @@ services:
         BUILD_MODE: development
     container_name: netra-frontend
     profiles: ["frontend", "full"]
+    env_file:
+      - .env.development
     environment:
       # API URLs (External - for browser connections from host)
       NEXT_PUBLIC_API_URL: http://localhost:8000
