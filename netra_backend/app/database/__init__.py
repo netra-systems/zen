@@ -34,9 +34,9 @@ except ImportError:
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     """Legacy compatibility function for get_async_session imports.
     
-    Uses UnifiedDatabaseManager as the single source of truth.
+    SSOT COMPLIANCE: Delegates to get_db() for centralized session management.
     """
-    async for session in UnifiedDatabaseManager.postgres_session():
+    async for session in get_db():
         yield session
 
 class UnifiedDatabaseManager:
@@ -50,41 +50,12 @@ class UnifiedDatabaseManager:
     async def postgres_session() -> AsyncGenerator[AsyncSession, None]:
         """Get PostgreSQL session via DatabaseManager - single source of truth.
         
-        CRITICAL FIX: Improved session lifecycle management to prevent IllegalStateChangeError.
-        Uses proper session state checking to avoid concurrent operations.
+        SSOT COMPLIANCE: Delegates to get_db() to maintain single implementation.
+        This ensures all session management logic is centralized.
         """
-        # Use DatabaseManager's session factory directly
-        async_session_factory = DatabaseManager.get_application_session()
-        async with async_session_factory() as session:
-            session_yielded = False
-            try:
-                session_yielded = True
-                yield session
-                # CRITICAL FIX: Only attempt commit if session is properly active
-                # and not already committed/rolled back
-                if hasattr(session, 'is_active') and session.is_active:
-                    # Check if there's an active transaction to commit
-                    if hasattr(session, 'in_transaction') and session.in_transaction():
-                        await session.commit()
-            except asyncio.CancelledError:
-                # Handle task cancellation - minimal session operations
-                # Don't attempt rollback as the context manager will handle cleanup
-                raise
-            except GeneratorExit:
-                # Handle generator cleanup - session context manager handles this
-                pass
-            except Exception:
-                # CRITICAL FIX: Only rollback if session is still in a valid state
-                # and has an active transaction
-                if (session_yielded and 
-                    hasattr(session, 'is_active') and session.is_active and
-                    hasattr(session, 'in_transaction') and session.in_transaction()):
-                    try:
-                        await session.rollback()
-                    except Exception:
-                        # If rollback fails, let the context manager handle cleanup
-                        pass
-                raise
+        # Delegate to the primary get_db() function for true SSOT
+        async for session in get_db():
+            yield session
     
     @staticmethod
     def clickhouse_client():
@@ -125,10 +96,33 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     This is the SINGLE source of truth for PostgreSQL sessions in netra_backend.
     All database access delegates to DatabaseManager implementation.
     
-    CRITICAL FIX: Use async context manager instead of async for to prevent state conflicts.
+    CRITICAL FIX: Proper session lifecycle management with GeneratorExit handling.
     """
-    async with DatabaseManager.get_async_session() as session:
-        yield session
+    # Get session factory directly from DatabaseManager
+    async_session_factory = DatabaseManager.get_application_session()
+    async with async_session_factory() as session:
+        try:
+            yield session
+            # Only commit if we have an active transaction
+            if hasattr(session, 'in_transaction') and session.in_transaction():
+                await asyncio.shield(session.commit())
+        except GeneratorExit:
+            # Don't attempt any session operations during generator cleanup
+            # The async context manager will handle proper cleanup
+            pass
+        except asyncio.CancelledError:
+            # For cancellation, attempt rollback if safe
+            if hasattr(session, 'in_transaction') and session.in_transaction():
+                try:
+                    await asyncio.shield(session.rollback())
+                except Exception:
+                    pass  # Suppress rollback errors during cancellation
+            raise
+        except Exception:
+            # For other exceptions, rollback if possible
+            if hasattr(session, 'in_transaction') and session.in_transaction():
+                await session.rollback()
+            raise
 
 # SINGLE SOURCE OF TRUTH for ClickHouse connections
 def get_clickhouse_client():
