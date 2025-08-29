@@ -1024,41 +1024,44 @@ class DevLauncher:
             if hasattr(self.config, 'services_config') and self.config.services_config:
                 services_config = self.config.services_config
                 
-                # Get service modes with fallback to environment variables
+                # NO MOCKS IN DEV MODE - get service modes 
                 redis_mode = getattr(services_config.redis, 'mode', None)
                 env = get_env()
-                redis_mock = (redis_mode and redis_mode.value == "mock") or env.get('REDIS_MODE') == 'mock'
                 
+                # Check if any service is trying to use mock mode
+                redis_mock = (redis_mode and redis_mode.value == "mock") or env.get('REDIS_MODE') == 'mock'
                 clickhouse_mode = getattr(services_config.clickhouse, 'mode', None) 
                 clickhouse_mock = (clickhouse_mode and clickhouse_mode.value == "mock") or env.get('CLICKHOUSE_MODE') == 'mock'
-                
                 postgres_mode = getattr(services_config.postgres, 'mode', None)
                 postgres_mock = (postgres_mode and postgres_mode.value == "mock") or env.get('POSTGRES_MODE') == 'mock'
                 
-                # Check for disabled services as well
+                # NO MOCKS ALLOWED - fail if any service uses mock
+                if redis_mock or clickhouse_mock or postgres_mock:
+                    self._print("❌", "DATABASE", "Mock mode not allowed in development - use real services")
+                    mock_services = []
+                    if redis_mock: mock_services.append("Redis")
+                    if clickhouse_mock: mock_services.append("ClickHouse")
+                    if postgres_mock: mock_services.append("PostgreSQL")
+                    raise RuntimeError(f"NO MOCKS IN DEV MODE - {', '.join(mock_services)} cannot use mock mode. Configure real services.")
+                
+                # Check for disabled services (allowed)
                 redis_disabled = redis_mode and redis_mode.value == "disabled"
                 clickhouse_disabled = clickhouse_mode and clickhouse_mode.value == "disabled" 
                 postgres_disabled = postgres_mode and postgres_mode.value == "disabled"
                 
-                all_mock_or_disabled = all([
-                    redis_mock or redis_disabled,
-                    clickhouse_mock or clickhouse_disabled,
-                    postgres_mock or postgres_disabled
-                ])
+                all_disabled = all([redis_disabled, clickhouse_disabled, postgres_disabled])
                 
-                if all_mock_or_disabled:
-                    mock_count = sum([redis_mock, clickhouse_mock, postgres_mock])
-                    disabled_count = sum([redis_disabled, clickhouse_disabled, postgres_disabled])
-                    self._print("✅", "DATABASE", f"All databases in mock/disabled mode ({mock_count} mock, {disabled_count} disabled) - skipping validation")
+                if all_disabled:
+                    self._print("✅", "DATABASE", f"All databases disabled - skipping validation")
                     return True
                 
-                # Show which services will be validated
+                # Show which services will be validated (real services only)
                 services_to_validate = []
-                if not (redis_mock or redis_disabled):
+                if not redis_disabled:
                     services_to_validate.append("Redis")
-                if not (clickhouse_mock or clickhouse_disabled):
+                if not clickhouse_disabled:
                     services_to_validate.append("ClickHouse")
-                if not (postgres_mock or postgres_disabled):
+                if not postgres_disabled:
                     services_to_validate.append("PostgreSQL")
                 
                 if services_to_validate:
