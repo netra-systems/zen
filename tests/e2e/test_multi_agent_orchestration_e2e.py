@@ -84,9 +84,8 @@ class MultiAgentOrchestrationSuite:
     
     async def _initialize_agents(self) -> None:
         """Initialize all sub-agents with proper dependencies."""
-        mock_dispatcher = AsyncMock()
-        mock_db_session = AsyncMock()
         mock_tool_dispatcher = AsyncMock()
+        mock_db_session = AsyncMock()
         
         self.agents = {
             'triage': TriageSubAgent(
@@ -96,23 +95,27 @@ class MultiAgentOrchestrationSuite:
             ),
             'data': DataSubAgent(
                 llm_manager=self.llm_manager, 
-                dispatcher=mock_dispatcher
+                tool_dispatcher=mock_tool_dispatcher,
+                websocket_manager=self.websocket_manager
             ),
             'corpus_admin': CorpusAdminSubAgent(
                 llm_manager=self.llm_manager,
-                dispatcher=mock_dispatcher
+                tool_dispatcher=mock_tool_dispatcher,
+                websocket_manager=self.websocket_manager
             ),
             'optimization': OptimizationsCoreSubAgent(
                 llm_manager=self.llm_manager,
-                dispatcher=mock_dispatcher
+                tool_dispatcher=mock_tool_dispatcher,
+                websocket_manager=self.websocket_manager
             ),
             'reporting': ReportingSubAgent(
                 llm_manager=self.llm_manager,
-                dispatcher=mock_dispatcher
+                tool_dispatcher=mock_tool_dispatcher,
+                websocket_manager=self.websocket_manager
             ),
             'actions': ActionsToMeetGoalsSubAgent(
                 llm_manager=self.llm_manager,
-                dispatcher=mock_dispatcher
+                tool_dispatcher=mock_tool_dispatcher
             )
         }
         
@@ -188,11 +191,9 @@ class MultiAgentOrchestrationSuite:
             user_request=scenario_data['user_request'],
             user_id=f'test_user_{uuid.uuid4().hex[:8]}',
             chat_thread_id=f'thread_{scenario}_{uuid.uuid4().hex[:8]}',
-            metadata=scenario_data['context']
+            agent_input=scenario_data['context'],
+            messages=[{'role': 'user', 'content': scenario_data['user_request']}]
         )
-        
-        # Add conversation history for realistic state
-        state.add_message('user', scenario_data['user_request'])
         
         return state
 
@@ -285,26 +286,26 @@ class TestComplexUserJourneys:
         run_id = f'capacity_test_{uuid.uuid4().hex[:12]}'
         
         # Execute workflow with state checkpoints
-        initial_state_snapshot = json.dumps({
+        initial_state_snapshot = {
             'user_request': state.user_request,
-            'metadata': state.metadata,
+            'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()),
             'message_count': len(state.messages)
-        })
+        }
         
         # Execute triage with state validation
         triage_agent = suite.agents['triage']
         await triage_agent.run(state, run_id, stream_updates=True)
         
-        post_triage_snapshot = json.dumps({
+        post_triage_snapshot = {
             'user_request': state.user_request,
-            'metadata': state.metadata,
+            'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()),
             'message_count': len(state.messages)
-        })
+        }
         
         # Validate state consistency after triage
         assert state.user_request == 'Plan capacity for 300% traffic increase next quarter with geographic expansion to EU and APAC'
-        assert state.metadata.get('traffic_multiplier') == 3.0
-        assert state.metadata.get('regions') == ['EU', 'APAC']
+        assert state.agent_input.get('traffic_multiplier') == 3.0
+        assert state.agent_input.get('regions') == ['EU', 'APAC']
         
         # Execute optimization agent
         optimization_agent = suite.agents['optimization']
@@ -314,15 +315,15 @@ class TestComplexUserJourneys:
         actions_agent = suite.agents['actions']
         await actions_agent.run(state, run_id, stream_updates=True)
         
-        final_state_snapshot = json.dumps({
+        final_state_snapshot = {
             'user_request': state.user_request,
-            'metadata': state.metadata,
+            'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()),
             'message_count': len(state.messages)
-        })
+        }
         
         # Validate state evolution
-        initial_data = json.loads(initial_state_snapshot)
-        final_data = json.loads(final_state_snapshot)
+        initial_data = initial_state_snapshot
+        final_data = final_state_snapshot
         
         assert initial_data['user_request'] == final_data['user_request'], "User request should remain consistent"
         assert final_data['message_count'] >= initial_data['message_count'], "Messages should accumulate"
@@ -354,7 +355,7 @@ class TestAgentHandoffsAndStatePropagation:
         state_checkpoints.append({
             'checkpoint': 'initial',
             'user_request': state.user_request,
-            'metadata_keys': list(state.metadata.keys()),
+            'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()),
             'message_count': len(state.messages)
         })
         
@@ -366,7 +367,7 @@ class TestAgentHandoffsAndStatePropagation:
         state_checkpoints.append({
             'checkpoint': 'post_triage',
             'user_request': state.user_request,
-            'metadata_keys': list(state.metadata.keys()),
+            'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()),
             'message_count': len(state.messages),
             'agent_state': triage_agent.state.value
         })
@@ -379,7 +380,7 @@ class TestAgentHandoffsAndStatePropagation:
         state_checkpoints.append({
             'checkpoint': 'post_data',
             'user_request': state.user_request,
-            'metadata_keys': list(state.metadata.keys()),
+            'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()),
             'message_count': len(state.messages),
             'agent_state': data_agent.state.value
         })
@@ -392,7 +393,7 @@ class TestAgentHandoffsAndStatePropagation:
         state_checkpoints.append({
             'checkpoint': 'final',
             'user_request': state.user_request,
-            'metadata_keys': list(state.metadata.keys()),
+            'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()),
             'message_count': len(state.messages),
             'agent_state': reporting_agent.state.value
         })
@@ -910,7 +911,7 @@ class TestCrossAgentDataDependencies:
             pre_execution_snapshot = {
                 'agent': agent_name,
                 'user_request': state.user_request,
-                'metadata_keys': list(state.metadata.keys()) if hasattr(state, 'metadata') else [],
+                'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()) if hasattr(state, 'metadata') else [],
                 'message_count': len(state.messages) if hasattr(state, 'messages') else 0,
                 'timestamp': time.time()
             }
@@ -923,7 +924,7 @@ class TestCrossAgentDataDependencies:
             post_execution_snapshot = {
                 'agent': agent_name,
                 'user_request': state.user_request,
-                'metadata_keys': list(state.metadata.keys()) if hasattr(state, 'metadata') else [],
+                'metadata_keys': list(state.metadata.execution_context.keys()) + list(state.metadata.custom_fields.keys()) if hasattr(state, 'metadata') else [],
                 'message_count': len(state.messages) if hasattr(state, 'messages') else 0,
                 'agent_state': agent.state.value,
                 'timestamp': time.time()
@@ -968,8 +969,11 @@ class TestCrossAgentDataDependencies:
         # Create state with complex data dependencies
         state = await suite.create_complex_user_journey_state('capacity_planning')
         
-        # Add complex dependency data
-        state.metadata.update({
+        # Add complex dependency data to agent_input
+        if state.agent_input is None:
+            state.agent_input = {}
+        
+        state.agent_input.update({
             'dependencies': {
                 'infrastructure': ['compute', 'storage', 'network'],
                 'regions': ['US', 'EU', 'APAC'],
@@ -992,14 +996,14 @@ class TestCrossAgentDataDependencies:
             agent = suite.agents[agent_name]
             
             # Capture dependencies before processing
-            pre_dependencies = state.metadata.get('dependencies', {}).copy()
-            pre_constraints = state.metadata.get('constraints', {}).copy()
+            pre_dependencies = state.agent_input.get('dependencies', {}).copy()
+            pre_constraints = state.agent_input.get('constraints', {}).copy()
             
             await agent.run(state, f'{run_id}_{agent_name}', stream_updates=True)
             
             # Capture dependencies after processing
-            post_dependencies = state.metadata.get('dependencies', {})
-            post_constraints = state.metadata.get('constraints', {})
+            post_dependencies = state.agent_input.get('dependencies', {})
+            post_constraints = state.agent_input.get('constraints', {})
             
             dependency_results.append({
                 'agent': agent_name,
@@ -1022,8 +1026,8 @@ class TestCrossAgentDataDependencies:
             assert result['constraint_count'] > 0, f"{result['agent']} should preserve constraints"
         
         # Validate final state has all required dependency data
-        final_dependencies = state.metadata.get('dependencies', {})
-        final_constraints = state.metadata.get('constraints', {})
+        final_dependencies = state.agent_input.get('dependencies', {})
+        final_constraints = state.agent_input.get('constraints', {})
         
         assert 'infrastructure' in final_dependencies, "Infrastructure dependencies should be preserved"
         assert 'budget' in final_constraints, "Budget constraints should be preserved"

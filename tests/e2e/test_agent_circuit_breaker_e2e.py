@@ -16,7 +16,6 @@ from datetime import datetime
 
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.test_utils import wait_for_condition, create_test_user
-from test_framework.performance_helpers import retry_on_failure
 
 
 class TestAgentCircuitBreakerE2E(BaseE2ETest):
@@ -352,7 +351,7 @@ class TestAgentCircuitBreakerE2E(BaseE2ETest):
             assert slow_result["request_id"] == "ws_test_002"
             
 
-class TestCircuitBreakerMetricsMonitoring(E2ETestBase):
+class TestCircuitBreakerMetricsMonitoring(BaseE2ETest):
     """E2E tests for circuit breaker metrics monitoring and alerting."""
     
     @pytest.fixture(autouse=True)
@@ -412,7 +411,7 @@ class TestCircuitBreakerMetricsMonitoring(E2ETestBase):
                            len(breaker_data) > 0
                            
 
-class TestRegressionPrevention(E2ETestBase):
+class TestRegressionPrevention(BaseE2ETest):
     """Specific tests to prevent regression of the circuit breaker metrics issue."""
     
     @pytest.fixture(autouse=True)
@@ -423,7 +422,6 @@ class TestRegressionPrevention(E2ETestBase):
         self.api_base = "http://localhost:8000"
         
     @pytest.mark.e2e
-    @pytest.mark.regression
     @pytest.mark.asyncio
     async def test_no_attribute_error_on_slow_requests(self):
         """Regression test: Ensure no AttributeError on slow_requests access."""
@@ -454,7 +452,6 @@ class TestRegressionPrevention(E2ETestBase):
                     f"Regression detected: Original error found in: {error_msg}"
                     
     @pytest.mark.e2e
-    @pytest.mark.regression
     @pytest.mark.asyncio
     async def test_circuit_breaker_metrics_interface_consistency(self):
         """Regression test: Verify all metrics implementations have consistent interface."""
@@ -494,7 +491,6 @@ class TestRegressionPrevention(E2ETestBase):
                     check_metrics(data, endpoint)
                     
     @pytest.mark.e2e
-    @pytest.mark.regression
     @pytest.mark.asyncio
     async def test_agent_execution_after_circuit_breaker_fix(self):
         """Regression test: Ensure agents work correctly after circuit breaker fix."""
