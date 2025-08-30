@@ -134,13 +134,15 @@ class LLMConfigManager:
     """Unified manager for all LLM test configuration."""
     
     # CANONICAL environment variable names (SSOT)
+    # NETRA_REAL_LLM_ENABLED is the PRIMARY control variable
+    PRIMARY_LLM_VAR = "NETRA_REAL_LLM_ENABLED"
     ENABLE_REAL_LLM_VAR = "ENABLE_REAL_LLM_TESTING"
     TEST_LLM_MODE_VAR = "TEST_LLM_MODE"
     
     def __init__(self):
         """Initialize the configuration manager."""
-        self.config = self._load_configuration()
         self._api_keys = self._load_api_keys()
+        self.config = self._load_configuration()
         self._original_env = {}  # For restoration
         
     def _load_configuration(self) -> LLMTestConfig:
@@ -165,22 +167,39 @@ class LLMConfigManager:
         return config
     
     def _determine_mode(self) -> LLMTestMode:
-        """Determine LLM test mode from environment variables."""
+        """Determine LLM test mode from environment variables.
+        
+        CRITICAL: Real LLM testing is the DEFAULT for Netra Apex (per CLAUDE.md).
+        Mocks are forbidden in dev/staging/production.
+        """
         # Check explicit mode setting first
         explicit_mode = os.getenv(self.TEST_LLM_MODE_VAR)
         if explicit_mode:
             try:
                 return LLMTestMode(explicit_mode.lower())
             except ValueError:
-                logger.warning(f"Invalid LLM test mode: {explicit_mode}, defaulting to mock")
+                logger.warning(f"Invalid LLM test mode: {explicit_mode}, defaulting to real")
         
-        # Check legacy environment variables for backward compatibility
-        if (os.getenv(self.ENABLE_REAL_LLM_VAR, "false").lower() == "true" or 
-            os.getenv("USE_REAL_LLM", "false").lower() == "true" or
-            os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"):  # Legacy support
+        # Check primary control variable (NETRA_REAL_LLM_ENABLED)
+        primary_setting = os.getenv(self.PRIMARY_LLM_VAR, "true").lower()  # Default to "true"
+        if primary_setting == "false":
+            logger.warning(
+                "Real LLM testing disabled via NETRA_REAL_LLM_ENABLED=false. "
+                "This violates CLAUDE.md principles - mocks are forbidden in dev/staging/production."
+            )
+            return LLMTestMode.MOCK
+        
+        # Check other environment variables for backward compatibility
+        # Real LLM is enabled if ANY of these are true, or by default if none specified
+        if (primary_setting == "true" or
+            os.getenv(self.ENABLE_REAL_LLM_VAR, "true").lower() == "true" or 
+            os.getenv("USE_REAL_LLM", "true").lower() == "true" or
+            os.getenv("TEST_USE_REAL_LLM", "true").lower() == "true"):  # Legacy support
             return LLMTestMode.REAL
         
-        return LLMTestMode.MOCK
+        # Default to REAL mode (per CLAUDE.md - no mocks allowed)
+        logger.info("No LLM configuration specified - defaulting to REAL mode per CLAUDE.md")
+        return LLMTestMode.REAL
     
     def _load_api_keys(self) -> Dict[str, str]:
         """Load API keys, preferring TEST_* variants."""
@@ -251,7 +270,8 @@ class LLMConfigManager:
         else:
             parallel_value = int(parallel)
         
-        # Set canonical environment variables
+        # Set canonical environment variables (PRIMARY variable first)
+        os.environ[self.PRIMARY_LLM_VAR] = str(actual_mode == LLMTestMode.REAL).lower()
         os.environ[self.ENABLE_REAL_LLM_VAR] = str(actual_mode == LLMTestMode.REAL).lower()
         os.environ[self.TEST_LLM_MODE_VAR] = actual_mode.value
         os.environ["TEST_LLM_MODEL"] = model
@@ -321,6 +341,7 @@ class LLMConfigManager:
     def _save_original_environment(self):
         """Save original environment variables for restoration."""
         env_vars = [
+            self.PRIMARY_LLM_VAR,  # NETRA_REAL_LLM_ENABLED
             self.ENABLE_REAL_LLM_VAR,
             self.TEST_LLM_MODE_VAR,
             "USE_REAL_LLM",

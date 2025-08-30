@@ -174,3 +174,48 @@ def validate_chat_integration(chat_data: Dict[str, Any]) -> None:
     assert chat_data["content_length"] > 50, "Agent response must be comprehensive"
     response = chat_data["response"]
     assert response.get("type") == "agent_response", "Must be valid agent response"
+
+
+class UnifiedFlowHelper:
+    """Helper class for unified flow operations across tests."""
+    
+    def __init__(self):
+        self.signup_helper = ControlledSignupHelper()
+        self.login_helper = ControlledLoginHelper()
+        self.chat_helper = ChatFlowSimulationHelper()
+        self.ws_helper = WebSocketSimulationHelper()
+    
+    async def execute_full_user_journey(self, test_scenario: str = "default") -> Dict[str, Any]:
+        """Execute complete user journey from signup to chat."""
+        journey_id = str(uuid.uuid4())
+        
+        # Step 1: Signup
+        signup_result = await self.signup_helper.execute_controlled_signup()
+        
+        # Step 2: Login
+        login_result = await self.login_helper.execute_controlled_login(
+            signup_result["email"], "test_password"
+        )
+        
+        # Step 3: Chat simulation
+        chat_result = await self.chat_helper.execute_chat_simulation(
+            login_result["access_token"], f"Hello from {test_scenario}"
+        )
+        
+        return {
+            "journey_id": journey_id,
+            "signup": signup_result,
+            "login": login_result,
+            "chat": chat_result,
+            "scenario": test_scenario
+        }
+    
+    async def validate_journey_completion(self, journey_result: Dict[str, Any]) -> bool:
+        """Validate that journey completed successfully."""
+        try:
+            validate_signup_integration(journey_result["signup"])
+            validate_login_integration(journey_result["login"])
+            validate_chat_integration(journey_result["chat"])
+            return True
+        except (AssertionError, KeyError):
+            return False

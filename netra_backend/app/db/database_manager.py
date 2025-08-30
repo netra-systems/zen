@@ -468,14 +468,16 @@ class DatabaseManager:
         engine_args = {
             "echo": sql_echo,
             "poolclass": pool_class,  # CRITICAL: Specify pool class explicitly
-            "pool_pre_ping": True,
-            "pool_recycle": 3600,
-            "pool_reset_on_return": 'rollback',  # Reset connections properly
-            "pool_use_lifo": True,  # Use LIFO to keep connections warm
         }
         
-        # Add pool sizing only for non-NullPool configurations
+        # Add pool-specific arguments only for non-NullPool configurations (PostgreSQL)
         if pool_class != NullPool:
+            engine_args.update({
+                "pool_pre_ping": True,
+                "pool_recycle": 3600,
+                "pool_reset_on_return": 'rollback',  # Reset connections properly
+                "pool_use_lifo": True,  # Use LIFO to keep connections warm
+            })
             # Get optimized pool configuration
             pool_config = DatabaseManager._get_optimized_pool_config()
             engine_args.update(pool_config)

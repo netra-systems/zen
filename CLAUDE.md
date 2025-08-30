@@ -139,6 +139,7 @@ Before coding, conduct a rigorous analysis.
   * **Modular Implementation:** Delegate tasks to Implementation Agents one module at a time.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Prefer real tests over mocks. **E2E \> Integration \> Unit.**
+  CRITICAL: Mocks = Abomination
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
 ### 3.4. Multi-Environment Validation
@@ -248,6 +249,8 @@ This is a non-exhaustive list of mission-critical specs.
 | [`conventions.xml`](https://www.google.com/search?q=SPEC/conventions.xml) | Standards and guidelines. |
 | [`git_commit_atomic_units.xml`](https://www.google.com/search?q=SPEC/git_commit_atomic_units.xml) | **CRITICAL:** Git commit standards. |
 | [`import_management_architecture.xml`](https://www.google.com/search?q=SPEC/import_management_architecture.xml) | **CRITICAL:** Absolute import rules. |
+
+Direct OS.env access is FORBIDDEN except in each services canonical env config SSOT. Applies to ALL tests too. EACH SERVICE MUST MAINTAIN INDEPENDENCE. Import ONLY from the env of the service.
 
 -----
 

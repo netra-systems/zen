@@ -10,11 +10,11 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Awaitable, Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock
-
 from netra_backend.app.llm.fallback_config import FallbackConfig
 from netra_backend.app.llm.fallback_handler import LLMFallbackHandler
 from netra_backend.app.schemas.llm_base_types import LLMProvider
+from netra_backend.app.llm.llm_provider_handlers import create_llm_for_provider
+from netra_backend.app.schemas.llm_config_types import LLMConfig
 
 
 class ProviderStatus(Enum):
@@ -49,18 +49,60 @@ class FailoverMetrics:
     failover_count: int = 0
 
 
-class MockLLMProvider:
-    """Mock LLM provider with configurable behavior."""
+class RealLLMProvider:
+    """Real LLM provider with configurable behavior for testing."""
     
     def __init__(self, config: ProviderConfig):
         self.config = config
         self.request_count = 0
         self.last_request_time = 0
+        self.llm_client = self._create_real_llm_client()
+
+    def _create_real_llm_client(self) -> Optional[Any]:
+        """Create real LLM client based on provider name."""
+        provider_map = {
+            "gemini": LLMProvider.GOOGLE,
+            "gpt4": LLMProvider.OPENAI, 
+            "claude": LLMProvider.ANTHROPIC
+        }
+        
+        provider = provider_map.get(self.config.name)
+        if not provider:
+            return None
+            
+        # Use real API keys from environment or fail gracefully
+        api_key = self._get_api_key_for_provider(provider)
+        if not api_key:
+            raise ValueError(f"API key required for {self.config.name} provider")
+            
+        model_name = self._get_model_for_provider(provider)
+        generation_config = {"temperature": 0.7, "max_tokens": 1000}
+        
+        return create_llm_for_provider(provider, model_name, api_key, generation_config)
+    
+    def _get_api_key_for_provider(self, provider: LLMProvider) -> Optional[str]:
+        """Get API key for provider from environment."""
+        import os
+        key_map = {
+            LLMProvider.GOOGLE: "GOOGLE_API_KEY",
+            LLMProvider.OPENAI: "OPENAI_API_KEY",
+            LLMProvider.ANTHROPIC: "ANTHROPIC_API_KEY"
+        }
+        return os.getenv(key_map.get(provider, ""))
+    
+    def _get_model_for_provider(self, provider: LLMProvider) -> str:
+        """Get default model name for provider."""
+        model_map = {
+            LLMProvider.GOOGLE: "gemini-2.5-flash",
+            LLMProvider.OPENAI: "gpt-4",
+            LLMProvider.ANTHROPIC: "claude-3.5-sonnet"
+        }
+        return model_map.get(provider, "gpt-4")
 
     async def generate(self, prompt: str, **kwargs) -> Dict[str, Any]:
-        """Simulate LLM generation with provider-specific behavior."""
+        """Generate response using real LLM provider with configured behavior."""
         await self._simulate_provider_behavior()
-        return self._create_mock_response(prompt)
+        return await self._make_real_llm_request(prompt)
     
     async def _simulate_provider_behavior(self) -> None:
         """Simulate provider-specific behavior patterns."""
@@ -95,22 +137,33 @@ class MockLLMProvider:
             # For degraded quality, we lower the quality score but don't fail
             self.config.quality_score = 0.5  # Below acceptable threshold
 
-
-    def _create_mock_response(self, prompt: str) -> Dict[str, Any]:
-        """Create mock response based on provider quality."""
-        base_data = self._get_response_metadata(prompt)
-        return {
-            "content": f"Mock response from {self.config.name}",
-            "provider": self.config.name,
-            "quality_score": self.config.quality_score,
-            **base_data
-        }
-
-    def _get_response_metadata(self, prompt: str) -> Dict[str, Any]:
-        """Get response metadata for mock response."""
-        tokens_used = len(prompt.split())
-        cost = len(prompt) * self.config.cost_per_token
-        return {"cost": cost, "tokens_used": tokens_used}
+    async def _make_real_llm_request(self, prompt: str) -> Dict[str, Any]:
+        """Make actual request to real LLM provider."""
+        if not self.llm_client:
+            raise Exception(f"No LLM client available for {self.config.name}")
+        
+        try:
+            # Make real API call to LLM
+            from langchain.schema import HumanMessage
+            messages = [HumanMessage(content=prompt)]
+            response = await self.llm_client.ainvoke(messages)
+            
+            # Extract response content and metadata
+            content = response.content if hasattr(response, 'content') else str(response)
+            tokens_used = len(prompt.split()) + len(content.split())
+            cost = tokens_used * self.config.cost_per_token
+            
+            return {
+                "content": content,
+                "provider": self.config.name,
+                "quality_score": self.config.quality_score,
+                "cost": cost,
+                "tokens_used": tokens_used
+            }
+            
+        except Exception as e:
+            # If real API fails, raise exception instead of returning mock data
+            raise Exception(f"Real LLM request failed for {self.config.name}: {str(e)}")
 
 
 class ProviderSimulator:
@@ -120,14 +173,14 @@ class ProviderSimulator:
         self.providers = self._create_default_providers()
         self.metrics = FailoverMetrics()
 
-    def _create_default_providers(self) -> Dict[str, MockLLMProvider]:
+    def _create_default_providers(self) -> Dict[str, RealLLMProvider]:
         """Create default provider configurations."""
         configs = {
             "gemini": ProviderConfig("gemini", 0.001, 0.95, 2000, 60),
             "gpt4": ProviderConfig("gpt4", 0.03, 0.98, 3000, 40),
             "claude": ProviderConfig("claude", 0.008, 0.97, 1500, 50)
         }
-        return {name: MockLLMProvider(config) for name, config in configs.items()}
+        return {name: RealLLMProvider(config) for name, config in configs.items()}
 
     def set_provider_status(self, provider: str, status: ProviderStatus) -> None:
         """Set provider status for testing scenarios."""
@@ -237,7 +290,7 @@ class CostOptimizer:
         projected_spend = self.current_spend + current_cost
         return projected_spend > self.cost_threshold
 
-    def get_cheapest_provider(self, providers: Dict[str, MockLLMProvider]) -> str:
+    def get_cheapest_provider(self, providers: Dict[str, RealLLMProvider]) -> str:
         """Find cheapest available provider."""
         return min(providers.keys(), 
                   key=lambda p: providers[p].config.cost_per_token)

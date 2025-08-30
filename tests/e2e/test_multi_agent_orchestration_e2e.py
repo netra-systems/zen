@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import pytest
+from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
@@ -65,8 +66,17 @@ class MultiAgentOrchestrationSuite:
         """Initialize core services for orchestration."""
         # Use real services when available, mocks for testing
         if get_env().get('USE_REAL_SERVICES') == '1':
-            self.llm_manager = LLMManager()
-            await self.llm_manager.initialize()
+            # Initialize LLM manager with proper app config
+            from netra_backend.app.core.configuration import AppConfigurationManager
+            config_manager = AppConfigurationManager()
+            await config_manager.initialize()
+            app_config = config_manager.get_app_config()
+            
+            # Force LLM mode to be enabled for real service testing
+            app_config.llm_mode = "shared"  # Ensure LLMs are enabled
+            app_config.dev_mode_llm_enabled = True  # Ensure dev mode allows LLMs
+            
+            self.llm_manager = LLMManager(app_config)
             
             # Mock WebSocket for E2E tests to avoid network complexity
             self.websocket_manager = AsyncMock(spec=UnifiedWebSocketManager)
@@ -76,15 +86,19 @@ class MultiAgentOrchestrationSuite:
             self.websocket_manager = AsyncMock(spec=UnifiedWebSocketManager)
         
         # Configure WebSocket mock behavior
-        self.websocket_manager.send_message = AsyncNone  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_agent_update = AsyncNone  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_agent_log = AsyncNone  # TODO: Use real service instead of Mock
-        self.websocket_manager.send_error = AsyncNone  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_message = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_agent_update = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_agent_log = AsyncMock()  # TODO: Use real service instead of Mock
+        self.websocket_manager.send_error = AsyncMock()  # TODO: Use real service instead of Mock
     
     async def _initialize_agents(self) -> None:
         """Initialize all sub-agents with proper dependencies."""
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instead of Mock
-        mock_db_session = AsyncNone  # TODO: Use real service instead of Mock
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
+        mock_db_session = AsyncMock()  # TODO: Use real service instead of Mock
+        
+        # Configure mock_tool_dispatcher to avoid unawaited coroutine issues
+        mock_tool_dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
+        mock_tool_dispatcher.get_available_tools = AsyncMock(return_value=[])
         
         self.agents = {
             'triage': TriageSubAgent(
@@ -125,8 +139,8 @@ class MultiAgentOrchestrationSuite:
     
     async def _initialize_supervisor(self) -> None:
         """Initialize supervisor agent with all sub-agents."""
-        mock_db_session = AsyncNone  # TODO: Use real service instead of Mock
-        mock_tool_dispatcher = AsyncNone  # TODO: Use real service instead of Mock
+        mock_db_session = AsyncMock()  # TODO: Use real service instead of Mock
+        mock_tool_dispatcher = AsyncMock()  # TODO: Use real service instead of Mock
         
         self.supervisor = SupervisorAgent(
             db_session=mock_db_session,

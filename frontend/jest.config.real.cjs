@@ -49,7 +49,7 @@ const config = {
     env: {
       USE_REAL_SERVICES: process.env.USE_REAL_SERVICES || 'true',
       USE_DOCKER_SERVICES: process.env.USE_DOCKER_SERVICES || 'false',
-      USE_REAL_LLM: process.env.USE_REAL_LLM || 'false',
+      USE_REAL_LLM: process.env.USE_REAL_LLM || 'true',  // Real LLM enabled by default per CLAUDE.md
       BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:8000',
       AUTH_SERVICE_URL: process.env.AUTH_SERVICE_URL || 'http://localhost:8081',
       WEBSOCKET_URL: process.env.WEBSOCKET_URL || 'ws://localhost:8000',

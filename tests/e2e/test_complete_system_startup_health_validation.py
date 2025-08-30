@@ -132,7 +132,7 @@ class SystemHealthMetrics:
 
 
 @dataclass
-class TestSystemConfig:
+class SystemTestConfig:
     """Configuration for comprehensive system testing."""
     timeout_seconds: int = 60
     enable_websocket_tests: bool = True

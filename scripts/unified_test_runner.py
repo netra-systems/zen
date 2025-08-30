@@ -75,6 +75,9 @@ except ImportError:
 # Service availability checking
 from test_framework.service_availability import require_real_services, ServiceUnavailableError
 
+# Docker port discovery
+from test_framework.docker_port_discovery import DockerPortDiscovery
+
 
 class UnifiedTestRunner:
     """Modern test runner with category-based execution and progress tracking."""
@@ -101,6 +104,9 @@ class UnifiedTestRunner:
         
         # Initialize Cypress runner lazily to avoid Docker issues during init
         self.cypress_runner = None
+        
+        # Initialize Docker port discovery with test services by default
+        self.port_discovery = DockerPortDiscovery(use_test_services=True)
         
         # Test execution timeout fix for iterations 41-60
         env = get_env()
@@ -231,15 +237,24 @@ class UnifiedTestRunner:
         # Load test environment secrets first to prevent validation errors
         self._load_test_environment_secrets()
         
-        if args.env == "dev" or args.real_services:
+        if args.env == "dev":
             configure_dev_environment()
-            # Enable real services for frontend tests
-            if args.real_services:
-                env = get_env()
-                env.set('USE_REAL_SERVICES', 'true', 'test_runner')
-                env.set('BACKEND_URL', env.get('BACKEND_URL', 'http://localhost:8000'), 'test_runner')
-                env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8081'), 'test_runner')
-                env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
+            # Use DEV services for dev environment
+            self.port_discovery = DockerPortDiscovery(use_test_services=False)
+            env = get_env()
+            env.set('USE_REAL_SERVICES', 'true', 'test_runner')
+            env.set('BACKEND_URL', env.get('BACKEND_URL', 'http://localhost:8000'), 'test_runner')
+            env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8081'), 'test_runner')
+            env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8000'), 'test_runner')
+        elif args.real_services:
+            configure_test_environment()
+            # Use TEST services for real service testing by default
+            env = get_env()
+            env.set('USE_REAL_SERVICES', 'true', 'test_runner')
+            # Use test-specific ports
+            env.set('BACKEND_URL', env.get('BACKEND_URL', 'http://localhost:8001'), 'test_runner')
+            env.set('AUTH_SERVICE_URL', env.get('AUTH_SERVICE_URL', 'http://localhost:8082'), 'test_runner')
+            env.set('WEBSOCKET_URL', env.get('WEBSOCKET_URL', 'ws://localhost:8001'), 'test_runner')
         else:
             # Default: Configure testing environment for unit/integration tests
             configure_mock_environment()
@@ -638,7 +653,10 @@ class UnifiedTestRunner:
         # Check Docker availability
         docker_available = check_docker_availability()
         
-        # Quick service availability checks (non-blocking)
+        # Use port discovery to get actual service ports
+        port_mappings = self.port_discovery.discover_all_ports()
+        
+        # Quick service availability checks with discovered ports
         def quick_service_check(host: str, port: int, timeout: float = 1.0) -> bool:
             """Quick, non-blocking check if a service is available."""
             try:
@@ -647,22 +665,45 @@ class UnifiedTestRunner:
             except (socket.timeout, socket.error, ConnectionRefusedError, OSError):
                 return False
         
-        local_postgres = quick_service_check("localhost", 5432)
-        local_redis = quick_service_check("localhost", 6379)
-        local_backend = quick_service_check("localhost", 8000)
+        # Check services with discovered ports - use test defaults when in test mode
+        postgres_port = port_mappings['postgres'].external_port if 'postgres' in port_mappings else 5434
+        redis_port = port_mappings['redis'].external_port if 'redis' in port_mappings else 6381
+        backend_port = port_mappings['backend'].external_port if 'backend' in port_mappings else 8001
         
+        local_postgres = quick_service_check("localhost", postgres_port)
+        local_redis = quick_service_check("localhost", redis_port)
+        local_backend = quick_service_check("localhost", backend_port)
+        
+        # Check if we can start missing services
+        if not (local_postgres and local_redis) and docker_available:
+            print("[INFO] Some services not running, attempting to start via Docker...")
+            required = ['postgres', 'redis'] if not local_postgres else ['redis']
+            success, started = self.port_discovery.start_missing_services(required)
+            if success:
+                print(f"[INFO] Started services: {started}")
+                # Re-check after starting
+                import time
+                time.sleep(5)  # Give services time to start
+                port_mappings = self.port_discovery.discover_all_ports()
+                postgres_port = port_mappings['postgres'].external_port if 'postgres' in port_mappings else 5432
+                redis_port = port_mappings['redis'].external_port if 'redis' in port_mappings else 6379
+                local_postgres = quick_service_check("localhost", postgres_port)
+                local_redis = quick_service_check("localhost", redis_port)
+        
+        # Hard fail if services still not available
         if not docker_available and not (local_postgres and local_redis):
             raise RuntimeError(
-                "Cannot run Cypress tests: Docker Desktop not running and "
+                "HARD FAIL: Cannot run E2E tests - Docker Desktop not running and "
                 "required local services not available. "
-                "Either start Docker Desktop or run local PostgreSQL (port 5432) "
-                "and Redis (port 6379) services."
+                f"Either start Docker Desktop or run local PostgreSQL (port {postgres_port}) "
+                f"and Redis (port {redis_port}) services. "
+                "For test environment, use: docker compose -f docker-compose.test.yml up -d"
             )
         
         if not local_backend:
             raise RuntimeError(
-                "Cannot run Cypress tests: Backend service not running on port 8000. "
-                "Start the backend service first."
+                f"HARD FAIL: Cannot run E2E tests - Backend service not running on port {backend_port}. "
+                "Start the backend service first using 'python scripts/dev_launcher.py backend' or docker-compose."
             )
         
         return True, "Services available for Cypress tests"
@@ -680,9 +721,17 @@ class UnifiedTestRunner:
         # Early check for service availability - will raise exception if services unavailable
         try:
             can_run, message = self._can_run_cypress_tests()
+            print(f"[INFO] {message}")
         except RuntimeError as e:
-            # Hard failure - let the exception propagate
-            raise RuntimeError(f"Cypress test prerequisites not met: {str(e)}")
+            # Hard failure for E2E tests when services unavailable
+            print(f"\n[ERROR] {str(e)}")
+            print("\n[HARD FAIL] E2E tests cannot proceed without required services.")
+            print("\nTo fix this issue:")
+            print("  1. Start Docker Desktop to enable automatic service containers")
+            print("  2. OR manually start required TEST services using: docker compose -f docker-compose.test.yml up -d")
+            print("  3. OR manually start required services locally")
+            print("  4. OR use 'python scripts/docker_services.py start test' to start test services")
+            raise SystemExit(1)  # Hard exit with error code
         
         try:
             # Create Cypress execution options
@@ -755,7 +804,8 @@ class UnifiedTestRunner:
             if "Docker" in str(e) or "docker" in str(e).lower():
                 print("HINT: This appears to be a Docker-related issue.")
                 print("      Either start Docker Desktop or ensure required services are running locally.")
-                print("      Required services: PostgreSQL (port 5432), Redis (port 6379)")
+                print("      For test environment: PostgreSQL (port 5434), Redis (port 6381)")
+                print("      Use: docker compose -f docker-compose.test.yml up -d")
             
             return {
                 "success": False,
@@ -855,7 +905,8 @@ class UnifiedTestRunner:
             env = get_env()
             env.set('USE_REAL_SERVICES', 'false', 'test_runner_frontend')
             env.set('USE_DOCKER_SERVICES', 'false', 'test_runner_frontend')
-            env.set('USE_REAL_LLM', 'false', 'test_runner_frontend')
+            # CRITICAL: Real LLM enabled by default per CLAUDE.md - mocks forbidden
+            env.set('USE_REAL_LLM', 'true', 'test_runner_frontend')
         
         category_commands = {
             "unit": f"npm run test:unit -- --setupFilesAfterEnv='<rootDir>/{setup_file}'",

@@ -34,6 +34,9 @@ from sqlalchemy.orm import sessionmaker
 # from app.services.apex_optimizer_agent.models import User, Organization
 # from app.core.cross_service_auth import CrossServiceAuth
 
+# Import test framework for real auth
+from test_framework.fixtures.auth import create_test_user_token, create_admin_token, create_real_jwt_token, create_mock_jwt_manager
+
 # Mock implementations for testing
 
 class MockAuthService:
@@ -95,19 +98,24 @@ class MockAuthService:
             if email in self.failed_attempts:
                 del self.failed_attempts[email]
 
-            token = f"token_{uuid.uuid4()}"
-
-            self.tokens[token] = {"user": email, "created": time.time()}
-
-            return {
-
-                "access_token": token,
-
-                "refresh_token": f"refresh_{token}",
-
-                "user": email
-
-            }
+            # Use real JWT token for integration testing
+            try:
+                real_token = create_real_jwt_token(email, ["user"])
+                self.tokens[real_token] = {"user": email, "created": time.time()}
+                return {
+                    "access_token": real_token,
+                    "refresh_token": f"refresh_{real_token}",
+                    "user": email
+                }
+            except Exception:
+                # Fallback to mock token format
+                token = f"token_{uuid.uuid4()}"
+                self.tokens[token] = {"user": email, "created": time.time()}
+                return {
+                    "access_token": token,
+                    "refresh_token": f"refresh_{token}",
+                    "user": email
+                }
         finally:
             # Always release the lock
             if email in self.login_locks:
@@ -123,7 +131,15 @@ class MockAuthService:
 
         self.tokens[refresh_token] = True
 
-        return {"access_token": f"new_token_{uuid.uuid4()}", "refresh_token": f"new_refresh_{uuid.uuid4()}"}
+        # Generate real refresh token
+        try:
+            new_access_token = create_real_jwt_token("refreshed_user", ["user"])
+            new_refresh_token = f"refresh_{new_access_token}"
+        except Exception:
+            new_access_token = f"new_token_{uuid.uuid4()}"
+            new_refresh_token = f"new_refresh_{uuid.uuid4()}"
+        
+        return {"access_token": new_access_token, "refresh_token": new_refresh_token}
     
     async def logout(self, token: str):
 
@@ -206,24 +222,25 @@ class MockJWTHandler:
         self.current_user = None
     
     def create_token(self, user_id: str, expires_in: int = 3600) -> str:
-
-        """Create mock JWT token"""
-
-        payload = {
-
-            "user_id": user_id,
-
-            "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
-
-            "iat": datetime.now(timezone.utc)
-
-        }
-
-        token = jwt.encode(payload, self.secret, algorithm="HS256")
-        # Store current context for get_current_user
-        self.current_token = token
-        self.current_user = user_id
-        return token
+        """Create JWT token (real if available, mock otherwise)"""
+        try:
+            # Use real JWT token generation
+            token = create_real_jwt_token(user_id, ["user"], expires_in=expires_in)
+            self.current_token = token
+            self.current_user = user_id
+            return token
+        except Exception:
+            # Fallback to mock implementation
+            payload = {
+                "user_id": user_id,
+                "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
+                "iat": datetime.now(timezone.utc)
+            }
+            token = jwt.encode(payload, self.secret, algorithm="HS256")
+            # Store current context for get_current_user
+            self.current_token = token
+            self.current_user = user_id
+            return token
     
     def verify_token(self, token: str) -> Optional[Dict]:
 

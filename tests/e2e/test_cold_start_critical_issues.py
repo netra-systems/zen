@@ -22,6 +22,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 # Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
@@ -508,7 +509,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             del os.environ["GEMINI_API_KEY"]
             
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-                from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
         # Create required dependencies
@@ -552,7 +553,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         Database.execute = failing_execute
         
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-                from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
         # Create required dependencies

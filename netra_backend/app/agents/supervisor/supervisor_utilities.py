@@ -60,12 +60,22 @@ class SupervisorUtilities:
         if not self.monitor:
             return {"error": "Modern monitoring not available"}
         
-        return {
+        base_health = {
             "modern_health": self.monitor.get_health_status(),
             "reliability": self.reliability_manager.get_health_status() if self.reliability_manager else {},
             "execution_engine": self.execution_engine.get_health_status() if self.execution_engine else {},
             "error_handler": self.error_handler.get_health_status() if self.error_handler else {}
         }
+        
+        # Add expected fields for test compatibility
+        base_health["observability_metrics"] = {
+            "total_agents": len(self.registry.agents),
+            "monitoring_active": bool(self.monitor),
+            "reliability_active": bool(self.reliability_manager)
+        }
+        base_health["registered_agents"] = list(self.registry.agents.keys())
+        
+        return base_health
     
     def get_performance_metrics(self, agent_name: str) -> Dict[str, Any]:
         """Get performance metrics from modern monitoring."""

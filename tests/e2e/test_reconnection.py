@@ -39,7 +39,18 @@ try:
     from netra_backend.tests.helpers.websocket_test_helpers import create_mock_websocket
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
-        return f"mock_token_{user_id}_{exp_offset}"
+        try:
+            # Try to use real JWT token creation
+            from test_framework.fixtures.auth import create_real_jwt_token
+            return create_real_jwt_token(
+                user_id=user_id,
+                permissions=["read", "write", "websocket"],
+                token_type="access",
+                expires_in=exp_offset
+            )
+        except (ImportError, ValueError, NameError):
+            # Fallback to mock token
+            return f"mock_token_{user_id}_{exp_offset}"
     
     class create_mock_websocket:
         def __init__(self):

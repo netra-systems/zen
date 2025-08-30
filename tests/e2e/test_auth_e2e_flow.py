@@ -18,10 +18,15 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 import pytest
+from unittest.mock import AsyncMock, MagicMock
 
 # Set minimal environment for testing
 os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+
+# Mock utility aliases for cleaner code
+MagicNone = MagicMock()
+AsyncNone = AsyncMock()
 
 
 class TestUnifiedE2EHarness:
@@ -82,7 +87,7 @@ class TestAuthE2EFlow:
     
     def setup_method(self):
         """Setup test harness for each test"""
-        self.harness = UnifiedE2ETestHarness()
+        self.harness = TestUnifiedE2EHarness()
         # Sync setup for compatibility
         # Mock: Generic component isolation for controlled unit testing
         self.harness.auth_service = MagicNone  # TODO: Use real service instead of Mock

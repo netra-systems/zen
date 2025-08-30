@@ -12,7 +12,7 @@ describe('Agent Optimization Workflow - Real Services', () => {
     // Get real auth configuration and setup authentication
     cy.request({
       method: 'GET',
-      url: 'http://localhost:8002/auth/config',
+      url: 'http://localhost:8081/auth/config',
       failOnStatusCode: false
     }).then((configResponse) => {
       if (configResponse.status === 200 && configResponse.body.development_mode) {
@@ -100,7 +100,7 @@ describe('Agent Optimization Workflow - Real Services', () => {
     });
   });
 
-  it.skip('should send optimization request to real agent service', () => {
+  it('should send optimization request to real agent service', () => {
     // Wait for page to be ready (authentication + chat interface)
     cy.get('[data-testid="main-chat"], [data-testid="loading"], textarea, input[type="text"]', { timeout: 15000 })
       .should('exist');

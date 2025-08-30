@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.tools.data_helper import DataHelper
@@ -22,17 +23,19 @@ class DataHelperAgent(BaseSubAgent):
     to enable optimization strategies when data is insufficient.
     """
     
-    def __init__(self, llm_manager: LLMManager):
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         """Initialize the Data Helper Agent.
         
         Args:
             llm_manager: LLM manager for the agent
+            tool_dispatcher: Tool dispatcher for the agent
         """
         super().__init__(
             llm_manager=llm_manager,
             name="data_helper",
             description="Generates data requests when insufficient data is available"
         )
+        self.tool_dispatcher = tool_dispatcher
         self.data_helper_tool = DataHelper(llm_manager)
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:

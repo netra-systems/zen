@@ -3,13 +3,36 @@
  * Tests for send button states and functionality
  */
 
+// CRITICAL: Mock lucide-react FIRST before any other imports
+jest.mock('lucide-react', () => {
+  const React = require('react');
+  return {
+    Send: ({ className = '', ...props }) => React.createElement('div', { className: `lucide-send ${className}`, 'data-icon': 'Send', ...props }),
+    Loader2: ({ className = '', ...props }) => React.createElement('div', { className: `lucide-loader-2 ${className}`, 'data-icon': 'Loader2', ...props }),
+    Paperclip: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Paperclip', ...props }),
+    Mic: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Mic', ...props }),
+    ArrowUp: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'ArrowUp', 'data-testid': 'arrowup-icon', ...props }),
+    ArrowDown: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'ArrowDown', 'data-testid': 'arrowdown-icon', ...props }),
+    Command: ({ className = '', ...props }) => React.createElement('div', { className, 'data-icon': 'Command', ...props }),
+  };
+});
+
+// Mock framer-motion
+jest.mock('framer-motion', () => {
+  const React = require('react');
+  return {
+    motion: {
+      div: ({ children, ...props }) => React.createElement('div', props, children)
+    },
+    AnimatePresence: ({ children }) => React.createElement(React.Fragment, {}, children)
+  };
+});
+
 // Mock dependencies BEFORE imports
 const mockSendMessage = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockGenerateUniqueId = jest.fn();
 
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: mockUseWebSocket
+  useWebSocket: jest.fn()
 }));
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: jest.fn()
@@ -75,17 +98,20 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useThreadStore } from '@/store/threadStore';
+import { useAuthStore } from '@/store/authStore';
+import { generateUniqueId } from '@/lib/utils';
+
+// Get the mocked functions
+const mockUseWebSocket = useWebSocket as jest.Mock;
+const mockUseUnifiedChatStore = useUnifiedChatStore as jest.Mock;
+const mockUseThreadStore = useThreadStore as jest.Mock;
+const mockUseAuthStore = useAuthStore as jest.Mock;
+const mockGenerateUniqueId = generateUniqueId as jest.Mock;
 
 describe('MessageInput - Send Button States', () => {
-  const mockChatStore = {
-    setProcessing: jest.fn(),
-    addMessage: jest.fn()
-  };
-  const mockThreadStore = {
-    setCurrentThread: jest.fn(),
-    addThread: jest.fn()
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     
@@ -97,8 +123,8 @@ describe('MessageInput - Send Button States', () => {
     mockUseUnifiedChatStore.mockReturnValue({
       activeThreadId: 'thread-1',
       isProcessing: false,
-      setProcessing: mockChatStore.setProcessing,
-      addMessage: mockChatStore.addMessage,
+      setProcessing: jest.fn(),
+      addMessage: jest.fn(),
       setActiveThread: jest.fn(),
       addOptimisticMessage: jest.fn(),
       updateOptimisticMessage: jest.fn(),
@@ -106,8 +132,8 @@ describe('MessageInput - Send Button States', () => {
     
     mockUseThreadStore.mockReturnValue({
       currentThreadId: 'thread-1',
-      setCurrentThread: mockThreadStore.setCurrentThread,
-      addThread: mockThreadStore.addThread,
+      setCurrentThread: jest.fn(),
+      addThread: jest.fn(),
     });
     
     mockUseAuthStore.mockReturnValue({

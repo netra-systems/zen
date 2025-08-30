@@ -14,6 +14,7 @@ from typing import Dict, Optional, Any
 
 from netra_backend.app.llm.llm_defaults import LLMModel
 from netra_backend.app.schemas.llm_types import LLMProvider
+from netra_backend.app.core.isolated_environment import get_env
 
 
 class TriageConfig:
@@ -22,15 +23,29 @@ class TriageConfig:
     SSOT for all triage-specific LLM settings and behaviors.
     """
     
-    # Model Selection (Explicit Gemini 2.5 Pro)
-    PRIMARY_MODEL = LLMModel.GEMINI_2_5_PRO
-    FALLBACK_MODEL = LLMModel.GEMINI_2_5_FLASH
+    # Get environment through centralized management
+    _env = get_env()
+    
+    # Model Selection (Use fast model for tests)
+    _is_testing = _env.get('TESTING') == '1'
+    _use_flash_model = _env.get('NETRA_DEFAULT_LLM_MODEL') == 'gemini-2.5-flash'
+    
+    if _is_testing or _use_flash_model:
+        PRIMARY_MODEL = LLMModel.GEMINI_2_5_FLASH
+        FALLBACK_MODEL = LLMModel.GEMINI_2_5_FLASH
+    else:
+        PRIMARY_MODEL = LLMModel.GEMINI_2_5_PRO
+        FALLBACK_MODEL = LLMModel.GEMINI_2_5_FLASH
     PROVIDER = LLMProvider.GOOGLE
     
     # Triage-specific LLM Parameters
     TEMPERATURE = 0.0  # Deterministic for consistent categorization
     MAX_TOKENS = 4096
-    TIMEOUT_SECONDS = 17.0  # Pro model timeout (longer than Flash's 10s)
+    # Use faster timeout for tests with flash model
+    if _is_testing or _use_flash_model:
+        TIMEOUT_SECONDS = 10.0  # Flash model timeout
+    else:
+        TIMEOUT_SECONDS = 17.0  # Pro model timeout (longer than Flash's 10s)
     MAX_RETRIES = 2
     
     # Output Configuration
@@ -39,10 +54,11 @@ class TriageConfig:
     CACHE_TTL_SECONDS = 3600
     
     # Circuit Breaker Configuration for Triage
+    circuit_timeout = 10.0 if (_is_testing or _use_flash_model) else 17.0
     CIRCUIT_BREAKER_CONFIG = {
         "failure_threshold": 10,  # Open circuit after 10 failures
         "recovery_timeout": 10.0,  # Try recovery after 10 seconds
-        "timeout_seconds": 17.0,   # Same as request timeout
+        "timeout_seconds": circuit_timeout,   # Same as request timeout
         "half_open_max_calls": 5,  # Max calls when half-open
     }
     

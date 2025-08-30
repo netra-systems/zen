@@ -20,187 +20,25 @@ Test Coverage:
 import asyncio
 import logging
 import time
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from uuid import uuid4
 
 import httpx
 import jwt
 import pytest
 
+from test_framework.auth_jwt_test_manager import JWTGenerationTestManager, TokenSet
+from tests.e2e.jwt_token_helpers import JWTTestHelper
+
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class TokenSet:
-    """Container for token pair with metadata."""
-    access_token: str
-    refresh_token: str
-    user_id: str
-    expires_at: datetime
-    token_type: str = "Bearer"
-
-
-@dataclass
-class ServiceEndpoints:
-    """Service endpoint configuration."""
-    auth_service_url: str = "http://localhost:8081"  # Docker default port
-    backend_service_url: str = "http://localhost:8000"
-    frontend_service_url: str = "http://localhost:3000"
-
-
-class TestJWTGenerationManager:
-    """
-    Manages JWT token generation testing across all services.
-    Provides real token operations with comprehensive validation.
-    """
+class ExtendedJWTGenerationTestManager(JWTGenerationTestManager):
+    """Extended JWT manager with additional methods needed for generation tests."""
     
-    def __init__(self):
-        self.endpoints = ServiceEndpoints()
-        self.test_tokens: List[TokenSet] = []
-        self.jwt_secret = "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"  # Dev environment
-        self.jwt_algorithm = "HS256"
-        
-    async def generate_token_via_auth_service(self, 
-                                            email: str = "test@example.com") -> TokenSet:
-        """
-        Generate JWT tokens via simulated auth service login.
-        Tests the complete token generation pipeline.
-        """
-        # For testing, create tokens directly using JWT library
-        # This simulates what the auth service would do
-        user_id = f"test-user-{uuid4().hex[:8]}"
-        now = datetime.now(timezone.utc)
-        now_timestamp = int(now.timestamp())
-        expires_at = now + timedelta(minutes=15)
-        expires_timestamp = int(expires_at.timestamp())
-        refresh_expires_timestamp = int((now + timedelta(days=7)).timestamp())
-        
-        # Create access token payload
-        access_payload = {
-            "sub": user_id,
-            "email": email,
-            "iat": now_timestamp,
-            "exp": expires_timestamp,
-            "token_type": "access",
-            "iss": "netra-auth-service",
-            "permissions": ["read", "write"]
-        }
-        
-        # Create refresh token payload
-        refresh_payload = {
-            "sub": user_id,
-            "iat": now_timestamp,
-            "exp": refresh_expires_timestamp,
-            "token_type": "refresh",
-            "iss": "netra-auth-service"
-        }
-        
-        # Generate tokens
-        access_token = jwt.encode(access_payload, self.jwt_secret, algorithm=self.jwt_algorithm)
-        refresh_token = jwt.encode(refresh_payload, self.jwt_secret, algorithm=self.jwt_algorithm)
-        
-        token_set = TokenSet(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            user_id=user_id,
-            expires_at=expires_at
-        )
-        
-        self.test_tokens.append(token_set)
-        logger.info(f"Generated token set for user {user_id}")
-        return token_set
-    
-    async def validate_token_across_services(self, token: str) -> Dict[str, bool]:
-        """
-        Validate token across all services.
-        Returns validation status for each service.
-        """
-        validation_results = {}
-        
-        # Test Auth Service validation (simulated)
-        validation_results["auth_service"] = await self._validate_token_auth_service(token)
-        
-        # Test Backend Service validation (simulated)
-        validation_results["backend_service"] = await self._validate_token_backend_service(token)
-        
-        # Test direct JWT validation (what services should do internally)
-        validation_results["jwt_direct"] = await self._validate_token_direct(token)
-        
-        return validation_results
-    
-    async def _validate_token_auth_service(self, token: str) -> bool:
-        """Simulate auth service token validation."""
-        try:
-            # Decode and validate JWT
-            payload = jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
-            
-            # Check required fields
-            required_fields = ["sub", "exp", "token_type", "iss"]
-            if not all(field in payload for field in required_fields):
-                return False
-            
-            # Check expiry
-            if datetime.fromtimestamp(payload["exp"], timezone.utc) < datetime.now(timezone.utc):
-                return False
-            
-            # Check issuer
-            if payload["iss"] != "netra-auth-service":
-                return False
-            
-            return True
-            
-        except jwt.InvalidTokenError:
-            return False
-        except Exception:
-            return False
-    
-    async def _validate_token_backend_service(self, token: str) -> bool:
-        """Simulate backend service token validation."""
-        try:
-            # Backend service should perform same validation as auth service
-            payload = jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
-            
-            # Check for access token type
-            if payload.get("token_type") != "access":
-                return False
-            
-            # Check permissions for backend access
-            permissions = payload.get("permissions", [])
-            if not any(perm in permissions for perm in ["read", "write"]):
-                return False
-            
-            # Check expiry
-            if datetime.fromtimestamp(payload["exp"], timezone.utc) < datetime.now(timezone.utc):
-                return False
-            
-            return True
-            
-        except jwt.InvalidTokenError:
-            return False
-        except Exception:
-            return False
-    
-    async def _validate_token_direct(self, token: str) -> bool:
-        """Direct JWT validation (baseline validation)."""
-        try:
-            payload = jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
-            
-            # Basic structure validation
-            if not payload.get("sub") or not payload.get("exp"):
-                return False
-            
-            # Check expiry
-            if datetime.fromtimestamp(payload["exp"], timezone.utc) < datetime.now(timezone.utc):
-                return False
-            
-            return True
-            
-        except jwt.InvalidTokenError:
-            return False
-        except Exception:
-            return False
+    def __init__(self, environment: Optional[str] = None):
+        super().__init__(environment)
+        self.jwt_helper = JWTTestHelper(environment)
     
     def get_token_info(self, token: str) -> Dict[str, Any]:
         """Extract token information for analysis."""
@@ -209,7 +47,7 @@ class TestJWTGenerationManager:
             return {
                 "user_id": payload.get("sub"),
                 "email": payload.get("email"),
-                "token_type": payload.get("token_type"),
+                "token_type": payload.get("type"),  # Note: type not token_type
                 "permissions": payload.get("permissions", []),
                 "issued_at": payload.get("iat"),
                 "expires_at": payload.get("exp"),
@@ -240,13 +78,13 @@ class TestJWTGenerationManager:
             result["token_info"] = payload
             
             # Check required fields
-            required_fields = ["sub", "exp", "iat", "token_type"]
+            required_fields = ["sub", "exp", "iat", "type"]  # Note: type not token_type
             if all(field in payload for field in required_fields):
                 result["has_required_fields"] = True
             
-            # Check signature
+            # Check signature using helper's secret
             try:
-                jwt.decode(token, self.jwt_secret, algorithms=[self.jwt_algorithm])
+                jwt.decode(token, self.jwt_helper.test_secret, algorithms=["HS256"])
                 result["valid_signature"] = True
             except jwt.InvalidSignatureError:
                 pass
@@ -255,6 +93,26 @@ class TestJWTGenerationManager:
             result["error"] = str(e)
         
         return result
+    
+    async def generate_token_via_auth_service(self, email: str = "test@example.com") -> TokenSet:
+        """Generate JWT tokens with email parameter support."""
+        # Generate basic token set
+        token_set = await super().generate_token_via_auth_service()
+        
+        # Update with email-specific token if needed
+        if email != "test@netrasystems.ai":  # Default might be different
+            # Create new tokens with specified email
+            user_id = token_set.user_id
+            access_token = self.jwt_helper.create_access_token(user_id, email)
+            refresh_payload = self.jwt_helper.create_refresh_payload()
+            refresh_payload["sub"] = user_id
+            refresh_payload["email"] = email  # Add email to refresh token too
+            refresh_token = self.jwt_helper.create_token(refresh_payload)
+            
+            token_set.access_token = access_token
+            token_set.refresh_token = refresh_token
+        
+        return token_set
 
 
 @pytest.mark.critical
@@ -266,7 +124,7 @@ class TestJWTGeneration:
     @pytest.fixture
     def jwt_manager(self):
         """Provide JWT generation test manager."""
-        return JWTGenerationTestManager()
+        return ExtendedJWTGenerationTestManager()
     
     @pytest.mark.e2e
     async def test_jwt_token_generation_via_auth_service(self, jwt_manager):

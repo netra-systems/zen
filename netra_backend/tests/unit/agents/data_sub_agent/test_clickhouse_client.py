@@ -49,21 +49,25 @@ class TestClickHouseServiceConnection:
             # Verify initialization was called
             mock_init.assert_called_once()
     
-    @mock_justified("L1 Unit Test: Testing that service can be initialized with mock.", "L1")
+    @mock_justified("L1 Unit Test: Testing that service can be initialized with NoOp client in testing environment.", "L1")
     def test_service_can_use_mock(self, clickhouse_client):
-        """Test that service can be initialized with mock client."""
-        # The global service doesn't auto-initialize, but we can force it
-        if not clickhouse_client._client:
-            clickhouse_client._initialize_mock_client()
+        """Test that service can be initialized with NoOp client in testing environment."""
+        # In testing environment with CLICKHOUSE_ENABLED=false, the service should use NoOp client
+        # The service auto-initializes with NoOp client when ClickHouse is disabled
+        # Check that the client is properly configured for testing
+        assert clickhouse_client._client is not None
         
+        # In testing environment with ClickHouse disabled, is_mock should be True
+        # This aligns with the NoOp client behavior for testing
         assert clickhouse_client.is_mock is True
     
-    @mock_justified("L1 Unit Test: Testing ping method with mock client.", "L1")
+    @mock_justified("L1 Unit Test: Testing ping method with NoOp client.", "L1")
     @pytest.mark.asyncio
     async def test_ping_mock_client(self, clickhouse_client):
-        """Test ping method with mock client."""
-        # Force mock client
-        clickhouse_client._initialize_mock_client()
+        """Test ping method with NoOp client."""
+        # Ensure client is initialized (should auto-initialize with NoOp in testing)
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
         
         result = await clickhouse_client.ping()
         assert result is True
@@ -92,13 +96,15 @@ class TestClickHouseServiceConnection:
         # Should not be mock until initialized
         assert real_service.is_mock is False
     
-    def test_is_real_property(self, clickhouse_client):
+    @pytest.mark.asyncio
+    async def test_is_real_property(self, clickhouse_client):
         """Test is_real property."""
         # Before initialization, should be False
         assert clickhouse_client.is_real is False
         
-        # After mock initialization, should still be False
-        clickhouse_client._initialize_mock_client()
+        # After NoOp initialization, should still be False
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
         assert clickhouse_client.is_real is False
 
 
@@ -116,8 +122,9 @@ class TestClickHouseServiceQueryExecution:
         """Test successful query execution."""
         mock_result = [{"id": 1, "name": "test"}]
         
-        # Initialize with mock client for testing
-        clickhouse_client._initialize_mock_client()
+        # Initialize with NoOp client for testing
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
         
         # Mock the execute method to return our test data instead of empty
         with patch.object(clickhouse_client._client, 'execute', new_callable=AsyncMock) as mock_execute:
@@ -153,8 +160,9 @@ class TestClickHouseServiceQueryExecution:
     @pytest.mark.asyncio
     async def test_execute_query_failure(self, clickhouse_client):
         """Test query execution failure handling."""
-        # Initialize with mock client
-        clickhouse_client._initialize_mock_client()
+        # Initialize with NoOp client
+        if not clickhouse_client._client:
+            await clickhouse_client.initialize()
         
         # Mock the execute method to raise an exception
         with patch.object(clickhouse_client._client, 'execute', new_callable=AsyncMock) as mock_execute:
@@ -175,8 +183,7 @@ class TestClickHouseServiceWorkloadMetrics:
     def clickhouse_client(self):
         """Create ClickHouse client for testing."""
         client = get_clickhouse_service()
-        # Initialize with mock client for testing
-        client._initialize_mock_client()
+        # Client will auto-initialize with NoOp client in testing environment
         return client
     
     @mock_justified("L1 Unit Test: Testing workload metrics query without user filter.", "L1")

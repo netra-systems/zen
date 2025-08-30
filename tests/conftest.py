@@ -445,9 +445,10 @@ async def dev_launcher():
 
     config = LauncherConfig(
         dynamic_ports=True,
-        test_mode=True,
-        startup_timeout=30,
-        services=["auth", "backend"],  # Don't start frontend for tests
+        non_interactive=True,
+        verbose=False,
+        silent_mode=True,  # Use silent mode for tests
+        no_browser=True,
     )
 
     launcher = DevLauncher(config)

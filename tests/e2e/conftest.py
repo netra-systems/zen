@@ -128,9 +128,13 @@ async def model_selection_setup():
 def real_llm_config():
     """Configuration for real LLM testing."""
     # Check environment variable to determine if real LLM should be enabled
-    # Check both new and legacy variable names
-    use_real_llm = (os.getenv("USE_REAL_LLM", "false").lower() == "true" or
-                    os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true")
+    # CRITICAL: Real LLM is DEFAULT per CLAUDE.md (no mocks allowed in dev/staging/production)
+    # Check primary control variable first
+    primary_enabled = os.getenv("NETRA_REAL_LLM_ENABLED", "true").lower() == "true"
+    use_real_llm = (primary_enabled or
+                    os.getenv("USE_REAL_LLM", "true").lower() == "true" or
+                    os.getenv("TEST_USE_REAL_LLM", "true").lower() == "true" or
+                    os.getenv("ENABLE_REAL_LLM_TESTING", "true").lower() == "true")
     return {
         "enabled": use_real_llm,
         "timeout": 30.0,

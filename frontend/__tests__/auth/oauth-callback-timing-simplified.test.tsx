@@ -93,6 +93,9 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
   });
 
   beforeEach(() => {
+    // Use fake timers to avoid conflicts with waitFor
+    jest.useFakeTimers();
+    
     // Reset all mocks and state
     jest.clearAllMocks();
     mockLocalStorage.clear();
@@ -109,6 +112,11 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
     mockDispatchEvent.mockImplementation((event: Event) => {
       return originalDispatchEvent.call(window, event);
     });
+  });
+  
+  afterEach(() => {
+    // Clean up fake timers after each test
+    jest.useRealTimers();
   });
 
   afterAll(() => {
@@ -207,9 +215,9 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
     // CRITICAL ASSERTION 2: Router.push should NOT be called immediately
     expect(mockPush).not.toHaveBeenCalled();
 
-    // Wait for the timeout to execute
+    // Wait for the timeout to execute using fake timers
     await act(async () => {
-      await new Promise(resolve => originalSetTimeout(resolve, 70)); // Wait slightly longer than 50ms
+      jest.advanceTimersByTime(70); // Advance by 70ms
     });
 
     // CRITICAL ASSERTION 3: Router.push should now be called
@@ -257,7 +265,7 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
 
     // Redirect should still happen
     await act(async () => {
-      await new Promise(resolve => originalSetTimeout(resolve, 70));
+      jest.advanceTimersByTime(70);
     });
 
     expect(mockPush).toHaveBeenCalledWith('/chat');
@@ -277,7 +285,7 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
       });
       
       await act(async () => {
-        await new Promise(resolve => originalSetTimeout(resolve, 70));
+        jest.advanceTimersByTime(70);
       });
     } catch (error) {
       componentCrashed = true;
@@ -302,7 +310,7 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
 
     // Should NOT attempt redirect
     await act(async () => {
-      await new Promise(resolve => originalSetTimeout(resolve, 70));
+      jest.advanceTimersByTime(70);
     });
     
     expect(mockPush).not.toHaveBeenCalledWith('/chat');
@@ -325,7 +333,7 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
     
     // Wait a tiny bit, then re-render with different token (simulating race)
     await act(async () => {
-      await new Promise(resolve => originalSetTimeout(resolve, 5));
+      jest.advanceTimersByTime(5);
     });
     
     mockSearchParams.set('token', testToken2);
@@ -335,7 +343,7 @@ describe('OAuth Callback Timing - Focused Challenges', () => {
 
     // Wait for all operations to complete
     await act(async () => {
-      await new Promise(resolve => originalSetTimeout(resolve, 100));
+      jest.advanceTimersByTime(100);
     });
 
     // Should handle race condition gracefully - only one successful redirect

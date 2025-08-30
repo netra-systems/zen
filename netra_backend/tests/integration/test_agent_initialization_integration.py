@@ -83,7 +83,7 @@ class TestAgentInitializationIntegration:
         
         # Verify core agents are registered
         agent_names = agent_registry.list_agents()
-        expected_agents = ["triage", "data", "optimization", "actions", "reporting", "synthetic_data", "corpus_admin"]
+        expected_agents = ["triage", "data", "optimization", "actions", "reporting", "data_helper", "synthetic_data", "corpus_admin"]
         
         for expected_agent in expected_agents:
             assert expected_agent in agent_names, f"Agent {expected_agent} not registered"
@@ -235,8 +235,14 @@ class TestAgentInitializationIntegration:
         recovery_strategy = mock_recovery_strategy()
         
         # Simulate agent failure
-        from netra_backend.app.core.error_recovery import RecoveryContext
-        failure_context = RecoveryContext("test_operation_123", "Mock failure for testing")
+        from netra_backend.app.core.error_recovery import RecoveryContext, OperationType
+        from netra_backend.app.core.error_codes import ErrorSeverity
+        failure_context = RecoveryContext(
+            operation_id="test_operation_123",
+            operation_type=OperationType.AGENT_EXECUTION,
+            error=Exception("Mock failure for testing"),
+            severity=ErrorSeverity.HIGH
+        )
         
         # Test recovery assessment
         assessment = await recovery_strategy.assess_failure(failure_context)

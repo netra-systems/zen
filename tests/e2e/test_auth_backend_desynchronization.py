@@ -34,6 +34,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
+from unittest.mock import patch
 
 import httpx
 import pytest
@@ -87,10 +88,10 @@ class TestAuthBackendDesynchronizationer:
         # Attempt cleanup of test user if created
         await self._cleanup_test_user()
     
-    async def execute_desynchronization_test(self) -> DesynchronizationTestResult:
+    async def execute_desynchronization_test(self) -> TestDesynchronizationResult:
         """Execute complete desynchronization vulnerability test."""
         start_time = time.time()
-        result = DesynchronizationTestResult()
+        result = TestDesynchronizationResult()
         
         try:
             # Step 1: Create user in auth service (should succeed)
@@ -133,7 +134,7 @@ class TestAuthBackendDesynchronizationer:
             
         return result
     
-    async def _create_auth_user(self, result: DesynchronizationTestResult) -> None:
+    async def _create_auth_user(self, result: TestDesynchronizationResult) -> None:
         """Step 1: Create user in auth service."""
         try:
             auth_url = self.harness.get_service_url("auth")
@@ -164,7 +165,7 @@ class TestAuthBackendDesynchronizationer:
         except Exception as e:
             result.errors.append(f"Auth user creation error: {str(e)}")
     
-    async def _simulate_backend_sync_failure(self, result: DesynchronizationTestResult) -> None:
+    async def _simulate_backend_sync_failure(self, result: TestDesynchronizationResult) -> None:
         """Step 2: Simulate backend sync failure."""
         try:
             backend_url = self.harness.get_service_url("backend")
@@ -200,7 +201,7 @@ class TestAuthBackendDesynchronizationer:
             result.backend_sync_failed = True
             result.errors.append(f"Backend sync failure (expected): {str(e)}")
     
-    async def _verify_inconsistent_state(self, result: DesynchronizationTestResult) -> None:
+    async def _verify_inconsistent_state(self, result: TestDesynchronizationResult) -> None:
         """Step 3: Verify system is in inconsistent state."""
         try:
             if not self.auth_tokens or not self.auth_tokens.get("access_token"):
@@ -233,7 +234,7 @@ class TestAuthBackendDesynchronizationer:
         except Exception as e:
             result.errors.append(f"Inconsistent state verification failed: {str(e)}")
     
-    async def _test_auth_still_works(self, result: DesynchronizationTestResult) -> None:
+    async def _test_auth_still_works(self, result: TestDesynchronizationResult) -> None:
         """Step 4: Test authentication still works (exposes vulnerability)."""
         try:
             if not self.auth_tokens or not self.auth_tokens.get("access_token"):
@@ -260,7 +261,7 @@ class TestAuthBackendDesynchronizationer:
         except Exception as e:
             result.errors.append(f"Auth validation test failed: {str(e)}")
     
-    async def _test_backend_access_blocked(self, result: DesynchronizationTestResult) -> None:
+    async def _test_backend_access_blocked(self, result: TestDesynchronizationResult) -> None:
         """Step 5: Test backend access is blocked (expected behavior)."""
         try:
             if not self.auth_tokens or not self.auth_tokens.get("access_token"):
@@ -295,7 +296,7 @@ class TestAuthBackendDesynchronizationer:
         except Exception as e:
             result.errors.append(f"Backend access test failed: {str(e)}")
     
-    async def _test_rollback_detection(self, result: DesynchronizationTestResult) -> None:
+    async def _test_rollback_detection(self, result: TestDesynchronizationResult) -> None:
         """Step 6: Test rollback mechanism detection."""
         try:
             # Check if system has any rollback detection mechanisms
@@ -315,7 +316,7 @@ class TestAuthBackendDesynchronizationer:
         except Exception as e:
             result.errors.append(f"Rollback detection test failed: {str(e)}")
     
-    async def _attempt_rollback_cleanup(self, result: DesynchronizationTestResult) -> None:
+    async def _attempt_rollback_cleanup(self, result: TestDesynchronizationResult) -> None:
         """Step 7: Attempt rollback cleanup."""
         try:
             if not self.test_user_id:
@@ -345,7 +346,7 @@ class TestAuthBackendDesynchronizationer:
         except Exception as e:
             result.errors.append(f"Rollback cleanup attempt failed: {str(e)}")
     
-    async def _verify_orphaned_cleanup(self, result: DesynchronizationTestResult) -> None:
+    async def _verify_orphaned_cleanup(self, result: TestDesynchronizationResult) -> None:
         """Step 8: Verify orphaned records cleanup."""
         try:
             if not self.auth_tokens or not self.auth_tokens.get("access_token"):

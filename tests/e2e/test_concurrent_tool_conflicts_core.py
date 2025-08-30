@@ -30,7 +30,7 @@ from netra_backend.app.logging_config import central_logger
 from tests.e2e.conftest import E2E_CONFIG, E2EEnvironmentValidator
 
 
-class TestConcurrencyMetrics:
+class ConcurrencyTestMetrics:
     """Tracks metrics for concurrent tool execution testing."""
     total_operations: int = 0
     successful_operations: int = 0

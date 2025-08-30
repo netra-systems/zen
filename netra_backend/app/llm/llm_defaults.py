@@ -36,8 +36,8 @@ class LLMModel(Enum):
     GPT_3_5_TURBO = "gpt-3.5-turbo"       # DEPRECATED - migrate to GEMINI
     CLAUDE_3_OPUS = "claude-3-opus"        # DEPRECATED - migrate to GEMINI
     
-    # Mock for testing
-    MOCK = "mock"                           # Mock model for unit tests
+    # DEPRECATED: Mock models are forbidden per CLAUDE.md principles
+    # Use real models with API keys instead
     
     @classmethod
     def get_default(cls) -> 'LLMModel':
@@ -92,7 +92,7 @@ class LLMModel(Enum):
         elif self == self.CLAUDE_3_OPUS:
             return "anthropic"
         else:
-            return "mock"
+            raise ValueError(f"Unknown model provider for {self.value} - configure real LLM instead")
 
 
 class LLMConfig:
@@ -105,7 +105,7 @@ class LLMConfig:
         LLMModel.GPT_4: 0.03,                # 30x more expensive - DEPRECATED
         LLMModel.GPT_3_5_TURBO: 0.002,      # 2x more expensive - DEPRECATED
         LLMModel.CLAUDE_3_OPUS: 0.075,       # 75x more expensive - DEPRECATED
-        LLMModel.MOCK: 0.0,                  # Free for testing
+        # MOCK model removed - use real models only per CLAUDE.md principles
     }
     
     # Model performance characteristics
@@ -140,12 +140,7 @@ class LLMConfig:
             "timeout_seconds": 60,
             "rate_limit_rpm": 20,
         },
-        LLMModel.MOCK: {
-            "max_tokens": 4096,
-            "temperature": 0.0,
-            "timeout_seconds": 1,
-            "rate_limit_rpm": 1000,
-        }
+        # MOCK model removed - use real models only per CLAUDE.md principles
     }
     
     @classmethod
@@ -234,7 +229,7 @@ class LLMConfig:
         elif provider == "anthropic":
             return "ANTHROPIC_API_KEY"  # DEPRECATED
         else:
-            return ""  # Mock doesn't need API key
+            raise ValueError(f"Unknown provider for {model.value} - configure real LLM with API key instead")
 
 
 # Convenience function for migration

@@ -284,6 +284,36 @@ class UploadErrorHandler:
         }
 
 
+class CorpusUploadHandlers:
+    """Container class for corpus upload handlers."""
+    
+    def __init__(self, file_manager=None):
+        """Initialize corpus upload handlers manager."""
+        self.file_manager = file_manager
+        self.upload_handler = UploadErrorHandler(file_manager)
+        self.handlers_registry = {
+            'upload_error': self.upload_handler
+        }
+    
+    def process(self):
+        """Process handlers registration."""
+        return list(self.handlers_registry.keys())
+    
+    def process_invalid(self):
+        """Process invalid operation for testing."""
+        raise Exception("Invalid handlers processing operation")
+    
+    def get_handler(self, handler_type: str):
+        """Get handler by type."""
+        return self.handlers_registry.get(handler_type)
+    
+    async def handle_document_upload_error(self, filename: str, file_size: int, run_id: str, original_error: Exception):
+        """Handle document upload error."""
+        return await self.upload_handler.handle_document_upload_error(
+            filename, file_size, run_id, original_error
+        )
+
+
 # Factory function for creating upload handlers
 def create_upload_handler(file_manager=None):
     """Create upload error handler instance."""

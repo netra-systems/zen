@@ -37,12 +37,13 @@ class TestAgentRegistryIdempotency:
         initial_agents = list(agent_registry.agents.keys())
         
         # Verify agents were registered
-        assert len(initial_agents) == 7
+        assert len(initial_agents) == 8
         assert "triage" in initial_agents
         assert "data" in initial_agents
         assert "optimization" in initial_agents
         assert "actions" in initial_agents
         assert "reporting" in initial_agents
+        assert "data_helper" in initial_agents
         assert "synthetic_data" in initial_agents
         assert "corpus_admin" in initial_agents
         
@@ -52,7 +53,7 @@ class TestAgentRegistryIdempotency:
         
         # Verify no new agents were added
         assert initial_agents == second_agents
-        assert len(agent_registry.agents) == 7
+        assert len(agent_registry.agents) == 8
 
     def test_register_method_prevents_duplicates(self, agent_registry):
         """Test that register method prevents duplicate agent registration."""
@@ -91,7 +92,7 @@ class TestAgentRegistryIdempotency:
         def register_agents():
             nonlocal registration_count
             agent_registry.register_default_agents()
-            if len(agent_registry.agents) == 7:
+            if len(agent_registry.agents) == 8:
                 registration_count += 1
         
         # Create multiple threads trying to register simultaneously
@@ -105,8 +106,8 @@ class TestAgentRegistryIdempotency:
         for thread in threads:
             thread.join()
         
-        # Verify only 7 agents registered despite multiple attempts
-        assert len(agent_registry.agents) == 7
+        # Verify only 8 agents registered despite multiple attempts
+        assert len(agent_registry.agents) == 8
         assert agent_registry._agents_registered is True
 
     @pytest.mark.asyncio
@@ -118,8 +119,8 @@ class TestAgentRegistryIdempotency:
         # Run multiple concurrent registrations
         await asyncio.gather(*[register_agents() for _ in range(10)])
         
-        # Verify only 7 agents registered
-        assert len(agent_registry.agents) == 7
+        # Verify only 8 agents registered
+        assert len(agent_registry.agents) == 8
         assert agent_registry._agents_registered is True
 
     def test_websocket_manager_assignment(self, agent_registry):
@@ -144,19 +145,20 @@ class TestAgentRegistryIdempotency:
         
         # Test list_agents method
         agent_names = agent_registry.list_agents()
-        assert len(agent_names) == 7
+        assert len(agent_names) == 8
         assert "triage" in agent_names
         
         # Test get_all_agents method
         all_agents = agent_registry.get_all_agents()
-        assert len(all_agents) == 7
+        assert len(all_agents) == 8
 
     @patch('netra_backend.app.agents.supervisor.agent_registry.logger')
     def test_logging_behavior(self, mock_logger, agent_registry):
         """Test that appropriate logging occurs during registration."""
-        # First registration - should log info
+        # First registration - should log debug for each agent and info for summary
         agent_registry.register_default_agents()
-        assert mock_logger.info.call_count == 7  # One for each agent
+        assert mock_logger.debug.call_count == 8  # One for each agent
+        assert mock_logger.info.call_count == 1  # Summary message
         
         # Reset mock
         mock_logger.reset_mock()
@@ -176,12 +178,12 @@ class TestAgentRegistryIdempotency:
         mock_custom_agent = MagicMock()
         agent_registry.register("custom_agent", mock_custom_agent)
         
-        assert len(agent_registry.agents) == 8
+        assert len(agent_registry.agents) == 9
         assert "custom_agent" in agent_registry.agents
         
         # But not duplicate of existing
         mock_duplicate = MagicMock()
         agent_registry.register("triage", mock_duplicate)
         
-        # Should still have 8 agents, not 9
-        assert len(agent_registry.agents) == 8
+        # Should still have 9 agents, not 10
+        assert len(agent_registry.agents) == 9

@@ -19,6 +19,13 @@
     </retrieval-protocol>
 
     <categories>
+        <category name="WebSocket/Routing" path="SPEC/learnings/websocket_routing_regression.xml" keywords="WebSocket, Message Routing, Run ID, Agent Updates, Privacy, Security, Regression, Broadcasting, Connection Management">
+            <critical-takeaway>CRITICAL: WebSocket send_agent_update MUST route by run_id, NEVER broadcast to all users - severe privacy/security issue (websocket_routing_regression.xml).</critical-takeaway>
+            <critical-takeaway>Always implement proper message routing from the start - broadcasting is almost never correct for user-specific data (websocket_routing_regression.xml).</critical-takeaway>
+            <critical-takeaway>WebSocket manager must maintain run_id_connections mapping and clean up on disconnect (websocket_routing_regression.xml).</critical-takeaway>
+            <critical-takeaway>Create regression tests IMMEDIATELY when fixing critical bugs to ensure they never resurface (websocket_routing_regression.xml).</critical-takeaway>
+        </category>
+        
         <category name="Testing/Performance" path="SPEC/learnings/test_collection_optimization.xml" keywords="Test Collection, PyTest, Test Discovery, Test Performance, Test Audit, Test Markers, Test Organization, Collection Optimization">
             <critical-takeaway>Test collection optimized from 60+ seconds to ~21 seconds using importlib mode and ignore patterns (test_collection_optimization.xml).</critical-takeaway>
             <critical-takeaway>Use scripts/test_collection_audit.py to identify duplicate tests, orphaned files, and missing markers (test_collection_optimization.xml).</critical-takeaway>
@@ -152,6 +159,7 @@
             <critical-takeaway>NEVER use os.getenv() directly - always use IsolatedEnvironment's get_env().get() for consistency (staging_environment_configuration.xml).</critical-takeaway>
             <critical-takeaway>Validate staging config with StagingConfigurationValidator before deployment to catch placeholders and localhost refs (staging_environment_configuration.xml).</critical-takeaway>
             <critical-takeaway>SERVICE_SECRET must be set and different from JWT_SECRET_KEY in staging/production (staging_environment_configuration.xml).</critical-takeaway>
+            <critical-takeaway>CRITICAL: .env files must NEVER be loaded in staging/production - check ENVIRONMENT variable and skip loading (env_file_staging_protection.xml).</critical-takeaway>
         </category>
 
         <category name="Redis Service Independence" path="SPEC/learnings/redis_service_independence.xml" keywords="Redis, Microservices, Circular Dependencies, Service Independence, Shared Components, Infrastructure">
@@ -193,6 +201,14 @@
             <critical-takeaway>Use initialization guards (flags/refs) to prevent duplicate initialization.</critical-takeaway>
             <critical-takeaway>Load configuration in order of criticality with appropriate fallbacks.</critical-takeaway>
             <critical-takeaway>Restore authentication state from storage synchronously before making API calls.</critical-takeaway>
+        </category>
+
+        <category name="SQLAlchemy Import Requirements" path="SPEC/learnings/sqlalchemy_func_import.xml" keywords="SQLAlchemy, func, Import Error, Database Functions, func.now(), NameError">
+            <critical-takeaway>CRITICAL: SQLAlchemy's func must be explicitly imported from sqlalchemy to use database functions like func.now().</critical-takeaway>
+            <critical-takeaway>Import pattern: from sqlalchemy import func - required for func.now(), func.count(), func.sum() and other SQL functions.</critical-takeaway>
+            <critical-takeaway>Common error: "name 'func' is not defined" when using func.now() without importing func from sqlalchemy.</critical-takeaway>
+            <critical-takeaway>Always verify SQLAlchemy imports include all needed components: select, update, delete, func, desc, asc.</critical-takeaway>
+            <critical-takeaway>Test imports at module level with simple import test to catch missing imports early.</critical-takeaway>
         </category>
 
         <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">
@@ -1781,4 +1797,18 @@
             <critical-takeaway>Unregistered routers (example_messages.py, synthetic_data_corpus.py) should be reviewed and properly registered</critical-takeaway>
         </category>
     </routing_architecture>
+    
+    <environment_security>
+        <category name="Environment Pollution Prevention" path="SPEC/learnings/env_pollution_remediation.xml" keywords="Environment Variables, Test Flags, Security, Authentication Bypass, Rate Limiting, Staging, Production, Environment Validation, TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, localhost, Environment Pollution">
+            <critical-takeaway>CRITICAL: Test environment variables (TESTING, E2E_TESTING, etc.) MUST NEVER be checked in production code - isolate all test logic in tests/ directory</critical-takeaway>
+            <critical-takeaway>Environment validator MUST run FIRST at startup and fail fast on critical violations in staging/production</critical-takeaway>
+            <critical-takeaway>NEVER use localhost references in staging/production configurations - always use proper service endpoints</critical-takeaway>
+            <critical-takeaway>Authentication and rate limiting bypasses MUST only exist in test-only helper modules, never in production code</critical-takeaway>
+            <critical-takeaway>Use netra_backend/tests/helpers/auth_test_helper.py for test authentication, not production auth.py</critical-takeaway>
+            <critical-takeaway>Run test_env_validation.py to verify environment configurations before deployment</critical-takeaway>
+            <critical-takeaway>Forbidden variables list: TESTING, E2E_TESTING, AUTH_FAST_TEST_MODE, PYTEST_CURRENT_TEST, ALLOW_DEV_AUTH_BYPASS, WEBSOCKET_AUTH_BYPASS</critical-takeaway>
+            <critical-takeaway>All secrets in staging/production MUST be loaded from Google Secrets Manager, never hardcoded</critical-takeaway>
+            <critical-takeaway>Use .env.staging.example as template - actual .env.staging should never contain localhost or test flags</critical-takeaway>
+        </category>
+    </environment_security>
 </specification>

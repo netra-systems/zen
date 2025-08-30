@@ -155,7 +155,7 @@ class TestBasicWebSocketConnection:
             # Verify connection rejected
             with pytest.raises(ValueError, match="Invalid token"):
                 # Mock: Authentication service isolation for testing without real auth flows
-                await mock_auth(websocket, websocket.auth_token, None  # TODO: Use real service instead of Mock)
+                await mock_auth(websocket, websocket.auth_token, None)  # TODO: Use real service instead of Mock
     
     @pytest.mark.e2e
     async def test_6_websocket_message_round_trip(self):

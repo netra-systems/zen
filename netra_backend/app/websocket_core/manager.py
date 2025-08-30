@@ -68,6 +68,8 @@ class WebSocketManager:
         # Compatibility attribute for tests
         self.active_connections: Dict[str, list] = {}
         self.connection_registry: Dict[str, Any] = {}
+        # NEW: Map run_ids to connection IDs for proper routing
+        self.run_id_connections: Dict[str, Set[str]] = {}
         self.connection_stats = {
             "total_connections": 0,
             "active_connections": 0,
@@ -302,12 +304,19 @@ class WebSocketManager:
         conn = self.connections[connection_id]
         user_id = conn["user_id"]
         websocket = conn["websocket"]
+        run_id = conn.get("run_id")
         
         # Remove from user connections
         if user_id in self.user_connections:
             self.user_connections[user_id].discard(connection_id)
             if not self.user_connections[user_id]:
                 del self.user_connections[user_id]
+        
+        # Remove from run_id connections
+        if run_id and run_id in self.run_id_connections:
+            self.run_id_connections[run_id].discard(connection_id)
+            if not self.run_id_connections[run_id]:
+                del self.run_id_connections[run_id]
         
         # Remove from rooms
         self._leave_all_rooms_for_connection(connection_id)
@@ -685,6 +694,77 @@ class WebSocketManager:
             }
         }
         return await self.send_to_user(user_id, error_msg)
+    
+    async def associate_run_id(self, connection_id: str, run_id: str) -> bool:
+        """Associate a run_id with an existing connection for proper message routing."""
+        if connection_id not in self.connections:
+            logger.warning(f"Cannot associate run_id {run_id} with non-existent connection {connection_id}")
+            return False
+        
+        # Store run_id in connection metadata
+        self.connections[connection_id]["run_id"] = run_id
+        
+        # Add to run_id mapping
+        if run_id not in self.run_id_connections:
+            self.run_id_connections[run_id] = set()
+        self.run_id_connections[run_id].add(connection_id)
+        
+        logger.debug(f"Associated run_id {run_id} with connection {connection_id}")
+        return True
+    
+    async def get_connections_by_run_id(self, run_id: str) -> List[str]:
+        """Get all connection IDs associated with a run_id."""
+        connections = []
+        
+        # Check direct mapping
+        if run_id in self.run_id_connections:
+            connections.extend(list(self.run_id_connections[run_id]))
+        
+        # Also check connections metadata
+        for conn_id, conn_info in self.connections.items():
+            if conn_info.get("run_id") == run_id and conn_id not in connections:
+                connections.append(conn_id)
+        
+        return connections
+    
+    async def send_agent_update(self, run_id: str, agent_name: str, update: Dict[str, Any]) -> None:
+        """Send agent update via WebSocket - routes to connections by run_id."""
+        # Create agent update message
+        agent_update_msg = {
+            "type": "agent_update",
+            "payload": {
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "update": update
+            }
+        }
+        
+        # Route to connections associated with this run_id
+        connections_sent = 0
+        sent_connections = set()  # Track which connections we've sent to
+        
+        # First check if we have direct run_id mapping
+        if run_id in self.run_id_connections:
+            for conn_id in list(self.run_id_connections[run_id]):
+                if conn_id not in sent_connections:
+                    if await self._send_to_connection(conn_id, agent_update_msg):
+                        connections_sent += 1
+                        sent_connections.add(conn_id)
+        
+        # Also check connections that have run_id in their metadata (for backwards compatibility)
+        # but skip if already sent via run_id_connections
+        for conn_id, conn_info in list(self.connections.items()):
+            if conn_info.get("run_id") == run_id and conn_id not in sent_connections:
+                if await self._send_to_connection(conn_id, agent_update_msg):
+                    connections_sent += 1
+                    sent_connections.add(conn_id)
+        
+        if connections_sent > 0:
+            self.connection_stats["messages_sent"] += connections_sent
+            logger.debug(f"Sent agent update for {run_id} to {connections_sent} connections")
+        else:
+            logger.debug(f"No active connections for run_id {run_id}")
     
     async def initiate_recovery(self, connection_id: str, user_id: str, error: Any, strategies: Optional[List] = None) -> bool:
         """Initiate connection recovery - consolidated recovery functionality."""

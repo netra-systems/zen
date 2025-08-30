@@ -21,8 +21,7 @@ from netra_backend.tests.validation_formatting_test_helpers import (
     ValidationTestHelpers,
 )
 
-# Skip all tests in this file since the utility modules don't exist yet
-pytestmark = pytest.mark.skip(reason="Utility modules (file_utils, crypto_utils, validation_utils) not implemented yet")
+# Utility modules (file_utils, crypto_utils, validation_utils) are now implemented
 
 # Test 89: File utils operations
 class TestFileUtilsOperations:

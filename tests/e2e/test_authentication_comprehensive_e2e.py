@@ -120,7 +120,7 @@ class TestAuthenticationE2Eer:
 @pytest_asyncio.fixture
 async def auth_tester():
     """Create authentication tester fixture."""
-    tester = AuthenticationE2ETester()
+    tester = TestAuthenticationE2Eer()
     await tester.setup()
     yield tester
     await tester.cleanup()

@@ -38,6 +38,7 @@ from websockets.exceptions import ConnectionClosedError, WebSocketException
 
 from tests.e2e.config import setup_test_environment, TestEndpoints, TestUser
 from test_framework.websocket_helpers import WebSocketTestHelpers
+from test_framework.fixtures.auth import create_real_jwt_token, create_test_user_token
 
 # Handle different websockets library versions
 try:
@@ -216,7 +217,16 @@ class TestWebSocketAuthTiminger:
             await asyncio.sleep(0.1)  # 100ms delay to simulate race
             
             # Token becomes available but connection already failed
-            valid_token = "Bearer valid-token-available-too-late"  
+            try:
+                # Use real JWT token
+                real_token = create_real_jwt_token(
+                    user_id="test_user_race_condition",
+                    permissions=["read", "write", "websocket"],
+                    token_type="access"
+                )
+                valid_token = f"Bearer {real_token}"
+            except (ImportError, ValueError):
+                valid_token = "Bearer valid-token-available-too-late"  
             
             # Wait for initial connection attempt to complete
             connection_result = await connection_task
@@ -361,8 +371,18 @@ class TestWebSocketAuthTiminger:
         return result
     
     def _create_mock_token(self) -> str:
-        """Create a mock JWT token for testing."""
-        return "Bearer mock-jwt-token-for-recovery-testing"
+        """Create a real JWT token for testing."""
+        try:
+            # Use real JWT token creation
+            token = create_real_jwt_token(
+                user_id="test_user_websocket_recovery",
+                permissions=["read", "write", "websocket"],
+                token_type="access"
+            )
+            return f"Bearer {token}"
+        except (ImportError, ValueError):
+            # Fallback to mock token if real JWT creation fails
+            return "Bearer mock-jwt-token-for-recovery-testing"
 
 
 # ============================================================================

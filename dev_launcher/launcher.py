@@ -1461,19 +1461,19 @@ class DevLauncher:
                 
                 # Check if service is disabled and skip validation
                 if service_name == 'redis':
-                    redis_mode = getattr(self.services_config.redis, 'mode', None) if hasattr(self.services_config, 'redis') else None
+                    redis_mode = getattr(self.config.services_config.redis, 'mode', None) if hasattr(self.config.services_config, 'redis') else None
                     if redis_mode and redis_mode.value == "disabled":
                         self._print("⏭️", "SKIP", f"{service_name}: Service disabled, skipping validation")
                         successful_connections.append(service_name)  # Count as successful since it's intentionally disabled
                         continue
                 elif service_name == 'clickhouse':
-                    clickhouse_mode = getattr(self.services_config.clickhouse, 'mode', None) if hasattr(self.services_config, 'clickhouse') else None
+                    clickhouse_mode = getattr(self.config.services_config.clickhouse, 'mode', None) if hasattr(self.config.services_config, 'clickhouse') else None
                     if clickhouse_mode and clickhouse_mode.value == "disabled":
                         self._print("⏭️", "SKIP", f"{service_name}: Service disabled, skipping validation")
                         successful_connections.append(service_name)  # Count as successful since it's intentionally disabled
                         continue
                 elif service_name == 'postgres':
-                    postgres_mode = getattr(self.services_config.postgres, 'mode', None) if hasattr(self.services_config, 'postgres') else None
+                    postgres_mode = getattr(self.config.services_config.postgres, 'mode', None) if hasattr(self.config.services_config, 'postgres') else None
                     if postgres_mode and postgres_mode.value == "disabled":
                         self._print("⏭️", "SKIP", f"{service_name}: Service disabled, skipping validation")
                         successful_connections.append(service_name)  # Count as successful since it's intentionally disabled

@@ -53,6 +53,7 @@ class MessageType(str, Enum):
     
     # Agent communication
     START_AGENT = "start_agent"
+    AGENT_REQUEST = "agent_request"
     AGENT_TASK = "agent_task"
     AGENT_TASK_ACK = "agent_task_ack"
     AGENT_RESPONSE = "agent_response"

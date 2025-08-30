@@ -242,17 +242,6 @@ class UnifiedHTTPClient:
     
     async def _establish_websocket_connection(self, ws_url: str, headers: Optional[Dict[str, str]]):
         """Establish WebSocket connection."""
-        # Extract token from Authorization header and convert to query param
-        token = None
-        if headers and "Authorization" in headers:
-            auth_header = headers["Authorization"]
-            if auth_header.startswith("Bearer "):
-                token = auth_header[7:]  # Remove "Bearer " prefix
-        
-        # Build WebSocket URL with token as query parameter
-        if token:
-            ws_url = f"{ws_url}?token={token}"
-        
         # Connection kwargs with timeout - CRITICAL FIX: Use proper timeout settings
         connection_kwargs = {
             "ping_timeout": 20.0,  # Timeout for ping/pong
@@ -260,6 +249,11 @@ class UnifiedHTTPClient:
             "close_timeout": 10.0  # Timeout for closing
             # Note: 'timeout' parameter is not supported in this version
         }
+        
+        # CRITICAL FIX: Pass Authorization header directly to WebSocket connection
+        # The backend expects "Authorization: Bearer token" header, not query parameters
+        if headers:
+            connection_kwargs["additional_headers"] = headers
         
         # Only use SSL context for wss:// URLs
         if ws_url.startswith("wss://"):

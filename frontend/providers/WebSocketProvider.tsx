@@ -137,9 +137,18 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               debugLogger.debug('[WebSocketProvider] Secure WebSocket connection established');
             },
             onError: (error) => {
-              logger.error('WebSocket connection error', undefined, {
+              // Log auth errors as authentication failures, not WebSocket errors
+              const errorMessage = error.type === 'auth' 
+                ? 'Authentication failure' 
+                : 'WebSocket connection error';
+              
+              const errorAction = error.type === 'auth'
+                ? 'authentication_error'
+                : 'connection_error';
+              
+              logger.error(errorMessage, undefined, {
                 component: 'WebSocketProvider',
-                action: 'connection_error',
+                action: errorAction,
                 metadata: { 
                   error: error.message,
                   type: error.type,

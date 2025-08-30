@@ -168,7 +168,7 @@ class TestBasicHealthChecksE2E:
     @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_health_check_infrastructure_works(self, health_check_config):
         """Test that health check infrastructure itself works."""
-        tester = BasicHealthCheckTester(health_check_config)
+        tester = TestBasicHealthChecker(health_check_config)
         
         # This should not fail - we're testing the test infrastructure
         assert tester is not None
@@ -190,7 +190,7 @@ class TestBasicHealthChecksE2E:
     @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_service_connectivity_attempt(self, health_check_config):
         """Test service connectivity - passes regardless of service status."""
-        tester = BasicHealthCheckTester(health_check_config)
+        tester = TestBasicHealthChecker(health_check_config)
         
         # Run connectivity checks
         results = await tester.check_all_services()
@@ -226,7 +226,7 @@ class TestBasicHealthChecksE2E:
     @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_auth_service_health_if_running(self, health_check_config):
         """Test auth service health if it's running."""
-        tester = BasicHealthCheckTester(health_check_config)
+        tester = TestBasicHealthChecker(health_check_config)
         
         # Check only auth service
         auth_config = health_check_config["services"]["auth"]
@@ -261,7 +261,7 @@ class TestBasicHealthChecksE2E:
     @env_safe(operations=["read_only", "health_check"], impact="none", rollback=True)
     async def test_backend_service_health_if_running(self, health_check_config):
         """Test backend service health if it's running."""
-        tester = BasicHealthCheckTester(health_check_config)
+        tester = TestBasicHealthChecker(health_check_config)
         
         # Check only backend service
         backend_config = health_check_config["services"]["backend"]
@@ -342,7 +342,7 @@ async def run_basic_health_checks():
         "max_retries": 2
     }
     
-    tester = BasicHealthCheckTester(config)
+    tester = TestBasicHealthChecker(config)
     results = await tester.check_all_services()
     summary = tester.get_service_summary(results)
     

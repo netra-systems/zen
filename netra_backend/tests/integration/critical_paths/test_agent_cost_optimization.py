@@ -48,16 +48,12 @@ class AgentCostOptimizationManager:
         """Initialize cost optimization services."""
         try:
             self.cost_optimizer = LLMCostOptimizer()
-            await self.cost_optimizer.initialize()
             
             self.model_selector = ModelSelector()
-            await self.model_selector.initialize()
             
             self.response_cache = ResponseCache()
-            await self.response_cache.initialize()
             
             self.cost_tracker = CostTracker()
-            await self.cost_tracker.initialize()
             
             logger.info("Cost optimization services initialized")
             

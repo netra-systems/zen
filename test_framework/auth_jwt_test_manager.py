@@ -53,16 +53,33 @@ class JWTGenerationTestManager:
         if user_id is None:
             user_id = f"test_user_{uuid.uuid4().hex[:8]}"
         
-        access_token = await self.jwt_helper.generate_valid_token(user_id=user_id)
+        # Create access token with specified user_id
+        access_payload = self.jwt_helper.create_valid_payload()
+        access_payload["sub"] = user_id  # Set the user_id
+        access_token = await self.jwt_helper.create_jwt_token(access_payload)
         refresh_token = ""
         
         if include_refresh:
-            refresh_token = await self.jwt_helper.generate_refresh_token(user_id=user_id)
+            refresh_payload = self.jwt_helper.create_refresh_payload()
+            refresh_payload["sub"] = user_id  # Set the user_id
+            refresh_token = await self.jwt_helper.create_jwt_token(refresh_payload)
+        
+        # Extract expires_at from the access token
+        expires_at = None
+        try:
+            import jwt
+            access_decoded = jwt.decode(access_token, options={"verify_signature": False})
+            if "exp" in access_decoded:
+                from datetime import datetime, timezone
+                expires_at = datetime.fromtimestamp(access_decoded["exp"], timezone.utc)
+        except Exception:
+            pass
         
         token_set = TokenSet(
             access_token=access_token,
             refresh_token=refresh_token,
-            user_id=user_id
+            user_id=user_id,
+            expires_at=expires_at
         )
         
         self.generated_tokens.append(token_set)
@@ -125,7 +142,8 @@ class JWTGenerationTestManager:
     
     async def test_expired_token_handling(self) -> Dict[str, Any]:
         """Test expired token handling across services."""
-        expired_token = await self.jwt_helper.generate_expired_token()
+        expired_payload = self.jwt_helper.create_expired_payload()
+        expired_token = await self.jwt_helper.create_jwt_token(expired_payload)
         validation_results = await self.validate_token_across_services(expired_token)
         return {
             "expired_token": expired_token,

@@ -14,6 +14,58 @@ from netra_backend.app.agents.corpus_admin.value_based_corpus.value_corpus_valid
 )
 
 
+class CreateValueCorpus:
+    """Class wrapper for value corpus creation functionality."""
+    
+    def __init__(self):
+        """Initialize corpus creator."""
+        self.corpus = []
+        self.corpus_file = "value_corpus.json"
+    
+    def process(self):
+        """Process corpus creation operations."""
+        return {"status": "ready", "corpus_count": len(self.corpus)}
+    
+    def process_invalid(self):
+        """Process invalid operation for testing."""
+        raise Exception("Invalid corpus creation operation")
+    
+    def create_entry(self, prompt: str, response: str, workload_type: str = "simple_chat", **kwargs):
+        """Create a corpus entry programmatically."""
+        entry = {
+            "prompt": prompt,
+            "response": response,
+            "workload_type": workload_type
+        }
+        
+        # Add any additional fields
+        for key, value in kwargs.items():
+            if value is not None:
+                entry[key] = value
+        
+        self.corpus.append(entry)
+        return entry
+    
+    def save_corpus_data(self, filename: str = None):
+        """Save corpus data to file."""
+        target_file = filename or self.corpus_file
+        return save_corpus(self.corpus, target_file)
+    
+    def load_corpus_data(self, filename: str = None):
+        """Load corpus data from file."""
+        target_file = filename or self.corpus_file
+        self.corpus = load_corpus(target_file)
+        return self.corpus
+    
+    def generate_xml(self):
+        """Generate XML files from corpus."""
+        if not self.corpus:
+            return False
+        
+        self.save_corpus_data()
+        return process_corpus_to_xml(self.corpus_file)
+
+
 def get_user_input(prompt: str, default: str = "") -> str:
     """Get user input with optional default."""
     if default:

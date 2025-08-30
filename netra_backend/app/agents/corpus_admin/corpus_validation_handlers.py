@@ -358,6 +358,35 @@ class DocumentValidationErrorHandler:
         return True
 
 
+class CorpusValidationHandlers:
+    """Container class for corpus validation handlers."""
+    
+    def __init__(self):
+        """Initialize corpus validation handlers manager."""
+        self.validation_handler = DocumentValidationErrorHandler()
+        self.handlers_registry = {
+            'validation_error': self.validation_handler
+        }
+    
+    def process(self):
+        """Process handlers registration."""
+        return list(self.handlers_registry.keys())
+    
+    def process_invalid(self):
+        """Process invalid operation for testing."""
+        raise Exception("Invalid handlers processing operation")
+    
+    def get_handler(self, handler_type: str):
+        """Get handler by type."""
+        return self.handlers_registry.get(handler_type)
+    
+    async def handle_document_validation_error(self, filename: str, validation_errors: List[str], run_id: str, original_error: Exception):
+        """Handle document validation error."""
+        return await self.validation_handler.handle_document_validation_error(
+            filename, validation_errors, run_id, original_error
+        )
+
+
 # Factory function for creating validation handlers
 def create_validation_handler():
     """Create document validation error handler instance."""

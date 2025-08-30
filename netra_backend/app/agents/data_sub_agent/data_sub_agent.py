@@ -69,7 +69,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.clickhouse_client = get_clickhouse_service()
         self.schema_cache = SchemaCache()
         self.performance_analyzer = PerformanceAnalyzer(self.clickhouse_client)
-        self.cost_optimizer = LLMCostOptimizer(self.clickhouse_client)
+        self.cost_optimizer = LLMCostOptimizer()
         self.data_validator = DataValidator()
     
     @agent_type_safe

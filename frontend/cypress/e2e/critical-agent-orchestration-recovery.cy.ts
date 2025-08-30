@@ -1,16 +1,18 @@
 /// <reference types="cypress" />
-// Import helper functions - fallback to inline implementations if utils not available
+
+// Define helper functions - fallback implementations for testing
+let AgentRecoverySetup, AgentMocking, AgentInteraction, RecoveryAssertions, CircuitBreakerUtils;
+
 try {
-  const {
-    AgentRecoverySetup, 
-    AgentMocking, 
-    AgentInteraction, 
-    RecoveryAssertions,
-    CircuitBreakerUtils
-  } = require('./utils/recovery-test-helpers');
+  const helpers = require('./utils/recovery-test-helpers');
+  AgentRecoverySetup = helpers.AgentRecoverySetup;
+  AgentMocking = helpers.AgentMocking;
+  AgentInteraction = helpers.AgentInteraction;
+  RecoveryAssertions = helpers.RecoveryAssertions;
+  CircuitBreakerUtils = helpers.CircuitBreakerUtils;
 } catch (e) {
   // Define inline helper functions
-  const AgentRecoverySetup = {
+  AgentRecoverySetup = {
     fullSetup: () => {
       cy.clearLocalStorage();
       cy.clearCookies();
@@ -30,7 +32,7 @@ try {
     }
   };
   
-  const AgentMocking = {
+  AgentMocking = {
     mockTimeout: (agentType) => {
       cy.intercept('POST', `**/api/agents/${agentType}**`, {
         statusCode: 408,
@@ -46,7 +48,7 @@ try {
     }
   };
   
-  const AgentInteraction = {
+  AgentInteraction = {
     sendMessage: (message) => {
       cy.get('[data-testid="message-input"], textarea').first().type(message);
       cy.get('[data-testid="send-button"], button[type="submit"]').first().click();
@@ -59,7 +61,7 @@ try {
     }
   };
   
-  const RecoveryAssertions = {
+  RecoveryAssertions = {
     verifyTimeout: () => {
       cy.contains(/timeout|error|retry/i, { timeout: 10000 }).should('be.visible');
     },
@@ -77,7 +79,7 @@ try {
     }
   };
   
-  const CircuitBreakerUtils = {
+  CircuitBreakerUtils = {
     setupFailureTracking: () => {
       return { failures: 0 };
     },

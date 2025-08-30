@@ -54,6 +54,30 @@ class OptimizationsResult(BaseModel):
     def parse_recommendations(cls, v: Any) -> List[str]:
         """Parse recommendations field, converting dicts to strings"""
         return parse_string_list_field(v)
+    
+    @field_validator('cost_savings')
+    @classmethod
+    def validate_cost_savings(cls, v: Optional[float]) -> Optional[float]:
+        """Validate cost savings bounds."""
+        if v is None:
+            return v
+        if v < 0:
+            raise ValueError('Cost savings cannot be negative')
+        if v > 1000000:  # $1M upper bound
+            raise ValueError('Cost savings exceeds reasonable limit')
+        return v
+    
+    @field_validator('performance_improvement')
+    @classmethod
+    def validate_performance_improvement(cls, v: Optional[float]) -> Optional[float]:
+        """Validate performance improvement bounds."""
+        if v is None:
+            return v
+        if v < -100:
+            raise ValueError('Performance improvement cannot be less than -100%')
+        if v > 10000:  # 100x improvement upper bound
+            raise ValueError('Performance improvement exceeds reasonable limit')
+        return v
 
 
 class ActionPlanResult(BaseModel):
@@ -156,6 +180,7 @@ class DeepAgentState(BaseModel):
     messages: List[Dict[str, Any]] = Field(default_factory=list)  # Added for E2E test compatibility
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
+    context_tracking: Dict[str, Any] = Field(default_factory=dict)  # Added for E2E test compatibility
     
     @field_validator('step_count')
     @classmethod
@@ -170,33 +195,8 @@ class DeepAgentState(BaseModel):
     @field_validator('optimizations_result')
     @classmethod
     def validate_optimizations_result(cls, v: OptimizationsResult) -> OptimizationsResult:
-        """Validate optimizations result bounds."""
-        if v is None:
-            return v
-        
-        cls._validate_cost_savings(v.cost_savings)
-        cls._validate_performance_improvement(v.performance_improvement)
+        """Validate optimizations result - validation is now handled by OptimizationsResult itself."""
         return v
-    
-    @classmethod
-    def _validate_cost_savings(cls, cost_savings: Optional[float]) -> None:
-        """Validate cost savings bounds."""
-        if cost_savings is None:
-            return
-        if cost_savings < 0:
-            raise ValueError('Cost savings cannot be negative')
-        if cost_savings > 1000000:  # $1M upper bound
-            raise ValueError('Cost savings exceeds reasonable limit')
-    
-    @classmethod
-    def _validate_performance_improvement(cls, improvement: Optional[float]) -> None:
-        """Validate performance improvement bounds."""
-        if improvement is None:
-            return
-        if improvement < -100:
-            raise ValueError('Performance improvement cannot be less than -100%')
-        if improvement > 10000:  # 100x improvement upper bound
-            raise ValueError('Performance improvement exceeds reasonable limit')
     
     def to_dict(self) -> Dict[str, Union[str, int, float, bool, None]]:
         """Convert state to dictionary with typed values."""

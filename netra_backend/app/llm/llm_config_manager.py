@@ -59,6 +59,8 @@ class LLMConfigManager:
         # Use unified config LLM mode setting
         llm_mode = self.settings.llm_mode.lower()
         if llm_mode in ["disabled", "mock"]:
+            if llm_mode == "mock":
+                raise ServiceUnavailableError("Mock LLM mode is forbidden per CLAUDE.md principles - use real LLM instead")
             logger.info(f"LLMs are disabled (mode: {llm_mode})")
             return False
         return self._check_environment_enabled()
@@ -85,24 +87,18 @@ class LLMConfigManager:
         raise ServiceUnavailableError(error_msg)
     
     def _handle_disabled_llm(self, name: str) -> Any:
-        """Handle disabled LLM based on environment - dev gets mock, production gets error."""
-        if self._should_use_mock_llm():
-            return self._create_mock_llm()
+        """Handle disabled LLM - always raise error (no mocks per CLAUDE.md)."""
         self._raise_llm_unavailable_error(name)
     
     def _should_use_mock_llm(self) -> bool:
-        """Check if mock LLM should be used in development via unified config."""
-        # Use unified config environment setting
-        return self.settings.environment == "development"
+        """DEPRECATED: Mock LLMs are forbidden per CLAUDE.md principles."""
+        # CRITICAL: Mocks are forbidden - always return False
+        return False
     
     def _create_mock_llm(self) -> Any:
-        """Create mock LLM for development environment."""
-        try:
-            from netra_backend.tests.helpers.llm_mocks import MockLLM
-            return MockLLM("mock-dev-model")
-        except ImportError:
-            logger.warning("MockLLM not available - using None")
-            return None
+        """DEPRECATED: Mock LLMs are forbidden per CLAUDE.md principles."""
+        # CRITICAL: Mocks are forbidden - always raise error
+        raise ServiceUnavailableError("Mock LLMs are forbidden per CLAUDE.md principles - configure real LLM instead")
     
     def get_llm_config(self, name: str) -> Any:
         """Get LLM configuration for specified name from unified config.

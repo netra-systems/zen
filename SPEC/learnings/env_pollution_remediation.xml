@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>EnvironmentPollutionRemediation</name>
+        <type>SecurityLearning</type>
+        <version>1.0</version>
+        <date>2025-08-30</date>
+        <description>Critical security fixes for environment variable pollution that could expose test bypass mechanisms in production.</description>
+    </metadata>
+    
+    <problem>
+        <title>Environment Pollution Security Vulnerability</title>
+        <severity>CRITICAL</severity>
+        <description>
+            Test environment variables and authentication bypasses were present in production code,
+            creating severe security vulnerabilities. The system checked for test flags at runtime
+            to bypass authentication, rate limiting, and other security controls.
+        </description>
+        <impacts>
+            <impact>Authentication could be bypassed in production if test flags were set</impact>
+            <impact>Rate limiting could be disabled via environment variables</impact>
+            <impact>Staging configurations contained localhost references</impact>
+            <impact>No validation prevented test flags from leaking to production</impact>
+        </impacts>
+    </problem>
+    
+    <solution>
+        <principle>Complete separation of test and production code paths</principle>
+        <principle>Fail-fast validation at application startup</principle>
+        <principle>Test logic isolated in test-only modules</principle>
+        
+        <implementation>
+            <step>Created test-only auth helper in tests/helpers/auth_test_helper.py</step>
+            <step>Removed ALL test environment checks from production code</step>
+            <step>Added environment validator that fails fast on violations</step>
+            <step>Integrated validator into application startup sequence</step>
+            <step>Fixed staging configurations to remove localhost references</step>
+            <step>Created safe .env.staging.example template</step>
+        </implementation>
+        
+        <files-modified>
+            <file>netra_backend/app/websocket_core/auth.py - Removed test bypass logic</file>
+            <file>netra_backend/tests/helpers/auth_test_helper.py - Created test-only auth</file>
+            <file>netra_backend/app/core/environment_validator.py - Created validator</file>
+            <file>netra_backend/app/startup_module.py - Added startup validation</file>
+            <file>.env.staging - Fixed localhost references</file>
+            <file>.env.staging.example - Created safe template</file>
+        </files-modified>
+    </solution>
+    
+    <forbidden-variables>
+        <description>These variables MUST NEVER appear in staging/production</description>
+        <variable>TESTING</variable>
+        <variable>E2E_TESTING</variable>
+        <variable>AUTH_FAST_TEST_MODE</variable>
+        <variable>PYTEST_CURRENT_TEST</variable>
+        <variable>ALLOW_DEV_AUTH_BYPASS</variable>
+        <variable>WEBSOCKET_AUTH_BYPASS</variable>
+        <variable>SKIP_AUTH_VALIDATION</variable>
+        <variable>TEST_MODE</variable>
+        <variable>CI_TEST_RUN</variable>
+    </forbidden-variables>
+    
+    <validation>
+        <startup-validation>
+            Environment validator runs FIRST during application startup.
+            Critical violations cause immediate failure with detailed error.
+            High severity violations log warnings but allow startup.
+        </startup-validation>
+        
+        <test-script>
+            Run test_env_validation.py to verify validator catches violations.
+            Tests confirm staging/production reject test flags.
+            Tests confirm localhost references are detected.
+        </test-script>
+        
+        <compliance-check>
+            Run scripts/check_architecture_compliance.py after changes.
+            Verifies no test logic remains in production code.
+        </compliance-check>
+    </validation>
+    
+    <best-practices>
+        <practice>NEVER check for test environment variables in production code</practice>
+        <practice>ALL test-only logic MUST be in tests/ directory</practice>
+        <practice>Use dependency injection for test vs production services</practice>
+        <practice>Validate environment at startup, not at runtime</practice>
+        <practice>Fail fast on security violations</practice>
+        <practice>Use allowlists for environment-specific variables</practice>
+        <practice>Never hardcode secrets in configuration files</practice>
+        <practice>Always use Google Secrets Manager for staging/production secrets</practice>
+    </best-practices>
+    
+    <monitoring>
+        <metric>Count of forbidden variables detected at startup</metric>
+        <metric>Count of localhost references in configurations</metric>
+        <metric>Authentication bypass attempts (should be zero)</metric>
+        <metric>Rate limit bypass attempts (should be zero)</metric>
+        <alert>CRITICAL alert on any test flag in production</alert>
+        <alert>HIGH alert on localhost in staging configuration</alert>
+    </monitoring>
+    
+    <future-work>
+        <task>Implement configuration profiles for each environment</task>
+        <task>Add build-time code separation for test vs production</task>
+        <task>Create feature flags to replace environment checks</task>
+        <task>Add continuous monitoring for environment violations</task>
+        <task>Implement configuration encryption for sensitive values</task>
+    </future-work>
+</specification>

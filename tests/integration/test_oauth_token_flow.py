@@ -10,6 +10,9 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
+# Import test framework for real auth
+from test_framework.fixtures.auth import create_test_user_token, create_admin_token, create_real_jwt_token
+
 
 @pytest.mark.asyncio
 async def test_oauth_callback_token_exchange():
@@ -80,9 +83,17 @@ async def test_oauth_callback_token_exchange():
                 mock_repo_instance.create_oauth_user.return_value = mock_auth_user
                 mock_repo.return_value = mock_repo_instance
                 
-                # Mock JWT creation
-                mock_auth_service.jwt_handler.create_access_token.return_value = 'jwt-access-token'
-                mock_auth_service.jwt_handler.create_refresh_token.return_value = 'jwt-refresh-token'
+                # Use real JWT token creation for more realistic testing
+                try:
+                    real_access_token = create_real_jwt_token('user-123', ['user'])
+                    real_refresh_token = f'refresh_{real_access_token}'
+                except Exception:
+                    # Fallback to mock tokens if JWT library unavailable
+                    real_access_token = 'jwt-access-token'
+                    real_refresh_token = 'jwt-refresh-token'
+                
+                mock_auth_service.jwt_handler.create_access_token.return_value = real_access_token
+                mock_auth_service.jwt_handler.create_refresh_token.return_value = real_refresh_token
                 mock_auth_service.session_manager.create_session.return_value = 'session-123'
                 
                 # Test the callback
@@ -100,8 +111,8 @@ async def test_oauth_callback_token_exchange():
                 assert response.status_code == 302
                 location = response.headers.get('location')
                 assert location is not None
-                assert 'token=jwt-access-token' in location
-                assert 'refresh=jwt-refresh-token' in location
+                assert f'token={real_access_token}' in location
+                assert f'refresh={real_refresh_token}' in location
                 assert location.startswith('http://app.test/chat')
 
 
@@ -111,17 +122,24 @@ async def test_frontend_token_storage():
     # This would be better as a frontend test, but we can test the logic
     from urllib.parse import parse_qs, urlparse
     
-    # Simulate the redirect URL from auth service
-    redirect_url = "http://app.test/chat?token=jwt-access-token&refresh=jwt-refresh-token"
+    # Simulate the redirect URL from auth service with real tokens
+    try:
+        test_token = create_real_jwt_token('test_user', ['user'])
+        refresh_token = f'refresh_{test_token}'
+    except Exception:
+        test_token = 'jwt-access-token'
+        refresh_token = 'jwt-refresh-token'
+    
+    redirect_url = f"http://app.test/chat?token={test_token}&refresh={refresh_token}"
     
     parsed = urlparse(redirect_url)
     params = parse_qs(parsed.query)
     
     # Verify tokens are present in URL
     assert 'token' in params
-    assert params['token'][0] == 'jwt-access-token'
+    assert params['token'][0] == test_token
     assert 'refresh' in params
-    assert params['refresh'][0] == 'jwt-refresh-token'
+    assert params['refresh'][0] == refresh_token
 
 
 @pytest.mark.asyncio
@@ -131,7 +149,11 @@ async def test_token_validation_after_storage():
     app = FastAPI()
     app.include_router(router)
     
-    test_token = 'jwt-access-token'
+    # Use real JWT token for validation testing
+    try:
+        test_token = create_real_jwt_token('user-123', ['user'])
+    except Exception:
+        test_token = 'jwt-access-token'
     
     # Mock: Authentication service isolation for testing without real auth flows
     with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth_service:

@@ -3,15 +3,46 @@
  * Tests for textarea auto-resize behavior
  */
 
+// CRITICAL: Mock all dependencies FIRST before any React imports
+jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
+  useTextareaResize: jest.fn()
+}));
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn()
+}));
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: jest.fn()
+}));
+
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: jest.fn()
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn()
+}));
+
+jest.mock('@/components/chat/hooks/useMessageSending', () => ({
+  useMessageSending: jest.fn()
+}));
+
+jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
+  useMessageHistory: jest.fn()
+}));
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
-import {
-  mockSendMessage,
-  setupMinimalMocks,
-  resetMocks
-} from './minimal-test-setup';
+import { useTextareaResize } from '@/components/chat/hooks/useTextareaResize';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useThreadStore } from '@/store/threadStore';
+import { useAuthStore } from '@/store/authStore';
+import { useMessageSending } from '@/components/chat/hooks/useMessageSending';
+import { useMessageHistory } from '@/components/chat/hooks/useMessageHistory';
 import {
   renderMessageInput,
   getTextarea,
@@ -19,12 +50,66 @@ import {
   sendViaEnter
 } from './test-helpers';
 
-// Setup minimal mocks before imports
-setupMinimalMocks();
+// Get the mocked functions
+const mockUseTextareaResize = useTextareaResize as jest.Mock;
+const mockUseWebSocket = useWebSocket as jest.Mock;
+const mockUseUnifiedChatStore = useUnifiedChatStore as jest.Mock;
+const mockUseThreadStore = useThreadStore as jest.Mock;
+const mockUseAuthStore = useAuthStore as jest.Mock;
+const mockUseMessageSending = useMessageSending as jest.Mock;
+const mockUseMessageHistory = useMessageHistory as jest.Mock;
 
 describe('MessageInput - Auto-resize Textarea Behavior', () => {
   beforeEach(() => {
-    resetMocks();
+    jest.clearAllMocks();
+    
+    // Setup the textarea resize mock with dynamic behavior
+    mockUseTextareaResize.mockImplementation((textareaRef: any, message: string) => {
+      const lineCount = message ? message.split('\n').length : 1;
+      const rows = Math.min(Math.max(lineCount, 1), 5);
+      return { rows };
+    });
+    
+    // Setup other mocks
+    mockUseWebSocket.mockReturnValue({
+      sendMessage: jest.fn(),
+    });
+    
+    mockUseUnifiedChatStore.mockReturnValue({
+      activeThreadId: 'thread-1',
+      isProcessing: false,
+      setProcessing: jest.fn(),
+      addMessage: jest.fn(),
+      addOptimisticMessage: jest.fn(),
+      updateOptimisticMessage: jest.fn(),
+    });
+    
+    mockUseThreadStore.mockReturnValue({
+      currentThreadId: 'thread-1',
+      setCurrentThread: jest.fn(),
+      addThread: jest.fn(),
+    });
+    
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+    });
+    
+    mockUseMessageSending.mockReturnValue({
+      isSending: false,
+      error: null,
+      isTimeout: false,
+      retryCount: 0,
+      isCircuitOpen: false,
+      handleSend: jest.fn().mockResolvedValue(undefined),
+      retry: jest.fn(),
+      reset: jest.fn()
+    });
+    
+    mockUseMessageHistory.mockReturnValue({
+      messageHistory: [],
+      addToHistory: jest.fn(),
+      navigateHistory: jest.fn(() => '')
+    });
   });
 
   describe('Auto-resize textarea behavior', () => {

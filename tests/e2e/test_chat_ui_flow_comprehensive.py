@@ -57,13 +57,13 @@ class PerformanceMetrics:
     
     def end_timer(self, metric_name: str) -> float:
         if metric_name not in self.start_times:
-            raise ChatUITestError(f"Timer {metric_name} not started")
+            raise TestChatUIError(f"Timer {metric_name} not started")
         duration = time.time() - self.start_times[metric_name]
         self.metrics[metric_name] = duration
         return duration
 
 
-class TestChatUIFlower:
+class ChatUIFlowTester:
     """Main test class for comprehensive chat UI flow testing"""
     
     def __init__(self):

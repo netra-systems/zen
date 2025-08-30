@@ -166,6 +166,7 @@ export const MessageInputWithCommands: React.FC = () => {
             }
             rows={messageInput.rows}
             disabled={!messageSender.isAuthenticated || isProcessing}
+            data-testid="message-textarea"
             className={cn(
               "w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-lg",
               "resize-none overflow-y-auto transition-all duration-200",
@@ -210,6 +211,7 @@ export const MessageInputWithCommands: React.FC = () => {
           <Button
             onClick={handleSend}
             disabled={isDisabled}
+            data-testid="send-button"
             className={cn(
               "bg-emerald-500 hover:bg-emerald-600 text-white",
               "disabled:opacity-50 disabled:cursor-not-allowed",

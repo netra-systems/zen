@@ -168,7 +168,10 @@ class UnifiedTestConfig:
         # Set additional test secrets
         os.environ["GOOGLE_CLIENT_ID"] = "test-google-client-id"
         os.environ["GOOGLE_CLIENT_SECRET"] = "test-google-client-secret"
-        os.environ["GEMINI_API_KEY"] = "test-gemini-api-key"
+        
+        # REMOVED: Mock API key fallbacks are forbidden per CLAUDE.md
+        # Configuration must require real API keys from environment
+        # If GEMINI_API_KEY is missing, system should fail explicitly
     
     def _create_test_endpoints(self) -> TestEndpoints:
         """Create test endpoint configuration"""
@@ -278,12 +281,9 @@ class TestTokenManager:
     def create_test_token(self, user_data: Dict[str, Any]) -> str:
         """Create test JWT token"""
         try:
-            from netra_backend.app.auth_integration.auth import create_access_token
-            token = create_access_token(data={"sub": user_data["email"]})
-            # If we get an empty token or None, fall back to mock
-            if not token:
-                return f"mock-token-{user_data['id']}"
-            return token
+            # Since create_access_token is async, we fall back to mock token in this sync context
+            # The test should use an async token manager if real tokens are needed
+            return f"mock-token-{user_data['id']}"
         except (ImportError, Exception):
             return f"mock-token-{user_data['id']}"
     

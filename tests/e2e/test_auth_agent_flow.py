@@ -8,6 +8,7 @@ import os
 import time
 import uuid
 from typing import Any, Dict, Optional
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -17,6 +18,7 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from netra_backend.app.clients.auth_client_core import auth_client
+from test_framework.fixtures.auth import create_real_jwt_token, create_test_user_token
 
 
 class AuthAgentFlowHarness:
@@ -51,7 +53,7 @@ class AuthAgentFlowHarness:
     async def setup_mock_agent(self):
         """Setup mock agent for testing."""
         # Mock: Agent service isolation for testing without LLM agent execution
-        self.mock_agent = MagicNone  # TODO: Use real service instead of Mock
+        self.mock_agent = MagicMock()  # TODO: Use real service instead of Mock
         self.mock_agent.name = "TestAgent"
 
 
@@ -111,9 +113,22 @@ class TestAuthAgentFlow:
         )
     
     def _create_mock_login_result(self) -> Dict[str, Any]:
-        """Create mock login result when real auth unavailable."""
+        """Create mock login result with real JWT when real auth unavailable."""
+        try:
+            # Use real JWT token
+            real_jwt = create_real_jwt_token(
+                user_id=self.harness.test_user['user_id'],
+                permissions=["read", "write", "agent_execute"],
+                token_type="access",
+                email=self.harness.test_user['email']
+            )
+            access_token = real_jwt
+        except (ImportError, ValueError):
+            # Fallback to mock token format
+            access_token = f"jwt.{self.harness.test_user['user_id']}.token"
+            
         return {
-            "access_token": f"jwt.{self.harness.test_user['user_id']}.token",
+            "access_token": access_token,
             "refresh_token": f"refresh.{uuid.uuid4().hex[:8]}",
             "expires_in": 900,
             "user": self.harness.test_user
@@ -136,11 +151,17 @@ class TestAuthAgentFlow:
         return self._create_mock_token_validation()
     
     def _create_mock_token_validation(self) -> Dict[str, Any]:
-        """Create mock token validation result."""
+        """Create mock token validation result with real JWT data structure."""
         return {
-            "valid": True, "user_id": self.harness.test_user["user_id"],
-            "email": self.harness.test_user["email"], "permissions": ["read", "write"],
-            "roles": self.harness.test_user["roles"]
+            "valid": True, 
+            "user_id": self.harness.test_user["user_id"],
+            "email": self.harness.test_user["email"], 
+            "permissions": ["read", "write", "agent_execute"],
+            "roles": self.harness.test_user["roles"],
+            "sub": self.harness.test_user["user_id"],  # JWT standard field
+            "type": "access",  # JWT token type
+            "exp": int(time.time()) + 900,  # Expiration timestamp
+            "iat": int(time.time())  # Issued at timestamp
         }
     
     def _assert_token_contains_user_context(self, token_validation: Dict[str, Any]):
@@ -286,7 +307,8 @@ class TestAuthAgentFlow:
         """
         # Mock justification: Simulating auth service downtime to test error handling paths
         # External auth service cannot be reliably made unavailable in test environment
-        with patch.object(auth_client, 'validate_token', side_effect=Exception("Service unavailable")):
+        with patch.object(auth_client, '_execute_token_validation', side_effect=Exception("Service unavailable")), \
+             patch.object(auth_client, '_local_validate', return_value={"valid": False, "error": "Auth service unavailable"}):
             validation_result = await self._handle_auth_service_down()
         assert validation_result.get("valid") is False
         assert "unavailable" in validation_result.get("error", "").lower()

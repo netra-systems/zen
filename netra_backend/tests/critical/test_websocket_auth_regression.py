@@ -338,6 +338,11 @@ class TestWebSocketMessageHandling:
                 headers={"Authorization": f"Bearer {valid_token}"}
             ) as websocket:
                 
+                # Read and discard welcome message
+                welcome_message = websocket.receive_json()
+                assert welcome_message.get("type") == "system_message"
+                assert welcome_message.get("data", {}).get("event") == "connection_established"
+                
                 # Send unknown message type
                 unknown_message = {
                     "type": "unknown_message_type",
@@ -346,8 +351,19 @@ class TestWebSocketMessageHandling:
                 
                 websocket.send_json(unknown_message)
                 
-                # Should receive error response or handle gracefully
-                response = websocket.receive_json()
+                # Should receive response (but may need to skip heartbeat messages)
+                response = None
+                max_attempts = 5  # Try a few times to get the right message
+                
+                for _ in range(max_attempts):
+                    message = websocket.receive_json()
+                    
+                    # Skip heartbeat/ping messages and look for actual response
+                    if message.get("type") not in ["ping", "pong", "heartbeat", "heartbeat_ack"]:
+                        response = message
+                        break
+                
+                assert response is not None, "Did not receive a non-heartbeat response"
                 
                 # Verify system handles unknown types gracefully
                 assert "type" in response

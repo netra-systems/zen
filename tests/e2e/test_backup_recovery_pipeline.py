@@ -524,7 +524,7 @@ async def test_backup_recovery_pipeline():
     
     Must complete in <120 seconds including recovery simulation.
     """
-    tester = BackupRecoveryTester()
+    tester = TestBackupRecoveryer()
     
     # Execute complete backup/recovery flow
     results = await tester.execute_backup_recovery_flow()
@@ -584,7 +584,7 @@ async def test_disaster_recovery_failover():
     3. Data consistency validation across services
     4. Performance impact assessment
     """
-    tester = BackupRecoveryTester()
+    tester = TestBackupRecoveryer()
     start_time = time.time()
     
     try:

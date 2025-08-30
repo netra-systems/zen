@@ -18,9 +18,10 @@ from netra_backend.app.clients.auth_client_config import (
     OAuthConfig,
     OAuthConfigGenerator,
 )
-from netra_backend.app.core.environment_constants import get_current_environment, Environment
+from netra_backend.app.core.environment_constants import get_current_environment, Environment, is_production
 from netra_backend.app.core.tracing import TracingManager
 from enum import Enum
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,25 @@ class AuthServiceClient:
         config = get_configuration()
         self.service_id = config.service_id or "netra-backend"
         self.service_secret = config.service_secret
+        
+        # PRODUCTION SECURITY: Validate auth service requirements in production
+        # Check both unified config and environment variable for robust production detection
+        env_var = os.environ.get('ENVIRONMENT', '').lower()
+        current_env = get_current_environment()
+        is_prod_env = (env_var == 'production' or current_env == Environment.PRODUCTION.value or self._is_production_environment())
+        
+        if is_prod_env:
+            if not self.settings.enabled:
+                logger.error("PRODUCTION SECURITY: Auth service is required in production")
+                logger.error(f"Environment variable: {env_var}")
+                logger.error(f"Current environment: {current_env}")
+                logger.error(f"Auth service enabled: {self.settings.enabled}")
+                raise RuntimeError("Auth service must be enabled in production environment")
+            if not self.service_secret:
+                logger.error("PRODUCTION SECURITY: Service secret is required in production")
+                logger.error(f"Environment variable: {env_var}")
+                logger.error(f"Current environment: {current_env}")
+                raise RuntimeError("SERVICE_SECRET must be configured in production environment")
     
     def _create_http_client(self) -> httpx.AsyncClient:
         """Create new HTTP client instance."""
@@ -551,6 +571,16 @@ class AuthServiceClient:
     
     async def _local_validate(self, token: str) -> Optional[Dict]:
         """Local token validation with cached fallback for resilience."""
+        # PRODUCTION SECURITY: Never allow mock authentication in production
+        if self._is_production_environment():
+            logger.error("PRODUCTION SECURITY: Mock authentication is forbidden in production")
+            logger.error("Auth service is required for all token validation in production")
+            return {
+                "valid": False, 
+                "error": "auth_service_required_production",
+                "details": "Production environment requires auth service - no fallbacks allowed"
+            }
+        
         # First, try cached token as fallback
         cached_result = self.token_cache.get_cached_token(token)
         if cached_result:
@@ -568,6 +598,21 @@ class AuthServiceClient:
                 
                 if self._is_valid_test_token(jwt_token):
                     logger.warning("Using emergency test token fallback due to auth service unavailability")
+                    
+                    # Try to decode JWT token to extract user data
+                    jwt_data = self._decode_test_jwt(jwt_token)
+                    if jwt_data:
+                        return {
+                            "valid": True,
+                            "user_id": jwt_data.get("sub", "test_user"),
+                            "email": jwt_data.get("email", "test@example.com"),
+                            "permissions": jwt_data.get("permissions", ["user"]),
+                            "fallback_used": True,
+                            "source": "emergency_test_fallback",
+                            "warning": "Emergency fallback validation - limited functionality"
+                        }
+                    
+                    # Fallback to default values if JWT decode fails
                     return {
                         "valid": True,
                         "user_id": "test_user",
@@ -605,6 +650,18 @@ class AuthServiceClient:
         from netra_backend.app.core.project_utils import is_test_environment
         return is_test_environment()
     
+    def _is_production_environment(self) -> bool:
+        """Check if we're in a production environment.
+        
+        Returns:
+            bool: True if in production environment
+        """
+        try:
+            return is_production()
+        except Exception:
+            # If we can't determine environment, assume production for security
+            return True
+    
     def _is_valid_test_token(self, jwt_token: str) -> bool:
         """Basic validation for test JWT tokens."""
         try:
@@ -623,6 +680,22 @@ class AuthServiceClient:
             return any(pattern in jwt_token for pattern in test_patterns)
         except Exception:
             return False
+    
+    def _decode_test_jwt(self, jwt_token: str) -> Optional[Dict[str, Any]]:
+        """Decode test JWT token to extract user data."""
+        try:
+            import jwt
+            import os
+            
+            # Use same secret as test JWT creation
+            secret = os.getenv("JWT_SECRET", "test_secret_key")
+            
+            # Decode the JWT token
+            decoded = jwt.decode(jwt_token, secret, algorithms=["HS256"], options={"verify_exp": False})
+            return decoded
+        except Exception as e:
+            logger.debug(f"Failed to decode test JWT token: {e}")
+            return None
 
     async def close(self):
         """Close HTTP client."""
@@ -646,54 +719,13 @@ class AuthServiceClient:
     
     # RBAC Methods for Role-Based Access Control
     
-    def _create_mock_token(self, user_role: str, user_email: str, user_id: str = None) -> str:
-        """Create a mock JWT token for testing."""
-        import jwt as pyjwt
-        import uuid
-        from datetime import datetime, timedelta, timezone
-        
-        if not user_id:
-            user_id = str(uuid.uuid4())
-            
-        # Define role permissions
-        role_permissions = {
-            "super_admin": [
-                "system:*", "users:*", "agents:*", "billing:*", "analytics:*"
-            ],
-            "org_admin": [
-                "users:read", "users:write", "users:delete", "agents:*", 
-                "analytics:read", "billing:read"
-            ],
-            "team_lead": [
-                "users:read", "users:write", "agents:read", "agents:write", 
-                "analytics:read"
-            ],
-            "developer": [
-                "agents:read", "agents:write", "analytics:read"
-            ],
-            "viewer": [
-                "agents:read", "analytics:read"
-            ],
-            "guest": [
-                "public:read"
-            ]
-        }
-        
-        payload = {
-            "sub": user_id,
-            "email": user_email,
-            "role": user_role,
-            "permissions": role_permissions.get(user_role, []),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
-            "iat": datetime.now(timezone.utc),
-            "jti": str(uuid.uuid4())
-        }
-        
-        # Use a test secret
-        return pyjwt.encode(payload, "test_secret", algorithm="HS256")
-    
     async def login(self, request) -> Optional[Dict]:
         """User login through auth service with LoginRequest object."""
+        # PRODUCTION SECURITY: Ensure auth service is always required in production
+        if self._is_production_environment() and not self.settings.enabled:
+            logger.error("PRODUCTION SECURITY: Auth service is required in production")
+            raise Exception("Authentication service is required in production environment")
+        
         if not self.settings.enabled:
             # Auth service is disabled - this should only occur in testing environments
             # Return proper error instead of mock authentication
@@ -725,15 +757,18 @@ class AuthServiceClient:
         return None
     
     def _decode_token(self, token: str) -> Dict:
-        """Decode JWT token for mock implementation."""
-        try:
-            import jwt as pyjwt
-            # Use the same test secret as in _create_mock_token
-            decoded = pyjwt.decode(token, "test_secret", algorithms=["HS256"])
-            return decoded
-        except Exception as e:
-            logger.error(f"Token decode failed: {e}")
-            return {}
+        """Decode JWT token - PRODUCTION: This should only be used with proper JWT secret from auth service."""
+        # PRODUCTION SECURITY: Never allow direct token decoding in production
+        if self._is_production_environment():
+            logger.error("PRODUCTION SECURITY: Direct token decoding is forbidden in production")
+            logger.error("All token validation must go through the auth service")
+            return {"error": "Direct token decoding forbidden in production"}
+        
+        # SECURITY: In staging/production, JWT tokens should only be validated by the auth service
+        # This method exists for backward compatibility but should not be used for actual authentication
+        logger.error("_decode_token called - this method should not be used in production or staging")
+        logger.error("All token validation must go through the auth service")
+        return {"error": "Direct token decoding not allowed - use auth service"}
     
     def _check_permission_match(self, required_permission: str, user_permissions: List[str]) -> bool:
         """Check if user has the required permission."""
@@ -779,11 +814,12 @@ class AuthServiceClient:
         
         try:
             client = await self._get_client()
+            headers = self._get_request_headers(bearer_token=token)
             response = await client.post("/auth/check-authorization", json={
                 "token": token,
                 "resource": resource,
                 "action": action
-            })
+            }, headers=headers)
             
             if response.status_code == 200:
                 result = response.json()
@@ -793,6 +829,7 @@ class AuthServiceClient:
                     'permissions': result.get('permissions', [])
                 })()
             else:
+                logger.warning(f"Authorization check returned {response.status_code}")
                 return type('AuthorizationResult', (), {
                     'authorized': False,
                     'reason': 'Service error',
@@ -818,10 +855,11 @@ class AuthServiceClient:
         
         try:
             client = await self._get_client()
+            headers = self._get_request_headers(bearer_token=token)
             response = await client.post("/auth/check-permission", json={
                 "token": token,
                 "permission": permission
-            })
+            }, headers=headers)
             
             if response.status_code == 200:
                 result = response.json()
@@ -830,6 +868,7 @@ class AuthServiceClient:
                     'reason': result.get('reason', 'Unknown')
                 })()
             else:
+                logger.warning(f"Permission check returned {response.status_code}")
                 return type('PermissionResult', (), {
                     'has_permission': False,
                     'reason': 'Service error'
@@ -844,31 +883,24 @@ class AuthServiceClient:
     async def make_api_call(self, token: str, endpoint: str) -> Dict:
         """Make rate-limited API call."""
         if not self.settings.enabled:
-            # Mock rate limiting - allow most calls but simulate some limits
-            token_data = self._decode_token(token)
-            role = token_data.get('role', 'guest')
-            
-            # Simple mock rate limiting
-            if role in ['guest', 'viewer'] and endpoint != '/api/test':
-                # Simulate rate limit for lower roles on non-test endpoints
-                import random
-                if random.random() < 0.3:  # 30% chance of rate limit
-                    raise Exception("Rate limit exceeded")
-            
-            return type('ApiCallResult', (), {'success': True})()
+            # Auth service disabled - deny API calls
+            logger.error("Auth service disabled - API calls unavailable")
+            return type('ApiCallResult', (), {'success': False, 'reason': 'Auth service disabled'})()
             
         try:
             client = await self._get_client()
+            headers = self._get_request_headers(bearer_token=token)
             response = await client.post("/auth/api-call", json={
                 "token": token,
                 "endpoint": endpoint
-            })
+            }, headers=headers)
             
             if response.status_code == 200:
                 return type('ApiCallResult', (), {'success': True})()
             elif response.status_code == 429:
                 raise Exception("Rate limit exceeded")
             else:
+                logger.warning(f"API call failed with status {response.status_code}")
                 return type('ApiCallResult', (), {'success': False})()
         except Exception as e:
             if "rate limit" in str(e).lower():
@@ -879,29 +911,17 @@ class AuthServiceClient:
     async def create_agent(self, token: str, agent_name: str) -> Optional[Dict]:
         """Create agent with resource limits check."""
         if not self.settings.enabled:
-            # Mock agent creation
-            token_data = self._decode_token(token)
-            role = token_data.get('role', 'guest')
-            
-            # Check if role can create agents
-            allowed_roles = ['super_admin', 'org_admin', 'team_lead', 'developer']
-            if role not in allowed_roles:
-                return None
-                
-            import uuid
-            agent_id = f"agent_{uuid.uuid4().hex[:8]}"
-            
-            return type('Agent', (), {
-                'id': agent_id,
-                'name': agent_name
-            })()
+            # Auth service disabled - deny agent creation
+            logger.error("Auth service disabled - agent creation unavailable")
+            return None
             
         try:
             client = await self._get_client()
+            headers = self._get_request_headers(bearer_token=token)
             response = await client.post("/auth/create-agent", json={
                 "token": token,
                 "agent_name": agent_name
-            })
+            }, headers=headers)
             
             if response.status_code == 200:
                 result = response.json()
@@ -909,18 +929,23 @@ class AuthServiceClient:
                     'id': result.get('id', ''),
                     'name': agent_name
                 })()
-            return None
+            else:
+                logger.warning(f"Agent creation failed with status {response.status_code}")
+                return None
         except Exception as e:
             logger.error(f"Agent creation failed: {e}")
             return None
     
     async def delete_agent(self, token: str, agent_id: str) -> bool:
         """Delete agent."""
+        if not self.settings.enabled:
+            logger.error("Auth service disabled - agent deletion unavailable")
+            return False
+            
         try:
             client = await self._get_client()
-            response = await client.delete(f"/auth/agents/{agent_id}", headers={
-                "Authorization": f"Bearer {token}"
-            })
+            headers = self._get_request_headers(bearer_token=token)
+            response = await client.delete(f"/auth/agents/{agent_id}", headers=headers)
             return response.status_code == 200
         except Exception as e:
             logger.error(f"Agent deletion failed: {e}")
@@ -929,27 +954,22 @@ class AuthServiceClient:
     async def validate_token_for_service(self, token: str, service_name: str) -> Dict:
         """Validate token for specific service."""
         if not self.settings.enabled:
-            # Mock service validation
-            token_data = self._decode_token(token)
-            if token_data:
-                return type('ServiceValidationResult', (), {
-                    'valid': True,
-                    'role': token_data.get('role', 'guest'),
-                    'permissions': token_data.get('permissions', [])
-                })()
-            else:
-                return type('ServiceValidationResult', (), {
-                    'valid': False,
-                    'role': 'guest',
-                    'permissions': []
-                })()
+            # Auth service disabled - deny service validation
+            logger.error("Auth service disabled - service token validation unavailable")
+            return type('ServiceValidationResult', (), {
+                'valid': False,
+                'role': 'guest',
+                'permissions': [],
+                'reason': 'Auth service disabled'
+            })()
         
         try:
             client = await self._get_client()
+            headers = self._get_request_headers(bearer_token=token)
             response = await client.post("/auth/validate-service-token", json={
                 "token": token,
                 "service_name": service_name
-            })
+            }, headers=headers)
             
             if response.status_code == 200:
                 result = response.json()
@@ -959,6 +979,7 @@ class AuthServiceClient:
                     'permissions': result.get('permissions', [])
                 })()
             else:
+                logger.warning(f"Service token validation failed with status {response.status_code}")
                 return type('ServiceValidationResult', (), {
                     'valid': False,
                     'role': 'guest',
@@ -975,22 +996,16 @@ class AuthServiceClient:
     async def update_user_role(self, token: str, user_id: str, new_role: str) -> Dict:
         """Update user role (admin only)."""
         if not self.settings.enabled:
-            # Mock role update - only admins can update roles
-            token_data = self._decode_token(token)
-            user_role = token_data.get('role', 'guest')
-            
-            # Check if user has permission to update roles
-            if user_role not in ['super_admin', 'org_admin']:
-                raise Exception("Unauthorized: Cannot update user role")
-            
-            # Mock successful update
-            return {"success": True, "message": f"Role updated to {new_role}"}
+            # Auth service disabled - deny role updates
+            logger.error("Auth service disabled - user role updates unavailable")
+            raise Exception("Auth service disabled: Cannot update user role")
         
         try:
             client = await self._get_client()
+            headers = self._get_request_headers(bearer_token=token)
             response = await client.put(f"/auth/users/{user_id}/role", 
                 json={"role": new_role},
-                headers={"Authorization": f"Bearer {token}"}
+                headers=headers
             )
             
             if response.status_code == 200:
@@ -1006,32 +1021,20 @@ class AuthServiceClient:
     async def get_user_info(self, token: str, user_id: str) -> Dict:
         """Get user information."""
         if not self.settings.enabled:
-            # Mock user info - extract role from user_id
-            role = user_id.replace('user_', '') if user_id.startswith('user_') else 'guest'
-            email = f"{role}@test.com"
-            
-            # Get permissions for role
-            role_permissions = {
-                "super_admin": ["system:*", "users:*", "agents:*", "billing:*", "analytics:*"],
-                "org_admin": ["users:read", "users:write", "users:delete", "agents:*", "analytics:read", "billing:read"],
-                "team_lead": ["users:read", "users:write", "agents:read", "agents:write", "analytics:read"],
-                "developer": ["agents:read", "agents:write", "analytics:read"],
-                "viewer": ["agents:read", "analytics:read"],
-                "guest": ["public:read"]
-            }
-            
+            # Auth service disabled - return minimal user info
+            logger.error("Auth service disabled - user info unavailable")
             return type('UserInfo', (), {
                 'user_id': user_id,
-                'email': email,
-                'role': role,
-                'permissions': role_permissions.get(role, [])
+                'email': '',
+                'role': 'guest',
+                'permissions': [],
+                'reason': 'Auth service disabled'
             })()
         
         try:
             client = await self._get_client()
-            response = await client.get(f"/auth/users/{user_id}",
-                headers={"Authorization": f"Bearer {token}"}
-            )
+            headers = self._get_request_headers(bearer_token=token)
+            response = await client.get(f"/auth/users/{user_id}", headers=headers)
             
             if response.status_code == 200:
                 result = response.json()
@@ -1042,6 +1045,7 @@ class AuthServiceClient:
                     'permissions': result.get('permissions', [])
                 })()
             else:
+                logger.warning(f"Get user info failed with status {response.status_code}")
                 return type('UserInfo', (), {
                     'user_id': user_id,
                     'email': '',
@@ -1061,42 +1065,17 @@ class AuthServiceClient:
                                        duration_minutes: int) -> Optional[str]:
         """Create impersonation token (admin only)."""
         if not self.settings.enabled:
-            # Mock impersonation - only super_admin can impersonate
-            token_data = self._decode_token(admin_token)
-            admin_role = token_data.get('role', 'guest')
-            admin_user_id = token_data.get('sub', 'unknown')
-            
-            if admin_role != 'super_admin':
-                raise Exception("Unauthorized: Cannot create impersonation token")
-            
-            # Create mock impersonation token
-            import jwt as pyjwt
-            import uuid
-            from datetime import datetime, timedelta, timezone
-            
-            # Assume target user is developer for testing
-            target_role = 'developer'
-            target_email = f"{target_role}@test.com"
-            
-            payload = {
-                "sub": target_user_id,
-                "email": target_email,
-                "role": target_role,
-                "permissions": ["agents:read", "agents:write", "analytics:read"],
-                "impersonated_by": admin_user_id,
-                "exp": datetime.now(timezone.utc) + timedelta(minutes=duration_minutes),
-                "iat": datetime.now(timezone.utc),
-                "jti": str(uuid.uuid4())
-            }
-            
-            return pyjwt.encode(payload, "test_secret", algorithm="HS256")
+            # Auth service disabled - deny impersonation
+            logger.error("Auth service disabled - impersonation unavailable")
+            raise Exception("Auth service disabled: Cannot create impersonation token")
         
         try:
             client = await self._get_client()
+            headers = self._get_request_headers(bearer_token=admin_token)
             response = await client.post("/auth/impersonate", json={
                 "target_user_id": target_user_id,
                 "duration_minutes": duration_minutes
-            }, headers={"Authorization": f"Bearer {admin_token}"})
+            }, headers=headers)
             
             if response.status_code == 200:
                 result = response.json()
@@ -1104,6 +1083,7 @@ class AuthServiceClient:
             elif response.status_code == 403:
                 raise Exception("Unauthorized: Cannot create impersonation token")
             else:
+                logger.warning(f"Impersonation token creation failed with status {response.status_code}")
                 return None
         except Exception as e:
             logger.error(f"Impersonation token creation failed: {e}")
